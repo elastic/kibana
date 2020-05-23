@@ -34,7 +34,7 @@
     "kibana_utils": "src/plugins/kibana_utils",
     "navigation": "src/plugins/navigation",
     "newsfeed": "src/plugins/newsfeed",
-    "regionMap": "src/legacy/core_plugins/region_map",
+    "regionMap": "src/plugins/region_map",
     "savedObjects": "src/plugins/saved_objects",
     "savedObjectsManagement": "src/plugins/saved_objects_management",
     "server": "src/legacy/server",
@@ -43,7 +43,7 @@
       "src/plugins/telemetry",
       "src/plugins/telemetry_management_section"
     ],
-    "tileMap": "src/legacy/core_plugins/tile_map",
+    "tileMap": "src/plugins/tile_map",
     "timelion": ["src/legacy/core_plugins/timelion", "src/plugins/vis_type_timelion"],
     "uiActions": "src/plugins/ui_actions",
     "visDefaultEditor": "src/plugins/vis_default_editor",
@@ -56,7 +56,8 @@
     "visTypeVislib": "src/plugins/vis_type_vislib",
     "visTypeXy": "src/plugins/vis_type_xy",
     "visualizations": "src/plugins/visualizations",
-    "visualize": "src/plugins/visualize"
+    "visualize": "src/plugins/visualize",
+    "apmOss": "src/plugins/apm_oss"
   },
   "exclude": [
     "src/legacy/ui/ui_render/ui_render_mixin.js"

@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions_simulators';
+} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 const mapping = [
   {

@@ -98,12 +98,12 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.discover.brushHistogram();
 
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(25);
+        expect(Math.round(newDurationHours)).to.be(24);
         const rowData = await PageObjects.discover.getDocTableField(1);
         log.debug(`The first timestamp value in doc table: ${rowData}`);
         expect(Date.parse(rowData)).to.be.within(
-          Date.parse('Sep 20, 2015 @ 21:30:00.000'),
-          Date.parse('Sep 20, 2015 @ 23:00:00.000')
+          Date.parse('Sep 20, 2015 @ 17:30:00.000'),
+          Date.parse('Sep 20, 2015 @ 23:30:00.000')
         );
       });
 
@@ -126,6 +126,23 @@ export default function({ getService, getPageObjects }) {
       it('should not show "no results"', async () => {
         const isVisible = await PageObjects.discover.hasNoResults();
         expect(isVisible).to.be(false);
+      });
+
+      it('should reload the saved search with persisted query to show the initial hit count', async function() {
+        // apply query some changes
+        await queryBar.setQuery('test');
+        await queryBar.submitQuery();
+        await retry.try(async function() {
+          expect(await PageObjects.discover.getHitCount()).to.be('22');
+        });
+
+        // reset to persisted state
+        await PageObjects.discover.clickResetSavedSearchButton();
+        const expectedHitCount = '14,004';
+        await retry.try(async function() {
+          expect(await queryBar.getQueryString()).to.be('');
+          expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
+        });
       });
     });
 

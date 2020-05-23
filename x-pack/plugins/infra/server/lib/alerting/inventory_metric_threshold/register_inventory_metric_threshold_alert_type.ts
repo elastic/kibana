@@ -11,19 +11,13 @@ import {
   createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,
 } from './inventory_metric_threshold_executor';
-import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from './types';
+import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
 import { InfraBackendLibs } from '../../infra_types';
+import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
-  comparator: schema.oneOf([
-    schema.literal('>'),
-    schema.literal('<'),
-    schema.literal('>='),
-    schema.literal('<='),
-    schema.literal('between'),
-    schema.literal('outside'),
-  ]),
+  comparator: oneOfLiterals(Object.values(Comparator)),
   timeUnit: schema.string(),
   timeSize: schema.number(),
   metric: schema.string(),
@@ -37,7 +31,9 @@ export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs
       {
         criteria: schema.arrayOf(condition),
         nodeType: schema.string(),
-        filterQuery: schema.maybe(schema.string()),
+        filterQuery: schema.maybe(
+          schema.string({ validate: validateIsStringElasticsearchJSONFilter })
+        ),
         sourceId: schema.string(),
       },
       { unknowns: 'allow' }
@@ -45,6 +41,7 @@ export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs
   },
   defaultActionGroupId: FIRED_ACTIONS.id,
   actionGroups: [FIRED_ACTIONS],
+  producer: 'metrics',
   executor: curry(createInventoryMetricThresholdExecutor)(libs, uuid.v4()),
   actionVariables: {
     context: [

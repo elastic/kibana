@@ -1,0 +1,9 @@
+{
+  "id": "task_manager_fixture",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack"],
+  "requiredPlugins": ["taskManager"],
+  "server": true,
+  "ui": false
+}

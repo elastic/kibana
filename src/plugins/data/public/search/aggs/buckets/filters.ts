@@ -48,7 +48,7 @@ export interface FiltersBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
-export interface AggParamsFilters extends BaseAggParams {
+export interface AggParamsFilters extends Omit<BaseAggParams, 'customLabel'> {
   filters?: Array<{
     input: Query;
     label: string;

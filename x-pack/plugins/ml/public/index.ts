@@ -22,3 +22,4 @@ export const plugin: PluginInitializer<
 > = () => new MlPlugin();
 
 export { MlPluginSetup, MlPluginStart };
+export * from './shared';

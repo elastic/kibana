@@ -1,3 +1,10 @@
+.dscAppWrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
 discover-app {
   flex-grow: 1;
 }
@@ -86,17 +93,7 @@ discover-app {
 }
 
 .dscResultCount {
-  text-align: center;
   padding-top: $euiSizeXS;
-  padding-left: $euiSizeM;
-
-  .dscResultHits {
-    padding-left: $euiSizeXS;
-  }
-
-  > .kuiLink {
-    padding-left: $euiSizeM;
-  }
 }
 
 .dscTimechart__header {

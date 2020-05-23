@@ -87,9 +87,11 @@ The following table describes the properties of the `options` object.
 |id|Unique identifier for the alert type. For convention purposes, ids starting with `.` are reserved for built in alert types. We recommend using a convention like `<plugin_id>.mySpecialAlert` for your alert types to avoid conflicting with another plugin.|string|
 |name|A user-friendly name for the alert type. These will be displayed in dropdowns when choosing alert types.|string|
 |actionGroups|An explicit list of groups the alert type may schedule actions for, each specifying the ActionGroup's unique ID and human readable name. Alert `actions` validation will use this configuartion to ensure groups are valid. We highly encourage using `kbn-i18n` to translate the names of actionGroup  when registering the AlertType. |Array<{id:string, name:string}>|
+|defaultActionGroupId|Default ID value for the group of the alert type.|string|
 |actionVariables|An explicit list of action variables the alert type makes available via context and state in action parameter templates, and a short human readable description. Alert UI  will use this to display prompts for the users for these variables, in action parameter editors. We highly encourage using `kbn-i18n` to translate the descriptions. |{ context: Array<{name:string, description:string}, state: Array<{name:string, description:string}>|
 |validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `executor` function or created as an alert saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.|@kbn/config-schema|
 |executor|This is where the code of the alert type lives. This is a function to be called when executing an alert on an interval basis. For full details, see executor section below.|Function|
+|producer|The id of the application producing this alert type.|string|
 
 ### Executor
 
@@ -102,6 +104,7 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 |services.callCluster(path, opts)|Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana but in the context of the user who created the alert when security is enabled.|
 |services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>The scope of the saved objects client is tied to the user who created the alert (only when security isenabled).|
 |services.getScopedCallCluster|This function scopes an instance of CallCluster by returning a `callCluster(path, opts)` function that runs in the context of the user who created the alert when security is enabled. This must only be called with instances of CallCluster provided by core.|
+|services.alertInstanceFactory(id)|This [alert instance factory](#alert-instance-factory) creates instances of alerts and must be used in order to execute actions. The id you give to the alert instance factory is a unique identifier to the alert instance.|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
 |startedAt|The date and time the alert type started execution.|
 |previousStartedAt|The previous date and time the alert type started a successful execution.|
@@ -117,7 +120,7 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 
 ### The `actionVariables` property
 
-This property should contain the **flattened** names of the state and context variables available when an executor calls `alertInstance.scheduleActions(groupName, context)`.  These names are meant to be used in prompters in the alerting user interface, are used as text values for display, and can be inserted into to an action parameter text entry field via UI gesture (eg, clicking a menu item from a menu built with these names).  They should be flattened,  so if a state or context variable is an object with properties, these should be listed with the "parent" property/properties in the name, separated by a `.` (period).
+This property should contain the **flattened** names of the state and context variables available when an executor calls `alertInstance.scheduleActions(actionGroup, context)`.  These names are meant to be used in prompters in the alerting user interface, are used as text values for display, and can be inserted into to an action parameter text entry field via UI gesture (eg, clicking a menu item from a menu built with these names).  They should be flattened,  so if a state or context variable is an object with properties, these should be listed with the "parent" property/properties in the name, separated by a `.` (period).
 
 For example, if the `context` has one variable `foo` which is an object that has one property `bar`, and there are no `state` variables, the `actionVariables` value would be in the following shape:
 
@@ -145,6 +148,17 @@ server.newPlatform.setup.plugins.alerting.registerType({
 			threshold: schema.number({ min: 0, max: 1 }),
 		}),
 	},
+	actionGroups: [
+		{
+			id: 'default',
+			name: 'Default',
+		},
+		{
+			id: 'warning',
+			name: 'Warning',
+		},
+	],
+	defaultActionGroupId: 'default',
 	actionVariables: {
 		context: [
 			{ name: 'server', description: 'the server' },
@@ -184,7 +198,7 @@ server.newPlatform.setup.plugins.alerting.registerType({
 				cpuUsage: currentCpuUsage,
 			});
 
-			// 'default' refers to a group of actions to be scheduled for execution, see 'actions' in create alert section
+			// 'default' refers to the id of a group of actions to be scheduled for execution, see 'actions' in create alert section
 			alertInstance.scheduleActions('default', {
 				server,
 				hasCpuUsageIncreased: currentCpuUsage > previousCpuUsage,
@@ -199,6 +213,7 @@ server.newPlatform.setup.plugins.alerting.registerType({
 			lastChecked: new Date(),
 		};
 	},
+	producer: 'alerting',
 });
 ```
 
@@ -213,6 +228,13 @@ server.newPlatform.setup.plugins.alerting.registerType({
 			threshold: schema.number({ min: 0, max: 1 }),
 		}),
 	},
+	actionGroups: [
+		{
+			id: 'default',
+			name: 'Default',
+		},
+	],
+	defaultActionGroupId: 'default',
 	actionVariables: {
 		context: [
 			{ name: 'server', description: 'the server' },
@@ -253,7 +275,7 @@ server.newPlatform.setup.plugins.alerting.registerType({
 					cpuUsage: currentCpuUsage,
 				});
 
-				// 'default' refers to a group of actions to be scheduled for execution, see 'actions' in create alert section
+				// 'default' refers to the id of a group of actions to be scheduled for execution, see 'actions' in create alert section
 				alertInstance.scheduleActions('default', {
 					server,
 					hasCpuUsageIncreased: currentCpuUsage > previousCpuUsage,
@@ -267,6 +289,7 @@ server.newPlatform.setup.plugins.alerting.registerType({
 			lastChecked: new Date(),
 		};
 	},
+	producer: 'alerting',
 });
 ```
 
@@ -472,7 +495,7 @@ This factory returns an instance of `AlertInstance`. The alert instance class ha
 |Method|Description|
 |---|---|
 |getState()|Get the current state of the alert instance.|
-|scheduleActions(actionGroup, context)|Called to schedule the execution of actions. The actionGroup relates to the group of alert `actions` to execute and the context will be used for templating purposes. This should only be called once per alert instance.|
+|scheduleActions(actionGroup, context)|Called to schedule the execution of actions. The actionGroup is a string `id` that relates to the group of alert `actions` to execute and the context will be used for templating purposes. This should only be called once per alert instance.|
 |replaceState(state)|Used to replace the current state of the alert instance. This doesn't work like react, the entire state must be provided. Use this feature as you see fit. The state that is set will persist between alert type executions whenever you re-create an alert instance with the same id. The instance state will be erased when `scheduleActions` isn't called during an execution.|
 
 ## Templating actions
@@ -488,6 +511,8 @@ When an alert instance executes, the first argument is the `group` of actions to
 - `alertName` - the name of the alert
 - `spaceId` - the id of the space the alert exists in
 - `tags` - the tags set in the alert
+
+The templating engine is [mustache]. General definition for the [mustache variable] is a double-brace {{}}. All variables are HTML-escaped by default and if there is a requirement to render unescaped HTML, it should be applied the triple mustache: `{{{name}}}`. Also, can be used `&` to unescape a variable.
 
 ## Examples
 
@@ -537,3 +562,6 @@ The templating system will take the alert and alert type as described above and 
 ```
 
 There are limitations that we are aware of using only templates, and we are gathering feedback and use cases for these. (for example passing an array of strings to an action).
+
+[mustache]: https://github.com/janl/mustache.js
+[mustache variable]: https://github.com/janl/mustache.js#variables

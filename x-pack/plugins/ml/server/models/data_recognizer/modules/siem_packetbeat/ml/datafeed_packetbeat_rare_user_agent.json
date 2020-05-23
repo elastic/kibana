@@ -7,7 +7,7 @@
   "query": {
     "bool": {
       "filter": [
-        {"term": {"event.dataset": "dns"}},
+        {"term": {"event.dataset": "http"}},
         {"term": {"agent.type": "packetbeat"}}
       ],
       "must_not": [

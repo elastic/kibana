@@ -29,7 +29,6 @@ import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constan
 import {
   createKbnUrlStateStorage,
   redirectWhenMissing,
-  InvalidJSONProperty,
   SavedObjectNotFound,
 } from '../../../kibana_utils/public';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
@@ -50,6 +49,7 @@ export function initDashboardApp(app, deps) {
       ['listingLimit', { watchDepth: 'reference' }],
       ['hideWriteControls', { watchDepth: 'reference' }],
       ['initialFilter', { watchDepth: 'reference' }],
+      ['initialPageSize', { watchDepth: 'reference' }],
     ]);
   });
 
@@ -90,10 +90,16 @@ export function initDashboardApp(app, deps) {
     };
 
     $routeProvider
+      .when('/', {
+        redirectTo: DashboardConstants.LANDING_PAGE_PATH,
+      })
       .when(DashboardConstants.LANDING_PAGE_PATH, {
         ...defaults,
         template: dashboardListingTemplate,
         controller: function($scope, kbnUrlStateStorage, history) {
+          deps.core.chrome.docTitle.change(
+            i18n.translate('dashboard.dashboardPageTitle', { defaultMessage: 'Dashboards' })
+          );
           const service = deps.savedDashboards;
           const dashboardConfig = deps.dashboardConfig;
 
@@ -103,7 +109,8 @@ export function initDashboardApp(app, deps) {
             kbnUrlStateStorage
           );
 
-          $scope.listingLimit = deps.uiSettings.get('savedObjects:listingLimit');
+          $scope.listingLimit = deps.savedObjects.settings.getListingLimit();
+          $scope.initialPageSize = deps.savedObjects.settings.getPerPage();
           $scope.create = () => {
             history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
           };
@@ -178,6 +185,7 @@ export function initDashboardApp(app, deps) {
               .catch(
                 redirectWhenMissing({
                   history,
+                  navigateToApp: deps.core.application.navigateToApp,
                   mapping: {
                     dashboard: DashboardConstants.LANDING_PAGE_PATH,
                   },
@@ -206,13 +214,6 @@ export function initDashboardApp(app, deps) {
                 return savedDashboard;
               })
               .catch(error => {
-                // A corrupt dashboard was detected (e.g. with invalid JSON properties)
-                if (error instanceof InvalidJSONProperty) {
-                  deps.core.notifications.toasts.addDanger(error.message);
-                  history.push(DashboardConstants.LANDING_PAGE_PATH);
-                  return;
-                }
-
                 // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
                 // See https://github.com/elastic/kibana/issues/10951 for more context.
                 if (error instanceof SavedObjectNotFound && id === 'create') {
@@ -230,26 +231,20 @@ export function initDashboardApp(app, deps) {
                   );
                   return new Promise(() => {});
                 } else {
-                  throw error;
+                  // E.g. a corrupt or deleted dashboard
+                  deps.core.notifications.toasts.addDanger(error.message);
+                  history.push(DashboardConstants.LANDING_PAGE_PATH);
+                  return new Promise(() => {});
                 }
-              })
-              .catch(
-                redirectWhenMissing({
-                  history,
-                  mapping: {
-                    dashboard: DashboardConstants.LANDING_PAGE_PATH,
-                  },
-                  toastNotifications: deps.core.notifications.toasts,
-                })
-              );
+              });
           },
         },
       })
-      .when(`dashboard/:tail*?`, {
-        redirectTo: `/${deps.config.defaultAppId}`,
-      })
-      .when(`dashboards/:tail*?`, {
-        redirectTo: `/${deps.config.defaultAppId}`,
+      .otherwise({
+        template: '<span></span>',
+        controller: function() {
+          deps.navigateToDefaultApp();
+        },
       });
   });
 }

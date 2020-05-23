@@ -48,7 +48,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.security.logout();
 
         const logoutMessage = await testSubjects.getVisibleText('loginInfoMessage');
-        expect(logoutMessage).to.eql('You have logged out of Kibana.');
+        expect(logoutMessage).to.eql('You have logged out of Elastic.');
       });
 
       describe('within a non-default space', async () => {
@@ -67,7 +67,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('logging out of a non-default space redirects to the login page at the server root', async () => {
-          await PageObjects.security.login(null, null, {
+          await PageObjects.security.login(undefined, undefined, {
             expectSpaceSelector: true,
           });
 

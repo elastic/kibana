@@ -145,6 +145,8 @@ export interface TimelineInput {
   savedQueryId?: Maybe<string>;
 
   sort?: Maybe<SortTimelineInput>;
+
+  status?: Maybe<TimelineStatus>;
 }
 
 export interface ColumnHeaderInput {
@@ -340,6 +342,11 @@ export enum NetworkDnsFields {
 
 export enum TlsFields {
   _id = '_id',
+}
+
+export enum TimelineStatus {
+  active = 'active',
+  draft = 'draft',
 }
 
 export enum TimelineType {
@@ -1955,6 +1962,8 @@ export interface TimelineResult {
 
   sort?: Maybe<SortTimelineResult>;
 
+  status?: Maybe<TimelineStatus>;
+
   title?: Maybe<string>;
 
   templateTimelineId?: Maybe<string>;
@@ -2237,6 +2246,8 @@ export interface GetAllTimelineQueryArgs {
   sort?: Maybe<SortTimeline>;
 
   onlyUserFavorite?: Maybe<boolean>;
+
+  timelineType?: Maybe<TimelineType>;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -2693,6 +2704,8 @@ export namespace QueryResolvers {
     sort?: Maybe<SortTimeline>;
 
     onlyUserFavorite?: Maybe<boolean>;
+
+    timelineType?: Maybe<TimelineType>;
   }
 }
 
@@ -8038,6 +8051,8 @@ export namespace TimelineResultResolvers {
 
     sort?: SortResolver<Maybe<SortTimelineResult>, TypeParent, TContext>;
 
+    status?: StatusResolver<Maybe<TimelineStatus>, TypeParent, TContext>;
+
     title?: TitleResolver<Maybe<string>, TypeParent, TContext>;
 
     templateTimelineId?: TemplateTimelineIdResolver<Maybe<string>, TypeParent, TContext>;
@@ -8145,6 +8160,11 @@ export namespace TimelineResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type SortResolver<
     R = Maybe<SortTimelineResult>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type StatusResolver<
+    R = Maybe<TimelineStatus>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;

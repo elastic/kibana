@@ -19,6 +19,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('load graph/secrepo data');
       await esArchiver.loadIfNeeded('graph/secrepo');
       await esArchiver.load('empty_kibana');
+      await PageObjects.common.navigateToApp('settings');
       log.debug('create secrepo index pattern');
       await PageObjects.settings.createIndexPattern('secrepo', '@timestamp');
       log.debug('navigateTo graph');

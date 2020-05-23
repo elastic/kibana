@@ -13,7 +13,7 @@ import {
   LAYER_TYPE,
   VECTOR_STYLES,
 } from '../constants';
-import { getJoinAggKey } from '../get_join_key';
+import { getJoinAggKey } from '../get_agg_key';
 import {
   AggDescriptor,
   JoinDescriptor,

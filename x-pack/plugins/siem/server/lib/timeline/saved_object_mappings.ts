@@ -8,7 +8,7 @@ import { SavedObjectsType } from '../../../../../../src/core/server';
 
 export const timelineSavedObjectType = 'siem-ui-timeline';
 
-export const timelineSavedObjectMappings = {
+export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
     columns: {
       properties: {
@@ -262,6 +262,9 @@ export const timelineSavedObjectMappings = {
           type: 'keyword',
         },
       },
+    },
+    status: {
+      type: 'keyword',
     },
     created: {
       type: 'date',

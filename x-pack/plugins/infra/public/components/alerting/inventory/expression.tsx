@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
 import {
   EuiFlexGroup,
@@ -50,6 +51,8 @@ import { MetricExpression } from './metric';
 import { NodeTypeExpression } from './node_type';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
+
+const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 interface AlertContextMeta {
   options?: Partial<InfraWaffleMapOptions>;
@@ -107,10 +110,14 @@ export const Expressions: React.FC<Props> = props => {
   );
 
   const addExpression = useCallback(() => {
-    const exp = alertParams.criteria.slice();
-    exp.push(defaultExpression);
+    const exp = alertParams.criteria?.slice() || [];
+    exp.push({
+      ...defaultExpression,
+      timeSize: timeSize ?? defaultExpression.timeSize,
+      timeUnit: timeUnit ?? defaultExpression.timeUnit,
+    });
     setAlertParams('criteria', exp);
-  }, [setAlertParams, alertParams.criteria]);
+  }, [setAlertParams, alertParams.criteria, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
     (id: number) => {
@@ -133,6 +140,10 @@ export const Expressions: React.FC<Props> = props => {
     },
     [derivedIndexPattern, setAlertParams]
   );
+
+  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
+    onFilterChange,
+  ]);
 
   const emptyError = useMemo(() => {
     return {
@@ -178,6 +189,31 @@ export const Expressions: React.FC<Props> = props => {
     [onFilterChange]
   );
 
+  const preFillAlertCriteria = useCallback(() => {
+    const md = alertsContext.metadata;
+    if (md && md.options) {
+      setAlertParams('criteria', [
+        {
+          ...defaultExpression,
+          metric: md.options.metric!.type,
+        } as InventoryMetricConditions,
+      ]);
+    } else {
+      setAlertParams('criteria', [defaultExpression]);
+    }
+  }, [alertsContext.metadata, setAlertParams]);
+
+  const preFillAlertFilter = useCallback(() => {
+    const md = alertsContext.metadata;
+    if (md && md.filter) {
+      setAlertParams('filterQueryText', md.filter);
+      setAlertParams(
+        'filterQuery',
+        convertKueryToElasticSearchQuery(md.filter, derivedIndexPattern) || ''
+      );
+    }
+  }, [alertsContext.metadata, derivedIndexPattern, setAlertParams]);
+
   useEffect(() => {
     const md = alertsContext.metadata;
     if (!alertParams.nodeType) {
@@ -188,31 +224,19 @@ export const Expressions: React.FC<Props> = props => {
       }
     }
 
-    if (!alertParams.criteria) {
-      if (md && md.options) {
-        setAlertParams('criteria', [
-          {
-            ...defaultExpression,
-            metric: md.options.metric!.type,
-          } as InventoryMetricConditions,
-        ]);
-      } else {
-        setAlertParams('criteria', [defaultExpression]);
-      }
+    if (alertParams.criteria && alertParams.criteria.length) {
+      setTimeSize(alertParams.criteria[0].timeSize);
+      setTimeUnit(alertParams.criteria[0].timeUnit);
+    } else {
+      preFillAlertCriteria();
     }
 
     if (!alertParams.filterQuery) {
-      if (md && md.filter) {
-        setAlertParams('filterQueryText', md.filter);
-        setAlertParams(
-          'filterQuery',
-          convertKueryToElasticSearchQuery(md.filter, derivedIndexPattern) || ''
-        );
-      }
+      preFillAlertFilter();
     }
 
     if (!alertParams.sourceId) {
-      setAlertParams('sourceId', source?.id);
+      setAlertParams('sourceId', source?.id || 'default');
     }
   }, [alertsContext.metadata, derivedIndexPattern, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -228,11 +252,13 @@ export const Expressions: React.FC<Props> = props => {
         </h4>
       </EuiText>
       <StyledExpression>
-        <NodeTypeExpression
-          options={nodeTypes}
-          value={alertParams.nodeType || 'host'}
-          onChange={updateNodeType}
-        />
+        <StyledExpressionRow>
+          <NodeTypeExpression
+            options={nodeTypes}
+            value={alertParams.nodeType || 'host'}
+            onChange={updateNodeType}
+          />
+        </StyledExpressionRow>
       </StyledExpression>
       <EuiSpacer size={'xs'} />
       {alertParams.criteria &&
@@ -291,7 +317,7 @@ export const Expressions: React.FC<Props> = props => {
           <MetricsExplorerKueryBar
             derivedIndexPattern={derivedIndexPattern}
             onSubmit={onFilterChange}
-            onChange={onFilterChange}
+            onChange={debouncedOnFilterChange}
             value={alertParams.filterQueryText}
           />
         )) || (
@@ -418,11 +444,13 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
               />
             </StyledExpression>
             {metric && (
-              <StyledExpression>
-                <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-                  <div>{metricUnit[metric]?.label || ''}</div>
-                </div>
-              </StyledExpression>
+              <div
+                style={{
+                  alignSelf: 'center',
+                }}
+              >
+                <EuiText size={'s'}>{metricUnit[metric]?.label || ''}</EuiText>
+              </div>
             )}
           </StyledExpressionRow>
         </EuiFlexItem>
@@ -495,4 +523,5 @@ const metricUnit: Record<string, { label: string }> = {
   s3UploadBytes: { label: 'bytes' },
   s3DownloadBytes: { label: 'bytes' },
   sqsOldestMessage: { label: 'seconds' },
+  rdsLatency: { label: 'ms' },
 };

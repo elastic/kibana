@@ -6,18 +6,15 @@
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { ConnectorAddFlyout } from './connector_add_flyout';
-import {
-  ActionsConnectorsContextProvider,
-  ActionsConnectorsContextValue,
-} from '../../context/actions_connectors_context';
+import ConnectorAddFlyout from './connector_add_flyout';
+import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('connector_add_flyout', () => {
-  let deps: ActionsConnectorsContextValue;
+  let deps: any;
 
   beforeAll(async () => {
     const mocks = coreMock.createSetup();
@@ -38,6 +35,7 @@ describe('connector_add_flyout', () => {
         },
       },
       actionTypeRegistry: actionTypeRegistry as any,
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
 
@@ -56,6 +54,7 @@ describe('connector_add_flyout', () => {
           reloadConnectors: () => {
             return new Promise<void>(() => {});
           },
+          docLinks: deps!.docLinks,
         }}
       >
         <ConnectorAddFlyout
@@ -95,6 +94,7 @@ describe('connector_add_flyout', () => {
           reloadConnectors: () => {
             return new Promise<void>(() => {});
           },
+          docLinks: deps!.docLinks,
         }}
       >
         <ConnectorAddFlyout
@@ -127,7 +127,7 @@ describe('connector_add_flyout', () => {
     const manageLink = callout.find('EuiButton');
     expect(manageLink).toHaveLength(1);
     expect(manageLink.getElements()[0].props.href).toMatchInlineSnapshot(
-      `"/app/kibana#/management/elasticsearch/license_management/"`
+      `"/app/kibana#/management/stack/license_management/"`
     );
 
     const subscriptionLink = callout.find('EuiButtonEmpty');
@@ -154,6 +154,7 @@ describe('connector_add_flyout', () => {
           reloadConnectors: () => {
             return new Promise<void>(() => {});
           },
+          docLinks: deps!.docLinks,
         }}
       >
         <ConnectorAddFlyout
@@ -201,6 +202,7 @@ describe('connector_add_flyout', () => {
           reloadConnectors: () => {
             return new Promise<void>(() => {});
           },
+          docLinks: deps!.docLinks,
         }}
       >
         <ConnectorAddFlyout

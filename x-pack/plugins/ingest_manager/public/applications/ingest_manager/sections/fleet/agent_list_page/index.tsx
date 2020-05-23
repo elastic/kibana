@@ -34,17 +34,14 @@ import {
   useGetAgents,
   useUrlParams,
   useLink,
+  useBreadcrumbs,
 } from '../../../hooks';
-import { ConnectedLink, AgentReassignConfigFlyout } from '../components';
+import { AgentReassignConfigFlyout } from '../components';
 import { SearchBar } from '../../../components/search_bar';
 import { AgentHealth } from '../components/agent_health';
 import { AgentUnenrollProvider } from '../components/agent_unenroll_provider';
 import { AgentStatusKueryHelper } from '../../../services';
-import {
-  FLEET_AGENT_DETAIL_PATH,
-  AGENT_CONFIG_DETAILS_PATH,
-  AGENT_SAVED_OBJECT_TYPE,
-} from '../../../constants';
+import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
@@ -77,8 +74,8 @@ const statusFilters = [
 
 const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refresh: () => void }>(
   ({ agent, refresh, onReassignClick }) => {
+    const { getHref } = useLink();
     const hasWriteCapabilites = useCapabilities().write;
-    const DETAILS_URI = useLink(FLEET_AGENT_DETAIL_PATH);
     const [isOpen, setIsOpen] = useState(false);
     const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
     const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
@@ -101,7 +98,11 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
       >
         <EuiContextMenuPanel
           items={[
-            <EuiContextMenuItem icon="inspect" href={`${DETAILS_URI}${agent.id}`} key="viewConfig">
+            <EuiContextMenuItem
+              icon="inspect"
+              href={getHref('fleet_agent_details', { agentId: agent.id })}
+              key="viewConfig"
+            >
               <FormattedMessage
                 id="xpack.ingestManager.agentList.viewActionText"
                 defaultMessage="View agent"
@@ -146,9 +147,19 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
   }
 );
 
+function safeMetadata(val: any) {
+  if (typeof val !== 'string') {
+    return '-';
+  }
+  return val;
+}
+
 export const AgentListPage: React.FunctionComponent<{}> = () => {
+  useBreadcrumbs('fleet_agent_list');
+  const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasWriteCapabilites = useCapabilities().write;
+
   // Agent data states
   const [showInactive, setShowInactive] = useState<boolean>(false);
 
@@ -234,18 +245,16 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
   const { isLoading: isAgentConfigsLoading } = agentConfigsRequest;
 
-  const CONFIG_DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
-
   const columns = [
     {
-      field: 'local_metadata.host',
+      field: 'local_metadata.host.hostname',
       name: i18n.translate('xpack.ingestManager.agentList.hostColumnTitle', {
         defaultMessage: 'Host',
       }),
       render: (host: string, agent: Agent) => (
-        <ConnectedLink color="primary" path={`${FLEET_AGENT_DETAIL_PATH}${agent.id}`}>
-          {agent.local_metadata['host.hostname'] || host || ''}
-        </ConnectedLink>
+        <EuiLink href={getHref('fleet_agent_details', { agentId: agent.id })}>
+          {safeMetadata(host)}
+        </EuiLink>
       ),
     },
     {
@@ -267,7 +276,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
             <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
               <EuiLink
-                href={`${CONFIG_DETAILS_URI}${configId}`}
+                href={getHref('configuration_details', { configId })}
                 style={NO_WRAP_TRUNCATE_STYLE}
                 title={configName || configId}
               >
@@ -308,13 +317,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       },
     },
     {
-      field: 'local_metadata.version',
+      field: 'local_metadata.elastic.agent.version',
       width: '100px',
       name: i18n.translate('xpack.ingestManager.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
-      render: (version: string, agent: Agent) =>
-        agent.local_metadata['agent.version'] || version || '',
+      render: (version: string, agent: Agent) => safeMetadata(version),
     },
     {
       field: 'last_checkin',
@@ -505,7 +513,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         loading={isLoading && agentsRequest.isInitialRequest}
         hasActions={true}
         noItemsMessage={
-          isLoading ? (
+          isLoading && agentsRequest.isInitialRequest ? (
             <FormattedMessage
               id="xpack.ingestManager.agentList.loadingAgentsMessage"
               defaultMessage="Loading agents…"

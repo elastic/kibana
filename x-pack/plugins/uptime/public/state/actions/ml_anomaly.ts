@@ -6,15 +6,17 @@
 
 import { createAction } from 'redux-actions';
 import { createAsyncAction } from './utils';
-import { MlCapabilitiesResponse } from '../../../../../plugins/ml/common/types/capabilities';
-import { AnomaliesTableRecord } from '../../../../../plugins/ml/common/types/anomalies';
+import {
+  MlCapabilitiesResponse,
+  AnomaliesTableRecord,
+  JobExistResult,
+} from '../../../../../plugins/ml/public';
 import {
   CreateMLJobSuccess,
   DeleteJobResults,
   MonitorIdParam,
   HeartbeatIndicesParam,
 } from './types';
-import { JobExistResult } from '../../../../../plugins/ml/common/types/data_recognizer';
 
 export const resetMLState = createAction('RESET_ML_STATE');
 

@@ -23,7 +23,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentConfig } from '../../../../types';
 import { EnrollmentStepAgentConfig } from './config_selection';
-import { useGetOneEnrollmentAPIKey, useCore, useGetSettings } from '../../../../hooks';
+import {
+  useGetOneEnrollmentAPIKey,
+  useCore,
+  useGetSettings,
+  useLink,
+  useFleetStatus,
+} from '../../../../hooks';
 import { ManualInstructions } from '../../../../components/enrollment_instructions';
 
 interface Props {
@@ -35,7 +41,10 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   onClose,
   agentConfigs = [],
 }) => {
+  const { getHref } = useLink();
   const core = useCore();
+  const fleetStatus = useFleetStatus();
+
   const [selectedAPIKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
 
   const settings = useGetSettings();
@@ -104,7 +113,28 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiSteps steps={steps} />
+        {fleetStatus.isReady ? (
+          <>
+            <EuiSteps steps={steps} />
+          </>
+        ) : (
+          <>
+            <FormattedMessage
+              id="xpack.ingestManager.agentEnrollment.fleetNotInitializedText"
+              defaultMessage="Fleet needs to be set up before agents can be enrolled. {link}"
+              values={{
+                link: (
+                  <EuiLink href={getHref('fleet')}>
+                    <FormattedMessage
+                      id="xpack.ingestManager.agentEnrollment.goToFleetButton"
+                      defaultMessage="Go to Fleet."
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </>
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

@@ -35,7 +35,7 @@ export default function({ getService, getPageObjects }) {
   describe('discover histogram', function describeIndexTests() {
     before(async function() {
       log.debug('load kibana index with default index pattern');
-      await PageObjects.common.navigateToApp('home');
+      await PageObjects.common.navigateToApp('settings');
       await security.testUser.setRoles([
         'kibana_admin',
         'test_logstash_reader',
@@ -56,7 +56,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('long-window-logstash-*');
       // NOTE: For some reason without setting this relative time, the abs times will not fetch data.
-      await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Last_1 year');
+      await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
     });
     after(async () => {
       await esArchiver.unload('long_window_logstash');
@@ -69,7 +69,7 @@ export default function({ getService, getPageObjects }) {
       const fromTime = 'Nov 01, 2017 @ 00:00:00.000';
       const toTime = 'Mar 21, 2018 @ 00:00:00.000';
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.discover.setChartInterval('Monthly');
+      await PageObjects.discover.setChartInterval('Month');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
@@ -78,7 +78,7 @@ export default function({ getService, getPageObjects }) {
       const fromTime = 'Mar 01, 2018 @ 00:00:00.000';
       const toTime = 'May 01, 2018 @ 00:00:00.000';
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.discover.setChartInterval('Weekly');
+      await PageObjects.discover.setChartInterval('Week');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
@@ -88,12 +88,12 @@ export default function({ getService, getPageObjects }) {
       const toTime = 'Mar 21, 2019 @ 00:00:00.000';
 
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.discover.setChartInterval('Daily');
+      await PageObjects.discover.setChartInterval('Day');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
-      const chartIntervalScaledDesc = await PageObjects.discover.getChartIntervalScaledToDesc();
-      expect(chartIntervalScaledDesc).to.be('Scaled to 30 days');
+      const chartIntervalIconTip = await PageObjects.discover.getChartIntervalWarningIcon();
+      expect(chartIntervalIconTip).to.be(true);
     });
   });
 }

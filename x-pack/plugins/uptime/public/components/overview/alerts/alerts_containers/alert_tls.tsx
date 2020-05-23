@@ -10,7 +10,7 @@ import { AlertTlsComponent } from '../alert_tls';
 import { setAlertFlyoutVisible } from '../../../../state/actions';
 import { selectDynamicSettings } from '../../../../state/selectors';
 
-export const AlertTls = () => {
+export const AlertTls: React.FC<{}> = () => {
   const dispatch = useDispatch();
   const setFlyoutVisible = useCallback((value: boolean) => dispatch(setAlertFlyoutVisible(value)), [
     dispatch,
@@ -18,9 +18,12 @@ export const AlertTls = () => {
   const { settings } = useSelector(selectDynamicSettings);
   return (
     <AlertTlsComponent
-      ageThreshold={settings?.certThresholds?.age}
-      expirationThreshold={settings?.certThresholds?.expiration}
+      ageThreshold={settings?.certAgeThreshold}
+      expirationThreshold={settings?.certExpirationThreshold}
       setAlertFlyoutVisible={setFlyoutVisible}
     />
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AlertTls as default };

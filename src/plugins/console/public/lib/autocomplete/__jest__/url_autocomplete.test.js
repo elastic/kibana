@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const _ = require('lodash');
+import _ from 'lodash';
 import {
   URL_PATH_END_MARKER,
   UrlPatternMatcher,

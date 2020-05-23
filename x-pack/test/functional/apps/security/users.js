@@ -18,15 +18,22 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.security.clickElasticsearchUsers();
     });
 
-    it('should show the default elastic and kibana users', async function() {
+    it('should show the default elastic and kibana_system users', async function() {
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.info('actualUsers = %j', users);
       log.info('config = %j', config.get('servers.elasticsearch.hostname'));
       if (config.get('servers.elasticsearch.hostname') === 'localhost') {
         expect(users.elastic.roles).to.eql(['superuser']);
         expect(users.elastic.reserved).to.be(true);
+        expect(users.elastic.deprecated).to.be(false);
+
+        expect(users.kibana_system.roles).to.eql(['kibana_system']);
+        expect(users.kibana_system.reserved).to.be(true);
+        expect(users.kibana_system.deprecated).to.be(false);
+
         expect(users.kibana.roles).to.eql(['kibana_system']);
         expect(users.kibana.reserved).to.be(true);
+        expect(users.kibana.deprecated).to.be(true);
       } else {
         expect(users.anonymous.roles).to.eql(['anonymous']);
         expect(users.anonymous.reserved).to.be(true);

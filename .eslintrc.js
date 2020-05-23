@@ -89,7 +89,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/canvas/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/canvas/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
         'jsx-a11y/click-events-have-key-events': 'off',
@@ -112,7 +112,6 @@ module.exports = {
       files: ['x-pack/plugins/lens/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
       },
     },
     {
@@ -134,7 +133,7 @@ module.exports = {
      * Licence headers
      */
     {
-      files: ['**/*.{js,ts,tsx}'],
+      files: ['**/*.{js,ts,tsx}', '!plugins/**/*'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -148,6 +147,16 @@ module.exports = {
             licenses: [ELASTIC_LICENSE_HEADER],
           },
         ],
+      },
+    },
+
+    /**
+     * New Platform client-side
+     */
+    {
+      files: ['{src,x-pack}/plugins/*/public/**/*.{js,ts,tsx}'],
+      rules: {
+        'import/no-commonjs': 'error',
       },
     },
 
@@ -184,6 +193,16 @@ module.exports = {
             basePath: __dirname,
             zones: [
               {
+                target: ['(src|x-pack)/**/*', '!src/core/**/*'],
+                from: ['src/core/utils/**/*'],
+                errorMessage: `Plugins may only import from src/core/server and src/core/public.`,
+              },
+              {
+                target: ['(src|x-pack)/plugins/*/public/**/*'],
+                from: ['(src|x-pack)/plugins/*/server/**/*'],
+                errorMessage: `Public code can not import from server, use a common directory.`,
+              },
+              {
                 target: [
                   '(src|x-pack)/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
@@ -205,6 +224,8 @@ module.exports = {
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/*.test.mocks{,.ts}',
+
+                  'target/types/**',
                 ],
                 allowSameFolder: true,
                 errorMessage:
@@ -223,6 +244,7 @@ module.exports = {
                 ],
                 from: [
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
+                  '!(src|x-pack)/plugins/**/(public|server)/mocks/index.{js,ts}',
                   '!(src|x-pack)/plugins/**/(public|server)/(index|mocks).{js,ts,tsx}',
                 ],
                 allowSameFolder: true,
@@ -306,7 +328,7 @@ module.exports = {
     {
       files: [
         'x-pack/test/functional/apps/**/*.js',
-        'x-pack/legacy/plugins/apm/**/*.js',
+        'x-pack/plugins/apm/**/*.js',
         'test/*/config.ts',
         'test/*/config_open.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
@@ -393,7 +415,7 @@ module.exports = {
         'x-pack/**/*.test.js',
         'x-pack/test_utils/**/*',
         'x-pack/gulpfile.js',
-        'x-pack/legacy/plugins/apm/public/utils/testHelpers.js',
+        'x-pack/plugins/apm/public/utils/testHelpers.js',
       ],
       rules: {
         'import/no-extraneous-dependencies': [
@@ -476,7 +498,6 @@ module.exports = {
         '.eslintrc.js',
         '**/webpackShims/**/*.js',
         'packages/kbn-plugin-generator/**/*.js',
-        'packages/kbn-plugin-helpers/**/*.js',
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
@@ -519,7 +540,7 @@ module.exports = {
      * APM overrides
      */
     {
-      files: ['x-pack/legacy/plugins/apm/**/*.js'],
+      files: ['x-pack/plugins/apm/**/*.js'],
       rules: {
         'no-unused-vars': ['error', { ignoreRestSiblings: true }],
         'no-console': ['warn', { allow: ['error'] }],
@@ -527,7 +548,7 @@ module.exports = {
     },
     {
       plugins: ['react-hooks'],
-      files: ['x-pack/legacy/plugins/apm/**/*.{ts,tsx}'],
+      files: ['x-pack/plugins/apm/**/*.{ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
         'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
@@ -878,7 +899,7 @@ module.exports = {
      * Canvas overrides
      */
     {
-      files: ['x-pack/legacy/plugins/canvas/**/*.js'],
+      files: ['x-pack/plugins/canvas/**/*.js'],
       rules: {
         radix: 'error',
 
@@ -922,12 +943,12 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/legacy/plugins/canvas/gulpfile.js',
-        'x-pack/legacy/plugins/canvas/scripts/*.js',
-        'x-pack/legacy/plugins/canvas/tasks/*.js',
-        'x-pack/legacy/plugins/canvas/tasks/**/*.js',
-        'x-pack/legacy/plugins/canvas/__tests__/**/*.js',
-        'x-pack/legacy/plugins/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
+        'x-pack/plugins/canvas/gulpfile.js',
+        'x-pack/plugins/canvas/scripts/*.js',
+        'x-pack/plugins/canvas/tasks/*.js',
+        'x-pack/plugins/canvas/tasks/**/*.js',
+        'x-pack/plugins/canvas/__tests__/**/*.js',
+        'x-pack/plugins/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
       ],
       rules: {
         'import/no-extraneous-dependencies': [
@@ -940,7 +961,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/canvas/canvas_plugin_src/**/*.js'],
+      files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*.js'],
       globals: { canvas: true, $: true },
       rules: {
         'import/no-unresolved': [
@@ -952,13 +973,13 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/canvas/public/**/*.js'],
+      files: ['x-pack/plugins/canvas/public/**/*.js'],
       env: {
         browser: true,
       },
     },
     {
-      files: ['x-pack/legacy/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
+      files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
       env: {
         jquery: true,
       },

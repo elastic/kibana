@@ -95,7 +95,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.ingestPipelines.form.descriptionFieldDescription"
-            defaultMessage="The description to apply to the pipeline."
+            defaultMessage="A description of what this pipeline does."
           />
         }
       >
@@ -122,12 +122,16 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
           <>
             <FormattedMessage
               id="xpack.ingestPipelines.form.processorsFieldDescription"
-              defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
+              defaultMessage="The processors to use to transform the documents before indexing. {learnMoreLink}"
               values={{
                 learnMoreLink: (
-                  <EuiLink href={services.documentation.getProcessorsUrl()} target="_blank">
+                  <EuiLink
+                    href={services.documentation.getProcessorsUrl()}
+                    target="_blank"
+                    external
+                  >
                     {i18n.translate('xpack.ingestPipelines.form.processorsDocumentionLink', {
-                      defaultMessage: 'Learn more.',
+                      defaultMessage: 'Learn more',
                     })}
                   </EuiLink>
                 ),
@@ -136,7 +140,12 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
 
             <EuiSpacer />
 
-            <EuiButton size="s" onClick={onTestPipelineClick} disabled={isTestButtonDisabled}>
+            <EuiButton
+              size="s"
+              onClick={onTestPipelineClick}
+              disabled={isTestButtonDisabled}
+              data-test-subj="testPipelineButton"
+            >
               <FormattedMessage
                 id="xpack.ingestPipelines.form.testPipelineButtonLabel"
                 defaultMessage="Test pipeline"
@@ -149,8 +158,8 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
           path="processors"
           component={JsonEditorField}
           componentProps={{
-            ['data-test-subj']: 'processorsField',
             euiCodeEditorProps: {
+              'data-test-subj': 'processorsEditor',
               height: '300px',
               'aria-label': i18n.translate('xpack.ingestPipelines.form.processorsFieldAriaLabel', {
                 defaultMessage: 'Processors JSON editor',
@@ -172,12 +181,16 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
           <>
             <FormattedMessage
               id="xpack.ingestPipelines.form.onFailureDescription"
-              defaultMessage="The processors to be executed following a failed processor. {learnMoreLink}"
+              defaultMessage="The alternate processors to execute after a processor fails. {learnMoreLink}"
               values={{
                 learnMoreLink: (
-                  <EuiLink href={services.documentation.getHandlingFailureUrl()} target="_blank">
+                  <EuiLink
+                    href={services.documentation.getHandlingFailureUrl()}
+                    target="_blank"
+                    external
+                  >
                     {i18n.translate('xpack.ingestPipelines.form.onFailureDocumentionLink', {
-                      defaultMessage: 'Learn more.',
+                      defaultMessage: 'Learn more',
                     })}
                   </EuiLink>
                 ),
@@ -188,7 +201,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
               label={
                 <FormattedMessage
                   id="xpack.ingestPipelines.form.onFailureToggleDescription"
-                  defaultMessage="Add on-failure processors"
+                  defaultMessage="Add failure processors"
                 />
               }
               checked={isOnFailureEditorVisible}
@@ -203,11 +216,11 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
             path="on_failure"
             component={JsonEditorField}
             componentProps={{
-              ['data-test-subj']: 'onFailureEditor',
               euiCodeEditorProps: {
+                'data-test-subj': 'onFailureEditor',
                 height: '300px',
                 'aria-label': i18n.translate('xpack.ingestPipelines.form.onFailureFieldAriaLabel', {
-                  defaultMessage: 'On-failure processors JSON editor',
+                  defaultMessage: 'Failure processors JSON editor',
                 }),
               },
             }}

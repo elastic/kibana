@@ -10,6 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import createContainer from 'constate';
+import { InventoryColorPaletteRT } from '../../../../lib/lib';
 import {
   SnapshotMetricInput,
   SnapshotGroupBy,
@@ -32,6 +33,12 @@ export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
   accountId: '',
   region: '',
   customMetrics: [],
+  legend: {
+    palette: 'cool',
+    steps: 10,
+    reverseColors: false,
+  },
+  sort: { by: 'name', direction: 'desc' },
 };
 
 export const useWaffleOptions = () => {
@@ -99,7 +106,22 @@ export const useWaffleOptions = () => {
     [setState]
   );
 
+  const changeLegend = useCallback(
+    (legend: WaffleLegendOptions) => {
+      setState(previous => ({ ...previous, legend }));
+    },
+    [setState]
+  );
+
+  const changeSort = useCallback(
+    (sort: WaffleSortOption) => {
+      setState(previous => ({ ...previous, sort }));
+    },
+    [setState]
+  );
+
   return {
+    ...DEFAULT_WAFFLE_OPTIONS_STATE,
     ...state,
     changeMetric,
     changeGroupBy,
@@ -111,9 +133,24 @@ export const useWaffleOptions = () => {
     changeAccount,
     changeRegion,
     changeCustomMetrics,
+    changeLegend,
+    changeSort,
     setWaffleOptionsState: setState,
   };
 };
+
+const WaffleLegendOptionsRT = rt.type({
+  palette: InventoryColorPaletteRT,
+  steps: rt.number,
+  reverseColors: rt.boolean,
+});
+
+export type WaffleLegendOptions = rt.TypeOf<typeof WaffleLegendOptionsRT>;
+
+export const WaffleSortOptionRT = rt.type({
+  by: rt.keyof({ name: null, value: null }),
+  direction: rt.keyof({ asc: null, desc: null }),
+});
 
 export const WaffleOptionsStateRT = rt.type({
   metric: SnapshotMetricInputRT,
@@ -134,8 +171,11 @@ export const WaffleOptionsStateRT = rt.type({
   accountId: rt.string,
   region: rt.string,
   customMetrics: rt.array(SnapshotCustomMetricInputRT),
+  legend: WaffleLegendOptionsRT,
+  sort: WaffleSortOptionRT,
 });
 
+export type WaffleSortOption = rt.TypeOf<typeof WaffleSortOptionRT>;
 export type WaffleOptionsState = rt.TypeOf<typeof WaffleOptionsStateRT>;
 const encodeUrlState = (state: WaffleOptionsState) => {
   return WaffleOptionsStateRT.encode(state);

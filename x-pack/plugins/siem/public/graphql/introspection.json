@@ -249,6 +249,12 @@
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "Boolean", "ofType": null },
                 "defaultValue": null
+              },
+              {
+                "name": "timelineType",
+                "description": "",
+                "type": { "kind": "ENUM", "name": "TimelineType", "ofType": null },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -9721,6 +9727,14 @@
             "deprecationReason": null
           },
           {
+            "name": "status",
+            "description": "",
+            "args": [],
+            "type": { "kind": "ENUM", "name": "TimelineStatus", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "title",
             "description": "",
             "args": [],
@@ -10348,6 +10362,19 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "TimelineStatus",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          { "name": "active", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "draft", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "SCALAR",
         "name": "Int",
         "description": "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1. ",
@@ -10954,6 +10981,12 @@
             "name": "sort",
             "description": "",
             "type": { "kind": "INPUT_OBJECT", "name": "SortTimelineInput", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "status",
+            "description": "",
+            "type": { "kind": "ENUM", "name": "TimelineStatus", "ofType": null },
             "defaultValue": null
           }
         ],

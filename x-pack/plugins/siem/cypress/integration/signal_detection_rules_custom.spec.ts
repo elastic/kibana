@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { newRule, totalNumberOfPrebuiltRules } from '../objects/rule';
+import { newRule, totalNumberOfPrebuiltRulesInEsArchive } from '../objects/rule';
 
 import {
   ABOUT_FALSE_POSITIVES,
@@ -91,7 +91,7 @@ describe('Signal detection rules, custom', () => {
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
-    const expectedNumberOfRules = totalNumberOfPrebuiltRules + 1;
+    const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchive + 1;
     cy.get(RULES_TABLE).then($table => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
@@ -195,7 +195,7 @@ describe('Signal detection rules, custom', () => {
     cy.get(DEFINITION_STEP)
       .eq(DEFINITION_TIMELINE)
       .invoke('text')
-      .should('eql', 'Default blank timeline');
+      .should('eql', 'None');
 
     cy.get(SCHEDULE_STEP)
       .eq(SCHEDULE_RUNS)

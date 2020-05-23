@@ -100,9 +100,9 @@ export default function({ getService, getPageObjects }) {
         const data = await PageObjects.visChart.getTableVisData();
         expect(data.trim().split('\n')).to.be.eql([
           '≥ 0B and < 1,000B',
-          '1,351 64.7%',
+          '1,351 64.703%',
           '≥ 1,000B and < 1.953KB',
-          '737 35.3%',
+          '737 35.297%',
         ]);
       }
 
@@ -174,7 +174,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickBucket('Split rows');
       await PageObjects.visEditor.selectAggregation('Date Histogram');
       await PageObjects.visEditor.selectField('@timestamp');
-      await PageObjects.visEditor.setInterval('Daily');
+      await PageObjects.visEditor.setInterval('Day');
       await PageObjects.visEditor.clickGo();
       const data = await PageObjects.visChart.getTableVisData();
       log.debug(data.split('\n'));
@@ -196,7 +196,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickBucket('Split rows');
       await PageObjects.visEditor.selectAggregation('Date Histogram');
       await PageObjects.visEditor.selectField('@timestamp');
-      await PageObjects.visEditor.setInterval('Daily');
+      await PageObjects.visEditor.setInterval('Day');
       await PageObjects.visEditor.clickGo();
       const data = await PageObjects.visChart.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([

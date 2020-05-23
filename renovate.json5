@@ -427,6 +427,14 @@
         ],
       },
       {
+        groupSlug: 'inquirer',
+        groupName: 'inquirer related packages',
+        packageNames: [
+          'inquirer',
+          '@types/inquirer',
+        ],
+      },
+      {
         groupSlug: 'intl-relativeformat',
         groupName: 'intl-relativeformat related packages',
         packageNames: [
@@ -684,6 +692,14 @@
         ],
       },
       {
+        groupSlug: 'node-sass',
+        groupName: 'node-sass related packages',
+        packageNames: [
+          'node-sass',
+          '@types/node-sass',
+        ],
+      },
+      {
         groupSlug: 'nodemailer',
         groupName: 'nodemailer related packages',
         packageNames: [
@@ -769,6 +785,14 @@
         packageNames: [
           'podium',
           '@types/podium',
+        ],
+      },
+      {
+        groupSlug: 'pretty-ms',
+        groupName: 'pretty-ms related packages',
+        packageNames: [
+          'pretty-ms',
+          '@types/pretty-ms',
         ],
       },
       {
@@ -865,6 +889,14 @@
         ],
       },
       {
+        groupSlug: 'stats-lite',
+        groupName: 'stats-lite related packages',
+        packageNames: [
+          'stats-lite',
+          '@types/stats-lite',
+        ],
+      },
+      {
         groupSlug: 'storybook',
         groupName: 'storybook related packages',
         packagePatterns: [
@@ -936,6 +968,22 @@
         ],
       },
       {
+        groupSlug: 'through2',
+        groupName: 'through2 related packages',
+        packageNames: [
+          'through2',
+          '@types/through2',
+        ],
+      },
+      {
+        groupSlug: 'through2-map',
+        groupName: 'through2-map related packages',
+        packageNames: [
+          'through2-map',
+          '@types/through2-map',
+        ],
+      },
+      {
         groupSlug: 'tinycolor2',
         groupName: 'tinycolor2 related packages',
         packageNames: [
@@ -986,6 +1034,14 @@
           '(\\b|_)vega(\\b|_)',
         ],
         enabled: false,
+      },
+      {
+        groupSlug: 'vinyl',
+        groupName: 'vinyl related packages',
+        packageNames: [
+          'vinyl',
+          '@types/vinyl',
+        ],
       },
       {
         groupSlug: 'vinyl-fs',

@@ -1,3 +1,6 @@
+@import '@elastic/eui/src/components/header/variables';
+@import '@elastic/eui/src/components/nav_drawer/variables';
+
 /**
  * stretch the root element of the Kibana application to set the base-size that
  * flexed children should keep. Only works when paired with root styles applied
@@ -9,7 +12,9 @@
   min-height: 100%;
 }
 
-.app-wrapper {
+// TODO #64541
+// Delete this block
+.chrHeaderWrapper:not(.headerWrapper) ~ .app-wrapper {
   display: flex;
   flex-flow: column nowrap;
   position: absolute;
@@ -19,6 +24,22 @@
   bottom: 0;
   z-index: 5;
   margin: 0 auto;
+
+  &:not(.hidden-chrome) {
+    top: $euiHeaderChildSize;
+    left: $euiHeaderChildSize;
+
+    // HOTFIX: Temporary fix for flyouts not inside portals
+    // SASSTODO: Find an actual solution
+    .euiFlyout {
+      top: $euiHeaderChildSize;
+      height: calc(100% - #{$euiHeaderChildSize});
+    }
+
+    @include euiBreakpoint('xs', 's') {
+      left: 0;
+    }
+  }
 
   /**
    * 1. Dirty, but we need to override the .kbnGlobalNav-isOpen state
@@ -30,6 +51,38 @@
 
   .navbar-right {
     margin-right: 0;
+  }
+}
+
+// TODO #64541
+// Delete this block
+@include euiBreakpoint('xl') {
+  .chrHeaderWrapper--navIsLocked:not(.headerWrapper) {
+    ~ .app-wrapper:not(.hidden-chrome) {
+      // Shrink the content from the left so it's no longer overlapped by the nav drawer (ALWAYS)
+      left: $euiNavDrawerWidthExpanded !important; // sass-lint:disable-line no-important
+      transition: left $euiAnimSpeedFast $euiAnimSlightResistance;
+    }
+  }
+}
+
+// TODO #64541
+// Remove .headerWrapper and header conditionals
+.headerWrapper ~ .app-wrapper,
+:not(header) ~ .app-wrapper {
+  display: flex;
+  flex-flow: column nowrap;
+  margin: 0 auto;
+  min-height: calc(100vh - #{$euiHeaderHeightCompensation});
+
+  @include internetExplorerOnly {
+    // IE specific bug with min-height in flex container, described in the next link
+    // https://github.com/philipwalton/flexbugs#3-min-height-on-a-flex-container-wont-apply-to-its-flex-items
+    height: calc(100vh - #{$euiHeaderHeightCompensation});
+  }
+
+  &.hidden-chrome {
+    min-height: 100vh;
   }
 }
 

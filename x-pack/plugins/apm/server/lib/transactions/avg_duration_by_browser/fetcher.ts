@@ -5,7 +5,7 @@
  */
 
 import { ESFilter } from '../../../../typings/elasticsearch';
-import { PromiseReturnType } from '../../../../typings/common';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,

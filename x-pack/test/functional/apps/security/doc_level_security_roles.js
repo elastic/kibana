@@ -21,6 +21,8 @@ export default function({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('security/dlstest');
       await browser.setWindowSize(1600, 1000);
       await PageObjects.settings.setLegacyDiscoverTable();
+
+      await PageObjects.common.navigateToApp('settings');
       await PageObjects.settings.createIndexPattern('dlstest', null);
 
       await PageObjects.settings.navigateTo();

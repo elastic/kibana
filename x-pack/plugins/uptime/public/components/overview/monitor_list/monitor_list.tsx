@@ -13,13 +13,10 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
-import { HistogramPoint, FetchMonitorStatesQueryArgs } from '../../../../common/runtime_types';
+import { HistogramPoint } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { ExpandedRowMap } from './types';
@@ -31,14 +28,13 @@ import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
 import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
 import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
-import { useUrlParams } from '../../../hooks';
-import { CERTIFICATES_ROUTE } from '../../../../common/constants';
 import { CertStatusColumn } from './cert_status_column';
+import { MonitorListHeader } from './monitor_list_header';
 
 interface Props extends MonitorListProps {
-  lastRefresh: number;
+  pageSize: number;
+  setPageSize: (val: number) => void;
   monitorList: MonitorList;
-  getMonitorList: (params: FetchMonitorStatesQueryArgs) => void;
 }
 
 const TruncatedEuiLink = styled(EuiLink)`
@@ -47,48 +43,14 @@ const TruncatedEuiLink = styled(EuiLink)`
   text-overflow: ellipsis;
 `;
 
-const DEFAULT_PAGE_SIZE = 10;
-const LOCAL_STORAGE_KEY = 'xpack.uptime.monitorList.pageSize';
-const getPageSizeValue = () => {
-  const value = parseInt(localStorage.getItem(LOCAL_STORAGE_KEY) ?? '', 10);
-  if (isNaN(value)) {
-    return DEFAULT_PAGE_SIZE;
-  }
-  return value;
-};
-
 export const MonitorListComponent: React.FC<Props> = ({
   filters,
-  getMonitorList,
-  lastRefresh,
   monitorList: { list, error, loading },
   linkParameters,
+  pageSize,
+  setPageSize,
 }) => {
-  const [pageSize, setPageSize] = useState<number>(getPageSizeValue());
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
-
-  const [getUrlValues] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd, pagination, statusFilter } = getUrlValues();
-
-  useEffect(() => {
-    getMonitorList({
-      dateRangeStart,
-      dateRangeEnd,
-      filters,
-      pageSize,
-      pagination,
-      statusFilter,
-    });
-  }, [
-    getMonitorList,
-    dateRangeStart,
-    dateRangeEnd,
-    filters,
-    lastRefresh,
-    pageSize,
-    pagination,
-    statusFilter,
-  ]);
 
   const items = list.summaries ?? [];
 
@@ -147,7 +109,7 @@ export const MonitorListComponent: React.FC<Props> = ({
       ),
     },
     {
-      align: 'center' as const,
+      align: 'left' as const,
       field: 'state.tls',
       name: labels.TLS_COLUMN_LABEL,
       render: (tls: any) => <CertStatusColumn cert={tls?.[0]} />,
@@ -174,6 +136,7 @@ export const MonitorListComponent: React.FC<Props> = ({
         return (
           <EuiButtonIcon
             aria-label={labels.getExpandDrawerLabel(id)}
+            data-test-subj={`xpack.uptime.monitorList.${id}.expandMonitorDetail`}
             iconType={drawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
             onClick={() => {
               if (drawerIds.includes(id)) {
@@ -190,39 +153,12 @@ export const MonitorListComponent: React.FC<Props> = ({
 
   return (
     <EuiPanel>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h5>
-              <FormattedMessage
-                id="xpack.uptime.monitorList.monitoringStatusTitle"
-                defaultMessage="Monitor status"
-              />
-            </h5>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h5>
-              <Link to={CERTIFICATES_ROUTE} data-test-subj="uptimeCertificatesLink">
-                <FormattedMessage
-                  id="xpack.uptime.monitorList.viewCertificateTitle"
-                  defaultMessage="View certificates status"
-                />
-              </Link>
-            </h5>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
+      <MonitorListHeader />
       <EuiSpacer size="m" />
       <EuiBasicTable
         aria-label={labels.getDescriptionLabel(items.length)}
         error={error?.message}
-        // Only set loading to true when there are no items present to prevent the bug outlined in
-        // in https://github.com/elastic/eui/issues/2393 . Once that is fixed we can simply set the value here to
-        // loading={loading}
-        loading={loading && (!items || items.length < 1)}
+        loading={loading}
         isExpandable={true}
         hasActions={true}
         itemId="monitor_id"

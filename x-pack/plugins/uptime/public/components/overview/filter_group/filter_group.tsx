@@ -6,9 +6,8 @@
 
 import React, { useState } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { FilterPopoverProps, FilterPopover } from './filter_popover';
-import { FilterStatusButton } from './filter_status_button';
 import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
 import { filterLabels } from './translations';
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
@@ -17,6 +16,10 @@ interface PresentationalComponentProps {
   loading: boolean;
   overviewFilters: OverviewFilters;
 }
+
+const Container = styled(EuiFilterGroup)`
+  margin-bottom: 10px;
+`;
 
 export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
   overviewFilters,
@@ -29,13 +32,14 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
     values: string[];
   }>({ fieldName: '', values: [] });
 
-  const currentFilters = useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values);
+  const { selectedLocations, selectedPorts, selectedSchemes, selectedTags } = useFilterUpdate(
+    updatedFieldValues.fieldName,
+    updatedFieldValues.values
+  );
 
   const onFilterFieldChange = (fieldName: string, values: string[]) => {
     setUpdatedFieldValues({ fieldName, values });
   };
-
-  const getSelectedItems = (fieldName: string) => currentFilters.get(fieldName) || [];
 
   const filterPopoverProps: FilterPopoverProps[] = [
     {
@@ -44,7 +48,7 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
       fieldName: 'observer.geo.name',
       id: 'location',
       items: locations,
-      selectedItems: getSelectedItems('observer.geo.name'),
+      selectedItems: selectedLocations,
       title: filterLabels.LOCATION,
     },
     {
@@ -54,7 +58,7 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
       id: 'port',
       disabled: ports.length === 0,
       items: ports.map((p: number) => p.toString()),
-      selectedItems: getSelectedItems('url.port'),
+      selectedItems: selectedPorts,
       title: filterLabels.PORT,
     },
     {
@@ -64,7 +68,7 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
       id: 'scheme',
       disabled: schemes.length === 0,
       items: schemes,
-      selectedItems: getSelectedItems('monitor.type'),
+      selectedItems: selectedSchemes,
       title: filterLabels.SCHEME,
     },
     {
@@ -74,32 +78,16 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
       id: 'tags',
       disabled: tags.length === 0,
       items: tags,
-      selectedItems: getSelectedItems('tags'),
+      selectedItems: selectedTags,
       title: filterLabels.TAGS,
     },
   ];
 
   return (
-    <EuiFilterGroup>
-      <FilterStatusButton
-        content={i18n.translate('xpack.uptime.filterBar.filterUpLabel', {
-          defaultMessage: 'Up',
-        })}
-        dataTestSubj="xpack.uptime.filterBar.filterStatusUp"
-        value="up"
-        withNext={true}
-      />
-      <FilterStatusButton
-        content={i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
-          defaultMessage: 'Down',
-        })}
-        dataTestSubj="xpack.uptime.filterBar.filterStatusDown"
-        value="down"
-        withNext={false}
-      />
+    <Container>
       {filterPopoverProps.map(item => (
         <FilterPopover key={item.id} {...item} />
       ))}
-    </EuiFilterGroup>
+    </Container>
   );
 };

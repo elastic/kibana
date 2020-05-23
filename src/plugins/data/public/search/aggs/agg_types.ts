@@ -118,7 +118,51 @@ import { aggHistogram } from './buckets/histogram_fn';
 import { aggDateHistogram } from './buckets/date_histogram_fn';
 import { aggTerms } from './buckets/terms_fn';
 
+/** Metrics: **/
+import { aggAvg } from './metrics/avg_fn';
+import { aggBucketAvg } from './metrics/bucket_avg_fn';
+import { aggBucketMax } from './metrics/bucket_max_fn';
+import { aggBucketMin } from './metrics/bucket_min_fn';
+import { aggBucketSum } from './metrics/bucket_sum_fn';
+import { aggCardinality } from './metrics/cardinality_fn';
+import { aggCount } from './metrics/count_fn';
+import { aggCumulativeSum } from './metrics/cumulative_sum_fn';
+import { aggDerivative } from './metrics/derivative_fn';
+import { aggGeoBounds } from './metrics/geo_bounds_fn';
+import { aggGeoCentroid } from './metrics/geo_centroid_fn';
+import { aggMax } from './metrics/max_fn';
+import { aggMedian } from './metrics/median_fn';
+import { aggMin } from './metrics/min_fn';
+import { aggMovingAvg } from './metrics/moving_avg_fn';
+import { aggPercentileRanks } from './metrics/percentile_ranks_fn';
+import { aggPercentiles } from './metrics/percentiles_fn';
+import { aggSerialDiff } from './metrics/serial_diff_fn';
+import { aggStdDeviation } from './metrics/std_deviation_fn';
+import { aggSum } from './metrics/sum_fn';
+import { aggTopHit } from './metrics/top_hit_fn';
+
 export const getAggTypesFunctions = () => [
+  aggAvg,
+  aggBucketAvg,
+  aggBucketMax,
+  aggBucketMin,
+  aggBucketSum,
+  aggCardinality,
+  aggCount,
+  aggCumulativeSum,
+  aggDerivative,
+  aggGeoBounds,
+  aggGeoCentroid,
+  aggMax,
+  aggMedian,
+  aggMin,
+  aggMovingAvg,
+  aggPercentileRanks,
+  aggPercentiles,
+  aggSerialDiff,
+  aggStdDeviation,
+  aggSum,
+  aggTopHit,
   aggFilter,
   aggFilters,
   aggSignificantTerms,

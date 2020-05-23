@@ -34,7 +34,7 @@ const style = {
 export function AnnotationsPlot(props: Props) {
   const { plotValues, annotations } = props;
 
-  const tickValues = annotations.map(annotation => annotation.time);
+  const tickValues = annotations.map(annotation => annotation['@timestamp']);
 
   return (
     <>
@@ -46,12 +46,12 @@ export function AnnotationsPlot(props: Props) {
           key={annotation.id}
           style={{
             position: 'absolute',
-            left: plotValues.x(annotation.time) - 8,
+            left: plotValues.x(annotation['@timestamp']) - 8,
             top: -2
           }}
         >
           <EuiToolTip
-            title={asAbsoluteDateTime(annotation.time, 'seconds')}
+            title={asAbsoluteDateTime(annotation['@timestamp'], 'seconds')}
             content={
               <EuiFlexGroup>
                 <EuiFlexItem grow={true}>

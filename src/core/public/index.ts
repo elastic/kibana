@@ -54,6 +54,7 @@ import {
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  NavType,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -64,7 +65,7 @@ import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
-import { DocLinksStart } from './doc_links';
+import { DocLinksSetup, DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 export { PackageInfo, EnvironmentMode } from '../server/types';
 import {
@@ -77,7 +78,17 @@ import {
 } from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
-export { RecursiveReadonly, DEFAULT_APP_CATEGORIES } from '../utils';
+export {
+  RecursiveReadonly,
+  DEFAULT_APP_CATEGORIES,
+  getFlattenedObject,
+  URLMeaningfulParts,
+  modifyUrl,
+  isRelativeUrl,
+  Freezable,
+  deepFreeze,
+  assertNever,
+} from '../utils';
 export {
   AppCategory,
   UiSettingsParams,
@@ -197,6 +208,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
    * @deprecated
    */
   context: ContextSetup;
+  /** {@link DocLinksSetup} */
+  docLinks: DocLinksSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
@@ -327,6 +340,7 @@ export {
   HandlerParameters,
   IContextProvider,
   ContextSetup,
+  DocLinksSetup,
   DocLinksStart,
   FatalErrorInfo,
   FatalErrorsSetup,
@@ -344,4 +358,5 @@ export {
   PluginOpaqueId,
   IUiSettingsClient,
   UiSettingsState,
+  NavType,
 };

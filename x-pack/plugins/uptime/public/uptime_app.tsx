@@ -47,7 +47,6 @@ export interface UptimeAppProps {
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
-  kibanaBreadcrumbs: ChromeBreadcrumb[];
   plugins: ClientPluginsSetup;
   startPlugins: ClientPluginsStart;
   routerBasename: string;
@@ -106,7 +105,7 @@ const Application = (props: UptimeAppProps) => {
                         <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                           <main>
                             <UptimeAlertsFlyoutWrapper />
-                            <PageRouter autocomplete={plugins.data.autocomplete} />
+                            <PageRouter />
                           </main>
                         </EuiPage>
                       </UptimeAlertsContextProvider>

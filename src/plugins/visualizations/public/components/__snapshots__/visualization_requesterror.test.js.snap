@@ -11,7 +11,6 @@ exports[`VisualizationRequestError should render according to snapshot 1`] = `
       class="euiTextColor euiTextColor--subdued"
     >
       <div
-        aria-hidden="true"
         color="danger"
         data-euiicon-type="alert"
       />

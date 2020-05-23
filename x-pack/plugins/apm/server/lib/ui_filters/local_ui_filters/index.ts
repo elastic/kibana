@@ -6,7 +6,7 @@
 import { cloneDeep, sortByOrder } from 'lodash';
 import { UIFilters } from '../../../../typings/ui_filters';
 import { Projection } from '../../../../common/projections/typings';
-import { PromiseReturnType } from '../../../../typings/common';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { getLocalFilterQuery } from './get_local_filter_query';
 import { Setup } from '../../helpers/setup_request';
 import { localUIFilters, LocalUIFilterName } from './config';

@@ -42,7 +42,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.contain('Management');
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`index pattern listing shows create button`, async () => {
@@ -69,13 +69,15 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.unload('empty_kibana');
       });
 
-      it(`redirects to Kibana home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/index_patterns', {
+      it(`redirects to management home`, async () => {
+        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/indexPatterns', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await testSubjects.existOrFail('managementHome', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
     });
   });

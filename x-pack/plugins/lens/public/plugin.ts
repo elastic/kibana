@@ -16,7 +16,9 @@ import { IndexPatternDatasource } from './indexpattern_datasource';
 import { XyVisualization } from './xy_visualization';
 import { MetricVisualization } from './metric_visualization';
 import { DatatableVisualization } from './datatable_visualization';
+import { PieVisualization } from './pie_visualization';
 import { stopReportManager } from './lens_ui_telemetry';
+import { AppNavLinkStatus } from '../../../../src/core/public';
 
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
@@ -24,6 +26,7 @@ import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 
 import './index.scss';
+import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 export interface LensPluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
@@ -39,6 +42,7 @@ export interface LensPluginStartDependencies {
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
+  dashboard: DashboardStart;
 }
 
 export class LensPlugin {
@@ -48,6 +52,7 @@ export class LensPlugin {
   private indexpatternDatasource: IndexPatternDatasource;
   private xyVisualization: XyVisualization;
   private metricVisualization: MetricVisualization;
+  private pieVisualization: PieVisualization;
 
   constructor() {
     this.datatableVisualization = new DatatableVisualization();
@@ -55,6 +60,7 @@ export class LensPlugin {
     this.indexpatternDatasource = new IndexPatternDatasource();
     this.xyVisualization = new XyVisualization();
     this.metricVisualization = new MetricVisualization();
+    this.pieVisualization = new PieVisualization();
   }
 
   setup(
@@ -78,23 +84,25 @@ export class LensPlugin {
     this.xyVisualization.setup(core, dependencies);
     this.datatableVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);
+    this.pieVisualization.setup(core, dependencies);
 
     visualizations.registerAlias(getLensAliasConfig());
 
-    kibanaLegacy.registerLegacyApp({
+    core.application.register({
       id: 'lens',
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
+      navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const { mountApp } = await import('./app_plugin/mounter');
         return mountApp(core, params, this.createEditorFrame!);
       },
     });
+
+    kibanaLegacy.forwardApp('lens', 'lens');
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
-    this.xyVisualization.start(core, startDependencies);
-    this.datatableVisualization.start(core, startDependencies);
   }
 
   stop() {

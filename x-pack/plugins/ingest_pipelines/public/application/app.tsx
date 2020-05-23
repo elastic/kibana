@@ -71,7 +71,7 @@ export const App: FunctionComponent = () => {
                 title={
                   <FormattedMessage
                     id="xpack.ingestPipelines.app.deniedPrivilegeTitle"
-                    defaultMessage="You're missing cluster privileges"
+                    defaultMessage="Cluster privileges required"
                   />
                 }
                 message={

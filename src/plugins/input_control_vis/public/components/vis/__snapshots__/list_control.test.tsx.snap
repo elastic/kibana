@@ -8,6 +8,7 @@ exports[`disableMsg 1`] = `
   label="list control"
 >
   <EuiFieldText
+    aria-label="Select..."
     disabled={true}
     placeholder="Select..."
   />

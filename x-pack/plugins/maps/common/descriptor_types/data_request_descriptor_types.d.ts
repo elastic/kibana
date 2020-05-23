@@ -7,15 +7,16 @@
 
 import { RENDER_AS, SORT_ORDER, SCALING_TYPES } from '../constants';
 import { MapExtent, MapQuery } from './map_descriptor';
+import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
 
 // Global map state passed to every layer.
 export type MapFilters = {
-  buffer: MapExtent; // extent with additional buffer
-  extent: MapExtent; // map viewport
-  filters: unknown[];
-  query: MapQuery;
-  refreshTimerLastTriggeredAt: string;
-  timeFilters: unknown;
+  buffer?: MapExtent; // extent with additional buffer
+  extent?: MapExtent; // map viewport
+  filters: Filter[];
+  query?: MapQuery;
+  refreshTimerLastTriggeredAt?: string;
+  timeFilters: TimeRange;
   zoom: number;
 };
 

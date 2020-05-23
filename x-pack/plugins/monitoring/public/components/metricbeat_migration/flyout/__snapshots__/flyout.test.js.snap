@@ -3,12 +3,7 @@
 exports[`Flyout apm part one should render normally 1`] = `
 <EuiFlyout
   aria-labelledby="flyoutTitle"
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[Function]}
-  ownFocus={false}
-  size="m"
 >
   <EuiFlyoutHeader
     hasBorder={true}
@@ -342,12 +337,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
 exports[`Flyout beats part one should render normally 1`] = `
 <EuiFlyout
   aria-labelledby="flyoutTitle"
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[Function]}
-  ownFocus={false}
-  size="m"
 >
   <EuiFlyoutHeader
     hasBorder={true}
@@ -723,12 +713,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
 exports[`Flyout elasticsearch part one should render normally 1`] = `
 <EuiFlyout
   aria-labelledby="flyoutTitle"
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[Function]}
-  ownFocus={false}
-  size="m"
 >
   <EuiFlyoutHeader
     hasBorder={true}
@@ -1064,12 +1049,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
 exports[`Flyout kibana part one should render normally 1`] = `
 <EuiFlyout
   aria-labelledby="flyoutTitle"
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[Function]}
-  ownFocus={false}
-  size="m"
 >
   <EuiFlyoutHeader
     hasBorder={true}
@@ -1412,12 +1392,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
 exports[`Flyout logstash part one should render normally 1`] = `
 <EuiFlyout
   aria-labelledby="flyoutTitle"
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[Function]}
-  ownFocus={false}
-  size="m"
 >
   <EuiFlyoutHeader
     hasBorder={true}
