@@ -46,7 +46,7 @@ export const ManagementLandingPage = ({ version, setBreadcrumbs }: ManagementLan
           <EuiTitle>
             <h1>
               <FormattedMessage
-                id="kbn.management.landing.header"
+                id="management.landing.header"
                 defaultMessage="Welcome to Stack Management {version}"
                 values={{ version }}
               />
@@ -54,7 +54,7 @@ export const ManagementLandingPage = ({ version, setBreadcrumbs }: ManagementLan
           </EuiTitle>
           <EuiText>
             <FormattedMessage
-              id="kbn.management.landing.subhead"
+              id="management.landing.subhead"
               defaultMessage="Manage your indices, index patterns, saved objects, Kibana settings, and more."
             />
           </EuiText>
@@ -65,7 +65,7 @@ export const ManagementLandingPage = ({ version, setBreadcrumbs }: ManagementLan
         <EuiText color="subdued" size="s" textAlign="center">
           <p>
             <FormattedMessage
-              id="kbn.management.landing.text"
+              id="management.landing.text"
               defaultMessage="A complete list of apps is in the menu on the left."
             />
           </p>

@@ -135,7 +135,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       expect(wrapperHeight).to.be.below(windowHeight);
     });
 
-    it('can navigate from NP apps to legacy apps', async () => {
+    // Not sure if we need this test or not. If yes, we need to find another legacy app
+    it.skip('can navigate from NP apps to legacy apps', async () => {
       await appsMenu.clickLink('Stack Management');
       await testSubjects.existOrFail('managementNav');
     });
