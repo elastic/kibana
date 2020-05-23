@@ -66,9 +66,9 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiLink
-                // TODO: move onClick into reactRouterNavigate
-                {...reactRouterNavigate(history, openPolicyDetailsUrl(name))}
-                onClick={() => uiMetricService.trackUiMetric(UIM_POLICY_SHOW_DETAILS_CLICK)}
+                {...reactRouterNavigate(history, openPolicyDetailsUrl(name), () =>
+                  uiMetricService.trackUiMetric(UIM_POLICY_SHOW_DETAILS_CLICK)
+                )}
                 data-test-subj="policyLink"
               >
                 {name}

@@ -57,9 +57,9 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
           <Fragment>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
-              // TODO: move onClick into reactRouterNavigate
-              {...reactRouterNavigate(history, openRepositoryDetailsUrl(name))}
-              onClick={() => uiMetricService.trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
+              {...reactRouterNavigate(history, openRepositoryDetailsUrl(name), () =>
+                uiMetricService.trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)
+              )}
               data-test-subj="repositoryLink"
             >
               {name}

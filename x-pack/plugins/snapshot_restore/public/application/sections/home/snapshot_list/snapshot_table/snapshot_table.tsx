@@ -76,9 +76,11 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       render: (snapshotId: string, snapshot: SnapshotDetails) => (
         /* eslint-disable-next-line @elastic/eui/href-or-on-click */
         <EuiLink
-          // TODO: move onClick into reactRouterNavigate
-          {...reactRouterNavigate(history, openSnapshotDetailsUrl(snapshot.repository, snapshotId))}
-          onClick={() => uiMetricService.trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK)}
+          {...reactRouterNavigate(
+            history,
+            openSnapshotDetailsUrl(snapshot.repository, snapshotId),
+            () => uiMetricService.trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK)
+          )}
           data-test-subj="snapshotLink"
         >
           {snapshotId}
