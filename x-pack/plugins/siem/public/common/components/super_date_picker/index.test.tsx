@@ -72,7 +72,7 @@ const timepickerRanges = [
   },
 ];
 
-describe('SIEM Super Date Picker', () => {
+describe.skip('SIEM Super Date Picker', () => {
   describe('#SuperDatePicker', () => {
     const state: State = mockGlobalState;
     let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
