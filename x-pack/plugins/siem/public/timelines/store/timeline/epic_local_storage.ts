@@ -10,9 +10,15 @@ import { map, filter, ignoreElements, tap, withLatestFrom } from 'rxjs/operators
 import { Epic, ofType } from 'redux-observable';
 import { get, isEmpty } from 'lodash/fp';
 
-import { createTimeline, updateTimeline, removeColumn, upsertColumn } from './actions';
+import {
+  createTimeline,
+  updateTimeline,
+  removeColumn,
+  upsertColumn,
+  applyDeltaToColumnWidth,
+} from './actions';
 import { TimelineEpicDependencies } from './epic';
-import { isNotNull } from './helpers';
+import { isNotNull, applyDeltaToTimelineColumnWidth } from './helpers';
 import { TimelineModel, ColumnHeaderOptions } from './model';
 
 const timelinePageIds = ['alerts-table', 'signals-page'];
@@ -119,6 +125,25 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
         const modifiedTimeline = addColumnToTimeline(storageTimelines[timelineId], column, index);
 
         addTimelineToLocalStorage(timelineId, modifiedTimeline);
+      }),
+      ignoreElements()
+    ),
+    action$.pipe(
+      ofType(applyDeltaToColumnWidth.type),
+      filter(action => filterPageTimelines(get('payload.id', action))),
+      tap(action => {
+        const storageTimelines = getAllTimelinesFromLocalStorage();
+        const timelineId: string = get('payload.id', action);
+        const columnId: string = get('payload.columnId', action);
+        const delta: number = get('payload.delta', action);
+        const modifiedTimelines = applyDeltaToTimelineColumnWidth({
+          id: timelineId,
+          columnId,
+          delta,
+          timelineById: storageTimelines,
+        });
+
+        addTimelineToLocalStorage(timelineId, modifiedTimelines[timelineId]);
       }),
       ignoreElements()
     )
