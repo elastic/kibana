@@ -142,7 +142,7 @@ export const ActionConnectorForm = ({
           placeholder="Untitled"
           data-test-subj="nameInput"
           value={connector.name || ''}
-          onChange={e => {
+          onChange={(e) => {
             setActionProperty('name', e.target.value);
           }}
           onBlur={() => {

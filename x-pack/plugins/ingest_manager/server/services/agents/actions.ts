@@ -35,7 +35,7 @@ export async function getAgentActionsForCheckin(
   });
 
   return Promise.all(
-    res.saved_objects.map(async so => {
+    res.saved_objects.map(async (so) => {
       // Get decrypted actions
       return savedObjectToAgentAction(
         await appContextService
@@ -55,7 +55,7 @@ export async function getAgentActionByIds(
 ) {
   const actions = (
     await soClient.bulkGet<AgentActionSOAttributes>(
-      actionIds.map(actionId => ({
+      actionIds.map((actionId) => ({
         id: actionId,
         type: AGENT_ACTION_SAVED_OBJECT_TYPE,
       }))
@@ -63,7 +63,7 @@ export async function getAgentActionByIds(
   ).saved_objects.map(savedObjectToAgentAction);
 
   return Promise.all(
-    actions.map(async action => {
+    actions.map(async (action) => {
       // Get decrypted actions
       return savedObjectToAgentAction(
         await appContextService

@@ -110,7 +110,7 @@ async function getIndicesFromPattern(
     return [];
   }
 
-  return (response.aggregations as IndiciesAggregation).indices.buckets.map(bucket => bucket.key);
+  return (response.aggregations as IndiciesAggregation).indices.buckets.map((bucket) => bucket.key);
 }
 
 async function getAliasesFromPattern(

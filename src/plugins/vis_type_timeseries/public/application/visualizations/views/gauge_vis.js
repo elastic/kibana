@@ -150,8 +150,8 @@ export class GaugeVis extends Component {
       );
     }
     return (
-      <div ref={el => (this.resize = el)} style={styles.resize}>
-        <div style={styles.svg} ref={el => (this.inner = el)}>
+      <div ref={(el) => (this.resize = el)} style={styles.resize}>
+        <div style={styles.svg} ref={(el) => (this.inner = el)}>
           {svg}
         </div>
       </div>

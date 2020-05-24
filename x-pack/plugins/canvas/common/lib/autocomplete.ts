@@ -200,7 +200,7 @@ export function getAutocompleteSuggestions(
     item. The context function for `formatnumber` is the return of `math "divide(value, 2)"`.
 */
 function getFnArgAtPosition(ast: ExpressionASTWithMeta, position: number): FnArgAtPosition {
-  const fnIndex = ast.node.chain.findIndex(fn => fn.start <= position && position <= fn.end);
+  const fnIndex = ast.node.chain.findIndex((fn) => fn.start <= position && position <= fn.end);
   const fn = ast.node.chain[fnIndex];
   for (const [argName, argValues] of Object.entries(fn.node.arguments)) {
     for (let argIndex = 0; argIndex < argValues.length; argIndex++) {
@@ -285,7 +285,7 @@ function getFnNameSuggestions(
     return aScore > bScore ? -1 : 1;
   });
 
-  return fnDefs.map(fnDef => {
+  return fnDefs.map((fnDef) => {
     return { type: 'function', text: `${fnDef.name} `, start, end: end - MARKER.length, fnDef };
   });
 }
@@ -325,7 +325,7 @@ function getSubFnNameSuggestions(
     return aScore > bScore ? -1 : 1;
   });
 
-  return fnDefs.map(fnDef => {
+  return fnDefs.map((fnDef) => {
     return { type: 'function', text: fnDef.name + ' ', start, end: end - MARKER.length, fnDef };
   });
 }
@@ -402,7 +402,7 @@ function getArgNameSuggestions(
   // Filter the list of args by those which aren't already present (unless they allow multi)
   const argEntries = Object.entries(fn.arguments).map<[string, ExpressionArgASTWithMeta[]]>(
     ([name, values]) => {
-      return [name, values.filter(value => !value.text.includes(MARKER))];
+      return [name, values.filter((value) => !value.text.includes(MARKER))];
     }
   );
 
@@ -422,7 +422,7 @@ function getArgNameSuggestions(
     .map(([name, arg]) => ({ name, ...arg }))
     .sort(unnamedArgComparator);
 
-  return argDefs.map(argDef => {
+  return argDefs.map((argDef) => {
     return {
       type: 'argument',
       text: argDef.name + '=',
@@ -464,7 +464,7 @@ function getArgValueSuggestions(
     suggestions.push(argDef.default);
   }
 
-  return uniq(suggestions).map(value => {
+  return uniq(suggestions).map((value) => {
     const text = maybeQuote(value) + ' ';
     return { start, end: end - MARKER.length, type: 'value', text };
   });

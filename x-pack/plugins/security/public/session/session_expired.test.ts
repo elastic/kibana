@@ -26,8 +26,8 @@ describe('#logout', () => {
   beforeEach(() => {
     window.history.pushState({}, '', CURRENT_URL);
     mockGetItem.mockReset();
-    newUrlPromise = new Promise<string>(resolve => {
-      jest.spyOn(window.location, 'assign').mockImplementation(url => {
+    newUrlPromise = new Promise<string>((resolve) => {
+      jest.spyOn(window.location, 'assign').mockImplementation((url) => {
         resolve(url);
       });
     });

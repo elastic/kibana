@@ -142,7 +142,7 @@ describe('data generator', () => {
   function buildResolverTree(events: Event[]): Node {
     // First pass we gather up all the events by entity_id
     const tree: Record<string, Node> = {};
-    events.forEach(event => {
+    events.forEach((event) => {
       if (event.process.entity_id in tree) {
         tree[event.process.entity_id].events.push(event);
       } else {
@@ -169,7 +169,7 @@ describe('data generator', () => {
     let visitedEvents = 0;
     for (let i = 0; i < generations + 1; i++) {
       let nextNodes: Node[] = [];
-      nodes.forEach(node => {
+      nodes.forEach((node) => {
         nextNodes = nextNodes.concat(node.children);
         visitedEvents += node.events.length;
       });

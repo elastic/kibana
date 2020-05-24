@@ -55,13 +55,7 @@ describe('get_clusters_state', () => {
   });
 
   it('does not filter out an unavailable cluster', () => {
-    set(
-      response,
-      '.hits.hits[0]._source.timestamp',
-      moment()
-        .subtract(30, 'days')
-        .format()
-    );
+    set(response, '.hits.hits[0]._source.timestamp', moment().subtract(30, 'days').format());
     const result = handleResponse(response, clusters);
     expect(result).to.be(clusters);
     expect(result.length).to.be(1);

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-module.exports = params => {
+module.exports = (params) => {
   const result = {};
-  Object.keys(params).forEach(param => {
+  Object.keys(params).forEach((param) => {
     const { type, description = '', options = [] } = params[param];
     const [, defaultValue] = description.match(/\(default: (.*)\)/) || [];
     switch (type) {
@@ -35,7 +35,7 @@ module.exports = params => {
       case 'enum':
         // This is to clean up entries like: "d (Days)". We only want the "d" part.
         if (param === 'time') {
-          result[param] = options.map(option => option.split(' ')[0]);
+          result[param] = options.map((option) => option.split(' ')[0]);
         } else {
           result[param] = options;
         }

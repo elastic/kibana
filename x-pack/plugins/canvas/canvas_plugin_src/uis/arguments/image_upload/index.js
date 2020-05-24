@@ -58,7 +58,7 @@ class ImageUpload extends React.Component {
     this._isMounted = false;
   }
 
-  updateAST = assetId => {
+  updateAST = (assetId) => {
     this.props.onValueChange({
       type: 'expression',
       chain: [
@@ -73,7 +73,7 @@ class ImageUpload extends React.Component {
     });
   };
 
-  handleUpload = files => {
+  handleUpload = (files) => {
     const { onAssetAdd } = this.props;
     const [file] = files;
 
@@ -82,8 +82,8 @@ class ImageUpload extends React.Component {
       this.setState({ loading: true }); // start loading indicator
 
       encode(file)
-        .then(dataurl => onAssetAdd('dataurl', dataurl))
-        .then(assetId => {
+        .then((dataurl) => onAssetAdd('dataurl', dataurl))
+        .then((assetId) => {
           this.updateAST(assetId);
 
           // this component can go away when onValueChange is called, check for _isMounted
@@ -92,7 +92,7 @@ class ImageUpload extends React.Component {
     }
   };
 
-  changeUrlType = optionId => {
+  changeUrlType = (optionId) => {
     this.setState({ urlType: optionId });
   };
 
@@ -140,7 +140,7 @@ class ImageUpload extends React.Component {
       link: (
         <LinkForm
           url={url}
-          inputRef={ref => (this.inputRefs.srcUrlText = ref)}
+          inputRef={(ref) => (this.inputRefs.srcUrlText = ref)}
           onSubmit={this.setSrcUrl}
         />
       ),
