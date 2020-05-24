@@ -35,6 +35,7 @@ import {
   CreateArchivesTask,
   CreateDebPackageTask,
   CreateDockerPackageTask,
+  CreateDockerUbiPackageTask,
   CreateEmptyDirsAndFilesTask,
   CreateNoticeFileTask,
   CreatePackageJsonTask,
