@@ -7,7 +7,7 @@
     "legacy/plugins/**/*",
     "plugins/**/*",
     "test_utils/**/*",
-    "tasks/**/*",
+    "tasks/**/*"
   ],
   "exclude": [
     "test/**/*",
