@@ -16,9 +16,10 @@ import {
   removeColumn,
   upsertColumn,
   applyDeltaToColumnWidth,
+  updateColumns,
 } from './actions';
 import { TimelineEpicDependencies } from './epic';
-import { isNotNull, applyDeltaToTimelineColumnWidth } from './helpers';
+import { isNotNull, applyDeltaToTimelineColumnWidth, updateTimelineColumns } from './helpers';
 import { TimelineModel, ColumnHeaderOptions } from './model';
 
 const timelinePageIds = ['alerts-table', 'signals-page'];
@@ -136,14 +137,31 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
         const timelineId: string = get('payload.id', action);
         const columnId: string = get('payload.columnId', action);
         const delta: number = get('payload.delta', action);
-        const modifiedTimelines = applyDeltaToTimelineColumnWidth({
+        const timelines = applyDeltaToTimelineColumnWidth({
           id: timelineId,
           columnId,
           delta,
           timelineById: storageTimelines,
         });
 
-        addTimelineToLocalStorage(timelineId, modifiedTimelines[timelineId]);
+        addTimelineToLocalStorage(timelineId, timelines[timelineId]);
+      }),
+      ignoreElements()
+    ),
+    action$.pipe(
+      ofType(updateColumns.type),
+      filter(action => filterPageTimelines(get('payload.id', action))),
+      tap(action => {
+        const storageTimelines = getAllTimelinesFromLocalStorage();
+        const timelineId: string = get('payload.id', action);
+        const columns: ColumnHeaderOptions[] = get('payload.columns', action);
+        const timelines = updateTimelineColumns({
+          id: timelineId,
+          columns,
+          timelineById: storageTimelines,
+        });
+
+        addTimelineToLocalStorage(timelineId, timelines[timelineId]);
       }),
       ignoreElements()
     )
