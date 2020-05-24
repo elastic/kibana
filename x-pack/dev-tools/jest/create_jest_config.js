@@ -58,7 +58,7 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
     ],
     testEnvironment: 'jest-environment-jsdom-sixteen',
     testMatch: ['**/*.test.{js,ts,tsx}'],
-    testRunner: 'jest-circus/runner',
+    // testRunner: 'jest-circus/runner',
     testTimeout: 10000,
     transform: {
       '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
