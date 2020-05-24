@@ -65,7 +65,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can navigate to spaces grid page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/spaces', {
+        await PageObjects.common.navigateToActualUrl('management/kibana/spaces', undefined, {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -74,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can navigate to create new space page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/spaces/create', {
+        await PageObjects.common.navigateToActualUrl('management/kibana/spaces/create', undefined, {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -84,8 +84,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`can navigate to edit space page`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'kibana',
           'management/kibana/spaces/edit/default',
+          undefined,
           {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
@@ -144,7 +144,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can't navigate to spaces grid page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/spaces', {
+        await PageObjects.common.navigateToActualUrl('management/kibana/spaces', undefined, {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -153,7 +153,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can't navigate to create new space page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/spaces/create', {
+        await PageObjects.common.navigateToActualUrl('management/kibana/spaces/create', undefined, {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -163,8 +163,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`can't navigate to edit space page`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'kibana',
           'management/kibana/spaces/edit/default',
+          undefined,
           {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,

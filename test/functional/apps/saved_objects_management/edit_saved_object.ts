@@ -139,7 +139,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const objects = await PageObjects.settings.getSavedObjectsInTable();
       expect(objects.includes('A Pie')).to.be(true);
 
-      await PageObjects.common.navigateToActualUrl('kibana', testVisualizationUrl);
+      await PageObjects.common.navigateToActualUrl(testVisualizationUrl);
 
       await testSubjects.existOrFail('savedObjectEditSave');
 
@@ -151,7 +151,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await PageObjects.settings.getSavedObjectsInTable();
 
-      await PageObjects.common.navigateToActualUrl('kibana', testVisualizationUrl);
+      await PageObjects.common.navigateToActualUrl(testVisualizationUrl);
 
       // Parsing to avoid random keys ordering issues in raw string comparison
       expect(JSON.parse(await getAceEditorFieldValue('references'))).to.eql(visualizationRefs);
@@ -162,7 +162,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await PageObjects.settings.getSavedObjectsInTable();
 
-      await PageObjects.common.navigateToActualUrl('kibana', testVisualizationUrl);
+      await PageObjects.common.navigateToActualUrl(testVisualizationUrl);
 
       displayedReferencesValue = await getAceEditorFieldValue('references');
 

@@ -182,7 +182,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`does not allow navigation to advanced settings; redirects to management home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
+        await PageObjects.common.navigateToActualUrl('management/kibana/settings', undefined, {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
