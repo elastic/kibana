@@ -22,7 +22,7 @@ import { getFieldFormatsRegistry } from '../../../../../../test_utils/public/stu
 import { setFieldFormats } from '../../../services';
 
 const mockUiSettings = {
-  get: item => {
+  get: (item) => {
     return mockUiSettings[item];
   },
   getUpdate$: () => ({
@@ -57,7 +57,7 @@ describe('createTickFormatter(format, template)', () => {
     const config = {
       'format:percent:defaultPattern': '0.[00]%',
     };
-    const fn = createTickFormatter('percent', null, key => config[key]);
+    const fn = createTickFormatter('percent', null, (key) => config[key]);
     expect(fn(0.5556)).toEqual('55.56%');
   });
 
@@ -65,7 +65,7 @@ describe('createTickFormatter(format, template)', () => {
     const config = {
       'format:bytes:defaultPattern': '0.0b',
     };
-    const fn = createTickFormatter('bytes', null, key => config[key]);
+    const fn = createTickFormatter('bytes', null, (key) => config[key]);
     expect(fn(1500 ^ 10)).toEqual('1.5KB');
   });
 
@@ -78,7 +78,7 @@ describe('createTickFormatter(format, template)', () => {
     const config = {
       'format:number:defaultLocale': 'fr',
     };
-    const fn = createTickFormatter('0,0.0', null, key => config[key]);
+    const fn = createTickFormatter('0,0.0', null, (key) => config[key]);
     expect(fn(1500)).toEqual('1 500,0');
   });
 
@@ -101,7 +101,7 @@ describe('createTickFormatter(format, template)', () => {
     const config = {
       'format:number:defaultPattern': '0,0.[00]',
     };
-    const fn = createTickFormatter('number', '{{value', key => config[key]);
+    const fn = createTickFormatter('number', '{{value', (key) => config[key]);
     expect(fn(1.5556)).toEqual('1.56');
   });
 });

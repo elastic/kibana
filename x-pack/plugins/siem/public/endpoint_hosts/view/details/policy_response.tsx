@@ -27,17 +27,17 @@ import {
  */
 const PolicyResponseConfigAccordion = styled(EuiAccordion)`
   > .euiAccordion__triggerWrapper {
-    padding: ${props => props.theme.eui.paddingSizes.s};
+    padding: ${(props) => props.theme.eui.paddingSizes.s};
   }
   &.euiAccordion-isOpen {
-    background-color: ${props => props.theme.eui.euiFocusBackgroundColor};
+    background-color: ${(props) => props.theme.eui.euiFocusBackgroundColor};
   }
   .euiAccordion__childWrapper {
-    background-color: ${props => props.theme.eui.euiColorLightestShade};
+    background-color: ${(props) => props.theme.eui.euiColorLightestShade};
   }
   .policyResponseAttentionBadge {
-    background-color: ${props => props.theme.eui.euiColorDanger};
-    color: ${props => props.theme.eui.euiColorEmptyShade};
+    background-color: ${(props) => props.theme.eui.euiColorDanger};
+    color: ${(props) => props.theme.eui.euiColorEmptyShade};
   }
   .euiAccordion__button {
     :hover,
@@ -46,13 +46,13 @@ const PolicyResponseConfigAccordion = styled(EuiAccordion)`
     }
   }
   :hover:not(.euiAccordion-isOpen) {
-    background-color: ${props => props.theme.eui.euiColorLightestShade};
+    background-color: ${(props) => props.theme.eui.euiColorLightestShade};
   }
 
   .policyResponseActionsAccordion {
     svg {
-      height: ${props => props.theme.eui.euiIconSizes.small};
-      width: ${props => props.theme.eui.euiIconSizes.small};
+      height: ${(props) => props.theme.eui.euiIconSizes.small};
+      width: ${(props) => props.theme.eui.euiIconSizes.small};
     }
   }
 
@@ -72,7 +72,7 @@ const ResponseActions = memo(
     return (
       <>
         {actions.map((action, index) => {
-          const statuses = responseActions.find(responseAction => responseAction.name === action);
+          const statuses = responseActions.find((responseAction) => responseAction.name === action);
           if (statuses === undefined) {
             return undefined;
           }

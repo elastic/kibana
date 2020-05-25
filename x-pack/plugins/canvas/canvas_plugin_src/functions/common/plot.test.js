@@ -66,7 +66,7 @@ describe('plot', () => {
     describe('seriesStyle', () => {
       it('sets the seriesStyle for a specific series', () => {
         const result = fn(testPlot, { seriesStyle: [seriesStyle] }).value;
-        const seriesIndex = result.data.findIndex(series => series.label === seriesStyle.label);
+        const seriesIndex = result.data.findIndex((series) => series.label === seriesStyle.label);
         const resultSeries = result.data[seriesIndex];
 
         expect(resultSeries.lines).toHaveProperty('lineWidth', seriesStyle.lines);

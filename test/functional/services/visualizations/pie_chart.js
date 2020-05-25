@@ -67,14 +67,14 @@ export function PieChartProvider({ getService }) {
       log.debug(`VisualizePage.getAllPieSliceStyles(${name})`);
       const pieSlices = await this.getAllPieSlices(name);
       return await Promise.all(
-        pieSlices.map(async pieSlice => await pieSlice.getAttribute('style'))
+        pieSlices.map(async (pieSlice) => await pieSlice.getAttribute('style'))
       );
     }
 
     async getPieChartData() {
       const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
 
-      const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('d'));
+      const getChartTypesPromises = chartTypes.map(async (chart) => await chart.getAttribute('d'));
       return await Promise.all(getChartTypesPromises);
     }
 
@@ -88,7 +88,7 @@ export function PieChartProvider({ getService }) {
       const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
 
       const getChartTypesPromises = chartTypes.map(
-        async chart => await chart.getAttribute('data-label')
+        async (chart) => await chart.getAttribute('data-label')
       );
       return await Promise.all(getChartTypesPromises);
     }

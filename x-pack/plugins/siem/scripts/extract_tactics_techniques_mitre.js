@@ -16,8 +16,8 @@ const OUTPUT_DIRECTORY = resolve('public', 'pages', 'detection_engine', 'mitre')
 const MITRE_ENTREPRISE_ATTACK_URL =
   'https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json';
 
-const getTacticsOptions = tactics =>
-  tactics.map(t =>
+const getTacticsOptions = (tactics) =>
+  tactics.map((t) =>
     `{
   id: '${t.id}',
   name: '${t.name}',
@@ -30,8 +30,8 @@ const getTacticsOptions = tactics =>
 }`.replace(/(\r\n|\n|\r)/gm, ' ')
   );
 
-const getTechniquesOptions = techniques =>
-  techniques.map(t =>
+const getTechniquesOptions = (techniques) =>
+  techniques.map((t) =>
     `{
   label: i18n.translate(
     'xpack.siem.detectionEngine.mitreAttackTechniques.${camelCase(t.name)}Description', {
@@ -45,7 +45,7 @@ const getTechniquesOptions = techniques =>
 }`.replace(/(\r\n|\n|\r)/gm, ' ')
   );
 
-const getIdReference = references =>
+const getIdReference = (references) =>
   references.reduce(
     (obj, extRef) => {
       if (extRef.source_name === 'mitre-attack') {
@@ -61,11 +61,11 @@ const getIdReference = references =>
 
 async function main() {
   fetch(MITRE_ENTREPRISE_ATTACK_URL)
-    .then(res => res.json())
-    .then(json => {
+    .then((res) => res.json())
+    .then((json) => {
       const mitreData = json.objects;
       const tactics = mitreData
-        .filter(obj => obj.type === 'x-mitre-tactic')
+        .filter((obj) => obj.type === 'x-mitre-tactic')
         .reduce((acc, item) => {
           const { id, reference } = getIdReference(item.external_references);
 
@@ -79,12 +79,12 @@ async function main() {
           ];
         }, []);
       const techniques = mitreData
-        .filter(obj => obj.type === 'attack-pattern')
+        .filter((obj) => obj.type === 'attack-pattern')
         .reduce((acc, item) => {
           let tactics = [];
           const { id, reference } = getIdReference(item.external_references);
           if (item.kill_chain_phases != null && item.kill_chain_phases.length > 0) {
-            item.kill_chain_phases.forEach(tactic => {
+            item.kill_chain_phases.forEach((tactic) => {
               tactics = [...tactics, tactic.phase_name];
             });
           }

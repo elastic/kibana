@@ -80,7 +80,7 @@ class ArgFormComponent extends PureComponent {
               });
             },
             error: hasError,
-            setLabel: label => this._isMounted && setLabel(label),
+            setLabel: (label) => this._isMounted && setLabel(label),
             resetErrorState: () => {
               resetErrorState();
               this._isMounted && setRenderError(false);

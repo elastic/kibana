@@ -72,6 +72,6 @@ export const plot = () => ({
     if (getState(context) !== 'ready') {
       return { labels: [] };
     }
-    return { labels: uniq(map(getValue(context).rows, 'color').filter(v => v !== undefined)) };
+    return { labels: uniq(map(getValue(context).rows, 'color').filter((v) => v !== undefined)) };
   },
 });

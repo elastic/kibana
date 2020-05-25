@@ -50,7 +50,7 @@ export function getSpaceInitials(space: Partial<Space> = {}) {
 
   words.splice(numInitials, words.length);
 
-  return words.map(word => word.substring(0, 1)).join('');
+  return words.map((word) => word.substring(0, 1)).join('');
 }
 
 /**

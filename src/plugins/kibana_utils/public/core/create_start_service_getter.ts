@@ -85,7 +85,7 @@ export const createStartServicesGetter = <TPluginsStart extends object, TStart>(
         self,
       };
     },
-    error => {
+    (error) => {
       // eslint-disable-next-line no-console
       console.error('Could not access start services.', error);
     }

@@ -85,9 +85,9 @@ export const TextStylePicker = ({
     });
   };
 
-  const onAlignmentChange = optionId => doChange('align', optionId);
+  const onAlignmentChange = (optionId) => doChange('align', optionId);
 
-  const onStyleChange = optionId => {
+  const onStyleChange = (optionId) => {
     let prop;
     let value;
 
@@ -106,14 +106,14 @@ export const TextStylePicker = ({
     <div className="canvasTextStylePicker">
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <FontPicker value={family} onSelect={value => doChange('family', value)} />
+          <FontPicker value={family} onSelect={(value) => doChange('family', value)} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSelect
             compressed
             value={size}
-            onChange={e => doChange('size', Number(e.target.value))}
-            options={fontSizes.map(size => ({ text: String(size), value: size }))}
+            onChange={(e) => doChange('size', Number(e.target.value))}
+            options={fontSizes.map((size) => ({ text: String(size), value: size }))}
             prepend="Size"
           />
         </EuiFlexItem>
@@ -125,7 +125,7 @@ export const TextStylePicker = ({
         <EuiFlexItem grow={false} style={{ fontSize: 0 }}>
           <ColorPickerPopover
             value={color}
-            onChange={value => doChange('color', value)}
+            onChange={(value) => doChange('color', value)}
             colors={colors}
             ariaLabel={strings.getFontColorLabel()}
           />

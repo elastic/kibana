@@ -62,12 +62,7 @@ describe('OpenTimelineModal', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="title-row"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="title-row"]').first().exists()).toBe(true);
   });
 
   test('it renders the search row', () => {
@@ -78,12 +73,7 @@ describe('OpenTimelineModal', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="search-row"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="search-row"]').first().exists()).toBe(true);
   });
 
   test('it renders the timelines table', () => {
@@ -94,12 +84,7 @@ describe('OpenTimelineModal', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="timelines-table"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="timelines-table"]').first().exists()).toBe(true);
   });
 
   test('it shows the delete action when onDeleteSelected and deleteTimelines are specified', () => {

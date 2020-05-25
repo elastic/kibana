@@ -6,13 +6,13 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'endpointAlerts']);
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('Endpoint Alert Page: when es has data and user has navigated to the page', function() {
+  describe('Endpoint Alert Page: when es has data and user has navigated to the page', function () {
     this.tags(['ciGroup7']);
     before(async () => {
       await esArchiver.load('endpoint/alerts/api_feature');
