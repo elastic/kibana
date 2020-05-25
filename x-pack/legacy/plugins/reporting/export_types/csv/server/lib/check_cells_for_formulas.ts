@@ -15,5 +15,5 @@ export const checkIfRowsHaveFormulas = (flattened: IFlattened, fields: string[])
   const pruned = _.pick(flattened, fields);
   const cells = [..._.keys(pruned), ...(_.values(pruned) as string[])];
 
-  return _.some(cells, cell => cellHasFormulas(cell));
+  return _.some(cells, (cell) => cellHasFormulas(cell));
 };

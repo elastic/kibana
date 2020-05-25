@@ -6,7 +6,8 @@
 
 import { XPackInfo } from '../../../xpack_main/server/lib/xpack_info';
 import { XPackInfoLicense } from '../../../xpack_main/server/lib/xpack_info_license';
-import { ExportTypesRegistry, ExportTypeDefinition } from '../../types';
+import { ExportTypeDefinition } from '../types';
+import { ExportTypesRegistry } from './export_types_registry';
 
 interface LicenseCheckResult {
   showLinks: boolean;
@@ -46,8 +47,8 @@ const makeManagementFeature = (
       }
 
       const validJobTypes = exportTypes
-        .filter(exportType => license.isOneOf(exportType.validLicenses))
-        .map(exportType => exportType.jobType);
+        .filter((exportType) => license.isOneOf(exportType.validLicenses))
+        .map((exportType) => exportType.jobType);
 
       return {
         showLinks: validJobTypes.length > 0,

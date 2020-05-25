@@ -401,9 +401,7 @@ export const WatchList = () => {
               />
             )}
           </EuiButton>
-        ) : (
-          undefined
-        ),
+        ) : undefined,
       toolsRight: createWatchContextMenu,
     };
 

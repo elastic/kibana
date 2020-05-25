@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RawValue } from './types';
+import { RawValue } from '../../types';
 import { cellHasFormulas } from './cell_has_formula';
 
 const nonAlphaNumRE = /[^a-zA-Z0-9]/;

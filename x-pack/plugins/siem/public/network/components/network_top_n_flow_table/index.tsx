@@ -117,7 +117,7 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
       : `node.${flowTargeted}.${sort.field}`;
 
   const updateActivePage = useCallback(
-    newPage =>
+    (newPage) =>
       updateNetworkTable({
         networkType: type,
         tableType,
@@ -127,7 +127,8 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
   );
 
   const updateLimitPagination = useCallback(
-    newLimit => updateNetworkTable({ networkType: type, tableType, updates: { limit: newLimit } }),
+    (newLimit) =>
+      updateNetworkTable({ networkType: type, tableType, updates: { limit: newLimit } }),
     [updateNetworkTable, type, tableType]
   );
 

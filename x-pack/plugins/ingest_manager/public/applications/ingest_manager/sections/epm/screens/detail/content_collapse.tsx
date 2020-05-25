@@ -9,10 +9,10 @@ import styled from 'styled-components';
 
 const BottomFade = styled.div`
   width: 100%;
-  background: ${props =>
+  background: ${(props) =>
     `linear-gradient(${props.theme.eui.euiColorEmptyShade}00 0%, ${props.theme.eui.euiColorEmptyShade} 100%)`};
-  margin-top: -${props => parseInt(props.theme.eui.spacerSizes.xl, 10) * 2}px;
-  height: ${props => parseInt(props.theme.eui.spacerSizes.xl, 10) * 2}px;
+  margin-top: -${(props) => parseInt(props.theme.eui.spacerSizes.xl, 10) * 2}px;
+  height: ${(props) => parseInt(props.theme.eui.spacerSizes.xl, 10) * 2}px;
   position: absolute;
 `;
 const ContentCollapseContainer = styled.div`
@@ -20,11 +20,11 @@ const ContentCollapseContainer = styled.div`
 `;
 const CollapseButtonContainer = styled.div`
   display: inline-block;
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  top: ${props => parseInt(props.theme.eui.euiButtonHeight, 10) / 2}px;
+  top: ${(props) => parseInt(props.theme.eui.euiButtonHeight, 10) / 2}px;
 `;
 const CollapseButtonTop = styled(EuiButtonEmpty)`
   float: right;

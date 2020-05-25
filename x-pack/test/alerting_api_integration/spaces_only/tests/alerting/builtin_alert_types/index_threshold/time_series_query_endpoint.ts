@@ -303,10 +303,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
 
   async function runQueryExpect(requestBody: TimeSeriesQuery, status: number): Promise<any> {
     const url = `${getUrlPrefix(Spaces.space1.id)}/${INDEX_THRESHOLD_TIME_SERIES_QUERY_URL}`;
-    const res = await supertest
-      .post(url)
-      .set('kbn-xsrf', 'foo')
-      .send(requestBody);
+    const res = await supertest.post(url).set('kbn-xsrf', 'foo').send(requestBody);
 
     if (res.status !== status) {
       // good place to put a console log for debugging unexpected results

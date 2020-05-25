@@ -21,7 +21,7 @@ const map = require('./static/map_interpolation');
 
 module.exports = (pattern, { brackets, exact } = {}) => {
   let newPattern = pattern;
-  Object.keys(map).forEach(key => {
+  Object.keys(map).forEach((key) => {
     const replaceFrom = brackets ? `{${key}}` : key;
     const replaceTo = brackets ? `{${map[key]}}` : map[key];
     if (exact) {

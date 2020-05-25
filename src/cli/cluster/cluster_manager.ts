@@ -37,7 +37,7 @@ process.env.kbnWorkerType = 'managr';
 
 const firstAllTrue = (...sources: Array<Rx.Observable<boolean>>) =>
   Rx.combineLatest(...sources).pipe(
-    filter(values => values.every(v => v === true)),
+    filter((values) => values.every((v) => v === true)),
     take(1),
     mapTo(undefined)
   );
@@ -75,7 +75,7 @@ export class ClusterManager {
         .pipe(
           map(({ state }) => state.phase === 'success' || state.phase === 'issue'),
           tap({
-            error: error => {
+            error: (error) => {
               this.log.bad('New platform optimizer error', error.stack);
               process.exit(1);
             },
@@ -139,9 +139,9 @@ export class ClusterManager {
       .subscribe(this.optimizerReady$);
 
     // broker messages between workers
-    this.workers.forEach(worker => {
-      worker.on('broadcast', msg => {
-        this.workers.forEach(to => {
+    this.workers.forEach((worker) => {
+      worker.on('broadcast', (msg) => {
+        this.workers.forEach((to) => {
           if (to !== worker && to.online) {
             to.fork!.send(msg);
           }
@@ -156,7 +156,7 @@ export class ClusterManager {
     this.server.on('reloadLoggingConfigFromServerWorker', () => {
       process.emit('message' as any, { reloadLoggingConfig: true } as any);
 
-      this.workers.forEach(worker => {
+      this.workers.forEach((worker) => {
         worker.fork!.send({ reloadLoggingConfig: true });
       });
     });
@@ -182,7 +182,7 @@ export class ClusterManager {
       const extraPaths = [...pluginPaths, ...scanDirs];
 
       const pluginInternalDirsIgnore = scanDirs
-        .map(scanDir => resolve(scanDir, '*'))
+        .map((scanDir) => resolve(scanDir, '*'))
         .concat(pluginPaths)
         .reduce(
           (acc, path) =>
@@ -212,10 +212,7 @@ export class ClusterManager {
         shouldRedirectFromOldBasePath: (path: string) => {
           // strip `s/{id}` prefix when checking for need to redirect
           if (path.startsWith('s/')) {
-            path = path
-              .split('/')
-              .slice(2)
-              .join('/');
+            path = path.split('/').slice(2).join('/');
           }
 
           const isApp = path.startsWith('app/');
@@ -253,7 +250,7 @@ export class ClusterManager {
           fromRoot('x-pack/legacy/server'),
           fromRoot('config'),
           ...extraPaths,
-        ].map(path => resolve(path))
+        ].map((path) => resolve(path))
       )
     );
 

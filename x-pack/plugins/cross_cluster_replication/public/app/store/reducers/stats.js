@@ -11,7 +11,7 @@ const initialState = {
   autoFollow: null,
 };
 
-const success = action => `${action}_SUCCESS`;
+const success = (action) => `${action}_SUCCESS`;
 
 export const reducer = (state = initialState, action) => {
   switch (action.type) {

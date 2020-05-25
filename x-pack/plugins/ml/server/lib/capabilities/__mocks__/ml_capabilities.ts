@@ -13,7 +13,7 @@ import {
 
 export function getAdminCapabilities() {
   const caps: any = {};
-  Object.keys(adminMlCapabilities).forEach(k => {
+  Object.keys(adminMlCapabilities).forEach((k) => {
     caps[k] = true;
   });
   return { ...getUserCapabilities(), ...caps } as MlCapabilities;
@@ -21,7 +21,7 @@ export function getAdminCapabilities() {
 
 export function getUserCapabilities() {
   const caps: any = {};
-  Object.keys(userMlCapabilities).forEach(k => {
+  Object.keys(userMlCapabilities).forEach((k) => {
     caps[k] = true;
   });
 

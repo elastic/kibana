@@ -17,7 +17,7 @@ export const CASE_DETAILS_STATUS = '[data-test-subj="case-view-status"]';
 
 export const CASE_DETAILS_TAGS = '[data-test-subj="case-tags"]';
 
-export const CASE_DETAILS_TIMELINE_MARKDOWN = '[data-test-subj="markdown-link"]';
+export const CASE_DETAILS_TIMELINE_LINK_MARKDOWN = '[data-test-subj="markdown-timeline-link"]';
 
 export const CASE_DETAILS_USER_ACTION = '[data-test-subj="user-action-title"] .euiFlexItem';
 

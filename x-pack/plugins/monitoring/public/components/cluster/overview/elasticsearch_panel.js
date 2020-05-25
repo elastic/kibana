@@ -35,7 +35,7 @@ import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 
-const calculateShards = shards => {
+const calculateShards = (shards) => {
   const total = get(shards, 'total', 0);
   let primaries = get(shards, 'primaries', 'N/A');
   let replicas = 'N/A';

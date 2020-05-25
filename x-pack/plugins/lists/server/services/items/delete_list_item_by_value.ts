@@ -33,7 +33,7 @@ export const deleteListItemByValue = async ({
     type,
     value: [value],
   });
-  const values = listItems.map(listItem => listItem.value);
+  const values = listItems.map((listItem) => listItem.value);
   const filter = getQueryFilterFromTypeValue({
     listId,
     type,
