@@ -8,7 +8,7 @@ import expect from '@kbn/expect/expect.js';
 import { IEvent } from '../../../../plugins/event_log/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const supertest = getService('supertest');
   const log = getService('log');
@@ -108,10 +108,7 @@ export default function({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         const uri = `/api/event_log/event_log_test/${eventId}/_find`;
         log.debug(`calling ${uri}`);
-        const result = await supertest
-          .get(uri)
-          .set('kbn-xsrf', 'foo')
-          .expect(200);
+        const result = await supertest.get(uri).set('kbn-xsrf', 'foo').expect(200);
         expect(result.body.data.length).to.be.eql(1);
       });
     });

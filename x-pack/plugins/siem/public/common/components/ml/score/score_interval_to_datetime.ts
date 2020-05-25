@@ -15,22 +15,14 @@ export interface FromTo {
 export const scoreIntervalToDateTime = (score: Anomaly, interval: string): FromTo => {
   if (interval === 'second' || interval === 'minute' || interval === 'hour') {
     return {
-      from: moment(score.time)
-        .subtract(1, 'hour')
-        .valueOf(),
-      to: moment(score.time)
-        .add(1, 'hour')
-        .valueOf(),
+      from: moment(score.time).subtract(1, 'hour').valueOf(),
+      to: moment(score.time).add(1, 'hour').valueOf(),
     };
   } else {
     // default should be a day
     return {
-      from: moment(score.time)
-        .subtract(1, 'day')
-        .valueOf(),
-      to: moment(score.time)
-        .add(1, 'day')
-        .valueOf(),
+      from: moment(score.time).subtract(1, 'day').valueOf(),
+      to: moment(score.time).add(1, 'day').valueOf(),
     };
   }
 };

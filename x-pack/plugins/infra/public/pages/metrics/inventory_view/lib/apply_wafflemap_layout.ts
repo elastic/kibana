@@ -66,14 +66,14 @@ export function applyWaffleMapLayout(
   const largestCount = getLargestCount(groups);
   return sortBy(groups, getTotalItemsOfGroup)
     .reverse()
-    .map(group => {
+    .map((group) => {
       if (isWaffleMapGroupWithGroups(group)) {
         const columns = getColumns(largestCount, width, height);
         const groupOfNodes = group.groups;
         const subGroups = sortBy(groupOfNodes, getTotalItemsOfGroup)
           .reverse()
           .filter(isWaffleMapGroupWithNodes)
-          .map(subGroup => {
+          .map((subGroup) => {
             return {
               ...subGroup,
               count: subGroup.nodes.length,

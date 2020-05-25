@@ -128,7 +128,7 @@ export function estimateBucketSpanFactory(
 
         this.polledDataChecker
           .run()
-          .then(result => {
+          .then((result) => {
             // if the data is polled, set a minimum threshold
             // of bucket span
             if (result.isPolled) {
@@ -154,10 +154,10 @@ export function estimateBucketSpanFactory(
               }
             };
 
-            _.each(this.checkers, check => {
+            _.each(this.checkers, (check) => {
               check.check
                 .run()
-                .then(interval => {
+                .then((interval) => {
                   check.result = interval;
                   runComplete();
                 })
@@ -170,7 +170,7 @@ export function estimateBucketSpanFactory(
                 });
             });
           })
-          .catch(resp => {
+          .catch((resp) => {
             reject(resp);
           });
       });
@@ -188,8 +188,8 @@ export function estimateBucketSpanFactory(
         const pos = i * numberOfSplitFields;
         let resultsSubset = allResults.slice(pos, pos + numberOfSplitFields);
         // remove results of tests which have failed
-        resultsSubset = _.remove(resultsSubset, res => res !== null);
-        resultsSubset = _.sortBy(resultsSubset, r => r.ms);
+        resultsSubset = _.remove(resultsSubset, (res) => res !== null);
+        resultsSubset = _.sortBy(resultsSubset, (r) => r.ms);
 
         const tempMedian = this.findMedian(resultsSubset);
         if (tempMedian !== null) {
@@ -197,7 +197,7 @@ export function estimateBucketSpanFactory(
         }
       }
 
-      reducedResults = _.sortBy(reducedResults, r => r.ms);
+      reducedResults = _.sortBy(reducedResults, (r) => r.ms);
 
       return this.findMedian(reducedResults);
     }
@@ -243,7 +243,7 @@ export function estimateBucketSpanFactory(
     }
   }
 
-  const getFieldCardinality = function(index, field) {
+  const getFieldCardinality = function (index, field) {
     return new Promise((resolve, reject) => {
       callAsCurrentUser('search', {
         index,
@@ -258,24 +258,24 @@ export function estimateBucketSpanFactory(
           },
         },
       })
-        .then(resp => {
+        .then((resp) => {
           const value = _.get(resp, ['aggregations', 'field_count', 'value'], 0);
           resolve(value);
         })
-        .catch(resp => {
+        .catch((resp) => {
           reject(resp);
         });
     });
   };
 
-  const getRandomFieldValues = function(index, field, query) {
+  const getRandomFieldValues = function (index, field, query) {
     let fieldValues = [];
     return new Promise((resolve, reject) => {
       const NUM_PARTITIONS = 10;
       // use a partitioned search to load 10 random fields
       // load ten fields, to test that there are at least 10.
       getFieldCardinality(index, field)
-        .then(value => {
+        .then((value) => {
           const numPartitions = Math.floor(value / NUM_PARTITIONS) || 1;
           callAsCurrentUser('search', {
             index,
@@ -295,24 +295,24 @@ export function estimateBucketSpanFactory(
               },
             },
           })
-            .then(partitionResp => {
+            .then((partitionResp) => {
               if (_.has(partitionResp, 'aggregations.fields_bucket_counts.buckets')) {
                 const buckets = partitionResp.aggregations.fields_bucket_counts.buckets;
-                fieldValues = _.map(buckets, b => b.key);
+                fieldValues = _.map(buckets, (b) => b.key);
               }
               resolve(fieldValues);
             })
-            .catch(resp => {
+            .catch((resp) => {
               reject(resp);
             });
         })
-        .catch(resp => {
+        .catch((resp) => {
           reject(resp);
         });
     });
   };
 
-  return function(formConfig) {
+  return function (formConfig) {
     if (typeof formConfig !== 'object' || formConfig === null) {
       throw new Error('Invalid formConfig: formConfig needs to be an object.');
     }
@@ -342,7 +342,7 @@ export function estimateBucketSpanFactory(
           includeDefaults: true,
           filterPath: '*.*max_buckets',
         })
-          .then(settings => {
+          .then((settings) => {
             if (typeof settings !== 'object') {
               reject('Unable to retrieve cluster settings');
             }
@@ -368,10 +368,10 @@ export function estimateBucketSpanFactory(
 
               bucketSpanEstimator
                 .run()
-                .then(resp => {
+                .then((resp) => {
                   resolve(resp);
                 })
-                .catch(resp => {
+                .catch((resp) => {
                   reject(resp);
                 });
             };
@@ -380,10 +380,10 @@ export function estimateBucketSpanFactory(
             // bucket span tests.
             if (formConfig.splitField !== undefined) {
               getRandomFieldValues(formConfig.index, formConfig.splitField, formConfig.query)
-                .then(splitFieldValues => {
+                .then((splitFieldValues) => {
                   runEstimator(splitFieldValues);
                 })
-                .catch(resp => {
+                .catch((resp) => {
                   reject(resp);
                 });
             } else {
@@ -391,7 +391,7 @@ export function estimateBucketSpanFactory(
               runEstimator();
             }
           })
-          .catch(resp => {
+          .catch((resp) => {
             reject(resp);
           });
       }
@@ -413,7 +413,7 @@ export function estimateBucketSpanFactory(
           ],
         };
         callAsCurrentUser('ml.privilegeCheck', { body })
-          .then(resp => {
+          .then((resp) => {
             if (
               resp.cluster['cluster:monitor/xpack/ml/job/get'] &&
               resp.cluster['cluster:monitor/xpack/ml/job/stats/get'] &&

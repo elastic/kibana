@@ -40,7 +40,7 @@ export function composeLibs(core: CoreStart) {
             headers: undefined,
             asResponse: true,
           })
-          .then(res => {
+          .then((res) => {
             if (!res.response) {
               return reject();
             }

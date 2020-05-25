@@ -38,7 +38,7 @@ export const savePinnedEvents = (
   pinnedEventIds: string[]
 ) =>
   Promise.all(
-    pinnedEventIds.map(eventId =>
+    pinnedEventIds.map((eventId) =>
       pinnedEventLib.persistPinnedEventOnTimeline(
         frameworkRequest,
         null, // pinnedEventSavedObjectId
@@ -56,7 +56,7 @@ export const saveNotes = (
   newNotes?: NoteResult[]
 ) => {
   return Promise.all(
-    newNotes?.map(note => {
+    newNotes?.map((note) => {
       const newNote: SavedNote = {
         eventId: note.eventId,
         note: note.note,
@@ -65,7 +65,7 @@ export const saveNotes = (
 
       return noteLib.persistNote(
         frameworkRequest,
-        existingNoteIds?.find(nId => nId === note.noteId) ?? null,
+        existingNoteIds?.find((nId) => nId === note.noteId) ?? null,
         timelineVersion ?? null,
         newNote
       );

@@ -29,7 +29,7 @@ export const ColorPicker: FunctionComponent<Props> = ({
   const tc = tinycolor(value);
   const isValidColor = tc.isValid();
 
-  colors = colors.filter(color => {
+  colors = colors.filter((color) => {
     return tinycolor(color).isValid();
   });
 
@@ -37,7 +37,7 @@ export const ColorPicker: FunctionComponent<Props> = ({
   let canAdd = false;
 
   if (isValidColor) {
-    const match = colors.filter(color => tinycolor.equals(value, color));
+    const match = colors.filter((color) => tinycolor.equals(value, color));
     canRemove = match.length > 0;
     canAdd = match.length === 0;
   }

@@ -34,7 +34,7 @@ const mapStateToProps = (state, ownProps) => {
   const indexStatusByName = {};
   const { indexNames } = ownProps;
 
-  indexNames.forEach(indexName => {
+  indexNames.forEach((indexName) => {
     indexStatusByName[indexName] = getIndexStatusByIndexName(state, indexName);
   });
 
@@ -72,7 +72,7 @@ const mapDispatchToProps = (dispatch, { indexNames }) => {
     unfreezeIndices: () => {
       dispatch(unfreezeIndices({ indexNames }));
     },
-    forcemergeIndices: maxNumSegments => {
+    forcemergeIndices: (maxNumSegments) => {
       dispatch(forcemergeIndices({ indexNames, maxNumSegments }));
     },
     showSettings: () => {

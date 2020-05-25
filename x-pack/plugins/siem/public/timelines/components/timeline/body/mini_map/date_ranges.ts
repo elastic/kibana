@@ -64,12 +64,8 @@ export const getDates = ({ unit, end, current }: GetDatesParams): Date[] =>
  * returns range of `Date`s with a granularity appropriate to the unit.
  */
 export function getDateRange(unit: MomentUnit): Date[] {
-  const current = moment()
-    .utc()
-    .startOf(unit);
-  const end = moment()
-    .utc()
-    .endOf(unit);
+  const current = moment().utc().startOf(unit);
+  const end = moment().utc().endOf(unit);
 
   return getDates({
     current,

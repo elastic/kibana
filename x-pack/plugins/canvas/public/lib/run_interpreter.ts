@@ -12,7 +12,7 @@ import { CanvasStartDeps, CanvasSetupDeps } from '../plugin';
 
 let expressionsStarting: Promise<CanvasStartDeps['expressions']> | undefined;
 
-export const initInterpreter = function(
+export const initInterpreter = function (
   expressionsStart: CanvasStartDeps['expressions'],
   expressionsSetup: CanvasSetupDeps['expressions']
 ) {
@@ -29,7 +29,7 @@ async function startExpressions(
   return expressionsStart;
 }
 
-export const resetInterpreter = function() {
+export const resetInterpreter = function () {
   expressionsStarting = undefined;
 };
 

@@ -29,7 +29,7 @@ class MultiJobActionsMenuUI extends Component {
   }
 
   onButtonClick = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isOpen: !prevState.isOpen,
     }));
   };
@@ -41,7 +41,7 @@ class MultiJobActionsMenuUI extends Component {
   };
 
   render() {
-    const anyJobsDeleting = this.props.jobs.some(j => j.deleting);
+    const anyJobsDeleting = this.props.jobs.some((j) => j.deleting);
     const button = (
       <EuiButtonIcon
         size="s"

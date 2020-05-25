@@ -32,9 +32,9 @@ describe('ServiceOverview -> List', () => {
       transactionsPerMinute: 86.93333333333334,
       errorsPerMinute: 12.6,
       avgResponseTime: 91535.42944785276,
-      environments: ['test']
+      environments: ['test'],
     };
-    const renderedColumns = SERVICE_COLUMNS.map(c =>
+    const renderedColumns = SERVICE_COLUMNS.map((c) =>
       c.render(service[c.field], service)
     );
     expect(renderedColumns[0]).toMatchSnapshot();
@@ -42,7 +42,7 @@ describe('ServiceOverview -> List', () => {
       'python',
       '92 ms',
       '86.9 tpm',
-      '12.6 err.'
+      '12.6 err.',
     ]);
   });
 });

@@ -28,7 +28,7 @@ interface GenerateOpts {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertestSvc = getService('supertest');
   const reportingAPI = getService('reportingAPI');
@@ -422,7 +422,7 @@ export default function({ getService }: FtrProviderContext) {
           };
         };
 
-        await new Promise(resolve => {
+        await new Promise((resolve) => {
           setTimeout(async () => {
             const { status, text, type } = await downloadFromPath(jobDownloadPath);
             expect(status).to.eql(200);

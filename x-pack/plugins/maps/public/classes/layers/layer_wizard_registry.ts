@@ -40,7 +40,7 @@ export function registerLayerWizard(layerWizard: LayerWizard) {
 }
 
 export async function getLayerWizards(): Promise<LayerWizard[]> {
-  const promises = registry.map(async layerWizard => {
+  const promises = registry.map(async (layerWizard) => {
     return {
       ...layerWizard,
       // @ts-ignore

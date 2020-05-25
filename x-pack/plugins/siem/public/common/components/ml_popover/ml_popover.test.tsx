@@ -16,10 +16,7 @@ describe('MlPopover', () => {
     const wrapper = mountWithIntl(<MlPopover />);
 
     // TODO: Update to use act() https://fb.me/react-wrap-tests-with-act
-    wrapper
-      .find('[data-test-subj="integrations-button"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="integrations-button"]').first().simulate('click');
     wrapper.update();
     expect(wrapper.find('[data-test-subj="ml-popover-upgrade-contents"]').exists()).toEqual(true);
   });

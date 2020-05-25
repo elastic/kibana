@@ -26,7 +26,7 @@ import { securityMock } from '../../../../../security/server/mocks';
 
 describe('GET space', () => {
   const spacesSavedObjects = createSpaces();
-  const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
+  const spaces = spacesSavedObjects.map((s) => ({ id: s.id, ...s.attributes }));
 
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
@@ -106,7 +106,7 @@ describe('GET space', () => {
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(spaces.find(s => s.id === 'default'));
+    expect(response.payload).toEqual(spaces.find((s) => s.id === 'default'));
   });
 
   it(`'GET spaces/{id}' returns 404 when retrieving a non-existent space`, async () => {
