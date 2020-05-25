@@ -17,6 +17,8 @@ import {
   Plugin,
   PluginInitializerContext,
   IClusterClient,
+  IScopedClusterClient,
+  ScopeableRequest,
 } from 'src/core/server';
 
 import { ILicense, PublicLicense, PublicFeatures } from '../common/types';
@@ -94,7 +96,30 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     this.logger.debug('Setting up Licensing plugin');
     const config = await this.config$.pipe(take(1)).toPromise();
     const pollingFrequency = config.api_polling_frequency;
-    const dataClient = await core.elasticsearch.dataClient;
+
+    async function callAsInternalUser(
+      ...args: Parameters<IScopedClusterClient['callAsInternalUser']>
+    ): ReturnType<IScopedClusterClient['callAsInternalUser']> {
+      const [coreStart] = await core.getStartServices();
+      const client = coreStart.elasticsearch.legacy.client;
+      return await client.callAsInternalUser(...args);
+    }
+
+    const dataClient: IClusterClient = {
+      callAsInternalUser,
+      asScoped(request?: ScopeableRequest): IScopedClusterClient {
+        return {
+          async callAsCurrentUser(
+            ...args: Parameters<IScopedClusterClient['callAsCurrentUser']>
+          ): ReturnType<IScopedClusterClient['callAsCurrentUser']> {
+            const [coreStart] = await core.getStartServices();
+            const client = coreStart.elasticsearch.legacy.client;
+            return await client.asScoped(request).callAsCurrentUser(...args);
+          },
+          callAsInternalUser,
+        };
+      },
+    };
 
     const { refresh, license$ } = this.createLicensePoller(
       dataClient,
