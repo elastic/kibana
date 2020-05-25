@@ -46,13 +46,11 @@ describe('CompareTimelinesStatus', () => {
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
             id: mockUniqueParsedObjects[0].savedObjectId,
-            type: TimelineType.default,
             version: mockUniqueParsedObjects[0].version,
           },
           timelineType: TimelineType.default,
           templateTimelineInput: {
             id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
-            type: TimelineType.template,
             version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
           },
           frameworkRequest: {} as FrameworkRequest,
@@ -119,13 +117,11 @@ describe('CompareTimelinesStatus', () => {
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
             id: mockUniqueParsedObjects[0].savedObjectId,
-            type: TimelineType.default,
             version: mockUniqueParsedObjects[0].version,
           },
           timelineType: TimelineType.default,
           templateTimelineInput: {
             id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
-            type: TimelineType.template,
             version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
           },
           frameworkRequest: {} as FrameworkRequest,
@@ -185,13 +181,11 @@ describe('CompareTimelinesStatus', () => {
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
             id: mockUniqueParsedObjects[0].savedObjectId,
-            type: TimelineType.default,
             version: mockUniqueParsedObjects[0].version,
           },
           timelineType: TimelineType.template,
           templateTimelineInput: {
             id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
-            type: TimelineType.template,
             version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
           },
           frameworkRequest: {} as FrameworkRequest,
@@ -262,13 +256,11 @@ describe('CompareTimelinesStatus', () => {
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
             id: mockUniqueParsedObjects[0].savedObjectId,
-            type: TimelineType.default,
             version: mockUniqueParsedObjects[0].version,
           },
           timelineType: TimelineType.template,
           templateTimelineInput: {
             id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
-            type: TimelineType.template,
             version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
           },
           frameworkRequest: {} as FrameworkRequest,
