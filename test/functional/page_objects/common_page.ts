@@ -142,12 +142,18 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         shouldLoginIfPrompted = true,
         useActualUrl = false,
         insertTimestamp = true,
+        shouldUseHashForSubUrl = true,
       } = {}
     ) {
-      const appConfig = {
+      const appConfig: { pathname: string; hash?: string } = {
         pathname: `${basePath}${config.get(['apps', appName]).pathname}`,
-        hash: useActualUrl ? subUrl : `/${appName}/${subUrl}`,
       };
+
+      if (shouldUseHashForSubUrl) {
+        appConfig.hash = useActualUrl ? subUrl : `/${appName}/${subUrl}`;
+      } else {
+        appConfig.pathname += `/${subUrl}`;
+      }
 
       await this.navigate({
         appConfig,

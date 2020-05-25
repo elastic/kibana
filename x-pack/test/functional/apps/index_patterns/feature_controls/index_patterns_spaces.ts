@@ -70,10 +70,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`redirects to management home`, async () => {
-        await PageObjects.common.navigateToActualUrl('management/kibana/indexPatterns', undefined, {
+        await PageObjects.common.navigateToUrl('management', 'kibana/indexPatterns', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
         });
         await testSubjects.existOrFail('managementHome', {
           timeout: config.get('timeouts.waitFor'),

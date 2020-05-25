@@ -19,7 +19,7 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { HashRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import { Router, Switch, Route, Link } from 'react-router-dom';
 import { CoreSetup, Plugin } from 'kibana/public';
 import { ManagementSetup, ManagementSectionId } from '../../../../../src/plugins/management/public';
 
@@ -34,17 +34,17 @@ export class ManagementTestPlugin
       mount(params: any) {
         params.setBreadcrumbs([{ text: 'Management Test' }]);
         ReactDOM.render(
-          <Router>
+          <Router history={params.history}>
             <h1 data-test-subj="test-management-header">Hello from management test plugin</h1>
             <Switch>
-              <Route exact path={`${params.basePath}`}>
-                <Link to={`${params.basePath}/one`} data-test-subj="test-management-link-one">
-                  Link to /one
-                </Link>
-              </Route>
-              <Route path={`${params.basePath}/one`}>
+              <Route path={'/one'}>
                 <Link to={`${params.basePath}`} data-test-subj="test-management-link-basepath">
                   Link to basePath
+                </Link>
+              </Route>
+              <Route path={'/'}>
+                <Link to={'/one'} data-test-subj="test-management-link-one">
+                  Link to /one
                 </Link>
               </Route>
             </Switch>

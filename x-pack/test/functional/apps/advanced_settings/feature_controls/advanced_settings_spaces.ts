@@ -47,10 +47,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`allows settings to be changed`, async () => {
-        await PageObjects.common.navigateToActualUrl('management/kibana/settings', undefined, {
+        await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
         });
         await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'America/Phoenix');
         const advancedSetting = await PageObjects.settings.getAdvancedSettings('dateFormat:tz');
@@ -77,10 +78,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`redirects to management home`, async () => {
-        await PageObjects.common.navigateToActualUrl('management/kibana/settings', undefined, {
+        await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
         });
         await testSubjects.existOrFail('managementHome', {
           timeout: config.get('timeouts.waitFor'),

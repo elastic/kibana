@@ -83,6 +83,10 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/dashboards',
         hash: '/list',
       },
+      management: {
+        pathname: '/app/management',
+      },
+      /** @obsolete "management" should be instead of "settings" **/
       settings: {
         pathname: '/app/management',
       },

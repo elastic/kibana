@@ -83,10 +83,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('displays an error and returns to the listing page when navigating to a role mapping which does not exist', async () => {
-      await pageObjects.common.navigateToActualUrl(
-        'management/security/role_mappings/edit/i-do-not-exist',
-        undefined,
-        { ensureCurrentUrl: false }
+      await pageObjects.common.navigateToUrl(
+        'management',
+        'security/role_mappings/edit/i-do-not-exist',
+        { ensureCurrentUrl: false, shouldUseHashForSubUrl: false }
       );
 
       await testSubjects.existOrFail('errorLoadingRoleMappingEditorToast');

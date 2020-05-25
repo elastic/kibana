@@ -38,8 +38,12 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should redirect when app is disabled', async () => {
-      await PageObjects.common.navigateToActualUrl('management/data/test-management-disabled');
-      await testSubjects.existOrFail('management-landing');
+      await PageObjects.common.navigateToUrl('management', 'data/test-management-disabled', {
+        useActualUrl: true,
+        shouldUseHashForSubUrl: false,
+      });
+
+      await testSubjects.existOrFail('managementHome');
     });
   });
 }

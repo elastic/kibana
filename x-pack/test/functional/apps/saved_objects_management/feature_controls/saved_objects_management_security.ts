@@ -111,11 +111,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('edit visualization', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
-            undefined,
+          await PageObjects.common.navigateToUrl(
+            'management',
+            'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
               shouldLoginIfPrompted: false,
+              shouldUseHashForSubUrl: false,
             }
           );
         });
@@ -229,11 +230,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('edit visualization', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
-            undefined,
+          await PageObjects.common.navigateToUrl(
+            'management',
+            'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
               shouldLoginIfPrompted: false,
+              shouldUseHashForSubUrl: false,
             }
           );
           await testSubjects.existOrFail('savedObjectsEdit');
@@ -302,9 +304,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('listing', () => {
         it('redirects to Kibana home', async () => {
-          await PageObjects.common.navigateToActualUrl('management/kibana/objects', undefined, {
+          await PageObjects.common.navigateToUrl('management', 'kibana/objects', {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
+            shouldUseHashForSubUrl: false,
           });
           await PageObjects.header.waitUntilLoadingHasFinished();
           await testSubjects.existOrFail('homeApp');
@@ -313,12 +316,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('edit visualization', () => {
         it('redirects to Kibana home', async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
-            undefined,
+          await PageObjects.common.navigateToUrl(
+            'management',
+            'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
               shouldLoginIfPrompted: false,
               ensureCurrentUrl: false,
+              shouldUseHashForSubUrl: false,
             }
           );
           await PageObjects.header.waitUntilLoadingHasFinished();

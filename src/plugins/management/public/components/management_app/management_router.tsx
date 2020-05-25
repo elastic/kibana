@@ -40,19 +40,21 @@ export const ManagementRouter = memo(
       <EuiPageBody restrictWidth={true} className="mgtPage__body">
         <Switch>
           {sections.map((section) =>
-            section.apps.map((app) => (
-              <Route
-                path={`${app.basePath}`}
-                component={() => (
-                  <ManagementAppWrapper
-                    app={app}
-                    setBreadcrumbs={setBreadcrumbs}
-                    onAppMounted={onAppMounted}
-                    history={history}
-                  />
-                )}
-              />
-            ))
+            section
+              .getAppsEnabled()
+              .map((app) => (
+                <Route
+                  path={`${app.basePath}`}
+                  component={() => (
+                    <ManagementAppWrapper
+                      app={app}
+                      setBreadcrumbs={setBreadcrumbs}
+                      onAppMounted={onAppMounted}
+                      history={history}
+                    />
+                  )}
+                />
+              ))
           )}
           <Route
             path={'/'}
