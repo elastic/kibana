@@ -23,7 +23,7 @@ import { LoadingSpinner } from './loading_spinner';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-describe('loading spinner', function() {
+describe('loading spinner', function () {
   let component: ReactWrapper;
 
   it('LoadingSpinner renders a Searching text and a spinner', () => {
