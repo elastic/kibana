@@ -69,7 +69,7 @@ async function record(observable: Rx.Observable<any>): Promise<string[]> {
 }
 
 async function waitForTick() {
-  await new Promise(resolve => {
+  await new Promise((resolve) => {
     process.nextTick(resolve);
   });
 }

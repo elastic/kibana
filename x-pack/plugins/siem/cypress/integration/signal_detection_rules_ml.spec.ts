@@ -81,92 +81,65 @@ describe('Signal detection rules, machine learning', () => {
     fillAboutRuleAndContinue(machineLearningRule);
     createAndActivateRule();
 
-    cy.get(CUSTOM_RULES_BTN)
-      .invoke('text')
-      .should('eql', 'Custom rules (1)');
+    cy.get(CUSTOM_RULES_BTN).invoke('text').should('eql', 'Custom rules (1)');
 
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
     const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchive + 1;
-    cy.get(RULES_TABLE).then($table => {
+    cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
 
     filterByCustomRules();
 
-    cy.get(RULES_TABLE).then($table => {
+    cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
     });
-    cy.get(RULE_NAME)
-      .invoke('text')
-      .should('eql', machineLearningRule.name);
-    cy.get(RISK_SCORE)
-      .invoke('text')
-      .should('eql', machineLearningRule.riskScore);
-    cy.get(SEVERITY)
-      .invoke('text')
-      .should('eql', machineLearningRule.severity);
+    cy.get(RULE_NAME).invoke('text').should('eql', machineLearningRule.name);
+    cy.get(RISK_SCORE).invoke('text').should('eql', machineLearningRule.riskScore);
+    cy.get(SEVERITY).invoke('text').should('eql', machineLearningRule.severity);
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
 
     let expectedUrls = '';
-    machineLearningRule.referenceUrls.forEach(url => {
+    machineLearningRule.referenceUrls.forEach((url) => {
       expectedUrls = expectedUrls + url;
     });
     let expectedFalsePositives = '';
-    machineLearningRule.falsePositivesExamples.forEach(falsePositive => {
+    machineLearningRule.falsePositivesExamples.forEach((falsePositive) => {
       expectedFalsePositives = expectedFalsePositives + falsePositive;
     });
     let expectedTags = '';
-    machineLearningRule.tags.forEach(tag => {
+    machineLearningRule.tags.forEach((tag) => {
       expectedTags = expectedTags + tag;
     });
     let expectedMitre = '';
-    machineLearningRule.mitre.forEach(mitre => {
+    machineLearningRule.mitre.forEach((mitre) => {
       expectedMitre = expectedMitre + mitre.tactic;
-      mitre.techniques.forEach(technique => {
+      mitre.techniques.forEach((technique) => {
         expectedMitre = expectedMitre + technique;
       });
     });
 
-    cy.get(RULE_NAME_HEADER)
-      .invoke('text')
-      .should('eql', `${machineLearningRule.name} Beta`);
+    cy.get(RULE_NAME_HEADER).invoke('text').should('eql', `${machineLearningRule.name} Beta`);
 
-    cy.get(ABOUT_RULE_DESCRIPTION)
-      .invoke('text')
-      .should('eql', machineLearningRule.description);
+    cy.get(ABOUT_RULE_DESCRIPTION).invoke('text').should('eql', machineLearningRule.description);
     cy.get(ABOUT_STEP)
       .eq(ABOUT_SEVERITY)
       .invoke('text')
       .should('eql', machineLearningRule.severity);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_RISK)
-      .invoke('text')
-      .should('eql', machineLearningRule.riskScore);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_URLS)
-      .invoke('text')
-      .should('eql', expectedUrls);
+    cy.get(ABOUT_STEP).eq(ABOUT_RISK).invoke('text').should('eql', machineLearningRule.riskScore);
+    cy.get(ABOUT_STEP).eq(ABOUT_URLS).invoke('text').should('eql', expectedUrls);
     cy.get(ABOUT_STEP)
       .eq(ABOUT_FALSE_POSITIVES)
       .invoke('text')
       .should('eql', expectedFalsePositives);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_MITRE)
-      .invoke('text')
-      .should('eql', expectedMitre);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_TAGS)
-      .invoke('text')
-      .should('eql', expectedTags);
+    cy.get(ABOUT_STEP).eq(ABOUT_MITRE).invoke('text').should('eql', expectedMitre);
+    cy.get(ABOUT_STEP).eq(ABOUT_TAGS).invoke('text').should('eql', expectedTags);
 
-    cy.get(DEFINITION_STEP)
-      .eq(RULE_TYPE)
-      .invoke('text')
-      .should('eql', 'Machine Learning');
+    cy.get(DEFINITION_STEP).eq(RULE_TYPE).invoke('text').should('eql', 'Machine Learning');
     cy.get(DEFINITION_STEP)
       .eq(ANOMALY_SCORE)
       .invoke('text')
@@ -185,13 +158,7 @@ describe('Signal detection rules, machine learning', () => {
       .invoke('text')
       .should('eql', 'None');
 
-    cy.get(SCHEDULE_STEP)
-      .eq(SCHEDULE_RUNS)
-      .invoke('text')
-      .should('eql', '5m');
-    cy.get(SCHEDULE_STEP)
-      .eq(SCHEDULE_LOOPBACK)
-      .invoke('text')
-      .should('eql', '1m');
+    cy.get(SCHEDULE_STEP).eq(SCHEDULE_RUNS).invoke('text').should('eql', '5m');
+    cy.get(SCHEDULE_STEP).eq(SCHEDULE_LOOPBACK).invoke('text').should('eql', '1m');
   });
 });

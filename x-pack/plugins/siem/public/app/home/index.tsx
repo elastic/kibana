@@ -91,7 +91,7 @@ export const HomePage: React.FC<HomePageProps> = ({ subPlugins }) => {
               <Switch>
                 <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
                 {subPlugins}
-                <Route path="/link-to" render={props => <LinkToPage {...props} />} />
+                <Route path="/link-to" render={(props) => <LinkToPage {...props} />} />
                 <Route
                   path="/ml-hosts"
                   render={({ location, match }) => (

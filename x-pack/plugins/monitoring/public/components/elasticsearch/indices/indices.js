@@ -32,7 +32,7 @@ const columns = [
     field: 'name',
     width: '350px',
     sortable: true,
-    render: value => (
+    render: (value) => (
       <div data-test-subj="name">
         <EuiLink
           href={getSafeForExternalLink(`#/elasticsearch/indices/${value}`)}
@@ -49,7 +49,7 @@ const columns = [
     }),
     field: 'status',
     sortable: true,
-    render: value => (
+    render: (value) => (
       <div className="monElasticsearchIndicesTable__status" title={`Index status: ${value}`}>
         <ElasticsearchStatusIcon status={value} />
         &nbsp;
@@ -63,7 +63,7 @@ const columns = [
     }),
     field: 'doc_count',
     sortable: true,
-    render: value => (
+    render: (value) => (
       <div data-test-subj="documentCount">{formatMetric(value, LARGE_ABBREVIATED)}</div>
     ),
   },
@@ -73,7 +73,7 @@ const columns = [
     }),
     field: 'data_size',
     sortable: true,
-    render: value => <div data-test-subj="dataSize">{formatMetric(value, LARGE_BYTES)}</div>,
+    render: (value) => <div data-test-subj="dataSize">{formatMetric(value, LARGE_BYTES)}</div>,
   },
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.indices.indexRateTitle', {
@@ -81,7 +81,9 @@ const columns = [
     }),
     field: 'index_rate',
     sortable: true,
-    render: value => <div data-test-subj="indexRate">{formatMetric(value, LARGE_FLOAT, '/s')}</div>,
+    render: (value) => (
+      <div data-test-subj="indexRate">{formatMetric(value, LARGE_FLOAT, '/s')}</div>
+    ),
   },
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.indices.searchRateTitle', {
@@ -89,7 +91,7 @@ const columns = [
     }),
     field: 'search_rate',
     sortable: true,
-    render: value => (
+    render: (value) => (
       <div data-test-subj="searchRate">{formatMetric(value, LARGE_FLOAT, '/s')}</div>
     ),
   },
@@ -99,7 +101,7 @@ const columns = [
     }),
     field: 'unassigned_shards',
     sortable: true,
-    render: value => <div data-test-subj="unassignedShards">{formatMetric(value, '0')}</div>,
+    render: (value) => <div data-test-subj="unassignedShards">{formatMetric(value, '0')}</div>,
   },
 ];
 
@@ -147,7 +149,7 @@ export const ElasticsearchIndices = ({
               />
             }
             checked={showSystemIndices}
-            onChange={e => toggleShowSystemIndices(e.target.checked)}
+            onChange={(e) => toggleShowSystemIndices(e.target.checked)}
           />
           <EuiSpacer size="m" />
           <EuiMonitoringTable

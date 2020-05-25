@@ -42,7 +42,7 @@ describe('alert list pagination', () => {
     const middleware = alertMiddlewareFactory(coreStart, depsStart);
     store = createStore(alertListReducer, applyMiddleware(middleware));
 
-    history.listen(location => {
+    history.listen((location) => {
       store.dispatch({ type: 'userChangedUrl', payload: location });
     });
 

@@ -18,7 +18,7 @@ function createEncryptedSavedObjectsSetupMock() {
 function createEncryptedSavedObjectsStartMock() {
   return {
     isEncryptionError: jest.fn(),
-    getClient: jest.fn(opts => createEncryptedSavedObjectsClienttMock(opts)),
+    getClient: jest.fn((opts) => createEncryptedSavedObjectsClienttMock(opts)),
   } as jest.Mocked<EncryptedSavedObjectsPluginStart>;
 }
 

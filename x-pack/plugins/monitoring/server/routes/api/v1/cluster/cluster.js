@@ -32,7 +32,7 @@ export function clusterRoute(server) {
         }),
       },
     },
-    handler: async req => {
+    handler: async (req) => {
       const config = server.config();
       await verifyCcsAvailability(req);
 

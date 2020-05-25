@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
@@ -37,7 +37,7 @@ export default function({ getService }) {
       // Deprecation message should be gone
       const { body: uaBody } = await supertest.get('/api/upgrade_assistant/status').expect(200);
       const depMessage = uaBody.indices.find(
-        dep =>
+        (dep) =>
           dep.index === indexName &&
           dep.message === 'Number of fields exceeds automatic field expansion limit'
       );

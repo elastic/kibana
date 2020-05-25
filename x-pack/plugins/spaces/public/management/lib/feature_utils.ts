@@ -9,5 +9,5 @@ import { FeatureConfig } from '../../../../features/common';
 import { Space } from '../..';
 
 export function getEnabledFeatures(features: FeatureConfig[], space: Partial<Space>) {
-  return features.filter(feature => !(space.disabledFeatures || []).includes(feature.id));
+  return features.filter((feature) => !(space.disabledFeatures || []).includes(feature.id));
 }

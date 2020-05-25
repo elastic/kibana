@@ -81,7 +81,7 @@ export async function setupIngestManager(
   }
   for (const installedPackage of installedPackages) {
     const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
-      packageName => installedPackage.name === packageName
+      (packageName) => installedPackage.name === packageName
     );
     if (!packageShouldBeInstalled) {
       continue;
