@@ -62,6 +62,7 @@ export const mountManagementSection = async ({
                   coreStart={coreStart}
                   serviceRegistry={serviceRegistry}
                   setBreadcrumbs={setBreadcrumbs}
+                  history={history}
                 />
               </Suspense>
             </RedirectToHomeIfUnauthorized>

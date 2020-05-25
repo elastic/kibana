@@ -82,9 +82,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       let objects = await PageObjects.settings.getSavedObjectsInTable();
       expect(objects.includes('A Dashboard')).to.be(true);
 
-      await PageObjects.common.navigateToActualUrl(
-        'kibana',
-        '/management/kibana/objects/savedDashboards/i-exist'
+      await PageObjects.common.navigateToUrl(
+        'management',
+        'kibana/objects/savedDashboards/i-exist',
+        {
+          shouldUseHashForSubUrl: false,
+        }
       );
 
       await testSubjects.existOrFail('savedObjectEditSave');
@@ -100,9 +103,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(objects.includes('A Dashboard')).to.be(false);
       expect(objects.includes('Edited Dashboard')).to.be(true);
 
-      await PageObjects.common.navigateToActualUrl(
-        'kibana',
-        '/management/kibana/objects/savedDashboards/i-exist'
+      await PageObjects.common.navigateToUrl(
+        'management',
+        'kibana/objects/savedDashboards/i-exist',
+        {
+          shouldUseHashForSubUrl: false,
+        }
       );
 
       expect(await getFieldValue('title')).to.eql('Edited Dashboard');
@@ -110,9 +116,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('allows to delete a saved object', async () => {
-      await PageObjects.common.navigateToActualUrl(
-        'kibana',
-        '/management/kibana/objects/savedDashboards/i-exist'
+      await PageObjects.common.navigateToUrl(
+        'management',
+        'kibana/objects/savedDashboards/i-exist',
+        {
+          shouldUseHashForSubUrl: false,
+        }
       );
 
       await focusAndClickButton('savedObjectEditDelete');
@@ -124,7 +133,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('preserves the object references when saving', async () => {
       const testVisualizationUrl =
-        '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed';
+        'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed';
       const visualizationRefs = [
         {
           name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
@@ -139,7 +148,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const objects = await PageObjects.settings.getSavedObjectsInTable();
       expect(objects.includes('A Pie')).to.be(true);
 
-      await PageObjects.common.navigateToActualUrl(testVisualizationUrl);
+      await PageObjects.common.navigateToUrl('management', testVisualizationUrl, {
+        shouldUseHashForSubUrl: false,
+      });
 
       await testSubjects.existOrFail('savedObjectEditSave');
 
@@ -151,7 +162,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await PageObjects.settings.getSavedObjectsInTable();
 
-      await PageObjects.common.navigateToActualUrl(testVisualizationUrl);
+      await PageObjects.common.navigateToUrl('management', testVisualizationUrl, {
+        shouldUseHashForSubUrl: false,
+      });
 
       // Parsing to avoid random keys ordering issues in raw string comparison
       expect(JSON.parse(await getAceEditorFieldValue('references'))).to.eql(visualizationRefs);
@@ -162,7 +175,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await PageObjects.settings.getSavedObjectsInTable();
 
-      await PageObjects.common.navigateToActualUrl(testVisualizationUrl);
+      await PageObjects.common.navigateToUrl('management', testVisualizationUrl, {
+        shouldUseHashForSubUrl: false,
+      });
 
       displayedReferencesValue = await getAceEditorFieldValue('references');
 

@@ -20,7 +20,7 @@
 import React, { useEffect } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
+import { CoreStart, ChromeBreadcrumb, ScopedHistory } from 'src/core/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import {
   ISavedObjectsManagementServiceRegistry,
@@ -52,7 +52,7 @@ const SavedObjectsTablePage = ({
         text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
           defaultMessage: 'Saved objects',
         }),
-        href: '#/management/kibana/objects',
+        href: '/',
       },
     ]);
   }, [setBreadcrumbs]);

@@ -141,7 +141,7 @@ describe('Relationships', () => {
         meta: {
           title: 'MySearch',
           icon: 'search',
-          editUrl: '#/management/kibana/objects/savedSearches/1',
+          editUrl: '/management/kibana/objects/savedSearches/1',
           inAppUrl: {
             path: '/discover/1',
             uiCapabilitiesPath: 'discover.show',
@@ -208,7 +208,7 @@ describe('Relationships', () => {
         meta: {
           title: 'MyViz',
           icon: 'visualizeApp',
-          editUrl: '#/management/kibana/objects/savedVisualizations/1',
+          editUrl: '/management/kibana/objects/savedVisualizations/1',
           inAppUrl: {
             path: '/edit/1',
             uiCapabilitiesPath: 'visualize.show',
@@ -275,7 +275,7 @@ describe('Relationships', () => {
         meta: {
           title: 'MyDashboard',
           icon: 'dashboardApp',
-          editUrl: '#/management/kibana/objects/savedDashboards/1',
+          editUrl: '/management/kibana/objects/savedDashboards/1',
           inAppUrl: {
             path: '/dashboard/1',
             uiCapabilitiesPath: 'dashboard.show',
@@ -315,7 +315,7 @@ describe('Relationships', () => {
         meta: {
           title: 'MyDashboard',
           icon: 'dashboardApp',
-          editUrl: '#/management/kibana/objects/savedDashboards/1',
+          editUrl: '/management/kibana/objects/savedDashboards/1',
           inAppUrl: {
             path: '/dashboard/1',
             uiCapabilitiesPath: 'dashboard.show',

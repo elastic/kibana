@@ -125,10 +125,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
           }>;
         }
       ) => (
-        <EuiButtonEmpty
-          size="xs"
-          {...reactRouterNavigate(history, `patterns/${index.id}/create-field/`)}
-        >
+        <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
           {name}
           {index.tags &&
             index.tags.map(({ key: tagKey, name: tagName }) => (
