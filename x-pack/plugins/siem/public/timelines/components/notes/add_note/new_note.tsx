@@ -49,7 +49,7 @@ export const NewNote = React.memo<{
           data-test-subj="add-a-note"
           fullWidth={true}
           height={noteInputHeight}
-          onChange={e => updateNewNote(e.target.value)}
+          onChange={(e) => updateNewNote(e.target.value)}
           placeholder={i18n.ADD_A_NOTE}
           spellCheck={true}
           value={note}

@@ -49,7 +49,7 @@ export async function scanDelete(options: Options) {
   const { directory, regularExpressions, concurrency = 20, excludePaths } = options;
 
   assertAbsolute(directory);
-  (excludePaths || []).forEach(excluded => assertAbsolute(excluded));
+  (excludePaths || []).forEach((excluded) => assertAbsolute(excluded));
 
   // get an observable of absolute paths within a directory
   const getChildPath$ = (path: string) =>
@@ -66,12 +66,12 @@ export async function scanDelete(options: Options) {
       return Rx.EMPTY;
     }
 
-    if (regularExpressions.some(re => re.test(path))) {
+    if (regularExpressions.some((re) => re.test(path))) {
       return Rx.of(path);
     }
 
     return getStat$(path).pipe(
-      mergeMap(stat => (stat.isDirectory() ? getChildPath$(path) : Rx.EMPTY)),
+      mergeMap((stat) => (stat.isDirectory() ? getChildPath$(path) : Rx.EMPTY)),
       mergeMap(getPathsToDelete$)
     );
   };
@@ -79,7 +79,7 @@ export async function scanDelete(options: Options) {
   return await Rx.of(directory)
     .pipe(
       mergeMap(getPathsToDelete$),
-      mergeMap(async path => await del(path), concurrency),
+      mergeMap(async (path) => await del(path), concurrency),
       count()
     )
     .toPromise();

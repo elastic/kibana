@@ -6,7 +6,7 @@
 
 import {
   OBSERVER_VERSION_MAJOR,
-  PROCESSOR_EVENT
+  PROCESSOR_EVENT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
 
@@ -23,11 +23,11 @@ export async function getLegacyDataStatus(setup: Setup) {
         bool: {
           filter: [
             { terms: { [PROCESSOR_EVENT]: ['transaction'] } },
-            { range: { [OBSERVER_VERSION_MAJOR]: { lt: 7 } } }
-          ]
-        }
-      }
-    }
+            { range: { [OBSERVER_VERSION_MAJOR]: { lt: 7 } } },
+          ],
+        },
+      },
+    },
   };
 
   const resp = await client.search(params, { includeLegacyData: true });

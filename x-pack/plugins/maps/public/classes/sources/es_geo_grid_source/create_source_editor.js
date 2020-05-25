@@ -38,7 +38,7 @@ export class CreateSourceEditor extends Component {
     this._isMounted = true;
   }
 
-  onIndexPatternSelect = indexPatternId => {
+  onIndexPatternSelect = (indexPatternId) => {
     this.setState(
       {
         indexPatternId,
@@ -47,7 +47,7 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  loadIndexPattern = indexPatternId => {
+  loadIndexPattern = (indexPatternId) => {
     this.setState(
       {
         isLoadingIndexPattern: true,
@@ -58,7 +58,7 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  debouncedLoad = _.debounce(async indexPatternId => {
+  debouncedLoad = _.debounce(async (indexPatternId) => {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
@@ -93,7 +93,7 @@ export class CreateSourceEditor extends Component {
     }
   }, 300);
 
-  _onGeoFieldSelect = geoField => {
+  _onGeoFieldSelect = (geoField) => {
     this.setState(
       {
         geoField,
@@ -102,7 +102,7 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  _onRequestTypeSelect = newValue => {
+  _onRequestTypeSelect = (newValue) => {
     this.setState(
       {
         requestType: newValue,

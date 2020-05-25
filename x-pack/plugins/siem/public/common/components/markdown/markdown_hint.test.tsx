@@ -31,12 +31,7 @@ describe('MarkdownHintComponent ', () => {
   test('it renders the heading hint', () => {
     const wrapper = mount(<MarkdownHintComponent show={true} />);
 
-    expect(
-      wrapper
-        .find('[data-test-subj="heading-hint"]')
-        .first()
-        .text()
-    ).toEqual('# heading');
+    expect(wrapper.find('[data-test-subj="heading-hint"]').first().text()).toEqual('# heading');
   });
 
   test('it renders the bold hint with a bold font-weight', () => {

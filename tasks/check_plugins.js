@@ -33,7 +33,7 @@ export default function checkPlugins(grunt) {
           return done();
         }
 
-        const plugins = files.filter(file => {
+        const plugins = files.filter((file) => {
           return fs.statSync(path.join(pluginsDir, file)).isDirectory();
         });
 
@@ -41,7 +41,7 @@ export default function checkPlugins(grunt) {
           grunt.log.error(
             '==================================================================================================='
           );
-          plugins.forEach(plugin => {
+          plugins.forEach((plugin) => {
             grunt.log.error(
               `The ${plugin} plugin may disrupt the test process. Consider removing it and re-running your tests.`
             );

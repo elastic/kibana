@@ -52,7 +52,7 @@ export function checkPrivilegesWithRequestFactory(
     applicationPrivilegesResponse: HasPrivilegesResponseApplication
   ) => {
     return Object.values(applicationPrivilegesResponse).some(
-      resource => !resource[actions.version] && resource[actions.login]
+      (resource) => !resource[actions.version] && resource[actions.login]
     );
   };
 
@@ -121,7 +121,7 @@ export function checkPrivilegesWithRequestFactory(
         return await checkPrivilegesAtResources([spaceResource], privilegeOrPrivileges);
       },
       async atSpaces(spaceIds: string[], privilegeOrPrivileges: string | string[]) {
-        const spaceResources = spaceIds.map(spaceId =>
+        const spaceResources = spaceIds.map((spaceId) =>
           ResourceSerializer.serializeSpaceResource(spaceId)
         );
         return await checkPrivilegesAtResources(spaceResources, privilegeOrPrivileges);

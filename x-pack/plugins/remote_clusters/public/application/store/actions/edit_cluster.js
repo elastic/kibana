@@ -26,7 +26,7 @@ import {
   CLEAR_EDIT_CLUSTER_ERRORS,
 } from '../action_types';
 
-export const editCluster = cluster => async dispatch => {
+export const editCluster = (cluster) => async (dispatch) => {
   dispatch({
     type: EDIT_CLUSTER_SAVE,
   });
@@ -35,7 +35,7 @@ export const editCluster = cluster => async dispatch => {
     await Promise.all([
       sendEditClusterRequest(cluster),
       // Wait at least half a second to avoid a weird flicker of the saving feedback.
-      new Promise(resolve => setTimeout(resolve, 500)),
+      new Promise((resolve) => setTimeout(resolve, 500)),
     ]);
   } catch (error) {
     if (error) {
@@ -101,7 +101,7 @@ export const editCluster = cluster => async dispatch => {
   }
 };
 
-export const startEditingCluster = ({ clusterName }) => dispatch => {
+export const startEditingCluster = ({ clusterName }) => (dispatch) => {
   dispatch(loadClusters());
 
   dispatch({
@@ -110,7 +110,7 @@ export const startEditingCluster = ({ clusterName }) => dispatch => {
   });
 };
 
-export const stopEditingCluster = () => dispatch => {
+export const stopEditingCluster = () => (dispatch) => {
   // Load the clusters to refresh the one we just edited.
   dispatch(loadClusters());
 
@@ -119,7 +119,7 @@ export const stopEditingCluster = () => dispatch => {
   });
 };
 
-export const clearEditClusterErrors = () => dispatch => {
+export const clearEditClusterErrors = () => (dispatch) => {
   dispatch({
     type: CLEAR_EDIT_CLUSTER_ERRORS,
   });

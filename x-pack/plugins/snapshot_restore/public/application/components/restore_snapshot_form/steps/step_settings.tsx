@@ -51,7 +51,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
   >(
     [
       ...new Set((ignoreIndexSettings || []).concat([...REMOVE_INDEX_SETTINGS_SUGGESTIONS].sort())),
-    ].map(setting => ({
+    ].map((setting) => ({
       label: setting,
     }))
   );
@@ -131,7 +131,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                 />
               }
               checked={isUsingIndexSettings}
-              onChange={e => {
+              onChange={(e) => {
                 const isChecked = e.target.checked;
                 if (isChecked) {
                   setIsUsingIndexSettings(true);
@@ -237,7 +237,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                 />
               }
               checked={isUsingIgnoreIndexSettings}
-              onChange={e => {
+              onChange={(e) => {
                 const isChecked = e.target.checked;
                 if (isChecked) {
                   setIsUsingIgnoreIndexSettings(true);
@@ -278,7 +278,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                           )
                         : []
                     }
-                    onChange={selectedOptions => {
+                    onChange={(selectedOptions) => {
                       const newIgnoreIndexSettings = selectedOptions.map(({ label }) => label);
                       updateRestoreSettings({ ignoreIndexSettings: newIgnoreIndexSettings });
                       setCachedRestoreSettings({

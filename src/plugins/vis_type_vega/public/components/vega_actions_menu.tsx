@@ -30,7 +30,7 @@ interface VegaActionsMenuProps {
 function VegaActionsMenu({ formatHJson, formatJson }: VegaActionsMenuProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const onButtonClick = useCallback(() => setIsPopoverOpen(isOpen => !isOpen), []);
+  const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
   const onHJsonCLick = useCallback(() => {
     formatHJson();
     setIsPopoverOpen(false);

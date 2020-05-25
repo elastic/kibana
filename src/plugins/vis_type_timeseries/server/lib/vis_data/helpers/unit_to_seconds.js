@@ -32,9 +32,9 @@ const units = {
   y: 86400 * 7 * 4 * 12, // Leap year?
 };
 
-const sortedUnits = sortBy(Object.keys(units), key => units[key]);
+const sortedUnits = sortBy(Object.keys(units), (key) => units[key]);
 
-export const parseInterval = intervalString => {
+export const parseInterval = (intervalString) => {
   let value;
   let unit;
 
@@ -65,7 +65,7 @@ export const convertIntervalToUnit = (intervalString, newUnit) => {
   return { value, unit };
 };
 
-export const getSuitableUnit = intervalInSeconds =>
+export const getSuitableUnit = (intervalInSeconds) =>
   sortedUnits.find((key, index, array) => {
     const nextUnit = array[index + 1];
     const isValidInput = isNumber(intervalInSeconds) && intervalInSeconds > 0;
@@ -77,4 +77,4 @@ export const getSuitableUnit = intervalInSeconds =>
     );
   });
 
-export const getUnitValue = unit => units[unit];
+export const getUnitValue = (unit) => units[unit];

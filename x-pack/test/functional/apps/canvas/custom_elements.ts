@@ -19,7 +19,7 @@ export default function canvasCustomElementTest({
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
 
-  describe('custom elements', function() {
+  describe('custom elements', function () {
     this.tags('skipFirefox');
 
     before(async () => {

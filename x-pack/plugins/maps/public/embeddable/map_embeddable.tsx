@@ -105,7 +105,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._settings = config.settings;
     this._store = createMapStore();
 
-    this._subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
+    this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
   }
 
   setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
@@ -150,7 +150,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._prevFilters = filters;
     this._store.dispatch<any>(
       setQuery({
-        filters: filters.filter(filter => !filter.meta.disabled),
+        filters: filters.filter((filter) => !filter.meta.disabled),
         query,
         timeFilters: timeRange,
         refresh,

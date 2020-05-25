@@ -438,10 +438,10 @@ export function clamp(val, min, max) {
 export function extractFeaturesFromFilters(filters) {
   const features = [];
   filters
-    .filter(filter => {
+    .filter((filter) => {
       return filter.meta.key && filter.meta.type === SPATIAL_FILTER_TYPE;
     })
-    .forEach(filter => {
+    .forEach((filter) => {
       let geometry;
       if (filter.geo_distance && filter.geo_distance[filter.meta.key]) {
         const distanceSplit = filter.geo_distance.distance.split('km');
