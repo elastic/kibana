@@ -34,12 +34,12 @@ import { Header } from './components/header';
 import { TimeField } from './components/time_field';
 import { AdvancedOptions } from './components/advanced_options';
 import { ActionButtons } from './components/action_buttons';
+import { context } from '../../../../../../kibana_react/public';
+import { IndexPatternManagmentContextValue } from '../../../../types';
 import { IndexPatternCreationConfig } from '../../../..';
-import { DataPublicPluginStart } from '../../../../../../data/public';
 
 interface StepTimeFieldProps {
   indexPattern: string;
-  indexPatternsService: DataPublicPluginStart['indexPatterns'];
   goToPreviousStep: () => void;
   createIndexPattern: (selectedTimeField: string | undefined, indexPatternId: string) => void;
   indexPatternCreationType: IndexPatternCreationConfig;
@@ -65,6 +65,10 @@ interface TimeFieldConfig {
 }
 
 export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldState> {
+  static contextType = context;
+
+  public readonly context!: IndexPatternManagmentContextValue;
+
   state = {
     error: '',
     timeFields: [],
@@ -96,10 +100,10 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
   }
 
   fetchTimeFields = async () => {
-    const { indexPatternsService, indexPattern: pattern } = this.props;
+    const { indexPattern: pattern } = this.props;
     const { getFetchForWildcardOptions } = this.props.indexPatternCreationType;
 
-    const indexPattern = await indexPatternsService.make();
+    const indexPattern = await this.context.services.data.indexPatterns.make();
     indexPattern.title = pattern;
 
     this.setState({ isFetchingTimeFields: true });
