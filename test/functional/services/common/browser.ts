@@ -410,6 +410,21 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Switches driver to specific browser tab by index
+     *
+     * @param {string} tabIndex
+     * @param {string} value
+     * @return {Promise<void>}
+     */
+    public async switchTab(tabIndex: number) {
+      const tabs = await driver.getAllWindowHandles();
+      if (tabs.length <= tabIndex) {
+        throw new Error(`Out of existing tabs bounds`);
+      }
+      await driver.switchTo().window(tabs[tabIndex]);
+    }
+
+    /**
      * Sets a value in local storage for the focused window/frame.
      *
      * @param {string} key
