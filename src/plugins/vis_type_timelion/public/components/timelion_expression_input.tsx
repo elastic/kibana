@@ -95,7 +95,7 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
 
   useEffect(() => {
     if (kibana.services.http) {
-      kibana.services.http.get('../api/timelion/functions').then(data => {
+      kibana.services.http.get('../api/timelion/functions').then((data) => {
         functionList.current = data;
       });
     }

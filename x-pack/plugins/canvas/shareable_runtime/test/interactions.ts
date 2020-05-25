@@ -8,7 +8,7 @@ import { ReactWrapper } from 'enzyme';
 import { getSettingsTrigger, getPortal, getContextMenuItems } from './selectors';
 import { waitFor } from './utils';
 
-export const openSettings = async function(wrapper: ReactWrapper) {
+export const openSettings = async function (wrapper: ReactWrapper) {
   getSettingsTrigger(wrapper).simulate('click');
 
   try {
@@ -16,19 +16,15 @@ export const openSettings = async function(wrapper: ReactWrapper) {
     await waitFor(() => {
       wrapper.update();
 
-      return getPortal(wrapper)
-        .find('EuiPanel')
-        .exists();
+      return getPortal(wrapper).find('EuiPanel').exists();
     });
   } catch (e) {
     throw new Error('Settings Panel did not open in given time');
   }
 };
 
-export const selectMenuItem = async function(wrapper: ReactWrapper, menuItemIndex: number) {
-  getContextMenuItems(wrapper)
-    .at(menuItemIndex)
-    .simulate('click');
+export const selectMenuItem = async function (wrapper: ReactWrapper, menuItemIndex: number) {
+  getContextMenuItems(wrapper).at(menuItemIndex).simulate('click');
 
   try {
     // When the menu item is clicked, wait for all of the context menus to be there

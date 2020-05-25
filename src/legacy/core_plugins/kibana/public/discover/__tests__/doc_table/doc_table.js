@@ -36,8 +36,8 @@ let $timeout;
 
 let indexPattern;
 
-const init = function($elem, props) {
-  ngMock.inject(function($rootScope, $compile, _$timeout_) {
+const init = function ($elem, props) {
+  ngMock.inject(function ($rootScope, $compile, _$timeout_) {
     $timeout = _$timeout_;
     $parentScope = $rootScope;
     _.assign($parentScope, props);
@@ -45,7 +45,7 @@ const init = function($elem, props) {
     $compile($elem)($parentScope);
 
     // I think the prereq requires this?
-    $timeout(function() {
+    $timeout(function () {
       $elem.scope().$digest();
     }, 0);
 
@@ -53,17 +53,17 @@ const init = function($elem, props) {
   });
 };
 
-const destroy = function() {
+const destroy = function () {
   $scope.$destroy();
   $parentScope.$destroy();
 };
 
-describe('docTable', function() {
+describe('docTable', function () {
   let $elem;
   beforeEach(() => pluginInstance.initializeInnerAngular());
   beforeEach(() => pluginInstance.initializeServices());
   beforeEach(ngMock.module('app/discover'));
-  beforeEach(function() {
+  beforeEach(function () {
     $elem = angular.element(`
       <doc-table
         index-pattern="indexPattern"
@@ -73,7 +73,7 @@ describe('docTable', function() {
         sorting="sorting"
       ></doc-table>
     `);
-    ngMock.inject(function(Private) {
+    ngMock.inject(function (Private) {
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     });
     init($elem, {
@@ -86,15 +86,15 @@ describe('docTable', function() {
     $scope.$digest();
   });
 
-  afterEach(function() {
+  afterEach(function () {
     destroy();
   });
 
-  it('should compile', function() {
+  it('should compile', function () {
     expect($elem.text()).to.not.be.empty();
   });
 
-  it('should have an addRows function that increases the row count', function() {
+  it('should have an addRows function that increases the row count', function () {
     expect($scope.addRows).to.be.a(Function);
     $scope.$digest();
     expect($scope.limit).to.be(50);
@@ -102,7 +102,7 @@ describe('docTable', function() {
     expect($scope.limit).to.be(100);
   });
 
-  it('should reset the row limit when results are received', function() {
+  it('should reset the row limit when results are received', function () {
     $scope.limit = 100;
     expect($scope.limit).to.be(100);
     $scope.hits = [...hits];
@@ -110,7 +110,7 @@ describe('docTable', function() {
     expect($scope.limit).to.be(50);
   });
 
-  it('should have a header and a table element', function() {
+  it('should have a header and a table element', function () {
     $scope.$digest();
 
     expect($elem.find('thead').length).to.be(1);

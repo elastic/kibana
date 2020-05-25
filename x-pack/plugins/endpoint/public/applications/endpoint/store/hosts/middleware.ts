@@ -10,8 +10,8 @@ import { HostState } from '../../types';
 import { ImmutableMiddlewareFactory } from '../../types';
 import { HostPolicyResponse } from '../../../../../common/types';
 
-export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = coreStart => {
-  return ({ getState, dispatch }) => next => async action => {
+export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (coreStart) => {
+  return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();
     if (

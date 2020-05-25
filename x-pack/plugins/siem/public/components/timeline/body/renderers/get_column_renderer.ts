@@ -16,7 +16,7 @@ export const getColumnRenderer = (
   columnRenderers: ColumnRenderer[],
   data: TimelineNonEcsData[]
 ): ColumnRenderer => {
-  const renderer = columnRenderers.find(columnRenderer =>
+  const renderer = columnRenderers.find((columnRenderer) =>
     columnRenderer.isInstance(columnName, data)
   );
   return renderer != null ? renderer : unhandledColumnRenderer();

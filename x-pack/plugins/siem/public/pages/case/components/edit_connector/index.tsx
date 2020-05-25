@@ -53,7 +53,7 @@ export const EditConnector = React.memo(
     });
     const [connectorHasChanged, setConnectorHasChanged] = useState(false);
     const onChangeConnector = useCallback(
-      connectorId => {
+      (connectorId) => {
         setConnectorHasChanged(selectedConnector !== connectorId);
       },
       [selectedConnector]

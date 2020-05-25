@@ -76,7 +76,7 @@ export const createDefaultMapping = (
   fields: Record<string, ThirdPartyField>
 ): CasesConfigurationMapping[] =>
   Object.keys(fields).map(
-    key =>
+    (key) =>
       ({
         source: fields[key].defaultSourceField,
         target: key,

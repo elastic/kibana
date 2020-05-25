@@ -39,7 +39,7 @@ export const getQueryFilter = (
   };
 
   const enabledFilters = ((filters as unknown) as Filter[]).filter(
-    f => f && !esFilters.isFilterDisabled(f)
+    (f) => f && !esFilters.isFilterDisabled(f)
   );
 
   return esQuery.buildEsQuery(indexPattern, queries, enabledFilters, config);

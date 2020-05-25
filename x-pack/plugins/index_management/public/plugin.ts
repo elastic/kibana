@@ -52,7 +52,7 @@ export class IndexMgmtUIPlugin {
       id: PLUGIN.id,
       title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
       order: 2,
-      mount: async params => {
+      mount: async (params) => {
         const { mountManagementSection } = await import('./application/mount_management_section');
         const services = {
           httpService,

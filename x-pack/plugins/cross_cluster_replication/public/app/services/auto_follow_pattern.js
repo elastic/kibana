@@ -29,24 +29,22 @@ export const getPreviewIndicesFromAutoFollowPattern = ({
   limit = 5,
   wildcardPlaceHolders = [
     moment().format('YYYY-MM-DD'),
-    moment()
-      .add(1, 'days')
-      .format('YYYY-MM-DD'),
-    moment()
-      .add(2, 'days')
-      .format('YYYY-MM-DD'),
+    moment().add(1, 'days').format('YYYY-MM-DD'),
+    moment().add(2, 'days').format('YYYY-MM-DD'),
   ],
 }) => {
   const indicesPreview = [];
   let indexPreview;
   let leaderIndexTemplate;
 
-  leaderIndexPatterns.forEach(leaderIndexPattern => {
-    wildcardPlaceHolders.forEach(placeHolder => {
+  leaderIndexPatterns.forEach((leaderIndexPattern) => {
+    wildcardPlaceHolders.forEach((placeHolder) => {
       leaderIndexTemplate = leaderIndexPattern.replace(/\*/g, placeHolder);
       indexPreview = getFollowPattern(prefix, suffix, leaderIndexTemplate);
 
-      if (!indicesPreview.some(_indexPreview => indexPreview.toString === _indexPreview.toString)) {
+      if (
+        !indicesPreview.some((_indexPreview) => indexPreview.toString === _indexPreview.toString)
+      ) {
         indicesPreview.push(indexPreview);
       }
     });
@@ -58,7 +56,7 @@ export const getPreviewIndicesFromAutoFollowPattern = ({
   };
 };
 
-export const getPrefixSuffixFromFollowPattern = followPattern => {
+export const getPrefixSuffixFromFollowPattern = (followPattern) => {
   let followIndexPatternPrefix;
   let followIndexPatternSuffix;
 

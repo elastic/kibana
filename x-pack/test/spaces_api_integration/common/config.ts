@@ -67,7 +67,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',
           `--plugin-path=${path.join(__dirname, 'fixtures', 'shared_type_plugin')}`,
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
         ],
       },
     };

@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../plugins/ml/common/constants/categorization_job';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
@@ -75,7 +75,7 @@ export default function({ getService }: FtrProviderContext) {
 
   const calendarId = `wizard-test-calendar_${Date.now()}`;
 
-  describe('categorization', function() {
+  describe('categorization', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/categorization');
@@ -222,7 +222,7 @@ export default function({ getService }: FtrProviderContext) {
       await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(jobId);
       const rows = await ml.jobTable.parseJobTable();
-      expect(rows.filter(row => row.id === jobId)).to.have.length(1);
+      expect(rows.filter((row) => row.id === jobId)).to.have.length(1);
     });
 
     it('job creation displays details for the created job in the job list', async () => {
@@ -356,7 +356,7 @@ export default function({ getService }: FtrProviderContext) {
       await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(jobIdClone);
       const rows = await ml.jobTable.parseJobTable();
-      expect(rows.filter(row => row.id === jobIdClone)).to.have.length(1);
+      expect(rows.filter((row) => row.id === jobIdClone)).to.have.length(1);
     });
 
     it('job cloning displays details for the created job in the job list', async () => {
@@ -389,7 +389,7 @@ export default function({ getService }: FtrProviderContext) {
       await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(jobIdClone);
       const rows = await ml.jobTable.parseJobTable();
-      expect(rows.filter(row => row.id === jobIdClone)).to.have.length(0);
+      expect(rows.filter((row) => row.id === jobIdClone)).to.have.length(0);
     });
 
     it('job deletion does not have results for the deleted job any more', async () => {

@@ -40,12 +40,7 @@ describe('#getExtendedColumns', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('thead tr th')
-          .at(4)
-          .text()
-      ).toContain(i18n.MODIFIED_BY);
+      expect(wrapper.find('thead tr th').at(4).text()).toContain(i18n.MODIFIED_BY);
     });
 
     test('it renders the username when the timeline has an updatedBy property', () => {
@@ -58,12 +53,9 @@ describe('#getExtendedColumns', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="username"]')
-          .first()
-          .text()
-      ).toEqual(mockResults[0].updatedBy);
+      expect(wrapper.find('[data-test-subj="username"]').first().text()).toEqual(
+        mockResults[0].updatedBy
+      );
     });
 
     test('it renders a placeholder when the timeline is missing the updatedBy property', () => {
@@ -77,12 +69,7 @@ describe('#getExtendedColumns', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="username"]')
-          .first()
-          .text()
-      ).toEqual(getEmptyValue());
+      expect(wrapper.find('[data-test-subj="username"]').first().text()).toEqual(getEmptyValue());
     });
   });
 });

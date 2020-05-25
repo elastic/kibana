@@ -50,7 +50,7 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
             total: this.state.configuration_blocks.length,
           }}
           onTagChange={(field: string, value: string | number) =>
-            this.setState(oldState => ({
+            this.setState((oldState) => ({
               tag: { ...oldState.tag, [field]: value },
             }))
           }
@@ -60,13 +60,13 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
             });
           }}
           onConfigAddOrEdit={(block: ConfigurationBlock) => {
-            this.setState(previousState => ({
+            this.setState((previousState) => ({
               configuration_blocks: previousState.configuration_blocks.concat([block]),
             }));
           }}
           onConfigRemoved={(block: ConfigurationBlock) => {
-            this.setState(previousState => {
-              const selectedIndex = previousState.configuration_blocks.findIndex(c => {
+            this.setState((previousState) => {
+              const selectedIndex = previousState.configuration_blocks.findIndex((c) => {
                 return isEqual(block, c);
               });
               const blocks = [...previousState.configuration_blocks];
@@ -118,7 +118,7 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
       );
     }
     const createBlocksResponse = await this.props.libs.configBlocks.upsert(
-      this.state.configuration_blocks.map(block => ({ ...block, tag: this.state.tag.id }))
+      this.state.configuration_blocks.map((block) => ({ ...block, tag: this.state.tag.id }))
     );
     const creationError = createBlocksResponse.results.reduce(
       (err: string, resp) => (!err ? (err = resp.error ? resp.error.message : '') : err),

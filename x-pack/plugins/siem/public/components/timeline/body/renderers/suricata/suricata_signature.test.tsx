@@ -76,10 +76,7 @@ describe('SuricataSignature', () => {
       );
 
       expect(
-        wrapper
-          .find('[data-test-subj="signature-id-tooltip"]')
-          .first()
-          .props().content
+        wrapper.find('[data-test-subj="signature-id-tooltip"]').first().props().content
       ).toEqual(SURICATA_SIGNATURE_ID_FIELD_NAME);
     });
   });

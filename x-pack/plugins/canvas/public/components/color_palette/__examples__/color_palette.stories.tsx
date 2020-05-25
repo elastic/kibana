@@ -21,7 +21,7 @@ class Interactive extends React.Component<{}, { value: string }> {
     return (
       <ColorPalette
         colors={SIX_COLORS}
-        onChange={value => this.setState({ value })}
+        onChange={(value) => this.setState({ value })}
         value={this.state.value}
       />
     );

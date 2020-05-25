@@ -7,7 +7,7 @@ import { chunk } from 'lodash';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
-  SERVICE_NAME
+  SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { getMlIndex } from '../../../common/ml_job_constants';
 import { getServicesProjection } from '../../../common/projections/services';
@@ -28,12 +28,12 @@ export interface IEnvOptions {
 async function getConnectionData({
   setup,
   serviceName,
-  environment
+  environment,
 }: IEnvOptions) {
   const { traceIds } = await getTraceSampleIds({
     setup,
     serviceName,
-    environment
+    environment,
   });
 
   const chunks = chunk(
@@ -43,7 +43,7 @@ async function getConnectionData({
 
   const init = {
     connections: [],
-    discoveredServices: []
+    discoveredServices: [],
   };
 
   if (!traceIds.length) {
@@ -51,12 +51,12 @@ async function getConnectionData({
   }
 
   const chunkedResponses = await Promise.all(
-    chunks.map(traceIdsChunk =>
+    chunks.map((traceIdsChunk) =>
       getServiceMapFromTraceIds({
         setup,
         serviceName,
         environment,
-        traceIds: traceIdsChunk
+        traceIds: traceIdsChunk,
       })
     )
   );
@@ -66,7 +66,7 @@ async function getConnectionData({
       connections: prev.connections.concat(current.connections),
       discoveredServices: prev.discoveredServices.concat(
         current.discoveredServices
-      )
+      ),
     };
   });
 }
@@ -75,7 +75,7 @@ async function getServicesData(options: IEnvOptions) {
   const { setup } = options;
 
   const projection = getServicesProjection({
-    setup: { ...setup, uiFiltersES: [] }
+    setup: { ...setup, uiFiltersES: [] },
   });
 
   const { filter } = projection.body.query.bool;
@@ -89,28 +89,28 @@ async function getServicesData(options: IEnvOptions) {
           filter: options.serviceName
             ? filter.concat({
                 term: {
-                  [SERVICE_NAME]: options.serviceName
-                }
+                  [SERVICE_NAME]: options.serviceName,
+                },
               })
-            : filter
-        }
+            : filter,
+        },
       },
       aggs: {
         services: {
           terms: {
             field: projection.body.aggs.services.terms.field,
-            size: 500
+            size: 500,
           },
           aggs: {
             agent_name: {
               terms: {
-                field: AGENT_NAME
-              }
-            }
-          }
-        }
-      }
-    }
+                field: AGENT_NAME,
+              },
+            },
+          },
+        },
+      },
+    },
   });
 
   const { client } = setup;
@@ -118,12 +118,12 @@ async function getServicesData(options: IEnvOptions) {
   const response = await client.search(params);
 
   return (
-    response.aggregations?.services.buckets.map(bucket => {
+    response.aggregations?.services.buckets.map((bucket) => {
       return {
         [SERVICE_NAME]: bucket.key as string,
         [AGENT_NAME]:
           (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
-        [SERVICE_ENVIRONMENT]: options.environment || null
+        [SERVICE_ENVIRONMENT]: options.environment || null,
       };
     }) || []
   );
@@ -138,7 +138,7 @@ function getAnomaliesData(options: IEnvOptions) {
     body: {
       size: 0,
       query: {
-        bool: { filter: [{ term: { result_type: 'record' } }, rangeQuery] }
+        bool: { filter: [{ term: { result_type: 'record' } }, rangeQuery] },
       },
       aggs: {
         jobs: {
@@ -148,13 +148,13 @@ function getAnomaliesData(options: IEnvOptions) {
               top_hits: {
                 sort: [{ record_score: { order: 'desc' as const } }],
                 _source: ['job_id', 'record_score', 'typical', 'actual'],
-                size: 1
-              }
-            }
-          }
-        }
-      }
-    }
+                size: 1,
+              },
+            },
+          },
+        },
+      },
+    },
   };
 
   return client.search(params);
@@ -175,12 +175,12 @@ export async function getServiceMap(options: IEnvOptions) {
   ] = await Promise.all([
     getConnectionData(options),
     getServicesData(options),
-    getAnomaliesData(options)
+    getAnomaliesData(options),
   ]);
 
   return transformServiceMapResponses({
     ...connectionData,
     anomalies: anomaliesData,
-    services: servicesData
+    services: servicesData,
   });
 }

@@ -46,7 +46,7 @@ export const AddFilter = ({ onAddFilter }: AddFilterProps) => {
         <EuiFieldText
           fullWidth
           value={filter}
-          onChange={e => setFilter(e.target.value.trim())}
+          onChange={(e) => setFilter(e.target.value.trim())}
           placeholder={sourcePlaceholder}
         />
       </EuiFlexItem>

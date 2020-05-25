@@ -110,7 +110,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
           placeholder="Example: https://hooks.slack.com/services"
           value={webhookUrl || ''}
           data-test-subj="slackWebhookUrlInput"
-          onChange={e => {
+          onChange={(e) => {
             editActionSecrets('webhookUrl', e.target.value);
           }}
           onBlur={() => {
@@ -173,7 +173,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionPa
           name="message"
           value={message || ''}
           data-test-subj="slackMessageTextArea"
-          onChange={e => {
+          onChange={(e) => {
             editAction('message', e.target.value, index);
           }}
           onBlur={() => {

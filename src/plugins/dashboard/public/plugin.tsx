@@ -162,7 +162,7 @@ export class DashboardPlugin
         }, []);
       };
 
-      const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = props => {
+      const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = (props) => {
         useHideChrome();
         return <ExitFullScreenButtonUi {...props} />;
       };
@@ -188,7 +188,7 @@ export class DashboardPlugin
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: `#${DashboardConstants.LANDING_PAGE_PATH}`,
-      shouldTrackUrlUpdate: pathname => {
+      shouldTrackUrlUpdate: (pathname) => {
         const targetAppName = pathname.split('/')[1];
         return (
           targetAppName === DashboardConstants.DASHBOARDS_ID ||

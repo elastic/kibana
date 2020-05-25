@@ -63,4 +63,4 @@ routes.otherwise({
 
 uiModules
   .get('kibana')
-  .run($location => showAppRedirectNotification($location, npSetup.core.notifications.toasts));
+  .run(($location) => showAppRedirectNotification($location, npSetup.core.notifications.toasts));

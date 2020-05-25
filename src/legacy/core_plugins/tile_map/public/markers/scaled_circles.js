@@ -43,12 +43,12 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
     this._valueFormatter =
       options.valueFormatter ||
-      (x => {
+      ((x) => {
         x;
       });
     this._tooltipFormatter =
       options.tooltipFormatter ||
-      (x => {
+      ((x) => {
         x;
       });
     this._label = options.label;
@@ -68,7 +68,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
     };
     // Filter leafletlayer on client when results are not filtered on the server
     if (!options.isFilteredByCollar) {
-      layerOptions.filter = feature => {
+      layerOptions.filter = (feature) => {
         const bucketRectBounds = feature.properties.geohash_meta.rectangle;
         return kibanaMap.isInside(bucketRectBounds);
       };
@@ -88,10 +88,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
     const quantizeDomain = min !== max ? [min, max] : d3.scale.quantize().domain();
 
     this._legendColors = this.getLegendColors();
-    this._legendQuantizer = d3.scale
-      .quantize()
-      .domain(quantizeDomain)
-      .range(this._legendColors);
+    this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
 
     return makeStyleFunction(this._legendColors, quantizeDomain);
   }
@@ -111,12 +108,10 @@ export class ScaledCirclesMarkers extends EventEmitter {
     }
 
     const titleText = this.getLabel();
-    const $title = $('<div>')
-      .addClass('visMapLegend__title')
-      .text(titleText);
+    const $title = $('<div>').addClass('visMapLegend__title').text(titleText);
     jqueryDiv.append($title);
 
-    this._legendColors.forEach(color => {
+    this._legendColors.forEach((color) => {
       const labelText = this._legendQuantizer
         .invertExtent(color)
         .map(this._valueFormatter)
@@ -146,7 +141,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
    */
   _bindPopup(feature, layer) {
     const popup = layer.on({
-      mouseover: e => {
+      mouseover: (e) => {
         const layer = e.target;
         // bring layer to front if not older browser
         if (!L.Browser.ie && !L.Browser.opera) {
@@ -206,7 +201,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
     const precisionBiasNumerator = 200;
 
     const precision = _.max(
-      this._featureCollection.features.map(feature => {
+      this._featureCollection.features.map((feature) => {
         return String(feature.properties.geohash).length;
       })
     );
@@ -231,18 +226,12 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
 function makeColorDarker(color) {
   const amount = 1.3; //magic number, carry over from earlier
-  return d3
-    .hcl(color)
-    .darker(amount)
-    .toString();
+  return d3.hcl(color).darker(amount).toString();
 }
 
 function makeStyleFunction(legendColors, quantizeDomain) {
-  const legendQuantizer = d3.scale
-    .quantize()
-    .domain(quantizeDomain)
-    .range(legendColors);
-  return feature => {
+  const legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(legendColors);
+  return (feature) => {
     const value = _.get(feature, 'properties.value');
     const color = legendQuantizer(value);
     return {

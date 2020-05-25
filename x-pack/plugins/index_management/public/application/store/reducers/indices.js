@@ -20,7 +20,7 @@ const byId = handleActions(
       const { indexNames } = action.payload;
 
       const newState = {};
-      Object.values(state).forEach(index => {
+      Object.values(state).forEach((index) => {
         if (!indexNames.includes(index.name)) {
           newState[index.name] = index;
         }
@@ -31,7 +31,7 @@ const byId = handleActions(
     [loadIndicesSuccess](state, action) {
       const { indices } = action.payload;
       const newState = {};
-      indices.forEach(index => {
+      indices.forEach((index) => {
         newState[index.name] = index;
       });
 
@@ -41,7 +41,7 @@ const byId = handleActions(
       const { indices } = action.payload;
 
       const newState = {};
-      indices.forEach(index => {
+      indices.forEach((index) => {
         newState[index.name] = index;
       });
 
@@ -59,7 +59,7 @@ const allIds = handleActions(
     [deleteIndicesSuccess](state, action) {
       const { indexNames } = action.payload;
       const newState = [];
-      state.forEach(indexName => {
+      state.forEach((indexName) => {
         if (!indexNames.includes(indexName)) {
           newState.push(indexName);
         }
@@ -68,7 +68,7 @@ const allIds = handleActions(
     },
     [loadIndicesSuccess](state, action) {
       const { indices } = action.payload;
-      return indices.map(index => index.name);
+      return indices.map((index) => index.name);
     },
     [reloadIndicesSuccess](state) {
       // the set of IDs should never change when refreshing indexes.

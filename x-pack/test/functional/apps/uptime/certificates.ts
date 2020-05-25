@@ -14,7 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const es = getService('es');
 
-  describe('certificates', function() {
+  describe('certificates', function () {
     beforeEach(async () => {
       await uptime.goToRoot(true);
       await makeCheck({ es, tls: true });

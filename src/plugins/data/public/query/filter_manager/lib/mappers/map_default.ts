@@ -22,7 +22,7 @@ import { Filter, FILTERS } from '../../../../../common';
 
 export const mapDefault = (filter: Filter) => {
   const metaProperty = /(^\$|meta)/;
-  const key = find(keys(filter), item => !item.match(metaProperty));
+  const key = find(keys(filter), (item) => !item.match(metaProperty));
 
   if (key) {
     const type = FILTERS.CUSTOM;

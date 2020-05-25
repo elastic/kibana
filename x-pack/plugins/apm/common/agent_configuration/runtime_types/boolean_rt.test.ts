@@ -9,7 +9,7 @@ import { isRight } from 'fp-ts/lib/Either';
 
 describe('booleanRt', () => {
   describe('it should not accept', () => {
-    [undefined, null, '', 0, 'foo', true, false].map(input => {
+    [undefined, null, '', 0, 'foo', true, false].map((input) => {
       it(`${JSON.stringify(input)}`, () => {
         expect(isRight(booleanRt.decode(input))).toBe(false);
       });
@@ -17,7 +17,7 @@ describe('booleanRt', () => {
   });
 
   describe('it should accept', () => {
-    ['true', 'false'].map(input => {
+    ['true', 'false'].map((input) => {
       it(`${JSON.stringify(input)}`, () => {
         expect(isRight(booleanRt.decode(input))).toBe(true);
       });

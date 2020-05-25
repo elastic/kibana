@@ -30,8 +30,8 @@ function flattenEvents(children: ResolverNode[], events: ResolverEvent[] = []): 
   }, events);
 }
 
-export const resolverMiddlewareFactory: MiddlewareFactory = context => {
-  return api => next => async (action: ResolverAction) => {
+export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
+  return (api) => (next) => async (action: ResolverAction) => {
     next(action);
     if (action.type === 'userChangedSelectedEvent') {
       /**

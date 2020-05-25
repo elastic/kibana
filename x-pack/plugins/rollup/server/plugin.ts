@@ -126,7 +126,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       this.globalConfig$
         .pipe(first())
         .toPromise()
-        .then(globalConfig => {
+        .then((globalConfig) => {
           registerRollupUsageCollector(usageCollection, globalConfig.kibana.index);
         })
         .catch((e: any) => {

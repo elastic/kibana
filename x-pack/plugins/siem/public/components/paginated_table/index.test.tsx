@@ -52,7 +52,7 @@ describe('Paginated Table Component', () => {
             showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={updateActivePage}
-            updateLimitPagination={limit => updateLimitPagination({ limit })}
+            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
@@ -79,7 +79,7 @@ describe('Paginated Table Component', () => {
             showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={updateActivePage}
-            updateLimitPagination={limit => updateLimitPagination({ limit })}
+            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
@@ -108,7 +108,7 @@ describe('Paginated Table Component', () => {
             showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={updateActivePage}
-            updateLimitPagination={limit => updateLimitPagination({ limit })}
+            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
@@ -135,7 +135,7 @@ describe('Paginated Table Component', () => {
             showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={updateActivePage}
-            updateLimitPagination={limit => updateLimitPagination({ limit })}
+            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
@@ -172,15 +172,12 @@ describe('Paginated Table Component', () => {
             showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={updateActivePage}
-            updateLimitPagination={limit => updateLimitPagination({ limit })}
+            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
 
-      wrapper
-        .find('[data-test-subj="loadingMoreSizeRowPopover"] button')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="loadingMoreSizeRowPopover"] button').first().simulate('click');
       expect(wrapper.find('[data-test-subj="loadingMorePickSizeRow"]').exists()).toBeTruthy();
     });
 
@@ -203,7 +200,7 @@ describe('Paginated Table Component', () => {
             showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={updateActivePage}
-            updateLimitPagination={limit => updateLimitPagination({ limit })}
+            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
@@ -233,7 +230,7 @@ describe('Paginated Table Component', () => {
             sorting={{ direction: Direction.asc, field: 'node.host.name' }}
             totalCount={10}
             updateActivePage={updateActivePage}
-            updateLimitPagination={limit => updateLimitPagination({ limit })}
+            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
@@ -260,14 +257,11 @@ describe('Paginated Table Component', () => {
             showMorePagesIndicator={true}
             totalCount={DEFAULT_MAX_TABLE_QUERY_SIZE * 3}
             updateActivePage={updateActivePage}
-            updateLimitPagination={limit => updateLimitPagination({ limit })}
+            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
-      wrapper
-        .find('[data-test-subj="pagination-button-next"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="pagination-button-next"]').first().simulate('click');
       expect(updateActivePage.mock.calls.length).toEqual(0);
     });
 
@@ -290,7 +284,7 @@ describe('Paginated Table Component', () => {
             showMorePagesIndicator={true}
             totalCount={30}
             updateActivePage={updateActivePage}
-            updateLimitPagination={limit => updateLimitPagination({ limit })}
+            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
@@ -316,7 +310,7 @@ describe('Paginated Table Component', () => {
             showMorePagesIndicator={true}
             totalCount={1}
             updateActivePage={updateActivePage}
-            updateLimitPagination={limit => updateLimitPagination({ limit })}
+            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
@@ -344,14 +338,11 @@ describe('Paginated Table Component', () => {
             showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={updateActivePage}
-            updateLimitPagination={limit => updateLimitPagination({ limit })}
+            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
-      wrapper
-        .find('[data-test-subj="pagination-button-next"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="pagination-button-next"]').first().simulate('click');
       expect(updateActivePage.mock.calls[0][0]).toEqual(1);
     });
 
@@ -374,24 +365,15 @@ describe('Paginated Table Component', () => {
             showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={updateActivePage}
-            updateLimitPagination={limit => updateLimitPagination({ limit })}
+            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
-      wrapper
-        .find('[data-test-subj="pagination-button-next"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="pagination-button-next"]').first().simulate('click');
 
-      wrapper
-        .find('[data-test-subj="loadingMoreSizeRowPopover"] button')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="loadingMoreSizeRowPopover"] button').first().simulate('click');
 
-      wrapper
-        .find('[data-test-subj="loadingMorePickSizeRow"] button')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="loadingMorePickSizeRow"] button').first().simulate('click');
       expect(updateActivePage.mock.calls[1][0]).toEqual(0);
     });
 
@@ -412,7 +394,7 @@ describe('Paginated Table Component', () => {
         showMorePagesIndicator: true,
         totalCount: 10,
         updateActivePage,
-        updateLimitPagination: limit => updateLimitPagination({ limit }),
+        updateLimitPagination: (limit) => updateLimitPagination({ limit }),
       };
 
       // enzyme does not allow us to pass props to child of HOC
@@ -430,18 +412,12 @@ describe('Paginated Table Component', () => {
 
       const wrapper = mount(<ComponentWithContext {...ourProps} />);
       expect(
-        wrapper
-          .find('[data-test-subj="numberedPagination"]')
-          .first()
-          .prop('activePage')
+        wrapper.find('[data-test-subj="numberedPagination"]').first().prop('activePage')
       ).toEqual(3);
       wrapper.setProps({ activePage: 0 });
       wrapper.update();
       expect(
-        wrapper
-          .find('[data-test-subj="numberedPagination"]')
-          .first()
-          .prop('activePage')
+        wrapper.find('[data-test-subj="numberedPagination"]').first().prop('activePage')
       ).toEqual(0);
     });
 
@@ -464,20 +440,14 @@ describe('Paginated Table Component', () => {
             showMorePagesIndicator={true}
             totalCount={10}
             updateActivePage={updateActivePage}
-            updateLimitPagination={limit => updateLimitPagination({ limit })}
+            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
 
-      wrapper
-        .find('[data-test-subj="loadingMoreSizeRowPopover"] button')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="loadingMoreSizeRowPopover"] button').first().simulate('click');
 
-      wrapper
-        .find('[data-test-subj="loadingMorePickSizeRow"] button')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="loadingMorePickSizeRow"] button').first().simulate('click');
       expect(updateLimitPagination).toBeCalled();
     });
 
@@ -503,15 +473,12 @@ describe('Paginated Table Component', () => {
             sorting={{ direction: Direction.asc, field: 'node.host.name' }}
             totalCount={10}
             updateActivePage={updateActivePage}
-            updateLimitPagination={limit => updateLimitPagination({ limit })}
+            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
 
-      wrapper
-        .find('.euiTable thead tr th button')
-        .first()
-        .simulate('click');
+      wrapper.find('.euiTable thead tr th button').first().simulate('click');
 
       expect(mockOnChange).toBeCalled();
       expect(mockOnChange.mock.calls[0]).toEqual([

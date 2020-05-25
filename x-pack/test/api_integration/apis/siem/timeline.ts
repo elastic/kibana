@@ -51,7 +51,7 @@ const FILTER_VALUE = {
   },
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -80,7 +80,7 @@ export default function({ getService }: FtrProviderContext) {
             inspect: false,
           },
         })
-        .then(resp => {
+        .then((resp) => {
           const timeline = resp.data.source.Timeline;
           expect(timeline.edges.length).to.be(EDGE_LENGTH);
           expect(timeline.edges[0].node.data.length).to.be(DATA_COUNT);
@@ -110,7 +110,7 @@ export default function({ getService }: FtrProviderContext) {
             inspect: false,
           },
         })
-        .then(resp => {
+        .then((resp) => {
           const timeline = resp.data.source.Timeline;
           expect(timeline.edges.length).to.be(EDGE_LENGTH);
           expect(timeline.totalCount).to.be(TOTAL_COUNT);

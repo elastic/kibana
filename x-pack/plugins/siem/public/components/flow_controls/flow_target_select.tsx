@@ -60,7 +60,7 @@ const FlowTargetSelectComponent: React.FC<FlowTargetSelectProps> = ({
   <EuiSuperSelect
     options={
       selectedDirection
-        ? toggleTargetOptions(id, displayTextOverride).filter(option =>
+        ? toggleTargetOptions(id, displayTextOverride).filter((option) =>
             option.directions.includes(selectedDirection)
           )
         : toggleTargetOptions(id, displayTextOverride)

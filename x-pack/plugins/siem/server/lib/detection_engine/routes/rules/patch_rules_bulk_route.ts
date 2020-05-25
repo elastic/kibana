@@ -44,7 +44,7 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
       const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
-        request.body.map(async payloadRule => {
+        request.body.map(async (payloadRule) => {
           const {
             actions,
             description,

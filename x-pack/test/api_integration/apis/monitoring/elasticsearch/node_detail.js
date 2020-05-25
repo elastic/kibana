@@ -7,11 +7,11 @@
 import expect from '@kbn/expect';
 import nodeDetailFixture from './fixtures/node_detail';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('node detail', function() {
+  describe('node detail', function () {
     // TODO: https://github.com/elastic/stack-monitoring/issues/31
     this.tags(['skipCloud']);
 

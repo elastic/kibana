@@ -292,7 +292,7 @@ function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | null) =>
   const { ResizeObserver } = useContext(SideEffectContext);
   useEffect(() => {
     if (nodeRef.current !== null) {
-      const resizeObserver = new ResizeObserver(entries => {
+      const resizeObserver = new ResizeObserver((entries) => {
         if (nodeRef.current !== null && nodeRef.current === entries[0].target) {
           setRect(nodeRef.current.getBoundingClientRect());
         }

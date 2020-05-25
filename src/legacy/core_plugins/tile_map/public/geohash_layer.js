@@ -110,8 +110,8 @@ export class GeohashLayer extends KibanaMapLayer {
         );
     }
 
-    this._geohashMarkers.on('showTooltip', event => this.emit('showTooltip', event));
-    this._geohashMarkers.on('hideTooltip', event => this.emit('hideTooltip', event));
+    this._geohashMarkers.on('showTooltip', (event) => this.emit('showTooltip', event));
+    this._geohashMarkers.on('hideTooltip', (event) => this.emit('hideTooltip', event));
     this._leafletLayer = this._geohashMarkers.getLeafletLayer();
   }
 
