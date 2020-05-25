@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { StartServicesAccessor } from 'src/core/public';
 
+import { KibanaContextProvider } from '../../../kibana_react/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import {
   IndexPatternTableWithRouter,
@@ -33,6 +34,7 @@ import {
   CreateIndexPatternWizardWithRouter,
 } from '../components';
 import { IndexPatternManagementStartDependencies, IndexPatternManagementStart } from '../plugin';
+import { IndexPatternManagmentContext } from '../types';
 
 const readOnlyBadge = {
   text: i18n.translate('indexPatternManagement.indexPatterns.badge.readOnly.text', {
@@ -59,81 +61,41 @@ export async function mountManagementSection(
     chrome.setBadge(readOnlyBadge);
   }
 
+  const deps: IndexPatternManagmentContext = {
+    chrome,
+    application,
+    savedObjects,
+    uiSettings,
+    notifications,
+    overlays,
+    http,
+    docLinks,
+    data,
+    indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
+    setBreadcrumbs: params.setBreadcrumbs,
+  };
+
   ReactDOM.render(
-    <I18nProvider>
-      <HashRouter basename={params.basePath}>
-        <Switch>
-          <Route path={['/create']}>
-            <CreateIndexPatternWizardWithRouter
-              services={{
-                indexPatternCreation: (indexPatternManagementStart as IndexPatternManagementStart)
-                  .creation,
-                es: data.search.__LEGACY.esClient,
-                indexPatterns: data.indexPatterns,
-                savedObjectsClient: savedObjects.client,
-                uiSettings,
-                docTitle: chrome.docTitle,
-                openConfirm: overlays.openConfirm,
-                setBreadcrumbs: params.setBreadcrumbs,
-                prependBasePath: http.basePath.prepend,
-              }}
-            />
-          </Route>
-          <Route path={['/patterns/:id/field/:fieldName', '/patterns/:id/create-field/']}>
-            <CreateEditFieldContainer
-              getIndexPattern={data.indexPatterns.get}
-              fieldFormatEditors={
-                (indexPatternManagementStart as IndexPatternManagementStart).fieldFormatEditors
-              }
-              getConfig={uiSettings}
-              services={{
-                http,
-                notifications,
-                uiSettings,
-                docTitle: chrome.docTitle,
-                docLinksScriptedFields: docLinks.links.scriptedFields,
-                toasts: notifications.toasts,
-                fieldFormats: data.fieldFormats,
-                SearchBar: data.ui.SearchBar,
-                indexPatterns: data.indexPatterns,
-                setBreadcrumbs: params.setBreadcrumbs,
-              }}
-            />
-          </Route>
-          <Route path={['/patterns/:id']}>
-            <EditIndexPatternContainer
-              getIndexPattern={data.indexPatterns.get}
-              config={uiSettings}
-              services={{
-                notifications,
-                docTitle: chrome.docTitle,
-                overlays,
-                savedObjectsClient: savedObjects.client,
-                setBreadcrumbs: params.setBreadcrumbs,
-                indexPatternManagement: indexPatternManagementStart as IndexPatternManagementStart,
-                painlessDocLink: docLinks.links.scriptedFields.painless,
-              }}
-            />
-          </Route>
-          <Route path={['/']}>
-            <IndexPatternTableWithRouter
-              getIndexPatternCreationOptions={
-                (indexPatternManagementStart as IndexPatternManagementStart).creation
-                  .getIndexPatternCreationOptions
-              }
-              canSave={canSave}
-              services={{
-                savedObjectsClient: savedObjects.client,
-                uiSettings,
-                docTitle: chrome.docTitle,
-                setBreadcrumbs: params.setBreadcrumbs,
-                indexPatternManagement: indexPatternManagementStart as IndexPatternManagementStart,
-              }}
-            />
-          </Route>
-        </Switch>
-      </HashRouter>
-    </I18nProvider>,
+    <KibanaContextProvider services={deps}>
+      <I18nProvider>
+        <HashRouter basename={params.basePath}>
+          <Switch>
+            <Route path={['/create']}>
+              <CreateIndexPatternWizardWithRouter />
+            </Route>
+            <Route path={['/patterns/:id/field/:fieldName', '/patterns/:id/create-field/']}>
+              <CreateEditFieldContainer />
+            </Route>
+            <Route path={['/patterns/:id']}>
+              <EditIndexPatternContainer />
+            </Route>
+            <Route path={['/']}>
+              <IndexPatternTableWithRouter canSave={canSave} />
+            </Route>
+          </Switch>
+        </HashRouter>
+      </I18nProvider>
+    </KibanaContextProvider>,
     params.element
   );
 
