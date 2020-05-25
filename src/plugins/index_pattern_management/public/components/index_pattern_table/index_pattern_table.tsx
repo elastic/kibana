@@ -117,7 +117,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   setBreadcrumbs(getListBreadcrumbs());
 
   useEffect(() => {
-    (async function() {
+    (async function () {
       const options = await indexPatternManagementStart.creation.getIndexPatternCreationOptions(
         history.push
       );

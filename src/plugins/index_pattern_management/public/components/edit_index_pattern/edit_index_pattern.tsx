@@ -113,14 +113,12 @@ export const EditIndexPattern = withRouter(
     }, [uiSettings, indexPattern.id]);
 
     const refreshFields = () => {
-      overlays
-        .openConfirm(confirmMessage, confirmModalOptionsRefresh)
-        .then(async (isConfirmed) => {
-          if (isConfirmed) {
-            await indexPattern.init(true);
-            setFields(indexPattern.getNonScriptedFields());
-          }
-        });
+      overlays.openConfirm(confirmMessage, confirmModalOptionsRefresh).then(async (isConfirmed) => {
+        if (isConfirmed) {
+          await indexPattern.init(true);
+          setFields(indexPattern.getNonScriptedFields());
+        }
+      });
     };
 
     const removePattern = () => {
