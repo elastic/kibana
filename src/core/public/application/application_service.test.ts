@@ -928,7 +928,7 @@ describe('#start()', () => {
       service.setup(setupDeps);
       const { navigateToUrl } = await service.start(startDeps);
 
-      await navigateToUrl('/not-an-app-path');
+      await navigateToUrl('/an-app-path');
 
       expect(MockHistory.push).toHaveBeenCalledWith('/app/foo/some-path', undefined);
       expect(setupDeps.redirectTo).not.toHaveBeenCalled();
