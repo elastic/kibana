@@ -96,7 +96,7 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
         embeddableInput={this.getInput$()}
         services={this.services}
         refresh={this.reload$.asObservable()}
-        onOutputChange={output => this.updateOutput(output)}
+        onOutputChange={(output) => this.updateOutput(output)}
       />,
       node
     );

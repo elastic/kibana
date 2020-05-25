@@ -52,14 +52,14 @@ const createArchive = (params = {}) => {
   };
 };
 
-const mockFetch = mock =>
+const mockFetch = (mock) =>
   fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(mock))));
 
 const previousEnvVars = {};
 const ENV_VARS_TO_RESET = ['ES_SNAPSHOT_MANIFEST', 'KBN_ES_SNAPSHOT_USE_UNVERIFIED'];
 
 beforeAll(() => {
-  ENV_VARS_TO_RESET.forEach(key => {
+  ENV_VARS_TO_RESET.forEach((key) => {
     if (key in process.env) {
       previousEnvVars[key] = process.env[key];
       delete process.env[key];
@@ -68,7 +68,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  Object.keys(previousEnvVars).forEach(key => {
+  Object.keys(previousEnvVars).forEach((key) => {
     process.env[key] = previousEnvVars[key];
   });
 });

@@ -58,7 +58,7 @@ export class BulkUploader {
       this._log.info(`Detected direct connection to monitoring cluster`);
       this._hasDirectConnectionToMonitoringCluster = true;
       this._cluster = elasticsearch.createClient('monitoring-direct', config.elasticsearch);
-      elasticsearch.adminClient.callAsInternalUser('info').then(data => {
+      elasticsearch.adminClient.callAsInternalUser('info').then((data) => {
         this._productionClusterUuid = get(data, 'cluster_uuid');
       });
     }
@@ -75,7 +75,7 @@ export class BulkUploader {
     const successfulUploadInLastDay =
       this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
 
-    return usageCollection.getFilteredCollectorSet(c => {
+    return usageCollection.getFilteredCollectorSet((c) => {
       // this is internal bulk upload, so filter out API-only collectors
       if (c.ignoreForInternalUploader) {
         return false;
@@ -272,7 +272,7 @@ export class BulkUploader {
   }
 
   static checkPayloadTypesUnique(payload) {
-    const ids = payload.map(item => item[0].index._type);
+    const ids = payload.map((item) => item[0].index._type);
     const uniques = uniq(ids);
     if (ids.length !== uniques.length) {
       throw new Error('Duplicate collector type identifiers found in payload! ' + ids.join(','));

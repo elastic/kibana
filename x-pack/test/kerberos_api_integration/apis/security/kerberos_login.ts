@@ -13,7 +13,7 @@ import {
   getSPNEGOToken,
 } from '../../fixtures/kerberos_tools';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const spnegoToken = getSPNEGOToken();
 
   const supertest = getService('supertestWithoutAuth');
@@ -50,10 +50,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('should reject API requests if client is not authenticated', async () => {
-      await supertest
-        .get('/internal/security/me')
-        .set('kbn-xsrf', 'xxx')
-        .expect(401);
+      await supertest.get('/internal/security/me').set('kbn-xsrf', 'xxx').expect(401);
     });
 
     it('does not prevent basic login', async () => {
@@ -120,7 +117,7 @@ export default function({ getService }: FtrProviderContext) {
 
         const isAnonymousAccessEnabled = (config.get(
           'esTestCluster.serverArgs'
-        ) as string[]).some(setting => setting.startsWith('xpack.security.authc.anonymous'));
+        ) as string[]).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
 
         // `superuser_anonymous` role is derived from the enabled anonymous access.
         const expectedUserRoles = isAnonymousAccessEnabled
@@ -297,7 +294,7 @@ export default function({ getService }: FtrProviderContext) {
         checkCookieIsSet(sessionCookie);
       });
 
-      it('AJAX call should refresh token and update existing cookie', async function() {
+      it('AJAX call should refresh token and update existing cookie', async function () {
         this.timeout(40000);
 
         // Access token expiration is set to 15s for API integration tests.
@@ -328,7 +325,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(apiResponse.headers['www-authenticate']).to.be(undefined);
       });
 
-      it('non-AJAX call should refresh token and update existing cookie', async function() {
+      it('non-AJAX call should refresh token and update existing cookie', async function () {
         this.timeout(40000);
 
         // Access token expiration is set to 15s for API integration tests.
@@ -382,12 +379,10 @@ export default function({ getService }: FtrProviderContext) {
           q: 'doc_type:token',
           refresh: true,
         });
-        expect(esResponse)
-          .to.have.property('deleted')
-          .greaterThan(0);
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
       });
 
-      it('AJAX call should initiate SPNEGO and clear existing cookie', async function() {
+      it('AJAX call should initiate SPNEGO and clear existing cookie', async function () {
         const apiResponse = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
@@ -401,7 +396,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(apiResponse.headers['www-authenticate']).to.be('Negotiate');
       });
 
-      it('non-AJAX call should initiate SPNEGO and clear existing cookie', async function() {
+      it('non-AJAX call should initiate SPNEGO and clear existing cookie', async function () {
         const nonAjaxResponse = await supertest
           .get('/')
           .set('Cookie', sessionCookie.cookieString())

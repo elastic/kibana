@@ -55,13 +55,13 @@ const ListItem = styled.button`
   height: ${px(units.double)};
   align-items: center;
   display: flex;
-  background: ${props => (props.selected ? theme.euiColorLightestShade : 'initial')};
+  background: ${(props) => (props.selected ? theme.euiColorLightestShade : 'initial')};
   cursor: pointer;
   border-radius: ${px(units.quarter)};
 
   ${Description} {
     p span {
-      background: ${props =>
+      background: ${(props) =>
         props.selected ? theme.euiColorEmptyShade : theme.euiColorLightestShade};
     }
     @media only screen and (max-width: ${theme.euiBreakpoints.s}) {
@@ -73,8 +73,8 @@ const ListItem = styled.button`
 
 const Icon = styled.div`
   flex: 0 0 ${px(units.double)};
-  background: ${props => tint(0.1, getIconColor(props.type))};
-  color: ${props => getIconColor(props.type)};
+  background: ${(props) => tint(0.1, getIconColor(props.type))};
+  color: ${(props) => getIconColor(props.type)};
   width: 100%;
   height: 100%;
   text-align: center;

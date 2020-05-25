@@ -87,7 +87,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
     describe('Jira - Action Creation', () => {
       it('should return 200 when creating a jira action successfully', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira action',
@@ -113,7 +113,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
         });
 
         const { body: fetchedAction } = await supertest
-          .get(`/api/action/${createdAction.id}`)
+          .get(`/api/actions/action/${createdAction.id}`)
           .expect(200);
 
         expect(fetchedAction).to.eql({
@@ -131,7 +131,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a jira action with no apiUrl', async () => {
         await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira action',
@@ -151,7 +151,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a jira action with no projectKey', async () => {
         await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira action',
@@ -171,7 +171,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a jira action with a non whitelisted apiUrl', async () => {
         await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira action',
@@ -196,7 +196,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a jira action without secrets', async () => {
         await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira action',
@@ -220,7 +220,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a jira action without casesConfiguration', async () => {
         await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira action',
@@ -244,7 +244,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a jira action with empty mapping', async () => {
         await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira action',
@@ -269,7 +269,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a jira action with wrong actionType', async () => {
         await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira action',
@@ -297,7 +297,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
       let simulatedActionId: string;
       before(async () => {
         const { body } = await supertest
-          .post('/api/action')
+          .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A jira simulator',
@@ -315,7 +315,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
       describe('Validation', () => {
         it('should handle failing with a simulated success without action', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {},
@@ -332,7 +332,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without unsupported action', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: { subAction: 'non-supported' },
@@ -350,7 +350,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without subActionParams', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: { subAction: 'pushToService' },
@@ -368,7 +368,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without caseId', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: { subAction: 'pushToService', subActionParams: {} },
@@ -386,7 +386,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without title', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -409,7 +409,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without createdAt', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -433,7 +433,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without commentId', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -461,7 +461,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without comment message', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -489,7 +489,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without comment.createdAt', async () => {
           await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -519,7 +519,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
       describe('Execution', () => {
         it('should handle creating an incident without comments', async () => {
           const { body } = await supertest
-            .post(`/api/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {

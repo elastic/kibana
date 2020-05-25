@@ -6,7 +6,7 @@
 const path = require('path');
 process.env.NODE_PATH = path.resolve(__dirname, '..', '..', '..', 'node_modules');
 
-module.exports = function(wallaby) {
+module.exports = function (wallaby) {
   return {
     debug: true,
     files: [
@@ -37,7 +37,7 @@ module.exports = function(wallaby) {
       }),
     },
 
-    setup: wallaby => {
+    setup: (wallaby) => {
       const path = require('path');
 
       const kibanaDirectory = path.resolve(wallaby.localProjectDir, '..', '..', '..');

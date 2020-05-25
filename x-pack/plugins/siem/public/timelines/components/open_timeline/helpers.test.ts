@@ -36,7 +36,7 @@ import { KueryFilterQueryKind } from '../../../common/store/model';
 import { Note } from '../../../common/lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/store/inputs/actions');
 jest.mock('../../store/timeline/actions');
@@ -299,8 +299,9 @@ describe('helpers', () => {
           columnId: '@timestamp',
           sortDirection: 'desc',
         },
+        status: TimelineStatus.draft,
         title: '',
-        timelineType: TimelineType.draft,
+        timelineType: TimelineType.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
@@ -396,8 +397,9 @@ describe('helpers', () => {
           columnId: '@timestamp',
           sortDirection: 'desc',
         },
+        status: TimelineStatus.draft,
         title: '',
-        timelineType: TimelineType.draft,
+        timelineType: TimelineType.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
@@ -408,7 +410,7 @@ describe('helpers', () => {
     test('should merge columns when event.action is deleted without two extra column names of user.name', () => {
       const timeline = {
         savedObjectId: 'savedObject-1',
-        columns: timelineDefaults.columns.filter(column => column.id !== 'event.action'),
+        columns: timelineDefaults.columns.filter((column) => column.id !== 'event.action'),
         version: '1',
       };
 
@@ -517,7 +519,7 @@ describe('helpers', () => {
         },
         loadingEventIds: [],
         title: '',
-        timelineType: TimelineType.draft,
+        timelineType: TimelineType.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         noteIds: [],
@@ -535,6 +537,7 @@ describe('helpers', () => {
           columnId: '@timestamp',
           sortDirection: 'desc',
         },
+        status: TimelineStatus.draft,
         width: 1100,
         id: 'savedObject-1',
       });
@@ -543,7 +546,7 @@ describe('helpers', () => {
     test('should merge filters object back with json object', () => {
       const timeline = {
         savedObjectId: 'savedObject-1',
-        columns: timelineDefaults.columns.filter(column => column.id !== 'event.action'),
+        columns: timelineDefaults.columns.filter((column) => column.id !== 'event.action'),
         filters: [
           {
             meta: {
@@ -685,7 +688,7 @@ describe('helpers', () => {
         },
         loadingEventIds: [],
         title: '',
-        timelineType: TimelineType.draft,
+        timelineType: TimelineType.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         noteIds: [],
@@ -703,6 +706,7 @@ describe('helpers', () => {
           columnId: '@timestamp',
           sortDirection: 'desc',
         },
+        status: TimelineStatus.draft,
         width: 1100,
         id: 'savedObject-1',
       });
@@ -745,7 +749,7 @@ describe('helpers', () => {
       timelineDispatch = dispatchUpdateTimeline(dispatch);
     });
 
-    afterEach(function() {
+    afterEach(function () {
       clock.restore();
     });
 

@@ -34,12 +34,12 @@ export function KbnAggTableGroup(RecursionHelper) {
       percentageCol: '=',
       filter: '=',
     },
-    compile: function($el) {
+    compile: function ($el) {
       // Use the compile function from the RecursionHelper,
       // And return the linking function(s) which it returns
       return RecursionHelper.compile($el, {
-        post: function($scope) {
-          $scope.$watch('group', function(group) {
+        post: function ($scope) {
+          $scope.$watch('group', function (group) {
             // clear the previous "state"
             $scope.rows = $scope.columns = false;
 

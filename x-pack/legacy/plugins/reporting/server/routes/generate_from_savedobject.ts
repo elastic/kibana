@@ -6,13 +6,19 @@
 
 import { Legacy } from 'kibana';
 import { get } from 'lodash';
+import { ReportingCore } from '../';
 import { API_BASE_GENERATE_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
-import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
-import { ReportingCore, ReportingSetupDeps } from '../types';
+import { LevelLogger as Logger } from '../lib';
+import { ReportingSetupDeps, ServerFacade } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
 import { getRouteOptionsCsv } from './lib/route_config_factories';
-import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
+import {
+  HandlerErrorFunction,
+  HandlerFunction,
+  QueuedJobPayload,
+  ReportingResponseToolkit,
+} from './types';
 
 /*
  * This function registers API Endpoints for queuing Reporting jobs. The API inputs are:

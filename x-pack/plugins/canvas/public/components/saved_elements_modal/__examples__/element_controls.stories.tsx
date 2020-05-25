@@ -10,7 +10,7 @@ import { action } from '@storybook/addon-actions';
 import { ElementControls } from '../element_controls';
 
 storiesOf('components/SavedElementsModal/ElementControls', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div
       style={{
         width: '50px',

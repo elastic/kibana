@@ -51,7 +51,7 @@ export const LoadingOverlay = ({ isLoading, percentageLoaded }: Props) => (
         <EuiText size="s" textAlign="center">
           {i18n.translate('xpack.apm.loadingServiceMap', {
             defaultMessage:
-              'Loading service map... This might take a short while.'
+              'Loading service map... This might take a short while.',
           })}
         </EuiText>
       </Overlay>

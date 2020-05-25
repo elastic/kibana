@@ -14,7 +14,7 @@ export class PipelineService {
   }
 
   loadPipeline(id) {
-    return this.http.get(`${ROUTES.API_ROOT}/pipeline/${id}`).then(response => {
+    return this.http.get(`${ROUTES.API_ROOT}/pipeline/${id}`).then((response) => {
       return Pipeline.fromUpstreamJSON(response);
     });
   }
@@ -24,7 +24,7 @@ export class PipelineService {
       .put(`${ROUTES.API_ROOT}/pipeline/${pipelineModel.id}`, {
         body: JSON.stringify(pipelineModel.upstreamJSON),
       })
-      .catch(e => {
+      .catch((e) => {
         throw e.message;
       });
   }
@@ -33,7 +33,7 @@ export class PipelineService {
     return this.http
       .delete(`${ROUTES.API_ROOT}/pipeline/${id}`)
       .then(() => this.pipelinesService.addToRecentlyDeleted(id))
-      .catch(e => {
+      .catch((e) => {
         throw e.message;
       });
   }

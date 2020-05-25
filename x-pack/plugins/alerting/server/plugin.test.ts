@@ -81,6 +81,7 @@ describe('Alerting Plugin', () => {
               execute: jest.fn(),
               getActionsClientWithRequest: jest.fn(),
             },
+            encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           } as unknown) as AlertingPluginsStart
         );
 
@@ -125,6 +126,7 @@ describe('Alerting Plugin', () => {
               getActionsClientWithRequest: jest.fn(),
             },
             spaces: () => null,
+            encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           } as unknown) as AlertingPluginsStart
         );
 

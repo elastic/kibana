@@ -16,15 +16,15 @@ function getMockContext(config: Record<string, unknown>) {
     core: {
       savedObjects: {
         client: {
-          create: jest.fn()
-        }
-      }
-    }
+          create: jest.fn(),
+        },
+      },
+    },
   } as unknown) as APMRequestHandlerContext;
 }
 function getMockSavedObjectsClient() {
   return ({
-    create: jest.fn()
+    create: jest.fn(),
   } as unknown) as InternalSavedObjectsClient;
 }
 
@@ -32,7 +32,7 @@ describe('createStaticIndexPattern', () => {
   it(`should not create index pattern if 'xpack.apm.autocreateApmIndexPattern=false'`, async () => {
     const setup = {} as Setup;
     const context = getMockContext({
-      'xpack.apm.autocreateApmIndexPattern': false
+      'xpack.apm.autocreateApmIndexPattern': false,
     });
     const savedObjectsClient = getMockSavedObjectsClient();
     await createStaticIndexPattern(setup, context, savedObjectsClient);
@@ -42,7 +42,7 @@ describe('createStaticIndexPattern', () => {
   it(`should not create index pattern if no APM data is found`, async () => {
     const setup = {} as Setup;
     const context = getMockContext({
-      'xpack.apm.autocreateApmIndexPattern': true
+      'xpack.apm.autocreateApmIndexPattern': true,
     });
 
     // does not have APM data
@@ -59,7 +59,7 @@ describe('createStaticIndexPattern', () => {
   it(`should create index pattern`, async () => {
     const setup = {} as Setup;
     const context = getMockContext({
-      'xpack.apm.autocreateApmIndexPattern': true
+      'xpack.apm.autocreateApmIndexPattern': true,
     });
 
     // does have APM data

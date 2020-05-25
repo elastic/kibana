@@ -82,7 +82,7 @@ const AppRoot = styled(
         /**
          * Either set the embeddable in state, or cancel and restart this process.
          */
-        Promise.race([cleanupPromise, embeddablePromise]).then(value => {
+        Promise.race([cleanupPromise, embeddablePromise]).then((value) => {
           setEmbeddable(value);
         });
 
