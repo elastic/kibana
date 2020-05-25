@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const globalNav = getService('globalNav');
@@ -82,7 +82,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map(link => link.text)).to.eql(['Discover', 'Stack Management']);
+        expect(navLinks.map((link) => link.text)).to.eql(['Discover', 'Stack Management']);
       });
 
       it('shows save button', async () => {
@@ -168,7 +168,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows discover navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.eql(['Discover', 'Stack Management']);
       });
 
@@ -259,7 +259,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows discover navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.eql(['Discover', 'Stack Management']);
       });
 

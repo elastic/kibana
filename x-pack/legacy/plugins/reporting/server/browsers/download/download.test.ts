@@ -43,9 +43,7 @@ test('downloads the url to the path', async () => {
 
 test('returns the md5 hex hash of the http body', async () => {
   const BODY = 'foobar';
-  const HASH = createHash('md5')
-    .update(BODY)
-    .digest('hex');
+  const HASH = createHash('md5').update(BODY).digest('hex');
   request.mockImplementationOnce(async () => {
     return {
       data: new ReadableOf(BODY),

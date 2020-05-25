@@ -16,10 +16,10 @@ export const deleteItemIdx = (data: TimelineNonEcsData[], idx: number) => [
 ];
 
 export const findItem = (data: TimelineNonEcsData[], field: string): number =>
-  data.findIndex(d => d.field === field);
+  data.findIndex((d) => d.field === field);
 
 export const getValues = (field: string, data: TimelineNonEcsData[]): string[] | undefined => {
-  const obj = data.find(d => d.field === field);
+  const obj = data.find((d) => d.field === field);
   if (obj != null && obj.value != null) {
     return obj.value;
   }

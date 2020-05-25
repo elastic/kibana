@@ -58,12 +58,12 @@ export class Join extends Component {
     }
 
     this.setState({
-      rightFields: indexPattern.fields.filter(field => !indexPatterns.isNestedField(field)),
+      rightFields: indexPattern.fields.filter((field) => !indexPatterns.isNestedField(field)),
       indexPattern,
     });
   }
 
-  _onLeftFieldChange = leftField => {
+  _onLeftFieldChange = (leftField) => {
     this.props.onChange({
       leftField: leftField,
       right: this.props.join.right,
@@ -86,7 +86,7 @@ export class Join extends Component {
     });
   };
 
-  _onRightFieldChange = term => {
+  _onRightFieldChange = (term) => {
     this.props.onChange({
       leftField: this.props.join.leftField,
       right: {
@@ -96,7 +96,7 @@ export class Join extends Component {
     });
   };
 
-  _onMetricsChange = metrics => {
+  _onMetricsChange = (metrics) => {
     this.props.onChange({
       leftField: this.props.join.leftField,
       right: {
@@ -106,7 +106,7 @@ export class Join extends Component {
     });
   };
 
-  _onWhereQueryChange = whereQuery => {
+  _onWhereQueryChange = (whereQuery) => {
     this.props.onChange({
       leftField: this.props.join.leftField,
       right: {
@@ -116,7 +116,7 @@ export class Join extends Component {
     });
   };
 
-  _onApplyGlobalQueryChange = applyGlobalQuery => {
+  _onApplyGlobalQueryChange = (applyGlobalQuery) => {
     this.props.onChange({
       leftField: this.props.join.leftField,
       right: {

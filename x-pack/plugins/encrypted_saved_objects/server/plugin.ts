@@ -14,7 +14,7 @@ import {
   EncryptionError,
 } from './crypto';
 import { EncryptedSavedObjectsAuditLogger } from './audit';
-import { SavedObjectsSetup, setupSavedObjects } from './saved_objects';
+import { setupSavedObjects, ClientInstanciator } from './saved_objects';
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
@@ -28,7 +28,7 @@ export interface EncryptedSavedObjectsPluginSetup {
 
 export interface EncryptedSavedObjectsPluginStart {
   isEncryptionError: (error: Error) => boolean;
-  getClient: SavedObjectsSetup;
+  getClient: ClientInstanciator;
 }
 
 /**
@@ -46,7 +46,7 @@ export interface LegacyAPI {
  */
 export class Plugin {
   private readonly logger: Logger;
-  private savedObjectsSetup!: SavedObjectsSetup;
+  private savedObjectsSetup!: ClientInstanciator;
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
@@ -95,7 +95,7 @@ export class Plugin {
     this.logger.debug('Starting plugin');
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
-      getClient: (includedHiddenTypes?: string[]) => this.savedObjectsSetup(includedHiddenTypes),
+      getClient: (options = {}) => this.savedObjectsSetup(options),
     };
   }
 

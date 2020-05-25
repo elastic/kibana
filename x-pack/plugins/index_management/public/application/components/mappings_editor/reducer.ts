@@ -180,7 +180,7 @@ const updateAliasesReferences = (
    */
   if (previousTargetPath && updatedAliases[previousTargetPath]) {
     updatedAliases[previousTargetPath] = updatedAliases[previousTargetPath].filter(
-      id => id !== field.id
+      (id) => id !== field.id
     );
   }
 
@@ -217,7 +217,7 @@ const removeFieldFromMap = (fieldId: string, fields: NormalizedFields): Normaliz
 
     if (parentField) {
       // If the parent exist, update its childFields Array
-      const childFields = parentField.childFields!.filter(childId => childId !== fieldId);
+      const childFields = parentField.childFields!.filter((childId) => childId !== fieldId);
 
       updatedById[parentId] = {
         ...parentField,
@@ -233,7 +233,7 @@ const removeFieldFromMap = (fieldId: string, fields: NormalizedFields): Normaliz
   } else {
     // If there are no parentId it means that we have deleted a top level field
     // We need to update the root level fields Array
-    rootLevelFields = rootLevelFields.filter(childId => childId !== fieldId);
+    rootLevelFields = rootLevelFields.filter((childId) => childId !== fieldId);
   }
 
   let updatedFields = {
@@ -410,7 +410,7 @@ export const reducer = (state: State, action: Action): State => {
         const allChildFields = getAllChildFields(field, state.fields.byId);
 
         // Remove all of its children
-        allChildFields!.forEach(childField => {
+        allChildFields!.forEach((childField) => {
           updatedFields = removeFieldFromMap(childField.id, updatedFields);
         });
       }
@@ -423,7 +423,7 @@ export const reducer = (state: State, action: Action): State => {
         const targetId = field.source.path as string;
         updatedFields.aliases = {
           ...updatedFields.aliases,
-          [targetId]: updatedFields.aliases[targetId].filter(aliasId => aliasId !== id),
+          [targetId]: updatedFields.aliases[targetId].filter((aliasId) => aliasId !== id),
         };
       }
 
@@ -491,7 +491,7 @@ export const reducer = (state: State, action: Action): State => {
             ...updatedFields.aliases,
             [previousField.source.path as string]: updatedFields.aliases[
               previousField.source.path as string
-            ].filter(aliasId => aliasId !== fieldToEdit),
+            ].filter((aliasId) => aliasId !== fieldToEdit),
           };
         } else {
           const nextTypeCanHaveAlias = !PARAMETERS_DEFINITION.path.targetTypesNotAllowed.includes(
@@ -499,7 +499,7 @@ export const reducer = (state: State, action: Action): State => {
           );
 
           if (!nextTypeCanHaveAlias && updatedFields.aliases[fieldToEdit]) {
-            updatedFields.aliases[fieldToEdit].forEach(aliasId => {
+            updatedFields.aliases[fieldToEdit].forEach((aliasId) => {
               updatedFields = removeFieldFromMap(aliasId, updatedFields);
             });
             delete updatedFields.aliases[fieldToEdit];
@@ -508,7 +508,7 @@ export const reducer = (state: State, action: Action): State => {
 
         if (shouldDeleteChildFields && previousField.childFields) {
           const allChildFields = getAllChildFields(previousField, updatedFields.byId);
-          allChildFields!.forEach(childField => {
+          allChildFields!.forEach((childField) => {
             updatedFields = removeFieldFromMap(childField.id, updatedFields);
           });
         }

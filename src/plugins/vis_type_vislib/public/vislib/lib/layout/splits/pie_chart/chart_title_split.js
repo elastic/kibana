@@ -28,14 +28,14 @@ import d3 from 'd3';
  */
 
 export function chartTitleSplit(selection, parent) {
-  selection.each(function(data) {
+  selection.each(function (data) {
     const div = d3.select(this);
 
     if (!data.slices) {
       div
         .selectAll('.chart-title')
         .append('div')
-        .data(function(d) {
+        .data(function (d) {
           return d.rows ? d.rows : d.columns;
         })
         .enter()
@@ -43,13 +43,9 @@ export function chartTitleSplit(selection, parent) {
         .attr('class', 'chart-title');
 
       if (data.rows) {
-        d3.select(parent)
-          .select('.visAxis__splitTitles--x')
-          .remove();
+        d3.select(parent).select('.visAxis__splitTitles--x').remove();
       } else {
-        d3.select(parent)
-          .select('.visAxis__splitTitles--y')
-          .remove();
+        d3.select(parent).select('.visAxis__splitTitles--y').remove();
       }
 
       return div;
