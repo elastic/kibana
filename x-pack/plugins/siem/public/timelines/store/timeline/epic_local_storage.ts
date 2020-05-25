@@ -90,8 +90,8 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
     ),
     action$.pipe(
       ofType(removeColumn.type),
-      filter(action => isPageTimeline(get('payload.id', action))),
-      tap(action => {
+      filter((action) => isPageTimeline(get('payload.id', action))),
+      tap((action) => {
         const storageTimelines = getAllTimelinesFromLocalStorage();
         const timelineId: string = get('payload.id', action);
         const columnId: string = get('payload.columnId', action);
@@ -107,8 +107,8 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
     ),
     action$.pipe(
       ofType(upsertColumn.type),
-      filter(action => isPageTimeline(get('payload.id', action))),
-      tap(action => {
+      filter((action) => isPageTimeline(get('payload.id', action))),
+      tap((action) => {
         const storageTimelines = getAllTimelinesFromLocalStorage();
         const timelineId: string = get('payload.id', action);
         const column: ColumnHeaderOptions = get('payload.column', action);
@@ -126,8 +126,8 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
     ),
     action$.pipe(
       ofType(applyDeltaToColumnWidth.type),
-      filter(action => isPageTimeline(get('payload.id', action))),
-      tap(action => {
+      filter((action) => isPageTimeline(get('payload.id', action))),
+      tap((action) => {
         const storageTimelines = getAllTimelinesFromLocalStorage();
         const timelineId: string = get('payload.id', action);
         const columnId: string = get('payload.columnId', action);
@@ -145,8 +145,8 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
     ),
     action$.pipe(
       ofType(updateColumns.type),
-      filter(action => isPageTimeline(get('payload.id', action))),
-      tap(action => {
+      filter((action) => isPageTimeline(get('payload.id', action))),
+      tap((action) => {
         const storageTimelines = getAllTimelinesFromLocalStorage();
         const timelineId: string = get('payload.id', action);
         const columns: ColumnHeaderOptions[] = get('payload.columns', action);
@@ -162,8 +162,8 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
     ),
     action$.pipe(
       ofType(updateItemsPerPage.type),
-      filter(action => isPageTimeline(get('payload.id', action))),
-      tap(action => {
+      filter((action) => isPageTimeline(get('payload.id', action))),
+      tap((action) => {
         const storageTimelines = getAllTimelinesFromLocalStorage();
         const timelineId: string = get('payload.id', action);
         const itemsPerPage: number = get('payload.itemsPerPage', action);
@@ -178,8 +178,8 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
     ),
     action$.pipe(
       ofType(updateSort.type),
-      filter(action => isPageTimeline(get('payload.id', action))),
-      tap(action => {
+      filter((action) => isPageTimeline(get('payload.id', action))),
+      tap((action) => {
         const storageTimelines = getAllTimelinesFromLocalStorage();
         const timelineId: string = get('payload.id', action);
         const sort: Sort = get('payload.sort', action);
