@@ -7,21 +7,30 @@
 import { i18n } from '@kbn/i18n';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { ReportingCore } from '../../../server';
-import { cryptoFactory } from '../../../server/lib';
+import { cryptoFactory, LevelLogger } from '../../../server/lib';
 import {
   ExecuteJobFactory,
-  ImmediateExecuteFn,
   JobDocOutput,
-  Logger,
+  JobDocPayload,
   RequestFacade,
-} from '../../../types';
+} from '../../../server/types';
 import { CsvResultFromSearch } from '../../csv/types';
 import { FakeRequest, JobDocPayloadPanelCsv, JobParamsPanelCsv, SearchPanel } from '../types';
 import { createGenerateCsv } from './lib';
 
+/*
+ * ImmediateExecuteFn receives the job doc payload because the payload was
+ * generated in the CreateFn
+ */
+export type ImmediateExecuteFn<JobParamsType> = (
+  jobId: null,
+  job: JobDocPayload<JobParamsType>,
+  request: RequestFacade
+) => Promise<JobDocOutput>;
+
 export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
   JobParamsPanelCsv
->> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
+>> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: LevelLogger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);

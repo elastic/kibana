@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Logger,
-  SavedObjectsBaseOptions,
-  PluginInitializerContext,
-  CoreSetup,
-} from 'src/core/server';
+import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { first } from 'rxjs/operators';
 import { SecurityPluginSetup } from '../../security/server';
 import { createConfig$ } from './config';
@@ -19,7 +14,7 @@ import {
   EncryptionError,
 } from './crypto';
 import { EncryptedSavedObjectsAuditLogger } from './audit';
-import { SavedObjectsSetup, setupSavedObjects } from './saved_objects';
+import { setupSavedObjects, ClientInstanciator } from './saved_objects';
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
@@ -31,8 +26,9 @@ export interface EncryptedSavedObjectsPluginSetup {
   usingEphemeralEncryptionKey: boolean;
 }
 
-export interface EncryptedSavedObjectsPluginStart extends SavedObjectsSetup {
+export interface EncryptedSavedObjectsPluginStart {
   isEncryptionError: (error: Error) => boolean;
+  getClient: ClientInstanciator;
 }
 
 /**
@@ -50,7 +46,7 @@ export interface LegacyAPI {
  */
 export class Plugin {
   private readonly logger: Logger;
-  private savedObjectsSetup!: SavedObjectsSetup;
+  private savedObjectsSetup!: ClientInstanciator;
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
@@ -97,12 +93,9 @@ export class Plugin {
 
   public start() {
     this.logger.debug('Starting plugin');
-
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
-      getDecryptedAsInternalUser: (type: string, id: string, options?: SavedObjectsBaseOptions) => {
-        return this.savedObjectsSetup.getDecryptedAsInternalUser(type, id, options);
-      },
+      getClient: (options = {}) => this.savedObjectsSetup(options),
     };
   }
 

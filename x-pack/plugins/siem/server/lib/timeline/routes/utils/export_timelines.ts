@@ -16,7 +16,7 @@ import {
   ExportedNotes,
   TimelineSavedObject,
   ExportTimelineNotFoundError,
-  TimelineType,
+  TimelineStatus,
 } from '../../../../../common/types/timeline';
 import { NoteSavedObject } from '../../../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
@@ -48,7 +48,7 @@ const getAllSavedPinnedEvents = (
   pinnedEventsSavedObjects: SavedObjectsFindResponse<PinnedEventSavedObject>
 ): PinnedEventSavedObject[] => {
   return pinnedEventsSavedObjects != null
-    ? (pinnedEventsSavedObjects?.saved_objects ?? []).map(savedObject =>
+    ? (pinnedEventsSavedObjects?.saved_objects ?? []).map((savedObject) =>
         convertSavedObjectToSavedPinnedEvent(savedObject)
       )
     : [];
@@ -70,7 +70,9 @@ const getAllSavedNote = (
   noteSavedObjects: SavedObjectsFindResponse<NoteSavedObject>
 ): NoteSavedObject[] => {
   return noteSavedObjects != null
-    ? noteSavedObjects.saved_objects.map(savedObject => convertSavedObjectToSavedNote(savedObject))
+    ? noteSavedObjects.saved_objects.map((savedObject) =>
+        convertSavedObjectToSavedNote(savedObject)
+      )
     : [];
 };
 
@@ -113,7 +115,7 @@ const getGlobalEventNotesByTimelineId = (currentNotes: NoteSavedObject[]): Expor
 const getPinnedEventsIdsByTimelineId = (
   currentPinnedEvents: PinnedEventSavedObject[]
 ): string[] => {
-  return currentPinnedEvents.map(event => event.eventId) ?? [];
+  return currentPinnedEvents.map((event) => event.eventId) ?? [];
 };
 
 const getTimelines = async (
@@ -157,8 +159,10 @@ const getTimelinesFromObjects = async (
   const { timelines, errors } = await getTimelines(savedObjectsClient, ids);
 
   const [notes, pinnedEventIds] = await Promise.all([
-    Promise.all(ids.map(timelineId => getNotesByTimelineId(savedObjectsClient, timelineId))),
-    Promise.all(ids.map(timelineId => getPinnedEventsByTimelineId(savedObjectsClient, timelineId))),
+    Promise.all(ids.map((timelineId) => getNotesByTimelineId(savedObjectsClient, timelineId))),
+    Promise.all(
+      ids.map((timelineId) => getPinnedEventsByTimelineId(savedObjectsClient, timelineId))
+    ),
   ]);
 
   const myNotes = notes.reduce<NoteSavedObject[]>(
@@ -172,18 +176,16 @@ const getTimelinesFromObjects = async (
   );
 
   const myResponse = ids.reduce<ExportedTimelines[]>((acc, timelineId) => {
-    const myTimeline = timelines.find(t => t.savedObjectId === timelineId);
+    const myTimeline = timelines.find((t) => t.savedObjectId === timelineId);
     if (myTimeline != null) {
-      const timelineNotes = myNotes.filter(n => n.timelineId === timelineId);
-      const timelinePinnedEventIds = myPinnedEventIds.filter(p => p.timelineId === timelineId);
+      const timelineNotes = myNotes.filter((n) => n.timelineId === timelineId);
+      const timelinePinnedEventIds = myPinnedEventIds.filter((p) => p.timelineId === timelineId);
       return [
         ...acc,
         {
           ...myTimeline,
-          timelineType:
-            myTimeline.timelineType === TimelineType.draft
-              ? TimelineType.default
-              : myTimeline.timelineType,
+          status:
+            myTimeline.status === TimelineStatus.draft ? TimelineStatus.active : myTimeline.status,
           ...getGlobalEventNotesByTimelineId(timelineNotes),
           pinnedEventIds: getPinnedEventsIdsByTimelineId(timelinePinnedEventIds),
         },

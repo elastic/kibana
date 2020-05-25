@@ -217,10 +217,10 @@ export const translateConfigSchema = (schemas: ConfigBlockSchema[]) => {
     return translatedConfigs;
   }
 
-  translatedConfigs = schemas.map(schema => {
+  translatedConfigs = schemas.map((schema) => {
     schema.name = supportedConfigLabelsMap.get(`supportedConfigs.${schema.id}.text`) || schema.name;
 
-    schema.configs = schema.configs.map(configBlock => {
+    schema.configs = schema.configs.map((configBlock) => {
       if (configBlock.ui.label) {
         configBlock.ui.label =
           supportedConfigLabelsMap.get(configBlock.ui.labelId || '') || configBlock.ui.label;

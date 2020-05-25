@@ -67,7 +67,7 @@ uiRoutes.when('/kibana/instances', {
 
       $scope.$watch(
         () => this.data,
-        data => {
+        (data) => {
           if (!data) {
             return;
           }

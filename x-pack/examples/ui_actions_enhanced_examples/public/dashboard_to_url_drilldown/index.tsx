@@ -63,7 +63,7 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, ActionContext>
           name="url"
           placeholder="Enter URL"
           value={config.url}
-          onChange={event => onConfig({ ...config, url: event.target.value })}
+          onChange={(event) => onConfig({ ...config, url: event.target.value })}
           onBlur={() => {
             if (!config.url) return;
             if (/https?:\/\//.test(config.url)) return;

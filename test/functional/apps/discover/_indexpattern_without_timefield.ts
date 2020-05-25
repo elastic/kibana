@@ -20,16 +20,16 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
 
-  describe('indexpattern without timefield', function() {
-    before(async function() {
+  describe('indexpattern without timefield', function () {
+    before(async function () {
       await esArchiver.loadIfNeeded('index_pattern_without_timefield');
     });
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('without-timefield');
     });
@@ -38,12 +38,12 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('index_pattern_without_timefield');
     });
 
-    it('should not display a timepicker', async function() {
+    it('should not display a timepicker', async function () {
       const timepickerExists = await PageObjects.timePicker.timePickerExists();
       expect(timepickerExists).to.be(false);
     });
 
-    it('should display a timepicker after switching to an index pattern with timefield', async function() {
+    it('should display a timepicker after switching to an index pattern with timefield', async function () {
       expect(await PageObjects.timePicker.timePickerExists()).to.be(false);
       await PageObjects.discover.selectIndexPattern('with-timefield');
       expect(await PageObjects.timePicker.timePickerExists()).to.be(true);

@@ -23,7 +23,15 @@ interface SetupSavedObjectsParams {
   getStartServices: StartServicesAccessor;
 }
 
-export interface SavedObjectsSetup {
+export type ClientInstanciator = (
+  options?: EncryptedSavedObjectsClientOptions
+) => EncryptedSavedObjectsClient;
+
+export interface EncryptedSavedObjectsClientOptions {
+  includedHiddenTypes?: string[];
+}
+
+export interface EncryptedSavedObjectsClient {
   getDecryptedAsInternalUser: <T = unknown>(
     type: string,
     id: string,
@@ -36,7 +44,7 @@ export function setupSavedObjects({
   savedObjects,
   security,
   getStartServices,
-}: SetupSavedObjectsParams): SavedObjectsSetup {
+}: SetupSavedObjectsParams): ClientInstanciator {
   // Register custom saved object client that will encrypt, decrypt and strip saved object
   // attributes where appropriate for any saved object repository request. We choose max possible
   // priority for this wrapper to allow all other wrappers to set proper `namespace` for the Saved
@@ -54,33 +62,34 @@ export function setupSavedObjects({
       })
   );
 
-  const internalRepositoryAndTypeRegistryPromise = getStartServices().then(
-    ([core]) =>
-      [core.savedObjects.createInternalRepository(), core.savedObjects.getTypeRegistry()] as [
-        ISavedObjectsRepository,
-        ISavedObjectTypeRegistry
-      ]
-  );
-
-  return {
-    getDecryptedAsInternalUser: async <T = unknown>(
-      type: string,
-      id: string,
-      options?: SavedObjectsBaseOptions
-    ): Promise<SavedObject<T>> => {
-      const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
-      const savedObject = await internalRepository.get(type, id, options);
-      return {
-        ...savedObject,
-        attributes: (await service.decryptAttributes(
-          {
-            type,
-            id,
-            namespace: typeRegistry.isSingleNamespace(type) ? options?.namespace : undefined,
-          },
-          savedObject.attributes as Record<string, unknown>
-        )) as T,
-      };
-    },
+  return (clientOpts) => {
+    const internalRepositoryAndTypeRegistryPromise = getStartServices().then(
+      ([core]) =>
+        [
+          core.savedObjects.createInternalRepository(clientOpts?.includedHiddenTypes),
+          core.savedObjects.getTypeRegistry(),
+        ] as [ISavedObjectsRepository, ISavedObjectTypeRegistry]
+    );
+    return {
+      getDecryptedAsInternalUser: async <T = unknown>(
+        type: string,
+        id: string,
+        options?: SavedObjectsBaseOptions
+      ): Promise<SavedObject<T>> => {
+        const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
+        const savedObject = await internalRepository.get(type, id, options);
+        return {
+          ...savedObject,
+          attributes: (await service.decryptAttributes(
+            {
+              type,
+              id,
+              namespace: typeRegistry.isSingleNamespace(type) ? options?.namespace : undefined,
+            },
+            savedObject.attributes as Record<string, unknown>
+          )) as T,
+        };
+      },
+    };
   };
 }

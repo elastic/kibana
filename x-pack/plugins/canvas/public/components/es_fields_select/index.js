@@ -21,7 +21,7 @@ export const ESFieldsSelect = compose(
       if (this.props.index !== index) {
         getFields(this.props.index).then((fields = []) => {
           setFields(fields);
-          onChange(selected.filter(option => fields.includes(option)));
+          onChange(selected.filter((option) => fields.includes(option)));
         });
       }
     },

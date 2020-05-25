@@ -24,7 +24,7 @@ export function location(): ExpressionFunctionDefinition<'location', null, {}, P
     args: {},
     help,
     fn: () => {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         function createLocation(geoposition: Position) {
           const { latitude, longitude } = geoposition.coords;
           return resolve({

@@ -14,11 +14,15 @@ import { DataProvider, DataProvidersAnd } from './data_provider';
 
 export const omitAnd = (provider: DataProvider): DataProvidersAnd => omit('and', provider);
 
-export const reorder = (
-  group: DataProvidersAnd[],
-  startIndex: number,
-  endIndex: number
-): DataProvidersAnd[] => {
+export const reorder = ({
+  endIndex,
+  group,
+  startIndex,
+}: {
+  endIndex: number;
+  group: DataProvidersAnd[];
+  startIndex: number;
+}): DataProvidersAnd[] => {
   const groupClone = [...group];
   const [removed] = groupClone.splice(startIndex, 1); // ⚠️ mutation
   groupClone.splice(endIndex, 0, removed); // ⚠️ mutation
@@ -95,7 +99,11 @@ export const reArrangeProvidersInSameGroup = ({
       dataProviderGroups,
     })
   ) {
-    const reorderedGroup = reorder(dataProviderGroups[groupIndex], source.index, destination.index);
+    const reorderedGroup = reorder({
+      group: dataProviderGroups[groupIndex],
+      startIndex: source.index,
+      endIndex: destination.index,
+    });
 
     const updatedGroups = dataProviderGroups.reduce<DataProvidersAnd[][]>(
       (acc, group, i) => [...acc, i === groupIndex ? [...reorderedGroup] : [...group]],
@@ -105,7 +113,7 @@ export const reArrangeProvidersInSameGroup = ({
     dispatch(
       updateProviders({
         id: timelineId,
-        providers: unFlattenGroups(updatedGroups.filter(g => g.length)),
+        providers: unFlattenGroups(updatedGroups.filter((g) => g.length)),
       })
     );
   }
@@ -183,7 +191,7 @@ export const moveProvidersBetweenGroups = ({
     dispatch(
       updateProviders({
         id: timelineId,
-        providers: unFlattenGroups(updatedGroups.filter(g => g.length)),
+        providers: unFlattenGroups(updatedGroups.filter((g) => g.length)),
       })
     );
   }
@@ -297,7 +305,7 @@ export const addProviderToGroup = ({
     dispatch(
       updateProviders({
         id: timelineId,
-        providers: unFlattenGroups(updatedGroups.filter(g => g.length)),
+        providers: unFlattenGroups(updatedGroups.filter((g) => g.length)),
       })
     );
     onAddedToTimeline(providerToAdd.name);
