@@ -18,6 +18,7 @@ import {
   applyDeltaToColumnWidth,
   updateColumns,
   updateItemsPerPage,
+  updateSort,
 } from './actions';
 import { TimelineEpicDependencies } from './epic';
 import {
@@ -25,8 +26,10 @@ import {
   applyDeltaToTimelineColumnWidth,
   updateTimelineColumns,
   updateTimelineItemsPerPage,
+  updateTimelineSort,
 } from './helpers';
 import { TimelineModel, ColumnHeaderOptions } from './model';
+import { Sort } from '../../components/timeline/body/sort';
 
 const timelinePageIds = ['alerts-table', 'signals-page'];
 
@@ -176,6 +179,22 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
         const timelines = updateTimelineItemsPerPage({
           id: timelineId,
           itemsPerPage,
+          timelineById: storageTimelines,
+        });
+        addTimelineToLocalStorage(timelineId, timelines[timelineId]);
+      }),
+      ignoreElements()
+    ),
+    action$.pipe(
+      ofType(updateSort.type),
+      filter(action => isPageTimeline(get('payload.id', action))),
+      tap(action => {
+        const storageTimelines = getAllTimelinesFromLocalStorage();
+        const timelineId: string = get('payload.id', action);
+        const sort: Sort = get('payload.sort', action);
+        const timelines = updateTimelineSort({
+          id: timelineId,
+          sort,
           timelineById: storageTimelines,
         });
         addTimelineToLocalStorage(timelineId, timelines[timelineId]);
