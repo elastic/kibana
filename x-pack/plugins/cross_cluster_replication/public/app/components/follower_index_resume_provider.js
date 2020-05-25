@@ -99,7 +99,7 @@ class FollowerIndexResumeProviderUi extends PureComponent {
                   editLink: (
                     <EuiLink
                       {...reactRouterNavigate(
-                        this.props.history,
+                        routing._reactRouter.history,
                         routing.getFollowerIndexPath(ids[0])
                       )}
                       data-test-subj="editLink"

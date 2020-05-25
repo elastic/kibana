@@ -7,6 +7,7 @@
 import React from 'react';
 import { of } from 'rxjs';
 import { ComponentType } from 'enzyme';
+import { LocationDescriptorObject } from 'history';
 import { ScopedHistory } from 'src/core/public';
 import {
   docLinksServiceMock,
@@ -29,6 +30,12 @@ class MockTimeBuckets {
     };
   }
 }
+
+const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+history.createHref = (location: LocationDescriptorObject) => {
+  return `${location.pathname}${location.search ? '?' + location.search : ''}`;
+};
+
 export const mockContextValue = {
   licenseStatus$: of<LicenseStatus>({ valid: true }),
   docLinks: docLinksServiceMock.createStartContract(),
@@ -41,7 +48,7 @@ export const mockContextValue = {
   } as any,
   // For our test harness, we don't use this mocked out http service
   http: httpServiceMock.createSetupContract(),
-  history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+  history,
   getUrlForApp: jest.fn(),
 };
 

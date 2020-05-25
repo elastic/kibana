@@ -14,7 +14,11 @@ import { FOLLOWER_INDEX_EDIT_NAME } from './constants';
 const testBedConfig = {
   store: ccrStore,
   memoryRouter: {
-    onRouter: (router) => (routing.reactRouter = router),
+    onRouter: (router) =>
+      (routing.reactRouter = {
+        ...router,
+        getUrlForApp: () => '',
+      }),
     // The follower index id to fetch is read from the router ":id" param
     // so we first set it in our initial entries
     initialEntries: [`/${FOLLOWER_INDEX_EDIT_NAME}`],

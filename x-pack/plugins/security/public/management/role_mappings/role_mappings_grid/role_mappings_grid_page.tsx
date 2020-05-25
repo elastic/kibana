@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NotificationsStart, ScopedHistory } from 'src/core/public';
+import { NotificationsStart, ApplicationStart, ScopedHistory } from 'src/core/public';
 import { RoleMapping, Role } from '../../../../common/model';
 import { EmptyPrompt } from './empty_prompt';
 import {
@@ -47,6 +47,7 @@ interface Props {
   notifications: NotificationsStart;
   docLinks: DocumentationLinksService;
   history: ScopedHistory;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
 interface State {
@@ -121,7 +122,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
     if (loadState === 'finished' && roleMappings && roleMappings.length === 0) {
       return (
         <EuiPageContent>
-          <EmptyPrompt />
+          <EmptyPrompt history={this.props.history} />
         </EuiPageContent>
       );
     }
@@ -328,7 +329,14 @@ export class RoleMappingsGridPage extends Component<Props, State> {
             const role: Role | string =
               this.state.roles?.find((r) => r.name === rolename) ?? rolename;
 
-            return <RoleTableDisplay role={role} key={rolename} history={this.props.history} />;
+            return (
+              <RoleTableDisplay
+                role={role}
+                key={rolename}
+                history={this.props.history}
+                getUrlForApp={this.props.getUrlForApp}
+              />
+            );
           });
           return <div data-test-subj="roleMappingRoles">{roleLinks}</div>;
         },

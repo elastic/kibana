@@ -7,11 +7,15 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { withRouter } from 'react-router-dom';
+import { ScopedHistory } from 'kibana/public';
 import { EDIT_ROLES_PATH } from '../../../management_urls';
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 
-export const CreateRoleMappingButton = withRouter(({ history }) => {
+interface CreateRoleMappingButtonProps {
+  history: ScopedHistory;
+}
+
+export const CreateRoleMappingButton = ({ history }: CreateRoleMappingButtonProps) => {
   return (
     <EuiButton
       data-test-subj="createRoleMappingButton"
@@ -24,4 +28,4 @@ export const CreateRoleMappingButton = withRouter(({ history }) => {
       />
     </EuiButton>
   );
-});
+};

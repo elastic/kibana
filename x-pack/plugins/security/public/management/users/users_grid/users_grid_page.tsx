@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NotificationsStart, ScopedHistory } from 'src/core/public';
+import { NotificationsStart, ApplicationStart, ScopedHistory } from 'src/core/public';
 import { User, Role } from '../../../../common/model';
 import { ConfirmDeleteUsers } from '../components';
 import { isUserReserved, getExtendedUserDeprecationNotice, isUserDeprecated } from '../user_utils';
@@ -38,6 +38,7 @@ interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   notifications: NotificationsStart;
   history: ScopedHistory;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
 interface State {
@@ -150,7 +151,12 @@ export class UsersGridPage extends Component<Props, State> {
           const roleLinks = rolenames.map((rolename, index) => {
             const roleDefinition = roles?.find((role) => role.name === rolename) ?? rolename;
             return (
-              <RoleTableDisplay role={roleDefinition} key={rolename} history={this.props.history} />
+              <RoleTableDisplay
+                role={roleDefinition}
+                key={rolename}
+                history={this.props.history}
+                getUrlForApp={this.props.getUrlForApp}
+              />
             );
           });
           return <div data-test-subj="userRowRoles">{roleLinks}</div>;

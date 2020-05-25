@@ -26,6 +26,7 @@ export const usersManagementApp = Object.freeze({
       order: 10,
       title: i18n.translate('xpack.security.management.usersTitle', { defaultMessage: 'Users' }),
       async mount({ basePath, element, setBreadcrumbs, history }) {
+        const [coreStart] = await getStartServices();
         const usersBreadcrumbs = [
           {
             text: i18n.translate('xpack.security.users.breadcrumb', { defaultMessage: 'Users' }),
@@ -57,6 +58,7 @@ export const usersManagementApp = Object.freeze({
               userAPIClient={userAPIClient}
               rolesAPIClient={rolesAPIClient}
               history={history}
+              getUrlForApp={coreStart.application.getUrlForApp}
             />
           );
         };

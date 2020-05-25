@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { LocationDescriptorObject } from 'history';
 import { ScopedHistory } from 'kibana/public';
 
 import { User } from '../../../../common/model';
@@ -18,6 +19,12 @@ import { EuiBasicTable } from '@elastic/eui';
 
 describe('UsersGridPage', () => {
   const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+  history.createHref = (location: LocationDescriptorObject) => {
+    return `${location.pathname}${location.search ? '?' + location.search : ''}`;
+  };
+  const getUrlForApp = (appId: string, options?: { path: string }) => {
+    return appId + '/' + (options ? options.path : '');
+  };
 
   it('renders the list of users', async () => {
     const apiClientMock = userAPIClientMock.create();
@@ -49,6 +56,7 @@ describe('UsersGridPage', () => {
         rolesAPIClient={rolesAPIClientMock.create()}
         notifications={coreMock.createStart().notifications}
         history={history}
+        getUrlForApp={getUrlForApp}
       />
     );
 
@@ -70,6 +78,7 @@ describe('UsersGridPage', () => {
         rolesAPIClient={rolesAPIClientMock.create()}
         notifications={coreMock.createStart().notifications}
         history={history}
+        getUrlForApp={getUrlForApp}
       />
     );
 
@@ -100,6 +109,7 @@ describe('UsersGridPage', () => {
         rolesAPIClient={rolesAPIClientMock.create()}
         notifications={coreMock.createStart().notifications}
         history={history}
+        getUrlForApp={getUrlForApp}
       />
     );
 
@@ -133,6 +143,7 @@ describe('UsersGridPage', () => {
         rolesAPIClient={rolesAPIClientMock.create()}
         notifications={coreMock.createStart().notifications}
         history={history}
+        getUrlForApp={getUrlForApp}
       />
     );
 
@@ -182,6 +193,7 @@ describe('UsersGridPage', () => {
         rolesAPIClient={roleAPIClientMock}
         notifications={coreMock.createStart().notifications}
         history={history}
+        getUrlForApp={getUrlForApp}
       />
     );
 
@@ -193,7 +205,7 @@ describe('UsersGridPage', () => {
       Object {
         "children": <div>
           kibana_user
-
+           
           <EuiIcon
             className="eui-alignTop"
             color="warning"
@@ -241,6 +253,7 @@ describe('UsersGridPage', () => {
         rolesAPIClient={roleAPIClientMock}
         notifications={coreMock.createStart().notifications}
         history={history}
+        getUrlForApp={getUrlForApp}
       />
     );
 

@@ -6,22 +6,23 @@
 
 import React from 'react';
 import { EuiLink, EuiToolTip, EuiIcon } from '@elastic/eui';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory, ApplicationStart } from 'kibana/public';
 import { Role, isRoleDeprecated, getExtendedRoleDeprecationNotice } from '../../../common/model';
-import { getEditRoleHref } from '../management_urls';
-import { reactRouterNavigate } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   role: Role | string;
   history: ScopedHistory;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
-export const RoleTableDisplay = ({ role, history }: Props) => {
+export const RoleTableDisplay = ({ role, history, getUrlForApp }: Props) => {
   let content;
   let href;
   if (typeof role === 'string') {
     content = <div>{role}</div>;
-    href = getEditRoleHref(role);
+    href = getUrlForApp('management', {
+      path: `security/roles/edit/${encodeURIComponent(role)}`,
+    });
   } else if (isRoleDeprecated(role)) {
     content = (
       <EuiToolTip
@@ -33,11 +34,15 @@ export const RoleTableDisplay = ({ role, history }: Props) => {
         </div>
       </EuiToolTip>
     );
-    href = getEditRoleHref(role.name);
+    href = getUrlForApp('management', {
+      path: `security/roles/edit/${encodeURIComponent(role.name)}`,
+    });
   } else {
     content = <div>{role.name}</div>;
-    href = getEditRoleHref(role.name);
+    href = getUrlForApp('management', {
+      path: `security/roles/edit/${encodeURIComponent(role.name)}`,
+    });
   }
 
-  return <EuiLink {...reactRouterNavigate(history, href)}>{content}</EuiLink>;
+  return <EuiLink href={href}>{content}</EuiLink>;
 };

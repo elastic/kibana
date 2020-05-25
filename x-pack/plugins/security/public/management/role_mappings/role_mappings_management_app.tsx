@@ -27,6 +27,7 @@ export const roleMappingsManagementApp = Object.freeze({
         defaultMessage: 'Role Mappings',
       }),
       async mount({ element, setBreadcrumbs, history }) {
+        const [coreStart] = await getStartServices();
         const roleMappingsBreadcrumbs = [
           {
             text: i18n.translate('xpack.security.roleMapping.breadcrumb', {
@@ -61,6 +62,7 @@ export const roleMappingsManagementApp = Object.freeze({
               roleMappingsAPI={roleMappingsAPIClient}
               docLinks={dockLinksService}
               history={history}
+              getUrlForApp={coreStart.application.getUrlForApp}
             />
           );
         };

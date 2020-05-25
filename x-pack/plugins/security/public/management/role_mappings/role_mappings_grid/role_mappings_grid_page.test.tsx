@@ -21,6 +21,9 @@ import { rolesAPIClientMock } from '../../roles/index.mock';
 
 describe('RoleMappingsGridPage', () => {
   const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+  const getUrlForApp = (appId: string, options?: { path: string }) => {
+    return appId + '/' + (options ? options.path : '');
+  };
 
   it('renders an empty prompt when no role mappings exist', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
@@ -38,6 +41,7 @@ describe('RoleMappingsGridPage', () => {
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
         history={history}
+        getUrlForApp={getUrlForApp}
       />
     );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
@@ -66,6 +70,7 @@ describe('RoleMappingsGridPage', () => {
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
         history={history}
+        getUrlForApp={getUrlForApp}
       />
     );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
@@ -102,6 +107,7 @@ describe('RoleMappingsGridPage', () => {
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
         history={history}
+        getUrlForApp={getUrlForApp}
       />
     );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
@@ -137,6 +143,7 @@ describe('RoleMappingsGridPage', () => {
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
         history={history}
+        getUrlForApp={getUrlForApp}
       />
     );
     await nextTick();
@@ -145,7 +152,7 @@ describe('RoleMappingsGridPage', () => {
     const links = findTestSubject(wrapper, 'roleMappingRoles').find(EuiLink);
     expect(links).toHaveLength(1);
     expect(links.at(0).props()).toMatchObject({
-      href: '/edit/superuser',
+      href: 'management/security/roles/edit/superuser',
     });
   });
 
@@ -172,6 +179,7 @@ describe('RoleMappingsGridPage', () => {
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
         history={history}
+        getUrlForApp={getUrlForApp}
       />
     );
     await nextTick();
@@ -211,6 +219,7 @@ describe('RoleMappingsGridPage', () => {
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
         history={history}
+        getUrlForApp={getUrlForApp}
       />
     );
     await nextTick();
@@ -273,6 +282,7 @@ describe('RoleMappingsGridPage', () => {
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
         history={history}
+        getUrlForApp={getUrlForApp}
       />
     );
     await nextTick();
@@ -284,7 +294,7 @@ describe('RoleMappingsGridPage', () => {
       Object {
         "children": <div>
           kibana_user
-
+           
           <EuiIcon
             className="eui-alignTop"
             color="warning"
