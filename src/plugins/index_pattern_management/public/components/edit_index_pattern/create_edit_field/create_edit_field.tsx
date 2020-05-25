@@ -94,7 +94,9 @@ export const CreateEditField = withRouter(
     services.docTitle.change([docFieldName, indexPattern.title]);
 
     const redirectAway = () => {
-      history.push(`${url}?_a=(tab:${field?.scripted ? TAB_SCRIPTED_FIELDS : TAB_INDEXED_FIELDS})`);
+      history.push(
+        `${url}#/?_a=(tab:${field?.scripted ? TAB_SCRIPTED_FIELDS : TAB_INDEXED_FIELDS})`
+      );
     };
 
     if (field) {
