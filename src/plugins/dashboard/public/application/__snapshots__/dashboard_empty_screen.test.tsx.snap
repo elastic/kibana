@@ -140,8 +140,29 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
           Array [
             "theme:darkMode",
           ],
+          Array [
+            "theme:darkMode",
+          ],
+          Array [
+            "theme:darkMode",
+          ],
+          Array [
+            "theme:darkMode",
+          ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
           Object {
             "type": "return",
             "value": undefined,

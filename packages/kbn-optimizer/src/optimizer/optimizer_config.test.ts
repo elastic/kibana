@@ -385,7 +385,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          2,
+          7,
         ],
         "results": Array [
           Object {
@@ -408,7 +408,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          3,
+          8,
         ],
         "results": Array [
           Object {
