@@ -82,7 +82,6 @@ export class TelemetryPlugin implements Plugin {
     const config$ = this.config$;
     const isDev = this.isDev;
 
-    registerCollection(telemetryCollectionManager, elasticsearch.dataClient);
     const router = http.createRouter();
 
     registerRoutes({
@@ -109,6 +108,7 @@ export class TelemetryPlugin implements Plugin {
       this.logger.warn('Unable to update legacy telemetry configs.');
     }
 
+    registerCollection(telemetryCollectionManager, core.elasticsearch.legacy.client);
     this.fetcherTask.start(core, { telemetryCollectionManager });
   }
 

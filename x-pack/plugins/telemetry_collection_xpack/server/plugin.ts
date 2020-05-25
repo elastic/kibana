@@ -5,20 +5,22 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/server';
-import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
+import { TelemetryCollectionManagerPluginStart } from 'src/plugins/telemetry_collection_manager/server';
 import { getClusterUuids, getLocalLicense } from '../../../../src/plugins/telemetry/server';
 import { getStatsWithXpack } from './telemetry_collection';
 
 interface TelemetryCollectionXpackDepsSetup {
-  telemetryCollectionManager: TelemetryCollectionManagerPluginSetup;
+  telemetryCollectionManager: TelemetryCollectionManagerPluginStart;
 }
 
 export class TelemetryCollectionXpackPlugin implements Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { telemetryCollectionManager }: TelemetryCollectionXpackDepsSetup) {
+  public setup(core: CoreSetup) {}
+
+  public start(core: CoreStart, { telemetryCollectionManager }: TelemetryCollectionXpackDepsSetup) {
     telemetryCollectionManager.setCollection({
-      esCluster: core.elasticsearch.dataClient,
+      esCluster: core.elasticsearch.legacy.client,
       title: 'local_xpack',
       priority: 1,
       statsGetter: getStatsWithXpack,
@@ -26,6 +28,4 @@ export class TelemetryCollectionXpackPlugin implements Plugin {
       licenseGetter: getLocalLicense,
     });
   }
-
-  public start(core: CoreStart) {}
 }
