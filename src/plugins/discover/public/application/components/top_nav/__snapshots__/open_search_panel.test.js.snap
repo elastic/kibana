@@ -53,7 +53,7 @@ exports[`render 1`] = `
       >
         <EuiButton
           fill={true}
-          href="#/management/kibana/objects?_a=(tab:search)"
+          href="/app/management/kibana/objects?_a=(tab:search)"
           onClick={[Function]}
         >
           <FormattedMessage

@@ -21,6 +21,7 @@ import React from 'react';
 import { render } from 'enzyme';
 import { RouteComponentProps } from 'react-router-dom';
 import { ScopedHistory } from 'kibana/public';
+import { scopedHistoryMock } from '../../../../../../../../core/public/mocks';
 
 import { Header } from './header';
 
@@ -29,7 +30,7 @@ describe('Header', () => {
     const component = render(
       <Header.WrappedComponent
         indexPatternId="test"
-        history={({} as unknown) as ScopedHistory}
+        history={(scopedHistoryMock.create() as unknown) as ScopedHistory}
         location={({} as unknown) as RouteComponentProps['location']}
         match={({} as unknown) as RouteComponentProps['match']}
       />
