@@ -32,7 +32,6 @@ import { createActionConnector } from '../../lib/action_connector_api';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { PLUGIN } from '../../constants/plugin';
-import { BASE_PATH as LICENSE_MANAGEMENT_BASE_PATH } from '../../../../../license_management/common/constants';
 
 export interface ConnectorAddFlyoutProps {
   addFlyoutVisible: boolean;
@@ -293,7 +292,7 @@ const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
     <EuiFlexGroup gutterSize="s" wrap={true}>
       <EuiFlexItem grow={false}>
         <EuiButton
-          href={`${http.basePath.get()}/app/${LICENSE_MANAGEMENT_BASE_PATH}`}
+          href={`${http.basePath.get()}/app/management/stack/license_management`}
           iconType="gear"
           target="_blank"
         >

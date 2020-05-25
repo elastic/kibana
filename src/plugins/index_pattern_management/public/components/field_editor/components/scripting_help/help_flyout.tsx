@@ -18,15 +18,13 @@
  */
 
 import React from 'react';
-import { HttpStart, DocLinksStart, IUiSettingsClient } from 'src/core/public';
-
 import { EuiFlyout, EuiFlyoutBody, EuiTabbedContent } from '@elastic/eui';
 
 import { ScriptingSyntax } from './scripting_syntax';
 import { TestScript } from './test_script';
 
 import { ExecuteScript } from '../../types';
-import { IndexPattern, DataPublicPluginStart } from '../../../../../../data/public';
+import { IndexPattern } from '../../../../../../data/public';
 
 interface ScriptingHelpFlyoutProps {
   indexPattern: IndexPattern;
@@ -36,10 +34,6 @@ interface ScriptingHelpFlyoutProps {
   executeScript: ExecuteScript;
   isVisible: boolean;
   onClose: () => void;
-  http: HttpStart;
-  docLinksScriptedFields: DocLinksStart['links']['scriptedFields'];
-  uiSettings: IUiSettingsClient;
-  SearchBar: DataPublicPluginStart['ui']['SearchBar'];
 }
 
 export const ScriptingHelpFlyout: React.FC<ScriptingHelpFlyoutProps> = ({
@@ -50,17 +44,13 @@ export const ScriptingHelpFlyout: React.FC<ScriptingHelpFlyoutProps> = ({
   name,
   script,
   executeScript,
-  http,
-  docLinksScriptedFields,
-  uiSettings,
-  SearchBar,
 }) => {
   const tabs = [
     {
       id: 'syntax',
       name: 'Syntax',
       ['data-test-subj']: 'syntaxTab',
-      content: <ScriptingSyntax docLinksScriptedFields={docLinksScriptedFields} />,
+      content: <ScriptingSyntax />,
     },
     {
       id: 'test',
@@ -73,9 +63,6 @@ export const ScriptingHelpFlyout: React.FC<ScriptingHelpFlyoutProps> = ({
           name={name}
           script={script}
           executeScript={executeScript}
-          http={http}
-          uiSettings={uiSettings}
-          SearchBar={SearchBar}
         />
       ),
     },

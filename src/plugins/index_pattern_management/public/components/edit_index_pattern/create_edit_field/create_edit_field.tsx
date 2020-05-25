@@ -21,9 +21,9 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpStart, DocLinksStart } from 'src/core/public';
-import { ChromeDocTitle, NotificationsStart, IUiSettingsClient } from 'src/core/public';
-import { IndexPattern, DataPublicPluginStart } from '../../../../../../plugins/data/public';
+import { IndexPattern } from '../../../../../../plugins/data/public';
+import { useKibana } from '../../../../../../plugins/kibana_react/public';
+import { IndexPatternManagmentContext } from '../../../types';
 import { IndexHeader } from '../index_header';
 import { TAB_SCRIPTED_FIELDS, TAB_INDEXED_FIELDS } from '../constants';
 
@@ -33,17 +33,6 @@ interface CreateEditFieldProps extends RouteComponentProps {
   indexPattern: IndexPattern;
   mode?: string;
   fieldName?: string;
-  fieldFormatEditors: any;
-  services: {
-    uiSettings: IUiSettingsClient;
-    docTitle: ChromeDocTitle;
-    http: HttpStart;
-    docLinksScriptedFields: DocLinksStart['links']['scriptedFields'];
-    SearchBar: DataPublicPluginStart['ui']['SearchBar'];
-    toasts: NotificationsStart['toasts'];
-    fieldFormats: DataPublicPluginStart['fieldFormats'];
-    indexPatterns: DataPublicPluginStart['indexPatterns'];
-  };
 }
 
 const newFieldPlaceholder = i18n.translate(
@@ -54,18 +43,14 @@ const newFieldPlaceholder = i18n.translate(
 );
 
 export const CreateEditField = withRouter(
-  ({
-    indexPattern,
-    mode,
-    fieldName,
-    fieldFormatEditors,
-    services,
-    history,
-  }: CreateEditFieldProps) => {
+  ({ indexPattern, mode, fieldName, history }: CreateEditFieldProps) => {
+    const { data, uiSettings, chrome, notifications } = useKibana<
+      IndexPatternManagmentContext
+    >().services;
     const field =
       mode === 'edit' && fieldName
         ? indexPattern.fields.getByName(fieldName)
-        : services.indexPatterns.createField(
+        : data.indexPatterns.createField(
             indexPattern,
             {
               scripted: true,
@@ -85,13 +70,13 @@ export const CreateEditField = withRouter(
           values: { indexPatternTitle: indexPattern.title, fieldName },
         }
       );
-      services.toasts.addWarning(message);
+      notifications.toasts.addWarning(message);
       history.push(url);
     }
 
     const docFieldName = field?.name || newFieldPlaceholder;
 
-    services.docTitle.change([docFieldName, indexPattern.title]);
+    chrome.docTitle.change([docFieldName, indexPattern.title]);
 
     const redirectAway = () => {
       history.push(
@@ -106,7 +91,7 @@ export const CreateEditField = withRouter(
             <EuiFlexItem>
               <IndexHeader
                 indexPattern={indexPattern}
-                defaultIndex={services.uiSettings.get('defaultIndex')}
+                defaultIndex={uiSettings.get('defaultIndex')}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -114,15 +99,7 @@ export const CreateEditField = withRouter(
                 indexPattern={indexPattern}
                 field={field}
                 services={{
-                  uiSettings: services.uiSettings,
-                  http: services.http,
-                  fieldFormatEditors,
                   redirectAway,
-                  docLinksScriptedFields: services.docLinksScriptedFields,
-                  SearchBar: services.SearchBar,
-                  toasts: services.toasts,
-                  fieldFormats: services.fieldFormats,
-                  indexPatterns: services.indexPatterns,
                 }}
               />
             </EuiFlexItem>
