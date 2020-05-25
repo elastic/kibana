@@ -14,7 +14,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const es = getService('es');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/66869
   describe('certificates', function() {
     before(async () => {
       await makeCheck({ es, tls: true });

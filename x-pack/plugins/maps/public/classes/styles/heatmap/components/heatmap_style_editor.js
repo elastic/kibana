@@ -16,7 +16,7 @@ import {
 } from './heatmap_constants';
 
 export function HeatmapStyleEditor({ colorRampName, onHeatmapColorChange }) {
-  const onColorRampChange = selectedColorRampName => {
+  const onColorRampChange = (selectedColorRampName) => {
     onHeatmapColorChange({
       colorRampName: selectedColorRampName,
     });

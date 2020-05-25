@@ -24,7 +24,7 @@ export const LogEntryTimestampColumn = memo<LogEntryTimestampColumnProps>(
 );
 
 const TimestampColumnContent = euiStyled(LogEntryColumnContent)`
-  color: ${props => props.theme.eui.euiColorDarkShade};
+  color: ${(props) => props.theme.eui.euiColorDarkShade};
   overflow: hidden;
   text-overflow: clip;
   white-space: pre;

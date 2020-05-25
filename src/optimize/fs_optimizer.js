@@ -26,7 +26,7 @@ export default class FsOptimizer extends BaseOptimizer {
       await this.init();
     }
 
-    await fromNode(cb => {
+    await fromNode((cb) => {
       this.compiler.run((err, stats) => {
         if (err || !stats) return cb(err);
 

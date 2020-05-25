@@ -70,7 +70,7 @@ export const removeInternalTagsFromRule = (
   } else {
     const ruleWithoutInternalTags: Partial<OutputRuleAlertRest> = {
       ...rule,
-      tags: rule.tags.filter(tag => !tag.startsWith(INTERNAL_IDENTIFIER)),
+      tags: rule.tags.filter((tag) => !tag.startsWith(INTERNAL_IDENTIFIER)),
     };
     return ruleWithoutInternalTags;
   }

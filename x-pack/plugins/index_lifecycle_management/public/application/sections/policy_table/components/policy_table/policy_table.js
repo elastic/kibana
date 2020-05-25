@@ -141,7 +141,7 @@ export class PolicyTable extends Component {
     this.props.fetchPolicies(true);
     this.setState({ renderDeleteConfirmModal: null, policyToDelete: null });
   };
-  onSort = column => {
+  onSort = (column) => {
     const { sortField, isSortAscending, policySortChanged } = this.props;
     const newIsSortAscending = sortField === column ? !isSortAscending : true;
     policySortChanged(column, newIsSortAscending);
@@ -286,22 +286,22 @@ export class PolicyTable extends Component {
     };
     return flattenPanelTree(panelTree);
   }
-  togglePolicyPopover = policy => {
+  togglePolicyPopover = (policy) => {
     if (this.isPolicyPopoverOpen(policy)) {
       this.closePolicyPopover(policy);
     } else {
       this.openPolicyPopover(policy);
     }
   };
-  isPolicyPopoverOpen = policy => {
+  isPolicyPopoverOpen = (policy) => {
     return this.state.policyPopover === policy.name;
   };
-  closePolicyPopover = policy => {
+  closePolicyPopover = (policy) => {
     if (this.isPolicyPopoverOpen(policy)) {
       this.setState({ policyPopover: null });
     }
   };
-  openPolicyPopover = policy => {
+  openPolicyPopover = (policy) => {
     this.setState({ policyPopover: policy.name });
   };
   buildRowCells(policy) {
@@ -374,7 +374,7 @@ export class PolicyTable extends Component {
 
   buildRows() {
     const { policies = [] } = this.props;
-    return policies.map(policy => {
+    return policies.map((policy) => {
       const { name } = policy;
       return <EuiTableRow key={`${name}-row`}>{this.buildRowCells(policy)}</EuiTableRow>;
     });
@@ -394,7 +394,7 @@ export class PolicyTable extends Component {
     );
   }
 
-  onItemSelectionChanged = selectedPolicies => {
+  onItemSelectionChanged = (selectedPolicies) => {
     this.setState({ selectedPolicies });
   };
 
@@ -455,7 +455,7 @@ export class PolicyTable extends Component {
               <EuiFieldSearch
                 fullWidth
                 value={filter}
-                onChange={event => {
+                onChange={(event) => {
                   policyFilterChanged(event.target.value);
                 }}
                 data-test-subj="policyTableFilterInput"

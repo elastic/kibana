@@ -57,7 +57,7 @@ export const deleteRulesRoute = (router: IRouter) => {
             search: rule.id,
             searchFields: ['alertId'],
           });
-          ruleStatuses.saved_objects.forEach(async obj => ruleStatusClient.delete(obj.id));
+          ruleStatuses.saved_objects.forEach(async (obj) => ruleStatusClient.delete(obj.id));
           const [validated, errors] = transformValidate(
             rule,
             undefined,

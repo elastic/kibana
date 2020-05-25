@@ -83,22 +83,22 @@ describe('getTelemetryOptIn', () => {
     { lastVersionChecked: 'beta', currentKibanaVersion: '8.0.0', result: null },
     { lastVersionChecked: 'beta', currentKibanaVersion: 'beta', result: false },
     { lastVersionChecked: 'BETA', currentKibanaVersion: 'beta', result: null },
-  ].map(el => ({ ...el, enabled: false }));
+  ].map((el) => ({ ...el, enabled: false }));
 
   // build a table of tests with version checks, with results for enabled true/null/undefined
-  const EnabledTrueVersionChecks: VersionCheckTable = EnabledFalseVersionChecks.map(el => ({
+  const EnabledTrueVersionChecks: VersionCheckTable = EnabledFalseVersionChecks.map((el) => ({
     ...el,
     enabled: true,
     result: true,
   }));
 
-  const EnabledNullVersionChecks: VersionCheckTable = EnabledFalseVersionChecks.map(el => ({
+  const EnabledNullVersionChecks: VersionCheckTable = EnabledFalseVersionChecks.map((el) => ({
     ...el,
     enabled: null,
     result: null,
   }));
 
-  const EnabledUndefinedVersionChecks: VersionCheckTable = EnabledFalseVersionChecks.map(el => ({
+  const EnabledUndefinedVersionChecks: VersionCheckTable = EnabledFalseVersionChecks.map((el) => ({
     ...el,
     enabled: undefined,
     result: null,

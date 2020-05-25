@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../actions/map_actions', () => ({}));
+jest.mock('../actions', () => ({}));
 
 import { resetDataRequest } from './map';
 import _ from 'lodash';

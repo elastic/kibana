@@ -20,25 +20,25 @@ test('transformDataToMetricsChart should transform an ES result into a chart obj
             b: { value: 10 },
             c: { value: 10 },
             key: 1,
-            doc_count: 0
+            doc_count: 0,
           },
           {
             a: { value: 20 },
             b: { value: 20 },
             c: { value: 20 },
             key: 2,
-            doc_count: 0
+            doc_count: 0,
           },
           {
             a: { value: 30 },
             b: { value: 30 },
             c: { value: 30 },
             key: 3,
-            doc_count: 0
-          }
-        ]
-      }
-    }
+            doc_count: 0,
+          },
+        ],
+      },
+    },
   } as any;
 
   const chartBase = {
@@ -49,8 +49,8 @@ test('transformDataToMetricsChart should transform an ES result into a chart obj
     series: {
       a: { title: 'Series A', color: 'red' },
       b: { title: 'Series B', color: 'blue' },
-      c: { title: 'Series C', color: 'green' }
-    }
+      c: { title: 'Series C', color: 'green' },
+    },
   };
 
   const chart = transformDataToMetricsChart(response, chartBase);

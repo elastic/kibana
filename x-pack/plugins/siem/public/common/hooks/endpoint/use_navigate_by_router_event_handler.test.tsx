@@ -59,7 +59,7 @@ describe('useNavigateByRouterEventHandler hook', () => {
     expect(history.location.pathname).toEqual('/mock/path');
   });
   it('should not navigate if preventDefault is true', () => {
-    clickHandlerSpy.mockImplementation(event => {
+    clickHandlerSpy.mockImplementation((event) => {
       event.preventDefault();
     });
     act(() => {
@@ -81,7 +81,7 @@ describe('useNavigateByRouterEventHandler hook', () => {
     expect(history.location.pathname).not.toEqual('/mock/path');
   });
   it('should not to navigate if meta|alt|ctrl|shift keys are pressed', () => {
-    ['meta', 'alt', 'ctrl', 'shift'].forEach(key => {
+    ['meta', 'alt', 'ctrl', 'shift'].forEach((key) => {
       act(() => {
         fireEvent.click(linkEle, { [`${key}Key`]: true });
       });

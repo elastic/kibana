@@ -65,7 +65,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
       },
     });
 
-    licensing.license$.subscribe(license => {
+    licensing.license$.subscribe((license) => {
       if (!checkLicenseStatus(license).valid && !devTool.isDisabled()) {
         devTool.disable();
       } else if (devTool.isDisabled()) {

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const APM_FEATURE = {
   id: 'apm',
   name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
-    defaultMessage: 'APM'
+    defaultMessage: 'APM',
   }),
   order: 900,
   icon: 'apmApp',
@@ -26,12 +26,12 @@ export const APM_FEATURE = {
         'actions-read',
         'actions-all',
         'alerting-read',
-        'alerting-all'
+        'alerting-all',
       ],
       catalogue: ['apm'],
       savedObject: {
         all: ['alert', 'action', 'action_task_params'],
-        read: []
+        read: [],
       },
       ui: [
         'show',
@@ -41,8 +41,8 @@ export const APM_FEATURE = {
         'alerting:save',
         'actions:save',
         'alerting:delete',
-        'actions:delete'
-      ]
+        'actions:delete',
+      ],
     },
     read: {
       app: ['apm', 'kibana'],
@@ -51,12 +51,12 @@ export const APM_FEATURE = {
         'actions-read',
         'actions-all',
         'alerting-read',
-        'alerting-all'
+        'alerting-all',
       ],
       catalogue: ['apm'],
       savedObject: {
         all: ['alert', 'action', 'action_task_params'],
-        read: []
+        read: [],
       },
       ui: [
         'show',
@@ -65,8 +65,8 @@ export const APM_FEATURE = {
         'alerting:save',
         'actions:save',
         'alerting:delete',
-        'actions:delete'
-      ]
-    }
-  }
+        'actions:delete',
+      ],
+    },
+  },
 };

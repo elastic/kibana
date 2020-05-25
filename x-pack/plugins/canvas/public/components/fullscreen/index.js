@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { getFullscreen } from '../../state/selectors/app';
 import { Fullscreen as Component } from './fullscreen';
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   isFullscreen: getFullscreen(state),
 });
 

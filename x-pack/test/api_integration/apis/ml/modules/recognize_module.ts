@@ -51,13 +51,13 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('module recognizer', function() {
+  describe('module recognizer', function () {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
     for (const testData of testDataList) {
-      describe('lists matching modules', function() {
+      describe('lists matching modules', function () {
         before(async () => {
           if (testData.hasOwnProperty('sourceDataArchive')) {
             await esArchiver.loadIfNeeded(testData.sourceDataArchive!);

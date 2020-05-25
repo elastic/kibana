@@ -51,7 +51,7 @@ export const ML__ID_COPY = 'ml__id_copy';
 export const isKeywordAndTextType = (fieldName: string): boolean => {
   const { fields } = newJobCapsService;
 
-  const fieldType = fields.find(field => field.name === fieldName)?.type;
+  const fieldType = fields.find((field) => field.name === fieldName)?.type;
   let isBothTypes = false;
 
   // If it's a keyword type - check if it has a corresponding text type
@@ -192,8 +192,8 @@ export const getDefaultFieldsFromJobCaps = (
 
       featureInfluenceFields.push(
         ...fields
-          .filter(d => !jobConfig.analyzed_fields.excludes.includes(d.id))
-          .map(d => ({
+          .filter((d) => !jobConfig.analyzed_fields.excludes.includes(d.id))
+          .map((d) => ({
             id: `${resultsField}.${FEATURE_INFLUENCE}.${d.id}`,
             name: `${resultsField}.${FEATURE_INFLUENCE}.${d.name}`,
             type: KBN_FIELD_TYPES.NUMBER,
