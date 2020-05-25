@@ -53,6 +53,8 @@ describe('CertificatesPage', () => {
       setItem: jest.fn(),
       clear: jest.fn(),
     };
+
+    // @ts-ignore
     global.localStorage = localStorageMock;
   });
 
