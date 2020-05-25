@@ -265,11 +265,6 @@ function useFeatures(
   return features;
 }
 
-function backToRoleList() {
-  // todo:  window.location.hash = ROLES_PATH;
-  // window.location.hash = '';
-}
-
 export const EditRolePage: FunctionComponent<Props> = ({
   userAPIClient,
   indexPatterns,
@@ -317,6 +312,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const isDeprecatedRole = checkIfRoleDeprecated(role);
 
   const [kibanaPrivileges, builtInESPrivileges] = privileges;
+
+  const backToRoleList = () => history.push('/');
 
   const getFormTitle = () => {
     let titleText;
