@@ -9,7 +9,7 @@ import path from 'path';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   const testDataListPositive = [
@@ -33,7 +33,7 @@ export default function({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('file based', function() {
+  describe('file based', function () {
     this.tags(['mlqa']);
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -43,7 +43,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     for (const testData of testDataListPositive) {
-      describe(testData.suiteSuffix, function() {
+      describe(testData.suiteSuffix, function () {
         after(async () => {
           await ml.api.deleteIndices(testData.indexName);
         });
@@ -88,7 +88,7 @@ export default function({ getService }: FtrProviderContext) {
     }
 
     for (const testData of testDataListNegative) {
-      describe(testData.suiteSuffix, function() {
+      describe(testData.suiteSuffix, function () {
         it('loads the data visualizer selector page', async () => {
           await ml.navigation.navigateToDataVisualizer();
         });

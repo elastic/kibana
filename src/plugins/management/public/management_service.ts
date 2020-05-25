@@ -53,7 +53,7 @@ export class ManagementService {
   }
 
   private getSection(sectionId: ManagementSectionId) {
-    return this.sections.find(section => section.id === sectionId);
+    return this.sections.find((section) => section.id === sectionId);
   }
 
   private getAllSections() {
@@ -62,7 +62,7 @@ export class ManagementService {
 
   private getSectionsEnabled() {
     return this.sections
-      .filter(section => section.getAppsEnabled().length > 0)
+      .filter((section) => section.getAppsEnabled().length > 0)
       .sort((a, b) => a.order - b.order);
   }
 

@@ -91,7 +91,7 @@ async function creatHelloWorldContainerAndEmbeddable(
   return { container, embeddable, coreSetup, coreStart, setup, start, uiActions };
 }
 
-test('Container initializes embeddables', async done => {
+test('Container initializes embeddables', async (done) => {
   const { container } = await creatHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {
@@ -130,7 +130,7 @@ test('Container.addNewEmbeddable', async () => {
   expect(embeddableInContainer.id).toBe(embeddable.id);
 });
 
-test('Container.removeEmbeddable removes and cleans up', async done => {
+test('Container.removeEmbeddable removes and cleans up', async (done) => {
   const { start, coreStart, uiActions } = await creatHelloWorldContainerAndEmbeddable();
   const container = new HelloWorldContainer(
     {
@@ -294,7 +294,7 @@ test('Container view mode change propagates to children', async () => {
   expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
 });
 
-test(`Container updates its state when a child's input is updated`, async done => {
+test(`Container updates its state when a child's input is updated`, async (done) => {
   const {
     container,
     embeddable,
@@ -381,7 +381,7 @@ test(`Derived container state passed to children`, async () => {
   subscription.unsubscribe();
 });
 
-test(`Can subscribe to children embeddable updates`, async done => {
+test(`Can subscribe to children embeddable updates`, async (done) => {
   const { embeddable } = await creatHelloWorldContainerAndEmbeddable(
     {
       id: 'hello container',
@@ -404,7 +404,7 @@ test(`Can subscribe to children embeddable updates`, async done => {
   embeddable.updateInput({ nameTitle: 'Dr.' });
 });
 
-test('Test nested reactions', async done => {
+test('Test nested reactions', async (done) => {
   const { container, embeddable } = await creatHelloWorldContainerAndEmbeddable(
     { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
     {
@@ -472,7 +472,7 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
   ]);
 });
 
-test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async done => {
+test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async (done) => {
   const { container } = await creatHelloWorldContainerAndEmbeddable({ id: 'hello', panels: {} });
 
   const embeddable = await container.addNewEmbeddable<
@@ -523,7 +523,7 @@ test('Panel removed from input state', async () => {
   };
 
   container.updateInput(newInput);
-  await new Promise(r => setTimeout(r, 1));
+  await new Promise((r) => setTimeout(r, 1));
 
   expect(container.getChild(embeddable.id)).toBeUndefined();
   expect(container.getOutput().embeddableLoaded[embeddable.id]).toBeUndefined();
@@ -554,7 +554,7 @@ test('Panel added to input state', async () => {
   );
 
   container2.updateInput(container.getInput());
-  await new Promise(r => setTimeout(r, 1));
+  await new Promise((r) => setTimeout(r, 1));
 
   expect(container.getChild(embeddable.id)).toBeDefined();
   expect(container.getOutput().embeddableLoaded[embeddable.id]).toBe(true);
@@ -562,7 +562,7 @@ test('Panel added to input state', async () => {
   expect(container.getOutput().embeddableLoaded[embeddable2.id]).toBe(true);
 });
 
-test('Container changes made directly after adding a new embeddable are propagated', async done => {
+test('Container changes made directly after adding a new embeddable are propagated', async (done) => {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   const { setup, doStart, uiActions } = testPlugin(coreSetup, coreStart);
@@ -618,7 +618,7 @@ test('Container changes made directly after adding a new embeddable are propagat
   container.updateInput({ viewMode: ViewMode.VIEW });
 });
 
-test('container stores ErrorEmbeddables when a factory for a child cannot be found (so the panel can be removed)', async done => {
+test('container stores ErrorEmbeddables when a factory for a child cannot be found (so the panel can be removed)', async (done) => {
   const { container } = await creatHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {
@@ -639,7 +639,7 @@ test('container stores ErrorEmbeddables when a factory for a child cannot be fou
   });
 });
 
-test('container stores ErrorEmbeddables when a saved object cannot be found', async done => {
+test('container stores ErrorEmbeddables when a saved object cannot be found', async (done) => {
   const { container } = await creatHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {
@@ -660,7 +660,7 @@ test('container stores ErrorEmbeddables when a saved object cannot be found', as
   });
 });
 
-test('ErrorEmbeddables get updated when parent does', async done => {
+test('ErrorEmbeddables get updated when parent does', async (done) => {
   const { container } = await creatHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {
@@ -723,7 +723,7 @@ test('untilEmbeddableLoaded() throws an error if there is no such child panel in
   expect(error.message).toMatchInlineSnapshot(`"Panel not found"`);
 });
 
-test('untilEmbeddableLoaded() resolves if child is loaded in the container', async done => {
+test('untilEmbeddableLoaded() resolves if child is loaded in the container', async (done) => {
   const { setup, doStart, coreStart, uiActions } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()
@@ -759,7 +759,7 @@ test('untilEmbeddableLoaded() resolves if child is loaded in the container', asy
   done();
 });
 
-test('untilEmbeddableLoaded resolves with undefined if child is subsequently removed', async done => {
+test('untilEmbeddableLoaded resolves with undefined if child is subsequently removed', async (done) => {
   const { doStart, setup, coreStart, uiActions } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()
@@ -793,7 +793,7 @@ test('untilEmbeddableLoaded resolves with undefined if child is subsequently rem
     }
   );
 
-  container.untilEmbeddableLoaded('123').then(embed => {
+  container.untilEmbeddableLoaded('123').then((embed) => {
     expect(embed).toBeUndefined();
     done();
   });
@@ -801,7 +801,7 @@ test('untilEmbeddableLoaded resolves with undefined if child is subsequently rem
   container.updateInput({ panels: {} });
 });
 
-test('adding a panel then subsequently removing it before its loaded removes the panel', async done => {
+test('adding a panel then subsequently removing it before its loaded removes the panel', async (done) => {
   const { doStart, coreStart, uiActions, setup } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()

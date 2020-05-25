@@ -117,7 +117,7 @@ export const calculateGradientColor = (
     }
     return acc;
   }, first(sortedRules));
-  const endRule = sortedRules.filter(r => r !== startRule).find(r => r.value >= normValue);
+  const endRule = sortedRules.filter((r) => r !== startRule).find((r) => r.value >= normValue);
   if (!endRule) {
     return startRule.color;
   }

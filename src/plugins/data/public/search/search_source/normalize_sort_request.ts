@@ -26,7 +26,7 @@ export function normalizeSortRequest(
   defaultSortOptions: SortOptions = {}
 ) {
   const sortArray: EsQuerySortValue[] = Array.isArray(sortObject) ? sortObject : [sortObject];
-  return sortArray.map(function(sortable) {
+  return sortArray.map(function (sortable) {
     return normalize(sortable, indexPattern, defaultSortOptions);
   });
 }

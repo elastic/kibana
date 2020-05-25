@@ -11,7 +11,7 @@ import { getWorkpadName, isWriteable } from '../selectors/workpad';
 import { getWindow } from '../../lib/get_window';
 import { setDocTitle } from '../../lib/doc_title';
 
-export const workpadUpdate = ({ dispatch, getState }) => next => action => {
+export const workpadUpdate = ({ dispatch, getState }) => (next) => (action) => {
   const oldIsWriteable = isWriteable(getState());
   const oldName = getWorkpadName(getState());
 

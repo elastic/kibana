@@ -18,7 +18,7 @@ describe('EventFieldsBrowser', () => {
   const mount = useMountAppended();
 
   describe('column headers', () => {
-    ['Field', 'Value', 'Description'].forEach(header => {
+    ['Field', 'Value', 'Description'].forEach((header) => {
       test(`it renders the ${header} column header`, () => {
         const wrapper = mount(
           <TestProviders>
@@ -81,12 +81,9 @@ describe('EventFieldsBrowser', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find(`[data-test-subj="toggle-field-${field}"]`)
-          .first()
-          .props().checked
-      ).toBe(false);
+      expect(wrapper.find(`[data-test-subj="toggle-field-${field}"]`).first().props().checked).toBe(
+        false
+      );
     });
 
     test('it renders an checked checkbox for a field that is a member of columnHeaders', () => {
@@ -106,12 +103,9 @@ describe('EventFieldsBrowser', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find(`[data-test-subj="toggle-field-${field}"]`)
-          .first()
-          .props().checked
-      ).toBe(true);
+      expect(wrapper.find(`[data-test-subj="toggle-field-${field}"]`).first().props().checked).toBe(
+        true
+      );
     });
 
     test('it invokes toggleColumn when the checkbox is clicked', () => {
@@ -191,12 +185,7 @@ describe('EventFieldsBrowser', () => {
           />
         </TestProviders>
       );
-      expect(
-        wrapper
-          .find('[data-test-subj="field-name"]')
-          .at(0)
-          .text()
-      ).toEqual('@timestamp');
+      expect(wrapper.find('[data-test-subj="field-name"]').at(0).text()).toEqual('@timestamp');
     });
   });
 
@@ -215,12 +204,9 @@ describe('EventFieldsBrowser', () => {
           />
         </TestProviders>
       );
-      expect(
-        wrapper
-          .find('[data-test-subj="draggable-content-@timestamp"]')
-          .at(0)
-          .text()
-      ).toEqual('Feb 28, 2019 @ 16:50:54.621');
+      expect(wrapper.find('[data-test-subj="draggable-content-@timestamp"]').at(0).text()).toEqual(
+        'Feb 28, 2019 @ 16:50:54.621'
+      );
     });
   });
 
@@ -240,13 +226,7 @@ describe('EventFieldsBrowser', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('.euiTableRow')
-          .find('.euiTableRowCell')
-          .at(3)
-          .text()
-      ).toContain(
+      expect(wrapper.find('.euiTableRow').find('.euiTableRowCell').at(3).text()).toContain(
         'DescriptionDate/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events. Example: 2016-05-23T08:05:34.853Z'
       );
     });

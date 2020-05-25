@@ -229,7 +229,7 @@ export class DetailPanel extends Component {
             </EuiDescriptionListTitle>
 
             <EuiDescriptionListDescription data-test-subj="remoteClusterDetailSeeds">
-              {seeds.map(seed => (
+              {seeds.map((seed) => (
                 <EuiText size="s" key={seed}>
                   {seed}
                 </EuiText>
@@ -490,7 +490,7 @@ export class DetailPanel extends Component {
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
                   <RemoveClusterButtonProvider clusterNames={[clusterName]}>
-                    {removeCluster => (
+                    {(removeCluster) => (
                       <EuiButtonEmpty
                         color="danger"
                         onClick={removeCluster}

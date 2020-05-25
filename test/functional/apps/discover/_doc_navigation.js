@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
@@ -27,14 +27,14 @@ export default function({ getService, getPageObjects }) {
   const retry = getService('retry');
 
   describe('doc link in discover', function contextSize() {
-    before(async function() {
+    before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitForDocTableLoadingComplete();
     });
 
-    it('should open the doc view of the selected document', async function() {
+    it('should open the doc view of the selected document', async function () {
       // navigate to the doc view
       await docTable.clickRowToggle({ rowIndex: 0 });
 

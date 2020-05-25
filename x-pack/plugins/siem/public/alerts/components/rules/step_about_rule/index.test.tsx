@@ -69,10 +69,7 @@ describe('StepAboutRuleComponent', () => {
     nextButton.simulate('click');
 
     expect(
-      wrapper
-        .find('input[aria-describedby="detectionEngineStepAboutRuleName"]')
-        .at(0)
-        .props().value
+      wrapper.find('input[aria-describedby="detectionEngineStepAboutRuleName"]').at(0).props().value
     ).toEqual('Test name text');
     expect(descriptionInput.props().value).toEqual('');
     expect(

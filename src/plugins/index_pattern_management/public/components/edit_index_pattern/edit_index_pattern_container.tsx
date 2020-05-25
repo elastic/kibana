@@ -19,52 +19,26 @@
 
 import React, { useEffect, useState } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import {
-  ChromeDocTitle,
-  NotificationsStart,
-  OverlayStart,
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-} from 'src/core/public';
 import { IndexPattern } from '../../../../../plugins/data/public';
-import { ManagementAppMountParams } from '../../../../management/public';
-import { IndexPatternManagementStart } from '../..';
+import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { IndexPatternManagmentContext } from '../../types';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import { EditIndexPattern } from '../edit_index_pattern';
 
-interface EditIndexPatternContainerProps extends RouteComponentProps<{ id: string }> {
-  getIndexPattern: (id: string) => Promise<IndexPattern>;
-  config: IUiSettingsClient;
-  services: {
-    notifications: NotificationsStart;
-    docTitle: ChromeDocTitle;
-    overlays: OverlayStart;
-    savedObjectsClient: SavedObjectsClientContract;
-    setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
-    indexPatternManagement: IndexPatternManagementStart;
-    painlessDocLink: string;
-  };
-}
-
-const EditIndexPatternCont: React.FC<EditIndexPatternContainerProps> = ({ ...props }) => {
+const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ ...props }) => {
+  const { data, setBreadcrumbs } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPattern, setIndexPattern] = useState<IndexPattern>();
 
   useEffect(() => {
-    props.getIndexPattern(props.match.params.id).then((ip: IndexPattern) => {
+    data.indexPatterns.get(props.match.params.id).then((ip: IndexPattern) => {
       setIndexPattern(ip);
-      props.services.setBreadcrumbs(getEditBreadcrumbs(ip));
+      setBreadcrumbs(getEditBreadcrumbs(ip));
     });
-  }, [props.match.params.id, props.getIndexPattern, props]);
+  }, [data.indexPatterns, props.match.params.id, setBreadcrumbs]);
 
   if (indexPattern) {
-    return (
-      <EditIndexPattern
-        indexPattern={indexPattern}
-        services={props.services}
-        config={props.config}
-      />
-    );
+    return <EditIndexPattern indexPattern={indexPattern} />;
   } else {
     return <></>;
   }

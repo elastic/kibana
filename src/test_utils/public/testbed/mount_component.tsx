@@ -22,7 +22,8 @@ import { Store } from 'redux';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
-import { mountWithIntl, WithMemoryRouter, WithRoute, WithStore } from '../helpers';
+import { mountWithIntl } from '../enzyme_helpers';
+import { WithMemoryRouter, WithRoute, WithStore } from '../helpers';
 import { MemoryRouterConfig } from './types';
 
 interface Config {
@@ -66,7 +67,7 @@ export const mountComponentAsync = async (config: Config): Promise<ReactWrapper>
   });
 
   // @ts-ignore
-  return component;
+  return component.update();
 };
 
 export const getJSXComponentWithProps = (Component: ComponentType, props: any) => (

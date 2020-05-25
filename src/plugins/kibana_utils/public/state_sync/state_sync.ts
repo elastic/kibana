@@ -146,7 +146,7 @@ export function syncState<
         stateStorage.cancel();
       }
 
-      subscriptions.forEach(s => s.unsubscribe());
+      subscriptions.forEach((s) => s.unsubscribe());
       subscriptions.splice(0, subscriptions.length);
     },
     start: () => {
@@ -175,13 +175,13 @@ export function syncState<
  * @param stateSyncConfigs - Array of IStateSyncConfig to sync
  */
 export function syncStates(stateSyncConfigs: Array<IStateSyncConfig<any>>): ISyncStateRef {
-  const syncRefs = stateSyncConfigs.map(config => syncState(config));
+  const syncRefs = stateSyncConfigs.map((config) => syncState(config));
   return {
     stop: () => {
-      syncRefs.forEach(s => s.stop());
+      syncRefs.forEach((s) => s.stop());
     },
     start: () => {
-      syncRefs.forEach(s => s.start());
+      syncRefs.forEach((s) => s.start());
     },
   };
 }

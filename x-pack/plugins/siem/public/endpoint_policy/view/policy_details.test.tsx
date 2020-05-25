@@ -14,7 +14,7 @@ import { createAppRootMockRenderer } from '../../common/mock/endpoint';
 describe('Policy Details', () => {
   type FindReactWrapperResponse = ReturnType<ReturnType<typeof render>['find']>;
 
-  const sleep = (ms = 100) => new Promise(wakeup => setTimeout(wakeup, ms));
+  const sleep = (ms = 100) => new Promise((wakeup) => setTimeout(wakeup, ms));
   const generator = new EndpointDocGenerator();
   const { history, AppWrapper, coreStart } = createAppRootMockRenderer();
   const http = coreStart.http;

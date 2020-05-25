@@ -8,7 +8,7 @@ import { getHeapMemoryChart } from './heap_memory';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../../helpers/setup_request';
 import { getNonHeapMemoryChart } from './non_heap_memory';
 import { getThreadCountChart } from './thread_count';
@@ -29,7 +29,7 @@ export async function getJavaMetricsCharts(
     getNonHeapMemoryChart(setup, serviceName, serviceNodeName),
     getThreadCountChart(setup, serviceName, serviceNodeName),
     getGcRateChart(setup, serviceName, serviceNodeName),
-    getGcTimeChart(setup, serviceName, serviceNodeName)
+    getGcTimeChart(setup, serviceName, serviceNodeName),
   ]);
 
   return { charts };
