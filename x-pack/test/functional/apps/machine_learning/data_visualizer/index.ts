@@ -5,8 +5,8 @@
  */
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('data visualizer', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('data visualizer', function () {
     this.tags(['skipFirefox']);
 
     loadTestFile(require.resolve('./index_data_visualizer'));

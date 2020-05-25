@@ -7,12 +7,12 @@
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const overview = getService('monitoringClusterOverview');
   const nodesList = getService('monitoringElasticsearchNodes');
   const esClusterSummaryStatus = getService('monitoringElasticsearchSummaryStatus');
 
-  describe('Elasticsearch nodes listing', function() {
+  describe('Elasticsearch nodes listing', function () {
     // FF issue: https://github.com/elastic/kibana/issues/35551
     this.tags(['skipFirefox']);
 
@@ -47,7 +47,7 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      describe('skipCloud', function() {
+      describe('skipCloud', function () {
         // TODO: https://github.com/elastic/stack-monitoring/issues/31
         this.tags(['skipCloud']);
 

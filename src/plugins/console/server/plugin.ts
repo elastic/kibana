@@ -45,10 +45,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
       },
     }));
 
-    const config = await this.ctx.config
-      .create()
-      .pipe(first())
-      .toPromise();
+    const config = await this.ctx.config.create().pipe(first()).toPromise();
 
     const { elasticsearch } = await this.ctx.config.legacy.globalConfig$.pipe(first()).toPromise();
 

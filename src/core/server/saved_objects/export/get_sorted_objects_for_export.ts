@@ -95,7 +95,7 @@ async function fetchObjectsToExport({
       throw Boom.badRequest(`Can't specify both "search" and "objects" properties when exporting`);
     }
     const bulkGetResult = await savedObjectsClient.bulkGet(objects, { namespace });
-    const erroredObjects = bulkGetResult.saved_objects.filter(obj => !!obj.error);
+    const erroredObjects = bulkGetResult.saved_objects.filter((obj) => !!obj.error);
     if (erroredObjects.length) {
       const err = Boom.badRequest();
       err.output.payload.attributes = {

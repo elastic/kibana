@@ -27,7 +27,7 @@ export const JobDescriptionInput: FC<Props> = ({ description, setFormState }) =>
       value={description}
       placeholder={helpText}
       rows={2}
-      onChange={e => {
+      onChange={(e) => {
         const value = e.target.value;
         setFormState({ description: value });
       }}

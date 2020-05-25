@@ -70,7 +70,7 @@ const projectGraph = buildProjectGraph(projectsByName);
 function getFsMockCalls() {
   const fs = require('./fs');
   const fsMockCalls: { [key: string]: any[][] } = {};
-  Object.keys(fs).map(key => {
+  Object.keys(fs).map((key) => {
     if (jest.isMockFunction(fs[key])) {
       fsMockCalls[key] = fs[key].mock.calls;
     }

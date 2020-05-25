@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 
-export const SplitByFilter = props => {
+export const SplitByFilter = (props) => {
   const { onChange, uiRestrictions, indexPattern } = props;
   const defaults = { filter: { language: getDefaultQueryLanguage(), query: '' } };
   const model = { ...defaults, ...props.model };
@@ -66,7 +66,7 @@ export const SplitByFilter = props => {
               language: model.filter.language || getDefaultQueryLanguage(),
               query: model.filter.query || '',
             }}
-            onChange={filter => onChange({ filter })}
+            onChange={(filter) => onChange({ filter })}
             indexPatterns={[indexPattern]}
           />
         </EuiFormRow>

@@ -142,7 +142,7 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
           const userConfiguredTmsLayer = tmsServices[0];
           const initBasemapLayer = userConfiguredTmsLayer
             ? userConfiguredTmsLayer
-            : tmsServices.find(s => s.id === emsTileLayerId.bright);
+            : tmsServices.find((s) => s.id === emsTileLayerId.bright);
           if (initBasemapLayer) {
             this._setTmsLayer(initBasemapLayer);
           }
@@ -245,9 +245,7 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
       const interval$ = Rx.interval(10).pipe(filter(() => !this._baseLayerDirty));
       const timer$ = Rx.timer(maxTimeForBaseLayer);
 
-      return Rx.race(interval$, timer$)
-        .pipe(first())
-        .toPromise();
+      return Rx.race(interval$, timer$).pipe(first()).toPromise();
     }
   };
 }

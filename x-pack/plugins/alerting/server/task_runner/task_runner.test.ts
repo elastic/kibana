@@ -54,7 +54,7 @@ describe('Task Runner', () => {
 
   afterAll(() => fakeTimer.restore());
 
-  const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
+  const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
   const services = alertsMock.createAlertServices();
   const savedObjectsClient = services.savedObjectsClient;
 
@@ -64,7 +64,7 @@ describe('Task Runner', () => {
   } = {
     getServices: jest.fn().mockReturnValue(services),
     actionsPlugin: actionsMock.createStart(),
-    encryptedSavedObjectsPlugin,
+    encryptedSavedObjectsClient,
     logger: loggingServiceMock.create().get(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     getBasePath: jest.fn().mockReturnValue(undefined),
@@ -123,7 +123,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
-    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -197,7 +197,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
-    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -316,7 +316,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
-    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -403,7 +403,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
-    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -434,7 +434,7 @@ describe('Task Runner', () => {
       ...mockedAlertTypeSavedObject,
       references: [],
     });
-    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -462,7 +462,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
-    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -498,7 +498,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
-    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {},
@@ -537,7 +537,7 @@ describe('Task Runner', () => {
     );
 
     savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
-    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -588,7 +588,7 @@ describe('Task Runner', () => {
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when fetching the encrypted attributes', async () => {
-    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockImplementation(() => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockImplementation(() => {
       throw new Error('OMG');
     });
 
@@ -624,7 +624,7 @@ describe('Task Runner', () => {
     );
 
     savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
-    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -656,7 +656,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
 
-    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -688,7 +688,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
 
-    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
