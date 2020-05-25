@@ -34,7 +34,7 @@ const routeLocation = (state: Immutable<PolicyListState>) => state.location;
  */
 export const urlSearchParams: (
   state: Immutable<PolicyListState>
-) => PolicyListUrlSearchParams = createSelector(routeLocation, location => {
+) => PolicyListUrlSearchParams = createSelector(routeLocation, (location) => {
   const searchParams = {
     page_index: 0,
     page_size: 10,

@@ -284,9 +284,9 @@ export class JsonUploadAndParse extends Component {
               {...{
                 onFileUpload,
                 fileRef,
-                setIndexName: indexName => this.setState({ indexName }),
-                setFileRef: fileRef => this.setState({ fileRef }),
-                setParsedFile: parsedFile => this.setState({ parsedFile }),
+                setIndexName: (indexName) => this.setState({ indexName }),
+                setFileRef: (fileRef) => this.setState({ fileRef }),
+                setParsedFile: (parsedFile) => this.setState({ parsedFile }),
                 transformDetails,
                 resetFileAndIndexSettings: this._resetFileAndIndexSettings,
               }}
@@ -294,10 +294,10 @@ export class JsonUploadAndParse extends Component {
             <IndexSettings
               disabled={!fileRef}
               indexName={indexName}
-              setIndexName={indexName => this.setState({ indexName })}
+              setIndexName={(indexName) => this.setState({ indexName })}
               indexTypes={indexTypes}
-              setSelectedIndexType={selectedIndexType => this.setState({ selectedIndexType })}
-              setHasIndexErrors={hasIndexErrors => this.setState({ hasIndexErrors })}
+              setSelectedIndexType={(selectedIndexType) => this.setState({ selectedIndexType })}
+              setHasIndexErrors={(hasIndexErrors) => this.setState({ hasIndexErrors })}
             />
           </Fragment>
         )}

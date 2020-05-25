@@ -61,7 +61,7 @@ exports.run = function run(argv) {
       name,
       targetPath,
     },
-  }).catch(error => {
+  }).catch((error) => {
     console.error(chalk`{red fatal error}!`);
     console.error(error.stack);
     process.exit(1);

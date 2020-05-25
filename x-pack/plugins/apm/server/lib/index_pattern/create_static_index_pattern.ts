@@ -38,7 +38,7 @@ export async function createStaticIndexPattern(
       'index-pattern',
       {
         ...apmIndexPattern.attributes,
-        title: apmIndexPatternTitle
+        title: apmIndexPatternTitle,
       },
       { id: APM_STATIC_INDEX_PATTERN_ID, overwrite: false }
     );

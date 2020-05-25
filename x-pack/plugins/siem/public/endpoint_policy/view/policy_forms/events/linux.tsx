@@ -67,7 +67,7 @@ export const LinuxEvents = React.memo(() => {
               setter={(config, checked) =>
                 setIn(config)(item.os)('events')(item.protectionField)(checked)
               }
-              getter={config => getIn(config)(item.os)('events')(item.protectionField)}
+              getter={(config) => getIn(config)(item.os)('events')(item.protectionField)}
             />
           );
         })}

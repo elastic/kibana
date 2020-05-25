@@ -106,6 +106,6 @@ export function paginatedResults(response: SearchResponse<ResolverEvent>): Pagin
     {}
   );
 
-  const results = response.hits.hits.map(hit => hit._source);
+  const results = response.hits.hits.map((hit) => hit._source);
   return { totals, results };
 }

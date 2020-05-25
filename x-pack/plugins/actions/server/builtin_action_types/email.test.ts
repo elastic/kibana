@@ -121,7 +121,7 @@ describe('config validation', () => {
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        isWhitelistedHostname: hostname => hostname === NODEMAILER_AOL_SERVICE_HOST,
+        isWhitelistedHostname: (hostname) => hostname === NODEMAILER_AOL_SERVICE_HOST,
       },
     });
     const baseConfig = {

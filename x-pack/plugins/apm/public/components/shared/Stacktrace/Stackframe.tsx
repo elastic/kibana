@@ -10,12 +10,12 @@ import styled from 'styled-components';
 import { EuiAccordion } from '@elastic/eui';
 import {
   IStackframe,
-  IStackframeWithLineContext
+  IStackframeWithLineContext,
 } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import {
   borderRadius,
   fontFamilyCode,
-  fontSize
+  fontSize,
 } from '../../../style/variables';
 import { FrameHeading } from './FrameHeading';
 import { Context } from './Context';
@@ -27,7 +27,7 @@ const ContextContainer = styled.div<{ isLibraryFrame: boolean }>`
   font-size: ${fontSize};
   border: 1px solid ${theme.euiColorLightShade};
   border-radius: ${borderRadius};
-  background: ${props =>
+  background: ${(props) =>
     props.isLibraryFrame
       ? theme.euiColorEmptyShade
       : theme.euiColorLightestShade};
@@ -46,7 +46,7 @@ export function Stackframe({
   codeLanguage,
   id,
   initialIsOpen = false,
-  isLibraryFrame = false
+  isLibraryFrame = false,
 }: Props) {
   if (!hasLineContext(stackframe)) {
     return (

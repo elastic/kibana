@@ -89,7 +89,7 @@ export class ColdPhase extends PureComponent {
                 }
                 id={`${PHASE_COLD}-${PHASE_ENABLED}`}
                 checked={phaseData[PHASE_ENABLED]}
-                onChange={e => {
+                onChange={(e) => {
                   setPhaseData(PHASE_ENABLED, e.target.checked);
                 }}
                 aria-controls="coldPhaseContent"
@@ -146,7 +146,7 @@ export class ColdPhase extends PureComponent {
                       <EuiFieldNumber
                         id={`${PHASE_COLD}-${PHASE_REPLICA_COUNT}`}
                         value={phaseData[PHASE_REPLICA_COUNT]}
-                        onChange={e => {
+                        onChange={(e) => {
                           setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
                         }}
                         min={0}
@@ -187,7 +187,7 @@ export class ColdPhase extends PureComponent {
               <EuiSwitch
                 data-test-subj="freezeSwitch"
                 checked={phaseData[PHASE_FREEZE_ENABLED]}
-                onChange={e => {
+                onChange={(e) => {
                   setPhaseData(PHASE_FREEZE_ENABLED, e.target.checked);
                 }}
                 label={freezeLabel}

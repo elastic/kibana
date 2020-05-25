@@ -10,7 +10,7 @@ import { METRIC_JAVA_GC_TIME } from '../../../../../../common/elasticsearch_fiel
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../../../helpers/setup_request';
 import { fetchAndTransformGcMetrics } from './fetch_and_transform_gc_metrics';
 import { ChartBase } from '../../../types';
@@ -18,20 +18,20 @@ import { ChartBase } from '../../../types';
 const series = {
   [METRIC_JAVA_GC_TIME]: {
     title: i18n.translate('xpack.apm.agentMetrics.java.gcTime', {
-      defaultMessage: 'GC time'
+      defaultMessage: 'GC time',
     }),
-    color: theme.euiColorVis0
-  }
+    color: theme.euiColorVis0,
+  },
 };
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.java.gcTimeChartTitle', {
-    defaultMessage: 'Garbage collection time spent per minute'
+    defaultMessage: 'Garbage collection time spent per minute',
   }),
   key: 'gc_time_line_chart',
   type: 'linemark',
   yUnit: 'time',
-  series
+  series,
 };
 
 const getGcTimeChart = (
@@ -44,7 +44,7 @@ const getGcTimeChart = (
     serviceName,
     serviceNodeName,
     chartBase,
-    fieldName: METRIC_JAVA_GC_TIME
+    fieldName: METRIC_JAVA_GC_TIME,
   });
 };
 

@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   function useFixtures() {
@@ -25,11 +25,7 @@ export default function({ getService }: FtrProviderContext) {
       useFixtures();
 
       it('should return a 400 if the request is not valid', async () => {
-        await supertest
-          .post(`/api/ingest/policies`)
-          .set('kbn-xsrf', 'xxx')
-          .send({})
-          .expect(400);
+        await supertest.post(`/api/ingest/policies`).set('kbn-xsrf', 'xxx').send({}).expect(400);
       });
 
       it('should allow to create a new policy', async () => {
@@ -53,7 +49,7 @@ export default function({ getService }: FtrProviderContext) {
         const { body: apiResponse } = await supertest.get(`/api/ingest/policies`).expect(200);
         expect(apiResponse).to.have.keys('success', 'page', 'total', 'list');
         expect(apiResponse.success).to.eql(true);
-        const policiesIds = (apiResponse.list as Array<{ id: string }>).map(i => i.id);
+        const policiesIds = (apiResponse.list as Array<{ id: string }>).map((i) => i.id);
         expect(policiesIds.length).to.eql(3);
         expect(policiesIds).to.contain('1');
         expect(policiesIds).to.contain('3');

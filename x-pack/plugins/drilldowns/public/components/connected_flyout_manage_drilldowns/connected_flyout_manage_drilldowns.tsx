@@ -115,7 +115,7 @@ export function createFlyoutManageDrilldowns({
     function resolveInitialDrilldownWizardConfig(): DrilldownWizardConfig | undefined {
       if (route !== Routes.Edit) return undefined;
       if (!currentEditId) return undefined;
-      const drilldownToEdit = drilldowns?.find(d => d.eventId === currentEditId);
+      const drilldownToEdit = drilldowns?.find((d) => d.eventId === currentEditId);
       if (!drilldownToEdit) return undefined;
 
       return {
@@ -200,11 +200,11 @@ export function createFlyoutManageDrilldowns({
             showWelcomeMessage={shouldShowWelcomeMessage}
             onWelcomeHideClick={onHideWelcomeMessage}
             drilldowns={drilldowns.map(mapToDrilldownToDrilldownListItem)}
-            onDelete={ids => {
+            onDelete={(ids) => {
               setCurrentEditId(null);
               deleteDrilldown(ids);
             }}
-            onEdit={id => {
+            onEdit={(id) => {
               setCurrentEditId(id);
               setRoute(Routes.Edit);
             }}
@@ -228,7 +228,7 @@ function useCompatibleActionFactoriesForCurrentContext<Context extends object = 
     let canceled = false;
     async function updateCompatibleFactoriesForContext() {
       const compatibility = await Promise.all(
-        actionFactories.map(factory => factory.isCompatible(context))
+        actionFactories.map((factory) => factory.isCompatible(context))
       );
       if (canceled) return;
       setCompatibleActionFactories(actionFactories.filter((_, i) => compatibility[i]));

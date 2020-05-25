@@ -73,7 +73,7 @@ export class Layout {
    * @returns {*} Creates the visualization layout
    */
   createLayout(arr) {
-    return _.each(arr, obj => {
+    return _.each(arr, (obj) => {
       this.layout(obj);
     });
   }
@@ -93,9 +93,7 @@ export class Layout {
     const width = axisWrapperElement.width();
     const height = axisWrapperElement.height();
     axis.destroy();
-    $(this.el)
-      .find('.chart-title svg')
-      .remove();
+    $(this.el).find('.chart-title svg').remove();
     axisWrapperElement.css('visibility', '');
 
     if (axis.axisConfig.isHorizontal()) {
@@ -145,7 +143,7 @@ export class Layout {
     if (obj.children) {
       const newParent = childEl[0][0];
 
-      _.forEach(obj.children, function(obj) {
+      _.forEach(obj.children, function (obj) {
         if (!obj.parent) {
           obj.parent = newParent;
         }
@@ -178,10 +176,7 @@ export class Layout {
       el = d3.select(this.el).select(el)[0][0];
     }
 
-    return d3
-      .select(el)
-      .append(type)
-      .attr('class', className);
+    return d3.select(el).append(type).attr('class', className);
   }
 
   /**
@@ -192,9 +187,6 @@ export class Layout {
    * @returns {D3.Selection|D3.Transition.Transition} Reference to an empty DOM element
    */
   removeAll(el) {
-    return d3
-      .select(el)
-      .selectAll('*')
-      .remove();
+    return d3.select(el).selectAll('*').remove();
   }
 }

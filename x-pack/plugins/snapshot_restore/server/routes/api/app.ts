@@ -75,7 +75,7 @@ export function registerAppRoutes({
               return true;
             }
 
-            const indexHasAllPrivileges = APP_RESTORE_INDEX_PRIVILEGES.every(privilege =>
+            const indexHasAllPrivileges = APP_RESTORE_INDEX_PRIVILEGES.every((privilege) =>
               privileges.includes(privilege)
             );
 

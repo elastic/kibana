@@ -48,7 +48,7 @@ export const help: FunctionHelp<FunctionFactory<typeof progress>> = {
       values: {
         list: Object.values(Shape)
           .slice(0, -1)
-          .map(shape => `\`"${shape}"\``)
+          .map((shape) => `\`"${shape}"\``)
           .join(', '),
         end: `\`"${Object.values(Shape).slice(-1)[0]}"\``,
       },

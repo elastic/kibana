@@ -8,7 +8,7 @@ import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
 import { services } from './services';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {

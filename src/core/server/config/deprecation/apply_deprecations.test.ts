@@ -36,7 +36,7 @@ describe('applyDeprecations', () => {
     const handlerC = jest.fn();
     applyDeprecations(
       {},
-      [handlerA, handlerB, handlerC].map(h => wrapHandler(h))
+      [handlerA, handlerB, handlerC].map((h) => wrapHandler(h))
     );
     expect(handlerA).toHaveBeenCalledTimes(1);
     expect(handlerB).toHaveBeenCalledTimes(1);
@@ -49,7 +49,7 @@ describe('applyDeprecations', () => {
     const alteredConfig = { foo: 'bar' };
 
     const handlerA = jest.fn().mockReturnValue(alteredConfig);
-    const handlerB = jest.fn().mockImplementation(conf => conf);
+    const handlerB = jest.fn().mockImplementation((conf) => conf);
 
     applyDeprecations(
       initialConfig,
