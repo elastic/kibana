@@ -155,7 +155,7 @@ migrations.](https://github.com/elastic/kibana/blob/75444a9f1879c5702f9f2b8ad4a7
 3. Administrators should be able to generate a migration report (similar to
    the one dry run migrations create) which is an NDJSON export of all objects
    tagged as “invalid”.
-   1. Expose this as an API first
+   1. Expose this as an HTTP API first
    2. (later) Notify administrators and allow them to export invalid objects
       from the Kibana UI.
 4. When an invalid object is read, the Saved Objects repository will throw an
@@ -200,6 +200,13 @@ which introduces the following restrictions:
    transform will always return the same result for the same set of inputs. 
 2. It should always be possible to construct the exact set of inputs required
    for (1) at any point during the migration process (before, during, after). 
+
+Although these restrictions require significant changes, it does not prevent
+known upcoming migrations such as [sharing saved-objects in multiple spaces](https://github.com/elastic/kibana/issues/27004) or [splitting a saved
+object into multiple child
+documents](https://github.com/elastic/kibana/issues/26602). To ensure that
+these migrations are idempotent, they will have to generate new saved object
+id's deterministically with e.g. UUIDv5.
 
 ### 4.3.1.2 Algorithm
 
