@@ -62,7 +62,7 @@ export function setupSavedObjects({
       })
   );
 
-  return clientOpts => {
+  return (clientOpts) => {
     const internalRepositoryAndTypeRegistryPromise = getStartServices().then(
       ([core]) =>
         [

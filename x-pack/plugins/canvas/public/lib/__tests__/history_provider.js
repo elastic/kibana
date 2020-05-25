@@ -130,16 +130,16 @@ describe.skip('historyProvider', () => {
       teardownFn();
     });
 
-    it('should call handler on state change', done => {
-      createOnceHandler(history, done, loc => {
+    it('should call handler on state change', (done) => {
+      createOnceHandler(history, done, (loc) => {
         expect(loc).to.be.a('object');
       });
 
       history.push({});
     });
 
-    it('should pass location object to handler', done => {
-      createOnceHandler(history, done, location => {
+    it('should pass location object to handler', (done) => {
+      createOnceHandler(history, done, (location) => {
         expect(location.pathname).to.be.a('string');
         expect(location.hash).to.be.a('string');
         expect(location.state).to.be.an('object');
@@ -149,7 +149,7 @@ describe.skip('historyProvider', () => {
       history.push(state);
     });
 
-    it('should pass decompressed state to handler', done => {
+    it('should pass decompressed state to handler', (done) => {
       createOnceHandler(history, done, ({ state: curState }) => {
         expect(curState).to.eql(state);
       });
@@ -157,7 +157,7 @@ describe.skip('historyProvider', () => {
       history.push(state);
     });
 
-    it('should pass in the previous location object to handler', done => {
+    it('should pass in the previous location object to handler', (done) => {
       createOnceHandler(history, done, (location, prevLocation) => {
         expect(prevLocation.pathname).to.be.a('string');
         expect(prevLocation.hash).to.be.a('string');

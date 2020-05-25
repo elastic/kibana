@@ -94,7 +94,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
         index={draggableIndex}
         key={header.id}
       >
-        {dragProvided => (
+        {(dragProvided) => (
           <EventsTh
             data-test-subj="draggable-header"
             {...dragProvided.draggableProps}

@@ -165,7 +165,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const variables = await testTableVariables.findAllByCssSelector(variablesSelector);
 
       const variablesKeyValueSelectorMap = await Promise.all(
-        variables.map(async variable => {
+        variables.map(async (variable) => {
           const subVars = await variable.findAllByCssSelector('td');
           const selector = await subVars[0].findByTagName('a');
           const key = await selector.getVisibleText();

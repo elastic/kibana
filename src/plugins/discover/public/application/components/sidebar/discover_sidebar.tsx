@@ -174,7 +174,7 @@ export function DiscoverSidebar({
         <DiscoverIndexPattern
           selectedIndexPattern={selectedIndexPattern}
           setIndexPattern={setIndexPattern}
-          indexPatternList={sortBy(indexPatternList, o => o.attributes.title)}
+          indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
         />
         <div className="dscSidebar__item">
           <form>

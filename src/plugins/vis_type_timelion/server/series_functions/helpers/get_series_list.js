@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-export default function(list, overrides) {
+export default function (list, overrides) {
   return _.merge(
     {
       type: 'seriesList',

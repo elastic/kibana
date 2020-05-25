@@ -46,9 +46,6 @@ it('should disable delete data', () => {
 
 it('should call toggleVisible function', () => {
   const wrapper = mountWithIntl(<GaugeSeries {...defaultProps} />);
-  wrapper
-    .find('EuiButtonIcon')
-    .at(0)
-    .simulate('click');
+  wrapper.find('EuiButtonIcon').at(0).simulate('click');
   expect(defaultProps.toggleVisible).toBeCalled();
 });

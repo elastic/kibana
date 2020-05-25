@@ -29,7 +29,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 const POPOVER_STYLE = { zIndex: '200' };
 
 function getFilterListOptions(filterListIds) {
-  return filterListIds.map(filterId => ({ value: filterId, text: filterId }));
+  return filterListIds.map((filterId) => ({ value: filterId, text: filterId }));
 }
 
 export class ScopeExpression extends Component {
@@ -53,19 +53,19 @@ export class ScopeExpression extends Component {
     });
   };
 
-  onChangeFilterType = event => {
+  onChangeFilterType = (event) => {
     const { fieldName, filterId, enabled, updateScope } = this.props;
 
     updateScope(fieldName, filterId, event.target.value, enabled);
   };
 
-  onChangeFilterId = event => {
+  onChangeFilterId = (event) => {
     const { fieldName, filterType, enabled, updateScope } = this.props;
 
     updateScope(fieldName, event.target.value, filterType, enabled);
   };
 
-  onEnableChange = event => {
+  onEnableChange = (event) => {
     const { fieldName, filterId, filterType, updateScope } = this.props;
 
     updateScope(fieldName, filterId, filterType, event.target.checked);
@@ -131,7 +131,7 @@ export class ScopeExpression extends Component {
             }
             value={fieldName}
             isActive={false}
-            onClick={event => event.preventDefault()}
+            onClick={(event) => event.preventDefault()}
           />
         </EuiFlexItem>
 

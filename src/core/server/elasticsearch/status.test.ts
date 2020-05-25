@@ -38,11 +38,7 @@ const nodeInfo = {
 
 describe('calculateStatus', () => {
   it('starts in unavailable', async () => {
-    expect(
-      await calculateStatus$(new Subject())
-        .pipe(take(1))
-        .toPromise()
-    ).toEqual({
+    expect(await calculateStatus$(new Subject()).pipe(take(1)).toPromise()).toEqual({
       level: ServiceStatusLevels.unavailable,
       summary: 'Waiting for Elasticsearch',
       meta: {
@@ -123,7 +119,7 @@ describe('calculateStatus', () => {
     const nodeCompat$ = new Subject<NodesVersionCompatibility>();
 
     const statusUpdates: ServiceStatus[] = [];
-    const subscription = calculateStatus$(nodeCompat$).subscribe(status =>
+    const subscription = calculateStatus$(nodeCompat$).subscribe((status) =>
       statusUpdates.push(status)
     );
 

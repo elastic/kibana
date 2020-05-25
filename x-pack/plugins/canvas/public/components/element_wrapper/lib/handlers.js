@@ -11,12 +11,12 @@ import {
   fetchEmbeddableRenderable,
 } from '../../../state/actions/embeddable';
 
-export const createHandlers = dispatch => {
+export const createHandlers = (dispatch) => {
   let isComplete = false;
   let oldElement;
   let completeFn = () => {};
 
-  return element => {
+  return (element) => {
     // reset isComplete when element changes
     if (!isEqual(oldElement, element)) {
       isComplete = false;

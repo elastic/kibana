@@ -22,56 +22,35 @@ describe('HeaderToolTipContent', () => {
   test('it renders the category', () => {
     const wrapper = mount(<HeaderToolTipContent header={header} />);
 
-    expect(
-      wrapper
-        .find('[data-test-subj="category-value"]')
-        .first()
-        .text()
-    ).toEqual(header.category);
+    expect(wrapper.find('[data-test-subj="category-value"]').first().text()).toEqual(
+      header.category
+    );
   });
 
   test('it renders the name of the field', () => {
     const wrapper = mount(<HeaderToolTipContent header={header} />);
 
-    expect(
-      wrapper
-        .find('[data-test-subj="field-value"]')
-        .first()
-        .text()
-    ).toEqual(header.id);
+    expect(wrapper.find('[data-test-subj="field-value"]').first().text()).toEqual(header.id);
   });
 
   test('it renders the expected icon for the header type', () => {
     const wrapper = mount(<HeaderToolTipContent header={header} />);
 
-    expect(
-      wrapper
-        .find('[data-test-subj="type-icon"]')
-        .first()
-        .props().type
-    ).toEqual('clock');
+    expect(wrapper.find('[data-test-subj="type-icon"]').first().props().type).toEqual('clock');
   });
 
   test('it renders the type of the field', () => {
     const wrapper = mount(<HeaderToolTipContent header={header} />);
 
-    expect(
-      wrapper
-        .find('[data-test-subj="type-value"]')
-        .first()
-        .text()
-    ).toEqual(header.type);
+    expect(wrapper.find('[data-test-subj="type-value"]').first().text()).toEqual(header.type);
   });
 
   test('it renders the description of the field', () => {
     const wrapper = mount(<HeaderToolTipContent header={header} />);
 
-    expect(
-      wrapper
-        .find('[data-test-subj="description-value"]')
-        .first()
-        .text()
-    ).toEqual(header.description);
+    expect(wrapper.find('[data-test-subj="description-value"]').first().text()).toEqual(
+      header.description
+    );
   });
 
   test('it does NOT render the description column when the field does NOT contain a description', () => {

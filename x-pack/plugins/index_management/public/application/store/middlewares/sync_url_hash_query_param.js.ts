@@ -8,7 +8,7 @@ import { Middleware } from 'redux';
 // @ts-ignore
 import { showHiddenIndicesChanged } from '../actions';
 
-export const syncUrlHashQueryParam: Middleware = () => next => action => {
+export const syncUrlHashQueryParam: Middleware = () => (next) => (action) => {
   if (action.type === String(showHiddenIndicesChanged)) {
     const { url, query } = q.parseUrl(window.location.hash);
     if (action.payload.showHiddenIndices) {

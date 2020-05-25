@@ -12,11 +12,11 @@ import { getDiscoverQuery } from '../DiscoverTransactionLink';
 function getMockTransaction() {
   return {
     transaction: {
-      id: '8b60bd32ecc6e150'
+      id: '8b60bd32ecc6e150',
     },
     trace: {
-      id: '8b60bd32ecc6e1506735a8b6cfcf175c'
-    }
+      id: '8b60bd32ecc6e1506735a8b6cfcf175c',
+    },
   } as Transaction;
 }
 
