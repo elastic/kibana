@@ -40,7 +40,7 @@ export const CreateButtonPopOver = ({ anchorPosition = 'upCenter' }: Props) => {
           data-test-subj="manageTemplateButton"
           iconType="arrowDown"
           iconSide="right"
-          onClick={() => setIsPopOverOpen(prev => !prev)}
+          onClick={() => setIsPopOverOpen((prev) => !prev)}
         >
           <FormattedMessage
             id="xpack.idxMgmt.componentTemplatesFlyout.manageButtonLabel"

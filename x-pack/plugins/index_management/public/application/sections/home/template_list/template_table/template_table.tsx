@@ -313,7 +313,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         field: 'type',
         name: 'View',
         multiSelect: 'or' as 'or',
-        options: viewOptions.map(option => ({
+        options: viewOptions.map((option) => ({
           value: option.value,
           view: option.label,
         })),

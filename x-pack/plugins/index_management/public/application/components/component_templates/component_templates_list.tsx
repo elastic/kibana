@@ -16,7 +16,7 @@ interface Props {
 export const ComponentTemplatesList = ({ components }: Props) => {
   return (
     <>
-      {components.map(component => (
+      {components.map((component) => (
         <ComponentTemplatesListItem key={component.name} component={component} />
       ))}
     </>

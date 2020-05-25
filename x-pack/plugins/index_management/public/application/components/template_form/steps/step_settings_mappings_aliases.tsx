@@ -195,7 +195,7 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
               label=""
               id="toggle-use-components"
               checked={isFromComponentsVisible}
-              onChange={e => {
+              onChange={(e) => {
                 setIsFromComponentsVisible(e.target.checked);
               }}
               aria-controls="warmPhaseContent"
@@ -242,7 +242,7 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
               label=""
               id="toggle-manual-add"
               checked={isAddManualVisible}
-              onChange={e => {
+              onChange={(e) => {
                 setIsAddManualVisible(e.target.checked);
               }}
             />
@@ -276,7 +276,7 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
                     label="Index settings"
                     id="toggle-use-components"
                     checked={isSettingsVisible}
-                    onChange={e => {
+                    onChange={(e) => {
                       setIsSettingsVisible(e.target.checked);
                     }}
                   />
@@ -293,7 +293,7 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
                     label="Mappings"
                     id="toggle-use-components"
                     checked={isMappingsVisible}
-                    onChange={e => {
+                    onChange={(e) => {
                       setIsMappingsVisible(e.target.checked);
                     }}
                   />
@@ -310,7 +310,7 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
                     label="Aliases"
                     id="toggle-use-components"
                     checked={isAliasesVisible}
-                    onChange={e => {
+                    onChange={(e) => {
                       setIsAliasesVisible(e.target.checked);
                     }}
                   />
