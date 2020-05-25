@@ -108,6 +108,20 @@ interface IplacementDirection {
   fits: boolean;
 }
 
+function comparePanels(a: GridData, b: GridData): number {
+  if (a.y < b.y) {
+    return -1;
+  }
+  if (a.y > b.y) {
+    return 1;
+  }
+  // a.y === b.y
+  if (a.x <= b.x) {
+    return -1;
+  }
+  return 1;
+}
+
 export function placePanelBeside({
   width,
   height,
@@ -158,21 +172,9 @@ export function placePanelBeside({
    * 2. find the best placement for the cloned panel
    * 3. reposition the panels after the cloned panel in the grid
    */
-  const grid = otherPanels.sort((a: GridData, b: GridData) => {
-    if (a.y < b.y) {
-      return -1;
-    }
-    if (a.y > b.y) {
-      return 1;
-    }
-    // a.y === b.y
-    if (a.x <= b.x) {
-      return -1;
-    }
-    return 1;
-  });
+  const grid = otherPanels.sort(comparePanels);
   let position = 0;
-  for (position = 0; position < grid.length; position++) {
+  for (position; position < grid.length; position++) {
     if (beside.i === grid[position].i) {
       break;
     }
@@ -197,8 +199,8 @@ export function placePanelBeside({
     // no space, place in the next row leftmost AND move all the subsequent panels
     const diff = bottomLeftPlacement.grid.h;
     for (let j = position + 1; j < grid.length; j++) {
-      const originalPositionInTheGrid = grid[position].i;
-      const movedPanel = currentPanels[originalPositionInTheGrid];
+      const originalPositionInTheGrid = grid[j].i;
+      const movedPanel = _.cloneDeep(currentPanels[originalPositionInTheGrid]);
       if (
         movedPanel.gridData.y === bottomLeftPlacement.grid.y &&
         movedPanel.gridData.x > bottomLeftPlacement.grid.x + bottomLeftPlacement.grid.w
@@ -211,5 +213,4 @@ export function placePanelBeside({
     }
     return bottomLeftPlacement.grid;
   }
-  return bottomLeftPlacement.grid;
 }
