@@ -16,11 +16,7 @@ const GRADIENT_INTERVALS = 8;
 
 export const DEFAULT_FILL_COLORS: string[] = euiPaletteColorBlind();
 export const DEFAULT_LINE_COLORS: string[] = [
-  ...DEFAULT_FILL_COLORS.map((color: string) =>
-    tinycolor(color)
-      .darken()
-      .toHexString()
-  ),
+  ...DEFAULT_FILL_COLORS.map((color: string) => tinycolor(color).darken().toHexString()),
   // Explicitly add black & white as border color options
   '#000',
   '#FFF',
@@ -68,7 +64,7 @@ export function getHexColorRangeStrings(
   colorRampName: string,
   numberColors: number = GRADIENT_INTERVALS
 ): string[] {
-  return getRGBColorRangeStrings(colorRampName, numberColors).map(rgbColor =>
+  return getRGBColorRangeStrings(colorRampName, numberColors).map((rgbColor) =>
     chroma(rgbColor).hex()
   );
 }
@@ -113,7 +109,7 @@ export function getOrdinalColorRampStops(
   );
 }
 
-export const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map(colorRampName => ({
+export const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map((colorRampName) => ({
   value: colorRampName,
   inputDisplay: <ColorGradient colorRampName={colorRampName} />,
 }));
@@ -150,13 +146,14 @@ const COLOR_PALETTES_CONFIGS: ColorPalette[] = [
   },
 ];
 
+
 export function getColorPalette(paletteId: string): string[] | null {
   const palette = COLOR_PALETTES_CONFIGS.find(({ id }: ColorPalette) => id === paletteId);
   return palette ? palette.colors : null;
 }
 
-export const COLOR_PALETTES = COLOR_PALETTES_CONFIGS.map(palette => {
-  const paletteDisplay = palette.colors.map(color => {
+export const COLOR_PALETTES = COLOR_PALETTES_CONFIGS.map((palette) => {
+  const paletteDisplay = palette.colors.map((color) => {
     const style: React.CSSProperties = {
       backgroundColor: color,
       width: `${100 / palette.colors.length}%`,

@@ -101,7 +101,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
             ]}
           >
             <EuiFieldText
-              inputRef={input => {
+              inputRef={(input) => {
                 if (input) {
                   forceInput.current = input;
                 }
@@ -109,7 +109,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
               disabled={isJobCreated}
               placeholder="analytics job ID"
               value={jobId}
-              onChange={e => setFormState({ jobId: e.target.value })}
+              onChange={(e) => setFormState({ jobId: e.target.value })}
               aria-label={i18n.translate(
                 'xpack.ml.dataframe.analytics.create.advancedEditor.jobIdInputAriaLabel',
                 {

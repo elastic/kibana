@@ -35,7 +35,7 @@ const MOCK_REPO_DIR = Path.resolve(TMP_DIR, 'mock_repo');
 
 expect.addSnapshotSerializer({
   print: () => '<Bundle>',
-  test: v => v instanceof Bundle,
+  test: (v) => v instanceof Bundle,
 });
 expect.addSnapshotSerializer(createAbsolutePathSerializer(MOCK_REPO_DIR));
 

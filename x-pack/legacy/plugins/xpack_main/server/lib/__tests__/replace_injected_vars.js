@@ -28,7 +28,7 @@ const buildRequest = (path = '/app/kibana') => {
         create: sinon.stub(),
 
         errors: {
-          isNotFoundError: error => {
+          isNotFoundError: (error) => {
             return error.message === 'not found exception';
           },
         },
@@ -176,16 +176,6 @@ describe('replaceInjectedVars uiExport', () => {
         },
       },
     });
-  });
-
-  it('sends the originalInjectedVars if the license check result is not available', async () => {
-    const originalInjectedVars = { a: 1 };
-    const request = buildRequest();
-    const server = mockServer();
-    server.plugins.xpack_main.info.feature().getLicenseCheckResults.returns(undefined);
-
-    const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
-    expect(newVars).to.eql(originalInjectedVars);
   });
 });
 

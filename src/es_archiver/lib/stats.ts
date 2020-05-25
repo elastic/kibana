@@ -101,7 +101,7 @@ export function createStats(name: string, log: ToolingLog) {
     public createdIndex(index: string, metadata: Record<string, any> = {}) {
       getOrCreate(index).created = true;
       info('Created index %j', index);
-      Object.keys(metadata).forEach(key => {
+      Object.keys(metadata).forEach((key) => {
         debug('%j %s %j', index, key, metadata[key]);
       });
     }
@@ -113,7 +113,7 @@ export function createStats(name: string, log: ToolingLog) {
     public archivedIndex(index: string, metadata: Record<string, any> = {}) {
       getOrCreate(index).archived = true;
       info('Archived %j', index);
-      Object.keys(metadata).forEach(key => {
+      Object.keys(metadata).forEach((key) => {
         debug('%j %s %j', index, key, metadata[key]);
       });
     }
@@ -147,7 +147,7 @@ export function createStats(name: string, log: ToolingLog) {
      */
     public forEachIndex(fn: (index: string, stats: IndexStats) => void) {
       const clone = this.toJSON();
-      Object.keys(clone).forEach(index => {
+      Object.keys(clone).forEach((index) => {
         fn(index, clone[index]);
       });
     }

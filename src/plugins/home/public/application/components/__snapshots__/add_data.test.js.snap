@@ -277,7 +277,7 @@ exports[`apmUiEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/management/kibana/index_pattern"
+          href="#/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",
@@ -543,7 +543,7 @@ exports[`isNewKibanaInstance 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/management/kibana/index_pattern"
+          href="#/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",
@@ -876,7 +876,7 @@ exports[`mlEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/management/kibana/index_pattern"
+          href="#/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",
@@ -1142,7 +1142,7 @@ exports[`render 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/management/kibana/index_pattern"
+          href="#/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",

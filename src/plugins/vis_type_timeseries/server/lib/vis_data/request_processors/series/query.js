@@ -22,7 +22,7 @@ import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { esQuery } from '../../../../../../data/server';
 
 export function query(req, panel, series, esQueryConfig, indexPatternObject) {
-  return next => doc => {
+  return (next) => (doc) => {
     const { timeField } = getIntervalAndTimefield(panel, series, indexPatternObject);
     const { from, to } = offsetTime(req, series.offset_time);
 

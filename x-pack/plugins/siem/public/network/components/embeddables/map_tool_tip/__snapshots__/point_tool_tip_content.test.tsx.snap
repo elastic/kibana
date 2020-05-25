@@ -6,8 +6,9 @@ exports[`PointToolTipContent renders correctly against snapshot 1`] = `
   contextId="contextId"
   featureProps={
     Array [
-      Object {
+      TooltipProperty {
         "_propertyKey": "host.name",
+        "_propertyName": "host.name",
         "_rawValue": "testPropValue",
       },
     ]

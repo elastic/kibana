@@ -55,10 +55,7 @@ describe('Header', () => {
       );
 
       expect(
-        wrapper
-          .find(`[data-test-subj="header-text-${columnHeader.id}"]`)
-          .first()
-          .text()
+        wrapper.find(`[data-test-subj="header-text-${columnHeader.id}"]`).first().text()
       ).toEqual(columnHeader.id);
     });
 
@@ -78,10 +75,7 @@ describe('Header', () => {
       );
 
       expect(
-        wrapper
-          .find(`[data-test-subj="header-text-${columnHeader.id}"]`)
-          .first()
-          .text()
+        wrapper.find(`[data-test-subj="header-text-${columnHeader.id}"]`).first().text()
       ).toEqual(label);
     });
 
@@ -99,12 +93,9 @@ describe('Header', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="header-sort-indicator"]')
-          .first()
-          .exists()
-      ).toEqual(true);
+      expect(wrapper.find('[data-test-subj="header-sort-indicator"]').first().exists()).toEqual(
+        true
+      );
     });
 
     test('it renders a filter', () => {
@@ -125,12 +116,9 @@ describe('Header', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="textFilter"]')
-          .first()
-          .props()
-      ).toHaveProperty('placeholder');
+      expect(wrapper.find('[data-test-subj="textFilter"]').first().props()).toHaveProperty(
+        'placeholder'
+      );
     });
   });
 
@@ -150,10 +138,7 @@ describe('Header', () => {
         </TestProviders>
       );
 
-      wrapper
-        .find('[data-test-subj="header-sort-button"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="header-sort-button"]').first().simulate('click');
 
       expect(mockOnColumnSorted).toBeCalledWith({
         columnId: columnHeader.id,
@@ -212,10 +197,7 @@ describe('Header', () => {
         </TestProviders>
       );
 
-      wrapper
-        .find('[data-test-subj="header"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="header"]').first().simulate('click');
 
       expect(mockOnColumnSorted).not.toHaveBeenCalled();
     });
@@ -229,10 +211,7 @@ describe('Header', () => {
         <CloseButton columnId={columnHeader.id} onColumnRemoved={mockOnColumnRemoved} />
       );
 
-      wrapper
-        .find('[data-test-subj="remove-column"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="remove-column"]').first().simulate('click');
 
       expect(mockOnColumnRemoved).toBeCalledWith(columnHeader.id);
     });
@@ -323,10 +302,9 @@ describe('Header', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find(`[data-test-subj="header-text-${columnHeader.id}"]`)).toHaveStyleRule(
-        'text-overflow',
-        'ellipsis'
-      );
+      expect(
+        wrapper.find(`[data-test-subj="header-text-${columnHeader.id}"]`).at(1)
+      ).toHaveStyleRule('text-overflow', 'ellipsis');
     });
   });
 

@@ -14,9 +14,7 @@ Given(`a user browses the APM UI application`, () => {
 
 When(`the user inspects the opbeans-node service`, () => {
   // click opbeans-node service
-  cy.get(':contains(opbeans-node)')
-    .last()
-    .click({ force: true });
+  cy.get(':contains(opbeans-node)').last().click({ force: true });
 });
 
 Then(`should redirect to correct path with correct params`, () => {
@@ -31,18 +29,9 @@ Then(`should have correct y-axis ticks`, () => {
   // wait for all loading to finish
   cy.get('kbnLoadingIndicator').should('not.be.visible');
 
-  cy.get(yAxisTick)
-    .eq(2)
-    .invoke('text')
-    .snapshot();
+  cy.get(yAxisTick).eq(2).invoke('text').snapshot();
 
-  cy.get(yAxisTick)
-    .eq(1)
-    .invoke('text')
-    .snapshot();
+  cy.get(yAxisTick).eq(1).invoke('text').snapshot();
 
-  cy.get(yAxisTick)
-    .eq(0)
-    .invoke('text')
-    .snapshot();
+  cy.get(yAxisTick).eq(0).invoke('text').snapshot();
 });

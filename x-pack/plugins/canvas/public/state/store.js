@@ -29,7 +29,7 @@ export function createStore(initialState) {
 export function destroyStore() {
   if (store) {
     // Replace reducer so that anything that gets fired after navigating away doesn't really do anything
-    store.replaceReducer(state => state);
+    store.replaceReducer((state) => state);
   }
   store = undefined;
 }

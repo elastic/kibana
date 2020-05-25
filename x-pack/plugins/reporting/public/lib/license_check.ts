@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { LicenseCheckResults } from '../..';
+
 import { LicenseCheck } from '../../../licensing/public';
+import { LicenseCheckResults } from '../../common/types';
 
 export const checkLicense = (checkResults: LicenseCheck): LicenseCheckResults => {
   switch (checkResults.state) {
