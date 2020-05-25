@@ -139,7 +139,7 @@ export const PolicyDeleteProvider: React.FunctionComponent<Props> = ({ children 
                 />
               </p>
               <ul>
-                {policyNames.map(name => (
+                {policyNames.map((name) => (
                   <li key={name}>{name}</li>
                 ))}
               </ul>

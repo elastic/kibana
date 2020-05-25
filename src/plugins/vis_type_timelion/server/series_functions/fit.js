@@ -40,7 +40,7 @@ export default new Chainable('fit', {
           fitFunctions: _.keys(fitFunctions).join(', '),
         },
       }),
-      suggestions: _.keys(fitFunctions).map(key => {
+      suggestions: _.keys(fitFunctions).map((key) => {
         return { name: key };
       }),
     },
@@ -49,8 +49,8 @@ export default new Chainable('fit', {
     defaultMessage: 'Fills null values using a defined fit function',
   }),
   fn: function absFn(args) {
-    return alter(args, function(eachSeries, mode) {
-      const noNulls = eachSeries.data.filter(item => item[1] === 0 || item[1]);
+    return alter(args, function (eachSeries, mode) {
+      const noNulls = eachSeries.data.filter((item) => item[1] === 0 || item[1]);
 
       if (noNulls.length === 0) {
         return eachSeries;

@@ -33,7 +33,7 @@ export const help: FunctionHelp<FunctionFactory<typeof plot>> = {
         'The legend position. For example, {positions}, or {BOOLEAN_FALSE}. When {BOOLEAN_FALSE}, the legend is hidden.',
       values: {
         positions: Object.values(Position)
-          .map(position => `\`"${position}"\``)
+          .map((position) => `\`"${position}"\``)
           .join(', '),
         BOOLEAN_FALSE,
       },

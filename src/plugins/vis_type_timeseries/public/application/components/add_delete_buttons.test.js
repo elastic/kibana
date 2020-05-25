@@ -27,30 +27,21 @@ describe('AddDeleteButtons', () => {
   it('calls onAdd={handleAdd}', () => {
     const handleAdd = sinon.spy();
     const wrapper = shallowWithIntl(<AddDeleteButtons onAdd={handleAdd} />);
-    wrapper
-      .find('EuiButtonIcon')
-      .at(0)
-      .simulate('click');
+    wrapper.find('EuiButtonIcon').at(0).simulate('click');
     expect(handleAdd.calledOnce).to.equal(true);
   });
 
   it('calls onDelete={handleDelete}', () => {
     const handleDelete = sinon.spy();
     const wrapper = shallowWithIntl(<AddDeleteButtons onDelete={handleDelete} />);
-    wrapper
-      .find('EuiButtonIcon')
-      .at(1)
-      .simulate('click');
+    wrapper.find('EuiButtonIcon').at(1).simulate('click');
     expect(handleDelete.calledOnce).to.equal(true);
   });
 
   it('calls onClone={handleClone}', () => {
     const handleClone = sinon.spy();
     const wrapper = shallowWithIntl(<AddDeleteButtons onClone={handleClone} />);
-    wrapper
-      .find('EuiButtonIcon')
-      .at(0)
-      .simulate('click');
+    wrapper.find('EuiButtonIcon').at(0).simulate('click');
     expect(handleClone.calledOnce).to.equal(true);
   });
 

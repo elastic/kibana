@@ -19,14 +19,14 @@ const Version = styled('span')`
 
 export function UserAgentSummaryItem({
   name,
-  version
+  version,
 }: UserAgentSummaryItemProps) {
   return (
     <EuiToolTip
       content={i18n.translate(
         'xpack.apm.transactionDetails.userAgentAndVersionLabel',
         {
-          defaultMessage: 'User agent & version'
+          defaultMessage: 'User agent & version',
         }
       )}
     >

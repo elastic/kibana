@@ -50,7 +50,7 @@ export const FrequencyInput: FC = () => {
       <EuiFieldText
         value={frequency}
         placeholder={defaultFrequency}
-        onChange={e => setFrequency(e.target.value)}
+        onChange={(e) => setFrequency(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputFrequency"
       />

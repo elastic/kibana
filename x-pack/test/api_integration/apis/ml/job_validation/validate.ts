@@ -18,7 +18,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
 
-  describe('Validate job', function() {
+  describe('Validate job', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
       await ml.testResources.setKibanaTimeZoneToUTC();

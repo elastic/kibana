@@ -58,8 +58,8 @@ async function* getEachRelatedEventsResult(
   }
 }
 
-export const resolverMiddlewareFactory: MiddlewareFactory = context => {
-  return api => next => async (action: ResolverAction) => {
+export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
+  return (api) => (next) => async (action: ResolverAction) => {
     next(action);
     if (action.type === 'userChangedSelectedEvent') {
       /**
@@ -130,7 +130,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
 
           const fetchedResults = apiResults.events;
           // pack up the results into response
-          const relatedEventEntry = fetchedResults.map(relatedEvent => {
+          const relatedEventEntry = fetchedResults.map((relatedEvent) => {
             return {
               relatedEvent,
               relatedEventType: event.eventType(relatedEvent),

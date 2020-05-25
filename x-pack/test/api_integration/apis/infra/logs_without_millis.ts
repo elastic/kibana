@@ -38,7 +38,7 @@ const KEY_WITHIN_DATA_RANGE = {
   tiebreaker: 0,
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 

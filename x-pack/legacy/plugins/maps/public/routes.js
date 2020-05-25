@@ -45,19 +45,19 @@ routes
     controller($scope, config) {
       const gisMapSavedObjectLoader = getMapsSavedObjectLoader();
       $scope.listingLimit = config.get(LISTING_LIMIT_SETTING);
-      $scope.find = search => {
+      $scope.find = (search) => {
         return gisMapSavedObjectLoader.find(search, $scope.listingLimit);
       };
-      $scope.delete = ids => {
+      $scope.delete = (ids) => {
         return gisMapSavedObjectLoader.delete(ids);
       };
       $scope.readOnly = !getMapsCapabilities().save;
     },
     resolve: {
-      hasMaps: function(kbnUrl) {
+      hasMaps: function (kbnUrl) {
         getSavedObjectsClient()
           .find({ type: 'map', perPage: 1 })
-          .then(resp => {
+          .then((resp) => {
             // Do not show empty listing page, just redirect to a new map
             if (resp.savedObjects.length === 0) {
               kbnUrl.redirect('/map');
@@ -71,7 +71,7 @@ routes
     template: mapTemplate,
     controller: 'GisMapController',
     resolve: {
-      map: function(redirectWhenMissing) {
+      map: function (redirectWhenMissing) {
         const gisMapSavedObjectLoader = getMapsSavedObjectLoader();
         return gisMapSavedObjectLoader.get().catch(
           redirectWhenMissing({
@@ -85,12 +85,12 @@ routes
     template: mapTemplate,
     controller: 'GisMapController',
     resolve: {
-      map: function(redirectWhenMissing, $route) {
+      map: function (redirectWhenMissing, $route) {
         const gisMapSavedObjectLoader = getMapsSavedObjectLoader();
         const id = $route.current.params.id;
         return gisMapSavedObjectLoader
           .get(id)
-          .then(savedMap => {
+          .then((savedMap) => {
             getCoreChrome().recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, id);
             getCoreChrome().docTitle.change(savedMap.title);
             return savedMap;

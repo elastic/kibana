@@ -47,7 +47,7 @@ export function migrationsRetryCallCluster(
   return (endpoint: string, clientParams: Record<string, any> = {}, options?: CallAPIOptions) => {
     return defer(() => apiCaller(endpoint, clientParams, options))
       .pipe(
-        retryWhen(error$ =>
+        retryWhen((error$) =>
           error$.pipe(
             concatMap((error, i) => {
               if (!previousErrors.includes(error.message)) {
@@ -90,7 +90,7 @@ export function retryCallCluster(apiCaller: APICaller) {
   return (endpoint: string, clientParams: Record<string, any> = {}, options?: CallAPIOptions) => {
     return defer(() => apiCaller(endpoint, clientParams, options))
       .pipe(
-        retryWhen(errors =>
+        retryWhen((errors) =>
           errors.pipe(
             concatMap((error, i) =>
               iif(
