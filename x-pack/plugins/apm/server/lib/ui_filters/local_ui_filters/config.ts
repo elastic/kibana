@@ -10,46 +10,46 @@ import {
   AGENT_NAME,
   HOST_NAME,
   TRANSACTION_RESULT,
-  SERVICE_VERSION
+  SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
 
 const filtersByName = {
   host: {
     title: i18n.translate('xpack.apm.localFilters.titles.host', {
-      defaultMessage: 'Host'
+      defaultMessage: 'Host',
     }),
-    fieldName: HOST_NAME
+    fieldName: HOST_NAME,
   },
   agentName: {
     title: i18n.translate('xpack.apm.localFilters.titles.agentName', {
-      defaultMessage: 'Agent name'
+      defaultMessage: 'Agent name',
     }),
-    fieldName: AGENT_NAME
+    fieldName: AGENT_NAME,
   },
   containerId: {
     title: i18n.translate('xpack.apm.localFilters.titles.containerId', {
-      defaultMessage: 'Container ID'
+      defaultMessage: 'Container ID',
     }),
-    fieldName: CONTAINER_ID
+    fieldName: CONTAINER_ID,
   },
   podName: {
     title: i18n.translate('xpack.apm.localFilters.titles.podName', {
-      defaultMessage: 'Kubernetes pod'
+      defaultMessage: 'Kubernetes pod',
     }),
-    fieldName: POD_NAME
+    fieldName: POD_NAME,
   },
   transactionResult: {
     title: i18n.translate('xpack.apm.localFilters.titles.transactionResult', {
-      defaultMessage: 'Transaction result'
+      defaultMessage: 'Transaction result',
     }),
-    fieldName: TRANSACTION_RESULT
+    fieldName: TRANSACTION_RESULT,
   },
   serviceVersion: {
     title: i18n.translate('xpack.apm.localFilters.titles.serviceVersion', {
-      defaultMessage: 'Service version'
+      defaultMessage: 'Service version',
     }),
-    fieldName: SERVICE_VERSION
-  }
+    fieldName: SERVICE_VERSION,
+  },
 };
 
 export type LocalUIFilterName = keyof typeof filtersByName;
@@ -75,7 +75,7 @@ export const localUIFilters = localUIFilterNames.reduce((acc, key) => {
     ...acc,
     [key]: {
       ...field,
-      name: key
-    }
+      name: key,
+    },
   };
 }, {} as LocalUIFilterMap);

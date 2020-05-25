@@ -54,7 +54,7 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
           return true;
         }
 
-        const indexHasAllPrivileges = APP_INDEX_PRIVILEGES.every(privilege =>
+        const indexHasAllPrivileges = APP_INDEX_PRIVILEGES.every((privilege) =>
           privileges.includes(privilege)
         );
 

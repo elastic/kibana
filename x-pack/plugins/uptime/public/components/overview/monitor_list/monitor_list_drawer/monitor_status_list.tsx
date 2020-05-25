@@ -36,7 +36,7 @@ export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
   });
 
   // if monitor is down in one dns, it will be considered down so removing it from up list
-  const absUpChecks: Set<string> = new Set([...upChecks].filter(item => !downChecks.has(item)));
+  const absUpChecks: Set<string> = new Set([...upChecks].filter((item) => !downChecks.has(item)));
 
   return (
     <>

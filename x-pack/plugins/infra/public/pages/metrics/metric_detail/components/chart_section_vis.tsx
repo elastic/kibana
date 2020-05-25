@@ -117,7 +117,7 @@ export const ChartSectionVis = ({
           />
           <Axis id="values" position={Position.Left} tickFormat={valueFormatter} />
           {metric &&
-            metric.series.map(series => (
+            metric.series.map((series) => (
               <SeriesChart
                 key={`series-${id}-${series.id}`}
                 id={`series-${id}-${series.id}`}

@@ -30,7 +30,7 @@ export class BeatEventsLib {
                 timestamp: new Date(events[events.length - 2].timestamp),
               },
             })
-            .catch(e => {
+            .catch((e) => {
               // eslint-disable-next-line
               console.error('Error inserting event into beats log.', e);
             });
@@ -48,7 +48,7 @@ export class BeatEventsLib {
               timestamp: new Date(events[events.length - 1].timestamp),
             },
           })
-          .catch(e => {
+          .catch((e) => {
             // eslint-disable-next-line
             console.error('Error inserting event into beats log.', e);
           });

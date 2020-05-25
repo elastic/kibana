@@ -64,7 +64,7 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
     const cache: Record<string, any> = {};
     formattedCache.set(hit, cache);
 
-    _.forOwn(indexPattern.flattenHit(hit), function(val: any, fieldName?: string) {
+    _.forOwn(indexPattern.flattenHit(hit), function (val: any, fieldName?: string) {
       // sync the formatted and partial cache
       if (!fieldName) {
         return;
@@ -77,7 +77,7 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
     return cache;
   }
 
-  formatHit.formatField = function(hit: Record<string, any>, fieldName: string) {
+  formatHit.formatField = function (hit: Record<string, any>, fieldName: string) {
     let partials = partialFormattedCache.get(hit);
     if (partials && partials[fieldName] != null) {
       return partials[fieldName];

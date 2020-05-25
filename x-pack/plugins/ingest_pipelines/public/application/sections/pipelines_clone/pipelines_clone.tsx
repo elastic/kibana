@@ -21,7 +21,7 @@ export interface ParamProps {
  * This section is a wrapper around the create section where we receive a pipeline name
  * to load and set as the source pipeline for the {@link PipelinesCreate} form.
  */
-export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> = props => {
+export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> = (props) => {
   const { sourceName } = props.match.params;
   const { services } = useKibana();
 

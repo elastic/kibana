@@ -190,6 +190,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                 isHollow={true}
                 number={1}
                 status="incomplete"
+                titleSize="s"
               >
                 <div
                   aria-label="Incomplete Step 1"
@@ -490,6 +491,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                 isHollow={false}
                 number={1}
                 status="complete"
+                titleSize="s"
               >
                 <div
                   aria-label="Step 1"
@@ -502,12 +504,14 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                     <EuiIcon
                       aria-label="complete"
                       className="euiStepNumber__icon"
+                      size="m"
                       type="check"
                     >
                       <div
                         aria-label="complete"
                         className="euiStepNumber__icon"
                         data-euiicon-type="check"
+                        size="m"
                       />
                     </EuiIcon>
                   </EuiI18n>

@@ -127,7 +127,7 @@ export function initializeInnerAngularModule(
         'discoverPromise',
       ])
       .config(watchMultiDecorator)
-      .directive('icon', reactDirective => reactDirective(EuiIcon))
+      .directive('icon', (reactDirective) => reactDirective(EuiIcon))
       .directive('renderComplete', createRenderCompleteDirective)
       .service('debounce', ['$timeout', DebounceProviderTimeout]);
   }
@@ -149,7 +149,7 @@ export function initializeInnerAngularModule(
     ])
     .config(watchMultiDecorator)
     .run(registerListenEventListener)
-    .directive('icon', reactDirective => reactDirective(EuiIcon))
+    .directive('icon', (reactDirective) => reactDirective(EuiIcon))
     .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
     .directive('collapsibleSidebar', CollapsibleSidebarProvider)
     .directive('fixedScroll', FixedScrollProvider)
@@ -191,8 +191,8 @@ function createLocalStorageModule() {
     .service('sessionStorage', createLocalStorageService('sessionStorage'));
 }
 
-const createLocalStorageService = function(type: string) {
-  return function($window: any) {
+const createLocalStorageService = function (type: string) {
+  return function ($window: any) {
     return new Storage($window[type]);
   };
 };
@@ -202,7 +202,7 @@ function createElasticSearchModule(data: DataPublicPluginStart) {
     .module('discoverEs', [])
     // Elasticsearch client used for requesting data.  Connects to the /elasticsearch proxy
     // have to be written as function expression, because it's not compiled in dev mode
-    .service('es', function() {
+    .service('es', function () {
       return data.search.__LEGACY.esClient;
     });
 }

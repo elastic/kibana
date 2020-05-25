@@ -20,18 +20,18 @@
 import expect from '@kbn/expect';
 import { ReportManager, METRIC_TYPE } from '@kbn/analytics';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
-  const createStatsMetric = eventName => ({
+  const createStatsMetric = (eventName) => ({
     eventName,
     appName: 'myApp',
     type: METRIC_TYPE.CLICK,
     count: 1,
   });
 
-  const createUserAgentMetric = appName => ({
+  const createUserAgentMetric = (appName) => ({
     appName,
     type: METRIC_TYPE.USER_AGENT,
     userAgent:
