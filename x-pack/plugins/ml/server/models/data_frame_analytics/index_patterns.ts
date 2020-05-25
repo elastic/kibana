@@ -11,30 +11,22 @@ export class IndexPatternHandler {
   constructor(private savedObjectsClient: SavedObjectsClientContract) {}
   // returns a id based on an index pattern name
   async getIndexPatternId(indexName: string) {
-    try {
-      const response = await this.savedObjectsClient.find<IIndexPattern>({
-        type: 'index-pattern',
-        perPage: 10,
-        search: `"${indexName}"`,
-        searchFields: ['title'],
-        fields: ['title'],
-      });
+    const response = await this.savedObjectsClient.find<IIndexPattern>({
+      type: 'index-pattern',
+      perPage: 10,
+      search: `"${indexName}"`,
+      searchFields: ['title'],
+      fields: ['title'],
+    });
 
-      const ip = response.saved_objects.find(
-        obj => obj.attributes.title.toLowerCase() === indexName.toLowerCase()
-      );
+    const ip = response.saved_objects.find(
+      obj => obj.attributes.title.toLowerCase() === indexName.toLowerCase()
+    );
 
-      return ip !== undefined ? ip.id : undefined;
-    } catch (error) {
-      throw error;
-    }
+    return ip?.id;
   }
 
   async deleteIndexPatternById(indexId: string) {
-    try {
-      return await this.savedObjectsClient.delete('index-pattern', indexId);
-    } catch (error) {
-      throw error;
-    }
+    return await this.savedObjectsClient.delete('index-pattern', indexId);
   }
 }

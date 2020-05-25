@@ -10,12 +10,22 @@ import { render } from '@testing-library/react';
 import * as CheckPrivilige from '../../../../../capabilities/check_capabilities';
 
 import { DeleteAction } from './action_delete';
-
+import { coreMock as mockCoreServices } from '../../../../../../../../../../src/core/public/mocks';
 import mockAnalyticsListItem from './__mocks__/analytics_list_item.json';
 
 jest.mock('../../../../../capabilities/check_capabilities', () => ({
   checkPermission: jest.fn(() => false),
   createPermissionFailureMessage: jest.fn(),
+}));
+
+jest.mock('../../../../../../application/util/dependency_cache', () => ({
+  getToastNotifications: () => ({ addSuccess: jest.fn(), addDanger: jest.fn() }),
+}));
+
+jest.mock('../../../../../contexts/kibana', () => ({
+  useMlKibana: () => ({
+    services: mockCoreServices.createStart(),
+  }),
 }));
 
 describe('DeleteAction', () => {

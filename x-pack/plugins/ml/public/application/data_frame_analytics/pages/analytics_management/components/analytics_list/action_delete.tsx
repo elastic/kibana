@@ -45,7 +45,6 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
   const [indexPatternExists, setIndexPatternExists] = useState<boolean>(false);
 
   const { savedObjects, notifications } = useMlKibana().services;
-  const { toasts } = notifications;
   const savedObjectsClient = savedObjects.client;
 
   const indexName = item.config.dest.index;
@@ -66,11 +65,14 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
         setIndexPatternExists(true);
       }
     } catch (error) {
+      const { toasts } = notifications;
+
       toasts.addDanger(
         i18n.translate(
           'xpack.ml.dataframe.analyticsList.errorWithCheckingIfIndexPatternExistsNotificationErrorMessage',
           {
-            defaultMessage: 'An error occurred checking if index pattern ${indexPattern} exists',
+            defaultMessage:
+              'An error occurred checking if index pattern ${indexPattern} exists: {error}',
             values: { indexPattern: indexName, error: JSON.stringify(error) },
           }
         )
@@ -84,11 +86,13 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
         setUserCanDeleteIndex(true);
       }
     } catch (error) {
+      const { toasts } = notifications;
       toasts.addDanger(
         i18n.translate(
           'xpack.ml.dataframe.analyticsList.errorWithCheckingIfUserCanDeleteIndexNotificationErrorMessage',
           {
-            defaultMessage: 'An error occurred checking if user can delete ${destinationIndex}',
+            defaultMessage:
+              'An error occurred checking if user can delete ${destinationIndex} exists: {error}',
             values: { destinationIndex: indexName, error: JSON.stringify(error) },
           }
         )

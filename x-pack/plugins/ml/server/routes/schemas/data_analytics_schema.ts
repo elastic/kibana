@@ -60,7 +60,7 @@ export const analyticsIdSchema = schema.object({
   analyticsId: schema.string(),
 });
 
-export const analyticsIdIndexSchema = schema.object({
+export const deleteDataFrameAnalyticsJobSchema = schema.object({
   /**
    * Analytics Destination Index
    */

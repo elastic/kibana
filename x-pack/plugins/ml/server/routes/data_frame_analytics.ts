@@ -5,7 +5,6 @@
  */
 
 import { RequestHandlerContext } from 'kibana/server';
-import { i18n } from '@kbn/i18n';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { RouteInitialization } from '../types';
@@ -15,7 +14,7 @@ import {
   dataAnalyticsExplainSchema,
   analyticsIdSchema,
   stopsDataFrameAnalyticsJobQuerySchema,
-  analyticsIdIndexSchema,
+  deleteDataFrameAnalyticsJobSchema,
 } from './schemas/data_analytics_schema';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
 
@@ -316,7 +315,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       path: '/api/ml/data_frame/analytics/{analyticsId}',
       validate: {
         params: analyticsIdSchema,
-        query: analyticsIdIndexSchema,
+        query: deleteDataFrameAnalyticsJobSchema,
       },
       options: {
         tags: ['access:ml:canDeleteDataFrameAnalytics'],
@@ -357,17 +356,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
                 deleteTargetIndexAcknowledged = true;
               } catch (deleteIndexError) {
                 errorsEncountered.push({
-                  msg: i18n.translate(
-                    'xpack.ml.dataframe.analyticsList.errorDeleteIndexNotificationErrorMessage',
-                    {
-                      defaultMessage:
-                        'An error occurred deleting destination index {destinationIndex}: {error}',
-                      values: {
-                        destinationIndex,
-                        error: JSON.stringify(deleteIndexError),
-                      },
-                    }
-                  ),
+                  msg: `An error occurred deleting destination index ${destinationIndex}`,
                 });
               }
             } else {
@@ -385,17 +374,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
               deleteIndexPatternAcknowledged = true;
             } catch (deleteIndexPatternError) {
               errorsEncountered.push({
-                msg: i18n.translate(
-                  'xpack.ml.dataframe.analyticsList.errorDeleteIndexPatternNotificationErrorMessage',
-                  {
-                    defaultMessage:
-                      'An error occurred deleting index pattern {destinationIndex}: {error}',
-                    values: {
-                      destinationIndex,
-                      error: JSON.stringify(deleteIndexPatternError),
-                    },
-                  }
-                ),
+                msg: `An error occurred deleting index pattern ${destinationIndex}`,
               });
             }
           }
