@@ -45,15 +45,15 @@ describe('createFilterStream()', () => {
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": true,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": true,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": true,
           },
         ],

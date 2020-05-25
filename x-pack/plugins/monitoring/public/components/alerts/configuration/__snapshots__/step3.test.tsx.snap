@@ -24,7 +24,7 @@ exports[`Step3 should show a disabled state 1`] = `
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -48,7 +48,7 @@ exports[`Step3 should show a saving state 1`] = `
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -82,7 +82,7 @@ exports[`Step3 should show an error 1`] = `
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],

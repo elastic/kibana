@@ -152,7 +152,7 @@
     "jest-circus": "^25.5.4",
     "jest-cli": "^25.5.4",
     "jest-styled-components": "^7.0.2",
-    "jsdom": "^15.2.1",
+    "jsdom": "13.1.0",
     "loader-utils": "^1.2.3",
     "madge": "3.4.4",
     "marge": "^1.0.1",

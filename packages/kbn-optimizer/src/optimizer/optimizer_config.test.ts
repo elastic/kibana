@@ -385,11 +385,11 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          7,
+          2,
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": Symbol(new platform plugins),
           },
         ],
@@ -408,11 +408,11 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          8,
+          3,
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": Array [
               Symbol(bundle1),
               Symbol(bundle2),

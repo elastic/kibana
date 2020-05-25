@@ -20,7 +20,7 @@ exports[`SourceFiltersTable should add a filter 1`] = `
           ],
           "results": Array [
             Object {
-              "isThrow": false,
+              "type": "return",
               "value": undefined,
             },
           ],
@@ -114,7 +114,7 @@ exports[`SourceFiltersTable should remove a filter 1`] = `
           ],
           "results": Array [
             Object {
-              "isThrow": false,
+              "type": "return",
               "value": undefined,
             },
           ],
@@ -285,7 +285,7 @@ exports[`SourceFiltersTable should update a filter 1`] = `
           ],
           "results": Array [
             Object {
-              "isThrow": false,
+              "type": "return",
               "value": undefined,
             },
           ],

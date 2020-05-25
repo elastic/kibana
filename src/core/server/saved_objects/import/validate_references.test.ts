@@ -106,7 +106,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": Promise {},
           },
         ],
@@ -212,7 +212,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": Promise {},
           },
         ],
@@ -442,7 +442,7 @@ describe('validateReferences()', () => {
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": Promise {},
           },
         ],

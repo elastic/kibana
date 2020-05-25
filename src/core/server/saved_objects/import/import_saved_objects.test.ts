@@ -166,7 +166,7 @@ describe('importSavedObjects()', () => {
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": Promise {},
           },
         ],
@@ -250,7 +250,7 @@ describe('importSavedObjects()', () => {
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": Promise {},
           },
         ],
@@ -333,7 +333,7 @@ describe('importSavedObjects()', () => {
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": Promise {},
           },
         ],
@@ -515,7 +515,7 @@ describe('importSavedObjects()', () => {
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": Promise {},
           },
         ],
@@ -609,7 +609,7 @@ describe('importSavedObjects()', () => {
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": Promise {},
           },
         ],

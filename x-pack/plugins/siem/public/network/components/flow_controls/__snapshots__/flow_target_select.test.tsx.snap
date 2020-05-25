@@ -16,7 +16,7 @@ exports[`FlowTargetSelect Component rendering it renders the FlowTargetSelect 1`
       ],
       "results": Array [
         Object {
-          "isThrow": false,
+          "type": "return",
           "value": undefined,
         },
       ],

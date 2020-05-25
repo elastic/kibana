@@ -140,31 +140,10 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
           Array [
             "theme:darkMode",
           ],
-          Array [
-            "theme:darkMode",
-          ],
-          Array [
-            "theme:darkMode",
-          ],
-          Array [
-            "theme:darkMode",
-          ],
         ],
         "results": Array [
           Object {
-            "isThrow": false,
-            "value": undefined,
-          },
-          Object {
-            "isThrow": false,
-            "value": undefined,
-          },
-          Object {
-            "isThrow": false,
-            "value": undefined,
-          },
-          Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -505,7 +484,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -854,11 +833,11 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
