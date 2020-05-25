@@ -23,51 +23,52 @@ import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
-} from '../instructions/metricbeat_instructions';
+} from '../instructions/filebeat_instructions';
 import {
   TutorialContext,
   TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
-export function azureMetricsSpecProvider(context: TutorialContext): TutorialSchema {
+export function azureLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'azure';
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
-    id: 'azureMetrics',
-    name: i18n.translate('home.tutorials.azureMetrics.nameTitle', {
-      defaultMessage: 'Azure metrics',
+    id: 'azureLogs',
+    name: i18n.translate('home.tutorials.azureLogs.nameTitle', {
+      defaultMessage: 'Azure logs',
     }),
-    isBeta: false,
-    category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('home.tutorials.azureMetrics.shortDescription', {
-      defaultMessage: 'Fetch Azure Monitor metrics.',
+    isBeta: true,
+    category: TutorialsCategory.LOGGING,
+    shortDescription: i18n.translate('home.tutorials.azureLogs.shortDescription', {
+      defaultMessage: 'Collects Azure activity and audit related logs.',
     }),
-    longDescription: i18n.translate('home.tutorials.azureMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.azureLogs.longDescription', {
       defaultMessage:
-        'The `azure` Metricbeat module fetches Azure Monitor metrics. \
+        'The `azure` Filebeat module collects Azure activity and audit related logs. \
 [Learn more]({learnMoreLink}).',
       values: {
-        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-azure.html',
+        learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-azure.html',
       },
     }),
     euiIconType: 'logoAzure',
     artifacts: {
       dashboards: [
         {
-          id: 'eb3f05f0-ea9a-11e9-90ec-112a988266d5',
-          linkLabel: i18n.translate('home.tutorials.azureMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Azure metrics dashboard',
+          id: '41e84340-ec20-11e9-90ec-112a988266d5',
+          linkLabel: i18n.translate('home.tutorials.azureLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Azure logs dashboard',
           }),
           isOverview: true,
         },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-azure.html',
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-azure.html',
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/azure_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    previewImagePath: '/plugins/home/assets/azure_logs/screenshot.png',
+    onPrem: onPremInstructions(moduleName, platforms, context),
+    elasticCloud: cloudInstructions(moduleName, platforms),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

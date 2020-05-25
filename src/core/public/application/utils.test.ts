@@ -180,7 +180,7 @@ describe('parseAppUrl', () => {
         }
       );
     });
-    it('includes query and hash in the path', () => {
+    it('includes query and hash in the path for default app route', () => {
       expect(parseAppUrl('/base-path/app/foo#hash/bang', basePath, apps, getOrigin)).toEqual({
         app: 'foo',
         path: '#hash/bang',
@@ -203,6 +203,34 @@ describe('parseAppUrl', () => {
         parseAppUrl('/base-path/app/foo/path#hash/bang?hello=dolly', basePath, apps, getOrigin)
       ).toEqual({
         app: 'foo',
+        path: '/path#hash/bang?hello=dolly',
+      });
+    });
+    it('includes query and hash in the path for custom app route', () => {
+      expect(parseAppUrl('/base-path/custom-bar#hash/bang', basePath, apps, getOrigin)).toEqual({
+        app: 'bar',
+        path: '#hash/bang',
+      });
+      expect(parseAppUrl('/base-path/custom-bar?hello=dolly', basePath, apps, getOrigin)).toEqual({
+        app: 'bar',
+        path: '?hello=dolly',
+      });
+      expect(
+        parseAppUrl('/base-path/custom-bar/path?hello=dolly', basePath, apps, getOrigin)
+      ).toEqual({
+        app: 'bar',
+        path: '/path?hello=dolly',
+      });
+      expect(
+        parseAppUrl('/base-path/custom-bar/path#hash/bang', basePath, apps, getOrigin)
+      ).toEqual({
+        app: 'bar',
+        path: '/path#hash/bang',
+      });
+      expect(
+        parseAppUrl('/base-path/custom-bar/path#hash/bang?hello=dolly', basePath, apps, getOrigin)
+      ).toEqual({
+        app: 'bar',
         path: '/path#hash/bang?hello=dolly',
       });
     });
@@ -265,7 +293,7 @@ describe('parseAppUrl', () => {
         path: '/another/path/',
       });
     });
-    it('includes query and hash in the path', () => {
+    it('includes query and hash in the path for default app routes', () => {
       expect(
         parseAppUrl(
           'https://kibana.local:8080/base-path/app/foo#hash/bang',
@@ -322,6 +350,63 @@ describe('parseAppUrl', () => {
         path: '/path#hash/bang?hello=dolly',
       });
     });
+    it('includes query and hash in the path for custom app route', () => {
+      expect(
+        parseAppUrl(
+          'https://kibana.local:8080/base-path/custom-bar#hash/bang',
+          basePath,
+          apps,
+          getOrigin
+        )
+      ).toEqual({
+        app: 'bar',
+        path: '#hash/bang',
+      });
+      expect(
+        parseAppUrl(
+          'https://kibana.local:8080/base-path/custom-bar?hello=dolly',
+          basePath,
+          apps,
+          getOrigin
+        )
+      ).toEqual({
+        app: 'bar',
+        path: '?hello=dolly',
+      });
+      expect(
+        parseAppUrl(
+          'https://kibana.local:8080/base-path/custom-bar/path?hello=dolly',
+          basePath,
+          apps,
+          getOrigin
+        )
+      ).toEqual({
+        app: 'bar',
+        path: '/path?hello=dolly',
+      });
+      expect(
+        parseAppUrl(
+          'https://kibana.local:8080/base-path/custom-bar/path#hash/bang',
+          basePath,
+          apps,
+          getOrigin
+        )
+      ).toEqual({
+        app: 'bar',
+        path: '/path#hash/bang',
+      });
+      expect(
+        parseAppUrl(
+          'https://kibana.local:8080/base-path/custom-bar/path#hash/bang?hello=dolly',
+          basePath,
+          apps,
+          getOrigin
+        )
+      ).toEqual({
+        app: 'bar',
+        path: '/path#hash/bang?hello=dolly',
+      });
+    });
     it('works with legacy apps', () => {
       expect(
         parseAppUrl('https://kibana.local:8080/base-path/app/legacy', basePath, apps, getOrigin)
@@ -352,6 +437,24 @@ describe('parseAppUrl', () => {
       ).toEqual(undefined);
       expect(
         parseAppUrl('https://kibana.local:8080/base-path/unknown-path', basePath, apps, getOrigin)
+      ).toEqual(undefined);
+    });
+    it('returns undefined when origin does not match', () => {
+      expect(
+        parseAppUrl(
+          'https://other-kibana.external:8080/base-path/app/foo',
+          basePath,
+          apps,
+          getOrigin
+        )
+      ).toEqual(undefined);
+      expect(
+        parseAppUrl(
+          'https://other-kibana.external:8080/base-path/custom-bar',
+          basePath,
+          apps,
+          getOrigin
+        )
       ).toEqual(undefined);
     });
   });

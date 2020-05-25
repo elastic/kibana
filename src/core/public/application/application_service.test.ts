@@ -180,6 +180,10 @@ describe('#setup()', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"Cannot register an application route that includes HTTP base path"`
       );
+
+      expect(() =>
+        register(Symbol(), createApp({ id: 'app3', appRoute: '/base-path-i-am-not' }))
+      ).not.toThrow();
     });
   });
 
@@ -928,7 +932,7 @@ describe('#start()', () => {
       service.setup(setupDeps);
       const { navigateToUrl } = await service.start(startDeps);
 
-      await navigateToUrl('/not-an-app-path');
+      await navigateToUrl('/an-app-path');
 
       expect(MockHistory.push).toHaveBeenCalledWith('/app/foo/some-path', undefined);
       expect(setupDeps.redirectTo).not.toHaveBeenCalled();

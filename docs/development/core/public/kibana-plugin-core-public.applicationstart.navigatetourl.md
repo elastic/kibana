@@ -8,7 +8,7 @@ Navigate to given url, which can either be an absolute url or a relative path, i
 
 If all these criteria are true for the given url: - (only for absolute URLs) The origin of the URL matches the origin of the browser's current location - The pathname of the URL starts with the current basePath (eg. /mybasepath/s/my-space) - The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)
 
-Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path. Else, a full page reload will be performed to navigate to the url using `window.location.assign`
+Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path. Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`
 
 <b>Signature:</b>
 
