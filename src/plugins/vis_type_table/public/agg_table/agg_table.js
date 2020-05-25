@@ -139,7 +139,7 @@ export function KbnAggTable(config, RecursionHelper) {
                 ? splitRow.find((splitRow) => splitRow.accessor === i)
                 : undefined;
               const dimension =
-                isBucket || isSplitColumn || metrics.find(metric => metric.accessor === i);
+                isBucket || isSplitColumn || metrics.find((metric) => metric.accessor === i);
 
               const formatter = dimension
                 ? getFormatService().deserialize(dimension.format)
