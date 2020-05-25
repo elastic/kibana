@@ -389,7 +389,7 @@ describe('OptimizerConfig::create()', () => {
         ],
         "results": Array [
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": Symbol(new platform plugins),
           },
         ],
@@ -412,7 +412,7 @@ describe('OptimizerConfig::create()', () => {
         ],
         "results": Array [
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": Array [
               Symbol(bundle1),
               Symbol(bundle2),

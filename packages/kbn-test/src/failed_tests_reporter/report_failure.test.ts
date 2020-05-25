@@ -61,7 +61,7 @@ describe('createFailureIssue()', () => {
         ],
         "results": Array [
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": undefined,
           },
         ],
@@ -100,7 +100,7 @@ describe('updateFailureIssue()', () => {
         ],
         "results": Array [
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": undefined,
           },
         ],
@@ -116,7 +116,7 @@ describe('updateFailureIssue()', () => {
         ],
         "results": Array [
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": undefined,
           },
         ],

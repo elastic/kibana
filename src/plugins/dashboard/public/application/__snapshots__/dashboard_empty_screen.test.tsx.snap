@@ -152,19 +152,19 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
         ],
         "results": Array [
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": undefined,
           },
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": undefined,
           },
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": undefined,
           },
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": undefined,
           },
         ],
@@ -505,7 +505,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
         ],
         "results": Array [
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": undefined,
           },
         ],
@@ -854,11 +854,11 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
         ],
         "results": Array [
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": undefined,
           },
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": undefined,
           },
         ],

@@ -257,7 +257,7 @@ describe('injectNestedDependencies', () => {
         ],
         "results": Array [
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": Promise {},
           },
         ],
@@ -438,11 +438,11 @@ describe('injectNestedDependencies', () => {
         ],
         "results": Array [
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": Promise {},
           },
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": Promise {},
           },
         ],
@@ -608,7 +608,7 @@ describe('injectNestedDependencies', () => {
         ],
         "results": Array [
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": Promise {},
           },
         ],

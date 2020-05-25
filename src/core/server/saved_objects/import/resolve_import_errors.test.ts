@@ -149,7 +149,7 @@ describe('resolveImportErrors()', () => {
         ],
         "results": Array [
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": Promise {},
           },
         ],
@@ -211,7 +211,7 @@ describe('resolveImportErrors()', () => {
         ],
         "results": Array [
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": Promise {},
           },
         ],
@@ -284,7 +284,7 @@ describe('resolveImportErrors()', () => {
         ],
         "results": Array [
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": Promise {},
           },
         ],
@@ -483,7 +483,7 @@ describe('resolveImportErrors()', () => {
         ],
         "results": Array [
           Object {
-            "type": "return",
+            "isThrow": false,
             "value": Promise {},
           },
         ],

@@ -12,7 +12,7 @@ exports[`Mounting and unmounting DocViewerRenderTab 1`] = `
   ],
   "results": Array [
     Object {
-      "type": "return",
+      "isThrow": false,
       "value": [MockFunction],
     },
   ],
