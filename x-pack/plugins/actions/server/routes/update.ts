@@ -28,7 +28,7 @@ const bodySchema = schema.object({
 export const updateActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.put(
     {
-      path: `${BASE_ACTION_API_PATH}/{id}`,
+      path: `${BASE_ACTION_API_PATH}/action/{id}`,
       validate: {
         body: bodySchema,
         params: paramSchema,
