@@ -39,22 +39,17 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     if (!mlLicense.isSecurityEnabled()) {
       return true;
     }
-    let privilege;
-    try {
-      privilege = await context.ml!.mlClient.callAsCurrentUser('ml.privilegeCheck', {
-        body: {
-          index: [
-            {
-              names: [destinationIndex], // uses wildcard
-              privileges: ['delete_index'],
-            },
-          ],
-        },
-      });
-      return privilege.index[destinationIndex].delete_index === true;
-    } catch (err) {
-      throw err;
-    }
+    const privilege = await context.ml!.mlClient.callAsCurrentUser('ml.privilegeCheck', {
+      body: {
+        index: [
+          {
+            names: [destinationIndex], // uses wildcard
+            privileges: ['delete_index'],
+          },
+        ],
+      },
+    });
+    return privilege.index[destinationIndex].delete_index === true;
   }
 
   /**

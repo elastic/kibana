@@ -20,7 +20,7 @@ export class IndexPatternHandler {
     });
 
     const ip = response.saved_objects.find(
-      obj => obj.attributes.title.toLowerCase() === indexName.toLowerCase()
+      (obj) => obj.attributes.title.toLowerCase() === indexName.toLowerCase()
     );
 
     return ip?.id;

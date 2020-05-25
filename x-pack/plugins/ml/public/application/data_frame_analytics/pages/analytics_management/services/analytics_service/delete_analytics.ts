@@ -84,7 +84,7 @@ export const deleteAnalyticsAndTargetIndex = async (
     }
 
     if (Array.isArray(status.errors)) {
-      status.errors.map(error => {
+      status.errors.map((error) => {
         toastNotifications.addDanger(error.msg);
       });
     }

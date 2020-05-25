@@ -59,7 +59,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
         fields: ['title'],
       });
       const ip = response.savedObjects.find(
-        obj => obj.attributes.title.toLowerCase() === indexName.toLowerCase()
+        (obj) => obj.attributes.title.toLowerCase() === indexName.toLowerCase()
       );
       if (ip !== undefined) {
         setIndexPatternExists(true);
