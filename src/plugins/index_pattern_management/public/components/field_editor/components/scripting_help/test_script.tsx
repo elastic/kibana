@@ -20,8 +20,6 @@
 import './test_script.scss';
 
 import React, { Component, Fragment } from 'react';
-import { HttpStart, IUiSettingsClient } from 'src/core/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
 
 import {
   EuiButton,
@@ -36,7 +34,15 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { esQuery, IndexPattern, Query, UI_SETTINGS } from '../../../../../../data/public';
+
+import {
+  esQuery,
+  IndexPattern,
+  Query,
+  UI_SETTINGS,
+} from '../../../../../../../plugins/data/public';
+import { context as contextType } from '../../../../../../kibana_react/public';
+import { IndexPatternManagmentContextValue } from '../../../../types';
 import { ExecuteScript } from '../../types';
 
 interface TestScriptProps {
@@ -45,9 +51,6 @@ interface TestScriptProps {
   name?: string;
   script?: string;
   executeScript: ExecuteScript;
-  http: HttpStart;
-  uiSettings: IUiSettingsClient;
-  SearchBar: DataPublicPluginStart['ui']['SearchBar'];
 }
 
 interface AdditionalField {
@@ -62,6 +65,10 @@ interface TestScriptState {
 }
 
 export class TestScript extends Component<TestScriptProps, TestScriptState> {
+  static contextType = contextType;
+
+  public readonly context!: IndexPatternManagmentContextValue;
+
   defaultProps = {
     name: 'myScriptedField',
   };
@@ -79,7 +86,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
   }
 
   previewScript = async (searchContext?: { query?: Query | undefined }) => {
-    const { indexPattern, lang, name, script, executeScript, http } = this.props;
+    const { indexPattern, lang, name, script, executeScript } = this.props;
 
     if (!script || script.length === 0) {
       return;
@@ -91,7 +98,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
 
     let query;
     if (searchContext) {
-      const esQueryConfigs = esQuery.getEsQueryConfig(this.props.uiSettings);
+      const esQueryConfigs = esQuery.getEsQueryConfig(this.context.services.uiSettings);
       query = esQuery.buildEsQuery(
         this.props.indexPattern,
         searchContext.query || [],
@@ -107,7 +114,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
       indexPatternTitle: indexPattern.title,
       query,
       additionalFields: this.state.additionalFields.map((option: AdditionalField) => option.value),
-      http,
+      http: this.context.services.http,
     });
 
     if (scriptResponse.status !== 200) {
@@ -120,7 +127,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
 
     this.setState({
       isLoading: false,
-      previewData: scriptResponse.hits.hits.map((hit) => ({
+      previewData: scriptResponse.hits.hits.map((hit: any) => ({
         _id: hit._id,
         ...hit._source,
         ...hit.fields,
@@ -181,7 +188,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
     );
   }
 
-  renderToolbar(SearchBar: DataPublicPluginStart['ui']['SearchBar']) {
+  renderToolbar() {
     const fieldsByTypeMap = new Map();
     const fields: EuiComboBoxOptionOption[] = [];
 
@@ -236,13 +243,13 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
         </EuiFormRow>
 
         <div className="testScript__searchBar">
-          <SearchBar
+          <this.context.services.data.ui.SearchBar
             appName={'indexPatternManagement'}
             showFilterBar={false}
             showDatePicker={false}
             showQueryInput={true}
             query={{
-              language: this.props.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE),
+              language: this.context.services.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE),
               query: '',
             }}
             onQuerySubmit={this.previewScript}
@@ -266,7 +273,6 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
   }
 
   render() {
-    const { SearchBar } = this.props;
     return (
       <Fragment>
         <EuiSpacer />
@@ -287,7 +293,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
           </p>
         </EuiText>
         <EuiSpacer />
-        {this.renderToolbar(SearchBar)}
+        {this.renderToolbar()}
         <EuiSpacer />
         {this.renderPreview(this.state.previewData)}
       </Fragment>

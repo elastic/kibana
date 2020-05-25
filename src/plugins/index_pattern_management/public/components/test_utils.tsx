@@ -17,26 +17,24 @@
  * under the License.
  */
 
-import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
+import React from 'react';
+import PropTypes from 'prop-types';
+import { shallow } from 'enzyme';
 
-export const MockCapabilitiesService = capabilitiesServiceMock.create();
-export const CapabilitiesServiceConstructor = jest
-  .fn()
-  .mockImplementation(() => MockCapabilitiesService);
-jest.doMock('./capabilities', () => ({
-  CapabilitiesService: CapabilitiesServiceConstructor,
-}));
+// since the 'shallow' from 'enzyme' doesn't support context API for React 16 and above (https://github.com/facebook/react/pull/14329)
+// we use this workaround where define legacy contextTypes for react class component
+export function createComponentWithContext(
+  MyComponent: React.ComponentClass<any>,
+  props: Record<string, any>,
+  mockedContext: Record<string, any>
+) {
+  MyComponent.contextTypes = {
+    services: PropTypes.object,
+  };
 
-export const MockHistory = {
-  push: jest.fn(),
-};
-export const createBrowserHistoryMock = jest.fn().mockReturnValue(MockHistory);
-jest.doMock('history', () => ({
-  createBrowserHistory: createBrowserHistoryMock,
-}));
-
-export const parseAppUrlMock = jest.fn();
-jest.doMock('./utils', () => ({
-  ...jest.requireActual('./utils'),
-  parseAppUrl: parseAppUrlMock,
-}));
+  return shallow(<MyComponent {...props} />, {
+    context: {
+      services: mockedContext,
+    },
+  });
+}
