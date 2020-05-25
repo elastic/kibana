@@ -19,7 +19,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
 
     it('should handle get action request appropriately', async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
@@ -32,10 +32,10 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
       await supertest
-        .get(`${getUrlPrefix(Spaces.space1.id)}/api/action/${createdAction.id}`)
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/${createdAction.id}`)
         .expect(200, {
           id: createdAction.id,
           isPreconfigured: false,
@@ -49,7 +49,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
 
     it(`action should't be acessible from another space`, async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
@@ -62,10 +62,10 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
       await supertest
-        .get(`${getUrlPrefix(Spaces.other.id)}/api/action/${createdAction.id}`)
+        .get(`${getUrlPrefix(Spaces.other.id)}/api/actions/action/${createdAction.id}`)
         .expect(404, {
           statusCode: 404,
           error: 'Not Found',
@@ -74,12 +74,14 @@ export default function getActionTests({ getService }: FtrProviderContext) {
     });
 
     it('should handle get action request from preconfigured list', async () => {
-      await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/action/my-slack1`).expect(200, {
-        id: 'my-slack1',
-        isPreconfigured: true,
-        actionTypeId: '.slack',
-        name: 'Slack#xyz',
-      });
+      await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/my-slack1`)
+        .expect(200, {
+          id: 'my-slack1',
+          isPreconfigured: true,
+          actionTypeId: '.slack',
+          name: 'Slack#xyz',
+        });
     });
   });
 }

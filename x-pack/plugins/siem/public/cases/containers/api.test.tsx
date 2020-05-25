@@ -88,7 +88,7 @@ describe('Case Configuration API', () => {
     });
     test('check url, method, signal', async () => {
       await getActionLicense(abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`/api/action/types`, {
+      expect(fetchMock).toHaveBeenCalledWith(`/api/actions/list_action_types`, {
         method: 'GET',
         signal: abortCtrl.signal,
       });
@@ -416,7 +416,7 @@ describe('Case Configuration API', () => {
     const connectorId = 'connectorId';
     test('check url, method, signal', async () => {
       await pushToService(connectorId, casePushParams, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`/api/action/${connectorId}/_execute`, {
+      expect(fetchMock).toHaveBeenCalledWith(`/api/actions/action/${connectorId}/_execute`, {
         method: 'POST',
         body: JSON.stringify({
           params: { subAction: 'pushToService', subActionParams: casePushParams },
