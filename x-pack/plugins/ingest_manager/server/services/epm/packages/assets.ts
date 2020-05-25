@@ -62,7 +62,7 @@ export async function getAssetsData(
 
   // Gather all asset data
   const assets = getAssets(packageInfo, filter, datasetName);
-  const entries: Registry.ArchiveEntry[] = assets.map(registryPath => {
+  const entries: Registry.ArchiveEntry[] = assets.map((registryPath) => {
     const archivePath = registryPathToArchivePath(registryPath);
     const buffer = Registry.getAsset(archivePath);
 

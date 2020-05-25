@@ -61,7 +61,7 @@ export abstract class NumeralFormat extends FieldFormat {
     return formatted;
   }
 
-  textConvert: TextContextTypeConvert = val => {
+  textConvert: TextContextTypeConvert = (val) => {
     return this.getConvertedValue(val);
   };
 }

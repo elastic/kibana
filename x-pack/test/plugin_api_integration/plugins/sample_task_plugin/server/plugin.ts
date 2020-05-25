@@ -157,8 +157,8 @@ function millisecondsFromNow(ms: number) {
   return dt;
 }
 
-const once = function(emitter: EventEmitter, event: string): Promise<Record<string, unknown>> {
-  return new Promise(resolve => {
-    emitter.once(event, data => resolve(data || {}));
+const once = function (emitter: EventEmitter, event: string): Promise<Record<string, unknown>> {
+  return new Promise((resolve) => {
+    emitter.once(event, (data) => resolve(data || {}));
   });
 };

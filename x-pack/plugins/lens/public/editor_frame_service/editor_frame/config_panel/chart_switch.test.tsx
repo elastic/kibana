@@ -22,7 +22,7 @@ describe('chart_switch', () => {
     return {
       ...createMockVisualization(),
       id,
-      getVisualizationTypeId: jest.fn(_state => id),
+      getVisualizationTypeId: jest.fn((_state) => id),
       visualizationTypes: [
         {
           icon: 'empty',
@@ -33,7 +33,7 @@ describe('chart_switch', () => {
       initialize: jest.fn((_frame, state?: unknown) => {
         return state || `${id} initial state`;
       }),
-      getSuggestions: jest.fn(options => {
+      getSuggestions: jest.fn((options) => {
         return [
           {
             score: 1,
@@ -70,8 +70,8 @@ describe('chart_switch', () => {
             label: 'C3',
           },
         ],
-        getVisualizationTypeId: jest.fn(state => state.type),
-        getSuggestions: jest.fn(options => {
+        getVisualizationTypeId: jest.fn((state) => state.type),
+        getSuggestions: jest.fn((options) => {
           if (options.subVisualizationId === 'subvisC2') {
             return [];
           }
@@ -144,18 +144,12 @@ describe('chart_switch', () => {
   }
 
   function showFlyout(component: ReactWrapper) {
-    component
-      .find('[data-test-subj="lnsChartSwitchPopover"]')
-      .first()
-      .simulate('click');
+    component.find('[data-test-subj="lnsChartSwitchPopover"]').first().simulate('click');
   }
 
   function switchTo(subType: string, component: ReactWrapper) {
     showFlyout(component);
-    component
-      .find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`)
-      .first()
-      .simulate('click');
+    component.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).first().simulate('click');
   }
 
   function getMenuItem(subType: string, component: ReactWrapper) {
@@ -566,7 +560,7 @@ describe('chart_switch', () => {
     showFlyout(component);
 
     const allDisplayed = ['visA', 'visB', 'subvisC1', 'subvisC2', 'subvisC3'].every(
-      subType => component.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).length > 0
+      (subType) => component.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).length > 0
     );
 
     expect(allDisplayed).toBeTruthy();

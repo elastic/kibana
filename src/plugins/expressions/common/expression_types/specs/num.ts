@@ -36,11 +36,11 @@ export const num: ExpressionTypeDefinition<'num', ExpressionValueNum> = {
       type: 'num',
       value: 0,
     }),
-    boolean: b => ({
+    boolean: (b) => ({
       type: 'num',
       value: Number(b),
     }),
-    string: n => {
+    string: (n) => {
       const value = Number(n);
       if (Number.isNaN(value)) {
         throw new Error(
@@ -57,7 +57,7 @@ export const num: ExpressionTypeDefinition<'num', ExpressionValueNum> = {
         value,
       };
     },
-    '*': value => ({
+    '*': (value) => ({
       type: 'num',
       value: Number(value),
     }),

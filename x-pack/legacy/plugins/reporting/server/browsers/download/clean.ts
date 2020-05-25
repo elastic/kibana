@@ -27,7 +27,7 @@ export async function clean(dir: string, expectedPaths: string[]) {
     throw error;
   }
 
-  await asyncMap(filenames, async filename => {
+  await asyncMap(filenames, async (filename) => {
     const path = resolvePath(dir, filename);
     if (!expectedPaths.includes(path)) {
       log(`Deleting unexpected file ${path}`);

@@ -84,7 +84,7 @@ describe('stdDeviationBands(resp, panel, series)', () => {
   });
 
   test('creates a series', () => {
-    const next = results => results;
+    const next = (results) => results;
     const results = stdDeviationBands(resp, panel, series)(next)([]);
     expect(results).toHaveLength(1);
 
