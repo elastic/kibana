@@ -10,7 +10,7 @@ export default function endpointAPIIntegrationTests({
   loadTestFile,
   getService,
 }: FtrProviderContext) {
-  describe('Endpoint plugin', function() {
+  describe('Endpoint plugin', function () {
     const ingestManager = getService('ingestManager');
     this.tags(['endpoint']);
     before(async () => {

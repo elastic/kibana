@@ -72,20 +72,20 @@ export async function scanCopy(options: Options) {
   const getChildRecords = async (parent: Record) => {
     const names = await readdirAsync(parent.absolute);
     const records = await Promise.all(
-      names.map(async name => {
+      names.map(async (name) => {
         const absolute = join(parent.absolute, name);
         const stat = await statAsync(absolute);
         return new Record(stat.isDirectory(), name, absolute, join(parent.absoluteDest, name));
       })
     );
 
-    return records.filter(record => (filter ? filter(record) : true));
+    return records.filter((record) => (filter ? filter(record) : true));
   };
 
   // create or copy each child of a directory
   const copyChildren = async (record: Record) => {
     const children = await getChildRecords(record);
-    await Promise.all(children.map(async child => await copy(child)));
+    await Promise.all(children.map(async (child) => await copy(child)));
   };
 
   // create or copy a record and recurse into directories

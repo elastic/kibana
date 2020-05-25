@@ -182,7 +182,7 @@ export async function getOptimizerCacheKey(config: OptimizerConfig) {
   };
 
   const mtimes = await getMtimes(modifiedPaths);
-  for (const [path, mtime] of Array.from(mtimes.entries()).sort(ascending(e => e[0]))) {
+  for (const [path, mtime] of Array.from(mtimes.entries()).sort(ascending((e) => e[0]))) {
     if (typeof mtime === 'number') {
       cacheKeys.modifiedTimes[path] = mtime;
     }

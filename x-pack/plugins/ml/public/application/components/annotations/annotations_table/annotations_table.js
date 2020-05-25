@@ -95,7 +95,7 @@ export class AnnotationsTable extends Component {
           maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
         })
         .toPromise()
-        .then(resp => {
+        .then((resp) => {
           this.setState((prevState, props) => ({
             annotations: resp.annotations[props.jobs[0].job_id] || [],
             errorMessage: undefined,
@@ -103,7 +103,7 @@ export class AnnotationsTable extends Component {
             jobId: props.jobs[0].job_id,
           }));
         })
-        .catch(resp => {
+        .catch((resp) => {
           console.log('Error loading list of annotations for jobs list:', resp);
           this.setState({
             annotations: [],
@@ -225,7 +225,7 @@ export class AnnotationsTable extends Component {
     window.open(`#/timeseriesexplorer${url}`, '_self');
   };
 
-  onMouseOverRow = record => {
+  onMouseOverRow = (record) => {
     if (this.mouseOverRecord !== undefined) {
       if (this.mouseOverRecord.rowId !== record.rowId) {
         // Mouse is over a different row, fire mouseleave on the previous record.
@@ -354,7 +354,7 @@ export class AnnotationsTable extends Component {
       },
     ];
 
-    const jobIds = _.uniq(annotations.map(a => a.job_id));
+    const jobIds = _.uniq(annotations.map((a) => a.job_id));
     if (jobIds.length > 1) {
       columns.unshift({
         field: 'job_id',
@@ -373,7 +373,7 @@ export class AnnotationsTable extends Component {
         }),
         sortable: true,
         width: '60px',
-        render: key => {
+        render: (key) => {
           return <EuiBadge color="default">{key}</EuiBadge>;
         },
       });
@@ -382,7 +382,7 @@ export class AnnotationsTable extends Component {
     const actions = [];
 
     actions.push({
-      render: annotation => {
+      render: (annotation) => {
         const editAnnotationsTooltipText = (
           <FormattedMessage
             id="xpack.ml.annotationsTable.editAnnotationsTooltip"
@@ -409,7 +409,7 @@ export class AnnotationsTable extends Component {
 
     if (isSingleMetricViewerLinkVisible) {
       actions.push({
-        render: annotation => {
+        render: (annotation) => {
           const isDrillDownAvailable = isTimeSeriesViewJob(this.getJob(annotation.job_id));
           const openInSingleMetricViewerTooltipText = isDrillDownAvailable ? (
             <FormattedMessage
@@ -457,7 +457,7 @@ export class AnnotationsTable extends Component {
       actions,
     });
 
-    const getRowProps = item => {
+    const getRowProps = (item) => {
       return {
         onMouseOver: () => this.onMouseOverRow(item),
         onMouseLeave: () => this.onMouseLeaveRow(),

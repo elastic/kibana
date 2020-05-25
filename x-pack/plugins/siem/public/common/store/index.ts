@@ -14,7 +14,7 @@ import { SubstateMiddlewareFactory } from './types';
 export { createStore, getStore };
 
 export const substateMiddlewareFactory: SubstateMiddlewareFactory = (selector, middleware) => {
-  return api => {
+  return (api) => {
     const substateAPI = {
       ...api,
       // Return just the substate instead of global state.

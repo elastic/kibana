@@ -25,18 +25,18 @@ class FollowerIndexPauseProviderUi extends PureComponent {
     indices: [],
   };
 
-  onMouseOverModal = event => {
+  onMouseOverModal = (event) => {
     // This component can sometimes be used inside of an EuiToolTip, in which case mousing over
     // the modal can trigger the tooltip. Stopping propagation prevents this.
     event.stopPropagation();
   };
 
-  pauseFollowerIndex = index => {
+  pauseFollowerIndex = (index) => {
     this.setState({ isModalOpen: true, indices: arrify(index) });
   };
 
   onConfirm = () => {
-    this.props.pauseFollowerIndex(this.state.indices.map(index => index.name));
+    this.props.pauseFollowerIndex(this.state.indices.map((index) => index.name));
     this.setState({ isModalOpen: false, indices: [] });
     this.props.onConfirm && this.props.onConfirm();
   };
@@ -65,7 +65,7 @@ class FollowerIndexPauseProviderUi extends PureComponent {
             values: { count: indices.length },
           }
         );
-    const hasCustomSettings = indices.some(index => !areAllSettingsDefault(index));
+    const hasCustomSettings = indices.some((index) => !areAllSettingsDefault(index));
 
     return (
       <EuiOverlayMask>
@@ -118,7 +118,7 @@ class FollowerIndexPauseProviderUi extends PureComponent {
               </p>
 
               <ul>
-                {indices.map(index => (
+                {indices.map((index) => (
                   <li key={index.name}>{index.name}</li>
                 ))}
               </ul>
@@ -142,8 +142,8 @@ class FollowerIndexPauseProviderUi extends PureComponent {
   }
 }
 
-const mapDispatchToProps = dispatch => ({
-  pauseFollowerIndex: id => dispatch(pauseFollowerIndex(id)),
+const mapDispatchToProps = (dispatch) => ({
+  pauseFollowerIndex: (id) => dispatch(pauseFollowerIndex(id)),
 });
 
 export const FollowerIndexPauseProvider = connect(

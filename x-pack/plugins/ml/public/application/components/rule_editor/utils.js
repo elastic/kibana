@@ -60,7 +60,7 @@ export function isValidRule(rule) {
     } else {
       const scope = rule.scope;
       if (scope !== undefined) {
-        isValid = Object.keys(scope).some(field => scope[field].enabled === true);
+        isValid = Object.keys(scope).some((field) => scope[field].enabled === true);
       }
     }
   }
@@ -76,7 +76,7 @@ export function saveJobRule(job, detectorIndex, ruleIndex, editedRule) {
   const clonedRule = cloneDeep(editedRule);
   const scope = clonedRule.scope;
   if (scope !== undefined) {
-    Object.keys(scope).forEach(field => {
+    Object.keys(scope).forEach((field) => {
       if (scope[field].enabled === false) {
         delete scope[field];
       } else {
@@ -148,7 +148,7 @@ export function updateJobRules(job, detectorIndex, rules) {
   return new Promise((resolve, reject) => {
     mlJobService
       .updateJob(jobId, jobData)
-      .then(resp => {
+      .then((resp) => {
         if (resp.success) {
           // Refresh the job data in the job service before resolving.
           mlJobService
@@ -156,14 +156,14 @@ export function updateJobRules(job, detectorIndex, rules) {
             .then(() => {
               resolve({ success: true });
             })
-            .catch(refreshResp => {
+            .catch((refreshResp) => {
               reject(refreshResp);
             });
         } else {
           reject(resp);
         }
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -175,10 +175,10 @@ export function addItemToFilter(item, filterId) {
   return new Promise((resolve, reject) => {
     ml.filters
       .updateFilter(filterId, undefined, [item], undefined)
-      .then(updatedFilter => {
+      .then((updatedFilter) => {
         resolve(updatedFilter);
       })
-      .catch(error => {
+      .catch((error) => {
         reject(error);
       });
   });

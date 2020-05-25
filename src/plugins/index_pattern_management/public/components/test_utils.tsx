@@ -17,17 +17,24 @@
  * under the License.
  */
 
-export interface ParentPongMsg {
-  type: 'pong';
-}
+import React from 'react';
+import PropTypes from 'prop-types';
+import { shallow } from 'enzyme';
 
-export const isParentPong = (value: any): value is ParentPongMsg =>
-  typeof value === 'object' && value && value.type === 'pong';
+// since the 'shallow' from 'enzyme' doesn't support context API for React 16 and above (https://github.com/facebook/react/pull/14329)
+// we use this workaround where define legacy contextTypes for react class component
+export function createComponentWithContext(
+  MyComponent: React.ComponentClass<any>,
+  props: Record<string, any>,
+  mockedContext: Record<string, any>
+) {
+  MyComponent.contextTypes = {
+    services: PropTypes.object,
+  };
 
-export class ParentMsgs {
-  pong(): ParentPongMsg {
-    return {
-      type: 'pong',
-    };
-  }
+  return shallow(<MyComponent {...props} />, {
+    context: {
+      services: mockedContext,
+    },
+  });
 }

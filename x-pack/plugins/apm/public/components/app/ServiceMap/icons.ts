@@ -9,7 +9,7 @@ import { getNormalizedAgentName } from '../../../../common/agent_name';
 import {
   AGENT_NAME,
   SPAN_SUBTYPE,
-  SPAN_TYPE
+  SPAN_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import awsIcon from './icons/aws.svg';
 import cassandraIcon from './icons/cassandra.svg';
@@ -45,12 +45,12 @@ const defaultTypeIcons: { [key: string]: string } = {
   ext: globeIcon,
   external: globeIcon,
   messaging: documentsIcon,
-  resource: globeIcon
+  resource: globeIcon,
 };
 
 const typeIcons: { [key: string]: { [key: string]: string } } = {
   aws: {
-    servicename: awsIcon
+    servicename: awsIcon,
   },
   db: {
     cassandra: cassandraIcon,
@@ -58,20 +58,20 @@ const typeIcons: { [key: string]: { [key: string]: string } } = {
     mongodb: mongodbIcon,
     mysql: mysqlIcon,
     postgresql: postgresqlIcon,
-    redis: redisIcon
+    redis: redisIcon,
   },
   external: {
     graphql: graphqlIcon,
     grpc: grpcIcon,
-    websocket: websocketIcon
+    websocket: websocketIcon,
   },
   messaging: {
     jms: javaIcon,
-    kafka: kafkaIcon
+    kafka: kafkaIcon,
   },
   template: {
-    handlebars: handlebarsIcon
-  }
+    handlebars: handlebarsIcon,
+  },
 };
 
 const agentIcons: { [key: string]: string } = {
@@ -83,7 +83,7 @@ const agentIcons: { [key: string]: string } = {
   nodejs: nodeJsIcon,
   php: phpIcon,
   python: pythonIcon,
-  ruby: rubyIcon
+  ruby: rubyIcon,
 };
 
 function getAgentIcon(agentName?: string) {

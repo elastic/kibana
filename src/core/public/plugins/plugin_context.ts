@@ -95,8 +95,8 @@ export function createPluginSetupContext<
 ): CoreSetup {
   return {
     application: {
-      register: app => deps.application.register(plugin.opaqueId, app),
-      registerAppUpdater: statusUpdater$ => deps.application.registerAppUpdater(statusUpdater$),
+      register: (app) => deps.application.register(plugin.opaqueId, app),
+      registerAppUpdater: (statusUpdater$) => deps.application.registerAppUpdater(statusUpdater$),
       registerMountContext: (contextName, provider) =>
         deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
     },
@@ -138,6 +138,7 @@ export function createPluginStartContext<
       currentAppId$: deps.application.currentAppId$,
       capabilities: deps.application.capabilities,
       navigateToApp: deps.application.navigateToApp,
+      navigateToUrl: deps.application.navigateToUrl,
       getUrlForApp: deps.application.getUrlForApp,
       registerMountContext: (contextName, provider) =>
         deps.application.registerMountContext(plugin.opaqueId, contextName, provider),

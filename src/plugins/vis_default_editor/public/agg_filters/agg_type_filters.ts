@@ -65,8 +65,8 @@ export function filterAggTypes(
   aggConfig: IAggConfig,
   aggFilter: string[]
 ) {
-  const allowedAggTypes = aggTypes.filter(aggType => {
-    const isAggTypeAllowed = filters.every(filter =>
+  const allowedAggTypes = aggTypes.filter((aggType) => {
+    const isAggTypeAllowed = filters.every((filter) =>
       filter(aggType, indexPattern, aggConfig, aggFilter)
     );
     return isAggTypeAllowed;

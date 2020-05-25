@@ -11,7 +11,7 @@ import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import * as Transactions from './mockData';
 import {
   expectTextsNotInDocument,
-  expectTextsInDocument
+  expectTextsInDocument,
 } from '../../../../utils/testHelpers';
 import * as hooks from '../../../../hooks/useFetcher';
 import { LicenseContext } from '../../../../context/LicenseContext';
@@ -34,7 +34,7 @@ describe('TransactionActionMenu component', () => {
   beforeAll(() => {
     spyOn(hooks, 'useFetcher').and.returnValue({
       data: [],
-      status: 'success'
+      status: 'success',
     });
   });
   afterAll(() => {
@@ -171,8 +171,8 @@ describe('TransactionActionMenu component', () => {
           mode: 'gold',
           status: 'invalid',
           type: 'gold',
-          uid: '1'
-        }
+          uid: '1',
+        },
       });
       const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
@@ -188,8 +188,8 @@ describe('TransactionActionMenu component', () => {
           mode: 'basic',
           status: 'active',
           type: 'basic',
-          uid: '1'
-        }
+          uid: '1',
+        },
       });
       const component = render(
         <LicenseContext.Provider value={license}>
@@ -215,8 +215,8 @@ describe('TransactionActionMenu component', () => {
           mode: 'trial',
           status: 'active',
           type: 'trial',
-          uid: '1'
-        }
+          uid: '1',
+        },
       });
       const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
@@ -232,8 +232,8 @@ describe('TransactionActionMenu component', () => {
           mode: 'gold',
           status: 'active',
           type: 'gold',
-          uid: '1'
-        }
+          uid: '1',
+        },
       });
       const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
@@ -249,8 +249,8 @@ describe('TransactionActionMenu component', () => {
           mode: 'gold',
           status: 'active',
           type: 'gold',
-          uid: '1'
-        }
+          uid: '1',
+        },
       });
       const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
@@ -266,17 +266,17 @@ describe('TransactionActionMenu component', () => {
           [(component.getAllByText(key)[0] as HTMLOptionElement)
             .text]: (component.getAllByTestId(
             `${key}.value`
-          )[0] as HTMLInputElement).value
+          )[0] as HTMLInputElement).value,
         };
       };
       expect(getFilterKeyValue('service.name')).toEqual({
-        'service.name': 'opbeans-go'
+        'service.name': 'opbeans-go',
       });
       expect(getFilterKeyValue('transaction.name')).toEqual({
-        'transaction.name': 'GET /api/products/:id/customers'
+        'transaction.name': 'GET /api/products/:id/customers',
       });
       expect(getFilterKeyValue('transaction.type')).toEqual({
-        'transaction.type': 'request'
+        'transaction.type': 'request',
       });
       // Forces component to unmount to prevent to update the state when callApmAPI call returns after the test is finished.
       component.unmount();
