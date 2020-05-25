@@ -5,7 +5,7 @@
  */
 
 import React, { FC } from 'react';
-import { Router, Route, RouteProps } from 'react-router-dom';
+import { HashRouter, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 
 import { IUiSettingsClient, ChromeStart, ScopedHistory } from 'kibana/public';
@@ -35,7 +35,6 @@ interface PageDependencies {
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
   indexPatterns: IndexPatternsContract;
   config: IUiSettingsClient;
-  history: ScopedHistory;
 }
 
 export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {
@@ -48,7 +47,7 @@ export const MlRouter: FC<{ pageDeps: PageDependencies }> = ({ pageDeps }) => {
   const setBreadcrumbs = pageDeps.setBreadcrumbs;
 
   return (
-    <Router history={pageDeps.history}>
+    <HashRouter>
       <div className="ml-app">
         {Object.entries(routes).map(([name, route]) => (
           <Route
@@ -64,6 +63,6 @@ export const MlRouter: FC<{ pageDeps: PageDependencies }> = ({ pageDeps }) => {
           />
         ))}
       </div>
-    </Router>
+    </HashRouter>
   );
 };

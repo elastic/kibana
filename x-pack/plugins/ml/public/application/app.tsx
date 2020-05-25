@@ -23,17 +23,15 @@ type MlDependencies = MlSetupDependencies & MlStartDependencies;
 interface AppProps {
   coreStart: CoreStart;
   deps: MlDependencies;
-  history: ScopedHistory;
 }
 
 const localStorage = new Storage(window.localStorage);
 
-const App: FC<AppProps> = ({ coreStart, deps, history }) => {
+const App: FC<AppProps> = ({ coreStart, deps }) => {
   const pageDeps = {
     indexPatterns: deps.data.indexPatterns,
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
-    history,
   };
   const services = {
     appName: 'ML',
@@ -82,10 +80,7 @@ export const renderApp = (
 
   appMountParams.onAppLeave((actions) => actions.default());
 
-  ReactDOM.render(
-    <App coreStart={coreStart} deps={deps} history={appMountParams.history} />,
-    appMountParams.element
-  );
+  ReactDOM.render(<App coreStart={coreStart} deps={deps} />, appMountParams.element);
 
   return () => {
     mlLicense.unsubscribe();
