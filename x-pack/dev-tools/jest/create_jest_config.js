@@ -56,7 +56,7 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       `${kibanaDirectory}/src/dev/jest/setup/mocks.js`,
       `${kibanaDirectory}/src/dev/jest/setup/react_testing_library.js`,
     ],
-    testEnvironment: 'jest-environment-jsdom-thirteen',
+    testEnvironment: 'jest-environment-jsdom-twelve',
     testMatch: ['**/*.test.{js,ts,tsx}'],
     testRunner: 'jest-circus/runner',
     transform: {
