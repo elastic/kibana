@@ -17,7 +17,7 @@ import {
 
 interface GivenTimelineInput {
   id: string | null | undefined;
-  type: TimelineTypeLiteralWithNull;
+  type?: TimelineTypeLiteralWithNull;
   version: string | number | null | undefined;
 }
 
@@ -41,14 +41,14 @@ export class CompareTimelinesStatus {
   }: TimelinesStatusProps) {
     this.timelineObject = new TimelineObject({
       id: timelineInput.id,
-      type: timelineInput.type,
+      type: timelineInput.type ?? TimelineType.default,
       version: timelineInput.version,
       frameworkRequest,
     });
 
     this.templateTimelineObject = new TimelineObject({
       id: templateTimelineInput.id,
-      type: templateTimelineInput.type,
+      type: templateTimelineInput.type ?? TimelineType.template,
       version: templateTimelineInput.version,
       frameworkRequest,
     });

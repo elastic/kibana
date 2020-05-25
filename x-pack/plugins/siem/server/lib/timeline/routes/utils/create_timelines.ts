@@ -21,16 +21,10 @@ export const CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
 export const saveTimelines = (
   frameworkRequest: FrameworkRequest,
   timeline: SavedTimeline,
-  timelineSavedObjectId?: string | null,
-  timelineVersion?: string | null
-): Promise<ResponseTimeline> => {
-  return timelineLib.persistTimeline(
-    frameworkRequest,
-    timelineSavedObjectId ?? null,
-    timelineVersion ?? null,
-    timeline
-  );
-};
+  timelineSavedObjectId: string | null = null,
+  timelineVersion: string | null = null
+): Promise<ResponseTimeline> =>
+  timelineLib.persistTimeline(frameworkRequest, timelineSavedObjectId, timelineVersion, timeline);
 
 export const savePinnedEvents = (
   frameworkRequest: FrameworkRequest,
@@ -73,15 +67,25 @@ export const saveNotes = (
   );
 };
 
-export const createTimelines = async (
-  frameworkRequest: FrameworkRequest,
-  timeline: SavedTimeline,
-  timelineSavedObjectId?: string | null,
-  timelineVersion?: string | null,
-  pinnedEventIds?: string[] | null,
-  notes?: NoteResult[],
-  existingNoteIds?: string[]
-): Promise<ResponseTimeline> => {
+interface CreateTimelineProps {
+  frameworkRequest: FrameworkRequest;
+  timeline: SavedTimeline;
+  timelineSavedObjectId?: string | null;
+  timelineVersion?: string | null;
+  pinnedEventIds?: string[] | null;
+  notes?: NoteResult[];
+  existingNoteIds?: string[];
+}
+
+export const createTimelines = async ({
+  frameworkRequest,
+  timeline,
+  timelineSavedObjectId = null,
+  timelineVersion = null,
+  pinnedEventIds = null,
+  notes = [],
+  existingNoteIds = [],
+}: CreateTimelineProps): Promise<ResponseTimeline> => {
   const responseTimeline = await saveTimelines(
     frameworkRequest,
     timeline,

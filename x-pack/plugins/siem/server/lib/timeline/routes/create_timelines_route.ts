@@ -6,7 +6,6 @@
 import { IRouter } from '../../../../../../../src/core/server';
 
 import { TIMELINE_URL } from '../../../../common/constants';
-import { TimelineType } from '../../../../common/types/timeline';
 
 import { ConfigType } from '../../..';
 import { SetupPlugins } from '../../../plugin';
@@ -50,12 +49,10 @@ export const createTimelinesRoute = (
           timelineType,
           timelineInput: {
             id: timelineId,
-            type: TimelineType.default,
             version,
           },
           templateTimelineInput: {
             id: templateTimelineId,
-            type: TimelineType.template,
             version: templateTimelineVersion,
           },
           frameworkRequest,
@@ -64,7 +61,12 @@ export const createTimelinesRoute = (
 
         // Create timeline
         if (compareTimelinesStatus.isCreatable) {
-          const newTimeline = await createTimelines(frameworkRequest, timeline, null, version);
+          const newTimeline = await createTimelines({
+            frameworkRequest,
+            timeline,
+            timelineVersion: version,
+          });
+
           return response.ok({
             body: {
               data: {

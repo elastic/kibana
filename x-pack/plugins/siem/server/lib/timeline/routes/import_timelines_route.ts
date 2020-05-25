@@ -43,7 +43,7 @@ import {
   timelineSavedObjectOmittedFields,
 } from './utils/import_timelines';
 import { createTimelines } from './utils/create_timelines';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineStatus } from '../../../../common/types/timeline';
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
@@ -122,14 +122,14 @@ export const importTimelinesRoute = (
                       return null;
                     }
                     const {
-                      savedObjectId = null,
+                      savedObjectId,
                       pinnedEventIds,
                       globalNotes,
                       eventNotes,
-                      templateTimelineId = null,
-                      templateTimelineVersion = null,
-                      timelineType = TimelineType.default,
-                      version = null,
+                      templateTimelineId,
+                      templateTimelineVersion,
+                      timelineType,
+                      version,
                     } = parsedTimeline;
 
                     const parsedTimelineObject = omit(
@@ -143,12 +143,10 @@ export const importTimelinesRoute = (
                         timelineType,
                         timelineInput: {
                           id: savedObjectId,
-                          type: TimelineType.default,
                           version,
                         },
                         templateTimelineInput: {
                           id: templateTimelineId,
-                          type: TimelineType.template,
                           version: templateTimelineVersion,
                         },
                         frameworkRequest,
@@ -156,23 +154,22 @@ export const importTimelinesRoute = (
                       await compareTimelinesStatus.init();
                       if (compareTimelinesStatus.isCreatableViaImport) {
                         // create timeline / template timeline
-                        newTimeline = await createTimelines(
+                        newTimeline = await createTimelines({
                           frameworkRequest,
-                          {
+                          timeline: {
                             ...parsedTimelineObject,
                             status:
                               parsedTimelineObject.status === TimelineStatus.draft
                                 ? TimelineStatus.active
                                 : parsedTimelineObject.status,
                           },
-                          null, // timelineSavedObjectId
-                          null, // timelineVersion
-                          compareTimelinesStatus.isHandlingTemplateTimeline ? null : pinnedEventIds,
-                          compareTimelinesStatus.isHandlingTemplateTimeline
+                          pinnedEventIds: compareTimelinesStatus.isHandlingTemplateTimeline
+                            ? null
+                            : pinnedEventIds,
+                          notes: compareTimelinesStatus.isHandlingTemplateTimeline
                             ? globalNotes
                             : [...globalNotes, ...eventNotes],
-                          [] // existing note ids
-                        );
+                        });
 
                         resolve({
                           timeline_id: newTimeline.timeline.savedObjectId,
@@ -199,15 +196,14 @@ export const importTimelinesRoute = (
                       }
                       if (compareTimelinesStatus.isUpdatableViaImport) {
                         // update template timeline
-                        newTimeline = await createTimelines(
+                        newTimeline = await createTimelines({
                           frameworkRequest,
-                          parsedTimelineObject,
-                          savedObjectId, // timelineSavedObjectId
-                          version ?? null, // timelineVersion
-                          null, // pinnedEventIds
-                          globalNotes,
-                          compareTimelinesStatus.timelineInput.data?.noteIds ?? [] // existing note ids
-                        );
+                          timeline: parsedTimelineObject,
+                          timelineSavedObjectId: savedObjectId,
+                          timelineVersion: version,
+                          notes: globalNotes,
+                          existingNoteIds: compareTimelinesStatus.timelineInput.data?.noteIds,
+                        });
 
                         resolve({
                           timeline_id: newTimeline.timeline.savedObjectId,
