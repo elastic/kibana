@@ -27,6 +27,8 @@ import {
   updateTimelineColumns,
   updateTimelineItemsPerPage,
   updateTimelineSort,
+  removeTimelineColumn,
+  upsertTimelineColumn,
 } from './helpers';
 import { TimelineModel, ColumnHeaderOptions } from './model';
 import { Sort } from '../../components/timeline/body/sort';
@@ -38,26 +40,6 @@ const isPageTimeline = (timelineId: string | undefined): boolean =>
 
 const isItAtimelineAction = (timelineId: string | undefined): boolean =>
   !!(timelineId && timelineId.toLowerCase().startsWith('timeline'));
-
-const removeColumnFromTimeline = (timeline: TimelineModel, columnId: string): TimelineModel => {
-  return { ...timeline, columns: timeline.columns.filter(column => column.id !== columnId) };
-};
-
-const addColumnToTimeline = (
-  timeline: TimelineModel,
-  column: ColumnHeaderOptions,
-  index: number = 0
-): TimelineModel => {
-  const timelineWithoutColumn = removeColumnFromTimeline(timeline, column.id);
-  return {
-    ...timelineWithoutColumn,
-    columns: [
-      ...timelineWithoutColumn.columns.slice(0, index),
-      column,
-      ...timelineWithoutColumn.columns.slice(index, timeline.columns.length),
-    ],
-  };
-};
 
 const getAllTimelinesFromLocalStorage = () => {
   return JSON.parse(localStorage.getItem('timelines') ?? `{}`);
@@ -113,9 +95,13 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
         const storageTimelines = getAllTimelinesFromLocalStorage();
         const timelineId: string = get('payload.id', action);
         const columnId: string = get('payload.columnId', action);
-        const modifiedTimeline = removeColumnFromTimeline(storageTimelines[timelineId], columnId);
+        const timelines = removeTimelineColumn({
+          id: timelineId,
+          columnId,
+          timelineById: storageTimelines,
+        });
 
-        addTimelineToLocalStorage(timelineId, modifiedTimeline);
+        addTimelineToLocalStorage(timelineId, timelines[timelineId]);
       }),
       ignoreElements()
     ),
@@ -127,9 +113,14 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
         const timelineId: string = get('payload.id', action);
         const column: ColumnHeaderOptions = get('payload.column', action);
         const index: number = get('payload.index', action);
-        const modifiedTimeline = addColumnToTimeline(storageTimelines[timelineId], column, index);
+        const timelines = upsertTimelineColumn({
+          id: timelineId,
+          column,
+          index,
+          timelineById: storageTimelines,
+        });
 
-        addTimelineToLocalStorage(timelineId, modifiedTimeline);
+        addTimelineToLocalStorage(timelineId, timelines[timelineId]);
       }),
       ignoreElements()
     ),
