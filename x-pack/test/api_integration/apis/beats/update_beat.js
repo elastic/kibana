@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { ES_INDEX_NAME } from './constants';
 import moment from 'moment';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const randomness = getService('randomness');
   const es = getService('legacyEs');
@@ -48,9 +48,7 @@ export default function({ getService }) {
           type: 'enrollment_token',
           enrollment_token: {
             token: validEnrollmentToken,
-            expires_on: moment()
-              .add(4, 'hours')
-              .toJSON(),
+            expires_on: moment().add(4, 'hours').toJSON(),
           },
         },
       });

@@ -31,8 +31,8 @@ interface Props {
 export const SavedViewCreateModal = ({ close, save, isInvalid }: Props) => {
   const [viewName, setViewName] = useState('');
   const [includeTime, setIncludeTime] = useState(false);
-  const onCheckChange = useCallback(e => setIncludeTime(e.target.checked), []);
-  const textChange = useCallback(e => setViewName(e.target.value), []);
+  const onCheckChange = useCallback((e) => setIncludeTime(e.target.checked), []);
+  const textChange = useCallback((e) => setViewName(e.target.value), []);
 
   const saveView = useCallback(() => {
     save(viewName, includeTime);

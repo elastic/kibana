@@ -35,7 +35,7 @@ import { PROJECTS } from './projects';
 export function getTsProjectForAbsolutePath(path: string): Project {
   const relPath = relative(REPO_ROOT, path);
   const file = new File(resolve(REPO_ROOT, path));
-  const projects = PROJECTS.filter(p => p.isAbsolutePathSelected(path));
+  const projects = PROJECTS.filter((p) => p.isAbsolutePathSelected(path));
 
   if (!projects.length) {
     throw new Error(
@@ -44,7 +44,7 @@ export function getTsProjectForAbsolutePath(path: string): Project {
   }
 
   if (projects.length !== 1 && !file.isTypescriptAmbient()) {
-    const configPaths = projects.map(p => `"${relative(REPO_ROOT, p.tsConfigPath)}"`);
+    const configPaths = projects.map((p) => `"${relative(REPO_ROOT, p.tsConfigPath)}"`);
 
     const pathsMsg = `${configPaths.slice(0, -1).join(', ')} or ${
       configPaths[configPaths.length - 1]

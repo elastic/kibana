@@ -32,7 +32,7 @@ export class JoinExpression extends Component {
   };
 
   _togglePopover = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };
@@ -43,7 +43,7 @@ export class JoinExpression extends Component {
     });
   };
 
-  _onRightSourceChange = async indexPatternId => {
+  _onRightSourceChange = async (indexPatternId) => {
     try {
       const indexPattern = await getIndexPatternService().get(indexPatternId);
       this.props.onRightSourceChange({
@@ -55,7 +55,7 @@ export class JoinExpression extends Component {
     }
   };
 
-  _onLeftFieldChange = selectedFields => {
+  _onLeftFieldChange = (selectedFields) => {
     this.props.onLeftFieldChange(_.get(selectedFields, '[0].value.name', null));
   };
 
@@ -66,7 +66,7 @@ export class JoinExpression extends Component {
       return null;
     }
 
-    const options = leftFields.map(field => {
+    const options = leftFields.map((field) => {
       return {
         value: field,
         label: field.label,
@@ -75,7 +75,7 @@ export class JoinExpression extends Component {
 
     let leftFieldOption;
     if (leftValue) {
-      leftFieldOption = options.find(option => {
+      leftFieldOption = options.find((option) => {
         const field = option.value;
         return field.name === leftValue;
       });

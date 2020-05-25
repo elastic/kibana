@@ -60,12 +60,7 @@ describe('StatefulFieldsBrowser', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="show-field-browser"]')
-        .first()
-        .text()
-    ).toEqual('Columns');
+    expect(wrapper.find('[data-test-subj="show-field-browser"]').first().text()).toEqual('Columns');
   });
 
   describe('toggleShow', () => {
@@ -106,10 +101,7 @@ describe('StatefulFieldsBrowser', () => {
         </TestProviders>
       );
 
-      wrapper
-        .find('[data-test-subj="show-field-browser"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
 
       expect(wrapper.find('[data-test-subj="fields-browser-container"]').exists()).toBe(true);
     });
@@ -136,19 +128,13 @@ describe('StatefulFieldsBrowser', () => {
         </TestProviders>
       );
 
-      wrapper
-        .find('[data-test-subj="show-field-browser"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
 
-      wrapper
-        .find(`.field-browser-category-pane-auditd-${timelineId}`)
-        .first()
-        .simulate('click');
+      wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).first().simulate('click');
 
       wrapper.update();
       expect(
-        wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).first()
+        wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).at(1)
       ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
     });
 
@@ -169,12 +155,9 @@ describe('StatefulFieldsBrowser', () => {
         </TestProviders>
       );
 
-      wrapper
-        .find('[data-test-subj="show-field-browser"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
       expect(
-        wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).first()
+        wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).at(1)
       ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
       wrapper
         .find('[data-test-subj="field-search"]')
@@ -184,7 +167,7 @@ describe('StatefulFieldsBrowser', () => {
       jest.runOnlyPendingTimers();
       wrapper.update();
       expect(
-        wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).first()
+        wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).at(1)
       ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
     });
   });
@@ -209,12 +192,7 @@ describe('StatefulFieldsBrowser', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="show-field-browser-gear"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="show-field-browser-gear"]').first().exists()).toBe(true);
   });
 
   test('it does NOT render the Fields Browser button as a settings gear when the isEventViewer prop is false', () => {
@@ -237,12 +215,7 @@ describe('StatefulFieldsBrowser', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="show-field-browser-gear"]')
-        .first()
-        .exists()
-    ).toBe(false);
+    expect(wrapper.find('[data-test-subj="show-field-browser-gear"]').first().exists()).toBe(false);
   });
 
   test('it does NOT render the default Fields Browser button when the isEventViewer prop is true', () => {
@@ -265,11 +238,6 @@ describe('StatefulFieldsBrowser', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="show-field-browser"]')
-        .first()
-        .exists()
-    ).toBe(false);
+    expect(wrapper.find('[data-test-subj="show-field-browser"]').first().exists()).toBe(false);
   });
 });

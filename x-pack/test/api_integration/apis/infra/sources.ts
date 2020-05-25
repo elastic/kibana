@@ -16,7 +16,7 @@ import { SourceQuery } from '../../../../plugins/infra/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { sharedFragments } from '../../../../plugins/infra/common/graphql/shared';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
@@ -162,7 +162,7 @@ export default function({ getService }: FtrProviderContext) {
             () => {
               expect().fail('should have failed with a conflict');
             },
-            err => {
+            (err) => {
               expect(err.message).to.contain('conflict');
             }
           );

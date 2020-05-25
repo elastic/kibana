@@ -18,16 +18,6 @@ import {
 } from '../../common/descriptor_types';
 import { MapSettings } from '../reducers/map';
 
-export type SyncContext = {
-  startLoading(dataId: string, requestToken: symbol, meta: DataMeta): void;
-  stopLoading(dataId: string, requestToken: symbol, data: unknown, meta: DataMeta): void;
-  onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
-  updateSourceData(newData: unknown): void;
-  isRequestStillActive(dataId: string, requestToken: symbol): boolean;
-  registerCancelCallback(requestToken: symbol, callback: () => void): void;
-  dataFilters: MapFilters;
-};
-
 export function updateSourceProp(
   layerId: string,
   propName: string,
