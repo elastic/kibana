@@ -31,7 +31,7 @@ import { navigationPluginMock } from '../../../../../../navigation/public/mocks'
 import { dataPluginMock } from '../../../../../../data/public/mocks';
 import { initAngularBootstrap } from '../../../../../../kibana_legacy/public';
 
-describe.skip('debounce service', function () {
+describe('debounce service', function () {
   let debounce: (fn: () => void, timeout: number, options?: any) => any;
   let debounceFromProvider: (fn: () => void, timeout: number, options?: any) => any;
   let $timeout: ITimeoutService;

@@ -80,14 +80,13 @@ export default {
   coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html', 'text'],
   moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
   modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
-  testEnvironment: 'jest-environment-jsdom-sixteen',
+  testEnvironment: 'jest-environment-jsdom-thirteen',
   testMatch: ['**/*.test.{js,ts,tsx}'],
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
     '<rootDir>/packages/kbn-pm/dist/',
     `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
   ],
-  // testRunner: 'jest-circus/runner',
   transform: {
     '^.+\\.(js|tsx?)$': '<rootDir>/src/dev/jest/babel_transform.js',
     '^.+\\.txt?$': 'jest-raw-loader',

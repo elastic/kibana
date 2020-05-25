@@ -19,7 +19,7 @@ currentBuild.description = "ES: ${SNAPSHOT_VERSION}<br />Kibana: ${params.branch
 
 def SNAPSHOT_MANIFEST = "https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${SNAPSHOT_VERSION}/archives/${SNAPSHOT_ID}/manifest.json"
 
-kibanaPipeline(timeoutMinutes: 200) {
+kibanaPipeline(timeoutMinutes: 150) {
   catchErrors {
     slackNotifications.onFailure(
       title: ":broken_heart: *<${env.BUILD_URL}|[${SNAPSHOT_VERSION}] ES Snapshot Verification Failure>*",

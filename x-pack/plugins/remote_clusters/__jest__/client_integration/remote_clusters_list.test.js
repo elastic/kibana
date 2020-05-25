@@ -20,7 +20,7 @@ import { PROXY_MODE } from '../../common/constants';
 
 const { setup } = pageHelpers.remoteClustersList;
 
-describe.skip('<RemoteClusterList />', () => {
+describe('<RemoteClusterList />', () => {
   let server;
   let httpRequestsMockHelpers;
 

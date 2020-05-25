@@ -22,7 +22,7 @@ const removeWhiteSpaceOnArrayValues = (array: any[]) =>
 
 jest.mock('ui/new_platform');
 
-describe.skip('<IndexManagementHome />', () => {
+describe('<IndexManagementHome />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: IdxMgmtHomeTestBed;
 
