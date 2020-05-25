@@ -883,7 +883,7 @@ export class IndexPattern implements IIndexPattern {
         }[];
     };
     // (undocumented)
-    getFieldByName(name: string): IndexPatternField | void;
+    getFieldByName(name: string): IndexPatternField | undefined;
     // (undocumented)
     getNonScriptedFields(): IndexPatternField[];
     // (undocumented)

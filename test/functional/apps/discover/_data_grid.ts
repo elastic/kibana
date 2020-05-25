@@ -30,7 +30,7 @@ export default function ({
     const esArchiver = getService('esArchiver');
     const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
     const kibanaServer = getService('kibanaServer');
-    const defaultSettings = { defaultIndex: 'logstash-*' };
+    const defaultSettings = { defaultIndex: 'logstash-*', 'doc_table:legacyTable': false };
     const testSubjects = getService('testSubjects');
 
     before(async function () {
@@ -39,6 +39,10 @@ export default function ({
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
+    });
+
+    after(async function () {
+      await kibanaServer.uiSettings.replace({ 'doc_table:legacyTable': true });
     });
 
     it('can add fields to the table', async function () {

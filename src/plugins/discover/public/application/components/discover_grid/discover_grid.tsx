@@ -18,6 +18,7 @@
  */
 
 import React, { useMemo, useState, useEffect, useCallback, ReactNode } from 'react';
+import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiDataGrid,
@@ -147,7 +148,7 @@ export const DiscoverGrid = function DiscoverGridInner({
   const [flyoutRow, setFlyoutRow] = useState<ElasticSearchHit | undefined>(undefined);
 
   const dataGridColumns = columns.map(
-    (columnName, i): EuiDataGridColumn => {
+    (columnName): EuiDataGridColumn => {
       const column: EuiDataGridColumn = {
         id: columnName,
         schema: indexPattern.getFieldByName(columnName)?.type,
@@ -222,9 +223,12 @@ export const DiscoverGrid = function DiscoverGridInner({
     if (!mounted.current) {
       mounted.current = true;
     } else {
-      setVisibleColumns(dataGridColumns.map((obj) => obj.id));
+      const newColumns = dataGridColumns.map((obj) => obj.id);
+      if (!isEqual(newColumns, visibleColumns)) {
+        setVisibleColumns(newColumns);
+      }
     }
-  }, [dataGridColumns.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dataGridColumns, visibleColumns]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Cell rendering
@@ -362,7 +366,7 @@ export const DiscoverGrid = function DiscoverGridInner({
             detector() {
               return 0; // this schema is always explicitly defined
             },
-            comparator(a, b, direction) {
+            comparator() {
               // Eventually this column will be non-sortable: https://github.com/elastic/eui/issues/2623
               return 1;
             },
@@ -376,7 +380,7 @@ export const DiscoverGrid = function DiscoverGridInner({
             detector() {
               return 0; // this schema is always explicitly defined
             },
-            comparator(a, b, direction) {
+            comparator() {
               // TODO @myasonik this column is not sortable
               return 1;
             },
@@ -388,7 +392,7 @@ export const DiscoverGrid = function DiscoverGridInner({
         // TODO @dsnide can make edits here per type
         // Types [geoPoint], [kibanaJSON], numeric, datetime
         popoverContents={{
-          [geoPoint]: ({ children, cellContentsElement }) => {
+          [geoPoint]: ({ children }) => {
             return <span className="geo-point">{children}</span>;
           },
         }}
