@@ -9,6 +9,7 @@ import { outputService, appContextService } from '../../services';
 import { GetFleetStatusResponse } from '../../../common';
 import { setupIngestManager, setupFleet } from '../../services/setup';
 import { PostFleetSetupRequestSchema } from '../../types';
+import { IngestManagerError, getHTTPResponseCode } from '../../errors';
 
 export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
@@ -81,6 +82,13 @@ export const ingestManagerSetupHandler: RequestHandler = async (context, request
       body: { isInitialized: true },
     });
   } catch (e) {
+    if (e instanceof IngestManagerError) {
+      logger.error(e.getMessage());
+      return response.customError({
+        statusCode: getHTTPResponseCode(e),
+        body: { message: e.getMessage() },
+      });
+    }
     if (e.isBoom) {
       logger.error(e.output.payload.message);
       return response.customError({
