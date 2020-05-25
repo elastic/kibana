@@ -7,49 +7,24 @@
 import { createBrowserHistory } from 'history';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Switch, Route, Redirect } from 'react-router-dom';
-import { MapListing } from '../components/map_listing';
-import { getMapsSavedObjectLoader } from '../angular/services/gis_map_saved_object_loader';
-import { getMapsCapabilities, getUiSettings, getCoreI18n } from '../kibana_services';
+import { HashRouter as Router, Switch, Route } from 'react-router-dom';
+import { getCoreI18n } from '../kibana_services';
+import { MapsListView } from './list_view';
+import { MapsCreateEditView } from './create_edit_view';
 
 const history = createBrowserHistory();
-const listingLimit = getUiSettings().get('savedObjects:listingLimit');
-
-class SavedMapsList extends React.Component {
-  state = {
-    savedMapsList: null,
-  };
-
-  async componentDidMount() {
-    const { hits = [] } = await getMapsSavedObjectLoader().find();
-    this.setState({
-      savedMapsList: hits.length ? (
-        <MapListing
-          find={search => getMapsSavedObjectLoader().find(search, listingLimit)}
-          delete={ids => getMapsSavedObjectLoader().delete(ids)}
-          listingLimit={listingLimit}
-          readOnly={!getMapsCapabilities().save}
-        />
-      ) : (
-        <Redirect to={'/map'} />
-      ),
-    });
-  }
-
-  render() {
-    const { savedMapsList } = this.state;
-    return savedMapsList;
-  }
-}
 
 export function renderApp(context, params) {
   const I18nContext = getCoreI18n().Context;
   render(
     <I18nContext>
-      <Router basename={params.appBasePath} history={history}>
+      <Router basename={params.appBasePath}>
         <Switch>
+          <Route path="/map">
+            <MapsCreateEditView />
+          </Route>
           <Route path="/">
-            <SavedMapsList />
+            <MapsListView />
           </Route>
         </Switch>
       </Router>

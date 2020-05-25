@@ -51,7 +51,6 @@ import { APP_ICON, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
 import { MapsXPackConfig, MapsConfigType } from '../config';
-import { MapsConfigType } from './index';
 import { getAppTitle } from '../common/i18n_getters';
 
 export interface MapsPluginSetupDependencies {
@@ -156,10 +155,6 @@ export class MapsPlugin
         return renderApp(context, params);
       },
     });
-
-    return {
-      config,
-    };
   }
 
   public start(core: CoreStart, plugins: any) {
