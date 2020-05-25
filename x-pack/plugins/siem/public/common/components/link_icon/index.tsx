@@ -28,20 +28,20 @@ const Link = styled(({ iconSide, children, ...rest }) => <EuiLink {...rest}>{chi
     white-space: nowrap;
 
     ${iconSide === 'left' &&
-      css`
-        .euiIcon {
-          margin-right: ${theme.eui.euiSizeXS};
-        }
-      `}
+    css`
+      .euiIcon {
+        margin-right: ${theme.eui.euiSizeXS};
+      }
+    `}
 
     ${iconSide === 'right' &&
-      css`
-        flex-direction: row-reverse;
+    css`
+      flex-direction: row-reverse;
 
-        .euiIcon {
-          margin-left: ${theme.eui.euiSizeXS};
-        }
-      `}
+      .euiIcon {
+        margin-left: ${theme.eui.euiSizeXS};
+      }
+    `}
   `}
 `;
 Link.displayName = 'Link';

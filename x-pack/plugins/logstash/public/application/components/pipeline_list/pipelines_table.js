@@ -38,7 +38,7 @@ function getColumns(openPipeline, clonePipeline) {
       name: i18n.translate('xpack.logstash.pipelinesTable.descriptionColumnLabel', {
         defaultMessage: 'Description',
       }),
-      render: description => <span data-test-subj="cellDescription">{description}</span>,
+      render: (description) => <span data-test-subj="cellDescription">{description}</span>,
       sortable: true,
       truncateText: true,
     },
@@ -47,7 +47,7 @@ function getColumns(openPipeline, clonePipeline) {
       name: i18n.translate('xpack.logstash.pipelinesTable.lastModifiedColumnLabel', {
         defaultMessage: 'Last modified',
       }),
-      render: lastModified => <span data-test-subj="cellLastModified">{lastModified}</span>,
+      render: (lastModified) => <span data-test-subj="cellLastModified">{lastModified}</span>,
       sortable: ({ lastModified }) => lastModified.valueOf(),
     },
     {
@@ -55,7 +55,7 @@ function getColumns(openPipeline, clonePipeline) {
       name: i18n.translate('xpack.logstash.pipelinesTable.modifiedByColumnLabel', {
         defaultMessage: 'Modified by',
       }),
-      render: username => <span data-test-subj="cellUsername">{username}</span>,
+      render: (username) => <span data-test-subj="cellUsername">{username}</span>,
       sortable: true,
     },
     {

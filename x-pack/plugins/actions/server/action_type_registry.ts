@@ -69,7 +69,7 @@ export class ActionTypeRegistry {
       this.isActionTypeEnabled(actionTypeId) ||
       (!this.isActionTypeEnabled(actionTypeId) &&
         this.preconfiguredActions.find(
-          preconfiguredAction => preconfiguredAction.id === actionId
+          (preconfiguredAction) => preconfiguredAction.id === actionId
         ) !== undefined)
     );
   }

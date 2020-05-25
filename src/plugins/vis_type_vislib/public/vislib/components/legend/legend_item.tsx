@@ -168,7 +168,7 @@ const VisLegendItemComponent = ({
               values={{ legendDataLabel: item.label }}
             />
           </span>
-          {legendColors.map(color => (
+          {legendColors.map((color) => (
             <EuiIcon
               role="option"
               tabIndex={0}

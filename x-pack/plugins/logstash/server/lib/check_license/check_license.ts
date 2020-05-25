@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CheckLicense } from '../../../../licensing/server';
 
-export const checkLicense: CheckLicense = license => {
+export const checkLicense: CheckLicense = (license) => {
   if (!license.isAvailable) {
     return {
       valid: false,

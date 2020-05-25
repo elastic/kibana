@@ -36,7 +36,7 @@ export class FieldFormatEditors {
     return {
       getAll: () => [...this.editors],
       getById: (id: string) => {
-        return this.editors.find(editor => editor.formatId === id);
+        return this.editors.find((editor) => editor.formatId === id);
       },
     };
   }

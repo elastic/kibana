@@ -21,10 +21,10 @@ export const getEmptySeries = (
       type: 'line',
       legendValue: '',
       color: '',
-      data: dates.map(x => ({
+      data: dates.map((x) => ({
         x: x.getTime(),
-        y: null
-      }))
-    }
+        y: null,
+      })),
+    },
   ];
 };

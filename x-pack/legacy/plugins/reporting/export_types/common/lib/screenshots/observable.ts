@@ -86,7 +86,7 @@ export function screenshotsObservableFactory(
                 );
               }),
               mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),
-              mergeMap(async itemsCount => {
+              mergeMap(async (itemsCount) => {
                 const viewport = layout.getViewport(itemsCount) || getDefaultViewPort();
                 await Promise.all([
                   driver.setViewport(viewport, logger),
@@ -116,7 +116,7 @@ export function screenshotsObservableFactory(
                   timeRange,
                 }));
               }),
-              catchError(err => {
+              catchError((err) => {
                 logger.error(err);
                 return Rx.of({ elementsPositionAndAttributes: null, timeRange: null, error: err });
               })

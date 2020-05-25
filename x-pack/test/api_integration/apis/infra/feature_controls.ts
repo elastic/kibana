@@ -18,7 +18,7 @@ const introspectionQuery = gql`
   }
 `;
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const security = getService('security');
   const spaces = getService('spaces');
   const clientFactory = getService('infraOpsGraphQLClientFactory');

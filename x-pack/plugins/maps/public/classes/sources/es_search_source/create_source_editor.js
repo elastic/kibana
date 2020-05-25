@@ -20,7 +20,7 @@ import { ScalingForm } from './scaling_form';
 import { getTermsFields, supportsGeoTileAgg } from '../../../index_pattern_util';
 
 function getGeoFields(fields) {
-  return fields.filter(field => {
+  return fields.filter((field) => {
     return (
       !indexPatterns.isNestedField(field) &&
       [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE].includes(field.type)
@@ -63,7 +63,7 @@ export class CreateSourceEditor extends Component {
     this._isMounted = true;
   }
 
-  _onIndexPatternSelect = indexPatternId => {
+  _onIndexPatternSelect = (indexPatternId) => {
     this.setState(
       {
         indexPatternId,
@@ -72,7 +72,7 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  _loadIndexPattern = indexPatternId => {
+  _loadIndexPattern = (indexPatternId) => {
     this.setState(
       {
         isLoadingIndexPattern: true,
@@ -82,7 +82,7 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  _debouncedLoad = _.debounce(async indexPatternId => {
+  _debouncedLoad = _.debounce(async (indexPatternId) => {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
@@ -114,7 +114,7 @@ export class CreateSourceEditor extends Component {
 
     if (geoFields.length) {
       // make default selection, prefer aggregatable field over the first available
-      const firstAggregatableGeoField = geoFields.find(geoField => {
+      const firstAggregatableGeoField = geoFields.find((geoField) => {
         return geoField.aggregatable;
       });
       const defaultGeoFieldName = firstAggregatableGeoField
@@ -124,7 +124,7 @@ export class CreateSourceEditor extends Component {
     }
   }, 300);
 
-  _onGeoFieldSelect = geoFieldName => {
+  _onGeoFieldSelect = (geoFieldName) => {
     // Respect previous scaling type selection unless newly selected geo field does not support clustering.
     const scalingType =
       this.state.scalingType === SCALING_TYPES.CLUSTERS &&

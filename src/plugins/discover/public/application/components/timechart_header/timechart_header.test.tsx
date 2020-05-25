@@ -24,7 +24,7 @@ import { EuiIconTip } from '@elastic/eui';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-describe('timechart header', function() {
+describe('timechart header', function () {
   let props: TimechartHeaderProps;
   let component: ReactWrapper<TimechartHeaderProps>;
 
@@ -65,7 +65,7 @@ describe('timechart header', function() {
     expect(component.find(EuiIconTip).length).toBe(1);
   });
 
-  it('expect to render the date range', function() {
+  it('expect to render the date range', function () {
     component = mountWithIntl(<TimechartHeader {...props} />);
     const datetimeRangeText = findTestSubject(component, 'discoverIntervalDateRange');
     expect(datetimeRangeText.text()).toBe(
@@ -78,14 +78,14 @@ describe('timechart header', function() {
     const dropdown = findTestSubject(component, 'discoverIntervalSelect');
     expect(dropdown.length).toBe(1);
     // @ts-ignore
-    const values = dropdown.find('option').map(option => option.prop('value'));
+    const values = dropdown.find('option').map((option) => option.prop('value'));
     expect(values).toEqual(['auto', 'ms', 's']);
     // @ts-ignore
-    const labels = dropdown.find('option').map(option => option.text());
+    const labels = dropdown.find('option').map((option) => option.text());
     expect(labels).toEqual(['Auto', 'Millisecond', 'Second']);
   });
 
-  it('should change the interval', function() {
+  it('should change the interval', function () {
     component = mountWithIntl(<TimechartHeader {...props} />);
     findTestSubject(component, 'discoverIntervalSelect').simulate('change', {
       target: { value: 'ms' },

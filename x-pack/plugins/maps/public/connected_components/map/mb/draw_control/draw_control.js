@@ -57,7 +57,7 @@ export class DrawControl extends React.Component {
     }
   }, 256);
 
-  _onDraw = e => {
+  _onDraw = (e) => {
     if (!e.features.length) {
       return;
     }

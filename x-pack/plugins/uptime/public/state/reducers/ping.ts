@@ -24,7 +24,7 @@ type MonitorStatusPayload = HistogramResult & Error;
 
 export const pingReducer = handleActions<PingState, MonitorStatusPayload>(
   {
-    [String(getPingHistogram)]: state => ({
+    [String(getPingHistogram)]: (state) => ({
       ...state,
       loading: true,
     }),

@@ -30,7 +30,7 @@ class FieldFormatService {
       // pattern with a title attribute which matches the index configured in the datafeed.
       // If a Kibana index pattern has not been created
       // for this index, then no custom field formatting will occur.
-      jobIds.forEach(jobId => {
+      jobIds.forEach((jobId) => {
         const jobObj = mlJobService.getJob(jobId);
         const datafeedIndices = jobObj.datafeed_config.indices;
         const id = getIndexPatternIdFromName(datafeedIndices.length ? datafeedIndices[0] : '');
@@ -39,17 +39,17 @@ class FieldFormatService {
         }
       });
 
-      const promises = jobIds.map(jobId => Promise.all([this.getFormatsForJob(jobId)]));
+      const promises = jobIds.map((jobId) => Promise.all([this.getFormatsForJob(jobId)]));
 
       Promise.all(promises)
-        .then(fmtsByJobByDetector => {
+        .then((fmtsByJobByDetector) => {
           fmtsByJobByDetector.forEach((formatsByDetector, i) => {
             this.formatsByJob[jobIds[i]] = formatsByDetector[0];
           });
 
           resolve(this.formatsByJob);
         })
-        .catch(err => {
+        .catch((err) => {
           reject({ formats: {}, err });
         });
     });
@@ -94,10 +94,10 @@ class FieldFormatService {
       if (indexPatternId !== undefined) {
         // Load the full index pattern configuration to obtain the formats of each field.
         getIndexPatternById(indexPatternId)
-          .then(indexPatternData => {
+          .then((indexPatternData) => {
             // Store the FieldFormat for each job by detector_index.
             const fieldList = indexPatternData.fields;
-            detectors.forEach(dtr => {
+            detectors.forEach((dtr) => {
               const esAgg = mlFunctionToESAggregation(dtr.function);
               // distinct_count detectors should fall back to the default
               // formatter as the values are just counts.
@@ -111,7 +111,7 @@ class FieldFormatService {
 
             resolve(formatsByDetector);
           })
-          .catch(err => {
+          .catch((err) => {
             reject(err);
           });
       } else {

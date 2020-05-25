@@ -19,7 +19,7 @@ import { CODE_PATH_BEATS, BEATS_SYSTEM_ID } from '../../../../common/constants';
 uiRoutes.when('/beats/beats', {
   template,
   resolve: {
-    clusters: function(Private) {
+    clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_BEATS] });
     },
