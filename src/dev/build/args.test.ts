@@ -152,8 +152,8 @@ Object {
 `);
 });
 
-it('limits packages if --docker passed with --skip-ubi-docker and --all-platforms', () => {
-  expect(fn('--all-platforms', '--docker')).toMatchInlineSnapshot(`
+it('limits packages if --docker passed with --skip-docker-ubi and --all-platforms', () => {
+  expect(fn('--all-platforms', '--docker', '--skip-docker-ubi')).toMatchInlineSnapshot(`
 Object {
   "buildArgs": Object {
     "buildDefaultDist": true,
