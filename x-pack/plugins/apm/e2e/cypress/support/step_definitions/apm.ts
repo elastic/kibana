@@ -7,9 +7,6 @@
 import { Given, When, Then } from 'cypress-cucumber-preprocessor/steps';
 import { loginAndWaitForPage } from '../../integration/helpers';
 
-/** The default time in ms to wait for a Cypress command to complete */
-export const DEFAULT_TIMEOUT = 60 * 1000;
-
 Given(`a user browses the APM UI application`, () => {
   // open service overview page
   loginAndWaitForPage(`/app/apm#/services`);
@@ -17,7 +14,7 @@ Given(`a user browses the APM UI application`, () => {
 
 When(`the user inspects the opbeans-node service`, () => {
   // click opbeans-node service
-  cy.get(':contains(opbeans-node)', { timeout: DEFAULT_TIMEOUT }).last().click({ force: true });
+  cy.get(':contains(opbeans-node)').last().click({ force: true });
 });
 
 Then(`should redirect to correct path with correct params`, () => {
