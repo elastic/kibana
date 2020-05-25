@@ -52,7 +52,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
                 error: 'Not Found',
                 message: 'Not Found',
               });
-              objectRemover.add(space.id, createdAlert.id, 'alert');
+              objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
               // Ensure task still exists
               await getScheduledTask(createdAlert.scheduledTaskId);
               break;
@@ -78,7 +78,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
 
           const response = await supertestWithoutAuth
             .delete(`${getUrlPrefix('other')}/api/alert/${createdAlert.id}`)
@@ -143,7 +143,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
                 error: 'Not Found',
                 message: 'Not Found',
               });
-              objectRemover.add(space.id, createdAlert.id, 'alert');
+              objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
               // Ensure task still exists
               await getScheduledTask(createdAlert.scheduledTaskId);
               break;
