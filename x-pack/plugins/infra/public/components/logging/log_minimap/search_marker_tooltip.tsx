@@ -19,7 +19,7 @@ export class SearchMarkerTooltip extends React.PureComponent<SearchMarkerTooltip
 
     return (
       <EuiPortal>
-        <div style={{ position: 'relative' }}>
+        <div>
           <AutoSizer content={false} bounds>
             {({ measureRef, bounds: { width, height } }) => {
               const { top, left } =
