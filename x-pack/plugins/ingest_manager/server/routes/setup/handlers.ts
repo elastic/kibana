@@ -83,10 +83,10 @@ export const ingestManagerSetupHandler: RequestHandler = async (context, request
     });
   } catch (e) {
     if (e instanceof IngestManagerError) {
-      logger.error(e.getMessage());
+      logger.error(e.message);
       return response.customError({
         statusCode: getHTTPResponseCode(e),
-        body: { message: e.getMessage() },
+        body: { message: e.message },
       });
     }
     if (e.isBoom) {
