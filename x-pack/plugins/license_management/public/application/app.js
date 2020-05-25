@@ -90,7 +90,7 @@ export class App extends Component {
       <EuiPageBody>
         <Switch>
           <Route path={`/upload_license`} component={withTelemetry(UploadLicense)} />
-          <Route exact path={['', '/']} component={withTelemetry(LicenseDashboard)} />
+          <Route path={['/']} component={withTelemetry(LicenseDashboard)} />
         </Switch>
       </EuiPageBody>
     );

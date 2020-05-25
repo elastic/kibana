@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { httpServiceMock } from '../../../../src/core/public/mocks';
+import { httpServiceMock, scopedHistoryMock } from '../../../../src/core/public/mocks';
 import { mountWithIntl } from '../../../test_utils/enzyme_helpers';
 
 // @ts-ignore
@@ -44,9 +44,7 @@ const appDependencies = {
 
 const thunkServices = {
   http: httpServiceMock.createSetupContract(),
-  history: {
-    replace: jest.fn(),
-  },
+  history: scopedHistoryMock.create(),
   breadcrumbService: {
     setBreadcrumbs() {},
   },
