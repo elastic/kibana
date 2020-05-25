@@ -45,7 +45,8 @@ export const startBasicLicense = (currentLicenseType, ack) => async (
       'xpack.licenseMgmt.replacingCurrentLicenseWithBasicLicenseWarningMessage',
       {
         //eslint-disable-next-line
-      defaultMessage: 'Some functionality will be lost if you replace your {currentLicenseType} license with a BASIC license. Review the list of features below.',
+        defaultMessage:
+          'Some functionality will be lost if you replace your {currentLicenseType} license with a BASIC license. Review the list of features below.',
         values: {
           currentLicenseType: currentLicenseType.toUpperCase(),
         },
