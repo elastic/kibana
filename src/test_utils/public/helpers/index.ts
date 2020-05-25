@@ -17,10 +17,10 @@
  * under the License.
  */
 
-export { mountWithIntl } from './enzyme_helpers';
-
 export { findTestSubject } from './find_test_subject';
 
 export { WithStore } from './redux_helpers';
 
 export { WithMemoryRouter, WithRoute, reactRouterMock } from './router_helpers';
+
+export * from './utils';
