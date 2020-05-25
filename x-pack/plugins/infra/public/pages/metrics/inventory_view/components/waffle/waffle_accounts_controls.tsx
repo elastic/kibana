@@ -28,7 +28,7 @@ export const WaffleAccountsControls = (props: Props) => {
     setIsOpen(false);
   }, [setIsOpen]);
 
-  const currentLabel = options.find(o => o.value === accountId);
+  const currentLabel = options.find((o) => o.value === accountId);
 
   const changeAccount = useCallback(
     (val: string) => {
@@ -47,7 +47,7 @@ export const WaffleAccountsControls = (props: Props) => {
       {
         id: 0,
         title: '',
-        items: options.map(o => {
+        items: options.map((o) => {
           const icon = o.value === accountId ? 'check' : 'empty';
           const panel = { name: o.name, onClick: () => changeAccount(o.value), icon };
           return panel;
@@ -58,7 +58,10 @@ export const WaffleAccountsControls = (props: Props) => {
   );
 
   const button = (
-    <DropdownButton label="Account" onClick={showPopover}>
+    <DropdownButton
+      label={i18n.translate('xpack.infra.waffle.accountLabel', { defaultMessage: 'Account' })}
+      onClick={showPopover}
+    >
       {currentLabel
         ? currentLabel.name
         : i18n.translate('xpack.infra.waffle.accountAllTitle', {

@@ -109,7 +109,7 @@ export class DynamicActionManager {
       for (const event of this.ui.get().events) this.killAction(event);
       for (const event of events) this.reviveAction(event);
       this.ui.transitions.finishFetching(events);
-    })().catch(error => {
+    })().catch((error) => {
       /* eslint-disable */
       console.log('Dynamic action manager storage reload failed.');
       console.error(error);

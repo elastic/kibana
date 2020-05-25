@@ -16,29 +16,32 @@ import {
   tap,
   toArray,
 } from 'rxjs/operators';
-import { CaptureConfig } from '../../../../server/types';
+import { HeadlessChromiumDriverFactory } from '../../../../server/browsers';
+import {
+  CaptureConfig,
+  ElementsPositionAndAttribute,
+  ScreenshotObservableOpts,
+  ScreenshotResults,
+  ScreenshotsObservableFn,
+} from '../../../../server/types';
 import { DEFAULT_PAGELOAD_SELECTOR } from '../../constants';
-import { HeadlessChromiumDriverFactory } from '../../../../types';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
 import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
-import { ScreenSetupData, ScreenshotObservableOpts, ScreenshotResults } from './types';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
 
 const DEFAULT_SCREENSHOT_CLIP_HEIGHT = 1200;
 const DEFAULT_SCREENSHOT_CLIP_WIDTH = 1800;
 
-export type ScreenshotsObservableFn = ({
-  logger,
-  urls,
-  conditionalHeaders,
-  layout,
-  browserTimezone,
-}: ScreenshotObservableOpts) => Rx.Observable<ScreenshotResults[]>;
+interface ScreenSetupData {
+  elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
+  timeRange: string | null;
+  error?: Error;
+}
 
 export function screenshotsObservableFactory(
   captureConfig: CaptureConfig,
@@ -83,7 +86,7 @@ export function screenshotsObservableFactory(
                 );
               }),
               mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),
-              mergeMap(async itemsCount => {
+              mergeMap(async (itemsCount) => {
                 const viewport = layout.getViewport(itemsCount) || getDefaultViewPort();
                 await Promise.all([
                   driver.setViewport(viewport, logger),
@@ -113,7 +116,7 @@ export function screenshotsObservableFactory(
                   timeRange,
                 }));
               }),
-              catchError(err => {
+              catchError((err) => {
                 logger.error(err);
                 return Rx.of({ elementsPositionAndAttributes: null, timeRange: null, error: err });
               })

@@ -60,14 +60,14 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
   constructor(private readonly coreContext: CoreContext, plugins: InjectedPluginMetadata[]) {
     // Generate opaque ids
-    const opaqueIds = new Map<PluginName, PluginOpaqueId>(plugins.map(p => [p.id, Symbol(p.id)]));
+    const opaqueIds = new Map<PluginName, PluginOpaqueId>(plugins.map((p) => [p.id, Symbol(p.id)]));
 
     // Setup dependency map and plugin wrappers
     plugins.forEach(({ id, plugin, config = {} }) => {
       // Setup map of dependencies
       this.pluginDependencies.set(id, [
         ...plugin.requiredPlugins,
-        ...plugin.optionalPlugins.filter(optPlugin => opaqueIds.has(optPlugin)),
+        ...plugin.optionalPlugins.filter((optPlugin) => opaqueIds.has(optPlugin)),
       ]);
 
       // Construct plugin wrappers, depending on the topological order set by the server.
@@ -87,7 +87,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     return new Map(
       [...this.pluginDependencies].map(([id, deps]) => [
         this.plugins.get(id)!.opaqueId,
-        deps.map(depId => this.plugins.get(depId)!.opaqueId),
+        deps.map((depId) => this.plugins.get(depId)!.opaqueId),
       ])
     );
   }

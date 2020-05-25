@@ -16,7 +16,7 @@ export const units = {
   plus: unit * 1.5,
   double: unit * 2,
   triple: unit * 3,
-  quadruple: unit * 4
+  quadruple: unit * 4,
 };
 
 export function px(value: number): string {
@@ -42,7 +42,7 @@ export const fontSizes = {
   small: '12px',
   large: '16px',
   xlarge: '20px',
-  xxlarge: '30px'
+  xxlarge: '30px',
 };
 
 export function truncate(width: string) {

@@ -16,7 +16,7 @@ import {
   ERROR_GROUP_ID,
   ERROR_LOG_MESSAGE,
   PROCESSOR_EVENT,
-  SERVICE_NAME
+  SERVICE_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { createWatch } from '../../../../services/rest/watcher';
 
@@ -62,7 +62,7 @@ export async function createErrorGroupWatch({
   slackUrl,
   threshold,
   timeRange,
-  apmIndexPatternTitle
+  apmIndexPatternTitle,
 }: Arguments) {
   const id = `apm-${uuid.v4()}`;
 
@@ -93,8 +93,8 @@ export async function createErrorGroupWatch({
         docCountParam: '{{doc_count}}',
         slashErrorGroupsBucket:
           '{{/ctx.payload.aggregations.error_groups.buckets}}',
-        br: '<br/>'
-      }
+        br: '<br/>',
+      },
     }
   );
 
@@ -121,13 +121,13 @@ export async function createErrorGroupWatch({
         slashErrorCulprit: '{{/sample.hits.hits.0._source.error.culprit}}',
         docCountParam: '>{{doc_count}}',
         slashErrorGroupsBucket:
-          '{{/ctx.payload.aggregations.error_groups.buckets}}'
-      }
+          '{{/ctx.payload.aggregations.error_groups.buckets}}',
+      },
     }
   );
 
   const actions: Actions = {
-    log_error: { logging: { text: emailTemplate } }
+    log_error: { logging: { text: emailTemplate } },
   };
 
   const body = {
@@ -136,17 +136,17 @@ export async function createErrorGroupWatch({
       trigger: i18n.translate(
         'xpack.apm.serviceDetails.enableErrorReportsPanel.triggerText',
         {
-          defaultMessage: 'This value must be changed in trigger section'
+          defaultMessage: 'This value must be changed in trigger section',
         }
       ),
       serviceName,
       threshold,
       timeRangeValue: timeRange.value,
       timeRangeUnit: timeRange.unit,
-      slackUrlPath
+      slackUrlPath,
     },
     trigger: {
-      schedule
+      schedule,
     },
     input: {
       search: {
@@ -163,12 +163,12 @@ export async function createErrorGroupWatch({
                     range: {
                       '@timestamp': {
                         gte:
-                          'now-{{ctx.metadata.timeRangeValue}}{{ctx.metadata.timeRangeUnit}}'
-                      }
-                    }
-                  }
-                ]
-              }
+                          'now-{{ctx.metadata.timeRangeValue}}{{ctx.metadata.timeRangeUnit}}',
+                      },
+                    },
+                  },
+                ],
+              },
             },
             aggs: {
               error_groups: {
@@ -177,8 +177,8 @@ export async function createErrorGroupWatch({
                   field: ERROR_GROUP_ID,
                   size: 10,
                   order: {
-                    _count: 'desc'
-                  }
+                    _count: 'desc',
+                  },
                 },
                 aggs: {
                   sample: {
@@ -189,30 +189,30 @@ export async function createErrorGroupWatch({
                         ERROR_EXC_HANDLED,
                         ERROR_CULPRIT,
                         ERROR_GROUP_ID,
-                        '@timestamp'
+                        '@timestamp',
                       ],
                       sort: [
                         {
-                          '@timestamp': 'desc'
-                        }
+                          '@timestamp': 'desc',
+                        },
                       ],
-                      size: 1
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                      size: 1,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
     condition: {
       script: {
         source:
-          'return ctx.payload.aggregations.error_groups.buckets.length > 0'
-      }
+          'return ctx.payload.aggregations.error_groups.buckets.length > 0',
+      },
     },
-    actions
+    actions,
   };
 
   if (slackUrlPath) {
@@ -224,12 +224,12 @@ export async function createErrorGroupWatch({
         method: 'POST',
         path: '{{ctx.metadata.slackUrlPath}}',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: `__json__::${JSON.stringify({
-          text: slackTemplate
-        })}`
-      }
+          text: slackTemplate,
+        })}`,
+      },
     };
   }
 
@@ -242,20 +242,20 @@ export async function createErrorGroupWatch({
           {
             defaultMessage:
               '{serviceName} has error groups which exceeds the threshold',
-            values: { serviceName: '"{{ctx.metadata.serviceName}}"' }
+            values: { serviceName: '"{{ctx.metadata.serviceName}}"' },
           }
         ),
         body: {
-          html: emailTemplate
-        }
-      }
+          html: emailTemplate,
+        },
+      },
     };
   }
 
   await createWatch({
     http,
     id,
-    watch: body
+    watch: body,
   });
   return id;
 }

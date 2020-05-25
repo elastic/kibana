@@ -86,7 +86,7 @@ export class DocTitleService {
         this.applyTitle(defaultTitle);
       },
       __legacy: {
-        setBaseTitle: baseTitle => {
+        setBaseTitle: (baseTitle) => {
           this.baseTitle = baseTitle;
         },
       },

@@ -5,14 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
+import { HeadlessChromiumDriver } from '../../../../server/browsers';
 import { LevelLogger, startTrace } from '../../../../server/lib';
-import { CaptureConfig } from '../../../../server/types';
-import { ConditionalHeaders } from '../../../../types';
+import { CaptureConfig, ConditionalHeaders } from '../../../../server/types';
 
 export const openUrl = async (
   captureConfig: CaptureConfig,
-  browser: HeadlessBrowser,
+  browser: HeadlessChromiumDriver,
   url: string,
   pageLoadSelector: string,
   conditionalHeaders: ConditionalHeaders,

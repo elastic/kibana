@@ -37,7 +37,7 @@ export async function getMetrics(
     min = max - numOfBuckets * bucketSize * 1000;
   }
 
-  return Bluebird.map(metricSet, metric => {
+  return Bluebird.map(metricSet, (metric) => {
     // metric names match the literal metric name, but they can be supplied in groups or individually
     let metricNames;
 
@@ -47,7 +47,7 @@ export async function getMetrics(
       metricNames = [metric];
     }
 
-    return Bluebird.map(metricNames, metricName => {
+    return Bluebird.map(metricNames, (metricName) => {
       return getSeries(req, indexPattern, metricName, metricOptions, filters, groupBy, {
         min,
         max,
@@ -55,7 +55,7 @@ export async function getMetrics(
         timezone,
       });
     });
-  }).then(rows => {
+  }).then((rows) => {
     const data = {};
     metricSet.forEach((key, index) => {
       // keyName must match the value stored in the html template

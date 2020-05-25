@@ -61,7 +61,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
 
   useEffect(() => {
     if (pipelineNameFromLocation && data?.length) {
-      const pipeline = data.find(p => p.name === pipelineNameFromLocation);
+      const pipeline = data.find((p) => p.name === pipelineNameFromLocation);
       setSelectedPipeline(pipeline);
       setShowFlyout(true);
     }
@@ -201,7 +201,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
       {renderFlyout()}
       {pipelinesToDelete?.length > 0 ? (
         <PipelineDeleteModal
-          callback={deleteResponse => {
+          callback={(deleteResponse) => {
             if (deleteResponse?.hasDeletedPipelines) {
               // reload pipelines list
               sendRequest();

@@ -11,7 +11,7 @@ import { setHttp } from '../../crud_app/services';
 import { CRUD_APP_BASE_PATH } from '../../crud_app/constants';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
-jest.mock('lodash/function/debounce', () => fn => fn);
+jest.mock('lodash/function/debounce', () => (fn) => fn);
 
 jest.mock('../../kibana_services', () => {
   const services = require.requireActual('../../kibana_services');

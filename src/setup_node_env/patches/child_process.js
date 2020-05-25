@@ -21,7 +21,7 @@
 // `options.env` object passed to the child process function doesn't inherit
 // from `Object.prototype`. This protects against similar RCE vulnerabilities
 // as described in CVE-2019-7609
-module.exports = function(cp) {
+module.exports = function (cp) {
   // The `exec` function is currently just a wrapper around `execFile`. So for
   // now there's no need to patch it. If this changes in the future, our tests
   // will fail and we can uncomment the line below.

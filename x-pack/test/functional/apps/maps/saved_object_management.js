@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps', 'header', 'timePicker']);
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');

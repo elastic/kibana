@@ -20,8 +20,8 @@
 import { groupFields } from './group_fields';
 import { getDefaultFieldFilter } from './field_filter';
 
-describe('group_fields', function() {
-  it('should group fields in selected, popular, unpopular group', function() {
+describe('group_fields', function () {
+  it('should group fields in selected, popular, unpopular group', function () {
     const fields = [
       {
         name: 'category',

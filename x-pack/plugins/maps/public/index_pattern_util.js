@@ -10,7 +10,7 @@ import { ES_GEO_FIELD_TYPE } from '../common/constants';
 
 export async function getIndexPatternsFromIds(indexPatternIds = []) {
   const promises = [];
-  indexPatternIds.forEach(id => {
+  indexPatternIds.forEach((id) => {
     const indexPatternPromise = getIndexPatternService().get(id);
     if (indexPatternPromise) {
       promises.push(indexPatternPromise);
@@ -21,7 +21,7 @@ export async function getIndexPatternsFromIds(indexPatternIds = []) {
 }
 
 export function getTermsFields(fields) {
-  return fields.filter(field => {
+  return fields.filter((field) => {
     return (
       field.aggregatable &&
       !indexPatterns.isNestedField(field) &&
@@ -48,7 +48,7 @@ export function supportsGeoTileAgg(field) {
 
 // Returns filtered fields list containing only fields that exist in _source.
 export function getSourceFields(fields) {
-  return fields.filter(field => {
+  return fields.filter((field) => {
     // Multi fields are not stored in _source and only exist in index.
     const isMultiField = field.subType && field.subType.multi;
     return !isMultiField && !indexPatterns.isNestedField(field);
