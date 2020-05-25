@@ -58,7 +58,12 @@ export function KbnAggTable(config, RecursionHelper) {
 
       self.toCsv = function (formatted) {
         const rows = formatted ? $scope.rows : $scope.table.rows;
-        const columns = formatted ? $scope.formattedColumns : $scope.table.columns;
+        const columns = formatted ? [...$scope.formattedColumns] : [...$scope.table.columns];
+
+        if ($scope.splitRow && formatted) {
+          columns.unshift($scope.splitRow);
+        }
+
         const nonAlphaNumRE = /[^a-zA-Z0-9]/;
         const allDoubleQuoteRE = /"/g;
 
@@ -81,7 +86,9 @@ export function KbnAggTable(config, RecursionHelper) {
 
             const columnIdx = columns.findIndex((c) => c.id === k);
             const formattedValue =
-              formatted && column ? escape(column.formatter.convert(v)) : escape(v);
+              formatted && column && column.formatter
+                ? escape(column.formatter.convert(v))
+                : escape(v);
             rowArray.splice(columnIdx, 0, formattedValue);
           });
           csvRows = [...csvRows, rowArray];
@@ -110,6 +117,7 @@ export function KbnAggTable(config, RecursionHelper) {
           if (!table) {
             $scope.rows = null;
             $scope.formattedColumns = null;
+            $scope.splitRow = null;
             return;
           }
 
@@ -131,14 +139,11 @@ export function KbnAggTable(config, RecursionHelper) {
                 ? splitRow.find((splitRow) => splitRow.accessor === i)
                 : undefined;
               const dimension =
-                isBucket ||
-                isSplitColumn ||
-                isSplitRow ||
-                metrics.find((metric) => metric.accessor === i);
+                isBucket || isSplitColumn || metrics.find(metric => metric.accessor === i);
 
-              if (!dimension) return;
-
-              const formatter = getFormatService().deserialize(dimension.format);
+              const formatter = dimension
+                ? getFormatService().deserialize(dimension.format)
+                : undefined;
 
               const formattedColumn = {
                 id: col.id,
@@ -146,6 +151,12 @@ export function KbnAggTable(config, RecursionHelper) {
                 formatter: formatter,
                 filterable: !!isBucket,
               };
+
+              if (isSplitRow) {
+                $scope.splitRow = formattedColumn;
+              }
+
+              if (!dimension) return;
 
               const last = i === table.columns.length - 1;
 
