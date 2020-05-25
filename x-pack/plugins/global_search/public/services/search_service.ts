@@ -60,8 +60,8 @@ export class SearchService {
     this.maxProviderResults = maxProviderResults;
 
     return {
-      registerResultProvider: provider => {
-        if (this.providers.map(p => p.id).includes(provider.id)) {
+      registerResultProvider: (provider) => {
+        if (this.providers.map((p) => p.id).includes(provider.id)) {
           throw new Error(`trying to register duplicate provider: ${provider.id}`);
         }
         this.providers.push(provider);
@@ -106,18 +106,18 @@ export class SearchService {
     const serverResults$ = fetchServerResults(this.http!, term, {
       preference,
       aborted$,
-    }).pipe(map(results => results.map(r => addNavigate(r, navigateToUrl))));
+    }).pipe(map((results) => results.map((r) => addNavigate(r, navigateToUrl))));
 
-    const providersResults$ = this.providers.map(provider =>
+    const providersResults$ = this.providers.map((provider) =>
       provider.find(term, providerOptions).pipe(
         takeInArray(this.maxProviderResults),
         takeUntil(aborted$),
-        map(results => results.map(r => processResult(r)))
+        map((results) => results.map((r) => processResult(r)))
       )
     );
 
     return merge(...providersResults$, serverResults$).pipe(
-      map(results => ({
+      map((results) => ({
         results,
       }))
     );

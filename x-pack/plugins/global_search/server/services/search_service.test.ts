@@ -44,7 +44,7 @@ describe('SearchService', () => {
   const expectedResult = (id: string) => expect.objectContaining({ id });
 
   const expectedBatch = (...ids: string[]) => ({
-    results: ids.map(id => expectedResult(id)),
+    results: ids.map((id) => expectedResult(id)),
   });
 
   const result = (
@@ -62,7 +62,7 @@ describe('SearchService', () => {
   beforeEach(() => {
     service = new SearchService();
     basePath = httpServiceMock.createBasePath();
-    basePath.prepend.mockImplementation(path => `/base-path${path}`);
+    basePath.prepend.mockImplementation((path) => `/base-path${path}`);
     coreStart = coreMock.createStart();
     licenseChecker = licenseCheckerMock.create();
   });
@@ -285,9 +285,7 @@ describe('SearchService', () => {
         registerResultProvider(provider);
 
         const { find } = service.start(coreStart);
-        const batch = await find('foo', {}, request)
-          .pipe(take(1))
-          .toPromise();
+        const batch = await find('foo', {}, request).pipe(take(1)).toPromise();
 
         expect(batch.results).toHaveLength(2);
         expect(batch.results[0]).toEqual({

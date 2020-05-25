@@ -9,20 +9,20 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { NavigableGlobalSearchResult } from '../../../../plugins/global_search/public/services/types';
 import '../../plugins/global_search_test/public/types';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
   const browser = getService('browser');
 
   const findResultsWithAPI = async (t: string): Promise<NavigableGlobalSearchResult[]> => {
     return browser.executeAsync(async (term: string, cb: Function) => {
-      window.__globalSearchTestApi.findAll(term).then(results => {
+      window.__globalSearchTestApi.findAll(term).then((results) => {
         cb(results);
       });
     }, t) as any; // executeAsync signature is broken. return type should be inferred from the cb param.
   };
 
-  describe('GlobalSearch API', function() {
-    beforeEach(async function() {
+  describe('GlobalSearch API', function () {
+    beforeEach(async function () {
       await pageObjects.common.navigateToApp('globalSearchTestApp');
     });
 
@@ -33,17 +33,17 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     it('return results from the client provider', async () => {
       const results = await findResultsWithAPI('client');
       expect(results.length).to.be(2);
-      expect(results.map(r => r.id)).to.eql(['client1', 'client2']);
+      expect(results.map((r) => r.id)).to.eql(['client1', 'client2']);
     });
     it('return results from the server provider', async () => {
       const results = await findResultsWithAPI('server');
       expect(results.length).to.be(2);
-      expect(results.map(r => r.id)).to.eql(['server1', 'server2']);
+      expect(results.map((r) => r.id)).to.eql(['server1', 'server2']);
     });
     it('return mixed results from both client and server providers', async () => {
       const results = await findResultsWithAPI('server+client');
       expect(results.length).to.be(4);
-      expect(results.map(r => r.id)).to.eql(['client1', 'client2', 'server1', 'server2']);
+      expect(results.map((r) => r.id)).to.eql(['client1', 'client2', 'server1', 'server2']);
     });
   });
 }

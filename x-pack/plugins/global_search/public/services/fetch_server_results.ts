@@ -41,6 +41,6 @@ export const fetchServerResults = (
     })
   ).pipe(
     takeUntil(aborted$ ?? EMPTY),
-    map(response => response.results)
+    map((response) => response.results)
   );
 };

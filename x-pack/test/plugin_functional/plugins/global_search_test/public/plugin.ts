@@ -71,13 +71,13 @@ export class GlobalSearchTestPlugin
 
   public start({}: CoreStart, { globalSearch }: GlobalSearchTestPluginStartDeps) {
     const contract: GlobalSearchTestPluginStart = {
-      findAll: term =>
+      findAll: (term) =>
         globalSearch
           .find(term, {})
           .pipe(
-            map(batch => batch.results),
+            map((batch) => batch.results),
             // restrict to test type to avoid failure when real providers are present
-            map(results => results.filter(r => r.type.startsWith('test_'))),
+            map((results) => results.filter((r) => r.type.startsWith('test_'))),
             reduce((memo, results) => [...memo, ...results])
           )
           .toPromise(),

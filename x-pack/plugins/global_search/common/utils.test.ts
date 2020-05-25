@@ -15,7 +15,7 @@ describe('convertResultUrl', () => {
 
   beforeEach(() => {
     basePath = createBasePath();
-    basePath.prepend.mockImplementation(path => `/base-path${path}`);
+    basePath.prepend.mockImplementation((path) => `/base-path${path}`);
   });
 
   describe('when the url is a string', () => {

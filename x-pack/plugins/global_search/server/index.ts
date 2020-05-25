@@ -13,7 +13,7 @@ export const plugin: PluginInitializer<
   GlobalSearchPluginStart,
   GlobalSearchPluginSetupDeps,
   {}
-> = context => new GlobalSearchPlugin(context);
+> = (context) => new GlobalSearchPlugin(context);
 
 export { config } from './config';
 

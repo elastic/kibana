@@ -11,7 +11,7 @@ export type LicenseState = { valid: false; message: string } | { valid: true };
 
 export type CheckLicense = (license: ILicense) => LicenseState;
 
-const checkLicense: CheckLicense = license => {
+const checkLicense: CheckLicense = (license) => {
   const check = license.check('globalSearch', 'basic');
   switch (check.state) {
     case 'expired':
@@ -34,7 +34,7 @@ export class LicenseChecker {
   private state: LicenseState = { valid: false, message: 'unknown' };
 
   constructor(license$: Observable<ILicense>) {
-    this.subscription = license$.subscribe(license => this.update(license));
+    this.subscription = license$.subscribe((license) => this.update(license));
   }
 
   private update(license: ILicense | undefined) {

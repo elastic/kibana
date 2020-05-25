@@ -29,7 +29,7 @@ export const registerInternalFindRoute = (router: IRouter) => {
         const allResults = await ctx
           .globalSearch!.find(term, { ...options, aborted$: req.events.aborted$ })
           .pipe(
-            map(batch => batch.results),
+            map((batch) => batch.results),
             reduce((acc, results) => [...acc, ...results])
           )
           .toPromise();

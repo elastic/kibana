@@ -50,7 +50,7 @@ describe('SearchService', () => {
   const expectedResult = (id: string) => expect.objectContaining({ id });
 
   const expectedBatch = (...ids: string[]) => ({
-    results: ids.map(id => expectedResult(id)),
+    results: ids.map((id) => expectedResult(id)),
   });
 
   const providerResult = (
@@ -403,9 +403,7 @@ describe('SearchService', () => {
         registerResultProvider(provider);
 
         const { find } = service.start(startDeps());
-        const batch = await find('foo', {})
-          .pipe(take(1))
-          .toPromise();
+        const batch = await find('foo', {}).pipe(take(1)).toPromise();
 
         expect(batch.results).toHaveLength(2);
         expect(batch.results[0]).toEqual({
