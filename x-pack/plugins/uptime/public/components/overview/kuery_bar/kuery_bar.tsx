@@ -90,7 +90,7 @@ export function KueryBar({
             },
           ],
         })) || []
-      ).filter(suggestion => !startsWith(suggestion.text, 'span.'));
+      ).filter((suggestion) => !startsWith(suggestion.text, 'span.'));
 
       if (currentRequest !== currentRequestCheck) {
         return;

@@ -92,7 +92,7 @@ class Suggestions extends Component {
     });
 
     return (
-      <List ref={node => (this.parentNode = node)} onScroll={this.handleScroll}>
+      <List ref={(node) => (this.parentNode = node)} onScroll={this.handleScroll}>
         {suggestions}
       </List>
     );
