@@ -314,16 +314,10 @@ describe('helpers', () => {
       expect(result[0].title).toEqual('Test label');
       expect(wrapper.find('[data-test-subj="stringArrayDescriptionBadgeItem"]')).toHaveLength(2);
       expect(
-        wrapper
-          .find('[data-test-subj="stringArrayDescriptionBadgeItem"]')
-          .first()
-          .text()
+        wrapper.find('[data-test-subj="stringArrayDescriptionBadgeItem"]').first().text()
       ).toEqual('tag1');
       expect(
-        wrapper
-          .find('[data-test-subj="stringArrayDescriptionBadgeItem"]')
-          .at(1)
-          .text()
+        wrapper.find('[data-test-subj="stringArrayDescriptionBadgeItem"]').at(1).text()
       ).toEqual('tag2');
     });
   });
@@ -353,16 +347,10 @@ describe('helpers', () => {
       expect(result[0].title).toEqual('Test label');
       expect(wrapper.find('[data-test-subj="urlsDescriptionReferenceLinkItem"]')).toHaveLength(2);
       expect(
-        wrapper
-          .find('[data-test-subj="urlsDescriptionReferenceLinkItem"]')
-          .first()
-          .text()
+        wrapper.find('[data-test-subj="urlsDescriptionReferenceLinkItem"]').first().text()
       ).toEqual('www.test.com');
       expect(
-        wrapper
-          .find('[data-test-subj="urlsDescriptionReferenceLinkItem"]')
-          .at(1)
-          .text()
+        wrapper.find('[data-test-subj="urlsDescriptionReferenceLinkItem"]').at(1).text()
       ).toEqual('www.test2.com');
     });
   });

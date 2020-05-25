@@ -79,7 +79,7 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
   ]);
 });
 
-test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async done => {
+test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async (done) => {
   const container = new HelloWorldContainer(
     { id: 'hello', panels: {} },
     {

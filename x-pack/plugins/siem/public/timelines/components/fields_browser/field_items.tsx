@@ -84,7 +84,7 @@ export const getFieldItems = ({
 }): FieldItem[] =>
   uniqBy('name', [
     ...Object.values(category != null && category.fields != null ? category.fields : {}),
-  ]).map(field => ({
+  ]).map((field) => ({
     description: (
       <SelectableText data-test-subj={`field-${field.name}-description`}>
         {`${field.description || getEmptyValue()} ${getExampleText(field.example)}`}
@@ -98,7 +98,7 @@ export const getFieldItems = ({
         key={`field-browser-field-items-field-droppable-wrapper-${timelineId}-${categoryId}-${field.name}`}
         isDropDisabled={true}
         type={DRAG_TYPE_FIELD}
-        renderClone={provided => (
+        renderClone={(provided) => (
           <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
             <DragEffects>
               <DraggableFieldBadge fieldId={field.name || ''} />
@@ -113,13 +113,13 @@ export const getFieldItems = ({
           })}
           index={0}
         >
-          {provided => (
+          {(provided) => (
             <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
               <EuiFlexGroup alignItems="center" gutterSize="none">
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={i18n.TOGGLE_COLUMN_TOOLTIP}>
                     <EuiCheckbox
-                      checked={columnHeaders.findIndex(c => c.id === field.name) !== -1}
+                      checked={columnHeaders.findIndex((c) => c.id === field.name) !== -1}
                       data-test-subj={`field-${field.name}-checkbox`}
                       id={field.name || ''}
                       onChange={() =>

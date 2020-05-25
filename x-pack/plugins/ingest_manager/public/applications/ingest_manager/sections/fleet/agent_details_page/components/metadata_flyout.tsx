@@ -26,7 +26,7 @@ interface Props {
 
 export const AgentMetadataFlyout: React.FunctionComponent<Props> = ({ agent, flyout }) => {
   const mapMetadata = (obj: { [key: string]: string } | undefined) => {
-    return Object.keys(obj || {}).map(key => ({
+    return Object.keys(obj || {}).map((key) => ({
       title: key,
       description: obj ? obj[key] : '',
     }));

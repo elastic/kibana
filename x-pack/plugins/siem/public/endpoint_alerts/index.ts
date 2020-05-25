@@ -23,7 +23,7 @@ export class EndpointAlerts {
   ): SecuritySubPluginWithStore<'alertList', Immutable<AlertListState>> {
     const { data, ingestManager } = plugins;
     const middleware = substateMiddlewareFactory(
-      globalState => globalState.alertList,
+      (globalState) => globalState.alertList,
       alertMiddlewareFactory(core, { data, ingestManager })
     );
 

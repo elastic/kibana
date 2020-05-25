@@ -47,8 +47,8 @@ export class ChartGrid {
         const y1 = !isHorizontal ? tick : height;
         const d3Line = d3.svg
           .line()
-          .x(d => (isHorizontal ? scale(d[0]) : d[0]))
-          .y(d => (!isHorizontal ? scale(d[1]) : d[1]));
+          .x((d) => (isHorizontal ? scale(d[0]) : d[0]))
+          .y((d) => (!isHorizontal ? scale(d[1]) : d[1]));
         return d3Line([
           [x0, y0],
           [x1, y1],
@@ -64,28 +64,28 @@ export class ChartGrid {
     if (!axis) return;
     const ticks = axis.getScale().ticks;
     if (!ticks) return;
-    ticks().forEach(tick => {
+    ticks().forEach((tick) => {
       this.drawLine(svg, tick, axis, width, height);
     });
   }
 
   drawValueLines(svg, width, height) {
     const axis = this._handler.valueAxes.find(
-      axis => axis.axisConfig.get('id') === this.get('valueAxis')
+      (axis) => axis.axisConfig.get('id') === this.get('valueAxis')
     );
     if (!axis) return;
     const ticks = axis.getScale().ticks;
     if (!ticks) return;
-    ticks().forEach(tick => {
+    ticks().forEach((tick) => {
       this.drawLine(svg, tick, axis, width, height);
     });
   }
 
   draw(width, height) {
     const self = this;
-    return function(selection) {
+    return function (selection) {
       if (!self._values) return;
-      selection.each(function() {
+      selection.each(function () {
         if (self.get('categoryLines')) self.drawCategoryLines(d3.select(this), width, height);
         if (self.get('valueAxis', false)) self.drawValueLines(d3.select(this), width, height);
       });

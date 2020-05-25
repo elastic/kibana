@@ -6,7 +6,7 @@
 
 import PropTypes from 'prop-types';
 
-export const Paginate = props => {
+export const Paginate = (props) => {
   return props.children({
     rows: props.partialRows,
     perPage: props.perPage,
@@ -14,7 +14,7 @@ export const Paginate = props => {
     totalPages: props.totalPages,
     nextPageEnabled: props.nextPageEnabled,
     prevPageEnabled: props.prevPageEnabled,
-    setPage: num => props.setPage(num),
+    setPage: (num) => props.setPage(num),
     nextPage: props.nextPage,
     prevPage: props.prevPage,
   });
