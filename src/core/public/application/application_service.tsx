@@ -307,7 +307,7 @@ export class ApplicationService {
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },
       navigateToApp,
-      navigateToUrl: async url => {
+      navigateToUrl: async (url) => {
         const appInfo = parseAppUrl(url, http.basePath, this.apps);
         if (appInfo) {
           return navigateToApp(appInfo.app, { path: appInfo.path });
