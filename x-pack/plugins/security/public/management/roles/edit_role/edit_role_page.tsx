@@ -26,6 +26,7 @@ import React, {
   Fragment,
   FunctionComponent,
   HTMLProps,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -158,7 +159,8 @@ function useRole(
   notifications: NotificationsStart,
   license: SecurityLicense,
   action: string,
-  roleName?: string
+  roleName?: string,
+  backToRoleList: () => void
 ) {
   const [role, setRole] = useState<Role | null>(null);
   useEffect(() => {
@@ -218,7 +220,7 @@ function useRole(
           fatalErrors.add(err);
         }
       });
-  }, [roleName, action, fatalErrors, rolesAPIClient, notifications, license]);
+  }, [roleName, action, fatalErrors, rolesAPIClient, notifications, license, backToRoleList]);
 
   return [role, setRole] as [Role | null, typeof setRole];
 }
@@ -283,6 +285,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
   notifications,
   history,
 }) => {
+  const backToRoleList = useCallback(() => history.push('/'), [history]);
+
   // We should keep the same mutable instance of Validator for every re-render since we'll
   // eventually enable validation after the first time user tries to save a role.
   const { current: validator } = useRef(new RoleValidator({ shouldValidate: false }));
@@ -299,7 +303,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
     notifications,
     license,
     action,
-    roleName
+    roleName,
+    backToRoleList
   );
 
   if (!role || !runAsUsers || !indexPatternsTitles || !privileges || !spaces || !features) {
@@ -312,8 +317,6 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const isDeprecatedRole = checkIfRoleDeprecated(role);
 
   const [kibanaPrivileges, builtInESPrivileges] = privileges;
-
-  const backToRoleList = () => history.push('/');
 
   const getFormTitle = () => {
     let titleText;
