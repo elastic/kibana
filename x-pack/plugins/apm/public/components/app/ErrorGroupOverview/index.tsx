@@ -11,26 +11,21 @@ import {
   EuiSpacer,
   EuiTitle
 } from '@elastic/eui';
-import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
-import { Maybe } from '../../../../typings/common';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
-import { ErrorGroupList } from './List';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import React, { useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { PROJECTION } from '../../../../common/projections/typings';
-import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { useFetcher } from '../../../hooks/useFetcher';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
-// @ts-ignore
-import CustomPlot from '../../shared/charts/CustomPlot';
-import { unit } from '../../../style/variables';
-import { asPercent } from '../../../utils/formatters';
+import { ErrorRateChart } from '../../shared/charts/ErrorRateChart';
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
+import { ErrorGroupList } from './List';
+import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 
 const ErrorGroupOverview: React.FC = () => {
   const { urlParams, uiFilters } = useUrlParams();
-  const [errorRateTime, setErrorRateTime] = useState();
 
   const { serviceName, start, end, sortField, sortDirection } = urlParams;
 
@@ -38,24 +33,6 @@ const ErrorGroupOverview: React.FC = () => {
     if (serviceName && start && end) {
       return callApmApi({
         pathname: '/api/apm/services/{serviceName}/errors/distribution',
-        params: {
-          path: {
-            serviceName
-          },
-          query: {
-            start,
-            end,
-            uiFilters: JSON.stringify(uiFilters)
-          }
-        }
-      });
-    }
-  }, [serviceName, start, end, uiFilters]);
-
-  const { data: erroRateData } = useFetcher(() => {
-    if (serviceName && start && end) {
-      return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/errors/rate',
         params: {
           path: {
             serviceName
@@ -114,10 +91,6 @@ const ErrorGroupOverview: React.FC = () => {
     return null;
   }
 
-  const tickFormatY = (y: Maybe<number>) => {
-    return numeral(y || 0).format('0 %');
-  };
-
   return (
     <>
       <EuiSpacer />
@@ -127,55 +100,26 @@ const ErrorGroupOverview: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiPanel>
-                <ErrorDistribution
-                  distribution={errorDistributionData}
-                  title={i18n.translate(
-                    'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                    {
-                      defaultMessage: 'Error occurrences'
-                    }
-                  )}
-                />
-              </EuiPanel>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiPanel>
-                <EuiTitle size="xs">
-                  <span>
-                    {i18n.translate(
-                      'xpack.apm.serviceDetails.metrics.errorRateChartTitle',
+            <ChartsSyncContextProvider>
+              <EuiFlexItem>
+                <EuiPanel>
+                  <ErrorDistribution
+                    distribution={errorDistributionData}
+                    title={i18n.translate(
+                      'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
                       {
-                        defaultMessage: 'Error Rate'
+                        defaultMessage: 'Error occurrences'
                       }
                     )}
-                  </span>
-                </EuiTitle>
-                {erroRateData && (
-                  <CustomPlot
-                    series={[
-                      {
-                        data: erroRateData,
-                        type: 'line',
-                        color: '#f5a700',
-                        hideLegend: true,
-                        title: 'Rate'
-                      }
-                    ]}
-                    onHover={(time: number) => {
-                      setErrorRateTime(time);
-                    }}
-                    hoverX={errorRateTime}
-                    tickFormatY={tickFormatY}
-                    formatTooltipValue={({ y }: { y: number }) => {
-                      return asPercent(y, 1);
-                    }}
-                    height={unit * 10}
                   />
-                )}
-              </EuiPanel>
-            </EuiFlexItem>
+                </EuiPanel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiPanel>
+                  <ErrorRateChart />
+                </EuiPanel>
+              </EuiFlexItem>
+            </ChartsSyncContextProvider>
           </EuiFlexGroup>
 
           <EuiSpacer size="s" />

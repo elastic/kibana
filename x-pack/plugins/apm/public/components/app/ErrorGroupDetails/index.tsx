@@ -27,6 +27,8 @@ import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../observability/public';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { ErrorRateChart } from '../../shared/charts/ErrorRateChart';
+import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
@@ -180,16 +182,24 @@ export function ErrorGroupDetails() {
             </EuiText>
           </Titles>
         )}
-
-        <ErrorDistribution
-          distribution={errorDistributionData}
-          title={i18n.translate(
-            'xpack.apm.errorGroupDetails.occurrencesChartLabel',
-            {
-              defaultMessage: 'Occurrences'
-            }
-          )}
-        />
+        <EuiFlexGroup>
+          <ChartsSyncContextProvider>
+            <EuiFlexItem>
+              <ErrorDistribution
+                distribution={errorDistributionData}
+                title={i18n.translate(
+                  'xpack.apm.errorGroupDetails.occurrencesChartLabel',
+                  {
+                    defaultMessage: 'Occurrences'
+                  }
+                )}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ErrorRateChart />
+            </EuiFlexItem>
+          </ChartsSyncContextProvider>
+        </EuiFlexGroup>
       </EuiPanel>
       <EuiSpacer size="s" />
       {showDetails && (

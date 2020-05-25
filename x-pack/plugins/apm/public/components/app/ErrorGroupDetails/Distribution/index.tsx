@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { scaleUtc } from 'd3-scale';
 import d3 from 'd3';
 import React from 'react';
+import { useChartsSync } from '../../../../hooks/useChartsSync';
 import { asRelativeDateTimeRange } from '../../../../utils/formatters';
 import { getTimezoneOffsetInMs } from '../../../shared/charts/CustomPlot/getTimezoneOffsetInMs';
 // @ts-ignore
@@ -59,6 +60,8 @@ const tooltipHeader = (bucket: FormattedBucket) =>
   asRelativeDateTimeRange(bucket.x0, bucket.x);
 
 export function ErrorDistribution({ distribution, title }: Props) {
+  const syncedChartsProps = useChartsSync();
+
   const buckets = getFormattedBuckets(
     distribution.buckets,
     distribution.bucketSize
@@ -84,6 +87,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
         <span>{title}</span>
       </EuiTitle>
       <Histogram
+        {...syncedChartsProps}
         tooltipHeader={tooltipHeader}
         verticalLineHover={(bucket: FormattedBucket) => bucket.x}
         xType="time-utc"

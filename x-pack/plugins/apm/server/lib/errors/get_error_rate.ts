@@ -33,6 +33,8 @@ export async function getErrorRate({
 }) {
   const { start, end, uiFiltersES, client, indices } = setup;
   const bucketSize = getBucketSize({ start, end });
+  const groupIdTerm = groupId ? [{ term: { [ERROR_GROUP_ID]: groupId } }] : [];
+
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
@@ -40,16 +42,16 @@ export async function getErrorRate({
       bool: {
         should: [
           { term: { [PROCESSOR_EVENT]: 'transaction' } },
-          { term: { [PROCESSOR_EVENT]: 'error' } }
+          {
+            bool: {
+              filter: [{ term: { [PROCESSOR_EVENT]: 'error' } }, ...groupIdTerm]
+            }
+          }
         ]
       }
     },
     ...uiFiltersES
   ];
-
-  if (groupId) {
-    filter.push({ term: { [ERROR_GROUP_ID]: groupId } });
-  }
 
   const aggs = {
     count: {
