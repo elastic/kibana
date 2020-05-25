@@ -413,7 +413,6 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * Switches driver to specific browser tab by index
      *
      * @param {string} tabIndex
-     * @param {string} value
      * @return {Promise<void>}
      */
     public async switchTab(tabIndex: number) {
