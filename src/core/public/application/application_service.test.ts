@@ -174,6 +174,10 @@ describe('#setup()', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"Cannot register an application route that includes HTTP base path"`
       );
+
+      expect(() =>
+        register(Symbol(), createApp({ id: 'app3', appRoute: '/base-path-i-am-not' }))
+      ).not.toThrow();
     });
   });
 
