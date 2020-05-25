@@ -297,6 +297,10 @@ export const DiscoverGrid = function DiscoverGridInner({
     }
   }
 
+  if (!rows || !rows.length) {
+    return null;
+  }
+
   return (
     <>
       <EuiDataGrid
@@ -435,7 +439,7 @@ export const DiscoverGrid = function DiscoverGridInner({
                   <EuiFlexGroup justifyContent="flexEnd">
                     {indexPattern.isTimeBased() && (
                       <EuiFlexItem grow={false}>
-                        <EuiLink href={getContextAppHref(flyoutRow._id)}>
+                        <EuiLink href={getContextAppHref ? getContextAppHref(flyoutRow._id) : ''}>
                           {i18n.translate(
                             'kbn.docTable.tableRow.viewSurroundingDocumentsLinkText',
                             {

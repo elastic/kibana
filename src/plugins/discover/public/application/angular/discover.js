@@ -117,7 +117,9 @@ app.config(($routeProvider) => {
   };
   $routeProvider.when('/:id?', {
     ...defaults,
-    template: 1 === 1 ? indexTemplate : indexTemplateGrid,
+    template: getServices().uiSettings.get('doc_table:legacyTable', true)
+      ? indexTemplate
+      : indexTemplateGrid,
     reloadOnSearch: false,
     resolve: {
       savedObjects: function ($route, Promise) {

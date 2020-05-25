@@ -36,6 +36,7 @@ import {
 import { Container, Embeddable } from '../../../../embeddable/public';
 import * as columnActions from '../angular/doc_table/actions/columns';
 import searchTemplate from './search_template.html';
+import searchTemplateGrid from './search_template_datagrid.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_search_source';
@@ -164,7 +165,11 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     if (!this.searchScope) {
       throw new Error('Search scope not defined');
     }
-    this.searchInstance = this.$compile(searchTemplate)(this.searchScope);
+    this.searchInstance = this.$compile(
+      getServices().uiSettings.get('doc_table:legacyTable', true)
+        ? searchTemplate
+        : searchTemplateGrid
+    )(this.searchScope);
     const rootNode = angular.element(domNode);
     rootNode.append(this.searchInstance);
 
