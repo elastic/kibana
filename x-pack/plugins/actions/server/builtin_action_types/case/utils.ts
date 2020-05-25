@@ -33,7 +33,8 @@ import { SUPPORTED_SOURCE_FIELDS } from './constants';
 export const normalizeMapping = (supportedFields: string[], mapping: MapRecord[]): MapRecord[] => {
   // Prevent prototype pollution and remove unsupported fields
   return mapping.filter(
-    m => m.source !== '__proto__' && m.target !== '__proto__' && supportedFields.includes(m.source)
+    (m) =>
+      m.source !== '__proto__' && m.target !== '__proto__' && supportedFields.includes(m.source)
   );
 };
 
@@ -188,8 +189,8 @@ export const prepareFieldsForTransformation = ({
   defaultPipes = ['informationCreated'],
 }: PrepareFieldsForTransformArgs): PipedField[] => {
   return Object.keys(params.externalCase)
-    .filter(p => mapping.get(p)?.actionType != null && mapping.get(p)?.actionType !== 'nothing')
-    .map(p => {
+    .filter((p) => mapping.get(p)?.actionType != null && mapping.get(p)?.actionType !== 'nothing')
+    .map((p) => {
       const actionType = mapping.get(p)?.actionType ?? 'nothing';
       return {
         key: p,
@@ -206,7 +207,7 @@ export const transformFields = ({
   currentIncident,
 }: TransformFieldsArgs): Record<string, string> => {
   return fields.reduce((prev, cur) => {
-    const transform = flow<Transformer>(...cur.pipes.map(p => transformers[p]));
+    const transform = flow<Transformer>(...cur.pipes.map((p) => transformers[p]));
     return {
       ...prev,
       [cur.key]: transform({
@@ -227,9 +228,9 @@ export const transformFields = ({
 };
 
 export const transformComments = (comments: Comment[], pipes: string[]): Comment[] => {
-  return comments.map(c => ({
+  return comments.map((c) => ({
     ...c,
-    comment: flow<Transformer>(...pipes.map(p => transformers[p]))({
+    comment: flow<Transformer>(...pipes.map((p) => transformers[p]))({
       value: c.comment,
       date: c.updatedAt ?? c.createdAt,
       user:

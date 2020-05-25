@@ -56,7 +56,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       resolveCopyToSpaceConflictsTest(`user with no access from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         user: scenario.users.noAccess,

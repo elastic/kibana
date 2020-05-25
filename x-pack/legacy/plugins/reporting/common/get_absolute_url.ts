@@ -5,7 +5,13 @@
  */
 
 import url from 'url';
-import { AbsoluteURLFactoryOptions } from '../types';
+
+interface AbsoluteURLFactoryOptions {
+  defaultBasePath: string;
+  protocol: string;
+  hostname: string;
+  port: string | number;
+}
 
 export const getAbsoluteUrlFactory = ({
   protocol,

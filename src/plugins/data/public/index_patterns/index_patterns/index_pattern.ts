@@ -28,8 +28,13 @@ import {
   MappingObject,
 } from '../../../../kibana_utils/public';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
-
+import {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  IIndexPattern,
+  IFieldType,
+  META_FIELDS_SETTING,
+} from '../../../common';
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
 import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '../fields';
@@ -80,7 +85,7 @@ export class IndexPattern implements IIndexPattern {
         return _.isEmpty(serialized) ? undefined : JSON.stringify(serialized);
       },
       _deserialize: (map = '{}') => {
-        return _.mapValues(JSON.parse(map), mapping => {
+        return _.mapValues(JSON.parse(map), (mapping) => {
           return this.deserializeFieldFormatMap(mapping);
         });
       },
@@ -104,7 +109,7 @@ export class IndexPattern implements IIndexPattern {
     this.getConfig = getConfig;
 
     this.shortDotsEnable = this.getConfig('shortDots:enable');
-    this.metaFields = this.getConfig('metaFields');
+    this.metaFields = this.getConfig(META_FIELDS_SETTING);
 
     this.createFieldList = getIndexPatternFieldListCreator({
       fieldFormats: getFieldFormats(),
@@ -112,8 +117,8 @@ export class IndexPattern implements IIndexPattern {
     });
 
     this.fields = this.createFieldList(this, [], this.shortDotsEnable);
-    this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
-    this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
+    this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig(META_FIELDS_SETTING));
+    this.flattenHit = flattenHitWrapper(this, this.getConfig(META_FIELDS_SETTING));
     this.formatHit = formatHitProvider(
       this,
       getFieldFormats().getDefaultInstance(KBN_FIELD_TYPES.STRING)
@@ -144,7 +149,7 @@ export class IndexPattern implements IIndexPattern {
       return true;
     }
 
-    return this.fields.every(field => {
+    return this.fields.every((field) => {
       // See https://github.com/elastic/kibana/pull/8421
       const hasFieldCaps = 'aggregatable' in field && 'searchable' in field;
 
@@ -169,7 +174,7 @@ export class IndexPattern implements IIndexPattern {
 
   private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
     if (!response.found) {
-      throw new SavedObjectNotFound(type, this.id, '#/management/kibana/index_pattern');
+      throw new SavedObjectNotFound(type, this.id, '#/management/kibana/indexPatterns');
     }
 
     _.forOwn(this.mapping, (fieldMapping: FieldMappingSpec, name: string | undefined) => {
@@ -215,7 +220,7 @@ export class IndexPattern implements IIndexPattern {
       }
     );
 
-    each(this.getScriptedFields(), function(field) {
+    each(this.getScriptedFields(), function (field) {
       scriptFields[field.name] = {
         script: {
           source: field.script,
@@ -299,6 +304,13 @@ export class IndexPattern implements IIndexPattern {
   }
 
   async popularizeField(fieldName: string, unit = 1) {
+    /**
+     * This function is just used by Discover and it's high likely to be removed in the near future
+     * It doesn't use the save function to skip the error message that's displayed when
+     * a user adds several columns in a higher frequency that the changes can be persisted to ES
+     * resulting in 409 errors
+     */
+    if (!this.id) return;
     const field = this.fields.getByName(fieldName);
     if (!field) {
       return;
@@ -308,7 +320,15 @@ export class IndexPattern implements IIndexPattern {
       return;
     }
     field.count = count;
-    await this.save();
+
+    try {
+      const res = await this.savedObjectsClient.update(type, this.id, this.prepBody(), {
+        version: this.version,
+      });
+      this.version = res._version;
+    } catch (e) {
+      // no need for an error message here
+    }
   }
 
   getNonScriptedFields() {
@@ -404,7 +424,7 @@ export class IndexPattern implements IIndexPattern {
     const body = this.prepBody();
     // What keys changed since they last pulled the index pattern
     const originalChangedKeys = Object.keys(body).filter(
-      key => body[key] !== this.originalBody[key]
+      (key) => body[key] !== this.originalBody[key]
     );
     return this.savedObjectsClient
       .update(type, this.id, body, { version: this.version })
@@ -412,7 +432,7 @@ export class IndexPattern implements IIndexPattern {
         this.id = resp.id;
         this.version = resp._version;
       })
-      .catch(err => {
+      .catch((err) => {
         if (
           _.get(err, 'res.status') === 409 &&
           saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS
@@ -432,7 +452,7 @@ export class IndexPattern implements IIndexPattern {
             // and ensure we ignore the key if the server response
             // is the same as the original response (since that is expected
             // if we made a change in that key)
-            const serverChangedKeys = Object.keys(updatedBody).filter(key => {
+            const serverChangedKeys = Object.keys(updatedBody).filter((key) => {
               return updatedBody[key] !== body[key] && this.originalBody[key] !== updatedBody[key];
             });
 
@@ -459,7 +479,7 @@ export class IndexPattern implements IIndexPattern {
             }
 
             // Set the updated response on this object
-            serverChangedKeys.forEach(key => {
+            serverChangedKeys.forEach((key) => {
               this[key] = samePattern[key];
             });
             this.version = samePattern.version;
@@ -485,7 +505,7 @@ export class IndexPattern implements IIndexPattern {
   refreshFields() {
     return this._fetchFields()
       .then(() => this.save())
-      .catch(err => {
+      .catch((err) => {
         // https://github.com/elastic/kibana/issues/9224
         // This call will attempt to remap fields from the matching
         // ES index which may not actually exist. In that scenario,

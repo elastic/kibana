@@ -60,7 +60,7 @@ class AgentConfigService {
     await soClient.update<AgentConfig>(SAVED_OBJECT_TYPE, id, {
       ...agentConfig,
       revision: oldAgentConfig.revision + 1,
-      updated_on: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
 
@@ -99,7 +99,7 @@ class AgentConfigService {
       {
         ...agentConfig,
         revision: 1,
-        updated_on: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
       } as AgentConfig,
       options
@@ -165,7 +165,7 @@ class AgentConfigService {
     });
 
     return {
-      items: agentConfigs.saved_objects.map<AgentConfig>(agentConfigSO => {
+      items: agentConfigs.saved_objects.map<AgentConfig>((agentConfigSO) => {
         return {
           id: agentConfigSO.id,
           ...agentConfigSO.attributes,
@@ -238,7 +238,7 @@ class AgentConfigService {
         ...oldAgentConfig,
         datasources: uniq(
           [...((oldAgentConfig.datasources || []) as string[])].filter(
-            dsId => !datasourceIds.includes(dsId)
+            (dsId) => !datasourceIds.includes(dsId)
           )
         ),
       },
@@ -340,8 +340,8 @@ class AgentConfigService {
         ),
       },
       datasources: (config.datasources as Datasource[])
-        .filter(datasource => datasource.enabled)
-        .map(ds => storedDatasourceToAgentDatasource(ds)),
+        .filter((datasource) => datasource.enabled)
+        .map((ds) => storedDatasourceToAgentDatasource(ds)),
       revision: config.revision,
       ...(config.monitoring_enabled && config.monitoring_enabled.length > 0
         ? {

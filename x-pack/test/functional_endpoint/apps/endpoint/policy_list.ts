@@ -7,12 +7,13 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'endpoint']);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
 
-  describe('When on the Endpoint Policy List', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/66579
+  describe.skip('When on the Endpoint Policy List', function () {
     this.tags(['ciGroup7']);
     before(async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');
@@ -46,7 +47,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       expect(noItemsFoundMessage).to.equal('No items found');
     });
 
-    describe('and policies exists', () => {
+    xdescribe('and policies exists', () => {
       let policyInfo: PolicyTestResourceInfo;
 
       before(async () => {

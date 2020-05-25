@@ -34,7 +34,7 @@ export const CleanClientModulesOnDLLTask = {
     const kbnPkg = config.getKibanaPkg();
     const kbnPkgDependencies = (kbnPkg && kbnPkg.dependencies) || {};
     const kbnWebpackLoaders = Object.keys(kbnPkgDependencies).filter(
-      dep => !!dep.includes('-loader')
+      (dep) => !!dep.includes('-loader')
     );
 
     // Define the entry points for the server code in order to
@@ -44,7 +44,7 @@ export const CleanClientModulesOnDLLTask = {
       `${baseDir}/src/cli_keystore`,
       `${baseDir}/src/cli_plugin`,
       `${baseDir}/x-pack`,
-      ...kbnWebpackLoaders.map(loader => `${baseDir}/node_modules/${loader}`),
+      ...kbnWebpackLoaders.map((loader) => `${baseDir}/node_modules/${loader}`),
     ];
     const discoveredLegacyCorePluginEntries = await globby([
       `${baseDir}/src/legacy/core_plugins/*/index.js`,
@@ -84,7 +84,7 @@ export const CleanClientModulesOnDLLTask = {
     // consider the top modules as exceptions as the entry points
     // to look for other exceptions dependent on that one
     const manualExceptionEntries = [
-      ...manualExceptionModules.map(module => `${baseDir}/node_modules/${module}`),
+      ...manualExceptionModules.map((module) => `${baseDir}/node_modules/${module}`),
     ];
 
     // dependencies for declared exception modules

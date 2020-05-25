@@ -97,7 +97,7 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
         : `node.${flowTargeted}.${sort.field}`;
 
     const updateLimitPagination = useCallback(
-      newLimit =>
+      (newLimit) =>
         updateNetworkTable({
           networkType: type,
           tableType,
@@ -107,7 +107,7 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
     );
 
     const updateActivePage = useCallback(
-      newPage =>
+      (newPage) =>
         updateNetworkTable({
           networkType: type,
           tableType,

@@ -62,7 +62,7 @@ if (showHelp) {
   process.exit(1);
 }
 
-buildDistributables({ log, ...buildArgs }).catch(error => {
+buildDistributables({ log, ...buildArgs }).catch((error) => {
   if (!isErrorLogged(error)) {
     log.error('Uncaught error');
     log.error(error);

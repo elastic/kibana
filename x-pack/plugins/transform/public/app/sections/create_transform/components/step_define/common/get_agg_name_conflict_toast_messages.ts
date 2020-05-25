@@ -36,7 +36,7 @@ export function getAggNameConflictToastMessages(
   // check the new aggName against existing aggs and groupbys
   const aggNameSplit = aggName.split('.');
   let aggNameCheck: string;
-  aggNameSplit.forEach(aggNamePart => {
+  aggNameSplit.forEach((aggNamePart) => {
     aggNameCheck = aggNameCheck === undefined ? aggNamePart : `${aggNameCheck}.${aggNamePart}`;
     if (aggList[aggNameCheck] !== undefined || groupByList[aggNameCheck] !== undefined) {
       conflicts.push(

@@ -5,12 +5,12 @@
  */
 
 import events from 'events';
-import Puid from 'puid';
 import moment from 'moment';
-import { constants } from './constants';
-import { WorkerTimeoutError, UnspecifiedWorkerError } from './helpers/errors';
-import { CancellationToken } from '../../../common/cancellation_token';
+import Puid from 'puid';
+import { CancellationToken } from '../../../../../../plugins/reporting/common';
 import { Poller } from '../../../../../common/poller';
+import { constants } from './constants';
+import { UnspecifiedWorkerError, WorkerTimeoutError } from './helpers/errors';
 
 const puid = new Puid();
 
@@ -36,7 +36,7 @@ function getLogger(opts, id, logLevel) {
      * This does not get the logger instance from queue.registerWorker in the createWorker function.
      * The logger instance in the Equeue lib comes from createTaggedLogger, so logLevel tags are passed differently
      */
-    const logger = opts.logger || function() {};
+    const logger = opts.logger || function () {};
     const message = `${id} - ${msg}`;
     const tags = [logLevel];
 
@@ -167,7 +167,7 @@ export class Worker extends events.EventEmitter {
         if_primary_term: job._primary_term,
         body: { doc },
       })
-      .then(response => {
+      .then((response) => {
         this.info(`Job marked as claimed: ${getUpdatedDocPath(response)}`);
         const updatedJob = {
           ...job,
@@ -206,10 +206,10 @@ export class Worker extends events.EventEmitter {
         if_primary_term: job._primary_term,
         body: { doc },
       })
-      .then(response => {
+      .then((response) => {
         this.info(`Job marked as failed: ${getUpdatedDocPath(response)}`);
       })
-      .catch(err => {
+      .catch((err) => {
         if (err.statusCode === 409) return true;
         this.error(`_failJob failed to update job ${job._id}`, err);
         this.emit(constants.EVENT_WORKER_FAIL_UPDATE_ERROR, this._formatErrorParams(err, job));
@@ -248,7 +248,7 @@ export class Worker extends events.EventEmitter {
       const jobSource = job._source;
 
       Promise.resolve(this.workerFn.call(null, job, jobSource.payload, cancellationToken))
-        .then(res => {
+        .then((res) => {
           // job execution was successful
           if (res && res.warnings && res.warnings.length > 0) {
             this.warn(`Job execution completed with warnings`);
@@ -259,7 +259,7 @@ export class Worker extends events.EventEmitter {
           isResolved = true;
           resolve(res);
         })
-        .catch(err => {
+        .catch((err) => {
           isResolved = true;
           reject(err);
         });
@@ -281,7 +281,7 @@ export class Worker extends events.EventEmitter {
     });
 
     return workerOutput.then(
-      output => {
+      (output) => {
         const completedTime = moment().toISOString();
         const docOutput = this._formatOutput(output);
 
@@ -303,7 +303,7 @@ export class Worker extends events.EventEmitter {
             if_primary_term: job._primary_term,
             body: { doc },
           })
-          .then(response => {
+          .then((response) => {
             const eventOutput = {
               job: formatJobObject(job),
               output: docOutput,
@@ -312,14 +312,14 @@ export class Worker extends events.EventEmitter {
 
             this.info(`Job data saved successfully: ${getUpdatedDocPath(response)}`);
           })
-          .catch(err => {
+          .catch((err) => {
             if (err.statusCode === 409) return false;
             this.error(`Failure saving job output ${job._id}`, err);
             this.emit(constants.EVENT_WORKER_JOB_UPDATE_ERROR, this._formatErrorParams(err, job));
             return this._failJob(job, err.message ? err.message : false);
           });
       },
-      jobErr => {
+      (jobErr) => {
         if (!jobErr) {
           jobErr = new UnspecifiedWorkerError('Unspecified worker error', {
             jobId: job._id,
@@ -361,7 +361,7 @@ export class Worker extends events.EventEmitter {
   }
 
   _processPendingJobs() {
-    return this._getPendingJobs().then(jobs => {
+    return this._getPendingJobs().then((jobs) => {
       return this._claimPendingJobs(jobs);
     });
   }
@@ -374,16 +374,16 @@ export class Worker extends events.EventEmitter {
     // claim a single job, stopping after first successful claim
     return jobs
       .reduce((chain, job) => {
-        return chain.then(claimedJob => {
+        return chain.then((claimedJob) => {
           // short-circuit the promise chain if a job has been claimed
           if (claimed) return claimedJob;
 
           return this._claimJob(job)
-            .then(claimResult => {
+            .then((claimResult) => {
               claimed = true;
               return claimResult;
             })
-            .catch(err => {
+            .catch((err) => {
               if (err.statusCode === 409) {
                 this.warn(
                   `_claimPendingJobs encountered a version conflict on updating pending job ${job._id}`,
@@ -396,14 +396,14 @@ export class Worker extends events.EventEmitter {
             });
         });
       }, Promise.resolve())
-      .then(claimedJob => {
+      .then((claimedJob) => {
         if (!claimedJob) {
           this.debug(`Found no claimable jobs out of ${jobs.length} total`);
           return;
         }
         return this._performJob(claimedJob);
       })
-      .catch(err => {
+      .catch((err) => {
         this.error('Error claiming jobs', err);
         return Promise.reject(err);
       });
@@ -445,14 +445,14 @@ export class Worker extends events.EventEmitter {
         index: `${this.queue.index}-*`,
         body: query,
       })
-      .then(results => {
+      .then((results) => {
         const jobs = results.hits.hits;
         if (jobs.length > 0) {
           this.debug(`${jobs.length} outstanding jobs returned`);
         }
         return jobs;
       })
-      .catch(err => {
+      .catch((err) => {
         // ignore missing indices errors
         if (err && err.status === 404) return [];
 

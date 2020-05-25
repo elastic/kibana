@@ -43,7 +43,7 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
     const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
 
     const rules = await Promise.all(
-      request.body.map(async payloadRule => {
+      request.body.map(async (payloadRule) => {
         const { id, rule_id: ruleId } = payloadRule;
         const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
         try {
@@ -63,7 +63,7 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
               search: rule.id,
               searchFields: ['alertId'],
             });
-            ruleStatuses.saved_objects.forEach(async obj => ruleStatusClient.delete(obj.id));
+            ruleStatuses.saved_objects.forEach(async (obj) => ruleStatusClient.delete(obj.id));
             return transformValidateBulkError(idOrRuleIdOrUnknown, rule, undefined, ruleStatuses);
           } else {
             return getIdBulkError({ id, ruleId });

@@ -45,7 +45,7 @@ export class MonitoringViewBaseTableController extends MonitoringViewBaseControl
     this.sortKey = sortKey;
     this.sortOrder = sortOrder;
 
-    this.onNewState = newState => {
+    this.onNewState = (newState) => {
       setLocalStorageData(storage, newState);
     };
   }

@@ -125,12 +125,14 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         "aria-label": "recent 1",
         "href": "recent 1",
         "label": "recent 1",
+        "onClick": undefined,
         "title": "recent 1",
       },
       Object {
         "aria-label": "recent 2",
         "href": "recent 2",
         "label": "recent 2",
+        "onClick": undefined,
         "title": "recent 2",
       },
     ]
@@ -273,6 +275,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   <a
                                     class="euiListGroupItem__button"
                                     href="/"
+                                    rel="noreferrer"
                                   >
                                     <div
                                       class="euiListGroupItem__icon"
@@ -290,108 +293,113 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             </div>
                           </div>
                         </div>
+                        <div
+                          class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                          data-test-subj="collapsibleNavGroup-recentlyViewed"
+                        >
+                          <div
+                            class="euiAccordion__triggerWrapper"
+                          >
+                            <button
+                              aria-controls="mockId"
+                              aria-expanded="true"
+                              class="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                              type="button"
+                            >
+                              <span
+                                class="euiAccordion__iconWrapper"
+                              >
+                                <div
+                                  class="euiAccordion__icon euiAccordion__icon-isOpen"
+                                  data-euiicon-type="arrowRight"
+                                />
+                              </span>
+                              <span
+                                class="euiIEFlexWrapFix"
+                              >
+                                <div
+                                  class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                                >
+                                  <div
+                                    class="euiFlexItem"
+                                  >
+                                    <h3
+                                      class="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                                      id="mockId__title"
+                                    >
+                                      Recently viewed
+                                    </h3>
+                                  </div>
+                                </div>
+                              </span>
+                            </button>
+                          </div>
+                          <div
+                            class="euiAccordion__childWrapper"
+                            id="mockId"
+                          >
+                            <div>
+                              <div
+                                class=""
+                              >
+                                <div
+                                  class="euiCollapsibleNavGroup__children"
+                                >
+                                  <ul
+                                    aria-label="Recently viewed links"
+                                    class="euiListGroup kbnCollapsibleNav__recentsListGroup"
+                                    style="max-width: none;"
+                                  >
+                                    <li
+                                      class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
+                                    >
+                                      <a
+                                        aria-label="recent 1"
+                                        class="euiListGroupItem__button"
+                                        data-test-subj="collapsibleNavAppLink--recent"
+                                        href="recent 1"
+                                        rel="noreferrer"
+                                        title="recent 1"
+                                      >
+                                        <span
+                                          class="euiListGroupItem__label"
+                                          title="recent 1"
+                                        >
+                                          recent 1
+                                        </span>
+                                      </a>
+                                    </li>
+                                    <li
+                                      class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
+                                    >
+                                      <a
+                                        aria-label="recent 2"
+                                        class="euiListGroupItem__button"
+                                        data-test-subj="collapsibleNavAppLink--recent"
+                                        href="recent 2"
+                                        rel="noreferrer"
+                                        title="recent 2"
+                                      >
+                                        <span
+                                          class="euiListGroupItem__label"
+                                          title="recent 2"
+                                        >
+                                          recent 2
+                                        </span>
+                                      </a>
+                                    </li>
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                         <hr
                           class="euiHorizontalRule euiHorizontalRule--full"
                         />
                         <div
                           class="euiFlexItem eui-yScroll"
                         >
-                          <div
-                            class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                          >
-                            <div
-                              class="euiAccordion__triggerWrapper"
-                            >
-                              <button
-                                aria-controls="mockId"
-                                aria-expanded="true"
-                                class="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
-                                type="button"
-                              >
-                                <span
-                                  class="euiAccordion__iconWrapper"
-                                >
-                                  <div
-                                    class="euiAccordion__icon euiAccordion__icon-isOpen"
-                                    data-euiicon-type="arrowRight"
-                                  />
-                                </span>
-                                <span
-                                  class="euiIEFlexWrapFix"
-                                >
-                                  <div
-                                    class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-                                  >
-                                    <div
-                                      class="euiFlexItem"
-                                    >
-                                      <h3
-                                        class="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
-                                        id="mockId__title"
-                                      >
-                                        Recently viewed
-                                      </h3>
-                                    </div>
-                                  </div>
-                                </span>
-                              </button>
-                            </div>
-                            <div
-                              class="euiAccordion__childWrapper"
-                              id="mockId"
-                            >
-                              <div>
-                                <div
-                                  class=""
-                                >
-                                  <div
-                                    class="euiCollapsibleNavGroup__children"
-                                  >
-                                    <ul
-                                      aria-label="Recently viewed links"
-                                      class="euiListGroup"
-                                      style="max-width: none;"
-                                    >
-                                      <li
-                                        class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
-                                      >
-                                        <a
-                                          aria-label="recent 1"
-                                          class="euiListGroupItem__button"
-                                          href="recent 1"
-                                          title="recent 1"
-                                        >
-                                          <span
-                                            class="euiListGroupItem__label"
-                                            title="recent 1"
-                                          >
-                                            recent 1
-                                          </span>
-                                        </a>
-                                      </li>
-                                      <li
-                                        class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
-                                      >
-                                        <a
-                                          aria-label="recent 2"
-                                          class="euiListGroupItem__button"
-                                          href="recent 2"
-                                          title="recent 2"
-                                        >
-                                          <span
-                                            class="euiListGroupItem__label"
-                                            title="recent 2"
-                                          >
-                                            recent 2
-                                          </span>
-                                        </a>
-                                      </li>
-                                    </ul>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
                           <div
                             class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                             data-test-subj="collapsibleNavGroup-kibana"
@@ -423,7 +431,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       class="euiFlexItem euiFlexItem--flexGrowZero"
                                     >
                                       <div
-                                        aria-hidden="true"
                                         data-euiicon-type="logoKibana"
                                       />
                                     </div>
@@ -464,6 +471,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           class="euiListGroupItem__button"
                                           data-test-subj="collapsibleNavAppLink"
                                           href="discover"
+                                          rel="noreferrer"
                                         >
                                           <span
                                             class="euiListGroupItem__label"
@@ -480,6 +488,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           class="euiListGroupItem__button"
                                           data-test-subj="collapsibleNavAppLink"
                                           href="visualize"
+                                          rel="noreferrer"
                                         >
                                           <span
                                             class="euiListGroupItem__label"
@@ -496,6 +505,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           class="euiListGroupItem__button"
                                           data-test-subj="collapsibleNavAppLink"
                                           href="dashboard"
+                                          rel="noreferrer"
                                         >
                                           <span
                                             class="euiListGroupItem__label"
@@ -542,7 +552,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       class="euiFlexItem euiFlexItem--flexGrowZero"
                                     >
                                       <div
-                                        aria-hidden="true"
                                         data-euiicon-type="logoObservability"
                                       />
                                     </div>
@@ -583,6 +592,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           class="euiListGroupItem__button"
                                           data-test-subj="collapsibleNavAppLink"
                                           href="metrics"
+                                          rel="noreferrer"
                                         >
                                           <span
                                             class="euiListGroupItem__label"
@@ -599,6 +609,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           class="euiListGroupItem__button"
                                           data-test-subj="collapsibleNavAppLink"
                                           href="logs"
+                                          rel="noreferrer"
                                         >
                                           <span
                                             class="euiListGroupItem__label"
@@ -645,7 +656,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       class="euiFlexItem euiFlexItem--flexGrowZero"
                                     >
                                       <div
-                                        aria-hidden="true"
                                         data-euiicon-type="logoSecurity"
                                       />
                                     </div>
@@ -686,6 +696,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           class="euiListGroupItem__button"
                                           data-test-subj="collapsibleNavAppLink"
                                           href="siem"
+                                          rel="noreferrer"
                                         >
                                           <span
                                             class="euiListGroupItem__label"
@@ -765,6 +776,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           class="euiListGroupItem__button"
                                           data-test-subj="collapsibleNavAppLink"
                                           href="monitoring"
+                                          rel="noreferrer"
                                         >
                                           <span
                                             class="euiListGroupItem__label"
@@ -797,6 +809,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     class="euiListGroupItem__button"
                                     data-test-subj="collapsibleNavAppLink"
                                     href="canvas"
+                                    rel="noreferrer"
                                   >
                                     <span
                                       class="euiListGroupItem__label"
@@ -909,6 +922,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     <a
                                       class="euiListGroupItem__button"
                                       href="/"
+                                      rel="noreferrer"
                                     >
                                       <div
                                         class="euiListGroupItem__icon"
@@ -926,108 +940,113 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               </div>
                             </div>
                           </div>
+                          <div
+                            class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                            data-test-subj="collapsibleNavGroup-recentlyViewed"
+                          >
+                            <div
+                              class="euiAccordion__triggerWrapper"
+                            >
+                              <button
+                                aria-controls="mockId"
+                                aria-expanded="true"
+                                class="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                                type="button"
+                              >
+                                <span
+                                  class="euiAccordion__iconWrapper"
+                                >
+                                  <div
+                                    class="euiAccordion__icon euiAccordion__icon-isOpen"
+                                    data-euiicon-type="arrowRight"
+                                  />
+                                </span>
+                                <span
+                                  class="euiIEFlexWrapFix"
+                                >
+                                  <div
+                                    class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                                  >
+                                    <div
+                                      class="euiFlexItem"
+                                    >
+                                      <h3
+                                        class="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                                        id="mockId__title"
+                                      >
+                                        Recently viewed
+                                      </h3>
+                                    </div>
+                                  </div>
+                                </span>
+                              </button>
+                            </div>
+                            <div
+                              class="euiAccordion__childWrapper"
+                              id="mockId"
+                            >
+                              <div>
+                                <div
+                                  class=""
+                                >
+                                  <div
+                                    class="euiCollapsibleNavGroup__children"
+                                  >
+                                    <ul
+                                      aria-label="Recently viewed links"
+                                      class="euiListGroup kbnCollapsibleNav__recentsListGroup"
+                                      style="max-width: none;"
+                                    >
+                                      <li
+                                        class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
+                                      >
+                                        <a
+                                          aria-label="recent 1"
+                                          class="euiListGroupItem__button"
+                                          data-test-subj="collapsibleNavAppLink--recent"
+                                          href="recent 1"
+                                          rel="noreferrer"
+                                          title="recent 1"
+                                        >
+                                          <span
+                                            class="euiListGroupItem__label"
+                                            title="recent 1"
+                                          >
+                                            recent 1
+                                          </span>
+                                        </a>
+                                      </li>
+                                      <li
+                                        class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
+                                      >
+                                        <a
+                                          aria-label="recent 2"
+                                          class="euiListGroupItem__button"
+                                          data-test-subj="collapsibleNavAppLink--recent"
+                                          href="recent 2"
+                                          rel="noreferrer"
+                                          title="recent 2"
+                                        >
+                                          <span
+                                            class="euiListGroupItem__label"
+                                            title="recent 2"
+                                          >
+                                            recent 2
+                                          </span>
+                                        </a>
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                           <hr
                             class="euiHorizontalRule euiHorizontalRule--full"
                           />
                           <div
                             class="euiFlexItem eui-yScroll"
                           >
-                            <div
-                              class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                            >
-                              <div
-                                class="euiAccordion__triggerWrapper"
-                              >
-                                <button
-                                  aria-controls="mockId"
-                                  aria-expanded="true"
-                                  class="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
-                                  type="button"
-                                >
-                                  <span
-                                    class="euiAccordion__iconWrapper"
-                                  >
-                                    <div
-                                      class="euiAccordion__icon euiAccordion__icon-isOpen"
-                                      data-euiicon-type="arrowRight"
-                                    />
-                                  </span>
-                                  <span
-                                    class="euiIEFlexWrapFix"
-                                  >
-                                    <div
-                                      class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-                                    >
-                                      <div
-                                        class="euiFlexItem"
-                                      >
-                                        <h3
-                                          class="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
-                                          id="mockId__title"
-                                        >
-                                          Recently viewed
-                                        </h3>
-                                      </div>
-                                    </div>
-                                  </span>
-                                </button>
-                              </div>
-                              <div
-                                class="euiAccordion__childWrapper"
-                                id="mockId"
-                              >
-                                <div>
-                                  <div
-                                    class=""
-                                  >
-                                    <div
-                                      class="euiCollapsibleNavGroup__children"
-                                    >
-                                      <ul
-                                        aria-label="Recently viewed links"
-                                        class="euiListGroup"
-                                        style="max-width: none;"
-                                      >
-                                        <li
-                                          class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
-                                        >
-                                          <a
-                                            aria-label="recent 1"
-                                            class="euiListGroupItem__button"
-                                            href="recent 1"
-                                            title="recent 1"
-                                          >
-                                            <span
-                                              class="euiListGroupItem__label"
-                                              title="recent 1"
-                                            >
-                                              recent 1
-                                            </span>
-                                          </a>
-                                        </li>
-                                        <li
-                                          class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
-                                        >
-                                          <a
-                                            aria-label="recent 2"
-                                            class="euiListGroupItem__button"
-                                            href="recent 2"
-                                            title="recent 2"
-                                          >
-                                            <span
-                                              class="euiListGroupItem__label"
-                                              title="recent 2"
-                                            >
-                                              recent 2
-                                            </span>
-                                          </a>
-                                        </li>
-                                      </ul>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
                             <div
                               class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                               data-test-subj="collapsibleNavGroup-kibana"
@@ -1059,7 +1078,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                         class="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <div
-                                          aria-hidden="true"
                                           data-euiicon-type="logoKibana"
                                         />
                                       </div>
@@ -1100,6 +1118,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             class="euiListGroupItem__button"
                                             data-test-subj="collapsibleNavAppLink"
                                             href="discover"
+                                            rel="noreferrer"
                                           >
                                             <span
                                               class="euiListGroupItem__label"
@@ -1116,6 +1135,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             class="euiListGroupItem__button"
                                             data-test-subj="collapsibleNavAppLink"
                                             href="visualize"
+                                            rel="noreferrer"
                                           >
                                             <span
                                               class="euiListGroupItem__label"
@@ -1132,6 +1152,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             class="euiListGroupItem__button"
                                             data-test-subj="collapsibleNavAppLink"
                                             href="dashboard"
+                                            rel="noreferrer"
                                           >
                                             <span
                                               class="euiListGroupItem__label"
@@ -1178,7 +1199,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                         class="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <div
-                                          aria-hidden="true"
                                           data-euiicon-type="logoObservability"
                                         />
                                       </div>
@@ -1219,6 +1239,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             class="euiListGroupItem__button"
                                             data-test-subj="collapsibleNavAppLink"
                                             href="metrics"
+                                            rel="noreferrer"
                                           >
                                             <span
                                               class="euiListGroupItem__label"
@@ -1235,6 +1256,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             class="euiListGroupItem__button"
                                             data-test-subj="collapsibleNavAppLink"
                                             href="logs"
+                                            rel="noreferrer"
                                           >
                                             <span
                                               class="euiListGroupItem__label"
@@ -1281,7 +1303,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                         class="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <div
-                                          aria-hidden="true"
                                           data-euiicon-type="logoSecurity"
                                         />
                                       </div>
@@ -1322,6 +1343,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             class="euiListGroupItem__button"
                                             data-test-subj="collapsibleNavAppLink"
                                             href="siem"
+                                            rel="noreferrer"
                                           >
                                             <span
                                               class="euiListGroupItem__label"
@@ -1401,6 +1423,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             class="euiListGroupItem__button"
                                             data-test-subj="collapsibleNavAppLink"
                                             href="monitoring"
+                                            rel="noreferrer"
                                           >
                                             <span
                                               class="euiListGroupItem__label"
@@ -1433,6 +1456,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       class="euiListGroupItem__button"
                                       data-test-subj="collapsibleNavAppLink"
                                       href="canvas"
+                                      rel="noreferrer"
                                     >
                                       <span
                                         class="euiListGroupItem__label"
@@ -1598,6 +1622,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       className="euiListGroupItem__button"
                                       href="/"
                                       onClick={[Function]}
+                                      rel="noreferrer"
                                     >
                                       <EuiIcon
                                         className="euiListGroupItem__icon"
@@ -1624,6 +1649,236 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       </EuiCollapsibleNavGroup>
                     </div>
                   </EuiFlexItem>
+                  <EuiCollapsibleNavGroup
+                    background="light"
+                    data-test-subj="collapsibleNavGroup-recentlyViewed"
+                    initialIsOpen={true}
+                    isCollapsible={true}
+                    key="recentlyViewed"
+                    onToggle={[Function]}
+                    title="Recently viewed"
+                  >
+                    <EuiAccordion
+                      arrowDisplay="right"
+                      buttonClassName="euiCollapsibleNavGroup__heading"
+                      buttonContent={
+                        <ForwardRef
+                          alignItems="center"
+                          gutterSize="m"
+                          responsive={false}
+                        >
+                          <EuiFlexItem>
+                            <EuiTitle
+                              size="xxs"
+                            >
+                              <h3
+                                className="euiCollapsibleNavGroup__title"
+                                id="mockId__title"
+                              >
+                                Recently viewed
+                              </h3>
+                            </EuiTitle>
+                          </EuiFlexItem>
+                        </ForwardRef>
+                      }
+                      className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                      data-test-subj="collapsibleNavGroup-recentlyViewed"
+                      id="mockId"
+                      initialIsOpen={true}
+                      onToggle={[Function]}
+                      paddingSize="none"
+                    >
+                      <div
+                        className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                        data-test-subj="collapsibleNavGroup-recentlyViewed"
+                        onToggle={[Function]}
+                      >
+                        <div
+                          className="euiAccordion__triggerWrapper"
+                        >
+                          <button
+                            aria-controls="mockId"
+                            aria-expanded={true}
+                            className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            <span
+                              className="euiAccordion__iconWrapper"
+                            >
+                              <EuiIcon
+                                className="euiAccordion__icon euiAccordion__icon-isOpen"
+                                size="m"
+                                type="arrowRight"
+                              >
+                                <div
+                                  className="euiAccordion__icon euiAccordion__icon-isOpen"
+                                  data-euiicon-type="arrowRight"
+                                  size="m"
+                                />
+                              </EuiIcon>
+                            </span>
+                            <span
+                              className="euiIEFlexWrapFix"
+                            >
+                              <EuiFlexGroup
+                                alignItems="center"
+                                gutterSize="m"
+                                responsive={false}
+                              >
+                                <div
+                                  className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                                >
+                                  <EuiFlexItem>
+                                    <div
+                                      className="euiFlexItem"
+                                    >
+                                      <EuiTitle
+                                        size="xxs"
+                                      >
+                                        <h3
+                                          className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                                          id="mockId__title"
+                                        >
+                                          Recently viewed
+                                        </h3>
+                                      </EuiTitle>
+                                    </div>
+                                  </EuiFlexItem>
+                                </div>
+                              </EuiFlexGroup>
+                            </span>
+                          </button>
+                        </div>
+                        <div
+                          className="euiAccordion__childWrapper"
+                          id="mockId"
+                        >
+                          <EuiResizeObserver
+                            onResize={[Function]}
+                          >
+                            <div>
+                              <div
+                                className=""
+                              >
+                                <div
+                                  className="euiCollapsibleNavGroup__children"
+                                >
+                                  <EuiListGroup
+                                    aria-label="Recently viewed links"
+                                    className="kbnCollapsibleNav__recentsListGroup"
+                                    color="subdued"
+                                    gutterSize="none"
+                                    listItems={
+                                      Array [
+                                        Object {
+                                          "aria-label": "recent 1",
+                                          "data-test-subj": "collapsibleNavAppLink--recent",
+                                          "href": "recent 1",
+                                          "label": "recent 1",
+                                          "onClick": [Function],
+                                          "title": "recent 1",
+                                        },
+                                        Object {
+                                          "aria-label": "recent 2",
+                                          "data-test-subj": "collapsibleNavAppLink--recent",
+                                          "href": "recent 2",
+                                          "label": "recent 2",
+                                          "onClick": [Function],
+                                          "title": "recent 2",
+                                        },
+                                      ]
+                                    }
+                                    maxWidth="none"
+                                    size="s"
+                                  >
+                                    <ul
+                                      aria-label="Recently viewed links"
+                                      className="euiListGroup kbnCollapsibleNav__recentsListGroup"
+                                      style={
+                                        Object {
+                                          "maxWidth": "none",
+                                        }
+                                      }
+                                    >
+                                      <EuiListGroupItem
+                                        aria-label="recent 1"
+                                        color="subdued"
+                                        data-test-subj="collapsibleNavAppLink--recent"
+                                        href="recent 1"
+                                        key="title-0"
+                                        label="recent 1"
+                                        onClick={[Function]}
+                                        showToolTip={false}
+                                        size="s"
+                                        title="recent 1"
+                                        wrapText={false}
+                                      >
+                                        <li
+                                          className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
+                                        >
+                                          <a
+                                            aria-label="recent 1"
+                                            className="euiListGroupItem__button"
+                                            data-test-subj="collapsibleNavAppLink--recent"
+                                            href="recent 1"
+                                            onClick={[Function]}
+                                            rel="noreferrer"
+                                            title="recent 1"
+                                          >
+                                            <span
+                                              className="euiListGroupItem__label"
+                                              title="recent 1"
+                                            >
+                                              recent 1
+                                            </span>
+                                          </a>
+                                        </li>
+                                      </EuiListGroupItem>
+                                      <EuiListGroupItem
+                                        aria-label="recent 2"
+                                        color="subdued"
+                                        data-test-subj="collapsibleNavAppLink--recent"
+                                        href="recent 2"
+                                        key="title-1"
+                                        label="recent 2"
+                                        onClick={[Function]}
+                                        showToolTip={false}
+                                        size="s"
+                                        title="recent 2"
+                                        wrapText={false}
+                                      >
+                                        <li
+                                          className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
+                                        >
+                                          <a
+                                            aria-label="recent 2"
+                                            className="euiListGroupItem__button"
+                                            data-test-subj="collapsibleNavAppLink--recent"
+                                            href="recent 2"
+                                            onClick={[Function]}
+                                            rel="noreferrer"
+                                            title="recent 2"
+                                          >
+                                            <span
+                                              className="euiListGroupItem__label"
+                                              title="recent 2"
+                                            >
+                                              recent 2
+                                            </span>
+                                          </a>
+                                        </li>
+                                      </EuiListGroupItem>
+                                    </ul>
+                                  </EuiListGroup>
+                                </div>
+                              </div>
+                            </div>
+                          </EuiResizeObserver>
+                        </div>
+                      </div>
+                    </EuiAccordion>
+                  </EuiCollapsibleNavGroup>
                   <EuiHorizontalRule
                     margin="none"
                   >
@@ -1637,217 +1892,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     <div
                       className="euiFlexItem eui-yScroll"
                     >
-                      <EuiCollapsibleNavGroup
-                        initialIsOpen={true}
-                        isCollapsible={true}
-                        key="recentlyViewed"
-                        onToggle={[Function]}
-                        title="Recently viewed"
-                      >
-                        <EuiAccordion
-                          arrowDisplay="right"
-                          buttonClassName="euiCollapsibleNavGroup__heading"
-                          buttonContent={
-                            <ForwardRef
-                              alignItems="center"
-                              gutterSize="m"
-                              responsive={false}
-                            >
-                              <EuiFlexItem>
-                                <EuiTitle
-                                  size="xxs"
-                                >
-                                  <h3
-                                    className="euiCollapsibleNavGroup__title"
-                                    id="mockId__title"
-                                  >
-                                    Recently viewed
-                                  </h3>
-                                </EuiTitle>
-                              </EuiFlexItem>
-                            </ForwardRef>
-                          }
-                          className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                          id="mockId"
-                          initialIsOpen={true}
-                          onToggle={[Function]}
-                          paddingSize="none"
-                        >
-                          <div
-                            className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                            onToggle={[Function]}
-                          >
-                            <div
-                              className="euiAccordion__triggerWrapper"
-                            >
-                              <button
-                                aria-controls="mockId"
-                                aria-expanded={true}
-                                className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
-                                onClick={[Function]}
-                                type="button"
-                              >
-                                <span
-                                  className="euiAccordion__iconWrapper"
-                                >
-                                  <EuiIcon
-                                    className="euiAccordion__icon euiAccordion__icon-isOpen"
-                                    size="m"
-                                    type="arrowRight"
-                                  >
-                                    <div
-                                      className="euiAccordion__icon euiAccordion__icon-isOpen"
-                                      data-euiicon-type="arrowRight"
-                                      size="m"
-                                    />
-                                  </EuiIcon>
-                                </span>
-                                <span
-                                  className="euiIEFlexWrapFix"
-                                >
-                                  <EuiFlexGroup
-                                    alignItems="center"
-                                    gutterSize="m"
-                                    responsive={false}
-                                  >
-                                    <div
-                                      className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-                                    >
-                                      <EuiFlexItem>
-                                        <div
-                                          className="euiFlexItem"
-                                        >
-                                          <EuiTitle
-                                            size="xxs"
-                                          >
-                                            <h3
-                                              className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
-                                              id="mockId__title"
-                                            >
-                                              Recently viewed
-                                            </h3>
-                                          </EuiTitle>
-                                        </div>
-                                      </EuiFlexItem>
-                                    </div>
-                                  </EuiFlexGroup>
-                                </span>
-                              </button>
-                            </div>
-                            <div
-                              className="euiAccordion__childWrapper"
-                              id="mockId"
-                            >
-                              <EuiResizeObserver
-                                onResize={[Function]}
-                              >
-                                <div>
-                                  <div
-                                    className=""
-                                  >
-                                    <div
-                                      className="euiCollapsibleNavGroup__children"
-                                    >
-                                      <EuiListGroup
-                                        aria-label="Recently viewed links"
-                                        color="subdued"
-                                        gutterSize="none"
-                                        listItems={
-                                          Array [
-                                            Object {
-                                              "aria-label": "recent 1",
-                                              "href": "recent 1",
-                                              "label": "recent 1",
-                                              "title": "recent 1",
-                                            },
-                                            Object {
-                                              "aria-label": "recent 2",
-                                              "href": "recent 2",
-                                              "label": "recent 2",
-                                              "title": "recent 2",
-                                            },
-                                          ]
-                                        }
-                                        maxWidth="none"
-                                        size="s"
-                                      >
-                                        <ul
-                                          aria-label="Recently viewed links"
-                                          className="euiListGroup"
-                                          style={
-                                            Object {
-                                              "maxWidth": "none",
-                                            }
-                                          }
-                                        >
-                                          <EuiListGroupItem
-                                            aria-label="recent 1"
-                                            color="subdued"
-                                            href="recent 1"
-                                            key="title-0"
-                                            label="recent 1"
-                                            showToolTip={false}
-                                            size="s"
-                                            title="recent 1"
-                                            wrapText={false}
-                                          >
-                                            <li
-                                              className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
-                                            >
-                                              <a
-                                                aria-label="recent 1"
-                                                className="euiListGroupItem__button"
-                                                href="recent 1"
-                                                title="recent 1"
-                                              >
-                                                <span
-                                                  className="euiListGroupItem__label"
-                                                  title="recent 1"
-                                                >
-                                                  recent 1
-                                                </span>
-                                              </a>
-                                            </li>
-                                          </EuiListGroupItem>
-                                          <EuiListGroupItem
-                                            aria-label="recent 2"
-                                            color="subdued"
-                                            href="recent 2"
-                                            key="title-1"
-                                            label="recent 2"
-                                            showToolTip={false}
-                                            size="s"
-                                            title="recent 2"
-                                            wrapText={false}
-                                          >
-                                            <li
-                                              className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
-                                            >
-                                              <a
-                                                aria-label="recent 2"
-                                                className="euiListGroupItem__button"
-                                                href="recent 2"
-                                                title="recent 2"
-                                              >
-                                                <span
-                                                  className="euiListGroupItem__label"
-                                                  title="recent 2"
-                                                >
-                                                  recent 2
-                                                </span>
-                                              </a>
-                                            </li>
-                                          </EuiListGroupItem>
-                                        </ul>
-                                      </EuiListGroup>
-                                    </div>
-                                  </div>
-                                </div>
-                              </EuiResizeObserver>
-                            </div>
-                          </div>
-                        </EuiAccordion>
-                      </EuiCollapsibleNavGroup>
                       <EuiCollapsibleNavGroup
                         data-test-subj="collapsibleNavGroup-kibana"
                         iconType="logoKibana"
@@ -1870,7 +1914,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 grow={false}
                               >
                                 <EuiIcon
-                                  aria-hidden="true"
                                   size="l"
                                   type="logoKibana"
                                 />
@@ -1944,12 +1987,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           className="euiFlexItem euiFlexItem--flexGrowZero"
                                         >
                                           <EuiIcon
-                                            aria-hidden="true"
                                             size="l"
                                             type="logoKibana"
                                           >
                                             <div
-                                              aria-hidden="true"
                                               data-euiicon-type="logoKibana"
                                               size="l"
                                             />
@@ -2055,6 +2096,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                                 data-test-subj="collapsibleNavAppLink"
                                                 href="discover"
                                                 onClick={[Function]}
+                                                rel="noreferrer"
                                               >
                                                 <span
                                                   className="euiListGroupItem__label"
@@ -2085,6 +2127,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                                 data-test-subj="collapsibleNavAppLink"
                                                 href="visualize"
                                                 onClick={[Function]}
+                                                rel="noreferrer"
                                               >
                                                 <span
                                                   className="euiListGroupItem__label"
@@ -2115,6 +2158,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                                 data-test-subj="collapsibleNavAppLink"
                                                 href="dashboard"
                                                 onClick={[Function]}
+                                                rel="noreferrer"
                                               >
                                                 <span
                                                   className="euiListGroupItem__label"
@@ -2157,7 +2201,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 grow={false}
                               >
                                 <EuiIcon
-                                  aria-hidden="true"
                                   size="l"
                                   type="logoObservability"
                                 />
@@ -2231,12 +2274,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           className="euiFlexItem euiFlexItem--flexGrowZero"
                                         >
                                           <EuiIcon
-                                            aria-hidden="true"
                                             size="l"
                                             type="logoObservability"
                                           >
                                             <div
-                                              aria-hidden="true"
                                               data-euiicon-type="logoObservability"
                                               size="l"
                                             />
@@ -2334,6 +2375,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                                 data-test-subj="collapsibleNavAppLink"
                                                 href="metrics"
                                                 onClick={[Function]}
+                                                rel="noreferrer"
                                               >
                                                 <span
                                                   className="euiListGroupItem__label"
@@ -2364,6 +2406,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                                 data-test-subj="collapsibleNavAppLink"
                                                 href="logs"
                                                 onClick={[Function]}
+                                                rel="noreferrer"
                                               >
                                                 <span
                                                   className="euiListGroupItem__label"
@@ -2406,7 +2449,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 grow={false}
                               >
                                 <EuiIcon
-                                  aria-hidden="true"
                                   size="l"
                                   type="logoSecurity"
                                 />
@@ -2480,12 +2522,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           className="euiFlexItem euiFlexItem--flexGrowZero"
                                         >
                                           <EuiIcon
-                                            aria-hidden="true"
                                             size="l"
                                             type="logoSecurity"
                                           >
                                             <div
-                                              aria-hidden="true"
                                               data-euiicon-type="logoSecurity"
                                               size="l"
                                             />
@@ -2575,6 +2615,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                                 data-test-subj="collapsibleNavAppLink"
                                                 href="siem"
                                                 onClick={[Function]}
+                                                rel="noreferrer"
                                               >
                                                 <span
                                                   className="euiListGroupItem__label"
@@ -2757,6 +2798,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                                 data-test-subj="collapsibleNavAppLink"
                                                 href="monitoring"
                                                 onClick={[Function]}
+                                                rel="noreferrer"
                                               >
                                                 <span
                                                   className="euiListGroupItem__label"
@@ -2810,6 +2852,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       data-test-subj="collapsibleNavAppLink"
                                       href="canvas"
                                       onClick={[Function]}
+                                      rel="noreferrer"
                                     >
                                       <span
                                         className="euiListGroupItem__label"
@@ -3234,6 +3277,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                                       className="euiListGroupItem__button"
                                       href="/"
                                       onClick={[Function]}
+                                      rel="noreferrer"
                                     >
                                       <EuiIcon
                                         className="euiListGroupItem__icon"
@@ -3260,6 +3304,160 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                       </EuiCollapsibleNavGroup>
                     </div>
                   </EuiFlexItem>
+                  <EuiCollapsibleNavGroup
+                    background="light"
+                    data-test-subj="collapsibleNavGroup-recentlyViewed"
+                    initialIsOpen={true}
+                    isCollapsible={true}
+                    key="recentlyViewed"
+                    onToggle={[Function]}
+                    title="Recently viewed"
+                  >
+                    <EuiAccordion
+                      arrowDisplay="right"
+                      buttonClassName="euiCollapsibleNavGroup__heading"
+                      buttonContent={
+                        <ForwardRef
+                          alignItems="center"
+                          gutterSize="m"
+                          responsive={false}
+                        >
+                          <EuiFlexItem>
+                            <EuiTitle
+                              size="xxs"
+                            >
+                              <h3
+                                className="euiCollapsibleNavGroup__title"
+                                id="mockId__title"
+                              >
+                                Recently viewed
+                              </h3>
+                            </EuiTitle>
+                          </EuiFlexItem>
+                        </ForwardRef>
+                      }
+                      className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                      data-test-subj="collapsibleNavGroup-recentlyViewed"
+                      id="mockId"
+                      initialIsOpen={true}
+                      onToggle={[Function]}
+                      paddingSize="none"
+                    >
+                      <div
+                        className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                        data-test-subj="collapsibleNavGroup-recentlyViewed"
+                        onToggle={[Function]}
+                      >
+                        <div
+                          className="euiAccordion__triggerWrapper"
+                        >
+                          <button
+                            aria-controls="mockId"
+                            aria-expanded={true}
+                            className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            <span
+                              className="euiAccordion__iconWrapper"
+                            >
+                              <EuiIcon
+                                className="euiAccordion__icon euiAccordion__icon-isOpen"
+                                size="m"
+                                type="arrowRight"
+                              >
+                                <div
+                                  className="euiAccordion__icon euiAccordion__icon-isOpen"
+                                  data-euiicon-type="arrowRight"
+                                  size="m"
+                                />
+                              </EuiIcon>
+                            </span>
+                            <span
+                              className="euiIEFlexWrapFix"
+                            >
+                              <EuiFlexGroup
+                                alignItems="center"
+                                gutterSize="m"
+                                responsive={false}
+                              >
+                                <div
+                                  className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                                >
+                                  <EuiFlexItem>
+                                    <div
+                                      className="euiFlexItem"
+                                    >
+                                      <EuiTitle
+                                        size="xxs"
+                                      >
+                                        <h3
+                                          className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                                          id="mockId__title"
+                                        >
+                                          Recently viewed
+                                        </h3>
+                                      </EuiTitle>
+                                    </div>
+                                  </EuiFlexItem>
+                                </div>
+                              </EuiFlexGroup>
+                            </span>
+                          </button>
+                        </div>
+                        <div
+                          className="euiAccordion__childWrapper"
+                          id="mockId"
+                        >
+                          <EuiResizeObserver
+                            onResize={[Function]}
+                          >
+                            <div>
+                              <div
+                                className=""
+                              >
+                                <div
+                                  className="euiCollapsibleNavGroup__children"
+                                >
+                                  <EuiText
+                                    color="subdued"
+                                    size="s"
+                                    style={
+                                      Object {
+                                        "padding": "0 8px 8px",
+                                      }
+                                    }
+                                  >
+                                    <div
+                                      className="euiText euiText--small"
+                                      style={
+                                        Object {
+                                          "padding": "0 8px 8px",
+                                        }
+                                      }
+                                    >
+                                      <EuiTextColor
+                                        color="subdued"
+                                        component="div"
+                                      >
+                                        <div
+                                          className="euiTextColor euiTextColor--subdued"
+                                        >
+                                          <p>
+                                            No recently viewed items
+                                          </p>
+                                        </div>
+                                      </EuiTextColor>
+                                    </div>
+                                  </EuiText>
+                                </div>
+                              </div>
+                            </div>
+                          </EuiResizeObserver>
+                        </div>
+                      </div>
+                    </EuiAccordion>
+                  </EuiCollapsibleNavGroup>
                   <EuiHorizontalRule
                     margin="none"
                   >
@@ -3273,156 +3471,6 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                     <div
                       className="euiFlexItem eui-yScroll"
                     >
-                      <EuiCollapsibleNavGroup
-                        initialIsOpen={true}
-                        isCollapsible={true}
-                        key="recentlyViewed"
-                        onToggle={[Function]}
-                        title="Recently viewed"
-                      >
-                        <EuiAccordion
-                          arrowDisplay="right"
-                          buttonClassName="euiCollapsibleNavGroup__heading"
-                          buttonContent={
-                            <ForwardRef
-                              alignItems="center"
-                              gutterSize="m"
-                              responsive={false}
-                            >
-                              <EuiFlexItem>
-                                <EuiTitle
-                                  size="xxs"
-                                >
-                                  <h3
-                                    className="euiCollapsibleNavGroup__title"
-                                    id="mockId__title"
-                                  >
-                                    Recently viewed
-                                  </h3>
-                                </EuiTitle>
-                              </EuiFlexItem>
-                            </ForwardRef>
-                          }
-                          className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                          id="mockId"
-                          initialIsOpen={true}
-                          onToggle={[Function]}
-                          paddingSize="none"
-                        >
-                          <div
-                            className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                            onToggle={[Function]}
-                          >
-                            <div
-                              className="euiAccordion__triggerWrapper"
-                            >
-                              <button
-                                aria-controls="mockId"
-                                aria-expanded={true}
-                                className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
-                                onClick={[Function]}
-                                type="button"
-                              >
-                                <span
-                                  className="euiAccordion__iconWrapper"
-                                >
-                                  <EuiIcon
-                                    className="euiAccordion__icon euiAccordion__icon-isOpen"
-                                    size="m"
-                                    type="arrowRight"
-                                  >
-                                    <div
-                                      className="euiAccordion__icon euiAccordion__icon-isOpen"
-                                      data-euiicon-type="arrowRight"
-                                      size="m"
-                                    />
-                                  </EuiIcon>
-                                </span>
-                                <span
-                                  className="euiIEFlexWrapFix"
-                                >
-                                  <EuiFlexGroup
-                                    alignItems="center"
-                                    gutterSize="m"
-                                    responsive={false}
-                                  >
-                                    <div
-                                      className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-                                    >
-                                      <EuiFlexItem>
-                                        <div
-                                          className="euiFlexItem"
-                                        >
-                                          <EuiTitle
-                                            size="xxs"
-                                          >
-                                            <h3
-                                              className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
-                                              id="mockId__title"
-                                            >
-                                              Recently viewed
-                                            </h3>
-                                          </EuiTitle>
-                                        </div>
-                                      </EuiFlexItem>
-                                    </div>
-                                  </EuiFlexGroup>
-                                </span>
-                              </button>
-                            </div>
-                            <div
-                              className="euiAccordion__childWrapper"
-                              id="mockId"
-                            >
-                              <EuiResizeObserver
-                                onResize={[Function]}
-                              >
-                                <div>
-                                  <div
-                                    className=""
-                                  >
-                                    <div
-                                      className="euiCollapsibleNavGroup__children"
-                                    >
-                                      <EuiText
-                                        color="subdued"
-                                        size="s"
-                                        style={
-                                          Object {
-                                            "padding": "0 8px 8px",
-                                          }
-                                        }
-                                      >
-                                        <div
-                                          className="euiText euiText--small"
-                                          style={
-                                            Object {
-                                              "padding": "0 8px 8px",
-                                            }
-                                          }
-                                        >
-                                          <EuiTextColor
-                                            color="subdued"
-                                            component="div"
-                                          >
-                                            <div
-                                              className="euiTextColor euiTextColor--subdued"
-                                            >
-                                              <p>
-                                                No recently viewed items
-                                              </p>
-                                            </div>
-                                          </EuiTextColor>
-                                        </div>
-                                      </EuiText>
-                                    </div>
-                                  </div>
-                                </div>
-                              </EuiResizeObserver>
-                            </div>
-                          </div>
-                        </EuiAccordion>
-                      </EuiCollapsibleNavGroup>
                       <EuiShowFor
                         sizes={
                           Array [
@@ -3723,6 +3771,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                                   <a
                                     class="euiListGroupItem__button"
                                     href="/"
+                                    rel="noreferrer"
                                   >
                                     <div
                                       class="euiListGroupItem__icon"
@@ -3740,80 +3789,81 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                             </div>
                           </div>
                         </div>
-                        <hr
-                          class="euiHorizontalRule euiHorizontalRule--full"
-                        />
                         <div
-                          class="euiFlexItem eui-yScroll"
+                          class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                          data-test-subj="collapsibleNavGroup-recentlyViewed"
                         >
                           <div
-                            class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                            class="euiAccordion__triggerWrapper"
                           >
-                            <div
-                              class="euiAccordion__triggerWrapper"
+                            <button
+                              aria-controls="mockId"
+                              aria-expanded="true"
+                              class="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                              type="button"
                             >
-                              <button
-                                aria-controls="mockId"
-                                aria-expanded="true"
-                                class="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
-                                type="button"
+                              <span
+                                class="euiAccordion__iconWrapper"
                               >
-                                <span
-                                  class="euiAccordion__iconWrapper"
-                                >
-                                  <div
-                                    class="euiAccordion__icon euiAccordion__icon-isOpen"
-                                    data-euiicon-type="arrowRight"
-                                  />
-                                </span>
-                                <span
-                                  class="euiIEFlexWrapFix"
-                                >
-                                  <div
-                                    class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-                                  >
-                                    <div
-                                      class="euiFlexItem"
-                                    >
-                                      <h3
-                                        class="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
-                                        id="mockId__title"
-                                      >
-                                        Recently viewed
-                                      </h3>
-                                    </div>
-                                  </div>
-                                </span>
-                              </button>
-                            </div>
-                            <div
-                              class="euiAccordion__childWrapper"
-                              id="mockId"
-                            >
-                              <div>
                                 <div
-                                  class=""
+                                  class="euiAccordion__icon euiAccordion__icon-isOpen"
+                                  data-euiicon-type="arrowRight"
+                                />
+                              </span>
+                              <span
+                                class="euiIEFlexWrapFix"
+                              >
+                                <div
+                                  class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                                 >
                                   <div
-                                    class="euiCollapsibleNavGroup__children"
+                                    class="euiFlexItem"
+                                  >
+                                    <h3
+                                      class="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                                      id="mockId__title"
+                                    >
+                                      Recently viewed
+                                    </h3>
+                                  </div>
+                                </div>
+                              </span>
+                            </button>
+                          </div>
+                          <div
+                            class="euiAccordion__childWrapper"
+                            id="mockId"
+                          >
+                            <div>
+                              <div
+                                class=""
+                              >
+                                <div
+                                  class="euiCollapsibleNavGroup__children"
+                                >
+                                  <div
+                                    class="euiText euiText--small"
+                                    style="padding: 0px 8px 8px;"
                                   >
                                     <div
-                                      class="euiText euiText--small"
-                                      style="padding: 0px 8px 8px;"
+                                      class="euiTextColor euiTextColor--subdued"
                                     >
-                                      <div
-                                        class="euiTextColor euiTextColor--subdued"
-                                      >
-                                        <p>
-                                          No recently viewed items
-                                        </p>
-                                      </div>
+                                      <p>
+                                        No recently viewed items
+                                      </p>
                                     </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           </div>
+                        </div>
+                        <hr
+                          class="euiHorizontalRule euiHorizontalRule--full"
+                        />
+                        <div
+                          class="euiFlexItem eui-yScroll"
+                        >
                           <div
                             class="euiCollapsibleNavGroup eui-showFor--l eui-showFor--xl"
                             id="mockId"
@@ -3914,6 +3964,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                                     <a
                                       class="euiListGroupItem__button"
                                       href="/"
+                                      rel="noreferrer"
                                     >
                                       <div
                                         class="euiListGroupItem__icon"
@@ -3931,80 +3982,81 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                               </div>
                             </div>
                           </div>
-                          <hr
-                            class="euiHorizontalRule euiHorizontalRule--full"
-                          />
                           <div
-                            class="euiFlexItem eui-yScroll"
+                            class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                            data-test-subj="collapsibleNavGroup-recentlyViewed"
                           >
                             <div
-                              class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                              class="euiAccordion__triggerWrapper"
                             >
-                              <div
-                                class="euiAccordion__triggerWrapper"
+                              <button
+                                aria-controls="mockId"
+                                aria-expanded="true"
+                                class="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                                type="button"
                               >
-                                <button
-                                  aria-controls="mockId"
-                                  aria-expanded="true"
-                                  class="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
-                                  type="button"
+                                <span
+                                  class="euiAccordion__iconWrapper"
                                 >
-                                  <span
-                                    class="euiAccordion__iconWrapper"
-                                  >
-                                    <div
-                                      class="euiAccordion__icon euiAccordion__icon-isOpen"
-                                      data-euiicon-type="arrowRight"
-                                    />
-                                  </span>
-                                  <span
-                                    class="euiIEFlexWrapFix"
-                                  >
-                                    <div
-                                      class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-                                    >
-                                      <div
-                                        class="euiFlexItem"
-                                      >
-                                        <h3
-                                          class="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
-                                          id="mockId__title"
-                                        >
-                                          Recently viewed
-                                        </h3>
-                                      </div>
-                                    </div>
-                                  </span>
-                                </button>
-                              </div>
-                              <div
-                                class="euiAccordion__childWrapper"
-                                id="mockId"
-                              >
-                                <div>
                                   <div
-                                    class=""
+                                    class="euiAccordion__icon euiAccordion__icon-isOpen"
+                                    data-euiicon-type="arrowRight"
+                                  />
+                                </span>
+                                <span
+                                  class="euiIEFlexWrapFix"
+                                >
+                                  <div
+                                    class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                                   >
                                     <div
-                                      class="euiCollapsibleNavGroup__children"
+                                      class="euiFlexItem"
+                                    >
+                                      <h3
+                                        class="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                                        id="mockId__title"
+                                      >
+                                        Recently viewed
+                                      </h3>
+                                    </div>
+                                  </div>
+                                </span>
+                              </button>
+                            </div>
+                            <div
+                              class="euiAccordion__childWrapper"
+                              id="mockId"
+                            >
+                              <div>
+                                <div
+                                  class=""
+                                >
+                                  <div
+                                    class="euiCollapsibleNavGroup__children"
+                                  >
+                                    <div
+                                      class="euiText euiText--small"
+                                      style="padding: 0px 8px 8px;"
                                     >
                                       <div
-                                        class="euiText euiText--small"
-                                        style="padding: 0px 8px 8px;"
+                                        class="euiTextColor euiTextColor--subdued"
                                       >
-                                        <div
-                                          class="euiTextColor euiTextColor--subdued"
-                                        >
-                                          <p>
-                                            No recently viewed items
-                                          </p>
-                                        </div>
+                                        <p>
+                                          No recently viewed items
+                                        </p>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
+                          </div>
+                          <hr
+                            class="euiHorizontalRule euiHorizontalRule--full"
+                          />
+                          <div
+                            class="euiFlexItem eui-yScroll"
+                          >
                             <div
                               class="euiCollapsibleNavGroup eui-showFor--l eui-showFor--xl"
                               id="mockId"
@@ -4158,6 +4210,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                                       className="euiListGroupItem__button"
                                       href="/"
                                       onClick={[Function]}
+                                      rel="noreferrer"
                                     >
                                       <EuiIcon
                                         className="euiListGroupItem__icon"
@@ -4184,6 +4237,160 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                       </EuiCollapsibleNavGroup>
                     </div>
                   </EuiFlexItem>
+                  <EuiCollapsibleNavGroup
+                    background="light"
+                    data-test-subj="collapsibleNavGroup-recentlyViewed"
+                    initialIsOpen={true}
+                    isCollapsible={true}
+                    key="recentlyViewed"
+                    onToggle={[Function]}
+                    title="Recently viewed"
+                  >
+                    <EuiAccordion
+                      arrowDisplay="right"
+                      buttonClassName="euiCollapsibleNavGroup__heading"
+                      buttonContent={
+                        <ForwardRef
+                          alignItems="center"
+                          gutterSize="m"
+                          responsive={false}
+                        >
+                          <EuiFlexItem>
+                            <EuiTitle
+                              size="xxs"
+                            >
+                              <h3
+                                className="euiCollapsibleNavGroup__title"
+                                id="mockId__title"
+                              >
+                                Recently viewed
+                              </h3>
+                            </EuiTitle>
+                          </EuiFlexItem>
+                        </ForwardRef>
+                      }
+                      className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                      data-test-subj="collapsibleNavGroup-recentlyViewed"
+                      id="mockId"
+                      initialIsOpen={true}
+                      onToggle={[Function]}
+                      paddingSize="none"
+                    >
+                      <div
+                        className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                        data-test-subj="collapsibleNavGroup-recentlyViewed"
+                        onToggle={[Function]}
+                      >
+                        <div
+                          className="euiAccordion__triggerWrapper"
+                        >
+                          <button
+                            aria-controls="mockId"
+                            aria-expanded={true}
+                            className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            <span
+                              className="euiAccordion__iconWrapper"
+                            >
+                              <EuiIcon
+                                className="euiAccordion__icon euiAccordion__icon-isOpen"
+                                size="m"
+                                type="arrowRight"
+                              >
+                                <div
+                                  className="euiAccordion__icon euiAccordion__icon-isOpen"
+                                  data-euiicon-type="arrowRight"
+                                  size="m"
+                                />
+                              </EuiIcon>
+                            </span>
+                            <span
+                              className="euiIEFlexWrapFix"
+                            >
+                              <EuiFlexGroup
+                                alignItems="center"
+                                gutterSize="m"
+                                responsive={false}
+                              >
+                                <div
+                                  className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                                >
+                                  <EuiFlexItem>
+                                    <div
+                                      className="euiFlexItem"
+                                    >
+                                      <EuiTitle
+                                        size="xxs"
+                                      >
+                                        <h3
+                                          className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                                          id="mockId__title"
+                                        >
+                                          Recently viewed
+                                        </h3>
+                                      </EuiTitle>
+                                    </div>
+                                  </EuiFlexItem>
+                                </div>
+                              </EuiFlexGroup>
+                            </span>
+                          </button>
+                        </div>
+                        <div
+                          className="euiAccordion__childWrapper"
+                          id="mockId"
+                        >
+                          <EuiResizeObserver
+                            onResize={[Function]}
+                          >
+                            <div>
+                              <div
+                                className=""
+                              >
+                                <div
+                                  className="euiCollapsibleNavGroup__children"
+                                >
+                                  <EuiText
+                                    color="subdued"
+                                    size="s"
+                                    style={
+                                      Object {
+                                        "padding": "0 8px 8px",
+                                      }
+                                    }
+                                  >
+                                    <div
+                                      className="euiText euiText--small"
+                                      style={
+                                        Object {
+                                          "padding": "0 8px 8px",
+                                        }
+                                      }
+                                    >
+                                      <EuiTextColor
+                                        color="subdued"
+                                        component="div"
+                                      >
+                                        <div
+                                          className="euiTextColor euiTextColor--subdued"
+                                        >
+                                          <p>
+                                            No recently viewed items
+                                          </p>
+                                        </div>
+                                      </EuiTextColor>
+                                    </div>
+                                  </EuiText>
+                                </div>
+                              </div>
+                            </div>
+                          </EuiResizeObserver>
+                        </div>
+                      </div>
+                    </EuiAccordion>
+                  </EuiCollapsibleNavGroup>
                   <EuiHorizontalRule
                     margin="none"
                   >
@@ -4197,156 +4404,6 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                     <div
                       className="euiFlexItem eui-yScroll"
                     >
-                      <EuiCollapsibleNavGroup
-                        initialIsOpen={true}
-                        isCollapsible={true}
-                        key="recentlyViewed"
-                        onToggle={[Function]}
-                        title="Recently viewed"
-                      >
-                        <EuiAccordion
-                          arrowDisplay="right"
-                          buttonClassName="euiCollapsibleNavGroup__heading"
-                          buttonContent={
-                            <ForwardRef
-                              alignItems="center"
-                              gutterSize="m"
-                              responsive={false}
-                            >
-                              <EuiFlexItem>
-                                <EuiTitle
-                                  size="xxs"
-                                >
-                                  <h3
-                                    className="euiCollapsibleNavGroup__title"
-                                    id="mockId__title"
-                                  >
-                                    Recently viewed
-                                  </h3>
-                                </EuiTitle>
-                              </EuiFlexItem>
-                            </ForwardRef>
-                          }
-                          className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                          id="mockId"
-                          initialIsOpen={true}
-                          onToggle={[Function]}
-                          paddingSize="none"
-                        >
-                          <div
-                            className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                            onToggle={[Function]}
-                          >
-                            <div
-                              className="euiAccordion__triggerWrapper"
-                            >
-                              <button
-                                aria-controls="mockId"
-                                aria-expanded={true}
-                                className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
-                                onClick={[Function]}
-                                type="button"
-                              >
-                                <span
-                                  className="euiAccordion__iconWrapper"
-                                >
-                                  <EuiIcon
-                                    className="euiAccordion__icon euiAccordion__icon-isOpen"
-                                    size="m"
-                                    type="arrowRight"
-                                  >
-                                    <div
-                                      className="euiAccordion__icon euiAccordion__icon-isOpen"
-                                      data-euiicon-type="arrowRight"
-                                      size="m"
-                                    />
-                                  </EuiIcon>
-                                </span>
-                                <span
-                                  className="euiIEFlexWrapFix"
-                                >
-                                  <EuiFlexGroup
-                                    alignItems="center"
-                                    gutterSize="m"
-                                    responsive={false}
-                                  >
-                                    <div
-                                      className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-                                    >
-                                      <EuiFlexItem>
-                                        <div
-                                          className="euiFlexItem"
-                                        >
-                                          <EuiTitle
-                                            size="xxs"
-                                          >
-                                            <h3
-                                              className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
-                                              id="mockId__title"
-                                            >
-                                              Recently viewed
-                                            </h3>
-                                          </EuiTitle>
-                                        </div>
-                                      </EuiFlexItem>
-                                    </div>
-                                  </EuiFlexGroup>
-                                </span>
-                              </button>
-                            </div>
-                            <div
-                              className="euiAccordion__childWrapper"
-                              id="mockId"
-                            >
-                              <EuiResizeObserver
-                                onResize={[Function]}
-                              >
-                                <div>
-                                  <div
-                                    className=""
-                                  >
-                                    <div
-                                      className="euiCollapsibleNavGroup__children"
-                                    >
-                                      <EuiText
-                                        color="subdued"
-                                        size="s"
-                                        style={
-                                          Object {
-                                            "padding": "0 8px 8px",
-                                          }
-                                        }
-                                      >
-                                        <div
-                                          className="euiText euiText--small"
-                                          style={
-                                            Object {
-                                              "padding": "0 8px 8px",
-                                            }
-                                          }
-                                        >
-                                          <EuiTextColor
-                                            color="subdued"
-                                            component="div"
-                                          >
-                                            <div
-                                              className="euiTextColor euiTextColor--subdued"
-                                            >
-                                              <p>
-                                                No recently viewed items
-                                              </p>
-                                            </div>
-                                          </EuiTextColor>
-                                        </div>
-                                      </EuiText>
-                                    </div>
-                                  </div>
-                                </div>
-                              </EuiResizeObserver>
-                            </div>
-                          </div>
-                        </EuiAccordion>
-                      </EuiCollapsibleNavGroup>
                       <EuiShowFor
                         sizes={
                           Array [

@@ -7,10 +7,10 @@
 import Boom from 'boom';
 import { ResponseToolkit } from 'hapi';
 import { ElasticsearchServiceSetup } from 'kibana/server';
+import { ReportingConfig } from '../../';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
-import { ExportTypesRegistry } from '../../../types';
+import { ExportTypesRegistry } from '../../lib/export_types_registry';
 import { jobsQueryFactory } from '../../lib/jobs_query';
-import { ReportingConfig } from '../../types';
 import { getDocumentPayloadFactory } from './get_document_payload';
 
 interface JobResponseHandlerParams {
@@ -38,7 +38,7 @@ export function downloadJobResponseHandlerFactory(
   ) {
     const { docId } = params;
     // TODO: async/await
-    return jobsQuery.get(user, docId, { includeContent: !opts.excludeContent }).then(doc => {
+    return jobsQuery.get(user, docId, { includeContent: !opts.excludeContent }).then((doc) => {
       if (!doc) return Boom.notFound();
 
       const { jobtype: jobType } = doc._source;
@@ -54,13 +54,10 @@ export function downloadJobResponseHandlerFactory(
         );
       }
 
-      const response = h
-        .response(output.content)
-        .type(output.contentType)
-        .code(output.statusCode);
+      const response = h.response(output.content).type(output.contentType).code(output.statusCode);
 
       if (output.headers) {
-        Object.keys(output.headers).forEach(key => {
+        Object.keys(output.headers).forEach((key) => {
           response.header(key, output.headers[key]);
         });
       }

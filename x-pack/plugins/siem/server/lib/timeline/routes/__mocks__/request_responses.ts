@@ -5,13 +5,14 @@
  */
 import * as rt from 'io-ts';
 import {
+  TIMELINE_DRAFT_URL,
   TIMELINE_EXPORT_URL,
   TIMELINE_IMPORT_URL,
   TIMELINE_URL,
 } from '../../../../../common/constants';
 import stream from 'stream';
 import { requestMock } from '../../../detection_engine/routes/__mocks__';
-import { SavedTimeline, TimelineType } from '../../../../../common/types/timeline';
+import { SavedTimeline, TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
 import { updateTimelineSchema } from '../schemas/update_timelines_schema';
 import { createTimelineSchema } from '../schemas/create_timelines_schema';
 
@@ -80,6 +81,15 @@ export const createTimelineWithoutTimelineId = {
   timelineType: TimelineType.default,
 };
 
+export const createDraftTimelineWithoutTimelineId = {
+  templateTimelineId: null,
+  timeline: inputTimeline,
+  timelineId: null,
+  version: null,
+  timelineType: TimelineType.default,
+  status: TimelineStatus.draft,
+};
+
 export const createTemplateTimelineWithoutTimelineId = {
   templateTimelineId: null,
   timeline: inputTemplateTimeline,
@@ -90,6 +100,11 @@ export const createTemplateTimelineWithoutTimelineId = {
 
 export const createTimelineWithTimelineId = {
   ...createTimelineWithoutTimelineId,
+  timelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+};
+
+export const createDraftTimelineWithTimelineId = {
+  ...createDraftTimelineWithoutTimelineId,
   timelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
 };
 
@@ -136,6 +151,24 @@ export const getImportTimelinesRequestEnableOverwrite = (filename?: string) =>
     query: { overwrite: true },
     body: {
       file: { hapi: { filename: filename ?? 'filename.ndjson' } },
+    },
+  });
+
+export const getDraftTimelinesRequest = (timelineType: TimelineType) =>
+  requestMock.create({
+    method: 'get',
+    path: TIMELINE_DRAFT_URL,
+    query: {
+      timelineType,
+    },
+  });
+
+export const cleanDraftTimelinesRequest = (timelineType: TimelineType) =>
+  requestMock.create({
+    method: 'post',
+    path: TIMELINE_DRAFT_URL,
+    body: {
+      timelineType,
     },
   });
 

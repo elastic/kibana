@@ -9,7 +9,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSuperSelect,
-  EuiText
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -23,21 +23,21 @@ interface TransactionSelectProps {
 export function TransactionSelect({
   transactionTypes,
   onChange,
-  selectedTransactionType
+  selectedTransactionType,
 }: TransactionSelectProps) {
   return (
     <EuiFormRow
       label={i18n.translate(
         'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.selectTransactionTypeLabel',
         {
-          defaultMessage: 'Select a transaction type for this job'
+          defaultMessage: 'Select a transaction type for this job',
         }
       )}
     >
       <EuiSuperSelect
         valueOfSelected={selectedTransactionType}
         onChange={onChange}
-        options={transactionTypes.map(transactionType => {
+        options={transactionTypes.map((transactionType) => {
           return {
             value: transactionType,
             inputDisplay: transactionType,
@@ -47,7 +47,7 @@ export function TransactionSelect({
                   <EuiText>{transactionType}</EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            )
+            ),
           };
         })}
       />

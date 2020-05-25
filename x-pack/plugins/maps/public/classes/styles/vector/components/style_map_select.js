@@ -24,7 +24,7 @@ export class StyleMapSelect extends Component {
     };
   }
 
-  _onMapSelect = selectedValue => {
+  _onMapSelect = (selectedValue) => {
     const useCustomMap = selectedValue === CUSTOM_MAP;
     this.props.onChange({
       selectedMapId: useCustomMap ? null : selectedValue,
@@ -71,7 +71,9 @@ export class StyleMapSelect extends Component {
     if (this.props.useCustomMap) {
       valueOfSelected = CUSTOM_MAP;
     } else {
-      valueOfSelected = this.props.options.find(option => option.value === this.props.selectedMapId)
+      valueOfSelected = this.props.options.find(
+        (option) => option.value === this.props.selectedMapId
+      )
         ? this.props.selectedMapId
         : '';
     }

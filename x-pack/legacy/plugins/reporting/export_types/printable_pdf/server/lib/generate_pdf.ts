@@ -9,16 +9,14 @@ import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { ReportingCore } from '../../../../server';
 import { LevelLogger } from '../../../../server/lib';
-import { ConditionalHeaders } from '../../../../types';
-import { createLayout } from '../../../common/layouts';
-import { LayoutInstance, LayoutParams } from '../../../common/layouts/layout';
-import { ScreenshotResults } from '../../../common/lib/screenshots/types';
-import { getTracker } from './tracker';
+import { ConditionalHeaders, ScreenshotResults } from '../../../../server/types';
+import { createLayout, LayoutInstance, LayoutParams } from '../../../common/layouts';
 // @ts-ignore untyped module
 import { pdf } from './pdf';
+import { getTracker } from './tracker';
 
 const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
-  const grouped = groupBy(urlScreenshots.map(u => u.timeRange));
+  const grouped = groupBy(urlScreenshots.map((u) => u.timeRange));
   const values = Object.values(grouped);
   if (values.length === 1) {
     return values[0][0];
@@ -62,13 +60,13 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
         const pdfOutput = pdf.create(layout, logo);
         if (title) {
           const timeRange = getTimeRange(results);
-          title += timeRange ? ` - ${timeRange.duration}` : '';
+          title += timeRange ? ` - ${timeRange}` : '';
           pdfOutput.setTitle(title);
         }
         tracker.endSetup();
 
-        results.forEach(r => {
-          r.screenshots.forEach(screenshot => {
+        results.forEach((r) => {
+          r.screenshots.forEach((screenshot) => {
             logger.debug(`Adding image to PDF. Image base64 size: ${screenshot.base64EncodedData?.length || 0}`); // prettier-ignore
             tracker.startAddImage();
             tracker.endAddImage();
