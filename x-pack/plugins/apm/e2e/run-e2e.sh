@@ -115,6 +115,12 @@ echo "\n${bold}Waiting for Kibana to start...${normal}"
 echo "Note: you need to start Kibana manually. Find the instructions at the top."
 yarn wait-on -i 500 -w 500 http-get://admin:changeme@localhost:$KIBANA_PORT/api/status > /dev/null
 
+## Workaround to wait for the http server running
+## See: https://github.com/elastic/kibana/issues/66326
+if [ -e kibana.log ] ; then
+    grep -m 1 "http server running" <(tail -f -n +1 kibana.log)
+fi
+
 echo "\n✅ Setup completed successfully. Running tests...\n"
 
 #
