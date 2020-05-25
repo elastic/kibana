@@ -49,17 +49,11 @@ export const registerHelpers = ({ supertest }) => {
     },
   });
 
-  const createTemplate = payload =>
-    supertest
-      .put(`${API_BASE_PATH}/templates`)
-      .set('kbn-xsrf', 'xxx')
-      .send(payload);
+  const createTemplate = (payload) =>
+    supertest.put(`${API_BASE_PATH}/templates`).set('kbn-xsrf', 'xxx').send(payload);
 
-  const deleteTemplates = templates =>
-    supertest
-      .post(`${API_BASE_PATH}/delete-templates`)
-      .set('kbn-xsrf', 'xxx')
-      .send({ templates });
+  const deleteTemplates = (templates) =>
+    supertest.post(`${API_BASE_PATH}/delete-templates`).set('kbn-xsrf', 'xxx').send({ templates });
 
   const updateTemplate = (payload, templateName) =>
     supertest

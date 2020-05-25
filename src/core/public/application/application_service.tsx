@@ -136,7 +136,7 @@ export class ApplicationService {
 
     const registerStatusUpdater = (application: string, updater$: Observable<AppUpdater>) => {
       const updaterId = Symbol();
-      const subscription = updater$.subscribe(updater => {
+      const subscription = updater$.subscribe((updater) => {
         const nextValue = new Map(this.statusUpdaters$.getValue());
         nextValue.set(updaterId, {
           application,
@@ -160,7 +160,7 @@ export class ApplicationService {
       } else {
         handler = app.mount;
       }
-      return async params => {
+      return async (params) => {
         this.currentAppId$.next(app.id);
         return handler(params);
       };
@@ -179,7 +179,7 @@ export class ApplicationService {
           throw new Error(
             `An application is already registered with the appRoute "${app.appRoute}"`
           );
-        } else if (basename && app.appRoute!.startsWith(basename)) {
+        } else if (basename && app.appRoute!.startsWith(`${basename}/`)) {
           throw new Error('Cannot register an application route that includes HTTP base path');
         }
 
@@ -201,14 +201,14 @@ export class ApplicationService {
           legacy: false,
         });
       },
-      registerLegacyApp: app => {
+      registerLegacyApp: (app) => {
         const appRoute = `/app/${app.id.split(':')[0]}`;
 
         if (this.registrationClosed) {
           throw new Error('Applications cannot be registered after "setup"');
         } else if (this.apps.has(app.id)) {
           throw new Error(`An application is already registered with the id "${app.id}"`);
-        } else if (basename && appRoute!.startsWith(basename)) {
+        } else if (basename && appRoute!.startsWith(`${basename}/`)) {
           throw new Error('Cannot register an application route that includes HTTP base path');
         }
 
@@ -262,7 +262,7 @@ export class ApplicationService {
     const applications$ = new BehaviorSubject(availableApps);
     this.statusUpdaters$
       .pipe(
-        map(statusUpdaters => {
+        map((statusUpdaters) => {
           return new Map(
             [...availableApps].map(([id, app]) => [
               id,
@@ -271,10 +271,10 @@ export class ApplicationService {
           );
         })
       )
-      .subscribe(apps => applications$.next(apps));
+      .subscribe((apps) => applications$.next(apps));
 
     const applicationStatuses$ = applications$.pipe(
-      map(apps => new Map([...apps.entries()].map(([id, app]) => [id, app.status!]))),
+      map((apps) => new Map([...apps.entries()].map(([id, app]) => [id, app.status!]))),
       shareReplay(1)
     );
 
@@ -282,7 +282,7 @@ export class ApplicationService {
       applications$,
       capabilities,
       currentAppId$: this.currentAppId$.pipe(
-        filter(appId => appId !== undefined),
+        filter((appId) => appId !== undefined),
         distinctUntilChanged(),
         takeUntil(this.stop$)
       ),
@@ -314,7 +314,7 @@ export class ApplicationService {
             mounters={availableMounters}
             appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}
-            setIsMounting={isMounting => httpLoadingCount$.next(isMounting ? 1 : 0)}
+            setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
           />
         );
       },
@@ -360,14 +360,14 @@ export class ApplicationService {
     this.stop$.next();
     this.currentAppId$.complete();
     this.statusUpdaters$.complete();
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
     window.removeEventListener('beforeunload', this.onBeforeUnload);
   }
 }
 
 const updateStatus = <T extends AppBase>(app: T, statusUpdaters: AppUpdaterWrapper[]): T => {
   let changes: Partial<AppUpdatableFields> = {};
-  statusUpdaters.forEach(wrapper => {
+  statusUpdaters.forEach((wrapper) => {
     if (wrapper.application !== allApplicationsFilter && wrapper.application !== app.id) {
       return;
     }

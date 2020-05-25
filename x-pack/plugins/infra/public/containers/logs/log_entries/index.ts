@@ -98,8 +98,8 @@ export const logEntriesInitialState: LogEntriesStateParams = {
 };
 
 const cleanDuplicateItems = (entriesA: LogEntry[], entriesB: LogEntry[]) => {
-  const ids = new Set(entriesB.map(item => item.id));
-  return entriesA.filter(item => !ids.has(item.id));
+  const ids = new Set(entriesB.map((item) => item.id));
+  return entriesA.filter((item) => !ids.has(item.id));
 };
 
 const shouldFetchNewEntries = ({
@@ -280,7 +280,7 @@ const useFetchEntriesEffect = (
     (async () => {
       if (props.isStreaming && !state.isLoadingMore && !state.isReloading) {
         if (startedStreaming) {
-          await new Promise(res => setTimeout(res, LIVE_STREAM_INTERVAL));
+          await new Promise((res) => setTimeout(res, LIVE_STREAM_INTERVAL));
         } else {
           const endTimestamp = Date.now();
           props.jumpToTargetPosition({ tiebreaker: 0, time: endTimestamp });
@@ -335,7 +335,7 @@ const useFetchEntriesEffect = (
 
 export const useLogEntriesState: (
   props: LogEntriesProps
-) => [LogEntriesStateParams, LogEntriesCallbacks] = props => {
+) => [LogEntriesStateParams, LogEntriesCallbacks] = (props) => {
   const [state, dispatch] = useReducer(logEntriesStateReducer, logEntriesInitialState);
 
   const { fetchNewerEntries, checkForNewEntries } = useFetchEntriesEffect(state, dispatch, props);

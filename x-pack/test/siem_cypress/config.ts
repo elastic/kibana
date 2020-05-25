@@ -12,7 +12,7 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 import { SiemCypressTestRunner } from './runner';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );

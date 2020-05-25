@@ -53,7 +53,7 @@ if (!EVENTS_PATH) {
 const requestProgress = {
   succeeded: 0,
   failed: 0,
-  total: 0
+  total: 0,
 };
 
 const spinner = ora({ text: 'Warming up...', stream: process.stdout });
@@ -71,7 +71,7 @@ async function insertItem(item) {
   try {
     const url = `${APM_SERVER_URL}${item.url}`;
     const headers = {
-      'content-type': 'application/x-ndjson'
+      'content-type': 'application/x-ndjson',
     };
 
     if (SECRET_TOKEN) {
@@ -82,7 +82,7 @@ async function insertItem(item) {
       method: item.method,
       url,
       headers,
-      data: item.body
+      data: item.body,
     });
   } catch (e) {
     console.error(
@@ -97,16 +97,16 @@ async function init() {
   const items = content
     .toString()
     .split('\n')
-    .filter(item => item)
-    .map(item => JSON.parse(item))
-    .filter(item => item.url === '/intake/v2/events');
+    .filter((item) => item)
+    .map((item) => JSON.parse(item))
+    .filter((item) => item.url === '/intake/v2/events');
 
   spinner.start();
   requestProgress.total = items.length;
 
   const limit = pLimit(20); // number of concurrent requests
   await Promise.all(
-    items.map(async item => {
+    items.map(async (item) => {
       try {
         // retry 5 times with exponential backoff
         await pRetry(() => limit(() => insertItem(item)), { retries: 5 });
@@ -132,7 +132,7 @@ init()
       process.exit(1);
     }
   })
-  .catch(e => {
+  .catch((e) => {
     console.log('An error occurred:', e);
     process.exit(1);
   });

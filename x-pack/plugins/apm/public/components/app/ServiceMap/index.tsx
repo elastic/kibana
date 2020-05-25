@@ -9,7 +9,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import {
   invalidLicenseMessage,
-  isValidPlatinumLicense
+  isValidPlatinumLicense,
 } from '../../../../common/service_map';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useLicense } from '../../../hooks/useLicense';
@@ -49,9 +49,9 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
             start,
             end,
             environment,
-            serviceName
-          }
-        }
+            serviceName,
+          },
+        },
       });
     }
   }, [license, serviceName, urlParams]);

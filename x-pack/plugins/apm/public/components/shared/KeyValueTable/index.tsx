@@ -10,14 +10,14 @@ import {
   EuiTableProps,
   EuiTableBody,
   EuiTableRow,
-  EuiTableRowCell
+  EuiTableRowCell,
 } from '@elastic/eui';
 import { FormattedValue } from './FormattedValue';
 import { KeyValuePair } from '../../../utils/flattenObject';
 
 export function KeyValueTable({
   keyValuePairs,
-  tableProps = {}
+  tableProps = {},
 }: {
   keyValuePairs: KeyValuePair[];
   tableProps?: EuiTableProps & TableHTMLAttributes<HTMLTableElement>;

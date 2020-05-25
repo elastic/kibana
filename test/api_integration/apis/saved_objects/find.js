@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
@@ -33,7 +33,7 @@ export default function({ getService }) {
         await supertest
           .get('/api/saved_objects/_find?type=visualization&fields=title')
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               page: 1,
               per_page: 20,
@@ -66,7 +66,7 @@ export default function({ getService }) {
           await supertest
             .get('/api/saved_objects/_find?type=wigwags')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 page: 1,
                 per_page: 20,
@@ -81,7 +81,7 @@ export default function({ getService }) {
           await supertest
             .get('/api/saved_objects/_find?type=visualization&page=100&per_page=100')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 page: 100,
                 per_page: 100,
@@ -96,7 +96,7 @@ export default function({ getService }) {
           await supertest
             .get('/api/saved_objects/_find?type=url&search_fields=a')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 page: 1,
                 per_page: 20,
@@ -113,7 +113,7 @@ export default function({ getService }) {
               '/api/saved_objects/_find?type=visualization&filter=visualization.attributes.title:"Count of requests"'
             )
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 page: 1,
                 per_page: 20,
@@ -155,7 +155,7 @@ export default function({ getService }) {
               '/api/saved_objects/_find?type=visualization&filter=dashboard.attributes.title:foo'
             )
             .expect(400)
-            .then(resp => {
+            .then((resp) => {
               console.log('body', JSON.stringify(resp.body));
               expect(resp.body).to.eql({
                 error: 'Bad Request',
@@ -170,7 +170,7 @@ export default function({ getService }) {
               '/api/saved_objects/_find?type=dashboard&filter=dashboard.attributes.title:foo<invalid'
             )
             .expect(400)
-            .then(resp => {
+            .then((resp) => {
               console.log('body', JSON.stringify(resp.body));
               expect(resp.body).to.eql({
                 error: 'Bad Request',
@@ -198,7 +198,7 @@ export default function({ getService }) {
         await supertest
           .get('/api/saved_objects/_find?type=visualization')
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               page: 1,
               per_page: 20,
@@ -212,7 +212,7 @@ export default function({ getService }) {
           await supertest
             .get('/api/saved_objects/_find?type=wigwags')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 page: 1,
                 per_page: 20,
@@ -227,7 +227,7 @@ export default function({ getService }) {
           await supertest
             .get('/api/saved_objects/_find')
             .expect(400)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 error: 'Bad Request',
                 message:
@@ -242,7 +242,7 @@ export default function({ getService }) {
           await supertest
             .get('/api/saved_objects/_find?type=visualization&page=100&per_page=100')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 page: 100,
                 per_page: 100,
@@ -257,7 +257,7 @@ export default function({ getService }) {
           await supertest
             .get('/api/saved_objects/_find?type=url&search_fields=a')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 page: 1,
                 per_page: 20,
@@ -274,7 +274,7 @@ export default function({ getService }) {
               '/api/saved_objects/_find?type=visualization&filter=visualization.attributes.title:"Count of requests"'
             )
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 page: 1,
                 per_page: 20,
@@ -289,7 +289,7 @@ export default function({ getService }) {
               '/api/saved_objects/_find?type=visualization&filter=dashboard.attributes.title:foo'
             )
             .expect(400)
-            .then(resp => {
+            .then((resp) => {
               console.log('body', JSON.stringify(resp.body));
               expect(resp.body).to.eql({
                 error: 'Bad Request',

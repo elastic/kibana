@@ -46,8 +46,8 @@ if (process.env.IS_KIBANA_DISTRIBUTABLE !== 'true' && injectedMetadata.vars.apmC
 
 i18n
   .load(injectedMetadata.i18n.translationsUrl)
-  .catch(e => e)
-  .then(async i18nError => {
+  .catch((e) => e)
+  .then(async (i18nError) => {
     const coreSystem = new CoreSystem({
       injectedMetadata,
       rootDomElement: document.body,

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'header',
     'common',
@@ -65,11 +65,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   async function clickOnBarHistogram() {
     const el = await elasticChart.getCanvas();
 
-    await browser
-      .getActions()
-      .move({ x: 5, y: 5, origin: el._webElement })
-      .click()
-      .perform();
+    await browser.getActions().move({ x: 5, y: 5, origin: el._webElement }).click().perform();
   }
 
   // Failing: https://github.com/elastic/kibana/issues/66779

@@ -38,9 +38,7 @@ function createLicense(license = {}, features = {}) {
 }
 
 function getSignature(object) {
-  return createHash('md5')
-    .update(JSON.stringify(object))
-    .digest('hex');
+  return createHash('md5').update(JSON.stringify(object)).digest('hex');
 }
 
 describe('XPackInfo', () => {
@@ -208,7 +206,7 @@ describe('XPackInfo', () => {
       expect(xPackInfo.toJSON().features.security).to.be(undefined);
       expect(xPackInfo.toJSON().features.watcher).to.be(undefined);
 
-      securityFeature.registerLicenseCheckResultsGenerator(info => {
+      securityFeature.registerLicenseCheckResultsGenerator((info) => {
         return {
           isXPackInfo: info instanceof XPackInfo,
           license: info.license.getType(),
@@ -223,7 +221,7 @@ describe('XPackInfo', () => {
       });
       expect(xPackInfo.toJSON().features.watcher).to.be(undefined);
 
-      watcherFeature.registerLicenseCheckResultsGenerator(info => {
+      watcherFeature.registerLicenseCheckResultsGenerator((info) => {
         return {
           isXPackInfo: info instanceof XPackInfo,
           license: info.license.getType(),
@@ -263,7 +261,7 @@ describe('XPackInfo', () => {
       expect(securityFeature.getLicenseCheckResults()).to.be(undefined);
       expect(watcherFeature.getLicenseCheckResults()).to.be(undefined);
 
-      securityFeature.registerLicenseCheckResultsGenerator(info => {
+      securityFeature.registerLicenseCheckResultsGenerator((info) => {
         return {
           isXPackInfo: info instanceof XPackInfo,
           license: info.license.getType(),
@@ -278,7 +276,7 @@ describe('XPackInfo', () => {
       });
       expect(watcherFeature.getLicenseCheckResults()).to.be(undefined);
 
-      watcherFeature.registerLicenseCheckResultsGenerator(info => {
+      watcherFeature.registerLicenseCheckResultsGenerator((info) => {
         return {
           isXPackInfo: info instanceof XPackInfo,
           license: info.license.getType(),
@@ -323,7 +321,7 @@ describe('XPackInfo', () => {
     });
 
     const watcherFeature = xPackInfo.feature('watcher');
-    watcherFeature.registerLicenseCheckResultsGenerator(info => ({
+    watcherFeature.registerLicenseCheckResultsGenerator((info) => ({
       type: info.license.getType(),
     }));
 
@@ -349,7 +347,7 @@ describe('XPackInfo', () => {
 
     const watcherFeature = xPackInfo.feature('watcher');
 
-    watcherFeature.registerLicenseCheckResultsGenerator(info => ({
+    watcherFeature.registerLicenseCheckResultsGenerator((info) => ({
       type: info.license.getType(),
     }));
 
