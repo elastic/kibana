@@ -9,7 +9,7 @@ import { TelemetryCollectionManagerPluginStart } from 'src/plugins/telemetry_col
 import { getClusterUuids, getLocalLicense } from '../../../../src/plugins/telemetry/server';
 import { getStatsWithXpack } from './telemetry_collection';
 
-interface TelemetryCollectionXpackDepsSetup {
+interface TelemetryCollectionXpackDepsStart {
   telemetryCollectionManager: TelemetryCollectionManagerPluginStart;
 }
 
@@ -18,7 +18,7 @@ export class TelemetryCollectionXpackPlugin implements Plugin {
 
   public setup(core: CoreSetup) {}
 
-  public start(core: CoreStart, { telemetryCollectionManager }: TelemetryCollectionXpackDepsSetup) {
+  public start(core: CoreStart, { telemetryCollectionManager }: TelemetryCollectionXpackDepsStart) {
     telemetryCollectionManager.setCollection({
       esCluster: core.elasticsearch.legacy.client,
       title: 'local_xpack',
