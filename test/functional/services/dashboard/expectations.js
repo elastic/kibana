@@ -41,7 +41,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
       log.debug('Checking all visualisations are present on dashsboard');
       let notLoaded = await PageObjects.dashboard.getNotLoadedVisualizations(vizList);
       // TODO: Determine issue occasionally preventing 'geo map' from loading
-      notLoaded = notLoaded.filter(x => x !== 'Rendering Test: geo map');
+      notLoaded = notLoaded.filter((x) => x !== 'Rendering Test: geo map');
       expect(notLoaded).to.be.empty();
     }
 
@@ -67,7 +67,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     async fieldSuggestions(expectedFields) {
       log.debug(`DashboardExpect.fieldSuggestions(${expectedFields})`);
       const fields = await filterBar.getFilterEditorFields();
-      expectedFields.forEach(expectedField => {
+      expectedFields.forEach((expectedField) => {
         expect(fields).to.contain(expectedField);
       });
     }
@@ -75,7 +75,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     async legendValuesToExist(legendValues) {
       log.debug(`DashboardExpect.legendValuesToExist(${legendValues})`);
       await Promise.all(
-        legendValues.map(async legend => {
+        legendValues.map(async (legend) => {
           await retry.try(async () => {
             const legendValueExists = await testSubjects.exists(`legend-${legend}`);
             expect(legendValueExists).to.be(true);
@@ -90,12 +90,12 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
         const elements = await getElementsFn();
         const elementTexts = [];
         await Promise.all(
-          elements.map(async element => {
+          elements.map(async (element) => {
             elementTexts.push(await element.getVisibleText());
           })
         );
         log.debug(`Found ${elements.length} elements with values: ${JSON.stringify(elementTexts)}`);
-        texts.forEach(value => {
+        texts.forEach((value) => {
           const indexOfValue = elementTexts.indexOf(value);
           expect(indexOfValue).to.be.greaterThan(-1);
           elementTexts.splice(indexOfValue, 1);
@@ -121,12 +121,12 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
         const elements = await getElementsFn();
         const elementTexts = [];
         await Promise.all(
-          elements.map(async element => {
+          elements.map(async (element) => {
             elementTexts.push(await element.getVisibleText());
           })
         );
         log.debug(`Found ${elements.length} elements with values: ${JSON.stringify(elementTexts)}`);
-        texts.forEach(value => {
+        texts.forEach((value) => {
           const indexOfValue = elementTexts.indexOf(value);
           expect(indexOfValue).to.be(-1);
         });
@@ -153,7 +153,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
       log.debug(`DashboardExpect.emptyTagCloudFound()`);
       const tagCloudVisualizations = await testSubjects.findAll('tagCloudVisualization');
       const tagCloudsHaveContent = await Promise.all(
-        tagCloudVisualizations.map(async tagCloud => {
+        tagCloudVisualizations.map(async (tagCloud) => {
           return await find.descendantExistsByCssSelector('text', tagCloud);
         })
       );
@@ -164,7 +164,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
       log.debug(`DashboardExpect.tagCloudWithValuesFound(${values})`);
       const tagCloudVisualizations = await testSubjects.findAll('tagCloudVisualization');
       const matches = await Promise.all(
-        tagCloudVisualizations.map(async tagCloud => {
+        tagCloudVisualizations.map(async (tagCloud) => {
           for (let i = 0; i < values.length; i++) {
             const valueExists = await testSubjects.descendantExists(values[i], tagCloud);
             if (!valueExists) {

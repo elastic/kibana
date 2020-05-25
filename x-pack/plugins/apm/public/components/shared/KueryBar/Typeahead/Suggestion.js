@@ -13,7 +13,7 @@ import {
   px,
   units,
   fontSizes,
-  unit
+  unit,
 } from '../../../../style/variables';
 import { tint } from 'polished';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
@@ -53,14 +53,14 @@ const ListItem = styled.li`
   height: ${px(units.double)};
   align-items: center;
   display: flex;
-  background: ${props =>
+  background: ${(props) =>
     props.selected ? theme.euiColorLightestShade : 'initial'};
   cursor: pointer;
   border-radius: ${px(units.quarter)};
 
   ${Description} {
     p span {
-      background: ${props =>
+      background: ${(props) =>
         props.selected
           ? theme.euiColorEmptyShade
           : theme.euiColorLightestShade};
@@ -70,8 +70,8 @@ const ListItem = styled.li`
 
 const Icon = styled.div`
   flex: 0 0 ${px(units.double)};
-  background: ${props => tint(0.1, getIconColor(props.type))};
-  color: ${props => getIconColor(props.type)};
+  background: ${(props) => tint(0.1, getIconColor(props.type))};
+  color: ${(props) => getIconColor(props.type)};
   width: 100%;
   height: 100%;
   text-align: center;
@@ -123,7 +123,7 @@ Suggestion.propTypes = {
   onMouseEnter: PropTypes.func.isRequired,
   selected: PropTypes.bool,
   suggestion: PropTypes.object.isRequired,
-  innerRef: PropTypes.func.isRequired
+  innerRef: PropTypes.func.isRequired,
 };
 
 export default Suggestion;

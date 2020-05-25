@@ -116,7 +116,7 @@ export const buildMatchAll = ({
     default:
       const or = getLanguageBooleanOperator({ language, value: 'or' });
       const exceptionOperator = operatorBuilder({ operator, language });
-      const matchAllValues = values.map(value => {
+      const matchAllValues = values.map((value) => {
         return value.name;
       });
 
@@ -149,7 +149,7 @@ export const formatQuery = ({
 }): string => {
   if (exceptions.length > 0) {
     const or = getLanguageBooleanOperator({ language, value: 'or' });
-    const formattedExceptions = exceptions.map(exception => {
+    const formattedExceptions = exceptions.map((exception) => {
       return `(${query}${exception})`;
     });
 

@@ -46,7 +46,7 @@ export const multiSelectComponent: Record<string, SerializerFunc<string[]>> = {
    * @param value The Eui Selectable options array
    */
   optionsToSelectedValue(options: EuiSelectableOption[]): string[] {
-    return options.filter(option => option.checked === 'on').map(option => option.label);
+    return options.filter((option) => option.checked === 'on').map((option) => option.label);
   },
 };
 

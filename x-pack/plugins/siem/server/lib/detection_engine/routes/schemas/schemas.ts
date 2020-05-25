@@ -7,10 +7,7 @@
 import Joi from 'joi';
 
 /* eslint-disable @typescript-eslint/camelcase */
-export const anomaly_threshold = Joi.number()
-  .integer()
-  .greater(-1)
-  .less(101);
+export const anomaly_threshold = Joi.number().integer().greater(-1).less(101);
 export const description = Joi.string();
 export const enabled = Joi.boolean();
 export const exclude_export_details = Joi.boolean();
@@ -21,9 +18,7 @@ export const from = Joi.string();
 export const immutable = Joi.boolean();
 export const rule_id = Joi.string();
 export const id = Joi.string();
-export const index = Joi.array()
-  .items(Joi.string())
-  .single();
+export const index = Joi.array().items(Joi.string()).single();
 export const interval = Joi.string();
 export const query = Joi.string();
 export const language = Joi.string().valid('kuery', 'lucene');
@@ -41,39 +36,24 @@ export const timeline_title = Joi.string().when('timeline_id', {
   otherwise: Joi.forbidden(),
 });
 export const meta = Joi.object();
-export const max_signals = Joi.number()
-  .integer()
-  .greater(0);
+export const max_signals = Joi.number().integer().greater(0);
 export const name = Joi.string();
-export const risk_score = Joi.number()
-  .integer()
-  .greater(-1)
-  .less(101);
+export const risk_score = Joi.number().integer().greater(-1).less(101);
 export const severity = Joi.string().valid('low', 'medium', 'high', 'critical');
 export const status = Joi.string().valid('open', 'closed');
 export const to = Joi.string();
 export const type = Joi.string().valid('query', 'saved_query', 'machine_learning');
 export const machine_learning_job_id = Joi.string();
 export const queryFilter = Joi.string();
-export const references = Joi.array()
-  .items(Joi.string())
-  .single();
-export const per_page = Joi.number()
-  .integer()
-  .min(0)
-  .default(20);
-export const page = Joi.number()
-  .integer()
-  .min(1)
-  .default(1);
+export const references = Joi.array().items(Joi.string()).single();
+export const per_page = Joi.number().integer().min(0).default(20);
+export const page = Joi.number().integer().min(1).default(1);
 export const signal_ids = Joi.array().items(Joi.string());
 export const signal_status_query = Joi.object();
 export const sort_field = Joi.string();
 export const sort_order = Joi.string().valid('asc', 'desc');
 export const tags = Joi.array().items(Joi.string());
-export const fields = Joi.array()
-  .items(Joi.string())
-  .single();
+export const fields = Joi.array().items(Joi.string()).single();
 export const threat_framework = Joi.string();
 export const threat_tactic_id = Joi.string();
 export const threat_tactic_name = Joi.string();
@@ -99,17 +79,11 @@ export const threat = Joi.array().items(
     technique: threat_techniques.required(),
   })
 );
-export const created_at = Joi.string()
-  .isoDate()
-  .strict();
-export const updated_at = Joi.string()
-  .isoDate()
-  .strict();
+export const created_at = Joi.string().isoDate().strict();
+export const updated_at = Joi.string().isoDate().strict();
 export const created_by = Joi.string();
 export const updated_by = Joi.string();
-export const version = Joi.number()
-  .integer()
-  .min(1);
+export const version = Joi.number().integer().min(1);
 export const action_group = Joi.string();
 export const action_id = Joi.string();
 export const action_action_type_id = Joi.string();
@@ -142,9 +116,7 @@ export const list = Joi.object({
   values: Joi.when('values_type', {
     is: 'exists',
     then: Joi.forbidden(),
-    otherwise: Joi.array()
-      .items(list_values)
-      .required(),
+    otherwise: Joi.array().items(list_values).required(),
   }),
 });
 export const list_and = Joi.object({

@@ -47,11 +47,11 @@ export const filterDuplicateRules = (
   ruleId: string,
   signalSearchResponse: SignalSearchResponse
 ) => {
-  return signalSearchResponse.hits.hits.filter(doc => {
+  return signalSearchResponse.hits.hits.filter((doc) => {
     if (doc._source.signal == null) {
       return true;
     } else {
-      return !doc._source.signal.ancestors.some(ancestor => ancestor.rule === ruleId);
+      return !doc._source.signal.ancestors.some((ancestor) => ancestor.rule === ruleId);
     }
   });
 };
@@ -95,7 +95,7 @@ export const singleBulkCreate = async ({
   // while preventing duplicates from being added to the
   // signals index if rules are re-run over the same time
   // span. Also allow for versioning.
-  const bulkBody = someResult.hits.hits.flatMap(doc => [
+  const bulkBody = someResult.hits.hits.flatMap((doc) => [
     {
       create: {
         _index: signalsIndex,

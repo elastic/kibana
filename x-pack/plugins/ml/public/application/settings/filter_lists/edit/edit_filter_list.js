@@ -49,11 +49,11 @@ function getMatchingFilterItems(searchBarQuery, items) {
 
   // Convert the list of Strings into a list of Objects suitable for running through
   // the search bar query.
-  const allItems = items.map(item => ({ value: item }));
+  const allItems = items.map((item) => ({ value: item }));
   const matchingObjects = EuiSearchBar.Query.execute(searchBarQuery, allItems, {
     defaultFields: ['value'],
   });
-  return matchingObjects.map(item => item.value);
+  return matchingObjects.map((item) => item.value);
 }
 
 function getActivePage(activePageState, itemsPerPage, numMatchingItems) {
@@ -105,13 +105,13 @@ export class EditFilterListUI extends Component {
     }
   }
 
-  loadFilterList = filterId => {
+  loadFilterList = (filterId) => {
     ml.filters
       .filters({ filterId })
-      .then(filter => {
+      .then((filter) => {
         this.setLoadedFilterState(filter);
       })
-      .catch(resp => {
+      .catch((resp) => {
         console.log(`Error loading filter ${filterId}:`, resp);
         const { toasts } = this.props.kibana.services.notifications;
         toasts.addDanger(
@@ -128,9 +128,9 @@ export class EditFilterListUI extends Component {
       });
   };
 
-  setLoadedFilterState = loadedFilter => {
+  setLoadedFilterState = (loadedFilter) => {
     // Store the loaded filter so we can diff changes to the items when saving updates.
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const { itemsPerPage, searchQuery } = prevState;
 
       const matchingItems = getMatchingFilterItems(searchQuery, loadedFilter.items);
@@ -150,23 +150,23 @@ export class EditFilterListUI extends Component {
     });
   };
 
-  updateNewFilterId = newFilterId => {
+  updateNewFilterId = (newFilterId) => {
     this.setState({
       newFilterId,
       isNewFilterIdInvalid: !isValidFilterListId(newFilterId),
     });
   };
 
-  updateDescription = description => {
+  updateDescription = (description) => {
     this.setState({ description });
   };
 
-  addItems = itemsToAdd => {
-    this.setState(prevState => {
+  addItems = (itemsToAdd) => {
+    this.setState((prevState) => {
       const { itemsPerPage, searchQuery } = prevState;
       const items = [...prevState.items];
       const alreadyInFilter = [];
-      itemsToAdd.forEach(item => {
+      itemsToAdd.forEach((item) => {
         if (items.indexOf(item) === -1) {
           items.push(item);
         } else {
@@ -206,10 +206,10 @@ export class EditFilterListUI extends Component {
   };
 
   deleteSelectedItems = () => {
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const { selectedItems, itemsPerPage, searchQuery } = prevState;
       const items = [...prevState.items];
-      selectedItems.forEach(item => {
+      selectedItems.forEach((item) => {
         const index = items.indexOf(item);
         if (index !== -1) {
           items.splice(index, 1);
@@ -230,7 +230,7 @@ export class EditFilterListUI extends Component {
   };
 
   onSearchChange = ({ query }) => {
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const { items, itemsPerPage } = prevState;
 
       const matchingItems = getMatchingFilterItems(query, items);
@@ -245,7 +245,7 @@ export class EditFilterListUI extends Component {
   };
 
   setItemSelected = (item, isSelected) => {
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const selectedItems = [...prevState.selectedItems];
       const index = selectedItems.indexOf(item);
       if (isSelected === true && index === -1) {
@@ -260,11 +260,11 @@ export class EditFilterListUI extends Component {
     });
   };
 
-  setActivePage = activePage => {
+  setActivePage = (activePage) => {
     this.setState({ activePage });
   };
 
-  setItemsPerPage = itemsPerPage => {
+  setItemsPerPage = (itemsPerPage) => {
     this.setState({
       itemsPerPage,
       activePage: 0,
@@ -277,11 +277,11 @@ export class EditFilterListUI extends Component {
     const { loadedFilter, newFilterId, description, items } = this.state;
     const filterId = this.props.filterId !== undefined ? this.props.filterId : newFilterId;
     saveFilterList(filterId, description, items, loadedFilter)
-      .then(savedFilter => {
+      .then((savedFilter) => {
         this.setLoadedFilterState(savedFilter);
         returnToFiltersList();
       })
-      .catch(resp => {
+      .catch((resp) => {
         console.log(`Error saving filter ${filterId}:`, resp);
         const { toasts } = this.props.kibana.services.notifications;
         toasts.addDanger(

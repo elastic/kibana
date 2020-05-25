@@ -5,9 +5,10 @@
  */
 
 import Joi from 'joi';
+import { ReportingConfig } from '../../';
+import { LevelLogger as Logger } from '../../lib';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
-import { Logger } from '../../../types';
-import { ReportingConfig, ReportingSetupDeps } from '../../types';
+import { ReportingSetupDeps } from '../../types';
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
 import {
   GetReportingFeatureIdFn,
