@@ -82,10 +82,7 @@ describe('MetricsService', () => {
       // however the `reset` call is executed after the async call to `collect`
       // meaning that we are going to miss the call if we don't wait for the
       // actual observable emission that is performed after
-      const waitForNextEmission = () =>
-        getOpsMetrics$()
-          .pipe(take(1))
-          .toPromise();
+      const waitForNextEmission = () => getOpsMetrics$().pipe(take(1)).toPromise();
 
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
       expect(mockOpsCollector.reset).toHaveBeenCalledTimes(1);

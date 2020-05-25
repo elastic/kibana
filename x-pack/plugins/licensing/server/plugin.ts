@@ -123,7 +123,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       this.fetchLicense(clusterClient)
     );
 
-    this.loggingSubscription = license$.subscribe(license =>
+    this.loggingSubscription = license$.subscribe((license) =>
       this.logger.debug(
         'Imported license information from Elasticsearch:' +
           [

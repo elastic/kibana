@@ -23,7 +23,7 @@ import { ToolingLog } from '@kbn/dev-utils';
 
 function printArgs(args: any[]): string {
   return args
-    .map(arg => {
+    .map((arg) => {
       if (typeof arg === 'string' || typeof arg === 'number' || arg instanceof Date) {
         return inspect(arg);
       }
@@ -42,7 +42,7 @@ export function createVerboseInstance(
   name: string,
   instance: { [k: string]: any; [i: number]: any }
 ) {
-  if (!log.getWriters().some(l => (l as any).level.flags.verbose)) {
+  if (!log.getWriters().some((l) => (l as any).level.flags.verbose)) {
     return instance;
   }
 
@@ -54,7 +54,7 @@ export function createVerboseInstance(
         return value;
       }
 
-      return function(this: any, ...args: any[]) {
+      return function (this: any, ...args: any[]) {
         log.verbose(`${name}.${prop}(${printArgs(args)})`);
         log.indent(2);
 

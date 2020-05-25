@@ -39,7 +39,7 @@ function getExistingFilter(
   value: any
 ): Filter | undefined {
   // TODO: On array fields, negating does not negate the combination, rather all terms
-  return _.find(appFilters, function(filter) {
+  return _.find(appFilters, function (filter) {
     if (!filter) return;
 
     if (fieldName === '_exists_' && isExistsFilter(filter)) {
@@ -95,7 +95,7 @@ export function generateFilters(
   const negate = operation === '-';
   let filter;
 
-  _.each(values, function(value) {
+  _.each(values, function (value) {
     const existing = getExistingFilter(appFilters, fieldName, value);
 
     if (existing) {

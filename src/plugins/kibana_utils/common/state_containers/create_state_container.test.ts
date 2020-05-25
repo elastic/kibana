@@ -220,7 +220,7 @@ test('throws when state is modified inline', () => {
 test('throws when state is modified inline in subscription', () => {
   const container = createStateContainer({ a: 'b' }, { set: () => (newState: any) => newState });
 
-  container.subscribe(value => {
+  container.subscribe((value) => {
     expect(() => {
       (value.a as any) = 'd';
     }).toThrowErrorMatchingInlineSnapshot(

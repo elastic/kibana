@@ -91,7 +91,7 @@ export class LegacyService implements CoreService {
     this.log = logger.get('legacy-service');
     this.devConfig$ = configService
       .atPath<DevConfigType>(devConfig.path)
-      .pipe(map(rawConfig => new DevConfig(rawConfig)));
+      .pipe(map((rawConfig) => new DevConfig(rawConfig)));
     this.httpConfig$ = combineLatest(
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path)
@@ -108,7 +108,7 @@ export class LegacyService implements CoreService {
           this.kbnServer.applyLoggingConfiguration(getLegacyRawConfig(config, pathConfig));
         }
       }),
-      tap({ error: err => this.log.error(err) }),
+      tap({ error: (err) => this.log.error(err) }),
       publishReplay(1)
     ) as ConnectableObservable<[Config, PathConfigType]>;
 
@@ -146,14 +146,14 @@ export class LegacyService implements CoreService {
     };
 
     const deprecationProviders = await pluginSpecs
-      .map(spec => spec.getDeprecationsProvider())
+      .map((spec) => spec.getDeprecationsProvider())
       .reduce(async (providers, current) => {
         if (current) {
           return [...(await providers), await convertLegacyDeprecationProvider(current)];
         }
         return providers;
       }, Promise.resolve([] as ConfigDeprecationProvider[]));
-    deprecationProviders.forEach(provider =>
+    deprecationProviders.forEach((provider) =>
       this.coreContext.configService.addDeprecationProvider('', provider)
     );
 

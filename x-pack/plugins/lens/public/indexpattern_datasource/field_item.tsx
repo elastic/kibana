@@ -125,7 +125,7 @@ export function FieldItem(props: FieldItemProps) {
       return;
     }
 
-    setState(s => ({ ...s, isLoading: true }));
+    setState((s) => ({ ...s, isLoading: true }));
 
     core.http
       .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
@@ -143,7 +143,7 @@ export function FieldItem(props: FieldItemProps) {
         }),
       })
       .then((results: FieldStatsResponse<string | number>) => {
-        setState(s => ({
+        setState((s) => ({
           ...s,
           isLoading: false,
           totalDocuments: results.totalDocuments,
@@ -154,7 +154,7 @@ export function FieldItem(props: FieldItemProps) {
         }));
       })
       .catch(() => {
-        setState(s => ({ ...s, isLoading: false }));
+        setState((s) => ({ ...s, isLoading: false }));
       });
   }
 
@@ -193,7 +193,7 @@ export function FieldItem(props: FieldItemProps) {
               onClick={() => {
                 togglePopover();
               }}
-              onKeyPress={event => {
+              onKeyPress={(event) => {
                 if (event.key === 'ENTER') {
                   togglePopover();
                 }
@@ -331,7 +331,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             id: 'histogram',
           },
         ]}
-        onChange={optionId => {
+        onChange={(optionId) => {
           setShowingHistogram(optionId === 'histogram');
         }}
         idSelected={showingHistogram ? 'histogram' : 'topValues'}
@@ -444,7 +444,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             id="key"
             position={Position.Left}
             showOverlappingTicks={true}
-            tickFormat={d => formatter.convert(d)}
+            tickFormat={(d) => formatter.convert(d)}
           />
 
           <BarSeries
@@ -463,7 +463,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   if (props.topValues && props.topValues.buckets.length) {
     return wrapInPopover(
       <div data-test-subj="lnsFieldListPanel-topValues">
-        {props.topValues.buckets.map(topValue => {
+        {props.topValues.buckets.map((topValue) => {
           const formatted = formatter.convert(topValue.key);
           return (
             <div className="lnsFieldItem__topValue" key={topValue.key}>

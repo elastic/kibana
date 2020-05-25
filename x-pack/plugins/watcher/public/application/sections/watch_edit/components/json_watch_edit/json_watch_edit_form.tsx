@@ -40,7 +40,7 @@ export const JsonWatchEditForm = () => {
   const { xJsonMode, convertToJson, setXJson, xJson } = useXJsonMode(watch.watchString);
 
   const { errors } = watch.validate();
-  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  const hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);

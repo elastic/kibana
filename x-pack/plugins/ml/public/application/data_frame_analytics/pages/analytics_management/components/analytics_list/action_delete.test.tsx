@@ -36,7 +36,7 @@ describe('DeleteAction', () => {
 
   test('When canDeleteDataFrameAnalytics permission is true, button should not be disabled.', () => {
     const mock = jest.spyOn(CheckPrivilige, 'checkPermission');
-    mock.mockImplementation(p => p === 'canDeleteDataFrameAnalytics');
+    mock.mockImplementation((p) => p === 'canDeleteDataFrameAnalytics');
     const { getByTestId } = render(<DeleteAction item={mockAnalyticsListItem} />);
 
     expect(getByTestId('mlAnalyticsJobDeleteButton')).not.toHaveAttribute('disabled');
