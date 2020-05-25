@@ -32,7 +32,7 @@ export const executeActionRoute = (
 ) => {
   router.post(
     {
-      path: `${BASE_ACTION_API_PATH}/{id}/_execute`,
+      path: `${BASE_ACTION_API_PATH}/action/{id}/_execute`,
       validate: {
         body: bodySchema,
         params: paramSchema,
