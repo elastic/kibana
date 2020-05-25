@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 
-import { AppMountParameters, CoreStart, ScopedHistory } from 'kibana/public';
+import { AppMountParameters, CoreStart } from 'kibana/public';
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 

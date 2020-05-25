@@ -159,8 +159,8 @@ function useRole(
   notifications: NotificationsStart,
   license: SecurityLicense,
   action: string,
-  roleName?: string,
-  backToRoleList: () => void
+  backToRoleList: () => void,
+  roleName?: string
 ) {
   const [role, setRole] = useState<Role | null>(null);
   useEffect(() => {
@@ -303,8 +303,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
     notifications,
     license,
     action,
-    roleName,
-    backToRoleList
+    backToRoleList,
+    roleName
   );
 
   if (!role || !runAsUsers || !indexPatternsTitles || !privileges || !spaces || !features) {

@@ -93,7 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const url = parse(await browser.getCurrentUrl());
 
-      expect(url.pathname).to.eql('/management/security/role_mappings');
+      expect(url.pathname).to.eql('/management/security/role_mappings/');
     });
 
     describe('with role mappings', () => {
