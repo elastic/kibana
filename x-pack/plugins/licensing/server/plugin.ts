@@ -12,7 +12,6 @@ import stringify from 'json-stable-stringify';
 
 import {
   CoreSetup,
-  CoreStart,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -87,6 +86,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
   private loggingSubscription?: Subscription;
   private featureUsage = new FeatureUsageService();
 
+  private refresh?: () => Promise<ILicense>;
+  private license$?: Observable<ILicense>;
+
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
     this.config$ = this.context.config.create<LicenseConfigType>();
@@ -130,6 +132,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
 
     registerRoutes(core.http.createRouter(), core.getStartServices);
     core.http.registerOnPreResponse(createOnPreResponseHandler(refresh, license$));
+
+    this.refresh = refresh;
+    this.license$ = license$;
 
     return {
       refresh,
@@ -214,9 +219,15 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     return error.message;
   }
 
-  public async start(core: CoreStart) {
+  public async start() {
+    if (!this.refresh || !this.license$) {
+      throw new Error('Setup has not been completed');
+    }
     return {
+      refresh: this.refresh,
+      license$: this.license$,
       featureUsage: this.featureUsage.start(),
+      createLicensePoller: this.createLicensePoller.bind(this),
     };
   }
 
