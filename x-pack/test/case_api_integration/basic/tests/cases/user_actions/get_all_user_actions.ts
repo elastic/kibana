@@ -244,14 +244,11 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send(postCommentReq);
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
-      await supertest
-        .patch(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send({
-          id: patchedCase.comments[0].id,
-          version: patchedCase.comments[0].version,
-          comment: newComment,
-        });
+      await supertest.patch(`${CASES_URL}/${postedCase.id}/comments`).set('kbn-xsrf', 'true').send({
+        id: patchedCase.comments[0].id,
+        version: patchedCase.comments[0].version,
+        comment: newComment,
+      });
 
       const { body } = await supertest
         .get(`${CASES_URL}/${postedCase.id}/user_actions`)

@@ -81,7 +81,7 @@ describe('Input', () => {
         data = prefix;
       }
 
-      test('Token test ' + testCount++ + ' prefix: ' + prefix, async function() {
+      test('Token test ' + testCount++ + ' prefix: ' + prefix, async function () {
         await coreEditor.setValue(data, true);
         const tokens = tokensAsList();
         const normTokenList = [];
@@ -473,7 +473,7 @@ describe('Input', () => {
         data = prefix;
       }
 
-      test('States test ' + testCount++ + ' prefix: ' + prefix, async function() {
+      test('States test ' + testCount++ + ' prefix: ' + prefix, async function () {
         await coreEditor.setValue(data, true);
         const modes = statesAsList();
         expect(modes).toEqual(statesList);

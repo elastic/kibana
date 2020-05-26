@@ -17,7 +17,7 @@
  * under the License.
  */
 
-module.exports = function(source) {
+module.exports = function (source) {
   const options = this.query;
   return `__webpack_public_path__ = window.__kbnPublicPath__['${options.key}'];${source}`;
 };

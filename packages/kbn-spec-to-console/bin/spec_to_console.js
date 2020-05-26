@@ -46,7 +46,7 @@ console.log();
 console.log(files);
 console.log();
 
-files.forEach(file => {
+files.forEach((file) => {
   const spec = JSON.parse(fs.readFileSync(file));
   const convertedSpec = convert(spec);
   if (!Object.keys(convertedSpec).length) {

@@ -51,20 +51,14 @@ describe('DraggableLegendItem', () => {
     });
 
     it('renders a colored circle with the expected legend item color', () => {
-      expect(
-        wrapper
-          .find('[data-test-subj="legend-color"]')
-          .first()
-          .props().color
-      ).toEqual(legendItem.color);
+      expect(wrapper.find('[data-test-subj="legend-color"]').first().props().color).toEqual(
+        legendItem.color
+      );
     });
 
     it('renders draggable legend item text', () => {
       expect(
-        wrapper
-          .find(`[data-test-subj="legend-item-${legendItem.dataProviderId}"]`)
-          .first()
-          .text()
+        wrapper.find(`[data-test-subj="legend-item-${legendItem.dataProviderId}"]`).first().text()
       ).toEqual(legendItem.value);
     });
 
@@ -95,12 +89,9 @@ describe('DraggableLegendItem', () => {
     });
 
     it('renders a colored circle with the expected legend item color', () => {
-      expect(
-        wrapper
-          .find('[data-test-subj="legend-color"]')
-          .first()
-          .props().color
-      ).toEqual(allOthersLegendItem.color);
+      expect(wrapper.find('[data-test-subj="legend-color"]').first().props().color).toEqual(
+        allOthersLegendItem.color
+      );
     });
 
     it('does NOT render a draggable legend item', () => {
@@ -112,12 +103,9 @@ describe('DraggableLegendItem', () => {
     });
 
     it('renders NON-draggable `All others` legend item text', () => {
-      expect(
-        wrapper
-          .find(`[data-test-subj="all-others-legend-item"]`)
-          .first()
-          .text()
-      ).toEqual(allOthersLegendItem.value);
+      expect(wrapper.find(`[data-test-subj="all-others-legend-item"]`).first().text()).toEqual(
+        allOthersLegendItem.value
+      );
     });
   });
 

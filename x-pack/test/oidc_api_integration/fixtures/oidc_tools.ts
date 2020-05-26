@@ -20,9 +20,7 @@ export function createTokens(userId: string, nonce: string) {
   const iat = Math.floor(Date.now() / 1000);
 
   const accessToken = `valid-access-token${userId}`;
-  const accessTokenHashBuffer = createHash('sha256')
-    .update(accessToken)
-    .digest();
+  const accessTokenHashBuffer = createHash('sha256').update(accessToken).digest();
 
   return {
     accessToken,

@@ -10,7 +10,7 @@ import { IIndexPattern } from '../../../../../../src/plugins/data/common';
 import { APMConfig } from '../..';
 import {
   getApmIndices,
-  ApmIndicesConfig
+  ApmIndicesConfig,
 } from '../settings/apm_indices/get_apm_indices';
 import { ESFilter } from '../../../typings/elasticsearch';
 import { ESClient } from './es_client';
@@ -76,13 +76,13 @@ export async function setupRequest<TParams extends SetupRequestParams>(
 
   const indices = await getApmIndices({
     savedObjectsClient: context.core.savedObjects.client,
-    config
+    config,
   });
 
   const dynamicIndexPattern = await getDynamicIndexPattern({
     context,
     indices,
-    processorEvent: query.processorEvent
+    processorEvent: query.processorEvent,
   });
 
   const uiFiltersES = decodeUiFilters(dynamicIndexPattern, query.uiFilters);
@@ -91,16 +91,16 @@ export async function setupRequest<TParams extends SetupRequestParams>(
     indices,
     client: getESClient(context, request, { clientAsInternalUser: false }),
     internalClient: getESClient(context, request, {
-      clientAsInternalUser: true
+      clientAsInternalUser: true,
     }),
     config,
-    dynamicIndexPattern
+    dynamicIndexPattern,
   };
 
   return {
     ...('start' in query ? { start: moment.utc(query.start).valueOf() } : {}),
     ...('end' in query ? { end: moment.utc(query.end).valueOf() } : {}),
     ...('uiFilters' in query ? { uiFiltersES } : {}),
-    ...coreSetupRequest
+    ...coreSetupRequest,
   } as InferSetup<TParams>;
 }

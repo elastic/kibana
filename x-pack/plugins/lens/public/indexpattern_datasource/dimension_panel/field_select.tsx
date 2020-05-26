@@ -65,12 +65,12 @@ export function FieldSelect({
 
     const [specialFields, normalFields] = _.partition(
       fields,
-      field => fieldMap[field].type === 'document'
+      (field) => fieldMap[field].type === 'document'
     );
 
     function fieldNamesToOptions(items: string[]) {
       return items
-        .map(field => ({
+        .map((field) => ({
           label: field,
           value: {
             type: 'field',
@@ -86,7 +86,7 @@ export function FieldSelect({
             fieldExists(existingFields, currentIndexPattern.title, field),
           compatible: isCompatibleWithCurrentOperation(field),
         }))
-        .filter(field => showEmptyFields || field.exists)
+        .filter((field) => showEmptyFields || field.exists)
         .sort((a, b) => {
           if (a.compatible && !b.compatible) {
             return -1;
@@ -153,7 +153,7 @@ export function FieldSelect({
           : []) as unknown) as EuiComboBoxOptionOption[]
       }
       singleSelection={{ asPlainText: true }}
-      onChange={choices => {
+      onChange={(choices) => {
         if (choices.length === 0) {
           onDeleteColumn();
           return;

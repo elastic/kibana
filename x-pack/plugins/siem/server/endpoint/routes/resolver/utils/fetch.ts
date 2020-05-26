@@ -116,7 +116,7 @@ export class Fetcher {
     const { extras } = await statsQuery.search(this.client, ...ids);
     const alerts = extras?.alerts || {};
     const events = extras?.events || {};
-    ids.forEach(id => {
+    ids.forEach((id) => {
       tree.addStats(id, { totalAlerts: alerts[id] || 0, totalEvents: events[id] || 0 });
     });
   }

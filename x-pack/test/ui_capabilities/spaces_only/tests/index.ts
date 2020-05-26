@@ -12,7 +12,7 @@ export default function uiCapabilitesTests({ loadTestFile, getService }: FtrProv
   const spacesService = getService('spaces');
   const featuresService: FeaturesService = getService('features');
 
-  describe('ui capabilities', function() {
+  describe('ui capabilities', function () {
     this.tags('ciGroup9');
 
     before(async () => {

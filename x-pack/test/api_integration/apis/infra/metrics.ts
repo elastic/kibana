@@ -25,7 +25,7 @@ interface NodeDetailsRequest {
   cloudId?: string;
 }
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
@@ -56,7 +56,7 @@ export default function({ getService }: FtrProviderContext) {
         nodeId: 'demo-stack-mysql-01',
         nodeType: 'host' as InfraNodeType,
       });
-      return data.then(resp => {
+      return data.then((resp) => {
         if (!resp) {
           return;
         }
@@ -85,7 +85,7 @@ export default function({ getService }: FtrProviderContext) {
         nodeId: 'demo-stack-mysql-01',
         nodeType: 'host' as InfraNodeType,
       });
-      return data.then(resp => {
+      return data.then((resp) => {
         if (!resp) {
           return;
         }

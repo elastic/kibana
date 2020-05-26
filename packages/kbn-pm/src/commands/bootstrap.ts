@@ -69,7 +69,7 @@ export const BootstrapCommand: ICommand = {
     log.write(chalk.bold('\nLinking executables completed, running `kbn:bootstrap` scripts\n'));
 
     const checksums = options.cache ? await getAllChecksums(kbn, log) : false;
-    await parallelizeBatches(batchedProjects, async project => {
+    await parallelizeBatches(batchedProjects, async (project) => {
       if (project.hasScript('kbn:bootstrap')) {
         const cacheFile = new BootstrapCacheFile(kbn, project, checksums);
         if (cacheFile.isValid()) {
