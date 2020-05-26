@@ -7,13 +7,13 @@
 import {
   staticIndexPatternRoute,
   dynamicIndexPatternRoute,
-  apmIndexPatternTitleRoute
+  apmIndexPatternTitleRoute,
 } from './index_pattern';
 import {
   errorDistributionRoute,
   errorGroupsRoute,
   errorsRoute,
-  errorRateRoute
+  errorRateRoute,
 } from './errors';
 import {
   serviceAgentNameRoute,
@@ -21,7 +21,7 @@ import {
   servicesRoute,
   serviceNodeMetadataRoute,
   serviceAnnotationsRoute,
-  serviceAnnotationsCreateRoute
+  serviceAnnotationsCreateRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -31,12 +31,12 @@ import {
   listAgentConfigurationEnvironmentsRoute,
   listAgentConfigurationServicesRoute,
   createOrUpdateAgentConfigurationRoute,
-  agentConfigurationAgentNameRoute
+  agentConfigurationAgentNameRoute,
 } from './settings/agent_configuration';
 import {
   apmIndexSettingsRoute,
   apmIndicesRoute,
-  saveApmIndicesRoute
+  saveApmIndicesRoute,
 } from './settings/apm_indices';
 import { metricsChartsRoute } from './metrics';
 import { serviceNodesRoute } from './service_nodes';
@@ -48,7 +48,7 @@ import {
   transactionGroupsDistributionRoute,
   transactionGroupsRoute,
   transactionGroupsAvgDurationByCountry,
-  transactionGroupsAvgDurationByBrowser
+  transactionGroupsAvgDurationByBrowser,
 } from './transaction_groups';
 import {
   errorGroupsLocalFiltersRoute,
@@ -58,7 +58,7 @@ import {
   transactionGroupsLocalFiltersRoute,
   transactionsLocalFiltersRoute,
   serviceNodesLocalFiltersRoute,
-  uiFiltersEnvironmentsRoute
+  uiFiltersEnvironmentsRoute,
 } from './ui_filters';
 import { createApi } from './create_api';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
@@ -68,7 +68,7 @@ import {
   updateCustomLinkRoute,
   deleteCustomLinkRoute,
   listCustomLinksRoute,
-  customLinkTransactionRoute
+  customLinkTransactionRoute,
 } from './settings/custom_link';
 
 const createApmApi = () => {

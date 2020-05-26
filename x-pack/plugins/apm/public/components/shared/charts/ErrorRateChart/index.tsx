@@ -31,15 +31,15 @@ export const ErrorRateChart = () => {
         pathname: '/api/apm/services/{serviceName}/errors/rate',
         params: {
           path: {
-            serviceName
+            serviceName,
           },
           query: {
             start,
             end,
             uiFilters: JSON.stringify(uiFilters),
-            groupId: errorGroupId
-          }
-        }
+            groupId: errorGroupId,
+          },
+        },
       });
     }
   }, [serviceName, start, end, uiFilters, errorGroupId]);
@@ -56,7 +56,7 @@ export const ErrorRateChart = () => {
       <EuiTitle size="xs">
         <span>
           {i18n.translate('xpack.apm.errorRateChart.title', {
-            defaultMessage: 'Error Rate'
+            defaultMessage: 'Error Rate',
           })}
         </span>
       </EuiTitle>
@@ -68,8 +68,8 @@ export const ErrorRateChart = () => {
             type: 'line',
             color: '#f5a700',
             hideLegend: true,
-            title: 'Rate'
-          }
+            title: 'Rate',
+          },
         ]}
         onHover={combinedOnHover}
         tickFormatY={tickFormatY}

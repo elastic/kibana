@@ -7,12 +7,12 @@ import { ESFilter } from '../../../typings/elasticsearch';
 import {
   SERVICE_NAME,
   PROCESSOR_EVENT,
-  ERROR_GROUP_ID
+  ERROR_GROUP_ID,
 } from '../../../common/elasticsearch_fieldnames';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../helpers/setup_request';
 import { rangeFilter } from '../helpers/range_filter';
 import { getBucketSize } from '../helpers/get_bucket_size';
@@ -20,7 +20,7 @@ import { getBucketSize } from '../helpers/get_bucket_size';
 export async function getErrorRate({
   serviceName,
   groupId,
-  setup
+  setup,
 }: {
   serviceName: string;
   groupId?: string;
@@ -39,13 +39,16 @@ export async function getErrorRate({
           { term: { [PROCESSOR_EVENT]: 'transaction' } },
           {
             bool: {
-              filter: [{ term: { [PROCESSOR_EVENT]: 'error' } }, ...groupIdTerm]
-            }
-          }
-        ]
-      }
+              filter: [
+                { term: { [PROCESSOR_EVENT]: 'error' } },
+                ...groupIdTerm,
+              ],
+            },
+          },
+        ],
+      },
     },
-    ...uiFiltersES
+    ...uiFiltersES,
   ];
 
   const aggs = {
@@ -54,36 +57,36 @@ export async function getErrorRate({
         field: '@timestamp',
         fixed_interval: intervalString,
         min_doc_count: 0,
-        extended_bounds: { min: start, max: end }
+        extended_bounds: { min: start, max: end },
       },
       aggs: {
         processorEventCount: {
           terms: {
             field: PROCESSOR_EVENT,
-            size: 10
-          }
-        }
-      }
-    }
+            size: 10,
+          },
+        },
+      },
+    },
   };
 
   const params = {
     index: [
       indices['apm_oss.errorIndices'],
-      indices['apm_oss.transactionIndices']
+      indices['apm_oss.transactionIndices'],
     ],
     body: {
       size: 0,
       query: { bool: { filter } },
-      aggs
-    }
+      aggs,
+    },
   };
 
   const resp = await client.search(params);
-  return resp.aggregations?.response_times.buckets.map(responseTime => {
+  return resp.aggregations?.response_times.buckets.map((responseTime) => {
     const {
       transaction: transactionCount = 1,
-      error: errorCount = 0
+      error: errorCount = 0,
     } = responseTime.processorEventCount.buckets.reduce(
       (acc, { key, doc_count }) => ({ ...acc, [key]: doc_count }),
       {} as { transaction?: number; error?: number }
@@ -91,7 +94,7 @@ export async function getErrorRate({
 
     return {
       x: responseTime.key,
-      y: errorCount / transactionCount
+      y: errorCount / transactionCount,
     };
   });
 }

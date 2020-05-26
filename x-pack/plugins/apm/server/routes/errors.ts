@@ -86,15 +86,15 @@ export const errorRateRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/errors/rate',
   params: {
     path: t.type({
-      serviceName: t.string
+      serviceName: t.string,
     }),
     query: t.intersection([
       t.partial({
-        groupId: t.string
+        groupId: t.string,
       }),
       uiFiltersRt,
-      rangeRt
-    ])
+      rangeRt,
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -102,5 +102,5 @@ export const errorRateRoute = createRoute(() => ({
     const { serviceName } = params.path;
     const { groupId } = params.query;
     return getErrorRate({ serviceName, groupId, setup });
-  }
+  },
 }));
