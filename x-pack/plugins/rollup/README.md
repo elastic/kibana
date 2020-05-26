@@ -17,14 +17,15 @@ The rest of this doc dives into the implementation details of each of the above 
 
 The pattern for creating a rollup job and rollup index pattern is:
 
-* Install sample data (web logs is a good one).
-* Create a rollup job with an index pattern that captures this index (e.g. `k*`).
-* Set frequency to "minute". Clear the latency buffer field.
-* Select the time field which is the same time field selected in the installed index pattern (`timestamp` without an `@` in the case of web logs).
-* Select a few terms, histogram, and metrics fields.
-* Create and start the rollup job. Wait a minute for the job to run. You should see the numbers for documents and pages processed change in the detail panel.
-* Create a rollup index pattern in the Index Patterns app.
-* Now you can create visualizations using this index pattern.
+1. Install sample data (web logs is a good one).
+2. Create a rollup job with an index pattern that captures this index (e.g. `k*`).
+3. Set frequency to "minute". Clear the latency buffer field.
+4. Select the time field which is the same time field selected in the installed index pattern (`timestamp` without an `@` in the case of web logs).
+5. Specify a time bucket size (`10m` will do).
+6. Select a few terms, histogram, and metrics fields.
+7. Create and start the rollup job. Wait a minute for the job to run. You should see the numbers for documents and pages processed change in the detail panel.
+8. Create a rollup index pattern in the Index Patterns app.
+9. Now you can create visualizations using this index pattern.
 
 ---
 

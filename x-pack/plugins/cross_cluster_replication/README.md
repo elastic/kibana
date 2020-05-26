@@ -13,3 +13,11 @@ Note that these settings are required for testing auto-follow pattern conflicts 
 
 Now you can create follower indices and auto-follow patterns to replicate the `my-leader-index`
 index on the remote cluster that's available at `127.0.0.1:9400`.
+
+### Auto-follow pattern conflict errors
+
+You can view conflict errors by creating two auto-follow patterns with overlapping patterns (e.g. `my*` and `my-*`) that will both capture the `my-leader-index` index on your remote cluster. Run the curl command to create `my-leader-index2` on your remote cluster, since auto-follow patterns don't replicate existing indices.
+
+Now, when you open the details flyout of one of the auto-follow patterns you will see a list of recent errors.  
+
+![image](https://user-images.githubusercontent.com/1238659/79623769-e879b800-80d2-11ea-906d-0b2d6637c3a3.png)
