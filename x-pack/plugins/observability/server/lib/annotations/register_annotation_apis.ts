@@ -32,7 +32,7 @@ export function registerAnnotationAPIs({
     handler: (params: { data: t.TypeOf<TType>; client: ScopedAnnotationsClient }) => Promise<any>
   ): RequestHandler {
     return async (...args: Parameters<RequestHandler>) => {
-      const [, request, response] = args;
+      const [context, request, response] = args;
 
       const rt = types;
 
@@ -50,22 +50,32 @@ export function registerAnnotationAPIs({
         });
       }
 
-      const apiCaller = core.elasticsearch.dataClient.asScoped(request).callAsCurrentUser;
+      const apiCaller = context.core.elasticsearch.dataClient.callAsCurrentUser;
 
       const client = createAnnotationsClient({
         index,
         apiCaller,
         logger,
+        license: context.licensing?.license,
       });
 
-      const res = await handler({
-        data: validation.right,
-        client,
-      });
+      try {
+        const res = await handler({
+          data: validation.right,
+          client,
+        });
 
-      return response.ok({
-        body: res,
-      });
+        return response.ok({
+          body: res,
+        });
+      } catch (err) {
+        return response.custom({
+          statusCode: err.output?.statusCode ?? 500,
+          body: {
+            message: err.output?.payload?.message ?? 'An internal server error occured',
+          },
+        });
+      }
     };
   }
 

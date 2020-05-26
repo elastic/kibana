@@ -10,6 +10,7 @@ import { EuiLink, EuiTableRow, EuiTableRowCell, EuiText, EuiToolTip } from '@ela
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled, { css } from 'styled-components';
+import * as i18n from './translations';
 
 const TableHeader = styled.thead`
   font-weight: bold;
@@ -37,8 +38,9 @@ const REL_NOREFERRER = 'noreferrer';
 export const Markdown = React.memo<{
   disableLinks?: boolean;
   raw?: string;
+  onClickTimeline?: (timelineId: string) => void;
   size?: 'xs' | 's' | 'm';
-}>(({ disableLinks = false, raw, size = 's' }) => {
+}>(({ disableLinks = false, onClickTimeline, raw, size = 's' }) => {
   const markdownRenderers = {
     root: ({ children }: { children: React.ReactNode[] }) => (
       <EuiText data-test-subj="markdown-root" grow={true} size={size}>
@@ -59,18 +61,33 @@ export const Markdown = React.memo<{
     tableCell: ({ children }: { children: React.ReactNode[] }) => (
       <EuiTableRowCell data-test-subj="markdown-table-cell">{children}</EuiTableRowCell>
     ),
-    link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
-      <EuiToolTip content={href}>
-        <EuiLink
-          href={disableLinks ? undefined : href}
-          data-test-subj="markdown-link"
-          rel={`${REL_NOOPENER} ${REL_NOFOLLOW} ${REL_NOREFERRER}`}
-          target="_blank"
-        >
-          {children}
-        </EuiLink>
-      </EuiToolTip>
-    ),
+    link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => {
+      if (onClickTimeline != null && href != null && href.indexOf(`timelines?timeline=(id:`) > -1) {
+        const timelineId = href.split('timelines?timeline=(id:')[1].split("'")[1] ?? '';
+        return (
+          <EuiToolTip content={i18n.TIMELINE_ID(timelineId)}>
+            <EuiLink
+              onClick={() => onClickTimeline(timelineId)}
+              data-test-subj="markdown-timeline-link"
+            >
+              {children}
+            </EuiLink>
+          </EuiToolTip>
+        );
+      }
+      return (
+        <EuiToolTip content={href}>
+          <EuiLink
+            href={disableLinks ? undefined : href}
+            data-test-subj="markdown-link"
+            rel={`${REL_NOOPENER} ${REL_NOFOLLOW} ${REL_NOREFERRER}`}
+            target="_blank"
+          >
+            {children}
+          </EuiLink>
+        </EuiToolTip>
+      );
+    },
     blockquote: ({ children }: { children: React.ReactNode[] }) => (
       <MyBlockquote>{children}</MyBlockquote>
     ),

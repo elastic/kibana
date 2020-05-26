@@ -7,9 +7,7 @@
 import { KQL_INPUT, REFRESH_BUTTON } from '../screens/siem_header';
 
 export const clearSearchBar = () => {
-  cy.get(KQL_INPUT)
-    .clear()
-    .type('{enter}');
+  cy.get(KQL_INPUT).clear().type('{enter}');
 };
 
 export const kqlSearch = (search: string) => {
@@ -21,8 +19,5 @@ export const navigateFromHeaderTo = (page: string) => {
 };
 
 export const refreshPage = () => {
-  cy.get(REFRESH_BUTTON)
-    .click({ force: true })
-    .invoke('text')
-    .should('not.equal', 'Updating');
+  cy.get(REFRESH_BUTTON).click({ force: true }).invoke('text').should('not.equal', 'Updating');
 };

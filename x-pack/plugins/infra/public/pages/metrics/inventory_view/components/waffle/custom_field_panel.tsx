@@ -33,12 +33,12 @@ export const CustomFieldPanel = class extends React.PureComponent<Props, State> 
     const { fields, currentOptions } = this.props;
     const options = fields
       .filter(
-        f =>
+        (f) =>
           f.aggregatable &&
           f.type === 'string' &&
-          !(currentOptions && currentOptions.some(o => o.field === f.name))
+          !(currentOptions && currentOptions.some((o) => o.field === f.name))
       )
-      .map(f => ({ label: f.name }));
+      .map((f) => ({ label: f.name }));
     const isSubmitDisabled = !this.state.selectedOptions.length;
     return (
       <div style={{ padding: 16 }}>

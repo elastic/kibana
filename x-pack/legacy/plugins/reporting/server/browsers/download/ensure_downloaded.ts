@@ -6,9 +6,8 @@
 
 import { existsSync } from 'fs';
 import { resolve as resolvePath } from 'path';
+import { BrowserDownload, chromium } from '../';
 import { BROWSER_TYPE } from '../../../common/constants';
-import { chromium } from '../index';
-import { BrowserDownload } from '../types';
 import { md5 } from './checksum';
 import { clean } from './clean';
 import { download } from './download';
@@ -40,12 +39,12 @@ export async function ensureAllBrowsersDownloaded() {
  * @return {Promise<undefined>}
  */
 async function ensureDownloaded(browsers: BrowserDownload[]) {
-  await asyncMap(browsers, async browser => {
+  await asyncMap(browsers, async (browser) => {
     const { archivesPath } = browser.paths;
 
     await clean(
       archivesPath,
-      browser.paths.packages.map(p => resolvePath(archivesPath, p.archiveFilename))
+      browser.paths.packages.map((p) => resolvePath(archivesPath, p.archiveFilename))
     );
 
     const invalidChecksums: string[] = [];

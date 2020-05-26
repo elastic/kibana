@@ -15,8 +15,7 @@ import {
   EuiSpacer,
   EuiIcon,
 } from '@elastic/eui';
-import { sendRequest, useCore } from '../../../hooks';
-import { fleetSetupRouteService } from '../../../services';
+import { useCore, sendPostFleetSetup } from '../../../hooks';
 import { WithoutHeaderLayout } from '../../../layouts';
 import { GetFleetStatusResponse } from '../../../types';
 
@@ -31,10 +30,7 @@ export const SetupPage: React.FunctionComponent<{
     e.preventDefault();
     setIsFormLoading(true);
     try {
-      await sendRequest({
-        method: 'post',
-        path: fleetSetupRouteService.postFleetSetupPath(),
-      });
+      await sendPostFleetSetup({ forceRecreate: true });
       await refresh();
     } catch (error) {
       core.notifications.toasts.addDanger(error.message);

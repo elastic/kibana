@@ -7,12 +7,8 @@
 import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { savedSearches } from './test_resources_data';
-
+import { COMMON_REQUEST_HEADERS } from './common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-};
 
 export enum SavedObjectType {
   CONFIG = 'config',
@@ -52,7 +48,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       log.debug(`Searching for '${objectType}' with title '${title}'...`);
       const findResponse = await supertest
         .get(`/api/saved_objects/_find?type=${objectType}`)
-        .set(COMMON_HEADERS)
+        .set(COMMON_REQUEST_HEADERS)
         .expect(200)
         .then((res: any) => res.body);
 
@@ -83,7 +79,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
 
       const createResponse = await supertest
         .post(`/api/saved_objects/${SavedObjectType.INDEX_PATTERN}`)
-        .set(COMMON_HEADERS)
+        .set(COMMON_REQUEST_HEADERS)
         .send({ attributes: { title, timeFieldName } })
         .expect(200)
         .then((res: any) => res.body);
@@ -107,7 +103,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
 
       const createResponse = await supertest
         .post(`/api/saved_objects/${SavedObjectType.SEARCH}`)
-        .set(COMMON_HEADERS)
+        .set(COMMON_REQUEST_HEADERS)
         .send(body)
         .expect(200)
         .then((res: any) => res.body);
@@ -186,7 +182,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       } else {
         await supertest
           .delete(`/api/saved_objects/${SavedObjectType.INDEX_PATTERN}/${indexPatternId}`)
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(200);
 
         log.debug(` > Deleted index pattern with id '${indexPatternId}'`);
@@ -203,7 +199,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       } else {
         await supertest
           .delete(`/api/saved_objects/${SavedObjectType.SEARCH}/${savedSearchId}`)
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(200);
 
         log.debug(` > Deleted saved searchwith id '${savedSearchId}'`);

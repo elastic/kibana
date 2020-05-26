@@ -7,10 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/machine_learning/security_common';
-
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-};
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/machine_learning/common';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -75,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/anomaly_detectors`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(200);
 
         expect(body.count).to.eql(2);
@@ -88,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/anomaly_detectors`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(404);
 
         expect(body.error).to.eql('Not Found');
@@ -101,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/anomaly_detectors/${jobId}_1`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(200);
 
         expect(body.count).to.eql(1);
@@ -113,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/anomaly_detectors/${jobId}_1,${jobId}_2`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(200);
 
         expect(body.count).to.eql(2);
@@ -126,7 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/anomaly_detectors/${jobId}_1`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(404);
 
         expect(body.error).to.eql('Not Found');
@@ -139,13 +136,13 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/anomaly_detectors/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(200);
 
         expect(body.count).to.eql(2);
         expect(body.jobs.length).to.eql(2);
         expect(body.jobs[0].job_id).to.eql(`${jobId}_1`);
-        expect(body.jobs[0]).to.keys(
+        expect(body.jobs[0]).to.have.keys(
           'timing_stats',
           'state',
           'forecasts_stats',
@@ -159,7 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/anomaly_detectors/_stats`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(404);
 
         expect(body.error).to.eql('Not Found');
@@ -172,13 +169,13 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/anomaly_detectors/${jobId}_1/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(200);
 
         expect(body.count).to.eql(1);
         expect(body.jobs.length).to.eql(1);
         expect(body.jobs[0].job_id).to.eql(`${jobId}_1`);
-        expect(body.jobs[0]).to.keys(
+        expect(body.jobs[0]).to.have.keys(
           'timing_stats',
           'state',
           'forecasts_stats',
@@ -191,13 +188,13 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/anomaly_detectors/${jobId}_1,${jobId}_2/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(200);
 
         expect(body.count).to.eql(2);
         expect(body.jobs.length).to.eql(2);
         expect(body.jobs[0].job_id).to.eql(`${jobId}_1`);
-        expect(body.jobs[0]).to.keys(
+        expect(body.jobs[0]).to.have.keys(
           'timing_stats',
           'state',
           'forecasts_stats',
@@ -211,7 +208,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/anomaly_detectors/${jobId}_1/_stats`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(404);
 
         expect(body.error).to.eql('Not Found');

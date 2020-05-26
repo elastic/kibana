@@ -37,10 +37,8 @@ import {
   EuiCallOut,
   EuiBasicTableColumn,
 } from '@elastic/eui';
-import { ToastsStart, IUiSettingsClient } from 'kibana/public';
+import { ToastsStart } from 'kibana/public';
 import { toMountPoint } from '../util';
-
-export const EMPTY_FILTER = '';
 
 interface Column {
   name: string;
@@ -61,12 +59,12 @@ export interface TableListViewProps {
   findItems(query: string): Promise<{ total: number; hits: object[] }>;
   listingLimit: number;
   initialFilter: string;
+  initialPageSize: number;
   noItemsFragment: JSX.Element;
   // update possible column types to something like (FieldDataColumn | ComputedColumn | ActionsColumn)[] when they have been added to EUI
   tableColumns: Column[];
   tableListTitle: string;
   toastNotifications: ToastsStart;
-  uiSettings: IUiSettingsClient;
   /**
    * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
    * If the table is not empty, this component renders its own h1 element using the same id.
@@ -98,11 +96,10 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   constructor(props: TableListViewProps) {
     super(props);
 
-    const initialPageSize = props.uiSettings.get('savedObjects:perPage');
     this.pagination = {
       initialPageIndex: 0,
-      initialPageSize,
-      pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
+      initialPageSize: props.initialPageSize,
+      pageSizeOptions: uniq([10, 20, 50, props.initialPageSize]).sort(),
     };
     this.state = {
       items: [],
@@ -169,7 +166,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     });
     try {
       const itemsById = indexBy(this.state.items, 'id');
-      await this.props.deleteItems(this.state.selectedIds.map(id => itemsById[id]));
+      await this.props.deleteItems(this.state.selectedIds.map((id) => itemsById[id]));
     } catch (error) {
       this.props.toastNotifications.addDanger({
         title: toMountPoint(
@@ -366,7 +363,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
           onSelectionChange: (obj: Item[]) => {
             this.setState({
               selectedIds: obj
-                .map(item => item.id)
+                .map((item) => item.id)
                 .filter((id: undefined | string): id is string => Boolean(id)),
             });
           },

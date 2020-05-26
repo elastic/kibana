@@ -33,6 +33,7 @@ interface State {
   isLoading: boolean;
   isSaveModalVisible: boolean;
   indexPatternsForTopNav: IndexPatternInstance[];
+  originatingApp: string | undefined;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
 
@@ -54,7 +55,7 @@ export function App({
   docId,
   docStorage,
   redirectTo,
-  originatingApp,
+  originatingAppFromUrl,
   navigation,
 }: {
   editorFrame: EditorFrameInstance;
@@ -64,8 +65,13 @@ export function App({
   storage: IStorageWrapper;
   docId?: string;
   docStorage: SavedObjectStore;
-  redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
-  originatingApp?: string | undefined;
+  redirectTo: (
+    id?: string,
+    returnToOrigin?: boolean,
+    originatingApp?: string | undefined,
+    newlyCreated?: boolean
+  ) => void;
+  originatingAppFromUrl?: string | undefined;
 }) {
   const language =
     storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
@@ -77,6 +83,7 @@ export function App({
       isSaveModalVisible: false,
       indexPatternsForTopNav: [],
       query: { query: '', language },
+      originatingApp: originatingAppFromUrl,
       dateRange: {
         fromDate: currentRange.from,
         toDate: currentRange.to,
@@ -94,7 +101,7 @@ export function App({
 
     const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
-        setState(s => ({ ...s, filters: data.query.filterManager.getFilters() }));
+        setState((s) => ({ ...s, filters: data.query.filterManager.getFilters() }));
         trackUiEvent('app_filters_updated');
       },
     });
@@ -102,7 +109,7 @@ export function App({
     const timeSubscription = data.query.timefilter.timefilter.getTimeUpdate$().subscribe({
       next: () => {
         const currentRange = data.query.timefilter.timefilter.getTime();
-        setState(s => ({
+        setState((s) => ({
           ...s,
           dateRange: {
             fromDate: currentRange.from,
@@ -123,7 +130,7 @@ export function App({
     core.chrome.setBreadcrumbs([
       {
         href: core.http.basePath.prepend(`/app/visualize#/`),
-        onClick: e => {
+        onClick: (e) => {
           core.application.navigateToApp('visualize', { path: '/' });
           e.preventDefault();
         },
@@ -141,19 +148,19 @@ export function App({
 
   useEffect(() => {
     if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
-      setState(s => ({ ...s, isLoading: true }));
+      setState((s) => ({ ...s, isLoading: true }));
       docStorage
         .load(docId)
-        .then(doc => {
+        .then((doc) => {
           getAllIndexPatterns(
             doc.state.datasourceMetaData.filterableIndexPatterns,
             data.indexPatterns,
             core.notifications
           )
-            .then(indexPatterns => {
+            .then((indexPatterns) => {
               // Don't overwrite any pinned filters
               data.query.filterManager.setAppFilters(doc.state.filters);
-              setState(s => ({
+              setState((s) => ({
                 ...s,
                 isLoading: false,
                 persistedDoc: doc,
@@ -163,13 +170,13 @@ export function App({
               }));
             })
             .catch(() => {
-              setState(s => ({ ...s, isLoading: false }));
+              setState((s) => ({ ...s, isLoading: false }));
 
               redirectTo();
             });
         })
         .catch(() => {
-          setState(s => ({ ...s, isLoading: false }));
+          setState((s) => ({ ...s, isLoading: false }));
 
           core.notifications.toasts.addDanger(
             i18n.translate('xpack.lens.app.docLoadingError', {
@@ -222,17 +229,17 @@ export function App({
       .then(({ id }) => {
         // Prevents unnecessary network request and disables save button
         const newDoc = { ...doc, id };
-        setState(s => ({
+        setState((s) => ({
           ...s,
           isSaveModalVisible: false,
           persistedDoc: newDoc,
           lastKnownDoc: newDoc,
         }));
         if (docId !== id || saveProps.returnToOrigin) {
-          redirectTo(id, saveProps.returnToOrigin, newlyCreated);
+          redirectTo(id, saveProps.returnToOrigin, state.originatingApp, newlyCreated);
         }
       })
-      .catch(e => {
+      .catch((e) => {
         // eslint-disable-next-line no-console
         console.dir(e);
         trackUiEvent('save_failed');
@@ -241,7 +248,7 @@ export function App({
             defaultMessage: 'Error saving document',
           })
         );
-        setState(s => ({ ...s, isSaveModalVisible: false }));
+        setState((s) => ({ ...s, isSaveModalVisible: false }));
       });
   };
 
@@ -269,7 +276,7 @@ export function App({
           <div className="lnsApp__header">
             <TopNavMenu
               config={[
-                ...(!!originatingApp && lastKnownDoc?.id
+                ...(!!state.originatingApp && lastKnownDoc?.id
                   ? [
                       {
                         label: i18n.translate('xpack.lens.app.saveAndReturn', {
@@ -294,17 +301,17 @@ export function App({
                   : []),
                 {
                   label:
-                    lastKnownDoc?.id && !!originatingApp
+                    lastKnownDoc?.id && !!state.originatingApp
                       ? i18n.translate('xpack.lens.app.saveAs', {
                           defaultMessage: 'Save as',
                         })
                       : i18n.translate('xpack.lens.app.save', {
                           defaultMessage: 'Save',
                         }),
-                  emphasize: !originatingApp || !lastKnownDoc?.id,
+                  emphasize: !state.originatingApp || !lastKnownDoc?.id,
                   run: () => {
                     if (isSaveable && lastKnownDoc) {
-                      setState(s => ({ ...s, isSaveModalVisible: true }));
+                      setState((s) => ({ ...s, isSaveModalVisible: true }));
                     }
                   },
                   testId: 'lnsApp_saveButton',
@@ -313,7 +320,7 @@ export function App({
               ]}
               data-test-subj="lnsApp_topNav"
               screenTitle={'lens'}
-              onQuerySubmit={payload => {
+              onQuerySubmit={(payload) => {
                 const { dateRange, query } = payload;
 
                 if (
@@ -326,7 +333,7 @@ export function App({
                   trackUiEvent('app_query_change');
                 }
 
-                setState(s => ({
+                setState((s) => ({
                   ...s,
                   dateRange: {
                     fromDate: dateRange.from,
@@ -343,14 +350,14 @@ export function App({
               showFilterBar={true}
               showSaveQuery={core.application.capabilities.visualize.saveQuery as boolean}
               savedQuery={state.savedQuery}
-              onSaved={savedQuery => {
-                setState(s => ({ ...s, savedQuery }));
+              onSaved={(savedQuery) => {
+                setState((s) => ({ ...s, savedQuery }));
               }}
-              onSavedQueryUpdated={savedQuery => {
+              onSavedQueryUpdated={(savedQuery) => {
                 const savedQueryFilters = savedQuery.attributes.filters || [];
                 const globalFilters = data.query.filterManager.getGlobalFilters();
                 data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
-                setState(s => ({
+                setState((s) => ({
                   ...s,
                   savedQuery: { ...savedQuery }, // Shallow query for reference issues
                   dateRange: savedQuery.attributes.timefilter
@@ -363,7 +370,7 @@ export function App({
               }}
               onClearSavedQuery={() => {
                 data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
-                setState(s => ({
+                setState((s) => ({
                   ...s,
                   savedQuery: undefined,
                   filters: data.query.filterManager.getGlobalFilters(),
@@ -394,7 +401,7 @@ export function App({
                 onError,
                 onChange: ({ filterableIndexPatterns, doc }) => {
                   if (!_.isEqual(state.persistedDoc, doc)) {
-                    setState(s => ({ ...s, lastKnownDoc: doc }));
+                    setState((s) => ({ ...s, lastKnownDoc: doc }));
                   }
 
                   // Update the cached index patterns if the user made a change to any of them
@@ -402,16 +409,16 @@ export function App({
                     state.indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
                     filterableIndexPatterns.find(
                       ({ id }) =>
-                        !state.indexPatternsForTopNav.find(indexPattern => indexPattern.id === id)
+                        !state.indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
                     )
                   ) {
                     getAllIndexPatterns(
                       filterableIndexPatterns,
                       data.indexPatterns,
                       core.notifications
-                    ).then(indexPatterns => {
+                    ).then((indexPatterns) => {
                       if (indexPatterns) {
-                        setState(s => ({ ...s, indexPatternsForTopNav: indexPatterns }));
+                        setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
                       }
                     });
                   }
@@ -422,9 +429,9 @@ export function App({
         </div>
         {lastKnownDoc && state.isSaveModalVisible && (
           <SavedObjectSaveModalOrigin
-            originatingApp={originatingApp}
-            onSave={props => runSave(props)}
-            onClose={() => setState(s => ({ ...s, isSaveModalVisible: false }))}
+            originatingApp={state.originatingApp}
+            onSave={(props) => runSave(props)}
+            onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
             documentInfo={{
               id: lastKnownDoc.id,
               title: lastKnownDoc.title || '',

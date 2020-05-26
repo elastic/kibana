@@ -41,7 +41,7 @@ export const getAvgMetricAgg = ({ getInternalStartServices }: AvgMetricAggDepend
     {
       name: METRIC_TYPES.AVG,
       title: averageTitle,
-      makeLabel: aggConfig => {
+      makeLabel: (aggConfig) => {
         return i18n.translate('data.search.aggs.metrics.averageLabel', {
           defaultMessage: 'Average {field}',
           values: { field: aggConfig.getFieldDisplayName() },
@@ -51,7 +51,7 @@ export const getAvgMetricAgg = ({ getInternalStartServices }: AvgMetricAggDepend
         {
           name: 'field',
           type: 'field',
-          filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
+          filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM],
         },
       ],
     },

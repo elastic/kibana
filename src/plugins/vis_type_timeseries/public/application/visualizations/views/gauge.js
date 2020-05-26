@@ -77,7 +77,7 @@ export class Gauge extends Component {
     const formatter =
       (metric && (metric.tickFormatter || metric.formatter)) ||
       this.props.tickFormatter ||
-      (v => v);
+      ((v) => v);
     const title = (metric && metric.label) || '';
     const styles = reactcss(
       {
@@ -119,7 +119,7 @@ export class Gauge extends Component {
       metrics = (
         <div
           className="tvbVisHalfGauge__metrics"
-          ref={el => (this.inner = el)}
+          ref={(el) => (this.inner = el)}
           style={styles.inner}
         >
           <div className="tvbVisGauge__label" ref="title">
@@ -135,7 +135,7 @@ export class Gauge extends Component {
       metrics = (
         <div
           className="tvbVisCircleGauge__metrics"
-          ref={el => (this.inner = el)}
+          ref={(el) => (this.inner = el)}
           style={styles.inner}
         >
           <div className="tvbVisGauge__value" style={styles.value} ref="label">
@@ -158,7 +158,7 @@ export class Gauge extends Component {
     return (
       <div className={classes}>
         <div
-          ref={el => (this.resize = el)}
+          ref={(el) => (this.resize = el)}
           className={`tvbVisGauge__resize`}
           data-test-subj="tvbVisGaugeContainer"
         >

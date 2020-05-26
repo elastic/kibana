@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import {
   TRACE_ID,
-  TRANSACTION_ID
+  TRANSACTION_ID,
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { useUrlParams } from '../../../../../hooks/useUrlParams';
 import { px, unit, units } from '../../../../../style/variables';
@@ -50,6 +50,7 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
 
   const button = (
     <Button
+      data-test-subj="popover"
       clickable
       color={theme.euiColorDanger}
       shape={Shape.square}
@@ -60,12 +61,16 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
   const { error } = mark;
 
   const { rangeTo, rangeFrom } = urlParams;
+
   const query = {
-    kuery: encodeURIComponent(
-      `${TRACE_ID} : "${error.trace?.id}" and ${TRANSACTION_ID} : "${error.transaction?.id}"`
-    ),
+    kuery: [
+      ...(error.trace?.id ? [`${TRACE_ID} : "${error.trace?.id}"`] : []),
+      ...(error.transaction?.id
+        ? [`${TRANSACTION_ID} : "${error.transaction?.id}"`]
+        : []),
+    ].join(' and '),
     rangeFrom,
-    rangeTo
+    rangeTo,
   };
 
   return (
@@ -90,6 +95,7 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
         />
         <EuiText size="s">
           <ErrorLink
+            data-test-subj="errorLink"
             serviceName={error.service.name}
             errorGroupId={error.error.grouping_key}
             query={query}

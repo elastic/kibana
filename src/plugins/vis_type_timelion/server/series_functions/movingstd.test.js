@@ -66,7 +66,7 @@ describe('movingstd.js', () => {
     const position = 'left';
     const results = await invoke(fn, [seriesList, numWindows, position]);
 
-    const resultPoints = results.output.list[0].data.map(row => {
+    const resultPoints = results.output.list[0].data.map((row) => {
       // row is an array; index 0 is the time bucket, index 1 is the value
       return row[1];
     });

@@ -11,7 +11,7 @@ import {
   ReportingRequestPayload,
   ReportingRequestPre,
   ReportingRequestQuery,
-} from '../../../types';
+} from '../../../server/types';
 
 export function makeRequestFacade(request: Legacy.Request): RequestFacade {
   // This condition is for unit tests
