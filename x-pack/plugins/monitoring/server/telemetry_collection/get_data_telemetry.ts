@@ -48,7 +48,7 @@ export async function getDataTelemetry(
   maxBucketSize: number
 ) {
   const responses = await Promise.all(
-    clusterUuids.map(async clusterUuid => {
+    clusterUuids.map(async (clusterUuid) => {
       // Should we take into consideration CCS? https://github.com/elastic/kibana/blob/3a396027f669803e1a3143237578973fb1ab20d0/x-pack/plugins/monitoring/server/routes/api/v1/elasticsearch/indices.js#L42
       const index = INDEX_PATTERN_ELASTICSEARCH;
       const params = buildGetIndicesQuery(index, clusterUuid, {

@@ -66,7 +66,7 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
       } as any,
       context
     );
-    stats.forEach(entry => {
+    stats.forEach((entry) => {
       expect(entry).toMatchSnapshot({
         timestamp: expect.any(String),
         stack_stats: {
@@ -105,7 +105,7 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
       } as any,
       context
     );
-    stats.forEach(entry => {
+    stats.forEach((entry) => {
       expect(entry).toMatchSnapshot({
         timestamp: expect.any(String),
         stack_stats: {

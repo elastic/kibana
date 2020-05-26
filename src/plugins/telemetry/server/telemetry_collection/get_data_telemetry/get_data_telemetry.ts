@@ -86,7 +86,7 @@ export function buildDataTelemetryPayload(indices: DataTelemetryIndex[]): DataTe
     ({ name }) =>
       !(
         name.startsWith('.') &&
-        !startingDotPatternsUntilTheFirstAsterisk.find(pattern => name.startsWith(pattern))
+        !startingDotPatternsUntilTheFirstAsterisk.find((pattern) => name.startsWith(pattern))
       )
   );
 
@@ -174,7 +174,7 @@ export async function getDataTelemetry(callCluster: APICaller) {
 
     const stateIndices = state?.metadata?.indices || {};
     const indexNames = Object.keys(stateIndices);
-    const indices = indexNames.map(name => {
+    const indices = indexNames.map((name) => {
       const isECS = !!stateIndices[name]?.mappings?._doc?.properties.ecs?.properties.version?.type;
 
       const stats = (indexStats?.indices || {})[name];

@@ -14,7 +14,7 @@ function mockCallCluster(docs: any[] = []) {
     expect(options.filterPath).toContain('hits.hits._source.index_stats.primaries.docs.count');
     expect(options.filterPath).toContain('hits.hits._source.index_stats.total.store.size_in_bytes');
 
-    return { hits: { hits: docs.map(_source => ({ _source })) } };
+    return { hits: { hits: docs.map((_source) => ({ _source })) } };
   });
 }
 
@@ -32,7 +32,7 @@ describe('get_ingest_solutions', () => {
   });
 
   test('it counts 4 "logs.count" providers but 1 logs.total_providers', async () => {
-    const indices = ['some_logs', 'some_logs_other', 'logs_app', 'logs'].map(index => ({
+    const indices = ['some_logs', 'some_logs_other', 'logs_app', 'logs'].map((index) => ({
       index_stats: {
         index,
         primaries: { docs: { count: 100 } },

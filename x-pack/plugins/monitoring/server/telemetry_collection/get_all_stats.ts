@@ -33,7 +33,7 @@ export const getAllStats: StatsGetter<CustomContext> = async (
   { callCluster, start, end },
   { maxBucketSize }
 ) => {
-  const clusterUuids = clustersDetails.map(clusterDetails => clusterDetails.clusterUuid);
+  const clusterUuids = clustersDetails.map((clusterDetails) => clusterDetails.clusterUuid);
 
   const [esClusters, kibana, logstash, beats, dataTelemetry] = await Promise.all([
     getElasticsearchStats(callCluster, clusterUuids, maxBucketSize), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
@@ -70,7 +70,7 @@ export function handleAllStats(
     dataTelemetry: PromiseReturnType<typeof getDataTelemetry>;
   }
 ) {
-  return clusters.map(cluster => {
+  return clusters.map((cluster) => {
     const stats = {
       ...cluster,
       stack_stats: {
