@@ -176,7 +176,7 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/management/data/cross_cluster_replication',
       },
       remoteClusters: {
-        pathname: '/app/management/data/remote_cluster',
+        pathname: '/app/management/data/remote_clusters',
       },
       apm: {
         pathname: '/app/apm',
