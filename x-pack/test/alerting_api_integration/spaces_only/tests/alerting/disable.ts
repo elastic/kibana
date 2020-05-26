@@ -39,7 +39,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: true }))
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', undefined);
 
       await alertUtils.disable(createdAlert.id);
 
@@ -65,7 +65,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: true }))
         .expect(200);
-      objectRemover.add(Spaces.other.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.other.id, createdAlert.id, 'alert', undefined);
 
       await alertUtils.getDisableRequest(createdAlert.id).expect(404, {
         statusCode: 404,
