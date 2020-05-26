@@ -5,7 +5,7 @@
  */
 
 import { DynamicStyleProperty } from './dynamic_style_property';
-import { OrdinalLegend } from './components/ordinal_legend';
+import { OrdinalLegend } from '../components/legend/ordinal_legend';
 import { makeMbClampedNumberExpression } from '../style_util';
 import {
   HALF_LARGE_MAKI_ICON_SIZE,

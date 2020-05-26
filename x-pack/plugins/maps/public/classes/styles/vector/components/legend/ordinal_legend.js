@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { RangedStyleLegendRow } from '../../../components/ranged_style_legend_row';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-import { CircleIcon } from '../../components/legend/circle_icon';
+import { CircleIcon } from './circle_icon';
 
 function getLineWidthIcons() {
   const defaultStyle = {

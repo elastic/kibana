@@ -14,8 +14,13 @@ import {
 } from '../../color_utils';
 import React from 'react';
 import { COLOR_MAP_TYPE } from '../../../../../common/constants';
-import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
-import { BreakedLegend } from './components/breaked_legend';
+import {
+  isCategoricalStopsInvalid,
+  getOtherCategoryLabel,
+} from '../components/color/color_stops_utils';
+import { BreakedLegend } from '../components/legend/breaked_legend';
+import { Category } from '../components/legend/category';
+import { EuiTextColor, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };
 const RGBA_0000 = 'rgba(0,0,0,0)';
@@ -284,19 +289,45 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
+    const categories = [];
     const { stops, defaultColor } = this._getColorStops();
+    stops.map(({ stop, color }) => {
+      categories.push(
+        <EuiFlexItem
+          key={stop} //works under assumption __fallbackCategory__ will never be used
+        >
+          <Category
+            styleName={this.getStyleName()}
+            label={this.formatField(stop)}
+            color={color}
+            isLinesOnly={isLinesOnly}
+            isPointsOnly={isPointsOnly}
+            symbolId={symbolId}
+          />
+        </EuiFlexItem>
+      );
+    });
+    if (defaultColor) {
+      categories.push(
+        <EuiFlexItem key="__fallbackCategory__">
+          <Category
+            styleName={this.getStyleName()}
+            label={<EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>}
+            color={defaultColor}
+            isLinesOnly={isLinesOnly}
+            isPointsOnly={isPointsOnly}
+            symbolId={symbolId}
+          />
+        </EuiFlexItem>
+      );
+    }
+
     return (
-      <BreakedLegend
-        style={this}
-        isPointsOnly={isPointsOnly}
-        isLinesOnly={isLinesOnly}
-        stops={stops}
-        symbolId={symbolId}
-        color={null}
-        useFallback={!!defaultColor}
-        fallbackSymbolId={null}
-        fallbackColor={defaultColor}
-      />
+      <BreakedLegend style={this}>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {categories}
+        </EuiFlexGroup>
+      </BreakedLegend>
     );
   }
 }

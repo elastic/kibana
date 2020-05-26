@@ -6,10 +6,12 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { assignCategoriesToPalette } from '../style_util';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_utils';
-import { BreakedLegend } from './components/breaked_legend';
+import { BreakedLegend } from '../components/legend/breaked_legend';
+import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
+import { Category } from '../components/legend/category';
+import { EuiTextColor, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 export class DynamicIconProperty extends DynamicStyleProperty {
   isOrdinal() {
@@ -64,9 +66,9 @@ export class DynamicIconProperty extends DynamicStyleProperty {
   }
 
   _getMbIconImageExpression(iconPixelSize) {
-    const { stops, fallback } = this._getPaletteStops();
+    const { stops, fallbackSymbolId } = this._getPaletteStops();
 
-    if (stops.length < 1 || !fallback) {
+    if (stops.length < 1 || !fallbackSymbolId) {
       //occurs when no data
       return null;
     }
@@ -76,14 +78,14 @@ export class DynamicIconProperty extends DynamicStyleProperty {
       mbStops.push(`${stop}`);
       mbStops.push(getMakiIconId(style, iconPixelSize));
     });
-    mbStops.push(getMakiIconId(fallback, iconPixelSize)); //last item is fallback style for anything that does not match provided stops
+    mbStops.push(getMakiIconId(fallbackSymbolId, iconPixelSize)); //last item is fallback style for anything that does not match provided stops
     return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
   }
 
   _getMbIconAnchorExpression() {
-    const { stops, fallback } = this._getPaletteStops();
+    const { stops, fallbackSymbolId } = this._getPaletteStops();
 
-    if (stops.length < 1 || !fallback) {
+    if (stops.length < 1 || !fallbackSymbolId) {
       //occurs when no data
       return null;
     }
@@ -93,7 +95,7 @@ export class DynamicIconProperty extends DynamicStyleProperty {
       mbStops.push(`${stop}`);
       mbStops.push(getMakiSymbolAnchor(style));
     });
-    mbStops.push(getMakiSymbolAnchor(fallback)); //last item is fallback style for anything that does not match provided stops
+    mbStops.push(getMakiSymbolAnchor(fallbackSymbolId)); //last item is fallback style for anything that does not match provided stops
     return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
   }
 
@@ -102,20 +104,45 @@ export class DynamicIconProperty extends DynamicStyleProperty {
   }
 
   renderLegendDetailRow({ isPointsOnly, isLinesOnly }) {
+    const categories = [];
     const { stops, fallbackSymbolId } = this._getPaletteStops();
 
+    stops.map(({ stop, style }) => {
+      categories.push(
+        <EuiFlexItem key={stop}>
+          <Category
+            styleName={this.getStyleName()}
+            label={this.formatField(stop)}
+            color="grey"
+            isLinesOnly={isLinesOnly}
+            isPointsOnly={isPointsOnly}
+            symbolId={style}
+          />
+        </EuiFlexItem>
+      );
+    });
+
+    if (fallbackSymbolId) {
+      categories.push(
+        <EuiFlexItem key="__fallbackCategory__">
+          <Category
+            styleName={this.getStyleName()}
+            label={<EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>}
+            color="grey"
+            isLinesOnly={isLinesOnly}
+            isPointsOnly={isPointsOnly}
+            symbolId={fallbackSymbolId}
+          />
+        </EuiFlexItem>
+      );
+    }
+
     return (
-      <BreakedLegend
-        style={this}
-        isPointsOnly={isPointsOnly}
-        isLinesOnly={isLinesOnly}
-        stops={stops}
-        symbolId={null}
-        color={'grey'}
-        useFallback={!!fallbackSymbolId}
-        fallbackSymbolId={fallbackSymbolId}
-        fallbackColor={null}
-      />
+      <BreakedLegend style={this}>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {categories}
+        </EuiFlexGroup>
+      </BreakedLegend>
     );
   }
 }
