@@ -55,7 +55,7 @@ let mockFieldsFetcherResponse: any[] = [];
 jest.mock('./_fields_fetcher', () => ({
   createFieldsFetcher: jest.fn().mockImplementation(() => ({
     fetch: jest.fn().mockImplementation(() => {
-      return new Promise(resolve => resolve(mockFieldsFetcherResponse));
+      return new Promise((resolve) => resolve(mockFieldsFetcherResponse));
     }),
     every: jest.fn(),
   })),
@@ -160,7 +160,7 @@ describe('IndexPattern', () => {
   });
 
   describe('fields', () => {
-    test('should have expected properties on fields', function() {
+    test('should have expected properties on fields', function () {
       expect(indexPattern.fields[0]).toHaveProperty('displayName');
       expect(indexPattern.fields[0]).toHaveProperty('filterable');
       expect(indexPattern.fields[0]).toHaveProperty('format');
@@ -191,7 +191,7 @@ describe('IndexPattern', () => {
 
     test('should request date fields as docvalue_fields', () => {
       const { docvalueFields } = indexPattern.getComputedFields();
-      const docValueFieldNames = docvalueFields.map(field => field.field);
+      const docValueFieldNames = docvalueFields.map((field) => field.field);
 
       expect(Object.keys(docValueFieldNames).length).toBe(3);
       expect(docValueFieldNames).toContain('@timestamp');
@@ -201,7 +201,7 @@ describe('IndexPattern', () => {
 
     test('should request date field doc values in date_time format', () => {
       const { docvalueFields } = indexPattern.getComputedFields();
-      const timestampField = docvalueFields.find(field => field.field === '@timestamp');
+      const timestampField = docvalueFields.find((field) => field.field === '@timestamp');
 
       expect(timestampField).toHaveProperty('format', 'date_time');
     });
@@ -237,7 +237,7 @@ describe('IndexPattern', () => {
       const newFields = indexPattern.getNonScriptedFields();
 
       expect(newFields).toHaveLength(2);
-      expect(newFields.map(f => f.name)).toEqual(['foo', 'bar']);
+      expect(newFields.map((f) => f.name)).toEqual(['foo', 'bar']);
     });
 
     test('should preserve the scripted fields', async () => {
@@ -249,7 +249,7 @@ describe('IndexPattern', () => {
 
       // called to append scripted fields to the response from mapper.getFieldsForIndexPattern
       // sinon.assert.calledOnce(indexPattern.getScriptedFields);
-      expect(indexPattern.getScriptedFields().map(f => f.name)).toEqual(
+      expect(indexPattern.getScriptedFields().map((f) => f.name)).toEqual(
         mockLogStashFields()
           .filter((f: Field) => f.scripted)
           .map((f: Field) => f.name)
@@ -313,7 +313,7 @@ describe('IndexPattern', () => {
   describe('popularizeField', () => {
     test('should increment the popularity count by default', () => {
       // const saveSpy = sinon.stub(indexPattern, 'save');
-      indexPattern.fields.forEach(async field => {
+      indexPattern.fields.forEach(async (field) => {
         const oldCount = field.count || 0;
 
         await indexPattern.popularizeField(field.name);
@@ -325,7 +325,7 @@ describe('IndexPattern', () => {
 
     test('should increment the popularity count', () => {
       // const saveSpy = sinon.stub(indexPattern, 'save');
-      indexPattern.fields.forEach(async field => {
+      indexPattern.fields.forEach(async (field) => {
         const oldCount = field.count || 0;
         const incrementAmount = 4;
 
@@ -337,7 +337,7 @@ describe('IndexPattern', () => {
     });
 
     test('should decrement the popularity count', () => {
-      indexPattern.fields.forEach(async field => {
+      indexPattern.fields.forEach(async (field) => {
         const oldCount = field.count || 0;
         const incrementAmount = 4;
         const decrementAmount = -2;
@@ -350,7 +350,7 @@ describe('IndexPattern', () => {
     });
 
     test('should not go below 0', () => {
-      indexPattern.fields.forEach(async field => {
+      indexPattern.fields.forEach(async (field) => {
         const decrementAmount = -Number.MAX_VALUE;
 
         await indexPattern.popularizeField(field.name, decrementAmount);

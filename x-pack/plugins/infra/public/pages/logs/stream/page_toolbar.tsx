@@ -64,6 +64,7 @@ export const LogsToolbar = () => {
                 isLoadingSuggestions={isLoadingSuggestions}
                 isValid={isFilterQueryDraftValid}
                 loadSuggestions={loadSuggestions}
+                disabled={isStreaming}
                 onChange={(expression: string) => {
                   setSurroundingLogsId(null);
                   setLogFilterQueryDraft(expression);
@@ -100,7 +101,7 @@ export const LogsToolbar = () => {
             onChange={setHighlightTerms}
             isLoading={loadLogEntryHighlightsRequest.state === 'pending'}
             activeHighlights={
-              highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length > 0
+              highlightTerms.filter((highlightTerm) => highlightTerm.length > 0).length > 0
             }
             goToPreviousHighlight={goToPreviousHighlight}
             goToNextHighlight={goToNextHighlight}

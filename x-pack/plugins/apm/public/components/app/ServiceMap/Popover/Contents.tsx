@@ -10,12 +10,12 @@ import {
   EuiHorizontalRule,
   EuiTitle,
   EuiIconTip,
-  EuiHealth
+  EuiHealth,
 } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import styled from 'styled-components';
 import { fontSize, px } from '../../../../style/variables';
 import { Buttons } from './Buttons';
@@ -31,7 +31,7 @@ const popoverMinWidth = 280;
 interface ContentsProps {
   isService: boolean;
   label: string;
-  onFocusClick: () => void;
+  onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
   selectedNodeData: cytoscape.NodeDataDefinition;
   selectedNodeServiceName: string;
 }
@@ -90,11 +90,11 @@ const ANOMALY_DETECTION_TITLE = i18n.translate(
   { defaultMessage: 'Anomaly Detection' }
 );
 
-const ANOMALY_DETECTION_INFO = i18n.translate(
-  'xpack.apm.serviceMap.anomalyDetectionPopoverInfo',
+const ANOMALY_DETECTION_TOOLTIP = i18n.translate(
+  'xpack.apm.serviceMap.anomalyDetectionPopoverTooltip',
   {
     defaultMessage:
-      'Display the health of your service by enabling the anomaly detection feature in Machine Learning.'
+      'Service health indicators are powered by the anomaly detection feature in machine learning',
   }
 );
 
@@ -108,11 +108,11 @@ const ANOMALY_DETECTION_LINK = i18n.translate(
   { defaultMessage: 'View anomalies' }
 );
 
-const ANOMALY_DETECTION_ENABLE_TEXT = i18n.translate(
-  'xpack.apm.serviceMap.anomalyDetectionPopoverEnable',
+const ANOMALY_DETECTION_DISABLED_TEXT = i18n.translate(
+  'xpack.apm.serviceMap.anomalyDetectionPopoverDisabled',
   {
     defaultMessage:
-      'Enable anomaly detection from the Integrations menu in the Service details view.'
+      'Display service health indicators by enabling anomaly detection from the Integrations menu in the Service details view.',
   }
 );
 
@@ -121,7 +121,7 @@ export function Contents({
   isService,
   label,
   onFocusClick,
-  selectedNodeServiceName
+  selectedNodeServiceName,
 }: ContentsProps) {
   // Anomaly Detection
   const severity = selectedNodeData.severity;
@@ -134,8 +134,8 @@ export function Contents({
     maxScore,
     actualValue,
     typicalValue,
-    jobId
-  ].every(value => value !== undefined);
+    jobId,
+  ].every((value) => value !== undefined);
   const anomalyDescription = hasAnomalyDetection
     ? getMetricChangeDescription(actualValue, typicalValue).message
     : null;
@@ -154,15 +154,18 @@ export function Contents({
       </FlexColumnItem>
       {isService && (
         <FlexColumnItem>
-          <section>
-            <HealthStatusTitle size="xxs">
-              <h3>{ANOMALY_DETECTION_TITLE}</h3>
-            </HealthStatusTitle>
-            &nbsp;
-            <EuiIconTip type="iInCircle" content={ANOMALY_DETECTION_INFO} />
-          </section>
           {hasAnomalyDetection ? (
             <>
+              <section>
+                <HealthStatusTitle size="xxs">
+                  <h3>{ANOMALY_DETECTION_TITLE}</h3>
+                </HealthStatusTitle>
+                &nbsp;
+                <EuiIconTip
+                  type="iInCircle"
+                  content={ANOMALY_DETECTION_TOOLTIP}
+                />
+              </section>
               <ContentLine>
                 <EuiFlexGroup>
                   <EuiFlexItem>
@@ -188,7 +191,12 @@ export function Contents({
               </ContentLine>
             </>
           ) : (
-            <EnableText>{ANOMALY_DETECTION_ENABLE_TEXT}</EnableText>
+            <>
+              <HealthStatusTitle size="xxs">
+                <h3>{ANOMALY_DETECTION_TITLE}</h3>
+              </HealthStatusTitle>
+              <EnableText>{ANOMALY_DETECTION_DISABLED_TEXT}</EnableText>
+            </>
           )}
           <EuiHorizontalRule margin="xs" />
         </FlexColumnItem>

@@ -10,8 +10,9 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
+import { BehaviorSubject } from 'rxjs';
 
-import { AppMountParameters, CoreStart, CoreSetup } from 'kibana/public';
+import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from 'kibana/public';
 
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 // @ts-ignore Untyped local
@@ -26,9 +27,6 @@ import { getDocumentationLinks } from './lib/documentation_links';
 import { HelpMenu } from './components/help_menu/help_menu';
 import { createStore, destroyStore } from './store';
 
-import { VALUE_CLICK_TRIGGER, ActionByType } from '../../../../src/plugins/ui_actions/public';
-/* eslint-disable */
-import { ACTION_VALUE_CLICK } from '../../../../src/plugins/data/public/actions/value_click_action';
 /* eslint-enable */
 import { init as initStatsReporter } from './lib/ui_metric';
 
@@ -43,16 +41,6 @@ import { stopRouter } from './lib/router_provider';
 import './style/index.scss';
 
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
-
-let restoreAction: ActionByType<any> | undefined;
-const emptyAction = {
-  id: 'empty-action',
-  type: '',
-  getDisplayName: () => 'empty action',
-  getIconType: () => undefined,
-  isCompatible: async () => true,
-  execute: async () => undefined,
-} as ActionByType<any>;
 
 export const renderApp = (
   coreStart: CoreStart,
@@ -88,9 +76,10 @@ export const initializeCanvas = async (
   coreStart: CoreStart,
   setupPlugins: CanvasSetupDeps,
   startPlugins: CanvasStartDeps,
-  registries: SetupRegistries
+  registries: SetupRegistries,
+  appUpdater: BehaviorSubject<AppUpdater>
 ) => {
-  startServices(coreSetup, coreStart, setupPlugins, startPlugins);
+  startServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
 
   // Create Store
   const canvasStore = await createStore(coreSetup, setupPlugins);
@@ -126,22 +115,11 @@ export const initializeCanvas = async (
         href: getDocumentationLinks().canvas,
       },
     ],
-    content: domNode => {
+    content: (domNode) => {
       ReactDOM.render(<HelpMenu />, domNode);
       return () => ReactDOM.unmountComponentAtNode(domNode);
     },
   });
-
-  // TODO: We need this to disable the filtering modal from popping up in lens embeds until
-  // they honor the disableTriggers parameter
-  const action = startPlugins.uiActions.getAction(ACTION_VALUE_CLICK);
-
-  if (action) {
-    restoreAction = action;
-
-    startPlugins.uiActions.detachAction(VALUE_CLICK_TRIGGER, action.id);
-    startPlugins.uiActions.addTriggerAction(VALUE_CLICK_TRIGGER, emptyAction);
-  }
 
   if (setupPlugins.usageCollection) {
     initStatsReporter(setupPlugins.usageCollection.reportUiStats);
@@ -155,12 +133,6 @@ export const teardownCanvas = (coreStart: CoreStart, startPlugins: CanvasStartDe
   destroyRegistries();
   resetInterpreter();
   destroyStore();
-
-  startPlugins.uiActions.detachAction(VALUE_CLICK_TRIGGER, emptyAction.id);
-  if (restoreAction) {
-    startPlugins.uiActions.addTriggerAction(VALUE_CLICK_TRIGGER, restoreAction);
-    restoreAction = undefined;
-  }
 
   coreStart.chrome.setBadge(undefined);
   coreStart.chrome.setHelpExtension(undefined);

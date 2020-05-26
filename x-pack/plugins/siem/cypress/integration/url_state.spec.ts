@@ -30,7 +30,7 @@ import { openAllHosts } from '../tasks/hosts/main';
 
 import { waitForIpsTableToBeLoaded } from '../tasks/network/flows';
 import { clearSearchBar, kqlSearch, navigateFromHeaderTo } from '../tasks/siem_header';
-import { openTimeline, openTimelineIfClosed } from '../tasks/siem_main';
+import { openTimeline } from '../tasks/siem_main';
 import {
   addDescriptionToTimeline,
   addNameToTimeline,
@@ -174,11 +174,10 @@ describe('url state', () => {
     kqlSearch('source.ip: "10.142.0.9" {enter}');
     navigateFromHeaderTo(HOSTS);
 
-    cy.get(NETWORK).should($div =>
-      // @ts-ignore
-      expect($div[0].attributes.href.value).to.include(
-        "#/link-to/network?query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))"
-      )
+    cy.get(NETWORK).should(
+      'have.attr',
+      'href',
+      "#/link-to/network?query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))"
     );
   });
 
@@ -188,52 +187,40 @@ describe('url state', () => {
     openAllHosts();
     waitForAllHostsToBeLoaded();
 
-    cy.get(HOSTS).should($div =>
-      // @ts-ignore
-      expect($div[0].attributes.href.value).to.include(
-        "#/link-to/hosts?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
-      )
+    cy.get(HOSTS).should(
+      'have.attr',
+      'href',
+      "#/link-to/hosts?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
     );
-
-    cy.get(NETWORK).should($div =>
-      // @ts-ignore
-      expect($div[0].attributes.href.value).to.include(
-        "#/link-to/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
-      )
+    cy.get(NETWORK).should(
+      'have.attr',
+      'href',
+      "#/link-to/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
     );
-
-    cy.get(HOSTS_NAMES)
-      .first()
-      .invoke('text')
-      .should('eq', 'siem-kibana');
+    cy.get(HOSTS_NAMES).first().invoke('text').should('eq', 'siem-kibana');
 
     openFirstHostDetails();
     clearSearchBar();
     kqlSearch('agent.type: "auditbeat" {enter}');
 
-    cy.get(ANOMALIES_TAB).should($div =>
-      // @ts-ignore
-      expect($div[0].attributes.href.value).to.include(
-        "#/hosts/siem-kibana/anomalies?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
-      )
+    cy.get(ANOMALIES_TAB).should(
+      'have.attr',
+      'href',
+      "#/hosts/siem-kibana/anomalies?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
     );
-
     cy.get(BREADCRUMBS)
       .eq(1)
-      .should($div =>
-        // @ts-ignore
-        expect($div[0].attributes.href.value).to.include(
-          "#/link-to/hosts?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
-        )
+      .should(
+        'have.attr',
+        'href',
+        "#/link-to/hosts?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
       );
-
     cy.get(BREADCRUMBS)
       .eq(2)
-      .should($div =>
-        // @ts-ignore
-        expect($div[0].attributes.href.value).to.include(
-          "#/link-to/hosts/siem-kibana?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
-        )
+      .should(
+        'have.attr',
+        'href',
+        "#/link-to/hosts/siem-kibana?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
       );
   });
 
@@ -246,12 +233,12 @@ describe('url state', () => {
 
   it('sets and reads the url state for timeline by id', () => {
     loginAndWaitForPage(HOSTS_PAGE);
-    openTimelineIfClosed();
+    openTimeline();
     executeTimelineKQL('host.name: *');
 
     cy.get(SERVER_SIDE_EVENT_COUNT)
       .invoke('text')
-      .then(strCount => {
+      .then((strCount) => {
         const intCount = +strCount;
         cy.wrap(intCount).should('be.above', 0);
       });
@@ -262,7 +249,7 @@ describe('url state', () => {
     cy.wait(5000);
 
     cy.url({ timeout: 30000 }).should('match', /\w*-\w*-\w*-\w*-\w*/);
-    cy.url().then(url => {
+    cy.url().then((url) => {
       const matched = url.match(/\w*-\w*-\w*-\w*-\w*/);
       const newTimelineId = matched && matched.length > 0 ? matched[0] : 'null';
       expect(matched).to.have.lengthOf(1);
@@ -270,9 +257,7 @@ describe('url state', () => {
       cy.visit('/app/kibana');
       cy.visit(`/app/siem#/overview?timeline\=(id:'${newTimelineId}',isOpen:!t)`);
       cy.contains('a', 'SIEM');
-      cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE)
-        .invoke('text')
-        .should('not.equal', 'Updating');
+      cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).invoke('text').should('not.equal', 'Updating');
       cy.get(TIMELINE_TITLE).should('have.attr', 'value', timelineName);
     });
   });

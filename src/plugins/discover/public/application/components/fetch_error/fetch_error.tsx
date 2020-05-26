@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './fetch_error.scss';
 import React, { Fragment } from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
@@ -41,7 +42,7 @@ const DiscoverFetchError = ({ fetchError }: Props) => {
     const { chrome } = getServices();
     const mangagementUrlObj = chrome.navLinks.get('kibana:stack_management');
     const managementUrl = mangagementUrlObj ? mangagementUrlObj.url : '';
-    const url = `${managementUrl}/kibana/index_patterns`;
+    const url = `${managementUrl}/kibana/indexPatterns`;
 
     body = (
       <p>

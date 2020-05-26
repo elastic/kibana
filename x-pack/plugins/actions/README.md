@@ -27,12 +27,12 @@ Table of Contents
     - [Example](#example)
   - [RESTful API](#restful-api)
     - [`POST /api/action`: Create action](#post-apiaction-create-action)
-    - [`DELETE /api/action/{id}`: Delete action](#delete-apiactionid-delete-action)
-    - [`GET /api/action/_getAll`: Get all actions](#get-apiactiongetall-get-all-actions)
-    - [`GET /api/action/{id}`: Get action](#get-apiactionid-get-action)
-    - [`GET /api/action/types`: List action types](#get-apiactiontypes-list-action-types)
-    - [`PUT /api/action/{id}`: Update action](#put-apiactionid-update-action)
-    - [`POST /api/action/{id}/_execute`: Execute action](#post-apiactionidexecute-execute-action)
+    - [`DELETE /api/actions/action/{id}`: Delete action](#delete-apiactionid-delete-action)
+    - [`GET /api/actions`: Get all actions](#get-apiactiongetall-get-all-actions)
+    - [`GET /api/actions/action/{id}`: Get action](#get-apiactionid-get-action)
+    - [`GET /api/actions/list_action_types`: List action types](#get-apiactiontypes-list-action-types)
+    - [`PUT /api/actions/action/{id}`: Update action](#put-apiactionid-update-action)
+    - [`POST /api/actions/action/{id}/_execute`: Execute action](#post-apiactionidexecute-execute-action)
   - [Firing actions](#firing-actions)
   - [Example](#example-1)
 - [Built-in Action Types](#built-in-action-types)
@@ -98,7 +98,7 @@ Built-In-Actions are configured using the _xpack.actions_ namespoace under _kiba
 | _xpack.actions._**enabled**            | Feature toggle which enabled Actions in Kibana.                                                                                                                                                                                                                                                                                                                                                                                                                               | boolean       |
 | _xpack.actions._**whitelistedHosts**   | Which _hostnames_ are whitelisted for the Built-In-Action? This list should contain hostnames of every external service you wish to interact with using Webhooks, Email or any other built in Action. Note that you may use the string "\*" in place of a specific hostname to enable Kibana to target any URL, but keep in mind the potential use of such a feature to execute [SSRF](https://www.owasp.org/index.php/Server_Side_Request_Forgery) attacks from your server. | Array<String> |
 | _xpack.actions._**enabledActionTypes** | A list of _actionTypes_ id's that are enabled. A "\*" may be used as an element to indicate all registered actionTypes should be enabled. The actionTypes registered for Kibana are `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, `.webhook`. Default: `["*"]`                                                                                                                                                                                                   | Array<String> |
-| _xpack.actions._**preconfigured**      | A list of preconfigured actions. Default: `[]`                                                                                                                                                                                                                                                                                                                                                                                                                                | Array<Object> |
+| _xpack.actions._**preconfigured**      | A object of action id / preconfigured actions. Default: `{}`                                                                                                                                                                                                                                                                                                                                                                                                                                | Array<Object> |
 
 #### Whitelisting Built-in Action Types
 
@@ -174,7 +174,7 @@ Payload:
 | config       | The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined. | object |
 | secrets      | The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.      | object |
 
-### `DELETE /api/action/{id}`: Delete action
+### `DELETE /api/actions/action/{id}`: Delete action
 
 Params:
 
@@ -182,7 +182,7 @@ Params:
 | -------- | --------------------------------------------- | ------ |
 | id       | The id of the action you're trying to delete. | string |
 
-### `GET /api/action/_getAll`: Get all actions
+### `GET /api/actions`: Get all actions
 
 No parameters.
 
@@ -190,7 +190,7 @@ Return all actions from saved objects merged with predefined list.
 Use the [saved objects API for find](https://www.elastic.co/guide/en/kibana/master/saved-objects-api-find.html) with the proprties: `type: 'action'` and `perPage: 10000`.
 List of predefined actions should be set up in Kibana.yaml.
 
-### `GET /api/action/{id}`: Get action
+### `GET /api/actions/action/{id}`: Get action
 
 Params:
 
@@ -198,11 +198,11 @@ Params:
 | -------- | ------------------------------------------ | ------ |
 | id       | The id of the action you're trying to get. | string |
 
-### `GET /api/action/types`: List action types
+### `GET /api/actions/list_action_types`: List action types
 
 No parameters.
 
-### `PUT /api/action/{id}`: Update action
+### `PUT /api/actions/action/{id}`: Update action
 
 Params:
 
@@ -218,7 +218,7 @@ Payload:
 | config   | The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined. | object |
 | secrets  | The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.      | object |
 
-### `POST /api/action/{id}/_execute`: Execute action
+### `POST /api/actions/action/{id}/_execute`: Execute action
 
 Params:
 

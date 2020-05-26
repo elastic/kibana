@@ -56,7 +56,7 @@ const StyledExpression = euiStyled.div`
   padding: 0 4px;
 `;
 
-export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
+export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const [isExpanded, setRowState] = useState(true);
   const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
   const {
@@ -102,7 +102,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
   );
 
   const updateThreshold = useCallback(
-    t => {
+    (t) => {
       if (t.join() !== expression.threshold.join()) {
         setAlertParams(expressionId, { ...expression, threshold: t });
       }
@@ -136,7 +136,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
                 <OfExpression
                   customAggTypesOptions={aggregationType}
                   aggField={metric}
-                  fields={fields.map(f => ({
+                  fields={fields.map((f) => ({
                     normalizedType: f.type,
                     name: f.name,
                   }))}
@@ -232,6 +232,22 @@ export const aggregationType: { [key: string]: any } = {
     }),
     fieldRequired: false,
     value: AGGREGATION_TYPES.SUM,
+    validNormalizedTypes: ['number'],
+  },
+  p95: {
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.p95', {
+      defaultMessage: '95th Percentile',
+    }),
+    fieldRequired: false,
+    value: AGGREGATION_TYPES.P95,
+    validNormalizedTypes: ['number'],
+  },
+  p99: {
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.p99', {
+      defaultMessage: '99th Percentile',
+    }),
+    fieldRequired: false,
+    value: AGGREGATION_TYPES.P99,
     validNormalizedTypes: ['number'],
   },
 };

@@ -6,7 +6,7 @@
 
 import { SearchResponse, SearchParams } from 'elasticsearch';
 
-import { AnomalyRecordDoc as Anomaly } from '../../../../ml/common/types/anomalies';
+import { AnomalyRecordDoc as Anomaly } from '../../../../ml/server';
 
 export { Anomaly };
 export type AnomalyResults = SearchResponse<Anomaly>;
@@ -75,7 +75,7 @@ const buildCriteria = (params: AnomaliesSearchParams): object[] => {
   ];
 
   if (jobIdsFilterable) {
-    const jobIdFilter = jobIds.map(jobId => `job_id:${jobId}`).join(' OR ');
+    const jobIdFilter = jobIds.map((jobId) => `job_id:${jobId}`).join(' OR ');
 
     boolCriteria.push({
       query_string: {

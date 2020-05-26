@@ -16,9 +16,8 @@ import {
 } from '../actions';
 import { getAsyncInitialState, handleAsyncAction } from './utils';
 import { AsyncInitialState } from './types';
-import { MlCapabilitiesResponse } from '../../../../../plugins/ml/common/types/capabilities';
+import { MlCapabilitiesResponse, JobExistResult } from '../../../../../plugins/ml/public';
 import { CreateMLJobSuccess, DeleteJobResults } from '../actions/types';
-import { JobExistResult } from '../../../../../plugins/ml/common/types/data_recognizer';
 
 export interface MLJobState {
   mlJob: AsyncInitialState<JobExistResult>;
@@ -44,7 +43,7 @@ export const mlJobsReducer = handleActions<MLJobState>(
     ...handleAsyncAction<MLJobState>('deleteJob', deleteMLJobAction),
     ...handleAsyncAction<MLJobState>('anomalies', getAnomalyRecordsAction),
     ...{
-      [String(resetMLState)]: state => ({
+      [String(resetMLState)]: (state) => ({
         ...state,
         mlJob: {
           loading: false,

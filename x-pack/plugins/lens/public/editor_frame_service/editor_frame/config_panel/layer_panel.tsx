@@ -43,6 +43,12 @@ export function LayerPanel(
   }
 ) {
   const dragDropContext = useContext(DragContext);
+  const [popoverState, setPopoverState] = useState<DimensionPopoverState>({
+    isOpen: false,
+    openId: null,
+    addingToGroupId: null,
+  });
+
   const { framePublicAPI, layerId, activeVisualization, isOnlyLayer, onRemoveLayer } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
   if (!datasourcePublicAPI) {
@@ -74,14 +80,8 @@ export function LayerPanel(
     dateRange: props.framePublicAPI.dateRange,
   };
 
-  const [popoverState, setPopoverState] = useState<DimensionPopoverState>({
-    isOpen: false,
-    openId: null,
-    addingToGroupId: null,
-  });
-
   const { groups } = activeVisualization.getConfiguration(layerVisualizationConfigProps);
-  const isEmptyLayer = !groups.some(d => d.accessors.length > 0);
+  const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
@@ -120,9 +120,9 @@ export function LayerPanel(
                     const removed = datasourcePublicAPI
                       .getTableSpec()
                       .map(({ columnId }) => columnId)
-                      .filter(columnId => !nextTable.has(columnId));
+                      .filter((columnId) => !nextTable.has(columnId));
                     let nextVisState = props.visualizationState;
-                    removed.forEach(columnId => {
+                    removed.forEach((columnId) => {
                       nextVisState = activeVisualization.removeDimension({
                         layerId,
                         columnId,
@@ -158,7 +158,7 @@ export function LayerPanel(
               }
             >
               <>
-                {group.accessors.map(accessor => (
+                {group.accessors.map((accessor) => (
                   <DragDrop
                     key={accessor}
                     className="lnsLayerPanel__dimension"
@@ -171,7 +171,7 @@ export function LayerPanel(
                         filterOperations: group.filterOperations,
                       })
                     }
-                    onDrop={droppedItem => {
+                    onDrop={(droppedItem) => {
                       layerDatasource.onDrop({
                         ...layerDatasourceDropProps,
                         droppedItem,
@@ -268,7 +268,7 @@ export function LayerPanel(
                         filterOperations: group.filterOperations,
                       })
                     }
-                    onDrop={droppedItem => {
+                    onDrop={(droppedItem) => {
                       const dropSuccess = layerDatasource.onDrop({
                         ...layerDatasourceDropProps,
                         droppedItem,

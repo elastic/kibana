@@ -8,7 +8,7 @@ import React, { Component, Fragment } from 'react';
 
 import { EuiButtonEmpty, EuiPopover, EuiContextMenu, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ILayer } from '../../../../../../layers/layer';
+import { ILayer } from '../../../../../../classes/layers/layer';
 
 interface Props {
   cloneLayer: (layerId: string) => void;
@@ -55,7 +55,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   }
 
   _togglePopover = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };

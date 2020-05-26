@@ -4,25 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CancellationToken } from '../../common/cancellation_token';
+import { CancellationToken } from '../../../../../plugins/reporting/common';
 import { PLUGIN_ID } from '../../common/constants';
-import { ReportingCore } from '../../server/types';
-import {
-  ESQueueInstance,
-  ESQueueWorkerExecuteFn,
-  ExportTypeDefinition,
-  ImmediateExecuteFn,
-  JobDocPayload,
-  JobSource,
-  Logger,
-  RequestFacade,
-} from '../../types';
+import { ReportingCore } from '../../server';
+import { LevelLogger } from '../../server/lib';
+import { ESQueueWorkerExecuteFn, ExportTypeDefinition, JobSource } from '../../server/types';
+import { ESQueueInstance } from './create_queue';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
 
-export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, logger: Logger) {
-  type JobDocPayloadType = JobDocPayload<JobParamsType>;
-
+export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, logger: LevelLogger) {
   const config = reporting.getConfig();
   const queueConfig = config.get('queue');
   const kibanaName = config.kbnConfig.get('server', 'name');
@@ -31,48 +22,36 @@ export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, log
   // Once more document types are added, this will need to be passed in
   return async function createWorker(queue: ESQueueInstance) {
     // export type / execute job map
-    const jobExecutors: Map<
-      string,
-      ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<JobDocPayloadType>
-    > = new Map();
+    const jobExecutors: Map<string, ESQueueWorkerExecuteFn<unknown>> = new Map();
 
     for (const exportType of reporting.getExportTypesRegistry().getAll() as Array<
-      ExportTypeDefinition<
-        JobParamsType,
-        unknown,
-        unknown,
-        ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<JobDocPayloadType>
-      >
+      ExportTypeDefinition<JobParamsType, unknown, unknown, ESQueueWorkerExecuteFn<unknown>>
     >) {
       const jobExecutor = await exportType.executeJobFactory(reporting, logger); // FIXME: does not "need" to be async
       jobExecutors.set(exportType.jobType, jobExecutor);
     }
 
-    const workerFn = (jobSource: JobSource<JobParamsType>, ...workerRestArgs: any[]) => {
+    const workerFn = <ScheduledTaskParamsType>(
+      jobSource: JobSource<ScheduledTaskParamsType>,
+      jobParams: ScheduledTaskParamsType,
+      cancellationToken: CancellationToken
+    ) => {
       const {
         _id: jobId,
         _source: { jobtype: jobType },
       } = jobSource;
 
+      if (!jobId) {
+        throw new Error(`Claimed job is missing an ID!: ${JSON.stringify(jobSource)}`);
+      }
+
       const jobTypeExecutor = jobExecutors.get(jobType);
-      // pass the work to the jobExecutor
       if (!jobTypeExecutor) {
         throw new Error(`Unable to find a job executor for the claimed job: [${jobId}]`);
       }
 
-      if (jobId) {
-        const jobExecutorWorker = jobTypeExecutor as ESQueueWorkerExecuteFn<JobDocPayloadType>;
-        return jobExecutorWorker(
-          jobId,
-          ...(workerRestArgs as [JobDocPayloadType, CancellationToken])
-        );
-      } else {
-        const jobExecutorImmediate = jobExecutors.get(jobType) as ImmediateExecuteFn<JobParamsType>;
-        return jobExecutorImmediate(
-          null,
-          ...(workerRestArgs as [JobDocPayload<JobParamsType>, RequestFacade])
-        );
-      }
+      // pass the work to the jobExecutor
+      return jobTypeExecutor(jobId, jobParams, cancellationToken);
     };
 
     const workerOptions = {

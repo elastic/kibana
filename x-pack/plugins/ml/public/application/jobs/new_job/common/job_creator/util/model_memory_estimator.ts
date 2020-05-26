@@ -45,7 +45,7 @@ export const modelMemoryEstimatorProvider = (
     get updates$(): Observable<string> {
       return combineLatest([
         jobCreator.wizardInitialized$.pipe(
-          skipWhile(wizardInitialized => wizardInitialized === false)
+          skipWhile((wizardInitialized) => wizardInitialized === false)
         ),
         modelMemoryCheck$,
       ]).pipe(
@@ -58,10 +58,10 @@ export const modelMemoryEstimatorProvider = (
         distinctUntilChanged(isEqual),
         // don't call the endpoint with invalid payload
         filter(() => jobValidator.isModelMemoryEstimationPayloadValid),
-        switchMap(payload => {
+        switchMap((payload) => {
           return ml.calculateModelMemoryLimit$(payload).pipe(
             pluck('modelMemoryLimit'),
-            catchError(error => {
+            catchError((error) => {
               // eslint-disable-next-line no-console
               console.error('Model memory limit could not be calculated', error.body);
               error$.next(error.body);
@@ -115,7 +115,7 @@ export const useModelMemoryEstimator = (
     );
 
     subscription.add(
-      modelMemoryEstimator.error$.subscribe(error => {
+      modelMemoryEstimator.error$.subscribe((error) => {
         notifications.toasts.addWarning({
           title: i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryError', {
             defaultMessage: 'Model memory limit could not be calculated',

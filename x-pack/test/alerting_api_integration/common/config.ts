@@ -51,7 +51,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
     // Find all folders in ./plugins since we treat all them as plugin folder
     const allFiles = fs.readdirSync(path.resolve(__dirname, 'fixtures', 'plugins'));
-    const plugins = allFiles.filter(file =>
+    const plugins = allFiles.filter((file) =>
       fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
     );
 
@@ -69,8 +69,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ssl,
         serverArgs: [
           `xpack.license.self_generated.type=${license}`,
-          `xpack.security.enabled=${!disabledPlugins.includes('security') &&
-            ['trial', 'basic'].includes(license)}`,
+          `xpack.security.enabled=${
+            !disabledPlugins.includes('security') && ['trial', 'basic'].includes(license)
+          }`,
         ],
       },
       kbnTestServer: {
@@ -83,17 +84,15 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
-          `--xpack.actions.preconfigured=${JSON.stringify([
-            {
-              id: 'my-slack1',
+          `--xpack.actions.preconfigured=${JSON.stringify({
+            'my-slack1': {
               actionTypeId: '.slack',
               name: 'Slack#xyz',
               config: {
                 webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
               },
             },
-            {
-              id: 'custom-system-abc-connector',
+            'custom-system-abc-connector': {
               actionTypeId: 'system-abc-action-type',
               name: 'SystemABC',
               config: {
@@ -106,8 +105,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 xyzSecret2: 'credential2',
               },
             },
-            {
-              id: 'preconfigured-es-index-action',
+            'preconfigured-es-index-action': {
               actionTypeId: '.index',
               name: 'preconfigured_es_index_action',
               config: {
@@ -116,8 +114,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 executionTimeField: 'timestamp',
               },
             },
-            {
-              id: 'preconfigured.test.index-record',
+            'preconfigured.test.index-record': {
               actionTypeId: 'test.index-record',
               name: 'Test:_Preconfigured_Index_Record',
               config: {
@@ -127,10 +124,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 encrypted: 'this-is-also-ignored-and-also-required',
               },
             },
-          ])}`,
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          })}`,
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
           ...plugins.map(
-            pluginDir =>
+            (pluginDir) =>
               `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
           ),
           `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,

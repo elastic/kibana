@@ -23,7 +23,7 @@ function SingleRect({ innerHeight, marginTop, style, x, width }) {
 
 SingleRect.requiresSVG = true;
 SingleRect.propTypes = {
-  x: PropTypes.number.isRequired
+  x: PropTypes.number.isRequired,
 };
 
 export default SingleRect;

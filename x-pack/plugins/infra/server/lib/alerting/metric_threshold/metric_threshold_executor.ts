@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mapValues } from 'lodash';
+import { mapValues, first } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { InfraDatabaseSearchResponse } from '../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../utils/create_afterkey_handler';
@@ -21,12 +21,16 @@ import { AlertServices, AlertExecutorOptions } from '../../../../../alerting/ser
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { getDateHistogramOffset } from '../../snapshot/query_helpers';
 import { InfraBackendLibs } from '../../infra_types';
+import { createPercentileAggregation } from './create_percentile_aggregation';
 
 const TOTAL_BUCKETS = 5;
 
 interface Aggregation {
   aggregatedIntervals: {
-    buckets: Array<{ aggregatedValue: { value: number }; doc_count: number }>;
+    buckets: Array<{
+      aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
+      doc_count: number;
+    }>;
   };
 }
 
@@ -47,6 +51,12 @@ const getCurrentValueFromAggregations = (
     if (aggType === Aggregators.COUNT) {
       return mostRecentBucket.doc_count;
     }
+    if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
+      const values = mostRecentBucket.aggregatedValue?.values || [];
+      const firstValue = first(values);
+      if (!firstValue) return null;
+      return firstValue.value;
+    }
     const { value } = mostRecentBucket.aggregatedValue;
     return value;
   } catch (e) {
@@ -56,7 +66,7 @@ const getCurrentValueFromAggregations = (
 
 const getParsedFilterQuery: (
   filterQuery: string | undefined
-) => Record<string, any> | Array<Record<string, any>> = filterQuery => {
+) => Record<string, any> | Array<Record<string, any>> = (filterQuery) => {
   if (!filterQuery) return {};
   return JSON.parse(filterQuery).bool;
 };
@@ -64,7 +74,7 @@ const getParsedFilterQuery: (
 export const getElasticsearchMetricQuery = (
   { metric, aggType, timeUnit, timeSize }: MetricExpressionParams,
   timefield: string,
-  groupBy?: string,
+  groupBy?: string | string[],
   filterQuery?: string
 ) => {
   if (aggType === Aggregators.COUNT && metric) {
@@ -86,6 +96,8 @@ export const getElasticsearchMetricQuery = (
       ? {}
       : aggType === Aggregators.RATE
       ? networkTraffic('aggregatedValue', metric)
+      : aggType === Aggregators.P95 || aggType === Aggregators.P99
+      ? createPercentileAggregation(aggType, metric)
       : {
           aggregatedValue: {
             [aggType]: {
@@ -114,15 +126,21 @@ export const getElasticsearchMetricQuery = (
         groupings: {
           composite: {
             size: 10,
-            sources: [
-              {
-                groupBy: {
-                  terms: {
-                    field: groupBy,
+            sources: Array.isArray(groupBy)
+              ? groupBy.map((field, index) => ({
+                  [`groupBy${index}`]: {
+                    terms: { field },
                   },
-                },
-              },
-            ],
+                }))
+              : [
+                  {
+                    groupBy0: {
+                      terms: {
+                        field: groupBy,
+                      },
+                    },
+                  },
+                ],
           },
           aggs: baseAggs,
         },
@@ -174,9 +192,9 @@ const getMetric: (
   params: MetricExpressionParams,
   index: string,
   timefield: string,
-  groupBy: string | undefined,
+  groupBy: string | undefined | string[],
   filterQuery: string | undefined
-) => Promise<Record<string, number>> = async function(
+) => Promise<Record<string, number>> = async function (
   { callCluster },
   params,
   index,
@@ -194,18 +212,20 @@ const getMetric: (
       ) => response.aggregations?.groupings?.buckets || [];
       const afterKeyHandler = createAfterKeyHandler(
         'aggs.groupings.composite.after',
-        response => response.aggregations?.groupings?.after_key
+        (response) => response.aggregations?.groupings?.after_key
       );
       const compositeBuckets = (await getAllCompositeData(
-        body => callCluster('search', { body, index }),
+        (body) => callCluster('search', { body, index }),
         searchBody,
         bucketSelector,
         afterKeyHandler
-      )) as Array<Aggregation & { key: { groupBy: string } }>;
+      )) as Array<Aggregation & { key: Record<string, string> }>;
       return compositeBuckets.reduce(
         (result, bucket) => ({
           ...result,
-          [bucket.key.groupBy]: getCurrentValueFromAggregations(bucket, aggType),
+          [Object.values(bucket.key)
+            .map((value) => value)
+            .join(', ')]: getCurrentValueFromAggregations(bucket, aggType),
         }),
         {}
       );
@@ -234,10 +254,10 @@ const comparatorMap = {
 };
 
 export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: string) =>
-  async function({ services, params }: AlertExecutorOptions) {
+  async function ({ services, params }: AlertExecutorOptions) {
     const { criteria, groupBy, filterQuery, sourceId, alertOnNoData } = params as {
       criteria: MetricExpressionParams[];
-      groupBy: string | undefined;
+      groupBy: string | undefined | string[];
       filterQuery: string | undefined;
       sourceId?: string;
       alertOnNoData: boolean;
@@ -249,7 +269,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
     );
     const config = source.configuration;
     const alertResults = await Promise.all(
-      criteria.map(criterion => {
+      criteria.map((criterion) => {
         return (async () => {
           const currentValues = await getMetric(
             services,
@@ -261,7 +281,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
           );
           const { threshold, comparator } = criterion;
           const comparisonFunction = comparatorMap[comparator];
-          return mapValues(currentValues, value => ({
+          return mapValues(currentValues, (value) => ({
             ...criterion,
             metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
             currentValue: value,
@@ -275,16 +295,16 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
     );
 
     // Because each alert result has the same group definitions, just grap the groups from the first one.
-    const groups = Object.keys(alertResults[0]);
+    const groups = Object.keys(first(alertResults));
     for (const group of groups) {
       const alertInstance = services.alertInstanceFactory(`${alertId}-${group}`);
 
       // AND logic; all criteria must be across the threshold
-      const shouldAlertFire = alertResults.every(result => result[group].shouldFire);
+      const shouldAlertFire = alertResults.every((result) => result[group].shouldFire);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = alertResults.some(result => result[group].isNoData);
-      const isError = alertResults.some(result => result[group].isError);
+      const isNoData = alertResults.some((result) => result[group].isNoData);
+      const isError = alertResults.some((result) => result[group].isError);
 
       const nextState = isError
         ? AlertStates.ERROR
@@ -296,18 +316,18 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
 
       let reason;
       if (nextState === AlertStates.ALERT) {
-        reason = alertResults.map(result => buildFiredAlertReason(result[group])).join('\n');
+        reason = alertResults.map((result) => buildFiredAlertReason(result[group])).join('\n');
       }
       if (alertOnNoData) {
         if (nextState === AlertStates.NO_DATA) {
           reason = alertResults
-            .filter(result => result[group].isNoData)
-            .map(result => buildNoDataAlertReason(result[group]))
+            .filter((result) => result[group].isNoData)
+            .map((result) => buildNoDataAlertReason(result[group]))
             .join('\n');
         } else if (nextState === AlertStates.ERROR) {
           reason = alertResults
-            .filter(result => result[group].isError)
-            .map(result => buildErrorAlertReason(result[group].metric))
+            .filter((result) => result[group].isError)
+            .map((result) => buildErrorAlertReason(result[group].metric))
             .join('\n');
         }
       }

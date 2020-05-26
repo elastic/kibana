@@ -34,7 +34,7 @@ export const ShardDetails = ({ index, shard, operations }: Props) => {
   const { relative, time } = shard;
 
   const [shardVisibility, setShardVisibility] = useState<boolean>(() =>
-    hasVisibleOperation(operations.map(op => op.treeRoot ?? op))
+    hasVisibleOperation(operations.map((op) => op.treeRoot ?? op))
   );
 
   return (
@@ -44,6 +44,7 @@ export const ShardDetails = ({ index, shard, operations }: Props) => {
           <EuiLink
             className="prfDevTool__profileTree__shardDetails"
             onClick={() => setShardVisibility(!shardVisibility)}
+            data-test-subj="openCloseShardDetails"
           >
             <EuiIcon type={shardVisibility ? 'arrowDown' : 'arrowRight'} />[{shard.id[0]}][
             {shard.id[2]}]

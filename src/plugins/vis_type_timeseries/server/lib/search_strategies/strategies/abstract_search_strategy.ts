@@ -61,9 +61,9 @@ export class AbstractSearchStrategy {
     callWithRequestFactory: (server: any, req: ReqFacade) => APICaller,
     SearchRequest: any
   ) {
-    this.getCallWithRequestInstance = req => callWithRequestFactory(server, req);
+    this.getCallWithRequestInstance = (req) => callWithRequestFactory(server, req);
 
-    this.getSearchRequest = req => {
+    this.getSearchRequest = (req) => {
       const callWithRequest = this.getCallWithRequestInstance(req);
 
       return new SearchRequest(req, callWithRequest);

@@ -20,7 +20,7 @@ import {
 } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
 import { getMLJobId } from '../../../state/api/ml_anomaly';
-import { JobStat } from '../../../../../ml/common/types/data_recognizer';
+import { JobStat } from '../../../../../ml/public';
 import { MonitorDurationComponent } from './monitor_duration';
 import { MonitorIdParam } from '../../../../common/types';
 

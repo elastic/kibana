@@ -17,9 +17,9 @@ interface Props {
 export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
-  const currentFilters = useFilterUpdate();
+  const { selectedFilters } = useFilterUpdate();
 
-  const getSelectedItems = (fieldName: string) => currentFilters.get(fieldName) || [];
+  const getSelectedItems = (fieldName: string) => selectedFilters.get(fieldName) || [];
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -38,7 +38,7 @@ export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter }) =>
     { id: 'monitor.type', label: labels.TYPE },
   ];
 
-  allFilters.forEach(filter => {
+  allFilters.forEach((filter) => {
     if (getSelectedItems(filter.id)?.length === 0 && !newFilters.includes(filter.id)) {
       items.push(
         <EuiContextMenuItem

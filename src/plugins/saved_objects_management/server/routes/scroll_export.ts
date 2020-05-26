@@ -39,7 +39,7 @@ export const registerScrollForExportRoute = (router: IRouter) => {
       });
 
       return res.ok({
-        body: objects.map(hit => {
+        body: objects.map((hit) => {
           return {
             _id: hit.id,
             _source: hit.attributes,

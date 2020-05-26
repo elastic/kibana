@@ -13,6 +13,7 @@ import * as Registry from '../../registry';
 import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
 import { getPackageKeysByStatus } from '../../packages/get';
 import { InstallationStatus, RegistryPackage, CallESAsCurrentUser } from '../../../../types';
+import { appContextService } from '../../../../services';
 
 interface FieldFormatMap {
   [key: string]: FieldFormatMapItem;
@@ -87,7 +88,7 @@ export async function installIndexPatterns(
   );
   if (pkgName && pkgVersion) {
     // add this package to the array if it doesn't already exist
-    const foundPkg = installedPackages.find(pkg => pkg.pkgName === pkgName);
+    const foundPkg = installedPackages.find((pkg) => pkg.pkgName === pkgName);
     // this may be removed if we add the packged to saved objects before installing index patterns
     // otherwise this is a first time install
     // TODO: handle update case when versions are different
@@ -96,7 +97,7 @@ export async function installIndexPatterns(
     }
   }
   // get each package's registry info
-  const installedPackagesFetchInfoPromise = installedPackages.map(pkg =>
+  const installedPackagesFetchInfoPromise = installedPackages.map((pkg) =>
     Registry.fetchInfo(pkg.pkgName, pkg.pkgVersion)
   );
   const installedPackagesInfo = await Promise.all(installedPackagesFetchInfoPromise);
@@ -107,7 +108,7 @@ export async function installIndexPatterns(
     IndexPatternType.metrics,
     IndexPatternType.events,
   ];
-  indexPatternTypes.forEach(async indexPatternType => {
+  indexPatternTypes.forEach(async (indexPatternType) => {
     // if this is an update because a package is being unisntalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
     if (!pkgName && installedPackages.length === 0) {
       try {
@@ -139,8 +140,8 @@ export const getAllDatasetFieldsByType = async (
   const datasetsPromises = packages.reduce<Array<Promise<Field[]>>>((acc, pkg) => {
     if (pkg.datasets) {
       // filter out datasets by datasetType
-      const matchingDatasets = pkg.datasets.filter(dataset => dataset.type === datasetType);
-      matchingDatasets.forEach(dataset => acc.push(loadFieldsFromYaml(pkg, dataset.path)));
+      const matchingDatasets = pkg.datasets.filter((dataset) => dataset.type === datasetType);
+      matchingDatasets.forEach((dataset) => acc.push(loadFieldsFromYaml(pkg, dataset.path)));
     }
     return acc;
   }, []);
@@ -328,7 +329,7 @@ export const flattenFields = (allFields: Fields): Fields => {
   // helper function to call flatten() and rename the fields
   const renameAndFlatten = (field: Field, fields: Fields, acc: Fields): Fields => {
     const flattenedFields = flatten(fields);
-    flattenedFields.forEach(nestedField => {
+    flattenedFields.forEach((nestedField) => {
       acc.push({
         ...nestedField,
         name: `${field.name}.${nestedField.name}`,
@@ -366,18 +367,18 @@ const getFieldFormatParams = (field: Field): FieldFormatParams => {
   return params;
 };
 
-export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) =>
+export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) => {
   // create placeholder indices to supress errors in the kibana Dashboards app
   // that no matching indices exist https://github.com/elastic/kibana/issues/62343
-  Promise.all(
-    Object.keys(IndexPatternType).map(async indexPattern => {
+  const logger = appContextService.getLogger();
+  return Promise.all(
+    Object.keys(IndexPatternType).map(async (indexPattern) => {
       const defaultIndexPatternName = indexPattern + INDEX_PATTERN_PLACEHOLDER_SUFFIX;
-      const indexExists = await doesIndexExist(defaultIndexPatternName, callCluster);
+      const indexExists = await callCluster('indices.exists', { index: defaultIndexPatternName });
       if (!indexExists) {
         try {
-          await callCluster('transport.request', {
-            method: 'PUT',
-            path: `/${defaultIndexPatternName}`,
+          await callCluster('indices.create', {
+            index: defaultIndexPatternName,
             body: {
               mappings: {
                 properties: {
@@ -387,20 +388,9 @@ export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) =>
             },
           });
         } catch (putErr) {
-          throw new Error(`${defaultIndexPatternName} could not be created`);
+          logger.error(`${defaultIndexPatternName} could not be created`);
         }
       }
     })
   );
-
-export const doesIndexExist = async (indexName: string, callCluster: CallESAsCurrentUser) => {
-  try {
-    await callCluster('transport.request', {
-      method: 'HEAD',
-      path: indexName,
-    });
-    return true;
-  } catch (err) {
-    return false;
-  }
 };

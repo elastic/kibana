@@ -86,5 +86,6 @@ export async function registerLogThresholdAlertType(
         { name: 'conditions', description: conditionsActionVariableDescription },
       ],
     },
+    producer: 'logs',
   });
 }

@@ -39,7 +39,7 @@ export function MLLink({ children, path = '', query = {}, external }: Props) {
 
   const href = url.format({
     pathname: core.http.basePath.prepend('/app/ml'),
-    hash: `${path}?_g=${rison.encode(risonQuery as RisonValue)}`
+    hash: `${path}?_g=${rison.encode(risonQuery as RisonValue)}`,
   });
 
   return (

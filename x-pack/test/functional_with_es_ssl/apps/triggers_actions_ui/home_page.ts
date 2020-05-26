@@ -14,7 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const alerting = getService('alerting');
 
-  describe('Home page', function() {
+  describe('Home page', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
     });
@@ -29,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Connectors tab', () => {
       it('renders the connectors tab', async () => {
         // Navigate to the connectors tab
-        pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -45,7 +45,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Alerts tab', () => {
       it('renders the alerts tab', async () => {
         // Navigate to the alerts tab
-        pageObjects.triggersActionsUI.changeTabs('alertsTab');
+        await pageObjects.triggersActionsUI.changeTabs('alertsTab');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 

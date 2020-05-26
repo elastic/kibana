@@ -8,7 +8,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
   TRANSACTION_SAMPLED,
-  TRANSACTION_NAME
+  TRANSACTION_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
@@ -18,7 +18,7 @@ import { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../helpers/setup_request';
 
 interface TopTransactionOptions {
@@ -44,12 +44,12 @@ export function transactionGroupsFetcher(
 
   const projection = getTransactionGroupsProjection({
     setup,
-    options
+    options,
   });
 
   const sort: SortOptions = [
     { _score: 'desc' as const }, // sort by _score to ensure that buckets with sampled:true ends up on top
-    { '@timestamp': { order: 'desc' as const } }
+    { '@timestamp': { order: 'desc' as const } },
   ];
 
   const isTopTraces = options.type === 'top_traces';
@@ -65,8 +65,8 @@ export function transactionGroupsFetcher(
       query: {
         bool: {
           // prefer sampled transactions
-          should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
-        }
+          should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
+        },
       },
       aggs: {
         transaction_groups: {
@@ -76,8 +76,8 @@ export function transactionGroupsFetcher(
               ...(isTopTraces
                 ? [{ service: { terms: { field: SERVICE_NAME } } }]
                 : []),
-              { transaction: { terms: { field: TRANSACTION_NAME } } }
-            ]
+              { transaction: { terms: { field: TRANSACTION_NAME } } },
+            ],
           },
           aggs: {
             sample: { top_hits: { size: 1, sort } },
@@ -86,14 +86,14 @@ export function transactionGroupsFetcher(
               percentiles: {
                 field: TRANSACTION_DURATION,
                 percents: [95],
-                hdr: { number_of_significant_value_digits: 2 }
-              }
+                hdr: { number_of_significant_value_digits: 2 },
+              },
             },
-            sum: { sum: { field: TRANSACTION_DURATION } }
-          }
-        }
-      }
-    }
+            sum: { sum: { field: TRANSACTION_DURATION } },
+          },
+        },
+      },
+    },
   });
 
   return client.search<Transaction, typeof params>(params);

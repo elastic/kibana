@@ -22,7 +22,7 @@ import { DEMO_SEARCH_STRATEGY } from '../common';
 
 export const demoSearchStrategyProvider: TSearchStrategyProvider<typeof DEMO_SEARCH_STRATEGY> = () => {
   return {
-    search: request => {
+    search: (request) => {
       return Promise.resolve({
         greeting:
           request.mood === 'happy'

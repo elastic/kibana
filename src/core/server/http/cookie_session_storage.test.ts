@@ -62,6 +62,7 @@ configService.atPath.mockReturnValue(
       disableProtection: true,
       whitelist: [],
     },
+    customResponseHeaders: {},
   } as any)
 );
 
@@ -100,7 +101,7 @@ const userData = { id: '42' };
 const sessionDurationMs = 1000;
 const path = '/';
 const sessVal = () => ({ value: userData, expires: Date.now() + sessionDurationMs, path });
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 const cookieOptions = {
   name: 'sid',
   encryptionKey: 'something_at_least_32_characters',
@@ -134,9 +135,7 @@ describe('Cookie based SessionStorage', () => {
       );
       await server.start();
 
-      const response = await supertest(innerServer.listener)
-        .get('/')
-        .expect(200);
+      const response = await supertest(innerServer.listener).get('/').expect(200);
 
       const cookies = response.get('set-cookie');
       expect(cookies).toBeDefined();
@@ -173,9 +172,7 @@ describe('Cookie based SessionStorage', () => {
       );
       await server.start();
 
-      const response = await supertest(innerServer.listener)
-        .get('/')
-        .expect(200);
+      const response = await supertest(innerServer.listener).get('/').expect(200);
 
       const cookies = response.get('set-cookie');
       expect(cookies).toBeDefined();
@@ -206,9 +203,7 @@ describe('Cookie based SessionStorage', () => {
       );
       await server.start();
 
-      const response = await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { value: null });
+      const response = await supertest(innerServer.listener).get('/').expect(200, { value: null });
 
       const cookies = response.get('set-cookie');
       expect(cookies).not.toBeDefined();
@@ -413,9 +408,7 @@ describe('Cookie based SessionStorage', () => {
       );
       await server.start();
 
-      const response = await supertest(innerServer.listener)
-        .get('/')
-        .expect(200);
+      const response = await supertest(innerServer.listener).get('/').expect(200);
 
       const cookies = response.get('set-cookie');
       const sessionCookie = retrieveSessionCookie(cookies[0]);

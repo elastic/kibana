@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './discover_sidebar.scss';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiTitle } from '@elastic/eui';
@@ -26,6 +27,7 @@ import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { IndexPatternAttributes } from '../../../../../data/common';
 import { SavedObject } from '../../../../../../core/types';
+import { FIELDS_LIMIT_SETTING } from '../../../../common';
 import { groupFields } from './lib/group_fields';
 import {
   IIndexPatternFieldList,
@@ -130,7 +132,7 @@ export function DiscoverSidebar({
     [selectedIndexPattern, state, columns, hits, services]
   );
 
-  const popularLimit = services.uiSettings.get('fields:popularLimit');
+  const popularLimit = services.uiSettings.get(FIELDS_LIMIT_SETTING);
   const useShortDots = services.uiSettings.get('shortDots:enable');
 
   const {
@@ -172,7 +174,7 @@ export function DiscoverSidebar({
         <DiscoverIndexPattern
           selectedIndexPattern={selectedIndexPattern}
           setIndexPattern={setIndexPattern}
-          indexPatternList={sortBy(indexPatternList, o => o.attributes.title)}
+          indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
         />
         <div className="dscSidebar__item">
           <form>

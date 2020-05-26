@@ -26,14 +26,14 @@ export interface FilterPopoverProps {
 }
 
 const isItemSelected = (selectedItems: string[], item: string): 'on' | undefined =>
-  selectedItems.find(selected => selected === item) ? 'on' : undefined;
+  selectedItems.find((selected) => selected === item) ? 'on' : undefined;
 
 export const FilterPopover = ({
   fieldName,
   id,
   disabled,
   loading,
-  items,
+  items: allItems,
   onFilterFieldChange,
   selectedItems,
   title,
@@ -46,9 +46,19 @@ export const FilterPopover = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [tempSelectedItems, setTempSelectedItems] = useState<string[]>(selectedItems);
 
+  const [items, setItems] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Merge incoming items with selected items, to enable deselection
+
+    const mItems = selectedItems.concat(allItems ?? []);
+    const newItems = mItems.filter((item, index) => mItems.indexOf(item) === index);
+    setItems(newItems);
+  }, [allItems, selectedItems]);
+
   useEffect(() => {
     if (searchQuery !== '') {
-      const toDisplay = items.filter(item => item.indexOf(searchQuery) >= 0);
+      const toDisplay = items.filter((item) => item.indexOf(searchQuery) >= 0);
       setItemsToDisplay(toDisplay);
     } else {
       setItemsToDisplay(items);
@@ -60,7 +70,7 @@ export const FilterPopover = ({
       button={
         btnContent ?? (
           <UptimeFilterButton
-            isDisabled={disabled}
+            isDisabled={disabled && selectedItems.length === 0}
             isSelected={tempSelectedItems.length > 0}
             numFilters={items.length}
             numActiveFilters={tempSelectedItems.length}
@@ -90,7 +100,7 @@ export const FilterPopover = ({
         <EuiFieldSearch
           incremental={true}
           disabled={items.length === 0}
-          onSearch={query => setSearchQuery(query)}
+          onSearch={(query) => setSearchQuery(query)}
           placeholder={
             loading
               ? i18n.translate('xpack.uptime.filterPopout.loadingMessage', {
@@ -106,7 +116,7 @@ export const FilterPopover = ({
         />
       </EuiPopoverTitle>
       {!loading &&
-        itemsToDisplay.map(item => (
+        itemsToDisplay.map((item) => (
           <EuiFilterSelectItem
             checked={isItemSelected(tempSelectedItems, item)}
             data-test-subj={`filter-popover-item_${item}`}

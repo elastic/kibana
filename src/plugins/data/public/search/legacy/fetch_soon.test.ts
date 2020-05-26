@@ -25,7 +25,7 @@ import { SearchRequest, SearchResponse } from '../index';
 
 function getConfigStub(config: any = {}) {
   return {
-    get: key => config[key],
+    get: (key) => config[key],
   } as IUiSettingsClient;
 }
 
@@ -41,9 +41,9 @@ jest.mock('./call_client', () => ({
   callClient: jest.fn((requests: SearchRequest[]) => {
     // Allow a request object to specify which mockResponse it wants to receive (_mockResponseId)
     // in addition to how long to simulate waiting before returning a response (_waitMs)
-    const responses = requests.map(request => {
+    const responses = requests.map((request) => {
       const waitMs = requests.reduce((total, { _waitMs }) => total + _waitMs || 0, 0);
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         setTimeout(() => {
           resolve(mockResponses[request._mockResponseId]);
         }, waitMs);
@@ -58,7 +58,7 @@ describe('fetchSoon', () => {
     (callClient as jest.Mock).mockClear();
   });
 
-  test('should delay by 0ms if config is set to not batch searches', () => {
+  test('should execute asap if config is set to not batch searches', () => {
     const config = getConfigStub({
       'courier:batchSearches': false,
     });
@@ -67,8 +67,6 @@ describe('fetchSoon', () => {
 
     fetchSoon(request, options, { config } as FetchHandlers);
 
-    expect(callClient).not.toBeCalled();
-    jest.advanceTimersByTime(0);
     expect(callClient).toBeCalled();
   });
 
@@ -111,7 +109,7 @@ describe('fetchSoon', () => {
     });
     const requests = [{ _mockResponseId: 'foo' }, { _mockResponseId: 'bar' }];
 
-    const promises = requests.map(request => {
+    const promises = requests.map((request) => {
       return fetchSoon(request, {}, { config } as FetchHandlers);
     });
     jest.advanceTimersByTime(50);
@@ -127,11 +125,11 @@ describe('fetchSoon', () => {
     const firstBatch = [{ foo: 1 }, { foo: 2 }];
     const secondBatch = [{ bar: 1 }, { bar: 2 }];
 
-    firstBatch.forEach(request => {
+    firstBatch.forEach((request) => {
       fetchSoon(request, {}, { config } as FetchHandlers);
     });
     jest.advanceTimersByTime(50);
-    secondBatch.forEach(request => {
+    secondBatch.forEach((request) => {
       fetchSoon(request, {}, { config } as FetchHandlers);
     });
 

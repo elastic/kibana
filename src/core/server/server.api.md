@@ -91,7 +91,6 @@ import { IngestGetPipelineParams } from 'elasticsearch';
 import { IngestPutPipelineParams } from 'elasticsearch';
 import { IngestSimulateParams } from 'elasticsearch';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
-import { Logger as Logger_2 } from 'src/core/server/logging';
 import { MGetParams } from 'elasticsearch';
 import { MGetResponse } from 'elasticsearch';
 import { MSearchParams } from 'elasticsearch';
@@ -1735,7 +1734,7 @@ export type SavedObjectMigrationFn<InputAttributes = unknown, MigratedAttributes
 // @public
 export interface SavedObjectMigrationMap {
     // (undocumented)
-    [version: string]: SavedObjectMigrationFn;
+    [version: string]: SavedObjectMigrationFn<any, any>;
 }
 
 // @public
@@ -1841,8 +1840,9 @@ export class SavedObjectsClient {
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
 // @public
-export type SavedObjectsClientFactory = ({ request, }: {
+export type SavedObjectsClientFactory = ({ request, includedHiddenTypes, }: {
     request: KibanaRequest;
+    includedHiddenTypes?: string[];
 }) => SavedObjectsClientContract;
 
 // @public
@@ -1852,6 +1852,8 @@ export type SavedObjectsClientFactoryProvider = (repositoryFactory: SavedObjects
 export interface SavedObjectsClientProviderOptions {
     // (undocumented)
     excludedWrappers?: string[];
+    // (undocumented)
+    includedHiddenTypes?: string[];
 }
 
 // @public
@@ -1885,6 +1887,7 @@ export interface SavedObjectsCoreFieldMapping {
     fields?: {
         [subfield: string]: {
             type: string;
+            ignore_above?: number;
         };
     };
     // (undocumented)
@@ -2169,6 +2172,8 @@ export interface SavedObjectsMigrationLogger {
     // (undocumented)
     debug: (msg: string) => void;
     // (undocumented)
+    error: (msg: string, meta: LogMeta) => void;
+    // (undocumented)
     info: (msg: string) => void;
     // (undocumented)
     warn: (msg: string) => void;
@@ -2211,7 +2216,7 @@ export class SavedObjectsRepository {
     // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
+    static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, callCluster: APICaller, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
@@ -2231,8 +2236,8 @@ export class SavedObjectsRepository {
 
 // @public
 export interface SavedObjectsRepositoryFactory {
-    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
-    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+    createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
+    createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) => ISavedObjectsRepository;
 }
 
 // @public
@@ -2283,8 +2288,8 @@ export interface SavedObjectsServiceSetup {
 
 // @public
 export interface SavedObjectsServiceStart {
-    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
-    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+    createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
+    createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) => ISavedObjectsRepository;
     createSerializer: () => SavedObjectsSerializer;
     getScopedClient: (req: KibanaRequest, options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
     getTypeRegistry: () => ISavedObjectTypeRegistry;

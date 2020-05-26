@@ -23,7 +23,7 @@ import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
 import { LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY } from '../../../common/lib/constants';
 import { Workpad as Component } from './workpad';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const { width, height, id: workpadId, css: workpadCss } = getWorkpad(state);
   return {
     pages: getPages(state),
@@ -51,7 +51,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     ...ownProps,
     ...stateProps,
     ...dispatchProps,
-    setFullscreen: value => {
+    setFullscreen: (value) => {
       dispatchProps.setFullscreen(value);
 
       if (value === true) {
@@ -93,7 +93,7 @@ export const Workpad = compose(
     return { getAnimation };
   }),
   withHandlers({
-    onPageChange: props => pageNumber => {
+    onPageChange: (props) => (pageNumber) => {
       if (pageNumber === props.selectedPageNumber) {
         return;
       }
@@ -108,11 +108,11 @@ export const Workpad = compose(
   }),
   withHandlers({
     onTransitionEnd: ({ setTransition }) => () => setTransition(null),
-    nextPage: props => () => {
+    nextPage: (props) => () => {
       const pageNumber = Math.min(props.selectedPageNumber + 1, props.pages.length);
       props.onPageChange(pageNumber);
     },
-    previousPage: props => () => {
+    previousPage: (props) => () => {
       const pageNumber = Math.max(1, props.selectedPageNumber - 1);
       props.onPageChange(pageNumber);
     },

@@ -5,18 +5,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { LevelLogger } from '../../../../server/lib';
+import { LevelLogger, startTrace } from '../../../../server/lib';
+import { HeadlessChromiumDriver } from '../../../../server/browsers';
 import { CaptureConfig } from '../../../../server/types';
-import { LayoutInstance } from '../../layouts/layout';
+import { LayoutInstance } from '../../layouts';
 import { CONTEXT_GETNUMBEROFITEMS, CONTEXT_READMETADATA } from './constants';
 
 export const getNumberOfItems = async (
   captureConfig: CaptureConfig,
-  browser: HeadlessBrowser,
+  browser: HeadlessChromiumDriver,
   layout: LayoutInstance,
   logger: LevelLogger
 ): Promise<number> => {
+  const endTrace = startTrace('get_number_of_items', 'read');
   const { renderComplete: renderCompleteSelector, itemsCountAttribute } = layout.selectors;
   let itemsCount: number;
 
@@ -69,6 +70,8 @@ export const getNumberOfItems = async (
     );
     itemsCount = 1;
   }
+
+  endTrace();
 
   return itemsCount;
 };

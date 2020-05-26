@@ -37,7 +37,7 @@ const getKibanaUrl = (pathname?: string, search?: string) =>
   });
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
+export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
@@ -57,7 +57,8 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     }, i)) as any;
   };
 
-  describe('application status management', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/65423
+  describe.skip('application status management', () => {
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('app_status_start');
     });

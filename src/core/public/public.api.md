@@ -116,6 +116,7 @@ export interface ApplicationStart {
         path?: string;
         state?: any;
     }): Promise<void>;
+    navigateToUrl(url: string): Promise<void>;
     // @deprecated
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }
@@ -383,6 +384,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // @deprecated (undocumented)
     context: ContextSetup;
     // (undocumented)
+    docLinks: DocLinksSetup;
+    // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
     getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
@@ -471,7 +474,7 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
 }>;
 
 // @public (undocumented)
-export interface DocLinksStart {
+export interface DocLinksSetup {
     // (undocumented)
     readonly DOC_LINK_VERSION: string;
     // (undocumented)
@@ -564,6 +567,9 @@ export interface DocLinksStart {
         readonly management: Record<string, string>;
     };
 }
+
+// @public (undocumented)
+export type DocLinksStart = DocLinksSetup;
 
 // @public (undocumented)
 export interface EnvironmentMode {

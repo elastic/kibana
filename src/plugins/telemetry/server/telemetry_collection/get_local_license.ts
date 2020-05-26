@@ -43,7 +43,7 @@ function fetchLicense(callCluster: APICaller, local: boolean) {
  */
 async function getLicenseFromLocalOrMaster(callCluster: APICaller) {
   // Fetching the local license is cheaper than getting it from the master and good enough
-  const { license } = await fetchLicense(callCluster, true).catch(async err => {
+  const { license } = await fetchLicense(callCluster, true).catch(async (err) => {
     if (cachedLicense) {
       try {
         // Fallback to the master node's license info

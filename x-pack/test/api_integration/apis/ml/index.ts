@@ -6,11 +6,11 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('Machine Learning', function() {
+  describe('Machine Learning', function () {
     this.tags(['mlqa']);
 
     before(async () => {
@@ -37,5 +37,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./fields_service'));
     loadTestFile(require.resolve('./job_validation'));
     loadTestFile(require.resolve('./jobs'));
+    loadTestFile(require.resolve('./results'));
+    loadTestFile(require.resolve('./data_frame_analytics'));
   });
 }

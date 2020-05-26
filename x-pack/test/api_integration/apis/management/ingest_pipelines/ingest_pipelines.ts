@@ -11,15 +11,20 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_BASE_PATH = '/api/ingest_pipelines';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const { createPipeline, deletePipeline } = registerEsHelpers(getService);
 
-  describe('Pipelines', function() {
+  describe('Pipelines', function () {
     describe('Create', () => {
       const PIPELINE_ID = 'test_create_pipeline';
-      after(() => deletePipeline(PIPELINE_ID));
+      const REQUIRED_FIELDS_PIPELINE_ID = 'test_create_required_fields_pipeline';
+
+      after(() => {
+        deletePipeline(PIPELINE_ID);
+        deletePipeline(REQUIRED_FIELDS_PIPELINE_ID);
+      });
 
       it('should create a pipeline', async () => {
         const { body } = await supertest
@@ -44,6 +49,28 @@ export default function({ getService }: FtrProviderContext) {
               },
             ],
             version: 1,
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          acknowledged: true,
+        });
+      });
+
+      it('should create a pipeline with only required fields', async () => {
+        const { body } = await supertest
+          .post(API_BASE_PATH)
+          .set('kbn-xsrf', 'xxx')
+          // Excludes description, version and on_failure processors
+          .send({
+            name: REQUIRED_FIELDS_PIPELINE_ID,
+            processors: [
+              {
+                script: {
+                  source: 'ctx._type = null',
+                },
+              },
+            ],
           })
           .expect(200);
 
@@ -151,10 +178,7 @@ export default function({ getService }: FtrProviderContext) {
 
       describe('all pipelines', () => {
         it('should return an array of pipelines', async () => {
-          const { body } = await supertest
-            .get(API_BASE_PATH)
-            .set('kbn-xsrf', 'xxx')
-            .expect(200);
+          const { body } = await supertest.get(API_BASE_PATH).set('kbn-xsrf', 'xxx').expect(200);
 
           expect(Array.isArray(body)).to.be(true);
 
@@ -173,10 +197,7 @@ export default function({ getService }: FtrProviderContext) {
         it('should return a single pipeline', async () => {
           const uri = `${API_BASE_PATH}/${PIPELINE_ID}`;
 
-          const { body } = await supertest
-            .get(uri)
-            .set('kbn-xsrf', 'xxx')
-            .expect(200);
+          const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(200);
 
           expect(body).to.eql({
             ...PIPELINE,
@@ -206,10 +227,7 @@ export default function({ getService }: FtrProviderContext) {
 
         const uri = `${API_BASE_PATH}/${PIPELINE_ID}`;
 
-        const { body } = await supertest
-          .delete(uri)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
+        const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
 
         expect(body).to.eql({
           itemsDeleted: [PIPELINE_ID],
@@ -228,15 +246,12 @@ export default function({ getService }: FtrProviderContext) {
 
         const {
           body: { itemsDeleted, errors },
-        } = await supertest
-          .delete(uri)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
+        } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
 
         expect(errors).to.eql([]);
 
         // The itemsDeleted array order isn't guaranteed, so we assert against each pipeline name instead
-        [PIPELINE_ONE_ID, PIPELINE_TWO_ID].forEach(pipelineName => {
+        [PIPELINE_ONE_ID, PIPELINE_TWO_ID].forEach((pipelineName) => {
           expect(itemsDeleted.includes(pipelineName)).to.be(true);
         });
       });
@@ -250,10 +265,7 @@ export default function({ getService }: FtrProviderContext) {
 
         const uri = `${API_BASE_PATH}/${PIPELINE_ONE_ID},${PIPELINE_DOES_NOT_EXIST}`;
 
-        const { body } = await supertest
-          .delete(uri)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
+        const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
 
         expect(body).to.eql({
           itemsDeleted: [PIPELINE_ONE_ID],
