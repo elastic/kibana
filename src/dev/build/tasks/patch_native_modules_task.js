@@ -27,7 +27,7 @@ const DOWNLOAD_DIRECTORY = '.native_modules';
 const packages = [
   {
     name: 're2',
-    version: '1.10.5',
+    version: '1.14.0',
     destinationPath: 'node_modules/re2/build/Release/',
     shas: {
       darwin: '066533b592094f91e00412499e44c338ce2466d63c9eaf0dc32be8214bde2099',
