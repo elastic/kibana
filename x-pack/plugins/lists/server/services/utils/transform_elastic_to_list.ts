@@ -15,7 +15,7 @@ export interface TransformElasticToListOptions {
 export const transformElasticToList = ({
   response,
 }: TransformElasticToListOptions): ListArraySchema => {
-  return response.hits.hits.map(hit => {
+  return response.hits.hits.map((hit) => {
     return {
       id: hit._id,
       ...hit._source,
