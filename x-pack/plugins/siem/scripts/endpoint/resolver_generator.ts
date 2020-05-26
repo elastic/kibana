@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as yargs from 'yargs';
-import fs from 'fs';
 import seedrandom from 'seedrandom';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
@@ -163,9 +162,6 @@ async function main() {
   eventMapping.settings.index.default_pipeline = pipelineName;
   const clientOptions: ClientOptions = {
     node: argv.node,
-    ssl: {
-      ca: fs.readFileSync('../../../packages/kbn-dev-utils/certs/ca.crt'),
-    },
   };
   if (argv.auth) {
     const [username, password]: string[] = argv.auth.split(':', 2);
