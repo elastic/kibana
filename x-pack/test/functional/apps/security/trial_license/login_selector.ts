@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // We need to make sure that both path and hash are respected.
       const currentURL = parse(await browser.getCurrentUrl());
 
-      expect(currentURL.pathname).to.eql('/app/management/security/users/');
+      expect(currentURL.pathname).to.eql('/app/management/security/users');
     });
 
     it('can login with SSO preserving original URL', async () => {
@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // We need to make sure that both path and hash are respected.
       const currentURL = parse(await browser.getCurrentUrl());
-      expect(currentURL.pathname).to.eql('/app/management/security/users/');
+      expect(currentURL.pathname).to.eql('/app/management/security/users');
     });
 
     it('should show toast with error if SSO fails', async () => {

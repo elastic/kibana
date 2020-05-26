@@ -25,7 +25,6 @@ import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
 import { APMIndicesPermission } from '../components/app/APMIndicesPermission';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { routes } from '../components/app/Main/route_config';
-// import { history, resetHistory } from '../utils/history';
 import { ConfigSchema } from '..';
 import 'react-vis/dist/style.css';
 
