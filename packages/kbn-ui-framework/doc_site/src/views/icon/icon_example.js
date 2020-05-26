@@ -38,7 +38,7 @@ import inactiveHtml from './icon_inactive.html';
 import spinnerHtml from './icon_spinner.html';
 import spinnerJs from 'raw-loader!./icon_spinner.js';
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Icon"

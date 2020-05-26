@@ -10,7 +10,7 @@ import {
   EuiHorizontalRule,
   EuiTitle,
   EuiIconTip,
-  EuiHealth
+  EuiHealth,
 } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
@@ -94,7 +94,7 @@ const ANOMALY_DETECTION_TOOLTIP = i18n.translate(
   'xpack.apm.serviceMap.anomalyDetectionPopoverTooltip',
   {
     defaultMessage:
-      'Service health indicators are powered by the anomaly detection feature in machine learning'
+      'Service health indicators are powered by the anomaly detection feature in machine learning',
   }
 );
 
@@ -112,7 +112,7 @@ const ANOMALY_DETECTION_DISABLED_TEXT = i18n.translate(
   'xpack.apm.serviceMap.anomalyDetectionPopoverDisabled',
   {
     defaultMessage:
-      'Display service health indicators by enabling anomaly detection from the Integrations menu in the Service details view.'
+      'Display service health indicators by enabling anomaly detection from the Integrations menu in the Service details view.',
   }
 );
 
@@ -121,7 +121,7 @@ export function Contents({
   isService,
   label,
   onFocusClick,
-  selectedNodeServiceName
+  selectedNodeServiceName,
 }: ContentsProps) {
   // Anomaly Detection
   const severity = selectedNodeData.severity;
@@ -134,8 +134,8 @@ export function Contents({
     maxScore,
     actualValue,
     typicalValue,
-    jobId
-  ].every(value => value !== undefined);
+    jobId,
+  ].every((value) => value !== undefined);
   const anomalyDescription = hasAnomalyDetection
     ? getMetricChangeDescription(actualValue, typicalValue).message
     : null;

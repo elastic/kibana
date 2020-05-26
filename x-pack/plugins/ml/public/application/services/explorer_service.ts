@@ -96,7 +96,7 @@ export class ExplorerService {
     // Ensure the search bounds align to the bucketing interval used in the swimlane so
     // that the first and last buckets are complete.
     const searchBounds = getBoundsRoundedToInterval(bounds, interval, false);
-    const selectedJobIds = selectedJobs.map(d => d.id);
+    const selectedJobIds = selectedJobs.map((d) => d.id);
 
     // Load the overall bucket scores by time.
     // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
@@ -152,7 +152,7 @@ export class ExplorerService {
       false
     );
 
-    const selectedJobIds = selectedJobs.map(d => d.id);
+    const selectedJobIds = selectedJobs.map((d) => d.id);
     // load scores by influencer/jobId value and time.
     // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
     // which wouldn't be the case if e.g. '1M' was used.

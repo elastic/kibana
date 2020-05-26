@@ -225,7 +225,7 @@ export const getDateHistogramBucketAgg = ({
             const scaleMetrics =
               scaleMetricValues && interval.scaled && interval.scale && interval.scale < 1;
             if (scaleMetrics && aggs) {
-              const metrics = aggs.aggs.filter(a => isMetricAggType(a.type));
+              const metrics = aggs.aggs.filter((a) => isMetricAggType(a.type));
               const all = every(metrics, (a: IBucketAggConfig) => {
                 const { type } = a;
 
@@ -275,7 +275,7 @@ export const getDateHistogramBucketAgg = ({
           name: 'drop_partials',
           default: false,
           write: noop,
-          shouldShow: agg => {
+          shouldShow: (agg) => {
             const field = agg.params.field;
             return field && field.name && field.name === agg.getIndexPattern().timeFieldName;
           },

@@ -28,7 +28,7 @@ import { IVectorLayer } from '../vector_layer/vector_layer';
 import { IESSource } from '../../sources/es_source';
 import { IESAggSource } from '../../sources/es_agg_source';
 import { ISource } from '../../sources/source';
-import { SyncContext } from '../../../actions/map_actions';
+import { DataRequestContext } from '../../../actions';
 import { DataRequestAbortError } from '../../util/data_request';
 import {
   VectorStyleDescriptor,
@@ -56,7 +56,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
       type: AGG_TYPE.COUNT,
       label: COUNT_PROP_LABEL,
     },
-    ...documentStyle.getDynamicPropertiesArray().map(dynamicProperty => {
+    ...documentStyle.getDynamicPropertiesArray().map((dynamicProperty) => {
       return {
         type: getAggType(dynamicProperty),
         field: dynamicProperty.getFieldName(),
@@ -247,7 +247,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return this._documentStyle;
   }
 
-  async syncData(syncContext: SyncContext) {
+  async syncData(syncContext: DataRequestContext) {
     const dataRequestId = ACTIVE_COUNT_DATA_ID;
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
     const searchFilters = this._getSearchFilters(

@@ -35,7 +35,7 @@ export const getFieldByNodeType = (options: InfraSnapshotRequestOptions) => {
 
 export const getGroupedNodesSources = (options: InfraSnapshotRequestOptions) => {
   const fields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
-  const sources: GroupBySource[] = options.groupBy.map(gb => {
+  const sources: GroupBySource[] = options.groupBy.map((gb) => {
     return { [`${gb.field}`]: { terms: { field: gb.field } } };
   });
   sources.push({

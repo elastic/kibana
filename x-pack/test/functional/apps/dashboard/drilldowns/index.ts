@@ -5,8 +5,8 @@
  */
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('drilldowns', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('drilldowns', function () {
     this.tags(['skipFirefox']);
     loadTestFile(require.resolve('./dashboard_drilldowns'));
   });

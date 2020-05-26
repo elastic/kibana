@@ -21,7 +21,7 @@ import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
 import { BROWSER_TYPE } from '../../../../common/constants';
 import { CaptureConfig } from '../../../../server/types';
-import { LevelLogger as Logger } from '../../../lib/level_logger';
+import { LevelLogger } from '../../../lib';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { getChromeLogLocation } from '../paths';
@@ -39,7 +39,7 @@ export class HeadlessChromiumDriverFactory {
   private userDataDir: string;
   private getChromiumArgs: (viewport: ViewportConfig) => string[];
 
-  constructor(binaryPath: binaryPath, logger: Logger, captureConfig: CaptureConfig) {
+  constructor(binaryPath: binaryPath, logger: LevelLogger, captureConfig: CaptureConfig) {
     this.binaryPath = binaryPath;
     this.captureConfig = captureConfig;
     this.browserConfig = captureConfig.browser.chromium;
@@ -56,7 +56,7 @@ export class HeadlessChromiumDriverFactory {
 
   type = BROWSER_TYPE;
 
-  test(logger: Logger) {
+  test(logger: LevelLogger) {
     const chromiumArgs = args({
       userDataDir: this.userDataDir,
       viewport: { width: 800, height: 600 },
@@ -84,7 +84,7 @@ export class HeadlessChromiumDriverFactory {
    */
   createPage(
     { viewport, browserTimezone }: { viewport: ViewportConfig; browserTimezone: string },
-    pLogger: Logger
+    pLogger: LevelLogger
   ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
     return Rx.Observable.create(async (observer: InnerSubscriber<any, any>) => {
       const logger = pLogger.clone(['browser-driver']);
@@ -136,7 +136,7 @@ export class HeadlessChromiumDriverFactory {
       observer.add(
         terminate$
           .pipe(
-            tap(signal => {
+            tap((signal) => {
               logger.debug(`Termination signal received: ${signal}`);
             }),
             ignoreElements()
@@ -165,16 +165,16 @@ export class HeadlessChromiumDriverFactory {
         logger.debug(`deleting chromium user data directory at [${userDataDir}]`);
         // the unsubscribe function isn't `async` so we're going to make our best effort at
         // deleting the userDataDir and if it fails log an error.
-        del(userDataDir, { force: true }).catch(error => {
+        del(userDataDir, { force: true }).catch((error) => {
           logger.error(`error deleting user data directory at [${userDataDir}]: [${error}]`);
         });
       });
     });
   }
 
-  getBrowserLogger(page: Page, logger: Logger): Rx.Observable<void> {
+  getBrowserLogger(page: Page, logger: LevelLogger): Rx.Observable<void> {
     const consoleMessages$ = Rx.fromEvent<ConsoleMessage>(page, 'console').pipe(
-      map(line => {
+      map((line) => {
         if (line.type() === 'error') {
           logger.error(line.text(), ['headless-browser-console']);
         } else {
@@ -184,7 +184,7 @@ export class HeadlessChromiumDriverFactory {
     );
 
     const pageRequestFailed$ = Rx.fromEvent<PuppeteerRequest>(page, 'requestfailed').pipe(
-      map(req => {
+      map((req) => {
         const failure = req.failure && req.failure();
         if (failure) {
           logger.warning(
@@ -197,7 +197,7 @@ export class HeadlessChromiumDriverFactory {
     return Rx.merge(consoleMessages$, pageRequestFailed$);
   }
 
-  getProcessLogger(browser: Browser, logger: Logger): Rx.Observable<void> {
+  getProcessLogger(browser: Browser, logger: LevelLogger): Rx.Observable<void> {
     const childProcess = browser.process();
     // NOTE: The browser driver can not observe stdout and stderr of the child process
     // Puppeteer doesn't give a handle to the original ChildProcess object
@@ -215,7 +215,7 @@ export class HeadlessChromiumDriverFactory {
 
   getPageExit(browser: Browser, page: Page) {
     const pageError$ = Rx.fromEvent<Error>(page, 'error').pipe(
-      mergeMap(err => {
+      mergeMap((err) => {
         return Rx.throwError(
           i18n.translate('xpack.reporting.browsers.chromium.errorDetected', {
             defaultMessage: 'Reporting detected an error: {err}',
@@ -226,7 +226,7 @@ export class HeadlessChromiumDriverFactory {
     );
 
     const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page, 'pageerror').pipe(
-      mergeMap(err => {
+      mergeMap((err) => {
         return Rx.throwError(
           i18n.translate('xpack.reporting.browsers.chromium.pageErrorDetected', {
             defaultMessage: `Reporting detected an error on the page: {err}`,

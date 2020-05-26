@@ -75,7 +75,7 @@ export const getFiltersBucketAgg = ({
             const inFilters: FilterValue[] = aggConfig.params.filters;
             if (!size(inFilters)) return;
 
-            inFilters.forEach(filter => {
+            inFilters.forEach((filter) => {
               const persistedLog = getQueryLog(
                 uiSettings,
                 new Storage(window.localStorage),
@@ -87,7 +87,7 @@ export const getFiltersBucketAgg = ({
 
             const outFilters = transform(
               inFilters,
-              function(filters, filter) {
+              function (filters, filter) {
                 const input = cloneDeep(filter.input);
 
                 if (!input) {

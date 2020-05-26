@@ -88,22 +88,14 @@ describe('NetworkHttp Table Component', () => {
         direction: 'desc',
       });
 
-      wrapper
-        .find('.euiTable thead tr th button')
-        .first()
-        .simulate('click');
+      wrapper.find('.euiTable thead tr th button').first().simulate('click');
 
       wrapper.update();
 
       expect(store.getState().network.page.queries!.http.sort).toEqual({
         direction: 'asc',
       });
-      expect(
-        wrapper
-          .find('.euiTable thead tr th button')
-          .first()
-          .find('svg')
-      ).toBeTruthy();
+      expect(wrapper.find('.euiTable thead tr th button').first().find('svg')).toBeTruthy();
     });
   });
 });

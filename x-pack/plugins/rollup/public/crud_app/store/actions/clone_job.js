@@ -6,14 +6,14 @@
 
 import { CLONE_JOB_START, CLONE_JOB_CLEAR } from '../action_types';
 
-export const cloneJob = jobToClone => dispatch => {
+export const cloneJob = (jobToClone) => (dispatch) => {
   dispatch({
     type: CLONE_JOB_START,
     payload: jobToClone,
   });
 };
 
-export const clearCloneJob = () => dispatch => {
+export const clearCloneJob = () => (dispatch) => {
   dispatch({
     type: CLONE_JOB_CLEAR,
   });

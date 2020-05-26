@@ -148,7 +148,7 @@ class KibanaAdapterServiceProvider {
     }
 
     this.serviceRefs.rootScope.$apply(() => {
-      bufferedCalls.forEach(serviceCall => {
+      bufferedCalls.forEach((serviceCall) => {
         if (!this.serviceRefs) {
           return;
         }
