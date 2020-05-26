@@ -51,7 +51,7 @@ const DEFAULTS = {
 const shouldShowHint = ({ model_type: type, window, period }) =>
   type === MODEL_TYPES.WEIGHTED_EXPONENTIAL_TRIPLE && period * 2 > window;
 
-export const MovingAverageAgg = props => {
+export const MovingAverageAgg = (props) => {
   const { siblings } = props;
 
   const model = { ...DEFAULTS, ...props.model };

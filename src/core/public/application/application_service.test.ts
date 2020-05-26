@@ -17,6 +17,12 @@
  * under the License.
  */
 
+import {
+  MockCapabilitiesService,
+  MockHistory,
+  parseAppUrlMock,
+} from './application_service.test.mocks';
+
 import { createElement } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { bufferCount, take, takeUntil } from 'rxjs/operators';
@@ -26,7 +32,6 @@ import { injectedMetadataServiceMock } from '../injected_metadata/injected_metad
 import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
-import { MockCapabilitiesService, MockHistory } from './application_service.test.mocks';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
 import { App, AppNavLinkStatus, AppStatus, AppUpdater, LegacyApp } from './types';
@@ -61,6 +66,7 @@ describe('#setup()', () => {
       http,
       context: contextServiceMock.createSetupContract(),
       injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
+      redirectTo: jest.fn(),
     };
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
@@ -92,7 +98,7 @@ describe('#setup()', () => {
       const setup = service.setup(setupDeps);
 
       const pluginId = Symbol('plugin');
-      const updater$ = new BehaviorSubject<AppUpdater>(app => ({}));
+      const updater$ = new BehaviorSubject<AppUpdater>((app) => ({}));
       setup.register(pluginId, createApp({ id: 'app1', updater$ }));
       setup.register(pluginId, createApp({ id: 'app2' }));
       const { applications$ } = await service.start(startDeps);
@@ -116,7 +122,7 @@ describe('#setup()', () => {
         })
       );
 
-      updater$.next(app => ({
+      updater$.next((app) => ({
         status: AppStatus.inaccessible,
         tooltip: 'App inaccessible due to reason',
         defaultPath: 'foo/bar',
@@ -174,6 +180,10 @@ describe('#setup()', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"Cannot register an application route that includes HTTP base path"`
       );
+
+      expect(() =>
+        register(Symbol(), createApp({ id: 'app3', appRoute: '/base-path-i-am-not' }))
+      ).not.toThrow();
     });
   });
 
@@ -220,7 +230,7 @@ describe('#setup()', () => {
       setup.register(pluginId, createApp({ id: 'app1' }));
       setup.register(pluginId, createApp({ id: 'app2' }));
       setup.registerAppUpdater(
-        new BehaviorSubject<AppUpdater>(app => {
+        new BehaviorSubject<AppUpdater>((app) => {
           if (app.id === 'app1') {
             return {
               status: AppStatus.inaccessible,
@@ -260,7 +270,7 @@ describe('#setup()', () => {
     it(`properly combine with application's updater$`, async () => {
       const setup = service.setup(setupDeps);
       const pluginId = Symbol('plugin');
-      const appStatusUpdater$ = new BehaviorSubject<AppUpdater>(app => ({
+      const appStatusUpdater$ = new BehaviorSubject<AppUpdater>((app) => ({
         status: AppStatus.inaccessible,
         navLinkStatus: AppNavLinkStatus.disabled,
       }));
@@ -268,7 +278,7 @@ describe('#setup()', () => {
       setup.register(pluginId, createApp({ id: 'app2' }));
 
       setup.registerAppUpdater(
-        new BehaviorSubject<AppUpdater>(app => {
+        new BehaviorSubject<AppUpdater>((app) => {
           if (app.id === 'app1') {
             return {
               status: AppStatus.accessible,
@@ -311,7 +321,7 @@ describe('#setup()', () => {
       const pluginId = Symbol('plugin');
       setup.register(pluginId, createApp({ id: 'app1' }));
       setup.registerAppUpdater(
-        new BehaviorSubject<AppUpdater>(app => {
+        new BehaviorSubject<AppUpdater>((app) => {
           return {
             status: AppStatus.inaccessible,
             navLinkStatus: AppNavLinkStatus.disabled,
@@ -319,7 +329,7 @@ describe('#setup()', () => {
         })
       );
       setup.registerAppUpdater(
-        new BehaviorSubject<AppUpdater>(app => {
+        new BehaviorSubject<AppUpdater>((app) => {
           return {
             status: AppStatus.accessible,
             navLinkStatus: AppNavLinkStatus.default,
@@ -347,7 +357,7 @@ describe('#setup()', () => {
       const pluginId = Symbol('plugin');
       setup.register(pluginId, createApp({ id: 'app1' }));
 
-      const statusUpdater = new BehaviorSubject<AppUpdater>(app => {
+      const statusUpdater = new BehaviorSubject<AppUpdater>((app) => {
         return {
           status: AppStatus.inaccessible,
           navLinkStatus: AppNavLinkStatus.disabled,
@@ -357,7 +367,7 @@ describe('#setup()', () => {
 
       const start = await service.start(startDeps);
       let latestValue: ReadonlyMap<string, App | LegacyApp> = new Map<string, App | LegacyApp>();
-      start.applications$.subscribe(apps => {
+      start.applications$.subscribe((apps) => {
         latestValue = apps;
       });
 
@@ -370,7 +380,7 @@ describe('#setup()', () => {
         })
       );
 
-      statusUpdater.next(app => {
+      statusUpdater.next((app) => {
         return {
           status: AppStatus.accessible,
           navLinkStatus: AppNavLinkStatus.hidden,
@@ -393,7 +403,7 @@ describe('#setup()', () => {
       setup.registerLegacyApp(createLegacyApp({ id: 'app1' }));
 
       setup.registerAppUpdater(
-        new BehaviorSubject<AppUpdater>(app => {
+        new BehaviorSubject<AppUpdater>((app) => {
           return {
             status: AppStatus.inaccessible,
             navLinkStatus: AppNavLinkStatus.hidden,
@@ -423,7 +433,7 @@ describe('#setup()', () => {
       const pluginId = Symbol('plugin');
       setup.register(pluginId, createApp({ id: 'app1' }));
 
-      const updater = new BehaviorSubject<AppUpdater>(app => ({}));
+      const updater = new BehaviorSubject<AppUpdater>((app) => ({}));
       setup.registerAppUpdater(updater);
 
       const start = await service.start(startDeps);
@@ -431,17 +441,17 @@ describe('#setup()', () => {
       expect(MockHistory.push).toHaveBeenCalledWith('/app/app1', undefined);
       MockHistory.push.mockClear();
 
-      updater.next(app => ({ defaultPath: 'default-path' }));
+      updater.next((app) => ({ defaultPath: 'default-path' }));
       await start.navigateToApp('app1');
       expect(MockHistory.push).toHaveBeenCalledWith('/app/app1/default-path', undefined);
       MockHistory.push.mockClear();
 
-      updater.next(app => ({ defaultPath: 'another-path' }));
+      updater.next((app) => ({ defaultPath: 'another-path' }));
       await start.navigateToApp('app1');
       expect(MockHistory.push).toHaveBeenCalledWith('/app/app1/another-path', undefined);
       MockHistory.push.mockClear();
 
-      updater.next(app => ({}));
+      updater.next((app) => ({}));
       await start.navigateToApp('app1');
       expect(MockHistory.push).toHaveBeenCalledWith('/app/app1', undefined);
       MockHistory.push.mockClear();
@@ -462,12 +472,14 @@ describe('#setup()', () => {
 describe('#start()', () => {
   beforeEach(() => {
     MockHistory.push.mockReset();
+    parseAppUrlMock.mockReset();
 
     const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
     setupDeps = {
       http,
       context: contextServiceMock.createSetupContract(),
       injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
+      redirectTo: jest.fn(),
     };
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
@@ -775,7 +787,6 @@ describe('#start()', () => {
     });
 
     it('redirects when in legacyMode', async () => {
-      setupDeps.redirectTo = jest.fn();
       setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(true);
       service.setup(setupDeps);
 
@@ -816,11 +827,11 @@ describe('#start()', () => {
       const history = createMemoryHistory();
       setupDeps.history = history;
 
-      const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+      const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
       // Create an app and a promise that allows us to control when the app completes mounting
       const createWaitingApp = (props: Partial<App>): [App, () => void] => {
         let finishMount: () => void;
-        const mountPromise = new Promise(resolve => (finishMount = resolve));
+        const mountPromise = new Promise((resolve) => (finishMount = resolve));
         const app = {
           id: 'some-id',
           title: 'some-title',
@@ -881,7 +892,6 @@ describe('#start()', () => {
     it('sets window.location.href when navigating to legacy apps', async () => {
       setupDeps.http = httpServiceMock.createSetupContract({ basePath: '/test' });
       setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(true);
-      setupDeps.redirectTo = jest.fn();
       service.setup(setupDeps);
 
       const { navigateToApp } = await service.start(startDeps);
@@ -893,7 +903,6 @@ describe('#start()', () => {
     it('handles legacy apps with subapps', async () => {
       setupDeps.http = httpServiceMock.createSetupContract({ basePath: '/test' });
       setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(true);
-      setupDeps.redirectTo = jest.fn();
 
       const { registerLegacyApp } = service.setup(setupDeps);
 
@@ -903,6 +912,30 @@ describe('#start()', () => {
 
       await navigateToApp('baseApp:legacyApp1');
       expect(setupDeps.redirectTo).toHaveBeenCalledWith('/test/app/baseApp');
+    });
+  });
+
+  describe('navigateToUrl', () => {
+    it('calls `redirectTo` when the url is not parseable', async () => {
+      parseAppUrlMock.mockReturnValue(undefined);
+      service.setup(setupDeps);
+      const { navigateToUrl } = await service.start(startDeps);
+
+      await navigateToUrl('/not-an-app-path');
+
+      expect(MockHistory.push).not.toHaveBeenCalled();
+      expect(setupDeps.redirectTo).toHaveBeenCalledWith('/not-an-app-path');
+    });
+
+    it('calls `navigateToApp` when the url is an internal app link', async () => {
+      parseAppUrlMock.mockReturnValue({ app: 'foo', path: '/some-path' });
+      service.setup(setupDeps);
+      const { navigateToUrl } = await service.start(startDeps);
+
+      await navigateToUrl('/an-app-path');
+
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/foo/some-path', undefined);
+      expect(setupDeps.redirectTo).not.toHaveBeenCalled();
     });
   });
 });

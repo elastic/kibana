@@ -8,10 +8,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/machine_learning/security_common';
-
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-};
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/machine_learning/common';
 
 const moduleIds = [
   'apache_ecs',
@@ -43,13 +40,13 @@ export default ({ getService }: FtrProviderContext) => {
     const { body } = await supertest
       .get(`/api/ml/modules/get_module/${module}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_HEADERS)
+      .set(COMMON_REQUEST_HEADERS)
       .expect(rspCode);
 
     return body;
   }
 
-  describe('get_module', function() {
+  describe('get_module', function () {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
     });

@@ -65,7 +65,7 @@ export const ProfileQueryEditor = memo(() => {
     }
   };
 
-  const onEditorReady = useCallback(editorInstance => (editorRef.current = editorInstance), []);
+  const onEditorReady = useCallback((editorInstance) => (editorRef.current = editorInstance), []);
   const licenseEnabled = getLicenseStatus().valid;
 
   return (
@@ -87,7 +87,7 @@ export const ProfileQueryEditor = memo(() => {
               >
                 <EuiFieldText
                   disabled={!licenseEnabled}
-                  inputRef={ref => {
+                  inputRef={(ref) => {
                     if (ref) {
                       indexInputRef.current = ref;
                       ref.value = DEFAULT_INDEX_VALUE;

@@ -47,8 +47,8 @@ const makeManagementFeature = (
       }
 
       const validJobTypes = exportTypes
-        .filter(exportType => license.isOneOf(exportType.validLicenses))
-        .map(exportType => exportType.jobType);
+        .filter((exportType) => license.isOneOf(exportType.validLicenses))
+        .map((exportType) => exportType.jobType);
 
       return {
         showLinks: validJobTypes.length > 0,

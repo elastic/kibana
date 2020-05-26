@@ -54,7 +54,7 @@ export class LegacyManagementSection {
   }
 
   get visibleItems() {
-    return this.items.inOrder.filter(item => {
+    return this.items.inOrder.filter((item) => {
       const capabilityManagementSection = this.capabilities.management[this.id];
       const itemCapability = capabilityManagementSection
         ? capabilityManagementSection[item.id]
@@ -94,7 +94,7 @@ export class LegacyManagementSection {
     }
 
     this.items.push(item);
-    listeners.forEach(fn => fn());
+    listeners.forEach((fn) => fn());
 
     return item;
   }
@@ -105,8 +105,8 @@ export class LegacyManagementSection {
    * @param {string} id
    */
   deregister(id) {
-    this.items.remove(item => item.id === id);
-    listeners.forEach(fn => fn(this.items));
+    this.items.remove((item) => item.id === id);
+    listeners.forEach((fn) => fn(this.items));
   }
 
   /**

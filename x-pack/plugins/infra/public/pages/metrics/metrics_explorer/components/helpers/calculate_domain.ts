@@ -29,13 +29,13 @@ export const calculateDomain = (
         .map((m, index) => {
           return (row[getMetricId(m, index)] as number) || null;
         })
-        .filter(v => isNumber(v));
+        .filter((v) => isNumber(v));
       const minValue = getMin(rowValues);
       // For stacked domains we want to add 10% head room so the charts have
       // enough room to draw the 2 pixel line as well.
       const maxValue = stacked ? sum(rowValues) * 1.1 : getMax(rowValues);
       return acc.concat([minValue || null, maxValue || null]);
     }, [] as Array<number | null>)
-    .filter(v => isNumber(v));
+    .filter((v) => isNumber(v));
   return { min: getMin(values) || 0, max: getMax(values) || 0 };
 };

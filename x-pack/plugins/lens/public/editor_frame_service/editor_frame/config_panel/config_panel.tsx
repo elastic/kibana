@@ -79,7 +79,7 @@ function LayerPanels(
       props.dispatch({
         type: 'UPDATE_STATE',
         subType: 'UPDATE_ALL_STATES',
-        updater: prevState => {
+        updater: (prevState) => {
           return {
             ...prevState,
             datasourceStates: {
@@ -104,7 +104,7 @@ function LayerPanels(
 
   return (
     <EuiForm className="lnsConfigPanel">
-      {layerIds.map(layerId => (
+      {layerIds.map((layerId) => (
         <LayerPanel
           {...props}
           key={layerId}
@@ -120,7 +120,7 @@ function LayerPanels(
             dispatch({
               type: 'UPDATE_STATE',
               subType: 'REMOVE_OR_CLEAR_LAYER',
-              updater: state =>
+              updater: (state) =>
                 removeLayer({
                   activeVisualization,
                   layerId,
@@ -157,7 +157,7 @@ function LayerPanels(
                 dispatch({
                   type: 'UPDATE_STATE',
                   subType: 'ADD_LAYER',
-                  updater: state =>
+                  updater: (state) =>
                     appendLayer({
                       activeVisualization,
                       generateId,

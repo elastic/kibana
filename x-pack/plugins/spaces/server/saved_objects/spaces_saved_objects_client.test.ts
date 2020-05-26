@@ -55,7 +55,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 [
   { id: DEFAULT_SPACE_ID, expectedNamespace: undefined },
   { id: 'space_1', expectedNamespace: 'space_1' },
-].forEach(currentSpace => {
+].forEach((currentSpace) => {
   describe(`${currentSpace.id} space`, () => {
     const createSpacesSavedObjectsClient = async () => {
       const request = createMockRequest();

@@ -225,7 +225,7 @@ const specialAggs = [
 const allAggOptions = [...metricAggs, ...pipelineAggs, ...siblingAggs, ...specialAggs];
 
 function filterByPanelType(panelType) {
-  return agg => {
+  return (agg) => {
     if (panelType === 'table') return agg.value !== 'series_agg';
     return true;
   };
@@ -234,11 +234,11 @@ function filterByPanelType(panelType) {
 function AggSelectUi(props) {
   const { siblings, panelType, value, onChange, uiRestrictions, ...rest } = props;
 
-  const selectedOptions = allAggOptions.filter(option => {
+  const selectedOptions = allAggOptions.filter((option) => {
     return value === option.value && isMetricEnabled(option.value, uiRestrictions);
   });
 
-  let enablePipelines = siblings.some(s => !!metricAggs.find(m => m.value === s.type));
+  let enablePipelines = siblings.some((s) => !!metricAggs.find((m) => m.value === s.type));
 
   if (siblings.length <= 1) enablePipelines = false;
 
@@ -246,7 +246,7 @@ function AggSelectUi(props) {
   if (panelType === 'metrics') {
     options = metricAggs;
   } else {
-    const disableSiblingAggs = agg => ({
+    const disableSiblingAggs = (agg) => ({
       ...agg,
       disabled: !enablePipelines || !isMetricEnabled(agg.value, uiRestrictions),
     });
@@ -256,7 +256,7 @@ function AggSelectUi(props) {
         label: i18n.translate('visTypeTimeseries.aggSelect.aggGroups.metricAggLabel', {
           defaultMessage: 'Metric Aggregations',
         }),
-        options: metricAggs.map(agg => ({
+        options: metricAggs.map((agg) => ({
           ...agg,
           disabled: !isMetricEnabled(agg.value, uiRestrictions),
         })),
@@ -282,7 +282,7 @@ function AggSelectUi(props) {
     ];
   }
 
-  const handleChange = selectedOptions => {
+  const handleChange = (selectedOptions) => {
     if (!selectedOptions || selectedOptions.length <= 0) return;
     onChange(selectedOptions);
   };

@@ -14,7 +14,7 @@ describe('AgentMarker', () => {
     id: 'agent',
     offset: 1000,
     type: 'agentMark',
-    verticalLine: true
+    verticalLine: true,
   } as AgentMark;
   it('renders', () => {
     const component = shallow(<AgentMarker mark={mark} />);

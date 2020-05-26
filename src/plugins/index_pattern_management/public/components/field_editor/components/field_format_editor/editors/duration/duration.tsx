@@ -116,7 +116,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
                 text: fmt.text,
               };
             })}
-            onChange={e => {
+            onChange={(e) => {
               this.onChange({ inputFormat: e.target.value });
             }}
             isInvalid={!!error}
@@ -139,7 +139,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
                 text: fmt.text,
               };
             })}
-            onChange={e => {
+            onChange={(e) => {
               this.onChange({ outputFormat: e.target.value });
             }}
             isInvalid={!!error}
@@ -160,7 +160,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
               value={formatParams.outputPrecision}
               min={0}
               max={20}
-              onChange={e => {
+              onChange={(e) => {
                 this.onChange({ outputPrecision: e.target.value ? Number(e.target.value) : null });
               }}
               isInvalid={!!error}

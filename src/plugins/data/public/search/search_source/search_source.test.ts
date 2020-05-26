@@ -58,7 +58,7 @@ describe('SearchSource', () => {
     const data = dataPluginMock.createStartContract();
 
     mockSearchMethod = jest.fn(() => {
-      return new Observable(subscriber => {
+      return new Observable((subscriber) => {
         setTimeout(() => {
           subscriber.next({
             rawResponse: '',

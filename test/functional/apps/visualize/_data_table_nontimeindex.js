@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
   const retry = getService('retry');
@@ -30,7 +30,7 @@ export default function({ getService, getPageObjects }) {
   describe.skip('data table with index without time filter', function indexPatternCreation() {
     const vizName1 = 'Visualization DataTable without time filter';
 
-    before(async function() {
+    before(async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickDataTable');
@@ -64,18 +64,18 @@ export default function({ getService, getPageObjects }) {
       expect(interval).to.be('2000');
     });
 
-    it('should be able to save and load', async function() {
+    it('should be able to save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visChart.waitForVisualization();
     });
 
-    it('should have inspector enabled', async function() {
+    it('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
     });
 
-    it('should show correct data', function() {
+    it('should show correct data', function () {
       const expectedChartData = [
         ['0B', '2,088'],
         ['1.953KB', '2,748'],
@@ -89,7 +89,7 @@ export default function({ getService, getPageObjects }) {
         ['17.578KB', '137'],
       ];
 
-      return retry.try(async function() {
+      return retry.try(async function () {
         await inspector.open();
         await inspector.expectTableData(expectedChartData);
         await inspector.close();

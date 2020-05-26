@@ -54,7 +54,7 @@ describe('NewVisModal', () => {
   ];
   const visTypes: TypesStart = {
     get: (id: string) => {
-      return _visTypes.find(vis => vis.name === id) as VisType;
+      return _visTypes.find((vis) => vis.name === id) as VisType;
     },
     all: () => {
       return _visTypes as VisType[];

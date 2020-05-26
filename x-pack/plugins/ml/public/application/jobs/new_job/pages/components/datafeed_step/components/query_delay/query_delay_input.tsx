@@ -36,7 +36,7 @@ export const QueryDelayInput: FC = () => {
       <EuiFieldText
         value={queryDelay}
         placeholder={DEFAULT_QUERY_DELAY}
-        onChange={e => setQueryDelay(e.target.value)}
+        onChange={(e) => setQueryDelay(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputQueryDelay"
       />

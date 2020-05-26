@@ -26,7 +26,7 @@ import { getConfig } from '../config';
 import { getVersionInfo } from '../version_info';
 
 describe('dev/build/lib/config', () => {
-  const setup = async function({ targetAllPlatforms = true } = {}) {
+  const setup = async function ({ targetAllPlatforms = true } = {}) {
     const isRelease = Boolean(Math.round(Math.random()));
     const config = await getConfig({
       isRelease,
@@ -78,7 +78,7 @@ describe('dev/build/lib/config', () => {
       expect(
         config
           .getTargetPlatforms()
-          .map(p => p.getName())
+          .map((p) => p.getName())
           .sort()
       ).to.eql(['darwin', 'linux', 'windows']);
     });
@@ -99,7 +99,7 @@ describe('dev/build/lib/config', () => {
       expect(
         config
           .getTargetPlatforms()
-          .map(p => p.getName())
+          .map((p) => p.getName())
           .sort()
       ).to.eql(['darwin', 'linux', 'windows']);
     });
