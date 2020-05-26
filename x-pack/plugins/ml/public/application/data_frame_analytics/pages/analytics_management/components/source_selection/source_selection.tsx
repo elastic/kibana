@@ -34,7 +34,6 @@ export const SourceSelection: FC<Props> = ({ onClose }) => {
     }=${encodeURIComponent(id)}`;
   };
 
-  // TODO: keep the height of the modal constant so it doesn't look jerky when you're searching
   return (
     <>
       <EuiOverlayMask>

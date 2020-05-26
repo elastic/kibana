@@ -22,6 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useMlContext } from '../../../contexts/ml';
+import { newJobCapsService } from '../../../services/new_job_capabilities_service';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
 import { CreateAnalyticsAdvancedEditor } from '../analytics_management/components/create_analytics_advanced_editor';
 import { AdvancedStep, ConfigurationStep, CreateStep, DetailsStep } from './components';
@@ -51,6 +52,14 @@ export const Page: FC = () => {
       setActivatedSteps(activatedSteps);
     }
   }, [currentStep]);
+
+  useEffect(() => {
+    if (currentIndexPattern) {
+      (async function () {
+        await newJobCapsService.initializeFromIndexPattern(currentIndexPattern, false, false);
+      })();
+    }
+  }, []);
 
   const analyticsWizardSteps = [
     {

@@ -46,7 +46,7 @@ export interface AnalyticsCreationStep {
 export interface CreateAnalyticsFormProps {
   actions: ActionDispatchers;
   state: State;
-  setCurrentStep?: any; // TODO: update
+  setCurrentStep?: React.Dispatch<React.SetStateAction<any>>;
   step?: ANALYTICS_STEPS;
   stepActivated?: boolean;
 }
@@ -263,7 +263,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       });
     }
   };
-  // TODO: deprecated
+
   const openModal = async () => {
     await mlContext.indexPatterns.clearCache();
     resetForm();

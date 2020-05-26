@@ -107,10 +107,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
   const loadDepVarOptions = async (formState: State['form']) => {
     setFormState({
       loadingDepVarOptions: true,
-      // clear when the source index changes
       maxDistinctValuesError: undefined,
-      // sourceIndexFieldsCheckFailed: false,
-      // sourceIndexContainsNumericalFields: true,
     });
     try {
       if (currentIndexPattern !== undefined) {
@@ -125,7 +122,6 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
           dependentVariableOptions: [] as State['form']['dependentVariableOptions'],
         };
 
-        await newJobCapsService.initializeFromIndexPattern(currentIndexPattern, false, false);
         // Get fields and filter for supported types for job type
         const { fields } = newJobCapsService;
 

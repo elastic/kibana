@@ -63,7 +63,7 @@ export interface State {
     eta: undefined | number;
     excludes: string[];
     excludesTableItems: FieldSelectionItem[];
-    excludesOptions: EuiComboBoxOptionOption[]; // TODO: remove once we switch to table
+    excludesOptions: EuiComboBoxOptionOption[];
     featureBagFraction: undefined | number;
     featureInfluenceThreshold: undefined | number;
     fieldOptionsFetchFail: boolean;
@@ -74,7 +74,7 @@ export interface State {
     jobIdInvalidMaxLength: boolean;
     jobIdValid: boolean;
     jobType: AnalyticsJobType;
-    jobConfigQuery: any; // TODO update type here
+    jobConfigQuery: any;
     jobConfigQueryString: string | undefined;
     lambda: number | undefined;
     loadingDepVarOptions: boolean;
@@ -149,7 +149,7 @@ export const getInitialState = (): State => ({
     jobIdInvalidMaxLength: false,
     jobIdValid: false,
     jobType: undefined,
-    jobConfigQuery: { match_all: {} }, // TODO: use constant here
+    jobConfigQuery: { match_all: {} },
     jobConfigQueryString: undefined,
     lambda: undefined,
     loadingDepVarOptions: false,
@@ -167,14 +167,14 @@ export const getInitialState = (): State => ({
     outlierFraction: undefined,
     predictionFieldName: undefined,
     previousJobType: null,
-    previousSourceIndex: undefined, // TODO: deprecated - remove
+    previousSourceIndex: undefined,
     requiredFieldsError: undefined,
     randomizeSeed: undefined,
     sourceIndex: '',
-    sourceIndexNameEmpty: true, // TODO: deprecated - remove
-    sourceIndexNameValid: false, // TODO: deprecated - remove
-    sourceIndexContainsNumericalFields: true, // TODO: deprecated - remove
-    sourceIndexFieldsCheckFailed: false, // TODO: deprecated - remove
+    sourceIndexNameEmpty: true,
+    sourceIndexNameValid: false,
+    sourceIndexContainsNumericalFields: true,
+    sourceIndexFieldsCheckFailed: false,
     standardizationEnabled: 'true',
     trainingPercent: 80,
   },
@@ -358,7 +358,7 @@ export function getCloneFormStateFromJobConfig(
     resultState.trainingPercent = analysisConfig.training_percent;
 
     if (isClassificationAnalysis(analyticsJobConfig.analysis)) {
-      // @ts-ignore // TODO: prediction_field_name as well?
+      // @ts-ignore
       resultState.numTopClasses = analysisConfig.num_top_classes;
     }
   }
