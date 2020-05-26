@@ -208,7 +208,7 @@ export const QueryBarDefineRule = ({
             ? [...newFilters, getDataProviderFilter(dataProvidersDsl)]
             : newFilters,
         query: newQuery,
-        saved_id: '',
+        saved_id: undefined,
       });
     },
     [browserFields, field, indexPattern]
