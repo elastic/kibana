@@ -24,7 +24,7 @@ export interface AgentsSummaryProps {
 /**
  * Display a summary of stats (counts) associated with a group of agents (ex. those associated with a Policy)
  */
-export const AgentsSummary = memo<AgentsSummaryProps>(props => {
+export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
   const stats = useMemo<
     Array<{ key: keyof AgentsSummaryProps; title: string; health: string }>
   >(() => {

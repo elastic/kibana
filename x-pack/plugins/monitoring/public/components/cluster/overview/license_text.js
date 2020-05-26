@@ -11,7 +11,7 @@ import { capitalize } from 'lodash';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-const formatDateLocal = input => moment.tz(input, moment.tz.guess()).format('LL');
+const formatDateLocal = (input) => moment.tz(input, moment.tz.guess()).format('LL');
 
 export function LicenseText({ license, showLicenseExpiration }) {
   if (!showLicenseExpiration) {

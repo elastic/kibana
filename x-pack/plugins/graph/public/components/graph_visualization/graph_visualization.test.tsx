@@ -136,10 +136,7 @@ describe('graph_visualization', () => {
         edges={edges}
       />
     );
-    instance
-      .find('.gphNode')
-      .first()
-      .simulate('click', {});
+    instance.find('.gphNode').first().simulate('click', {});
     expect(nodeClickSpy).toHaveBeenCalledWith(nodes[0], {});
   });
 
@@ -153,10 +150,7 @@ describe('graph_visualization', () => {
         edges={edges}
       />
     );
-    instance
-      .find('.gphEdge')
-      .first()
-      .simulate('click');
+    instance.find('.gphEdge').first().simulate('click');
     expect(edgeClickSpy).toHaveBeenCalledWith(edges[0]);
   });
 });

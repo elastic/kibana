@@ -18,21 +18,21 @@
  */
 
 import React, { Fragment } from 'react';
-import { DocLinksStart } from 'src/core/public';
 
 import { EuiCallOut, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { useKibana } from '../../../../../../../plugins/kibana_react/public';
+import { IndexPatternManagmentContext } from '../../../../types';
+
 export interface ScriptingWarningCallOutProps {
   isVisible: boolean;
-  docLinksScriptedFields: DocLinksStart['links']['scriptedFields'];
 }
 
-export const ScriptingWarningCallOut = ({
-  isVisible = false,
-  docLinksScriptedFields,
-}: ScriptingWarningCallOutProps) => {
+export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningCallOutProps) => {
+  const docLinksScriptedFields = useKibana<IndexPatternManagmentContext>().services.docLinks?.links
+    .scriptedFields;
   return isVisible ? (
     <Fragment>
       <EuiCallOut

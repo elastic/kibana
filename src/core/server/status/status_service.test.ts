@@ -93,7 +93,7 @@ describe('StatusService', () => {
         });
 
         const statusUpdates: CoreStatus[] = [];
-        const subscription = setup.core$.subscribe(status => statusUpdates.push(status));
+        const subscription = setup.core$.subscribe((status) => statusUpdates.push(status));
 
         elasticsearch$.next(available);
         elasticsearch$.next(available);
@@ -198,7 +198,7 @@ describe('StatusService', () => {
         });
 
         const statusUpdates: ServiceStatus[] = [];
-        const subscription = setup.overall$.subscribe(status => statusUpdates.push(status));
+        const subscription = setup.overall$.subscribe((status) => statusUpdates.push(status));
 
         elasticsearch$.next(available);
         elasticsearch$.next(available);

@@ -9,7 +9,7 @@ import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import { Header, HeaderProps } from '../components';
 
 const Page = styled(EuiPage)`
-  background: ${props => props.theme.eui.euiColorEmptyShade};
+  background: ${(props) => props.theme.eui.euiColorEmptyShade};
 `;
 
 interface Props extends HeaderProps {

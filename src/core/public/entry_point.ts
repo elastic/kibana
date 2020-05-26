@@ -33,7 +33,11 @@ const injectedMetadata = JSON.parse(
   document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
 );
 
-if (process.env.IS_KIBANA_DISTRIBUTABLE !== 'true' && process.env.ELASTIC_APM_ACTIVE === 'true') {
+/**
+ * `apmConfig` would be populated with relavant APM RUM agent
+ * configuration if server is started with `ELASTIC_APM_ACTIVE=true`
+ */
+if (process.env.IS_KIBANA_DISTRIBUTABLE !== 'true' && injectedMetadata.vars.apmConfig != null) {
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { init } = require('@elastic/apm-rum');
@@ -42,8 +46,8 @@ if (process.env.IS_KIBANA_DISTRIBUTABLE !== 'true' && process.env.ELASTIC_APM_AC
 
 i18n
   .load(injectedMetadata.i18n.translationsUrl)
-  .catch(e => e)
-  .then(async i18nError => {
+  .catch((e) => e)
+  .then(async (i18nError) => {
     const coreSystem = new CoreSystem({
       injectedMetadata,
       rootDomElement: document.body,

@@ -21,7 +21,7 @@ import { setFormatService } from '../services';
 
 setFormatService({
   deserialize: () => ({
-    convert: v => v,
+    convert: (v) => v,
   }),
 });
 

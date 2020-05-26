@@ -38,7 +38,7 @@ const createTestCases = (overwrite: boolean, spaceId: string) => [
   CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
 ];
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');

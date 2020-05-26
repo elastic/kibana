@@ -390,7 +390,7 @@ export const getCollectionStatus = async (
 
   const status = PRODUCTS.reduce((products, product) => {
     const token = product.token || product.name;
-    const indexBuckets = indicesBuckets.filter(bucket => bucket.key.includes(token));
+    const indexBuckets = indicesBuckets.filter((bucket) => bucket.key.includes(token));
     const uuidBucketName = getUuidBucketName(product.name);
 
     const productStatus = {

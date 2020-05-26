@@ -33,12 +33,9 @@ describe('EmailActionConnectorFields renders', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="emailFromInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="emailFromInput"]')
-        .first()
-        .prop('value')
-    ).toBe('test@test.com');
+    expect(wrapper.find('[data-test-subj="emailFromInput"]').first().prop('value')).toBe(
+      'test@test.com'
+    );
     expect(wrapper.find('[data-test-subj="emailHostInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailPortInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailUserInput"]').length > 0).toBeTruthy();

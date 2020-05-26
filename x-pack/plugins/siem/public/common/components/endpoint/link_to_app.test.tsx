@@ -44,7 +44,7 @@ describe('LinkToApp component', () => {
   });
   it('should support onClick prop', () => {
     // Take `_event` (even though it is not used) so that `jest.fn` will have a type that expects to be called with an event
-    const spyOnClickHandler: LinkToAppOnClickMock = jest.fn(_event => {});
+    const spyOnClickHandler: LinkToAppOnClickMock = jest.fn((_event) => {});
     const renderResult = render(
       <LinkToApp appId="ingestManager" href="/app/ingest" onClick={spyOnClickHandler}>
         {'link'}
@@ -98,7 +98,7 @@ describe('LinkToApp component', () => {
   });
   it('should still preventDefault if onClick callback throws', () => {
     // Take `_event` (even though it is not used) so that `jest.fn` will have a type that expects to be called with an event
-    const spyOnClickHandler: LinkToAppOnClickMock<never> = jest.fn(_event => {
+    const spyOnClickHandler: LinkToAppOnClickMock<never> = jest.fn((_event) => {
       throw new Error('test');
     });
     const renderResult = render(
@@ -111,7 +111,7 @@ describe('LinkToApp component', () => {
     expect(clickEventArg.isDefaultPrevented()).toBe(true);
   });
   it('should not navigate if onClick callback prevents default', () => {
-    const spyOnClickHandler: LinkToAppOnClickMock = jest.fn(ev => {
+    const spyOnClickHandler: LinkToAppOnClickMock = jest.fn((ev) => {
       ev.preventDefault();
     });
     const renderResult = render(
@@ -143,7 +143,7 @@ describe('LinkToApp component', () => {
       </LinkToApp>
     );
     const euiLink = renderResult.find('EuiLink');
-    ['meta', 'alt', 'ctrl', 'shift'].forEach(key => {
+    ['meta', 'alt', 'ctrl', 'shift'].forEach((key) => {
       euiLink.simulate('click', { button: 0, [`${key}Key`]: true });
       expect(fakeCoreStart.application.navigateToApp).not.toHaveBeenCalled();
     });
