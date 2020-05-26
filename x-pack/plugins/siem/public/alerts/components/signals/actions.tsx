@@ -23,6 +23,8 @@ import {
   replaceTemplateFieldFromMatchFilters,
   replaceTemplateFieldFromDataProviders,
 } from './helpers';
+import { displaySuccessToast } from '../../../common/components/toasters';
+import * as i18n from './translations';
 
 export const getUpdateSignalsQuery = (eventIds: Readonly<string[]>) => {
   return {
@@ -56,6 +58,7 @@ export const updateSignalStatusAction = async ({
   status,
   setEventsLoading,
   setEventsDeleted,
+  dispatchToaster,
 }: UpdateSignalStatusActionProps) => {
   try {
     setEventsLoading({ eventIds: signalIds, isLoading: true });
@@ -65,6 +68,13 @@ export const updateSignalStatusAction = async ({
     await updateSignalStatus({ query: queryObject, status });
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: signalIds, isDeleted: true });
+
+    const statusMessage =
+      status === 'closed'
+        ? i18n.CLOSED_ALERT_TOAST(signalIds.length)
+        : i18n.OPENED_ALERT_TOAST(signalIds.length);
+
+    displaySuccessToast(statusMessage, dispatchToaster);
   } catch (e) {
     // TODO: Show error toasts
   } finally {

@@ -101,3 +101,17 @@ export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
     defaultMessage: 'Investigate in timeline',
   }
 );
+
+export const CLOSED_ALERT_TOAST = (totalAlerts: number) =>
+  i18n.translate('xpack.siem.detectionEngine.signals.closedAlertToastMessage', {
+    values: { totalAlerts },
+    defaultMessage:
+      'Successfully Closed {totalAlerts} {totalAlerts, plural, =1 {Alert} other {Alerts}}.',
+  });
+
+export const OPENED_ALERT_TOAST = (totalAlerts: number) =>
+  i18n.translate('xpack.siem.detectionEngine.signals.openedAlertToastMessage', {
+    values: { totalAlerts },
+    defaultMessage:
+      'Successfully Opened {totalAlerts} {totalAlerts, plural, =1 {Alert} other {Alerts}}.',
+  });

@@ -46,6 +46,7 @@ import {
   UpdateSignalsStatusProps,
 } from './types';
 import { dispatchUpdateTimeline } from '../../../timelines/components/open_timeline/helpers';
+import { useStateToaster } from '../../../common/components/toasters';
 
 export const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
 
@@ -91,6 +92,7 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
     signalsIndex !== '' ? [signalsIndex] : []
   );
   const kibana = useKibana();
+  const [, dispatchToaster] = useStateToaster();
 
   const getGlobalQuery = useCallback(() => {
     if (browserFields != null && indexPatterns != null) {
@@ -189,6 +191,7 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
         status,
         setEventsDeleted: setEventsDeletedCallback,
         setEventsLoading: setEventsLoadingCallback,
+        dispatchToaster,
       });
       refetchQuery();
     },
@@ -198,6 +201,7 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
       setEventsDeletedCallback,
       setEventsLoadingCallback,
       showClearSelectionAction,
+      dispatchToaster,
     ]
   );
 
@@ -244,6 +248,7 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
         setEventsDeleted: setEventsDeletedCallback,
         status: filterGroup === FILTER_OPEN ? FILTER_CLOSED : FILTER_OPEN,
         updateTimelineIsLoading,
+        dispatchToaster,
       }),
     [
       apolloClient,
@@ -254,6 +259,7 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
       setEventsLoadingCallback,
       setEventsDeletedCallback,
       updateTimelineIsLoading,
+      dispatchToaster,
     ]
   );
 
