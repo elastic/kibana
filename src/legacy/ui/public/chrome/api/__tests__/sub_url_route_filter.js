@@ -26,14 +26,14 @@ describe('kbn-chrome subUrlRouteFilter()', () => {
   describe('no ngRoute', () => {
     beforeEach(ngMock.module('kibana/private'));
     beforeEach(
-      ngMock.inject($injector => {
+      ngMock.inject(($injector) => {
         expect($injector.has('$route')).to.be(false);
       })
     );
 
     it(
       'always returns true when there is no $route service',
-      ngMock.inject(Private => {
+      ngMock.inject((Private) => {
         const subUrlRouteFilter = Private(SubUrlRouteFilterProvider);
         expect(subUrlRouteFilter()).to.be(true);
       })
@@ -42,7 +42,7 @@ describe('kbn-chrome subUrlRouteFilter()', () => {
 
   describe('with ngRoute', () => {
     beforeEach(
-      ngMock.module('kibana/private', 'ngRoute', $routeProvider => {
+      ngMock.module('kibana/private', 'ngRoute', ($routeProvider) => {
         $routeProvider.when('/foo', {
           redirectTo: '/bar',
         });

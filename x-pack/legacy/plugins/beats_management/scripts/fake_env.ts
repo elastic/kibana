@@ -15,7 +15,7 @@ const args = process.argv.slice(2);
 const chance = new Chance();
 
 function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 function getRandomColor() {
   const letters = '0123456789ABCDEF';

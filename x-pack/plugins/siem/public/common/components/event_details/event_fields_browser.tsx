@@ -32,7 +32,7 @@ export const EventFieldsBrowser = React.memo<Props>(
     const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
     const items = useMemo(
       () =>
-        sortBy(data, ['field']).map(item => ({
+        sortBy(data, ['field']).map((item) => ({
           ...item,
           ...fieldsByName[item.field],
           valuesConcatenated: item.values != null ? item.values.join() : '',

@@ -53,5 +53,5 @@ export const args = [
 export const initializers = [dateFormatInitializer, numberFormatInitializer];
 
 export const initializeArgs: SetupInitializer<any> = (core, plugins) => {
-  return [...args, ...initializers.map(initializer => initializer(core, plugins))];
+  return [...args, ...initializers.map((initializer) => initializer(core, plugins))];
 };

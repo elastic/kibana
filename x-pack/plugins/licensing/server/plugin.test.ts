@@ -26,7 +26,7 @@ function buildRawLicense(options: Partial<RawLicense> = {}): RawLicense {
   return Object.assign(defaultRawLicense, options);
 }
 
-const flushPromises = (ms = 50) => new Promise(res => setTimeout(res, ms));
+const flushPromises = (ms = 50) => new Promise((res) => setTimeout(res, ms));
 
 describe('licensing plugin', () => {
   describe('#setup', () => {

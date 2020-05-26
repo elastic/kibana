@@ -16,7 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  describe('Delete reports', function() {
+  describe('Delete reports', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'reporting_user']);
       await esArchiver.load('empty_kibana');

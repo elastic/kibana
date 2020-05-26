@@ -14,7 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const supertest = getService('supertest');
     const retry = getService('retry');
 
-    describe('overview page alert flyout controls', function() {
+    describe('overview page alert flyout controls', function () {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
       let alerts: any;
@@ -129,15 +129,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               '"minimum_should_match":1}},{"bool":{"should":[{"match":{"monitor.type":"http"}}],"minimum_should_match":1}}]}}]}}]}}'
           );
         } finally {
-          await supertest
-            .delete(`/api/alert/${id}`)
-            .set('kbn-xsrf', 'true')
-            .expect(204);
+          await supertest.delete(`/api/alert/${id}`).set('kbn-xsrf', 'true').expect(204);
         }
       });
     });
 
-    describe('tls alert', function() {
+    describe('tls alert', function () {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
       let alerts: any;
@@ -207,10 +204,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(params).to.eql({});
           expect(interval).to.eql('11m');
         } finally {
-          await supertest
-            .delete(`/api/alert/${id}`)
-            .set('kbn-xsrf', 'true')
-            .expect(204);
+          await supertest.delete(`/api/alert/${id}`).set('kbn-xsrf', 'true').expect(204);
         }
       });
     });

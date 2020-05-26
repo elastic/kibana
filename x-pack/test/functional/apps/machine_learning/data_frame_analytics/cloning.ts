@@ -9,11 +9,11 @@ import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/appli
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('jobs cloning supported by UI form', function() {
+  describe('jobs cloning supported by UI form', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
@@ -131,7 +131,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function() {
+      describe(`${testData.suiteTitle}`, function () {
         const cloneJobId = `${testData.job.id}_clone`;
         const cloneDestIndex = `${testData.job!.dest!.index}_clone`;
 
@@ -200,7 +200,7 @@ export default function({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
           await ml.dataFrameAnalyticsTable.filterWithSearchString(cloneJobId);
           const rows = await ml.dataFrameAnalyticsTable.parseAnalyticsTable();
-          const filteredRows = rows.filter(row => row.id === cloneJobId);
+          const filteredRows = rows.filter((row) => row.id === cloneJobId);
           expect(filteredRows).to.have.length(
             1,
             `Filtered analytics table should have 1 row for job id '${cloneJobId}' (got matching items '${filteredRows}')`

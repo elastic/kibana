@@ -57,10 +57,10 @@ function areAllElementsInResolvedArgs(workpad: Workpad, resolvedArgs: ResolvedAr
   const resolvedArgsElements = Object.keys(resolvedArgs);
 
   const workpadElements = workpad.pages.reduce<string[]>((reduction, page) => {
-    return [...reduction, ...page.elements.map(element => element.id)];
+    return [...reduction, ...page.elements.map((element) => element.id)];
   }, []);
 
-  return workpadElements.every(element => resolvedArgsElements.includes(element));
+  return workpadElements.every((element) => resolvedArgsElements.includes(element));
 }
 
 export const withUnconnectedElementsLoadedTelemetry = <P extends {}>(

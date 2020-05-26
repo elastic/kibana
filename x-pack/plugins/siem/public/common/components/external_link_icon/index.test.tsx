@@ -19,12 +19,9 @@ describe('Duration', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="external-link-icon"]')
-        .first()
-        .props().type
-    ).toEqual('popout');
+    expect(wrapper.find('[data-test-subj="external-link-icon"]').first().props().type).toEqual(
+      'popout'
+    );
   });
 
   test('it renders expected icon type when the leftMargin prop is true', () => {
@@ -34,12 +31,9 @@ describe('Duration', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="external-link-icon"]')
-        .first()
-        .props().type
-    ).toEqual('popout');
+    expect(wrapper.find('[data-test-subj="external-link-icon"]').first().props().type).toEqual(
+      'popout'
+    );
   });
 
   test('it applies a margin-left style when the leftMargin prop is true', () => {
@@ -74,11 +68,8 @@ describe('Duration', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="external-link-icon"]')
-        .first()
-        .props().type
-    ).toEqual('popout');
+    expect(wrapper.find('[data-test-subj="external-link-icon"]').first().props().type).toEqual(
+      'popout'
+    );
   });
 });

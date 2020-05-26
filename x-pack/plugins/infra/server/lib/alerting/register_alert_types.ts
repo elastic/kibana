@@ -16,7 +16,7 @@ const registerAlertTypes = (alertingPlugin: PluginSetupContract, libs: InfraBack
     alertingPlugin.registerType(registerMetricInventoryThresholdAlertType(libs));
 
     const registerFns = [registerLogThresholdAlertType];
-    registerFns.forEach(fn => {
+    registerFns.forEach((fn) => {
       fn(alertingPlugin, libs);
     });
   }

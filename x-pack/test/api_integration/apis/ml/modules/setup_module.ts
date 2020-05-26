@@ -159,13 +159,13 @@ export default ({ getService }: FtrProviderContext) => {
     return 0;
   }
 
-  describe('module setup', function() {
+  describe('module setup', function () {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
     for (const testData of testDataListPositive) {
-      describe('sets up module data', function() {
+      describe('sets up module data', function () {
         before(async () => {
           await esArchiver.loadIfNeeded(testData.sourceDataArchive);
           await ml.testResources.createIndexPatternIfNeeded(
@@ -192,7 +192,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(rspBody).to.have.property('jobs');
 
             const expectedRspJobs = testData.expected.jobs
-              .map(job => {
+              .map((job) => {
                 return { id: job.jobId, success: true };
               })
               .sort(compareById);
@@ -210,7 +210,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(rspBody).to.have.property('datafeeds');
 
             const expectedRspDatafeeds = testData.expected.jobs
-              .map(job => {
+              .map((job) => {
                 return {
                   id: `datafeed-${job.jobId}`,
                   success: true,
@@ -245,7 +245,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // compare model memory limits for created jobs
           const expectedModelMemoryLimits = testData.expected.jobs
-            .map(j => ({
+            .map((j) => ({
               id: j.jobId,
               modelMemoryLimit: j.modelMemoryLimit,
             }))
@@ -257,10 +257,12 @@ export default ({ getService }: FtrProviderContext) => {
             body: {
               jobs: Job[];
             };
-          } = await ml.api.getAnomalyDetectionJob(testData.expected.jobs.map(j => j.jobId).join());
+          } = await ml.api.getAnomalyDetectionJob(
+            testData.expected.jobs.map((j) => j.jobId).join()
+          );
 
           const actualModelMemoryLimits = jobs
-            .map(j => ({
+            .map((j) => ({
               id: j.job_id,
               modelMemoryLimit: j.analysis_limits!.model_memory_limit,
             }))
@@ -279,7 +281,7 @@ export default ({ getService }: FtrProviderContext) => {
     }
 
     for (const testData of testDataListNegative) {
-      describe('rejects request', function() {
+      describe('rejects request', function () {
         before(async () => {
           if (testData.hasOwnProperty('sourceDataArchive')) {
             await esArchiver.loadIfNeeded(testData.sourceDataArchive!);
@@ -304,13 +306,9 @@ export default ({ getService }: FtrProviderContext) => {
             testData.expected.responseCode
           );
 
-          expect(rspBody)
-            .to.have.property('error')
-            .eql(testData.expected.error);
+          expect(rspBody).to.have.property('error').eql(testData.expected.error);
 
-          expect(rspBody)
-            .to.have.property('message')
-            .eql(testData.expected.message);
+          expect(rspBody).to.have.property('message').eql(testData.expected.message);
         });
       });
     }

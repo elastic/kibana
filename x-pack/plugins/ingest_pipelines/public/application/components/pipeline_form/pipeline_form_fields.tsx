@@ -60,7 +60,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
                 />
               }
               checked={isVersionVisible}
-              onChange={e => setIsVersionVisible(e.target.checked)}
+              onChange={(e) => setIsVersionVisible(e.target.checked)}
               data-test-subj="versionToggle"
             />
           </>
@@ -205,7 +205,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
                 />
               }
               checked={isOnFailureEditorVisible}
-              onChange={e => setIsOnFailureEditorVisible(e.target.checked)}
+              onChange={(e) => setIsOnFailureEditorVisible(e.target.checked)}
               data-test-subj="onFailureToggle"
             />
           </>

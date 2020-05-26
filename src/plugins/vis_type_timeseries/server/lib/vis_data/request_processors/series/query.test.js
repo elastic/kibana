@@ -52,7 +52,7 @@ describe('query(req, panel, series)', () => {
   });
 
   test('returns doc with query for timerange', () => {
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = query(req, panel, series, config)(next)({});
     expect(doc).toEqual({
       size: 0,
@@ -79,7 +79,7 @@ describe('query(req, panel, series)', () => {
 
   test('returns doc with query for timerange (offset by 1h)', () => {
     series.offset_time = '1h';
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = query(req, panel, series, config)(next)({});
     expect(doc).toEqual({
       size: 0,
@@ -118,7 +118,7 @@ describe('query(req, panel, series)', () => {
         },
       },
     ];
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = query(req, panel, series, config)(next)({});
     expect(doc).toEqual({
       size: 0,
@@ -157,7 +157,7 @@ describe('query(req, panel, series)', () => {
 
   test('returns doc with series filter', () => {
     series.filter = { query: 'host:web-server', language: 'lucene' };
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = query(req, panel, series, config)(next)({});
     expect(doc).toEqual({
       size: 0,
@@ -211,7 +211,7 @@ describe('query(req, panel, series)', () => {
       },
     ];
     panel.filter = { query: 'host:web-server', language: 'lucene' };
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = query(req, panel, series, config)(next)({});
     expect(doc).toEqual({
       size: 0,
@@ -279,7 +279,7 @@ describe('query(req, panel, series)', () => {
     ];
     panel.filter = { query: 'host:web-server', language: 'lucene' };
     panel.ignore_global_filter = true;
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = query(req, panel, series, config)(next)({});
     expect(doc).toEqual({
       size: 0,

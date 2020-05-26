@@ -29,7 +29,7 @@ export const ModelPlotSwitch: FC = () => {
     // and a rare detector is being used.
     const isRareCategoryJob =
       isCategorizationJobCreator(jobCreator) &&
-      jobCreator.aggregations.some(agg => aggs.includes(agg.id));
+      jobCreator.aggregations.some((agg) => aggs.includes(agg.id));
     setEnabled(isRareCategoryJob === false);
   }, [jobCreatorUpdated]);
 

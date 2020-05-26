@@ -21,7 +21,7 @@ import chalk from 'chalk';
 
 export const pipe = (...fns) => fns.reduce((f, g) => (...args) => g(f(...args)));
 export const noop = () => {};
-export const green = x => chalk.greenBright.bold(x);
-export const id = x => x;
-export const always = x => () => x;
-export const pretty = x => JSON.stringify(x, null, 2);
+export const green = (x) => chalk.greenBright.bold(x);
+export const id = (x) => x;
+export const always = (x) => () => x;
+export const pretty = (x) => JSON.stringify(x, null, 2);

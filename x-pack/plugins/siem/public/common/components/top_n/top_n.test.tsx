@@ -118,22 +118,14 @@ describe('TopN', () => {
     });
 
     test('it invokes the toggleTopN function when the close button is clicked', () => {
-      wrapper
-        .find('[data-test-subj="close"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="close"]').first().simulate('click');
       wrapper.update();
 
       expect(toggleTopN).toHaveBeenCalled();
     });
 
     test('it enables the view select by default', () => {
-      expect(
-        wrapper
-          .find('[data-test-subj="view-select"]')
-          .first()
-          .props().disabled
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="view-select"]').first().props().disabled).toBe(false);
     });
   });
 
@@ -240,12 +232,7 @@ describe('TopN', () => {
     });
 
     test(`it disables the view select when 'options' contains only one entry`, () => {
-      expect(
-        wrapper
-          .find('[data-test-subj="view-select"]')
-          .first()
-          .props().disabled
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="view-select"]').first().props().disabled).toBe(true);
     });
 
     test(`it renders EventsByDataset when defaultView is 'all'`, () => {
