@@ -123,10 +123,7 @@ describe('Actions', () => {
       </TestProviders>
     );
 
-    wrapper
-      .find('[data-test-subj="expand-event"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="expand-event"]').first().simulate('click');
 
     expect(onEventToggled).toBeCalled();
   });
@@ -189,10 +186,7 @@ describe('Actions', () => {
       </TestProviders>
     );
 
-    wrapper
-      .find('[data-test-subj="timeline-notes-button-small"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="timeline-notes-button-small"]').first().simulate('click');
 
     expect(toggleShowNotes).toBeCalled();
   });
@@ -255,10 +249,7 @@ describe('Actions', () => {
       </TestProviders>
     );
 
-    wrapper
-      .find('[data-test-subj="pin"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="pin"]').first().simulate('click');
 
     expect(onPinClicked).toHaveBeenCalled();
   });

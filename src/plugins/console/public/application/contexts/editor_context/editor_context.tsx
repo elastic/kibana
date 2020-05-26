@@ -31,7 +31,7 @@ export interface EditorContextArgs {
 }
 
 export function EditorContextProvider({ children, settings }: EditorContextArgs) {
-  const [state, dispatch] = useReducer(editor.reducer, editor.initialValue, value => ({
+  const [state, dispatch] = useReducer(editor.reducer, editor.initialValue, (value) => ({
     ...value,
     settings,
   }));

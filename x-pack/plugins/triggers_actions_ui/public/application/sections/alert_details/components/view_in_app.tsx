@@ -40,10 +40,10 @@ export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ alert }) =>
          * navigation isn't supported
          */
         () => setAlertNavigation(NO_NAVIGATION),
-        alerting =>
+        (alerting) =>
           alerting
             .getNavigation(alert.id)
-            .then(nav => (nav ? setAlertNavigation(nav) : setAlertNavigation(NO_NAVIGATION)))
+            .then((nav) => (nav ? setAlertNavigation(nav) : setAlertNavigation(NO_NAVIGATION)))
             .catch(() => {
               setAlertNavigation(NO_NAVIGATION);
             })

@@ -19,12 +19,12 @@
 
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default function({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  describe('bfetch explorer', function() {
+  describe('bfetch explorer', function () {
     before(async () => {
       await browser.setWindowSize(1300, 900);
       await PageObjects.common.navigateToApp('settings');

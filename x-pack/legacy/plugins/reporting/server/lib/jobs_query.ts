@@ -67,7 +67,7 @@ export function jobsQueryFactory(
       body: Object.assign(defaultBody[queryType] || {}, body),
     };
 
-    return callAsInternalUser(queryType, query).catch(err => {
+    return callAsInternalUser(queryType, query).catch((err) => {
       if (err instanceof esErrors['401']) return;
       if (err instanceof esErrors['403']) return;
       if (err instanceof esErrors['404']) return;
@@ -78,7 +78,7 @@ export function jobsQueryFactory(
   type Result = number;
 
   function getHits(query: Promise<Result>) {
-    return query.then(res => get(res, 'hits.hits', []));
+    return query.then((res) => get(res, 'hits.hits', []));
   }
 
   return {
@@ -153,7 +153,7 @@ export function jobsQueryFactory(
         };
       }
 
-      return getHits(execQuery('search', body)).then(hits => {
+      return getHits(execQuery('search', body)).then((hits) => {
         if (hits.length !== 1) return;
         return hits[0];
       });

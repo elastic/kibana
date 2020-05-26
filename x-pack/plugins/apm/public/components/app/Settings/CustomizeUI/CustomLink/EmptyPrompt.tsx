@@ -9,7 +9,7 @@ import React from 'react';
 import { CreateCustomLinkButton } from './CreateCustomLinkButton';
 
 export const EmptyPrompt = ({
-  onCreateCustomLinkClick
+  onCreateCustomLinkClick,
 }: {
   onCreateCustomLinkClick: () => void;
 }) => {
@@ -22,7 +22,7 @@ export const EmptyPrompt = ({
           {i18n.translate(
             'xpack.apm.settings.customizeUI.customLink.emptyPromptTitle',
             {
-              defaultMessage: 'No links found.'
+              defaultMessage: 'No links found.',
             }
           )}
         </h2>
@@ -34,7 +34,7 @@ export const EmptyPrompt = ({
               'xpack.apm.settings.customizeUI.customLink.emptyPromptText',
               {
                 defaultMessage:
-                  "Let's change that! You can add custom links to the Actions context menu by the transaction details for each service. Create a helpful link to your company's support portal or open a new bug report. Learn more about it in our docs."
+                  "Let's change that! You can add custom links to the Actions context menu by the transaction details for each service. Create a helpful link to your company's support portal or open a new bug report. Learn more about it in our docs.",
               }
             )}
           </p>

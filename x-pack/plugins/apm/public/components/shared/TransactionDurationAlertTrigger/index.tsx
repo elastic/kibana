@@ -10,7 +10,7 @@ import React from 'react';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import {
   ALERT_TYPES_CONFIG,
-  TRANSACTION_ALERT_AGGREGATION_TYPES
+  TRANSACTION_ALERT_AGGREGATION_TYPES,
 } from '../../../../common/alert_types';
 import { ALL_OPTION, useEnvironments } from '../../../hooks/useEnvironments';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
@@ -54,12 +54,12 @@ export function TransactionDurationAlertTrigger(props: Props) {
     windowSize: 5,
     windowUnit: 'm',
     transactionType: transactionTypes[0],
-    environment: ALL_OPTION.value
+    environment: ALL_OPTION.value,
   };
 
   const params = {
     ...defaults,
-    ...alertParams
+    ...alertParams,
   };
 
   const fields = [
@@ -72,14 +72,14 @@ export function TransactionDurationAlertTrigger(props: Props) {
       title={i18n.translate(
         'xpack.apm.transactionDurationAlertTrigger.environment',
         {
-          defaultMessage: 'Environment'
+          defaultMessage: 'Environment',
         }
       )}
     >
       <EuiSelect
         value={params.environment}
         options={environmentOptions}
-        onChange={e =>
+        onChange={(e) =>
           setAlertParams('environment', e.target.value as Params['environment'])
         }
         compressed
@@ -88,18 +88,18 @@ export function TransactionDurationAlertTrigger(props: Props) {
     <PopoverExpression
       value={params.transactionType}
       title={i18n.translate('xpack.apm.transactionDurationAlertTrigger.type', {
-        defaultMessage: 'Type'
+        defaultMessage: 'Type',
       })}
     >
       <EuiSelect
         value={params.transactionType}
-        options={transactionTypes.map(key => {
+        options={transactionTypes.map((key) => {
           return {
             text: key,
-            value: key
+            value: key,
           };
         })}
-        onChange={e =>
+        onChange={(e) =>
           setAlertParams(
             'transactionType',
             e.target.value as Params['transactionType']
@@ -111,7 +111,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
     <PopoverExpression
       value={params.aggregationType}
       title={i18n.translate('xpack.apm.transactionDurationAlertTrigger.when', {
-        defaultMessage: 'When'
+        defaultMessage: 'When',
       })}
     >
       <EuiSelect
@@ -119,10 +119,10 @@ export function TransactionDurationAlertTrigger(props: Props) {
         options={map(TRANSACTION_ALERT_AGGREGATION_TYPES, (label, key) => {
           return {
             text: label,
-            value: key
+            value: key,
           };
         })}
-        onChange={e =>
+        onChange={(e) =>
           setAlertParams(
             'aggregationType',
             e.target.value as Params['aggregationType']
@@ -136,33 +136,33 @@ export function TransactionDurationAlertTrigger(props: Props) {
       title={i18n.translate(
         'xpack.apm.transactionDurationAlertTrigger.isAbove',
         {
-          defaultMessage: 'is above'
+          defaultMessage: 'is above',
         }
       )}
     >
       <EuiFieldNumber
         value={params.threshold ?? ''}
-        onChange={e => setAlertParams('threshold', e.target.value)}
+        onChange={(e) => setAlertParams('threshold', e.target.value)}
         append={i18n.translate('xpack.apm.transactionDurationAlertTrigger.ms', {
-          defaultMessage: 'ms'
+          defaultMessage: 'ms',
         })}
         compressed
       />
     </PopoverExpression>,
     <ForLastExpression
-      onChangeWindowSize={timeWindowSize =>
+      onChangeWindowSize={(timeWindowSize) =>
         setAlertParams('windowSize', timeWindowSize || '')
       }
-      onChangeWindowUnit={timeWindowUnit =>
+      onChangeWindowUnit={(timeWindowUnit) =>
         setAlertParams('windowUnit', timeWindowUnit)
       }
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
       errors={{
         timeWindowSize: [],
-        timeWindowUnit: []
+        timeWindowUnit: [],
       }}
-    />
+    />,
   ];
 
   return (

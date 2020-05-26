@@ -131,7 +131,7 @@ export const getCases = async ({
   signal,
 }: FetchCasesProps): Promise<AllCases> => {
   const query = {
-    reporters: filterOptions.reporters.map(r => r.username ?? '').filter(r => r !== ''),
+    reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
     tags: filterOptions.tags,
     ...(filterOptions.status !== '' ? { status: filterOptions.status } : {}),
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
@@ -242,7 +242,7 @@ export const pushToService = async (
   signal: AbortSignal
 ): Promise<ServiceConnectorCaseResponse> => {
   const response = await KibanaServices.get().http.fetch<ActionTypeExecutorResult>(
-    `${ACTION_URL}/${connectorId}/_execute`,
+    `${ACTION_URL}/action/${connectorId}/_execute`,
     {
       method: 'POST',
       body: JSON.stringify({

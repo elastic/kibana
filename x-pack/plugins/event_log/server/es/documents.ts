@@ -13,7 +13,7 @@ export function getIndexTemplate(esNames: EsNames) {
     index_patterns: [esNames.indexPatternWithVersion],
     settings: {
       number_of_shards: 1,
-      number_of_replicas: 1,
+      auto_expand_replicas: '0-1',
       'index.lifecycle.name': esNames.ilmPolicy,
       'index.lifecycle.rollover_alias': esNames.alias,
     },

@@ -39,7 +39,7 @@ const createTestCases = (overwrite: boolean, spaceId: string) => [
   CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
 ];
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
@@ -51,7 +51,7 @@ export default function({ getService }: FtrProviderContext) {
       spaceId,
       singleRequest: true,
     }).concat(
-      ['namespace', 'namespaces'].map(key => ({
+      ['namespace', 'namespaces'].map((key) => ({
         title: `(bad request) when ${key} is specified on the saved object`,
         request: [{ type: 'isolatedtype', id: 'some-id', [key]: 'any-value' }] as any,
         responseStatusCode: 400,

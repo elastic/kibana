@@ -93,7 +93,7 @@ async function getBody(
 
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
   const getEscapedQuery = (q: string = '') =>
-    q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, match => `\\${match}`);
+    q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 
   // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
   const executionHint = 'map';
