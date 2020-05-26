@@ -48,7 +48,7 @@ export abstract class ResolverQuery<T> implements MSearchQuery {
   }
 
   protected static getResults(response: SearchResponse<ResolverEvent>): ResolverEvent[] {
-    return response.hits.hits.map(hit => hit._source);
+    return response.hits.hits.map((hit) => hit._source);
   }
 
   /**

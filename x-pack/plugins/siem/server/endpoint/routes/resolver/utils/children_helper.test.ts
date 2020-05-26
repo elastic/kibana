@@ -14,7 +14,7 @@ function findParents(events: ResolverEvent[]): ResolverEvent[] {
   const cache = _.groupBy(events, entityId);
 
   const parents: ResolverEvent[] = [];
-  Object.values(cache).forEach(lifecycle => {
+  Object.values(cache).forEach((lifecycle) => {
     const parentNode = cache[parentEntityId(lifecycle[0])!];
     if (parentNode) {
       parents.push(parentNode[0]);
@@ -24,7 +24,7 @@ function findParents(events: ResolverEvent[]): ResolverEvent[] {
 }
 
 function findNode(tree: ResolverChildren, id: string) {
-  return tree.childNodes.find(node => {
+  return tree.childNodes.find((node) => {
     return node.entityID === id;
   });
 }
@@ -58,9 +58,9 @@ describe('Children helper', () => {
     parent = findNode(tree, entityId(parents[1]));
     expect(parent?.nextChild).toBeNull();
 
-    tree.childNodes.forEach(node => {
-      node.lifecycle.forEach(event => {
-        expect(children.find(child => child.event.id === eventId(event))).toEqual(event);
+    tree.childNodes.forEach((node) => {
+      node.lifecycle.forEach((event) => {
+        expect(children.find((child) => child.event.id === eventId(event))).toEqual(event);
       });
     });
   });
@@ -72,9 +72,9 @@ describe('Children helper', () => {
     helper.getNodes();
 
     const tree = helper.getNodes();
-    tree.childNodes.forEach(node => {
-      node.lifecycle.forEach(event => {
-        expect(children.find(child => child.event.id === eventId(event))).toEqual(event);
+    tree.childNodes.forEach((node) => {
+      node.lifecycle.forEach((event) => {
+        expect(children.find((child) => child.event.id === eventId(event))).toEqual(event);
       });
     });
   });

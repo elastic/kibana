@@ -51,7 +51,7 @@ export class ChildrenNodesHelper {
   addChildren(totals: Record<string, number>, results: ResolverEvent[]) {
     const startEventsCache: Map<string, ResolverEvent[]> = new Map();
 
-    results.forEach(event => {
+    results.forEach((event) => {
       const entityID = entityId(event);
       const parentID = parentEntityId(event);
       if (!entityID || !parentID) {

@@ -145,7 +145,7 @@ describe('data generator', () => {
     it('has all events in one of the tree fields', () => {
       expect(tree.allEvents.length).toBeGreaterThan(0);
 
-      tree.allEvents.forEach(event => {
+      tree.allEvents.forEach((event) => {
         if (event.event.kind === 'alert') {
           expect(event).toEqual(tree.alertEvent);
         } else {

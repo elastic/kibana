@@ -61,16 +61,16 @@ const verifyAncestryFromOrigin = (
  */
 const verifyAncestry = (ancestors: LifecycleNode[], tree: Tree, verifyLastParent: boolean) => {
   // group the ancestors by their entity_id mapped to a lifecycle node
-  const groupedAncestors = _.groupBy(ancestors, ancestor => ancestor.entityID);
+  const groupedAncestors = _.groupBy(ancestors, (ancestor) => ancestor.entityID);
   // group by parent entity_id
-  const groupedAncestorsParent = _.groupBy(ancestors, ancestor =>
+  const groupedAncestorsParent = _.groupBy(ancestors, (ancestor) =>
     parentEntityId(ancestor.lifecycle[0])
   );
   // make sure there aren't any nodes with the same entity_id
   expect(Object.keys(groupedAncestors).length).to.eql(ancestors.length);
   // make sure there aren't any nodes with the same parent entity_id
   expect(Object.keys(groupedAncestorsParent).length).to.eql(ancestors.length);
-  ancestors.forEach(node => {
+  ancestors.forEach((node) => {
     const parentID = parentEntityId(node.lifecycle[0]);
     // the last node generated will have `undefined` as the parent entity_id
     if (parentID !== undefined && verifyLastParent) {
@@ -95,20 +95,20 @@ const verifyChildren = (
   childrenPerParent?: number
 ) => {
   // group the children by their entity_id mapped to a child node
-  const groupedChildren = _.groupBy(children, child => child.entityID);
+  const groupedChildren = _.groupBy(children, (child) => child.entityID);
   // make sure each child is unique
   expect(Object.keys(groupedChildren).length).to.eql(children.length);
   if (numberOfParents !== undefined) {
-    const groupParent = _.groupBy(children, child => parentEntityId(child.lifecycle[0]));
+    const groupParent = _.groupBy(children, (child) => parentEntityId(child.lifecycle[0]));
     expect(Object.keys(groupParent).length).to.eql(numberOfParents);
     if (childrenPerParent !== undefined) {
-      Object.values(groupParent).forEach(childNodes =>
+      Object.values(groupParent).forEach((childNodes) =>
         expect(childNodes.length).to.be(childrenPerParent)
       );
     }
   }
 
-  children.forEach(child => {
+  children.forEach((child) => {
     expectLifecycleNodeInMap(child, tree.children);
   });
 };
@@ -128,9 +128,9 @@ const compareArrays = (
   if (lengthCheck) {
     expect(expected.length).to.eql(toTest.length);
   }
-  toTest.forEach(toTestEvent => {
+  toTest.forEach((toTestEvent) => {
     expect(
-      expected.find(arrEvent => {
+      expected.find((arrEvent) => {
         return JSON.stringify(arrEvent) === JSON.stringify(toTestEvent);
       })
     ).to.be.ok();

@@ -21,10 +21,10 @@ describe('Tree', () => {
     const ancestorInfo: ResolverAncestry = {
       ancestors: generator
         .createAlertEventAncestry(5, 0, 0)
-        .filter(event => {
+        .filter((event) => {
           return event.event.kind === 'event';
         })
-        .map(event => {
+        .map((event) => {
           return {
             entityID: event.process.entity_id,
             // The generator returns Events, but the tree needs a ResolverEvent
@@ -37,9 +37,9 @@ describe('Tree', () => {
     it('adds ancestors to the tree', () => {
       const tree = new Tree(ancestorInfo.ancestors[0].entityID, { ancestry: ancestorInfo });
       const ids = tree.ids();
-      ids.forEach(id => {
+      ids.forEach((id) => {
         const foundAncestor = ancestorInfo.ancestors.find(
-          ancestor => entityId(ancestor.lifecycle[0]) === id
+          (ancestor) => entityId(ancestor.lifecycle[0]) === id
         );
         expect(foundAncestor).not.toBeUndefined();
       });

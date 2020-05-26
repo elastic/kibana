@@ -58,7 +58,9 @@ export class MultiSearcher {
     }
 
     let searchQuery: JsonObject[] = [];
-    queries.forEach(info => (searchQuery = [...searchQuery, ...info.query.buildMSearch(info.ids)]));
+    queries.forEach(
+      (info) => (searchQuery = [...searchQuery, ...info.query.buildMSearch(info.ids)])
+    );
     const res: MSearchResponse<ResolverEvent> = await this.client.callAsCurrentUser('msearch', {
       body: searchQuery,
     });
