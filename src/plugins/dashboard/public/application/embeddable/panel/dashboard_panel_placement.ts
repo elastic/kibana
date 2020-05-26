@@ -109,14 +109,14 @@ interface IplacementDirection {
 }
 
 function comparePanels(a: GridData, b: GridData): number {
-  if (a.y < b.y) {
+  if (a.y + a.h < b.y + b.h) {
     return -1;
   }
-  if (a.y > b.y) {
+  if (a.y + a.h > b.y + b.h) {
     return 1;
   }
   // a.y === b.y
-  if (a.x <= b.x) {
+  if (a.x + a.w <= b.x + b.w) {
     return -1;
   }
   return 1;
