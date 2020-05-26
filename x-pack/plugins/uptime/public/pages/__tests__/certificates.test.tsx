@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithRouter, renderWithRouter } from '../../lib';
+import { renderWithRouter, shallowWithRouter } from '../../lib';
 import { CertificatesPage } from '../certificates';
 import * as redux from 'react-redux';
 import moment from 'moment';
@@ -16,6 +16,9 @@ describe('CertificatesPage', () => {
     spy.mockReturnValue(jest.fn());
 
     const spy1 = jest.spyOn(redux, 'useSelector');
+
+    jest.spyOn(moment.fn, 'diff').mockReturnValue(55555);
+
     spy1.mockReturnValue({
       data: {
         certs: [
@@ -30,8 +33,8 @@ describe('CertificatesPage', () => {
             issuer: 'DigiCert ECC Extended Validation Server CA',
             sha1: '6a4cb249b71b6659dabb960115fd7a01bfc9968c',
             sha256: '84694645cbd183bf9be472ce702bd189246e1fcd1544ffead466d956a71690bf',
-            not_after: moment().add(4, 'm'),
-            not_before: moment().subtract(4, 'm'),
+            not_after: '2020-07-28T08:30:36.000Z',
+            not_before: '2020-05-05T08:30:36.000Z',
             common_name: 'cloudflare.com',
           },
           {
@@ -39,8 +42,8 @@ describe('CertificatesPage', () => {
             issuer: 'DigiCert SHA2 Secure Server CA',
             sha1: '7bb698386970363d2919cc5772846984ffd4a889',
             sha256: '9250711c54de546f4370e0c3d3a3ec45bc96092a25a4a71a1afa396af7047eb8',
-            not_after: moment().add(4, 'm'),
-            not_before: moment().subtract(4, 'm'),
+            not_after: '2020-08-28T12:00:00.000Z',
+            not_before: '2019-08-29T00:00:00.000Z',
             common_name: 'www.example.org',
           },
         ],
@@ -48,21 +51,15 @@ describe('CertificatesPage', () => {
       },
     });
 
-    const localStorageMock = {
+    // @ts-ignore
+    global.localStorage = {
       getItem: jest.fn(),
       setItem: jest.fn(),
       clear: jest.fn(),
     };
-
-    // @ts-ignore
-    global.localStorage = localStorageMock;
   });
 
   it('shallow renders expected elements for valid props', () => {
     expect(shallowWithRouter(<CertificatesPage />)).toMatchSnapshot();
-  });
-
-  it('renders expected elements for valid props', () => {
-    expect(renderWithRouter(<CertificatesPage />)).toMatchSnapshot();
   });
 });
