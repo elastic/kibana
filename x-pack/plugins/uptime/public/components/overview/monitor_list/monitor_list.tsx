@@ -43,7 +43,7 @@ const TruncatedEuiLink = styled(EuiLink)`
   text-overflow: ellipsis;
 `;
 
-const noItemsMessage = (loading: boolean, filters?: string) => {
+export const noItemsMessage = (loading: boolean, filters?: string) => {
   if (loading) return labels.LOADING;
   return !!filters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE;
 };
