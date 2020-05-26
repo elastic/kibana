@@ -15,6 +15,7 @@ import { TestProviders } from '../../mock';
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { TimelineContext } from '../../../timelines/components/timeline/timeline_context';
+import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 
 import { DraggableWrapperHoverContent } from './draggable_wrapper_hover_content';
 
@@ -27,11 +28,18 @@ jest.mock('uuid', () => {
   };
 });
 
+jest.mock('../../hooks/use_add_to_timeline');
+
 const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
 const field = 'process.name';
 const value = 'nice';
 
 describe('DraggableWrapperHoverContent', () => {
+  beforeAll(() => {
+    // our mock implementation of the useAddToTimeline hook returns a mock startDragToTimeline function:
+    (useAddToTimeline as jest.Mock).mockReturnValue(jest.fn());
+  });
+
   // Suppress warnings about "react-beautiful-dnd"
   /* eslint-disable no-console */
   const originalError = console.error;
@@ -51,7 +59,7 @@ describe('DraggableWrapperHoverContent', () => {
    */
   const forOrOut = ['for', 'out'];
 
-  forOrOut.forEach(hoverAction => {
+  forOrOut.forEach((hoverAction) => {
     describe(`Filter ${hoverAction} value`, () => {
       test(`it renders the 'Filter ${hoverAction} value' button when showTopN is false`, () => {
         const wrapper = mount(
@@ -66,10 +74,7 @@ describe('DraggableWrapperHoverContent', () => {
         );
 
         expect(
-          wrapper
-            .find(`[data-test-subj="filter-${hoverAction}-value"]`)
-            .first()
-            .exists()
+          wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().exists()
         ).toBe(true);
       });
 
@@ -86,10 +91,7 @@ describe('DraggableWrapperHoverContent', () => {
         );
 
         expect(
-          wrapper
-            .find(`[data-test-subj="filter-${hoverAction}-value"]`)
-            .first()
-            .exists()
+          wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().exists()
         ).toBe(false);
       });
 
@@ -119,10 +121,7 @@ describe('DraggableWrapperHoverContent', () => {
         });
 
         test('when clicked, it adds a filter to the timeline when running in the context of a timeline', () => {
-          wrapper
-            .find(`[data-test-subj="filter-${hoverAction}-value"]`)
-            .first()
-            .simulate('click');
+          wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
 
           expect(filterManager.addFilters).toBeCalledWith({
@@ -140,10 +139,7 @@ describe('DraggableWrapperHoverContent', () => {
         });
 
         test('when clicked, invokes onFilterAdded when running in the context of a timeline', () => {
-          wrapper
-            .find(`[data-test-subj="filter-${hoverAction}-value"]`)
-            .first()
-            .simulate('click');
+          wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
 
           expect(onFilterAdded).toBeCalled();
@@ -173,10 +169,7 @@ describe('DraggableWrapperHoverContent', () => {
         });
 
         test('when clicked, it adds a filter to the global filters when NOT running in the context of a timeline', () => {
-          wrapper
-            .find(`[data-test-subj="filter-${hoverAction}-value"]`)
-            .first()
-            .simulate('click');
+          wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
 
           expect(kibana.services.data.query.filterManager.addFilters).toBeCalledWith({
@@ -194,10 +187,7 @@ describe('DraggableWrapperHoverContent', () => {
         });
 
         test('when clicked, invokes onFilterAdded when NOT running in the context of a timeline', () => {
-          wrapper
-            .find(`[data-test-subj="filter-${hoverAction}-value"]`)
-            .first()
-            .simulate('click');
+          wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
 
           expect(onFilterAdded).toBeCalled();
@@ -257,10 +247,7 @@ describe('DraggableWrapperHoverContent', () => {
                   },
                 };
 
-          wrapper
-            .find(`[data-test-subj="filter-${hoverAction}-value"]`)
-            .first()
-            .simulate('click');
+          wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
 
           expect(filterManager.addFilters).toBeCalledWith(expected);
@@ -317,15 +304,75 @@ describe('DraggableWrapperHoverContent', () => {
                   },
                 };
 
-          wrapper
-            .find(`[data-test-subj="filter-${hoverAction}-value"]`)
-            .first()
-            .simulate('click');
+          wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
 
           expect(kibana.services.data.query.filterManager.addFilters).toBeCalledWith(expected);
         });
       });
+    });
+  });
+
+  describe('Add to timeline', () => {
+    const aggregatableStringField = 'cloud.account.id';
+    const draggableId = 'draggable.id';
+
+    [false, true].forEach((showTopN) => {
+      [value, null].forEach((maybeValue) => {
+        [draggableId, undefined].forEach((maybeDraggableId) => {
+          const shouldRender = !showTopN && maybeValue != null && maybeDraggableId != null;
+          const assertion = shouldRender ? 'should render' : 'should NOT render';
+
+          test(`it ${assertion} the 'Add to timeline investigation' button when showTopN is ${showTopN}, value is ${maybeValue}, and a draggableId is ${maybeDraggableId}`, () => {
+            const wrapper = mount(
+              <TestProviders>
+                <MockedProvider mocks={mocksSource} addTypename={false}>
+                  <DraggableWrapperHoverContent
+                    draggableId={maybeDraggableId}
+                    field={aggregatableStringField}
+                    showTopN={showTopN}
+                    toggleTopN={jest.fn()}
+                    value={maybeValue}
+                  />
+                </MockedProvider>
+              </TestProviders>
+            );
+
+            expect(wrapper.find('[data-test-subj="add-to-timeline"]').first().exists()).toBe(
+              shouldRender
+            );
+          });
+        });
+      });
+    });
+
+    test('when clicked, it invokes the `startDragToTimeline` function returned by the `useAddToTimeline` hook', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocksSource} addTypename={false}>
+            <DraggableWrapperHoverContent
+              draggableId={draggableId}
+              field={aggregatableStringField}
+              showTopN={false}
+              toggleTopN={jest.fn()}
+              value={value}
+            />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      // The following "startDragToTimeline" function returned by our mock
+      // useAddToTimeline hook is called when the user clicks the
+      // Add to timeline investigation action:
+      const startDragToTimeline = useAddToTimeline({
+        draggableId,
+        fieldName: aggregatableStringField,
+      });
+
+      wrapper.find('[data-test-subj="add-to-timeline"]').first().simulate('click');
+      wrapper.update();
+
+      expect(startDragToTimeline).toHaveBeenCalled();
     });
   });
 
@@ -348,12 +395,7 @@ describe('DraggableWrapperHoverContent', () => {
       await wait(); // https://github.com/apollographql/react-apollo/issues/1711
       wrapper.update();
 
-      expect(
-        wrapper
-          .find('[data-test-subj="show-top-field"]')
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(true);
     });
 
     test(`it renders the 'Show top field' button when showTopN is false and a whitelisted signal field is provided`, async () => {
@@ -374,12 +416,7 @@ describe('DraggableWrapperHoverContent', () => {
       await wait();
       wrapper.update();
 
-      expect(
-        wrapper
-          .find('[data-test-subj="show-top-field"]')
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(true);
     });
 
     test(`it does NOT render the 'Show top field' button when showTopN is false and a field not known to BrowserFields is provided`, async () => {
@@ -400,12 +437,7 @@ describe('DraggableWrapperHoverContent', () => {
       await wait();
       wrapper.update();
 
-      expect(
-        wrapper
-          .find('[data-test-subj="show-top-field"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(false);
     });
 
     test(`invokes the toggleTopN function when the 'Show top field' button is clicked`, async () => {
@@ -427,10 +459,7 @@ describe('DraggableWrapperHoverContent', () => {
       await wait();
       wrapper.update();
 
-      wrapper
-        .find('[data-test-subj="show-top-field"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="show-top-field"]').first().simulate('click');
       wrapper.update();
 
       expect(toggleTopN).toBeCalled();
@@ -454,12 +483,9 @@ describe('DraggableWrapperHoverContent', () => {
       await wait();
       wrapper.update();
 
-      expect(
-        wrapper
-          .find('[data-test-subj="eventsByDatasetOverviewPanel"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="eventsByDatasetOverviewPanel"]').first().exists()).toBe(
+        false
+      );
     });
 
     test(`it does NOT render the 'Show top field' button when showTopN is true`, async () => {
@@ -480,12 +506,7 @@ describe('DraggableWrapperHoverContent', () => {
       await wait();
       wrapper.update();
 
-      expect(
-        wrapper
-          .find('[data-test-subj="show-top-field"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(false);
     });
 
     test(`it renders the Top N histogram when when showTopN is true`, async () => {
@@ -507,10 +528,7 @@ describe('DraggableWrapperHoverContent', () => {
       wrapper.update();
 
       expect(
-        wrapper
-          .find('[data-test-subj="eventsByDatasetOverview-uuid.v4()Panel"]')
-          .first()
-          .exists()
+        wrapper.find('[data-test-subj="eventsByDatasetOverview-uuid.v4()Panel"]').first().exists()
       ).toBe(true);
     });
   });
@@ -528,12 +546,7 @@ describe('DraggableWrapperHoverContent', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find(`[data-test-subj="copy-to-clipboard"]`)
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find(`[data-test-subj="copy-to-clipboard"]`).first().exists()).toBe(true);
     });
 
     test(`it does NOT render the 'Copy to Clipboard' button when showTopN is true`, () => {
@@ -548,12 +561,7 @@ describe('DraggableWrapperHoverContent', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find(`[data-test-subj="copy-to-clipboard"]`)
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find(`[data-test-subj="copy-to-clipboard"]`).first().exists()).toBe(false);
     });
   });
 });

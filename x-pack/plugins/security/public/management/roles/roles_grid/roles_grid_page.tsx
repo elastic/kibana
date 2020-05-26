@@ -118,7 +118,7 @@ export class RolesGridPage extends Component<Props, State> {
           {this.state.showDeleteConfirmation ? (
             <ConfirmDelete
               onCancel={this.onCancelDelete}
-              rolesToDelete={this.state.selection.map(role => role.name)}
+              rolesToDelete={this.state.selection.map((role) => role.name)}
               callback={this.handleDelete}
               notifications={this.props.notifications}
               rolesAPIClient={this.props.rolesAPIClient}
@@ -259,7 +259,7 @@ export class RolesGridPage extends Component<Props, State> {
   };
 
   private getVisibleRoles = (roles: Role[], filter: string, includeReservedRoles: boolean) => {
-    return roles.filter(role => {
+    return roles.filter((role) => {
       const normalized = `${role.name}`.toLowerCase();
       const normalizedQuery = filter.toLowerCase();
       return (

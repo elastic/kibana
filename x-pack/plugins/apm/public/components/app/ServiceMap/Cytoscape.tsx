@@ -11,13 +11,13 @@ import React, {
   ReactNode,
   useEffect,
   useRef,
-  useState
+  useState,
 } from 'react';
 import { debounce } from 'lodash';
 import {
   animationOptions,
   cytoscapeOptions,
-  nodeHeight
+  nodeHeight,
 } from './cytoscapeOptions';
 import { useUiTracker } from '../../../../../observability/public';
 
@@ -66,7 +66,7 @@ function rotatePoint(
   const sinθ = Math.sin(θ);
   return {
     x: x * cosθ - y * sinθ,
-    y: x * sinθ + y * cosθ
+    y: x * sinθ + y * cosθ,
   };
 }
 
@@ -80,29 +80,26 @@ function getLayoutOptions(
     roots: selectedRoots.length ? selectedRoots : undefined,
     fit: true,
     padding: nodeHeight,
-    spacingFactor: 0.85,
-    animate: true,
-    animationEasing: animationOptions.easing,
-    animationDuration: animationOptions.duration,
+    spacingFactor: 1.2,
     // @ts-ignore
     // Rotate nodes counter-clockwise to transform layout from top→bottom to left→right.
     // The extra 5° achieves the effect of separating overlapping taxi-styled edges.
     transform: (node: any, pos: cytoscape.Position) => rotatePoint(pos, -95),
     // swap width/height of boundingBox to compensate for the rotation
-    boundingBox: { x1: 0, y1: 0, w: height, h: width }
+    boundingBox: { x1: 0, y1: 0, w: height, h: width },
   };
 }
 
 function selectRoots(cy: cytoscape.Core): string[] {
   const bfs = cy.elements().bfs({
-    roots: cy.elements().leaves()
+    roots: cy.elements().leaves(),
   });
   const furthestNodeFromLeaves = bfs.path.last();
   return cy
     .elements()
     .roots()
     .union(furthestNodeFromLeaves)
-    .map(el => el.id());
+    .map((el) => el.id());
 }
 
 export function Cytoscape({
@@ -111,11 +108,11 @@ export function Cytoscape({
   height,
   width,
   serviceName,
-  style
+  style,
 }: CytoscapeProps) {
   const [ref, cy] = useCytoscape({
     ...cytoscapeOptions,
-    elements
+    elements,
   });
 
   // Add the height to the div style. The height is a separate prop because it
@@ -145,7 +142,7 @@ export function Cytoscape({
       }
     };
 
-    const dataHandler: cytoscape.EventHandler = event => {
+    const dataHandler: cytoscape.EventHandler = (event) => {
       if (cy && cy.elements().length > 0) {
         if (serviceName) {
           resetConnectedEdgeStyle(cy.getElementById(serviceName));
@@ -167,7 +164,7 @@ export function Cytoscape({
       }
     };
     let layoutstopDelayTimeout: NodeJS.Timeout;
-    const layoutstopHandler: cytoscape.EventHandler = event => {
+    const layoutstopHandler: cytoscape.EventHandler = (event) => {
       // This 0ms timer is necessary to prevent a race condition
       // between the layout finishing rendering and viewport centering
       layoutstopDelayTimeout = setTimeout(() => {
@@ -176,11 +173,11 @@ export function Cytoscape({
             ...animationOptions,
             fit: {
               eles: event.cy.elements(),
-              padding: nodeHeight
+              padding: nodeHeight,
             },
             center: {
-              eles: event.cy.getElementById(serviceName)
-            }
+              eles: event.cy.getElementById(serviceName),
+            },
           });
         } else {
           event.cy.fit(undefined, nodeHeight);
@@ -192,25 +189,25 @@ export function Cytoscape({
       () => trackApmEvent({ metric: 'service_map_node_or_edge_hover' }),
       1000
     );
-    const mouseoverHandler: cytoscape.EventHandler = event => {
+    const mouseoverHandler: cytoscape.EventHandler = (event) => {
       trackNodeEdgeHover();
       event.target.addClass('hover');
       event.target.connectedEdges().addClass('nodeHover');
     };
-    const mouseoutHandler: cytoscape.EventHandler = event => {
+    const mouseoutHandler: cytoscape.EventHandler = (event) => {
       event.target.removeClass('hover');
       event.target.connectedEdges().removeClass('nodeHover');
     };
-    const selectHandler: cytoscape.EventHandler = event => {
+    const selectHandler: cytoscape.EventHandler = (event) => {
       trackApmEvent({ metric: 'service_map_node_select' });
       resetConnectedEdgeStyle(event.target);
     };
-    const unselectHandler: cytoscape.EventHandler = event => {
+    const unselectHandler: cytoscape.EventHandler = (event) => {
       resetConnectedEdgeStyle(
         serviceName ? event.cy.getElementById(serviceName) : undefined
       );
     };
-    const debugHandler: cytoscape.EventHandler = event => {
+    const debugHandler: cytoscape.EventHandler = (event) => {
       const debugEnabled = sessionStorage.getItem('apm_debug') === 'true';
       if (debugEnabled) {
         // eslint-disable-next-line no-console

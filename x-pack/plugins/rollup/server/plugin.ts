@@ -14,6 +14,7 @@ import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
   CoreSetup,
+  ICustomClusterClient,
   Plugin,
   Logger,
   KibanaRequest,
@@ -42,11 +43,18 @@ import { mergeCapabilitiesWithFields } from './lib/merge_capabilities_with_field
 interface RollupContext {
   client: IScopedClusterClient;
 }
+async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
+  const [core] = await getStartServices();
+  // Extend the elasticsearchJs client with additional endpoints.
+  const esClientConfig = { plugins: [elasticsearchJsPlugin] };
+  return core.elasticsearch.legacy.createClient('rollup', esClientConfig);
+}
 
 export class RollupPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;
   private readonly globalConfig$: Observable<SharedGlobalConfig>;
   private readonly license: License;
+  private rollupEsClient?: ICustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -55,7 +63,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
   }
 
   public setup(
-    { http, uiSettings, elasticsearch }: CoreSetup,
+    { http, uiSettings, getStartServices }: CoreSetup,
     { licensing, indexManagement, visTypeTimeseries, usageCollection }: Dependencies
   ) {
     this.license.setup(
@@ -72,12 +80,10 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       }
     );
 
-    // Extend the elasticsearchJs client with additional endpoints.
-    const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-    const rollupEsClient = elasticsearch.createClient('rollup', esClientConfig);
-    http.registerRouteHandlerContext('rollup', (context, request) => {
+    http.registerRouteHandlerContext('rollup', async (context, request) => {
+      this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
       return {
-        client: rollupEsClient.asScoped(request),
+        client: this.rollupEsClient.asScoped(request),
       };
     });
 
@@ -116,7 +122,12 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       const callWithRequestFactoryShim = (
         elasticsearchServiceShim: CallWithRequestFactoryShim,
         request: KibanaRequest
-      ): APICaller => rollupEsClient.asScoped(request).callAsCurrentUser;
+      ): APICaller => {
+        return async (...args: Parameters<APICaller>) => {
+          this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
+          return await this.rollupEsClient.asScoped(request).callAsCurrentUser(...args);
+        };
+      };
 
       const { addSearchStrategy } = visTypeTimeseries;
       registerRollupSearchStrategy(callWithRequestFactoryShim, addSearchStrategy);
@@ -126,7 +137,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       this.globalConfig$
         .pipe(first())
         .toPromise()
-        .then(globalConfig => {
+        .then((globalConfig) => {
           registerRollupUsageCollector(usageCollection, globalConfig.kibana.index);
         })
         .catch((e: any) => {
@@ -140,5 +151,10 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
   }
 
   start() {}
-  stop() {}
+
+  stop() {
+    if (this.rollupEsClient) {
+      this.rollupEsClient.close();
+    }
+  }
 }

@@ -70,7 +70,7 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
   };
 
   const onComboChange = (options: EuiComboBoxOptionOption[]) => {
-    field.setValue(options.map(option => option.label));
+    field.setValue(options.map((option) => option.label));
   };
 
   const onSearchComboChange = (value: string) => {
@@ -95,7 +95,7 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
         placeholder={i18n.translate('esUi.forms.comboBoxField.placeHolderText', {
           defaultMessage: 'Type and then hit "ENTER"',
         })}
-        selectedOptions={(field.value as any[]).map(v => ({ label: v }))}
+        selectedOptions={(field.value as any[]).map((v) => ({ label: v }))}
         onCreateOption={onCreateComboOption}
         onChange={onComboChange}
         onSearchChange={onSearchComboChange}

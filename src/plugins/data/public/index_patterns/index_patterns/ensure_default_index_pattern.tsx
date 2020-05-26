@@ -61,7 +61,7 @@ export const createEnsureDefaultIndexPattern = (core: CoreStart) => {
       core.uiSettings.set('defaultIndex', defaultId);
     } else {
       const canManageIndexPatterns = core.application.capabilities.management.kibana.index_patterns;
-      const redirectTarget = canManageIndexPatterns ? 'management' : 'home';
+      const redirectTarget = canManageIndexPatterns ? '/management/kibana/indexPatterns' : '/home';
 
       if (timeoutId) {
         clearTimeout(timeoutId);
@@ -88,11 +88,11 @@ export const createEnsureDefaultIndexPattern = (core: CoreStart) => {
         timeoutId = undefined;
       }, 15000);
 
-      if (redirectTarget === 'home') {
+      if (redirectTarget === '/home') {
         core.application.navigateToApp('home');
       } else {
         window.location.href = core.http.basePath.prepend(
-          `/app/kibana#/management/kibana/index_pattern?bannerMessage=${bannerMessage}`
+          `/app/kibana#/management/kibana/indexPatterns?bannerMessage=${bannerMessage}`
         );
       }
 

@@ -41,7 +41,7 @@ describe('licensing plugin', () => {
         const { license$, refresh } = await plugin.setup(coreSetup);
 
         let fromObservable;
-        license$.subscribe(license => (fromObservable = license));
+        license$.subscribe((license) => (fromObservable = license));
 
         const licenseResult = await refresh();
         expect(licenseResult.uid).toBe('first');
@@ -88,7 +88,7 @@ describe('licensing plugin', () => {
         expect(sessionStorage.getItem).toHaveBeenCalledWith(licensingSessionStorageKey);
       });
 
-      it('observable receives updated licenses', async done => {
+      it('observable receives updated licenses', async (done) => {
         const types: LicenseType[] = ['gold', 'platinum'];
 
         const sessionStorage = coreMock.createStorage();
@@ -102,7 +102,7 @@ describe('licensing plugin', () => {
         const { license$, refresh } = await plugin.setup(coreSetup);
 
         let i = 0;
-        license$.subscribe(value => {
+        license$.subscribe((value) => {
           i++;
           if (i === 1) {
             expect(value.type).toBe('basic');
@@ -367,7 +367,7 @@ describe('licensing plugin', () => {
       expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(1);
       expect(mountExpiredBannerMock).toHaveBeenCalledWith({
         type: 'gold',
-        uploadUrl: '/app/kibana#/management/elasticsearch/license_management/upload_license',
+        uploadUrl: '/app/kibana#/management/stack/license_management/upload_license',
       });
     });
   });

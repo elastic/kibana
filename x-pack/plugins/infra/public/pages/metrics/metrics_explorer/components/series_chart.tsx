@@ -46,11 +46,11 @@ export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack, opac
     colorTransformer(MetricsExplorerColor.color0);
 
   const yAccessors = Array.isArray(id)
-    ? id.map(i => getMetricId(metric, i)).slice(id.length - 1, id.length)
+    ? id.map((i) => getMetricId(metric, i)).slice(id.length - 1, id.length)
     : [getMetricId(metric, id)];
   const y0Accessors =
     Array.isArray(id) && id.length > 1
-      ? id.map(i => getMetricId(metric, i)).slice(0, 1)
+      ? id.map((i) => getMetricId(metric, i)).slice(0, 1)
       : undefined;
   const chartId = `series-${series.id}-${yAccessors.join('-')}`;
 
@@ -89,7 +89,7 @@ export const MetricsExplorerBarChart = ({ metric, id, series, stack }: Props) =>
     colorTransformer(MetricsExplorerColor.color0);
 
   const yAccessors = Array.isArray(id)
-    ? id.map(i => getMetricId(metric, i)).slice(id.length - 1, id.length)
+    ? id.map((i) => getMetricId(metric, i)).slice(id.length - 1, id.length)
     : [getMetricId(metric, id)];
   const chartId = `series-${series.id}-${yAccessors.join('-')}`;
 

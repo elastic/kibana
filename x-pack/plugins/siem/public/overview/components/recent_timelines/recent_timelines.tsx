@@ -44,7 +44,7 @@ export const RecentTimelines = React.memo<{
       {timelines.map((t, i) => (
         <React.Fragment key={`${t.savedObjectId}-${i}`}>
           <WithHoverActions
-            render={showHoverContent => (
+            render={(showHoverContent) => (
               <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <RecentTimelineHeader onOpenTimeline={onOpenTimeline} timeline={t} />

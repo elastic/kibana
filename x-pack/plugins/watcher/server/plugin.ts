@@ -12,6 +12,7 @@ declare module 'kibana/server' {
 
 import {
   CoreSetup,
+  ICustomClusterClient,
   IScopedClusterClient,
   Logger,
   Plugin,
@@ -33,8 +34,15 @@ export interface WatcherContext {
   client: IScopedClusterClient;
 }
 
+async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
+  const [core] = await getStartServices();
+  const esConfig = { plugins: [elasticsearchJsPlugin] };
+  return core.elasticsearch.legacy.createClient('watcher', esConfig);
+}
+
 export class WatcherServerPlugin implements Plugin<void, void, any, any> {
-  log: Logger;
+  private readonly log: Logger;
+  private watcherESClient?: ICustomClusterClient;
 
   private licenseStatus: LicenseStatus = {
     hasRequired: false,
@@ -44,21 +52,17 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
     this.log = ctx.logger.get();
   }
 
-  async setup(
-    { http, elasticsearch: elasticsearchService }: CoreSetup,
-    { licensing }: Dependencies
-  ) {
+  async setup({ http, getStartServices }: CoreSetup, { licensing }: Dependencies) {
     const router = http.createRouter();
     const routeDependencies: RouteDependencies = {
       router,
       getLicenseStatus: () => this.licenseStatus,
     };
 
-    const config = { plugins: [elasticsearchJsPlugin] };
-    const watcherESClient = elasticsearchService.createClient('watcher', config);
-    http.registerRouteHandlerContext('watcher', (ctx, request) => {
+    http.registerRouteHandlerContext('watcher', async (ctx, request) => {
+      this.watcherESClient = this.watcherESClient ?? (await getCustomEsClient(getStartServices));
       return {
-        client: watcherESClient.asScoped(request),
+        client: this.watcherESClient.asScoped(request),
       };
     });
 
@@ -70,7 +74,7 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
     registerWatchesRoutes(routeDependencies);
     registerWatchRoutes(routeDependencies);
 
-    licensing.license$.subscribe(async license => {
+    licensing.license$.subscribe(async (license) => {
       const { state, message } = license.check(PLUGIN.ID, PLUGIN.MINIMUM_LICENSE_REQUIRED);
       const hasMinimumLicense = state === 'valid';
       if (hasMinimumLicense && license.getFeature(PLUGIN.ID)) {
@@ -89,6 +93,12 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
       }
     });
   }
+
   start() {}
-  stop() {}
+
+  stop() {
+    if (this.watcherESClient) {
+      this.watcherESClient.close();
+    }
+  }
 }

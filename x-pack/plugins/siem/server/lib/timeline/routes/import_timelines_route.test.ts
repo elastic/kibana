@@ -12,7 +12,7 @@ import {
   createMockConfig,
 } from '../../detection_engine/routes/__mocks__';
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineStatus } from '../../../../common/types/timeline';
 import { SecurityPluginSetup } from '../../../../../../plugins/security/server';
 
 import {
@@ -145,13 +145,13 @@ describe('import timelines', () => {
     test('should Create a new timeline savedObject with given draft timeline', async () => {
       mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue([
         mockDuplicateIdErrors,
-        [{ ...mockUniqueParsedObjects[0], timelineType: TimelineType.draft }],
+        [{ ...mockUniqueParsedObjects[0], status: TimelineStatus.draft }],
       ]);
       const mockRequest = getImportTimelinesRequest();
       await server.inject(mockRequest, context);
       expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
         ...mockParsedTimelineObject,
-        timelineType: TimelineType.default,
+        status: TimelineStatus.active,
       });
     });
 

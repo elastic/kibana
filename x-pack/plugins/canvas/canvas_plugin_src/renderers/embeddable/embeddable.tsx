@@ -71,7 +71,7 @@ export const embeddableRendererFactory = (core: CoreStart, plugins: StartDeps) =
 
       if (!embeddablesRegistry[uniqueId]) {
         const factory = Array.from(plugins.embeddable.getEmbeddableFactories()).find(
-          embeddableFactory => embeddableFactory.type === embeddableType
+          (embeddableFactory) => embeddableFactory.type === embeddableType
         ) as EmbeddableFactory<EmbeddableInput>;
 
         if (!factory) {
@@ -84,7 +84,7 @@ export const embeddableRendererFactory = (core: CoreStart, plugins: StartDeps) =
         embeddablesRegistry[uniqueId] = embeddableObject;
         ReactDOM.unmountComponentAtNode(domNode);
 
-        const subscription = embeddableObject.getInput$().subscribe(function(updatedInput) {
+        const subscription = embeddableObject.getInput$().subscribe(function (updatedInput) {
           const updatedExpression = embeddableInputToExpression(updatedInput, embeddableType);
 
           if (updatedExpression) {
@@ -112,6 +112,7 @@ export const embeddableRendererFactory = (core: CoreStart, plugins: StartDeps) =
         });
       } else {
         embeddablesRegistry[uniqueId].updateInput(input);
+        embeddablesRegistry[uniqueId].reload();
       }
     },
   });

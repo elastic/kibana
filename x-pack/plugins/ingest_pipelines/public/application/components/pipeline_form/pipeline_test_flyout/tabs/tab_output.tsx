@@ -76,7 +76,7 @@ export const OutputTab: React.FunctionComponent<Props> = ({
               />
             }
             checked={cachedVerbose}
-            onChange={e => onEnableVerbose(e.target.checked)}
+            onChange={(e) => onEnableVerbose(e.target.checked)}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

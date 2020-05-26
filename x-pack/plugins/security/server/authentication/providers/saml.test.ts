@@ -835,7 +835,7 @@ describe('SAMLAuthenticationProvider', () => {
         realm: 'test-realm',
       };
 
-      mockOptions.client.asScoped.mockImplementation(scopeableRequest => {
+      mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
         if (scopeableRequest?.headers.authorization === `Bearer ${state.accessToken}`) {
           const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
           mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(

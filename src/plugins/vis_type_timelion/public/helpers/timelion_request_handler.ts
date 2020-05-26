@@ -68,7 +68,7 @@ export function getTimelionRequestHandler({
 }: TimelionVisDependencies) {
   const timezone = getTimezone(uiSettings);
 
-  return async function({
+  return async function ({
     timeRange,
     filters,
     query,

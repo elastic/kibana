@@ -39,7 +39,7 @@ export const installPipelines = async (
       }
       return acc;
     }, []);
-    return Promise.all(pipelines).then(results => results.flat());
+    return Promise.all(pipelines).then((results) => results.flat());
   }
   return [];
 };
@@ -48,7 +48,7 @@ export function rewriteIngestPipeline(
   pipeline: string,
   substitutions: RewriteSubstitution[]
 ): string {
-  substitutions.forEach(sub => {
+  substitutions.forEach((sub) => {
     const { source, target, templateFunction } = sub;
     // This fakes the use of the golang text/template expression {{SomeTemplateFunction 'some-param'}}
     // cf. https://github.com/elastic/beats/blob/master/filebeat/fileset/fileset.go#L294
@@ -84,7 +84,7 @@ export async function installPipelinesForDataset({
   let pipelines: any[] = [];
   const substitutions: RewriteSubstitution[] = [];
 
-  pipelinePaths.forEach(path => {
+  pipelinePaths.forEach((path) => {
     const { name, extension } = getNameAndExtension(path);
     const nameForInstallation = getPipelineNameForInstallation({
       pipelineName: name,
@@ -105,14 +105,14 @@ export async function installPipelinesForDataset({
     });
   });
 
-  pipelines = pipelines.map(pipeline => {
+  pipelines = pipelines.map((pipeline) => {
     return {
       ...pipeline,
       contentForInstallation: rewriteIngestPipeline(pipeline.content, substitutions),
     };
   });
 
-  const installationPromises = pipelines.map(async pipeline => {
+  const installationPromises = pipelines.map(async (pipeline) => {
     return installPipeline({ callCluster, pipeline });
   });
 

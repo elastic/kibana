@@ -63,7 +63,7 @@ export function readCliArgs(argv: string[]): ParsedArgs {
       oss: null,
       'version-qualifier': '',
     },
-    unknown: flag => {
+    unknown: (flag) => {
       unknownFlags.push(flag);
       return false;
     },
