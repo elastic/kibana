@@ -16,13 +16,13 @@ export async function getResponse(url: string): Promise<Response> {
     } else {
       throw new IngestManagerError(
         IngestManagerErrorType.RegistryError,
-        `Error connecting to package registry: ${response.statusText}`
+        `Error connecting to package registry at ${url}: ${response.statusText}`
       );
     }
   } catch (e) {
     throw new IngestManagerError(
       IngestManagerErrorType.RegistryError,
-      `Error connecting to package registry: ${e.message}`
+      `Error connecting to package registry at ${url}: ${e.message}`
     );
   }
 }
