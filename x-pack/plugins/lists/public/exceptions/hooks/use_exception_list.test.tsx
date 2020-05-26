@@ -100,7 +100,7 @@ describe('useExceptionList', () => {
     const spyOnfetchExceptionListItemsByListId = jest.spyOn(api, 'fetchExceptionListItemsByListId');
     await act(async () => {
       const { rerender, waitForNextUpdate } = renderHook<string, ReturnExceptionListAndItems>(
-        id => useExceptionList({ http: mockKibanaHttpService, id, onError }),
+        (id) => useExceptionList({ http: mockKibanaHttpService, id, onError }),
         {
           initialProps: 'myListId',
         }
