@@ -8,7 +8,6 @@ import React from 'react';
 import { renderWithRouter, shallowWithRouter } from '../../lib';
 import { CertificatesPage } from '../certificates';
 import * as redux from 'react-redux';
-import moment from 'moment';
 
 describe('CertificatesPage', () => {
   beforeAll(() => {
@@ -17,7 +16,9 @@ describe('CertificatesPage', () => {
 
     const spy1 = jest.spyOn(redux, 'useSelector');
 
-    jest.spyOn(moment.fn, 'diff').mockReturnValue(555555);
+    // jest.spyOn(moment.fn, 'diff').mockReturnValue(55555555);
+
+    jest.mock('moment', () => () => ({ format: () => '2018–01–30T12:34:56+00:00' }));
 
     spy1.mockReturnValue({
       data: {
@@ -61,5 +62,9 @@ describe('CertificatesPage', () => {
 
   it('shallow renders expected elements for valid props', () => {
     expect(shallowWithRouter(<CertificatesPage />)).toMatchSnapshot();
+  });
+
+  it('renders expected elements for valid props', () => {
+    expect(renderWithRouter(<CertificatesPage />)).toMatchSnapshot();
   });
 });
