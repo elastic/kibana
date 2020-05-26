@@ -201,6 +201,7 @@ function peg$parse(input, options) {
           if (result === 'null') return null;
           if (result === 'true') return true;
           if (result === 'false') return false;
+          if (result === 'undefined') return undefined;
           if (isNaN(Number(result))) return result; // 5bears
           return Number(result);
         },
