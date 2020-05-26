@@ -68,6 +68,18 @@ export default ({ getService }: FtrProviderContext) => {
         error: 'Not Found',
       },
     },
+    {
+      testTitle: 'as ML Viewer',
+      user: USER.ML_VIEWER,
+      requestBody: {
+        jobIds: [SINGLE_METRIC_JOB_CONFIG.job_id, MULTI_METRIC_JOB_CONFIG.job_id],
+      },
+      // Note that the jobs and datafeeds are loaded async so the actual error message is not deterministic.
+      expected: {
+        responseCode: 404,
+        error: 'Not Found',
+      },
+    },
   ];
 
   async function runCloseJobsRequest(
@@ -85,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('close_jobs', function() {
+  describe('close_jobs', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
@@ -111,9 +123,9 @@ export default ({ getService }: FtrProviderContext) => {
       }
     });
 
-    describe('rejects request', function() {
+    describe('rejects request', function () {
       for (const testData of testDataListUnauthorized) {
-        describe('fails to close job ID supplied', function() {
+        describe('fails to close job ID supplied', function () {
           it(`${testData.testTitle}`, async () => {
             const body = await runCloseJobsRequest(
               testData.user,
@@ -121,9 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
               testData.expected.responseCode
             );
 
-            expect(body)
-              .to.have.property('error')
-              .eql(testData.expected.error);
+            expect(body).to.have.property('error').eql(testData.expected.error);
 
             // ensure jobs are still open
             for (const id of testData.requestBody.jobIds) {
@@ -134,7 +144,7 @@ export default ({ getService }: FtrProviderContext) => {
       }
     });
 
-    describe('close jobs fail because they are running', function() {
+    describe('close jobs fail because they are running', function () {
       for (const testData of testDataListFailed) {
         it(`${testData.testTitle}`, async () => {
           const body = await runCloseJobsRequest(
@@ -151,7 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(actualRspJobIds).to.have.length(expectedRspJobIds.length);
           expect(actualRspJobIds).to.eql(expectedRspJobIds);
 
-          expectedRspJobIds.forEach(id => {
+          expectedRspJobIds.forEach((id) => {
             expect(body[id].closed).to.eql(testData.expected.responseBody[id].closed);
             expect(body[id].error.statusCode).to.eql(
               testData.expected.responseBody[id].error.statusCode
@@ -166,7 +176,7 @@ export default ({ getService }: FtrProviderContext) => {
       }
     });
 
-    describe('stops datafeeds', function() {
+    describe('stops datafeeds', function () {
       it('stops datafeeds', async () => {
         for (const job of testSetupJobConfigs) {
           const datafeedId = `datafeed-${job.job_id}`;
@@ -176,7 +186,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('close jobs succeed', function() {
+    describe('close jobs succeed', function () {
       for (const testData of testDataList) {
         it(`${testData.testTitle}`, async () => {
           const body = await runCloseJobsRequest(
@@ -193,7 +203,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(actualRspJobIds).to.have.length(expectedRspJobIds.length);
           expect(actualRspJobIds).to.eql(expectedRspJobIds);
 
-          expectedRspJobIds.forEach(id => {
+          expectedRspJobIds.forEach((id) => {
             expect(body[id].closed).to.eql(testData.expected.responseBody[id].closed);
           });
 

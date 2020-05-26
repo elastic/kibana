@@ -49,6 +49,18 @@ export default ({ getService }: FtrProviderContext) => {
         error: 'Not Found',
       },
     },
+    {
+      testTitle: 'as ML Viewer',
+      user: USER.ML_VIEWER,
+      requestBody: {
+        jobIds: [SINGLE_METRIC_JOB_CONFIG.job_id, MULTI_METRIC_JOB_CONFIG.job_id],
+      },
+      // Note that the jobs and datafeeds are loaded async so the actual error message is not deterministic.
+      expected: {
+        responseCode: 404,
+        error: 'Not Found',
+      },
+    },
   ];
 
   async function runJobsDeleteRequest(
@@ -66,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('delete_jobs', function() {
+  describe('delete_jobs', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -82,9 +94,9 @@ export default ({ getService }: FtrProviderContext) => {
       }
     });
 
-    describe('rejects request', function() {
+    describe('rejects request', function () {
       for (const testData of testDataListUnauthorized) {
-        describe('fails to delete job ID supplied', function() {
+        describe('fails to delete job ID supplied', function () {
           it(`${testData.testTitle}`, async () => {
             const body = await runJobsDeleteRequest(
               testData.user,
@@ -92,9 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
               testData.expected.responseCode
             );
 
-            expect(body)
-              .to.have.property('error')
-              .eql(testData.expected.error);
+            expect(body).to.have.property('error').eql(testData.expected.error);
 
             // check jobs still exist
             for (const id of testData.requestBody.jobIds) {
@@ -105,7 +115,7 @@ export default ({ getService }: FtrProviderContext) => {
       }
     });
 
-    describe('deletes job with ID supplied', function() {
+    describe('deletes job with ID supplied', function () {
       for (const testData of testDataList) {
         it(`${testData.testTitle}`, async () => {
           const body = await runJobsDeleteRequest(

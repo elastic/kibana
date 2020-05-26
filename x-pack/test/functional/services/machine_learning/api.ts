@@ -365,13 +365,13 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async stopDatafeed(datafeedId: string) {
       log.debug(`Stopping datafeed '${datafeedId}'...`);
-      const startResponse = await esSupertest
+      const stopResponse = await esSupertest
         .post(`/_ml/datafeeds/${datafeedId}/_stop`)
         .set({ 'Content-Type': 'application/json' })
         .expect(200)
         .then((res: any) => res.body);
 
-      expect(startResponse)
+      expect(stopResponse)
         .to.have.property('stopped')
         .eql(true, 'Response for stop datafeed request should be acknowledged');
     },
