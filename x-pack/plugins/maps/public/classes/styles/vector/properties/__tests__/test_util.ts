@@ -14,6 +14,7 @@ import {
   StyleMetaDescriptor,
 } from '../../../../../../common/descriptor_types';
 import { AbstractField, IField } from '../../../../fields/field';
+import { IStyle } from '../../../style';
 
 class MockField extends AbstractField {
   async getLabel(): Promise<string> {
