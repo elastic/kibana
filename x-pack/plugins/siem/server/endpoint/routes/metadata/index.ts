@@ -33,6 +33,7 @@ const HOST_STATUS_MAPPING = new Map<AgentStatus, HostStatus>([
 ]);
 
 export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
+  const logger = endpointAppContext.logFactory.get('metadata');
   router.post(
     {
       path: '/api/endpoint/metadata',
@@ -85,6 +86,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           }),
         });
       } catch (err) {
+        logger.warn(JSON.stringify(err, null, 2));
         return res.internalError({ body: err });
       }
     }
@@ -112,6 +114,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
         }
         return res.notFound({ body: 'Endpoint Not Found' });
       } catch (err) {
+        logger.warn(JSON.stringify(err, null, 2));
         return res.internalError({ body: err });
       }
     }
