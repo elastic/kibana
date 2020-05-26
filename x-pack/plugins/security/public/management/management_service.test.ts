@@ -120,7 +120,7 @@ describe('ManagementService', () => {
           sections: {
             getSection: jest
               .fn()
-              .mockReturnValue({ getApp: jest.fn().mockImplementation(id => mockApps.get(id)) }),
+              .mockReturnValue({ getApp: jest.fn().mockImplementation((id) => mockApps.get(id)) }),
             getAllSections: jest.fn(),
             navigateToApp: jest.fn(),
           },

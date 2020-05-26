@@ -14,7 +14,7 @@ export async function getServiceAnnotations({
   serviceName,
   environment,
   annotationsClient,
-  apiCaller
+  apiCaller,
 }: {
   serviceName: string;
   environment?: string;
@@ -27,7 +27,7 @@ export async function getServiceAnnotations({
   const derivedAnnotationsPromise = getDerivedServiceAnnotations({
     setup,
     serviceName,
-    environment
+    environment,
   });
 
   const storedAnnotations = annotationsClient
@@ -36,18 +36,18 @@ export async function getServiceAnnotations({
         serviceName,
         environment,
         annotationsClient,
-        apiCaller
+        apiCaller,
       })
     : [];
 
   if (storedAnnotations.length) {
-    derivedAnnotationsPromise.catch(error => {
+    derivedAnnotationsPromise.catch((error) => {
       // handle error silently to prevent Kibana from crashing
     });
     return { annotations: storedAnnotations };
   }
 
   return {
-    annotations: await derivedAnnotationsPromise
+    annotations: await derivedAnnotationsPromise,
   };
 }

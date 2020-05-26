@@ -98,7 +98,7 @@ describe('helpers', () => {
   });
 
   describe('move', () => {
-    [0, 1, 2].forEach(moveProviderFromSourceIndex =>
+    [0, 1, 2].forEach((moveProviderFromSourceIndex) =>
       test(`it moves moveProviderFromSourceIndex ${moveProviderFromSourceIndex} to an empty group`, () => {
         const sourceGroup = [providerA, providerB, providerC];
         const destinationGroup: DataProvidersAnd[] = []; // destination is always empty
@@ -117,8 +117,8 @@ describe('helpers', () => {
       })
     );
 
-    [0, 1, 2].forEach(moveProviderFromSourceIndex =>
-      [0, 1, 2].forEach(moveProviderToDestinationIndex =>
+    [0, 1, 2].forEach((moveProviderFromSourceIndex) =>
+      [0, 1, 2].forEach((moveProviderToDestinationIndex) =>
         test(`it moves moveProviderFromSourceIndex ${moveProviderFromSourceIndex} to moveProviderToDestinationIndex ${moveProviderToDestinationIndex} (no duplicates in destination)`, () => {
           const sourceGroup = [providerA, providerB, providerC];
           const destinationGroup: DataProvidersAnd[] = [providerD, providerE, providerF]; // destination has no duplicates
@@ -144,8 +144,8 @@ describe('helpers', () => {
       )
     );
 
-    [0, 1, 2].forEach(moveProviderFromSourceIndex =>
-      [0, 1, 2].forEach(moveProviderToDestinationIndex =>
+    [0, 1, 2].forEach((moveProviderFromSourceIndex) =>
+      [0, 1, 2].forEach((moveProviderToDestinationIndex) =>
         test(`it moves moveProviderFromSourceIndex ${moveProviderFromSourceIndex} to moveProviderToDestinationIndex ${moveProviderToDestinationIndex} (with duplicates in destination)`, () => {
           const sourceGroup = [providerA, providerB, providerC];
           const destinationGroup: DataProvidersAnd[] = [providerA, providerB, providerC]; // destination has duplicates
@@ -432,7 +432,7 @@ describe('helpers', () => {
   });
 
   describe('moveProvidersBetweenGroups', () => {
-    [0, 1, 2].forEach(moveProviderFromSourceIndex =>
+    [0, 1, 2].forEach((moveProviderFromSourceIndex) =>
       test(`it dispatches the expected action when moving from moveProviderFromSourceIndex ${moveProviderFromSourceIndex} to an empty group`, () => {
         const dataProviderGroups: DataProvidersAnd[][] = [[providerA, providerB, providerC], []];
         const destination = {
@@ -466,8 +466,8 @@ describe('helpers', () => {
       })
     );
 
-    [0, 1, 2].forEach(moveProviderFromSourceIndex =>
-      [0, 1, 2].forEach(moveProviderToDestinationIndex =>
+    [0, 1, 2].forEach((moveProviderFromSourceIndex) =>
+      [0, 1, 2].forEach((moveProviderToDestinationIndex) =>
         test(`it dispatches the expected action when moving from moveProviderFromSourceIndex ${moveProviderFromSourceIndex} to moveProviderToDestinationIndex ${moveProviderToDestinationIndex} (no duplicates in destination)`, () => {
           const dataProviderGroups: DataProvidersAnd[][] = [
             [providerA, providerB, providerC],
@@ -512,8 +512,8 @@ describe('helpers', () => {
       )
     );
 
-    [0, 1, 2].forEach(moveProviderFromSourceIndex =>
-      [0, 1, 2].forEach(moveProviderToDestinationIndex =>
+    [0, 1, 2].forEach((moveProviderFromSourceIndex) =>
+      [0, 1, 2].forEach((moveProviderToDestinationIndex) =>
         test(`it dispatches the expected action when moving from moveProviderFromSourceIndex ${moveProviderFromSourceIndex} to moveProviderToDestinationIndex ${moveProviderToDestinationIndex} (with duplicates in destination)`, () => {
           const dataProviderGroups: DataProvidersAnd[][] = [
             [providerA, providerB, providerC],

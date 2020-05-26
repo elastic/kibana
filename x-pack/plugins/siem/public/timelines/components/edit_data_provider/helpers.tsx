@@ -41,9 +41,9 @@ export const getFieldNames = (category: Partial<BrowserField>): string[] =>
 export const getCategorizedFieldNames = (browserFields: BrowserFields): EuiComboBoxOptionOption[] =>
   Object.keys(browserFields)
     .sort()
-    .map(categoryId => ({
+    .map((categoryId) => ({
       label: categoryId,
-      options: getFieldNames(browserFields[categoryId]).map(fieldId => ({
+      options: getFieldNames(browserFields[categoryId]).map((fieldId) => ({
         label: fieldId,
       })),
     }));
@@ -62,7 +62,7 @@ export const selectionsAreValid = ({
   const operator = selectedOperator.length > 0 ? selectedOperator[0].label : '';
 
   const fieldIsValid = getAllFieldsByName(browserFields)[fieldId] != null;
-  const operatorIsValid = findIndex(o => o.label === operator, operatorLabels) !== -1;
+  const operatorIsValid = findIndex((o) => o.label === operator, operatorLabels) !== -1;
 
   return fieldIsValid && operatorIsValid;
 };

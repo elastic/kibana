@@ -13,7 +13,7 @@ import { syncUrlHashQueryParam } from './middlewares';
 
 export function indexManagementStore(services) {
   const toggleNameToVisibleMap = {};
-  services.extensionsService.toggles.forEach(toggleExtension => {
+  services.extensionsService.toggles.forEach((toggleExtension) => {
     toggleNameToVisibleMap[toggleExtension.name] = false;
   });
   const initialState = { tableState: { ...defaultTableState, toggleNameToVisibleMap } };

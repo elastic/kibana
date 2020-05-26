@@ -11,7 +11,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexLifecycleManagement']);
   const log = getService('log');
 
-  describe('Home page', function() {
+  describe('Home page', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('indexLifecycleManagement');
     });

@@ -22,10 +22,10 @@ import { ImmutableMiddlewareFactory } from '../../../common/store';
 
 export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<Immutable<
   PolicyDetailsState
->> = coreStart => {
+>> = (coreStart) => {
   const http = coreStart.http;
 
-  return ({ getState, dispatch }) => next => async action => {
+  return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();
 

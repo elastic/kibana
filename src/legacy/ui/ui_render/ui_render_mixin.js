@@ -108,10 +108,10 @@ export function uiRenderMixin(kbnServer, server, config) {
         const dllBundlePath = `${basePath}/${buildHash}/built_assets/dlls`;
 
         const dllStyleChunks = DllCompiler.getRawDllConfig().chunks.map(
-          chunk => `${dllBundlePath}/vendors${chunk}.style.dll.css`
+          (chunk) => `${dllBundlePath}/vendors${chunk}.style.dll.css`
         );
         const dllJsChunks = DllCompiler.getRawDllConfig().chunks.map(
-          chunk => `${dllBundlePath}/vendors${chunk}.bundle.dll.js`
+          (chunk) => `${dllBundlePath}/vendors${chunk}.bundle.dll.js`
         );
 
         const styleSheetPaths = [
@@ -139,9 +139,9 @@ export function uiRenderMixin(kbnServer, server, config) {
                 `${regularBundlePath}/${app.getId()}.style.css`,
                 ...kbnServer.uiExports.styleSheetPaths
                   .filter(
-                    path => path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
+                    (path) => path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
                   )
-                  .map(path =>
+                  .map((path) =>
                     path.localPath.endsWith('.scss')
                       ? `${basePath}/${buildHash}/built_assets/css/${path.publicPath}`
                       : `${basePath}/${path.publicPath}`
@@ -162,7 +162,7 @@ export function uiRenderMixin(kbnServer, server, config) {
 
         const jsDependencyPaths = [
           ...UiSharedDeps.jsDepFilenames.map(
-            filename => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
+            (filename) => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
           ),
           `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
           ...(isCore
@@ -174,7 +174,7 @@ export function uiRenderMixin(kbnServer, server, config) {
               ]),
 
           ...kpPluginIds.map(
-            pluginId => `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`
+            (pluginId) => `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`
           ),
         ];
 
@@ -260,17 +260,14 @@ export function uiRenderMixin(kbnServer, server, config) {
       vars,
     });
 
-    return h
-      .response(content)
-      .type('text/html')
-      .header('content-security-policy', http.csp.header);
+    return h.response(content).type('text/html').header('content-security-policy', http.csp.header);
   }
 
-  server.decorate('toolkit', 'renderApp', function(app, overrides) {
+  server.decorate('toolkit', 'renderApp', function (app, overrides) {
     return renderApp(this, app, true, overrides);
   });
 
-  server.decorate('toolkit', 'renderAppWithDefaultConfig', function(app) {
+  server.decorate('toolkit', 'renderAppWithDefaultConfig', function (app) {
     return renderApp(this, app, false);
   });
 }

@@ -11,7 +11,7 @@ import { LocalUIFiltersAPIResponse } from '../../server/lib/ui_filters/local_ui_
 import { useUrlParams } from './useUrlParams';
 import {
   LocalUIFilterName,
-  localUIFilters
+  localUIFilters,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/ui_filters/local_ui_filters/config';
 import { history } from '../utils/history';
@@ -24,16 +24,16 @@ import { useCallApi } from './useCallApi';
 const getInitialData = (
   filterNames: LocalUIFilterName[]
 ): LocalUIFiltersAPIResponse => {
-  return filterNames.map(filterName => ({
+  return filterNames.map((filterName) => ({
     options: [],
-    ...localUIFilters[filterName]
+    ...localUIFilters[filterName],
   }));
 };
 
 export function useLocalUIFilters({
   projection,
   filterNames,
-  params
+  params,
 }: {
   projection: PROJECTION;
   filterNames: LocalUIFilterName[];
@@ -52,9 +52,9 @@ export function useLocalUIFilters({
       search: fromQuery(
         removeUndefinedProps({
           ...search,
-          [name]: value.length ? value.join(',') : undefined
+          [name]: value.length ? value.join(',') : undefined,
         })
-      )
+      ),
     });
   };
 
@@ -62,7 +62,7 @@ export function useLocalUIFilters({
     const search = omit(toQuery(history.location.search), filterNames);
     history.push({
       ...history.location,
-      search: fromQuery(search)
+      search: fromQuery(search),
     });
   };
 
@@ -75,8 +75,8 @@ export function useLocalUIFilters({
         start: urlParams.start,
         end: urlParams.end,
         filterNames: JSON.stringify(filterNames),
-        ...params
-      }
+        ...params,
+      },
     });
   }, [
     callApi,
@@ -85,18 +85,18 @@ export function useLocalUIFilters({
     urlParams.start,
     urlParams.end,
     filterNames,
-    params
+    params,
   ]);
 
-  const filters = data.map(filter => ({
+  const filters = data.map((filter) => ({
     ...filter,
-    value: values[filter.name] || []
+    value: values[filter.name] || [],
   }));
 
   return {
     filters,
     status,
     setFilterValue,
-    clearValues
+    clearValues,
   };
 }

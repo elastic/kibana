@@ -44,7 +44,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
 
           const response = await alertUtils.getEnableRequest(createdAlert.id);
 
@@ -95,7 +95,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
 
           await supertest
             .put(
@@ -158,7 +158,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add('other', createdAlert.id, 'alert');
+          objectRemover.add('other', createdAlert.id, 'alert', undefined);
 
           const response = await alertUtils.getEnableRequest(createdAlert.id);
 

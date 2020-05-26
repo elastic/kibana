@@ -115,7 +115,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const [searchRef, setSearchRef] = useState<HTMLElement | null>(null);
   const { fetchAllTimeline, timelines, loading, totalCount: timelineCount } = useGetAllTimeline();
 
-  const onSearchTimeline = useCallback(val => {
+  const onSearchTimeline = useCallback((val) => {
     setSearchTimelineValue(val);
   }, []);
 
@@ -193,7 +193,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   }, []);
 
   const handleTimelineChange = useCallback(
-    options => {
+    (options) => {
       const selectedTimeline = options.filter(
         (option: { checked: string }) => option.checked === 'on'
       );
@@ -272,7 +272,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
           virtualizedProps: ({
             onScroll: handleOnScroll.bind(
               null,
-              timelines.filter(t => !hideUntitled || t.title !== '').length,
+              timelines.filter((t) => !hideUntitled || t.title !== '').length,
               timelineCount
             ),
           } as unknown) as ListProps,

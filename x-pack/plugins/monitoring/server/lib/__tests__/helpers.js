@@ -82,7 +82,7 @@ export const response = {
   },
 };
 
-export const defaultResponseSort = handleResponse => {
+export const defaultResponseSort = (handleResponse) => {
   const responseMulti = { hits: { hits: [] } };
   const hit = response.hits.hits[0];
   const version = ['6.6.2', '7.0.0-rc1', '6.7.1'];

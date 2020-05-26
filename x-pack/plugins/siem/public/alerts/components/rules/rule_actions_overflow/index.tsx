@@ -142,7 +142,7 @@ const RuleActionsOverflowComponent = ({
         ids={rulesToExport}
         exportSelectedData={exportRules}
         data-test-subj="rules-details-generic-downloader"
-        onExportSuccess={exportCount => {
+        onExportSuccess={(exportCount) => {
           displaySuccessToast(
             i18nActions.SUCCESSFULLY_EXPORTED_RULES(exportCount),
             dispatchToaster
