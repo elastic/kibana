@@ -24,7 +24,9 @@ export const registerPrivilegesRoute = ({ license, router }: RouteDependencies) 
     license.guardApiRoute(async (ctx, req, res) => {
       const {
         core: {
-          elasticsearch: { dataClient },
+          elasticsearch: {
+            legacy: { client },
+          },
         },
       } = ctx;
 
@@ -36,7 +38,7 @@ export const registerPrivilegesRoute = ({ license, router }: RouteDependencies) 
       };
 
       try {
-        const { has_all_requested: hasAllPrivileges, cluster } = await dataClient.callAsCurrentUser(
+        const { has_all_requested: hasAllPrivileges, cluster } = await client.callAsCurrentUser(
           'transport.request',
           {
             path: '/_security/user/_has_privileges',
