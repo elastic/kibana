@@ -1,0 +1,40 @@
+{
+  "name": "@elastic/safer-lodash-set",
+  "version": "0.0.0",
+  "description": "A safer version of the lodash set and setWith functions",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "dependency-check": "^4.1.0",
+    "standard": "^14.3.3"
+  },
+  "scripts": {
+    "lint": "standard && dependency-check --no-dev package.json set.js setWith.js",
+    "test": "npm run lint && node test.js",
+    "update": "./scripts/update.sh",
+    "save_state": "./scripts/save_state.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elastic/safer-lodash-set.git"
+  },
+  "keywords": [
+    "lodash",
+    "security",
+    "set",
+    "setWith",
+    "prototype",
+    "pollution"
+  ],
+  "author": "Thomas Watson <w@tson.dk> (https://twitter.com/wa7son)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/elastic/safer-lodash-set/issues"
+  },
+  "homepage": "https://github.com/elastic/safer-lodash-set#readme",
+  "standard": {
+    "ignore": [
+      "/lodash/"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+31a32,35
+>     if (typeof nested == 'function' && key == 'prototype' && hasOwnProperty.call(nested, 'prototype')) {
+>       throw new Error('Illegal access of function prototype')
+>     }
+> 
+33c37
+<       var objValue = nested[key];
+---
+>       var objValue = hasOwnProperty.call(nested, key) ? nested[key] : undefined
