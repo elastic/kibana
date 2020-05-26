@@ -113,7 +113,7 @@ image:management/ingest-pipelines/images/ingest-pipeline-processor.png["Processo
 ]
 ----------------------------------
 
-. Click *Run the pipeline*, and then switch to the *Output* tab to check if the pipeline worked as expected.
+. Click *Run the pipeline* and check if the pipeline worked as expected.
 +
 You can also
 view the verbose output and refresh the output from this view.
