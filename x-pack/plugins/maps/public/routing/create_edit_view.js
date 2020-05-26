@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { withRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { GisMap } from '../connected_components/gis_map';
 import { createMapStore } from '../reducers/store';
@@ -40,39 +41,25 @@ import rison from 'rison-node';
 import { getInitialTimeFilters } from '../angular/get_initial_time_filters';
 import { getInitialRefreshConfig } from '../angular/get_initial_refresh_config';
 import { getInitialQuery } from '../angular/get_initial_query';
+import {getMapsSavedObjectLoader} from "../angular/services/gis_map_saved_object_loader";
 
-export class MapsCreateEditView extends React.Component {
+export const MapsCreateEditView = withRouter(class extends React.Component {
   constructor(props) {
     super(props);
-    const { savedMap, mapsAppState, localStorage, globalState } = props;
-    const layerList = getInitialLayers(savedMap.layerListJSON, this.getInitialLayersFromUrlParam());
     this.state = {
       store: createMapStore(),
       prevIndexPatternIds: undefined,
       // TODO: Replace empty object w/ global state replacement
       globalState: {},
       filters: [],
-      query: getInitialQuery({
-        mapStateJSON: savedMap.mapStateJSON,
-        appState: mapsAppState,
-        userQueryLanguage: getUiSettings().get('search:queryLanguage'),
-      }),
-      time: getInitialTimeFilters({
-        mapStateJSON: savedMap.mapStateJSON,
-        globalState: globalState,
-      }),
-      refreshConfig: getInitialRefreshConfig({
-        mapStateJSON: savedMap.mapStateJSON,
-        globalState: globalState,
-      }),
       showSaveQuery: getMapsCapabilities().saveQuery,
-      initialLayerListConfig: copyPersistentState(layerList),
-      layerList,
+      layerList: [],
     };
   }
 
   componentDidMount() {
-    this.initMap();
+    const { savedMapId } = this.props.match.params;
+    this.initMap(savedMapId);
   }
 
   getInitialLayersFromUrlParam() {
@@ -192,10 +179,49 @@ export class MapsCreateEditView extends React.Component {
     this.dispatchSetQuery(refresh);
   }
 
-  async initMap() {
+  async _fetchSavedMap(savedObjectId) {
+    const savedObjectLoader = getMapsSavedObjectLoader();
+    return await savedObjectLoader.get(savedObjectId);
+  }
+
+  getSavedMapFilters(savedMap) {
+    const { globalState, mapsAppState } = this.props;
+    return {
+      query: getInitialQuery({
+        mapStateJSON: savedMap.mapStateJSON,
+        appState: mapsAppState,
+        userQueryLanguage: getUiSettings().get('search:queryLanguage'),
+      }),
+      time: getInitialTimeFilters({
+        mapStateJSON: savedMap.mapStateJSON,
+        globalState: globalState,
+      }),
+      refreshConfig: getInitialRefreshConfig({
+        mapStateJSON: savedMap.mapStateJSON,
+        globalState: globalState,
+      }),
+    };
+  }
+
+  async initMap(savedMapId) {
     let unsubscribe;
-    const { store, refreshConfig, layerList } = this.state;
-    const { savedMap, globalState } = this.props;
+    const { store, refreshConfig } = this.state;
+    const { globalState } = this.props;
+
+    let savedMap;
+    let savedMapFilters = {};
+    if (savedMapId) {
+      savedMap = await this._fetchSavedMap(savedMapId);
+      savedMapFilters = this.getSavedMapFilters(savedMap);
+    }
+    const layerList = getInitialLayers(savedMap.layerListJSON, this.getInitialLayersFromUrlParam());
+    // Update state
+    this.state = {
+      ...this.state,
+      ...savedMapFilters,
+      initialLayerListConfig: copyPersistentState(layerList),
+      layerList
+    };
 
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
@@ -244,7 +270,6 @@ export class MapsCreateEditView extends React.Component {
       ...savedObjectFilters,
     ];
     await this.onQueryChange({ filters: initialFilters });
-    // const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
   }
 
   render() {
@@ -255,10 +280,9 @@ export class MapsCreateEditView extends React.Component {
       </Provider>
     );
   }
-}
+});
 
 MapsCreateEditView.defaultProps = {
-  savedMap: {},
   mapsAppState: {},
   localStorage: {},
   globalState: {},

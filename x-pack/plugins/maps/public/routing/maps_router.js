@@ -24,7 +24,7 @@ export function renderApp(context, params) {
         <div id="react-maps-root">
           <Router basename={params.appBasePath}>
             <Switch>
-              <Route path="/map">
+              <Route path="/map/:savedMapId">
                 <MapsCreateEditView />
               </Route>
               <Route path="/">
