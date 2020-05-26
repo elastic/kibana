@@ -24,7 +24,7 @@ const removeLensAutoDate: SavedObjectMigrationFn<any, any> = (doc, context) => {
   const expression: string = doc.attributes?.expression;
   try {
     const ast = fromExpression(expression);
-    const newChain: ExpressionFunctionAST[] = ast.chain.map(topNode => {
+    const newChain: ExpressionFunctionAST[] = ast.chain.map((topNode) => {
       if (topNode.function !== 'lens_merge_tables') {
         return topNode;
       }
@@ -32,10 +32,10 @@ const removeLensAutoDate: SavedObjectMigrationFn<any, any> = (doc, context) => {
         ...topNode,
         arguments: {
           ...topNode.arguments,
-          tables: (topNode.arguments.tables as Ast[]).map(middleNode => {
+          tables: (topNode.arguments.tables as Ast[]).map((middleNode) => {
             return {
               type: 'expression',
-              chain: middleNode.chain.map(node => {
+              chain: middleNode.chain.map((node) => {
                 // Check for sub-expression in aggConfigs
                 if (
                   node.function === 'esaggs' &&
@@ -80,7 +80,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<any, any> = (doc, context) =>
 
   try {
     const ast = fromExpression(expression);
-    const newChain: ExpressionFunctionAST[] = ast.chain.map(topNode => {
+    const newChain: ExpressionFunctionAST[] = ast.chain.map((topNode) => {
       if (topNode.function !== 'lens_merge_tables') {
         return topNode;
       }
@@ -88,10 +88,10 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<any, any> = (doc, context) =>
         ...topNode,
         arguments: {
           ...topNode.arguments,
-          tables: (topNode.arguments.tables as Ast[]).map(middleNode => {
+          tables: (topNode.arguments.tables as Ast[]).map((middleNode) => {
             return {
               type: 'expression',
-              chain: middleNode.chain.map(node => {
+              chain: middleNode.chain.map((node) => {
                 // Skip if there are any timeField arguments already, because that indicates
                 // the fix is already applied
                 if (node.function !== 'esaggs' || node.arguments.timeFields) {
@@ -135,7 +135,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<any, any> = (doc, context) =>
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const migrations: Record<string, SavedObjectMigrationFn<any, any>> = {
-  '7.7.0': doc => {
+  '7.7.0': (doc) => {
     const newDoc = cloneDeep(doc);
     if (newDoc.attributes?.visualizationType === 'lnsXY') {
       const datasourceState = newDoc.attributes.state?.datasourceStates?.indexpattern;
@@ -148,7 +148,7 @@ export const migrations: Record<string, SavedObjectMigrationFn<any, any>> = {
           ...layer,
           xAccessor: datasource?.columns[layer.xAccessor] ? layer.xAccessor : undefined,
           splitAccessor: datasource?.columns[layer.splitAccessor] ? layer.splitAccessor : undefined,
-          accessors: layer.accessors.filter(accessor => !!datasource?.columns[accessor]),
+          accessors: layer.accessors.filter((accessor) => !!datasource?.columns[accessor]),
         };
       }) as typeof xyState.layers;
     }

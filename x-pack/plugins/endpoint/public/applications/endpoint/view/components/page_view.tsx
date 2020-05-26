@@ -24,7 +24,7 @@ const StyledEuiPage = styled(EuiPage)`
     padding: 0;
 
     .endpoint-header {
-      padding: ${props => props.theme.eui.euiSizeL};
+      padding: ${(props) => props.theme.eui.euiSizeL};
       margin-bottom: 0;
     }
     .endpoint-page-content {

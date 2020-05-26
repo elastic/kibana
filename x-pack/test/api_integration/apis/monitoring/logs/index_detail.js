@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import indexDetailFixture from './fixtures/index_detail';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

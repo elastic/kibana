@@ -59,7 +59,7 @@ export function createKbnUrlTracker({
   history,
   getHistory,
   storage,
-  shouldTrackUrlUpdate = pathname => {
+  shouldTrackUrlUpdate = (pathname) => {
     const currentAppName = defaultSubUrl.slice(2); // cut hash and slash symbols
     const targetAppName = pathname.split('/')[1];
 
@@ -145,7 +145,7 @@ export function createKbnUrlTracker({
     }
 
     if (unsubscribeGlobalState) {
-      unsubscribeGlobalState.forEach(sub => sub.unsubscribe());
+      unsubscribeGlobalState.forEach((sub) => sub.unsubscribe());
       unsubscribeGlobalState = undefined;
     }
   }
@@ -167,7 +167,7 @@ export function createKbnUrlTracker({
     unsubscribe();
     const historyInstance = history || (getHistory && getHistory()) || createHashHistory();
     // track current hash when within app
-    unsubscribeURLHistory = historyInstance.listen(location => {
+    unsubscribeURLHistory = historyInstance.listen((location) => {
       if (shouldTrackUrlUpdate(location.pathname)) {
         setActiveUrl(location.pathname + location.search);
       }
@@ -178,7 +178,7 @@ export function createKbnUrlTracker({
     unsubscribe();
     // propagate state updates when in other apps
     unsubscribeGlobalState = stateParams.map(({ stateUpdate$, kbnUrlKey }) =>
-      stateUpdate$.subscribe(state => {
+      stateUpdate$.subscribe((state) => {
         const updatedUrl = setStateToKbnUrl(
           kbnUrlKey,
           state,

@@ -19,7 +19,7 @@ const composeWithReduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMP
   : compose;
 
 export const substateMiddlewareFactory: SubstateMiddlewareFactory = (selector, middleware) => {
-  return api => {
+  return (api) => {
     const substateAPI = {
       ...api,
       // Return just the substate instead of global state.
@@ -48,26 +48,26 @@ export const appStoreFactory: (middlewareDeps?: {
    * (should only be used for testing - example: to inject the action spy middleware)
    */
   additionalMiddleware?: Array<ReturnType<ImmutableMiddlewareFactory>>;
-}) => Store = middlewareDeps => {
+}) => Store = (middlewareDeps) => {
   let middleware;
   if (middlewareDeps) {
     const { coreStart, depsStart, additionalMiddleware = [] } = middlewareDeps;
     middleware = composeWithReduxDevTools(
       applyMiddleware(
         substateMiddlewareFactory(
-          globalState => globalState.hostList,
+          (globalState) => globalState.hostList,
           hostMiddlewareFactory(coreStart, depsStart)
         ),
         substateMiddlewareFactory(
-          globalState => globalState.policyList,
+          (globalState) => globalState.policyList,
           policyListMiddlewareFactory(coreStart, depsStart)
         ),
         substateMiddlewareFactory(
-          globalState => globalState.policyDetails,
+          (globalState) => globalState.policyDetails,
           policyDetailsMiddlewareFactory(coreStart, depsStart)
         ),
         substateMiddlewareFactory(
-          globalState => globalState.alertList,
+          (globalState) => globalState.alertList,
           alertMiddlewareFactory(coreStart, depsStart)
         ),
         // Additional Middleware should go last

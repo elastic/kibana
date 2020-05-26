@@ -53,13 +53,13 @@ export const HighlightedInterval: React.FC<HighlightedIntervalProps> = ({
 HighlightedInterval.displayName = 'HighlightedInterval';
 
 const HighlightTargetMarker = euiStyled.line`
-  stroke: ${props => props.theme.eui.euiColorPrimary};
+  stroke: ${(props) => props.theme.eui.euiColorPrimary};
   stroke-width: 1;
 `;
 
 const HighlightPolygon = euiStyled.polygon`
-  fill: ${props => props.theme.eui.euiColorPrimary};
+  fill: ${(props) => props.theme.eui.euiColorPrimary};
   fill-opacity: 0.3;
-  stroke: ${props => props.theme.eui.euiColorPrimary};
+  stroke: ${(props) => props.theme.eui.euiColorPrimary};
   stroke-width: 1;
 `;

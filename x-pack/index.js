@@ -16,7 +16,7 @@ import { taskManager } from './legacy/plugins/task_manager';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
 import { ingestManager } from './legacy/plugins/ingest_manager';
 
-module.exports = function(kibana) {
+module.exports = function (kibana) {
   return [
     xpackMain(kibana),
     monitoring(kibana),

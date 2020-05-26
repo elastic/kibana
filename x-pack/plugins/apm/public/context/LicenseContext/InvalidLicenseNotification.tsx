@@ -21,7 +21,7 @@ export function InvalidLicenseNotification() {
       title={
         <h1>
           {i18n.translate('xpack.apm.invalidLicense.title', {
-            defaultMessage: 'Invalid License'
+            defaultMessage: 'Invalid License',
           })}
         </h1>
       }
@@ -29,16 +29,16 @@ export function InvalidLicenseNotification() {
         <p>
           {i18n.translate('xpack.apm.invalidLicense.message', {
             defaultMessage:
-              'The APM UI is not available because your current license has expired or is no longer valid.'
+              'The APM UI is not available because your current license has expired or is no longer valid.',
           })}
         </p>
       }
       actions={[
         <EuiButton href={manageLicenseURL}>
           {i18n.translate('xpack.apm.invalidLicense.licenseManagementLink', {
-            defaultMessage: 'Manage your license'
+            defaultMessage: 'Manage your license',
           })}
-        </EuiButton>
+        </EuiButton>,
       ]}
     />
   );

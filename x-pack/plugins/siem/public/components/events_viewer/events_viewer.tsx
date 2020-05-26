@@ -106,7 +106,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   const queryFields = useMemo(
     () =>
       union(
-        columnsHeader.map(c => c.id),
+        columnsHeader.map((c) => c.id),
         timelineTypeContext.queryFields ?? []
       ),
     [columnsHeader, timelineTypeContext.queryFields]
@@ -145,11 +145,10 @@ const EventsViewerComponent: React.FC<Props> = ({
               const totalCountMinusDeleted =
                 totalCount > 0 ? totalCount - deletedEventIds.length : 0;
 
-              const subtitle = `${
-                i18n.SHOWING
-              }: ${totalCountMinusDeleted.toLocaleString()} ${timelineTypeContext.unit?.(
-                totalCountMinusDeleted
-              ) ?? i18n.UNIT(totalCountMinusDeleted)}`;
+              const subtitle = `${i18n.SHOWING}: ${totalCountMinusDeleted.toLocaleString()} ${
+                timelineTypeContext.unit?.(totalCountMinusDeleted) ??
+                i18n.UNIT(totalCountMinusDeleted)
+              }`;
 
               return (
                 <>
@@ -179,7 +178,7 @@ const EventsViewerComponent: React.FC<Props> = ({
 
                       <StatefulBody
                         browserFields={browserFields}
-                        data={events.filter(e => !deletedEventIds.includes(e._id))}
+                        data={events.filter((e) => !deletedEventIds.includes(e._id))}
                         id={id}
                         isEventViewer={true}
                         height={height}

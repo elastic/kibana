@@ -102,8 +102,8 @@ export const useMetricsExplorerState = (
         aggregation === 'count'
           ? [{ aggregation }]
           : options.metrics
-              .filter(metric => metric.aggregation !== 'count')
-              .map(metric => ({
+              .filter((metric) => metric.aggregation !== 'count')
+              .map((metric) => ({
                 ...metric,
                 aggregation,
               }));

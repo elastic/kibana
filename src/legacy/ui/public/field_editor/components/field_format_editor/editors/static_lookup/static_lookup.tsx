@@ -90,7 +90,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
           return (
             <EuiFieldText
               value={value || ''}
-              onChange={e => {
+              onChange={(e) => {
                 this.onLookupChange(
                   {
                     key: e.target.value,
@@ -114,7 +114,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
           return (
             <EuiFieldText
               value={value || ''}
-              onChange={e => {
+              onChange={(e) => {
                 this.onLookupChange(
                   {
                     value: e.target.value,
@@ -179,7 +179,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
                 defaultMessage: 'Leave blank to keep value as-is',
               }
             )}
-            onChange={e => {
+            onChange={(e) => {
               this.onChange({ unknownKeyValue: e.target.value });
             }}
           />

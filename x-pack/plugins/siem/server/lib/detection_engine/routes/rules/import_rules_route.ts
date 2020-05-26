@@ -264,8 +264,8 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
           ];
         }
 
-        const errorsResp = importRuleResponse.filter(resp => isBulkError(resp)) as BulkError[];
-        const successes = importRuleResponse.filter(resp => {
+        const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
+        const successes = importRuleResponse.filter((resp) => {
           if (isImportRegular(resp)) {
             return resp.status_code === 200;
           } else {

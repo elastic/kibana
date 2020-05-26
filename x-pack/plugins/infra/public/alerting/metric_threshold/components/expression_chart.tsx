@@ -118,7 +118,7 @@ export const ExpressionChart: React.FC<Props> = ({
 
   const series = {
     ...firstSeries,
-    rows: firstSeries.rows.map(row => {
+    rows: firstSeries.rows.map((row) => {
       const newRow: MetricsExplorerRow = { ...row };
       thresholds.forEach((thresholdValue, index) => {
         newRow[getMetricId(metric, `threshold_${index}`)] = thresholdValue;

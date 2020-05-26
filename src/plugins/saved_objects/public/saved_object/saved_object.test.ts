@@ -121,13 +121,17 @@ describe('Saved Object', () => {
       it('when false does not request overwrite', () => {
         stubESResponse(getMockedDocResponse('myId'));
 
-        return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
-          stubSavedObjectsClientCreate({ id: 'myId' } as SimpleSavedObject<SavedObjectAttributes>);
+        return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(
+          (savedObject) => {
+            stubSavedObjectsClientCreate({ id: 'myId' } as SimpleSavedObject<
+              SavedObjectAttributes
+            >);
 
-          return savedObject.save({ confirmOverwrite: false }).then(() => {
-            expect(startMock.overlays.openModal).not.toHaveBeenCalled();
-          });
-        });
+            return savedObject.save({ confirmOverwrite: false }).then(() => {
+              expect(startMock.overlays.openModal).not.toHaveBeenCalled();
+            });
+          }
+        );
       });
     });
 
@@ -135,17 +139,19 @@ describe('Saved Object', () => {
       it('as true creates a copy on save success', () => {
         stubESResponse(getMockedDocResponse('myId'));
 
-        return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
-          stubSavedObjectsClientCreate({
-            type: 'dashboard',
-            id: 'newUniqueId',
-          } as SimpleSavedObject<SavedObjectAttributes>);
-          savedObject.copyOnSave = true;
+        return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(
+          (savedObject) => {
+            stubSavedObjectsClientCreate({
+              type: 'dashboard',
+              id: 'newUniqueId',
+            } as SimpleSavedObject<SavedObjectAttributes>);
+            savedObject.copyOnSave = true;
 
-          return savedObject.save(saveOptionsMock).then(id => {
-            expect(id).toBe('newUniqueId');
-          });
-        });
+            return savedObject.save(saveOptionsMock).then((id) => {
+              expect(id).toBe('newUniqueId');
+            });
+          }
+        );
       });
 
       it('as true does not create a copy when save fails', () => {
@@ -153,7 +159,7 @@ describe('Saved Object', () => {
         stubESResponse(getMockedDocResponse(originalId));
 
         return createInitializedSavedObject({ type: 'dashboard', id: originalId }).then(
-          savedObject => {
+          (savedObject) => {
             stubSavedObjectsClientCreate('simulated error', false);
             savedObject.copyOnSave = true;
 
@@ -173,14 +179,14 @@ describe('Saved Object', () => {
         const myId = 'myId';
         stubESResponse(getMockedDocResponse(myId));
 
-        return createInitializedSavedObject({ type: 'dashboard', id: myId }).then(savedObject => {
+        return createInitializedSavedObject({ type: 'dashboard', id: myId }).then((savedObject) => {
           savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
             expect(savedObject.id).toBe(myId);
             return Bluebird.resolve({ id: myId });
           });
           savedObject.copyOnSave = false;
 
-          return savedObject.save(saveOptionsMock).then(id => {
+          return savedObject.save(saveOptionsMock).then((id) => {
             expect(id).toBe(myId);
           });
         });
@@ -188,7 +194,7 @@ describe('Saved Object', () => {
     });
 
     it('returns id from server on success', () => {
-      return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
+      return createInitializedSavedObject({ type: 'dashboard' }).then((savedObject) => {
         stubESResponse(getMockedDocResponse('myId'));
         stubSavedObjectsClientCreate({
           type: 'dashboard',
@@ -196,7 +202,7 @@ describe('Saved Object', () => {
           _version: 'foo',
         } as SimpleSavedObject<SavedObjectAttributes>);
 
-        return savedObject.save(saveOptionsMock).then(id => {
+        return savedObject.save(saveOptionsMock).then((id) => {
           expect(id).toBe('myId');
         });
       });
@@ -207,7 +213,7 @@ describe('Saved Object', () => {
         const id = 'id';
         stubESResponse(getMockedDocResponse(id));
 
-        return createInitializedSavedObject({ type: 'dashboard', id }).then(savedObject => {
+        return createInitializedSavedObject({ type: 'dashboard', id }).then((savedObject) => {
           savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
             expect(savedObject.isSaving).toBe(true);
             return Bluebird.resolve({
@@ -226,7 +232,7 @@ describe('Saved Object', () => {
 
       it('on failure', () => {
         stubESResponse(getMockedDocResponse('id'));
-        return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
+        return createInitializedSavedObject({ type: 'dashboard' }).then((savedObject) => {
           savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
             expect(savedObject.isSaving).toBe(true);
             return Bluebird.reject('');
@@ -256,7 +262,7 @@ describe('Saved Object', () => {
           return { attributes, references };
         };
         return createInitializedSavedObject({ type: 'dashboard', extractReferences }).then(
-          savedObject => {
+          (savedObject) => {
             stubSavedObjectsClientCreate({
               id,
               _version: 'foo',
@@ -280,7 +286,7 @@ describe('Saved Object', () => {
         const id = '123';
         stubESResponse(getMockedDocResponse(id));
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
-          savedObject => {
+          (savedObject) => {
             stubSavedObjectsClientCreate({
               id,
               _version: '2',
@@ -321,7 +327,7 @@ describe('Saved Object', () => {
         const id = '123';
         stubESResponse(getMockedDocResponse(id));
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
-          savedObject => {
+          (savedObject) => {
             stubSavedObjectsClientCreate({
               id,
               _version: '2',
@@ -360,7 +366,7 @@ describe('Saved Object', () => {
         const id = '123';
         stubESResponse(getMockedDocResponse(id));
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
-          savedObject => {
+          (savedObject) => {
             stubSavedObjectsClientCreate({
               id,
               _version: '2',
@@ -405,7 +411,7 @@ describe('Saved Object', () => {
 
   describe('applyESResp', () => {
     it('throws error if not found', () => {
-      return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
+      return createInitializedSavedObject({ type: 'dashboard' }).then((savedObject) => {
         const response = { _source: {} };
         try {
           savedObject.applyESResp(response);
@@ -696,7 +702,7 @@ describe('Saved Object', () => {
     });
 
     describe('type', () => {
-      it('that is not specified throws an error', done => {
+      it('that is not specified throws an error', (done) => {
         const config = {};
 
         const savedObject = new SavedObjectClass(config);
@@ -733,7 +739,7 @@ describe('Saved Object', () => {
       }
 
       function expectDefaultApplied(config: SavedObjectConfig) {
-        return createInitializedSavedObject(config).then(savedObject => {
+        return createInitializedSavedObject(config).then((savedObject) => {
           expect(savedObject.defaults).toBe(config.defaults);
         });
       }
@@ -778,7 +784,7 @@ describe('Saved Object', () => {
 
         stubESResponse(mockDocResponse);
 
-        return createInitializedSavedObject(config).then(savedObject => {
+        return createInitializedSavedObject(config).then((savedObject) => {
           expect(!!savedObject._source).toBe(true);
           expect(savedObject.defaults).toBe(config.defaults);
           expect(savedObject._source.overwriteMe).toBe(serverValue);

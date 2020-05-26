@@ -40,7 +40,7 @@ export default function sectionsReducer(state = defaultState, action) {
 
     case ActionTypes.UNREGISTER_SECTION: {
       const sections = state.sections.slice();
-      const index = sections.findIndex(section => section.id === action.id);
+      const index = sections.findIndex((section) => section.id === action.id);
       sections.splice(index, 1);
 
       return {

@@ -14,7 +14,7 @@ interface MappingsWithType {
 }
 
 const isMappingDefinition = (obj: GenericObject): boolean => {
-  const areAllKeysValid = Object.keys(obj).every(key => VALID_MAPPINGS_PARAMETERS.includes(key));
+  const areAllKeysValid = Object.keys(obj).every((key) => VALID_MAPPINGS_PARAMETERS.includes(key));
 
   if (!areAllKeysValid) {
     return false;

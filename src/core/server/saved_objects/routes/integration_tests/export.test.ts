@@ -98,7 +98,7 @@ describe('POST /api/saved_objects/_export', () => {
       })
     );
 
-    const objects = (result.text as string).split('\n').map(row => JSON.parse(row));
+    const objects = (result.text as string).split('\n').map((row) => JSON.parse(row));
     expect(objects).toEqual(sortedObjects);
     expect(exportSavedObjectsToStream.mock.calls[0][0]).toEqual(
       expect.objectContaining({

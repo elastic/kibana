@@ -37,7 +37,7 @@ export const TemplateSteps: React.FunctionComponent<Props> = ({
   updateCurrentStep,
   isCurrentStepValid,
 }) => {
-  const steps = [1, 2, 3, 4, 5].map(step => {
+  const steps = [1, 2, 3, 4, 5].map((step) => {
     return {
       title: stepNamesMap[step],
       isComplete: currentStep > step,

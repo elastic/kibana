@@ -28,7 +28,7 @@ export function getExternalServiceSimulatorPath(service: ExternalServiceSimulato
 }
 
 export function getAllExternalServiceSimulatorPaths(): string[] {
-  const allPaths = Object.values(ExternalServiceSimulator).map(service =>
+  const allPaths = Object.values(ExternalServiceSimulator).map((service) =>
     getExternalServiceSimulatorPath(service)
   );
 
@@ -38,7 +38,7 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
+export default function (kibana: any) {
   return new kibana.Plugin({
     require: ['xpack_main'],
     name: NAME,

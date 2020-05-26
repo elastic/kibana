@@ -17,7 +17,7 @@ import { ScreenshotResults } from '../../../common/lib/screenshots/types';
 import { pdf } from './pdf';
 
 const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
-  const grouped = groupBy(urlScreenshots.map(u => u.timeRange));
+  const grouped = groupBy(urlScreenshots.map((u) => u.timeRange));
   const values = Object.values(grouped);
   if (values.length === 1) {
     return values[0][0];
@@ -57,8 +57,8 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
           pdfOutput.setTitle(title);
         }
 
-        results.forEach(r => {
-          r.screenshots.forEach(screenshot => {
+        results.forEach((r) => {
+          r.screenshots.forEach((screenshot) => {
             pdfOutput.addImage(screenshot.base64EncodedData, {
               title: screenshot.title,
               description: screenshot.description,

@@ -23,7 +23,7 @@ import _ from 'lodash';
 // Good: average, min, max
 // Bad: sum, count
 export default function nearest(dataTuples, targetTuples) {
-  return _.map(targetTuples, function(bucket) {
+  return _.map(targetTuples, function (bucket) {
     const time = bucket[0];
     let i = 0;
     while (

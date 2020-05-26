@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects, updateBaselines }) {
+export default function ({ getService, getPageObjects, updateBaselines }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common', 'timePicker']);
   const screenshot = getService('screenshots');
   const browser = getService('browser');
@@ -29,7 +29,7 @@ export default function({ getService, getPageObjects, updateBaselines }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard snapshots', function describeIndexTests() {
-    before(async function() {
+    before(async function () {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
@@ -41,7 +41,7 @@ export default function({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.navigateToApp('dashboard');
     });
 
-    after(async function() {
+    after(async function () {
       await browser.setWindowSize(1300, 900);
     });
 

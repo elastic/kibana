@@ -31,8 +31,8 @@ export function pollForLogEntry$(driver: WebDriver, type: string, ms: number) {
   // setup log polling
   return Rx.defer(async () => await logCtrl.get(type)).pipe(
     // filter and flatten list of entries
-    mergeMap(entries =>
-      entries.filter(entry => {
+    mergeMap((entries) =>
+      entries.filter((entry) => {
         // ignore react devtools
         if (entry.message.includes('Download the React DevTools')) {
           return false;
@@ -48,7 +48,7 @@ export function pollForLogEntry$(driver: WebDriver, type: string, ms: number) {
     ),
 
     // repeat when parent completes, delayed by `ms` milliseconds
-    repeatWhen($ => $.pipe(delay(ms))),
+    repeatWhen(($) => $.pipe(delay(ms))),
 
     catchError((error, resubscribe) => {
       return Rx.concat(

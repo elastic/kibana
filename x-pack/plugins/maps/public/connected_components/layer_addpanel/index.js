@@ -34,7 +34,7 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    previewLayer: async layerDescriptor => {
+    previewLayer: async (layerDescriptor) => {
       await dispatch(setSelectedLayer(null));
       await dispatch(removeTransientLayer());
       dispatch(addLayer(layerDescriptor));
