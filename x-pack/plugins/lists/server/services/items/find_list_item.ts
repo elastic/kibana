@@ -48,7 +48,7 @@ export const findListItem = async ({
   page,
   perPage,
   searchAfter,
-  sortField,
+  sortField: sortFieldWithPossibleValue,
   listIndex,
   listItemIndex,
   sortOrder,
@@ -58,6 +58,8 @@ export const findListItem = async ({
   if (list == null) {
     return null;
   } else {
+    const sortField =
+      sortFieldWithPossibleValue === 'value' ? list.type : sortFieldWithPossibleValue;
     const scroll = await scrollToStartPage({
       callCluster,
       currentIndexPosition,
