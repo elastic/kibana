@@ -164,6 +164,10 @@ export class Plugin {
     });
 
     return deepFreeze<SecurityPluginSetup>({
+      audit: {
+        getLogger: audit.getLogger,
+      },
+
       authc: {
         isAuthenticated: authc.isAuthenticated,
         getCurrentUser: authc.getCurrentUser,

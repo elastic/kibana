@@ -3,193 +3,163 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AuditLogger } from './audit_service';
-import {
-  LICENSE_TYPE_STANDARD,
-  LICENSE_TYPE_BASIC,
-  LICENSE_TYPE_GOLD,
-} from '../../../../legacy/common/constants';
+import { AuditService } from './audit_service';
+import { loggingServiceMock } from 'src/core/server/mocks';
+import { licenseMock } from '../../common/licensing/index.mock';
+import { ConfigSchema, ConfigType } from '../config';
+import { SecurityLicenseFeatures } from '../../common/licensing';
+import { BehaviorSubject } from 'rxjs';
 
-const createMockConfig = (settings) => {
-  const mockConfig = {
-    get: jest.fn(),
-  };
-
-  mockConfig.get.mockImplementation((key) => {
-    return settings[key];
-  });
-
-  return mockConfig;
+const createConfig = (settings: Partial<ConfigType['audit']>) => {
+  return ConfigSchema.validate(settings);
 };
 
-const mockLicenseInfo = {
-  isAvailable: () => true,
-  feature: () => {
-    return {
-      registerLicenseCheckResultsGenerator: () => {
-        return;
-      },
-    };
-  },
-  license: {
-    isActive: () => true,
-    isOneOf: () => true,
-    getType: () => LICENSE_TYPE_STANDARD,
-  },
-};
-
-const mockConfig = createMockConfig({
-  'xpack.security.enabled': true,
-  'xpack.security.audit.enabled': true,
+const config = createConfig({
+  enabled: true,
 });
 
-test(`calls server.log with 'info', audit', pluginId and eventType as tags`, () => {
-  const mockServer = {
-    logWithMetadata: jest.fn(),
-  };
+describe('#setup', () => {
+  it('returns the expected contract', () => {
+    const logger = loggingServiceMock.createLogger();
+    const auditService = new AuditService(logger);
+    const license = licenseMock.create();
+    expect(auditService.setup({ license, config })).toMatchInlineSnapshot(`
+      Object {
+        "getLogger": [Function],
+      }
+    `);
+  });
+});
 
+test(`calls the underlying logger with the provided message and requisite tags`, () => {
   const pluginId = 'foo';
-  const auditLogger = new AuditLogger(mockServer, pluginId, mockConfig, mockLicenseInfo);
+
+  const logger = loggingServiceMock.createLogger();
+  const license = licenseMock.create();
+  license.features$ = new BehaviorSubject({
+    allowAuditLogging: true,
+  } as SecurityLicenseFeatures).asObservable();
+
+  const auditService = new AuditService(logger).setup({ license, config });
+
+  const auditLogger = auditService.getLogger(pluginId);
 
   const eventType = 'bar';
-  auditLogger.log(eventType, '');
-  expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(1);
-  expect(mockServer.logWithMetadata).toHaveBeenCalledWith(
-    ['info', 'audit', pluginId, eventType],
-    expect.anything(),
-    expect.anything()
-  );
-});
+  const message = 'this is my audit message';
+  auditLogger.log(eventType, message);
 
-test(`calls server.log with message`, () => {
-  const mockServer = {
-    logWithMetadata: jest.fn(),
-  };
-  const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, mockLicenseInfo);
-
-  const message = 'summary of what happened';
-  auditLogger.log('bar', message);
-  expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(1);
-  expect(mockServer.logWithMetadata).toHaveBeenCalledWith(
-    expect.anything(),
-    message,
-    expect.anything()
-  );
-});
-
-test(`calls server.log with metadata `, () => {
-  const mockServer = {
-    logWithMetadata: jest.fn(),
-  };
-
-  const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, mockLicenseInfo);
-
-  const data = {
-    foo: 'yup',
-    baz: 'nah',
-  };
-
-  auditLogger.log('bar', 'summary of what happened', data);
-  expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(1);
-  expect(mockServer.logWithMetadata).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
-    eventType: 'bar',
-    foo: data.foo,
-    baz: data.baz,
+  expect(logger.info).toHaveBeenCalledTimes(1);
+  expect(logger.info).toHaveBeenCalledWith(message, {
+    eventType,
+    tags: [pluginId, eventType],
   });
 });
 
-test(`does not call server.log for license level < Standard`, () => {
-  const mockServer = {
-    logWithMetadata: jest.fn(),
-  };
-  const mockLicenseInfo = {
-    isAvailable: () => true,
-    feature: () => {
-      return {
-        registerLicenseCheckResultsGenerator: () => {
-          return;
-        },
-      };
-    },
-    license: {
-      isActive: () => true,
-      isOneOf: () => false,
-      getType: () => LICENSE_TYPE_BASIC,
-    },
-  };
+test(`calls the underlying logger with the provided metadata`, () => {
+  const pluginId = 'foo';
 
-  const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, mockLicenseInfo);
-  auditLogger.log('bar', 'what happened');
-  expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(0);
+  const logger = loggingServiceMock.createLogger();
+  const license = licenseMock.create();
+  license.features$ = new BehaviorSubject({
+    allowAuditLogging: true,
+  } as SecurityLicenseFeatures).asObservable();
+
+  const auditService = new AuditService(logger).setup({ license, config });
+
+  const auditLogger = auditService.getLogger(pluginId);
+
+  const eventType = 'bar';
+  const message = 'this is my audit message';
+  const metadata = Object.freeze({
+    property1: 'value1',
+    property2: false,
+    property3: 123,
+  });
+  auditLogger.log(eventType, message, metadata);
+
+  expect(logger.info).toHaveBeenCalledTimes(1);
+  expect(logger.info).toHaveBeenCalledWith(message, {
+    eventType,
+    tags: [pluginId, eventType],
+    property1: 'value1',
+    property2: false,
+    property3: 123,
+  });
 });
 
-test(`does not call server.log if security is not enabled`, () => {
-  const mockServer = {
-    logWithMetadata: jest.fn(),
-  };
+test(`does not call the underlying logger if license does not support audit logging`, () => {
+  const pluginId = 'foo';
 
-  const mockConfig = createMockConfig({
-    'xpack.security.enabled': false,
-    'xpack.security.audit.enabled': true,
+  const logger = loggingServiceMock.createLogger();
+  const license = licenseMock.create();
+  license.features$ = new BehaviorSubject({
+    allowAuditLogging: false,
+  } as SecurityLicenseFeatures).asObservable();
+
+  const auditService = new AuditService(logger).setup({ license, config });
+
+  const auditLogger = auditService.getLogger(pluginId);
+
+  const eventType = 'bar';
+  const message = 'this is my audit message';
+  auditLogger.log(eventType, message);
+
+  expect(logger.info).not.toHaveBeenCalled();
+});
+
+test(`does not call the underlying logger if security audit logging is not enabled`, () => {
+  const pluginId = 'foo';
+
+  const logger = loggingServiceMock.createLogger();
+  const license = licenseMock.create();
+  license.features$ = new BehaviorSubject({
+    allowAuditLogging: true,
+  } as SecurityLicenseFeatures).asObservable();
+
+  const auditService = new AuditService(logger).setup({
+    license,
+    config: createConfig({
+      enabled: false,
+    }),
   });
 
-  const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, mockLicenseInfo);
-  auditLogger.log('bar', 'what happened');
-  expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(0);
+  const auditLogger = auditService.getLogger(pluginId);
+
+  const eventType = 'bar';
+  const message = 'this is my audit message';
+  auditLogger.log(eventType, message);
+
+  expect(logger.info).not.toHaveBeenCalled();
 });
 
-test(`does not call server.log if security audit logging is not enabled`, () => {
-  const mockServer = {
-    logWithMetadata: jest.fn(),
-  };
+test(`calls the underlying logger after license upgrade`, () => {
+  const pluginId = 'foo';
 
-  const mockConfig = createMockConfig({
-    'xpack.security.enabled': true,
-  });
+  const logger = loggingServiceMock.createLogger();
+  const license = licenseMock.create();
 
-  const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, mockLicenseInfo);
-  auditLogger.log('bar', 'what happened');
-  expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(0);
-});
+  const features$ = new BehaviorSubject({
+    allowAuditLogging: false,
+  } as SecurityLicenseFeatures);
 
-test(`calls server.log after basic -> gold upgrade`, () => {
-  const mockServer = {
-    logWithMetadata: jest.fn(),
-  };
+  license.features$ = features$.asObservable();
 
-  const endLicenseInfo = {
-    isAvailable: () => true,
-    license: {
-      isActive: () => true,
-      isOneOf: () => true,
-      getType: () => LICENSE_TYPE_GOLD,
-    },
-  };
+  const auditService = new AuditService(logger).setup({ license, config });
 
-  let licenseCheckResultsGenerator;
+  const auditLogger = auditService.getLogger(pluginId);
 
-  const startLicenseInfo = {
-    isAvailable: () => true,
-    feature: () => {
-      return {
-        registerLicenseCheckResultsGenerator: (fn) => {
-          licenseCheckResultsGenerator = fn;
-        },
-      };
-    },
-    license: {
-      isActive: () => true,
-      isOneOf: () => false,
-      getType: () => LICENSE_TYPE_BASIC,
-    },
-  };
+  const eventType = 'bar';
+  const message = 'this is my audit message';
+  auditLogger.log(eventType, message);
 
-  const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, startLicenseInfo);
-  auditLogger.log('bar', 'what happened');
-  expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(0);
+  expect(logger.info).not.toHaveBeenCalled();
 
-  // change basic to gold
-  licenseCheckResultsGenerator(endLicenseInfo);
-  auditLogger.log('bar', 'what happened');
-  expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(1);
+  // perform license upgrade
+  features$.next({
+    allowAuditLogging: true,
+  } as SecurityLicenseFeatures);
+
+  auditLogger.log(eventType, message);
+
+  expect(logger.info).toHaveBeenCalledTimes(1);
 });
