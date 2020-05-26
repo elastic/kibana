@@ -101,9 +101,9 @@ export const SettingsPage: React.FC = () => {
 
   const fieldErrors = getFieldErrors(formFields);
 
-  const isFormValid = !(fieldErrors && Object.values(fieldErrors).find(v => !!v));
+  const isFormValid = !(fieldErrors && Object.values(fieldErrors).find((v) => !!v));
 
-  const onChangeFormField: OnFieldChangeType = changedField => {
+  const onChangeFormField: OnFieldChangeType = (changedField) => {
     if (formFields) {
       setFormFields({
         ...formFields,

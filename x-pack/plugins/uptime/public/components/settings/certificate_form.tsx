@@ -88,7 +88,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
               isInvalid={!!fieldErrors?.expirationThresholdError}
               isLoading={loading}
               value={formFields?.certExpirationThreshold ?? ''}
-              onChange={e =>
+              onChange={(e) =>
                 onChange({
                   certExpirationThreshold: Number(e.target.value) || undefined,
                 })

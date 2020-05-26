@@ -19,23 +19,23 @@ describe('StickyProperties', () => {
         fieldName: URL_FULL,
         label: 'URL',
         val: 'https://www.elastic.co/test',
-        truncated: true
+        truncated: true,
       },
       {
         label: 'Request method',
         fieldName: 'http.request.method',
-        val: 'GET'
+        val: 'GET',
       },
       {
         label: 'Handled',
         fieldName: 'error.exception.handled',
-        val: String(true)
+        val: String(true),
       },
       {
         label: 'User ID',
         fieldName: USER_ID,
-        val: 1337
-      }
+        val: 1337,
+      },
     ];
 
     const wrapper = shallow(
@@ -51,8 +51,8 @@ describe('StickyProperties', () => {
         {
           label: 'My Number',
           fieldName: 'myNumber',
-          val: 1337
-        }
+          val: 1337,
+        },
       ];
 
       const wrapper = shallow(
@@ -70,8 +70,8 @@ describe('StickyProperties', () => {
         {
           label: 'My boolean',
           fieldName: 'myBoolean',
-          val: true
-        }
+          val: true,
+        },
       ];
 
       const wrapper = shallow(
@@ -89,8 +89,8 @@ describe('StickyProperties', () => {
         {
           label: 'My Component',
           fieldName: 'myComponent',
-          val: <h1>My header</h1>
-        }
+          val: <h1>My header</h1>,
+        },
       ];
 
       const wrapper = shallow(

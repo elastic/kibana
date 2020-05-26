@@ -52,6 +52,12 @@ interface OwnProps<TCache = object> {
   onOpenTimeline?: (timeline: TimelineModel) => void;
 }
 
+/**
+ * CreateTemplateTimelineBtn
+ * Remove the comment here to enable template timeline
+ */
+export const disableTemplate = true;
+
 export type OpenTimelineOwnProps = OwnProps &
   Pick<
     OpenTimelineProps,
@@ -275,7 +281,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
-        tabs={timelineTabs}
+        tabs={!disableTemplate ? timelineTabs : undefined}
         title={title}
         totalSearchResultsCount={totalCount}
       />
@@ -302,7 +308,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
-        tabs={timelineFilters}
+        tabs={!disableTemplate ? timelineFilters : undefined}
         title={title}
         totalSearchResultsCount={totalCount}
       />

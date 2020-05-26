@@ -109,11 +109,6 @@ describe('netflowRowRenderer', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="destination-bytes"]')
-        .first()
-        .text()
-    ).toEqual('40B');
+    expect(wrapper.find('[data-test-subj="destination-bytes"]').first().text()).toEqual('40B');
   });
 });

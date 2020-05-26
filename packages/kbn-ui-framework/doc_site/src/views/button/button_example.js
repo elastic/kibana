@@ -71,7 +71,7 @@ const elementsHtml = renderToHtml(Elements);
 
 import sizesHtml from './button_sizes.html';
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Basic Button"

@@ -348,7 +348,7 @@ describe('workspace_panel', () => {
       .mockReturnValueOnce('datasource')
       .mockReturnValueOnce('datasource second');
 
-    expressionRendererMock = jest.fn(_arg => <span />);
+    expressionRendererMock = jest.fn((_arg) => <span />);
 
     await act(async () => {
       instance = mount(
@@ -404,7 +404,7 @@ describe('workspace_panel', () => {
       .mockReturnValueOnce('datasource')
       .mockReturnValueOnce('datasource second');
 
-    expressionRendererMock = jest.fn(_arg => <span />);
+    expressionRendererMock = jest.fn((_arg) => <span />);
     await act(async () => {
       instance = mount(
         <InnerWorkspacePanel
@@ -573,7 +573,7 @@ describe('workspace_panel', () => {
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
 
-    expressionRendererMock.mockImplementation(_ => {
+    expressionRendererMock.mockImplementation((_) => {
       return <span />;
     });
 

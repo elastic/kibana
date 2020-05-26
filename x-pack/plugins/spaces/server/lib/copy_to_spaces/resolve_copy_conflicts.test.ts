@@ -37,11 +37,11 @@ const expectStreamToContainObjects = async (
 ) => {
   const objectsToResolve: unknown[] = await new Promise((resolve, reject) => {
     const objects: SetupOpts['objects'] = [];
-    stream.on('data', chunk => {
+    stream.on('data', (chunk) => {
       objects.push(chunk);
     });
     stream.on('end', () => resolve(objects));
-    stream.on('error', err => reject(err));
+    stream.on('error', (err) => reject(err));
   });
 
   // Ensure the Readable stream passed to `resolveImportErrors` contains all of the expected objects.
@@ -76,7 +76,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
     ]);
 
     typeRegistry.isNamespaceAgnostic.mockImplementation((type: string) =>
-      typeRegistry.getAllTypes().some(t => t.name === type && t.namespaceType === 'agnostic')
+      typeRegistry.getAllTypes().some((t) => t.name === type && t.namespaceType === 'agnostic')
     );
 
     coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
@@ -88,7 +88,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
           new Readable({
             objectMode: true,
             read() {
-              setupOpts.objects.forEach(o => this.push(o));
+              setupOpts.objects.forEach((o) => this.push(o));
 
               this.push(null);
             },
@@ -392,7 +392,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
 
     const { savedObjects } = setup({
       objects,
-      resolveSavedObjectsImportErrorsImpl: async opts => {
+      resolveSavedObjectsImportErrorsImpl: async (opts) => {
         if (opts.namespace === 'failure-space') {
           throw new Error(`Some error occurred!`);
         }
@@ -471,7 +471,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
   it(`handles stream read errors`, async () => {
     const { savedObjects } = setup({
       objects: [],
-      exportSavedObjectsToStreamImpl: opts => {
+      exportSavedObjectsToStreamImpl: (opts) => {
         return Promise.resolve(
           new Readable({
             objectMode: true,

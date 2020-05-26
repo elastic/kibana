@@ -28,6 +28,7 @@ export const useWaffleViewState = () => {
     autoBounds,
     accountId,
     region,
+    legend,
     sort,
     setWaffleOptionsState,
   } = useWaffleOptionsContext();
@@ -49,6 +50,7 @@ export const useWaffleViewState = () => {
     time: currentTime,
     autoReload: isAutoReloading,
     filterQuery,
+    legend,
   };
 
   const defaultViewState: WaffleViewState = {
@@ -72,6 +74,7 @@ export const useWaffleViewState = () => {
         autoBounds: newState.autoBounds,
         accountId: newState.accountId,
         region: newState.region,
+        legend: newState.legend,
       });
       if (newState.time) {
         setWaffleTimeState({

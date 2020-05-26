@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 export const NOT_AVAILABLE_LABEL = i18n.translate(
   'xpack.apm.notAvailableLabel',
   {
-    defaultMessage: 'N/A'
+    defaultMessage: 'N/A',
   }
 );
 
 export const UNIDENTIFIED_SERVICE_NODES_LABEL = i18n.translate(
   'xpack.apm.serviceNodeNameMissing',
   {
-    defaultMessage: '(Empty)'
+    defaultMessage: '(Empty)',
   }
 );

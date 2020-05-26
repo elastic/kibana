@@ -35,10 +35,10 @@ export async function i18nMixin(kbnServer: KbnServer, server: Server, config: Ki
       cwd: fromRoot('.'),
       glob: I18N_RC,
     }),
-    ...(config.get('plugins.paths') as string[]).map(cwd =>
+    ...(config.get('plugins.paths') as string[]).map((cwd) =>
       getTranslationPaths({ cwd, glob: I18N_RC })
     ),
-    ...(config.get('plugins.scanDirs') as string[]).map(cwd =>
+    ...(config.get('plugins.scanDirs') as string[]).map((cwd) =>
       getTranslationPaths({ cwd, glob: `*/${I18N_RC}` })
     ),
     getTranslationPaths({
@@ -49,7 +49,7 @@ export async function i18nMixin(kbnServer: KbnServer, server: Server, config: Ki
 
   const currentTranslationPaths = ([] as string[])
     .concat(...translationPaths)
-    .filter(translationPath => basename(translationPath, '.json') === locale);
+    .filter((translationPath) => basename(translationPath, '.json') === locale);
   i18nLoader.registerTranslationFiles(currentTranslationPaths);
 
   const translations = await i18nLoader.getTranslationsByLocale(locale);

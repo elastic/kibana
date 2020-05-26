@@ -18,5 +18,5 @@
  */
 
 export function containsIllegalCharacters(pattern: string, illegalCharacters: string[]) {
-  return illegalCharacters.some(char => pattern.includes(char));
+  return illegalCharacters.some((char) => pattern.includes(char));
 }

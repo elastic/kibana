@@ -30,7 +30,7 @@ const KIBANA_VERSION = '5.1.0';
 function createNodes(...versions: string[]): NodesInfo {
   const nodes = {} as any;
   versions
-    .map(version => {
+    .map((version) => {
       return {
         version,
         http: {
@@ -121,7 +121,7 @@ describe('pollEsNodesVersion', () => {
     callWithInternalUser.mockClear();
   });
 
-  it('returns iscCompatible=false and keeps polling when a poll request throws', done => {
+  it('returns iscCompatible=false and keeps polling when a poll request throws', (done) => {
     expect.assertions(3);
     const expectedCompatibilityResults = [false, false, true];
     jest.clearAllMocks();
@@ -137,7 +137,7 @@ describe('pollEsNodesVersion', () => {
     })
       .pipe(take(3))
       .subscribe({
-        next: result => {
+        next: (result) => {
           expect(result.isCompatible).toBe(expectedCompatibilityResults.shift());
         },
         complete: done,
@@ -145,7 +145,7 @@ describe('pollEsNodesVersion', () => {
       });
   });
 
-  it('returns compatibility results', done => {
+  it('returns compatibility results', (done) => {
     expect.assertions(1);
     const nodes = createNodes('5.1.0', '5.2.0', '5.0.0');
     callWithInternalUser.mockResolvedValueOnce(nodes);
@@ -158,7 +158,7 @@ describe('pollEsNodesVersion', () => {
     })
       .pipe(take(1))
       .subscribe({
-        next: result => {
+        next: (result) => {
           expect(result).toEqual(mapNodesVersionCompatibility(nodes, KIBANA_VERSION, false));
         },
         complete: done,
@@ -166,7 +166,7 @@ describe('pollEsNodesVersion', () => {
       });
   });
 
-  it('only emits if the node versions changed since the previous poll', done => {
+  it('only emits if the node versions changed since the previous poll', (done) => {
     expect.assertions(4);
     callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit
     callWithInternalUser.mockResolvedValueOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // ignore, same versions, different ordering
@@ -184,7 +184,7 @@ describe('pollEsNodesVersion', () => {
     })
       .pipe(take(4))
       .subscribe({
-        next: result => expect(result).toBeDefined(),
+        next: (result) => expect(result).toBeDefined(),
         complete: done,
         error: done,
       });

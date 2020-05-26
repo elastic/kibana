@@ -74,7 +74,7 @@ const compileExistsCondition = (condition: LogMessageFormattingCondition) =>
     ? {
         conditionFields: condition.exists,
         fulfillsCondition: (fields: Fields) =>
-          condition.exists.every(fieldName => fieldName in fields),
+          condition.exists.every((fieldName) => fieldName in fields),
       }
     : null;
 

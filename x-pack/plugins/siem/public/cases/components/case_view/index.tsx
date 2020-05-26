@@ -165,7 +165,7 @@ export const CaseComponent = React.memo<CaseProps>(
     const { loading: isLoadingConnectors, connectors } = useConnectors();
 
     const [caseConnectorName, isValidConnector] = useMemo(() => {
-      const connector = connectors.find(c => c.id === caseData.connectorId);
+      const connector = connectors.find((c) => c.id === caseData.connectorId);
       return [connector?.name ?? 'none', !!connector];
     }, [connectors, caseData.connectorId]);
 
@@ -190,15 +190,15 @@ export const CaseComponent = React.memo<CaseProps>(
     });
 
     const onSubmitConnector = useCallback(
-      connectorId => onUpdateField('connectorId', connectorId),
+      (connectorId) => onUpdateField('connectorId', connectorId),
       [onUpdateField]
     );
-    const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
-    const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [
+    const onSubmitTags = useCallback((newTags) => onUpdateField('tags', newTags), [onUpdateField]);
+    const onSubmitTitle = useCallback((newTitle) => onUpdateField('title', newTitle), [
       onUpdateField,
     ]);
     const toggleStatusCase = useCallback(
-      e => onUpdateField('status', e.target.checked ? 'closed' : 'open'),
+      (e) => onUpdateField('status', e.target.checked ? 'closed' : 'open'),
       [onUpdateField]
     );
     const handleRefresh = useCallback(() => {

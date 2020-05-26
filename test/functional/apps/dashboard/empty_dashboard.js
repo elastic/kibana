@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');

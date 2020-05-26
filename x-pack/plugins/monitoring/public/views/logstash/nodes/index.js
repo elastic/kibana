@@ -38,7 +38,7 @@ uiRoutes.when('/logstash/nodes', {
 
       $scope.$watch(
         () => this.data,
-        data => {
+        (data) => {
           this.renderReact(
             <SetupModeRenderer
               scope={$scope}
