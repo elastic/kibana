@@ -138,7 +138,6 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
             ruleActions,
             ruleStatuses.saved_objects[0]
           );
-          await alertsClient.updateApiKey({ id: rule.id });
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {
