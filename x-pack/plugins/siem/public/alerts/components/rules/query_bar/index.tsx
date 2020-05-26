@@ -17,19 +17,19 @@ import {
   FilterManager,
   SavedQuery,
   SavedQueryTimeFilter,
-} from '../../../../../../../../../../src/plugins/data/public';
+} from '../../../../../../../../src/plugins/data/public';
 
-import { BrowserFields } from '../../../../../containers/source';
-import { OpenTimelineModal } from '../../../../../components/open_timeline/open_timeline_modal';
-import { ActionTimelineToShow } from '../../../../../components/open_timeline/types';
-import { QueryBar } from '../../../../../components/query_bar';
-import { buildGlobalQuery } from '../../../../../components/timeline/helpers';
-import { getDataProviderFilter } from '../../../../../components/timeline/query_bar';
-import { convertKueryToElasticSearchQuery } from '../../../../../lib/keury';
-import { useKibana } from '../../../../../lib/kibana';
-import { TimelineModel } from '../../../../../store/timeline/model';
-import { useSavedQueryServices } from '../../../../../utils/saved_query_services';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../../shared_imports';
+import { BrowserFields } from '../../../../common/containers/source';
+import { OpenTimelineModal } from '../../../../timelines/components/open_timeline/open_timeline_modal';
+import { ActionTimelineToShow } from '../../../../timelines/components/open_timeline/types';
+import { QueryBar } from '../../../../common/components/query_bar';
+import { buildGlobalQuery } from '../../../../timelines/components/timeline/helpers';
+import { getDataProviderFilter } from '../../../../timelines/components/timeline/query_bar';
+import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
+import { useKibana } from '../../../../common/lib/kibana';
+import { TimelineModel } from '../../../../timelines/store/timeline/model';
+import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as i18n from './translations';
 
 export interface FieldValueQueryBar {
