@@ -16,10 +16,9 @@ export interface AppLocation {
   search: string;
   hash: string;
   key?: string;
-  // Other parts of the application use the 'history' package which defines the state as type any.
-  // Also see: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/27012
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  state?: any;
+  state?: {
+    isTabChange?: boolean;
+  };
 }
 
 /**
