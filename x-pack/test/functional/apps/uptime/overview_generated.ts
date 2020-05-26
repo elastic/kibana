@@ -24,7 +24,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  describe('overview page generated', function() {
+  describe('overview page generated', function () {
     beforeEach(async () => {
       await makeChecksWithStatus(
         getService('legacyEs'),

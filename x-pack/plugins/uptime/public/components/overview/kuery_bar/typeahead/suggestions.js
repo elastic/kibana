@@ -61,7 +61,7 @@ class Suggestions extends Component {
       const key = suggestion + '_' + index;
       return (
         <Suggestion
-          innerRef={node => (this.childNodes[index] = node)}
+          innerRef={(node) => (this.childNodes[index] = node)}
           index={index}
           selected={index === this.props.index}
           suggestion={suggestion}
@@ -72,7 +72,7 @@ class Suggestions extends Component {
       );
     });
 
-    return <List innerRef={node => (this.parentNode = node)}>{suggestions}</List>;
+    return <List innerRef={(node) => (this.parentNode = node)}>{suggestions}</List>;
   }
 }
 
