@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../plugins/ml/common/constants/states';
 import { Job } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 import { USER } from '../../../../functional/services/machine_learning/security_common';
-import { COMMON_REQUEST_HEADERS } from '../common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/machine_learning/common';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

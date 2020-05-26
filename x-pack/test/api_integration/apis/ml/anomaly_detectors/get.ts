@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/machine_learning/security_common';
-import { COMMON_REQUEST_HEADERS } from '../common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/machine_learning/common';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
