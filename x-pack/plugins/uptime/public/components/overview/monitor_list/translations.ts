@@ -52,6 +52,11 @@ export const NO_MONITOR_ITEM_SELECTED = i18n.translate(
   }
 );
 
+export const LOADING = i18n.translate('xpack.uptime.monitorList.loading', {
+  defaultMessage: 'Loading...',
+  description: 'Shown when the monitor list is waiting for a server response',
+});
+
 export const NO_DATA_MESSAGE = i18n.translate('xpack.uptime.monitorList.noItemMessage', {
   defaultMessage: 'No uptime monitors found',
   description: 'This message is shown if the monitors table is rendered but has no items.',
