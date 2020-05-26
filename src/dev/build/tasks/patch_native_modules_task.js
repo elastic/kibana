@@ -19,20 +19,29 @@
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import { deleteAll, download, untar } from '../lib';
+import { deleteAll, download, gunzip, untar } from '../lib';
 
-const BASE_URL = `https://storage.googleapis.com/native-modules`;
 const DOWNLOAD_DIRECTORY = '.native_modules';
 
 const packages = [
   {
     name: 're2',
     version: '1.14.0',
-    destinationPath: 'node_modules/re2/build/Release/',
-    shas: {
-      darwin: '066533b592094f91e00412499e44c338ce2466d63c9eaf0dc32be8214bde2099',
-      linux: '0322cac3c2e106129b650a8eac509f598ed283791d6116984fec4c151b24e574',
-      windows: '65b5bef7de2352f4787224c2c76a619b6683a868c8d4d71e0fdd500786fc422b',
+    destinationPath: 'node_modules/re2/build/Release/re2.node',
+    extractMethod: 'gunzip',
+    archives: {
+      darwin: {
+        url: 'https://github.com/uhop/node-re2/releases/download/1.14.0/darwin-x64-64.gz',
+        sha256: '54c8386cb7cd53895cf379522114bfe82378e300e127e58d392ddd40a77e396f',
+      },
+      linux: {
+        url: 'https://github.com/uhop/node-re2/releases/download/1.14.0/linux-x64-64.gz',
+        sha256: 'f54f059035e71a7ccb3fa201080e260c41d228d13a8247974b4bb157691b6757',
+      },
+      windows: {
+        url: 'https://github.com/uhop/node-re2/releases/download/1.14.0/win32-x64-64.gz',
+        sha256: 'de708446a8b802f4634c2cfef097c2625a2811fdcd8133dfd7b7c485f966caa9',
+      },
     },
   },
 ];
@@ -54,21 +63,30 @@ async function patchModule(config, log, build, platform, pkg) {
     );
   }
   const platformName = platform.getName();
-  const archiveName = `${pkg.version}-${platformName}.tar.gz`;
-  const downloadUrl = `${BASE_URL}/${pkg.name}/${archiveName}`;
-  const downloadPath = config.resolveFromRepo(DOWNLOAD_DIRECTORY, archiveName);
-  const extractedPath = build.resolvePathForPlatform(platform, pkg.destinationPath);
-  log.debug(`Patching ${pkg.name} binaries from ${downloadUrl} to ${extractedPath}`);
+  const archive = pkg.archives[platformName];
+  const archiveName = path.basename(archive.url);
+  const downloadPath = config.resolveFromRepo(DOWNLOAD_DIRECTORY, pkg.name, archiveName);
+  const extractPath = build.resolvePathForPlatform(platform, pkg.destinationPath);
+  log.debug(`Patching ${pkg.name} binaries from ${archive.url} to ${extractPath}`);
 
-  await deleteAll([extractedPath], log);
+  await deleteAll([extractPath], log);
   await download({
     log,
-    url: downloadUrl,
+    url: archive.url,
     destination: downloadPath,
-    sha256: pkg.shas[platformName],
+    sha256: archive.sha256,
     retries: 3,
   });
-  await untar(downloadPath, extractedPath);
+  switch (pkg.extractMethod) {
+    case 'gunzip':
+      await gunzip(downloadPath, extractPath);
+      break;
+    case 'untar':
+      await untar(downloadPath, extractPath);
+      break;
+    default:
+      throw new Error(`Extract method of ${pkg.extractMethod} is not supported`);
+  }
 }
 
 export const PatchNativeModulesTask = {

@@ -28,6 +28,7 @@ export {
   copyAll,
   getFileHash,
   untar,
+  gunzip,
   deleteAll,
   deleteEmptyFolders,
   compress,
