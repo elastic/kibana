@@ -21,7 +21,7 @@ import { ListItemArraySchema } from '../../../../../lists/common/schemas';
 describe('searchAfterAndBulkCreate', () => {
   let mockService: AlertServicesMock;
   let inputIndexPattern: string[] = [];
-  const someGuids = Array.from({ length: 13 }).map((x) => uuid.v4());
+  const someGuids = Array.from({ length: 13 }).map(() => uuid.v4());
   beforeEach(() => {
     jest.clearAllMocks();
     inputIndexPattern = ['auditbeat-*'];
@@ -94,8 +94,9 @@ describe('searchAfterAndBulkCreate', () => {
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
       listClient: ({
-        getListItemByValues: async ({ value }: { type: string; listId: string; value: string[] }) =>
-          (value as unknown) as ListItemArraySchema,
+        getListItemByValues: async () => {
+          return ([] as unknown) as ListItemArraySchema;
+        },
       } as unknown) as ListClient,
       exceptionsList: [
         {
@@ -135,7 +136,7 @@ describe('searchAfterAndBulkCreate', () => {
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
-  test('should return success when all search results are in the allowlist', async () => {
+  test('should return success when no search results are in the allowlist', async () => {
     const sampleParams = sampleRuleAlertParams(30);
     mockService.callCluster
       .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3)))
@@ -171,8 +172,9 @@ describe('searchAfterAndBulkCreate', () => {
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
       listClient: ({
-        getListItemByValues: async ({ value }: { type: string; listId: string; value: string[] }) =>
-          (value as unknown) as ListItemArraySchema,
+        getListItemByValues: async () => {
+          return ([] as unknown) as ListItemArraySchema;
+        },
       } as unknown) as ListClient,
       exceptionsList: [
         {
@@ -248,8 +250,16 @@ describe('searchAfterAndBulkCreate', () => {
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
       listClient: ({
-        getListItemByValues: async ({ value }: { type: string; listId: string; value: string[] }) =>
-          (value as unknown) as ListItemArraySchema,
+        getListItemByValues: async ({
+          value,
+        }: {
+          type: string;
+          listId: string;
+          value: string[];
+        }) => {
+          const toReturn = value.map((item) => ({ value: item }));
+          return (toReturn as unknown) as ListItemArraySchema;
+        },
       } as unknown) as ListClient,
       exceptionsList: undefined,
       services: mockService,
@@ -284,7 +294,9 @@ describe('searchAfterAndBulkCreate', () => {
       .mockRejectedValue(new Error('bulk failed')); // Added this recently
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient: ({
-        getListItemByValues: ({ value }: { value: string[] }) => value,
+        getListItemByValues: async () => {
+          return ([] as unknown) as ListItemArraySchema;
+        },
       } as unknown) as ListClient,
       exceptionsList: [
         {
@@ -330,7 +342,16 @@ describe('searchAfterAndBulkCreate', () => {
     mockService.callCluster.mockResolvedValueOnce(sampleEmptyDocSearchResults());
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient: ({
-        getListItemByValues: ({ value }: { value: string[] }) => value,
+        getListItemByValues: async ({
+          value,
+        }: {
+          type: string;
+          listId: string;
+          value: string[];
+        }) => {
+          const toReturn = value.map((item) => ({ value: item }));
+          return (toReturn as unknown) as ListItemArraySchema;
+        },
       } as unknown) as ListClient,
       exceptionsList: [
         {
@@ -370,52 +391,6 @@ describe('searchAfterAndBulkCreate', () => {
     expect(lastLookBackDate).toEqual(null);
   });
 
-  // test('if successful iteration of while loop with maxDocs and search after returns results with no sort ids', async () => {
-  //   const sampleParams = sampleRuleAlertParams(10);
-  //   mockService.callCluster
-  //     .mockResolvedValueOnce({
-  //       took: 100,
-  //       errors: false,
-  //       items: [
-  //         {
-  //           fakeItemValue: 'fakeItemKey',
-  //         },
-  //         {
-  //           create: {
-  //             status: 201,
-  //           },
-  //         },
-  //       ],
-  //     })
-  //     .mockResolvedValueOnce(sampleDocSearchResultsNoSortId());
-  //   const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-  //     listClient: ({ getListItemByValues: () => [] } as unknown) as ListClient,
-  //     listValueType: 'ip',
-  //     ruleParams: sampleParams,
-  //     services: mockService,
-  //     logger: mockLogger,
-  //     id: sampleRuleGuid,
-  //     inputIndexPattern,
-  //     signalsIndex: DEFAULT_SIGNALS_INDEX,
-  //     name: 'rule-name',
-  //     actions: [],
-  //     createdAt: '2020-01-28T15:58:34.810Z',
-  //     updatedAt: '2020-01-28T15:59:14.004Z',
-  //     createdBy: 'elastic',
-  //     updatedBy: 'elastic',
-  //     interval: '5m',
-  //     enabled: true,
-  //     pageSize: 1,
-  //     filter: undefined,
-  //     refresh: false,
-  //     tags: ['some fake tag 1', 'some fake tag 2'],
-  //     throttle: 'no_actions',
-  //   });
-  //   expect(success).toEqual(true);
-  //   expect(createdSignalsCount).toEqual(1);
-  //   expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
-  // });
-
   test('if returns false when singleSearchAfter throws an exception', async () => {
     const sampleParams = sampleRuleAlertParams(10);
     mockService.callCluster
@@ -438,7 +413,16 @@ describe('searchAfterAndBulkCreate', () => {
       });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       listClient: ({
-        getListItemByValues: ({ value }: { value: string[] }) => value,
+        getListItemByValues: async ({
+          value,
+        }: {
+          type: string;
+          listId: string;
+          value: string[];
+        }) => {
+          const toReturn = value.map((item) => ({ value: item }));
+          return (toReturn as unknown) as ListItemArraySchema;
+        },
       } as unknown) as ListClient,
       exceptionsList: [
         {

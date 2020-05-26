@@ -91,6 +91,6 @@ export const filterEventsAgainstList = async ({
 
     return toReturn;
   } catch (exc) {
-    throw new Error('Failed to query lists index');
+    throw new Error(`Failed to query lists index. Reason: ${exc.message}`);
   }
 };
