@@ -19,6 +19,6 @@ export function getFieldType(columns: DatatableColumn[], field?: string): string
     return 'null';
   }
   const realField = unquoteString(field);
-  const column = columns.find(dataTableColumn => dataTableColumn.name === realField);
+  const column = columns.find((dataTableColumn) => dataTableColumn.name === realField);
   return column ? column.type : 'null';
 }

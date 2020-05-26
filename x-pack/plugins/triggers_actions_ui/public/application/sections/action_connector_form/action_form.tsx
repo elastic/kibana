@@ -150,9 +150,9 @@ export const ActionForm = ({
 
   useEffect(() => {
     const setActionTypesAvalilability = () => {
-      const preconfiguredConnectors = connectors.filter(connector => connector.isPreconfigured);
+      const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
       const hasActionsDisabled = actions.some(
-        action =>
+        (action) =>
           actionTypesIndex &&
           !actionTypesIndex[action.actionTypeId].enabled &&
           !checkActionFormActionTypeEnabled(
@@ -178,7 +178,7 @@ export const ActionForm = ({
   );
 
   const getSelectedOptions = (actionItemId: string) => {
-    const selectedConnector = connectors.find(connector => connector.id === actionItemId);
+    const selectedConnector = connectors.find((connector) => connector.id === actionItemId);
     if (
       !selectedConnector ||
       // if selected connector is not preconfigured and action type is for preconfiguration only,
@@ -218,7 +218,7 @@ export const ActionForm = ({
 
     const optionsList = connectors
       .filter(
-        connectorItem =>
+        (connectorItem) =>
           connectorItem.actionTypeId === actionItem.actionTypeId &&
           // include only enabled by config connectors or preconfigured
           (actionType.enabledInConfig || connectorItem.isPreconfigured)
@@ -233,7 +233,7 @@ export const ActionForm = ({
     const ParamsFieldsComponent = actionTypeRegistered.actionParamsFields;
     const checkEnabledResult = checkActionFormActionTypeEnabled(
       actionTypesIndex[actionConnector.actionTypeId],
-      connectors.filter(connector => connector.isPreconfigured)
+      connectors.filter((connector) => connector.isPreconfigured)
     );
 
     const accordionContent = checkEnabledResult.isEnabled ? (
@@ -279,7 +279,7 @@ export const ActionForm = ({
                 id={`selectActionConnector-${actionItem.id}`}
                 data-test-subj={`selectActionConnector-${actionItem.actionTypeId}`}
                 selectedOptions={getSelectedOptions(actionItem.id)}
-                onChange={selectedOptions => {
+                onChange={(selectedOptions) => {
                   setActionIdByIndex(selectedOptions[0].id ?? '', index);
                 }}
                 isClearable={false}
@@ -514,7 +514,7 @@ export const ActionForm = ({
     }
     setIsAddActionPanelOpen(false);
     const actionTypeConnectors = connectors.filter(
-      field => field.actionTypeId === actionTypeModel.id
+      (field) => field.actionTypeId === actionTypeModel.id
     );
 
     if (actionTypeConnectors.length > 0) {
@@ -543,14 +543,14 @@ export const ActionForm = ({
   let actionTypeNodes: Array<JSX.Element | null> | null = null;
   let hasDisabledByLicenseActionTypes = false;
   if (actionTypesIndex) {
-    const preconfiguredConnectors = connectors.filter(connector => connector.isPreconfigured);
+    const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
     actionTypeNodes = actionTypeRegistry
       .list()
-      .filter(item => actionTypesIndex[item.id])
+      .filter((item) => actionTypesIndex[item.id])
       .sort((a, b) =>
         actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id], preconfiguredConnectors)
       )
-      .map(function(item, index) {
+      .map(function (item, index) {
         const actionType = actionTypesIndex[item.id];
         const checkEnabledResult = checkActionFormActionTypeEnabled(
           actionTypesIndex[item.id],
@@ -590,7 +590,7 @@ export const ActionForm = ({
   }
 
   const alertActionsList = actions.map((actionItem: AlertAction, index: number) => {
-    const actionConnector = connectors.find(field => field.id === actionItem.id);
+    const actionConnector = connectors.find((field) => field.id === actionItem.id);
     // connectors doesn't exists
     if (!actionConnector) {
       return getAddConnectorsForm(actionItem, index);

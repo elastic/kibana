@@ -54,7 +54,7 @@ test('Should render categorical legend with breaks', async () => {
 
   const legendRow = iconStyle.renderLegendDetailRow({ isPointsOnly: true, isLinesOnly: false });
   const component = shallow(legendRow);
-  await new Promise(resolve => process.nextTick(resolve));
+  await new Promise((resolve) => process.nextTick(resolve));
   component.update();
 
   expect(component).toMatchSnapshot();

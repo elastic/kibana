@@ -26,7 +26,7 @@ export function createIndexDocRecordsStream(client: Client, stats: Stats, progre
   async function indexDocs(docs: any[]) {
     const body: any[] = [];
 
-    docs.forEach(doc => {
+    docs.forEach((doc) => {
       stats.indexedDoc(doc.index);
       body.push(
         {

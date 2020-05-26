@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { SavedObject } from 'src/core/server';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const randomness = getService('randomness');
   const supertest = getService('supertest');
@@ -483,10 +483,7 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await supertest
-          .delete(`/api/spaces/space/${SPACE_ID}`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(204);
+        await supertest.delete(`/api/spaces/space/${SPACE_ID}`).set('kbn-xsrf', 'xxx').expect(204);
       });
 
       describe('with `single` namespace saved object', () => {

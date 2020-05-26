@@ -16,7 +16,7 @@ import * as GenerationUrls from '../generation_urls';
  */
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
 

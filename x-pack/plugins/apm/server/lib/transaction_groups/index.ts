@@ -7,7 +7,7 @@
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../helpers/setup_request';
 import { transactionGroupsFetcher, Options } from './fetcher';
 import { transactionGroupsTransformer } from './transform';
@@ -25,6 +25,6 @@ export async function getTransactionGroupList(
   return transactionGroupsTransformer({
     response,
     start,
-    end
+    end,
   });
 }

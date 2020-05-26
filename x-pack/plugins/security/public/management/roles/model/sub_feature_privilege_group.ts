@@ -19,7 +19,7 @@ export class SubFeaturePrivilegeGroup {
 
   public get privileges() {
     return this.config.privileges.map(
-      p => new SubFeaturePrivilege(p, this.actionMapping[p.id] || [])
+      (p) => new SubFeaturePrivilege(p, this.actionMapping[p.id] || [])
     );
   }
 }

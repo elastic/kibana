@@ -49,7 +49,7 @@ function DefaultEditor({
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const onClickCollapse = useCallback(() => {
-    setIsCollapsed(value => !value);
+    setIsCollapsed((value) => !value);
   }, []);
 
   useEffect(() => {

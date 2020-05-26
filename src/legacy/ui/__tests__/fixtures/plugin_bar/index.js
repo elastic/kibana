@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default kibana =>
+export default (kibana) =>
   new kibana.Plugin({
     config(Joi) {
       return Joi.object()

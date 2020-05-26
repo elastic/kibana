@@ -58,7 +58,7 @@ describe('Alerts Cluster Search', () => {
         '.monitoring-alerts',
         { cluster_uuid: 'cluster-1234' },
         checkLicense
-      ).then(alerts => {
+      ).then((alerts) => {
         expect(alerts).to.eql(mockAlerts);
         expect(callWithRequestStub.getCall(0).args[2].body.size).to.be.undefined;
       });
@@ -72,7 +72,7 @@ describe('Alerts Cluster Search', () => {
         { cluster_uuid: 'cluster-1234' },
         checkLicense,
         { size: 3 }
-      ).then(alerts => {
+      ).then((alerts) => {
         expect(alerts).to.eql(mockAlerts);
         expect(callWithRequestStub.getCall(0).args[2].body.size).to.be(3);
       });
@@ -91,7 +91,7 @@ describe('Alerts Cluster Search', () => {
       };
       return alertsClusterSearch(mockReq, '.monitoring-alerts', cluster, checkLicense, {
         size: 3,
-      }).then(alerts => {
+      }).then((alerts) => {
         expect(alerts).to.have.length(3);
         expect(alerts[0]).to.eql(mockAlerts[0]);
         expect(alerts[1]).to.eql({
@@ -125,7 +125,7 @@ describe('Alerts Cluster Search', () => {
       };
       return alertsClusterSearch(mockReq, '.monitoring-alerts', cluster, checkLicense, {
         size: 3,
-      }).then(alerts => {
+      }).then((alerts) => {
         expect(alerts).to.have.length(1);
         expect(alerts[0]).to.eql({
           metadata: {
@@ -159,7 +159,7 @@ describe('Alerts Cluster Search', () => {
         '.monitoring-alerts',
         { cluster_uuid: 'cluster-1234' },
         checkLicense
-      ).then(alerts => {
+      ).then((alerts) => {
         const result = { message: 'monitoring cluster license check fail' };
         expect(alerts).to.eql(result);
         expect(checkLicense.called).to.be(false);
@@ -181,7 +181,7 @@ describe('Alerts Cluster Search', () => {
         '.monitoring-alerts',
         { cluster_uuid: 'cluster-1234' },
         checkLicense
-      ).then(alerts => {
+      ).then((alerts) => {
         const result = { message: 'prod goes boom' };
         expect(alerts).to.eql(result);
         expect(checkLicense.calledOnce).to.be(true);

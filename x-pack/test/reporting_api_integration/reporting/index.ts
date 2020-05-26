@@ -7,8 +7,8 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('Reporting APIs', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Reporting APIs', function () {
     this.tags('ciGroup2');
     loadTestFile(require.resolve('./bwc_existing_indexes'));
     loadTestFile(require.resolve('./bwc_generation_urls'));

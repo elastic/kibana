@@ -91,7 +91,7 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
   const resultLocations = new Set<string>();
   const linesByLocation: { [key: string]: LocationDurationLine } = {};
 
-  dateHistogramBuckets.forEach(dateHistogramBucket => {
+  dateHistogramBuckets.forEach((dateHistogramBucket) => {
     const x = dateHistogramBucket.key;
     // a set of all the locations for the current bucket
     const bucketLocations = new Set<string>();
@@ -118,7 +118,7 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
     // if there are more lines in the result than are represented in the current bucket,
     // we must add null entries
     if (dateHistogramBucket.location.buckets.length < resultLocations.size) {
-      resultLocations.forEach(resultLocation => {
+      resultLocations.forEach((resultLocation) => {
         // the current bucket had no value for this location, insert a null value
         if (!bucketLocations.has(resultLocation)) {
           const locationLine = monitorChartsData.locationDurationLines.find(

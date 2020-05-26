@@ -79,13 +79,13 @@ describe('geo_json_clean_and_validate', () => {
     // Confirm invalid geometry
     let geoJson = reader.read(badFeaturesGeoJson);
     let isSimpleOrValid;
-    geoJson.features.forEach(feature => {
+    geoJson.features.forEach((feature) => {
       isSimpleOrValid = feature.geometry.isSimple() || feature.geometry.isValid();
       expect(isSimpleOrValid).toEqual(false);
     });
 
     // Confirm changes to object
-    const cleanedFeatures = geoJson.features.map(feature => ({
+    const cleanedFeatures = geoJson.features.map((feature) => ({
       ...feature,
       geometry: cleanGeometry(feature),
     }));
@@ -95,7 +95,7 @@ describe('geo_json_clean_and_validate', () => {
 
     // Confirm now valid features geometry
     geoJson = reader.read({ ...badFeaturesGeoJson, features: cleanedFeatures });
-    geoJson.features.forEach(feature => {
+    geoJson.features.forEach((feature) => {
       isSimpleOrValid = feature.geometry.isSimple() || feature.geometry.isValid();
       expect(isSimpleOrValid).toEqual(true);
     });

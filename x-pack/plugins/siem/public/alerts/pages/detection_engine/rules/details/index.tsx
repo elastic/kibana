@@ -179,7 +179,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const tabs = useMemo(
     () => (
       <EuiTabs>
-        {ruleDetailTabs.map(tab => (
+        {ruleDetailTabs.map((tab) => (
           <EuiTab
             onClick={() => setRuleDetailTab(tab.id)}
             isSelected={tab.id === ruleDetailTab}
