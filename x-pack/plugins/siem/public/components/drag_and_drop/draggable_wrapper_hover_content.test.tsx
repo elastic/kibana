@@ -317,9 +317,9 @@ describe('DraggableWrapperHoverContent', () => {
     const aggregatableStringField = 'cloud.account.id';
     const draggableId = 'draggable.id';
 
-    [false, true].forEach(showTopN => {
-      [value, null].forEach(maybeValue => {
-        [draggableId, undefined].forEach(maybeDraggableId => {
+    [false, true].forEach((showTopN) => {
+      [value, null].forEach((maybeValue) => {
+        [draggableId, undefined].forEach((maybeDraggableId) => {
           const shouldRender = !showTopN && maybeValue != null && maybeDraggableId != null;
           const assertion = shouldRender ? 'should render' : 'should NOT render';
 
@@ -338,12 +338,9 @@ describe('DraggableWrapperHoverContent', () => {
               </TestProviders>
             );
 
-            expect(
-              wrapper
-                .find('[data-test-subj="add-to-timeline"]')
-                .first()
-                .exists()
-            ).toBe(shouldRender);
+            expect(wrapper.find('[data-test-subj="add-to-timeline"]').first().exists()).toBe(
+              shouldRender
+            );
           });
         });
       });
@@ -372,10 +369,7 @@ describe('DraggableWrapperHoverContent', () => {
         fieldName: aggregatableStringField,
       });
 
-      wrapper
-        .find('[data-test-subj="add-to-timeline"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="add-to-timeline"]').first().simulate('click');
       wrapper.update();
 
       expect(startDragToTimeline).toHaveBeenCalled();

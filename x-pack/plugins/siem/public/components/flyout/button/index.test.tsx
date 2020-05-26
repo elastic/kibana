@@ -45,10 +45,7 @@ describe('FlyoutButton', () => {
     );
 
     expect(
-      wrapper
-        .find('[data-test-subj="flyout-button-not-ready-to-drop"]')
-        .first()
-        .text()
+      wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').first().text()
     ).toEqual('Timeline');
   });
 
@@ -85,10 +82,7 @@ describe('FlyoutButton', () => {
       </TestProviders>
     );
 
-    wrapper
-      .find('[data-test-subj="flyout-button-not-ready-to-drop"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').first().simulate('click');
     wrapper.update();
 
     expect(onOpen).toBeCalled();
