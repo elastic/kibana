@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -66,7 +67,7 @@ export const ErrorRateChart = () => {
           {
             data: errorRateData,
             type: 'line',
-            color: '#f5a700',
+            color: theme.euiColorVis7,
             hideLegend: true,
             title: 'Rate',
           },
