@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n } from '@kbn/i18n';
 import {
   PluginInitializerContext,
   Plugin,
@@ -25,7 +26,6 @@ import { createApmApi } from './routes/create_apm_api';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { APMConfig, mergeConfigs, APMXPackConfig } from '.';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
-import { tutorialProvider } from './tutorial';
 import { CloudSetup } from '../../cloud/server';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
 import { LicensingPluginSetup } from '../../licensing/public';
@@ -34,6 +34,7 @@ import { createApmTelemetry } from './lib/apm_telemetry';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/features/server';
 import { APM_FEATURE } from './feature';
 import { apmIndices, apmTelemetry } from './saved_objects';
+import { createElasticCloudInstructions } from './tutorial/elastic_cloud';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
@@ -96,20 +97,27 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       });
     }
 
-    plugins.home.tutorials.registerTutorial(
-      tutorialProvider({
-        isEnabled: this.currentConfig['xpack.apm.ui.enabled'],
-        indexPatternTitle: this.currentConfig['apm_oss.indexPattern'],
-        cloud: plugins.cloud,
-        indices: {
-          errorIndices: this.currentConfig['apm_oss.errorIndices'],
-          metricsIndices: this.currentConfig['apm_oss.metricsIndices'],
-          onboardingIndices: this.currentConfig['apm_oss.onboardingIndices'],
-          sourcemapIndices: this.currentConfig['apm_oss.sourcemapIndices'],
-          transactionIndices: this.currentConfig['apm_oss.transactionIndices'],
-        },
-      })
-    );
+    const ossTutorialProvider = plugins.apmOss.getRegisteredTutorialProvider();
+    plugins.home.tutorials.unregisterTutorial(ossTutorialProvider);
+    plugins.home.tutorials.registerTutorial(() => {
+      const ossPart = ossTutorialProvider({});
+      if (this.currentConfig!['xpack.apm.ui.enabled'] && ossPart.artifacts) {
+        ossPart.artifacts.application = {
+          path: '/app/apm',
+          label: i18n.translate(
+            'xpack.apm.tutorial.specProvider.artifacts.application.label',
+            {
+              defaultMessage: 'Launch APM',
+            }
+          ),
+        };
+      }
+
+      return {
+        ...ossPart,
+        elasticCloud: createElasticCloudInstructions(plugins.cloud),
+      };
+    });
     plugins.features.registerFeature(APM_FEATURE);
 
     createApmApi().init(core, {

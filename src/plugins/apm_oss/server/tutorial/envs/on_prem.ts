@@ -1,7 +1,20 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -47,46 +60,31 @@ export function onPremInstructions({
   return {
     instructionSets: [
       {
-        title: i18n.translate('xpack.apm.tutorial.apmServer.title', {
+        title: i18n.translate('apmOss.tutorial.apmServer.title', {
           defaultMessage: 'APM Server',
         }),
         callOut: {
-          title: i18n.translate('xpack.apm.tutorial.apmServer.callOut.title', {
+          title: i18n.translate('apmOss.tutorial.apmServer.callOut.title', {
             defaultMessage: 'Important: Updating to 7.0 or higher',
           }),
-          message: i18n.translate(
-            'xpack.apm.tutorial.apmServer.callOut.message',
-            {
-              defaultMessage: `Please make sure your APM Server is updated to 7.0 or higher. \
+          message: i18n.translate('apmOss.tutorial.apmServer.callOut.message', {
+            defaultMessage: `Please make sure your APM Server is updated to 7.0 or higher. \
             You can also migrate your 6.x data with the migration assistant found in Kibana's management section.`,
-            }
-          ),
+          }),
           iconType: 'alert',
         },
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.OSX,
-            instructions: [
-              createDownloadServerOsx(),
-              EDIT_CONFIG,
-              START_SERVER_UNIX,
-            ],
+            instructions: [createDownloadServerOsx(), EDIT_CONFIG, START_SERVER_UNIX],
           },
           {
             id: INSTRUCTION_VARIANT.DEB,
-            instructions: [
-              createDownloadServerDeb(),
-              EDIT_CONFIG,
-              START_SERVER_UNIX_SYSV,
-            ],
+            instructions: [createDownloadServerDeb(), EDIT_CONFIG, START_SERVER_UNIX_SYSV],
           },
           {
             id: INSTRUCTION_VARIANT.RPM,
-            instructions: [
-              createDownloadServerRpm(),
-              EDIT_CONFIG,
-              START_SERVER_UNIX_SYSV,
-            ],
+            instructions: [createDownloadServerRpm(), EDIT_CONFIG, START_SERVER_UNIX_SYSV],
           },
           {
             id: INSTRUCTION_VARIANT.WINDOWS,
@@ -94,38 +92,23 @@ export function onPremInstructions({
           },
         ],
         statusCheck: {
-          title: i18n.translate(
-            'xpack.apm.tutorial.apmServer.statusCheck.title',
-            {
-              defaultMessage: 'APM Server status',
-            }
-          ),
-          text: i18n.translate(
-            'xpack.apm.tutorial.apmServer.statusCheck.text',
-            {
-              defaultMessage:
-                'Make sure APM Server is running before you start implementing the APM agents.',
-            }
-          ),
-          btnLabel: i18n.translate(
-            'xpack.apm.tutorial.apmServer.statusCheck.btnLabel',
-            {
-              defaultMessage: 'Check APM Server status',
-            }
-          ),
-          success: i18n.translate(
-            'xpack.apm.tutorial.apmServer.statusCheck.successMessage',
-            {
-              defaultMessage: 'You have correctly setup APM Server',
-            }
-          ),
-          error: i18n.translate(
-            'xpack.apm.tutorial.apmServer.statusCheck.errorMessage',
-            {
-              defaultMessage:
-                'No APM Server detected. Please make sure it is running and you have updated to 7.0 or higher.',
-            }
-          ),
+          title: i18n.translate('apmOss.tutorial.apmServer.statusCheck.title', {
+            defaultMessage: 'APM Server status',
+          }),
+          text: i18n.translate('apmOss.tutorial.apmServer.statusCheck.text', {
+            defaultMessage:
+              'Make sure APM Server is running before you start implementing the APM agents.',
+          }),
+          btnLabel: i18n.translate('apmOss.tutorial.apmServer.statusCheck.btnLabel', {
+            defaultMessage: 'Check APM Server status',
+          }),
+          success: i18n.translate('apmOss.tutorial.apmServer.statusCheck.successMessage', {
+            defaultMessage: 'You have correctly setup APM Server',
+          }),
+          error: i18n.translate('apmOss.tutorial.apmServer.statusCheck.errorMessage', {
+            defaultMessage:
+              'No APM Server detected. Please make sure it is running and you have updated to 7.0 or higher.',
+          }),
           esHitsCheck: {
             index: onboardingIndices,
             query: {
@@ -140,7 +123,7 @@ export function onPremInstructions({
         },
       },
       {
-        title: i18n.translate('xpack.apm.tutorial.apmAgents.title', {
+        title: i18n.translate('apmOss.tutorial.apmAgents.title', {
           defaultMessage: 'APM Agents',
         }),
         instructionVariants: [
@@ -182,56 +165,30 @@ export function onPremInstructions({
           },
         ],
         statusCheck: {
-          title: i18n.translate(
-            'xpack.apm.tutorial.apmAgents.statusCheck.title',
-            {
-              defaultMessage: 'Agent status',
-            }
-          ),
-          text: i18n.translate(
-            'xpack.apm.tutorial.apmAgents.statusCheck.text',
-            {
-              defaultMessage:
-                'Make sure your application is running and the agents are sending data.',
-            }
-          ),
-          btnLabel: i18n.translate(
-            'xpack.apm.tutorial.apmAgents.statusCheck.btnLabel',
-            {
-              defaultMessage: 'Check agent status',
-            }
-          ),
-          success: i18n.translate(
-            'xpack.apm.tutorial.apmAgents.statusCheck.successMessage',
-            {
-              defaultMessage:
-                'Data successfully received from one or more agents',
-            }
-          ),
-          error: i18n.translate(
-            'xpack.apm.tutorial.apmAgents.statusCheck.errorMessage',
-            {
-              defaultMessage: 'No data has been received from agents yet',
-            }
-          ),
+          title: i18n.translate('apmOss.tutorial.apmAgents.statusCheck.title', {
+            defaultMessage: 'Agent status',
+          }),
+          text: i18n.translate('apmOss.tutorial.apmAgents.statusCheck.text', {
+            defaultMessage:
+              'Make sure your application is running and the agents are sending data.',
+          }),
+          btnLabel: i18n.translate('apmOss.tutorial.apmAgents.statusCheck.btnLabel', {
+            defaultMessage: 'Check agent status',
+          }),
+          success: i18n.translate('apmOss.tutorial.apmAgents.statusCheck.successMessage', {
+            defaultMessage: 'Data successfully received from one or more agents',
+          }),
+          error: i18n.translate('apmOss.tutorial.apmAgents.statusCheck.errorMessage', {
+            defaultMessage: 'No data has been received from agents yet',
+          }),
           esHitsCheck: {
-            index: [
-              errorIndices,
-              transactionIndices,
-              metricsIndices,
-              sourcemapIndices,
-            ],
+            index: [errorIndices, transactionIndices, metricsIndices, sourcemapIndices],
             query: {
               bool: {
                 filter: [
                   {
                     terms: {
-                      'processor.event': [
-                        'error',
-                        'transaction',
-                        'metric',
-                        'sourcemap',
-                      ],
+                      'processor.event': ['error', 'transaction', 'metric', 'sourcemap'],
                     },
                   },
                   { range: { 'observer.version_major': { gte: 7 } } },

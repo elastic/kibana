@@ -28,7 +28,7 @@ import { tutorialSchema } from './lib/tutorial_schema';
 import { builtInTutorials } from '../../tutorials/register';
 
 export class TutorialsRegistry {
-  private readonly tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
+  private tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
 
   public setup(core: CoreSetup) {
@@ -61,6 +61,12 @@ export class TutorialsRegistry {
         }
 
         this.tutorialProviders.push(specProvider);
+      },
+
+      unregisterTutorial: (specProvider: TutorialProvider) => {
+        this.tutorialProviders = this.tutorialProviders.filter(
+          (provider) => provider !== specProvider
+        );
       },
 
       addScopedTutorialContextFactory: (
