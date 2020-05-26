@@ -24,7 +24,7 @@ export const backToCases = () => {
 
 export const createNewCase = (newCase: TestCase) => {
   cy.get(TITLE_INPUT).type(newCase.name, { force: true });
-  newCase.tags.forEach(tag => {
+  newCase.tags.forEach((tag) => {
     cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
   });
   cy.get(DESCRIPTION_INPUT).type(`${newCase.description} `, { force: true });
@@ -33,9 +33,7 @@ export const createNewCase = (newCase: TestCase) => {
   cy.get(TIMELINE_SEARCHBOX).type(`${newCase.timeline.title}{enter}`);
   cy.get(TIMELINE).should('be.visible');
   cy.wait(300);
-  cy.get(TIMELINE)
-    .eq(1)
-    .click({ force: true });
+  cy.get(TIMELINE).eq(1).click({ force: true });
 
   cy.get(SUBMIT_BTN).click({ force: true });
   cy.get(LOADING_SPINNER).should('exist');

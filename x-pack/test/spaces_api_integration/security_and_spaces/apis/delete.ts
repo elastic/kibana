@@ -51,7 +51,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       deleteTest(`user with no access from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         user: scenario.users.noAccess,

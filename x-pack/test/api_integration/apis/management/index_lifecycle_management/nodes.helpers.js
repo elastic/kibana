@@ -9,7 +9,7 @@ import { API_BASE_PATH } from './constants';
 export const registerHelpers = ({ supertest }) => {
   const loadNodes = () => supertest.get(`${API_BASE_PATH}/nodes/list`);
 
-  const getNodeDetails = nodeAttribute =>
+  const getNodeDetails = (nodeAttribute) =>
     supertest.get(`${API_BASE_PATH}/nodes/${nodeAttribute}/details`);
 
   return {

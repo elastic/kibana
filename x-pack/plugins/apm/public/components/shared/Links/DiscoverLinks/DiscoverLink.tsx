@@ -35,7 +35,7 @@ interface Props {
 export const getDiscoverHref = ({
   basePath,
   location,
-  query
+  query,
 }: {
   basePath: AppMountContextBasePath;
   location: Location;
@@ -45,15 +45,15 @@ export const getDiscoverHref = ({
     _g: getTimepickerRisonData(location.search),
     _a: {
       ...query._a,
-      index: APM_STATIC_INDEX_PATTERN_ID
-    }
+      index: APM_STATIC_INDEX_PATTERN_ID,
+    },
   };
 
   const href = url.format({
     pathname: basePath.prepend('/app/discover'),
     hash: `/?_g=${rison.encode(risonQuery._g)}&_a=${rison.encode(
       risonQuery._a as RisonValue
-    )}`
+    )}`,
   });
   return href;
 };
@@ -65,7 +65,7 @@ export function DiscoverLink({ query = {}, ...rest }: Props) {
   const href = getDiscoverHref({
     basePath: core.http.basePath,
     query,
-    location
+    location,
   });
 
   return <EuiLink {...rest} href={href} />;

@@ -42,7 +42,7 @@ const wrapToolbarItems = (
 ) => {
   return (
     <ToolbarWrapper>
-      {props => (
+      {(props) => (
         <>
           <ToolbarItems {...props} accounts={accounts} regions={regions} />
           <EuiFlexItem grow={true} />

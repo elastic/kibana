@@ -89,7 +89,7 @@ export const CustomMetricForm = withTheme(
     }, [metric, aggregation, field, onChange, label]);
 
     const handleLabelChange = useCallback(
-      e => {
+      (e) => {
         setLabel(e.target.value);
       },
       [setLabel]
@@ -103,7 +103,7 @@ export const CustomMetricForm = withTheme(
     );
 
     const handleAggregationChange = useCallback(
-      e => {
+      (e) => {
         const value = e.target.value;
         const aggValue: SnapshotCustomAggregation = SnapshotCustomAggregationRT.is(value)
           ? value
@@ -114,10 +114,10 @@ export const CustomMetricForm = withTheme(
     );
 
     const fieldOptions = fields
-      .filter(f => f.aggregatable && f.type === 'number' && !(field && field === f.name))
-      .map(f => ({ label: f.name }));
+      .filter((f) => f.aggregatable && f.type === 'number' && !(field && field === f.name))
+      .map((f) => ({ label: f.name }));
 
-    const aggregationOptions = SNAPSHOT_CUSTOM_AGGREGATIONS.map(k => ({
+    const aggregationOptions = SNAPSHOT_CUSTOM_AGGREGATIONS.map((k) => ({
       text: AGGREGATION_LABELS[k as SnapshotCustomAggregation],
       value: k,
     }));

@@ -166,7 +166,7 @@ export interface ReadRuleParams {
 }
 
 export const isAlertTypes = (partialAlert: PartialAlert[]): partialAlert is RuleAlertType[] => {
-  return partialAlert.every(rule => isAlertType(rule));
+  return partialAlert.every((rule) => isAlertType(rule));
 };
 
 export const isAlertType = (partialAlert: PartialAlert): partialAlert is RuleAlertType => {
@@ -188,5 +188,5 @@ export const isRuleStatusFindType = (
 export const isRuleStatusFindTypes = (
   obj: unknown[] | undefined
 ): obj is Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>> => {
-  return obj ? obj.every(ruleStatus => isRuleStatusFindType(ruleStatus)) : false;
+  return obj ? obj.every((ruleStatus) => isRuleStatusFindType(ruleStatus)) : false;
 };

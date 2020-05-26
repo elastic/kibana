@@ -27,7 +27,7 @@ describe('ml_server_info initial state', () => {
 });
 
 describe('ml_server_info', () => {
-  beforeEach(async done => {
+  beforeEach(async (done) => {
     await loadMlServerInfo();
     done();
   });
@@ -40,7 +40,7 @@ describe('ml_server_info', () => {
   });
 
   describe('defaults', () => {
-    it('can get defaults', async done => {
+    it('can get defaults', async (done) => {
       const defaults = getNewJobDefaults();
 
       expect(defaults.anomaly_detectors.model_memory_limit).toBe('128mb');
@@ -52,7 +52,7 @@ describe('ml_server_info', () => {
   });
 
   describe('limits', () => {
-    it('can get limits', async done => {
+    it('can get limits', async (done) => {
       const limits = getNewJobLimits();
 
       expect(limits.max_model_memory_limit).toBe('128mb');

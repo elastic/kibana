@@ -37,7 +37,7 @@ export const checkSavedObjectsPrivilegesWithRequestFactory = (
         } else if (!namespaceOrNamespaces.length) {
           throw new Error(`Can't check saved object privileges for 0 namespaces`);
         }
-        const spaceIds = namespaceOrNamespaces.map(x => spacesService.namespaceToSpaceId(x));
+        const spaceIds = namespaceOrNamespaces.map((x) => spacesService.namespaceToSpaceId(x));
         return await checkPrivilegesWithRequest(request).atSpaces(spaceIds, actions);
       } else if (spacesService) {
         const spaceId = spacesService.namespaceToSpaceId(namespaceOrNamespaces);

@@ -39,7 +39,7 @@ describe('Features Plugin', () => {
 
     const { getFeatures } = await plugin.start(coreStart);
 
-    expect(getFeatures().map(f => f.id)).toMatchInlineSnapshot(`
+    expect(getFeatures().map((f) => f.id)).toMatchInlineSnapshot(`
       Array [
         "baz",
         "discover",
@@ -67,7 +67,7 @@ describe('Features Plugin', () => {
 
     const { getFeatures } = await plugin.start(coreStart);
 
-    expect(getFeatures().map(f => f.id)).toMatchInlineSnapshot(`
+    expect(getFeatures().map((f) => f.id)).toMatchInlineSnapshot(`
       Array [
         "baz",
         "discover",
@@ -88,8 +88,8 @@ describe('Features Plugin', () => {
     const { getFeatures } = await plugin.start(coreStart);
 
     const soTypes =
-      getFeatures().find(f => f.id === 'savedObjectsManagement')?.privileges?.all.savedObject.all ||
-      [];
+      getFeatures().find((f) => f.id === 'savedObjectsManagement')?.privileges?.all.savedObject
+        .all || [];
 
     expect(soTypes.includes('foo')).toBe(true);
     expect(soTypes.includes('bar')).toBe(false);

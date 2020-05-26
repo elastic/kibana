@@ -43,7 +43,7 @@ export const PrivilegeSummaryTable = (props: Props) => {
 
   const toggleExpandedFeature = (featureId: string) => {
     if (expandedFeatures.includes(featureId)) {
-      setExpandedFeatures(expandedFeatures.filter(ef => ef !== featureId));
+      setExpandedFeatures(expandedFeatures.filter((ef) => ef !== featureId));
     } else {
       setExpandedFeatures([...expandedFeatures, featureId]);
     }
@@ -88,7 +88,7 @@ export const PrivilegeSummaryTable = (props: Props) => {
     }
     return 0;
   });
-  const privilegeColumns = rawKibanaPrivileges.map(entry => {
+  const privilegeColumns = rawKibanaPrivileges.map((entry) => {
     const key = getColumnKey(entry);
     return {
       name: <SpaceColumnHeader entry={entry} spaces={props.spaces} />,
@@ -140,7 +140,7 @@ export const PrivilegeSummaryTable = (props: Props) => {
     };
   }, {} as Record<string, EffectiveFeaturePrivileges>);
 
-  const items = props.kibanaPrivileges.getSecuredFeatures().map(feature => {
+  const items = props.kibanaPrivileges.getSecuredFeatures().map((feature) => {
     return {
       feature,
       featureId: feature.id,
@@ -153,7 +153,7 @@ export const PrivilegeSummaryTable = (props: Props) => {
       columns={columns}
       items={items}
       itemId="featureId"
-      rowProps={record => {
+      rowProps={(record) => {
         return {
           'data-test-subj': `summaryTableRow-${record.featureId}`,
         };
@@ -164,7 +164,7 @@ export const PrivilegeSummaryTable = (props: Props) => {
           [featureId]: (
             <PrivilegeSummaryExpandedRow
               feature={props.kibanaPrivileges.getSecuredFeature(featureId)}
-              effectiveFeaturePrivileges={Object.values(privileges).map(p => p[featureId])}
+              effectiveFeaturePrivileges={Object.values(privileges).map((p) => p[featureId])}
             />
           ),
         };

@@ -230,7 +230,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       }
       mlForecastService
         .getForecastDateRange(selectedJob, selectedForecastId)
-        .then(resp => {
+        .then((resp) => {
           if (autoZoomDuration === undefined) {
             return;
           }
@@ -248,7 +248,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
           }
           setSelectedForecastIdProp(selectedForecastId);
         })
-        .catch(resp => {
+        .catch((resp) => {
           // eslint-disable-next-line no-console
           console.error(
             'Time series explorer - error loading time range of forecast from elasticsearch:',

@@ -34,11 +34,14 @@ export function handleTree(
       const indexPattern = await indexRetriever.getEventIndexPattern(context);
 
       const fetcher = new Fetcher(client, id, indexPattern, endpointID);
-      const tree = await Tree.merge(
+
+      const [childrenNodes, ancestry, relatedEvents] = await Promise.all([
         fetcher.children(children, generations, afterChild),
-        fetcher.ancestors(ancestors + 1),
-        fetcher.events(events, afterEvent)
-      );
+        fetcher.ancestors(ancestors),
+        fetcher.events(events, afterEvent),
+      ]);
+
+      const tree = new Tree(id, { ancestry, children: childrenNodes, relatedEvents });
 
       const enrichedTree = await fetcher.stats(tree);
 
