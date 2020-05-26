@@ -40,7 +40,7 @@ exports[`categorical Should render categorical legend with breaks from default 1
     gutterSize="none"
   >
     <EuiFlexItem
-      key="US"
+      key="0"
     >
       <Category
         color="#54B399"
@@ -51,7 +51,7 @@ exports[`categorical Should render categorical legend with breaks from default 1
       />
     </EuiFlexItem>
     <EuiFlexItem
-      key="CN"
+      key="1"
     >
       <Category
         color="#6092C0"
@@ -62,7 +62,7 @@ exports[`categorical Should render categorical legend with breaks from default 1
       />
     </EuiFlexItem>
     <EuiFlexItem
-      key="__fallbackCategory__"
+      key="2"
     >
       <Category
         color="#D36086"
@@ -123,17 +123,6 @@ exports[`ordinal Should render custom ordinal legend with breaks 1`] = `
       key="0"
     >
       <Category
-        color="#FF0000"
-        isLinesOnly={false}
-        isPointsOnly={true}
-        label="0_format"
-        styleName="lineColor"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      key="10"
-    >
-      <Category
         color="#00FF00"
         isLinesOnly={false}
         isPointsOnly={true}
@@ -183,7 +172,7 @@ exports[`ordinal Should render only single band of last color when delta is 0 1`
     gutterSize="none"
   >
     <EuiFlexItem
-      key="100"
+      key="0"
     >
       <Category
         color="#072f6b"
@@ -238,17 +227,6 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       key="0"
     >
       <Category
-        color="#f7faff"
-        isLinesOnly={false}
-        isPointsOnly={true}
-        label="0_format"
-        styleName="lineColor"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      key="13"
-    >
-      <Category
         color="#ddeaf7"
         isLinesOnly={false}
         isPointsOnly={true}
@@ -257,7 +235,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      key="25"
+      key="1"
     >
       <Category
         color="#c5daee"
@@ -268,7 +246,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      key="38"
+      key="2"
     >
       <Category
         color="#9dc9e0"
@@ -279,7 +257,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      key="50"
+      key="3"
     >
       <Category
         color="#6aadd5"
@@ -290,7 +268,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      key="63"
+      key="4"
     >
       <Category
         color="#4191c5"
@@ -301,7 +279,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      key="75"
+      key="5"
     >
       <Category
         color="#2070b4"
@@ -312,7 +290,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      key="88"
+      key="6"
     >
       <Category
         color="#072f6b"

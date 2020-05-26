@@ -38,7 +38,7 @@ exports[`Should render categorical legend with breaks 1`] = `
     gutterSize="none"
   >
     <EuiFlexItem
-      key="US"
+      key="0"
     >
       <Category
         color="grey"
@@ -50,7 +50,7 @@ exports[`Should render categorical legend with breaks 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      key="CN"
+      key="1"
     >
       <Category
         color="grey"
