@@ -29,12 +29,7 @@ describe('Port', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="formatted-ip"]')
-        .first()
-        .text()
-    ).toEqual('10.1.2.3');
+    expect(wrapper.find('[data-test-subj="formatted-ip"]').first().text()).toEqual('10.1.2.3');
   });
 
   test('it hyperlinks to the network/ip page', () => {
@@ -45,11 +40,8 @@ describe('Port', () => {
     );
 
     expect(
-      wrapper
-        .find('[data-test-subj="draggable-content-destination.ip"]')
-        .find('a')
-        .first()
-        .props().href
+      wrapper.find('[data-test-subj="draggable-content-destination.ip"]').find('a').first().props()
+        .href
     ).toEqual('#/link-to/network/ip/10.1.2.3/source');
   });
 });

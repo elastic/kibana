@@ -63,8 +63,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ssl,
         serverArgs: [
           `xpack.license.self_generated.type=${license}`,
-          `xpack.security.enabled=${!disabledPlugins.includes('security') &&
-            ['trial', 'basic'].includes(license)}`,
+          `xpack.security.enabled=${
+            !disabledPlugins.includes('security') && ['trial', 'basic'].includes(license)
+          }`,
         ],
       },
       kbnTestServer: {
@@ -118,7 +119,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
               },
             },
           })}`,
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions_simulators')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'task_manager')}`,

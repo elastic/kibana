@@ -21,13 +21,10 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
     after(() => esArchiver.unload('alerting'));
 
     it('should handle create action with disabled actionType request appropriately', async () => {
-      const response = await supertest
-        .post(`/api/action`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'My action',
-          actionTypeId: DISABLED_ACTION_TYPE,
-        });
+      const response = await supertest.post(`/api/action`).set('kbn-xsrf', 'foo').send({
+        name: 'My action',
+        actionTypeId: DISABLED_ACTION_TYPE,
+      });
 
       expect(response.status).to.eql(403);
       expect(response.body).to.eql({

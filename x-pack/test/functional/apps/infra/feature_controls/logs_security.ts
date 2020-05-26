@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'infraHome', 'security']);
@@ -57,7 +57,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows logs navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.eql(['Logs', 'Stack Management']);
       });
 
@@ -120,7 +120,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows logs navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.eql(['Logs', 'Stack Management']);
       });
 
@@ -183,7 +183,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show logs navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.not.contain('Logs');
       });
 

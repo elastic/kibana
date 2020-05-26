@@ -28,7 +28,7 @@ jest.mock('ui/state_management/state', () => ({
   State: {},
 }));
 
-describe('DashboardState', function() {
+describe('DashboardState', function () {
   let dashboardState: DashboardStateManager;
   const savedDashboard = getSavedDashboardMock();
 
@@ -52,8 +52,8 @@ describe('DashboardState', function() {
     });
   }
 
-  describe('syncTimefilterWithDashboard', function() {
-    test('syncs quick time', function() {
+  describe('syncTimefilterWithDashboard', function () {
+    test('syncs quick time', function () {
       savedDashboard.timeRestore = true;
       savedDashboard.timeFrom = 'now/w';
       savedDashboard.timeTo = 'now/w';
@@ -68,7 +68,7 @@ describe('DashboardState', function() {
       expect(mockTime.from).toBe('now/w');
     });
 
-    test('syncs relative time', function() {
+    test('syncs relative time', function () {
       savedDashboard.timeRestore = true;
       savedDashboard.timeFrom = 'now-13d';
       savedDashboard.timeTo = 'now';
@@ -83,7 +83,7 @@ describe('DashboardState', function() {
       expect(mockTime.from).toBe('now-13d');
     });
 
-    test('syncs absolute time', function() {
+    test('syncs absolute time', function () {
       savedDashboard.timeRestore = true;
       savedDashboard.timeFrom = '2015-09-19 06:31:44.000';
       savedDashboard.timeTo = '2015-09-29 06:31:44.000';
@@ -99,7 +99,7 @@ describe('DashboardState', function() {
     });
   });
 
-  describe('isDirty', function() {
+  describe('isDirty', function () {
     beforeAll(() => {
       initDashboardState();
     });

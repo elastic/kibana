@@ -41,7 +41,7 @@ describe('when on the hosts page', () => {
     it('should not show the flyout', () => {
       const renderResult = render();
       expect.assertions(1);
-      return renderResult.findByTestId('hostDetailsFlyout').catch(e => {
+      return renderResult.findByTestId('hostDetailsFlyout').catch((e) => {
         expect(e).not.toBeNull();
       });
     });
@@ -112,7 +112,7 @@ describe('when on the hosts page', () => {
         });
 
         it('should show the flyout', () => {
-          return renderResult.findByTestId('hostDetailsFlyout').then(flyout => {
+          return renderResult.findByTestId('hostDetailsFlyout').then((flyout) => {
             expect(flyout).not.toBeNull();
           });
         });
@@ -173,7 +173,7 @@ describe('when on the hosts page', () => {
 
     it('should show the flyout', () => {
       const renderResult = render();
-      return renderResult.findByTestId('hostDetailsFlyout').then(flyout => {
+      return renderResult.findByTestId('hostDetailsFlyout').then((flyout) => {
         expect(flyout).not.toBeNull();
       });
     });

@@ -145,7 +145,7 @@ export const Providers = React.memo<Props>(
                 droppableId={getTimelineProviderDroppableId({ groupIndex, timelineId: id })}
                 direction="horizontal"
               >
-                {droppableProvided => (
+                {(droppableProvided) => (
                   <DroppableContainer
                     className={
                       groupIndex === dataProviderGroups.length - 1

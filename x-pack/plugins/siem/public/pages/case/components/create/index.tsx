@@ -70,14 +70,14 @@ export const Create = React.memo(() => {
   });
   const { tags: tagOptions } = useGetTags();
   const [options, setOptions] = useState(
-    tagOptions.map(label => ({
+    tagOptions.map((label) => ({
       label,
     }))
   );
   useEffect(
     () =>
       setOptions(
-        tagOptions.map(label => ({
+        tagOptions.map((label) => ({
           label,
         }))
       ),
@@ -159,7 +159,7 @@ export const Create = React.memo(() => {
         </ContainerBig>
         <FormDataProvider pathsToWatch="tags">
           {({ tags: anotherTags }) => {
-            const current: string[] = options.map(opt => opt.label);
+            const current: string[] = options.map((opt) => opt.label);
             const newOptions = anotherTags.reduce((acc: string[], item: string) => {
               if (!acc.includes(item)) {
                 return [...acc, item];

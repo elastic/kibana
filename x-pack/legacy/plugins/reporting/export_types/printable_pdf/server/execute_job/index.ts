@@ -36,9 +36,11 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
-      map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
-      map(filteredHeaders => getConditionalHeaders({ config, job, filteredHeaders })),
-      mergeMap(conditionalHeaders => getCustomLogo({ reporting, config, job, conditionalHeaders })),
+      map((decryptedHeaders) => omitBlacklistedHeaders({ job, decryptedHeaders })),
+      map((filteredHeaders) => getConditionalHeaders({ config, job, filteredHeaders })),
+      mergeMap((conditionalHeaders) =>
+        getCustomLogo({ reporting, config, job, conditionalHeaders })
+      ),
       mergeMap(({ logo, conditionalHeaders }) => {
         const urls = getFullUrls({ config, job });
 
@@ -59,7 +61,7 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
         size: buffer.byteLength,
         warnings,
       })),
-      catchError(err => {
+      catchError((err) => {
         jobLogger.error(err);
         return Rx.throwError(err);
       })

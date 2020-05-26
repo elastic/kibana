@@ -128,8 +128,8 @@ describe('Lens App', () => {
           },
         },
         indexPatterns: {
-          get: jest.fn(id => {
-            return new Promise(resolve => resolve({ id }));
+          get: jest.fn((id) => {
+            return new Promise((resolve) => resolve({ id }));
           }),
         },
       },
@@ -159,7 +159,7 @@ describe('Lens App', () => {
     core = coreMock.createStart({ basePath: '/testbasepath' });
 
     core.uiSettings.get.mockImplementation(
-      jest.fn(type => {
+      jest.fn((type) => {
         if (type === 'timepicker:timeDefaults') {
           return { from: 'now-7d', to: 'now' };
         } else if (type === 'search:queryLanguage') {
@@ -369,7 +369,7 @@ describe('Lens App', () => {
         return (inst
           .find('[data-test-subj="lnsApp_topNav"]')
           .prop('config') as TopNavMenuData[]).find(
-          button => button.testId === 'lnsApp_saveButton'
+          (button) => button.testId === 'lnsApp_saveButton'
         )!;
       }
 

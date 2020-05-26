@@ -140,12 +140,7 @@ describe('Properties', () => {
       </ReduxStoreProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="timeline-title"]')
-        .first()
-        .props().value
-    ).toEqual(title);
+    expect(wrapper.find('[data-test-subj="timeline-title"]').first().props().value).toEqual(title);
   });
 
   test('it renders the date picker with the lock icon', () => {

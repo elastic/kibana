@@ -20,7 +20,7 @@
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
 
   return {

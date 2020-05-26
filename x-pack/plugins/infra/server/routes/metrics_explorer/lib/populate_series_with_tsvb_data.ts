@@ -64,8 +64,8 @@ export const populateSeriesWithTSVBData = (
   // Create the TSVB model based on the request options
   const model = createMetricModel(options);
   const modules = await Promise.all(
-    uniq(options.metrics.filter(m => m.field)).map(
-      async m => await getDatasetForField(client, m.field as string, options.indexPattern)
+    uniq(options.metrics.filter((m) => m.field)).map(
+      async (m) => await getDatasetForField(client, m.field as string, options.indexPattern)
     )
   );
 
@@ -76,7 +76,7 @@ export const populateSeriesWithTSVBData = (
       timestampField: options.timerange.field,
       timerange: options.timerange,
     },
-    modules.filter(m => m) as string[]
+    modules.filter((m) => m) as string[]
   );
 
   if (calculatedInterval) {
@@ -121,15 +121,15 @@ export const populateSeriesWithTSVBData = (
     (currentTimestamps, tsvbSeries) =>
       union(
         currentTimestamps,
-        tsvbSeries.data.map(row => row[0])
+        tsvbSeries.data.map((row) => row[0])
       ).sort(),
     [] as number[]
   );
   // Combine the TSVB series for multiple metrics.
-  const rows = timestamps.map(timestamp => {
+  const rows = timestamps.map((timestamp) => {
     return tsvbResults.custom.series.reduce(
       (currentRow, tsvbSeries) => {
-        const matches = tsvbSeries.data.find(d => d[0] === timestamp);
+        const matches = tsvbSeries.data.find((d) => d[0] === timestamp);
         if (matches) {
           return { ...currentRow, [tsvbSeries.id]: matches[1] };
         }

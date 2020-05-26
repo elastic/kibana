@@ -64,7 +64,7 @@ export function useMetricsExplorerData(
               metrics:
                 options.aggregation === 'count'
                   ? [{ aggregation: 'count' }]
-                  : options.metrics.map(metric => ({
+                  : options.metrics.map((metric) => ({
                       aggregation: metric.aggregation,
                       field: metric.field,
                     })),

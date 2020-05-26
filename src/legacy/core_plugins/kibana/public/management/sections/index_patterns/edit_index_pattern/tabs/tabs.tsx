@@ -77,7 +77,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
     const tempScriptedFieldLanguages: string[] = [];
-    indexPattern.fields.forEach(field => {
+    indexPattern.fields.forEach((field) => {
       if (field.scripted) {
         if (field.lang) {
           tempScriptedFieldLanguages.push(field.lang);
@@ -110,7 +110,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
             <EuiFieldSearch
               placeholder={filterPlaceholder}
               value={fieldFilter}
-              onChange={e => setFieldFilter(e.target.value)}
+              onChange={(e) => setFieldFilter(e.target.value)}
               data-test-subj="indexPatternFieldFilter"
               aria-label={searchAriaLabel}
             />
@@ -120,7 +120,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
               <EuiSelect
                 options={indexedFieldTypes}
                 value={indexedFieldTypeFilter}
-                onChange={e => setIndexedFieldTypeFilter(e.target.value)}
+                onChange={(e) => setIndexedFieldTypeFilter(e.target.value)}
                 data-test-subj="indexedFieldTypeFilterDropdown"
                 aria-label={filterAriaLabel}
               />
@@ -131,7 +131,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
               <EuiSelect
                 options={scriptedFieldLanguages}
                 value={scriptedFieldLanguageFilter}
-                onChange={e => setScriptedFieldLanguageFilter(e.target.value)}
+                onChange={(e) => setScriptedFieldLanguageFilter(e.target.value)}
                 data-test-subj="scriptedFieldLanguageFilterDropdown"
               />
             </EuiFlexItem>
@@ -262,8 +262,8 @@ export function Tabs({ config, indexPattern, fields, services, history, location
   return (
     <EuiTabbedContent
       tabs={euiTabs}
-      selectedTab={euiTabs.find(tab => tab.id === selectedTabId)}
-      onTabClick={tab => {
+      selectedTab={euiTabs.find((tab) => tab.id === selectedTabId)}
+      onTabClick={(tab) => {
         setSelectedTabId(tab.id);
         syncingStateFunc.setCurrentTab(tab.id);
       }}

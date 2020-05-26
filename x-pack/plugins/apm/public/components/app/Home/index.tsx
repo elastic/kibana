@@ -9,7 +9,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTabs,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -27,7 +27,7 @@ import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
 
 function getHomeTabs({
-  serviceMapEnabled = true
+  serviceMapEnabled = true,
 }: {
   serviceMapEnabled: boolean;
 }) {
@@ -36,24 +36,24 @@ function getHomeTabs({
       link: (
         <ServiceOverviewLink>
           {i18n.translate('xpack.apm.home.servicesTabLabel', {
-            defaultMessage: 'Services'
+            defaultMessage: 'Services',
           })}
         </ServiceOverviewLink>
       ),
       render: () => <ServiceOverview />,
-      name: 'services'
+      name: 'services',
     },
     {
       link: (
         <TraceOverviewLink>
           {i18n.translate('xpack.apm.home.tracesTabLabel', {
-            defaultMessage: 'Traces'
+            defaultMessage: 'Traces',
           })}
         </TraceOverviewLink>
       ),
       render: () => <TraceOverview />,
-      name: 'traces'
-    }
+      name: 'traces',
+    },
   ];
 
   if (serviceMapEnabled) {
@@ -61,19 +61,19 @@ function getHomeTabs({
       link: (
         <ServiceMapLink>
           {i18n.translate('xpack.apm.home.serviceMapTabLabel', {
-            defaultMessage: 'Service Map'
+            defaultMessage: 'Service Map',
           })}
         </ServiceMapLink>
       ),
       render: () => <ServiceMap />,
-      name: 'service-map'
+      name: 'service-map',
     });
   }
 
   return homeTabs;
 }
 const SETTINGS_LINK_LABEL = i18n.translate('xpack.apm.settingsLinkLabel', {
-  defaultMessage: 'Settings'
+  defaultMessage: 'Settings',
 });
 
 interface Props {
@@ -84,7 +84,7 @@ export function Home({ tab }: Props) {
   const { config } = useApmPluginContext();
   const homeTabs = getHomeTabs(config);
   const selectedTab = homeTabs.find(
-    homeTab => homeTab.name === tab
+    (homeTab) => homeTab.name === tab
   ) as $ElementType<typeof homeTabs, number>;
 
   return (
@@ -109,7 +109,7 @@ export function Home({ tab }: Props) {
         </EuiFlexGroup>
       </ApmHeader>
       <EuiTabs>
-        {homeTabs.map(homeTab => (
+        {homeTabs.map((homeTab) => (
           <EuiTabLink isSelected={homeTab === selectedTab} key={homeTab.name}>
             {homeTab.link}
           </EuiTabLink>

@@ -70,7 +70,7 @@ export class NewsfeedApiDriver {
       old = stored.split(',');
     }
 
-    const newHashes = items.map(i => i.hash);
+    const newHashes = items.map((i) => i.hash);
     const updatedHashes = [...new Set(old.concat(newHashes))];
     localStorage.setItem(NEWSFEED_HASH_SET_STORAGE_KEY, updatedHashes.join(','));
 
@@ -178,7 +178,7 @@ export function getApi(
     filter(() => driver.shouldFetch()),
     mergeMap(() =>
       driver.fetchNewsfeedItems(http, config.service).pipe(
-        catchError(err => {
+        catchError((err) => {
           window.console.error(err);
           return Rx.of({
             error: err,

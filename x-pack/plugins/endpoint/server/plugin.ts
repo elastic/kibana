@@ -78,9 +78,7 @@ export class EndpointPlugin
       logFactory: this.initializerContext.logger,
       service: this.endpointAppContextService,
       config: (): Promise<EndpointConfigType> => {
-        return createConfig$(this.initializerContext)
-          .pipe(first())
-          .toPromise();
+        return createConfig$(this.initializerContext).pipe(first()).toPromise();
       },
     } as EndpointAppContext;
     const router = core.http.createRouter();

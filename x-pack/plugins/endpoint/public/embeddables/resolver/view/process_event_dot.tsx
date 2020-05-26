@@ -151,9 +151,9 @@ export const ProcessEventDot = styled(
           // Height according to symbol viewbox AR
           height: `${120 * magFactorX}px`,
           // Adjusted to position/scale with camera
-          transform: `translateX(-${0.172413 * 360 * magFactorX + 10}px) translateY(-${0.73684 *
-            120 *
-            magFactorX}px)`,
+          transform: `translateX(-${0.172413 * 360 * magFactorX + 10}px) translateY(-${
+            0.73684 * 120 * magFactorX
+          }px)`,
         }),
         [left, magFactorX, top]
       );

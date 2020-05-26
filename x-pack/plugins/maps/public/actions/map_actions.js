@@ -90,7 +90,7 @@ function getLayerLoadingCallbacks(dispatch, getState, layerId) {
       dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
     onLoadError: (dataId, requestToken, errorMessage) =>
       dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
-    updateSourceData: newData => {
+    updateSourceData: (newData) => {
       dispatch(updateSourceDataRequest(layerId, newData));
     },
     isRequestStillActive: (dataId, requestToken) => {
@@ -106,7 +106,7 @@ function getLayerLoadingCallbacks(dispatch, getState, layerId) {
 }
 
 function getLayerById(layerId, state) {
-  return getLayerList(state).find(layer => {
+  return getLayerList(state).find((layer) => {
     return layerId === layer.getId();
   });
 }
@@ -114,7 +114,7 @@ function getLayerById(layerId, state) {
 async function syncDataForAllLayers(dispatch, getState, dataFilters) {
   const state = getState();
   const layerList = getLayerList(state);
-  const syncs = layerList.map(layer => {
+  const syncs = layerList.map((layer) => {
     const loadingFunctions = getLayerLoadingCallbacks(dispatch, getState, layer.getId());
     return layer.syncData({ ...loadingFunctions, dataFilters });
   });
@@ -123,15 +123,15 @@ async function syncDataForAllLayers(dispatch, getState, dataFilters) {
 
 export function cancelAllInFlightRequests() {
   return (dispatch, getState) => {
-    getLayerList(getState()).forEach(layer => {
+    getLayerList(getState()).forEach((layer) => {
       dispatch(clearDataRequests(layer));
     });
   };
 }
 
 function clearDataRequests(layer) {
-  return dispatch => {
-    layer.getInFlightRequestTokens().forEach(requestToken => {
+  return (dispatch) => {
+    layer.getInFlightRequestTokens().forEach((requestToken) => {
       dispatch(cancelRequest(requestToken));
     });
     dispatch({
@@ -219,7 +219,7 @@ export function replaceLayerList(newLayerList) {
       });
     }
 
-    newLayerList.forEach(layerDescriptor => {
+    newLayerList.forEach((layerDescriptor) => {
       dispatch(addLayer(layerDescriptor));
     });
   };
@@ -266,7 +266,7 @@ export function addLayerWithoutDataSync(layerDescriptor) {
 }
 
 function setLayerDataLoadErrorStatus(layerId, errorMessage) {
-  return dispatch => {
+  return (dispatch) => {
     dispatch({
       type: SET_LAYER_ERROR_STATUS,
       isInErrorState: errorMessage !== null,
@@ -280,15 +280,15 @@ export function cleanTooltipStateForLayer(layerId, layerFeatures = []) {
   return (dispatch, getState) => {
     let featuresRemoved = false;
     const openTooltips = getOpenTooltips(getState())
-      .map(tooltipState => {
-        const nextFeatures = tooltipState.features.filter(tooltipFeature => {
+      .map((tooltipState) => {
+        const nextFeatures = tooltipState.features.filter((tooltipFeature) => {
           if (tooltipFeature.layerId !== layerId) {
             // feature from another layer, keep it
             return true;
           }
 
           // Keep feature if it is still in layer
-          return layerFeatures.some(layerFeature => {
+          return layerFeatures.some((layerFeature) => {
             return layerFeature.properties[FEATURE_ID_PROPERTY_NAME] === tooltipFeature.id;
           });
         });
@@ -299,7 +299,7 @@ export function cleanTooltipStateForLayer(layerId, layerFeatures = []) {
 
         return { ...tooltipState, features: nextFeatures };
       })
-      .filter(tooltipState => {
+      .filter((tooltipState) => {
         return tooltipState.features.length > 0;
       });
 
@@ -384,7 +384,7 @@ export function setTransientLayer(layerId) {
 }
 
 export function clearTransientLayerStateAndCloseFlyout() {
-  return async dispatch => {
+  return async (dispatch) => {
     await dispatch(updateFlyout(FLYOUT_STATE.NONE));
     await dispatch(setSelectedLayer(null));
     await dispatch(removeTransientLayer());
@@ -404,7 +404,7 @@ export function mapReady() {
       type: MAP_READY,
     });
 
-    getWaitingForMapReadyLayerListRaw(getState()).forEach(layerDescriptor => {
+    getWaitingForMapReadyLayerListRaw(getState()).forEach((layerDescriptor) => {
       dispatch(addLayer(layerDescriptor));
     });
 
@@ -555,7 +555,7 @@ export function disableScrollZoom() {
 }
 
 export function fitToLayerExtent(layerId) {
-  return async function(dispatch, getState) {
+  return async function (dispatch, getState) {
     const targetLayer = getLayerById(layerId, getState());
 
     if (targetLayer) {
@@ -569,7 +569,7 @@ export function fitToLayerExtent(layerId) {
 }
 
 export function fitToDataBounds() {
-  return async function(dispatch, getState) {
+  return async function (dispatch, getState) {
     const layerList = getFittableLayers(getState());
 
     if (!layerList.length) {
@@ -577,7 +577,7 @@ export function fitToDataBounds() {
     }
 
     const dataFilters = getDataFilters(getState());
-    const boundsPromises = layerList.map(async layer => {
+    const boundsPromises = layerList.map(async (layer) => {
       return layer.getBounds(dataFilters);
     });
 
@@ -661,7 +661,7 @@ export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
 }
 
 export function updateSourceDataRequest(layerId, newData) {
-  return dispatch => {
+  return (dispatch) => {
     dispatch({
       type: UPDATE_SOURCE_DATA_REQUEST,
       dataId: SOURCE_DATA_ID_ORIGIN,
@@ -740,7 +740,7 @@ export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
 }
 
 export function updateSourceProp(layerId, propName, value, newLayerType) {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
@@ -822,7 +822,7 @@ export function updateLayerAlpha(id, alpha) {
 }
 
 export function setLayerQuery(id, query) {
-  return dispatch => {
+  return (dispatch) => {
     dispatch({
       type: UPDATE_LAYER_PROP,
       id,
@@ -861,7 +861,7 @@ function removeLayerFromLayerList(layerId) {
       return;
     }
 
-    layerGettingRemoved.getInFlightRequestTokens().forEach(requestToken => {
+    layerGettingRemoved.getInFlightRequestTokens().forEach((requestToken) => {
       dispatch(cancelRequest(requestToken));
     });
     dispatch(cleanTooltipStateForLayer(layerId));
@@ -942,7 +942,7 @@ export function clearMissingStyleProperties(layerId) {
 }
 
 export function updateLayerStyle(layerId, styleDescriptor) {
-  return dispatch => {
+  return (dispatch) => {
     dispatch({
       type: UPDATE_LAYER_STYLE,
       layerId,
@@ -991,7 +991,7 @@ export function updateLayerStyleForSelectedLayer(styleDescriptor) {
 }
 
 export function setJoinsForLayer(layer, joins) {
-  return async dispatch => {
+  return async (dispatch) => {
     await dispatch({
       type: SET_JOINS,
       layer: layer,
@@ -1004,7 +1004,7 @@ export function setJoinsForLayer(layer, joins) {
 }
 
 export function updateDrawState(drawState) {
-  return dispatch => {
+  return (dispatch) => {
     if (drawState !== null) {
       dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] }); // tooltips just get in the way
     }
@@ -1041,7 +1041,7 @@ export function setHiddenLayers(hiddenLayerIds) {
     if (!isMapReady) {
       dispatch({ type: SET_WAITING_FOR_READY_HIDDEN_LAYERS, hiddenLayerIds });
     } else {
-      getLayerListRaw(getState()).forEach(layer =>
+      getLayerListRaw(getState()).forEach((layer) =>
         dispatch(setLayerVisibility(layer.id, !hiddenLayerIds.includes(layer.id)))
       );
     }

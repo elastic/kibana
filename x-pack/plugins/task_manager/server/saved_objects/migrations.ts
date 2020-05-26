@@ -6,7 +6,7 @@
 import { SavedObjectMigrationMap } from '../../../../../src/core/server';
 
 export const migrations: SavedObjectMigrationMap = {
-  '7.4.0': doc => ({
+  '7.4.0': (doc) => ({
     ...doc,
     updated_at: new Date().toISOString(),
   }),

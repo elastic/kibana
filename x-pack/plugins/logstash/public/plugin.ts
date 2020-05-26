@@ -32,7 +32,7 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
 
   public setup(core: CoreSetup, plugins: SetupDeps) {
     const logstashLicense$ = plugins.licensing.license$.pipe(
-      map(license => new LogstashLicenseService(license))
+      map((license) => new LogstashLicenseService(license))
     );
     const section = plugins.management.sections.register({
       id: 'logstash',
@@ -46,7 +46,7 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
         defaultMessage: 'Pipelines',
       }),
       order: 10,
-      mount: async params => {
+      mount: async (params) => {
         const [coreStart] = await core.getStartServices();
         const { renderApp } = await import('./application');
         const isMonitoringEnabled = 'monitoring' in plugins;

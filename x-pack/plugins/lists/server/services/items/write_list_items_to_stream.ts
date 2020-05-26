@@ -143,7 +143,7 @@ export const writeResponseHitsToStream = ({
 }: WriteResponseHitsToStreamOptions): void => {
   const stringToAppendOrEmpty = stringToAppend ?? '';
 
-  response.hits.hits.forEach(hit => {
+  response.hits.hits.forEach((hit) => {
     if (hit._source.ip != null) {
       stream.push(`${hit._source.ip}${stringToAppendOrEmpty}`);
     } else if (hit._source.keyword != null) {

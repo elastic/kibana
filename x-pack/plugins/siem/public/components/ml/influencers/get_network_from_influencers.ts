@@ -11,7 +11,7 @@ export const getNetworkFromInfluencers = (
   influencers: Array<Record<string, string>> = [],
   ip?: string
 ): { ip: string; type: DestinationOrSource } | null => {
-  const recordFound = influencers.find(influencer => {
+  const recordFound = influencers.find((influencer) => {
     const [influencerName, influencerValue] = getEntries(influencer);
     if (isDestinationOrSource(influencerName)) {
       if (ip == null) {

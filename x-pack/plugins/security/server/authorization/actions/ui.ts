@@ -26,7 +26,7 @@ export class UIActions {
     if (
       uiCapabilityParts.length === 0 ||
       uiCapabilityParts.findIndex(
-        part => !part || !isString(part) || !uiCapabilitiesRegex.test(part)
+        (part) => !part || !isString(part) || !uiCapabilitiesRegex.test(part)
       ) >= 0
     ) {
       throw new Error(

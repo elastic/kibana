@@ -107,10 +107,7 @@ describe('SIEM Super Date Picker', () => {
           .simulate('click');
         wrapper.update();
 
-        wrapper
-          .find('button.euiQuickSelect__applyButton')
-          .first()
-          .simulate('click');
+        wrapper.find('button.euiQuickSelect__applyButton').first().simulate('click');
         wrapper.update();
       });
 
@@ -172,12 +169,7 @@ describe('SIEM Super Date Picker', () => {
       });
 
       test('Today is in Recently used date ranges', () => {
-        expect(
-          wrapper
-            .find('div.euiQuickSelectPopover__section')
-            .at(1)
-            .text()
-        ).toBe('Today');
+        expect(wrapper.find('div.euiQuickSelectPopover__section').at(1).text()).toBe('Today');
       });
 
       test('Today and Last 24 hours are in Recently used date ranges', () => {
@@ -187,18 +179,12 @@ describe('SIEM Super Date Picker', () => {
           .simulate('click');
         wrapper.update();
 
-        wrapper
-          .find('button.euiQuickSelect__applyButton')
-          .first()
-          .simulate('click');
+        wrapper.find('button.euiQuickSelect__applyButton').first().simulate('click');
         wrapper.update();
 
-        expect(
-          wrapper
-            .find('div.euiQuickSelectPopover__section')
-            .at(1)
-            .text()
-        ).toBe('Last 24 hoursToday');
+        expect(wrapper.find('div.euiQuickSelectPopover__section').at(1).text()).toBe(
+          'Last 24 hoursToday'
+        );
       });
 
       test('Make sure that it does not add any duplicate if you click again on today', () => {
@@ -214,12 +200,7 @@ describe('SIEM Super Date Picker', () => {
           .simulate('click');
         wrapper.update();
 
-        expect(
-          wrapper
-            .find('div.euiQuickSelectPopover__section')
-            .at(1)
-            .text()
-        ).toBe('Today');
+        expect(wrapper.find('div.euiQuickSelectPopover__section').at(1).text()).toBe('Today');
       });
     });
 
@@ -292,10 +273,7 @@ describe('SIEM Super Date Picker', () => {
             <SuperDatePicker id="global" />
           </ReduxStoreProvider>
         );
-        wrapper
-          .find('[data-test-subj="superDatePickerShowDatesButton"]')
-          .first()
-          .simulate('click');
+        wrapper.find('[data-test-subj="superDatePickerShowDatesButton"]').first().simulate('click');
         wrapper.update();
 
         wrapper
@@ -304,22 +282,13 @@ describe('SIEM Super Date Picker', () => {
           .simulate('click');
         wrapper.update();
 
-        wrapper
-          .find('[data-test-subj="superDatePickerAbsoluteTab"]')
-          .first()
-          .simulate('click');
+        wrapper.find('[data-test-subj="superDatePickerAbsoluteTab"]').first().simulate('click');
         wrapper.update();
 
-        wrapper
-          .find('button.react-datepicker__navigation--previous')
-          .first()
-          .simulate('click');
+        wrapper.find('button.react-datepicker__navigation--previous').first().simulate('click');
         wrapper.update();
 
-        wrapper
-          .find('div.react-datepicker__day')
-          .at(1)
-          .simulate('click');
+        wrapper.find('div.react-datepicker__day').at(1).simulate('click');
         wrapper.update();
 
         wrapper
@@ -335,7 +304,7 @@ describe('SIEM Super Date Picker', () => {
         const mapStateToProps = makeMapStateToProps();
         const props1 = mapStateToProps(state, { id: 'global' });
         const props2 = mapStateToProps(state, { id: 'global' });
-        Object.keys(props1).forEach(key => {
+        Object.keys(props1).forEach((key) => {
           expect((props1 as Record<string, {}>)[key]).toBe((props2 as Record<string, {}>)[key]);
         });
       });

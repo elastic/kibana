@@ -51,7 +51,7 @@ export const authMatrixDataMappingFields: MatrixHistogramMappingTypes = {
 
 const histogramConfigs: MatrixHisrogramConfigs = {
   defaultStackByOption:
-    authStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? authStackByOptions[0],
+    authStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? authStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA,
   histogramType: HistogramType.authentications,
   mapping: authMatrixDataMappingFields,

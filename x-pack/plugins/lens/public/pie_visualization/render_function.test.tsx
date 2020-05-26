@@ -17,7 +17,7 @@ describe('PieVisualization component', () => {
   let convertSpy: jest.Mock;
 
   beforeEach(() => {
-    convertSpy = jest.fn(x => x);
+    convertSpy = jest.fn((x) => x);
     getFormatSpy = jest.fn();
     getFormatSpy.mockReturnValue({ convert: convertSpy });
   });

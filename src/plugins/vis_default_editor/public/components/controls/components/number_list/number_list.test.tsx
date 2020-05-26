@@ -139,12 +139,7 @@ describe('NumberList', () => {
     defaultProps.numberArray = [1];
     const comp = shallow(<NumberList {...defaultProps} />);
 
-    expect(
-      comp
-        .find(NumberRow)
-        .first()
-        .prop('disableDelete')
-    ).toEqual(true);
+    expect(comp.find(NumberRow).first().prop('disableDelete')).toEqual(true);
   });
 
   test('should change value', () => {
@@ -157,10 +152,7 @@ describe('NumberList', () => {
 
   test('should call setTouched', () => {
     const comp = shallow(<NumberList {...defaultProps} />);
-    comp
-      .find(NumberRow)
-      .first()
-      .prop('onBlur')();
+    comp.find(NumberRow).first().prop('onBlur')();
 
     expect(defaultProps.setTouched).toBeCalled();
   });

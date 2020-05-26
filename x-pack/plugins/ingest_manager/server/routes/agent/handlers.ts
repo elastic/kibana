@@ -188,7 +188,7 @@ export const postAgentCheckinHandler: RequestHandler<
     const body: PostAgentCheckinResponse = {
       action: 'checkin',
       success: true,
-      actions: actions.map(a => ({
+      actions: actions.map((a) => ({
         agent_id: agent.id,
         type: a.type,
         data: a.data,
@@ -277,7 +277,7 @@ export const getAgentsHandler: RequestHandler<
     });
 
     const body: GetAgentsResponse = {
-      list: agents.map(agent => ({
+      list: agents.map((agent) => ({
         ...agent,
         status: AgentService.getAgentStatus(agent),
       })),

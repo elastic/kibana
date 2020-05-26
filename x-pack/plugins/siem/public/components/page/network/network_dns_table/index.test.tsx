@@ -82,10 +82,7 @@ describe('NetworkTopNFlow Table Component', () => {
         field: 'queryCount',
       });
 
-      wrapper
-        .find('.euiTable thead tr th button')
-        .first()
-        .simulate('click');
+      wrapper.find('.euiTable thead tr th button').first().simulate('click');
 
       wrapper.update();
 
@@ -93,12 +90,7 @@ describe('NetworkTopNFlow Table Component', () => {
         direction: 'asc',
         field: 'dnsName',
       });
-      expect(
-        wrapper
-          .find('.euiTable thead tr th button')
-          .first()
-          .find('svg')
-      ).toBeTruthy();
+      expect(wrapper.find('.euiTable thead tr th button').first().find('svg')).toBeTruthy();
     });
   });
 });

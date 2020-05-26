@@ -9,7 +9,7 @@ import { appReady, appError } from '../actions/app';
 
 export const appReducer = handleActions(
   {
-    [appReady]: appState => ({ ...appState, ready: true }),
+    [appReady]: (appState) => ({ ...appState, ready: true }),
     [appError]: (appState, { payload }) => ({ ...appState, ready: payload }),
   },
   {}

@@ -3,8 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
-import { AppMountParameters, DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  AppMountParameters,
+} from 'kibana/public';
+import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
 import { UMFrontendLibs } from '../lib/lib';
 import { PLUGIN } from '../../common/constants';
 import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
@@ -24,7 +30,11 @@ export interface ClientPluginsStart {
   embeddable: EmbeddableStart;
 }
 
-export class UptimePlugin implements Plugin<void, void, ClientPluginsSetup, ClientPluginsStart> {
+export type ClientSetup = void;
+export type ClientStart = void;
+
+export class UptimePlugin
+  implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart> {
   constructor(_context: PluginInitializerContext) {}
 
   public async setup(
@@ -50,14 +60,13 @@ export class UptimePlugin implements Plugin<void, void, ClientPluginsSetup, Clie
       order: 8900,
       title: PLUGIN.TITLE,
       category: DEFAULT_APP_CATEGORIES.observability,
-      async mount(params: AppMountParameters) {
+      mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
         const { element } = params;
         const libs: UMFrontendLibs = {
           framework: getKibanaFrameworkAdapter(coreStart, plugins, corePlugins),
         };
-        libs.framework.render(element);
-        return () => {};
+        return libs.framework.render(element);
       },
     });
   }

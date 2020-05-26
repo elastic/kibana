@@ -13,7 +13,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const browser = getService('browser');
 
-  describe('Home page', function() {
+  describe('Home page', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('indexManagement');
     });

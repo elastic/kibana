@@ -194,7 +194,7 @@ export const persistFavorite = async (
     };
     if (timeline.favorite != null) {
       const alreadyExistsTimelineFavoriteByUser = timeline.favorite.findIndex(
-        user => user.userName === userName
+        (user) => user.userName === userName
       );
 
       timeline.favorite =
@@ -214,7 +214,7 @@ export const persistFavorite = async (
       version: persistResponse.timeline.version,
       favorite:
         persistResponse.timeline.favorite != null
-          ? persistResponse.timeline.favorite.filter(fav => fav.userName === userName)
+          ? persistResponse.timeline.favorite.filter((fav) => fav.userName === userName)
           : [],
     };
   } catch (err) {
@@ -322,7 +322,7 @@ export const resetTimeline = async (request: FrameworkRequest, timelineIds: stri
   }
 
   await Promise.all(
-    timelineIds.map(timelineId =>
+    timelineIds.map((timelineId) =>
       Promise.all([
         note.deleteNoteByTimelineId(request, timelineId),
         pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
@@ -331,7 +331,7 @@ export const resetTimeline = async (request: FrameworkRequest, timelineIds: stri
   );
 
   const response = await Promise.all(
-    timelineIds.map(timelineId =>
+    timelineIds.map((timelineId) =>
       updatePartialSavedTimeline(request, timelineId, draftTimelineDefaults)
     )
   );
@@ -343,7 +343,7 @@ export const deleteTimeline = async (request: FrameworkRequest, timelineIds: str
   const savedObjectsClient = request.context.core.savedObjects.client;
 
   await Promise.all(
-    timelineIds.map(timelineId =>
+    timelineIds.map((timelineId) =>
       Promise.all([
         savedObjectsClient.delete(timelineSavedObjectType, timelineId),
         note.deleteNoteByTimelineId(request, timelineId),
@@ -389,7 +389,7 @@ const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObje
   const savedObjects = await savedObjectsClient.find(options);
 
   const timelinesWithNotesAndPinnedEvents = await Promise.all(
-    savedObjects.saved_objects.map(async savedObject => {
+    savedObjects.saved_objects.map(async (savedObject) => {
       const timelineSaveObject = convertSavedObjectToSavedTimeline(savedObject);
       return Promise.all([
         note.getNotesByTimelineId(request, timelineSaveObject.savedObjectId),
@@ -425,11 +425,11 @@ export const timelineWithReduxProperties = (
   ...timeline,
   favorite:
     timeline.favorite != null && userName != null
-      ? timeline.favorite.filter(fav => fav.userName === userName)
+      ? timeline.favorite.filter((fav) => fav.userName === userName)
       : [],
-  eventIdToNoteIds: notes.filter(n => n.eventId != null),
-  noteIds: notes.filter(n => n.eventId == null && n.noteId != null).map(n => n.noteId),
+  eventIdToNoteIds: notes.filter((n) => n.eventId != null),
+  noteIds: notes.filter((n) => n.eventId == null && n.noteId != null).map((n) => n.noteId),
   notes,
-  pinnedEventIds: pinnedEvents.map(e => e.eventId),
+  pinnedEventIds: pinnedEvents.map((e) => e.eventId),
   pinnedEventsSaveObject: pinnedEvents,
 });

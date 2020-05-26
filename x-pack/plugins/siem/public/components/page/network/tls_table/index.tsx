@@ -64,7 +64,7 @@ const TlsTableComponent = React.memo<TlsTableProps>(
         : networkModel.IpDetailsTableType.tls;
 
     const updateLimitPagination = useCallback(
-      newLimit =>
+      (newLimit) =>
         updateNetworkTable({
           networkType: type,
           tableType,
@@ -74,7 +74,7 @@ const TlsTableComponent = React.memo<TlsTableProps>(
     );
 
     const updateActivePage = useCallback(
-      newPage =>
+      (newPage) =>
         updateNetworkTable({
           networkType: type,
           tableType,

@@ -66,7 +66,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   name: <MonitorStatusTitle />,
   iconClass: 'uptimeApp',
-  alertParamsExpression: params => <AlertMonitorStatus {...params} autocomplete={autocomplete} />,
+  alertParamsExpression: (params) => <AlertMonitorStatus {...params} autocomplete={autocomplete} />,
   validate,
   defaultActionMessage,
   requiresAppContext: true,

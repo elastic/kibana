@@ -29,7 +29,7 @@ export class IpFormat extends FieldFormat {
   });
   static fieldType = KBN_FIELD_TYPES.IP;
 
-  textConvert: TextContextTypeConvert = val => {
+  textConvert: TextContextTypeConvert = (val) => {
     if (val === undefined || val === null) return '-';
     if (!isFinite(val)) return val;
 

@@ -94,7 +94,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                 <EuiButtonGroup
                   options={toggleOptions}
                   idSelected={selectedToggleOption}
-                  onChange={val => {
+                  onChange={(val) => {
                     setToggleOption(val);
                   }}
                   data-test-subj="stepAboutDetailsToggle"
@@ -105,7 +105,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
           <EuiFlexItem grow={5} key="details">
             {selectedToggleOption === 'details' ? (
               <EuiResizeObserver data-test-subj="stepAboutDetailsContent" onResize={onResize}>
-                {resizeRef => (
+                {(resizeRef) => (
                   <AboutContent ref={resizeRef}>
                     <VerticalOverflowContainer maxHeight={120}>
                       <VerticalOverflowContent maxHeight={120} className="eui-yScrollWithShadows">

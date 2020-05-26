@@ -92,7 +92,7 @@ describe('#setup()', () => {
       const setup = service.setup(setupDeps);
 
       const pluginId = Symbol('plugin');
-      const updater$ = new BehaviorSubject<AppUpdater>(app => ({}));
+      const updater$ = new BehaviorSubject<AppUpdater>((app) => ({}));
       setup.register(pluginId, createApp({ id: 'app1', updater$ }));
       setup.register(pluginId, createApp({ id: 'app2' }));
       const { applications$ } = await service.start(startDeps);
@@ -116,7 +116,7 @@ describe('#setup()', () => {
         })
       );
 
-      updater$.next(app => ({
+      updater$.next((app) => ({
         status: AppStatus.inaccessible,
         tooltip: 'App inaccessible due to reason',
         defaultPath: 'foo/bar',
@@ -220,7 +220,7 @@ describe('#setup()', () => {
       setup.register(pluginId, createApp({ id: 'app1' }));
       setup.register(pluginId, createApp({ id: 'app2' }));
       setup.registerAppUpdater(
-        new BehaviorSubject<AppUpdater>(app => {
+        new BehaviorSubject<AppUpdater>((app) => {
           if (app.id === 'app1') {
             return {
               status: AppStatus.inaccessible,
@@ -260,7 +260,7 @@ describe('#setup()', () => {
     it(`properly combine with application's updater$`, async () => {
       const setup = service.setup(setupDeps);
       const pluginId = Symbol('plugin');
-      const appStatusUpdater$ = new BehaviorSubject<AppUpdater>(app => ({
+      const appStatusUpdater$ = new BehaviorSubject<AppUpdater>((app) => ({
         status: AppStatus.inaccessible,
         navLinkStatus: AppNavLinkStatus.disabled,
       }));
@@ -268,7 +268,7 @@ describe('#setup()', () => {
       setup.register(pluginId, createApp({ id: 'app2' }));
 
       setup.registerAppUpdater(
-        new BehaviorSubject<AppUpdater>(app => {
+        new BehaviorSubject<AppUpdater>((app) => {
           if (app.id === 'app1') {
             return {
               status: AppStatus.accessible,
@@ -311,7 +311,7 @@ describe('#setup()', () => {
       const pluginId = Symbol('plugin');
       setup.register(pluginId, createApp({ id: 'app1' }));
       setup.registerAppUpdater(
-        new BehaviorSubject<AppUpdater>(app => {
+        new BehaviorSubject<AppUpdater>((app) => {
           return {
             status: AppStatus.inaccessible,
             navLinkStatus: AppNavLinkStatus.disabled,
@@ -319,7 +319,7 @@ describe('#setup()', () => {
         })
       );
       setup.registerAppUpdater(
-        new BehaviorSubject<AppUpdater>(app => {
+        new BehaviorSubject<AppUpdater>((app) => {
           return {
             status: AppStatus.accessible,
             navLinkStatus: AppNavLinkStatus.default,
@@ -347,7 +347,7 @@ describe('#setup()', () => {
       const pluginId = Symbol('plugin');
       setup.register(pluginId, createApp({ id: 'app1' }));
 
-      const statusUpdater = new BehaviorSubject<AppUpdater>(app => {
+      const statusUpdater = new BehaviorSubject<AppUpdater>((app) => {
         return {
           status: AppStatus.inaccessible,
           navLinkStatus: AppNavLinkStatus.disabled,
@@ -357,7 +357,7 @@ describe('#setup()', () => {
 
       const start = await service.start(startDeps);
       let latestValue: ReadonlyMap<string, App | LegacyApp> = new Map<string, App | LegacyApp>();
-      start.applications$.subscribe(apps => {
+      start.applications$.subscribe((apps) => {
         latestValue = apps;
       });
 
@@ -370,7 +370,7 @@ describe('#setup()', () => {
         })
       );
 
-      statusUpdater.next(app => {
+      statusUpdater.next((app) => {
         return {
           status: AppStatus.accessible,
           navLinkStatus: AppNavLinkStatus.hidden,
@@ -393,7 +393,7 @@ describe('#setup()', () => {
       setup.registerLegacyApp(createLegacyApp({ id: 'app1' }));
 
       setup.registerAppUpdater(
-        new BehaviorSubject<AppUpdater>(app => {
+        new BehaviorSubject<AppUpdater>((app) => {
           return {
             status: AppStatus.inaccessible,
             navLinkStatus: AppNavLinkStatus.hidden,
@@ -423,7 +423,7 @@ describe('#setup()', () => {
       const pluginId = Symbol('plugin');
       setup.register(pluginId, createApp({ id: 'app1' }));
 
-      const updater = new BehaviorSubject<AppUpdater>(app => ({}));
+      const updater = new BehaviorSubject<AppUpdater>((app) => ({}));
       setup.registerAppUpdater(updater);
 
       const start = await service.start(startDeps);
@@ -431,17 +431,17 @@ describe('#setup()', () => {
       expect(MockHistory.push).toHaveBeenCalledWith('/app/app1', undefined);
       MockHistory.push.mockClear();
 
-      updater.next(app => ({ defaultPath: 'default-path' }));
+      updater.next((app) => ({ defaultPath: 'default-path' }));
       await start.navigateToApp('app1');
       expect(MockHistory.push).toHaveBeenCalledWith('/app/app1/default-path', undefined);
       MockHistory.push.mockClear();
 
-      updater.next(app => ({ defaultPath: 'another-path' }));
+      updater.next((app) => ({ defaultPath: 'another-path' }));
       await start.navigateToApp('app1');
       expect(MockHistory.push).toHaveBeenCalledWith('/app/app1/another-path', undefined);
       MockHistory.push.mockClear();
 
-      updater.next(app => ({}));
+      updater.next((app) => ({}));
       await start.navigateToApp('app1');
       expect(MockHistory.push).toHaveBeenCalledWith('/app/app1', undefined);
       MockHistory.push.mockClear();
@@ -816,11 +816,11 @@ describe('#start()', () => {
       const history = createMemoryHistory();
       setupDeps.history = history;
 
-      const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+      const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
       // Create an app and a promise that allows us to control when the app completes mounting
       const createWaitingApp = (props: Partial<App>): [App, () => void] => {
         let finishMount: () => void;
-        const mountPromise = new Promise(resolve => (finishMount = resolve));
+        const mountPromise = new Promise((resolve) => (finishMount = resolve));
         const app = {
           id: 'some-id',
           title: 'some-title',

@@ -37,7 +37,7 @@ import {
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-const StandardSiblingAggUi = props => {
+const StandardSiblingAggUi = (props) => {
   const { siblings, intl } = props;
   const defaults = { sigma: '' };
   const model = { ...defaults, ...props.model };
@@ -92,7 +92,7 @@ const StandardSiblingAggUi = props => {
         value: 'band',
       },
     ];
-    const selectedModeOption = modeOptions.find(option => {
+    const selectedModeOption = modeOptions.find((option) => {
       return model.mode === option.value;
     });
 

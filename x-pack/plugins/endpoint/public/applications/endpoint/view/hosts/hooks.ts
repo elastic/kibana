@@ -10,7 +10,7 @@ import { GlobalState, HostState } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export function useHostSelector<TSelected>(selector: (state: HostState) => TSelected) {
-  return useSelector(function(state: GlobalState) {
+  return useSelector(function (state: GlobalState) {
     return selector(state.hostList);
   });
 }
