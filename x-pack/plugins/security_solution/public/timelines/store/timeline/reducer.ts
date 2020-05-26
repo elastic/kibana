@@ -98,9 +98,10 @@ import {
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
+import { getAllTimelines } from '../../../common/lib/local_storage';
 
 export const initialTimelineState: TimelineState = {
-  timelineById: EMPTY_TIMELINE_BY_ID,
+  timelineById: { ...EMPTY_TIMELINE_BY_ID, ...getAllTimelines() },
   autoSavedWarningMsg: {
     timelineId: null,
     newTimelineModel: null,
