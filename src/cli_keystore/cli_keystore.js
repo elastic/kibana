@@ -19,14 +19,31 @@
 
 import _ from 'lodash';
 import { join } from 'path';
+import { existsSync } from 'fs';
 
 import { pkg } from '../core/server/utils';
 import Command from '../cli/command';
-import { getConfigDirectory } from '../core/server/path';
+import { getConfigDirectory, getDataPath } from '../core/server/path';
 import { Keystore } from '../legacy/server/keystore';
 
-const path = join(getConfigDirectory(), 'kibana.keystore');
-const keystore = new Keystore(path);
+
+
+function getPath() {
+  return [join(getConfigDirectory(), 'kibana.keystore'), join(getDataPath(), 'kibana.keystore')]
+    .filter(p => existsSync(p))
+    .shift();
+}
+
+function isDeprecated(path) {
+
+}
+
+const yml = getPath();
+if (isDeprecated(yml)) {
+  console.log(`Keystore in ${getConfigDirectory()} is deprecated.  Future versions will read from ${getDataPath}`)
+}
+const keystore = new Keystore();
+
 
 import { createCli } from './create';
 import { listCli } from './list';
