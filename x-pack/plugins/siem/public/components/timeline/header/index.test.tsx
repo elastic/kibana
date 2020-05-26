@@ -18,7 +18,7 @@ import { TimelineHeader } from '.';
 
 const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../lib/kibana');
 
 describe('Header', () => {
   const indexPattern = mockIndexPattern;
