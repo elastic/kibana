@@ -64,7 +64,7 @@ export function useComboInput(
         setValue([...value, newVal]);
       },
       onChange: (newSelectedOptions: any[]) => {
-        const newValues = newSelectedOptions.map(option => option.label);
+        const newValues = newSelectedOptions.map((option) => option.label);
         setValue(newValues);
         if (errors && validate && validate(newValues) === undefined) {
           setErrors(undefined);

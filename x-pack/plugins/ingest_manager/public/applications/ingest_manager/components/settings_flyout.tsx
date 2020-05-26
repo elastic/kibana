@@ -36,7 +36,7 @@ interface Props {
 function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
   const [isLoading, setIsloading] = React.useState(false);
   const { notifications } = useCore();
-  const kibanaUrlInput = useInput('', value => {
+  const kibanaUrlInput = useInput('', (value) => {
     if (!value.match(URL_REGEX)) {
       return [
         i18n.translate('xpack.ingestManager.settings.kibanaUrlError', {
@@ -45,8 +45,8 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
       ];
     }
   });
-  const elasticsearchUrlInput = useComboInput([], value => {
-    if (value.some(v => !v.match(URL_REGEX))) {
+  const elasticsearchUrlInput = useComboInput([], (value) => {
+    if (value.some((v) => !v.match(URL_REGEX))) {
       return [
         i18n.translate('xpack.ingestManager.settings.elasticHostError', {
           defaultMessage: 'Invalid URL',
