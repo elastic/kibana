@@ -22,7 +22,7 @@ import ReactDOM from 'react-dom';
 import { Router, Switch, Route } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { CoreSetup, Capabilities } from 'src/core/public';
+import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
@@ -66,7 +66,7 @@ export const mountManagementSection = async ({
       <Router history={history}>
         <Switch>
           <Route path={'/:service/:id'} exact={true}>
-            <RedirectToHomeIfUnauthorized capabilities={capabilities}>
+            <RedirectToHomeIfUnauthorized>
               <Suspense fallback={<EuiLoadingSpinner />}>
                 <SavedObjectsEditionPage
                   coreStart={coreStart}
@@ -78,7 +78,7 @@ export const mountManagementSection = async ({
             </RedirectToHomeIfUnauthorized>
           </Route>
           <Route path={'/'} exact={false}>
-            <RedirectToHomeIfUnauthorized capabilities={capabilities}>
+            <RedirectToHomeIfUnauthorized>
               <Suspense fallback={<EuiLoadingSpinner />}>
                 <SavedObjectsTablePage
                   coreStart={coreStart}
