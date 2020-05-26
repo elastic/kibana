@@ -34,7 +34,7 @@ export function healthRoute(
 ) {
   router.get(
     {
-      path: '/api/alert/_health',
+      path: '/api/alerts/_health',
       validate: false,
     },
     router.handleLegacyErrors(async function (

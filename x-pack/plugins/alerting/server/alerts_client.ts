@@ -59,7 +59,12 @@ interface ConstructorOptions {
   preconfiguredActions: PreConfiguredAction[];
 }
 
-export interface FindOptions {
+export interface MuteOptions extends IndexType {
+  alertId: string;
+  alertInstanceId: string;
+}
+
+export interface FindOptions extends IndexType {
   perPage?: number;
   page?: number;
   search?: string;
@@ -73,6 +78,10 @@ export interface FindOptions {
   };
   fields?: string[];
   filter?: string;
+}
+
+interface IndexType {
+  [key: string]: unknown;
 }
 
 export interface FindResult {
@@ -532,13 +541,7 @@ export class AlertsClient {
     });
   }
 
-  public async muteInstance({
-    alertId,
-    alertInstanceId,
-  }: {
-    alertId: string;
-    alertInstanceId: string;
-  }) {
+  public async muteInstance({ alertId, alertInstanceId }: MuteOptions) {
     const { attributes, version } = await this.savedObjectsClient.get<Alert>('alert', alertId);
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {

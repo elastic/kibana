@@ -258,7 +258,7 @@ Each alert type should be defined as `AlertTypeModel` object with the these prop
 |requiresAppContext|Define if alert type is enabled for create and edit in the alerting management UI.|
 
 IMPORTANT: The current UI supports a single action group only. 
-Action groups are mapped from the server API result for [GET /api/alert/types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#get-apialerttypes-list-alert-types).
+Action groups are mapped from the server API result for [GET /api/alerts/list_alert_types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#get-apialerttypes-list-alert-types).
 Server side alert type model:
 ```
 export interface AlertType {

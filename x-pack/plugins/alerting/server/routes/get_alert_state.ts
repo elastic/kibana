@@ -23,7 +23,7 @@ const paramSchema = schema.object({
 export const getAlertStateRoute = (router: IRouter, licenseState: LicenseState) => {
   router.get(
     {
-      path: `${BASE_ALERT_API_PATH}/{id}/state`,
+      path: `${BASE_ALERT_API_PATH}/alert/{id}/state`,
       validate: {
         params: paramSchema,
       },

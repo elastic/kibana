@@ -23,7 +23,7 @@ const paramSchema = schema.object({
 export const deleteAlertRoute = (router: IRouter, licenseState: LicenseState) => {
   router.delete(
     {
-      path: `${BASE_ALERT_API_PATH}/{id}`,
+      path: `${BASE_ALERT_API_PATH}/alert/{id}`,
       validate: {
         params: paramSchema,
       },

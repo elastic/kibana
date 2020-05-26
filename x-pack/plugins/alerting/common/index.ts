@@ -20,4 +20,4 @@ export interface AlertingFrameworkHealth {
   hasPermanentEncryptionKey: boolean;
 }
 
-export const BASE_ALERT_API_PATH = '/api/alerting';
+export const BASE_ALERT_API_PATH = '/api/alerts';

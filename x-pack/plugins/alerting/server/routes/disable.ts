@@ -23,7 +23,7 @@ const paramSchema = schema.object({
 export const disableAlertRoute = (router: IRouter, licenseState: LicenseState) => {
   router.post(
     {
-      path: `${BASE_ALERT_API_PATH}/{id}/_disable`,
+      path: `${BASE_ALERT_API_PATH}/alert/{id}/_disable`,
       validate: {
         params: paramSchema,
       },

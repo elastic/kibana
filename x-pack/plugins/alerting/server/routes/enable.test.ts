@@ -28,7 +28,7 @@ describe('enableAlertRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/_enable"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_enable"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [

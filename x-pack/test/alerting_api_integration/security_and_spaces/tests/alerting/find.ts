@@ -24,7 +24,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle find alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
@@ -32,7 +32,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
           const response = await supertestWithoutAuth
             .get(
-              `${getUrlPrefix(space.id)}/api/alert/_find?search=test.noop&search_fields=alertTypeId`
+              `${getUrlPrefix(
+                space.id
+              )}/api/alerts/_find?search=test.noop&search_fields=alertTypeId`
             )
             .auth(user.username, user.password);
 
@@ -116,7 +118,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/api/alert/_find?filter=alert.attributes.actions:{ actionTypeId: test.noop }`
+              )}/api/alerts/_find?filter=alert.attributes.actions:{ actionTypeId: test.noop }`
             )
             .auth(user.username, user.password);
 
@@ -174,7 +176,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't find alert from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
@@ -182,7 +184,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
           const response = await supertestWithoutAuth
             .get(
-              `${getUrlPrefix('other')}/api/alert/_find?search=test.noop&search_fields=alertTypeId`
+              `${getUrlPrefix('other')}/api/alerts/_find?search=test.noop&search_fields=alertTypeId`
             )
             .auth(user.username, user.password);
 

@@ -16,7 +16,7 @@ import { BASE_ALERT_API_PATH, alertStateSchema } from '../common';
 import { Alert, AlertType, AlertTaskState } from '../common';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
-  return await http.get(`${BASE_ALERT_API_PATH}/types`);
+  return await http.get(`${BASE_ALERT_API_PATH}/list_alert_types`);
 }
 
 export async function loadAlertType({
@@ -27,7 +27,7 @@ export async function loadAlertType({
   id: AlertType['id'];
 }): Promise<AlertType> {
   const maybeAlertType = findFirst<AlertType>((type) => type.id === id)(
-    await http.get(`${BASE_ALERT_API_PATH}/types`)
+    await http.get(`${BASE_ALERT_API_PATH}/list_alert_types`)
   );
   if (isNone(maybeAlertType)) {
     throw new Error(
@@ -49,7 +49,7 @@ export async function loadAlert({
   http: HttpSetup;
   alertId: string;
 }): Promise<Alert> {
-  return await http.get(`${BASE_ALERT_API_PATH}/${alertId}`);
+  return await http.get(`${BASE_ALERT_API_PATH}/alert/${alertId}`);
 }
 
 type EmptyHttpResponse = '';
@@ -61,7 +61,7 @@ export async function loadAlertState({
   alertId: string;
 }): Promise<AlertTaskState> {
   return await http
-    .get(`${BASE_ALERT_API_PATH}/${alertId}/state`)
+    .get(`${BASE_ALERT_API_PATH}/alert/${alertId}/state`)
     .then((state: AlertTaskState | EmptyHttpResponse) => (state ? state : {}))
     .then((state: AlertTaskState) => {
       return pipe(

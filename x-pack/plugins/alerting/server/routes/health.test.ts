@@ -31,7 +31,7 @@ describe('healthRoute', () => {
 
     const [config] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alert/_health"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/_health"`);
   });
 
   it('queries the usage api', async () => {

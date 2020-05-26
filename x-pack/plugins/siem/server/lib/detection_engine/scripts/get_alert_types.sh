@@ -13,5 +13,5 @@ set -e
 # https://github.com/elastic/kibana/blob/master/x-pack/plugins/alerting/README.md#get-apialerttypes-list-alert-types
 curl -s -k \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X GET ${KIBANA_URL}${SPACE_URL}/api/alert/types \
+  -X GET ${KIBANA_URL}${SPACE_URL}/api/alerts/list_alert_types \
   | jq .

@@ -24,7 +24,7 @@ const paramSchema = schema.object({
 export const unmuteAlertInstanceRoute = (router: IRouter, licenseState: LicenseState) => {
   router.post(
     {
-      path: `${BASE_ALERT_API_PATH}/{alertId}/alert_instance/{alertInstanceId}/_unmute`,
+      path: `${BASE_ALERT_API_PATH}/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`,
       validate: {
         params: paramSchema,
       },

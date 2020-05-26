@@ -186,7 +186,7 @@ instanceStateValue: true
 
       const reference = alertUtils.generateReference();
       const response = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/alert`)
+        .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
@@ -255,7 +255,7 @@ instanceStateValue: true
     it('should have proper callCluster and savedObjectsClient authorization for alert type executor', async () => {
       const reference = alertUtils.generateReference();
       const response = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/alert`)
+        .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
@@ -301,7 +301,7 @@ instanceStateValue: true
         .expect(200);
       objectRemover.add(space.id, createdAction.id, 'action', 'actions');
       const response = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/alert`)
+        .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({

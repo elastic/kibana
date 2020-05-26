@@ -47,7 +47,7 @@ describe('getAlertStateRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/state"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/state"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [
@@ -90,7 +90,7 @@ describe('getAlertStateRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/state"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/state"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [
@@ -133,7 +133,7 @@ describe('getAlertStateRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/state"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/state"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [

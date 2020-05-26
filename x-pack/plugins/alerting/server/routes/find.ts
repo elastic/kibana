@@ -64,27 +64,6 @@ export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
       const alertsClient = context.alerting.getAlertsClient();
-      const query = req.query;
-      const options: FindOptions = {
-        perPage: query.per_page,
-        page: query.page,
-        search: query.search,
-        defaultSearchOperator: query.default_search_operator,
-        sortField: query.sort_field,
-        fields: query.fields,
-        filter: query.filter,
-        sortOrder: query.sort_order,
-      };
-
-      if (query.search_fields) {
-        options.searchFields = Array.isArray(query.search_fields)
-          ? query.search_fields
-          : [query.search_fields];
-      }
-
-      if (query.has_reference) {
-        options.hasReference = query.has_reference;
-      }
 
       const renameMap = {
         defaultSearchOperator: 'default_search_operator',
@@ -99,11 +78,9 @@ export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
         filter: 'filter',
       };
 
-      const renamedQuery = renameKeys<FindOptions, unknown>(renameMap, query);
+      const renamedQuery = renameKeys<FindOptions, Record<string, unknown>>(renameMap, req.query);
 
-      const findResult = await alertsClient.find({
-        options,
-      });
+      const findResult = await alertsClient.find(renamedQuery);
       return res.ok({
         body: findResult,
       });

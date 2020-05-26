@@ -23,7 +23,7 @@ const paramSchema = schema.object({
 export const muteAllAlertRoute = (router: IRouter, licenseState: LicenseState) => {
   router.post(
     {
-      path: `${BASE_ALERT_API_PATH}/{id}/_mute_all`,
+      path: `${BASE_ALERT_API_PATH}/alert/{id}/_mute_all`,
       validate: {
         params: paramSchema,
       },

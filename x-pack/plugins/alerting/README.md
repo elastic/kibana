@@ -20,20 +20,20 @@ Table of Contents
 		- [Example](#example)
 	- [Alert Navigation](#alert-navigation)
 	- [RESTful API](#restful-api)
-		- [`POST /api/alert`: Create alert](#post-apialert-create-alert)
-		- [`DELETE /api/alert/{id}`: Delete alert](#delete-apialertid-delete-alert)
-		- [`GET /api/alert/_find`: Find alerts](#get-apialertfind-find-alerts)
-		- [`GET /api/alert/{id}`: Get alert](#get-apialertid-get-alert)
-		- [`GET /api/alert/{id}/state`: Get alert state](#get-apialertidstate-get-alert-state)
-		- [`GET /api/alert/types`: List alert types](#get-apialerttypes-list-alert-types)
-		- [`PUT /api/alert/{id}`: Update alert](#put-apialertid-update-alert)
-		- [`POST /api/alert/{id}/_enable`: Enable an alert](#post-apialertidenable-enable-an-alert)
-		- [`POST /api/alert/{id}/_disable`: Disable an alert](#post-apialertiddisable-disable-an-alert)
-		- [`POST /api/alert/{id}/_mute_all`: Mute all alert instances](#post-apialertidmuteall-mute-all-alert-instances)
-		- [`POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`: Mute alert instance](#post-apialertalertidalertinstancealertinstanceidmute-mute-alert-instance)
-		- [`POST /api/alert/{id}/_unmute_all`: Unmute all alert instances](#post-apialertidunmuteall-unmute-all-alert-instances)
-		- [`POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`: Unmute an alert instance](#post-apialertalertidalertinstancealertinstanceidunmute-unmute-an-alert-instance)
-		- [`POST /api/alert/{id}/_update_api_key`: Update alert API key](#post-apialertidupdateapikey-update-alert-api-key)
+		- [`POST /api/alerts/alert`: Create alert](#post-apialert-create-alert)
+		- [`DELETE /api/alerts/alert/{id}`: Delete alert](#delete-apialertid-delete-alert)
+		- [`GET /api/alerts/_find`: Find alerts](#get-apialertfind-find-alerts)
+		- [`GET /api/alerts/alert/{id}`: Get alert](#get-apialertid-get-alert)
+		- [`GET /api/alerts/alert/{id}/state`: Get alert state](#get-apialertidstate-get-alert-state)
+		- [`GET /api/alerts/list_alert_types`: List alert types](#get-apialerttypes-list-alert-types)
+		- [`PUT /api/alerts/alert/{id}`: Update alert](#put-apialertid-update-alert)
+		- [`POST /api/alerts/alert/{id}/_enable`: Enable an alert](#post-apialertidenable-enable-an-alert)
+		- [`POST /api/alerts/alert/{id}/_disable`: Disable an alert](#post-apialertiddisable-disable-an-alert)
+		- [`POST /api/alerts/alert/{id}/_mute_all`: Mute all alert instances](#post-apialertidmuteall-mute-all-alert-instances)
+		- [`POST /api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`: Mute alert instance](#post-apialertalertidalertinstancealertinstanceidmute-mute-alert-instance)
+		- [`POST /api/alerts/alert/{id}/_unmute_all`: Unmute all alert instances](#post-apialertidunmuteall-unmute-all-alert-instances)
+		- [`POST /api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`: Unmute an alert instance](#post-apialertalertidalertinstancealertinstanceidunmute-unmute-an-alert-instance)
+		- [`POST /api/alerts/alert/{id}/_update_api_key`: Update alert API key](#post-apialertidupdateapikey-update-alert-api-key)
 	- [Schedule Formats](#schedule-formats)
 	- [Alert instance factory](#alert-instance-factory)
 	- [Templating actions](#templating-actions)
@@ -352,7 +352,7 @@ You can use the `registerNavigation` api to specify as many AlertType specific h
 
 Using an alert type requires you to create an alert that will contain parameters and actions for a given alert type. See below for CRUD operations using the API.
 
-### `POST /api/alert`: Create alert
+### `POST /api/alerts/alert`: Create alert
 
 Payload:
 
@@ -367,7 +367,7 @@ Payload:
 |params|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
 |actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to execute.<br>- `params` (object): The map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
 
-### `DELETE /api/alert/{id}`: Delete alert
+### `DELETE /api/alerts/alert/{id}`: Delete alert
 
 Params:
 
@@ -375,13 +375,13 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to delete.|string|
 
-### `GET /api/alert/_find`: Find alerts
+### `GET /api/alerts/_find`: Find alerts
 
 Params:
 
 See the saved objects API documentation for find. All the properties are the same except you cannot pass in `type`.
 
-### `GET /api/alert/{id}`: Get alert
+### `GET /api/alerts/alert/{id}`: Get alert
 
 Params:
 
@@ -389,7 +389,7 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to get.|string|
 
-### `GET /api/alert/{id}/state`: Get alert state
+### `GET /api/alerts/alert/{id}/state`: Get alert state
 
 Params:
 
@@ -397,11 +397,11 @@ Params:
 |---|---|---|
 |id|The id of the alert whose state you're trying to get.|string|
 
-### `GET /api/alert/types`: List alert types
+### `GET /api/alerts/list_alert_types`: List alert types
 
 No parameters.
 
-### `PUT /api/alert/{id}`: Update alert
+### `PUT /api/alerts/alert/{id}`: Update alert
 
 Params:
 
@@ -420,7 +420,7 @@ Payload:
 |params|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
 |actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to execute.<br>- `params` (object): There map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
 
-### `POST /api/alert/{id}/_enable`: Enable an alert
+### `POST /api/alerts/alert/{id}/_enable`: Enable an alert
 
 Params:
 
@@ -428,7 +428,7 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to enable.|string|
 
-### `POST /api/alert/{id}/_disable`: Disable an alert
+### `POST /api/alerts/alert/{id}/_disable`: Disable an alert
 
 Params:
 
@@ -436,7 +436,7 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to disable.|string|
 
-### `POST /api/alert/{id}/_mute_all`: Mute all alert instances
+### `POST /api/alerts/alert/{id}/_mute_all`: Mute all alert instances
 
 Params:
 
@@ -444,7 +444,7 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to mute all alert instances for.|string|
 
-### `POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`: Mute alert instance
+### `POST /api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`: Mute alert instance
 
 Params:
 
@@ -453,7 +453,7 @@ Params:
 |alertId|The id of the alert you're trying to mute an instance for.|string|
 |alertInstanceId|The instance id of the alert instance you're trying to mute.|string|
 
-### `POST /api/alert/{id}/_unmute_all`: Unmute all alert instances
+### `POST /api/alerts/alert/{id}/_unmute_all`: Unmute all alert instances
 
 Params:
 
@@ -461,7 +461,7 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to unmute all alert instances for.|string|
 
-### `POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`: Unmute an alert instance
+### `POST /api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`: Unmute an alert instance
 
 Params:
 
@@ -470,7 +470,7 @@ Params:
 |alertId|The id of the alert you're trying to unmute an instance for.|string|
 |alertInstanceId|The instance id of the alert instance you're trying to unmute.|string|
 
-### `POST /api/alert/{id}/_update_api_key`: Update alert API key
+### `POST /api/alerts/alert/{id}/_update_api_key`: Update alert API key
 
 |Property|Description|Type|
 |---|---|---|

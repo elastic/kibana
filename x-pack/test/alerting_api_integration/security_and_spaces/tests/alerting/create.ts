@@ -43,7 +43,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .expect(200);
 
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
@@ -126,7 +126,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
         it('should handle create alert request appropriately when an alert is disabled ', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(getTestAlertData({ enabled: false }));
@@ -155,7 +155,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
         it('should handle create alert request appropriately when alert type is unregistered', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
@@ -191,7 +191,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
         it('should handle create alert request appropriately when payload is empty and invalid', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({});
@@ -223,7 +223,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
         it(`should handle create alert request appropriately when params isn't valid`, async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
@@ -260,7 +260,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
         it('should handle create alert request appropriately when interval schedule is wrong syntax', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(getTestAlertData(getTestAlertData({ schedule: { interval: '10x' } })));
@@ -292,7 +292,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
         it('should handle create alert request appropriately when interval schedule is 0', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(getTestAlertData(getTestAlertData({ schedule: { interval: '0s' } })));

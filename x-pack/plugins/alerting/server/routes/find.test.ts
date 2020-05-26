@@ -30,7 +30,7 @@ describe('findAlertRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alert/_find"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/_find"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [
@@ -74,16 +74,9 @@ describe('findAlertRoute', () => {
     expect(alertsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "options": Object {
-            "defaultSearchOperator": "OR",
-            "fields": undefined,
-            "filter": undefined,
-            "page": 1,
-            "perPage": 1,
-            "search": undefined,
-            "sortField": undefined,
-            "sortOrder": undefined,
-          },
+          "default_search_operator": "OR",
+          "page": 1,
+          "per_page": 1,
         },
       ]
     `);

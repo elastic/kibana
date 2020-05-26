@@ -29,7 +29,7 @@ describe('unmuteAlertInstanceRoute', () => {
     const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(
-      `"/api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute"`
+      `"/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute"`
     );
     expect(config.options).toMatchInlineSnapshot(`
       Object {

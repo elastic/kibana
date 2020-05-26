@@ -27,7 +27,7 @@ export default function createUnmuteInstanceTests({ getService }: FtrProviderCon
 
     it('should handle unmute alert instance request appropriately', async () => {
       const { body: createdAlert } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: false }))
         .expect(200);
@@ -37,7 +37,7 @@ export default function createUnmuteInstanceTests({ getService }: FtrProviderCon
       await alertUtils.unmuteInstance(createdAlert.id, '1');
 
       const { body: updatedAlert } = await supertestWithoutAuth
-        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`)
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .expect(200);
       expect(updatedAlert.mutedInstanceIds).to.eql([]);

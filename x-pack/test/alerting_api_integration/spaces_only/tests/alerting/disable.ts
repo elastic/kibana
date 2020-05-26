@@ -35,7 +35,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
 
     it('should handle disable alert request appropriately', async () => {
       const { body: createdAlert } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: true }))
         .expect(200);
@@ -61,7 +61,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
 
     it(`shouldn't disable alert from another space`, async () => {
       const { body: createdAlert } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.other.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.other.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: true }))
         .expect(200);

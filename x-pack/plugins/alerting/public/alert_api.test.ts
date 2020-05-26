@@ -31,7 +31,7 @@ describe('loadAlertTypes', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alert/types",
+        "/api/alerts/list_alert_types",
       ]
     `);
   });
@@ -53,7 +53,7 @@ describe('loadAlertType', () => {
 
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alert/types",
+        "/api/alerts/list_alert_types",
       ]
     `);
   });
@@ -111,7 +111,7 @@ describe('loadAlert', () => {
     http.get.mockResolvedValueOnce(resolvedValue);
 
     expect(await loadAlert({ http, alertId })).toEqual(resolvedValue);
-    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}`);
+    expect(http.get).toHaveBeenCalledWith(`/api/alerts/alert/${alertId}`);
   });
 });
 
@@ -130,7 +130,7 @@ describe('loadAlertState', () => {
     http.get.mockResolvedValueOnce(resolvedValue);
 
     expect(await loadAlertState({ http, alertId })).toEqual(resolvedValue);
-    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/state`);
+    expect(http.get).toHaveBeenCalledWith(`/api/alerts/alert/${alertId}/state`);
   });
 
   test('should parse AlertInstances', async () => {
@@ -167,7 +167,7 @@ describe('loadAlertState', () => {
         },
       },
     });
-    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/state`);
+    expect(http.get).toHaveBeenCalledWith(`/api/alerts/alert/${alertId}/state`);
   });
 
   test('should handle empty response from api', async () => {
@@ -175,6 +175,6 @@ describe('loadAlertState', () => {
     http.get.mockResolvedValueOnce('');
 
     expect(await loadAlertState({ http, alertId })).toEqual({});
-    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/state`);
+    expect(http.get).toHaveBeenCalledWith(`/api/alerts/alert/${alertId}/state`);
   });
 });

@@ -24,7 +24,7 @@ const paramSchema = schema.object({
 export const updateApiKeyRoute = (router: IRouter, licenseState: LicenseState) => {
   router.post(
     {
-      path: `${BASE_ALERT_API_PATH}/{id}/_update_api_key`,
+      path: `${BASE_ALERT_API_PATH}/alert/{id}/_update_api_key`,
       validate: {
         params: paramSchema,
       },

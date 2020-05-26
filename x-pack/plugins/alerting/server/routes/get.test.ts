@@ -60,7 +60,7 @@ describe('getAlertRoute', () => {
     getAlertRoute(router, licenseState);
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [

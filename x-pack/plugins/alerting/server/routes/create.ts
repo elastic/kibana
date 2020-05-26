@@ -43,7 +43,7 @@ export const bodySchema = schema.object({
 export const createAlertRoute = (router: IRouter, licenseState: LicenseState) => {
   router.post(
     {
-      path: BASE_ALERT_API_PATH,
+      path: `${BASE_ALERT_API_PATH}/alert`,
       validate: {
         body: bodySchema,
       },

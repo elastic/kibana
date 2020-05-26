@@ -15,6 +15,8 @@ import {
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { BASE_ALERT_API_PATH } from '../../common';
+import { renameKeys } from './lib/rename_keys';
+import { MuteOptions } from '../alerts_client';
 
 const paramSchema = schema.object({
   alert_id: schema.string(),
@@ -24,7 +26,7 @@ const paramSchema = schema.object({
 export const muteAlertInstanceRoute = (router: IRouter, licenseState: LicenseState) => {
   router.post(
     {
-      path: `${BASE_ALERT_API_PATH}/{alertId}/alert_instance/{alertInstanceId}/_mute`,
+      path: `${BASE_ALERT_API_PATH}/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`,
       validate: {
         params: paramSchema,
       },
@@ -42,8 +44,14 @@ export const muteAlertInstanceRoute = (router: IRouter, licenseState: LicenseSta
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
       const alertsClient = context.alerting.getAlertsClient();
-      const { alert_id, alert_instance_id } = req.params;
-      await alertsClient.muteInstance({ alertId: alert_id, alertInstanceId: alert_instance_id });
+
+      const renameMap = {
+        alertId: 'alert_id',
+        alertInstanceId: 'alert_instance_id',
+      };
+
+      const renamedQuery = renameKeys<MuteOptions, Record<string, unknown>>(renameMap, req.params);
+      await alertsClient.muteInstance(renamedQuery);
       return res.noContent();
     })
   );
