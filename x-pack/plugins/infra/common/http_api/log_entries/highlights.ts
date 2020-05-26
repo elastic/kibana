@@ -52,8 +52,8 @@ export type LogEntriesHighlightsRequest = rt.TypeOf<typeof logEntriesHighlightsR
 export const logEntriesHighlightsResponseRT = rt.type({
   data: rt.array(
     rt.type({
-      topCursor: logEntriesCursorRT,
-      bottomCursor: logEntriesCursorRT,
+      topCursor: rt.union([logEntriesCursorRT, rt.null]),
+      bottomCursor: rt.union([logEntriesCursorRT, rt.null]),
       entries: rt.array(logEntryRT),
     })
   ),
