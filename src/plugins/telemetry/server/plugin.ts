@@ -93,7 +93,7 @@ export class TelemetryPlugin implements Plugin {
       telemetryCollectionManager,
     });
 
-    this.registerMappings(opts => savedObjects.registerType(opts));
+    this.registerMappings((opts) => savedObjects.registerType(opts));
     this.registerUsageCollectors(usageCollection);
   }
 

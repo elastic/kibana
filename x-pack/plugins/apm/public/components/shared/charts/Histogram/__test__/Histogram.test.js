@@ -12,7 +12,7 @@ import { HistogramInner } from '../index';
 import response from './response.json';
 import {
   asDecimal,
-  getDurationFormatter
+  getDurationFormatter,
 } from '../../../../../utils/formatters';
 import { toJson } from '../../../../../utils/testHelpers';
 import { getFormattedBuckets } from '../../../../app/TransactionDetails/Distribution/index';
@@ -23,7 +23,7 @@ describe('Histogram', () => {
 
   beforeEach(() => {
     const buckets = getFormattedBuckets(response.buckets, response.bucketSize);
-    const xMax = d3.max(buckets, d => d.x);
+    const xMax = d3.max(buckets, (d) => d.x);
     const timeFormatter = getDurationFormatter(xMax);
 
     wrapper = mount(
@@ -32,10 +32,10 @@ describe('Histogram', () => {
         bucketSize={response.bucketSize}
         transactionId="myTransactionId"
         onClick={onClick}
-        formatX={time => timeFormatter(time).formatted}
-        formatYShort={t => `${asDecimal(t)} occ.`}
-        formatYLong={t => `${asDecimal(t)} occurrences`}
-        tooltipHeader={bucket => {
+        formatX={(time) => timeFormatter(time).formatted}
+        formatYShort={(t) => `${asDecimal(t)} occ.`}
+        formatYLong={(t) => `${asDecimal(t)} occurrences`}
+        tooltipHeader={(bucket) => {
           const xFormatted = timeFormatter(bucket.x);
           const x0Formatted = timeFormatter(bucket.x0);
           return `${x0Formatted.value} - ${xFormatted.value} ${xFormatted.unit}`;
@@ -61,10 +61,7 @@ describe('Histogram', () => {
 
   describe('when hovering over an empty bucket', () => {
     beforeEach(() => {
-      wrapper
-        .find('.rv-voronoi__cell')
-        .at(2)
-        .simulate('mouseOver');
+      wrapper.find('.rv-voronoi__cell').at(2).simulate('mouseOver');
     });
 
     it('should not display tooltip', () => {
@@ -74,10 +71,7 @@ describe('Histogram', () => {
 
   describe('when hovering over a non-empty bucket', () => {
     beforeEach(() => {
-      wrapper
-        .find('.rv-voronoi__cell')
-        .at(7)
-        .simulate('mouseOver');
+      wrapper.find('.rv-voronoi__cell').at(7).simulate('mouseOver');
     });
 
     it('should display tooltip', () => {
@@ -86,7 +80,7 @@ describe('Histogram', () => {
       expect(tooltips.length).toBe(1);
       expect(tooltips.prop('header')).toBe('811 - 927 ms');
       expect(tooltips.prop('tooltipPoints')).toEqual([
-        { value: '49.0 occurrences' }
+        { value: '49.0 occurrences' },
       ]);
       expect(tooltips.prop('x')).toEqual(869010);
       expect(tooltips.prop('y')).toEqual(27.5);
@@ -97,15 +91,15 @@ describe('Histogram', () => {
         hoveredBucket: {
           samples: [
             {
-              transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
-            }
+              transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192',
+            },
           ],
           style: { cursor: 'pointer' },
           xCenter: 869010,
           x0: 811076,
           x: 926944,
-          y: 49
-        }
+          y: 49,
+        },
       });
     });
 
@@ -117,24 +111,21 @@ describe('Histogram', () => {
 
   describe('when clicking on a non-empty bucket', () => {
     beforeEach(() => {
-      wrapper
-        .find('.rv-voronoi__cell')
-        .at(7)
-        .simulate('click');
+      wrapper.find('.rv-voronoi__cell').at(7).simulate('click');
     });
 
     it('should call onClick with bucket', () => {
       expect(onClick).toHaveBeenCalledWith({
         samples: [
           {
-            transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
-          }
+            transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192',
+          },
         ],
         style: { cursor: 'pointer' },
         xCenter: 869010,
         x0: 811076,
         x: 926944,
-        y: 49
+        y: 49,
       });
     });
   });

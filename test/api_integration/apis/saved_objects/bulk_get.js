@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
@@ -49,7 +49,7 @@ export default function({ getService }) {
           .post(`/api/saved_objects/_bulk_get`)
           .send(BULK_REQUESTS)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               saved_objects: [
                 {
@@ -117,7 +117,7 @@ export default function({ getService }) {
           .post('/api/saved_objects/_bulk_get')
           .send(BULK_REQUESTS)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               saved_objects: [
                 {

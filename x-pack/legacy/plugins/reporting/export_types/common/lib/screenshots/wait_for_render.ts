@@ -5,15 +5,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger, startTrace } from '../../../../server/lib';
+import { HeadlessChromiumDriver } from '../../../../server/browsers';
 import { CaptureConfig } from '../../../../server/types';
-import { LayoutInstance } from '../../layouts/layout';
+import { LayoutInstance } from '../../layouts';
 import { CONTEXT_WAITFORRENDER } from './constants';
 
 export const waitForRenderComplete = async (
   captureConfig: CaptureConfig,
-  browser: HeadlessBrowser,
+  browser: HeadlessChromiumDriver,
   layout: LayoutInstance,
   logger: LevelLogger
 ) => {
@@ -35,13 +35,13 @@ export const waitForRenderComplete = async (
           const renderedTasks = [];
 
           function waitForRender(visualization: Element) {
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
               visualization.addEventListener('renderComplete', () => resolve());
             });
           }
 
           function waitForRenderDelay() {
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
               setTimeout(resolve, visLoadDelay);
             });
           }
@@ -63,7 +63,7 @@ export const waitForRenderComplete = async (
           // capture the first visualization before it was actually in the DOM.
           // Note: 100 proved too short, see https://github.com/elastic/kibana/issues/22581,
           // bumping to 250.
-          const hackyWaitForVisualizations = () => new Promise(r => setTimeout(r, 250));
+          const hackyWaitForVisualizations = () => new Promise((r) => setTimeout(r, 250));
 
           return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
         },

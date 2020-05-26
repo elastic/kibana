@@ -57,7 +57,7 @@ export function registerExploreRoute({
             error,
             'body.error.root_cause',
             [] as Array<{ type: string; reason: string }>
-          ).find(cause => {
+          ).find((cause) => {
             return (
               cause.reason.includes('Fielddata is disabled on text fields') ||
               cause.reason.includes('No support for examining floating point') ||

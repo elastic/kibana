@@ -62,7 +62,7 @@ export class InnerJoin {
 
       // delete all dynamic properties for metric field
       const stylePropertyPrefix = getComputedFieldNamePrefix(metricPropertyKey);
-      Object.keys(feature.properties).forEach(featurePropertyKey => {
+      Object.keys(feature.properties).forEach((featurePropertyKey) => {
         if (
           featurePropertyKey.length >= stylePropertyPrefix.length &&
           featurePropertyKey.substring(0, stylePropertyPrefix.length) === stylePropertyPrefix

@@ -1,0 +1,97 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Table editing should show a save button 1`] = `
+<div>
+  <EuiButtonIcon
+    aria-label="Edit"
+    iconType="pencil"
+    onClick={[Function]}
+    size="s"
+  />
+  <EuiButtonIcon
+    aria-label="Delete"
+    color="danger"
+    iconType="trash"
+    onClick={[Function]}
+    size="s"
+  />
+</div>
+`;
+
+exports[`Table editing should show an input field 1`] = `
+<span>
+  tim*
+</span>
+`;
+
+exports[`Table editing should update the matches dynamically as input value is changed 1`] = `
+<div>
+  <em>
+    <FormattedMessage
+      defaultMessage="The source filter doesn't match any known fields."
+      id="indexPatternManagement.editIndexPattern.source.table.notMatchedLabel"
+      values={Object {}}
+    />
+  </em>
+</div>
+`;
+
+exports[`Table should render filter matches 1`] = `
+<span>
+  time
+</span>
+`;
+
+exports[`Table should render normally 1`] = `
+<EuiInMemoryTable
+  columns={
+    Array [
+      Object {
+        "dataType": "string",
+        "description": "Filter name",
+        "field": "value",
+        "name": "Filter",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "string",
+        "description": "Language used for the field",
+        "field": "value",
+        "name": "Matches",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "align": "right",
+        "name": "",
+        "render": [Function],
+        "width": "100",
+      },
+    ]
+  }
+  items={
+    Array [
+      Object {
+        "clientId": "",
+        "value": "tim*",
+      },
+    ]
+  }
+  loading={true}
+  pagination={
+    Object {
+      "initialPageSize": 10,
+      "pageSizeOptions": Array [
+        5,
+        10,
+        25,
+        50,
+      ],
+    }
+  }
+  responsive={true}
+  sorting={true}
+  tableLayout="fixed"
+/>
+`;

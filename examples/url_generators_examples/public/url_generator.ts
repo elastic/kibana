@@ -38,7 +38,7 @@ export const createHelloPageLinkGenerator = (
   getStartServices: () => Promise<{ appBasePath: string }>
 ): UrlGeneratorsDefinition<typeof HELLO_URL_GENERATOR> => ({
   id: HELLO_URL_GENERATOR,
-  createUrl: async state => {
+  createUrl: async (state) => {
     const startServices = await getStartServices();
     const appBasePath = startServices.appBasePath;
     const parsedUrl = url.parse(window.location.href);
@@ -72,7 +72,7 @@ export type LegacyHelloLinkGeneratorState = UrlGeneratorState<
 export const helloPageLinkGeneratorV1: UrlGeneratorsDefinition<typeof HELLO_URL_GENERATOR_V1> = {
   id: HELLO_URL_GENERATOR_V1,
   isDeprecated: true,
-  migrate: async state => {
+  migrate: async (state) => {
     return { id: HELLO_URL_GENERATOR, state: { firstName: state.name, lastName: '' } };
   },
 };

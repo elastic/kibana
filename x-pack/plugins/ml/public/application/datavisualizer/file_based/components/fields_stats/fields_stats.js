@@ -31,7 +31,7 @@ export class FieldsStats extends Component {
     return (
       <div className="fields-stats">
         <EuiFlexGrid gutterSize="m">
-          {this.state.fields.map(f => (
+          {this.state.fields.map((f) => (
             <EuiFlexItem key={f.name} style={{ width: '360px' }}>
               <FieldStatsCard field={f} />
             </EuiFlexItem>
@@ -53,7 +53,7 @@ function createFields(results) {
   if (mappings && fieldStats) {
     const fieldNames = getFieldNames(results);
 
-    return fieldNames.map(name => {
+    return fieldNames.map((name) => {
       if (fieldStats[name] !== undefined) {
         const field = { name };
         const f = fieldStats[name];

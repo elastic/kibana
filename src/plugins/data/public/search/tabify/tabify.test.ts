@@ -142,7 +142,7 @@ describe('tabifyAggResponse Integration', () => {
 
       expectColumns(tabbed, [ext, src, os, avg]);
 
-      tabbed.rows.forEach(row => {
+      tabbed.rows.forEach((row) => {
         expectRow(row, [expectExtension, expectCountry, expectOS, expectAvgBytes]);
       });
     });
@@ -152,7 +152,7 @@ describe('tabifyAggResponse Integration', () => {
 
       expectColumns(tabbed, [ext, avg, src, avg, os, avg]);
 
-      tabbed.rows.forEach(row => {
+      tabbed.rows.forEach((row) => {
         expectRow(row, [
           expectExtension,
           expectAvgBytes,

@@ -150,7 +150,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-test-subj="showRequestLink"
-              onClick={() => setIsRequestVisible(prevIsRequestVisible => !prevIsRequestVisible)}
+              onClick={() => setIsRequestVisible((prevIsRequestVisible) => !prevIsRequestVisible)}
             >
               {isRequestVisible ? (
                 <FormattedMessage
@@ -170,7 +170,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         {/* ES request flyout */}
         {isRequestVisible ? (
           <PipelineRequestFlyout
-            closeFlyout={() => setIsRequestVisible(prevIsRequestVisible => !prevIsRequestVisible)}
+            closeFlyout={() => setIsRequestVisible((prevIsRequestVisible) => !prevIsRequestVisible)}
           />
         ) : null}
 
@@ -178,7 +178,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         {isTestingPipeline ? (
           <PipelineTestFlyout
             closeFlyout={() => {
-              setIsTestingPipeline(prevIsTestingPipeline => !prevIsTestingPipeline);
+              setIsTestingPipeline((prevIsTestingPipeline) => !prevIsTestingPipeline);
             }}
           />
         ) : null}
