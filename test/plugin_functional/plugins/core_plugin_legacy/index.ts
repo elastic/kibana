@@ -37,7 +37,7 @@ export default function (kibana: any) {
       const router = http.createRouter();
 
       router.get({ path: '/api/np-http-in-legacy', validate: false }, async (context, req, res) => {
-        const response = await context.core.elasticsearch.adminClient.callAsInternalUser('ping');
+        const response = await context.core.elasticsearch.legacy.client.callAsInternalUser('ping');
         return res.ok({ body: `Pong in legacy via new platform: ${response}` });
       });
 
