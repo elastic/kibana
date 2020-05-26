@@ -5,18 +5,17 @@
   "main": "index.js",
   "dependencies": {},
   "devDependencies": {
-    "dependency-check": "^4.1.0",
-    "standard": "^14.3.3"
+    "dependency-check": "^4.1.0"
   },
   "scripts": {
-    "lint": "standard && dependency-check --no-dev package.json set.js setWith.js",
+    "lint": "dependency-check --no-dev package.json set.js setWith.js",
     "test": "npm run lint && node test.js",
     "update": "./scripts/update.sh",
     "save_state": "./scripts/save_state.sh"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/elastic/safer-lodash-set.git"
+    "url": "git+https://github.com/elastic/kibana.git"
   },
   "keywords": [
     "lodash",
@@ -29,9 +28,9 @@
   "author": "Thomas Watson <w@tson.dk> (https://twitter.com/wa7son)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/elastic/safer-lodash-set/issues"
+    "url": "https://github.com/elastic/kibana/issues"
   },
-  "homepage": "https://github.com/elastic/safer-lodash-set#readme",
+  "homepage": "https://github.com/elastic/kibana/tree/master/packages/safer-lodash-set#readme",
   "standard": {
     "ignore": [
       "/lodash/"
