@@ -19,6 +19,17 @@ export const CREATE_TIMELINE_ERROR_MESSAGE =
   'UPDATE timeline with POST is not allowed, please use PATCH instead';
 export const CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
   'UPDATE template timeline with POST is not allowed, please use PATCH instead';
+export const EMPTY_TITLE_ERROR_MESSAGE = 'Title cannot be empty';
+
+export const commonFailureChecker = (title: string | null | undefined) => {
+  if (title == null) {
+    return {
+      body: EMPTY_TITLE_ERROR_MESSAGE,
+      statusCode: 405,
+    };
+  }
+  return null;
+};
 
 export const checkIsUpdateFailureCases = (
   isHandlingTemplateTimeline: boolean,

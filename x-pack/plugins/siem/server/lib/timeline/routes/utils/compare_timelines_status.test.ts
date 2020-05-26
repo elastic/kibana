@@ -14,6 +14,8 @@ import {
 } from '../__mocks__/import_timelines';
 
 import { CompareTimelinesStatus as TimelinesStatusType } from './compare_timelines_status';
+import { EMPTY_TITLE_ERROR_MESSAGE } from './failure_cases';
+import { TimelineStatusActions } from './common';
 
 describe('CompareTimelinesStatus', () => {
   describe('timeline', () => {
@@ -50,6 +52,7 @@ describe('CompareTimelinesStatus', () => {
             version: mockUniqueParsedObjects[0].version,
           },
           timelineType: TimelineType.default,
+          title: mockUniqueParsedObjects[0].title,
           templateTimelineInput: {
             id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
             type: TimelineType.template,
@@ -123,6 +126,7 @@ describe('CompareTimelinesStatus', () => {
             version: mockUniqueParsedObjects[0].version,
           },
           timelineType: TimelineType.default,
+          title: mockUniqueParsedObjects[0].title,
           templateTimelineInput: {
             id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
             type: TimelineType.template,
@@ -189,6 +193,7 @@ describe('CompareTimelinesStatus', () => {
             version: mockUniqueParsedObjects[0].version,
           },
           timelineType: TimelineType.template,
+          title: mockUniqueParsedObjects[0].title,
           templateTimelineInput: {
             id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
             type: TimelineType.template,
@@ -266,6 +271,7 @@ describe('CompareTimelinesStatus', () => {
             version: mockUniqueParsedObjects[0].version,
           },
           timelineType: TimelineType.template,
+          title: mockUniqueParsedObjects[0].title,
           templateTimelineInput: {
             id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
             type: TimelineType.template,
@@ -303,6 +309,57 @@ describe('CompareTimelinesStatus', () => {
       test('should indicate we are handling a template timeline', () => {
         expect(timelineObj.isHandlingTemplateTimeline).toEqual(true);
       });
+    });
+  });
+
+  describe.skip(`Throw error if given title does NOT exists`, () => {
+    const mockGetTimeline: jest.Mock = jest.fn();
+    const mockGetTemplateTimeline: jest.Mock = jest.fn();
+    let timelineObj: TimelinesStatusType;
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    afterAll(() => {
+      jest.resetModules();
+    });
+
+    beforeEach(async () => {
+      jest.doMock('../../saved_object', () => {
+        return {
+          getTimeline: mockGetTimeline.mockReturnValue(null),
+          getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
+            timeline: [],
+          }),
+        };
+      });
+
+      const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
+        .CompareTimelinesStatus;
+
+      timelineObj = new CompareTimelinesStatus({
+        timelineInput: {
+          id: mockUniqueParsedObjects[0].savedObjectId,
+          type: TimelineType.default,
+          version: mockUniqueParsedObjects[0].version,
+        },
+        timelineType: TimelineType.default,
+        title: null,
+        templateTimelineInput: {
+          id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
+          type: TimelineType.template,
+          version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
+        },
+        frameworkRequest: {} as FrameworkRequest,
+      });
+
+      await timelineObj.init();
+    });
+
+    test(`create timeline`, () => {
+      const error = timelineObj.checkIsFailureCases(TimelineStatusActions.create);
+      expect(error?.body).toEqual(EMPTY_TITLE_ERROR_MESSAGE);
     });
   });
 });

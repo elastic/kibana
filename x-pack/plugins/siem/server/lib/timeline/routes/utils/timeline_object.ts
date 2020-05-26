@@ -14,6 +14,7 @@ import { FrameworkRequest } from '../../../framework';
 interface TimelineObjectProps {
   id: string | null | undefined;
   type: TimelineTypeLiteralWithNull | undefined;
+  title: string | null | undefined;
   version: string | number | null | undefined;
   frameworkRequest: FrameworkRequest;
 }
@@ -21,6 +22,7 @@ interface TimelineObjectProps {
 export class TimelineObject {
   private id: string | null;
   private type: TimelineTypeLiteralWithNull;
+  private title: string | null;
   private version: string | number | null;
   private frameworkRequest: FrameworkRequest;
 
@@ -29,11 +31,13 @@ export class TimelineObject {
   constructor({
     id = null,
     type = TimelineType.default,
+    title = null,
     version = null,
     frameworkRequest,
   }: TimelineObjectProps) {
     this.id = id;
     this.type = type;
+    this.title = title;
 
     this.version = version;
     this.frameworkRequest = frameworkRequest;
@@ -51,16 +55,20 @@ export class TimelineObject {
     return this.data;
   }
 
+  public get isTitleExists() {
+    return this.title != null;
+  }
+
   public get isExists() {
     return this.data != null;
   }
 
   public get isUpdatable() {
-    return this.isExists && !this.isVersionConflict();
+    return this.isExists && !this.isVersionConflict() && this.isTitleExists;
   }
 
   public get isCreatable() {
-    return !this.isExists;
+    return !this.isExists && this.isTitleExists;
   }
 
   public get isUpdatableViaImport() {

@@ -122,14 +122,15 @@ export const importTimelinesRoute = (
                       return null;
                     }
                     const {
-                      savedObjectId = null,
+                      savedObjectId,
                       pinnedEventIds,
                       globalNotes,
                       eventNotes,
-                      templateTimelineId = null,
-                      templateTimelineVersion = null,
-                      timelineType = TimelineType.default,
-                      version = null,
+                      templateTimelineId,
+                      templateTimelineVersion,
+                      title,
+                      timelineType,
+                      version,
                     } = parsedTimeline;
 
                     const parsedTimelineObject = omit(
@@ -141,6 +142,7 @@ export const importTimelinesRoute = (
                     try {
                       const compareTimelinesStatus = new CompareTimelinesStatus({
                         timelineType,
+                        title,
                         timelineInput: {
                           id: savedObjectId,
                           type: TimelineType.default,

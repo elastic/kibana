@@ -13,6 +13,7 @@ import {
   checkIsCreateFailureCases,
   checkIsUpdateFailureCases,
   checkIsCreateViaImportFailureCases,
+  commonFailureChecker,
 } from './failure_cases';
 
 interface GivenTimelineInput {
@@ -22,6 +23,7 @@ interface GivenTimelineInput {
 }
 
 interface TimelinesStatusProps {
+  title: string | null | undefined;
   timelineType: TimelineTypeLiteralWithNull | undefined;
   timelineInput: GivenTimelineInput;
   templateTimelineInput: GivenTimelineInput;
@@ -32,8 +34,10 @@ export class CompareTimelinesStatus {
   public readonly timelineObject: TimelineObject;
   public readonly templateTimelineObject: TimelineObject;
   private readonly timelineType: TimelineTypeLiteralWithNull;
+  private readonly title: string | null;
 
   constructor({
+    title,
     timelineType = TimelineType.default,
     timelineInput,
     templateTimelineInput,
@@ -42,6 +46,7 @@ export class CompareTimelinesStatus {
     this.timelineObject = new TimelineObject({
       id: timelineInput.id,
       type: timelineInput.type,
+      title,
       version: timelineInput.version,
       frameworkRequest,
     });
@@ -49,11 +54,13 @@ export class CompareTimelinesStatus {
     this.templateTimelineObject = new TimelineObject({
       id: templateTimelineInput.id,
       type: templateTimelineInput.type,
+      title,
       version: templateTimelineInput.version,
       frameworkRequest,
     });
 
     this.timelineType = timelineType ?? TimelineType.default;
+    this.title = title ?? null;
   }
 
   public get isCreatable() {
@@ -94,6 +101,10 @@ export class CompareTimelinesStatus {
   }
 
   public checkIsFailureCases(action?: TimelineStatusAction) {
+    const commonError = commonFailureChecker(this.title);
+    if (commonError) {
+      return commonError;
+    }
     const failureChecker = this.getFailureChecker(action);
     const version = this.templateTimelineObject.getVersion;
     return failureChecker(

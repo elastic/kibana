@@ -44,9 +44,10 @@ export const createTimelinesRoute = (
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
 
         const { timelineId, timeline, version } = request.body;
-        const { templateTimelineId, templateTimelineVersion, timelineType } = timeline;
+        const { templateTimelineId, templateTimelineVersion, timelineType, title } = timeline;
 
         const compareTimelinesStatus = new CompareTimelinesStatus({
+          title,
           timelineType,
           timelineInput: {
             id: timelineId,
