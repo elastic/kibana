@@ -17,7 +17,9 @@ Given(`a user browses the APM UI application`, () => {
 
 When(`the user inspects the opbeans-node service`, () => {
   // click opbeans-node service
-  cy.get(':contains(opbeans-node)', { timeout: DEFAULT_TIMEOUT }).last().click({ force: true });
+  cy.get(':contains(opbeans-node)', { timeout: DEFAULT_TIMEOUT })
+    .last()
+    .click({ force: true });
 });
 
 Then(`should redirect to correct path with correct params`, () => {
