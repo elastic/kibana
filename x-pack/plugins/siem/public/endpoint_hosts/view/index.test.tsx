@@ -42,7 +42,7 @@ describe('when on the hosts page', () => {
     it('should not show the flyout', () => {
       const renderResult = render();
       expect.assertions(1);
-      return renderResult.findByTestId('hostDetailsFlyout').catch(e => {
+      return renderResult.findByTestId('hostDetailsFlyout').catch((e) => {
         expect(e).not.toBeNull();
       });
     });
@@ -113,7 +113,7 @@ describe('when on the hosts page', () => {
         });
 
         it('should show the flyout', () => {
-          return renderResult.findByTestId('hostDetailsFlyout').then(flyout => {
+          return renderResult.findByTestId('hostDetailsFlyout').then((flyout) => {
             expect(flyout).not.toBeNull();
           });
         });
@@ -130,7 +130,7 @@ describe('when on the hosts page', () => {
       policyResponse.endpoint.policy.applied.status = overallStatus;
       policyResponse.endpoint.policy.applied.response.configurations.malware.status = overallStatus;
       let downloadModelAction = policyResponse.endpoint.policy.applied.actions.find(
-        action => action.name === 'download_model'
+        (action) => action.name === 'download_model'
       );
 
       if (!downloadModelAction) {
@@ -193,7 +193,7 @@ describe('when on the hosts page', () => {
 
     it('should show the flyout', () => {
       const renderResult = render();
-      return renderResult.findByTestId('hostDetailsFlyout').then(flyout => {
+      return renderResult.findByTestId('hostDetailsFlyout').then((flyout) => {
         expect(flyout).not.toBeNull();
       });
     });
@@ -353,9 +353,11 @@ describe('when on the hosts page', () => {
             },
           });
         });
-        return renderResult.findAllByTestId('hostDetailsPolicyResponseAttentionBadge').catch(e => {
-          expect(e).not.toBeNull();
-        });
+        return renderResult
+          .findAllByTestId('hostDetailsPolicyResponseAttentionBadge')
+          .catch((e) => {
+            expect(e).not.toBeNull();
+          });
       });
       it('should show a numbered badge if at least one action failed', () => {
         reactTestingLibrary.act(() => {

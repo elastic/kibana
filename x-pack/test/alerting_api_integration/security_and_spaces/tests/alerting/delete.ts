@@ -117,7 +117,9 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
             .expect(200);
 
           await supertest
-            .put(`${getUrlPrefix(space.id)}/api/saved_objects/alert/${createdAlert.id}`)
+            .put(
+              `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
+            )
             .set('kbn-xsrf', 'foo')
             .send({
               attributes: {

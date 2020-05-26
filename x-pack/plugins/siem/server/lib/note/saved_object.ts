@@ -60,7 +60,9 @@ export interface Note {
 export const deleteNote = async (request: FrameworkRequest, noteIds: string[]) => {
   const savedObjectsClient = request.context.core.savedObjects.client;
 
-  await Promise.all(noteIds.map(noteId => savedObjectsClient.delete(noteSavedObjectType, noteId)));
+  await Promise.all(
+    noteIds.map((noteId) => savedObjectsClient.delete(noteSavedObjectType, noteId))
+  );
 };
 
 export const deleteNoteByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
@@ -73,7 +75,9 @@ export const deleteNoteByTimelineId = async (request: FrameworkRequest, timeline
   const savedObjectsClient = request.context.core.savedObjects.client;
 
   await Promise.all(
-    notesToBeDeleted.notes.map(note => savedObjectsClient.delete(noteSavedObjectType, note.noteId))
+    notesToBeDeleted.notes.map((note) =>
+      savedObjectsClient.delete(noteSavedObjectType, note.noteId)
+    )
   );
 };
 
@@ -215,7 +219,7 @@ const getAllSavedNote = async (request: FrameworkRequest, options: SavedObjectsF
 
   return {
     totalCount: savedObjects.total,
-    notes: savedObjects.saved_objects.map(savedObject =>
+    notes: savedObjects.saved_objects.map((savedObject) =>
       convertSavedObjectToSavedNote(savedObject)
     ),
   };
@@ -227,13 +231,13 @@ export const convertSavedObjectToSavedNote = (
 ): NoteSavedObject =>
   pipe(
     NoteSavedObjectRuntimeType.decode(savedObject),
-    map(savedNote => ({
+    map((savedNote) => ({
       noteId: savedNote.id,
       version: savedNote.version,
       timelineVersion,
       ...savedNote.attributes,
     })),
-    fold(errors => {
+    fold((errors) => {
       throw new Error(failure(errors).join('\n'));
     }, identity)
   );

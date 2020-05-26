@@ -7,13 +7,13 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'endpoint']);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
 
   // FLAKY: https://github.com/elastic/kibana/issues/66579
-  describe.skip('When on the Endpoint Policy List', function() {
+  describe.skip('When on the Endpoint Policy List', function () {
     this.tags(['ciGroup7']);
     before(async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');

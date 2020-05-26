@@ -60,7 +60,7 @@ export function createKfetch(http: HttpSetup) {
         .then(({ pathname, ...restOptions }) =>
           http.fetch(pathname, { ...restOptions, prependBasePath })
         )
-        .catch(err => {
+        .catch((err) => {
           throw new KFetchError(err.response || { statusText: err.message }, err.body);
         })
     );

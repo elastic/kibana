@@ -32,7 +32,7 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
           caseId: request.params.case_id,
         });
         await Promise.all(
-          comments.saved_objects.map(comment =>
+          comments.saved_objects.map((comment) =>
             caseService.deleteComment({
               client,
               commentId: comment.id,
@@ -42,7 +42,7 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
 
         await userActionService.postUserActions({
           client,
-          actions: comments.saved_objects.map(comment =>
+          actions: comments.saved_objects.map((comment) =>
             buildCommentUserActionItem({
               action: 'delete',
               actionAt: deleteDate,

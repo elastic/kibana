@@ -60,7 +60,7 @@ export const createHostsResolvers = (
       const options: HostOverviewRequestOptions = {
         defaultIndex: args.defaultIndex,
         sourceConfiguration: source.configuration,
-        fields: fields.map(field => field.replace('edges.node.', '')),
+        fields: fields.map((field) => field.replace('edges.node.', '')),
         hostName: args.hostName,
         timerange: args.timerange,
       };

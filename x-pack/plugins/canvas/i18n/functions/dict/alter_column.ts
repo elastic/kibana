@@ -18,7 +18,7 @@ export const help: FunctionHelp<FunctionFactory<typeof alterColumn>> = {
     values: {
       list: Object.values(DATATABLE_COLUMN_TYPES)
         .slice(0, -1)
-        .map(type => `\`${type}\``)
+        .map((type) => `\`${type}\``)
         .join(', '),
       end: Object.values(DATATABLE_COLUMN_TYPES).slice(-1)[0],
       mapColumnFn: '`mapColumn`',

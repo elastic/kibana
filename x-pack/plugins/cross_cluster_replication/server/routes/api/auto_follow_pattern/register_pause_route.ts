@@ -43,13 +43,13 @@ export const registerPauseRoute = ({
       };
 
       await Promise.all(
-        ids.map(_id =>
+        ids.map((_id) =>
           context
             .crossClusterReplication!.client.callAsCurrentUser('ccr.pauseAutoFollowPattern', {
               id: _id,
             })
             .then(() => itemsPaused.push(_id))
-            .catch(err => {
+            .catch((err) => {
               errors.push({ id: _id, error: formatError(err) });
             })
         )

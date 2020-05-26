@@ -15,7 +15,7 @@ const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =
   schema.conditional(
     schema.siblingRef('providers'),
     schema.arrayOf(schema.string(), {
-      validate: providers => (!providers.includes(providerType) ? 'error' : undefined),
+      validate: (providers) => (!providers.includes(providerType) ? 'error' : undefined),
     }),
     optionsSchema,
     schema.never()
@@ -45,7 +45,7 @@ function getUniqueProviderSchema(
   return schema.maybe(
     schema.recordOf(schema.string(), schema.object(getCommonProviderSchemaProperties(overrides)), {
       validate(config) {
-        if (Object.values(config).filter(provider => provider.enabled).length > 1) {
+        if (Object.values(config).filter((provider) => provider.enabled).length > 1) {
           return `Only one "${providerType}" provider can be configured.`;
         }
       },
@@ -65,7 +65,7 @@ const providersConfigSchema = schema.object(
       icon: schema.string({ defaultValue: 'logoElasticsearch' }),
       showInSelector: schema.boolean({
         defaultValue: true,
-        validate: value => {
+        validate: (value) => {
           if (!value) {
             return '`basic` provider only supports `true` in `showInSelector`.';
           }
@@ -81,7 +81,7 @@ const providersConfigSchema = schema.object(
       icon: schema.string({ defaultValue: 'logoElasticsearch' }),
       showInSelector: schema.boolean({
         defaultValue: true,
-        validate: value => {
+        validate: (value) => {
           if (!value) {
             return '`token` provider only supports `true` in `showInSelector`.';
           }

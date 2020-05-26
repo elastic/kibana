@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { INSTRUCTION_VARIANT } from '../../../../home/server';
+import { INSTRUCTION_VARIANT } from '../../../../../../src/plugins/home/server';
 import {
   createWindowsServerInstructions,
   createEditConfig,

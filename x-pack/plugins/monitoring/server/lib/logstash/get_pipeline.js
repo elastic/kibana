@@ -71,7 +71,7 @@ export function _enrichStateWithStatsAggregation(
   const vertices = logstashState.pipeline.representation.graph.vertices;
 
   const verticesById = {};
-  vertices.forEach(vertex => {
+  vertices.forEach((vertex) => {
     verticesById[vertex.id] = vertex;
     vertex.stats = {};
   });
@@ -82,7 +82,7 @@ export function _enrichStateWithStatsAggregation(
 
   const verticesWithStatsBuckets =
     statsAggregation.aggregations.pipelines.scoped.vertices.vertex_id.buckets;
-  verticesWithStatsBuckets.forEach(vertexStatsBucket => {
+  verticesWithStatsBuckets.forEach((vertexStatsBucket) => {
     // Each vertexStats bucket contains a list of stats for a single vertex within a single timeseries interval
     const vertexId = vertexStatsBucket.key;
     const vertex = verticesById[vertexId];

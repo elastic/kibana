@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
@@ -35,7 +35,7 @@ export default function({ getService }: FtrProviderContext) {
       const form = await testSubjects.find('DoubleIntegers');
       const btn = await form.findByCssSelector('button');
       await btn.click();
-      await new Promise(r => setTimeout(r, 4000));
+      await new Promise((r) => setTimeout(r, 4000));
       const pre = await form.findByCssSelector('pre');
       const text = await pre.getVisibleText();
       const json = JSON.parse(text);
@@ -73,7 +73,7 @@ export default function({ getService }: FtrProviderContext) {
       const btn = await form.findByCssSelector('button');
       await btn.click();
 
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 500));
       const pre = await form.findByCssSelector('pre');
 
       const text1 = await pre.getVisibleText();
@@ -82,7 +82,7 @@ export default function({ getService }: FtrProviderContext) {
       expect(json1.length > 0).to.be(true);
       expect(json1.length < 4).to.be(true);
 
-      await new Promise(r => setTimeout(r, 3500));
+      await new Promise((r) => setTimeout(r, 3500));
 
       const text2 = await pre.getVisibleText();
       const json2 = JSON.parse(text2);

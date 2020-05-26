@@ -19,9 +19,9 @@ type SpacingOptions = keyof EuiTheme['eui']['spacerSizes'];
 export const VerticalDivider = styled.div<{ spacing?: SpacingOptions }>`
   width: 0;
   height: 100%;
-  border-left: ${props => {
+  border-left: ${(props) => {
     return props.theme.eui.euiBorderThin;
   }};
-  margin-left: ${props => props.theme.eui.paddingSizes[props?.spacing ?? 'none'] || 0};
-  margin-right: ${props => props.theme.eui.paddingSizes[props?.spacing ?? 'none'] || 0};
+  margin-left: ${(props) => props.theme.eui.paddingSizes[props?.spacing ?? 'none'] || 0};
+  margin-right: ${(props) => props.theme.eui.paddingSizes[props?.spacing ?? 'none'] || 0};
 `;

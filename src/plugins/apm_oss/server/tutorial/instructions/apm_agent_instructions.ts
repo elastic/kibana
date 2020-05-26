@@ -403,7 +403,7 @@ var apm = initApm({curlyOpen}
         'Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)',
     }
   )}
-  serviceName: 'your-app-name',
+  serviceName: '',
 
   // ${i18n.translate(
     'apmOss.tutorial.jsClient.installDependency.commands.setCustomApmServerUrlComment',

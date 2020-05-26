@@ -285,10 +285,7 @@ describe('ConfigureCases', () => {
       ).toBe(true);
 
       expect(
-        wrapper
-          .find('[data-test-subj="closure-options-radio-group"] input')
-          .at(1)
-          .prop('disabled')
+        wrapper.find('[data-test-subj="closure-options-radio-group"] input').at(1).prop('disabled')
       ).toBe(true);
     });
 

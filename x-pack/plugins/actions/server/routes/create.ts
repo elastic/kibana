@@ -34,7 +34,7 @@ export const createActionRoute = (router: IRouter, licenseState: ILicenseState) 
         tags: ['access:actions-all'],
       },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
       req: KibanaRequest<unknown, unknown, TypeOf<typeof bodySchema>>,
       res: KibanaResponseFactory
