@@ -45,7 +45,7 @@ export const updateRulesNotifications = async ({
     interval: ruleActions.alertThrottle,
   });
 
-  // TODO: Workaround for https://github.com/elastic/kibana/issues/53868
+  // TODO: Workaround for https://github.com/elastic/kibana/issues/67290
   await alertsClient.updateApiKey({ id: ruleAlertId });
 
   return ruleActions;
