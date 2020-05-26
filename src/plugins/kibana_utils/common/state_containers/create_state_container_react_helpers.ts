@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import * as React from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import defaultComparator from 'fast-deep-equal';
 import { Comparator, Connect, StateContainer, UnboxState } from './types';
@@ -28,6 +28,7 @@ const { useContext, useLayoutEffect, useRef, createElement: h } = React;
  * Returns the latest state of a state container.
  *
  * @param container State container which state to track.
+ * @public
  */
 export const useContainerState = <Container extends StateContainer<any, any>>(
   container: Container
@@ -42,6 +43,7 @@ export const useContainerState = <Container extends StateContainer<any, any>>(
  * @param comparator Comparator function used to memoize previous result, to not
  *    re-render React component if state did not change. By default uses
  *    `fast-deep-equal` package.
+ * @public
  */
 export const useContainerSelector = <Container extends StateContainer<any, any>, Result>(
   container: Container,
@@ -68,6 +70,11 @@ export const useContainerSelector = <Container extends StateContainer<any, any>,
   return value;
 };
 
+/**
+ * Creates helpers for using {@link StateContainer | State Containers} with react
+ *
+ * @public
+ */
 export const createStateContainerReactHelpers = <Container extends StateContainer<any, any>>() => {
   const context = React.createContext<Container>(null as any);
 

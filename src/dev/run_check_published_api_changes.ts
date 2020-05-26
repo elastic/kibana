@@ -43,7 +43,18 @@ import getopts from 'getopts';
  */
 
 const getReportFileName = (folder: string) => {
-  return folder.indexOf('public') > -1 ? 'public' : 'server';
+  switch (true) {
+    case folder.includes('public'):
+      return 'public';
+    case folder.includes('server'):
+      return 'server';
+    case folder.includes('common'):
+      return 'common';
+    default:
+      throw new Error(
+        `folder "${folder}" expected to include one of ["public", "server", "common"]`
+      );
+  }
 };
 
 const apiExtractorConfig = (folder: string): ExtractorConfig => {
@@ -224,7 +235,13 @@ async function run(
     opts.help = true;
   }
 
-  const folders = ['core/public', 'core/server', 'plugins/data/server', 'plugins/data/public'];
+  const core = ['core/public', 'core/server'];
+  const plugins = [
+    'plugins/data/server',
+    'plugins/data/public',
+    'plugins/kibana_utils/common/state_containers',
+  ];
+  const folders = [...core, ...plugins];
 
   if (opts.help) {
     process.stdout.write(
@@ -266,13 +283,15 @@ async function run(
     return false;
   }
 
-  const results = await Promise.all(
-    folders
-      .filter((folder) => (opts.filter.length ? folder.match(opts.filter) : true))
-      .map((folder) => run(folder, { log, opts }))
+  const filteredFolders = folders.filter((folder) =>
+    opts.filter.length ? folder.match(opts.filter) : true
   );
+  const results = [];
+  for (const folder of filteredFolders) {
+    results.push(await run(folder, { log, opts }));
+  }
 
-  if (results.find((r) => r === false) !== undefined) {
+  if (results.includes(false)) {
     process.exitCode = 1;
   }
 })().catch((e) => {

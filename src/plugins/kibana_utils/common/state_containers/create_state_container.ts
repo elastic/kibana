@@ -44,6 +44,11 @@ const defaultFreeze: <T>(value: T) => T = isProduction
       return value as T;
     };
 
+/**
+ * State container options
+ *
+ * @public
+ */
 export interface CreateStateContainerOptions {
   /**
    * Function to use when freezing state. Supply identity function
@@ -60,13 +65,35 @@ export interface CreateStateContainerOptions {
   freeze?: <T>(state: T) => T;
 }
 
+/**
+ * Creates a state container without transitions and without selectors.
+ * @param defaultState - initial state
+ * @typeParam State - shape of state
+ * @public
+ */
 export function createStateContainer<State extends BaseState>(
   defaultState: State
 ): ReduxLikeStateContainer<State>;
+/**
+ * Creates a state container with transitions, but without selectors
+ * @param defaultState - initial state
+ * @param pureTransitions - state transitions configuration object
+ * @typeParam State - shape of state
+ * @public
+ */
 export function createStateContainer<State extends BaseState, PureTransitions extends object>(
   defaultState: State,
   pureTransitions: PureTransitions
 ): ReduxLikeStateContainer<State, PureTransitions>;
+
+/**
+ * Creates a state container with transitions and selectors
+ * @param defaultState - initial state
+ * @param pureTransitions - state transitions configuration object
+ * @param pureSelectors - state selectors configuration object
+ * @typeParam State - shape of state
+ * @public
+ */
 export function createStateContainer<
   State extends BaseState,
   PureTransitions extends object,
@@ -77,6 +104,9 @@ export function createStateContainer<
   pureSelectors: PureSelectors,
   options?: CreateStateContainerOptions
 ): ReduxLikeStateContainer<State, PureTransitions, PureSelectors>;
+/**
+ * @internal
+ */
 export function createStateContainer<
   State extends BaseState,
   PureTransitions extends object,
