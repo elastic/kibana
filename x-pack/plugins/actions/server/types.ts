@@ -48,62 +48,83 @@ export interface ActionsConfigType {
   enabledActionTypes: string[];
 }
 
+// TODO: Remove once action type executor doesn't have default generics
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ActionTypeConfig = Record<string, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ActionTypeSecrets = Record<string, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ActionTypeParams = Record<string, any>;
+
 // the parameters passed to an action type executor function
-export interface ActionTypeExecutorOptions {
+export interface ActionTypeExecutorOptions<
+  Config = ActionTypeConfig,
+  Secrets = ActionTypeSecrets,
+  Params = ActionTypeParams
+> {
   actionId: string;
   services: Services;
-  // This will have to remain `any` until we can extend Action Executors with generics
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: Record<string, any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  secrets: Record<string, any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  params: Record<string, any>;
+  config: Config;
+  secrets: Secrets;
+  params: Params;
 }
 
-export interface ActionResult {
+export interface ActionResult<Config = ActionTypeConfig> {
   id: string;
   actionTypeId: string;
   name: string;
-  // This will have to remain `any` until we can extend Action Executors with generics
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config?: Record<string, any>;
+  config?: Config;
   isPreconfigured: boolean;
 }
 
-export interface PreConfiguredAction extends ActionResult {
-  // This will have to remain `any` until we can extend Action Executors with generics
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  secrets: Record<string, any>;
+export interface PreConfiguredAction<Config = ActionTypeConfig, Secrets = ActionTypeSecrets>
+  extends ActionResult<Config> {
+  secrets: Secrets;
 }
 
-export interface FindActionResult extends ActionResult {
+export interface FindActionResult<Config = ActionTypeConfig> extends ActionResult<Config> {
   referencedByCount: number;
 }
 
+// TODO: Remove usage of any once we remove the default generic for Data
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ActionTypeExecutorResultData = any;
+
 // the result returned from an action type executor function
-export interface ActionTypeExecutorResult {
+export interface ActionTypeExecutorResult<Data = ActionTypeExecutorResultData> {
   actionId: string;
   status: 'ok' | 'error';
   message?: string;
   serviceMessage?: string;
-  // This will have to remain `any` until we can extend Action Executors with generics
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data?: any;
+  data?: Data;
   retry?: null | boolean | Date;
 }
 
 // signature of the action type executor function
-export type ExecutorType = (
-  options: ActionTypeExecutorOptions
-) => Promise<ActionTypeExecutorResult | null | undefined | void>;
+export type ExecutorType<
+  Config = ActionTypeConfig,
+  Secrets = ActionTypeSecrets,
+  Params = ActionTypeParams,
+  ReturnData = ActionTypeExecutorResultData
+> = (
+  options: ActionTypeExecutorOptions<Config, Secrets, Params>
+) => Promise<ActionTypeExecutorResult<ReturnData> | null | undefined | void>;
 
 interface ValidatorType {
   validate(value: unknown): Record<string, unknown>;
 }
 
-export type ActionTypeCreator = (config?: ActionsConfigType) => ActionType;
-export interface ActionType {
+export type ActionTypeCreator<
+  Config = ActionTypeConfig,
+  Secrets = ActionTypeSecrets,
+  Params = ActionTypeParams
+> = (config?: ActionsConfigType) => ActionType<Config, Secrets, Params>;
+
+export interface ActionType<
+  Config = ActionTypeConfig,
+  Secrets = ActionTypeSecrets,
+  Params = ActionTypeParams
+> {
   id: string;
   name: string;
   maxAttempts?: number;
@@ -113,7 +134,7 @@ export interface ActionType {
     config?: ValidatorType;
     secrets?: ValidatorType;
   };
-  executor: ExecutorType;
+  executor: ExecutorType<Config, Secrets, Params>;
 }
 
 export interface RawAction extends SavedObjectAttributes {
@@ -125,9 +146,7 @@ export interface RawAction extends SavedObjectAttributes {
 
 export interface ActionTaskParams extends SavedObjectAttributes {
   actionId: string;
-  // Saved Objects won't allow us to enforce unknown rather than any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  params: Record<string, any>;
+  params: SavedObjectAttributes;
   apiKey?: string;
 }
 
