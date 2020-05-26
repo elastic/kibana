@@ -32,7 +32,7 @@ import { FailedImport } from './process_import_response';
 type SavedObjectsRawDoc = Record<string, any>;
 
 async function getSavedObject(doc: SavedObjectsRawDoc, services: SavedObjectLoader[]) {
-  const service = services.find(s => s.type === doc._type);
+  const service = services.find((s) => s.type === doc._type);
   if (!service) {
     return;
   }
@@ -161,7 +161,7 @@ function groupByType(docs: SavedObjectsRawDoc[]): Record<string, SavedObjectsRaw
 }
 
 async function awaitEachItemInParallel<T, R>(list: T[], op: (item: T) => R) {
-  return await Promise.all(list.map(item => op(item)));
+  return await Promise.all(list.map((item) => op(item)));
 }
 
 export async function resolveIndexPatternConflicts(
@@ -234,7 +234,7 @@ export async function resolveIndexPatternConflicts(
 
 export async function saveObjects(objs: SavedObject[], overwriteAll: boolean) {
   let importCount = 0;
-  await awaitEachItemInParallel(objs, async obj => {
+  await awaitEachItemInParallel(objs, async (obj) => {
     if (await saveObject(obj, overwriteAll)) {
       importCount++;
     }
@@ -253,7 +253,7 @@ export async function resolveSavedSearches(
   overwriteAll: boolean
 ) {
   let importCount = 0;
-  await awaitEachItemInParallel(savedSearches, async searchDoc => {
+  await awaitEachItemInParallel(savedSearches, async (searchDoc) => {
     const obj = await getSavedObject(searchDoc, services);
     if (!obj) {
       // Just ignore?
@@ -280,7 +280,7 @@ export async function resolveSavedObjects(
   let importedObjectCount = 0;
   const failedImports: FailedImport[] = [];
   // Start with the index patterns since everything is dependent on them
-  await awaitEachItemInParallel(docTypes.indexPatterns, async indexPatternDoc => {
+  await awaitEachItemInParallel(docTypes.indexPatterns, async (indexPatternDoc) => {
     try {
       const importedIndexPatternId = await importIndexPattern(
         indexPatternDoc,
@@ -311,7 +311,7 @@ export async function resolveSavedObjects(
   // likely that these saved objects will work once resaved so keep them around to resave them.
   const conflictedSavedObjectsLinkedToSavedSearches: any[] = [];
 
-  await awaitEachItemInParallel(docTypes.searches, async searchDoc => {
+  await awaitEachItemInParallel(docTypes.searches, async (searchDoc) => {
     const obj = await getSavedObject(searchDoc, services);
 
     try {
@@ -331,7 +331,7 @@ export async function resolveSavedObjects(
     }
   });
 
-  await awaitEachItemInParallel(docTypes.other, async otherDoc => {
+  await awaitEachItemInParallel(docTypes.other, async (otherDoc) => {
     const obj = await getSavedObject(otherDoc, services);
 
     try {

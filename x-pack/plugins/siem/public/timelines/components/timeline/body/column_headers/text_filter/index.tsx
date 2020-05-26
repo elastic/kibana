@@ -23,7 +23,7 @@ interface Props {
 export const DEFAULT_PLACEHOLDER = 'Filter';
 
 const FieldText = styled(EuiFieldText)<{ minwidth: string }>`
-  min-width: ${props => props.minwidth};
+  min-width: ${(props) => props.minwidth};
 `;
 
 FieldText.displayName = 'FieldText';

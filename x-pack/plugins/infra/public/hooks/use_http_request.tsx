@@ -7,8 +7,8 @@
 import React, { useMemo, useState } from 'react';
 import { IHttpFetchError } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { HttpHandler } from 'target/types/core/public/http';
-import { ToastInput } from 'target/types/core/public/notifications/toasts/toasts_api';
+import { HttpHandler } from 'src/core/public';
+import { ToastInput } from 'src/core/public';
 import { useTrackedPromise } from '../utils/use_tracked_promise';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
@@ -16,7 +16,7 @@ export function useHTTPRequest<Response>(
   pathname: string,
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD',
   body?: string | null,
-  decode: (response: any) => Response = response => response,
+  decode: (response: any) => Response = (response) => response,
   fetch?: HttpHandler,
   toastWarning?: (input: ToastInput) => void
 ) {
@@ -37,7 +37,7 @@ export function useHTTPRequest<Response>(
           body,
         });
       },
-      onResolve: resp => setResponse(decode(resp)),
+      onResolve: (resp) => setResponse(decode(resp)),
       onReject: (e: unknown) => {
         const err = e as IHttpFetchError;
         setError(err);

@@ -48,7 +48,7 @@ function splitAnomalySeverities(anomalies: Anomaly[]) {
     unknown: [],
     low: [],
   };
-  anomalies.forEach(a => {
+  anomalies.forEach((a) => {
     if (a.value !== 0) {
       severities[a.severity].push({ dataValue: a.time });
     }

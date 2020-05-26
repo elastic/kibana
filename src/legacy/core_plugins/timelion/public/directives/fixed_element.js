@@ -20,12 +20,12 @@
 import $ from 'jquery';
 
 const app = require('ui/modules').get('apps/timelion', []);
-app.directive('fixedElementRoot', function() {
+app.directive('fixedElementRoot', function () {
   return {
     restrict: 'A',
-    link: function($elem) {
+    link: function ($elem) {
       let fixedAt;
-      $(window).bind('scroll', function() {
+      $(window).bind('scroll', function () {
         const fixed = $('[fixed-element]', $elem);
         const body = $('[fixed-element-body]', $elem);
         const top = fixed.offset().top;

@@ -145,7 +145,7 @@ export class ExpressionsPublicPlugin
           // For every sever-side function, register a client-side
           // function that matches its definition, but which simply
           // calls the server-side function endpoint.
-          Object.keys(serverFunctionList).forEach(functionName => {
+          Object.keys(serverFunctionList).forEach((functionName) => {
             if (expressionsSetup.getFunction(functionName)) {
               return;
             }

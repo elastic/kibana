@@ -36,31 +36,31 @@ export function savedObjectsMixin(kbnServer, server) {
   const mappings = migrator.getActiveMappings();
   const allTypes = Object.keys(getRootPropertiesObjects(mappings));
   const schema = new SavedObjectsSchema(convertTypesToLegacySchema(typeRegistry.getAllTypes()));
-  const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
+  const visibleTypes = allTypes.filter((type) => !schema.isHiddenType(type));
 
   server.decorate('server', 'kibanaMigrator', migrator);
 
-  const warn = message => server.log(['warning', 'saved-objects'], message);
+  const warn = (message) => server.log(['warning', 'saved-objects'], message);
   // we use kibana.index which is technically defined in the kibana plugin, so if
   // we don't have the plugin (mainly tests) we can't initialize the saved objects
-  if (!kbnServer.pluginSpecs.some(p => p.getId() === 'kibana')) {
+  if (!kbnServer.pluginSpecs.some((p) => p.getId() === 'kibana')) {
     warn('Saved Objects uninitialized because the Kibana plugin is disabled.');
     return;
   }
 
   const serializer = kbnServer.newPlatform.start.core.savedObjects.createSerializer();
 
-  const createRepository = (callCluster, extraTypes = []) => {
+  const createRepository = (callCluster, includedHiddenTypes = []) => {
     if (typeof callCluster !== 'function') {
       throw new TypeError('Repository requires a "callCluster" function to be provided.');
     }
     // throw an exception if an extraType is not defined.
-    extraTypes.forEach(type => {
+    includedHiddenTypes.forEach((type) => {
       if (!allTypes.includes(type)) {
         throw new Error(`Missing mappings for saved objects type '${type}'`);
       }
     });
-    const combinedTypes = visibleTypes.concat(extraTypes);
+    const combinedTypes = visibleTypes.concat(includedHiddenTypes);
     const allowedTypes = [...new Set(combinedTypes)];
 
     const config = server.config();
@@ -98,7 +98,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.decorate('server', 'savedObjects', service);
 
   const savedObjectsClientCache = new WeakMap();
-  server.decorate('request', 'getSavedObjectsClient', function(options) {
+  server.decorate('request', 'getSavedObjectsClient', function (options) {
     const request = this;
 
     if (savedObjectsClientCache.has(request)) {

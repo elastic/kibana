@@ -16,7 +16,7 @@ describe('TransactionSummary', () => {
     const props = {
       errorCount: 0,
       totalDuration: 0,
-      transaction
+      transaction,
     };
 
     it('renders', () => {
@@ -31,7 +31,7 @@ describe('TransactionSummary', () => {
     const props = {
       errorCount: 0,
       totalDuration: 0,
-      transaction
+      transaction,
     };
 
     it('renders', () => {

@@ -83,7 +83,7 @@ export const WatchCommand: ICommand = {
       batchedProjects.push([projects.get(kibanaProjectName)!]);
     }
 
-    await parallelizeBatches(batchedProjects, async pkg => {
+    await parallelizeBatches(batchedProjects, async (pkg) => {
       const completionHint = await waitUntilWatchIsReady(
         pkg.runScriptStreaming(watchScriptName).stdout
       );

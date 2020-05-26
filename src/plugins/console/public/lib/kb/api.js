@@ -41,8 +41,8 @@ function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactori
   this.name = '';
 }
 
-(function(cls) {
-  cls.addGlobalAutocompleteRules = function(parentNode, rules) {
+(function (cls) {
+  cls.addGlobalAutocompleteRules = function (parentNode, rules) {
     this.globalRules[parentNode] = compileBodyDescription(
       'GLOBAL.' + parentNode,
       rules,
@@ -50,7 +50,7 @@ function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactori
     );
   };
 
-  cls.getGlobalAutocompleteComponents = function(term, throwOnMissing) {
+  cls.getGlobalAutocompleteComponents = function (term, throwOnMissing) {
     const result = this.globalRules[term];
     if (_.isUndefined(result) && (throwOnMissing || _.isUndefined(throwOnMissing))) {
       throw new Error("failed to resolve global components for  ['" + term + "']");
@@ -58,7 +58,7 @@ function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactori
     return result;
   };
 
-  cls.addEndpointDescription = function(endpoint, description) {
+  cls.addEndpointDescription = function (endpoint, description) {
     const copiedDescription = {};
     _.extend(copiedDescription, description || {});
     _.defaults(copiedDescription, {
@@ -68,7 +68,7 @@ function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactori
     });
     _.each(
       copiedDescription.patterns,
-      function(p) {
+      function (p) {
         this.urlPatternMatcher.addEndpoint(p, copiedDescription);
       },
       this
@@ -84,19 +84,19 @@ function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactori
     this.endpoints[endpoint] = copiedDescription;
   };
 
-  cls.getEndpointDescriptionByEndpoint = function(endpoint) {
+  cls.getEndpointDescriptionByEndpoint = function (endpoint) {
     return this.endpoints[endpoint];
   };
 
-  cls.getTopLevelUrlCompleteComponents = function(method) {
+  cls.getTopLevelUrlCompleteComponents = function (method) {
     return this.urlPatternMatcher.getTopLevelComponents(method);
   };
 
-  cls.getUnmatchedEndpointComponents = function() {
+  cls.getUnmatchedEndpointComponents = function () {
     return globalsOnlyAutocompleteComponents();
   };
 
-  cls.clear = function() {
+  cls.clear = function () {
     this.endpoints = {};
     this.globalRules = {};
   };

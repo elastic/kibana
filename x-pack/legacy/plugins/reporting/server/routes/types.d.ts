@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
-import { JobDocPayload, ReportingResponseToolkit } from '../../types';
+import { JobDocPayload } from '../types';
 
 export type HandlerFunction = (
   exportType: string,
@@ -24,3 +24,5 @@ export interface QueuedJobPayload<JobParamsType> {
     };
   };
 }
+
+export type ReportingResponseToolkit = Legacy.ResponseToolkit;

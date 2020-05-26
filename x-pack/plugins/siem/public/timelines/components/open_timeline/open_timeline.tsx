@@ -151,7 +151,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         />
 
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
-          {tabs}
+          {!!tabs && tabs}
           <SearchRow
             data-test-subj="search-row"
             onlyFavorites={onlyFavorites}

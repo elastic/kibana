@@ -16,10 +16,10 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
 import { AgentConfig, PackageInfo, NewDatasource } from '../../../types';
 import {
   useLink,
+  useBreadcrumbs,
   useCore,
   useConfig,
   sendUpdateDatasource,
@@ -53,6 +53,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
     params: { configId, datasourceId },
   } = useRouteMatch();
   const history = useHistory();
+  const { getHref, getPath } = useLink();
   const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
 
   useEffect(() => {
@@ -104,11 +105,11 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
           // Remove `agent_stream` from all stream info, we assign this after saving
           const newDatasource = {
             ...restOfDatasource,
-            inputs: inputs.map(input => {
+            inputs: inputs.map((input) => {
               const { streams, ...restOfInput } = input;
               return {
                 ...restOfInput,
-                streams: streams.map(stream => {
+                streams: streams.map((stream) => {
                   const { agent_stream, ...restOfStream } = stream;
                   return restOfStream;
                 }),
@@ -185,8 +186,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
   };
 
   // Cancel url
-  const CONFIG_URL = useLink(`${AGENT_CONFIG_DETAILS_PATH}${configId}`);
-  const cancelUrl = CONFIG_URL;
+  const cancelUrl = getHref('configuration_details', { configId });
 
   // Save datasource
   const [formState, setFormState] = useState<DatasourceFormState>('INVALID');
@@ -208,7 +208,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
     }
     const { error } = await saveDatasource();
     if (!error) {
-      history.push(`${AGENT_CONFIG_DETAILS_PATH}${configId}`);
+      history.push(getPath('configuration_details', { configId }));
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.ingestManager.editDatasource.updatedNotificationTitle', {
           defaultMessage: `Successfully updated '{datasourceName}'`,
@@ -262,6 +262,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
         />
       ) : (
         <>
+          <Breadcrumb configName={agentConfig.name} configId={configId} />
           {formState === 'CONFIRM' && (
             <ConfirmDeployConfigModal
               agentCount={agentCount}
@@ -349,4 +350,12 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
       )}
     </CreateDatasourcePageLayout>
   );
+};
+
+const Breadcrumb: React.FunctionComponent<{ configName: string; configId: string }> = ({
+  configName,
+  configId,
+}) => {
+  useBreadcrumbs('edit_datasource', { configName, configId });
+  return null;
 };

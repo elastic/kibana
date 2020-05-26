@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import path from 'path';
 import { indexBy } from 'lodash';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'settings', 'header']);
@@ -30,7 +30,7 @@ export default function({ getService, getPageObjects }) {
 
   describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
-      beforeEach(async function() {
+      beforeEach(async function () {
         // delete .kibana index and then wait for Kibana to re-create it
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
@@ -38,11 +38,11 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaSavedObjects();
       });
 
-      afterEach(async function() {
+      afterEach(async function () {
         await esArchiver.unload('management');
       });
 
-      it('should import saved objects', async function() {
+      it('should import saved objects', async function () {
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects.ndjson')
         );
@@ -67,7 +67,7 @@ export default function({ getService, getPageObjects }) {
         expect(flyout['Log Agents'].relationship).to.eql('Parent');
       });
 
-      it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function() {
+      it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_conflicts.ndjson')
         );
@@ -84,7 +84,7 @@ export default function({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(true);
       });
 
-      it('should allow the user to override duplicate saved objects', async function() {
+      it('should allow the user to override duplicate saved objects', async function () {
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can override the existing visualization.
         await PageObjects.settings.importFile(
@@ -103,7 +103,7 @@ export default function({ getService, getPageObjects }) {
         expect(isSuccessful).to.be(true);
       });
 
-      it('should allow the user to cancel overriding duplicate saved objects', async function() {
+      it('should allow the user to cancel overriding duplicate saved objects', async function () {
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can be prompted to override the existing visualization.
         await PageObjects.settings.importFile(
@@ -122,7 +122,7 @@ export default function({ getService, getPageObjects }) {
         expect(isSuccessful).to.be(true);
       });
 
-      it('should import saved objects linked to saved searches', async function() {
+      it('should import saved objects linked to saved searches', async function () {
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_saved_search.ndjson')
         );
@@ -140,7 +140,7 @@ export default function({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(true);
       });
 
-      it('should not import saved objects linked to saved searches when saved search does not exist', async function() {
+      it('should not import saved objects linked to saved searches when saved search does not exist', async function () {
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.ndjson')
         );
@@ -152,7 +152,7 @@ export default function({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(false);
       });
 
-      it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function() {
+      it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function () {
         const elements = indexBy(
           await PageObjects.settings.getSavedObjectElementsInTable(),
           'title'
@@ -209,7 +209,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('.json file', () => {
-      beforeEach(async function() {
+      beforeEach(async function () {
         // delete .kibana index and then wait for Kibana to re-create it
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
@@ -217,11 +217,11 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaSavedObjects();
       });
 
-      afterEach(async function() {
+      afterEach(async function () {
         await esArchiver.unload('management');
       });
 
-      it('should import saved objects', async function() {
+      it('should import saved objects', async function () {
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects.json')
         );
@@ -232,7 +232,7 @@ export default function({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(true);
       });
 
-      it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function() {
+      it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects-conflicts.json')
         );
@@ -250,7 +250,7 @@ export default function({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(true);
       });
 
-      it('should allow the user to override duplicate saved objects', async function() {
+      it('should allow the user to override duplicate saved objects', async function () {
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can override the existing visualization.
         await PageObjects.settings.importFile(
@@ -270,7 +270,7 @@ export default function({ getService, getPageObjects }) {
         expect(isSuccessful).to.be(true);
       });
 
-      it('should allow the user to cancel overriding duplicate saved objects', async function() {
+      it('should allow the user to cancel overriding duplicate saved objects', async function () {
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can be prompted to override the existing visualization.
         await PageObjects.settings.importFile(
@@ -290,7 +290,7 @@ export default function({ getService, getPageObjects }) {
         expect(isSuccessful).to.be(true);
       });
 
-      it('should import saved objects linked to saved searches', async function() {
+      it('should import saved objects linked to saved searches', async function () {
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_saved_search.json')
         );
@@ -308,7 +308,7 @@ export default function({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(true);
       });
 
-      it('should not import saved objects linked to saved searches when saved search does not exist', async function() {
+      it('should not import saved objects linked to saved searches when saved search does not exist', async function () {
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json')
         );
@@ -320,7 +320,7 @@ export default function({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(false);
       });
 
-      it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function() {
+      it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function () {
         // First, import the saved search
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_saved_search.json')

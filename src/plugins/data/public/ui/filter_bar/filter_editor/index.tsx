@@ -198,7 +198,7 @@ class FilterEditorUI extends Component<Props, State> {
     if (
       this.props.indexPatterns.length <= 1 &&
       this.props.indexPatterns.find(
-        indexPattern => indexPattern === this.state.selectedIndexPattern
+        (indexPattern) => indexPattern === this.state.selectedIndexPattern
       )
     ) {
       return '';
@@ -220,7 +220,7 @@ class FilterEditorUI extends Component<Props, State> {
               })}
               options={this.props.indexPatterns}
               selectedOptions={selectedIndexPattern ? [selectedIndexPattern] : []}
-              getLabel={indexPattern => indexPattern.title}
+              getLabel={(indexPattern) => indexPattern.title}
               onChange={this.onIndexPatternChange}
               singleSelection={{ asPlainText: true }}
               isClearable={false}
@@ -267,7 +267,7 @@ class FilterEditorUI extends Component<Props, State> {
           })}
           options={fields}
           selectedOptions={selectedField ? [selectedField] : []}
-          getLabel={field => field.name}
+          getLabel={(field) => field.name}
           onChange={this.onFieldChange}
           singleSelection={{ asPlainText: true }}
           isClearable={false}

@@ -23,19 +23,11 @@ describe('User action tree helpers', () => {
     });
 
     const wrapper = mount(<>{result}</>);
-    expect(
-      wrapper
-        .find(`[data-test-subj="ua-tags-label"]`)
-        .first()
-        .text()
-    ).toEqual(` ${i18n.TAGS.toLowerCase()}`);
+    expect(wrapper.find(`[data-test-subj="ua-tags-label"]`).first().text()).toEqual(
+      ` ${i18n.TAGS.toLowerCase()}`
+    );
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="ua-tag"]`)
-        .first()
-        .text()
-    ).toEqual(action.newValue);
+    expect(wrapper.find(`[data-test-subj="ua-tag"]`).first().text()).toEqual(action.newValue);
   });
   it('label title generated for update title', () => {
     const action = getUserAction(['title'], 'update');
@@ -106,18 +98,12 @@ describe('User action tree helpers', () => {
     });
 
     const wrapper = mount(<>{result}</>);
-    expect(
-      wrapper
-        .find(`[data-test-subj="pushed-label"]`)
-        .first()
-        .text()
-    ).toEqual(`${i18n.PUSHED_NEW_INCIDENT} ${basicPush.connectorName}`);
-    expect(
-      wrapper
-        .find(`[data-test-subj="pushed-value"]`)
-        .first()
-        .prop('href')
-    ).toEqual(JSON.parse(action.newValue).external_url);
+    expect(wrapper.find(`[data-test-subj="pushed-label"]`).first().text()).toEqual(
+      `${i18n.PUSHED_NEW_INCIDENT} ${basicPush.connectorName}`
+    );
+    expect(wrapper.find(`[data-test-subj="pushed-value"]`).first().prop('href')).toEqual(
+      JSON.parse(action.newValue).external_url
+    );
   });
   it('label title generated for needs update incident', () => {
     const action = getUserAction(['pushed'], 'push-to-service');
@@ -129,18 +115,12 @@ describe('User action tree helpers', () => {
     });
 
     const wrapper = mount(<>{result}</>);
-    expect(
-      wrapper
-        .find(`[data-test-subj="pushed-label"]`)
-        .first()
-        .text()
-    ).toEqual(`${i18n.UPDATE_INCIDENT} ${basicPush.connectorName}`);
-    expect(
-      wrapper
-        .find(`[data-test-subj="pushed-value"]`)
-        .first()
-        .prop('href')
-    ).toEqual(JSON.parse(action.newValue).external_url);
+    expect(wrapper.find(`[data-test-subj="pushed-label"]`).first().text()).toEqual(
+      `${i18n.UPDATE_INCIDENT} ${basicPush.connectorName}`
+    );
+    expect(wrapper.find(`[data-test-subj="pushed-value"]`).first().prop('href')).toEqual(
+      JSON.parse(action.newValue).external_url
+    );
   });
   it('label title generated for update connector', () => {
     const action = getUserAction(['connector_id'], 'update');
@@ -152,18 +132,10 @@ describe('User action tree helpers', () => {
     });
 
     const wrapper = mount(<>{result}</>);
-    expect(
-      wrapper
-        .find(`[data-test-subj="ua-tags-label"]`)
-        .first()
-        .text()
-    ).toEqual(` ${i18n.TAGS.toLowerCase()}`);
+    expect(wrapper.find(`[data-test-subj="ua-tags-label"]`).first().text()).toEqual(
+      ` ${i18n.TAGS.toLowerCase()}`
+    );
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="ua-tag"]`)
-        .first()
-        .text()
-    ).toEqual(action.newValue);
+    expect(wrapper.find(`[data-test-subj="ua-tag"]`).first().text()).toEqual(action.newValue);
   });
 });

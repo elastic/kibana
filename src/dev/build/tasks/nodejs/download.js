@@ -62,7 +62,7 @@ export async function download(options) {
 
     const hash = createHash('sha256');
     await new Promise((resolve, reject) => {
-      response.data.on('data', chunk => {
+      response.data.on('data', (chunk) => {
         hash.update(chunk);
         writeSync(fileHandle, chunk);
       });
