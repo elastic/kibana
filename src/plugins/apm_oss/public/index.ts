@@ -17,28 +17,13 @@
  * under the License.
  */
 
-import { of } from 'rxjs';
-import { APMOSSConfig } from '.';
-import { APMOSSPluginSetup } from './plugin';
+import { ApmOssPlugin } from './plugin';
 
-const apmStar = 'apm-*';
+// This exports static code and TypeScript types,
+// as well as, Kibana Platform `plugin()` initializer.
+export function plugin() {
+  return new ApmOssPlugin();
+}
+export { ApmOssPluginSetup, ApmOssPluginStart } from './types';
 
-const defaultConfig = {
-  enabled: true,
-  errorIndices: apmStar,
-  indexPattern: apmStar,
-  metricsIndices: apmStar,
-  onboardingIndices: apmStar,
-  sourcemapIndices: apmStar,
-  spanIndices: apmStar,
-  transactionIndices: apmStar,
-};
-
-export const apmOSSPluginSetupMock = {
-  create(config: Partial<APMOSSConfig> = {}): APMOSSPluginSetup {
-    return {
-      config$: of({ ...defaultConfig, ...config }),
-      getRegisteredTutorialProvider: jest.fn(),
-    };
-  },
-};
+export { APM_STATIC_INDEX_PATTERN_ID } from '../common/index_pattern_constants';
