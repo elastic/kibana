@@ -166,7 +166,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     });
     try {
       const itemsById = indexBy(this.state.items, 'id');
-      await this.props.deleteItems(this.state.selectedIds.map(id => itemsById[id]));
+      await this.props.deleteItems(this.state.selectedIds.map((id) => itemsById[id]));
     } catch (error) {
       this.props.toastNotifications.addDanger({
         title: toMountPoint(
@@ -363,7 +363,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
           onSelectionChange: (obj: Item[]) => {
             this.setState({
               selectedIds: obj
-                .map(item => item.id)
+                .map((item) => item.id)
                 .filter((id: undefined | string): id is string => Boolean(id)),
             });
           },

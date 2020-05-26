@@ -417,9 +417,7 @@ export class AlertsClient {
     }
 
     try {
-      const apiKeyId = Buffer.from(apiKey, 'base64')
-        .toString()
-        .split(':')[0];
+      const apiKeyId = Buffer.from(apiKey, 'base64').toString().split(':')[0];
       const response = await this.invalidateAPIKey({ id: apiKeyId });
       if (response.apiKeysEnabled === true && response.result.error_count > 0) {
         this.logger.error(`Failed to invalidate API Key [id="${apiKeyId}"]`);
@@ -603,7 +601,7 @@ export class AlertsClient {
     references: SavedObjectReference[]
   ) {
     return actions.map((action, i) => {
-      const reference = references.find(ref => ref.name === action.actionRef);
+      const reference = references.find((ref) => ref.name === action.actionRef);
       if (!reference) {
         throw new Error(`Reference ${action.actionRef} not found`);
       }
@@ -648,10 +646,10 @@ export class AlertsClient {
 
   private validateActions(alertType: AlertType, actions: NormalizedAlertAction[]): void {
     const { actionGroups: alertTypeActionGroups } = alertType;
-    const usedAlertActionGroups = actions.map(action => action.group);
+    const usedAlertActionGroups = actions.map((action) => action.group);
     const availableAlertTypeActionGroups = new Set(pluck(alertTypeActionGroups, 'id'));
     const invalidActionGroups = usedAlertActionGroups.filter(
-      group => !availableAlertTypeActionGroups.has(group)
+      (group) => !availableAlertTypeActionGroups.has(group)
     );
     if (invalidActionGroups.length) {
       throw Boom.badRequest(
@@ -672,7 +670,7 @@ export class AlertsClient {
     // map preconfigured actions
     for (const alertAction of alertActions) {
       const action = this.preconfiguredActions.find(
-        preconfiguredAction => preconfiguredAction.id === alertAction.id
+        (preconfiguredAction) => preconfiguredAction.id === alertAction.id
       );
       if (action !== undefined) {
         actionMap.set(action.id, action);
@@ -683,12 +681,12 @@ export class AlertsClient {
     const actionIds = [
       ...new Set(
         alertActions
-          .filter(alertAction => !actionMap.has(alertAction.id))
-          .map(alertAction => alertAction.id)
+          .filter((alertAction) => !actionMap.has(alertAction.id))
+          .map((alertAction) => alertAction.id)
       ),
     ];
     if (actionIds.length > 0) {
-      const bulkGetOpts = actionIds.map(id => ({ id, type: 'action' }));
+      const bulkGetOpts = actionIds.map((id) => ({ id, type: 'action' }));
       const bulkGetResult = await this.savedObjectsClient.bulkGet(bulkGetOpts);
 
       for (const action of bulkGetResult.saved_objects) {
@@ -712,7 +710,7 @@ export class AlertsClient {
       const actionMapValue = actionMap.get(id);
       // if action is a save object, than actionTypeId should be under attributes property
       // if action is a preconfigured, than actionTypeId is the action property
-      const actionTypeId = actionIds.find(actionId => actionId === id)
+      const actionTypeId = actionIds.find((actionId) => actionId === id)
         ? (actionMapValue as SavedObject<Record<string, string>>).attributes.actionTypeId
         : (actionMapValue as RawAlertAction).actionTypeId;
       return {

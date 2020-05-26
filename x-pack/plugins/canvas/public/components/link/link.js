@@ -12,7 +12,7 @@ import { ComponentStrings } from '../../../i18n';
 
 const { Link: strings } = ComponentStrings;
 
-const isModifiedEvent = ev => !!(ev.metaKey || ev.altKey || ev.ctrlKey || ev.shiftKey);
+const isModifiedEvent = (ev) => !!(ev.metaKey || ev.altKey || ev.ctrlKey || ev.shiftKey);
 
 export class Link extends React.PureComponent {
   static propTypes = {
@@ -27,7 +27,7 @@ export class Link extends React.PureComponent {
     router: PropTypes.object,
   };
 
-  navigateTo = (name, params) => ev => {
+  navigateTo = (name, params) => (ev) => {
     if (this.props.onClick) {
       this.props.onClick(ev);
     }

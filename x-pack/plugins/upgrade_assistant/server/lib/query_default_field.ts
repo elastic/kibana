@@ -64,7 +64,7 @@ export const generateDefaultFields = (
     if (type && fieldTypes.has(type)) {
       defaultFields.push(fieldName);
     } else if (properties) {
-      generateDefaultFields(properties, fieldTypes).forEach(subField =>
+      generateDefaultFields(properties, fieldTypes).forEach((subField) =>
         defaultFields.push(`${fieldName}.${subField}`)
       );
     }

@@ -50,7 +50,7 @@ const ELASTIC_LICENSE_HEADER = `
 `;
 
 const allMochaRulesOff = {};
-Object.keys(require('eslint-plugin-mocha').rules).forEach(k => {
+Object.keys(require('eslint-plugin-mocha').rules).forEach((k) => {
   allMochaRulesOff['mocha/' + k] = 'off';
 });
 
@@ -202,6 +202,11 @@ module.exports = {
                 target: ['(src|x-pack)/**/*', '!src/core/**/*'],
                 from: ['src/core/utils/**/*'],
                 errorMessage: `Plugins may only import from src/core/server and src/core/public.`,
+              },
+              {
+                target: ['(src|x-pack)/plugins/*/public/**/*'],
+                from: ['(src|x-pack)/plugins/*/server/**/*'],
+                errorMessage: `Public code can not import from server, use a common directory.`,
               },
               {
                 target: [

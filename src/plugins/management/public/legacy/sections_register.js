@@ -23,7 +23,7 @@ import { managementSections } from '../management_sections';
 
 export class LegacyManagementAdapter {
   main = undefined;
-  init = capabilities => {
+  init = (capabilities) => {
     this.main = new LegacyManagementSection(
       'management',
       {

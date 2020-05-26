@@ -57,6 +57,9 @@ Changing these settings may disable features of the APM App.
 | `xpack.apm.ui.maxTraceItems` {ess-icon}
   | Maximum number of child items displayed when viewing trace details. Defaults to `1000`.
 
+| `xpack.observability.annotations.index`
+  | Index name where Observability annotations are stored. Defaults to `observability-annotations`.
+
 | `apm_oss.indexPattern` {ess-icon}
   | The index pattern used for integrations with Machine Learning and Query Bar.
   It must match all apm indices. Defaults to `apm-*`.

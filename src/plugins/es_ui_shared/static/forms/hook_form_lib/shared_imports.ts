@@ -17,8 +17,6 @@
  * under the License.
  */
 
-export {
-  registerTestBed,
-  getRandomString,
-  TestBed,
-} from '../../../__packages_do_not_import__/test_utils_temp';
+export { registerTestBed, TestBed } from '../../../../../test_utils/public/testbed';
+
+export { getRandomString } from '../../../../../test_utils/public/helpers';

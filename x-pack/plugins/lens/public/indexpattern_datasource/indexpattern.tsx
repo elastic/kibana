@@ -86,7 +86,7 @@ export function uniqueLabels(layers: Record<string, IndexPatternLayer>) {
     return uniqueLabel;
   };
 
-  Object.values(layers).forEach(layer => {
+  Object.values(layers).forEach((layer) => {
     if (!layer.columns) {
       return;
     }
@@ -180,8 +180,8 @@ export function getIndexPatternDatasource({
       return {
         filterableIndexPatterns: _.uniq(
           Object.values(state.layers)
-            .map(layer => layer.indexPatternId)
-            .map(indexPatternId => ({
+            .map((layer) => layer.indexPatternId)
+            .map((indexPatternId) => ({
               id: indexPatternId,
               title: state.indexPatterns[indexPatternId].title,
             }))
@@ -282,7 +282,7 @@ export function getIndexPatternDatasource({
       render(
         <LayerPanel
           state={props.state}
-          onChangeIndexPattern={indexPatternId => {
+          onChangeIndexPattern={(indexPatternId) => {
             changeLayerIndexPattern({
               savedObjectsClient,
               indexPatternId,
@@ -309,7 +309,7 @@ export function getIndexPatternDatasource({
         datasourceId: 'indexpattern',
 
         getTableSpec: () => {
-          return state.layers[layerId].columnOrder.map(colId => ({ columnId: colId }));
+          return state.layers[layerId].columnOrder.map((colId) => ({ columnId: colId }));
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];

@@ -8,29 +8,29 @@ import { i18n } from '@kbn/i18n';
 
 export const createEditConfig = () => ({
   title: i18n.translate('xpack.apm.tutorial.editConfig.title', {
-    defaultMessage: 'Edit the configuration'
+    defaultMessage: 'Edit the configuration',
   }),
   textPre: i18n.translate('xpack.apm.tutorial.editConfig.textPre', {
     defaultMessage:
       "If you're using an X-Pack secured version of Elastic Stack, you must specify \
-credentials in the `apm-server.yml` config file."
+credentials in the `apm-server.yml` config file.",
   }),
   commands: [
     'output.elasticsearch:',
     '    hosts: ["<es_url>"]',
     '    username: <username>',
-    '    password: <password>'
-  ]
+    '    password: <password>',
+  ],
 });
 
 const createStartServer = () => ({
   title: i18n.translate('xpack.apm.tutorial.startServer.title', {
-    defaultMessage: 'Start APM Server'
+    defaultMessage: 'Start APM Server',
   }),
   textPre: i18n.translate('xpack.apm.tutorial.startServer.textPre', {
     defaultMessage:
-      'The server processes and stores application performance metrics in Elasticsearch.'
-  })
+      'The server processes and stores application performance metrics in Elasticsearch.',
+  }),
 });
 
 export function createStartServerUnixSysv() {
@@ -39,7 +39,7 @@ export function createStartServerUnixSysv() {
   return {
     title: START_SERVER.title,
     textPre: START_SERVER.textPre,
-    commands: ['service apm-server start']
+    commands: ['service apm-server start'],
   };
 }
 
@@ -49,13 +49,13 @@ export function createStartServerUnix() {
   return {
     title: START_SERVER.title,
     textPre: START_SERVER.textPre,
-    commands: ['./apm-server -e']
+    commands: ['./apm-server -e'],
   };
 }
 
 const createDownloadServerTitle = () =>
   i18n.translate('xpack.apm.tutorial.downloadServer.title', {
-    defaultMessage: 'Download and unpack APM Server'
+    defaultMessage: 'Download and unpack APM Server',
   });
 
 export const createDownloadServerOsx = () => ({
@@ -63,38 +63,38 @@ export const createDownloadServerOsx = () => ({
   commands: [
     'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-darwin-x86_64.tar.gz',
     'tar xzvf apm-server-{config.kibana.version}-darwin-x86_64.tar.gz',
-    'cd apm-server-{config.kibana.version}-darwin-x86_64/'
-  ]
+    'cd apm-server-{config.kibana.version}-darwin-x86_64/',
+  ],
 });
 
 export const createDownloadServerDeb = () => ({
   title: createDownloadServerTitle(),
   commands: [
     'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-amd64.deb',
-    'sudo dpkg -i apm-server-{config.kibana.version}-amd64.deb'
+    'sudo dpkg -i apm-server-{config.kibana.version}-amd64.deb',
   ],
   textPost: i18n.translate('xpack.apm.tutorial.downloadServerTitle', {
     defaultMessage:
       'Looking for the 32-bit packages? See the [Download page]({downloadPageLink}).',
     values: {
-      downloadPageLink: '{config.docs.base_url}downloads/apm/apm-server'
-    }
-  })
+      downloadPageLink: '{config.docs.base_url}downloads/apm/apm-server',
+    },
+  }),
 });
 
 export const createDownloadServerRpm = () => ({
   title: createDownloadServerTitle(),
   commands: [
     'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-x86_64.rpm',
-    'sudo rpm -vi apm-server-{config.kibana.version}-x86_64.rpm'
+    'sudo rpm -vi apm-server-{config.kibana.version}-x86_64.rpm',
   ],
   textPost: i18n.translate('xpack.apm.tutorial.downloadServerRpm', {
     defaultMessage:
       'Looking for the 32-bit packages? See the [Download page]({downloadPageLink}).',
     values: {
-      downloadPageLink: '{config.docs.base_url}downloads/apm/apm-server'
-    }
-  })
+      downloadPageLink: '{config.docs.base_url}downloads/apm/apm-server',
+    },
+  }),
 });
 
 export function createWindowsServerInstructions() {
@@ -117,13 +117,13 @@ PowerShell.\n5. From the PowerShell prompt, run the following commands to instal
           values: {
             downloadPageLink: 'https://www.elastic.co/downloads/apm/apm-server',
             zipFileExtractFolder: '`C:\\Program Files`',
-            apmServerDirectory: '`apm-server-{config.kibana.version}-windows`'
-          }
+            apmServerDirectory: '`apm-server-{config.kibana.version}-windows`',
+          },
         }
       ),
       commands: [
         `cd 'C:\\Program Files\\APM-Server'`,
-        `.\\install-service-apm-server.ps1`
+        `.\\install-service-apm-server.ps1`,
       ],
       textPost: i18n.translate(
         'xpack.apm.tutorial.windowsServerInstructions.textPost',
@@ -134,16 +134,16 @@ you need to set the execution policy for the current session \
 to allow the script to run. For example: {command}.',
           values: {
             command:
-              '`PowerShell.exe -ExecutionPolicy UnRestricted -File .\\install-service-apm-server.ps1`'
-          }
+              '`PowerShell.exe -ExecutionPolicy UnRestricted -File .\\install-service-apm-server.ps1`',
+          },
         }
-      )
+      ),
     },
     createEditConfig(),
     {
       title: START_SERVER.title,
       textPre: START_SERVER.textPre,
-      commands: ['Start-Service apm-server']
-    }
+      commands: ['Start-Service apm-server'],
+    },
   ];
 }

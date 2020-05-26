@@ -9,7 +9,7 @@ import * as GenerationUrls from '../generation_urls';
 import { OSS_DATA_ARCHIVE_PATH, OSS_KIBANA_ARCHIVE_PATH } from './constants';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('reportingAPI');

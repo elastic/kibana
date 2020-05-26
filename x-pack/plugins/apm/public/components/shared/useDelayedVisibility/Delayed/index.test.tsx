@@ -23,7 +23,7 @@ describe('Delayed', () => {
     const advanceTimer = new AdvanceTimer();
     const delayed = new Delayed();
 
-    delayed.onChange(isVisible => visibilityChanges.push(isVisible));
+    delayed.onChange((isVisible) => visibilityChanges.push(isVisible));
 
     for (let i = 1; i < 100; i += 2) {
       delayed.show();
@@ -42,7 +42,7 @@ describe('Delayed', () => {
     const visibilityChanges: boolean[] = [];
     const delayed = new Delayed();
 
-    delayed.onChange(isVisible => visibilityChanges.push(isVisible));
+    delayed.onChange((isVisible) => visibilityChanges.push(isVisible));
 
     delayed.show();
     advanceTimer.advance(30);
@@ -58,7 +58,7 @@ describe('Delayed', () => {
     const advanceTimer = new AdvanceTimer();
     const delayed = new Delayed();
 
-    delayed.onChange(isVisible => visibilityChanges.push(isVisible));
+    delayed.onChange((isVisible) => visibilityChanges.push(isVisible));
 
     delayed.show();
     advanceTimer.advance(200);
@@ -83,7 +83,7 @@ describe('Delayed', () => {
     const advanceTimer = new AdvanceTimer();
     const delayed = new Delayed({ minimumVisibleDuration: 2000 });
 
-    delayed.onChange(isVisible => visibilityChanges.push(isVisible));
+    delayed.onChange((isVisible) => visibilityChanges.push(isVisible));
 
     delayed.show();
     advanceTimer.advance(200);

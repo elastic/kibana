@@ -40,7 +40,7 @@ describe('embeddable', () => {
 
   beforeEach(() => {
     mountpoint = document.createElement('div');
-    expressionRenderer = jest.fn(_props => null);
+    expressionRenderer = jest.fn((_props) => null);
     trigger = { exec: jest.fn() };
     getTrigger = jest.fn(() => trigger);
   });

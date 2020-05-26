@@ -117,7 +117,7 @@ export class VectorTileLayer extends TileLayer {
     if (!vectorStyle) {
       return [];
     }
-    return vectorStyle.layers.map(layer => this._generateMbId(layer.id));
+    return vectorStyle.layers.map((layer) => this._generateMbId(layer.id));
   }
 
   getMbSourceIds() {
@@ -126,7 +126,7 @@ export class VectorTileLayer extends TileLayer {
       return [];
     }
     const sourceIds = Object.keys(vectorStyle.sources);
-    return sourceIds.map(sourceId => this._generateMbSourceId(sourceId));
+    return sourceIds.map((sourceId) => this._generateMbSourceId(sourceId));
   }
 
   ownsMbLayerId(mbLayerId) {
@@ -145,7 +145,7 @@ export class VectorTileLayer extends TileLayer {
   _requiresPrevSourceCleanup(mbMap) {
     const sourceIdPrefix = this._generateMbSourceIdPrefix();
     const mbStyle = mbMap.getStyle();
-    return Object.keys(mbStyle.sources).some(mbSourceId => {
+    return Object.keys(mbStyle.sources).some((mbSourceId) => {
       const doesMbSourceBelongToLayer = this.ownsMbSourceId(mbSourceId);
       const doesMbSourceBelongToSource = mbSourceId.startsWith(sourceIdPrefix);
       return doesMbSourceBelongToLayer && !doesMbSourceBelongToSource;
@@ -162,7 +162,7 @@ export class VectorTileLayer extends TileLayer {
 
     let initialBootstrapCompleted = false;
     const sourceIds = Object.keys(vectorStyle.sources);
-    sourceIds.forEach(sourceId => {
+    sourceIds.forEach((sourceId) => {
       if (initialBootstrapCompleted) {
         return;
       }
@@ -197,7 +197,7 @@ export class VectorTileLayer extends TileLayer {
       addSpriteSheetToMapFromImageData(newJson, imageData, mbMap);
 
       //sync layers
-      vectorStyle.layers.forEach(layer => {
+      vectorStyle.layers.forEach((layer) => {
         const mbLayerId = this._generateMbId(layer.id);
         const mbLayer = mbMap.getLayer(mbLayerId);
         if (mbLayer) {
@@ -242,7 +242,7 @@ export class VectorTileLayer extends TileLayer {
       return;
     }
 
-    opacityProps.forEach(opacityProp => {
+    opacityProps.forEach((opacityProp) => {
       if (mbLayer.paint && typeof mbLayer.paint[opacityProp] === 'number') {
         const newOpacity = mbLayer.paint[opacityProp] * this.getAlpha();
         mbMap.setPaintProperty(mbLayerId, opacityProp, newOpacity);
@@ -270,7 +270,7 @@ export class VectorTileLayer extends TileLayer {
       return;
     }
 
-    vectorStyle.layers.forEach(mbLayer => {
+    vectorStyle.layers.forEach((mbLayer) => {
       const mbLayerId = this._generateMbId(mbLayer.id);
       this.syncVisibilityWithMb(mbMap, mbLayerId);
       this._setLayerZoomRange(mbMap, mbLayer, mbLayerId);

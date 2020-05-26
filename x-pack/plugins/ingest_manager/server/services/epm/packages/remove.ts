@@ -119,7 +119,7 @@ export async function deleteAssetsByType({
   installedObjects: AssetReference[];
   assetType: ElasticsearchAssetType;
 }) {
-  const toDelete = installedObjects.filter(asset => asset.type === assetType);
+  const toDelete = installedObjects.filter((asset) => asset.type === assetType);
   try {
     await deleteAssets(toDelete, savedObjectsClient, callCluster);
   } catch (err) {

@@ -52,7 +52,7 @@ export const useAnalysisSetupState = <JobType extends string>({
   );
 
   const [validatedIndices, setValidatedIndices] = useState<AvailableIndex[]>(
-    sourceConfiguration.indices.map(indexName => ({
+    sourceConfiguration.indices.map((indexName) => ({
       name: indexName,
       validity: 'unknown' as const,
     }))
@@ -60,8 +60,8 @@ export const useAnalysisSetupState = <JobType extends string>({
 
   const updateIndicesWithValidationErrors = useCallback(
     (validationErrors: ValidationIndicesError[]) =>
-      setValidatedIndices(availableIndices =>
-        availableIndices.map(previousAvailableIndex => {
+      setValidatedIndices((availableIndices) =>
+        availableIndices.map((previousAvailableIndex) => {
           const indexValiationErrors = validationErrors.filter(
             ({ index }) => index === previousAvailableIndex.name
           );
@@ -96,8 +96,8 @@ export const useAnalysisSetupState = <JobType extends string>({
 
   const updateIndicesWithAvailableDatasets = useCallback(
     (availableDatasets: Array<{ indexName: string; datasets: string[] }>) =>
-      setValidatedIndices(availableIndices =>
-        availableIndices.map(previousAvailableIndex => {
+      setValidatedIndices((availableIndices) =>
+        availableIndices.map((previousAvailableIndex) => {
           if (previousAvailableIndex.validity !== 'valid') {
             return previousAvailableIndex;
           }
@@ -112,7 +112,7 @@ export const useAnalysisSetupState = <JobType extends string>({
           // filter out datasets that have disappeared if this index' datasets were updated
           const newDatasetFilter: DatasetFilter =
             availableDatasetsForIndex.length > 0
-              ? filterDatasetFilter(previousAvailableIndex.datasetFilter, dataset =>
+              ? filterDatasetFilter(previousAvailableIndex.datasetFilter, (dataset) =>
                   newAvailableDatasets.includes(dataset)
                 )
               : previousAvailableIndex.datasetFilter;
@@ -128,22 +128,22 @@ export const useAnalysisSetupState = <JobType extends string>({
   );
 
   const validIndexNames = useMemo(
-    () => validatedIndices.filter(index => index.validity === 'valid').map(index => index.name),
+    () => validatedIndices.filter((index) => index.validity === 'valid').map((index) => index.name),
     [validatedIndices]
   );
 
   const selectedIndexNames = useMemo(
     () =>
       validatedIndices
-        .filter(index => index.validity === 'valid' && index.isSelected)
-        .map(i => i.name),
+        .filter((index) => index.validity === 'valid' && index.isSelected)
+        .map((i) => i.name),
     [validatedIndices]
   );
 
   const datasetFilter = useMemo(
     () =>
       validatedIndices
-        .flatMap(validatedIndex =>
+        .flatMap((validatedIndex) =>
           validatedIndex.validity === 'valid'
             ? validatedIndex.datasetFilter
             : { type: 'includeAll' as const }

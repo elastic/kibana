@@ -146,7 +146,7 @@ export function replaceLayerList(newLayerList) {
       });
     }
 
-    newLayerList.forEach(layerDescriptor => {
+    newLayerList.forEach((layerDescriptor) => {
       dispatch(addLayer(layerDescriptor));
     });
   };
@@ -264,7 +264,7 @@ export function setTransientLayer(layerId) {
 }
 
 export function clearTransientLayerStateAndCloseFlyout() {
-  return async dispatch => {
+  return async (dispatch) => {
     await dispatch(updateFlyout(FLYOUT_STATE.NONE));
     await dispatch(setSelectedLayer(null));
     await dispatch(removeTransientLayer());
@@ -284,7 +284,7 @@ export function mapReady() {
       type: MAP_READY,
     });
 
-    getWaitingForMapReadyLayerListRaw(getState()).forEach(layerDescriptor => {
+    getWaitingForMapReadyLayerListRaw(getState()).forEach((layerDescriptor) => {
       dispatch(addLayer(layerDescriptor));
     });
 
@@ -376,7 +376,7 @@ export function disableScrollZoom() {
 }
 
 export function fitToLayerExtent(layerId) {
-  return async function(dispatch, getState) {
+  return async function (dispatch, getState) {
     const targetLayer = getLayerById(layerId, getState());
 
     if (targetLayer) {
@@ -390,7 +390,7 @@ export function fitToLayerExtent(layerId) {
 }
 
 export function fitToDataBounds() {
-  return async function(dispatch, getState) {
+  return async function (dispatch, getState) {
     const layerList = getFittableLayers(getState());
 
     if (!layerList.length) {
@@ -398,7 +398,7 @@ export function fitToDataBounds() {
     }
 
     const dataFilters = getDataFilters(getState());
-    const boundsPromises = layerList.map(async layer => {
+    const boundsPromises = layerList.map(async (layer) => {
       return layer.getBounds(dataFilters);
     });
 
@@ -457,7 +457,7 @@ export function clearGoto() {
 }
 
 export function updateSourceProp(layerId, propName, value, newLayerType) {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
@@ -525,7 +525,7 @@ export function updateLayerAlpha(id, alpha) {
 }
 
 export function setLayerQuery(id, query) {
-  return dispatch => {
+  return (dispatch) => {
     dispatch({
       type: UPDATE_LAYER_PROP,
       id,
@@ -564,7 +564,7 @@ function removeLayerFromLayerList(layerId) {
       return;
     }
 
-    layerGettingRemoved.getInFlightRequestTokens().forEach(requestToken => {
+    layerGettingRemoved.getInFlightRequestTokens().forEach((requestToken) => {
       dispatch(cancelRequest(requestToken));
     });
     dispatch(cleanTooltipStateForLayer(layerId));
@@ -611,7 +611,7 @@ export function setRefreshConfig({ isPaused, interval }) {
 }
 
 export function triggerRefreshTimer() {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch({
       type: TRIGGER_REFRESH_TIMER,
     });
@@ -643,7 +643,7 @@ export function clearMissingStyleProperties(layerId) {
 }
 
 export function updateLayerStyle(layerId, styleDescriptor) {
-  return dispatch => {
+  return (dispatch) => {
     dispatch({
       type: UPDATE_LAYER_STYLE,
       layerId,
@@ -672,7 +672,7 @@ export function updateLayerStyleForSelectedLayer(styleDescriptor) {
 }
 
 export function setJoinsForLayer(layer, joins) {
-  return async dispatch => {
+  return async (dispatch) => {
     await dispatch({
       type: SET_JOINS,
       layer,
@@ -685,7 +685,7 @@ export function setJoinsForLayer(layer, joins) {
 }
 
 export function updateDrawState(drawState) {
-  return dispatch => {
+  return (dispatch) => {
     if (drawState !== null) {
       dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] }); // tooltips just get in the way
     }
@@ -722,7 +722,7 @@ export function setHiddenLayers(hiddenLayerIds) {
     if (!isMapReady) {
       dispatch({ type: SET_WAITING_FOR_READY_HIDDEN_LAYERS, hiddenLayerIds });
     } else {
-      getLayerListRaw(getState()).forEach(layer =>
+      getLayerListRaw(getState()).forEach((layer) =>
         dispatch(setLayerVisibility(layer.id, !hiddenLayerIds.includes(layer.id)))
       );
     }

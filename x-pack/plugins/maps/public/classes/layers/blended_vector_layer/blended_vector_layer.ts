@@ -56,7 +56,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
       type: AGG_TYPE.COUNT,
       label: COUNT_PROP_LABEL,
     },
-    ...documentStyle.getDynamicPropertiesArray().map(dynamicProperty => {
+    ...documentStyle.getDynamicPropertiesArray().map((dynamicProperty) => {
       return {
         type: getAggType(dynamicProperty),
         field: dynamicProperty.getFieldName(),
