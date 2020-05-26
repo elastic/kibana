@@ -32,6 +32,10 @@ describe('CompareTimelinesStatus', () => {
         jest.resetModules();
       });
 
+      beforeAll(() => {
+        jest.resetModules();
+      });
+
       beforeEach(async () => {
         jest.doMock('../../saved_object', () => {
           return {
@@ -101,6 +105,10 @@ describe('CompareTimelinesStatus', () => {
       });
 
       afterAll(() => {
+        jest.resetModules();
+      });
+
+      beforeAll(() => {
         jest.resetModules();
       });
 
@@ -206,6 +214,10 @@ describe('CompareTimelinesStatus', () => {
         jest.resetModules();
       });
 
+      beforeAll(() => {
+        jest.resetModules();
+      });
+
       test('should get timeline', () => {
         expect(mockGetTimeline).toHaveBeenCalled();
       });
@@ -246,6 +258,10 @@ describe('CompareTimelinesStatus', () => {
       });
 
       afterAll(() => {
+        jest.resetModules();
+      });
+
+      beforeAll(() => {
         jest.resetModules();
       });
 
@@ -304,54 +320,58 @@ describe('CompareTimelinesStatus', () => {
     });
   });
 
-  // describe(`Throw error if given title does NOT exists`, () => {
-  //   const mockGetTimeline: jest.Mock = jest.fn();
-  //   const mockGetTemplateTimeline: jest.Mock = jest.fn();
-  //   let timelineObj: TimelinesStatusType;
+  describe(`Throw error if given title does NOT exists`, () => {
+    const mockGetTimeline: jest.Mock = jest.fn();
+    const mockGetTemplateTimeline: jest.Mock = jest.fn();
+    let timelineObj: TimelinesStatusType;
 
-  //   afterEach(() => {
-  //     jest.clearAllMocks();
-  //   });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
 
-  //   afterAll(() => {
-  //     jest.resetModules();
-  //   });
+    afterAll(() => {
+      jest.resetModules();
+    });
 
-  //   beforeEach(async () => {
-  //     jest.doMock('../../saved_object', () => {
-  //       return {
-  //         getTimeline: mockGetTimeline.mockReturnValue(null),
-  //         getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
-  //           timeline: [],
-  //         }),
-  //       };
-  //     });
+    beforeAll(() => {
+      jest.resetModules();
+    });
 
-  //     const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
-  //       .CompareTimelinesStatus;
+    beforeEach(async () => {
+      jest.doMock('../../saved_object', () => {
+        return {
+          getTimeline: mockGetTimeline.mockReturnValue(null),
+          getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
+            timeline: [],
+          }),
+        };
+      });
 
-  //     timelineObj = new CompareTimelinesStatus({
-  //       timelineInput: {
-  //         id: mockUniqueParsedObjects[0].savedObjectId,
-  //         type: TimelineType.default,
-  //         version: mockUniqueParsedObjects[0].version,
-  //       },
-  //       timelineType: TimelineType.default,
-  //       title: null,
-  //       templateTimelineInput: {
-  //         id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
-  //         type: TimelineType.template,
-  //         version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
-  //       },
-  //       frameworkRequest: {} as FrameworkRequest,
-  //     });
+      const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
+        .CompareTimelinesStatus;
 
-  //     await timelineObj.init();
-  //   });
+      timelineObj = new CompareTimelinesStatus({
+        timelineInput: {
+          id: mockUniqueParsedObjects[0].savedObjectId,
+          type: TimelineType.default,
+          version: mockUniqueParsedObjects[0].version,
+        },
+        timelineType: TimelineType.default,
+        title: null,
+        templateTimelineInput: {
+          id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
+          type: TimelineType.template,
+          version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
+        },
+        frameworkRequest: {} as FrameworkRequest,
+      });
 
-  //   test(`create timeline`, () => {
-  //     const error = timelineObj.checkIsFailureCases(TimelineStatusActions.create);
-  //     expect(error?.body).toEqual(EMPTY_TITLE_ERROR_MESSAGE);
-  //   });
-  // });
+      await timelineObj.init();
+    });
+
+    test(`create timeline`, () => {
+      const error = timelineObj.checkIsFailureCases(TimelineStatusActions.create);
+      expect(error?.body).toEqual(EMPTY_TITLE_ERROR_MESSAGE);
+    });
+  });
 });
