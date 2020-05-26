@@ -4,24 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LocationDescriptorObject } from 'history';
 import { Datasource, NewDatasource } from '../../../ingest_manager/common';
 
-/**
- * Object that allows you to maintain stateful information in the location object across navigation events
- *
- */
-export interface AppLocationState {
-  isTabChange?: boolean;
-  prevPath?: string;
-}
-
-export interface AppLocation {
-  pathname: string;
-  search: string;
-  hash: string;
-  key?: string;
-  state?: AppLocationState;
-}
+export type AppLocation = LocationDescriptorObject;
 
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
