@@ -86,7 +86,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   });
 
   const onFormUpdate = useCallback(
-    arg => {
+    (arg) => {
       setFormState({ validate: arg.validate });
     },
     [setFormState]
@@ -103,7 +103,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   }, [processorsState, onUpdate, formState, settingsFormMode]);
 
   const onSubmit = useCallback(
-    processorTypeAndOptions => {
+    (processorTypeAndOptions) => {
       switch (settingsFormMode.id) {
         case 'creatingTopLevelProcessor':
           processorsDispatch({
@@ -140,7 +140,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   );
 
   const onDragEnd = useCallback(
-    args => {
+    (args) => {
       processorsDispatch({
         type: 'moveProcessor',
         payload: args,
@@ -179,13 +179,11 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
             setFormState({ validate: () => Promise.resolve(true) });
           }}
         />
-      ) : (
-        undefined
-      )}
+      ) : undefined}
       {processorToDeleteSelector && (
         <ProcessorRemoveModal
           processor={getValue(processorToDeleteSelector, processorsState)}
-          onResult={confirmed => {
+          onResult={(confirmed) => {
             if (confirmed) {
               processorsDispatch({
                 type: 'removeProcessor',

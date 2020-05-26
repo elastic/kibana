@@ -11,7 +11,6 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/e
 import './pipeline_processors_editor.scss';
 
 import {
-  DragAndDropTree,
   RenderTreeItemFunction,
   OnDragEndArgs,
   PipelineProcessorsEditorItem,
@@ -52,11 +51,11 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
     learnMoreAboutOnFailureProcessorsUrl,
     onDragEnd,
   }) {
-    const renderTreeItem = useCallback<RenderTreeItemFunction>(
-      ({ processor, selector }) => {
+    const renderItem = useCallback<RenderTreeItemFunction>(
+      ({ processor, selector, onMove }) => {
         return (
           <PipelineProcessorsEditorItem
-            onClick={type => {
+            onClick={(type) => {
               switch (type) {
                 case 'edit':
                   setSettingsFormMode({
@@ -76,6 +75,9 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
                   break;
                 case 'addOnFailure':
                   setSettingsFormMode({ id: 'creatingOnFailureProcessor', arg: selector });
+                  break;
+                case 'move':
+                  onMove();
                   break;
               }
             }}
@@ -110,6 +112,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
                   }}
                   baseSelector={PROCESSOR_STATE_SCOPE}
                   processors={processors}
+                  renderItem={renderItem}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -158,10 +161,13 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
               className="processorsEditorContainer"
             >
               <EuiFlexItem grow={false}>
-                <DragAndDropTree
+                <Tree
                   baseSelector={ON_FAILURE_STATE_SCOPE}
                   processors={onFailureProcessors}
-                  renderItem={renderTreeItem}
+                  onAction={({ destination, source }) => {
+                    processorsDispatch({ type: 'moveProcessor', payload: { destination, source } });
+                  }}
+                  renderItem={renderItem}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ProcessorInternal } from '../types';
 
-type ProcessorClickEventType = 'edit' | 'addOnFailure' | 'delete';
+type ProcessorClickEventType = 'edit' | 'addOnFailure' | 'delete' | 'move';
 
 export interface Props {
   processor: ProcessorInternal;
@@ -43,6 +43,13 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = ({ process
               defaultMessage: 'Add on failure handler',
             }
           )}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty size="s" onClick={() => onClick('move')}>
+          {i18n.translate('xpack.ingestPipelines.pipelineEditor.moveProcessorButtonLabel', {
+            defaultMessage: 'Move',
+          })}
         </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>

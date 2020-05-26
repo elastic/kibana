@@ -7,10 +7,5 @@
     &__itemLeft {
       margin-right: auto;
     }
-    &__itemCenter {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-    }
   }
 }

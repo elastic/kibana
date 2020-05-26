@@ -5,3 +5,4 @@
  */
 
 export { Tree } from './tree';
+export { RenderTreeItemFunction } from './types';

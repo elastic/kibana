@@ -12,6 +12,7 @@ import './tree.scss';
 import { ProcessorInternal, ProcessorSelector } from '../../types';
 
 import { TreeLeaf } from './tree_leaf';
+import { RenderTreeItemFunction } from './types';
 
 export type TreeMode = 'copy' | 'move' | 'idle';
 
@@ -19,8 +20,7 @@ export interface SelectedNode {
   selector: ProcessorSelector;
 }
 
-export interface PrivateProps {
-  processors: ProcessorInternal[];
+export interface PrivateProps extends Omit<Props, 'baseSelector' | 'onAction'> {
   selector: ProcessorSelector;
   onAction: (args: any) => void;
   mode: TreeMode;
@@ -39,6 +39,7 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   selector,
   selectedNode,
   onAction,
+  renderItem,
   mode,
 }) => {
   return (
@@ -72,9 +73,7 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
                   Move Here
                 </EuiButtonIcon>
               </EuiFlexItem>
-            ) : (
-              undefined
-            )}
+            ) : undefined}
             <EuiFlexItem>
               <TreeLeaf
                 mode={mode}
@@ -82,6 +81,7 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
                 onAction={onAction}
                 processor={processor}
                 selectedNode={selectedNode}
+                renderItem={renderItem}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -106,15 +106,22 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
 export interface Props {
   processors: ProcessorInternal[];
   baseSelector: ProcessorSelector;
+  renderItem: RenderTreeItemFunction;
   onAction: (action: { source: ProcessorSelector; destination: ProcessorSelector }) => void;
 }
 
-export const Tree: FunctionComponent<Props> = ({ processors, baseSelector, onAction }) => {
+export const Tree: FunctionComponent<Props> = ({
+  processors,
+  baseSelector,
+  onAction,
+  renderItem,
+}) => {
   const [treeMode, setTreeMode] = useState<TreeMode>('idle');
   const [selectedNode, setSelectedNode] = useState<SelectedNode | undefined>();
   return (
     <PrivateTree
-      onAction={action => {
+      renderItem={renderItem}
+      onAction={(action) => {
         if (action.type === 'selectToMove') {
           setTreeMode('move');
           setSelectedNode({ selector: action.selector });

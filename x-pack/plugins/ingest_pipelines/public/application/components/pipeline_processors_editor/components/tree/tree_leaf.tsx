@@ -5,16 +5,18 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiPanel, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ProcessorInternal, ProcessorSelector } from '../../types';
 
 import { PrivateTree, TreeMode, SelectedNode, PrivateTreeAction } from './tree';
+import { RenderTreeItemFunction } from './types';
 
 export interface Props {
   selector: ProcessorSelector;
   processor: ProcessorInternal;
   onAction: (arg: { type: PrivateTreeAction; selector: ProcessorSelector }) => void;
   mode: TreeMode;
+  renderItem: RenderTreeItemFunction;
   selectedNode?: SelectedNode;
 }
 
@@ -24,7 +26,11 @@ export const TreeLeaf: FunctionComponent<Props> = ({
   onAction,
   mode,
   selectedNode,
+  renderItem,
 }) => {
+  const onMove = () => {
+    onAction({ type: 'selectToMove', selector });
+  };
   return (
     <EuiPanel paddingSize="s">
       <EuiFlexGroup
@@ -35,16 +41,12 @@ export const TreeLeaf: FunctionComponent<Props> = ({
         gutterSize="none"
       >
         <EuiFlexItem className="processorsEditor__tree__treeLeaf__itemLeft" grow={false}>
-          {processor.type}
-        </EuiFlexItem>
-        <EuiFlexItem className="processorsEditor__tree__treeLeaf__itemCenter" grow={false}>
-          <EuiButtonEmpty onClick={() => onAction({ type: 'selectToMove', selector })}>
-            Move
-          </EuiButtonEmpty>
+          {renderItem({ processor, selector, onMove })}
         </EuiFlexItem>
       </EuiFlexGroup>
       {processor.onFailure?.length && (
         <PrivateTree
+          renderItem={renderItem}
           selectedNode={selectedNode}
           onAction={onAction}
           selector={selector.concat('onFailure')}
