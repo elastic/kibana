@@ -3,14 +3,14 @@ This ingest pipeline defined below can be used in two ways;
   1. As new docs are being indexed into kibana_code_coverage index they can be sent to this ingest pipeline
   2. When we correct a code path to team association we can _update_by_query to update all the existing docs with this POST;
 
-POST kibana_code_coverage/_update_by_query?pipeline=team_assignment_new&timeout=800s&wait_for_completion=false&conflicts=proceed
+POST kibana_code_coverage/_update_by_query?pipeline=team_assignment&timeout=800s&wait_for_completion=false&conflicts=proceed
 
 As the index grows large we may need to trim some old data or use a rollup index since we don't really expect code coverage to change too quickly.
 
 DON'T remove paths even if the code is removed unless we really want them to be marked with team 'unknown'.
 */
 
-PUT _ingest/pipeline/team_assignment_new
+PUT _ingest/pipeline/team_assignment
 {
   "description": "Kibana code coverage team assignments",
   "processors": [
