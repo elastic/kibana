@@ -19,7 +19,7 @@
 
 import { dirname } from 'path';
 import { times } from 'lodash';
-import { makeJunitReportPath } from '@kbn/test';
+import { getJunitReportPath } from '@kbn/test';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { DllCompiler } from '../../src/optimize/dynamic_dll_plugin';
 
@@ -117,7 +117,7 @@ module.exports = function (grunt) {
       reporters: pickReporters(),
 
       junitReporter: {
-        outputFile: makeJunitReportPath(ROOT, 'karma'),
+        outputFile: getJunitReportPath(ROOT, 'karma'),
         useBrowserName: false,
         nameFormatter: (_, result) => [...result.suite, result.description].join(' '),
         classNameFormatter: (_, result) => {

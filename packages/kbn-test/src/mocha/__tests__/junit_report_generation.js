@@ -25,7 +25,7 @@ import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
 import expect from '@kbn/expect';
-import { makeJunitReportPath } from '@kbn/test';
+import { getJunitReportPath } from '@kbn/test';
 
 import { setupJUnitReportGeneration } from '../junit_report_generation';
 

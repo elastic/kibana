@@ -21,7 +21,7 @@ import glob from 'glob';
 import { resolve, join } from 'path';
 import { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';
 
-export function makeJunitReportPath(rootDirectory: string, reportName: string) {
+export function getJunitReportPath(rootDirectory: string, reportName: string) {
   const folder = resolve(rootDirectory, 'target/junit', process.env.JOB || '.');
   const fileGlob = `TEST-${CI_PARALLEL_PROCESS_PREFIX}*${reportName}.xml`;
   const search = join(folder, fileGlob);
