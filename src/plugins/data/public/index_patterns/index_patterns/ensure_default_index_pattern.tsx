@@ -91,9 +91,9 @@ export const createEnsureDefaultIndexPattern = (core: CoreStart) => {
       if (redirectTarget === '/home') {
         core.application.navigateToApp('home');
       } else {
-        window.location.href = core.http.basePath.prepend(
-          `/app/management/kibana/indexPatterns?bannerMessage=${bannerMessage}`
-        );
+        core.application.navigateToApp('management', {
+          path: `/kibana/indexPatterns?bannerMessage=${bannerMessage}`,
+        });
       }
 
       // return never-resolving promise to stop resolving and wait for the url change
