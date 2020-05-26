@@ -138,6 +138,7 @@ export function createPluginStartContext<
       currentAppId$: deps.application.currentAppId$,
       capabilities: deps.application.capabilities,
       navigateToApp: deps.application.navigateToApp,
+      navigateToUrl: deps.application.navigateToUrl,
       getUrlForApp: deps.application.getUrlForApp,
       registerMountContext: (contextName, provider) =>
         deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
