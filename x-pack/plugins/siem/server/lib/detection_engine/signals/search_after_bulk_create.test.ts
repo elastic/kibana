@@ -21,7 +21,7 @@ import { ListItemArraySchema } from '../../../../../lists/common/schemas';
 describe('searchAfterAndBulkCreate', () => {
   let mockService: AlertServicesMock;
   let inputIndexPattern: string[] = [];
-  const someGuids = Array.from({ length: 13 }).map(x => uuid.v4());
+  const someGuids = Array.from({ length: 13 }).map((x) => uuid.v4());
   beforeEach(() => {
     jest.clearAllMocks();
     inputIndexPattern = ['auditbeat-*'];

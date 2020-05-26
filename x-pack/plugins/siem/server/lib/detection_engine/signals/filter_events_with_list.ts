@@ -34,7 +34,7 @@ export const filterEventsAgainstList = async ({
     const isStringableType = (val: SearchTypes) =>
       ['string', 'number', 'boolean'].includes(typeof val);
     // grab the signals with values found in the given exception lists.
-    const filteredHitsPromises = exceptionsList.map(async exceptionItem => {
+    const filteredHitsPromises = exceptionsList.map(async (exceptionItem) => {
       if (exceptionItem.values == null || exceptionItem.values.length === 0) {
         throw new Error('Malformed exception list provided');
       }
@@ -60,12 +60,12 @@ export const filterEventsAgainstList = async ({
       });
 
       // create a set of list values that were a hit
-      const badSet = new Set<SearchTypes>(listSignals.map(item => item.value));
+      const badSet = new Set<SearchTypes>(listSignals.map((item) => item.value));
 
       // do a single search after with these values.
       // painless script to do nested query in elasticsearch
       // filter out the search results that match with the values found in the list.
-      const filteredEvents = eventSearchResult.hits.hits.filter(item => {
+      const filteredEvents = eventSearchResult.hits.hits.filter((item) => {
         const eventItem = get(exceptionItem.field, item._source);
         if (eventItem != null) {
           return !badSet.has(eventItem);

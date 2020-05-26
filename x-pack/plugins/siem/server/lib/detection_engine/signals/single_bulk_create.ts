@@ -95,7 +95,7 @@ export const singleBulkCreate = async ({
   // while preventing duplicates from being added to the
   // signals index if rules are re-run over the same time
   // span. Also allow for versioning.
-  const bulkBody = filteredEvents.hits.hits.flatMap(doc => [
+  const bulkBody = filteredEvents.hits.hits.flatMap((doc) => [
     {
       create: {
         _index: signalsIndex,

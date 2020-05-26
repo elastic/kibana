@@ -233,7 +233,7 @@ export const signalRulesAlertType = ({
             services,
             index: inputIndex,
             // temporary filter out list type
-            lists: exceptionsList?.filter(item => item.values_type !== 'list'),
+            lists: exceptionsList?.filter((item) => item.values_type !== 'list'),
           });
 
           result = await searchAfterAndBulkCreate({
