@@ -18,7 +18,7 @@
  */
 
 import * as ts from 'typescript';
-import { createFailError, isFailError } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-utils';
 import * as crypto from 'crypto';
 import * as path from 'path';
 import { getProperty, getPropertyValue } from './utils';
@@ -30,7 +30,7 @@ export function* traverseNodes(maybeNodes: ts.Node | ts.Node[]): Generator<ts.No
   for (const node of nodes) {
     const children: ts.Node[] = [];
     yield node;
-    ts.forEachChild(node, child => {
+    ts.forEachChild(node, (child) => {
       children.push(child);
     });
     for (const child of children) {
@@ -44,11 +44,12 @@ export function isMakeUsageCollectorFunction(
   sourceFile: ts.SourceFile
 ): node is ts.CallExpression {
   if (ts.isCallExpression(node)) {
-    const isMakeUsageCollector = node.expression.getText(sourceFile) === 'makeUsageCollector';
+    const isMakeUsageCollector = /makeUsageCollector$/.test(node.expression.getText(sourceFile));
     if (isMakeUsageCollector) {
       return true;
     }
   }
+
   return false;
 }
 
@@ -58,56 +59,109 @@ export interface CollectorDetails {
   mapping: { value: any };
 }
 
-function extractCollectorDetails(
+function getCollectionConfigNode(
   collectorNode: ts.CallExpression,
-  typeChecker: ts.TypeChecker
-): CollectorDetails {
+  sourceFile: ts.SourceFile
+): ts.Expression {
   if (collectorNode.arguments.length > 1) {
-    throw createFailError(`makeUsageCollector does not accept more than one argument.`);
+    throw Error(`makeUsageCollector does not accept more than one argument.`);
+  }
+  const collectorConfig = collectorNode.arguments[0];
+
+  if (ts.isObjectLiteralExpression(collectorConfig)) {
+    return collectorConfig;
   }
 
-  const collectorConfig = collectorNode.arguments[0];
-  if (!ts.isObjectLiteralExpression(collectorConfig)) {
-    throw createFailError(`makeUsageCollector does not accept more than one argument.`);
+  const variableDefintionName = collectorConfig.getText();
+  for (const node of traverseNodes(sourceFile)) {
+    if (ts.isVariableDeclaration(node)) {
+      const declarationName = node.name.getText();
+      if (declarationName === variableDefintionName) {
+        if (!node.initializer) {
+          throw Error(`Unable to parse collector configs.`);
+        }
+        if (ts.isObjectLiteralExpression(node.initializer)) {
+          return node.initializer;
+        }
+        if (ts.isCallExpression(node.initializer)) {
+          const functionName = node.initializer.expression.getText(sourceFile);
+          for (const sfNode of traverseNodes(sourceFile)) {
+            if (ts.isFunctionDeclaration(sfNode)) {
+              const fnDeclarationName = sfNode.name?.getText();
+              if (fnDeclarationName === functionName) {
+                const returnStatements: ts.ReturnStatement[] = [];
+                for (const fnNode of traverseNodes(sfNode)) {
+                  if (ts.isReturnStatement(fnNode) && fnNode.parent === sfNode.body) {
+                    returnStatements.push(fnNode);
+                  }
+                }
+
+                if (returnStatements.length > 1) {
+                  throw Error(`Collector function cannot have multiple return statements.`);
+                }
+                if (returnStatements.length === 0) {
+                  throw Error(`Collector function must have a return statement.`);
+                }
+                if (!returnStatements[0].expression) {
+                  throw Error(`Collector function return statement must be an expression.`);
+                }
+
+                return returnStatements[0].expression;
+              }
+            }
+          }
+        }
+      }
+    }
   }
+
+  throw Error(`makeUsageCollector argument must be an object.`);
+}
+
+function extractCollectorDetails(
+  collectorNode: ts.CallExpression,
+  typeChecker: ts.TypeChecker,
+  sourceFile: ts.SourceFile
+): CollectorDetails {
+  if (collectorNode.arguments.length > 1) {
+    throw Error(`makeUsageCollector does not accept more than one argument.`);
+  }
+
+  const collectorConfig = getCollectionConfigNode(collectorNode, sourceFile);
+
   const typeProperty = getProperty(collectorConfig, 'type');
   if (!typeProperty) {
-    throw createFailError(`usageCollector.type must be defined.`);
+    throw Error(`usageCollector.type must be defined.`);
   }
   const typePropertyValue = getPropertyValue(typeProperty);
   if (!typePropertyValue || typeof typePropertyValue !== 'string') {
-    throw createFailError(`usageCollector.type must be be a non-empty string literal.`);
+    throw Error(`usageCollector.type must be be a non-empty string literal.`);
   }
 
   const fetchProperty = getProperty(collectorConfig, 'fetch');
   if (!fetchProperty) {
-    throw createFailError(`usageCollector.fetch must be defined.`);
+    throw Error(`usageCollector.fetch must be defined.`);
   }
   const mappingProperty = getProperty(collectorConfig, 'mapping');
   if (!mappingProperty) {
-    throw createFailError(`usageCollector.mapping must be defined.`);
+    throw Error(`usageCollector.mapping must be defined.`);
   }
 
   const mappingPropertyValue = getPropertyValue(mappingProperty);
   if (!mappingPropertyValue || typeof mappingPropertyValue !== 'object') {
-    throw createFailError(`usageCollector.mapping must be be an object.`);
+    throw Error(`usageCollector.mapping must be be an object.`);
   }
 
   const collectorNodeType = collectorNode.typeArguments;
   if (!collectorNodeType || collectorNodeType?.length === 0) {
-    throw createFailError(
-      `makeUsageCollector requires a Usage type makeUsageCollector<Usage>({ ... }).`
-    );
+    throw Error(`makeUsageCollector requires a Usage type makeUsageCollector<Usage>({ ... }).`);
   }
 
   const usageTypeNode = collectorNodeType[0];
   const usageTypeName = usageTypeNode.getText();
   const usageType: Descriptor = getDescriptor(usageTypeNode, typeChecker);
   const snapshot = fetchProperty.getFullText();
-  const fnHash = crypto
-    .createHash('md5')
-    .update(snapshot)
-    .digest('hex');
+  const fnHash = crypto.createHash('md5').update(snapshot).digest('hex');
 
   return {
     collectorName: typePropertyValue,
@@ -122,15 +176,39 @@ function extractCollectorDetails(
   };
 }
 
+export function sourceHasUsageCollector(sourceFile: ts.SourceFile) {
+  if (sourceFile.isDeclarationFile === true || (sourceFile as any).identifierCount === 0) {
+    return false;
+  }
+
+  const identifiers = (sourceFile as any).identifiers;
+  if (
+    (!identifiers.get('makeUsageCollector') && !identifiers.get('type')) ||
+    !identifiers.get('fetch')
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 export type ParsedUsageCollection = [string, CollectorDetails];
+
 export function* parseUsageCollection(
   sourceFile: ts.SourceFile,
   typeChecker: ts.TypeChecker
 ): Generator<ParsedUsageCollection> {
   const relativePath = path.relative(process.cwd(), sourceFile.fileName);
-  for (const node of traverseNodes(sourceFile)) {
-    if (isMakeUsageCollectorFunction(node, sourceFile)) {
-      yield [relativePath, extractCollectorDetails(node, typeChecker)];
+  if (sourceHasUsageCollector(sourceFile)) {
+    for (const node of traverseNodes(sourceFile)) {
+      if (isMakeUsageCollectorFunction(node, sourceFile)) {
+        try {
+          const collectorDetails = extractCollectorDetails(node, typeChecker, sourceFile);
+          yield [relativePath, collectorDetails];
+        } catch (err) {
+          throw createFailError(`Error extracting collector in ${relativePath}\n${err}`);
+        }
+      }
     }
   }
 }

@@ -16,32 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet, UsageCollector } from '../../../plugins/usage_collection/server/collector';
 
-const collectorSet = new CollectorSet({
-  logger: null,
-  maximumWaitTimeForAllCollectorsInS: 0,
-});
+import { ParsedUsageCollection } from '../ts_parser';
 
-interface Usage {
-  locale?: string;
-}
-
-export class NestedInside {
-  collector?: UsageCollector<Usage>;
-  createMyCollector() {
-    this.collector = collectorSet.makeUsageCollector<Usage>({
-      type: 'my_nested_collector',
-      fetch: async () => {
-        return {
-          locale: 'en',
-        };
-      },
-      mapping: {
+export const parsedNestedCollector: ParsedUsageCollection = [
+  'src/dev/telemetry/__fixture__/nested_collector.ts',
+  {
+    collectorName: 'my_nested_collector',
+    mapping: {
+      value: {
         locale: {
           type: 'keyword',
         },
       },
-    });
-  }
-}
+    },
+    fetch: {
+      typeName: 'Usage',
+      typeDescriptor: {
+        locale: {
+          kind: 142,
+        },
+      },
+      signature: 'c213711f0b278700c8220552bc38d1f6',
+    },
+  },
+];

@@ -49,7 +49,7 @@ export function registerUiMetricUsageCollector(
   });
 
   const collector = usageCollection.makeUsageCollector({
-    type: UI_METRIC_USAGE_TYPE,
+    type: 'ui_metric',
     fetch: async () => {
       const savedObjectsClient = getSavedObjectsClient();
       if (typeof savedObjectsClient === 'undefined') {

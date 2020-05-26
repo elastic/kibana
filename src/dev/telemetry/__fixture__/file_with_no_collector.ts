@@ -16,32 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet, UsageCollector } from '../../../plugins/usage_collection/server/collector';
 
-const collectorSet = new CollectorSet({
-  logger: null,
-  maximumWaitTimeForAllCollectorsInS: 0,
-});
-
-interface Usage {
-  locale?: string;
-}
-
-export class NestedInside {
-  collector?: UsageCollector<Usage>;
-  createMyCollector() {
-    this.collector = collectorSet.makeUsageCollector<Usage>({
-      type: 'my_nested_collector',
-      fetch: async () => {
-        return {
-          locale: 'en',
-        };
-      },
-      mapping: {
-        locale: {
-          type: 'keyword',
-        },
-      },
-    });
-  }
-}
+export const SOME_CONST: number = 123;

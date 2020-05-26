@@ -1,0 +1,17 @@
+{
+  "properties": {
+    "csp": {
+      "properties": {
+        "strict": {
+          "type": "boolean"
+        },
+        "warnLegacyBrowsers": {
+          "type": "boolean"
+        },
+        "rulesChangedFromDefault": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

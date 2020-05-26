@@ -16,32 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet, UsageCollector } from '../../../plugins/usage_collection/server/collector';
 
-const collectorSet = new CollectorSet({
-  logger: null,
-  maximumWaitTimeForAllCollectorsInS: 0,
+import * as ts from 'typescript';
+import * as path from 'path';
+import { extractCollectors, getProgramPaths } from './extract_collectors';
+import { parseTelemetryRC } from './config';
+
+describe('extractCollectors', () => {
+  it('extracts collectors given rc file', async () => {
+    const configRoot = path.join(__dirname, '__fixture__');
+    const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
+    if (!tsConfig) {
+      throw new Error('Could not find a valid tsconfig.json.');
+    }
+    const configs = await parseTelemetryRC(configRoot);
+    expect(configs).toHaveLength(1);
+    const programPaths = await getProgramPaths(configs[0]);
+
+    const results = [...extractCollectors(programPaths, tsConfig)];
+    expect(results).toHaveLength(2);
+  });
 });
-
-interface Usage {
-  locale?: string;
-}
-
-export class NestedInside {
-  collector?: UsageCollector<Usage>;
-  createMyCollector() {
-    this.collector = collectorSet.makeUsageCollector<Usage>({
-      type: 'my_nested_collector',
-      fetch: async () => {
-        return {
-          locale: 'en',
-        };
-      },
-      mapping: {
-        locale: {
-          type: 'keyword',
-        },
-      },
-    });
-  }
-}

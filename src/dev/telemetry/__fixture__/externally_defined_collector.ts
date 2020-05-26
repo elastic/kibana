@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet, UsageCollector } from '../../../plugins/usage_collection/server/collector';
+import { CollectorSet } from '../../../plugins/usage_collection/server/collector';
 
 const collectorSet = new CollectorSet({
   logger: null,
@@ -24,24 +24,47 @@ const collectorSet = new CollectorSet({
 });
 
 interface Usage {
-  locale?: string;
+  locale: string;
 }
 
-export class NestedInside {
-  collector?: UsageCollector<Usage>;
-  createMyCollector() {
-    this.collector = collectorSet.makeUsageCollector<Usage>({
-      type: 'my_nested_collector',
-      fetch: async () => {
-        return {
-          locale: 'en',
-        };
+function createCollector() {
+  return {
+    type: 'from_fn_collector',
+    isReady: () => true,
+    fetch(): Usage {
+      return {
+        locale: 'en',
+      };
+    },
+    mapping: {
+      locale: {
+        type: 'keyword',
       },
-      mapping: {
-        locale: {
-          type: 'keyword',
-        },
+    },
+  };
+}
+
+export function defineCollectorFromVariable() {
+  const fromVarCollector = {
+    type: 'from_variable_collector',
+    isReady: () => true,
+    fetch(): Usage {
+      return {
+        locale: 'en',
+      };
+    },
+    mapping: {
+      locale: {
+        type: 'keyword',
       },
-    });
-  }
+    },
+  };
+
+  collectorSet.makeUsageCollector<Usage>(fromVarCollector);
+}
+
+export function defineCollectorFromFn() {
+  const fromFnCollector = createCollector();
+
+  collectorSet.makeUsageCollector<Usage>(fromFnCollector);
 }

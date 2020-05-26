@@ -16,32 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet, UsageCollector } from '../../../plugins/usage_collection/server/collector';
 
-const collectorSet = new CollectorSet({
-  logger: null,
-  maximumWaitTimeForAllCollectorsInS: 0,
-});
+import * as _ from 'lodash';
+import { TaskContext } from './task_context';
+import { generateMapping } from '../manage_mapping';
 
-interface Usage {
-  locale?: string;
-}
-
-export class NestedInside {
-  collector?: UsageCollector<Usage>;
-  createMyCollector() {
-    this.collector = collectorSet.makeUsageCollector<Usage>({
-      type: 'my_nested_collector',
-      fetch: async () => {
-        return {
-          locale: 'en',
-        };
-      },
-      mapping: {
-        locale: {
-          type: 'keyword',
-        },
-      },
-    });
-  }
+export function generateMappingsTask({ roots }: TaskContext) {
+  return roots.map((root) => ({
+    task: () => {
+      const mapping = generateMapping(root.parsedCollections);
+      root.mapping = mapping;
+    },
+    title: `Generating mapping for ${root.config.root}`,
+  }));
 }

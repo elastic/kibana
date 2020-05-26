@@ -16,32 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet, UsageCollector } from '../../../plugins/usage_collection/server/collector';
 
-const collectorSet = new CollectorSet({
-  logger: null,
-  maximumWaitTimeForAllCollectorsInS: 0,
-});
+import chalk from 'chalk';
+import { normalizePath } from '../utils';
 
-interface Usage {
-  locale?: string;
-}
+export class ErrorReporter {
+  errors: string[] = [];
 
-export class NestedInside {
-  collector?: UsageCollector<Usage>;
-  createMyCollector() {
-    this.collector = collectorSet.makeUsageCollector<Usage>({
-      type: 'my_nested_collector',
-      fetch: async () => {
-        return {
-          locale: 'en',
-        };
-      },
-      mapping: {
-        locale: {
-          type: 'keyword',
-        },
-      },
-    });
+  withContext(context: any) {
+    return { report: (error: any) => this.report(error, context) };
+  }
+  report(error: any, context: any) {
+    this.errors.push(
+      `${chalk.white.bgRed(' TELEMETRY ERROR ')} Error in ${normalizePath(context.name)}\n${error}`
+    );
   }
 }

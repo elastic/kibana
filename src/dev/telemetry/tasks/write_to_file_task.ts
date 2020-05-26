@@ -16,32 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet, UsageCollector } from '../../../plugins/usage_collection/server/collector';
 
-const collectorSet = new CollectorSet({
-  logger: null,
-  maximumWaitTimeForAllCollectorsInS: 0,
-});
+import * as path from 'path';
+import { ErrorReporter, serializeToJson, serializeToJson5, writeFileAsync } from '../utils';
 
-interface Usage {
-  locale?: string;
-}
+import { TaskContext } from './task_context';
+import { generateMapping } from '../manage_mapping';
 
-export class NestedInside {
-  collector?: UsageCollector<Usage>;
-  createMyCollector() {
-    this.collector = collectorSet.makeUsageCollector<Usage>({
-      type: 'my_nested_collector',
-      fetch: async () => {
-        return {
-          locale: 'en',
-        };
-      },
-      mapping: {
-        locale: {
-          type: 'keyword',
-        },
-      },
-    });
-  }
+export function writeToFileTask({ roots }: TaskContext) {
+  return roots.map((root) => ({
+    task: async () => {
+      const fullPath = path.resolve(process.cwd(), root.config.output);
+      const mapping = generateMapping(root.parsedCollections);
+      if (Object.keys(mapping.properties).length > 0) {
+        const serializedMapping = JSON.stringify(mapping, null, 2).concat('\n');
+        await writeFileAsync(fullPath, serializedMapping);
+      }
+    },
+    title: `Writing mapping for ${root.config.root}`,
+  }));
 }

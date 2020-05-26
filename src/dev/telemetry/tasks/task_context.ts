@@ -16,32 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet, UsageCollector } from '../../../plugins/usage_collection/server/collector';
 
-const collectorSet = new CollectorSet({
-  logger: null,
-  maximumWaitTimeForAllCollectorsInS: 0,
-});
-
-interface Usage {
-  locale?: string;
+import { TelemetryRC } from '../config';
+import { ErrorReporter } from './error_reporter';
+import { ParsedUsageCollection } from '../ts_parser';
+export interface TelemetryRoot {
+  config: TelemetryRC;
+  parsedCollections: ParsedUsageCollection[];
+  mapping: any;
 }
 
-export class NestedInside {
-  collector?: UsageCollector<Usage>;
-  createMyCollector() {
-    this.collector = collectorSet.makeUsageCollector<Usage>({
-      type: 'my_nested_collector',
-      fetch: async () => {
-        return {
-          locale: 'en',
-        };
-      },
-      mapping: {
-        locale: {
-          type: 'keyword',
-        },
-      },
-    });
-  }
+export interface TaskContext {
+  reporter: ErrorReporter;
+  roots: TelemetryRoot[];
+}
+
+export function createTaskContext(): TaskContext {
+  const reporter = new ErrorReporter();
+  return {
+    roots: [],
+    reporter,
+  };
 }

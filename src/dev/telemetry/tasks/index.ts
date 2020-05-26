@@ -16,32 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet, UsageCollector } from '../../../plugins/usage_collection/server/collector';
 
-const collectorSet = new CollectorSet({
-  logger: null,
-  maximumWaitTimeForAllCollectorsInS: 0,
-});
-
-interface Usage {
-  locale?: string;
-}
-
-export class NestedInside {
-  collector?: UsageCollector<Usage>;
-  createMyCollector() {
-    this.collector = collectorSet.makeUsageCollector<Usage>({
-      type: 'my_nested_collector',
-      fetch: async () => {
-        return {
-          locale: 'en',
-        };
-      },
-      mapping: {
-        locale: {
-          type: 'keyword',
-        },
-      },
-    });
-  }
-}
+export { parseConfigsTask } from './parse_configs_task';
+export { extractCollectorsTask } from './extract_collectors_task';
+export { generateMappingsTask } from './generate_mappings_task';
+export { writeToFileTask } from './write_to_file_task';
+export { ErrorReporter } from './error_reporter';
+export { TaskContext, createTaskContext } from './task_context';

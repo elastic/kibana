@@ -16,32 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet, UsageCollector } from '../../../plugins/usage_collection/server/collector';
 
-const collectorSet = new CollectorSet({
-  logger: null,
-  maximumWaitTimeForAllCollectorsInS: 0,
+import * as path from 'path';
+import { parseTelemetryRC } from './config';
+
+describe('parseTelemetryRC', () => {
+  it('throw if config path is not absolute', async () => {
+    const fixtureDir = './__fixture__/';
+    await expect(parseTelemetryRC(fixtureDir)).rejects.toThrowError();
+  });
+
+  it('returns parsed rc file', async () => {
+    const fixtureDir = path.join(__dirname, '__fixture__');
+    const config = await parseTelemetryRC(fixtureDir);
+    expect(config).toStrictEqual([
+      {
+        root: fixtureDir,
+        output: fixtureDir,
+        exclude: ['./unmapped_collector.ts'],
+      },
+    ]);
+  });
 });
-
-interface Usage {
-  locale?: string;
-}
-
-export class NestedInside {
-  collector?: UsageCollector<Usage>;
-  createMyCollector() {
-    this.collector = collectorSet.makeUsageCollector<Usage>({
-      type: 'my_nested_collector',
-      fetch: async () => {
-        return {
-          locale: 'en',
-        };
-      },
-      mapping: {
-        locale: {
-          type: 'keyword',
-        },
-      },
-    });
-  }
-}
