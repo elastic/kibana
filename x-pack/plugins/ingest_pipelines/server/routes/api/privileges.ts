@@ -30,7 +30,7 @@ export const registerPrivilegesRoute = ({ license, router, config }: RouteDepend
       };
 
       // Skip the privileges check if security is not enabled
-      if (!config.isSecurityEnabled) {
+      if (!config.isSecurityEnabled()) {
         return res.ok({ body: privilegesResult });
       }
 
