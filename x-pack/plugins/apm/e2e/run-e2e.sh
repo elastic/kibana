@@ -123,8 +123,9 @@ yarn wait-on -i 500 -w 500 http-get://admin:changeme@localhost:$KIBANA_PORT/api/
 ## See: https://github.com/elastic/kibana/issues/66326
 if [ -e kibana.log ] ; then
     grep -m 1 "http server running" <(tail -f -n +1 kibana.log)
-    grep -m 1 "http server running" kibana.log
     echo "\n✅ Kibana server running...\n"
+    grep -m 1 "bundles compiled successfully" <(tail -f -n +1 kibana.log)
+    echo "\n✅ Kibana bundles have been compiled...\n"
 fi
 
 echo "\n✅ Setup completed successfully. Running tests...\n"
