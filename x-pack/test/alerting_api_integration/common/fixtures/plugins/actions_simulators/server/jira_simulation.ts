@@ -27,7 +27,7 @@ export function initPlugin(router: IRouter, path: string) {
       },
       validate: {},
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -48,7 +48,7 @@ export function initPlugin(router: IRouter, path: string) {
       },
       validate: {},
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -70,7 +70,7 @@ export function initPlugin(router: IRouter, path: string) {
       },
       validate: {},
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -94,7 +94,7 @@ export function initPlugin(router: IRouter, path: string) {
       },
       validate: {},
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory

@@ -106,7 +106,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
 
     public async assertAnalyticsRowFields(analyticsId: string, expectedRow: object) {
       const rows = await this.parseAnalyticsTable();
-      const analyticsRow = rows.filter(row => row.id === analyticsId)[0];
+      const analyticsRow = rows.filter((row) => row.id === analyticsId)[0];
       expect(analyticsRow).to.eql(expectedRow);
     }
 

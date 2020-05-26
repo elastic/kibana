@@ -25,7 +25,7 @@ const makeProperty = (options, mockStyle, field = mockField) => {
     field,
     new MockLayer(mockStyle),
     () => {
-      return x => x + '_format';
+      return (x) => x + '_format';
     }
   );
 };
@@ -96,7 +96,7 @@ describe('ordinal', () => {
     const component = shallow(legendRow);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -117,7 +117,7 @@ describe('categorical', () => {
     const component = shallow(legendRow);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -153,7 +153,7 @@ describe('categorical', () => {
 });
 
 function makeFeatures(foobarPropValues) {
-  return foobarPropValues.map(value => {
+  return foobarPropValues.map((value) => {
     return {
       type: 'Feature',
       properties: {
@@ -230,7 +230,7 @@ describe('supportsFieldMeta', () => {
 
   test('should not support it when field does not', () => {
     const field = Object.create(mockField);
-    field.supportsFieldMeta = function() {
+    field.supportsFieldMeta = function () {
       return false;
     };
 

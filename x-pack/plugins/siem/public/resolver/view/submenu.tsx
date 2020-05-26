@@ -72,13 +72,13 @@ const OptionList = React.memo(
         <EuiSelectable
           singleSelection={true}
           options={options}
-          onChange={newOptions => {
+          onChange={(newOptions) => {
             setOptions(newOptions);
           }}
           listProps={{ showIcons: true, bordered: true }}
           isLoading={isLoading}
         >
-          {list => list}
+          {(list) => list}
         </EuiSelectable>
       ),
       [isLoading, options]

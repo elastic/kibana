@@ -21,8 +21,8 @@ import del from 'del';
 import { join } from 'path';
 import { execFileSync as exec } from 'child_process';
 
-export default function(grunt) {
-  grunt.registerTask('docker:docs', 'Build docs from docker', function() {
+export default function (grunt) {
+  grunt.registerTask('docker:docs', 'Build docs from docker', function () {
     const rootPath = grunt.config.get('root');
     const composePath = join(rootPath, 'tasks/docker_docs/docker-compose.yml');
     const htmlDocsDir = join(rootPath, 'html_docs');

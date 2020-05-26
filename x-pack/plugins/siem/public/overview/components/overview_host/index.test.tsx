@@ -106,12 +106,9 @@ describe('OverviewHost', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-section-title"]')
-        .first()
-        .text()
-    ).toEqual('Host events');
+    expect(wrapper.find('[data-test-subj="header-section-title"]').first().text()).toEqual(
+      'Host events'
+    );
   });
 
   test('it renders an empty subtitle while loading', () => {
@@ -121,12 +118,7 @@ describe('OverviewHost', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-panel-subtitle"]')
-        .first()
-        .text()
-    ).toEqual('');
+    expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').first().text()).toEqual('');
   });
 
   test('it renders the expected event count in the subtitle after loading events', async () => {
@@ -140,11 +132,8 @@ describe('OverviewHost', () => {
     await wait();
     wrapper.update();
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-panel-subtitle"]')
-        .first()
-        .text()
-    ).toEqual('Showing: 16 events');
+    expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').first().text()).toEqual(
+      'Showing: 16 events'
+    );
   });
 });

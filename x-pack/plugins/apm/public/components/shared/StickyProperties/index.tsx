@@ -14,7 +14,7 @@ import {
   fontSizes,
   px,
   truncate,
-  units
+  units,
 } from '../../../style/variables';
 
 export interface IStickyProperty {
@@ -70,7 +70,7 @@ function getPropertyLabel({ fieldName, label }: Partial<IStickyProperty>) {
 function getPropertyValue({
   val,
   fieldName,
-  truncated = false
+  truncated = false,
 }: Partial<IStickyProperty>) {
   if (truncated) {
     return (
@@ -84,7 +84,7 @@ function getPropertyValue({
 }
 
 export function StickyProperties({
-  stickyProperties
+  stickyProperties,
 }: {
   stickyProperties: IStickyProperty[];
 }) {
@@ -100,11 +100,11 @@ export function StickyProperties({
    * Hopefully we can make EUI handle this better and remove all this.
    */
   const itemStyles = {
-    padding: '1em 1em 1em 0'
+    padding: '1em 1em 1em 0',
   };
   const groupStyles = {
     marginTop: '-1em',
-    marginBottom: '-1em'
+    marginBottom: '-1em',
   };
 
   return (
@@ -116,7 +116,7 @@ export function StickyProperties({
               key={i}
               style={{
                 minWidth: width,
-                ...itemStyles
+                ...itemStyles,
               }}
               grow={false}
             >

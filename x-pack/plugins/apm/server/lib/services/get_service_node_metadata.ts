@@ -7,11 +7,11 @@
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../helpers/setup_request';
 import {
   HOST_NAME,
-  CONTAINER_ID
+  CONTAINER_ID,
 } from '../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
@@ -20,7 +20,7 @@ import { getServiceNodesProjection } from '../../../common/projections/service_n
 export async function getServiceNodeMetadata({
   serviceName,
   serviceNodeName,
-  setup
+  setup,
 }: {
   serviceName: string;
   serviceNodeName: string;
@@ -32,7 +32,7 @@ export async function getServiceNodeMetadata({
     getServiceNodesProjection({
       setup,
       serviceName,
-      serviceNodeName
+      serviceNodeName,
     }),
     {
       body: {
@@ -41,17 +41,17 @@ export async function getServiceNodeMetadata({
           host: {
             terms: {
               field: HOST_NAME,
-              size: 1
-            }
+              size: 1,
+            },
           },
           containerId: {
             terms: {
               field: CONTAINER_ID,
-              size: 1
-            }
-          }
-        }
-      }
+              size: 1,
+            },
+          },
+        },
+      },
     }
   );
 
@@ -60,6 +60,6 @@ export async function getServiceNodeMetadata({
   return {
     host: response.aggregations?.host.buckets[0]?.key || NOT_AVAILABLE_LABEL,
     containerId:
-      response.aggregations?.containerId.buckets[0]?.key || NOT_AVAILABLE_LABEL
+      response.aggregations?.containerId.buckets[0]?.key || NOT_AVAILABLE_LABEL,
   };
 }

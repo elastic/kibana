@@ -22,7 +22,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     this._getFieldFormatter = getFieldFormatter;
   }
 
-  getValueSuggestions = query => {
+  getValueSuggestions = (query) => {
     const field = this.getField();
     const fieldSource = this._getFieldSource();
     return fieldSource && field ? fieldSource.getValueSuggestions(field, query) : [];
@@ -33,7 +33,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
       return SOURCE_META_ID_ORIGIN;
     }
 
-    const join = this._layer.getValidJoins().find(join => {
+    const join = this._layer.getValidJoins().find((join) => {
       return join.getRightJoinSource().hasMatchingMetricField(fieldName);
     });
     return join ? join.getSourceMetaDataRequestId() : null;
@@ -248,7 +248,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
       return null;
     }
 
-    const ordered = fieldMetaData[rootFieldName].buckets.map(bucket => {
+    const ordered = fieldMetaData[rootFieldName].buckets.map((bucket) => {
       return {
         key: bucket.key,
         count: bucket.doc_count,

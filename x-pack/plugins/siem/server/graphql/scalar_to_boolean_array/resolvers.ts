@@ -68,8 +68,8 @@ const convertToBoolean = (value: object | number | boolean | string): boolean =>
 const convertArrayToBoolean = (values: any[]): boolean[] | boolean => {
   if (Array.isArray(values)) {
     return values
-      .filter(item => item != null)
-      .map(item => convertArrayToBoolean(item)) as boolean[];
+      .filter((item) => item != null)
+      .map((item) => convertArrayToBoolean(item)) as boolean[];
   }
   return convertToBoolean(values);
 };

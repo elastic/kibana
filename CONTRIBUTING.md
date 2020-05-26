@@ -490,6 +490,14 @@ module.exports = {
 };
 ```
 
+APM [Real User Monitoring agent](https://www.elastic.co/guide/en/apm/agent/rum-js/current/index.html) is not available in the Kibana distributables,
+however the agent can be enabled by setting `ELASTIC_APM_ACTIVE` to `true`.
+flags
+```
+ELASTIC_APM_ACTIVE=true yarn start
+// activates both Node.js and RUM agent
+```
+
 Once the agent is active, it will trace all incoming HTTP requests to Kibana, monitor for errors, and collect process-level metrics.
 The collected data will be sent to the APM Server and is viewable in the APM UI in Kibana.
 

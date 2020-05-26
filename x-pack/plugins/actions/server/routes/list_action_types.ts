@@ -17,13 +17,13 @@ import { BASE_ACTION_API_PATH } from '../../common';
 export const listActionTypesRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.get(
     {
-      path: `${BASE_ACTION_API_PATH}/types`,
+      path: `${BASE_ACTION_API_PATH}/list_action_types`,
       validate: {},
       options: {
         tags: ['access:actions-read'],
       },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
       req: KibanaRequest<unknown, unknown, unknown>,
       res: KibanaResponseFactory
