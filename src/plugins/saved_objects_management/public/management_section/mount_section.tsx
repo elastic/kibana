@@ -51,6 +51,16 @@ export const mountManagementSection = async ({
 
   const capabilities = coreStart.application.capabilities;
 
+  const RedirectToHomeIfUnauthorized: React.FunctionComponent = ({ children }) => {
+    const allowed = capabilities?.management?.kibana?.objects ?? false;
+
+    if (!allowed) {
+      coreStart.application.navigateToApp('home');
+      return null;
+    }
+    return children! as React.ReactElement;
+  };
+
   ReactDOM.render(
     <I18nProvider>
       <Router history={history}>
@@ -90,15 +100,4 @@ export const mountManagementSection = async ({
   return () => {
     ReactDOM.unmountComponentAtNode(element);
   };
-};
-
-const RedirectToHomeIfUnauthorized: React.FunctionComponent<{
-  capabilities: Capabilities;
-}> = ({ children, capabilities }) => {
-  const allowed = capabilities?.management?.kibana?.objects ?? false;
-  if (!allowed) {
-    window.location.hash = '/home';
-    return null;
-  }
-  return children! as React.ReactElement;
 };
