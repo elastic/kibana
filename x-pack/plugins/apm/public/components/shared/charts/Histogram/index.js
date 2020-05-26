@@ -67,6 +67,8 @@ export class HistogramInner extends PureComponent {
             xCenter: (bucketFound.x0 + bucketFound.x) / 2
           }
         });
+      } else {
+        this.setState({ hoveredBucket: {} });
       }
     }
   }

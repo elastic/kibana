@@ -15,12 +15,7 @@ import {
   SetupUIFilters
 } from '../helpers/setup_request';
 import { rangeFilter } from '../helpers/range_filter';
-import { BUCKET_TARGET_COUNT } from '../transactions/constants';
-
-// TODO: refactor
-function getBucketSize({ start, end }: SetupTimeRange) {
-  return Math.floor((end - start) / BUCKET_TARGET_COUNT);
-}
+import { getBucketSize } from '../helpers/get_bucket_size';
 
 export async function getErrorRate({
   serviceName,
@@ -32,7 +27,7 @@ export async function getErrorRate({
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const { start, end, uiFiltersES, client, indices } = setup;
-  const bucketSize = getBucketSize({ start, end });
+  const { intervalString } = getBucketSize(start, end, 'auto');
   const groupIdTerm = groupId ? [{ term: { [ERROR_GROUP_ID]: groupId } }] : [];
 
   const filter: ESFilter[] = [
@@ -54,15 +49,12 @@ export async function getErrorRate({
   ];
 
   const aggs = {
-    count: {
-      histogram: {
+    response_times: {
+      date_histogram: {
         field: '@timestamp',
+        fixed_interval: intervalString,
         min_doc_count: 0,
-        interval: bucketSize,
-        extended_bounds: {
-          min: start,
-          max: end
-        }
+        extended_bounds: { min: start, max: end }
       },
       aggs: {
         processorEventCount: {
@@ -88,17 +80,17 @@ export async function getErrorRate({
   };
 
   const resp = await client.search(params);
-  return resp.aggregations?.count.buckets.map(histogram => {
+  return resp.aggregations?.response_times.buckets.map(responseTime => {
     const {
       transaction: transactionCount = 1,
       error: errorCount = 0
-    } = histogram.processorEventCount.buckets.reduce(
+    } = responseTime.processorEventCount.buckets.reduce(
       (acc, { key, doc_count }) => ({ ...acc, [key]: doc_count }),
       {} as { transaction?: number; error?: number }
     );
 
     return {
-      x: histogram.key,
+      x: responseTime.key,
       y: errorCount / transactionCount
     };
   });
