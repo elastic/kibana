@@ -77,22 +77,16 @@ export function KbnAggTable(config, RecursionHelper) {
         }
 
         let csvRows = [];
-        rows.map((row) => {
+        for (const row of rows) {
           const rowArray = [];
-          Object.entries(row).map(([k, v]) => {
-            const column = columns.find((c) => c.id === k);
-
-            if (!column) return;
-
-            const columnIdx = columns.findIndex((c) => c.id === k);
+          for (const col of columns) {
+            const value = row[col.id];
             const formattedValue =
-              formatted && column && column.formatter
-                ? escape(column.formatter.convert(v))
-                : escape(v);
-            rowArray.splice(columnIdx, 0, formattedValue);
-          });
+              formatted && col.formatter ? escape(col.formatter.convert(value)) : escape(value);
+            rowArray.push(formattedValue);
+          }
           csvRows = [...csvRows, rowArray];
-        });
+        }
 
         // add the columns to the rows
         csvRows.unshift(
