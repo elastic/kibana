@@ -11,17 +11,17 @@ import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineProps, OpenTimelineResult, ActionTimelineToShow } from './types';
 import { SearchRow } from './search_row';
 import { TimelinesTable } from './timelines_table';
-import { ImportDataModal } from '../import_data_modal';
+import { ImportDataModal } from '../../components/import_data_modal';
 import * as i18n from './translations';
 import { importTimelines } from '../../containers/timeline/api';
-
 import {
   UtilityBarGroup,
   UtilityBarText,
   UtilityBar,
   UtilityBarSection,
   UtilityBarAction,
-} from '../utility_bar';
+} from '../../components/utility_bar';
+
 import { useEditTimelineBatchActions } from './edit_timeline_batch_actions';
 import { useEditTimelineActions } from './edit_timeline_actions';
 import { EditOneTimelineAction } from './export_timeline';
@@ -151,7 +151,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         />
 
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
-          {tabs}
+          {!!tabs && tabs}
           <SearchRow
             data-test-subj="search-row"
             onlyFavorites={onlyFavorites}
