@@ -21,9 +21,7 @@ import {
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { ANALYTICS_STEPS } from '../../page';
 
-const defaultPredictionField = 'ml';
-
-function getStringValue(value) {
+function getStringValue(value: number | undefined) {
   return value !== undefined ? `${value}` : UNSET_CONFIG_ITEM;
 }
 
@@ -116,7 +114,7 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
       title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.nNeighbors', {
         defaultMessage: 'Method',
       }),
-      description: getStringValue(method),
+      description: method !== undefined ? method : UNSET_CONFIG_ITEM,
     });
 
     hyperThirdCol.push({
@@ -172,7 +170,7 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
           defaultMessage: 'Prediction field name',
         }
       ),
-      description: `${dependentVariable}_prediction`,
+      description: predictionFieldName ? predictionFieldName : `${dependentVariable}_prediction`,
     });
 
     hyperSecondCol.push(

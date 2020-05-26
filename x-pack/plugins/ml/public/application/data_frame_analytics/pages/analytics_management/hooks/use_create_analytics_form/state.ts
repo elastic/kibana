@@ -27,7 +27,7 @@ export enum DEFAULT_MODEL_MEMORY_LIMIT {
   classification = '100mb',
 }
 
-export const DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES = 2;
+export const DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES = 0;
 export const UNSET_CONFIG_ITEM = '--';
 
 export type EsIndexName = string;
@@ -90,7 +90,7 @@ export interface State {
     numTopFeatureImportanceValuesValid: boolean;
     numTopClasses: number;
     outlierFraction: undefined | number;
-    predictionFieldName: string;
+    predictionFieldName: undefined | string;
     previousJobType: null | AnalyticsJobType;
     previousSourceIndex: EsIndexName | undefined;
     requiredFieldsError: string | undefined;
@@ -165,7 +165,7 @@ export const getInitialState = (): State => ({
     numTopFeatureImportanceValuesValid: true,
     numTopClasses: 2,
     outlierFraction: undefined,
-    predictionFieldName: '',
+    predictionFieldName: undefined,
     previousJobType: null,
     previousSourceIndex: undefined, // TODO: deprecated - remove
     requiredFieldsError: undefined,
@@ -246,7 +246,6 @@ const getExcludesFields = (excluded: string[]) => {
   return updatedExcluded;
 };
 
-// TODO: add in hyper parameters
 export const getJobConfigFromFormState = (
   formState: State['form']
 ): DeepPartial<DataFrameAnalyticsConfig> => {
@@ -276,26 +275,53 @@ export const getJobConfigFromFormState = (
     formState.jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
     formState.jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
   ) {
-    jobConfig.analysis = {
-      [formState.jobType]: {
-        dependent_variable: formState.dependentVariable,
-        num_top_feature_importance_values: formState.numTopFeatureImportanceValues,
-        training_percent: formState.trainingPercent,
+    let analysis = {
+      dependent_variable: formState.dependentVariable,
+      num_top_feature_importance_values: formState.numTopFeatureImportanceValues,
+      training_percent: formState.trainingPercent,
+    };
+
+    analysis = Object.assign(
+      analysis,
+      formState.predictionFieldName && { prediction_field_name: formState.predictionFieldName },
+      formState.eta && { eta: formState.eta },
+      formState.featureBagFraction && {
+        feature_bag_fraction: formState.featureBagFraction,
       },
+      formState.gamma && { gamma: formState.gamma },
+      formState.lambda && { lambda: formState.lambda },
+      formState.maxTrees && { max_trees: formState.maxTrees },
+      formState.randomizeSeed && { randomize_seed: formState.randomizeSeed }
+    );
+
+    jobConfig.analysis = {
+      [formState.jobType]: analysis,
     };
   }
 
   if (
     formState.jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-    jobConfig?.analysis?.classification !== undefined
+    jobConfig?.analysis?.classification !== undefined &&
+    formState.numTopClasses !== undefined
   ) {
     // @ts-ignore
     jobConfig.analysis.classification.num_top_classes = formState.numTopClasses;
+  }
 
-    if (formState.predictionFieldName !== '') {
-      // @ts-ignore
-      jobConfig.analysis.classification.prediction_field_name = formState.predictionFieldName;
-    }
+  if (formState.jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION) {
+    const analysis = Object.assign(
+      {},
+      formState.method && { method: formState.method },
+      formState.nNeighbors && {
+        n_neighbors: formState.nNeighbors,
+      },
+      formState.outlierFraction && { outlier_fraction: formState.outlierFraction },
+      formState.standardizationEnabled && {
+        standardization_enabled: formState.standardizationEnabled,
+      }
+    );
+    // @ts-ignore
+    jobConfig.analysis.outlier_detection = analysis;
   }
 
   return jobConfig;

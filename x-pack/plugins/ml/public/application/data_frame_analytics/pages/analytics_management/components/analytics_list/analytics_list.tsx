@@ -14,8 +14,6 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiModal,
-  EuiOverlayMask,
   EuiSpacer,
   EuiSearchBar,
 } from '@elastic/eui';
@@ -275,7 +273,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
             !isManagementTable && createAnalyticsForm
               ? [
                   <EuiButtonEmpty
-                    onClick={createAnalyticsForm.actions.openModal}
+                    onClick={() => setIsSourceIndexModalVisible(true)}
                     isDisabled={disabled}
                     data-test-subj="mlAnalyticsCreateFirstButton"
                   >
@@ -290,6 +288,9 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         />
         {!isManagementTable && createAnalyticsForm && (
           <CreateAnalyticsFlyoutWrapper {...createAnalyticsForm} />
+        )}
+        {isSourceIndexModalVisible === true && (
+          <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
         )}
       </Fragment>
     );
@@ -443,15 +444,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         <CreateAnalyticsFlyoutWrapper {...createAnalyticsForm} />
       )}
       {isSourceIndexModalVisible === true && (
-        <EuiOverlayMask>
-          <EuiModal
-            className="dataFrameAnalyticsCreateSearchDialog"
-            onClose={() => setIsSourceIndexModalVisible(false)}
-            data-test-subj="analyticsCreateSourceIndexModal"
-          >
-            <SourceSelection />
-          </EuiModal>
-        </EuiOverlayMask>
+        <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
       )}
     </Fragment>
   );
