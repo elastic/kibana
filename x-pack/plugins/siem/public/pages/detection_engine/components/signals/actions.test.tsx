@@ -15,7 +15,7 @@ import {
 } from '../../../../mock/';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
 import { Ecs } from '../../../../graphql/types';
-import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
 
 jest.mock('apollo-client');
 
@@ -215,6 +215,7 @@ describe('signals actions', () => {
               columnId: '@timestamp',
               sortDirection: 'desc',
             },
+            status: TimelineStatus.draft,
             title: '',
             timelineType: TimelineType.default,
             templateTimelineId: null,

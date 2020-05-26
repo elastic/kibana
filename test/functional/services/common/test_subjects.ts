@@ -80,7 +80,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
         const responseCodeBlock = await this.find(codeBlockSelector);
         const spans = await find.allDescendantDisplayedByTagName('span', responseCodeBlock);
         const foundInSpans = await Promise.all(
-          spans.map(async span => {
+          spans.map(async (span) => {
             const text = await span.getVisibleText();
             if (text === stringToFind) {
               log.debug(`"${text}" matched "${stringToFind}"!`);
@@ -90,19 +90,17 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
             }
           })
         );
-        if (!foundInSpans.find(foundInSpan => foundInSpan)) {
+        if (!foundInSpans.find((foundInSpan) => foundInSpan)) {
           throw new Error(`"${stringToFind}" was not found. Trying again...`);
         }
       });
     }
 
     public async append(selector: string, text: string): Promise<void> {
-      return await retry.try(async () => {
-        log.debug(`TestSubjects.append(${selector}, ${text})`);
-        const input = await this.find(selector);
-        await input.click();
-        await input.type(text);
-      });
+      log.debug(`TestSubjects.append(${selector}, ${text})`);
+      const input = await this.find(selector);
+      await input.click();
+      await input.type(text);
     }
 
     public async clickWhenNotDisabled(
@@ -119,12 +117,10 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
     }
 
     public async doubleClick(selector: string, timeout: number = FIND_TIME): Promise<void> {
-      return await retry.try(async () => {
-        log.debug(`TestSubjects.doubleClick(${selector})`);
-        const element = await this.find(selector, timeout);
-        await element.moveMouseTo();
-        await element.doubleClick();
-      });
+      log.debug(`TestSubjects.doubleClick(${selector})`);
+      const element = await this.find(selector, timeout);
+      await element.moveMouseTo();
+      await element.doubleClick();
     }
 
     async descendantExists(selector: string, parentElement: WebElementWrapper): Promise<boolean> {
@@ -206,27 +202,21 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
     }
 
     public async isEnabled(selector: string): Promise<boolean> {
-      return await retry.try(async () => {
-        log.debug(`TestSubjects.isEnabled(${selector})`);
-        const element = await this.find(selector);
-        return await element.isEnabled();
-      });
+      log.debug(`TestSubjects.isEnabled(${selector})`);
+      const element = await this.find(selector);
+      return await element.isEnabled();
     }
 
     public async isDisplayed(selector: string): Promise<boolean> {
-      return await retry.try(async () => {
-        log.debug(`TestSubjects.isDisplayed(${selector})`);
-        const element = await this.find(selector);
-        return await element.isDisplayed();
-      });
+      log.debug(`TestSubjects.isDisplayed(${selector})`);
+      const element = await this.find(selector);
+      return await element.isDisplayed();
     }
 
     public async isSelected(selector: string): Promise<boolean> {
-      return await retry.try(async () => {
-        log.debug(`TestSubjects.isSelected(${selector})`);
-        const element = await this.find(selector);
-        return await element.isSelected();
-      });
+      log.debug(`TestSubjects.isSelected(${selector})`);
+      const element = await this.find(selector);
+      return await element.isSelected();
     }
 
     public async isSelectedAll(selectorAll: string): Promise<boolean[]> {
@@ -237,11 +227,9 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
     }
 
     public async getVisibleText(selector: string): Promise<string> {
-      return await retry.try(async () => {
-        log.debug(`TestSubjects.getVisibleText(${selector})`);
-        const element = await this.find(selector);
-        return await element.getVisibleText();
-      });
+      log.debug(`TestSubjects.getVisibleText(${selector})`);
+      const element = await this.find(selector);
+      return await element.getVisibleText();
     }
 
     async getVisibleTextAll(selectorAll: string): Promise<string[]> {
@@ -292,6 +280,13 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       log.debug(`TestSubjects.waitForHidden(${selector})`);
       const element = await this.find(selector);
       await find.waitForElementHidden(element, timeout);
+    }
+
+    public async waitForEnabled(selector: string, timeout: number = TRY_TIME): Promise<void> {
+      await retry.tryForTime(timeout, async () => {
+        const element = await this.find(selector);
+        return (await element.isDisplayed()) && (await element.isEnabled());
+      });
     }
 
     public getCssSelector(selector: string): string {

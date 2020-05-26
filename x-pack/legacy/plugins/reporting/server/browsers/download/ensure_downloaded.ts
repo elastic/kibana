@@ -40,12 +40,12 @@ export async function ensureAllBrowsersDownloaded() {
  * @return {Promise<undefined>}
  */
 async function ensureDownloaded(browsers: BrowserDownload[]) {
-  await asyncMap(browsers, async browser => {
+  await asyncMap(browsers, async (browser) => {
     const { archivesPath } = browser.paths;
 
     await clean(
       archivesPath,
-      browser.paths.packages.map(p => resolvePath(archivesPath, p.archiveFilename))
+      browser.paths.packages.map((p) => resolvePath(archivesPath, p.archiveFilename))
     );
 
     const invalidChecksums: string[] = [];

@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('field_cardinality', function() {
+  describe('field_cardinality', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
       await ml.testResources.setKibanaTimeZoneToUTC();

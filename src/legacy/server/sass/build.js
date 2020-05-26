@@ -35,7 +35,7 @@ const copyFile = promisify(fs.copyFile);
 const mkdirAsync = promisify(fs.mkdir);
 
 const UI_ASSETS_DIR = resolve(__dirname, '../../../core/server/core_app/assets');
-const DARK_THEME_IMPORTER = url => {
+const DARK_THEME_IMPORTER = (url) => {
   if (url.includes('eui_colors_light')) {
     return { file: url.replace('eui_colors_light', 'eui_colors_dark') };
   }
@@ -101,7 +101,7 @@ export class Build {
     if (this.urlImports) {
       processor.use(
         postcssUrl({
-          url: request => {
+          url: (request) => {
             if (!request.pathname) {
               return request.url;
             }
@@ -144,7 +144,7 @@ export class Build {
 
     // verify that asset sources exist and import is valid before writing anything
     await Promise.all(
-      urlAssets.map(async asset => {
+      urlAssets.map(async (asset) => {
         try {
           await access(asset.path);
         } catch (e) {
@@ -171,7 +171,7 @@ export class Build {
 
     // copy non-shared urlAssets
     await Promise.all(
-      urlAssets.map(async asset => {
+      urlAssets.map(async (asset) => {
         if (!asset.copyTo) {
           return;
         }

@@ -219,7 +219,7 @@ export const GuidancePanel = connect(
       hasFields: hasFieldsSelector(state),
     };
   },
-  dispatch => ({
+  (dispatch) => ({
     onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => {
       dispatch(
         requestDatasource({

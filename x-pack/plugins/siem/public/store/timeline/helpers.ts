@@ -280,16 +280,16 @@ const addAndToProviderInTimeline = (
   timelineById: TimelineById
 ): TimelineById => {
   const alreadyExistsProviderIndex = timeline.dataProviders.findIndex(
-    p => p.id === timeline.highlightedDropAndProviderId
+    (p) => p.id === timeline.highlightedDropAndProviderId
   );
   const newProvider = timeline.dataProviders[alreadyExistsProviderIndex];
-  const alreadyExistsAndProviderIndex = newProvider.and.findIndex(p => p.id === provider.id);
+  const alreadyExistsAndProviderIndex = newProvider.and.findIndex((p) => p.id === provider.id);
   const { and, ...andProvider } = provider;
 
   if (
     isEqualWith(queryMatchCustomizer, newProvider.queryMatch, andProvider.queryMatch) ||
     (alreadyExistsAndProviderIndex === -1 &&
-      newProvider.and.filter(itemAndProvider =>
+      newProvider.and.filter((itemAndProvider) =>
         isEqualWith(queryMatchCustomizer, itemAndProvider.queryMatch, andProvider.queryMatch)
       ).length > 0)
   ) {
@@ -327,11 +327,11 @@ const addProviderToTimeline = (
   timeline: TimelineModel,
   timelineById: TimelineById
 ): TimelineById => {
-  const alreadyExistsAtIndex = timeline.dataProviders.findIndex(p => p.id === provider.id);
+  const alreadyExistsAtIndex = timeline.dataProviders.findIndex((p) => p.id === provider.id);
 
   if (alreadyExistsAtIndex > -1 && !isEmpty(timeline.dataProviders[alreadyExistsAtIndex].and)) {
     provider.id = `${provider.id}-${
-      timeline.dataProviders.filter(p => p.id === provider.id).length
+      timeline.dataProviders.filter((p) => p.id === provider.id).length
     }`;
   }
 
@@ -371,11 +371,11 @@ export const upsertTimelineColumn = ({
   timelineById,
 }: AddTimelineColumnParams): TimelineById => {
   const timeline = timelineById[id];
-  const alreadyExistsAtIndex = timeline.columns.findIndex(c => c.id === column.id);
+  const alreadyExistsAtIndex = timeline.columns.findIndex((c) => c.id === column.id);
 
   if (alreadyExistsAtIndex !== -1) {
     // remove the existing entry and add the new one at the specified index
-    const reordered = timeline.columns.filter(c => c.id !== column.id);
+    const reordered = timeline.columns.filter((c) => c.id !== column.id);
     reordered.splice(index, 0, column); // ⚠️ mutation
 
     return {
@@ -413,7 +413,7 @@ export const removeTimelineColumn = ({
 }: RemoveTimelineColumnParams): TimelineById => {
   const timeline = timelineById[id];
 
-  const columns = timeline.columns.filter(c => c.id !== columnId);
+  const columns = timeline.columns.filter((c) => c.id !== columnId);
 
   return {
     ...timelineById,
@@ -439,7 +439,7 @@ export const applyDeltaToTimelineColumnWidth = ({
 }: ApplyDeltaToTimelineColumnWidth): TimelineById => {
   const timeline = timelineById[id];
 
-  const columnIndex = timeline.columns.findIndex(c => c.id === columnId);
+  const columnIndex = timeline.columns.findIndex((c) => c.id === columnId);
   if (columnIndex === -1) {
     // the column was not found
     return {
@@ -772,11 +772,11 @@ const updateEnabledAndProvider = (
   providerId: string,
   timeline: TimelineModel
 ) =>
-  timeline.dataProviders.map(provider =>
+  timeline.dataProviders.map((provider) =>
     provider.id === providerId
       ? {
           ...provider,
-          and: provider.and.map(andProvider =>
+          and: provider.and.map((andProvider) =>
             andProvider.id === andProviderId ? { ...andProvider, enabled } : andProvider
           ),
         }
@@ -784,7 +784,7 @@ const updateEnabledAndProvider = (
   );
 
 const updateEnabledProvider = (enabled: boolean, providerId: string, timeline: TimelineModel) =>
-  timeline.dataProviders.map(provider =>
+  timeline.dataProviders.map((provider) =>
     provider.id === providerId
       ? {
           ...provider,
@@ -826,11 +826,11 @@ const updateExcludedAndProvider = (
   providerId: string,
   timeline: TimelineModel
 ) =>
-  timeline.dataProviders.map(provider =>
+  timeline.dataProviders.map((provider) =>
     provider.id === providerId
       ? {
           ...provider,
-          and: provider.and.map(andProvider =>
+          and: provider.and.map((andProvider) =>
             andProvider.id === andProviderId ? { ...andProvider, excluded } : andProvider
           ),
         }
@@ -838,7 +838,7 @@ const updateExcludedAndProvider = (
   );
 
 const updateExcludedProvider = (excluded: boolean, providerId: string, timeline: TimelineModel) =>
-  timeline.dataProviders.map(provider =>
+  timeline.dataProviders.map((provider) =>
     provider.id === providerId
       ? {
           ...provider,
@@ -889,7 +889,7 @@ const updateProviderProperties = ({
   timeline: TimelineModel;
   value: string | number;
 }) =>
-  timeline.dataProviders.map(provider =>
+  timeline.dataProviders.map((provider) =>
     provider.id === providerId
       ? {
           ...provider,
@@ -923,11 +923,11 @@ const updateAndProviderProperties = ({
   timeline: TimelineModel;
   value: string | number;
 }) =>
-  timeline.dataProviders.map(provider =>
+  timeline.dataProviders.map((provider) =>
     provider.id === providerId
       ? {
           ...provider,
-          and: provider.and.map(andProvider =>
+          and: provider.and.map((andProvider) =>
             andProvider.id === andProviderId
               ? {
                   ...andProvider,
@@ -1013,7 +1013,7 @@ export const updateTimelineProviderKqlQuery = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      dataProviders: timeline.dataProviders.map(provider =>
+      dataProviders: timeline.dataProviders.map((provider) =>
         provider.id === providerId ? { ...provider, ...{ kqlQuery } } : provider
       ),
     },
@@ -1084,9 +1084,9 @@ export const updateTimelinePerPageOptions = ({
 };
 
 const removeAndProvider = (andProviderId: string, providerId: string, timeline: TimelineModel) => {
-  const providerIndex = timeline.dataProviders.findIndex(p => p.id === providerId);
+  const providerIndex = timeline.dataProviders.findIndex((p) => p.id === providerId);
   const providerAndIndex = timeline.dataProviders[providerIndex].and.findIndex(
-    p => p.id === andProviderId
+    (p) => p.id === andProviderId
   );
   return [
     ...timeline.dataProviders.slice(0, providerIndex),
@@ -1102,7 +1102,7 @@ const removeAndProvider = (andProviderId: string, providerId: string, timeline: 
 };
 
 const removeProvider = (providerId: string, timeline: TimelineModel) => {
-  const providerIndex = timeline.dataProviders.findIndex(p => p.id === providerId);
+  const providerIndex = timeline.dataProviders.findIndex((p) => p.id === providerId);
   return [
     ...timeline.dataProviders.slice(0, providerIndex),
     ...(timeline.dataProviders[providerIndex].and.length
@@ -1160,7 +1160,7 @@ export const setDeletedTimelineEvents = ({
 
   const deletedEventIds = isDeleted
     ? union(timeline.deletedEventIds, eventIds)
-    : timeline.deletedEventIds.filter(currentEventId => !eventIds.includes(currentEventId));
+    : timeline.deletedEventIds.filter((currentEventId) => !eventIds.includes(currentEventId));
 
   const selectedEventIds = Object.fromEntries(
     Object.entries(timeline.selectedEventIds).filter(
@@ -1199,7 +1199,7 @@ export const setLoadingTimelineEvents = ({
 
   const loadingEventIds = isLoading
     ? union(timeline.loadingEventIds, eventIds)
-    : timeline.loadingEventIds.filter(currentEventId => !eventIds.includes(currentEventId));
+    : timeline.loadingEventIds.filter((currentEventId) => !eventIds.includes(currentEventId));
 
   return {
     ...timelineById,

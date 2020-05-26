@@ -66,9 +66,9 @@ export const useLogColumnsConfigurationFormState = ({
       formState.logColumns.map(
         (logColumn): LogColumnConfigurationProps => {
           const remove = () =>
-            setFormStateChanges(changes => ({
+            setFormStateChanges((changes) => ({
               ...changes,
-              logColumns: formState.logColumns.filter(item => item !== logColumn),
+              logColumns: formState.logColumns.filter((item) => item !== logColumn),
             }));
 
           if (isTimestampLogColumnConfiguration(logColumn)) {
@@ -97,7 +97,7 @@ export const useLogColumnsConfigurationFormState = ({
 
   const addLogColumn = useCallback(
     (logColumnConfiguration: LogColumnConfiguration) =>
-      setFormStateChanges(changes => ({
+      setFormStateChanges((changes) => ({
         ...changes,
         logColumns: [...formState.logColumns, logColumnConfiguration],
       })),
@@ -109,7 +109,7 @@ export const useLogColumnsConfigurationFormState = ({
       if (destinationIndex >= 0 && sourceIndex <= formState.logColumns.length - 1) {
         const newLogColumns = [...formState.logColumns];
         newLogColumns.splice(destinationIndex, 0, newLogColumns.splice(sourceIndex, 1)[0]);
-        setFormStateChanges(changes => ({
+        setFormStateChanges((changes) => ({
           ...changes,
           logColumns: newLogColumns,
         }));

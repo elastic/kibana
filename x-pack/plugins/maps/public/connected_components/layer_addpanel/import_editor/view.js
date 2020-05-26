@@ -9,7 +9,7 @@ import { EuiPanel } from '@elastic/eui';
 
 import { uploadLayerWizardConfig } from '../../../layers/sources/client_file_source';
 
-export const ImportEditor = props => {
+export const ImportEditor = (props) => {
   const editorProperties = getEditorProperties(props);
   return (
     <EuiPanel style={{ position: 'relative' }}>

@@ -136,7 +136,7 @@ export class HeadlessChromiumDriverFactory {
       observer.add(
         terminate$
           .pipe(
-            tap(signal => {
+            tap((signal) => {
               logger.debug(`Termination signal received: ${signal}`);
             }),
             ignoreElements()
@@ -165,7 +165,7 @@ export class HeadlessChromiumDriverFactory {
         logger.debug(`deleting chromium user data directory at [${userDataDir}]`);
         // the unsubscribe function isn't `async` so we're going to make our best effort at
         // deleting the userDataDir and if it fails log an error.
-        del(userDataDir, { force: true }).catch(error => {
+        del(userDataDir, { force: true }).catch((error) => {
           logger.error(`error deleting user data directory at [${userDataDir}]: [${error}]`);
         });
       });
@@ -174,7 +174,7 @@ export class HeadlessChromiumDriverFactory {
 
   getBrowserLogger(page: Page, logger: Logger): Rx.Observable<void> {
     const consoleMessages$ = Rx.fromEvent<ConsoleMessage>(page, 'console').pipe(
-      map(line => {
+      map((line) => {
         if (line.type() === 'error') {
           logger.error(line.text(), ['headless-browser-console']);
         } else {
@@ -184,7 +184,7 @@ export class HeadlessChromiumDriverFactory {
     );
 
     const pageRequestFailed$ = Rx.fromEvent<PuppeteerRequest>(page, 'requestfailed').pipe(
-      map(req => {
+      map((req) => {
         const failure = req.failure && req.failure();
         if (failure) {
           logger.warning(
@@ -215,7 +215,7 @@ export class HeadlessChromiumDriverFactory {
 
   getPageExit(browser: Browser, page: Page) {
     const pageError$ = Rx.fromEvent<Error>(page, 'error').pipe(
-      mergeMap(err => {
+      mergeMap((err) => {
         return Rx.throwError(
           i18n.translate('xpack.reporting.browsers.chromium.errorDetected', {
             defaultMessage: 'Reporting detected an error: {err}',
@@ -226,7 +226,7 @@ export class HeadlessChromiumDriverFactory {
     );
 
     const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page, 'pageerror').pipe(
-      mergeMap(err => {
+      mergeMap((err) => {
         return Rx.throwError(
           i18n.translate('xpack.reporting.browsers.chromium.pageErrorDetected', {
             defaultMessage: `Reporting detected an error on the page: {err}`,

@@ -34,7 +34,7 @@ export function addEmbeddableToDashboardUrl(url: string, embeddableId: string, u
   const dashboardParsedUrl = parseUrl(url);
   const keys = Object.keys(urlVars).sort();
 
-  keys.forEach(key => {
+  keys.forEach((key) => {
     dashboardParsedUrl.query[key] = urlVars[key];
   });
   if (embeddableId) {

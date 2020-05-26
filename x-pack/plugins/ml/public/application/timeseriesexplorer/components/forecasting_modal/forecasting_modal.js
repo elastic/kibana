@@ -74,17 +74,17 @@ export class ForecastingModalUI extends Component {
   addMessage = (message, status, clearFirst = false) => {
     const msg = { message, status };
 
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       messages: clearFirst ? [msg] : [...prevState.messages, msg],
     }));
   };
 
-  viewForecast = forecastId => {
+  viewForecast = (forecastId) => {
     this.props.setForecastId(forecastId);
     this.closeModal();
   };
 
-  onNewForecastDurationChange = event => {
+  onNewForecastDurationChange = (event) => {
     const newForecastDurationErrors = [];
     let isNewForecastDurationValid = true;
     const duration = parseInterval(event.target.value);
@@ -159,7 +159,7 @@ export class ForecastingModalUI extends Component {
         });
         this.runForecast(true);
       })
-      .catch(resp => {
+      .catch((resp) => {
         console.log('Time series forecast modal - could not open job:', resp);
         this.addMessage(
           i18n.translate(
@@ -202,7 +202,7 @@ export class ForecastingModalUI extends Component {
         .then(() => {
           this.setState({ jobClosingState: PROGRESS_STATES.DONE });
         })
-        .catch(response => {
+        .catch((response) => {
           console.log('Time series forecast modal - could not close job:', response);
           this.addMessage(
             i18n.translate(
@@ -218,7 +218,7 @@ export class ForecastingModalUI extends Component {
     }
   };
 
-  runForecast = closeJobAfterRunning => {
+  runForecast = (closeJobAfterRunning) => {
     this.setState({
       forecastProgress: 0,
     });
@@ -229,7 +229,7 @@ export class ForecastingModalUI extends Component {
 
     mlForecastService
       .runForecast(this.props.job.job_id, `${durationInSeconds}s`)
-      .then(resp => {
+      .then((resp) => {
         // Endpoint will return { acknowledged:true, id: <now timestamp> } before forecast is complete.
         // So wait for results and then refresh the dashboard to the end of the forecast.
         if (resp.forecast_id !== undefined) {
@@ -238,7 +238,7 @@ export class ForecastingModalUI extends Component {
           this.runForecastErrorHandler(resp, closeJobAfterRunning);
         }
       })
-      .catch(resp => this.runForecastErrorHandler(resp, closeJobAfterRunning));
+      .catch((resp) => this.runForecastErrorHandler(resp, closeJobAfterRunning));
   };
 
   waitForForecastResults = (forecastId, closeJobAfterRunning) => {
@@ -250,7 +250,7 @@ export class ForecastingModalUI extends Component {
     this.forecastChecker = setInterval(() => {
       mlForecastService
         .getForecastRequestStats(this.props.job, forecastId)
-        .then(resp => {
+        .then((resp) => {
           // Get the progress (stats value is between 0 and 1).
           const progress = _.get(resp, ['stats', 'forecast_progress'], previousProgress);
           const status = _.get(resp, ['stats', 'forecast_status']);
@@ -266,7 +266,7 @@ export class ForecastingModalUI extends Component {
 
           // Display any messages returned in the request stats.
           let messages = _.get(resp, ['stats', 'forecast_messages'], []);
-          messages = messages.map(message => ({ message, status: MESSAGE_LEVEL.WARNING }));
+          messages = messages.map((message) => ({ message, status: MESSAGE_LEVEL.WARNING }));
           this.setState({ messages });
 
           if (status === FORECAST_REQUEST_STATE.FINISHED) {
@@ -283,7 +283,7 @@ export class ForecastingModalUI extends Component {
                   this.props.setForecastId(forecastId);
                   this.closeAfterRunningForecast();
                 })
-                .catch(response => {
+                .catch((response) => {
                   // Load the forecast data in the main page,
                   // but leave this dialog open so the error can be viewed.
                   console.log('Time series forecast modal - could not close job:', response);
@@ -342,7 +342,7 @@ export class ForecastingModalUI extends Component {
             }
           }
         })
-        .catch(resp => {
+        .catch((resp) => {
           console.log(
             'Time series forecast modal - error loading stats of forecast from elasticsearch:',
             resp
@@ -378,12 +378,12 @@ export class ForecastingModalUI extends Component {
       };
       mlForecastService
         .getForecastsSummary(job, statusFinishedQuery, bounds.min.valueOf(), FORECASTS_VIEW_MAX)
-        .then(resp => {
+        .then((resp) => {
           this.setState({
             previousForecasts: resp.forecasts,
           });
         })
-        .catch(resp => {
+        .catch((resp) => {
           console.log('Time series forecast modal - error obtaining forecasts summary:', resp);
           this.addMessage(
             i18n.translate(
@@ -398,7 +398,7 @@ export class ForecastingModalUI extends Component {
 
       // Display a warning about running a forecast if there is high number
       // of partitioning fields.
-      const entityFieldNames = this.props.entities.map(entity => entity.fieldName);
+      const entityFieldNames = this.props.entities.map((entity) => entity.fieldName);
       if (entityFieldNames.length > 0) {
         ml.getCardinalityOfFields({
           index: job.datafeed_config.indices,
@@ -408,9 +408,9 @@ export class ForecastingModalUI extends Component {
           earliestMs: job.data_counts.earliest_record_timestamp,
           latestMs: job.data_counts.latest_record_timestamp,
         })
-          .then(results => {
+          .then((results) => {
             let numPartitions = 1;
-            Object.values(results).forEach(cardinality => {
+            Object.values(results).forEach((cardinality) => {
               numPartitions = numPartitions * cardinality;
             });
             if (numPartitions > WARN_NUM_PARTITIONS) {
@@ -428,7 +428,7 @@ export class ForecastingModalUI extends Component {
               );
             }
           })
-          .catch(resp => {
+          .catch((resp) => {
             console.log(
               'Time series forecast modal - error obtaining cardinality of fields:',
               resp

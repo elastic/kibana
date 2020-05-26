@@ -49,7 +49,7 @@ const getDefaultState = () => ({
   title: '',
 });
 
-const statusToEuiColor = status => {
+const statusToEuiColor = (status) => {
   switch (status) {
     case VALIDATION_STATUS.INFO:
       return 'primary';
@@ -62,7 +62,7 @@ const statusToEuiColor = status => {
   }
 };
 
-const statusToEuiIconType = status => {
+const statusToEuiIconType = (status) => {
   switch (status) {
     case VALIDATION_STATUS.INFO:
       return 'iInCircle';
@@ -106,7 +106,7 @@ Message.propTypes = {
 
 const MessageList = ({ messages, idFilterList }) => {
   const callouts = messages
-    .filter(m => idFilterList.includes(m.id) === false)
+    .filter((m) => idFilterList.includes(m.id) === false)
     .map((m, i) => <Callout key={`${m.id}_${i}`} message={m} />);
 
   // there could be no error or success messages due to the
@@ -211,7 +211,7 @@ export class ValidateJob extends Component {
     if (typeof job === 'object') {
       let shouldShowLoadingIndicator = true;
 
-      this.props.mlJobService.validateJob({ duration, fields, job }).then(data => {
+      this.props.mlJobService.validateJob({ duration, fields, job }).then((data) => {
         shouldShowLoadingIndicator = false;
         this.setState({
           ...this.state,
@@ -226,7 +226,7 @@ export class ValidateJob extends Component {
         });
         if (typeof this.props.setIsValid === 'function') {
           this.props.setIsValid(
-            data.messages.some(m => m.status === VALIDATION_STATUS.ERROR) === false
+            data.messages.some((m) => m.status === VALIDATION_STATUS.ERROR) === false
           );
         }
       });

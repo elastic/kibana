@@ -105,7 +105,7 @@ export const reArrangeProvidersInSameGroup = ({
     dispatch(
       updateProviders({
         id: timelineId,
-        providers: unFlattenGroups(updatedGroups.filter(g => g.length)),
+        providers: unFlattenGroups(updatedGroups.filter((g) => g.length)),
       })
     );
   }
@@ -183,7 +183,7 @@ export const moveProvidersBetweenGroups = ({
     dispatch(
       updateProviders({
         id: timelineId,
-        providers: unFlattenGroups(updatedGroups.filter(g => g.length)),
+        providers: unFlattenGroups(updatedGroups.filter((g) => g.length)),
       })
     );
   }
@@ -297,7 +297,7 @@ export const addProviderToGroup = ({
     dispatch(
       updateProviders({
         id: timelineId,
-        providers: unFlattenGroups(updatedGroups.filter(g => g.length)),
+        providers: unFlattenGroups(updatedGroups.filter((g) => g.length)),
       })
     );
     onAddedToTimeline(providerToAdd.name);

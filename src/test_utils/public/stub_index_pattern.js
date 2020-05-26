@@ -33,8 +33,8 @@ import { setFieldFormats } from '../../plugins/data/public/services';
 
 setFieldFormats({
   getDefaultInstance: () => ({
-    getConverterFor: () => value => value,
-    convert: value => JSON.stringify(value),
+    getConverterFor: () => (value) => value,
+    convert: (value) => JSON.stringify(value),
   }),
 });
 
@@ -67,11 +67,11 @@ export default function StubIndexPattern(pattern, getConfig, timeField, fields, 
   this.fieldsFetcher = { apiClient: { baseUrl: '' } };
   this.formatField = this.formatHit.formatField;
 
-  this._reindexFields = function() {
+  this._reindexFields = function () {
     this.fields = new IndexPatternFieldList(this, this.fields || fields);
   };
 
-  this.stubSetFieldFormat = function(fieldName, id, params) {
+  this.stubSetFieldFormat = function (fieldName, id, params) {
     const FieldFormat = registeredFieldFormats.getType(id);
     this.fieldFormatMap[fieldName] = new FieldFormat(params);
     this._reindexFields();

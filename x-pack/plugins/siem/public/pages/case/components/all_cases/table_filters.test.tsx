@@ -47,18 +47,12 @@ describe('CasesTableFilters ', () => {
         <CasesTableFilters {...props} />
       </TestProviders>
     );
-    expect(
-      wrapper
-        .find(`[data-test-subj="open-case-count"]`)
-        .last()
-        .text()
-    ).toEqual('Open cases (99)');
-    expect(
-      wrapper
-        .find(`[data-test-subj="closed-case-count"]`)
-        .last()
-        .text()
-    ).toEqual('Closed cases (1234)');
+    expect(wrapper.find(`[data-test-subj="open-case-count"]`).last().text()).toEqual(
+      'Open cases (99)'
+    );
+    expect(wrapper.find(`[data-test-subj="closed-case-count"]`).last().text()).toEqual(
+      'Closed cases (1234)'
+    );
   });
   it('should call onFilterChange when selected tags change', () => {
     const wrapper = mount(
@@ -66,14 +60,8 @@ describe('CasesTableFilters ', () => {
         <CasesTableFilters {...props} />
       </TestProviders>
     );
-    wrapper
-      .find(`[data-test-subj="options-filter-popover-button-Tags"]`)
-      .last()
-      .simulate('click');
-    wrapper
-      .find(`[data-test-subj="options-filter-popover-item-0"]`)
-      .last()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="options-filter-popover-button-Tags"]`).last().simulate('click');
+    wrapper.find(`[data-test-subj="options-filter-popover-item-0"]`).last().simulate('click');
 
     expect(onFilterChanged).toBeCalledWith({ tags: ['coke'] });
   });
@@ -88,10 +76,7 @@ describe('CasesTableFilters ', () => {
       .last()
       .simulate('click');
 
-    wrapper
-      .find(`[data-test-subj="options-filter-popover-item-0"]`)
-      .last()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="options-filter-popover-item-0"]`).last().simulate('click');
 
     expect(onFilterChanged).toBeCalledWith({ reporters: [{ username: 'casetester' }] });
   });
@@ -114,10 +99,7 @@ describe('CasesTableFilters ', () => {
         <CasesTableFilters {...props} />
       </TestProviders>
     );
-    wrapper
-      .find(`[data-test-subj="closed-case-count"]`)
-      .last()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="closed-case-count"]`).last().simulate('click');
 
     expect(onFilterChanged).toBeCalledWith({ status: 'closed' });
   });

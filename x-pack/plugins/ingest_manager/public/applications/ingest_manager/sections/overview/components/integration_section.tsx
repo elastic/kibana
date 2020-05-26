@@ -24,10 +24,11 @@ export const OverviewIntegrationSection: React.FC = () => {
   const packagesRequest = useGetPackages();
   const res = packagesRequest.data?.response;
   const total = res?.length ?? 0;
-  const installed = res?.filter(p => p.status === InstallationStatus.installed)?.length ?? 0;
+  const installed = res?.filter((p) => p.status === InstallationStatus.installed)?.length ?? 0;
   const updatablePackages =
-    res?.filter(item => 'savedObject' in item && item.version > item.savedObject.attributes.version)
-      ?.length ?? 0;
+    res?.filter(
+      (item) => 'savedObject' in item && item.version > item.savedObject.attributes.version
+    )?.length ?? 0;
   return (
     <EuiFlexItem component="section">
       <OverviewPanel>

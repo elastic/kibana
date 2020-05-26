@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
@@ -52,21 +51,24 @@ export const EditConnector = React.memo(
       options: { stripEmptyFields: false },
       schema,
     });
-    const [isEditConnector, setIsEditConnector] = useState(false);
-    const handleOnClick = useCallback(() => {
-      setIsEditConnector(true);
-    }, []);
+    const [connectorHasChanged, setConnectorHasChanged] = useState(false);
+    const onChangeConnector = useCallback(
+      (connectorId) => {
+        setConnectorHasChanged(selectedConnector !== connectorId);
+      },
+      [selectedConnector]
+    );
 
     const onCancelConnector = useCallback(() => {
       form.setFieldValue('connector', selectedConnector);
-      setIsEditConnector(false);
+      setConnectorHasChanged(false);
     }, [form, selectedConnector]);
 
     const onSubmitConnector = useCallback(async () => {
       const { isValid, data: newData } = await form.submit();
       if (isValid && newData.connector) {
         onSubmit(newData.connector);
-        setIsEditConnector(false);
+        setConnectorHasChanged(false);
       }
     }, [form, onSubmit]);
     return (
@@ -76,17 +78,6 @@ export const EditConnector = React.memo(
             <h4>{i18n.CONNECTORS}</h4>
           </EuiFlexItem>
           {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
-          {!isLoading && (
-            <EuiFlexItem data-test-subj="connector-edit" grow={false}>
-              <EuiButtonIcon
-                data-test-subj="connector-edit-button"
-                isDisabled={disabled}
-                aria-label={i18n.EDIT_CONNECTOR}
-                iconType={'pencil'}
-                onClick={handleOnClick}
-              />
-            </EuiFlexItem>
-          )}
         </MyFlexGroup>
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup gutterSize="xs">
@@ -103,15 +94,16 @@ export const EditConnector = React.memo(
                         dataTestSubj: 'caseConnectors',
                         idAria: 'caseConnectors',
                         isLoading,
-                        disabled: !isEditConnector,
+                        disabled,
                         defaultValue: selectedConnector,
                       }}
+                      onChange={onChangeConnector}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </Form>
             </EuiFlexItem>
-            {isEditConnector && (
+            {connectorHasChanged && (
               <EuiFlexItem>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>

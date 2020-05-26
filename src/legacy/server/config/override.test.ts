@@ -19,8 +19,8 @@
 
 import { override } from './override';
 
-describe('override(target, source)', function() {
-  it('should override the values form source to target', function() {
+describe('override(target, source)', function () {
+  it('should override the values form source to target', function () {
     const target = {
       test: {
         enable: true,

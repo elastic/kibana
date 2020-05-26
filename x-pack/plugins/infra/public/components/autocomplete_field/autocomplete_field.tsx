@@ -301,11 +301,13 @@ const withUnfocused = (state: AutocompleteFieldState) => ({
   isFocused: false,
 });
 
-const FixedEuiFieldSearch: React.FC<React.InputHTMLAttributes<HTMLInputElement> &
-  EuiFieldSearchProps & {
-    inputRef?: (element: HTMLInputElement | null) => void;
-    onSearch: (value: string) => void;
-  }> = EuiFieldSearch as any;
+const FixedEuiFieldSearch: React.FC<
+  React.InputHTMLAttributes<HTMLInputElement> &
+    EuiFieldSearchProps & {
+      inputRef?: (element: HTMLInputElement | null) => void;
+      onSearch: (value: string) => void;
+    }
+> = EuiFieldSearch as any;
 
 const AutocompleteContainer = euiStyled.div`
   position: relative;
@@ -320,6 +322,6 @@ const SuggestionsPanel = euiStyled(EuiPanel).attrs(() => ({
   margin-top: 2px;
   overflow-x: hidden;
   overflow-y: scroll;
-  z-index: ${props => props.theme.eui.euiZLevel1};
+  z-index: ${(props) => props.theme.eui.euiZLevel1};
   max-height: 322px;
 `;

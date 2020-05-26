@@ -9,7 +9,7 @@ import { GetPolicyResponseSchema } from '../../../common/schema/policy';
 import { EndpointAppContext } from '../../types';
 import { getPolicyResponseByHostId } from './service';
 
-export const getHostPolicyResponseHandler = function(
+export const getHostPolicyResponseHandler = function (
   endpointAppContext: EndpointAppContext
 ): RequestHandler<undefined, TypeOf<typeof GetPolicyResponseSchema.query>, undefined> {
   return async (context, request, response) => {

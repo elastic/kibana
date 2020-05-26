@@ -249,7 +249,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
 
     // If Fleet is not enabled, then remove the `agents` column
     if (!isFleetEnabled) {
-      return cols.filter(col => ('field' in col ? col.field !== 'agents' : true));
+      return cols.filter((col) => ('field' in col ? col.field !== 'agents' : true));
     }
 
     return cols;
@@ -303,7 +303,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         <EuiFlexItem grow={4}>
           <SearchBar
             value={search}
-            onChange={newSearch => {
+            onChange={(newSearch) => {
               setPagination({
                 ...pagination,
                 currentPage: 1,

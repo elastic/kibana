@@ -19,7 +19,7 @@ import { FIELDS_PANE_WIDTH, TABLE_HEIGHT } from './helpers';
 import * as i18n from './translations';
 
 const NoFieldsPanel = styled.div`
-  background-color: ${props => props.theme.eui.euiColorLightestShade};
+  background-color: ${(props) => props.theme.eui.euiColorLightestShade};
   width: ${FIELDS_PANE_WIDTH}px;
   height: ${TABLE_HEIGHT}px;
 `;

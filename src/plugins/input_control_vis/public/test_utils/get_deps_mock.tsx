@@ -53,7 +53,7 @@ export const getDepsMock = ({
         },
       ]),
       injectedMetadata: {
-        getInjectedVar: jest.fn().mockImplementation(key => {
+        getInjectedVar: jest.fn().mockImplementation((key) => {
           switch (key) {
             case 'autocompleteTimeout':
               return 1000;

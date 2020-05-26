@@ -29,7 +29,7 @@ const defaultValues = {
 class Interactive extends React.Component<{}, typeof defaultValues> {
   public state = defaultValues;
 
-  _onValueChange: (argValue: ExpressionAstExpression) => void = argValue => {
+  _onValueChange: (argValue: ExpressionAstExpression) => void = (argValue) => {
     action('onValueChange')(argValue);
     this.setState({ argValue });
   };
@@ -46,13 +46,13 @@ class Interactive extends React.Component<{}, typeof defaultValues> {
 }
 
 storiesOf('arguments/AxisConfig', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
   ))
   .add('extended', () => <Interactive />);
 
 storiesOf('arguments/AxisConfig/components', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
   ))
   .add('extended disabled', () => (

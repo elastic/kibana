@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const listingTable = getService('listingTable');
 
@@ -28,11 +28,11 @@ export default function({ getPageObjects, getService }) {
     const dashboardName = 'Dashboard Save Test';
     const dashboardNameEnterKey = 'Dashboard Save Test with Enter Key';
 
-    before(async function() {
+    before(async function () {
       await PageObjects.dashboard.initTests();
     });
 
-    it('warns on duplicate name for new dashboard', async function() {
+    it('warns on duplicate name for new dashboard', async function () {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.saveDashboard(dashboardName);
 
@@ -46,7 +46,7 @@ export default function({ getPageObjects, getService }) {
       await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
     });
 
-    it('does not save on reject confirmation', async function() {
+    it('does not save on reject confirmation', async function () {
       await PageObjects.dashboard.cancelSave();
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
@@ -57,7 +57,7 @@ export default function({ getPageObjects, getService }) {
       expect(countOfDashboards).to.equal(1);
     });
 
-    it('Saves on confirm duplicate title warning', async function() {
+    it('Saves on confirm duplicate title warning', async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, {
@@ -80,7 +80,7 @@ export default function({ getPageObjects, getService }) {
       expect(countOfDashboards).to.equal(2);
     });
 
-    it('Does not warn when you save an existing dashboard with the title it already has, and that title is a duplicate', async function() {
+    it('Does not warn when you save an existing dashboard with the title it already has, and that title is a duplicate', async function () {
       await listingTable.clickItemLink('dashboard', dashboardName);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
       await PageObjects.dashboard.switchToEditMode();
@@ -89,7 +89,7 @@ export default function({ getPageObjects, getService }) {
       await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: false });
     });
 
-    it('Warns you when you Save as New Dashboard, and the title is a duplicate', async function() {
+    it('Warns you when you Save as New Dashboard, and the title is a duplicate', async function () {
       await PageObjects.dashboard.switchToEditMode();
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, {
         saveAsNew: true,
@@ -100,13 +100,13 @@ export default function({ getPageObjects, getService }) {
       await PageObjects.dashboard.cancelSave();
     });
 
-    it('Does not warn when only the prefix matches', async function() {
+    it('Does not warn when only the prefix matches', async function () {
       await PageObjects.dashboard.saveDashboard(dashboardName.split(' ')[0]);
 
       await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: false });
     });
 
-    it('Warns when case is different', async function() {
+    it('Warns when case is different', async function () {
       await PageObjects.dashboard.switchToEditMode();
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName.toUpperCase(), {
         waitDialogIsClosed: false,
@@ -117,7 +117,7 @@ export default function({ getPageObjects, getService }) {
       await PageObjects.dashboard.cancelSave();
     });
 
-    it('Saves new Dashboard using the Enter key', async function() {
+    it('Saves new Dashboard using the Enter key', async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.enterDashboardTitleAndPressEnter(dashboardNameEnterKey);

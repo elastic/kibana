@@ -44,7 +44,7 @@ export const duplicateRulesAction = async (
     if (errors.length > 0) {
       displayErrorToast(
         i18n.DUPLICATE_RULE_ERROR,
-        errors.map(e => e.error.message),
+        errors.map((e) => e.error.message),
         dispatchToaster
       );
     } else {
@@ -75,7 +75,7 @@ export const deleteRulesAction = async (
     if (errors.length > 0) {
       displayErrorToast(
         i18n.BATCH_ACTION_DELETE_SELECTED_ERROR(ruleIds.length),
-        errors.map(e => e.error.message),
+        errors.map((e) => e.error.message),
         dispatchToaster
       );
     } else if (onRuleDeleted) {
@@ -112,18 +112,18 @@ export const enableRulesAction = async (
     if (errors.length > 0) {
       displayErrorToast(
         errorTitle,
-        errors.map(e => e.error.message),
+        errors.map((e) => e.error.message),
         dispatchToaster
       );
     }
 
-    if (rules.some(rule => rule.immutable)) {
+    if (rules.some((rule) => rule.immutable)) {
       track(
         METRIC_TYPE.COUNT,
         enabled ? TELEMETRY_EVENT.SIEM_RULE_ENABLED : TELEMETRY_EVENT.SIEM_RULE_DISABLED
       );
     }
-    if (rules.some(rule => !rule.immutable)) {
+    if (rules.some((rule) => !rule.immutable)) {
       track(
         METRIC_TYPE.COUNT,
         enabled ? TELEMETRY_EVENT.CUSTOM_RULE_ENABLED : TELEMETRY_EVENT.CUSTOM_RULE_DISABLED

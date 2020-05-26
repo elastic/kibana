@@ -12,7 +12,7 @@ const unhandledRowRenderer = (): never => {
 };
 
 export const getRowRenderer = (ecs: Ecs, rowRenderers: RowRenderer[]): RowRenderer => {
-  const renderer = rowRenderers.find(rowRenderer => rowRenderer.isInstance(ecs));
+  const renderer = rowRenderers.find((rowRenderer) => rowRenderer.isInstance(ecs));
   if (renderer == null) {
     return unhandledRowRenderer();
   } else {

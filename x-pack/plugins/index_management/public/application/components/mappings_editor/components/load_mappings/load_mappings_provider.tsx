@@ -128,7 +128,7 @@ const getErrorMessage = (error: MappingsValidationError) => {
 };
 
 const areAllObjectKeysValidParameters = (obj: { [key: string]: any }) =>
-  Object.keys(obj).every(key => VALID_MAPPINGS_PARAMETERS.includes(key));
+  Object.keys(obj).every((key) => VALID_MAPPINGS_PARAMETERS.includes(key));
 
 export const LoadMappingsProvider = ({ onJson, children }: Props) => {
   const [state, setState] = useState<State>({ isModalOpen: false });
@@ -138,7 +138,7 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
     state.json !== undefined && state.errors !== undefined ? 'validationResult' : 'json';
   const i18nTexts = getTexts(view, state.errors?.length);
 
-  const onJsonUpdate: OnJsonEditorUpdateHandler = jsonUpdateData => {
+  const onJsonUpdate: OnJsonEditorUpdateHandler = (jsonUpdateData) => {
     jsonContent.current = jsonUpdateData;
   };
 

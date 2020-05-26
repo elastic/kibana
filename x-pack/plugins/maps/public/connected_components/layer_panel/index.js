@@ -19,7 +19,7 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    fitToBounds: layerId => {
+    fitToBounds: (layerId) => {
       dispatch(fitToLayerExtent(layerId));
     },
     updateSourceProp: (id, propName, value, newLayerType) =>

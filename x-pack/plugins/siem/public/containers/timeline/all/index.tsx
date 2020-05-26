@@ -49,7 +49,7 @@ export const ALL_TIMELINE_QUERY_ID = 'FETCH_ALL_TIMELINES';
 
 export const getAllTimeline = memoizeOne(
   (variables: string, timelines: TimelineResult[]): OpenTimelineResult[] =>
-    timelines.map(timeline => ({
+    timelines.map((timeline) => ({
       created: timeline.created,
       description: timeline.description,
       eventIdToNoteIds:
@@ -66,7 +66,7 @@ export const getAllTimeline = memoizeOne(
       noteIds: timeline.noteIds,
       notes:
         timeline.notes != null
-          ? timeline.notes.map(note => ({ ...note, savedObjectId: note.noteId }))
+          ? timeline.notes.map((note) => ({ ...note, savedObjectId: note.noteId }))
           : null,
       pinnedEventIds:
         timeline.pinnedEventIds != null

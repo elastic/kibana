@@ -31,17 +31,11 @@ describe('FieldMappingRow', () => {
 
   test('it renders', () => {
     expect(
-      wrapper
-        .find('[data-test-subj="case-configure-field-mapping-cols"]')
-        .first()
-        .exists()
+      wrapper.find('[data-test-subj="case-configure-field-mapping-cols"]').first().exists()
     ).toBe(true);
 
     expect(
-      wrapper
-        .find('[data-test-subj="case-configure-field-mapping-row-wrapper"]')
-        .first()
-        .exists()
+      wrapper.find('[data-test-subj="case-configure-field-mapping-row-wrapper"]').first().exists()
     ).toBe(true);
 
     expect(wrapper.find(FieldMappingRow).length).toEqual(3);

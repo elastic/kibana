@@ -74,7 +74,7 @@ export class StringFormatEditor extends DefaultFormatEditor<StringFormatEditorFo
                 text: option.text,
               };
             })}
-            onChange={e => {
+            onChange={(e) => {
               this.onChange({ transform: e.target.value });
             }}
             isInvalid={!!error}

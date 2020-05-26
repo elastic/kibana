@@ -6,12 +6,12 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'endpoint']);
   const testSubjects = getService('testSubjects');
 
   // FIXME: Skipped until we can figure out how to load data for Ingest
-  describe.skip('Endpoint Policy List', function() {
+  describe.skip('Endpoint Policy List', function () {
     this.tags(['ciGroup7']);
     before(async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');

@@ -6,26 +6,26 @@
 
 import classNames from 'classnames';
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import { gutterTimeline } from '../../lib/helpers';
 import { AppGlobalStyle } from '../page/index';
 
-const Wrapper = styled.div`
-  ${({ theme }) => css`
-    padding: ${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l}
-      ${theme.eui.paddingSizes.l};
+const Wrapper = styled.div<{ noPadding?: boolean }>`
+  padding: ${(props) =>
+    props.noPadding
+      ? '0'
+      : `${props.theme.eui.paddingSizes.l} ${gutterTimeline} ${props.theme.eui.paddingSizes.l}
+  ${props.theme.eui.paddingSizes.l}`};
+  &.siemWrapperPage--restrictWidthDefault,
+  &.siemWrapperPage--restrictWidthCustom {
+    box-sizing: content-box;
+    margin: 0 auto;
+  }
 
-    &.siemWrapperPage--restrictWidthDefault,
-    &.siemWrapperPage--restrictWidthCustom {
-      box-sizing: content-box;
-      margin: 0 auto;
-    }
-
-    &.siemWrapperPage--restrictWidthDefault {
-      max-width: 1000px;
-    }
-  `}
+  &.siemWrapperPage--restrictWidthDefault {
+    max-width: 1000px;
+  }
 `;
 
 Wrapper.displayName = 'Wrapper';
@@ -35,6 +35,7 @@ interface WrapperPageProps {
   className?: string;
   restrictWidth?: boolean | number | string;
   style?: Record<string, string>;
+  noPadding?: boolean;
 }
 
 const WrapperPageComponent: React.FC<WrapperPageProps> = ({
@@ -42,6 +43,7 @@ const WrapperPageComponent: React.FC<WrapperPageProps> = ({
   className,
   restrictWidth,
   style,
+  noPadding,
 }) => {
   const classes = classNames(className, {
     siemWrapperPage: true,
@@ -58,7 +60,7 @@ const WrapperPageComponent: React.FC<WrapperPageProps> = ({
   }
 
   return (
-    <Wrapper className={classes} style={customStyle || style}>
+    <Wrapper className={classes} style={customStyle || style} noPadding={noPadding}>
       {children}
       <AppGlobalStyle />
     </Wrapper>

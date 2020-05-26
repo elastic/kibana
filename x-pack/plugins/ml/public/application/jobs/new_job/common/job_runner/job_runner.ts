@@ -81,7 +81,7 @@ export class JobRunner {
       // link the _subscribers list from the JobCreator
       // to the progress BehaviorSubject.
       const subscriptions =
-        pollProgress === true ? this._subscribers.map(s => this._progress$.subscribe(s)) : [];
+        pollProgress === true ? this._subscribers.map((s) => this._progress$.subscribe(s)) : [];
 
       await this.openJob();
       const { started } = await mlJobService.startDatafeed(
@@ -118,7 +118,7 @@ export class JobRunner {
           // than the end date supplied to the datafeed
           this._progress$.next(100);
           // unsubscribe everyone
-          subscriptions.forEach(s => s.unsubscribe());
+          subscriptions.forEach((s) => s.unsubscribe());
         }
       };
       // wait for the first check to run and then return success.

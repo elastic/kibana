@@ -28,28 +28,13 @@ describe('Configuration button', () => {
   });
 
   test('it renders without the tooltip', () => {
-    expect(
-      wrapper
-        .find('[data-test-subj="configure-case-button"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="configure-case-button"]').first().exists()).toBe(true);
 
-    expect(
-      wrapper
-        .find('[data-test-subj="configure-case-tooltip"]')
-        .first()
-        .exists()
-    ).toBe(false);
+    expect(wrapper.find('[data-test-subj="configure-case-tooltip"]').first().exists()).toBe(false);
   });
 
   test('it pass the correct props to the button', () => {
-    expect(
-      wrapper
-        .find('[data-test-subj="configure-case-button"]')
-        .first()
-        .props()
-    ).toMatchObject({
+    expect(wrapper.find('[data-test-subj="configure-case-button"]').first().props()).toMatchObject({
       href: `#/link-to/case/configure${searchURL}`,
       iconType: 'controlsHorizontal',
       isDisabled: false,
@@ -73,19 +58,11 @@ describe('Configuration button', () => {
       }
     );
 
-    expect(
-      newWrapper
-        .find('[data-test-subj="configure-case-tooltip"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(newWrapper.find('[data-test-subj="configure-case-tooltip"]').first().exists()).toBe(
+      true
+    );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="configure-case-button"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="configure-case-button"]').first().exists()).toBe(true);
   });
 
   test('it shows the tooltip when hovering the button', () => {
@@ -104,10 +81,7 @@ describe('Configuration button', () => {
       }
     );
 
-    newWrapper
-      .find('[data-test-subj="configure-case-button"]')
-      .first()
-      .simulate('mouseOver');
+    newWrapper.find('[data-test-subj="configure-case-button"]').first().simulate('mouseOver');
 
     expect(newWrapper.find('.euiToolTipPopover').text()).toBe(`${titleTooltip}${msgTooltip}`);
   });

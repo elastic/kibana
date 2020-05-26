@@ -26,6 +26,7 @@ import { BasicOptions, SwitchOption } from '../../../../../charts/public';
 import { GridPanel } from './grid_panel';
 import { ThresholdPanel } from './threshold_panel';
 import { BasicVislibParams } from '../../../types';
+import { ChartTypes } from '../../../utils/collections';
 
 function PointSeriesOptions(props: ValidationVisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue, vis } = props;
@@ -46,7 +47,7 @@ function PointSeriesOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         <BasicOptions {...props} />
 
         {vis.data.aggs!.aggs.some(
-          agg => agg.schema === 'segment' && agg.type.name === 'date_histogram'
+          (agg) => agg.schema === 'segment' && agg.type.name === 'date_histogram'
         ) ? (
           <SwitchOption
             label={i18n.translate('visTypeVislib.editors.pointSeries.currentTimeMarkerLabel', {
@@ -67,8 +68,9 @@ function PointSeriesOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
           />
         )}
 
-        {vis.type.type === 'histogram' && (
+        {vis.type.name === ChartTypes.HISTOGRAM && (
           <SwitchOption
+            data-test-subj="showValuesOnChart"
             label={i18n.translate('visTypeVislib.editors.pointSeries.showLabels', {
               defaultMessage: 'Show values on chart',
             })}

@@ -21,7 +21,7 @@ function mapStateToProps(state = {}) {
 }
 
 const mapDispatchToProps = {
-  onIndexReady: indexReady =>
+  onIndexReady: (indexReady) =>
     indexReady ? updateIndexingStage(INDEXING_STAGE.READY) : updateIndexingStage(null),
   importSuccessHandler: () => updateIndexingStage(INDEXING_STAGE.SUCCESS),
   importErrorHandler: () => updateIndexingStage(INDEXING_STAGE.ERROR),

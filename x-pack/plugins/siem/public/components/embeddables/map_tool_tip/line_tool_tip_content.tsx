@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { ITooltipProperty } from '../../../../../maps/public';
 import { SourceDestinationArrows } from '../../source_destination/source_destination_arrows';
 import {
   SUM_OF_CLIENT_BYTES,
@@ -14,7 +15,7 @@ import {
   SUM_OF_SERVER_BYTES,
   SUM_OF_SOURCE_BYTES,
 } from '../map_config';
-import { FeatureProperty } from '../types';
+
 import * as i18n from '../translations';
 
 const FlowBadge = (styled(EuiBadge)`
@@ -28,20 +29,22 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
 
 interface LineToolTipContentProps {
   contextId: string;
-  featureProps: FeatureProperty[];
+  featureProps: ITooltipProperty[];
 }
 
 export const LineToolTipContentComponent = ({
   contextId,
   featureProps,
 }: LineToolTipContentProps) => {
-  const lineProps = featureProps.reduce<Record<string, string[]>>(
-    (acc, f) => ({
+  const lineProps = featureProps.reduce<Record<string, string[]>>((acc, f) => {
+    const rawValue = f.getRawValue() ?? [];
+    return {
       ...acc,
-      ...{ [f._propertyKey]: Array.isArray(f._rawValue) ? f._rawValue : [f._rawValue] },
-    }),
-    {}
-  );
+      ...{
+        [f.getPropertyKey()]: Array.isArray(rawValue) ? rawValue : [rawValue],
+      },
+    };
+  }, {});
 
   const isSrcDest = Object.keys(lineProps).includes(SUM_OF_SOURCE_BYTES);
 

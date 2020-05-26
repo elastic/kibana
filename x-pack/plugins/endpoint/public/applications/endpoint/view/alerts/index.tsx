@@ -96,7 +96,7 @@ export const AlertIndex = memo(() => {
   const queryParams = useAlertListSelector(selectors.uiQueryParams);
 
   const onChangeItemsPerPage = useCallback(
-    newPageSize => {
+    (newPageSize) => {
       const newQueryParms = { ...queryParams };
       newQueryParms.page_size = newPageSize;
       delete newQueryParms.page_index;
@@ -107,7 +107,7 @@ export const AlertIndex = memo(() => {
   );
 
   const onChangePage = useCallback(
-    newPageIndex => {
+    (newPageIndex) => {
       return history.push(
         urlFromQueryParams({
           ...queryParams,
@@ -127,7 +127,7 @@ export const AlertIndex = memo(() => {
 
   const timestampForRows: Map<AlertData, number> = useMemo(() => {
     return new Map(
-      alertListData.map(alertData => {
+      alertListData.map((alertData) => {
         return [alertData, alertData['@timestamp']];
       })
     );

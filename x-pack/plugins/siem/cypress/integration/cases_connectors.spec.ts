@@ -11,7 +11,6 @@ import { goToEditExternalConnection } from '../tasks/all_cases';
 import {
   addServiceNowConnector,
   openAddNewConnectorOption,
-  saveChanges,
   selectLastConnectorCreated,
 } from '../tasks/configure_cases';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
@@ -31,17 +30,12 @@ describe('Cases connectors', () => {
     openAddNewConnectorOption();
     addServiceNowConnector(serviceNowConnector);
 
-    cy.wait('@createConnector')
-      .its('status')
-      .should('eql', 200);
+    cy.wait('@createConnector').its('status').should('eql', 200);
     cy.get(TOASTER).should('have.text', "Created 'New connector'");
 
     selectLastConnectorCreated();
-    saveChanges();
 
-    cy.wait('@saveConnector', { timeout: 10000 })
-      .its('status')
-      .should('eql', 200);
+    cy.wait('@saveConnector', { timeout: 10000 }).its('status').should('eql', 200);
     cy.get(TOASTER).should('have.text', 'Saved external connection settings');
   });
 });
