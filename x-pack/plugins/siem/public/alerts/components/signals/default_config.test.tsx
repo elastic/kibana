@@ -19,6 +19,7 @@ import {
 import { mockEcsDataWithSignal } from '../../../common/mock/mock_ecs';
 import { sendSignalToTimelineAction, updateSignalStatusAction } from './actions';
 import * as i18n from './translations';
+import { ActionToaster } from '../../../common/components/toasters';
 
 jest.mock('./actions');
 
@@ -53,12 +54,14 @@ describe('signals default_config', () => {
     let setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
     let createTimeline: CreateTimeline;
     let updateTimelineIsLoading: UpdateTimelineLoading;
+    let dispatchToaster: React.Dispatch<ActionToaster>;
 
     beforeEach(() => {
       setEventsLoading = jest.fn();
       setEventsDeleted = jest.fn();
       createTimeline = jest.fn();
       updateTimelineIsLoading = jest.fn();
+      dispatchToaster = jest.fn();
     });
 
     describe('timeline tooltip', () => {
@@ -71,6 +74,7 @@ describe('signals default_config', () => {
           createTimeline,
           status: 'open',
           updateTimelineIsLoading,
+          dispatchToaster,
         });
         const timelineAction = signalsActions[0].getAction({
           eventId: 'even-id',
@@ -97,6 +101,7 @@ describe('signals default_config', () => {
           createTimeline,
           status: 'open',
           updateTimelineIsLoading,
+          dispatchToaster,
         });
 
         signalOpenAction = signalsActions[1].getAction({
@@ -151,6 +156,7 @@ describe('signals default_config', () => {
           createTimeline,
           status: 'closed',
           updateTimelineIsLoading,
+          dispatchToaster,
         });
 
         signalCloseAction = signalsActions[1].getAction({
