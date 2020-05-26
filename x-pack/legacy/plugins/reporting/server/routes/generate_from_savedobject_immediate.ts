@@ -15,6 +15,7 @@ import { isoStringValidate } from '../lib/iso_string_validate';
 import { makeRequestFacade } from './lib/make_request_facade';
 import { LevelLogger as Logger } from '../lib';
 import { JobDocOutput, ReportingSetupDeps } from '../types';
+import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 
 /*
  * This function registers API Endpoints for immediate Reporting jobs. The API inputs are:
@@ -32,6 +33,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
   basePath: IBasePath['get'],
   parentLogger: Logger
 ) {
+  const userHandler = authorizedUserPreRoutingFactory(reporting.getConfig(), plugins);
   /*
    * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:
    *  - re-use the createJob function to build up es query config
@@ -59,7 +61,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         }),
       },
     },
-    router.handleLegacyErrors(async (context, req, res) => {
+    userHandler(async (user, context, req, res) => {
       const request = makeRequestFacade(context, req, basePath);
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });

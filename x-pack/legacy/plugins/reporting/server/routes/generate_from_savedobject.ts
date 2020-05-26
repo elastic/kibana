@@ -15,6 +15,7 @@ import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject
 import { LevelLogger as Logger } from '../lib';
 import { ReportingSetupDeps } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
+import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 
 /*
  * This function registers API Endpoints for queuing Reporting jobs. The API inputs are:
@@ -34,6 +35,7 @@ export function registerGenerateCsvFromSavedObject(
   handleRouteError: HandlerErrorFunction,
   logger: Logger
 ) {
+  const userHandler = authorizedUserPreRoutingFactory(reporting.getConfig(), plugins);
   router.post(
     {
       path: `${API_BASE_GENERATE_V1}/csv/saved-object/{savedObjectType}:{savedObjectId}`,
@@ -56,8 +58,9 @@ export function registerGenerateCsvFromSavedObject(
         }),
       },
     },
-    router.handleLegacyErrors(async (context, req, res) => {
+    userHandler(async (user, context, req, res) => {
       const requestFacade = makeRequestFacade(context, req, basePath);
+      const { username } = user;
 
       /*
        * 1. Build `jobParams` object: job data that execution will need to reference in various parts of the lifecycle
@@ -67,15 +70,21 @@ export function registerGenerateCsvFromSavedObject(
       let result: QueuedJobPayload<any>;
       try {
         const jobParams = getJobParamsFromRequest(requestFacade, { isImmediate: false });
-        result = await handleRoute(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, requestFacade, res);
+        result = await handleRoute(
+          username,
+          CSV_FROM_SAVEDOBJECT_JOB_TYPE,
+          jobParams,
+          requestFacade,
+          res
+        );
       } catch (err) {
-        throw handleRouteError(CSV_FROM_SAVEDOBJECT_JOB_TYPE, err);
+        return handleRouteError(CSV_FROM_SAVEDOBJECT_JOB_TYPE, err, res);
       }
 
       if (get(result, 'source.job') == null) {
-        throw new Error(
-          `The Export handler is expected to return a result with job info! ${result}`
-        );
+        return res.badRequest({
+          body: `The Export handler is expected to return a result with job info! ${result}`,
+        });
       }
 
       return res.ok({

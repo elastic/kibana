@@ -19,5 +19,5 @@ export function registerRoutes(
   logger: Logger
 ) {
   registerJobGenerationRoutes(reporting, plugins, router, basePath, logger);
-  registerJobInfoRoutes(reporting, plugins, router, basePath, logger);
+  registerJobInfoRoutes(reporting, plugins, router);
 }

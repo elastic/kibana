@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { ElasticsearchServiceSetup } from 'kibana/server';
+import { ElasticsearchServiceSetup, kibanaResponseFactory } from 'kibana/server';
 import { ReportingConfig } from '../../';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
 import { ExportTypesRegistry } from '../../lib/export_types_registry';
@@ -29,6 +29,7 @@ export function downloadJobResponseHandlerFactory(
   const getDocumentPayload = getDocumentPayloadFactory(exportTypesRegistry);
 
   return async function jobResponseHandler(
+    res: typeof kibanaResponseFactory,
     validJobTypes: string[],
     username: string,
     params: JobResponseHandlerParams,
@@ -37,23 +38,34 @@ export function downloadJobResponseHandlerFactory(
     const { docId } = params;
 
     const doc = await jobsQuery.get(username, docId, { includeContent: !opts.excludeContent });
-    if (!doc) throw Boom.notFound();
+    if (!doc) {
+      return res.notFound();
+    }
 
     const { jobtype: jobType } = doc._source;
 
     if (!validJobTypes.includes(jobType)) {
-      throw Boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
+      return res.unauthorized({
+        body: `Sorry, you are not authorized to download ${jobType} reports`,
+      });
     }
 
-    const output = getDocumentPayload(doc);
+    const response = getDocumentPayload(doc);
 
-    if (!WHITELISTED_JOB_CONTENT_TYPES.includes(output.contentType)) {
-      throw Boom.badImplementation(
-        `Unsupported content-type of ${output.contentType} specified by job output`
-      );
+    if (!WHITELISTED_JOB_CONTENT_TYPES.includes(response.contentType)) {
+      return res.badRequest({
+        body: `Unsupported content-type of ${response.contentType} specified by job output`,
+      });
     }
 
-    return output;
+    return res.custom({
+      body: typeof response.content === 'string' ? Buffer.from(response.content) : response.content,
+      statusCode: response.statusCode,
+      headers: {
+        ...response.headers,
+        'content-type': response.contentType,
+      },
+    });
   };
 }
 
@@ -64,25 +76,37 @@ export function deleteJobResponseHandlerFactory(
   const jobsQuery = jobsQueryFactory(config, elasticsearch);
 
   return async function deleteJobResponseHander(
+    res: typeof kibanaResponseFactory,
     validJobTypes: string[],
     username: string,
     params: JobResponseHandlerParams
   ) {
     const { docId } = params;
     const doc = await jobsQuery.get(username, docId, { includeContent: false });
-    if (!doc) throw Boom.notFound();
+
+    if (!doc) {
+      return res.notFound();
+    }
 
     const { jobtype: jobType } = doc._source;
+
     if (!validJobTypes.includes(jobType)) {
-      throw Boom.unauthorized(`Sorry, you are not authorized to delete ${jobType} reports`);
+      return res.unauthorized({
+        body: `Sorry, you are not authorized to delete ${jobType} reports`,
+      });
     }
 
     try {
       const docIndex = doc._index;
       await jobsQuery.delete(docIndex, docId);
-      return { deleted: true };
+      return res.ok({
+        body: { deleted: true },
+      });
     } catch (error) {
-      throw Boom.boomify(error, { statusCode: error.statusCode });
+      return res.customError({
+        statusCode: error.statusCode,
+        body: error.message,
+      });
     }
   };
 }

@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { IRouter, IBasePath } from 'src/core/server';
+import { IRouter } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
@@ -196,17 +196,7 @@ export async function registerJobInfoRoutes(
         management: { jobTypes = [] },
       } = reporting.getLicenseInfo();
 
-      const response = await downloadResponseHandler(jobTypes, username, { docId });
-
-      return res.custom({
-        body:
-          typeof response.content === 'string' ? Buffer.from(response.content) : response.content,
-        statusCode: response.statusCode,
-        headers: {
-          ...response.headers,
-          'content-type': response.contentType,
-        },
-      });
+      return downloadResponseHandler(res, jobTypes, username, { docId });
     })
   );
 
@@ -228,14 +218,7 @@ export async function registerJobInfoRoutes(
         management: { jobTypes = [] },
       } = reporting.getLicenseInfo();
 
-      const response = await deleteResponseHandler(jobTypes, username, { docId });
-
-      return res.ok({
-        body: response,
-        headers: {
-          'content-type': 'application/json',
-        },
-      });
+      return deleteResponseHandler(res, jobTypes, username, { docId });
     })
   );
 }
