@@ -23,8 +23,8 @@ import { PolicyListAction } from '../store/policy_list';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { Immutable, PolicyData } from '../../../../../common/endpoint/types';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { PageView } from '../../../../common/components/endpoint/page_view';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
+import { ManagementPageView } from '../../../components/management_page_view';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -150,7 +150,7 @@ export const PolicyList = React.memo(() => {
   );
 
   return (
-    <PageView
+    <ManagementPageView
       viewType="list"
       data-test-subj="policyListPage"
       headerLeft={i18n.translate('xpack.siem.endpoint.policyList.viewTitle', {
@@ -174,7 +174,7 @@ export const PolicyList = React.memo(() => {
         onChange={handleTableChange}
         data-test-subj="policyTable"
       />
-    </PageView>
+    </ManagementPageView>
   );
 });
 

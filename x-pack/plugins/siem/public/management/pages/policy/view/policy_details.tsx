@@ -35,7 +35,8 @@ import { WindowsEvents, MacEvents, LinuxEvents } from './policy_forms/events';
 import { MalwareProtections } from './policy_forms/protections/malware';
 import { AppAction } from '../../../../common/store/actions';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { PageView, PageViewHeaderTitle } from '../../../../common/components/endpoint/page_view';
+import { PageViewHeaderTitle } from '../../../../common/components/endpoint/page_view';
+import { ManagementPageView } from '../../../components/management_page_view';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -103,7 +104,7 @@ export const PolicyDetails = React.memo(() => {
   // Else, if we have an error, then show error on the page.
   if (!policyItem) {
     return (
-      <PageView viewType="details">
+      <ManagementPageView viewType="details">
         {isPolicyLoading ? (
           <EuiLoadingSpinner size="xl" />
         ) : policyApiError ? (
@@ -111,7 +112,7 @@ export const PolicyDetails = React.memo(() => {
             {policyApiError?.message}
           </EuiCallOut>
         ) : null}
-      </PageView>
+      </ManagementPageView>
     );
   }
 
@@ -180,7 +181,7 @@ export const PolicyDetails = React.memo(() => {
           onConfirm={handleSaveConfirmation}
         />
       )}
-      <PageView
+      <ManagementPageView
         viewType="details"
         data-test-subj="policyDetailsPage"
         headerLeft={headerLeftContent}
@@ -211,7 +212,7 @@ export const PolicyDetails = React.memo(() => {
         <MacEvents />
         <EuiSpacer size="l" />
         <LinuxEvents />
-      </PageView>
+      </ManagementPageView>
     </>
   );
 });
