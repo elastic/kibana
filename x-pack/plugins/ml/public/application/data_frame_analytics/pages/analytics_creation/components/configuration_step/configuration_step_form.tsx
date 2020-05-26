@@ -5,7 +5,7 @@
  */
 
 import React, { FC, Fragment, useEffect, useRef } from 'react';
-import { EuiBadge, EuiComboBox, EuiFormRow, EuiRange, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiComboBox, EuiFormRow, EuiRange, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
@@ -38,6 +38,7 @@ import { AnalysisFieldsTable } from './analysis_fields_table';
 import { DataGrid } from '../../../../../components/data_grid';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
+import { useSavedSearch } from './use_saved_search';
 
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
@@ -52,7 +53,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
   setCurrentStep,
 }) => {
   const mlContext = useMlContext();
-  const { currentIndexPattern } = mlContext;
+  const { currentSavedSearch, currentIndexPattern } = mlContext;
+  const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 
   const { initiateWizard, setEstimatedModelMemoryLimit, setFormState } = actions;
   const { estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
@@ -80,8 +82,13 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
     setFormState({ jobConfigQuery: query, jobConfigQueryString: queryString });
   };
 
+  const indexData = useIndexData(
+    currentIndexPattern,
+    savedSearchQuery !== undefined ? savedSearchQuery : jobConfigQuery
+  );
+
   const indexPreviewProps = {
-    ...useIndexData(currentIndexPattern, jobConfigQuery),
+    ...indexData,
     dataTestSubj: 'mlAnalyticsCreationDataGrid',
     toastNotifications: getToastNotifications(),
   };
@@ -240,6 +247,10 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
   }, []);
 
   useEffect(() => {
+    setFormState({ jobConfigQuery: savedSearchQuery, jobConfigQueryString: savedSearchQueryStr });
+  }, [JSON.stringify(savedSearchQuery), savedSearchQueryStr]);
+
+  useEffect(() => {
     if (isJobTypeWithDepVar) {
       loadDepVarOptions(form);
     }
@@ -259,35 +270,45 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
     return () => {
       debouncedGetExplainData.cancel();
     };
-  }, [jobType, dependentVariable, trainingPercent, JSON.stringify(excludes)]);
+  }, [jobType, dependentVariable, trainingPercent, JSON.stringify(excludes), jobConfigQueryString]);
 
   return (
     <Fragment>
       <Messages messages={requestMessages} />
       <SupportedFieldsMessage jobType={jobType} />
       <JobType type={jobType} setFormState={setFormState} />
-      <EuiFormRow
-        label={i18n.translate('xpack.ml.dataframe.analytics.create.sourceQueryLabel', {
-          defaultMessage: 'Query',
-        })}
-        fullWidth
-      >
-        <ExplorationQueryBar
-          indexPattern={currentIndexPattern}
-          // @ts-ignore
-          setSearchQuery={setJobConfigQuery}
-          includeQueryString
-          defaultQueryString={jobConfigQueryString}
-        />
-      </EuiFormRow>
+      {savedSearchQuery === undefined && (
+        <EuiFormRow
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.sourceQueryLabel', {
+            defaultMessage: 'Query',
+          })}
+          fullWidth
+        >
+          <ExplorationQueryBar
+            indexPattern={currentIndexPattern}
+            // @ts-ignore
+            setSearchQuery={setJobConfigQuery}
+            includeQueryString
+            defaultQueryString={jobConfigQueryString}
+          />
+        </EuiFormRow>
+      )}
       <EuiFormRow
         label={
-          <EuiBadge color="hollow">
-            {i18n.translate('xpack.ml.dataframe.analytics.create.sourcePreviewLabel', {
-              defaultMessage: '{sourceTitle}',
-              values: { sourceTitle: currentIndexPattern.title },
-            })}
-          </EuiBadge>
+          <Fragment>
+            {savedSearchQuery !== undefined && (
+              <EuiText>
+                {i18n.translate('xpack.ml.dataframe.analytics.create.savedSearchLabel', {
+                  defaultMessage: 'Saved search',
+                })}
+              </EuiText>
+            )}
+            <EuiBadge color="hollow">
+              {savedSearchQuery !== undefined
+                ? currentSavedSearch?.attributes.title
+                : currentIndexPattern.title}
+            </EuiBadge>
+          </Fragment>
         }
         fullWidth
       >

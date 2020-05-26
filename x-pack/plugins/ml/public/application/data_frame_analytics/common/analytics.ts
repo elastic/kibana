@@ -436,7 +436,7 @@ export function getEvalQueryBody({
 
   const searchQueryClone = cloneDeep(searchQuery);
 
-  if (isResultsSearchBoolQuery(searchQueryClone)) {
+  if (searchQueryClone && isResultsSearchBoolQuery(searchQueryClone)) {
     if (searchQueryClone.bool.must === undefined) {
       searchQueryClone.bool.must = [];
     }
@@ -446,7 +446,7 @@ export function getEvalQueryBody({
     }
 
     query = searchQueryClone;
-  } else if (isQueryStringQuery(searchQueryClone)) {
+  } else if (searchQueryClone && isQueryStringQuery(searchQueryClone)) {
     query = {
       bool: {
         must: [searchQueryClone],

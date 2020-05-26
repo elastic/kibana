@@ -258,6 +258,7 @@ export const getJobConfigFromFormState = (
       index: formState.sourceIndex.includes(',')
         ? formState.sourceIndex.split(',').map((d) => d.trim())
         : formState.sourceIndex,
+      query: formState.jobConfigQuery,
     },
     dest: {
       index: formState.destinationIndex,
