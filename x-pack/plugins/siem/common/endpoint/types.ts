@@ -4,10 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LocationDescriptorObject } from 'history';
 import { Datasource, NewDatasource } from '../../../ingest_manager/common';
 
-export type AppLocation = LocationDescriptorObject;
+/**
+ * Object that allows you to maintain stateful information in the location object across navigation events
+ *
+ */
+
+export interface AppLocation {
+  pathname: string;
+  search: string;
+  hash: string;
+  key?: string;
+  // Other parts of the application use the 'history' package which defines the state as type any.
+  // Also see: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/27012
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  state?: any;
+}
 
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
