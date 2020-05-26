@@ -195,7 +195,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
           >
             <p>
               <FormattedMessage
-                id="xpack.ml.dataframe.analyticsList.deleteAnalytics.deleteModalBody"
+                id="xpack.ml.dataframe.analyticsList.deleteModalBody"
                 defaultMessage="Are you sure you want to delete this analytics job?"
               />
             </p>
