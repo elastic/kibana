@@ -35,7 +35,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const SerialDiffAgg = props => {
+export const SerialDiffAgg = (props) => {
   const { siblings } = props;
   const defaults = { lag: '' };
   const model = { ...defaults, ...props.model };

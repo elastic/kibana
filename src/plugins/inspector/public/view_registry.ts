@@ -69,6 +69,6 @@ export class InspectorViewRegistry extends EventEmitter {
     if (!adapters) {
       return [];
     }
-    return this.views.filter(view => !view.shouldShow || view.shouldShow(adapters));
+    return this.views.filter((view) => !view.shouldShow || view.shouldShow(adapters));
   }
 }

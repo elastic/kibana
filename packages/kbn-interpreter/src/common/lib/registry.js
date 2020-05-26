@@ -48,7 +48,7 @@ export class Registry {
   }
 
   toArray() {
-    return Object.keys(this._indexed).map(key => this.get(key));
+    return Object.keys(this._indexed).map((key) => this.get(key));
   }
 
   get(name) {

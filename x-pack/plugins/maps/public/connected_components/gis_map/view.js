@@ -73,7 +73,7 @@ export class GisMap extends Component {
     }
   };
 
-  _loadGeoFields = async nextIndexPatternIds => {
+  _loadGeoFields = async (nextIndexPatternIds) => {
     if (_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
       // all ready loaded index pattern ids
       return;
@@ -84,8 +84,8 @@ export class GisMap extends Component {
     const geoFields = [];
     try {
       const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
-      indexPatterns.forEach(indexPattern => {
-        indexPattern.fields.forEach(field => {
+      indexPatterns.forEach((indexPattern) => {
+        indexPattern.fields.forEach((field) => {
           if (
             !indexPatternsUtils.isNestedField(field) &&
             (field.type === ES_GEO_FIELD_TYPE.GEO_POINT ||

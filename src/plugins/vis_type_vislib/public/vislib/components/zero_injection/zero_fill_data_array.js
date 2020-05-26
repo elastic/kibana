@@ -35,7 +35,7 @@ export function zeroFillDataArray(arr1, arr2) {
   let index;
   const max = arr2.length;
 
-  const getX = function(d) {
+  const getX = function (d) {
     return d.x === val.x;
   };
 

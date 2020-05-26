@@ -48,9 +48,7 @@ export function registerGenerateFromJobParams(
           exportType: Joi.string().required(),
         }).required(),
         payload: Joi.object({
-          jobParams: Joi.string()
-            .optional()
-            .default(null),
+          jobParams: Joi.string().optional().default(null),
         }).allow(null), // allow optional payload
         query: Joi.object({
           jobParams: Joi.string().default(null),

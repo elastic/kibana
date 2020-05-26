@@ -53,7 +53,7 @@ export const validateActionParams = (
 
     if (actionErrorsValues.length) {
       const filteredObjects: Array<string | string[]> = actionErrorsValues.filter(
-        item => isString(item) || isArray(item)
+        (item) => isString(item) || isArray(item)
       ) as Array<string | string[]>;
       const uniqActionErrors = uniq(flattenDeep(filteredObjects));
 

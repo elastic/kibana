@@ -30,11 +30,11 @@ const ReadableRt = new rt.Type<Readable, Readable, unknown>(
   'ReadableRt',
   (u): u is Readable => u instanceof Readable,
   (u, c) =>
-    either.chain(rt.object.validate(u, c), s => {
+    either.chain(rt.object.validate(u, c), (s) => {
       const d = s as Readable;
       return d.readable ? rt.success(d) : rt.failure(u, c);
     }),
-  a => a
+  (a) => a
 );
 export const ImportTimelinesPayloadSchemaRt = rt.type({
   file: rt.intersection([

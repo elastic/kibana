@@ -26,7 +26,7 @@ export const WithLogTextviewUrlState = () => {
       urlState={urlState}
       urlStateKey="logTextview"
       mapToUrlState={mapToUrlState}
-      onChange={newUrlState => {
+      onChange={(newUrlState) => {
         if (newUrlState && newUrlState.textScale) {
           setTextScale(newUrlState.textScale);
         }
@@ -34,7 +34,7 @@ export const WithLogTextviewUrlState = () => {
           setTextWrap(newUrlState.wrap);
         }
       }}
-      onInitialize={newUrlState => {
+      onInitialize={(newUrlState) => {
         if (newUrlState && newUrlState.textScale) {
           setTextScale(newUrlState.textScale);
         }

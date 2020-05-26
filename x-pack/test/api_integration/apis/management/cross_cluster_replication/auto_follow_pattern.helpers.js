@@ -6,14 +6,14 @@
 
 import { API_BASE_PATH } from './constants';
 
-export const registerHelpers = supertest => {
+export const registerHelpers = (supertest) => {
   let autoFollowPatternsCreated = [];
 
   const loadAutoFollowPatterns = () => supertest.get(`${API_BASE_PATH}/auto_follow_patterns`);
 
-  const getAutoFollowPattern = id => supertest.get(`${API_BASE_PATH}/auto_follow_patterns/${id}`);
+  const getAutoFollowPattern = (id) => supertest.get(`${API_BASE_PATH}/auto_follow_patterns/${id}`);
 
-  const createAutoFollowPattern = payload => {
+  const createAutoFollowPattern = (payload) => {
     autoFollowPatternsCreated.push(payload.id);
 
     return supertest
@@ -22,8 +22,8 @@ export const registerHelpers = supertest => {
       .send(payload);
   };
 
-  const deleteAutoFollowPattern = id => {
-    autoFollowPatternsCreated = autoFollowPatternsCreated.filter(c => c !== id);
+  const deleteAutoFollowPattern = (id) => {
+    autoFollowPatternsCreated = autoFollowPatternsCreated.filter((c) => c !== id);
 
     return supertest.delete(`${API_BASE_PATH}/auto_follow_patterns/${id}`).set('kbn-xsrf', 'xxx');
   };

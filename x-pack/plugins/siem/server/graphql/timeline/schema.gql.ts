@@ -127,8 +127,12 @@ export const timelineSchema = gql`
 
   enum TimelineType {
     default
-    draft
     template
+  }
+
+  enum TimelineStatus {
+    active
+    draft
   }
 
   input TimelineInput {
@@ -146,6 +150,7 @@ export const timelineSchema = gql`
     dateRange: DateRangePickerInput
     savedQueryId: String
     sort: SortTimelineInput
+    status: TimelineStatus
   }
 
   input PageInfoTimeline {
@@ -245,6 +250,7 @@ export const timelineSchema = gql`
     savedQueryId: String
     savedObjectId: String!
     sort: SortTimelineResult
+    status: TimelineStatus
     title: String
     templateTimelineId: String
     templateTimelineVersion: Int
@@ -279,7 +285,7 @@ export const timelineSchema = gql`
 
   extend type Query {
     getOneTimeline(id: ID!): TimelineResult!
-    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: String): ResponseTimelines!
+    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: TimelineType): ResponseTimelines!
   }
 
   extend type Mutation {

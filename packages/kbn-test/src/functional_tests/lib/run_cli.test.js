@@ -25,7 +25,7 @@ const mockConsoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
 
 const actualProcessArgv = process.argv;
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 beforeEach(() => {
   process.argv = actualProcessArgv.slice(0, 2);
@@ -72,7 +72,7 @@ it('waits for promise returned from run function to resolve before resolving', a
   let resolveMockRun;
   const mockRun = jest.fn().mockImplementation(
     () =>
-      new Promise(resolve => {
+      new Promise((resolve) => {
         resolveMockRun = resolve;
       })
   );

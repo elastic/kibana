@@ -11,7 +11,7 @@ import d3 from 'd3';
 
 // Pluggable function to handle the comms with a server. Default impl here is
 // for use outside of Kibana server with direct access to elasticsearch
-let graphExplorer = function(indexName, typeName, request, responseHandler) {
+let graphExplorer = function (indexName, typeName, request, responseHandler) {
   const dataForServer = JSON.stringify(request);
   $.ajax({
     type: 'POST',
@@ -20,12 +20,12 @@ let graphExplorer = function(indexName, typeName, request, responseHandler) {
     contentType: 'application/json;charset=utf-8',
     async: true,
     data: dataForServer,
-    success: function(data) {
+    success: function (data) {
       responseHandler(data);
     },
   });
 };
-let searcher = function(indexName, request, responseHandler) {
+let searcher = function (indexName, request, responseHandler) {
   const dataForServer = JSON.stringify(request);
   $.ajax({
     type: 'POST',
@@ -34,7 +34,7 @@ let searcher = function(indexName, request, responseHandler) {
     contentType: 'application/json;charset=utf-8', //Not sure why this was necessary - worked without elsewhere
     async: true,
     data: dataForServer,
-    success: function(data) {
+    success: function (data) {
       responseHandler(data);
     },
   });
@@ -46,14 +46,14 @@ function AddNodeOperation(node, owner) {
   const self = this;
   const vm = owner;
   self.node = node;
-  self.undo = function() {
+  self.undo = function () {
     vm.arrRemove(vm.nodes, self.node);
     vm.arrRemove(vm.selectedNodes, self.node);
     self.node.isSelected = false;
 
     delete vm.nodesMap[self.node.id];
   };
-  self.redo = function() {
+  self.redo = function () {
     vm.nodes.push(self.node);
     vm.nodesMap[self.node.id] = self.node;
   };
@@ -63,11 +63,11 @@ function AddEdgeOperation(edge, owner) {
   const self = this;
   const vm = owner;
   self.edge = edge;
-  self.undo = function() {
+  self.undo = function () {
     vm.arrRemove(vm.edges, self.edge);
     delete vm.edgesMap[self.edge.id];
   };
-  self.redo = function() {
+  self.redo = function () {
     vm.edges.push(self.edge);
     vm.edgesMap[self.edge.id] = self.edge;
   };
@@ -84,10 +84,10 @@ function GroupOperation(receiver, orphan) {
   const self = this;
   self.receiver = receiver;
   self.orphan = orphan;
-  self.undo = function() {
+  self.undo = function () {
     self.orphan.parent = undefined;
   };
-  self.redo = function() {
+  self.redo = function () {
     self.orphan.parent = self.receiver;
   };
 }
@@ -96,10 +96,10 @@ function UnGroupOperation(parent, child) {
   const self = this;
   self.parent = parent;
   self.child = child;
-  self.undo = function() {
+  self.undo = function () {
     self.child.parent = self.parent;
   };
-  self.redo = function() {
+  self.redo = function () {
     self.child.parent = undefined;
   };
 }
@@ -135,7 +135,7 @@ function GraphWorkspace(options) {
     searcher = options.searchProxy;
   }
 
-  this.addUndoLogEntry = function(undoOperations) {
+  this.addUndoLogEntry = function (undoOperations) {
     self.undoLog.push(undoOperations);
     if (self.undoLog.length > 50) {
       //Remove the oldest
@@ -144,29 +144,29 @@ function GraphWorkspace(options) {
     self.redoLog = [];
   };
 
-  this.undo = function() {
+  this.undo = function () {
     const lastOps = this.undoLog.pop();
     if (lastOps) {
       this.stopLayout();
       this.redoLog.push(lastOps);
-      lastOps.forEach(ops => ops.undo());
+      lastOps.forEach((ops) => ops.undo());
       this.runLayout();
     }
   };
-  this.redo = function() {
+  this.redo = function () {
     const lastOps = this.redoLog.pop();
     if (lastOps) {
       this.stopLayout();
       this.undoLog.push(lastOps);
-      lastOps.forEach(ops => ops.redo());
+      lastOps.forEach((ops) => ops.redo());
       this.runLayout();
     }
   };
 
   //Determines if 2 nodes are connected via an edge
-  this.areLinked = function(a, b) {
+  this.areLinked = function (a, b) {
     if (a === b) return true;
-    this.edges.forEach(e => {
+    this.edges.forEach((e) => {
       if (e.source === a && e.target === b) {
         return true;
       }
@@ -179,9 +179,9 @@ function GraphWorkspace(options) {
 
   //======== Selection functions ========
 
-  this.selectAll = function() {
+  this.selectAll = function () {
     self.selectedNodes = [];
-    self.nodes.forEach(node => {
+    self.nodes.forEach((node) => {
       if (node.parent === undefined) {
         node.isSelected = true;
         self.selectedNodes.push(node);
@@ -191,16 +191,16 @@ function GraphWorkspace(options) {
     });
   };
 
-  this.selectNone = function() {
+  this.selectNone = function () {
     self.selectedNodes = [];
-    self.nodes.forEach(node => {
+    self.nodes.forEach((node) => {
       node.isSelected = false;
     });
   };
 
-  this.selectInvert = function() {
+  this.selectInvert = function () {
     self.selectedNodes = [];
-    self.nodes.forEach(node => {
+    self.nodes.forEach((node) => {
       if (node.parent !== undefined) {
         return;
       }
@@ -211,8 +211,8 @@ function GraphWorkspace(options) {
     });
   };
 
-  this.selectNodes = function(nodes) {
-    nodes.forEach(node => {
+  this.selectNodes = function (nodes) {
+    nodes.forEach((node) => {
       node.isSelected = true;
       if (self.selectedNodes.indexOf(node) < 0) {
         self.selectedNodes.push(node);
@@ -220,14 +220,14 @@ function GraphWorkspace(options) {
     });
   };
 
-  this.selectNode = function(node) {
+  this.selectNode = function (node) {
     node.isSelected = true;
     if (self.selectedNodes.indexOf(node) < 0) {
       self.selectedNodes.push(node);
     }
   };
 
-  this.deleteSelection = function() {
+  this.deleteSelection = function () {
     let allAndGrouped = self.returnUnpackedGroupeds(self.selectedNodes);
 
     // Nothing selected so process all nodes
@@ -236,7 +236,7 @@ function GraphWorkspace(options) {
     }
 
     const undoOperations = [];
-    allAndGrouped.forEach(node => {
+    allAndGrouped.forEach((node) => {
       //We set selected to false because despite being deleted, node objects sit in an undo log
       node.isSelected = false;
       delete self.nodesMap[node.id];
@@ -245,10 +245,10 @@ function GraphWorkspace(options) {
     self.arrRemoveAll(self.nodes, allAndGrouped);
     self.arrRemoveAll(self.selectedNodes, allAndGrouped);
 
-    const danglingEdges = self.edges.filter(function(edge) {
+    const danglingEdges = self.edges.filter(function (edge) {
       return self.nodes.indexOf(edge.source) < 0 || self.nodes.indexOf(edge.target) < 0;
     });
-    danglingEdges.forEach(edge => {
+    danglingEdges.forEach((edge) => {
       delete self.edgesMap[edge.id];
       undoOperations.push(new ReverseOperation(new AddEdgeOperation(edge, self)));
     });
@@ -257,9 +257,9 @@ function GraphWorkspace(options) {
     self.runLayout();
   };
 
-  this.selectNeighbours = function() {
+  this.selectNeighbours = function () {
     const newSelections = [];
-    self.edges.forEach(edge => {
+    self.edges.forEach((edge) => {
       if (!edge.topSrc.isSelected) {
         if (self.selectedNodes.indexOf(edge.topTarget) >= 0) {
           if (newSelections.indexOf(edge.topSrc) < 0) {
@@ -275,37 +275,37 @@ function GraphWorkspace(options) {
         }
       }
     });
-    newSelections.forEach(newlySelectedNode => {
+    newSelections.forEach((newlySelectedNode) => {
       self.selectedNodes.push(newlySelectedNode);
       newlySelectedNode.isSelected = true;
     });
   };
 
-  this.selectNone = function() {
-    self.selectedNodes.forEach(node => {
+  this.selectNone = function () {
+    self.selectedNodes.forEach((node) => {
       node.isSelected = false;
     });
     self.selectedNodes = [];
   };
 
-  this.deselectNode = function(node) {
+  this.deselectNode = function (node) {
     node.isSelected = false;
     self.arrRemove(self.selectedNodes, node);
   };
 
-  this.getAllSelectedNodes = function() {
+  this.getAllSelectedNodes = function () {
     return this.returnUnpackedGroupeds(self.selectedNodes);
   };
 
-  this.colorSelected = function(colorNum) {
-    self.getAllSelectedNodes().forEach(node => {
+  this.colorSelected = function (colorNum) {
+    self.getAllSelectedNodes().forEach((node) => {
       node.color = colorNum;
     });
   };
 
-  this.getSelectionsThatAreGrouped = function() {
+  this.getSelectionsThatAreGrouped = function () {
     const result = [];
-    self.selectedNodes.forEach(node => {
+    self.selectedNodes.forEach((node) => {
       if (node.numChildren > 0) {
         result.push(node);
       }
@@ -313,13 +313,13 @@ function GraphWorkspace(options) {
     return result;
   };
 
-  this.ungroupSelection = function() {
-    self.getSelectionsThatAreGrouped().forEach(node => {
+  this.ungroupSelection = function () {
+    self.getSelectionsThatAreGrouped().forEach((node) => {
       self.ungroup(node);
     });
   };
 
-  this.toggleNodeSelection = function(node) {
+  this.toggleNodeSelection = function (node) {
     if (node.isSelected) {
       self.deselectNode(node);
     } else {
@@ -329,7 +329,7 @@ function GraphWorkspace(options) {
     return node.isSelected;
   };
 
-  this.returnUnpackedGroupeds = function(topLevelNodeArray) {
+  this.returnUnpackedGroupeds = function (topLevelNodeArray) {
     //Gather any grouped nodes that are part of this top-level selection
     const result = topLevelNodeArray.slice();
 
@@ -371,7 +371,7 @@ function GraphWorkspace(options) {
 
   // ======= Miscellaneous functions
 
-  this.clearGraph = function() {
+  this.clearGraph = function () {
     this.stopLayout();
     this.nodes = [];
     this.edges = [];
@@ -398,9 +398,9 @@ function GraphWorkspace(options) {
     }
   };
 
-  this.getNeighbours = function(node) {
+  this.getNeighbours = function (node) {
     const neighbourNodes = [];
-    self.edges.forEach(edge => {
+    self.edges.forEach((edge) => {
       if (edge.topSrc === edge.topTarget) {
         return;
       }
@@ -419,7 +419,7 @@ function GraphWorkspace(options) {
   };
 
   //Creates a query that represents a node - either simple term query or boolean if grouped
-  this.buildNodeQuery = function(topLevelNode) {
+  this.buildNodeQuery = function (topLevelNode) {
     let containedNodes = [topLevelNode];
     containedNodes = self.returnUnpackedGroupeds(containedNodes);
     if (containedNodes.length === 1) {
@@ -431,7 +431,7 @@ function GraphWorkspace(options) {
       };
     }
     const termsByField = {};
-    containedNodes.forEach(node => {
+    containedNodes.forEach((node) => {
       let termsList = termsByField[node.data.field];
       if (!termsList) {
         termsList = [];
@@ -465,20 +465,20 @@ function GraphWorkspace(options) {
 
   //====== Layout functions ========
 
-  this.stopLayout = function() {
+  this.stopLayout = function () {
     if (this.force) {
       this.force.stop();
     }
     this.force = null;
   };
 
-  this.runLayout = function() {
+  this.runLayout = function () {
     this.stopLayout();
     // The set of nodes and edges we present to the d3 layout algorithms
     // is potentially a reduced set of nodes if the client has used any
     // grouping of nodes into parent nodes.
     const effectiveEdges = [];
-    self.edges.forEach(edge => {
+    self.edges.forEach((edge) => {
       let topSrc = edge.source;
       let topTarget = edge.target;
       while (topSrc.parent !== undefined) {
@@ -497,12 +497,12 @@ function GraphWorkspace(options) {
         });
       }
     });
-    const visibleNodes = self.nodes.filter(function(n) {
+    const visibleNodes = self.nodes.filter(function (n) {
       return n.parent === undefined;
     });
     //reset then roll-up all the counts
     const allNodes = self.nodes;
-    allNodes.forEach(node => {
+    allNodes.forEach((node) => {
       node.numChildren = 0;
     });
 
@@ -527,11 +527,11 @@ function GraphWorkspace(options) {
       .theta(0.99)
       .alpha(0.5)
       .size([800, 600])
-      .on('tick', function() {
+      .on('tick', function () {
         const nodeArray = self.nodes;
         let hasRollups = false;
         //Update the position of all "top level nodes"
-        nodeArray.forEach(n => {
+        nodeArray.forEach((n) => {
           //Code to support roll-ups
           if (n.parent === undefined) {
             n.kx = n.x;
@@ -541,7 +541,7 @@ function GraphWorkspace(options) {
           }
         });
         if (hasRollups) {
-          nodeArray.forEach(n => {
+          nodeArray.forEach((n) => {
             //Code to support roll-ups
             if (n.parent !== undefined) {
               // Is a grouped node - inherit parent's position so edges point into parent
@@ -568,9 +568,9 @@ function GraphWorkspace(options) {
   //========Grouping functions==========
 
   //Merges all selected nodes into node
-  this.groupSelections = function(node) {
+  this.groupSelections = function (node) {
     const ops = [];
-    self.nodes.forEach(function(otherNode) {
+    self.nodes.forEach(function (otherNode) {
       if (otherNode !== node && otherNode.isSelected && otherNode.parent === undefined) {
         otherNode.parent = node;
         otherNode.isSelected = false;
@@ -584,10 +584,10 @@ function GraphWorkspace(options) {
     self.runLayout();
   };
 
-  this.mergeNeighbours = function(node) {
+  this.mergeNeighbours = function (node) {
     const neighbours = self.getNeighbours(node);
     const ops = [];
-    neighbours.forEach(function(otherNode) {
+    neighbours.forEach(function (otherNode) {
       if (otherNode !== node && otherNode.parent === undefined) {
         otherNode.parent = node;
         otherNode.isSelected = false;
@@ -599,14 +599,14 @@ function GraphWorkspace(options) {
     self.runLayout();
   };
 
-  this.mergeSelections = function(targetNode) {
+  this.mergeSelections = function (targetNode) {
     if (!targetNode) {
       console.log('Error - merge called on undefined target');
       return;
     }
     const selClone = self.selectedNodes.slice();
     const ops = [];
-    selClone.forEach(function(otherNode) {
+    selClone.forEach(function (otherNode) {
       if (otherNode !== targetNode && otherNode.parent === undefined) {
         otherNode.parent = targetNode;
         otherNode.isSelected = false;
@@ -618,9 +618,9 @@ function GraphWorkspace(options) {
     self.runLayout();
   };
 
-  this.ungroup = function(node) {
+  this.ungroup = function (node) {
     const ops = [];
-    self.nodes.forEach(function(other) {
+    self.nodes.forEach(function (other) {
       if (other.parent === node) {
         other.parent = undefined;
         ops.push(new UnGroupOperation(node, other));
@@ -630,20 +630,20 @@ function GraphWorkspace(options) {
     self.runLayout();
   };
 
-  this.unblacklist = function(node) {
+  this.unblacklist = function (node) {
     self.arrRemove(self.blacklistedNodes, node);
   };
 
-  this.blacklistSelection = function() {
+  this.blacklistSelection = function () {
     const selection = self.getAllSelectedNodes();
     const danglingEdges = [];
-    self.edges.forEach(function(edge) {
+    self.edges.forEach(function (edge) {
       if (selection.indexOf(edge.source) >= 0 || selection.indexOf(edge.target) >= 0) {
         delete self.edgesMap[edge.id];
         danglingEdges.push(edge);
       }
     });
-    selection.forEach(node => {
+    selection.forEach((node) => {
       delete self.nodesMap[node.id];
       self.blacklistedNodes.push(node);
       node.isSelected = false;
@@ -656,7 +656,7 @@ function GraphWorkspace(options) {
 
   // A "simple search" operation that requires no parameters from the client.
   // Performs numHops hops pulling in field-specific number of terms each time
-  this.simpleSearch = function(searchTerm, fieldsChoice, numHops) {
+  this.simpleSearch = function (searchTerm, fieldsChoice, numHops) {
     const qs = {
       query_string: {
         query: searchTerm,
@@ -665,7 +665,7 @@ function GraphWorkspace(options) {
     return this.search(qs, fieldsChoice, numHops);
   };
 
-  this.search = function(query, fieldsChoice, numHops) {
+  this.search = function (query, fieldsChoice, numHops) {
     if (!fieldsChoice) {
       fieldsChoice = self.options.vertex_fields;
     }
@@ -734,7 +734,7 @@ function GraphWorkspace(options) {
     self.callElasticsearch(request);
   };
 
-  this.buildControls = function() {
+  this.buildControls = function () {
     //This is an object managed by the client that may be subject to change
     const guiSettingsObj = self.options.exploreControls;
 
@@ -753,11 +753,11 @@ function GraphWorkspace(options) {
     return controls;
   };
 
-  this.makeNodeId = function(field, term) {
+  this.makeNodeId = function (field, term) {
     return field + '..' + term;
   };
 
-  this.makeEdgeId = function(srcId, targetId) {
+  this.makeEdgeId = function (srcId, targetId) {
     let id = srcId + '->' + targetId;
     if (srcId > targetId) {
       id = targetId + '->' + srcId;
@@ -766,7 +766,7 @@ function GraphWorkspace(options) {
   };
 
   //=======  Adds new nodes retrieved from an elasticsearch search ========
-  this.mergeGraph = function(newData) {
+  this.mergeGraph = function (newData) {
     this.stopLayout();
 
     if (!newData.nodes) {
@@ -785,7 +785,7 @@ function GraphWorkspace(options) {
 
     //Remove nodes we already have
     const dedupedNodes = [];
-    newData.nodes.forEach(node => {
+    newData.nodes.forEach((node) => {
       //Assign an ID
       node.id = self.makeNodeId(node.field, node.term);
       if (!this.nodesMap[node.id]) {
@@ -801,7 +801,7 @@ function GraphWorkspace(options) {
       this.options.nodeLabeller(dedupedNodes);
     }
 
-    dedupedNodes.forEach(dedupedNode => {
+    dedupedNodes.forEach((dedupedNode) => {
       let label = dedupedNode.term;
       if (dedupedNode.label) {
         label = dedupedNode.label;
@@ -827,7 +827,7 @@ function GraphWorkspace(options) {
       this.nodesMap[node.id] = node;
     });
 
-    newData.edges.forEach(edge => {
+    newData.edges.forEach((edge) => {
       const src = newData.nodes[edge.source];
       const target = newData.nodes[edge.target];
       edge.id = this.makeEdgeId(src.id, target.id);
@@ -867,7 +867,7 @@ function GraphWorkspace(options) {
     this.runLayout();
   };
 
-  this.mergeIds = function(parentId, childId) {
+  this.mergeIds = function (parentId, childId) {
     const parent = self.getNode(parentId);
     const child = self.getNode(childId);
     if (child.isSelected) {
@@ -879,16 +879,16 @@ function GraphWorkspace(options) {
     self.runLayout();
   };
 
-  this.getNode = function(nodeId) {
+  this.getNode = function (nodeId) {
     return this.nodesMap[nodeId];
   };
-  this.getEdge = function(edgeId) {
+  this.getEdge = function (edgeId) {
     return this.edgesMap[edgeId];
   };
 
   //======= Expand functions to request new additions to the graph
 
-  this.expandSelecteds = function(targetOptions = {}) {
+  this.expandSelecteds = function (targetOptions = {}) {
     let startNodes = self.getAllSelectedNodes();
     if (startNodes.length === 0) {
       startNodes = self.nodes;
@@ -897,19 +897,19 @@ function GraphWorkspace(options) {
     self.expand(clone, targetOptions);
   };
 
-  this.expandGraph = function() {
+  this.expandGraph = function () {
     self.expandSelecteds();
   };
 
   //Find new nodes to link to existing selected nodes
-  this.expandNode = function(node) {
+  this.expandNode = function (node) {
     self.expand(self.returnUnpackedGroupeds([node]), {});
   };
 
   // A manual expand function where the client provides the list
   // of existing nodes that are the start points and some options
   // about what targets are of interest.
-  this.expand = function(startNodes, targetOptions) {
+  this.expand = function (startNodes, targetOptions) {
     //=============================
     const nodesByField = {};
     const excludeNodesByField = {};
@@ -983,7 +983,7 @@ function GraphWorkspace(options) {
     }
 
     //Identify target fields
-    targetFields.forEach(targetField => {
+    targetFields.forEach((targetField) => {
       const fieldName = targetField.name;
       // Sometimes the target field is disabled from loading new hops so we need to use the last valid figure
       const hopSize = targetField.hopSize > 0 ? targetField.hopSize : targetField.lastValidHopSize;
@@ -1005,13 +1005,13 @@ function GraphWorkspace(options) {
       },
     };
     self.lastRequest = JSON.stringify(request, null, '\t');
-    graphExplorer(self.options.indexName, request, function(data) {
+    graphExplorer(self.options.indexName, request, function (data) {
       self.lastResponse = JSON.stringify(data, null, '\t');
       const edges = [];
 
       //Label fields with a field number for CSS styling
-      data.vertices.forEach(node => {
-        targetFields.some(fieldDef => {
+      data.vertices.forEach((node) => {
+        targetFields.some((fieldDef) => {
           if (node.field === fieldDef.name) {
             node.color = fieldDef.color;
             node.icon = fieldDef.icon;
@@ -1026,7 +1026,7 @@ function GraphWorkspace(options) {
       const minLineSize = 2;
       const maxLineSize = 10;
       let maxEdgeWeight = 0.00000001;
-      data.connections.forEach(edge => {
+      data.connections.forEach((edge) => {
         maxEdgeWeight = Math.max(maxEdgeWeight, edge.weight);
         edges.push({
           source: edge.source,
@@ -1046,11 +1046,11 @@ function GraphWorkspace(options) {
     //===== End expand graph ========================
   };
 
-  this.trimExcessNewEdges = function(newNodes, newEdges) {
+  this.trimExcessNewEdges = function (newNodes, newEdges) {
     let trimmedEdges = [];
     const maxNumEdgesToReturn = 5;
     //Trim here to just the new edges that are most interesting.
-    newEdges.forEach(edge => {
+    newEdges.forEach((edge) => {
       const src = newNodes[edge.source];
       const target = newNodes[edge.target];
       const srcId = src.field + '..' + src.term;
@@ -1080,7 +1080,7 @@ function GraphWorkspace(options) {
     });
     if (trimmedEdges.length > maxNumEdgesToReturn) {
       //trim to only the most interesting ones
-      trimmedEdges.sort(function(a, b) {
+      trimmedEdges.sort(function (a, b) {
         return b.weight - a.weight;
       });
       trimmedEdges = trimmedEdges.splice(0, maxNumEdgesToReturn);
@@ -1088,13 +1088,13 @@ function GraphWorkspace(options) {
     return trimmedEdges;
   };
 
-  this.getQuery = function(startNodes, loose) {
+  this.getQuery = function (startNodes, loose) {
     const shoulds = [];
     let nodes = startNodes;
     if (!startNodes) {
       nodes = self.nodes;
     }
-    nodes.forEach(node => {
+    nodes.forEach((node) => {
       if (node.parent === undefined) {
         shoulds.push(self.buildNodeQuery(node));
       }
@@ -1107,7 +1107,7 @@ function GraphWorkspace(options) {
     };
   };
 
-  this.getSelectedOrAllNodes = function() {
+  this.getSelectedOrAllNodes = function () {
     let startNodes = self.getAllSelectedNodes();
     if (startNodes.length === 0) {
       startNodes = self.nodes;
@@ -1115,8 +1115,8 @@ function GraphWorkspace(options) {
     return startNodes;
   };
 
-  this.getSelectedOrAllTopNodes = function() {
-    return self.getSelectedOrAllNodes().filter(function(node) {
+  this.getSelectedOrAllTopNodes = function () {
+    return self.getSelectedOrAllNodes().filter(function (node) {
       return node.parent === undefined;
     });
   };
@@ -1135,7 +1135,7 @@ function GraphWorkspace(options) {
    * @param maxNewEdges Max number of new edges added. Avoid adding too many new edges
    * at once into the graph otherwise disorientating
    */
-  this.fillInGraph = function(maxNewEdges = 10) {
+  this.fillInGraph = function (maxNewEdges = 10) {
     let nodesForLinking = self.getSelectedOrAllTopNodes();
 
     const maxNumVerticesSearchable = 100;
@@ -1161,7 +1161,7 @@ function GraphWorkspace(options) {
     // the first 2 nodes in the array will therefore be labelled "0|1"
     const shoulds = [];
     const filterMap = {};
-    nodesForLinking.forEach(function(node, nodeNum) {
+    nodesForLinking.forEach(function (node, nodeNum) {
       const nodeQuery = self.buildNodeQuery(node);
       shoulds.push(nodeQuery);
       filterMap[nodeNum] = nodeQuery;
@@ -1186,10 +1186,10 @@ function GraphWorkspace(options) {
     };
 
     // Search for connections between the selected nodes.
-    searcher(self.options.indexName, searchReq, function(data) {
+    searcher(self.options.indexName, searchReq, function (data) {
       const numDocsMatched = data.hits.total;
       const buckets = data.aggregations.matrix.buckets;
-      const vertices = nodesForLinking.map(function(existingNode) {
+      const vertices = nodesForLinking.map(function (existingNode) {
         return {
           field: existingNode.data.field,
           term: existingNode.data.term,
@@ -1202,11 +1202,11 @@ function GraphWorkspace(options) {
       let maxEdgeWeight = 0;
       // Turn matrix array of results into a map
       const keyedBuckets = {};
-      buckets.forEach(function(bucket) {
+      buckets.forEach(function (bucket) {
         keyedBuckets[bucket.key] = bucket;
       });
 
-      buckets.forEach(function(bucket) {
+      buckets.forEach(function (bucket) {
         // We calibrate line thickness based on % of max weight of
         // all edges (including the edges we may already have in the workspace)
         const ids = bucket.key.split('|');
@@ -1232,7 +1232,7 @@ function GraphWorkspace(options) {
       });
       const backFilledMinLineSize = 2;
       const backFilledMaxLineSize = 5;
-      buckets.forEach(function(bucket) {
+      buckets.forEach(function (bucket) {
         if (bucket.doc_count < parseInt(self.options.exploreControls.minDocCount)) {
           return;
         }
@@ -1263,7 +1263,7 @@ function GraphWorkspace(options) {
       });
       // Trim the array of connections so that we don't add too many at once - disorientating for users otherwise
       if (connections.length > maxNewEdges) {
-        connections = connections.sort(function(a, b) {
+        connections = connections.sort(function (a, b) {
           return b.weight - a.weight;
         });
         connections = connections.slice(0, maxNewEdges);
@@ -1287,11 +1287,11 @@ function GraphWorkspace(options) {
   // We use a free-text search on the index's configured default field (typically '_all')
   // to drill-down into docs that should be linked but aren't via the exact terms
   // we have in the workspace
-  this.getLikeThisButNotThisQuery = function(startNodes) {
+  this.getLikeThisButNotThisQuery = function (startNodes) {
     const likeQueries = [];
 
     const txtsByFieldType = {};
-    startNodes.forEach(node => {
+    startNodes.forEach((node) => {
       let txt = txtsByFieldType[node.data.field];
       if (txt) {
         txt = txt + ' ' + node.label;
@@ -1317,11 +1317,11 @@ function GraphWorkspace(options) {
 
     const excludeNodesByField = {};
     const allExistingNodes = self.nodes;
-    allExistingNodes.forEach(existingNode => {
+    allExistingNodes.forEach((existingNode) => {
       addTermToFieldList(excludeNodesByField, existingNode.data.field, existingNode.data.term);
     });
     const blacklistedNodes = self.blacklistedNodes;
-    blacklistedNodes.forEach(blacklistedNode => {
+    blacklistedNodes.forEach((blacklistedNode) => {
       addTermToFieldList(
         excludeNodesByField,
         blacklistedNode.data.field,
@@ -1331,7 +1331,7 @@ function GraphWorkspace(options) {
 
     //Create negative boosting queries to avoid matching what you already have in the workspace.
     const notExistingNodes = [];
-    Object.keys(excludeNodesByField).forEach(fieldName => {
+    Object.keys(excludeNodesByField).forEach((fieldName) => {
       const termsQuery = {};
       termsQuery[fieldName] = excludeNodesByField[fieldName];
       notExistingNodes.push({
@@ -1359,7 +1359,7 @@ function GraphWorkspace(options) {
     return result;
   };
 
-  this.getSelectedIntersections = function(callback) {
+  this.getSelectedIntersections = function (callback) {
     if (self.selectedNodes.length === 0) {
       return self.getAllIntersections(callback, self.nodes);
     }
@@ -1372,7 +1372,7 @@ function GraphWorkspace(options) {
     return self.getAllIntersections(callback, self.getAllSelectedNodes());
   };
 
-  this.jLHScore = function(subsetFreq, subsetSize, supersetFreq, supersetSize) {
+  this.jLHScore = function (subsetFreq, subsetSize, supersetFreq, supersetSize) {
     const subsetProbability = subsetFreq / subsetSize;
     const supersetProbability = supersetFreq / supersetSize;
 
@@ -1392,13 +1392,13 @@ function GraphWorkspace(options) {
 
   // Determines union/intersection stats for neighbours of a node.
   // TODO - could move server-side as a graph API function?
-  this.getAllIntersections = function(callback, nodes) {
+  this.getAllIntersections = function (callback, nodes) {
     //Ensure these are all top-level nodes only
-    nodes = nodes.filter(function(n) {
+    nodes = nodes.filter(function (n) {
       return n.parent === undefined;
     });
 
-    const allQueries = nodes.map(function(node) {
+    const allQueries = nodes.map(function (node) {
       return self.buildNodeQuery(node);
     });
 
@@ -1436,7 +1436,7 @@ function GraphWorkspace(options) {
       request.aggs.sources.filters.filters['bg' + n] = query;
       request.aggs.sources.aggs.targets.filters.filters['fg' + n] = query;
     });
-    searcher(self.options.indexName, request, function(data) {
+    searcher(self.options.indexName, request, function (data) {
       const termIntersects = [];
       const fullDocCounts = [];
       const allDocCount = data.aggregations.all.doc_count;
@@ -1499,7 +1499,7 @@ function GraphWorkspace(options) {
           termIntersects.push(termIntersect);
         });
       });
-      termIntersects.sort(function(a, b) {
+      termIntersects.sort(function (a, b) {
         if (b.mergeConfidence !== a.mergeConfidence) {
           return b.mergeConfidence - a.mergeConfidence;
         }
@@ -1520,14 +1520,14 @@ function GraphWorkspace(options) {
 
   // Internal utility function for calling the Graph API and handling the response
   // by merging results into existing nodes in this workspace.
-  this.callElasticsearch = function(request) {
+  this.callElasticsearch = function (request) {
     self.lastRequest = JSON.stringify(request, null, '\t');
-    graphExplorer(self.options.indexName, request, function(data) {
+    graphExplorer(self.options.indexName, request, function (data) {
       self.lastResponse = JSON.stringify(data, null, '\t');
       const edges = [];
       //Label the nodes with field number for CSS styling
-      data.vertices.forEach(node => {
-        self.options.vertex_fields.some(fieldDef => {
+      data.vertices.forEach((node) => {
+        self.options.vertex_fields.some((fieldDef) => {
           if (node.field === fieldDef.name) {
             node.color = fieldDef.color;
             node.icon = fieldDef.icon;
@@ -1542,10 +1542,10 @@ function GraphWorkspace(options) {
       const minLineSize = 2;
       const maxLineSize = 10;
       let maxEdgeWeight = 0.00000001;
-      data.connections.forEach(edge => {
+      data.connections.forEach((edge) => {
         maxEdgeWeight = Math.max(maxEdgeWeight, edge.weight);
       });
-      data.connections.forEach(edge => {
+      data.connections.forEach((edge) => {
         edges.push({
           source: edge.source,
           target: edge.target,

@@ -38,7 +38,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
 
   // Use the kibana filter bar filters
   if (config.kibana) {
-    bool.filter = _.get(tlConfig, 'request.payload.extended.es.filter');
+    bool.filter = _.get(tlConfig, 'request.body.extended.es.filter');
   }
 
   const aggs = {
@@ -46,7 +46,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
       meta: { type: 'split' },
       filters: {
         filters: _.chain(config.q)
-          .map(function(q) {
+          .map(function (q) {
             return [q, { query_string: { query: q } }];
           })
           .zipObject()
@@ -58,7 +58,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
 
   let aggCursor = aggs.q.aggs;
 
-  _.each(config.split, function(clause) {
+  _.each(config.split, function (clause) {
     clause = clause.split(':');
     if (clause[0] && clause[1]) {
       const termsAgg = buildAggBody(clause[0], scriptedFields);
