@@ -7,6 +7,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { Category } from './category';
 const EMPTY_VALUE = '';
 
 export class BreakedLegend extends React.Component {
@@ -40,6 +41,21 @@ export class BreakedLegend extends React.Component {
       return null;
     }
 
+    const categories = this.props.breaks.map((brk, index) => {
+      return (
+        <EuiFlexItem key={index}>
+          <Category
+            styleName={this.props.style.getStyleName()}
+            label={brk.label}
+            color={brk.color}
+            isLinesOnly={this.props.isLinesOnly}
+            isPointsOnly={this.props.isPointsOnly}
+            symbolId={brk.symbolId}
+          />
+        </EuiFlexItem>
+      );
+    });
+
     return (
       <div>
         <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
@@ -57,7 +73,9 @@ export class BreakedLegend extends React.Component {
             </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {this.props.children}
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {categories}
+        </EuiFlexGroup>
       </div>
     );
   }

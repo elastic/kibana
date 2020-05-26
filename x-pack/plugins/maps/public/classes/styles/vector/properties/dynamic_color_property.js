@@ -19,8 +19,7 @@ import {
   getOtherCategoryLabel,
 } from '../components/color/color_stops_utils';
 import { BreakedLegend } from '../components/legend/breaked_legend';
-import { Category } from '../components/legend/category';
-import { EuiTextColor, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiTextColor } from '@elastic/eui';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };
 const RGBA_0000 = 'rgba(0,0,0,0)';
@@ -289,45 +288,32 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
-    const categories = [];
     const { stops, defaultColor } = this._getColorStops();
-    stops.map(({ stop, color }) => {
-      categories.push(
-        <EuiFlexItem
-          key={stop} //works under assumption __fallbackCategory__ will never be used
-        >
-          <Category
-            styleName={this.getStyleName()}
-            label={this.formatField(stop)}
-            color={color}
-            isLinesOnly={isLinesOnly}
-            isPointsOnly={isPointsOnly}
-            symbolId={symbolId}
-          />
-        </EuiFlexItem>
-      );
+    const breaks = [];
+    stops.forEach(({ stop, color }) => {
+      if (stop) {
+        breaks.push({
+          color,
+          symbolId,
+          label: this.formatField(stop),
+        });
+      }
     });
     if (defaultColor) {
-      categories.push(
-        <EuiFlexItem key="__fallbackCategory__">
-          <Category
-            styleName={this.getStyleName()}
-            label={<EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>}
-            color={defaultColor}
-            isLinesOnly={isLinesOnly}
-            isPointsOnly={isPointsOnly}
-            symbolId={symbolId}
-          />
-        </EuiFlexItem>
-      );
+      breaks.push({
+        color: defaultColor,
+        label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
+        symbolId,
+      });
     }
 
     return (
-      <BreakedLegend style={this}>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {categories}
-        </EuiFlexGroup>
-      </BreakedLegend>
+      <BreakedLegend
+        style={this}
+        breaks={breaks}
+        isPointsOnly={isPointsOnly}
+        isLinesOnly={isLinesOnly}
+      />
     );
   }
 }

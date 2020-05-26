@@ -8,6 +8,7 @@ import React from 'react';
 
 export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId }) {
   const legendRows = [];
+
   for (let i = 0; i < styles.length; i++) {
     const row = styles[i].renderLegendDetailRow({
       isLinesOnly,
@@ -15,13 +16,11 @@ export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId 
       symbolId,
     });
 
-    if (row !== 0) {
-      legendRows.push(
-        <div key={styles[i].getStyleName()} className="vectorStyleLegendSpacer">
-          {row}
-        </div>
-      );
-    }
+    legendRows.push(
+      <div key={i} className="vectorStyleLegendSpacer">
+        {row}
+      </div>
+    );
   }
 
   return legendRows;

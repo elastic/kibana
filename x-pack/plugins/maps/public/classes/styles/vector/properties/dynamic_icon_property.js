@@ -10,8 +10,7 @@ import { DynamicStyleProperty } from './dynamic_style_property';
 import { getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_utils';
 import { BreakedLegend } from '../components/legend/breaked_legend';
 import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
-import { Category } from '../components/legend/category';
-import { EuiTextColor, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiTextColor } from '@elastic/eui';
 
 export class DynamicIconProperty extends DynamicStyleProperty {
   isOrdinal() {
@@ -78,7 +77,10 @@ export class DynamicIconProperty extends DynamicStyleProperty {
       mbStops.push(`${stop}`);
       mbStops.push(getMakiIconId(style, iconPixelSize));
     });
-    mbStops.push(getMakiIconId(fallbackSymbolId, iconPixelSize)); //last item is fallback style for anything that does not match provided stops
+
+    if (fallbackSymbolId) {
+      mbStops.push(getMakiIconId(fallbackSymbolId, iconPixelSize)); //last item is fallback style for anything that does not match provided stops
+    }
     return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
   }
 
@@ -95,7 +97,10 @@ export class DynamicIconProperty extends DynamicStyleProperty {
       mbStops.push(`${stop}`);
       mbStops.push(getMakiSymbolAnchor(style));
     });
-    mbStops.push(getMakiSymbolAnchor(fallbackSymbolId)); //last item is fallback style for anything that does not match provided stops
+
+    if (fallbackSymbolId) {
+      mbStops.push(getMakiSymbolAnchor(fallbackSymbolId)); //last item is fallback style for anything that does not match provided stops
+    }
     return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
   }
 
@@ -104,45 +109,33 @@ export class DynamicIconProperty extends DynamicStyleProperty {
   }
 
   renderLegendDetailRow({ isPointsOnly, isLinesOnly }) {
-    const categories = [];
     const { stops, fallbackSymbolId } = this._getPaletteStops();
-
-    stops.map(({ stop, style }) => {
-      categories.push(
-        <EuiFlexItem key={stop}>
-          <Category
-            styleName={this.getStyleName()}
-            label={this.formatField(stop)}
-            color="grey"
-            isLinesOnly={isLinesOnly}
-            isPointsOnly={isPointsOnly}
-            symbolId={style}
-          />
-        </EuiFlexItem>
-      );
+    const breaks = [];
+    stops.forEach(({ stop, style }) => {
+      if (stop) {
+        breaks.push({
+          color: 'grey',
+          label: this.formatField(stop),
+          symbolId: style,
+        });
+      }
     });
 
     if (fallbackSymbolId) {
-      categories.push(
-        <EuiFlexItem key="__fallbackCategory__">
-          <Category
-            styleName={this.getStyleName()}
-            label={<EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>}
-            color="grey"
-            isLinesOnly={isLinesOnly}
-            isPointsOnly={isPointsOnly}
-            symbolId={fallbackSymbolId}
-          />
-        </EuiFlexItem>
-      );
+      breaks.push({
+        color: 'grey',
+        label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
+        symbolId: fallbackSymbolId,
+      });
     }
 
     return (
-      <BreakedLegend style={this}>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {categories}
-        </EuiFlexGroup>
-      </BreakedLegend>
+      <BreakedLegend
+        style={this}
+        breaks={breaks}
+        isPointsOnly={isPointsOnly}
+        isLinesOnly={isLinesOnly}
+      />
     );
   }
 }
