@@ -100,7 +100,7 @@ export function runFailedTestsReporterCli() {
           }
 
           let existingIssue: GithubIssueMini | undefined = await githubApi.findFailedTestIssue(
-            i =>
+            (i) =>
               getIssueMetadata(i.body, 'test.class') === failure.classname &&
               getIssueMetadata(i.body, 'test.name') === failure.name
           );

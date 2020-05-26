@@ -35,7 +35,7 @@ export function getKqlQueryValues({
   // if ast.type == 'function' then layout of ast.arguments:
   // [{ arguments: [ { type: 'literal', value: 'AAL' } ] },{ arguments: [ { type: 'literal', value: 'AAL' } ] }]
   if (ast && Array.isArray(ast.arguments)) {
-    ast.arguments.forEach(arg => {
+    ast.arguments.forEach((arg) => {
       if (arg.arguments !== undefined) {
         arg.arguments.forEach((nestedArg: { type: string; value: string }) => {
           if (typeof nestedArg.value === 'string') {

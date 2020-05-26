@@ -10,12 +10,12 @@ import {
   LICENSE_TYPE_GOLD,
 } from '../../common/constants';
 
-const createMockConfig = settings => {
+const createMockConfig = (settings) => {
   const mockConfig = {
     get: jest.fn(),
   };
 
-  mockConfig.get.mockImplementation(key => {
+  mockConfig.get.mockImplementation((key) => {
     return settings[key];
   });
 
@@ -172,7 +172,7 @@ test(`calls server.log after basic -> gold upgrade`, () => {
     isAvailable: () => true,
     feature: () => {
       return {
-        registerLicenseCheckResultsGenerator: fn => {
+        registerLicenseCheckResultsGenerator: (fn) => {
           licenseCheckResultsGenerator = fn;
         },
       };

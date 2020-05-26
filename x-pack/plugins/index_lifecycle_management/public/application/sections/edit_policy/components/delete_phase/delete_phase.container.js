@@ -11,7 +11,7 @@ import { PHASE_DELETE, PHASE_HOT, PHASE_ROLLOVER_ENABLED } from '../../../../con
 import { DeletePhase as PresentationComponent } from './delete_phase';
 
 export const DeletePhase = connect(
-  state => ({
+  (state) => ({
     phaseData: getPhase(state, PHASE_DELETE),
     hotPhaseRolloverEnabled: getPhase(state, PHASE_HOT)[PHASE_ROLLOVER_ENABLED],
   }),

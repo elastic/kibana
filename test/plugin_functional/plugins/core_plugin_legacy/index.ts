@@ -20,7 +20,7 @@
 import KbnServer from 'src/legacy/server/kbn_server';
 
 // eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
+export default function (kibana: any) {
   return new kibana.Plugin({
     id: 'core_plugin_legacy',
     require: ['kibana'],

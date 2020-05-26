@@ -14,7 +14,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { EMSClient } from '@elastic/ems-client';
 import {
-  getInjectedVarFunc,
   getLicenseId,
   getIsEmsEnabled,
   getRegionmapLayers,
@@ -23,6 +22,8 @@ import {
   getEmsTileApiUrl,
   getEmsLandingPageUrl,
   getEmsFontLibraryUrl,
+  getProxyElasticMapsServiceInMaps,
+  getKibanaVersion,
 } from './kibana_services';
 import fetch from 'node-fetch';
 
@@ -52,10 +53,7 @@ export function getEMSClient() {
   if (!emsClient) {
     const isEmsEnabled = getIsEmsEnabled();
     if (isEmsEnabled) {
-      const proxyElasticMapsServiceInMaps = getInjectedVarFunc()(
-        'proxyElasticMapsServiceInMaps',
-        false
-      );
+      const proxyElasticMapsServiceInMaps = getProxyElasticMapsServiceInMaps();
       const proxyPath = '';
       const tileApiUrl = proxyElasticMapsServiceInMaps
         ? relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_TILES_CATALOGUE_PATH}`)
@@ -66,7 +64,7 @@ export function getEMSClient() {
 
       emsClient = new EMSClient({
         language: i18n.getLocale(),
-        appVersion: getInjectedVarFunc()('kbnPkgVersion'),
+        appVersion: getKibanaVersion(),
         appName: EMS_APP_NAME,
         tileApiUrl,
         fileApiUrl,
@@ -99,7 +97,7 @@ export function getGlyphUrl() {
   if (!getIsEmsEnabled()) {
     return '';
   }
-  return getInjectedVarFunc()('proxyElasticMapsServiceInMaps', false)
+  return getProxyElasticMapsServiceInMaps()
     ? relativeToAbsolute(`../${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}/${EMS_GLYPHS_PATH}`) +
         `/{fontstack}/{range}`
     : getEmsFontLibraryUrl();

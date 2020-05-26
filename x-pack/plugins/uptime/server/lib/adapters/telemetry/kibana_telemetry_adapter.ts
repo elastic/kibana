@@ -192,7 +192,7 @@ export class KibanaTelemetryAdapter {
     const frequencies: number[] = [];
     uniqueMonitors
       .map((item: any) => item!.docs.hits?.hits?.[0] ?? {})
-      .forEach(monitor => {
+      .forEach((monitor) => {
         const timespan = monitor?._source?.monitor?.timespan;
         if (timespan) {
           const timeDiffSec = moment
@@ -209,9 +209,9 @@ export class KibanaTelemetryAdapter {
   private static getReport() {
     const minBucket = this.getCollectorWindow();
     Object.keys(this.collector)
-      .map(key => parseInt(key, 10))
-      .filter(key => key < minBucket)
-      .forEach(oldBucket => {
+      .map((key) => parseInt(key, 10))
+      .filter((key) => key < minBucket)
+      .forEach((oldBucket) => {
         delete this.collector[oldBucket];
       });
 

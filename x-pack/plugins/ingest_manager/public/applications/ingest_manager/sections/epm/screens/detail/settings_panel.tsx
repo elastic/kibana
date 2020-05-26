@@ -17,12 +17,12 @@ import { InstallationButton } from './installation_button';
 import { UpdateIcon } from '../../components/icons';
 
 const SettingsTitleCell = styled.td`
-  padding-right: ${props => props.theme.eui.spacerSizes.xl};
-  padding-bottom: ${props => props.theme.eui.spacerSizes.m};
+  padding-right: ${(props) => props.theme.eui.spacerSizes.xl};
+  padding-bottom: ${(props) => props.theme.eui.spacerSizes.m};
 `;
 
 const UpdatesAvailableMsgContainer = styled.span`
-  padding-left: ${props => props.theme.eui.spacerSizes.s};
+  padding-left: ${(props) => props.theme.eui.spacerSizes.s};
 `;
 
 const NoteLabel = () => (

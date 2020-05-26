@@ -14,7 +14,7 @@ import { withAppContext } from './app_context.mock';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    onRouter: router => registerRouter(router),
+    onRouter: (router) => registerRouter(router),
     initialEntries: [`${ROUTES.API_ROOT}/watches/watch/${WATCH_ID}/edit`],
     componentRoutePath: `${ROUTES.API_ROOT}/watches/watch/:id/edit`,
   },

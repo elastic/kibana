@@ -34,7 +34,7 @@ export class AutocompleteService {
     }
   };
 
-  private getQuerySuggestions: QuerySuggestionGetFn = args => {
+  private getQuerySuggestions: QuerySuggestionGetFn = (args) => {
     const { language } = args;
     const provider = this.querySuggestionProviders.get(language);
 

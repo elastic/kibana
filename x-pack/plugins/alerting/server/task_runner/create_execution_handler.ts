@@ -52,7 +52,7 @@ export function createExecutionHandler({
     }
     const actions = alertActions
       .filter(({ group }) => group === actionGroup)
-      .map(action => {
+      .map((action) => {
         return {
           ...action,
           params: transformActionParams({

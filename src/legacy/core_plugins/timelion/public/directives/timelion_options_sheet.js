@@ -21,7 +21,7 @@ import { uiModules } from 'ui/modules';
 import template from 'plugins/timelion/partials/sheet_options.html';
 const app = uiModules.get('apps/timelion', []);
 
-app.directive('timelionOptions', function() {
+app.directive('timelionOptions', function () {
   return {
     replace: true,
     restrict: 'E',

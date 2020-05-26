@@ -69,10 +69,7 @@ export const isFromKueryExpressionValid = (kqlFilterQuery: KueryFilterQuery | nu
 };
 
 const escapeWhitespace = (val: string) =>
-  val
-    .replace(/\t/g, '\\t')
-    .replace(/\r/g, '\\r')
-    .replace(/\n/g, '\\n');
+  val.replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
 
 // See the SpecialCharacter rule in kuery.peg
 const escapeSpecialCharacters = (val: string) => val.replace(/["]/g, '\\$&'); // $& means the whole matched string
@@ -100,7 +97,7 @@ export const convertToBuildEsQuery = ({
       esQuery.buildEsQuery(
         indexPattern,
         queries,
-        filters.filter(f => f.meta.disabled === false),
+        filters.filter((f) => f.meta.disabled === false),
         {
           ...config,
           dateFormatTZ: undefined,

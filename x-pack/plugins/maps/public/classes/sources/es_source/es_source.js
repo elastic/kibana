@@ -280,7 +280,7 @@ export class AbstractESSource extends AbstractVectorSource {
     registerCancelCallback,
     searchFilters
   ) {
-    const promises = dynamicStyleProps.map(dynamicStyleProp => {
+    const promises = dynamicStyleProps.map((dynamicStyleProp) => {
       return dynamicStyleProp.getFieldMetaRequest();
     });
 

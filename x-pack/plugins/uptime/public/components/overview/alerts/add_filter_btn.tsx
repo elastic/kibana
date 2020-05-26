@@ -38,7 +38,7 @@ export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter }) =>
     { id: 'monitor.type', label: labels.TYPE },
   ];
 
-  allFilters.forEach(filter => {
+  allFilters.forEach((filter) => {
     if (getSelectedItems(filter.id)?.length === 0 && !newFilters.includes(filter.id)) {
       items.push(
         <EuiContextMenuItem

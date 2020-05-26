@@ -116,15 +116,15 @@ export function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxRes
         },
       },
     })
-      .then(resp => {
+      .then((resp) => {
         const dataByJobId = _.get(resp, ['aggregations', 'jobId', 'buckets'], []);
-        _.each(dataByJobId, dataForJob => {
+        _.each(dataByJobId, (dataForJob) => {
           const jobId = dataForJob.key;
 
           const resultsForTime = {};
 
           const dataByTime = _.get(dataForJob, ['byTime', 'buckets'], []);
-          _.each(dataByTime, dataForTime => {
+          _.each(dataByTime, (dataForTime) => {
             const value = _.get(dataForTime, ['anomalyScore', 'value']);
             if (value !== undefined) {
               const time = dataForTime.key;
@@ -136,7 +136,7 @@ export function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxRes
 
         resolve(obj);
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -205,7 +205,7 @@ export function getTopInfluencers(
     if (influencers.length > 0) {
       boolCriteria.push({
         bool: {
-          should: influencers.map(influencer => {
+          should: influencers.map((influencer) => {
             return {
               bool: {
                 must: [
@@ -282,18 +282,18 @@ export function getTopInfluencers(
         },
       },
     })
-      .then(resp => {
+      .then((resp) => {
         const fieldNameBuckets = _.get(
           resp,
           ['aggregations', 'influencerFieldNames', 'buckets'],
           []
         );
-        _.each(fieldNameBuckets, nameBucket => {
+        _.each(fieldNameBuckets, (nameBucket) => {
           const fieldName = nameBucket.key;
           const fieldValues = [];
 
           const fieldValueBuckets = _.get(nameBucket, ['influencerFieldValues', 'buckets'], []);
-          _.each(fieldValueBuckets, valueBucket => {
+          _.each(fieldValueBuckets, (valueBucket) => {
             const fieldValueResult = {
               influencerFieldValue: valueBucket.key,
               maxAnomalyScore: valueBucket.maxAnomalyScore.value,
@@ -307,7 +307,7 @@ export function getTopInfluencers(
 
         resolve(obj);
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -407,9 +407,9 @@ export function getTopInfluencerValues(
         },
       },
     })
-      .then(resp => {
+      .then((resp) => {
         const buckets = _.get(resp, ['aggregations', 'influencerFieldValues', 'buckets'], []);
-        _.each(buckets, bucket => {
+        _.each(buckets, (bucket) => {
           const result = {
             influencerFieldValue: bucket.key,
             maxAnomalyScore: bucket.maxAnomalyScore.value,
@@ -420,7 +420,7 @@ export function getTopInfluencerValues(
 
         resolve(obj);
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -440,9 +440,9 @@ export function getOverallBucketScores(jobIds, topN, earliestMs, latestMs, inter
       start: earliestMs,
       end: latestMs,
     })
-      .then(resp => {
+      .then((resp) => {
         const dataByTime = _.get(resp, ['overall_buckets'], []);
-        _.each(dataByTime, dataForTime => {
+        _.each(dataByTime, (dataForTime) => {
           const value = _.get(dataForTime, ['overall_score']);
           if (value !== undefined) {
             obj.results[dataForTime.timestamp] = value;
@@ -451,7 +451,7 @@ export function getOverallBucketScores(jobIds, topN, earliestMs, latestMs, inter
 
         resolve(obj);
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -594,18 +594,18 @@ export function getInfluencerValueMaxScoreByTime(
         },
       },
     })
-      .then(resp => {
+      .then((resp) => {
         const fieldValueBuckets = _.get(
           resp,
           ['aggregations', 'influencerFieldValues', 'buckets'],
           []
         );
-        _.each(fieldValueBuckets, valueBucket => {
+        _.each(fieldValueBuckets, (valueBucket) => {
           const fieldValue = valueBucket.key;
           const fieldValues = {};
 
           const timeBuckets = _.get(valueBucket, ['byTime', 'buckets'], []);
-          _.each(timeBuckets, timeBucket => {
+          _.each(timeBuckets, (timeBucket) => {
             const time = timeBucket.key;
             const score = timeBucket.maxAnomalyScore.value;
             fieldValues[time] = score;
@@ -616,7 +616,7 @@ export function getInfluencerValueMaxScoreByTime(
 
         resolve(obj);
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -710,15 +710,15 @@ export function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, ma
         sort: [{ record_score: { order: 'desc' } }],
       },
     })
-      .then(resp => {
+      .then((resp) => {
         if (resp.hits.total !== 0) {
-          _.each(resp.hits.hits, hit => {
+          _.each(resp.hits.hits, (hit) => {
             obj.records.push(hit._source);
           });
         }
         resolve(obj);
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -788,7 +788,7 @@ export function getRecordsForInfluencer(
     if (influencers.length > 0) {
       boolCriteria.push({
         bool: {
-          should: influencers.map(influencer => {
+          should: influencers.map((influencer) => {
             return {
               nested: {
                 path: 'influencers',
@@ -841,15 +841,15 @@ export function getRecordsForInfluencer(
         sort: [{ record_score: { order: 'desc' } }],
       },
     })
-      .then(resp => {
+      .then((resp) => {
         if (resp.hits.total !== 0) {
-          _.each(resp.hits.hits, hit => {
+          _.each(resp.hits.hits, (hit) => {
             obj.records.push(hit._source);
           });
         }
         resolve(obj);
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -966,15 +966,15 @@ export function getRecordsForDetector(
         sort: [{ record_score: { order: 'desc' } }],
       },
     })
-      .then(resp => {
+      .then((resp) => {
         if (resp.hits.total !== 0) {
-          _.each(resp.hits.hits, hit => {
+          _.each(resp.hits.hits, (hit) => {
             obj.records.push(hit._source);
           });
         }
         resolve(obj);
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -1045,9 +1045,9 @@ export function getEventRateData(index, query, timeFieldName, earliestMs, latest
         },
       },
     })
-      .then(resp => {
+      .then((resp) => {
         const dataByTimeBucket = _.get(resp, ['aggregations', 'eventRate', 'buckets'], []);
-        _.each(dataByTimeBucket, dataForTime => {
+        _.each(dataByTimeBucket, (dataForTime) => {
           const time = dataForTime.key;
           obj.results[time] = dataForTime.doc_count;
         });
@@ -1055,7 +1055,7 @@ export function getEventRateData(index, query, timeFieldName, earliestMs, latest
 
         resolve(obj);
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -1192,7 +1192,7 @@ export function getEventDistributionData(
       body,
       rest_total_hits_as_int: true,
     })
-      .then(resp => {
+      .then((resp) => {
         // Because of the sampling, results of metricFunctions which use sum or count
         // can be significantly skewed. Taking into account totalHits we calculate a
         // a factor to normalize results for these metricFunctions.
@@ -1208,7 +1208,7 @@ export function getEventDistributionData(
         const data = dataByTime.reduce((d, dataForTime) => {
           const date = +dataForTime.key;
           const entities = _.get(dataForTime, ['entities', 'buckets'], []);
-          entities.forEach(entity => {
+          entities.forEach((entity) => {
             let value = metricFunction === 'count' ? entity.doc_count : entity.metric.value;
 
             if (
@@ -1229,7 +1229,7 @@ export function getEventDistributionData(
         }, []);
         resolve(data);
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -1260,7 +1260,7 @@ export function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, lates
       { term: { job_id: jobId } },
     ];
 
-    _.each(criteriaFields, criteria => {
+    _.each(criteriaFields, (criteria) => {
       mustCriteria.push({
         term: {
           [criteria.fieldName]: criteria.fieldValue,
@@ -1307,9 +1307,9 @@ export function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, lates
         },
       },
     })
-      .then(resp => {
+      .then((resp) => {
         const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-        _.each(aggregationsByTime, dataForTime => {
+        _.each(aggregationsByTime, (dataForTime) => {
           const time = dataForTime.key;
           obj.results[time] = {
             score: _.get(dataForTime, ['recordScore', 'value']),
@@ -1318,7 +1318,7 @@ export function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, lates
 
         resolve(obj);
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });

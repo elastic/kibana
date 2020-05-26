@@ -81,7 +81,7 @@ export class XYZTMSEditor extends Component<Props, State> {
         <EuiFormRow label="Url">
           <EuiFieldText
             placeholder={'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'}
-            onChange={e => this._handleTMSInputChange(e)}
+            onChange={(e) => this._handleTMSInputChange(e)}
           />
         </EuiFormRow>
         <EuiFormRow

@@ -15,7 +15,7 @@ export const indicesPrivilegesRoute = createRoute(() => ({
     return getIndicesPrivileges({
       setup,
       isSecurityPluginEnabled:
-        context.plugins.security?.license.isEnabled() ?? false
+        context.plugins.security?.license.isEnabled() ?? false,
     });
-  }
+  },
 }));
