@@ -6,11 +6,11 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('Machine Learning', function() {
+  describe('Machine Learning', function () {
     this.tags(['mlqa']);
 
     before(async () => {

@@ -88,7 +88,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
               disabled={isDisabled}
               isLoading={loading}
               value={formFields?.certExpirationThreshold ?? ''}
-              onChange={e =>
+              onChange={(e) =>
                 onChange({
                   certExpirationThreshold: Number(e.target.value),
                 })

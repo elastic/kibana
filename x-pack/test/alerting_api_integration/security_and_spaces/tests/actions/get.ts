@@ -24,7 +24,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle get action request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
@@ -37,10 +37,10 @@ export default function getActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}`)
+            .get(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -74,7 +74,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
 
         it(`action shouldn't be acessible from another space`, async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
@@ -87,10 +87,10 @@ export default function getActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix('other')}/api/action/${createdAction.id}`)
+            .get(`${getUrlPrefix('other')}/api/actions/action/${createdAction.id}`)
             .auth(user.username, user.password);
 
           expect(response.statusCode).to.eql(404);
@@ -119,7 +119,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
 
         it('should handle get preconfigured action request appropriately', async () => {
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/action/my-slack1`)
+            .get(`${getUrlPrefix(space.id)}/api/actions/action/my-slack1`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {

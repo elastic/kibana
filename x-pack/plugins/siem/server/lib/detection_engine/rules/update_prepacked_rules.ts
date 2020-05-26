@@ -17,7 +17,7 @@ export const updatePrepackagedRules = async (
   outputIndex: string
 ): Promise<void> => {
   await Promise.all(
-    rules.map(async rule => {
+    rules.map(async (rule) => {
       const {
         description,
         false_positives: falsePositives,

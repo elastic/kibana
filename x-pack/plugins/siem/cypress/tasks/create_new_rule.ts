@@ -44,40 +44,30 @@ export const fillAboutRuleAndContinue = (rule: CustomRule | MachineLearningRule)
   cy.get(SEVERITY_DROPDOWN).click({ force: true });
   cy.get(`#${rule.severity.toLowerCase()}`).click();
 
-  cy.get(RISK_INPUT)
-    .clear({ force: true })
-    .type(`${rule.riskScore}`, { force: true });
+  cy.get(RISK_INPUT).clear({ force: true }).type(`${rule.riskScore}`, { force: true });
 
-  rule.tags.forEach(tag => {
+  rule.tags.forEach((tag) => {
     cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
   });
 
   cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 
   rule.referenceUrls.forEach((url, index) => {
-    cy.get(REFERENCE_URLS_INPUT)
-      .eq(index)
-      .type(url, { force: true });
+    cy.get(REFERENCE_URLS_INPUT).eq(index).type(url, { force: true });
     cy.get(ADD_REFERENCE_URL_BTN).click({ force: true });
   });
 
   rule.falsePositivesExamples.forEach((falsePositive, index) => {
-    cy.get(FALSE_POSITIVES_INPUT)
-      .eq(index)
-      .type(falsePositive, { force: true });
+    cy.get(FALSE_POSITIVES_INPUT).eq(index).type(falsePositive, { force: true });
     cy.get(ADD_FALSE_POSITIVE_BTN).click({ force: true });
   });
 
   rule.mitre.forEach((mitre, index) => {
-    cy.get(MITRE_TACTIC_DROPDOWN)
-      .eq(index)
-      .click({ force: true });
+    cy.get(MITRE_TACTIC_DROPDOWN).eq(index).click({ force: true });
     cy.contains(MITRE_TACTIC, mitre.tactic).click();
 
-    mitre.techniques.forEach(technique => {
-      cy.get(MITRE_TECHNIQUES_INPUT)
-        .eq(index)
-        .type(`${technique}{enter}`, { force: true });
+    mitre.techniques.forEach((technique) => {
+      cy.get(MITRE_TECHNIQUES_INPUT).eq(index).type(`${technique}{enter}`, { force: true });
     });
 
     cy.get(MITRE_BTN).click({ force: true });
@@ -85,17 +75,13 @@ export const fillAboutRuleAndContinue = (rule: CustomRule | MachineLearningRule)
 
   cy.get(INVESTIGATION_NOTES_TEXTAREA).type(rule.note, { force: true });
 
-  cy.get(ABOUT_CONTINUE_BTN)
-    .should('exist')
-    .click({ force: true });
+  cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
 };
 
 export const fillDefineCustomRuleAndContinue = (rule: CustomRule) => {
   cy.get(CUSTOM_QUERY_INPUT).type(rule.customQuery);
   cy.get(CUSTOM_QUERY_INPUT).should('have.attr', 'value', rule.customQuery);
-  cy.get(DEFINE_CONTINUE_BUTTON)
-    .should('exist')
-    .click({ force: true });
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
@@ -106,9 +92,7 @@ export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRu
   cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${machineLearningRule.anomalyScoreThreshold}`, {
     force: true,
   });
-  cy.get(DEFINE_CONTINUE_BUTTON)
-    .should('exist')
-    .click({ force: true });
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(MACHINE_LEARNING_DROPDOWN).should('not.exist');
 };
