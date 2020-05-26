@@ -116,6 +116,16 @@ interface NodeState {
 }
 
 /**
+ * The Tree and TreeNode interfaces define structures to make testing of resolver functionality easier. The `generateTree`
+ * method builds a `Tree` structures which organizes the different parts of the resolver tree. Maps are used to allow
+ * tests to quickly verify if the node they retrieved from ES was actually created by the generator or if there is an
+ * issue with the implementation. The `Tree` structure serves as a source of truth for queries to ES. The entire Tree
+ * is stored in memory so it can be quickly accessed by the tests. The resolver api_integration tests currently leverage
+ * these structures for verifying that its implementation is returning the correct documents from ES and structuring
+ * the response correctly.
+ */
+
+/**
  * Defines the fields for each node in the tree.
  */
 export interface TreeNode {

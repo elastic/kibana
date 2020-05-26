@@ -89,7 +89,7 @@ export interface ResolverTree {
 }
 
 /**
- * The lifecycle events (start, end etc) for a node nodes.
+ * The lifecycle events (start, end etc) for a node.
  */
 export interface LifecycleNode {
   entityID: string;

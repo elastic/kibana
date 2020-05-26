@@ -24,7 +24,7 @@ type MiddlewareFactory<S = ResolverState> = (
   api: MiddlewareAPI<Dispatch<ResolverAction>, S>
 ) => (next: Dispatch<ResolverAction>) => (action: ResolverAction) => unknown;
 
-function flattenEvents(nodes: LifecycleNode[], events: ResolverEvent[] = []): ResolverEvent[] {
+function getLifecycleEvents(nodes: LifecycleNode[], events: ResolverEvent[] = []): ResolverEvent[] {
   return nodes.reduce((flattenedEvents, currentNode) => {
     if (currentNode.lifecycle && currentNode.lifecycle.length > 0) {
       flattenedEvents.push(...currentNode.lifecycle);
@@ -95,8 +95,8 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
           }
           const response: ResolverEvent[] = [
             ...lifecycle,
-            ...flattenEvents(children.childNodes),
-            ...flattenEvents(ancestry.ancestors),
+            ...getLifecycleEvents(children.childNodes),
+            ...getLifecycleEvents(ancestry.ancestors),
           ];
           api.dispatch({
             type: 'serverReturnedResolverData',
