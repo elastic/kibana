@@ -27,6 +27,9 @@ import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { ManagementPageView } from '../../../components/management_page_view';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { getManagementUrl } from '../../../common/routing';
+import { FormattedDateAndTime } from '../../common/components/endpoint/formatted_date_time';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { Immutable, PolicyData } from '../../../common/endpoint/types';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -127,6 +130,38 @@ export const PolicyList = React.memo(() => {
           defaultMessage: 'Description',
         }),
         truncateText: true,
+      },
+      {
+        field: 'created_by',
+        name: i18n.translate('xpack.siem.endpoint.policyList.createdBy', {
+          defaultMessage: 'Created By',
+        }),
+        truncateText: true,
+      },
+      {
+        field: 'created_at',
+        name: i18n.translate('xpack.siem.endpoint.policyList.createdAt', {
+          defaultMessage: 'Created At',
+        }),
+        render(createdAt: string) {
+          return <FormattedDateAndTime date={new Date(createdAt)} />;
+        },
+      },
+      {
+        field: 'updated_by',
+        name: i18n.translate('xpack.siem.endpoint.policyList.updatedBy', {
+          defaultMessage: 'Last Updated By',
+        }),
+        truncateText: true,
+      },
+      {
+        field: 'updated_at',
+        name: i18n.translate('xpack.siem.endpoint.policyList.updatedAt', {
+          defaultMessage: 'Last Updated At',
+        }),
+        render(updatedAt: string) {
+          return <FormattedDateAndTime date={new Date(updatedAt)} />;
+        },
       },
       {
         field: 'config_id',
