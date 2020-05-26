@@ -11,7 +11,7 @@ import { Transaction } from '../../../../../../../../typings/es_schemas/ui/trans
 import { ElasticDocsLink } from '../../../../../../shared/Links/ElasticDocsLink';
 
 export function DroppedSpansWarning({
-  transactionDoc
+  transactionDoc,
 }: {
   transactionDoc: Transaction;
 }) {
@@ -28,7 +28,7 @@ export function DroppedSpansWarning({
           {
             defaultMessage:
               'The APM agent that reported this transaction dropped {dropped} spans or more based on its configuration.',
-            values: { dropped }
+            values: { dropped },
           }
         )}{' '}
         <ElasticDocsLink
@@ -39,7 +39,7 @@ export function DroppedSpansWarning({
           {i18n.translate(
             'xpack.apm.transactionDetails.transFlyout.callout.learnMoreAboutDroppedSpansLinkText',
             {
-              defaultMessage: 'Learn more about dropped spans.'
+              defaultMessage: 'Learn more about dropped spans.',
             }
           )}
         </ElasticDocsLink>

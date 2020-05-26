@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import ccrShardFixture from './fixtures/ccr_shard';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

@@ -21,7 +21,7 @@ const ExportTimeline: React.FC<{
 }> = ({ onComplete, isEnableDownloader, exportedIds, getExportedData }) => {
   const [, dispatchToaster] = useStateToaster();
   const onExportSuccess = useCallback(
-    exportCount => {
+    (exportCount) => {
       if (onComplete != null) {
         onComplete();
       }

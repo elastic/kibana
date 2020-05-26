@@ -40,7 +40,7 @@ export const savedSheetLoader = new SavedObjectLoader(
   savedObjectsClient,
   npStart.core.chrome
 );
-savedSheetLoader.urlFor = id => `#/${encodeURIComponent(id)}`;
+savedSheetLoader.urlFor = (id) => `#/${encodeURIComponent(id)}`;
 // Customize loader properties since adding an 's' on type doesn't work for type 'timelion-sheet'.
 savedSheetLoader.loaderProperties = {
   name: 'timelion-sheet',

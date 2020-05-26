@@ -43,7 +43,7 @@ export function uiSettingsMixin(kbnServer, server) {
     return uiSettingsServiceFactory(server, options);
   });
 
-  server.addMemoizedFactoryToRequest('getUiSettingsService', request => {
+  server.addMemoizedFactoryToRequest('getUiSettingsService', (request) => {
     return getUiSettingsServiceForRequest(server, request);
   });
 

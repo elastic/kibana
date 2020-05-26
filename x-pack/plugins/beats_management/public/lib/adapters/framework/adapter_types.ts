@@ -17,25 +17,13 @@ export interface FrameworkAdapter {
   currentUser: FrameworkUser;
   // Methods
   waitUntilFrameworkReady(): Promise<void>;
-  registerManagementSection(settings: {
-    id: string;
-    name: string;
-    iconName: string;
-    order?: number;
-  }): void;
-  registerManagementUI(settings: {
-    sectionId: string;
-    appId: string;
-    name: string;
-    order?: number;
-    mount: RegisterManagementAppArgs['mount'];
-  }): void;
+  registerManagementUI(mount: RegisterManagementAppArgs['mount']): void;
 }
 
 export const RuntimeFrameworkInfo = t.type({
   basePath: t.string,
   license: t.type({
-    type: t.keyof(Object.fromEntries(LICENSES.map(s => [s, null])) as Record<string, null>),
+    type: t.keyof(Object.fromEntries(LICENSES.map((s) => [s, null])) as Record<string, null>),
     expired: t.boolean,
     expiry_date_in_millis: t.number,
   }),

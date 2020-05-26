@@ -25,7 +25,7 @@ import { tmsLayerWizardConfig } from '../sources/xyz_tms_source';
 import { wmsLayerWizardConfig } from '../sources/wms_source';
 import { mvtVectorSourceWizardConfig } from '../sources/mvt_single_layer_vector_source';
 import { ObservabilityLayerWizardConfig } from './solution_layers/observability';
-import { getInjectedVarFunc } from '../../kibana_services';
+import { getEnableVectorTiles } from '../../kibana_services';
 
 let registered = false;
 export function registerLayerWizards() {
@@ -56,8 +56,7 @@ export function registerLayerWizards() {
   // @ts-ignore
   registerLayerWizard(wmsLayerWizardConfig);
 
-  const getInjectedVar = getInjectedVarFunc();
-  if (getInjectedVar && getInjectedVar('enableVectorTiles', false)) {
+  if (getEnableVectorTiles()) {
     // eslint-disable-next-line no-console
     console.warn('Vector tiles are an experimental feature and should not be used in production.');
     registerLayerWizard(mvtVectorSourceWizardConfig);

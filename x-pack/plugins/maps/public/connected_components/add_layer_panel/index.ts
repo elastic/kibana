@@ -8,14 +8,15 @@ import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { AddLayerPanel } from './view';
 import { FLYOUT_STATE, INDEXING_STAGE } from '../../reducers/ui';
-import { updateFlyout, updateIndexingStage } from '../../actions/ui_actions';
 import { getFlyoutDisplay, getIndexingStage } from '../../selectors/ui_selectors';
 import {
   setTransientLayer,
   addLayer,
   setSelectedLayer,
   removeTransientLayer,
-} from '../../actions/map_actions';
+  updateFlyout,
+  updateIndexingStage,
+} from '../../actions';
 import { MapStoreState } from '../../reducers/store';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 
@@ -32,15 +33,15 @@ function mapStateToProps(state: MapStoreState) {
 function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
     previewLayer: async (layerDescriptor: LayerDescriptor) => {
-      await dispatch(setSelectedLayer(null));
-      await dispatch(removeTransientLayer());
-      dispatch(addLayer(layerDescriptor));
-      dispatch(setSelectedLayer(layerDescriptor.id));
+      await dispatch<any>(setSelectedLayer(null));
+      await dispatch<any>(removeTransientLayer());
+      dispatch<any>(addLayer(layerDescriptor));
+      dispatch<any>(setSelectedLayer(layerDescriptor.id));
       dispatch(setTransientLayer(layerDescriptor.id));
     },
     removeTransientLayer: () => {
-      dispatch(setSelectedLayer(null));
-      dispatch(removeTransientLayer());
+      dispatch<any>(setSelectedLayer(null));
+      dispatch<any>(removeTransientLayer());
     },
     selectLayerAndAdd: () => {
       dispatch(setTransientLayer(null));

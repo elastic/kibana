@@ -108,37 +108,23 @@ describe('CaseView ', () => {
       </TestProviders>
     );
     await wait();
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-title"]`)
-        .first()
-        .prop('title')
-    ).toEqual(data.title);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-status"]`)
-        .first()
-        .text()
-    ).toEqual(data.status);
+    expect(wrapper.find(`[data-test-subj="case-view-title"]`).first().prop('title')).toEqual(
+      data.title
+    );
+    expect(wrapper.find(`[data-test-subj="case-view-status"]`).first().text()).toEqual(data.status);
     expect(
       wrapper
         .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="case-tag"]`)
         .first()
         .text()
     ).toEqual(data.tags[0]);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-username"]`)
-        .first()
-        .text()
-    ).toEqual(data.createdBy.username);
+    expect(wrapper.find(`[data-test-subj="case-view-username"]`).first().text()).toEqual(
+      data.createdBy.username
+    );
     expect(wrapper.contains(`[data-test-subj="case-view-closedAt"]`)).toBe(false);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-createdAt"]`)
-        .first()
-        .prop('value')
-    ).toEqual(data.createdAt);
+    expect(wrapper.find(`[data-test-subj="case-view-createdAt"]`).first().prop('value')).toEqual(
+      data.createdAt
+    );
     expect(
       wrapper
         .find(`[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]`)
@@ -161,18 +147,12 @@ describe('CaseView ', () => {
     );
     await wait();
     expect(wrapper.contains(`[data-test-subj="case-view-createdAt"]`)).toBe(false);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-closedAt"]`)
-        .first()
-        .prop('value')
-    ).toEqual(basicCaseClosed.closedAt);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-status"]`)
-        .first()
-        .text()
-    ).toEqual(basicCaseClosed.status);
+    expect(wrapper.find(`[data-test-subj="case-view-closedAt"]`).first().prop('value')).toEqual(
+      basicCaseClosed.closedAt
+    );
+    expect(wrapper.find(`[data-test-subj="case-view-status"]`).first().text()).toEqual(
+      basicCaseClosed.status
+    );
   });
 
   it('should dispatch update state when button is toggled', async () => {
@@ -203,17 +183,9 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
+    expect(wrapper.find('[data-test-subj="editable-title-loading"]').first().exists()).toBeTruthy();
     expect(
-      wrapper
-        .find('[data-test-subj="editable-title-loading"]')
-        .first()
-        .exists()
-    ).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="editable-title-edit-icon"]')
-        .first()
-        .exists()
+      wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()
     ).toBeFalsy();
   });
 
@@ -231,10 +203,7 @@ describe('CaseView ', () => {
       </TestProviders>
     );
     expect(
-      wrapper
-        .find('[data-test-subj="toggle-case-status"]')
-        .first()
-        .prop('isLoading')
+      wrapper.find('[data-test-subj="toggle-case-status"]').first().prop('isLoading')
     ).toBeTruthy();
   });
 
@@ -284,12 +253,7 @@ describe('CaseView ', () => {
         .first()
         .exists()
     ).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="tag-list-edit"]')
-        .first()
-        .exists()
-    ).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="tag-list-edit"]').first().exists()).toBeFalsy();
   });
 
   it('should update title', () => {
@@ -301,10 +265,7 @@ describe('CaseView ', () => {
       </TestProviders>
     );
     const newTitle = 'The new title';
-    wrapper
-      .find(`[data-test-subj="editable-title-edit-icon"]`)
-      .first()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="editable-title-edit-icon"]`).first().simulate('click');
     wrapper.update();
     wrapper
       .find(`[data-test-subj="editable-title-input-field"]`)
@@ -312,10 +273,7 @@ describe('CaseView ', () => {
       .simulate('change', { target: { value: newTitle } });
 
     wrapper.update();
-    wrapper
-      .find(`[data-test-subj="editable-title-submit-btn"]`)
-      .first()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="editable-title-submit-btn"]`).first().simulate('click');
 
     wrapper.update();
     const updateObject = updateCaseProperty.mock.calls[0][0];
@@ -340,16 +298,10 @@ describe('CaseView ', () => {
     await wait();
 
     expect(
-      wrapper
-        .find('[data-test-subj="has-data-to-push-button"]')
-        .first()
-        .exists()
+      wrapper.find('[data-test-subj="has-data-to-push-button"]').first().exists()
     ).toBeTruthy();
 
-    wrapper
-      .find('[data-test-subj="push-to-external-service"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="push-to-external-service"]').first().simulate('click');
 
     wrapper.update();
 
@@ -427,10 +379,7 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
-    wrapper
-      .find('[data-test-subj="case-refresh"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
     expect(fetchCaseUserActions).toBeCalledWith(caseProps.caseData.id);
     expect(fetchCase).toBeCalled();
   });
@@ -456,10 +405,7 @@ describe('CaseView ', () => {
     );
 
     expect(
-      wrapper
-        .find('button[data-test-subj="push-to-external-service"]')
-        .first()
-        .prop('disabled')
+      wrapper.find('button[data-test-subj="push-to-external-service"]').first().prop('disabled')
     ).toBeTruthy();
   });
 });

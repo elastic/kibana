@@ -24,8 +24,8 @@ export function splitOverwrites(savedObjects: SavedObject[], retries: SavedObjec
   const objectsToOverwrite: SavedObject[] = [];
   const objectsToNotOverwrite: SavedObject[] = [];
   const overwrites = retries
-    .filter(retry => retry.overwrite)
-    .map(retry => `${retry.type}:${retry.id}`);
+    .filter((retry) => retry.overwrite)
+    .map((retry) => `${retry.type}:${retry.id}`);
 
   for (const savedObject of savedObjects) {
     if (overwrites.includes(`${savedObject.type}:${savedObject.id}`)) {

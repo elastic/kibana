@@ -75,6 +75,12 @@
   margin: 0 auto;
   min-height: calc(100vh - #{$euiHeaderHeightCompensation});
 
+  @include internetExplorerOnly {
+    // IE specific bug with min-height in flex container, described in the next link
+    // https://github.com/philipwalton/flexbugs#3-min-height-on-a-flex-container-wont-apply-to-its-flex-items
+    height: calc(100vh - #{$euiHeaderHeightCompensation});
+  }
+
   &.hidden-chrome {
     min-height: 100vh;
   }

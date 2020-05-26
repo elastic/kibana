@@ -13,7 +13,7 @@ export const TimelineResizeHandle = styled.div<{ height: number }>`
   height: 100%;
   min-height: 20px;
   width: 0;
-  border: ${TIMELINE_RESIZE_HANDLE_WIDTH}px solid ${props => props.theme.eui.euiColorLightShade};
+  border: ${TIMELINE_RESIZE_HANDLE_WIDTH}px solid ${(props) => props.theme.eui.euiColorLightShade};
   z-index: 2;
   height: ${({ height }) => `${height}px`};
   position: absolute;

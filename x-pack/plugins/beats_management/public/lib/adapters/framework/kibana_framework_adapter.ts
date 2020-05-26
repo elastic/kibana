@@ -9,6 +9,7 @@ import { IScope } from 'angular';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { first } from 'rxjs/operators';
+import { i18n } from '@kbn/i18n';
 import { SecurityPluginSetup } from '../../../../../security/public';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
 import {
@@ -21,6 +22,7 @@ import {
 import {
   ManagementSetup,
   RegisterManagementAppArgs,
+  ManagementSectionId,
 } from '../../../../../../../src/plugins/management/public';
 import { LicensingPluginSetup } from '../../../../../licensing/public';
 import { BeatsManagementConfigType } from '../../../../common';
@@ -102,40 +104,15 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     }
   }
 
-  public registerManagementSection(settings: {
-    id: string;
-    name: string;
-    iconName: string;
-    order?: number;
-  }) {
-    this.management.sections.register({
-      id: settings.id,
-      title: settings.name,
-      euiIconType: settings.iconName,
-      order: settings.order || 30,
-    });
-  }
-
-  public registerManagementUI(settings: {
-    sectionId: string;
-    appId: string;
-    name: string;
-    order?: number;
-    mount: RegisterManagementAppArgs['mount'];
-  }) {
-    const section = this.management.sections.getSection(settings.sectionId);
-
-    if (!section) {
-      throw new Error(
-        `registerManagementUI was called with a sectionId of ${settings.sectionId}, and that is is not yet regestered as a section`
-      );
-    }
-
+  public registerManagementUI(mount: RegisterManagementAppArgs['mount']) {
+    const section = this.management.sections.getSection(ManagementSectionId.Ingest);
     section.registerApp({
-      id: settings.appId,
-      title: settings.name,
-      order: settings.order || 30,
-      mount: settings.mount,
+      id: 'beats_management',
+      title: i18n.translate('xpack.beatsManagement.centralManagementLinkLabel', {
+        defaultMessage: 'Beats Central Management',
+      }),
+      order: 2,
+      mount,
     });
   }
 }
@@ -171,7 +148,7 @@ class KibanaAdapterServiceProvider {
     }
 
     this.serviceRefs.rootScope.$apply(() => {
-      bufferedCalls.forEach(serviceCall => {
+      bufferedCalls.forEach((serviceCall) => {
         if (!this.serviceRefs) {
           return;
         }

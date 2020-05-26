@@ -9,7 +9,7 @@ import { kpiHostsQuery } from '../../../../plugins/siem/public/hosts/containers/
 import { GetKpiHostsQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('Kpi Hosts', () => {
@@ -111,7 +111,7 @@ export default function({ getService }: FtrProviderContext) {
               inspect: false,
             },
           })
-          .then(resp => {
+          .then((resp) => {
             const kpiHosts = resp.data.source.KpiHosts;
             expect(kpiHosts!).to.eql(expectedResult);
           });
@@ -215,7 +215,7 @@ export default function({ getService }: FtrProviderContext) {
               inspect: false,
             },
           })
-          .then(resp => {
+          .then((resp) => {
             const kpiHosts = resp.data.source.KpiHosts;
             expect(kpiHosts!).to.eql(expectedResult);
           });

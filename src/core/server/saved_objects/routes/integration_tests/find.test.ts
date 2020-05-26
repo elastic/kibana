@@ -129,9 +129,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the optional query parameter has_reference', async () => {
-    await supertest(httpSetup.server.listener)
-      .get('/api/saved_objects/_find?type=foo')
-      .expect(200);
+    await supertest(httpSetup.server.listener).get('/api/saved_objects/_find?type=foo').expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 

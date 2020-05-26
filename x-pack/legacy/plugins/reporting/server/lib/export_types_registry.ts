@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import memoizeOne from 'memoize-one';
 import { isString } from 'lodash';
+import memoizeOne from 'memoize-one';
 import { getExportType as getTypeCsv } from '../../export_types/csv';
 import { getExportType as getTypeCsvFromSavedObject } from '../../export_types/csv_from_savedobject';
 import { getExportType as getTypePng } from '../../export_types/png';
 import { getExportType as getTypePrintablePdf } from '../../export_types/printable_pdf';
-import { ExportTypeDefinition } from '../../types';
+import { ExportTypeDefinition } from '../types';
 
 type GetCallbackFn<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType> = (
   item: ExportTypeDefinition<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>
@@ -103,7 +103,7 @@ function getExportTypesRegistryFn(): ExportTypesRegistry {
     getTypePng,
     getTypePrintablePdf,
   ];
-  getTypeFns.forEach(getType => {
+  getTypeFns.forEach((getType) => {
     registry.register(getType());
   });
   return registry;
