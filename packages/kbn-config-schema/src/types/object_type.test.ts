@@ -374,3 +374,68 @@ test('handles optional properties', () => {
 
   expect(foo).toBeDefined();
 });
+
+describe('#getRaw', () => {
+  it('returns a copy of the initial properties of the ObjectType', () => {
+    const props = {
+      string: schema.string(),
+      number: schema.number(),
+    };
+
+    const type = schema.object(props);
+
+    expect(type.getRaw()).toStrictEqual(props);
+  });
+
+  it('returns a different copy each time', () => {
+    const type = schema.object({
+      string: schema.string(),
+      number: schema.number(),
+    });
+
+    const props1 = type.getRaw();
+    const props2 = type.getRaw();
+
+    expect(props1).not.toBe(props2);
+  });
+
+  it('allows to extend an existing schema by adding new properties', () => {
+    const origin = schema.object({
+      initial: schema.string(),
+    });
+
+    const extended = schema.object({
+      ...origin.getRaw(),
+      added: schema.number(),
+    });
+
+    expect(() => {
+      extended.validate({ initial: 'foo' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[added]: expected value of type [number] but got [undefined]"`
+    );
+
+    expect(() => {
+      extended.validate({ initial: 'foo', added: 42 });
+    }).not.toThrowError();
+  });
+
+  it('allows to extend an existing schema by removing properties', () => {
+    const origin = schema.object({
+      string: schema.string(),
+      number: schema.number(),
+    });
+
+    const { number, ...rest } = origin.getRaw();
+
+    const extended = schema.object({ ...rest });
+
+    expect(() => {
+      extended.validate({ string: 'foo', number: 12 });
+    }).toThrowErrorMatchingInlineSnapshot(`"[number]: definition for this key is missing"`);
+
+    expect(() => {
+      extended.validate({ string: 'foo' });
+    }).not.toThrowError();
+  });
+});

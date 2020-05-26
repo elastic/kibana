@@ -61,7 +61,8 @@ export type ObjectTypeOptions<P extends Props = any> = TypeOptions<ObjectResultT
   UnknownOptions;
 
 export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
-  private props: Record<string, AnySchema>;
+  private props: P;
+  private propSchemas: Record<string, AnySchema>;
 
   constructor(props: P, { unknowns = 'forbid', ...typeOptions }: ObjectTypeOptions<P> = {}) {
     const schemaKeys = {} as Record<string, AnySchema>;
@@ -77,7 +78,29 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       .options({ stripUnknown: { objects: unknowns === 'ignore' } });
 
     super(schema, typeOptions);
-    this.props = schemaKeys;
+
+    this.props = props;
+    this.propSchemas = schemaKeys;
+  }
+
+  /**
+   * Return a copy of the raw properties used to create this `ObjectType` that can be used to
+   * create a new schema.
+   *
+   * @example
+   * ```ts
+   * const origin = schema.object({
+   *   initial: schema.string(),
+   * });
+   *
+   * const extended = schema.object({
+   *   ...origin.getRaw(),
+   *   added: schema.number(),
+   * });
+   * ```
+   */
+  public getRaw(): P {
+    return { ...this.props };
   }
 
   protected handleError(type: string, { reason, value }: Record<string, any>) {
@@ -95,10 +118,10 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
   }
 
   validateKey(key: string, value: any) {
-    if (!this.props[key]) {
+    if (!this.propSchemas[key]) {
       throw new Error(`${key} is not a valid part of this schema`);
     }
-    const { value: validatedValue, error } = this.props[key].validate(value);
+    const { value: validatedValue, error } = this.propSchemas[key].validate(value);
     if (error) {
       throw new ValidationError(error as any, key);
     }
