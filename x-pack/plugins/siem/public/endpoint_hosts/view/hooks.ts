@@ -11,7 +11,7 @@ import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { State } from '../../common/store/reducer';
 
 export function useHostSelector<TSelected>(selector: (state: HostState) => TSelected) {
-  return useSelector(function(state: State) {
+  return useSelector(function (state: State) {
     return selector(state.hostList as HostState);
   });
 }

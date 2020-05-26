@@ -7,7 +7,6 @@
 import { IRouter } from '../../../../../../../src/core/server';
 
 import { TIMELINE_URL } from '../../../../common/constants';
-import { TimelineType } from '../../../../common/types/timeline';
 
 import { SetupPlugins } from '../../../plugin';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
@@ -49,12 +48,10 @@ export const updateTimelinesRoute = (
           timelineType,
           timelineInput: {
             id: timelineId,
-            type: TimelineType.default,
             version,
           },
           templateTimelineInput: {
             id: templateTimelineId,
-            type: TimelineType.template,
             version: templateTimelineVersion,
           },
           frameworkRequest,
@@ -62,12 +59,13 @@ export const updateTimelinesRoute = (
 
         await compareTimelinesStatus.init();
         if (compareTimelinesStatus.isUpdatable) {
-          const updatedTimeline = await createTimelines(
+          const updatedTimeline = await createTimelines({
             frameworkRequest,
             timeline,
-            timelineId,
-            version
-          );
+            timelineSavedObjectId: timelineId,
+            timelineVersion: version,
+          });
+
           return response.ok({
             body: {
               data: {

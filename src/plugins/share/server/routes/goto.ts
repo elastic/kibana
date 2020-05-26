@@ -41,7 +41,7 @@ export const createGotoRoute = ({
         params: schema.object({ urlId: schema.string() }),
       },
     },
-    router.handleLegacyErrors(async function(context, request, response) {
+    router.handleLegacyErrors(async function (context, request, response) {
       const url = await shortUrlLookup.getUrl(request.params.urlId, {
         savedObjects: context.core.savedObjects.client,
       });
@@ -52,7 +52,7 @@ export const createGotoRoute = ({
       if (!stateStoreInSessionStorage) {
         const basePath = http.basePath.get(request);
 
-        const prependedUrl = modifyUrl(url, parts => {
+        const prependedUrl = modifyUrl(url, (parts) => {
           if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
             parts.pathname = `${basePath}${parts.pathname}`;
           }

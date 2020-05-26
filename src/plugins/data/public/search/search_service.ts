@@ -102,12 +102,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       uiSettings: core.uiSettings,
       getInternalStartServices,
     });
-    aggTypes.buckets.forEach(b => aggTypesSetup.registerBucket(b));
-    aggTypes.metrics.forEach(m => aggTypesSetup.registerMetric(m));
+    aggTypes.buckets.forEach((b) => aggTypesSetup.registerBucket(b));
+    aggTypes.metrics.forEach((m) => aggTypesSetup.registerMetric(m));
 
     // register expression functions for each agg type
     const aggFunctions = getAggTypesFunctions();
-    aggFunctions.forEach(fn => expressions.registerFunction(fn));
+    aggFunctions.forEach((fn) => expressions.registerFunction(fn));
 
     return {
       aggs: {

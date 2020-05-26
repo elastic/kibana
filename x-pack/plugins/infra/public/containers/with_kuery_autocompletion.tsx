@@ -85,7 +85,7 @@ class WithKueryAutocompletionComponent extends React.Component<
         boolFilter: [],
       })) || [];
 
-    this.setState(state =>
+    this.setState((state) =>
       state.currentRequest &&
       state.currentRequest.expression !== expression &&
       state.currentRequest.cursorPosition !== cursorPosition

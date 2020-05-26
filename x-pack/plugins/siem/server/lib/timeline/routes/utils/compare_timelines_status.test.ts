@@ -48,14 +48,12 @@ describe('CompareTimelinesStatus', () => {
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
             id: mockUniqueParsedObjects[0].savedObjectId,
-            type: TimelineType.default,
             version: mockUniqueParsedObjects[0].version,
           },
           timelineType: TimelineType.default,
           title: mockUniqueParsedObjects[0].title,
           templateTimelineInput: {
             id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
-            type: TimelineType.template,
             version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
           },
           frameworkRequest: {} as FrameworkRequest,
@@ -122,14 +120,12 @@ describe('CompareTimelinesStatus', () => {
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
             id: mockUniqueParsedObjects[0].savedObjectId,
-            type: TimelineType.default,
             version: mockUniqueParsedObjects[0].version,
           },
           timelineType: TimelineType.default,
           title: mockUniqueParsedObjects[0].title,
           templateTimelineInput: {
             id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
-            type: TimelineType.template,
             version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
           },
           frameworkRequest: {} as FrameworkRequest,
@@ -189,14 +185,12 @@ describe('CompareTimelinesStatus', () => {
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
             id: mockUniqueParsedObjects[0].savedObjectId,
-            type: TimelineType.default,
             version: mockUniqueParsedObjects[0].version,
           },
           timelineType: TimelineType.template,
           title: mockUniqueParsedObjects[0].title,
           templateTimelineInput: {
             id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
-            type: TimelineType.template,
             version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
           },
           frameworkRequest: {} as FrameworkRequest,
@@ -267,14 +261,12 @@ describe('CompareTimelinesStatus', () => {
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
             id: mockUniqueParsedObjects[0].savedObjectId,
-            type: TimelineType.default,
             version: mockUniqueParsedObjects[0].version,
           },
           timelineType: TimelineType.template,
           title: mockUniqueParsedObjects[0].title,
           templateTimelineInput: {
             id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
-            type: TimelineType.template,
             version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
           },
           frameworkRequest: {} as FrameworkRequest,
@@ -312,54 +304,54 @@ describe('CompareTimelinesStatus', () => {
     });
   });
 
-  describe.skip(`Throw error if given title does NOT exists`, () => {
-    const mockGetTimeline: jest.Mock = jest.fn();
-    const mockGetTemplateTimeline: jest.Mock = jest.fn();
-    let timelineObj: TimelinesStatusType;
+  // describe(`Throw error if given title does NOT exists`, () => {
+  //   const mockGetTimeline: jest.Mock = jest.fn();
+  //   const mockGetTemplateTimeline: jest.Mock = jest.fn();
+  //   let timelineObj: TimelinesStatusType;
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
+  //   afterEach(() => {
+  //     jest.clearAllMocks();
+  //   });
 
-    afterAll(() => {
-      jest.resetModules();
-    });
+  //   afterAll(() => {
+  //     jest.resetModules();
+  //   });
 
-    beforeEach(async () => {
-      jest.doMock('../../saved_object', () => {
-        return {
-          getTimeline: mockGetTimeline.mockReturnValue(null),
-          getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
-            timeline: [],
-          }),
-        };
-      });
+  //   beforeEach(async () => {
+  //     jest.doMock('../../saved_object', () => {
+  //       return {
+  //         getTimeline: mockGetTimeline.mockReturnValue(null),
+  //         getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
+  //           timeline: [],
+  //         }),
+  //       };
+  //     });
 
-      const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
-        .CompareTimelinesStatus;
+  //     const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
+  //       .CompareTimelinesStatus;
 
-      timelineObj = new CompareTimelinesStatus({
-        timelineInput: {
-          id: mockUniqueParsedObjects[0].savedObjectId,
-          type: TimelineType.default,
-          version: mockUniqueParsedObjects[0].version,
-        },
-        timelineType: TimelineType.default,
-        title: null,
-        templateTimelineInput: {
-          id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
-          type: TimelineType.template,
-          version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
-        },
-        frameworkRequest: {} as FrameworkRequest,
-      });
+  //     timelineObj = new CompareTimelinesStatus({
+  //       timelineInput: {
+  //         id: mockUniqueParsedObjects[0].savedObjectId,
+  //         type: TimelineType.default,
+  //         version: mockUniqueParsedObjects[0].version,
+  //       },
+  //       timelineType: TimelineType.default,
+  //       title: null,
+  //       templateTimelineInput: {
+  //         id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
+  //         type: TimelineType.template,
+  //         version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
+  //       },
+  //       frameworkRequest: {} as FrameworkRequest,
+  //     });
 
-      await timelineObj.init();
-    });
+  //     await timelineObj.init();
+  //   });
 
-    test(`create timeline`, () => {
-      const error = timelineObj.checkIsFailureCases(TimelineStatusActions.create);
-      expect(error?.body).toEqual(EMPTY_TITLE_ERROR_MESSAGE);
-    });
-  });
+  //   test(`create timeline`, () => {
+  //     const error = timelineObj.checkIsFailureCases(TimelineStatusActions.create);
+  //     expect(error?.body).toEqual(EMPTY_TITLE_ERROR_MESSAGE);
+  //   });
+  // });
 });

@@ -8,10 +8,10 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ErrorRateAlertTrigger } from '.';
 
-storiesOf('app/ErrorRateAlertTrigger', module).add('example', props => {
+storiesOf('app/ErrorRateAlertTrigger', module).add('example', (props) => {
   const params = {
     threshold: 2,
-    window: '5m'
+    window: '5m',
   };
 
   return (

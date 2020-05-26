@@ -11,7 +11,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
@@ -62,21 +62,21 @@ export function ErrorGroupDetails() {
   const { serviceName, start, end, errorGroupId } = urlParams;
 
   const { data: errorGroupData } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (serviceName && start && end && errorGroupId) {
         return callApmApi({
           pathname: '/api/apm/services/{serviceName}/errors/{groupId}',
           params: {
             path: {
               serviceName,
-              groupId: errorGroupId
+              groupId: errorGroupId,
             },
             query: {
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters)
-            }
-          }
+              uiFilters: JSON.stringify(uiFilters),
+            },
+          },
         });
       }
     },
@@ -84,21 +84,21 @@ export function ErrorGroupDetails() {
   );
 
   const { data: errorDistributionData } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (serviceName && start && end && errorGroupId) {
         return callApmApi({
           pathname: '/api/apm/services/{serviceName}/errors/distribution',
           params: {
             path: {
-              serviceName
+              serviceName,
             },
             query: {
               start,
               end,
               groupId: errorGroupId,
-              uiFilters: JSON.stringify(uiFilters)
-            }
-          }
+              uiFilters: JSON.stringify(uiFilters),
+            },
+          },
         });
       }
     },
@@ -130,8 +130,8 @@ export function ErrorGroupDetails() {
                 {i18n.translate('xpack.apm.errorGroupDetails.errorGroupTitle', {
                   defaultMessage: 'Error group {errorGroupId}',
                   values: {
-                    errorGroupId: getShortGroupId(urlParams.errorGroupId)
-                  }
+                    errorGroupId: getShortGroupId(urlParams.errorGroupId),
+                  },
                 })}
               </h1>
             </EuiTitle>
@@ -140,7 +140,7 @@ export function ErrorGroupDetails() {
             <EuiFlexItem grow={false}>
               <EuiBadge color="warning">
                 {i18n.translate('xpack.apm.errorGroupDetails.unhandledLabel', {
-                  defaultMessage: 'Unhandled'
+                  defaultMessage: 'Unhandled',
                 })}
               </EuiBadge>
             </EuiFlexItem>
@@ -160,7 +160,7 @@ export function ErrorGroupDetails() {
                     {i18n.translate(
                       'xpack.apm.errorGroupDetails.logMessageLabel',
                       {
-                        defaultMessage: 'Log message'
+                        defaultMessage: 'Log message',
                       }
                     )}
                   </Label>
@@ -171,14 +171,14 @@ export function ErrorGroupDetails() {
                 {i18n.translate(
                   'xpack.apm.errorGroupDetails.exceptionMessageLabel',
                   {
-                    defaultMessage: 'Exception message'
+                    defaultMessage: 'Exception message',
                   }
                 )}
               </Label>
               <Message>{excMessage || NOT_AVAILABLE_LABEL}</Message>
               <Label>
                 {i18n.translate('xpack.apm.errorGroupDetails.culpritLabel', {
-                  defaultMessage: 'Culprit'
+                  defaultMessage: 'Culprit',
                 })}
               </Label>
               <Culprit>{culprit || NOT_AVAILABLE_LABEL}</Culprit>
@@ -191,7 +191,7 @@ export function ErrorGroupDetails() {
           title={i18n.translate(
             'xpack.apm.errorGroupDetails.occurrencesChartLabel',
             {
-              defaultMessage: 'Occurrences'
+              defaultMessage: 'Occurrences',
             }
           )}
         />

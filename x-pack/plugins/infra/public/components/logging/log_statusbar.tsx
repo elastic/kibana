@@ -13,11 +13,11 @@ export const LogStatusbar = euiStyled(EuiFlexGroup).attrs(() => ({
   gutterSize: 'none',
   justifyContent: 'flexEnd',
 }))`
-  padding: ${props => props.theme.eui.euiSizeS};
-  border-top: ${props => props.theme.eui.euiBorderThin};
+  padding: ${(props) => props.theme.eui.euiSizeS};
+  border-top: ${(props) => props.theme.eui.euiBorderThin};
   max-height: 48px;
   min-height: 48px;
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
   flex-direction: row;
 `;
 

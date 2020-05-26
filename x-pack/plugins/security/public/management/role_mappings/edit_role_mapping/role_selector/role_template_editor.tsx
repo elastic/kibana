@@ -81,7 +81,7 @@ export const RoleTemplateEditor = ({
           checked={roleTemplate.format === 'json'}
           label={returnsJsonLabel}
           showLabel={false}
-          onChange={e => {
+          onChange={(e) => {
             onChange({
               ...roleTemplate,
               format: e.target.checked ? 'json' : 'string',
@@ -164,7 +164,7 @@ export const RoleTemplateEditor = ({
               <EuiFieldText
                 data-test-subj="roleTemplateSourceEditor"
                 value={roleTemplate.template.source}
-                onChange={e => {
+                onChange={(e) => {
                   onChange({
                     ...roleTemplate,
                     template: {
@@ -213,7 +213,7 @@ export const RoleTemplateEditor = ({
               <EuiFieldText
                 data-test-subj="roleTemplateScriptIdEditor"
                 value={roleTemplate.template.id}
-                onChange={e => {
+                onChange={(e) => {
                   onChange({
                     ...roleTemplate,
                     template: {

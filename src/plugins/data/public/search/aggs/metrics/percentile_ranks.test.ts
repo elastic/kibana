@@ -30,7 +30,7 @@ import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 import { InternalStartServices } from '../../../types';
 
-describe('AggTypesMetricsPercentileRanksProvider class', function() {
+describe('AggTypesMetricsPercentileRanksProvider class', function () {
   let aggConfigs: IAggConfigs;
   let fieldFormats: FieldFormatsStart;
   let aggTypesDependencies: PercentileRanksMetricAggDependencies;
@@ -78,7 +78,7 @@ describe('AggTypesMetricsPercentileRanksProvider class', function() {
     );
   });
 
-  it('uses the custom label if it is set', function() {
+  it('uses the custom label if it is set', function () {
     const responseAggs: any = getPercentileRanksMetricAgg(aggTypesDependencies).getResponseAggs(
       aggConfigs.aggs[0] as IPercentileRanksAggConfig
     );

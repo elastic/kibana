@@ -60,7 +60,7 @@ export const FilterPopoverComponent = ({
 
   const setIsPopoverOpenCb = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const toggleSelectedGroupCb = useCallback(
-    option => onSelectedOptionsChanged(toggleSelectedGroup(option, selectedOptions)),
+    (option) => onSelectedOptionsChanged(toggleSelectedGroup(option, selectedOptions)),
     [selectedOptions, onSelectedOptionsChanged]
   );
 

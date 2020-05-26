@@ -38,60 +38,71 @@ export const checkIsUpdateFailureCases = (
   existTimeline: TimelineSavedObject | null,
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
-  if (!isHandlingTemplateTimeline && existTimeline == null) {
-    // timeline !exists
-    return {
-      body: UPDATE_TIMELINE_ERROR_MESSAGE,
-      statusCode: 405,
-    };
-  } else if (isHandlingTemplateTimeline && existTemplateTimeline == null) {
-    // template timeline !exists
-    // Throw error to create template timeline in patch
-    return {
-      body: UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
-      statusCode: 405,
-    };
-  } else if (
-    isHandlingTemplateTimeline &&
-    existTimeline != null &&
-    existTemplateTimeline != null &&
-    existTimeline.savedObjectId !== existTemplateTimeline.savedObjectId
-  ) {
-    // Throw error you can not have a no matching between your timeline and your template timeline during an update
-    return {
-      body: NO_MATCH_ID_ERROR_MESSAGE,
-      statusCode: 409,
-    };
-  } else if (!isHandlingTemplateTimeline && existTimeline?.version !== version) {
-    // throw error 409 conflict timeline
-    return {
-      body: NO_MATCH_VERSION_ERROR_MESSAGE,
-      statusCode: 409,
-    };
-  } else if (
-    isHandlingTemplateTimeline &&
-    existTemplateTimeline != null &&
-    existTemplateTimeline.templateTimelineVersion == null &&
-    existTemplateTimeline.version !== version
-  ) {
-    // throw error 409 conflict timeline
-    return {
-      body: NO_MATCH_VERSION_ERROR_MESSAGE,
-      statusCode: 409,
-    };
-  } else if (
-    isHandlingTemplateTimeline &&
-    templateTimelineVersion != null &&
-    existTemplateTimeline != null &&
-    existTemplateTimeline.templateTimelineVersion != null &&
-    existTemplateTimeline.templateTimelineVersion !== templateTimelineVersion
-  ) {
-    // Throw error you can not update a template timeline version with an old version
-    return {
-      body: TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
-      statusCode: 409,
-    };
+  if (isHandlingTemplateTimeline) {
+    if (existTemplateTimeline == null) {
+      // template timeline !exists
+      // Throw error to create template timeline in patch
+      return {
+        body: UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
+        statusCode: 405,
+      };
+    }
+
+    if (
+      existTimeline != null &&
+      existTemplateTimeline != null &&
+      existTimeline.savedObjectId !== existTemplateTimeline.savedObjectId
+    ) {
+      // Throw error you can not have a no matching between your timeline and your template timeline during an update
+      return {
+        body: NO_MATCH_ID_ERROR_MESSAGE,
+        statusCode: 409,
+      };
+    }
+
+    if (
+      existTemplateTimeline != null &&
+      existTemplateTimeline.templateTimelineVersion == null &&
+      existTemplateTimeline.version !== version
+    ) {
+      // throw error 409 conflict timeline
+      return {
+        body: NO_MATCH_VERSION_ERROR_MESSAGE,
+        statusCode: 409,
+      };
+    }
+
+    if (
+      templateTimelineVersion != null &&
+      existTemplateTimeline != null &&
+      existTemplateTimeline.templateTimelineVersion != null &&
+      existTemplateTimeline.templateTimelineVersion !== templateTimelineVersion
+    ) {
+      // Throw error you can not update a template timeline version with an old version
+      return {
+        body: TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
+        statusCode: 409,
+      };
+    }
+
+    return null;
   } else {
+    if (existTimeline == null) {
+      // timeline !exists
+      return {
+        body: UPDATE_TIMELINE_ERROR_MESSAGE,
+        statusCode: 405,
+      };
+    }
+
+    if (existTimeline?.version !== version) {
+      // throw error 409 conflict timeline
+      return {
+        body: NO_MATCH_VERSION_ERROR_MESSAGE,
+        statusCode: 409,
+      };
+    }
+
     return null;
   }
 };
