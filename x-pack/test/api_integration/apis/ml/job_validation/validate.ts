@@ -6,11 +6,8 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/machine_learning/security_common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/machine_learning/common';
 import pkg from '../../../../../../package.json';
-
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-};
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -65,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post('/api/ml/validate/job')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_HEADERS)
+        .set(COMMON_REQUEST_HEADERS)
         .send(requestBody)
         .expect(200);
 
@@ -146,7 +143,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post('/api/ml/validate/job')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_HEADERS)
+        .set(COMMON_REQUEST_HEADERS)
         .send(requestBody)
         .expect(200);
 
@@ -225,7 +222,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post('/api/ml/validate/job')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_HEADERS)
+        .set(COMMON_REQUEST_HEADERS)
         .send(requestBody)
         .expect(200);
 
@@ -326,7 +323,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post('/api/ml/validate/job')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_HEADERS)
+        .set(COMMON_REQUEST_HEADERS)
         .send(requestBody)
         .expect(400);
 
@@ -372,7 +369,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post('/api/ml/validate/job')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_HEADERS)
+        .set(COMMON_REQUEST_HEADERS)
         .send(requestBody)
         .expect(404);
 
