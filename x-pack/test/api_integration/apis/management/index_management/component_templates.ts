@@ -12,13 +12,13 @@ import { initElasticsearchHelpers } from './lib';
 // @ts-ignore
 import { API_BASE_PATH } from './constants';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
   const { createComponentTemplate, deleteComponentTemplate } = initElasticsearchHelpers(es);
 
-  describe('Component templates', function() {
+  describe('Component templates', function () {
     describe('Get', () => {
       const COMPONENT_NAME = 'test_component_template';
       const COMPONENT = {
@@ -61,9 +61,7 @@ export default function({ getService }: FtrProviderContext) {
 
           expect(testComponentTemplate).to.eql({
             name: COMPONENT_NAME,
-            component_template: {
-              ...COMPONENT,
-            },
+            component_template: COMPONENT,
           });
         });
       });
@@ -72,10 +70,7 @@ export default function({ getService }: FtrProviderContext) {
         it('should return a single component template', async () => {
           const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_NAME}`;
 
-          const { body } = await supertest
-            .get(uri)
-            .set('kbn-xsrf', 'xxx')
-            .expect(200);
+          const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(200);
 
           expect(body).to.eql({
             name: COMPONENT_NAME,
@@ -252,10 +247,7 @@ export default function({ getService }: FtrProviderContext) {
 
         const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_NAME}`;
 
-        const { body } = await supertest
-          .delete(uri)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
+        const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
 
         expect(body).to.eql({
           itemsDeleted: [COMPONENT_NAME],
@@ -274,15 +266,12 @@ export default function({ getService }: FtrProviderContext) {
 
         const {
           body: { itemsDeleted, errors },
-        } = await supertest
-          .delete(uri)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
+        } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
 
         expect(errors).to.eql([]);
 
         // The itemsDeleted array order isn't guaranteed, so we assert against each name instead
-        [COMPONENT_ONE_NAME, COMPONENT_TWO_NAME].forEach(componentName => {
+        [COMPONENT_ONE_NAME, COMPONENT_TWO_NAME].forEach((componentName) => {
           expect(itemsDeleted.includes(componentName)).to.be(true);
         });
       });
@@ -296,39 +285,11 @@ export default function({ getService }: FtrProviderContext) {
 
         const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_ONE_NAME},${COMPONENT_DOES_NOT_EXIST}`;
 
-        const { body } = await supertest
-          .delete(uri)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
+        const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
 
-        expect(body).to.eql({
-          itemsDeleted: [COMPONENT_ONE_NAME],
-          errors: [
-            {
-              name: COMPONENT_DOES_NOT_EXIST,
-              error: {
-                msg:
-                  '[index_template_missing_exception] index_template [component_does_not_exist] missing',
-                path: '/_component_template/component_does_not_exist',
-                query: {},
-                statusCode: 404,
-                response: JSON.stringify({
-                  error: {
-                    root_cause: [
-                      {
-                        type: 'index_template_missing_exception',
-                        reason: 'index_template [component_does_not_exist] missing',
-                      },
-                    ],
-                    type: 'index_template_missing_exception',
-                    reason: 'index_template [component_does_not_exist] missing',
-                  },
-                  status: 404,
-                }),
-              },
-            },
-          ],
-        });
+        expect(body.itemsDeleted).to.eql([COMPONENT_ONE_NAME]);
+        expect(body.errors[0].name).to.eql(COMPONENT_DOES_NOT_EXIST);
+        expect(body.errors[0].error.msg).to.contain('index_template_missing_exception');
       });
     });
   });

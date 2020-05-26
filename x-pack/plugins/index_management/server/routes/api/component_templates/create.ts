@@ -8,16 +8,11 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
+import { componentTemplateSchema } from './schema_validation';
 
 const bodySchema = schema.object({
   name: schema.string(),
-  template: schema.object({
-    settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    aliases: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    mappings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-  }),
-  version: schema.maybe(schema.number()),
-  _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  ...componentTemplateSchema,
 });
 
 export const registerCreateRoute = ({
