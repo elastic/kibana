@@ -75,6 +75,9 @@ export const usePivotConfig = (
   // The list of selected aggregations
   const [aggList, setAggList] = useState(defaults.aggList);
 
+  /**
+   * Adds an aggregation to the list.
+   */
   const addAggregation = (d: DropDownLabel[]) => {
     const label: AggName = d[0].label;
     const config: PivotAggsConfig = aggOptionsData[label];

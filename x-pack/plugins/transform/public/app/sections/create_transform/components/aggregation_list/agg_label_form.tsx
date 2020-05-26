@@ -10,7 +10,12 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 
-import { AggName, PivotAggsConfig, PivotAggsConfigWithUiSupportDict } from '../../../../common';
+import {
+  AggName,
+  isPivotAggsConfigWithUiSupport,
+  PivotAggsConfig,
+  PivotAggsConfigWithUiSupportDict,
+} from '../../../../common';
 
 import { PopoverForm } from './popover_form';
 
@@ -29,7 +34,9 @@ export const AggLabelForm: React.FC<Props> = ({
   onChange,
   options,
 }) => {
-  const [isPopoverVisible, setPopoverVisibility] = useState(false);
+  const [isPopoverVisible, setPopoverVisibility] = useState(
+    isPivotAggsConfigWithUiSupport(item) ? item.forceEdit : false
+  );
 
   function update(updateItem: PivotAggsConfig) {
     onChange({ ...updateItem });

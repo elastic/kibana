@@ -36,7 +36,6 @@ import {
   PivotGroupByDict,
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
-  PIVOT_SUPPORTED_AGGS,
 } from '../../../../common';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { useIndexData } from '../../../../hooks/use_index_data';
@@ -53,6 +52,7 @@ import { SourceSearchBar } from '../source_search_bar';
 
 import { StepDefineExposedState } from './common';
 import { useStepDefineForm } from './hooks/use_step_define_form';
+import { PivotSupportedAggs } from '../../../../common/pivot_aggs';
 
 export interface StepDefineFormProps {
   overrides?: StepDefineExposedState;
@@ -154,7 +154,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
         const aggName = d[0];
         const aggConfig = d[1] as PivotAggDict;
         const aggConfigKeys = Object.keys(aggConfig);
-        const agg = aggConfigKeys[0] as PIVOT_SUPPORTED_AGGS;
+        const agg = aggConfigKeys[0] as PivotSupportedAggs;
         newAggList[aggName] = {
           ...aggConfig[agg],
           agg,

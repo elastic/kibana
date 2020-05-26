@@ -4,36 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FC } from 'react';
 import { Dictionary } from '../../../common/types/common';
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
 import { AggName } from './aggregations';
 import { EsFieldName } from './fields';
+import { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg_config';
 
-export enum PIVOT_SUPPORTED_AGGS {
-  AVG = 'avg',
-  CARDINALITY = 'cardinality',
-  MAX = 'max',
-  MIN = 'min',
-  PERCENTILES = 'percentiles',
-  SUM = 'sum',
-  VALUE_COUNT = 'value_count',
-}
+export type PivotSupportedAggs = typeof PIVOT_SUPPORTED_AGGS[keyof typeof PIVOT_SUPPORTED_AGGS];
+
+export const PIVOT_SUPPORTED_AGGS = {
+  AVG: 'avg',
+  CARDINALITY: 'cardinality',
+  MAX: 'max',
+  MIN: 'min',
+  PERCENTILES: 'percentiles',
+  SUM: 'sum',
+  VALUE_COUNT: 'value_count',
+  FILTER: 'filter',
+} as const;
 
 export const PERCENTILES_AGG_DEFAULT_PERCENTS = [1, 5, 25, 50, 75, 95, 99];
 
 export const pivotAggsFieldSupport = {
-  [KBN_FIELD_TYPES.ATTACHMENT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
-  [KBN_FIELD_TYPES.BOOLEAN]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
+  [KBN_FIELD_TYPES.ATTACHMENT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
+  [KBN_FIELD_TYPES.BOOLEAN]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
   [KBN_FIELD_TYPES.DATE]: [
     PIVOT_SUPPORTED_AGGS.MAX,
     PIVOT_SUPPORTED_AGGS.MIN,
     PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
+    PIVOT_SUPPORTED_AGGS.FILTER,
   ],
-  [KBN_FIELD_TYPES.GEO_POINT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
-  [KBN_FIELD_TYPES.GEO_SHAPE]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
-  [KBN_FIELD_TYPES.IP]: [PIVOT_SUPPORTED_AGGS.CARDINALITY, PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
-  [KBN_FIELD_TYPES.MURMUR3]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
+  [KBN_FIELD_TYPES.GEO_POINT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
+  [KBN_FIELD_TYPES.GEO_SHAPE]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
+  [KBN_FIELD_TYPES.IP]: [
+    PIVOT_SUPPORTED_AGGS.CARDINALITY,
+    PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
+    PIVOT_SUPPORTED_AGGS.FILTER,
+  ],
+  [KBN_FIELD_TYPES.MURMUR3]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
   [KBN_FIELD_TYPES.NUMBER]: [
     PIVOT_SUPPORTED_AGGS.AVG,
     PIVOT_SUPPORTED_AGGS.CARDINALITY,
@@ -42,34 +52,58 @@ export const pivotAggsFieldSupport = {
     PIVOT_SUPPORTED_AGGS.PERCENTILES,
     PIVOT_SUPPORTED_AGGS.SUM,
     PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
+    PIVOT_SUPPORTED_AGGS.FILTER,
   ],
-  [KBN_FIELD_TYPES.STRING]: [PIVOT_SUPPORTED_AGGS.CARDINALITY, PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
-  [KBN_FIELD_TYPES._SOURCE]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
-  [KBN_FIELD_TYPES.UNKNOWN]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
-  [KBN_FIELD_TYPES.CONFLICT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
+  [KBN_FIELD_TYPES.STRING]: [
+    PIVOT_SUPPORTED_AGGS.CARDINALITY,
+    PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
+    PIVOT_SUPPORTED_AGGS.FILTER,
+  ],
+  [KBN_FIELD_TYPES._SOURCE]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
+  [KBN_FIELD_TYPES.UNKNOWN]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
+  [KBN_FIELD_TYPES.CONFLICT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
 };
 
 export type PivotAgg = {
-  [key in PIVOT_SUPPORTED_AGGS]?: {
+  [key in PivotSupportedAggs]?: {
     field: EsFieldName;
   };
 };
 
-export type PivotAggDict = { [key in AggName]: PivotAgg };
+export type PivotAggDict = {
+  [key in PivotSupportedAggs]: PivotAgg;
+};
 
 // The internal representation of an aggregation definition.
 export interface PivotAggsConfigBase {
-  agg: PIVOT_SUPPORTED_AGGS;
+  agg: PivotSupportedAggs;
   aggName: AggName;
   dropDownName: string;
 }
 
-interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
+export interface AggFormConfig<T> {
+  AggFormComponent: FC<{
+    aggConfig: Partial<T>;
+    onChange: (arg: T) => void;
+  }>;
+  defaultAggConfig?: Partial<T>;
+}
+
+export interface PivotAggsConfigWithUiBase<T = {}> extends PivotAggsConfigBase {
   field: EsFieldName;
+  /**
+   * Configuration of agg form
+   */
+  formConfig: T extends {} ? AggFormConfig<T> : undefined;
+  /**
+   * Indicates if the user's input is required after quick adding of the aggregation
+   * from the suggestions.
+   */
+  forceEdit?: boolean;
 }
 
 interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {
-  agg: PIVOT_SUPPORTED_AGGS.PERCENTILES;
+  agg: typeof PIVOT_SUPPORTED_AGGS.PERCENTILES;
   percents: number[];
 }
 
@@ -83,6 +117,15 @@ export function isPivotAggsConfigWithUiSupport(arg: any): arg is PivotAggsConfig
     arg.hasOwnProperty('field') &&
     Object.values(PIVOT_SUPPORTED_AGGS).includes(arg.agg)
   );
+}
+
+/**
+ * Union type for agg configs with extended forms
+ */
+type PivotAggsConfigWithExtendedForm = PivotAggsConfigFilter;
+
+export function isPivotAggsWithExtendedForm(arg: any): arg is PivotAggsConfigWithExtendedForm {
+  return arg.hasOwnProperty('formConfig');
 }
 
 export function isPivotAggsConfigPercentiles(arg: any): arg is PivotAggsConfigPercentiles {

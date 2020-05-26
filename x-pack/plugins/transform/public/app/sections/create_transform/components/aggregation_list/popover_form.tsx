@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -15,6 +15,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSelect,
+  EuiSelectOption,
 } from '@elastic/eui';
 
 import { dictionaryToArray } from '../../../../../../common/types/common';
@@ -30,10 +31,8 @@ import {
   PivotAggsConfigWithUiSupportDict,
   PIVOT_SUPPORTED_AGGS,
 } from '../../../../common';
-
-interface SelectOption {
-  text: string;
-}
+import { isPivotAggsWithExtendedForm, PivotSupportedAggs } from '../../../../common/pivot_aggs';
+import { getAggFormConfig } from '../step_define/common/get_agg_form_config';
 
 interface Props {
   defaultData: PivotAggsConfig;
@@ -70,19 +69,33 @@ function parsePercentsInput(inputValue: string | undefined) {
 }
 
 export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onChange, options }) => {
-  const isUnsupportedAgg = !isPivotAggsConfigWithUiSupport(defaultData);
-
   const [aggName, setAggName] = useState(defaultData.aggName);
   const [agg, setAgg] = useState(defaultData.agg);
   const [field, setField] = useState(
     isPivotAggsConfigWithUiSupport(defaultData) ? defaultData.field : ''
   );
+
   const [percents, setPercents] = useState(getDefaultPercents(defaultData));
 
-  const availableFields: SelectOption[] = [];
-  const availableAggs: SelectOption[] = [];
+  const [aggFormConfig, setAggFormConfig] = useState(
+    isPivotAggsWithExtendedForm(defaultData) ? defaultData.formConfig : undefined
+  );
 
-  function updateAgg(aggVal: PIVOT_SUPPORTED_AGGS) {
+  const [aggForm, setAggForm] = useState(aggFormConfig?.defaultAggConfig);
+
+  const isUnsupportedAgg = !isPivotAggsConfigWithUiSupport(defaultData);
+
+  // Update configuration based on the aggregation type
+  useEffect(() => {
+    const config = getAggFormConfig(agg);
+    setAggFormConfig(config);
+    setAggForm(config?.defaultAggConfig);
+  }, [agg]);
+
+  const availableFields: EuiSelectOption[] = [];
+  const availableAggs: EuiSelectOption[] = [];
+
+  function updateAgg(aggVal: PivotSupportedAggs) {
     setAgg(aggVal);
     if (aggVal === PIVOT_SUPPORTED_AGGS.PERCENTILES && percents === undefined) {
       setPercents(PERCENTILES_AGG_DEFAULT_PERCENTS);
@@ -183,19 +196,6 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           onChange={(e) => setAggName(e.target.value)}
         />
       </EuiFormRow>
-      {availableAggs.length > 0 && (
-        <EuiFormRow
-          label={i18n.translate('xpack.transform.agg.popoverForm.aggLabel', {
-            defaultMessage: 'Aggregation',
-          })}
-        >
-          <EuiSelect
-            options={availableAggs}
-            value={agg}
-            onChange={(e) => updateAgg(e.target.value as PIVOT_SUPPORTED_AGGS)}
-          />
-        </EuiFormRow>
-      )}
       {availableFields.length > 0 && (
         <EuiFormRow
           label={i18n.translate('xpack.transform.agg.popoverForm.fieldLabel', {
@@ -208,6 +208,30 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
             onChange={(e) => setField(e.target.value)}
           />
         </EuiFormRow>
+      )}
+      {availableAggs.length > 0 && (
+        <EuiFormRow
+          label={i18n.translate('xpack.transform.agg.popoverForm.aggLabel', {
+            defaultMessage: 'Aggregation',
+          })}
+        >
+          <EuiSelect
+            options={availableAggs}
+            value={agg}
+            onChange={(e) => updateAgg(e.target.value as PivotSupportedAggs)}
+          />
+        </EuiFormRow>
+      )}
+      {aggFormConfig && (
+        <aggFormConfig.AggFormComponent
+          aggConfig={aggForm!}
+          onChange={(update) => {
+            setAggForm({
+              ...aggForm,
+              ...update,
+            });
+          }}
+        />
       )}
       {agg === PIVOT_SUPPORTED_AGGS.PERCENTILES && (
         <EuiFormRow

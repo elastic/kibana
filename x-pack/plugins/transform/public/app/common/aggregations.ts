@@ -5,8 +5,9 @@
  */
 
 import { composeValidators, patternValidator } from '../../../../ml/public';
+import { PivotSupportedAggs } from './pivot_aggs';
 
-export type AggName = string;
+export type AggName = string | PivotSupportedAggs;
 
 export function isAggName(arg: any): arg is AggName {
   // allow all characters except `[]>` and must not start or end with a space.
