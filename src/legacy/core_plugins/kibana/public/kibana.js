@@ -44,11 +44,16 @@ import { localApplicationService } from './local_application_service';
 npSetup.plugins.kibanaLegacy.registerLegacyAppAlias('doc', 'discover', { keepPrefix: true });
 npSetup.plugins.kibanaLegacy.registerLegacyAppAlias('context', 'discover', { keepPrefix: true });
 
+npSetup.plugins.kibanaLegacy.forwardApp('management', 'management', (path) => {
+  return path.replace('/management', '');
+});
+
 localApplicationService.attachToAngular(routes);
 
 routes.enable();
 
 const { config } = npSetup.plugins.kibanaLegacy;
+
 routes.otherwise({
   redirectTo: `/${config.defaultAppId || 'discover'}`,
 });

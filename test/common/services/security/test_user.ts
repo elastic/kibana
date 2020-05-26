@@ -71,7 +71,7 @@ export async function createTestUserService(
       }
     }
 
-    async setRoles(roles: string[]) {
+    async setRoles(roles: string[], shouldRefreshBrowser: boolean = true) {
       if (isEnabled()) {
         log.debug(`set roles = ${roles}`);
         await user.create('test_user', {
@@ -80,7 +80,7 @@ export async function createTestUserService(
           full_name: 'test user',
         });
 
-        if (browser && testSubjects) {
+        if (browser && testSubjects && shouldRefreshBrowser) {
           if (await testSubjects.exists('kibanaChrome', { allowHidden: true })) {
             await browser.refresh();
             await testSubjects.find('kibanaChrome', config.get('timeouts.find') * 10);
