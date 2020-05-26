@@ -58,7 +58,7 @@ export function getReportingUsageCollector(
 export function registerReportingUsageCollector(
   reporting: ReportingCore,
   { licensing, usageCollection }: ReportingSetupDeps
-): void {
+) {
   if (!usageCollection) {
     return;
   }
