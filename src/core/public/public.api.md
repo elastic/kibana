@@ -1205,9 +1205,9 @@ export interface SavedObjectsFindOptions {
     search?: string;
     searchFields?: string[];
     // (undocumented)
-    sortField?: string;
+    sortField?: string | string[];
     // (undocumented)
-    sortOrder?: string;
+    sortOrder?: string | string[];
     // (undocumented)
     type: string | string[];
 }

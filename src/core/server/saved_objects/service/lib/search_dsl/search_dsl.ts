@@ -32,8 +32,8 @@ interface GetSearchDslOptions {
   defaultSearchOperator?: string;
   searchFields?: string[];
   rootSearchFields?: string[];
-  sortField?: string;
-  sortOrder?: string;
+  sortField?: string | string[];
+  sortOrder?: string | string[];
   namespaces?: string[];
   hasReference?: {
     type: string;
@@ -64,7 +64,10 @@ export function getSearchDsl(
     throw Boom.notAcceptable('type must be specified');
   }
 
-  if (sortOrder && !sortField) {
+  const sortFields = sortField ? (Array.isArray(sortField) ? sortField : [sortField]) : [];
+  const sortOrders = sortOrder ? (Array.isArray(sortOrder) ? sortOrder : [sortOrder]) : [];
+
+  if (sortOrders.length > sortFields.length) {
     throw Boom.notAcceptable('sortOrder requires a sortField');
   }
 
@@ -81,6 +84,6 @@ export function getSearchDsl(
       hasReference,
       kueryNode,
     }),
-    ...getSortingParams(mappings, type, sortField, sortOrder),
+    ...getSortingParams(mappings, type, sortFields, sortOrders),
   };
 }

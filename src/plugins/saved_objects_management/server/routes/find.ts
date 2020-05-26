@@ -38,7 +38,7 @@ export const registerFindRoute = (
           defaultSearchOperator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
             defaultValue: 'OR',
           }),
-          sortField: schema.maybe(schema.string()),
+          sortField: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           hasReference: schema.maybe(
             schema.object({
               type: schema.string(),

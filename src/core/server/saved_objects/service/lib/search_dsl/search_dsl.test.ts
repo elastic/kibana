@@ -46,12 +46,17 @@ describe('getSearchDsl', () => {
         });
       }).toThrowError(/type must be specified/);
     });
-    it('throws when sortOrder without sortField', () => {
+
+    it('throws when sortOrder is defined and sortField is undefined', () => {
       expect(() => {
-        getSearchDsl(mappings, registry, {
-          type: 'foo',
-          sortOrder: 'desc',
-        });
+        getSearchDsl(mappings, registry, { type: 'foo', sortOrder: 'desc' });
+      }).toThrowError(/sortOrder requires a sortField/);
+    });
+
+    it('throws when sortOrder length is greater than sortField length', () => {
+      expect(() => {
+        const options = { type: 'foo', sortField: ['bar'], sortOrder: ['baz', 'qux'] };
+        getSearchDsl(mappings, registry, options);
       }).toThrowError(/sortOrder requires a sortField/);
     });
   });
@@ -86,22 +91,30 @@ describe('getSearchDsl', () => {
       });
     });
 
-    it('passes (mappings, type, sortField, sortOrder) to getSortingParams', () => {
-      getSortingParams.mockReturnValue({});
-      const opts = {
-        type: 'foo',
-        sortField: 'bar',
-        sortOrder: 'baz',
-      };
+    describe('passes (mappings, type, sortField, sortOrder) to getSortingParams', () => {
+      it('with string type and undefined sortField/sortOrder', () => {
+        getSortingParams.mockReturnValue({});
 
-      getSearchDsl(mappings, registry, opts);
-      expect(getSortingParams).toHaveBeenCalledTimes(1);
-      expect(getSortingParams).toHaveBeenCalledWith(
-        mappings,
-        opts.type,
-        opts.sortField,
-        opts.sortOrder
-      );
+        getSearchDsl(mappings, registry, { type: 'foo' });
+        expect(getSortingParams).toHaveBeenCalledTimes(1);
+        expect(getSortingParams).toHaveBeenCalledWith(mappings, 'foo', [], []);
+      });
+
+      it('with strings', () => {
+        getSortingParams.mockReturnValue({});
+
+        getSearchDsl(mappings, registry, { type: 'foo', sortField: 'bar', sortOrder: 'baz' });
+        expect(getSortingParams).toHaveBeenCalledTimes(1);
+        expect(getSortingParams).toHaveBeenCalledWith(mappings, 'foo', ['bar'], ['baz']);
+      });
+
+      it('with string arrays', () => {
+        getSortingParams.mockReturnValue({});
+
+        getSearchDsl(mappings, registry, { type: ['foo'], sortField: ['bar'], sortOrder: ['baz'] });
+        expect(getSortingParams).toHaveBeenCalledTimes(1);
+        expect(getSortingParams).toHaveBeenCalledWith(mappings, ['foo'], ['bar'], ['baz']);
+      });
     });
 
     it('returns combination of getQueryParams and getSortingParams', () => {
