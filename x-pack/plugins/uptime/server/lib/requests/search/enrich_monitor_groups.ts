@@ -6,7 +6,6 @@
 
 import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
-import { QUERY } from '../../../../common/constants';
 import {
   Check,
   Histogram,
@@ -358,7 +357,7 @@ const getHistogramForMonitors = async (
   const histosById: { [key: string]: any } = {};
   monitorIds.forEach((id: string) => {
     const points: any[] = [];
-    simplified.forEach(simpleHisto => {
+    simplified.forEach((simpleHisto) => {
       points.push({
         timestamp: simpleHisto.timestamp,
         down: simpleHisto.byId[id],
