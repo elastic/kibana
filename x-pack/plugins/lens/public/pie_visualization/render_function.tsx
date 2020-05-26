@@ -6,11 +6,14 @@
 
 import React, { useState, useEffect } from 'react';
 import color from 'color';
+import { uniq } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
 // @ts-ignore no types
 import { euiPaletteColorBlindBehindText } from '@elastic/eui/lib/services';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+// @ts-ignore no types
+import { colorPalette as buildColorPalette } from '@elastic/eui/lib/services';
 import {
   Chart,
   Datum,
@@ -30,11 +33,11 @@ import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
 import { ColumnGroups, PieExpressionProps } from './types';
 import { getSliceValueWithFallback, getFilterContext } from './render_helpers';
 import { EmptyPlaceholder } from '../shared_components';
-import './visualization.scss';
+import { palettes } from '../palettes';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
-const sortedColors = euiPaletteColorBlindBehindText();
+// const sortedColors = euiPaletteColorBlindBehindText();
 
 export function PieComponent(
   props: PieExpressionProps & {
@@ -58,10 +61,11 @@ export function PieComponent(
     nestedLegend,
     percentDecimals,
     hideLabels,
+    paletteName,
   } = props.args;
 
   if (!hideLabels) {
-    firstTable.columns.forEach((column) => {
+    firstTable.columns.forEach(column => {
       formatters[column.id] = props.formatFactory(column.formatHint);
     });
   }
@@ -70,7 +74,7 @@ export function PieComponent(
   // [bucket, subtotal, bucket, count]
   // But the user only configured [bucket, bucket, count]
   const columnGroups: ColumnGroups = [];
-  firstTable.columns.forEach((col) => {
+  firstTable.columns.forEach(col => {
     if (groups.includes(col.id)) {
       columnGroups.push({
         col,
@@ -94,6 +98,13 @@ export function PieComponent(
     fillLabel.valueFormatter = () => '';
   }
 
+  const uniqueValues = uniq(firstTable.rows, row => row[columnGroups[0].col.id]).length;
+  const colorPalette = paletteName ? palettes[paletteName] : palettes.eui;
+  const colors: string[] =
+    'buildCategorical' in colorPalette
+      ? colorPalette.buildCategorical(uniqueValues)
+      : buildColorPalette(colorPalette.gradientColors, uniqueValues);
+
   const layers: PartitionLayer[] = columnGroups.map(({ col }, layerIndex) => {
     return {
       groupByRollup: (d: Datum) => d[col.id] ?? EMPTY_SLICE,
@@ -115,7 +126,7 @@ export function PieComponent(
           ? { ...fillLabel, textColor: euiDarkVars.euiTextColor }
           : fillLabel,
       shape: {
-        fillColor: (d) => {
+        fillColor: d => {
           // Color is determined by round-robin on the index of the innermost slice
           // This has to be done recursively until we get to the slice index
           let parentIndex = 0;
@@ -126,15 +137,18 @@ export function PieComponent(
           }
 
           // Look up round-robin color from default palette
-          const outputColor = sortedColors[parentIndex % sortedColors.length];
+          const outputColor = colors[parentIndex % colors.length];
 
           if (shape === 'treemap') {
+            // return outputColor;
             // Only highlight the innermost color of the treemap, as it accurately represents area
             return layerIndex < columnGroups.length - 1 ? 'rgba(0,0,0,0)' : outputColor;
           }
 
           const lighten = (d.depth - 1) / (columnGroups.length * 2);
-          return color(outputColor, 'hsl').lighten(lighten).hex();
+          return color(outputColor, 'hsl')
+            .lighten(lighten)
+            .hex();
         },
       },
     };
@@ -177,7 +191,7 @@ export function PieComponent(
       config.linkLabel = { maxCount: 0 };
     }
   }
-  const metricColumn = firstTable.columns.find((c) => c.id === metric)!;
+  const metricColumn = firstTable.columns.find(c => c.id === metric)!;
   const percentFormatter = props.formatFactory({
     id: 'percent',
     params: {
@@ -194,14 +208,14 @@ export function PieComponent(
 
   const reverseGroups = [...columnGroups].reverse();
 
-  const hasNegative = firstTable.rows.some((row) => {
+  const hasNegative = firstTable.rows.some(row => {
     const value = row[metricColumn.id];
     return typeof value === 'number' && value < 0;
   });
   const isEmpty =
     firstTable.rows.length === 0 ||
-    firstTable.rows.every((row) =>
-      groups.every((colId) => !row[colId] || typeof row[colId] === 'undefined')
+    firstTable.rows.every(row =>
+      groups.every(colId => !row[colId] || typeof row[colId] === 'undefined')
     );
 
   if (isEmpty) {
@@ -235,7 +249,7 @@ export function PieComponent(
               (legendDisplay === 'default' && columnGroups.length > 1 && shape !== 'treemap'))
           }
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
-          onElementClick={(args) => {
+          onElementClick={args => {
             const context = getFilterContext(
               args[0][0] as LayerValue[],
               columnGroups.map(({ col }) => col.id),

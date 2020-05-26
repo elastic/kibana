@@ -54,6 +54,10 @@ export const pie: ExpressionFunctionDefinition<
       types: ['boolean'],
       help: '',
     },
+    paletteName: {
+      types: ['string'],
+      help: '',
+    },
     numberDisplay: {
       types: ['string'],
       options: ['hidden', 'percent', 'value'],

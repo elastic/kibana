@@ -18,3 +18,4 @@
  */
 
 export { ColorsService } from './colors';
+export { createColorPalette } from './color_palette';

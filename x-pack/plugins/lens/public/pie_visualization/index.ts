@@ -5,7 +5,7 @@
  */
 
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup, CoreStart } from 'src/core/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { pieVisualization } from './pie_visualization';
 import { pie, getPieRenderer } from './register_expression';

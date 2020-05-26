@@ -12,11 +12,15 @@ import {
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
   EuiButtonEmpty,
+  EuiToolTip,
+  EuiButtonIcon,
+  EuiFormRow,
 } from '@elastic/eui';
 import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Visualization, FramePublicAPI, Datasource } from '../../../types';
 import { Action } from '../state_management';
+import { PalettePicker } from '../../../palettes';
 import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 
@@ -73,10 +77,13 @@ function VisualizationSummary(props: Props) {
 }
 
 export function ChartSwitch(props: Props) {
-  const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
+  const [state, setState] = useState<{ flyout: boolean; settings: boolean }>({
+    flyout: false,
+    settings: false,
+  });
 
   const commitSelection = (selection: VisualizationSelection) => {
-    setFlyoutOpen(false);
+    setState({ flyout: false, settings: false });
 
     trackUiEvent(`chart_switch`);
 
@@ -170,21 +177,21 @@ export function ChartSwitch(props: Props) {
 
   const visualizationTypes = useMemo(
     () =>
-      flyoutOpen &&
+      state.flyout &&
       flatten(
-        Object.values(props.visualizationMap).map((v) =>
-          v.visualizationTypes.map((t) => ({
+        Object.values(props.visualizationMap).map(v =>
+          v.visualizationTypes.map(t => ({
             visualizationId: v.id,
             ...t,
             icon: t.largeIcon || t.icon,
           }))
         )
-      ).map((visualizationType) => ({
+      ).map(visualizationType => ({
         ...visualizationType,
         selection: getSelection(visualizationType.visualizationId, visualizationType.id),
       })),
     [
-      flyoutOpen,
+      state.flyout,
       props.visualizationMap,
       props.framePublicAPI,
       props.visualizationId,
@@ -192,7 +199,57 @@ export function ChartSwitch(props: Props) {
     ]
   );
 
-  const popover = (
+  const visualizationSettingsPopover = (
+    <EuiPopover
+      id="lnsLensSettingsPopover"
+      ownFocus
+      initialFocus=".lnsChartSwitch__popoverPanel"
+      panelClassName="lnsChartSwitch__popoverPanel"
+      anchorClassName="eui-textTruncate"
+      panelPaddingSize="s"
+      display="inlineBlock"
+      button={
+        <EuiToolTip
+          content={i18n.translate('xpack.lens.configPanel.visualizationSettingsLabel', {
+            defaultMessage: 'Visualization settings',
+          })}
+        >
+          <EuiButtonIcon
+            iconType={'gear'}
+            onClick={() => setState({ flyout: false, settings: true })}
+            data-test-subj="lns_layer_settings"
+          />
+        </EuiToolTip>
+      }
+      isOpen={state.settings}
+      closePopover={() => setState({ flyout: false, settings: false })}
+      anchorPosition="downLeft"
+    >
+      <EuiPopoverTitle>
+        {i18n.translate('xpack.lens.configPanel.visualizationSettingsLabel', {
+          defaultMessage: 'Visualization settings',
+        })}
+      </EuiPopoverTitle>
+
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.xyChart.colorPaletteLabel', {
+          defaultMessage: 'Color palette',
+        })}
+      >
+        <PalettePicker
+          paletteName={props.framePublicAPI.paletteId}
+          onChange={({ paletteName }) => {
+            props.dispatch({
+              type: 'SET_PALETTE_ID',
+              paletteId: paletteName!,
+            });
+          }}
+        />
+      </EuiFormRow>
+    </EuiPopover>
+  );
+
+  const switchPopover = (
     <EuiPopover
       id="lnsChartSwitchPopover"
       ownFocus
@@ -200,10 +257,11 @@ export function ChartSwitch(props: Props) {
       panelClassName="lnsChartSwitch__popoverPanel"
       anchorClassName="eui-textTruncate"
       panelPaddingSize="s"
+      display="inlineBlock"
       button={
         <EuiButtonEmpty
           className="lnsChartSwitch__triggerButton"
-          onClick={() => setFlyoutOpen(!flyoutOpen)}
+          onClick={() => setState({ flyout: !state.flyout, settings: false })}
           data-test-subj="lnsChartSwitchPopover"
           flush="left"
           iconSide="right"
@@ -213,8 +271,8 @@ export function ChartSwitch(props: Props) {
           <VisualizationSummary {...props} />
         </EuiButtonEmpty>
       }
-      isOpen={flyoutOpen}
-      closePopover={() => setFlyoutOpen(false)}
+      isOpen={state.flyout}
+      closePopover={() => setState({ flyout: false, settings: false })}
       anchorPosition="downLeft"
     >
       <EuiPopoverTitle>
@@ -223,7 +281,7 @@ export function ChartSwitch(props: Props) {
         })}
       </EuiPopoverTitle>
       <EuiKeyPadMenu>
-        {(visualizationTypes || []).map((v) => (
+        {(visualizationTypes || []).map(v => (
           <EuiKeyPadMenuItem
             key={`${v.visualizationId}:${v.id}`}
             label={<span data-test-subj="visTypeTitle">{v.label}</span>}
@@ -253,7 +311,13 @@ export function ChartSwitch(props: Props) {
     </EuiPopover>
   );
 
-  return <div className="lnsChartSwitch__header">{popover}</div>;
+  return (
+    <div className="lnsChartSwitch__header">
+      {visualizationSettingsPopover}
+
+      {switchPopover}
+    </div>
+  );
 }
 
 function getTopSuggestion(
@@ -269,7 +333,7 @@ function getTopSuggestion(
     activeVisualizationId: props.visualizationId,
     visualizationState: props.visualizationState,
     subVisualizationId,
-  }).filter((suggestion) => {
+  }).filter(suggestion => {
     // don't use extended versions of current data table on switching between visualizations
     // to avoid confusing the user.
     return (
@@ -282,8 +346,8 @@ function getTopSuggestion(
   // charts since that allows you to switch from A to B and back
   // to A with the greatest chance of preserving your original state.
   return (
-    suggestions.find((s) => s.changeType === 'unchanged') ||
-    suggestions.find((s) => s.changeType === 'reduced') ||
+    suggestions.find(s => s.changeType === 'unchanged') ||
+    suggestions.find(s => s.changeType === 'reduced') ||
     suggestions[0]
   );
 }

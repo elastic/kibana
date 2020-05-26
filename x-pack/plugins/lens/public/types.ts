@@ -16,6 +16,7 @@ import {
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
+import { PaletteDefinition } from './palettes';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
 import {
   SELECT_RANGE_TRIGGER,
@@ -379,6 +380,9 @@ export interface FramePublicAPI {
   // Adds a new layer. This has a side effect of updating the datasource state
   addNewLayer: () => string;
   removeLayers: (layerIds: string[]) => void;
+
+  paletteId: string;
+  colorPalette: PaletteDefinition;
 }
 
 export interface VisualizationType {

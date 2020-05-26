@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import { uniq } from 'lodash';
 import moment from 'moment';
 import {
   Chart,
@@ -26,6 +27,8 @@ import {
   ExpressionValueSearchContext,
 } from 'src/plugins/expressions/public';
 import { IconType } from '@elastic/eui';
+// @ts-ignore no types
+import { colorPalette as buildColorPalette } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import {
   LensMultiTable,
@@ -38,6 +41,7 @@ import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
 import { parseInterval } from '../../../../../src/plugins/data/common';
+import { palettes } from '../palettes';
 import { EmptyPlaceholder } from '../shared_components';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
@@ -90,6 +94,12 @@ export const xyChart: ExpressionFunctionDefinition<
       types: ['lens_xy_legendConfig'],
       help: i18n.translate('xpack.lens.xyChart.legend.help', {
         defaultMessage: 'Configure the chart legend.',
+      }),
+    },
+    paletteId: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.xyChart.paletteId.help', {
+        defaultMessage: 'ID of one of the predefined Lens palettes',
       }),
     },
     layers: {
@@ -271,13 +281,27 @@ export function XYChart({
       }
     : undefined;
 
+  const uniqueSeries = uniq(
+    layers.flatMap((layer) => {
+      if (layer.splitAccessor) {
+        return uniq(data.tables[layer.layerId].rows, (row) => row[layer.splitAccessor]);
+      }
+      return [layer.layerId];
+    })
+  ).length;
+  const colorPalette = palettes[args.paletteId];
+  const vizColors: string[] =
+    'buildCategorical' in colorPalette
+      ? colorPalette.buildCategorical(uniqueSeries)
+      : buildColorPalette(colorPalette.gradientColors, uniqueSeries);
+
   return (
     <Chart>
       <Settings
         showLegend={legend.isVisible ? chartHasMoreThanOneSeries : legend.isVisible}
         legendPosition={legend.position}
         showLegendExtra={false}
-        theme={chartTheme}
+        theme={{ ...chartTheme, colors: { ...chartTheme.colors, vizColors } }}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
         onBrushEnd={({ x }) => {

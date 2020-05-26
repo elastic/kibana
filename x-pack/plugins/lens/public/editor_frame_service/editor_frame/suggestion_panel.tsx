@@ -202,6 +202,7 @@ export function SuggestionPanel({
     currentVisualizationId,
     datasourceMap,
     visualizationMap,
+    frame.paletteId,
   ]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);

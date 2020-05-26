@@ -12,7 +12,7 @@ import { Visualization, OperationMetadata } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
 import { LayerState, PieVisualizationState } from './types';
 import { suggestions } from './suggestions';
-import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
+import { CHART_NAMES, MAX_PIE_BUCKETS } from './constants';
 import { SettingsWidget } from './settings_widget';
 
 function newLayerState(layerId: string): LayerState {

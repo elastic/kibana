@@ -20,6 +20,7 @@ export interface EditorFrameState extends PreviewState {
   title: string;
   stagedPreview?: PreviewState;
   activeDatasourceId: string | null;
+  paletteId?: string;
 }
 
 export type Action =
@@ -88,6 +89,10 @@ export type Action =
   | {
       type: 'SWITCH_DATASOURCE';
       newDatasourceId: string;
+    }
+  | {
+      type: 'SET_PALETTE_ID';
+      paletteId: string;
     };
 
 export function getActiveDatasourceIdFromDoc(doc?: Document) {
@@ -127,6 +132,7 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
       state: null,
       activeId: props.initialVisualizationId,
     },
+    paletteId: 'eui',
   };
 };
 
@@ -173,6 +179,7 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
           activeId: action.doc.visualizationType,
           state: action.doc.state.visualization,
         },
+        paletteId: action.doc.state.paletteId,
       };
     case 'SWITCH_DATASOURCE':
       return {
@@ -272,6 +279,11 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
           state: action.newState,
         },
         stagedPreview: action.clearStagedPreview ? undefined : state.stagedPreview,
+      };
+    case 'SET_PALETTE_ID':
+      return {
+        ...state,
+        paletteId: action.paletteId,
       };
     default:
       return state;

@@ -133,6 +133,7 @@ export function InnerWorkspacePanel({
     framePublicAPI.dateRange,
     framePublicAPI.query,
     framePublicAPI.filters,
+    framePublicAPI.paletteId,
   ]);
 
   useEffect(() => {

@@ -25,6 +25,7 @@ import { RootDragDropProvider } from '../../drag_drop';
 import { getSavedObjectFormat } from './save';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { generateId } from '../../id_generator';
+import { palettes } from '../../palettes';
 import { Filter, Query, SavedQuery } from '../../../../../../src/plugins/data/public';
 import { EditorFrameStartPlugins } from '../service';
 
@@ -113,6 +114,8 @@ export function EditorFrame(props: EditorFrameProps) {
     dateRange: props.dateRange,
     query: props.query,
     filters: props.filters,
+    paletteId: state.paletteId || 'eui',
+    colorPalette: palettes[state.paletteId || 'eui'],
 
     addNewLayer() {
       const newLayerId = generateId();
@@ -227,6 +230,7 @@ export function EditorFrame(props: EditorFrameProps) {
     activeVisualization,
     state.datasourceStates,
     state.visualization,
+    state.paletteId,
     props.query,
     props.dateRange,
     props.filters,

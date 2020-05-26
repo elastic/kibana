@@ -15,6 +15,8 @@ export interface SharedLayerState {
   legendDisplay: 'default' | 'show' | 'hide';
   nestedLegend?: boolean;
   percentDecimals?: number;
+  paletteName?: string;
+  paletteCustomColors?: string[];
 }
 
 export type LayerState = SharedLayerState & {

@@ -22,6 +22,7 @@ export interface Document {
     visualization: unknown;
     query: Query;
     filters: Filter[];
+    paletteId?: string;
   };
 }
 

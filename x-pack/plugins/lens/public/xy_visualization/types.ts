@@ -210,6 +210,7 @@ export interface XYArgs {
   yTitle: string;
   legend: LegendConfig & { type: 'lens_xy_legendConfig' };
   layers: LayerArgs[];
+  paletteId: string;
 }
 
 // Persisted parts of the state
