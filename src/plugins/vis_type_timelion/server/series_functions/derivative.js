@@ -33,9 +33,9 @@ export default new Chainable('derivative', {
     defaultMessage: 'Plot the change in values over time.',
   }),
   fn: function derivativeFn(args) {
-    return alter(args, function(eachSeries) {
+    return alter(args, function (eachSeries) {
       const pairs = eachSeries.data;
-      eachSeries.data = _.map(pairs, function(point, i) {
+      eachSeries.data = _.map(pairs, function (point, i) {
         if (i === 0 || pairs[i - 1][1] == null || point[1] == null) {
           return [point[0], null];
         }

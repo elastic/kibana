@@ -210,7 +210,7 @@ export const transformSavedObjectsToFounExceptionListItem = ({
   savedObjectsFindResponse: SavedObjectsFindResponse<ExceptionListSoSchema>;
 }): FoundExceptionListItemSchema => {
   return {
-    data: savedObjectsFindResponse.saved_objects.map(savedObject =>
+    data: savedObjectsFindResponse.saved_objects.map((savedObject) =>
       transformSavedObjectToExceptionListItem({ savedObject })
     ),
     page: savedObjectsFindResponse.page,
@@ -225,7 +225,7 @@ export const transformSavedObjectsToFounExceptionList = ({
   savedObjectsFindResponse: SavedObjectsFindResponse<ExceptionListSoSchema>;
 }): FoundExceptionListSchema => {
   return {
-    data: savedObjectsFindResponse.saved_objects.map(savedObject =>
+    data: savedObjectsFindResponse.saved_objects.map((savedObject) =>
       transformSavedObjectToExceptionList({ savedObject })
     ),
     page: savedObjectsFindResponse.page,

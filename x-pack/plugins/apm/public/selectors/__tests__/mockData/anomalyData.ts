@@ -35,158 +35,158 @@ export const anomalyData = {
     1530616440000,
     1530616500000,
     1530616560000,
-    1530616620000
+    1530616620000,
   ],
   buckets: [
     {
       anomalyScore: null,
       lower: 15669,
-      upper: 54799
+      upper: 54799,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: 0,
       lower: 17808,
-      upper: 49874
+      upper: 49874,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: 0,
       lower: 18012,
-      upper: 49421
+      upper: 49421,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: 0,
       lower: 17889,
-      upper: 49654
+      upper: 49654,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: 0,
       lower: 17713,
-      upper: 50026
+      upper: 50026,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: 0,
       lower: 18044,
-      upper: 49371
+      upper: 49371,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: 0,
       lower: 17713,
-      upper: 50110
+      upper: 50110,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: 0,
       lower: 17582,
-      upper: 50419
+      upper: 50419,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
+      upper: null,
     },
     {
       anomalyScore: null,
       lower: null,
-      upper: null
-    }
-  ]
+      upper: null,
+    },
+  ],
 };

@@ -26,7 +26,7 @@ import { SavedObjectMigrationFn } from 'kibana/server';
  * without loading the page again.
  * @param doc
  */
-export const migrateLegacyKibanaAppShortUrls: SavedObjectMigrationFn<any, any> = doc => ({
+export const migrateLegacyKibanaAppShortUrls: SavedObjectMigrationFn<any, any> = (doc) => ({
   ...doc,
   attributes: {
     ...doc.attributes,

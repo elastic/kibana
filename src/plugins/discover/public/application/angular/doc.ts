@@ -28,7 +28,7 @@ interface LazyScope extends ng.IScope {
 
 const { timefilter } = getServices();
 const app = getAngularModule();
-app.directive('discoverDoc', function(reactDirective: any) {
+app.directive('discoverDoc', function (reactDirective: any) {
   return reactDirective(
     Doc,
     [
@@ -51,7 +51,7 @@ app.config(($routeProvider: any) => {
     .when('/doc/:indexPattern/:index', {
       // have to be written as function expression, because it's not compiled in dev mode
       // eslint-disable-next-line object-shorthand
-      controller: function($scope: LazyScope, $route: any, es: any) {
+      controller: function ($scope: LazyScope, $route: any, es: any) {
         timefilter.disableAutoRefreshSelector();
         timefilter.disableTimeRangeSelector();
         $scope.esClient = es;

@@ -13,7 +13,7 @@ export function getUnits(series) {
   // For Bytes, find the largest unit from any data set's _last_ item
   if (units === 'B') {
     let maxLastBytes = 0;
-    forEach(series, s => {
+    forEach(series, (s) => {
       const lastDataPoint = last(s.data) || [null, 0];
       maxLastBytes = Math.max(maxLastBytes, lastDataPoint[1]); // lastDataPoint[1] is the "y" value
     });

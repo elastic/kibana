@@ -67,7 +67,7 @@ describe('Date Nanos Format', () => {
         pattern: 'SSSSSSSSS',
         expected: '201900001',
       },
-    ].forEach(fixture => {
+    ].forEach((fixture) => {
       const fracPattern = analysePatternForFract(fixture.pattern);
       const momentDate = moment(fixture.input).utc();
       const value = formatWithNanos(momentDate, fixture.input, fracPattern);

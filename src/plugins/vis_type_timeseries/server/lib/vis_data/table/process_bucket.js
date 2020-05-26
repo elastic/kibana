@@ -26,8 +26,8 @@ import { overwrite } from '../helpers';
 import { getActiveSeries } from '../helpers/get_active_series';
 
 export function processBucket(panel) {
-  return bucket => {
-    const series = getActiveSeries(panel).map(series => {
+  return (bucket) => {
+    const series = getActiveSeries(panel).map((series) => {
       const timeseries = get(bucket, `${series.id}.timeseries`);
       const buckets = get(bucket, `${series.id}.buckets`);
 

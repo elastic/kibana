@@ -42,7 +42,7 @@ function convertHeatmapLabelColor(visState) {
  */
 function convertTermAggregation(visState) {
   if (visState.aggs) {
-    visState.aggs.forEach(agg => {
+    visState.aggs.forEach((agg) => {
       if (agg.type === 'terms' && agg.params && agg.params.orderBy === '_term') {
         agg.params.orderBy = '_key';
       }
@@ -60,7 +60,7 @@ function convertPropertyNames(visState) {
 
 function convertDateHistogramScaleMetrics(visState) {
   if (visState.aggs) {
-    visState.aggs.forEach(agg => {
+    visState.aggs.forEach((agg) => {
       if (
         agg.type === 'date_histogram' &&
         agg.params &&
@@ -153,7 +153,7 @@ function convertSeriesParams(visState) {
  * It will return the updated version as Kibana would expect it. It does not modify
  * the passed state.
  */
-export const updateOldState = visState => {
+export const updateOldState = (visState) => {
   if (!visState) return visState;
   const newState = _.cloneDeep(visState);
 

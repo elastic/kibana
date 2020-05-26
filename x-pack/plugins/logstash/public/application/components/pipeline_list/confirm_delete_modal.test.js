@@ -36,19 +36,13 @@ describe('ConfirmDeleteModal component', () => {
 
   it('calls cancel delete', () => {
     const wrapper = mountWithIntl(<ConfirmDeleteModal {...props} />);
-    wrapper
-      .find('[data-test-subj="confirmModalCancelButton"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="confirmModalCancelButton"]').first().simulate('click');
     expect(props.cancelDeletePipelines).toHaveBeenCalled();
   });
 
   it('calls deleteSelectedPipelines', () => {
     const wrapper = mountWithIntl(<ConfirmDeleteModal {...props} />);
-    wrapper
-      .find('[data-test-subj="confirmModalConfirmButton"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
     expect(props.deleteSelectedPipelines).toHaveBeenCalled();
   });
 

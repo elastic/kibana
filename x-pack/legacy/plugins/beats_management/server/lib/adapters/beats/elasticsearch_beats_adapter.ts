@@ -64,7 +64,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async getWithIds(user: FrameworkUser, beatIds: string[]) {
-    const ids = beatIds.map(beatId => `beat:${beatId}`);
+    const ids = beatIds.map((beatId) => `beat:${beatId}`);
 
     const params = {
       body: {

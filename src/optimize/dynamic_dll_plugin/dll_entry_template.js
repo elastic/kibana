@@ -19,7 +19,7 @@
 
 export function dllEntryTemplate(requirePaths = []) {
   return requirePaths
-    .map(path => `require('${path}');`)
+    .map((path) => `require('${path}');`)
     .sort()
     .join('\n');
 }
@@ -33,9 +33,5 @@ export function dllEntryFileContentArrayToString(content = []) {
 }
 
 export function dllMergeAllEntryFilesContent(content = []) {
-  return content
-    .join('\n')
-    .split('\n')
-    .sort()
-    .join('\n');
+  return content.join('\n').split('\n').sort().join('\n');
 }

@@ -360,7 +360,7 @@ const ProcessEventDotComponents = React.memo(
         return [];
       }
       // If we have entries to show, map them into options to display in the selectable list
-      return Object.entries(relatedStats).map(statsEntry => {
+      return Object.entries(relatedStats).map((statsEntry) => {
         const displayName = getDisplayName(statsEntry[0]);
         return {
           prefix: <EuiI18nNumber value={statsEntry[1] || 0} />,

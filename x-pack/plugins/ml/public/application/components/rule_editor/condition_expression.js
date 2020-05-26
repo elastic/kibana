@@ -84,17 +84,17 @@ export class ConditionExpression extends Component {
     });
   };
 
-  changeAppliesTo = event => {
+  changeAppliesTo = (event) => {
     const { index, operator, value, updateCondition } = this.props;
     updateCondition(index, event.target.value, operator, value);
   };
 
-  changeOperator = event => {
+  changeOperator = (event) => {
     const { index, appliesTo, value, updateCondition } = this.props;
     updateCondition(index, appliesTo, event.target.value, value);
   };
 
-  changeValue = event => {
+  changeValue = (event) => {
     const { index, appliesTo, operator, updateCondition } = this.props;
     updateCondition(index, appliesTo, operator, +event.target.value);
   };

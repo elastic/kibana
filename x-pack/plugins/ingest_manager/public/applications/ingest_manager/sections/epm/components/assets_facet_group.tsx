@@ -32,11 +32,11 @@ import {
 
 export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByType }) {
   const FirstHeaderRow = styled(EuiFlexGroup)`
-    padding: 0 0 ${props => props.theme.eui.paddingSizes.m} 0;
+    padding: 0 0 ${(props) => props.theme.eui.paddingSizes.m} 0;
   `;
 
   const HeaderRow = styled(EuiFlexGroup)`
-    padding: ${props => props.theme.eui.paddingSizes.m} 0;
+    padding: ${(props) => props.theme.eui.paddingSizes.m} 0;
   `;
 
   const FacetGroup = styled(EuiFacetGroup)`
@@ -78,7 +78,7 @@ export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByT
                 const iconType = type in AssetIcons && AssetIcons[type];
                 const iconNode = iconType ? <EuiIcon type={iconType} size="s" /> : '';
                 const FacetButton = styled(EuiFacetButton)`
-                  padding: '${props => props.theme.eui.paddingSizes.xs} 0';
+                  padding: '${(props) => props.theme.eui.paddingSizes.xs} 0';
                   height: 'unset';
                 `;
                 return (

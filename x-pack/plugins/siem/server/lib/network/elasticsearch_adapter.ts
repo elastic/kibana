@@ -268,7 +268,7 @@ const formatTopNFlowEdges = (
     node: {
       _id: bucket.key,
       [flowTarget]: {
-        domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key),
+        domain: bucket.domain.buckets.map((bucketDomain) => bucketDomain.key),
         ip: bucket.key,
         location: getGeoItem(bucket),
         autonomous_system: getAsItem(bucket),
