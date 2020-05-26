@@ -33,12 +33,9 @@ describe('EditableTitle', () => {
     wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
     wrapper.update();
 
-    expect(
-      wrapper
-        .find('[data-test-subj="editable-title-input-field"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="editable-title-input-field"]').first().exists()).toBe(
+      true
+    );
   });
 
   test('it shows the submit button', () => {
@@ -51,12 +48,9 @@ describe('EditableTitle', () => {
     wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
     wrapper.update();
 
-    expect(
-      wrapper
-        .find('[data-test-subj="editable-title-submit-btn"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="editable-title-submit-btn"]').first().exists()).toBe(
+      true
+    );
   });
 
   test('it shows the cancel button', () => {
@@ -69,12 +63,9 @@ describe('EditableTitle', () => {
     wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
     wrapper.update();
 
-    expect(
-      wrapper
-        .find('[data-test-subj="editable-title-cancel-btn"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="editable-title-cancel-btn"]').first().exists()).toBe(
+      true
+    );
   });
 
   test('it DOES NOT shows the edit icon when in edit mode', () => {
@@ -87,12 +78,9 @@ describe('EditableTitle', () => {
     wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
     wrapper.update();
 
-    expect(
-      wrapper
-        .find('[data-test-subj="editable-title-edit-icon"]')
-        .first()
-        .exists()
-    ).toBe(false);
+    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(
+      false
+    );
   });
 
   test('it switch to non edit mode when canceled', () => {
@@ -106,12 +94,7 @@ describe('EditableTitle', () => {
     wrapper.update();
     wrapper.find('button[data-test-subj="editable-title-cancel-btn"]').simulate('click');
 
-    expect(
-      wrapper
-        .find('[data-test-subj="editable-title-edit-icon"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(true);
   });
 
   test('it should change the title', () => {
@@ -182,11 +165,6 @@ describe('EditableTitle', () => {
 
     expect(submitTitle).toHaveBeenCalled();
     expect(submitTitle.mock.calls[0][0]).toEqual(newTitle);
-    expect(
-      wrapper
-        .find('[data-test-subj="editable-title-edit-icon"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(true);
   });
 });

@@ -9,7 +9,7 @@
 // with 'mock' so it can be used lazily.
 const mockCheckPermission = jest.fn(() => true);
 jest.mock('../../../../capabilities/check_capabilities', () => ({
-  checkPermission: privilege => mockCheckPermission(privilege),
+  checkPermission: (privilege) => mockCheckPermission(privilege),
 }));
 jest.mock('../../../../services/ml_api_service', () => 'ml');
 

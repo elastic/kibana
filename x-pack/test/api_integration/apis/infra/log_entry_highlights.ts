@@ -33,7 +33,7 @@ const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
@@ -85,8 +85,8 @@ export default function({ getService }: FtrProviderContext) {
           expect(lastEntry.cursor.time <= KEY_AFTER_END.time).to.be(true);
 
           // All entries contain the highlights
-          entries.forEach(entry => {
-            entry.columns.forEach(column => {
+          entries.forEach((entry) => {
+            entry.columns.forEach((column) => {
               if ('message' in column && 'highlights' in column.message[0]) {
                 expect(column.message[0].highlights).to.eql(['message', 'of', 'document', '0']);
               }
@@ -123,8 +123,8 @@ export default function({ getService }: FtrProviderContext) {
           expect(entries).to.have.length(50);
 
           // All entries contain the highlights
-          entries.forEach(entry => {
-            entry.columns.forEach(column => {
+          entries.forEach((entry) => {
+            entry.columns.forEach((column) => {
               if ('field' in column && 'highlights' in column && column.highlights.length > 0) {
                 expect(column.highlights).to.eql(['generate_test_data/simple_logs']);
               }
@@ -162,8 +162,8 @@ export default function({ getService }: FtrProviderContext) {
           expect(entries).to.have.length(25);
 
           // All entries contain the highlights
-          entries.forEach(entry => {
-            entry.columns.forEach(column => {
+          entries.forEach((entry) => {
+            entry.columns.forEach((column) => {
               if ('message' in column && 'highlights' in column.message[0]) {
                 expect(column.message[0].highlights).to.eql(['message', 'message']);
               }

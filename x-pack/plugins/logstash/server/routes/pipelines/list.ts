@@ -40,7 +40,7 @@ export function registerPipelinesListRoute(router: IRouter) {
           const client = context.logstash!.esClient;
           const pipelinesHits = await fetchPipelines(client.callAsCurrentUser);
 
-          const pipelines = pipelinesHits.map(pipeline => {
+          const pipelines = pipelinesHits.map((pipeline) => {
             return PipelineListItem.fromUpstreamJSON(pipeline).downstreamJSON;
           });
 

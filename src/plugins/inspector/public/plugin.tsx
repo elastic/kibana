@@ -82,7 +82,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
   }
 
   public start(core: CoreStart) {
-    const isAvailable: Start['isAvailable'] = adapters =>
+    const isAvailable: Start['isAvailable'] = (adapters) =>
       this.views!.getVisible(adapters).length > 0;
 
     const closeButtonLabel = i18n.translate('inspector.closeButton', {

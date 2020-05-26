@@ -87,7 +87,7 @@ export function runFtrCli() {
         }
       };
 
-      process.on('unhandledRejection', err =>
+      process.on('unhandledRejection', (err) =>
         teardown(
           err instanceof Error ? err : new Error(`non-Error type rejection value: ${inspect(err)}`)
         )

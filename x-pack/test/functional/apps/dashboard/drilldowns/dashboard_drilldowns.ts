@@ -13,7 +13,7 @@ const DASHBOARD_WITH_AREA_CHART_NAME = 'Dashboard With Area Chart';
 const DRILLDOWN_TO_PIE_CHART_NAME = 'Go to pie chart dashboard';
 const DRILLDOWN_TO_AREA_CHART_NAME = 'Go to area chart dashboard';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
   const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
@@ -27,7 +27,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
 
-  describe('Dashboard Drilldowns', function() {
+  describe('Dashboard Drilldowns', function () {
     before(async () => {
       log.debug('Dashboard Drilldowns:initTests');
       await esArchiver.loadIfNeeded('logstash_functional');

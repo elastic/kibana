@@ -89,7 +89,7 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
               runAt: getNextMidnight(),
             };
           })
-          .catch(errMsg => {
+          .catch((errMsg) => {
             logger.warn(`Error executing alerting telemetry task: ${errMsg}`);
             return {
               state: {},
@@ -102,8 +102,5 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
 }
 
 function getNextMidnight() {
-  return moment()
-    .add(1, 'd')
-    .startOf('d')
-    .toDate();
+  return moment().add(1, 'd').startOf('d').toDate();
 }

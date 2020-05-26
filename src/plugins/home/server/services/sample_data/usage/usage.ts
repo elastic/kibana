@@ -37,7 +37,7 @@ export function usage(
     logger.warn(`saved objects repository incrementCounter encountered an error: ${err}`);
   };
 
-  const internalRepositoryPromise = savedObjects.then(so => so.createInternalRepository());
+  const internalRepositoryPromise = savedObjects.then((so) => so.createInternalRepository());
 
   return {
     addInstall: async (dataSet: string) => {

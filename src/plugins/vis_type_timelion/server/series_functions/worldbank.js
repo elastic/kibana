@@ -72,24 +72,24 @@ export default new Datasource('worldbank', {
       '&per_page=1000';
 
     return fetch(URL)
-      .then(function(resp) {
+      .then(function (resp) {
         return resp.json();
       })
-      .then(function(resp) {
+      .then(function (resp) {
         let hasData = false;
 
         const respSeries = resp[1];
 
         const deduped = {};
         let description;
-        _.each(respSeries, function(bucket) {
+        _.each(respSeries, function (bucket) {
           if (bucket.value != null) hasData = true;
           description = bucket.country.value + ' ' + bucket.indicator.value;
           deduped[bucket.date] = bucket.value;
         });
 
         const data = _.compact(
-          _.map(deduped, function(val, date) {
+          _.map(deduped, function (val, date) {
             // Discard nulls
             if (val == null) return;
             return [moment(date, 'YYYY').valueOf(), Number(val)];
@@ -121,7 +121,7 @@ export default new Datasource('worldbank', {
           ],
         };
       })
-      .catch(function(e) {
+      .catch(function (e) {
         throw e;
       });
   },

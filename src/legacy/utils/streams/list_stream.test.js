@@ -25,7 +25,7 @@ describe('listStream', () => {
     const onData = jest.fn();
     str.on('data', onData);
 
-    await new Promise(resolve => str.on('end', resolve));
+    await new Promise((resolve) => str.on('end', resolve));
 
     expect(onData).toHaveBeenCalledTimes(4);
     expect(onData.mock.calls[0]).toEqual([1]);
@@ -38,7 +38,7 @@ describe('listStream', () => {
     const list = [1, 2, 3, 4];
     const str = createListStream(list);
     str.resume();
-    await new Promise(resolve => str.on('end', resolve));
+    await new Promise((resolve) => str.on('end', resolve));
     expect(list).toEqual([1, 2, 3, 4]);
   });
 });
