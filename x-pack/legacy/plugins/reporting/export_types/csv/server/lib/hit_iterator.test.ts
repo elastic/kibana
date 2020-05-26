@@ -6,16 +6,16 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { CancellationToken } from '../../../../common/cancellation_token';
+import { CancellationToken } from '../../../../../../../plugins/reporting/common';
+import { LevelLogger } from '../../../../server/lib';
 import { ScrollConfig } from '../../../../server/types';
-import { Logger } from '../../../../types';
 import { createHitIterator } from './hit_iterator';
 
 const mockLogger = {
   error: new Function(),
   debug: new Function(),
   warning: new Function(),
-} as Logger;
+} as LevelLogger;
 const debugLogStub = sinon.stub(mockLogger, 'debug');
 const warnLogStub = sinon.stub(mockLogger, 'warning');
 const errorLogStub = sinon.stub(mockLogger, 'error');
@@ -25,7 +25,7 @@ const mockConfig: ScrollConfig = { duration: '2s', size: 123 };
 let realCancellationToken = new CancellationToken();
 let isCancelledStub: sinon.SinonStub<[], boolean>;
 
-describe('hitIterator', function() {
+describe('hitIterator', function () {
   beforeEach(() => {
     debugLogStub.resetHistory();
     warnLogStub.resetHistory();

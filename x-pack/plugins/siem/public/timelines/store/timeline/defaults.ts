@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+
 import { Direction } from '../../../graphql/types';
-import { DEFAULT_TIMELINE_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
+import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/constants';
+import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { SubsetTimelineModel, TimelineModel } from './model';
 
 export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filters'> = {
@@ -53,6 +54,7 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   },
+  status: TimelineStatus.draft,
   width: DEFAULT_TIMELINE_WIDTH,
   version: null,
 };

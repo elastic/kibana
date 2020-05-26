@@ -19,12 +19,17 @@ jest.mock('@elastic/eui', () => ({
   ),
 }));
 
-import { registerTestBed, nextTick, TestBed } from '../../../../../../../../test_utils';
+jest.mock('lodash', () => ({
+  ...jest.requireActual('lodash'),
+  debounce: (fn: any) => fn,
+}));
+
+import { registerTestBed, TestBed } from '../../../../../../../../test_utils';
 import { LoadMappingsProvider } from './load_mappings_provider';
 
 const ComponentToTest = ({ onJson }: { onJson: () => void }) => (
   <LoadMappingsProvider onJson={onJson}>
-    {openModal => (
+    {(openModal) => (
       <button onClick={openModal} data-test-subj="load-json-button">
         Load JSON
       </button>
@@ -38,22 +43,23 @@ const setup = (props: any) =>
     defaultProps: props,
   })();
 
-const openModalWithJsonContent = ({ find, waitFor }: TestBed) => async (json: any) => {
-  // Set the mappings to load
-  await act(async () => {
+const openModalWithJsonContent = ({ component, find }: TestBed) => (json: any) => {
+  act(() => {
     find('load-json-button').simulate('click');
-    await waitFor('mockCodeEditor');
+  });
 
+  component.update();
+
+  act(() => {
+    // Set the mappings to load
     find('mockCodeEditor').simulate('change', {
       jsonString: JSON.stringify(json),
     });
-    await nextTick(500); // There is a debounce in the JsonEditor that we need to wait for
   });
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/59030
-describe.skip('<LoadMappingsProvider />', () => {
-  test('it should forward valid mapping definition', async () => {
+describe('<LoadMappingsProvider />', () => {
+  test('it should forward valid mapping definition', () => {
     const mappingsToLoad = {
       properties: {
         title: {
@@ -63,10 +69,10 @@ describe.skip('<LoadMappingsProvider />', () => {
     };
 
     const onJson = jest.fn();
-    const testBed = await setup({ onJson });
+    const testBed = setup({ onJson }) as TestBed;
 
     // Open the modal and add the JSON
-    await openModalWithJsonContent(testBed)(mappingsToLoad);
+    openModalWithJsonContent(testBed)(mappingsToLoad);
 
     // Confirm
     testBed.find('confirmModalConfirmButton').simulate('click');

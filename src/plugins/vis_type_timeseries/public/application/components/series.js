@@ -45,11 +45,11 @@ export class Series extends Component {
     selectedTab: 'metrics',
   };
 
-  switchTab = selectedTab => {
+  switchTab = (selectedTab) => {
     this.setState({ selectedTab });
   };
 
-  handleChange = part => {
+  handleChange = (part) => {
     if (this.props.onChange) {
       const { model } = this.props;
       const doc = assign({}, model, part);
@@ -65,7 +65,7 @@ export class Series extends Component {
     });
   };
 
-  toggleVisible = e => {
+  toggleVisible = (e) => {
     e.preventDefault();
 
     this.setState({
@@ -79,7 +79,7 @@ export class Series extends Component {
 
     return Boolean(Component) ? (
       <VisDataContext.Consumer>
-        {visData => {
+        {(visData) => {
           const series = get(visData, `${panel.id}.series`, []);
           const counter = {};
           const seriesQuantity = series.reduce((acc, value) => {

@@ -73,7 +73,7 @@ export class PointSeries {
 
   getValueAxis() {
     return (
-      _.find(this.handler.valueAxes, axis => {
+      _.find(this.handler.valueAxes, (axis) => {
         return axis.axisConfig.get('id') === this.seriesConfig.valueAxis;
       }) || this.handler.valueAxes[0]
     );
@@ -81,7 +81,7 @@ export class PointSeries {
 
   getCategoryAxis() {
     return (
-      _.find(this.handler.categoryAxes, axis => {
+      _.find(this.handler.categoryAxes, (axis) => {
         return axis.axisConfig.get('id') === this.seriesConfig.categoryAxis;
       }) || this.handler.categoryAxes[0]
     );

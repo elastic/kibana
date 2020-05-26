@@ -29,6 +29,7 @@ import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
 
 import { dispatchRenderComplete } from '../../../../../../kibana_utils/public';
+import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
 import cellTemplateHtml from '../components/table_row/cell.html';
 import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
 import { esFilters } from '../../../../../../data/public';
@@ -137,7 +138,7 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
         const newHtmls = [openRowHtml];
 
         const mapping = indexPattern.fields.getByName;
-        const hideTimeColumn = getServices().uiSettings.get('doc_table:hideTimeColumn');
+        const hideTimeColumn = getServices().uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
         if (indexPattern.timeFieldName && !hideTimeColumn) {
           newHtmls.push(
             cellTemplate({
@@ -150,7 +151,7 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
           );
         }
 
-        $scope.columns.forEach(function(column: any) {
+        $scope.columns.forEach(function (column: any) {
           const isFilterable =
             $scope.flattenedRow[column] !== undefined &&
             mapping(column) &&
@@ -169,11 +170,11 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
         });
 
         let $cells = $el.children();
-        newHtmls.forEach(function(html, i) {
+        newHtmls.forEach(function (html, i) {
           const $cell = $cells.eq(i);
           if ($cell.data('discover:html') === html) return;
 
-          const reuse = _.find($cells.slice(i + 1), function(cell: any) {
+          const reuse = _.find($cells.slice(i + 1), function (cell: any) {
             return $.data(cell, 'discover:html') === html;
           });
 

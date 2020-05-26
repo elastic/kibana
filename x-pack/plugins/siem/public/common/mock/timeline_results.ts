@@ -5,7 +5,7 @@
  */
 import { FilterStateStore } from '../../../../../../src/plugins/data/common/es_query/filters/meta_filter';
 
-import { TimelineType } from '../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 
 import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../../graphql/types';
@@ -2142,6 +2142,7 @@ export const mockTimelineModel: TimelineModel = {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   },
+  status: TimelineStatus.active,
   title: 'Test rule',
   timelineType: TimelineType.default,
   templateTimelineId: null,
@@ -2152,7 +2153,7 @@ export const mockTimelineModel: TimelineModel = {
 
 export const mockTimelineResult: TimelineResult = {
   savedObjectId: 'ef579e40-jibber-jabber',
-  columns: timelineDefaults.columns.filter(column => column.id !== 'event.action'),
+  columns: timelineDefaults.columns.filter((column) => column.id !== 'event.action'),
   dateRange: { start: 1584539198929, end: 1584539558929 },
   description: 'This is a sample rule description',
   eventType: 'all',
@@ -2242,6 +2243,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     showCheckboxes: false,
     showRowRenderers: true,
     sort: { columnId: '@timestamp', sortDirection: Direction.desc },
+    status: TimelineStatus.draft,
     title: '',
     timelineType: TimelineType.default,
     templateTimelineVersion: null,

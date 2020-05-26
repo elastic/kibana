@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { startMLJob } from '../../../../../services/rest/ml';
+import { startMLJob, MLError } from '../../../../../services/rest/ml';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MachineLearningFlyoutView } from './view';
@@ -27,11 +27,11 @@ export class MachineLearningFlyout extends Component<Props, State> {
   static contextType = ApmPluginContext;
 
   public state: State = {
-    isCreatingJob: false
+    isCreatingJob: false,
   };
 
   public onClickCreate = async ({
-    transactionType
+    transactionType,
   }: {
     transactionType: string;
   }) => {
@@ -49,14 +49,14 @@ export class MachineLearningFlyout extends Component<Props, State> {
       }
       this.addSuccessToast({ transactionType });
     } catch (e) {
-      this.addErrorToast();
+      this.addErrorToast(e as MLError);
     }
 
     this.setState({ isCreatingJob: false });
     this.props.onClose();
   };
 
-  public addErrorToast = () => {
+  public addErrorToast = (error: MLError) => {
     const { core } = this.context;
 
     const { urlParams } = this.props;
@@ -66,29 +66,37 @@ export class MachineLearningFlyout extends Component<Props, State> {
       return;
     }
 
+    const errorDescription = error?.body?.message;
+    const errorText = errorDescription
+      ? `${error.message}: ${errorDescription}`
+      : error.message;
+
     core.notifications.toasts.addWarning({
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationTitle',
         {
-          defaultMessage: 'Job creation failed'
+          defaultMessage: 'Job creation failed',
         }
       ),
       text: toMountPoint(
-        <p>
-          {i18n.translate(
-            'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationText',
-            {
-              defaultMessage:
-                'Your current license may not allow for creating machine learning jobs, or this job may already exist.'
-            }
-          )}
-        </p>
-      )
+        <>
+          <p>{errorText}</p>
+          <p>
+            {i18n.translate(
+              'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationText',
+              {
+                defaultMessage:
+                  'Your current license may not allow for creating machine learning jobs, or this job may already exist.',
+              }
+            )}
+          </p>
+        </>
+      ),
     });
   };
 
   public addSuccessToast = ({
-    transactionType
+    transactionType,
   }: {
     transactionType: string;
   }) => {
@@ -104,7 +112,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationTitle',
         {
-          defaultMessage: 'Job successfully created'
+          defaultMessage: 'Job successfully created',
         }
       ),
       text: toMountPoint(
@@ -116,8 +124,8 @@ export class MachineLearningFlyout extends Component<Props, State> {
                 'The analysis is now running for {serviceName} ({transactionType}). It might take a while before results are added to the response times graph.',
               values: {
                 serviceName,
-                transactionType
-              }
+                transactionType,
+              },
             }
           )}{' '}
           <ApmPluginContext.Provider value={this.context}>
@@ -128,13 +136,13 @@ export class MachineLearningFlyout extends Component<Props, State> {
               {i18n.translate(
                 'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationText.viewJobLinkText',
                 {
-                  defaultMessage: 'View job'
+                  defaultMessage: 'View job',
                 }
               )}
             </MLJobLink>
           </ApmPluginContext.Provider>
         </p>
-      )
+      ),
     });
   };
 

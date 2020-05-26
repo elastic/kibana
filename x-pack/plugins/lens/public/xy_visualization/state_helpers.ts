@@ -12,11 +12,11 @@ export function isHorizontalSeries(seriesType: SeriesType) {
 }
 
 export function isHorizontalChart(layers: Array<{ seriesType: SeriesType }>) {
-  return layers.every(l => isHorizontalSeries(l.seriesType));
+  return layers.every((l) => isHorizontalSeries(l.seriesType));
 }
 
 export function getIconForSeries(type: SeriesType): EuiIconType {
-  const definition = visualizationTypes.find(t => t.id === type);
+  const definition = visualizationTypes.find((t) => t.id === type);
 
   if (!definition) {
     throw new Error(`Unknown series type ${type}`);

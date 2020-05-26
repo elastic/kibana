@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/e
 import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 
+import { useDispatch } from 'react-redux';
 import * as i18n from '../case_view/translations';
 import { Markdown } from '../../../common/components/markdown';
 import { Form, useForm, UseField } from '../../../shared_imports';
@@ -15,6 +16,13 @@ import { schema, Content } from './schema';
 import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import { MarkdownEditorForm } from '../../../common/components//markdown_editor/form';
+import {
+  dispatchUpdateTimeline,
+  queryTimelineById,
+} from '../../../timelines/components/open_timeline/helpers';
+
+import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/timeline/actions';
+import { useApolloClient } from '../../../common/utils/apollo_context';
 
 const ContentWrapper = styled.div`
   ${({ theme }) => css`
@@ -36,6 +44,8 @@ export const UserActionMarkdown = ({
   onChangeEditable,
   onSaveContent,
 }: UserActionMarkdownProps) => {
+  const dispatch = useDispatch();
+  const apolloClient = useApolloClient();
   const { form } = useForm<Content>({
     defaultValue: { content },
     options: { stripEmptyFields: false },
@@ -48,6 +58,24 @@ export const UserActionMarkdown = ({
   const handleCancelAction = useCallback(() => {
     onChangeEditable(id);
   }, [id, onChangeEditable]);
+
+  const handleTimelineClick = useCallback(
+    (timelineId: string) => {
+      queryTimelineById({
+        apolloClient,
+        timelineId,
+        updateIsLoading: ({
+          id: currentTimelineId,
+          isLoading,
+        }: {
+          id: string;
+          isLoading: boolean;
+        }) => dispatch(dispatchUpdateIsLoading({ id: currentTimelineId, isLoading })),
+        updateTimeline: dispatchUpdateTimeline(dispatch),
+      });
+    },
+    [apolloClient]
+  );
 
   const handleSaveAction = useCallback(async () => {
     const { isValid, data } = await form.submit();
@@ -98,6 +126,7 @@ export const UserActionMarkdown = ({
             cancelAction: handleCancelAction,
             saveAction: handleSaveAction,
           }),
+          onClickTimeline: handleTimelineClick,
           onCursorPositionUpdate: handleCursorChange,
           topRightContent: (
             <InsertTimelinePopover
@@ -111,7 +140,11 @@ export const UserActionMarkdown = ({
     </Form>
   ) : (
     <ContentWrapper>
-      <Markdown raw={content} data-test-subj="user-action-markdown" />
+      <Markdown
+        onClickTimeline={handleTimelineClick}
+        raw={content}
+        data-test-subj="user-action-markdown"
+      />
     </ContentWrapper>
   );
 };

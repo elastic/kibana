@@ -154,7 +154,9 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     );
   }
 
-  const unknownManifestKeys = Object.keys(manifest).filter(key => !KNOWN_MANIFEST_FIELDS.has(key));
+  const unknownManifestKeys = Object.keys(manifest).filter(
+    (key) => !KNOWN_MANIFEST_FIELDS.has(key)
+  );
   if (unknownManifestKeys.length > 0) {
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,

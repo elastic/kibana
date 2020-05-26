@@ -14,9 +14,9 @@ export const useLogEntryCategoriesQuality = ({ jobSummaries }: { jobSummaries: J
     () =>
       jobSummaries
         .filter(
-          jobSummary => jobSummary.fullJob?.model_size_stats?.categorization_status === 'warn'
+          (jobSummary) => jobSummary.fullJob?.model_size_stats?.categorization_status === 'warn'
         )
-        .map(jobSummary => ({
+        .map((jobSummary) => ({
           type: 'categoryQualityWarning',
           jobId: jobSummary.id,
           reasons: jobSummary.fullJob?.model_size_stats

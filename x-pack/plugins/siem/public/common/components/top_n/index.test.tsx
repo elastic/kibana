@@ -26,6 +26,7 @@ import { Props } from './top_n';
 import { ACTIVE_TIMELINE_REDUX_ID, StatefulTopN } from '.';
 
 jest.mock('../../lib/kibana');
+jest.mock('../../../timelines/store/timeline/actions');
 
 const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
 
@@ -174,37 +175,25 @@ describe('StatefulTopN', () => {
     });
 
     test('it has undefined combinedQueries when rendering in a global context', () => {
-      const props = wrapper
-        .find('[data-test-subj="top-n"]')
-        .first()
-        .props() as Props;
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.combinedQueries).toBeUndefined();
     });
 
     test(`defaults to the 'Raw events' view when rendering in a global context`, () => {
-      const props = wrapper
-        .find('[data-test-subj="top-n"]')
-        .first()
-        .props() as Props;
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.defaultView).toEqual('raw');
     });
 
     test(`provides a 'deleteQuery' when rendering in a global context`, () => {
-      const props = wrapper
-        .find('[data-test-subj="top-n"]')
-        .first()
-        .props() as Props;
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.deleteQuery).toBeDefined();
     });
 
     test(`provides filters from Redux state (inputs > global > filters) when rendering in a global context`, () => {
-      const props = wrapper
-        .find('[data-test-subj="top-n"]')
-        .first()
-        .props() as Props;
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.filters).toEqual([
         {
@@ -222,37 +211,25 @@ describe('StatefulTopN', () => {
     });
 
     test(`provides 'from' via GlobalTime when rendering in a global context`, () => {
-      const props = wrapper
-        .find('[data-test-subj="top-n"]')
-        .first()
-        .props() as Props;
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.from).toEqual(0);
     });
 
     test('provides the global query from Redux state (inputs > global > query) when rendering in a global context', () => {
-      const props = wrapper
-        .find('[data-test-subj="top-n"]')
-        .first()
-        .props() as Props;
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.query).toEqual({ query: 'host.name : end*', language: 'kuery' });
     });
 
     test(`provides a 'global' 'setAbsoluteRangeDatePickerTarget' when rendering in a global context`, () => {
-      const props = wrapper
-        .find('[data-test-subj="top-n"]')
-        .first()
-        .props() as Props;
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.setAbsoluteRangeDatePickerTarget).toEqual('global');
     });
 
     test(`provides 'to' via GlobalTime when rendering in a global context`, () => {
-      const props = wrapper
-        .find('[data-test-subj="top-n"]')
-        .first()
-        .props() as Props;
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.to).toEqual(1);
     });
@@ -283,10 +260,7 @@ describe('StatefulTopN', () => {
     });
 
     test('it has a combinedQueries value from Redux state composed of the timeline [data providers + kql + filter-bar-filters] when rendering in a timeline context', () => {
-      const props = wrapper
-        .find('[data-test-subj="top-n"]')
-        .first()
-        .props() as Props;
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.combinedQueries).toEqual(
         '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"network.transport":"tcp"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1586835969047}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1586922369047}}}],"minimum_should_match":1}}]}}]}},{"match_phrase":{"source.port":{"query":"30045"}}}],"should":[],"must_not":[]}}'
@@ -294,64 +268,43 @@ describe('StatefulTopN', () => {
     });
 
     test('it provides only one view option that matches the `eventType` from redux when rendering in the context of the active timeline', () => {
-      const props = wrapper
-        .find('[data-test-subj="top-n"]')
-        .first()
-        .props() as Props;
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.defaultView).toEqual('all');
     });
 
     test(`provides an undefined 'deleteQuery' when rendering in a timeline context`, () => {
-      const props = wrapper
-        .find('[data-test-subj="top-n"]')
-        .first()
-        .props() as Props;
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.deleteQuery).toBeUndefined();
     });
 
     test(`provides empty filters when rendering in a timeline context`, () => {
-      const props = wrapper
-        .find('[data-test-subj="top-n"]')
-        .first()
-        .props() as Props;
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.filters).toEqual([]);
     });
 
     test(`provides 'from' via redux state (inputs > timeline > timerange) when rendering in a timeline context`, () => {
-      const props = wrapper
-        .find('[data-test-subj="top-n"]')
-        .first()
-        .props() as Props;
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.from).toEqual(1586835969047);
     });
 
     test('provides an empty query when rendering in a timeline context', () => {
-      const props = wrapper
-        .find('[data-test-subj="top-n"]')
-        .first()
-        .props() as Props;
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.query).toEqual({ query: '', language: 'kuery' });
     });
 
     test(`provides a 'timeline' 'setAbsoluteRangeDatePickerTarget' when rendering in a timeline context`, () => {
-      const props = wrapper
-        .find('[data-test-subj="top-n"]')
-        .first()
-        .props() as Props;
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.setAbsoluteRangeDatePickerTarget).toEqual('timeline');
     });
 
     test(`provides 'to' via redux state (inputs > timeline > timerange) when rendering in a timeline context`, () => {
-      const props = wrapper
-        .find('[data-test-subj="top-n"]')
-        .first()
-        .props() as Props;
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.to).toEqual(1586922369047);
     });
@@ -377,10 +330,7 @@ describe('StatefulTopN', () => {
       </TestProviders>
     );
 
-    const props = wrapper
-      .find('[data-test-subj="top-n"]')
-      .first()
-      .props() as Props;
+    const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
     expect(props.defaultView).toEqual('signal');
   });

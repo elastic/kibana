@@ -17,7 +17,7 @@ import { encryptedSavedObjectsMock } from '../../../plugins/encrypted_saved_obje
 const taskManager = taskManagerMock.start();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const savedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createStart();
+const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 
 const alertsClientParams = {
   taskManager,
@@ -29,7 +29,7 @@ const alertsClientParams = {
   createAPIKey: jest.fn(),
   invalidateAPIKey: jest.fn(),
   logger: loggingServiceMock.create().get(),
-  encryptedSavedObjectsPlugin: encryptedSavedObjects,
+  encryptedSavedObjectsClient: encryptedSavedObjects,
   preconfiguredActions: [],
 };
 
@@ -2805,7 +2805,7 @@ describe('update()', () => {
       expect(taskManager.runNow).not.toHaveBeenCalled();
     });
 
-    test('updating the alert should not wait for the rerun the task to complete', async done => {
+    test('updating the alert should not wait for the rerun the task to complete', async (done) => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 

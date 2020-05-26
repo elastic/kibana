@@ -81,7 +81,7 @@ export function LayerPanel(
   };
 
   const { groups } = activeVisualization.getConfiguration(layerVisualizationConfigProps);
-  const isEmptyLayer = !groups.some(d => d.accessors.length > 0);
+  const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
@@ -120,9 +120,9 @@ export function LayerPanel(
                     const removed = datasourcePublicAPI
                       .getTableSpec()
                       .map(({ columnId }) => columnId)
-                      .filter(columnId => !nextTable.has(columnId));
+                      .filter((columnId) => !nextTable.has(columnId));
                     let nextVisState = props.visualizationState;
-                    removed.forEach(columnId => {
+                    removed.forEach((columnId) => {
                       nextVisState = activeVisualization.removeDimension({
                         layerId,
                         columnId,
@@ -158,7 +158,7 @@ export function LayerPanel(
               }
             >
               <>
-                {group.accessors.map(accessor => (
+                {group.accessors.map((accessor) => (
                   <DragDrop
                     key={accessor}
                     className="lnsLayerPanel__dimension"
@@ -171,7 +171,7 @@ export function LayerPanel(
                         filterOperations: group.filterOperations,
                       })
                     }
-                    onDrop={droppedItem => {
+                    onDrop={(droppedItem) => {
                       layerDatasource.onDrop({
                         ...layerDatasourceDropProps,
                         droppedItem,
@@ -268,7 +268,7 @@ export function LayerPanel(
                         filterOperations: group.filterOperations,
                       })
                     }
-                    onDrop={droppedItem => {
+                    onDrop={(droppedItem) => {
                       const dropSuccess = layerDatasource.onDrop({
                         ...layerDatasourceDropProps,
                         droppedItem,

@@ -84,7 +84,7 @@ export function EmbeddablePanelExample({ embeddableServices }: Props) {
       const factory = embeddableServices.getEmbeddableFactory(SEARCHABLE_LIST_CONTAINER);
       const promise = factory?.create(searchableInput);
       if (promise) {
-        promise.then(e => {
+        promise.then((e) => {
           if (ref.current) {
             setEmbeddable(e);
           }

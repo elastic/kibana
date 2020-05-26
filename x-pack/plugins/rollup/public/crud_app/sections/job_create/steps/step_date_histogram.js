@@ -31,7 +31,7 @@ import { getDateHistogramDetailsUrl, getDateHistogramAggregationUrl } from '../.
 
 import { StepError } from './components';
 
-const timeZoneOptions = moment.tz.names().map(name => ({
+const timeZoneOptions = moment.tz.names().map((name) => ({
   value: name,
   text: name,
 }));
@@ -49,7 +49,7 @@ export class StepDateHistogram extends Component {
   static getDerivedStateFromProps(props) {
     const { dateFields } = props;
 
-    const dateHistogramFieldOptions = dateFields.map(dateField => ({
+    const dateHistogramFieldOptions = dateFields.map((dateField) => ({
       value: dateField,
       text: dateField,
     }));
@@ -255,7 +255,7 @@ export class StepDateHistogram extends Component {
                 isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramField)}
                 options={dateHistogramFieldOptions}
                 value={dateHistogramField}
-                onChange={e => onFieldsChange({ dateHistogramField: e.target.value })}
+                onChange={(e) => onFieldsChange({ dateHistogramField: e.target.value })}
                 fullWidth
                 data-test-subj="rollupJobCreateDateFieldSelect"
               />
@@ -275,7 +275,7 @@ export class StepDateHistogram extends Component {
             >
               <EuiFieldText
                 value={dateHistogramInterval || ''}
-                onChange={e => onFieldsChange({ dateHistogramInterval: e.target.value })}
+                onChange={(e) => onFieldsChange({ dateHistogramInterval: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramInterval)}
                 fullWidth
                 data-test-subj="rollupJobInterval"
@@ -296,7 +296,7 @@ export class StepDateHistogram extends Component {
               <EuiSelect
                 options={timeZoneOptions}
                 value={dateHistogramTimeZone}
-                onChange={e => onFieldsChange({ dateHistogramTimeZone: e.target.value })}
+                onChange={(e) => onFieldsChange({ dateHistogramTimeZone: e.target.value })}
                 fullWidth
                 data-test-subj="rollupJobCreateTimeZoneSelect"
               />
