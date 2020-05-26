@@ -7,7 +7,6 @@
 import { PluginInitializer } from '../../../../../../src/core/public';
 import { ApmPlugin, ApmPluginSetup, ApmPluginStart } from './plugin';
 
-export const plugin: PluginInitializer<
-  ApmPluginSetup,
-  ApmPluginStart
-> = pluginInitializerContext => new ApmPlugin(pluginInitializerContext);
+export const plugin: PluginInitializer<ApmPluginSetup, ApmPluginStart> = (
+  pluginInitializerContext
+) => new ApmPlugin(pluginInitializerContext);

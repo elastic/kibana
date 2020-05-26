@@ -102,7 +102,7 @@ export class JobValidator {
     this._asyncValidators$ = [cardinalityValidator(this._jobCreatorSubject$)];
 
     this._asyncValidatorsResult$ = combineLatest(this._asyncValidators$).pipe(
-      map(res => {
+      map((res) => {
         return res.reduce((acc, curr) => {
           return {
             ...acc,
@@ -122,7 +122,7 @@ export class JobValidator {
           ...asyncValidatorsResult,
         };
       }),
-      tap(latestValidationResult => {
+      tap((latestValidationResult) => {
         this.latestValidationResult = latestValidationResult;
       })
     );
@@ -166,7 +166,7 @@ export class JobValidator {
 
   private _resetBasicValidations() {
     this._validationSummary.basic = true;
-    Object.values(this._basicValidations).forEach(v => {
+    Object.values(this._basicValidations).forEach((v) => {
       v.valid = true;
       delete v.message;
     });
@@ -212,7 +212,7 @@ export class JobValidator {
   }
 
   private _isOverallBasicValid() {
-    return Object.values(this._basicValidations).some(v => v.valid === false) === false;
+    return Object.values(this._basicValidations).some((v) => v.valid === false) === false;
   }
 
   public get validationSummary(): ValidationSummary {

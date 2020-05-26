@@ -8,21 +8,21 @@ import expect from '@kbn/expect';
 import { validateInfluencers } from '../validate_influencers';
 
 describe('ML - validateInfluencers', () => {
-  it('called without arguments throws an error', done => {
+  it('called without arguments throws an error', (done) => {
     validateInfluencers().then(
       () => done(new Error('Promise should not resolve for this test without job argument.')),
       () => done()
     );
   });
 
-  it('called with non-valid job argument #1, missing analysis_config', done => {
+  it('called with non-valid job argument #1, missing analysis_config', (done) => {
     validateInfluencers(undefined, {}).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
       () => done()
     );
   });
 
-  it('called with non-valid job argument #2, missing analysis_config.influencers', done => {
+  it('called with non-valid job argument #2, missing analysis_config.influencers', (done) => {
     const job = {
       analysis_config: {},
       datafeed_config: { indices: [] },
@@ -34,7 +34,7 @@ describe('ML - validateInfluencers', () => {
     );
   });
 
-  it('called with non-valid job argument #3, missing analysis_config.detectors', done => {
+  it('called with non-valid job argument #3, missing analysis_config.detectors', (done) => {
     const job = {
       analysis_config: { influencers: [] },
       datafeed_config: { indices: [] },
@@ -56,8 +56,8 @@ describe('ML - validateInfluencers', () => {
 
   it('success_influencer', () => {
     const job = getJobConfig(['airline']);
-    return validateInfluencers(undefined, job).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateInfluencers(undefined, job).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql(['success_influencers']);
     });
   });
@@ -75,24 +75,24 @@ describe('ML - validateInfluencers', () => {
       ]
     );
 
-    return validateInfluencers(undefined, job).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateInfluencers(undefined, job).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql([]);
     });
   });
 
   it('influencer_low', () => {
     const job = getJobConfig();
-    return validateInfluencers(undefined, job).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateInfluencers(undefined, job).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql(['influencer_low']);
     });
   });
 
   it('influencer_high', () => {
     const job = getJobConfig(['i1', 'i2', 'i3', 'i4']);
-    return validateInfluencers(undefined, job).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateInfluencers(undefined, job).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql(['influencer_high']);
     });
   });
@@ -110,8 +110,8 @@ describe('ML - validateInfluencers', () => {
         },
       ]
     );
-    return validateInfluencers(undefined, job).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateInfluencers(undefined, job).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql(['influencer_low_suggestion']);
     });
   });
@@ -143,7 +143,7 @@ describe('ML - validateInfluencers', () => {
         },
       ]
     );
-    return validateInfluencers(undefined, job).then(messages => {
+    return validateInfluencers(undefined, job).then((messages) => {
       expect(messages).to.eql([
         {
           id: 'influencer_low_suggestions',

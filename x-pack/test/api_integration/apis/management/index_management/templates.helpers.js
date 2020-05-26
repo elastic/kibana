@@ -9,9 +9,9 @@ import { API_BASE_PATH, INDEX_PATTERNS } from './constants';
 export const registerHelpers = ({ supertest }) => {
   const getAllTemplates = () => supertest.get(`${API_BASE_PATH}/templates`);
 
-  const getOneTemplate = name => supertest.get(`${API_BASE_PATH}/templates/${name}`);
+  const getOneTemplate = (name) => supertest.get(`${API_BASE_PATH}/templates/${name}`);
 
-  const getTemplatePayload = name => ({
+  const getTemplatePayload = (name) => ({
     name,
     order: 1,
     indexPatterns: INDEX_PATTERNS,
@@ -43,17 +43,14 @@ export const registerHelpers = ({ supertest }) => {
     },
   });
 
-  const createTemplate = payload =>
-    supertest
-      .put(`${API_BASE_PATH}/templates`)
-      .set('kbn-xsrf', 'xxx')
-      .send(payload);
+  const createTemplate = (payload) =>
+    supertest.put(`${API_BASE_PATH}/templates`).set('kbn-xsrf', 'xxx').send(payload);
 
-  const deleteTemplates = templatesToDelete =>
+  const deleteTemplates = (templatesToDelete) =>
     supertest
       .delete(
         `${API_BASE_PATH}/templates/${templatesToDelete
-          .map(template => encodeURIComponent(template))
+          .map((template) => encodeURIComponent(template))
           .join(',')}`
       )
       .set('kbn-xsrf', 'xxx');

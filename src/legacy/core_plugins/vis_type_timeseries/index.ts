@@ -30,7 +30,7 @@ const metricsPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPlu
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
-      injectDefaultVars: server => ({}),
+      injectDefaultVars: (server) => ({}),
     },
     config(Joi: any) {
       return Joi.object({

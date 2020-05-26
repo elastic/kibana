@@ -20,7 +20,7 @@
 import path from 'path';
 import { services } from '../plugin_functional/services';
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {

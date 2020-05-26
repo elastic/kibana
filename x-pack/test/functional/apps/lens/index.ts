@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context.d';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace, import/no-default-export
-export default function({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
@@ -25,7 +25,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('lens/basic');
     });
 
-    describe('', function() {
+    describe('', function () {
       this.tags(['ciGroup4', 'skipFirefox']);
 
       loadTestFile(require.resolve('./smokescreen'));

@@ -20,7 +20,7 @@
 import { flow, get } from 'lodash';
 import { SavedObjectMigrationFn } from 'kibana/server';
 
-const migrateIndexPattern: SavedObjectMigrationFn = doc => {
+const migrateIndexPattern: SavedObjectMigrationFn = (doc) => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {
     return doc;
@@ -68,7 +68,7 @@ const setNewReferences: SavedObjectMigrationFn = (doc, context) => {
   return migrateIndexPattern(doc, context);
 };
 
-const migrateSearchSortToNestedArray: SavedObjectMigrationFn = doc => {
+const migrateSearchSortToNestedArray: SavedObjectMigrationFn = (doc) => {
   const sort = get(doc, 'attributes.sort');
   if (!sort) return doc;
 

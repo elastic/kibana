@@ -28,7 +28,7 @@ jest.mock('ui/chrome', () => ({
 }));
 jest.mock('ui/visualize/loader/pipeline_helpers/utilities', () => ({
   getFormat: jest.fn(() => ({
-    convert: jest.fn(v => v),
+    convert: jest.fn((v) => v),
   })),
 }));
 
@@ -189,7 +189,7 @@ describe('buildHierarchicalData convertTable', () => {
     });
 
     it('should set the correct hits attribute for each of the results', () => {
-      tables.forEach(t => {
+      tables.forEach((t) => {
         const results = buildHierarchicalData(t.tables[0], dimensions);
         expect(results).toHaveProperty('hits');
         expect(results.hits).toBe(4);

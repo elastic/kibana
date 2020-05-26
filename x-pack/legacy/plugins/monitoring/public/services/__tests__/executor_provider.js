@@ -19,14 +19,14 @@ describe('$executor service', () => {
   beforeEach(ngMock.module('kibana'));
 
   beforeEach(
-    ngMock.inject(function(_$rootScope_) {
+    ngMock.inject(function (_$rootScope_) {
       scope = _$rootScope_.$new();
     })
   );
 
   beforeEach(() => {
     $timeout = sinon.spy(setTimeout);
-    $timeout.cancel = id => clearTimeout(id);
+    $timeout.cancel = (id) => clearTimeout(id);
 
     timefilter.setRefreshInterval({
       value: 0,
@@ -51,7 +51,7 @@ describe('$executor service', () => {
     expect($timeout.callCount).to.equal(1);
   });
 
-  it('should execute function if timefilter is not paused and interval set to 1000ms', done => {
+  it('should execute function if timefilter is not paused and interval set to 1000ms', (done) => {
     timefilter.setRefreshInterval({
       pause: false,
       value: 1000,
@@ -60,7 +60,7 @@ describe('$executor service', () => {
     executor.start(scope);
   });
 
-  it('should execute function multiple times', done => {
+  it('should execute function multiple times', (done) => {
     let calls = 0;
     timefilter.setRefreshInterval({
       pause: false,
@@ -77,7 +77,7 @@ describe('$executor service', () => {
     executor.start(scope);
   });
 
-  it('should call handleResponse', done => {
+  it('should call handleResponse', (done) => {
     timefilter.setRefreshInterval({
       pause: false,
       value: 10,
@@ -89,7 +89,7 @@ describe('$executor service', () => {
     executor.start(scope);
   });
 
-  it('should call handleError', done => {
+  it('should call handleError', (done) => {
     timefilter.setRefreshInterval({
       pause: false,
       value: 10,

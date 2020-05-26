@@ -20,7 +20,7 @@ const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
 
 export function extractPropertiesMap(rawEsData, countPropertyName) {
   const propertiesMap = new Map();
-  _.get(rawEsData, ['aggregations', TERMS_AGG_NAME, 'buckets'], []).forEach(termBucket => {
+  _.get(rawEsData, ['aggregations', TERMS_AGG_NAME, 'buckets'], []).forEach((termBucket) => {
     const properties = extractPropertiesFromBucket(termBucket, TERMS_BUCKET_KEYS_TO_IGNORE);
     if (countPropertyName) {
       properties[countPropertyName] = termBucket.doc_count;
@@ -130,6 +130,6 @@ export class ESTermSource extends AbstractESAggSource {
   }
 
   getFieldNames() {
-    return this.getMetricFields().map(esAggMetricField => esAggMetricField.getName());
+    return this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName());
   }
 }

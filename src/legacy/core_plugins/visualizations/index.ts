@@ -20,7 +20,7 @@
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from '../../../../src/legacy/types';
 
-export const visualizations: LegacyPluginInitializer = kibana =>
+export const visualizations: LegacyPluginInitializer = (kibana) =>
   new kibana.Plugin({
     id: 'visualizations',
     publicDir: resolve(__dirname, 'public'),

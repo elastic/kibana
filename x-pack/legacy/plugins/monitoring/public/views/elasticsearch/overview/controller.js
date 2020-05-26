@@ -47,7 +47,7 @@ export class ElasticsearchOverviewController extends MonitoringViewBaseControlle
   initScope($scope) {
     $scope.$watch(
       () => this.data,
-      data => {
+      (data) => {
         this.renderReact(data, $scope.cluster);
       }
     );
@@ -68,7 +68,7 @@ export class ElasticsearchOverviewController extends MonitoringViewBaseControlle
   }
 
   filterShardActivityData(shardActivity) {
-    return shardActivity.filter(row => {
+    return shardActivity.filter((row) => {
       return this.showShardActivityHistory || row.stage !== 'DONE';
     });
   }

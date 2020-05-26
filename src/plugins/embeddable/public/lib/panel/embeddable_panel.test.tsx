@@ -63,7 +63,7 @@ actionRegistry.set(editModeAction.id, editModeAction);
 triggerRegistry.set(trigger.id, trigger);
 embeddableFactories.set(embeddableFactory.type, embeddableFactory);
 
-test('HelloWorldContainer initializes embeddables', async done => {
+test('HelloWorldContainer initializes embeddables', async (done) => {
   const container = new HelloWorldContainer(
     {
       id: '123',

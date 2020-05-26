@@ -87,7 +87,7 @@ export function setStateToKbnUrl<State>(
   { useHash = false }: { useHash: boolean } = { useHash: false },
   rawUrl = window.location.href
 ): string {
-  return replaceUrlHashQuery(rawUrl, query => {
+  return replaceUrlHashQuery(rawUrl, (query) => {
     const encoded = encodeState(state, useHash);
     return {
       ...query,

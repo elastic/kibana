@@ -165,7 +165,7 @@ export function expectExpressionProvider({
         log.debug('starting to render');
         const result = await browser.executeAsync<any>(
           (_context: ExpressionResult, done: (renderResult: any) => void) =>
-            window.renderPipelineResponse(_context).then(renderResult => {
+            window.renderPipelineResponse(_context).then((renderResult) => {
               done(renderResult);
               return renderResult;
             }),

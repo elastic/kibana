@@ -31,12 +31,14 @@ export function privilegesFactory(
     get() {
       const features = featuresService.getFeatures();
       const { allowSubFeaturePrivileges } = licenseService.getFeatures();
-      const basePrivilegeFeatures = features.filter(feature => !feature.excludeFromBasePrivileges);
+      const basePrivilegeFeatures = features.filter(
+        (feature) => !feature.excludeFromBasePrivileges
+      );
 
       let allActions: string[] = [];
       let readActions: string[] = [];
 
-      basePrivilegeFeatures.forEach(feature => {
+      basePrivilegeFeatures.forEach((feature) => {
         for (const { privilegeId, privilege } of featurePrivilegeIterator(feature, {
           augmentWithSubFeaturePrivileges: true,
           predicate: (pId, featurePrivilege) => !featurePrivilege.excludeFromBasePrivileges,

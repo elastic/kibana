@@ -116,7 +116,7 @@ export function SavedQueryManagementComponent({
   const onDeleteSavedQuery = async (savedQuery: SavedQuery) => {
     cancelPendingListingRequest.current();
     setSavedQueries(
-      savedQueries.filter(currentSavedQuery => currentSavedQuery.id !== savedQuery.id)
+      savedQueries.filter((currentSavedQuery) => currentSavedQuery.id !== savedQuery.id)
     );
 
     if (loadedSavedQuery && loadedSavedQuery.id === savedQuery.id) {
@@ -146,7 +146,7 @@ export function SavedQueryManagementComponent({
   );
 
   const savedQueryRows = () => {
-    const savedQueriesWithoutCurrent = savedQueries.filter(savedQuery => {
+    const savedQueriesWithoutCurrent = savedQueries.filter((savedQuery) => {
       if (!loadedSavedQuery) return true;
       return savedQuery.id !== loadedSavedQuery.id;
     });
@@ -154,16 +154,16 @@ export function SavedQueryManagementComponent({
       loadedSavedQuery && savedQueriesWithoutCurrent.length !== savedQueries.length
         ? [loadedSavedQuery, ...savedQueriesWithoutCurrent]
         : [...savedQueriesWithoutCurrent];
-    return savedQueriesReordered.map(savedQuery => (
+    return savedQueriesReordered.map((savedQuery) => (
       <SavedQueryListItem
         key={savedQuery.id}
         savedQuery={savedQuery}
         isSelected={!!loadedSavedQuery && loadedSavedQuery.id === savedQuery.id}
-        onSelect={savedQueryToSelect => {
+        onSelect={(savedQueryToSelect) => {
           onLoad(savedQueryToSelect);
           setIsOpen(false);
         }}
-        onDelete={savedQueryToDelete => onDeleteSavedQuery(savedQueryToDelete)}
+        onDelete={(savedQueryToDelete) => onDeleteSavedQuery(savedQueryToDelete)}
         showWriteOperations={!!showSaveQuery}
       />
     ));

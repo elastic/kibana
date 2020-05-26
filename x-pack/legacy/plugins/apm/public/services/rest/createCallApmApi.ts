@@ -39,7 +39,7 @@ export function createCallApmApi(http: HttpSetup) {
       ...opts,
       pathname: formattedPathname,
       body: params.body,
-      query: params.query
+      query: params.query,
     });
   }) as APMClient;
 }

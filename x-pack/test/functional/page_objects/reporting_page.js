@@ -70,11 +70,11 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
               responseType: 'arraybuffer',
               headers,
             },
-            res => {
+            (res) => {
               resolve(res);
             }
           )
-          .on('error', e => {
+          .on('error', (e) => {
             reject(e);
           });
       });
@@ -87,7 +87,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       return new Promise(async (resolve, reject) => {
         const response = await this.getResponse(url).catch(reject);
 
-        response.on('data', chunk => data.push(chunk));
+        response.on('data', (chunk) => data.push(chunk));
         response.on('end', () => resolve(Buffer.concat(data)));
       });
     }
@@ -109,7 +109,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     async clearToastNotifications() {
       const toasts = await testSubjects.findAll('toastCloseButton');
-      await Promise.all(toasts.map(async t => await t.click()));
+      await Promise.all(toasts.map(async (t) => await t.click()));
     }
 
     async getQueueReportError() {

@@ -14,7 +14,7 @@ import { wrapComponent } from './setup_context';
 
 const initTestBed = registerTestBed(wrapComponent(JobCreate), { store: rollupJobsStore });
 
-export const setup = props => {
+export const setup = (props) => {
   const testBed = initTestBed(props);
   const { component, form, table } = testBed;
 
@@ -38,7 +38,7 @@ export const setup = props => {
   };
 
   // Forms
-  const fillFormFields = async step => {
+  const fillFormFields = async (step) => {
     switch (step) {
       case 'logistics':
         form.setInputValue('rollupJobName', JOB_TO_CREATE.id);
@@ -54,7 +54,7 @@ export const setup = props => {
   };
 
   // Navigation
-  const goToStep = async targetStep => {
+  const goToStep = async (targetStep) => {
     const stepHandlers = {
       1: () => fillFormFields('logistics'),
       2: () => fillFormFields('date-histogram'),
@@ -78,18 +78,18 @@ export const setup = props => {
     return rows;
   };
 
-  const getFieldListTableRow = row => {
+  const getFieldListTableRow = (row) => {
     const rows = getFieldListTableRows();
     return rows[row];
   };
 
-  const getFieldChooserColumnForRow = row => {
+  const getFieldChooserColumnForRow = (row) => {
     const selectedRow = getFieldListTableRow(row);
     const [, , fieldChooserColumn] = selectedRow.columns;
     return fieldChooserColumn;
   };
 
-  const getSelectAllInputForRow = row => {
+  const getSelectAllInputForRow = (row) => {
     const fieldChooser = getFieldChooserColumnForRow(row);
     return fieldChooser.reactWrapper.find('input').first();
   };

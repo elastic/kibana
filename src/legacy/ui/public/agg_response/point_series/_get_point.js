@@ -73,7 +73,7 @@ export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
   if (series) {
     const seriesArray = series.length ? series : [series];
     point.series = seriesArray
-      .map(s => {
+      .map((s) => {
         const fieldFormatter = getFormat(s.format);
         return fieldFormatter.convert(row[s.accessor]);
       })

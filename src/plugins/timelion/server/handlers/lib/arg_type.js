@@ -21,10 +21,7 @@ import _ from 'lodash';
 
 export default function argType(arg) {
   if (Array.isArray(arg)) {
-    return _.chain(arg)
-      .map(argType)
-      .flattenDeep()
-      .value();
+    return _.chain(arg).map(argType).flattenDeep().value();
   }
 
   if (_.isObject(arg) && arg) {

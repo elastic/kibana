@@ -31,7 +31,7 @@ export const getCloudMetricsMetadata = async (
       query: {
         bool: {
           filter: [{ match: { 'cloud.instance.id': instanceId } }],
-          should: CLOUD_METRICS_MODULES.map(module => ({ match: { 'event.module': module } })),
+          should: CLOUD_METRICS_MODULES.map((module) => ({ match: { 'event.module': module } })),
         },
       },
       size: 0,

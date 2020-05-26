@@ -67,7 +67,7 @@ export class ExpressionRenderHandler {
     this.onRenderError = onRenderError || defaultRenderErrorHandler;
 
     this.renderSubject = new Rx.BehaviorSubject(null as any | null);
-    this.render$ = this.renderSubject.asObservable().pipe(filter(_ => _ !== null)) as Observable<
+    this.render$ = this.renderSubject.asObservable().pipe(filter((_) => _ !== null)) as Observable<
       any
     >;
 
@@ -85,10 +85,10 @@ export class ExpressionRenderHandler {
       reload: () => {
         this.updateSubject.next(null);
       },
-      update: params => {
+      update: (params) => {
         this.updateSubject.next(params);
       },
-      event: data => {
+      event: (data) => {
         this.eventsSubject.next(data);
       },
     };

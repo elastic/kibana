@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 
 export function SourceSelect({ updateSourceSelection }) {
-  const sourceCards = ALL_SOURCES.map(Source => {
+  const sourceCards = ALL_SOURCES.map((Source) => {
     const icon = Source.icon ? <EuiIcon type={Source.icon} size="l" /> : null;
 
     const sourceTitle = Source.title;

@@ -72,7 +72,7 @@ describe('<WatchStatus />', () => {
         const { find } = testBed;
 
         expect(find('tab').length).toBe(2);
-        expect(find('tab').map(t => t.text())).toEqual(['Execution history', 'Action statuses']);
+        expect(find('tab').map((t) => t.text())).toEqual(['Execution history', 'Action statuses']);
       });
 
       test('should navigate to the "Action statuses" tab', () => {
@@ -269,7 +269,7 @@ describe('<WatchStatus />', () => {
 
         const { tableCellsValues } = table.getMetaData('watchActionStatusTable');
 
-        tableCellsValues.forEach(row => {
+        tableCellsValues.forEach((row) => {
           expect(row).toEqual([ACTION_ID, ACTION_STATES.ACKNOWLEDGED, '']);
         });
       });

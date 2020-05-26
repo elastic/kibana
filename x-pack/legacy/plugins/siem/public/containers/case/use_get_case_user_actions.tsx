@@ -40,10 +40,10 @@ const getPushedInfo = (
   caseUserActions: CaseUserActions[]
 ): { firstIndexPushToService: number; lastIndexPushToService: number; hasDataToPush: boolean } => {
   const firstIndexPushToService = caseUserActions.findIndex(
-    cua => cua.action === 'push-to-service'
+    (cua) => cua.action === 'push-to-service'
   );
   const lastIndexPushToService = caseUserActions
-    .map(cua => cua.action)
+    .map((cua) => cua.action)
     .lastIndexOf('push-to-service');
 
   const hasDataToPush =
@@ -78,7 +78,7 @@ export const useGetCaseUserActions = (caseId: string): UseGetCaseUserActions => 
             // We are removing the first item because it will always be the creation of the case
             // and we do not want it to simplify our life
             const participants = !isEmpty(response)
-              ? uniqBy('actionBy.username', response).map(cau => cau.actionBy)
+              ? uniqBy('actionBy.username', response).map((cau) => cau.actionBy)
               : [];
             const caseUserActions = !isEmpty(response) ? response.slice(1) : [];
             setCaseUserActionsState({

@@ -8,12 +8,12 @@ import { API_BASE_PATH } from './constants';
 import { getRandomString } from './lib';
 import { getAutoFollowIndexPayload } from './fixtures';
 
-export const registerHelpers = supertest => {
+export const registerHelpers = (supertest) => {
   let autoFollowPatternsCreated = [];
 
   const loadAutoFollowPatterns = () => supertest.get(`${API_BASE_PATH}/auto_follow_patterns`);
 
-  const getAutoFollowPattern = name =>
+  const getAutoFollowPattern = (name) =>
     supertest.get(`${API_BASE_PATH}/auto_follow_patterns/${name}`);
 
   const createAutoFollowPattern = (
@@ -28,8 +28,8 @@ export const registerHelpers = supertest => {
       .send({ ...payload, id: name });
   };
 
-  const deleteAutoFollowPattern = name => {
-    autoFollowPatternsCreated = autoFollowPatternsCreated.filter(c => c !== name);
+  const deleteAutoFollowPattern = (name) => {
+    autoFollowPatternsCreated = autoFollowPatternsCreated.filter((c) => c !== name);
 
     return supertest.delete(`${API_BASE_PATH}/auto_follow_patterns/${name}`).set('kbn-xsrf', 'xxx');
   };

@@ -21,7 +21,7 @@ export function ReportingAPIProvider({ getService }) {
       log.debug(`Waiting for job to finish: ${downloadReportPath}`);
       const JOB_IS_PENDING_CODE = 503;
 
-      const statusCode = await new Promise(resolve => {
+      const statusCode = await new Promise((resolve) => {
         const intervalId = setInterval(async () => {
           const response = await supertest
             .get(downloadReportPath)
@@ -40,7 +40,7 @@ export function ReportingAPIProvider({ getService }) {
 
     async expectAllJobsToFinishSuccessfully(jobPaths) {
       await Promise.all(
-        jobPaths.map(async path => {
+        jobPaths.map(async (path) => {
           await this.waitForJobToFinish(path);
         })
       );

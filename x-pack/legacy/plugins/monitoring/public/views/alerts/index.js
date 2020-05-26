@@ -36,8 +36,8 @@ function getPageData($injector) {
         max: timeBounds.max.toISOString(),
       },
     })
-    .then(response => get(response, 'data', []))
-    .catch(err => {
+    .then((response) => get(response, 'data', []))
+    .catch((err) => {
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
     });
@@ -77,7 +77,7 @@ uiRoutes.when('/alerts', {
 
       this.data = $route.current.locals.alerts;
 
-      const renderReact = data => {
+      const renderReact = (data) => {
         const app = data.message ? (
           <p>{data.message}</p>
         ) : (
@@ -112,7 +112,7 @@ uiRoutes.when('/alerts', {
       };
       $scope.$watch(
         () => this.data,
-        data => renderReact(data)
+        (data) => renderReact(data)
       );
     }
   },

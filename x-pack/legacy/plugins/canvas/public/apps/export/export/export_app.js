@@ -27,7 +27,7 @@ export class ExportApp extends React.PureComponent {
   render() {
     const { workpad, selectedPageId } = this.props;
     const { pages, height, width } = workpad;
-    const activePage = pages.find(page => page.id === selectedPageId);
+    const activePage = pages.find((page) => page.id === selectedPageId);
 
     return (
       <div className="canvasExport">

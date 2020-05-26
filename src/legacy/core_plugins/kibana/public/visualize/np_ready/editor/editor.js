@@ -58,7 +58,7 @@ import {
 import { getServices } from '../../kibana_services';
 
 export function initEditorDirective(app, deps) {
-  app.directive('visualizeApp', function() {
+  app.directive('visualizeApp', function () {
     return {
       restrict: 'E',
       controllerAs: 'visualizeApp',
@@ -202,7 +202,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                   isTitleDuplicateConfirmed,
                   onTitleDuplicate,
                 };
-                return doSave(saveOptions).then(response => {
+                return doSave(saveOptions).then((response) => {
                   // If the save wasn't successful, put the original values back.
                   if (!response.id || response.error) {
                     savedVis.title = currentTitle;
@@ -244,7 +244,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
         defaultMessage: 'Share Visualization',
       }),
       testId: 'shareTopNavButton',
-      run: anchorElement => {
+      run: (anchorElement) => {
         const hasUnappliedChanges = $scope.dirty;
         const hasUnsavedChanges = $appStatus.dirty;
         share.toggleShareContextMenu({
@@ -294,7 +294,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       description: i18n.translate('kbn.visualize.topNavMenu.refreshButtonAriaLabel', {
         defaultMessage: 'Refresh',
       }),
-      run: function() {
+      run: function () {
         embeddableHandler.reload();
       },
       testId: 'visualizeRefreshButton',
@@ -313,7 +313,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     {
       set: ({ filters }) => stateContainer.transitions.set('filters', filters),
       get: () => ({ filters: stateContainer.getState().filters }),
-      state$: stateContainer.state$.pipe(map(state => ({ filters: state.filters }))),
+      state$: stateContainer.state$.pipe(map((state) => ({ filters: state.filters }))),
     },
     {
       filters: esFilters.FilterStateStore.APP_STATE,
@@ -353,7 +353,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
 
   $scope.filters = filterManager.getFilters();
 
-  $scope.onFiltersUpdated = filters => {
+  $scope.onFiltersUpdated = (filters) => {
     // The filters will automatically be set when the filterManager emits an update event (see below)
     filterManager.setFilters(filters);
   };
@@ -362,12 +362,12 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
 
   $scope.$watch(
     () => visualizeCapabilities.saveQuery,
-    newCapability => {
+    (newCapability) => {
       $scope.showSaveQuery = newCapability;
     }
   );
 
-  const updateSavedQueryFromUrl = savedQueryId => {
+  const updateSavedQueryFromUrl = (savedQueryId) => {
     if (!savedQueryId) {
       delete $scope.savedQuery;
 
@@ -378,7 +378,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       return;
     }
 
-    savedQueryService.getSavedQuery(savedQueryId).then(savedQuery => {
+    savedQueryService.getSavedQuery(savedQueryId).then((savedQuery) => {
       $scope.$evalAsync(() => {
         $scope.updateSavedQuery(savedQuery);
       });
@@ -389,14 +389,14 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     if (vis.data.indexPattern) {
       $scope.indexPattern = vis.data.indexPattern;
     } else {
-      indexPatterns.getDefault().then(defaultIndexPattern => {
+      indexPatterns.getDefault().then((defaultIndexPattern) => {
         $scope.indexPattern = defaultIndexPattern;
       });
     }
 
     const initialState = stateContainer.getState();
 
-    const handleLinkedSearch = linked => {
+    const handleLinkedSearch = (linked) => {
       if (linked && !savedVis.savedSearchId && savedSearch) {
         savedVis.savedSearchId = savedSearch.id;
         vis.data.savedSearchId = savedSearch.id;
@@ -444,7 +444,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
 
     $scope.timeRange = timefilter.getTime();
 
-    const unsubscribeStateUpdates = stateContainer.subscribe(state => {
+    const unsubscribeStateUpdates = stateContainer.subscribe((state) => {
       const newQuery = migrateLegacyQuery(state.query);
       if (!_.isEqual(state.query, newQuery)) {
         stateContainer.transitions.set('query', newQuery);
@@ -496,7 +496,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
             $scope.refreshInterval = timefilter.getRefreshInterval();
           },
         },
-        error => addFatalError(fatalErrors, error)
+        (error) => addFatalError(fatalErrors, error)
       )
     );
     subscriptions.add(
@@ -506,12 +506,12 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
         {
           next: updateTimeRange,
         },
-        error => addFatalError(fatalErrors, error)
+        (error) => addFatalError(fatalErrors, error)
       )
     );
 
     subscriptions.add(
-      chrome.getIsVisible$().subscribe(isVisible => {
+      chrome.getIsVisible$().subscribe((isVisible) => {
         $scope.$evalAsync(() => {
           $scope.isVisible = isVisible;
         });
@@ -519,7 +519,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     );
 
     // update the searchSource when query updates
-    $scope.fetch = function() {
+    $scope.fetch = function () {
       const { query, linked, filters } = stateContainer.getState();
       $scope.query = query;
       handleLinkedSearch(linked);
@@ -538,7 +538,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
             $scope.filters = filterManager.getFilters();
           },
         },
-        error => addFatalError(fatalErrors, error)
+        (error) => addFatalError(fatalErrors, error)
       )
     );
     subscriptions.add(
@@ -548,7 +548,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
         {
           next: $scope.fetch,
         },
-        error => addFatalError(fatalErrors, error)
+        (error) => addFatalError(fatalErrors, error)
       )
     );
 
@@ -572,7 +572,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     });
   }
 
-  $scope.updateQueryAndFetch = function({ query, dateRange }) {
+  $scope.updateQueryAndFetch = function ({ query, dateRange }) {
     const isUpdate =
       (query && !_.isEqual(query, stateContainer.getState().query)) ||
       (dateRange && !_.isEqual(dateRange, $scope.timeRange));
@@ -586,7 +586,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     }
   };
 
-  $scope.onRefreshChange = function({ isPaused, refreshInterval }) {
+  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
     timefilter.setRefreshInterval({
       pause: isPaused,
       value: refreshInterval ? refreshInterval : $scope.refreshInterval.value,
@@ -599,7 +599,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     filterManager.setFilters(filterManager.getGlobalFilters());
   };
 
-  const updateStateFromSavedQuery = savedQuery => {
+  const updateStateFromSavedQuery = (savedQuery) => {
     stateContainer.transitions.updateFromSavedQuery(savedQuery);
 
     const savedQueryFilters = savedQuery.attributes.filters || [];
@@ -617,7 +617,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     }
   };
 
-  $scope.updateSavedQuery = savedQuery => {
+  $scope.updateSavedQuery = (savedQuery) => {
     $scope.savedQuery = savedQuery;
     updateStateFromSavedQuery(savedQuery);
   };
@@ -638,7 +638,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     $appStatus.dirty = false;
 
     return savedVis.save(saveOptions).then(
-      function(id) {
+      function (id) {
         $scope.$evalAsync(() => {
           if (id) {
             toastNotifications.addSuccess({
@@ -693,7 +693,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
         });
         return { id };
       },
-      error => {
+      (error) => {
         // eslint-disable-next-line
         console.error(error);
         toastNotifications.addDanger({

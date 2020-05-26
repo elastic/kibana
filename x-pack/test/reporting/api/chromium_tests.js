@@ -6,11 +6,11 @@
 
 import { OSS_KIBANA_ARCHIVE_PATH, OSS_DATA_ARCHIVE_PATH } from './constants';
 
-export default function({ loadTestFile, getService }) {
+export default function ({ loadTestFile, getService }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('chromium', function() {
+  describe('chromium', function () {
     this.tags('ciGroup2');
 
     before(async () => {

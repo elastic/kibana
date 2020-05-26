@@ -232,7 +232,7 @@ export const registerFollowerIndexRoutes = ({ router, __LEGACY }: RouteDependenc
         const errors: Array<{ id: string; error: any }> = [];
 
         await Promise.all(
-          ids.map(_id =>
+          ids.map((_id) =>
             callWithRequest('ccr.pauseFollowerIndex', { id: _id })
               .then(() => itemsPaused.push(_id))
               .catch((err: Error) => {
@@ -272,7 +272,7 @@ export const registerFollowerIndexRoutes = ({ router, __LEGACY }: RouteDependenc
         const errors: Array<{ id: string; error: any }> = [];
 
         await Promise.all(
-          ids.map(_id =>
+          ids.map((_id) =>
             callWithRequest('ccr.resumeFollowerIndex', { id: _id })
               .then(() => itemsResumed.push(_id))
               .catch((err: Error) => {
@@ -313,7 +313,7 @@ export const registerFollowerIndexRoutes = ({ router, __LEGACY }: RouteDependenc
         const errors: Array<{ id: string; error: any }> = [];
 
         await Promise.all(
-          ids.map(async _id => {
+          ids.map(async (_id) => {
             try {
               // Try to pause follower, let it fail silently since it may already be paused
               try {

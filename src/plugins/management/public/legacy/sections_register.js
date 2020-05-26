@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 
 export class LegacyManagementAdapter {
   main = undefined;
-  init = capabilities => {
+  init = (capabilities) => {
     this.main = new LegacyManagementSection(
       'management',
       {

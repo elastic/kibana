@@ -128,7 +128,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
           render: ({ name }: Repository) => {
             return (
               <RepositoryDeleteProvider>
-                {deleteRepositoryPrompt => {
+                {(deleteRepositoryPrompt) => {
                   const label =
                     name !== managedRepository
                       ? i18n.translate(
@@ -210,7 +210,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
             <EuiButton
               onClick={() =>
                 deleteRepositoryPrompt(
-                  selectedItems.map(repository => repository.name),
+                  selectedItems.map((repository) => repository.name),
                   onRepositoryDeleted
                 )
               }
@@ -232,9 +232,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
           );
         }}
       </RepositoryDeleteProvider>
-    ) : (
-      undefined
-    ),
+    ) : undefined,
     toolsRight: [
       <EuiButton
         key="reloadButton"
@@ -278,7 +276,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
             typeMap[repository.type] = true;
             return typeMap;
           }, {})
-        ).map(type => {
+        ).map((type) => {
           return {
             value: type,
             view: textService.getRepositoryTypeName(type),

@@ -8,7 +8,7 @@ import { AUTHENTICATION } from '../../common/lib/authentication';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { resolveImportErrorsTestSuiteFactory } from '../../common/suites/resolve_import_errors';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');

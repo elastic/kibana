@@ -105,10 +105,10 @@ export function uiRenderMixin(kbnServer, server, config) {
         const regularBundlePath = `${basePath}/bundles`;
         const dllBundlePath = `${basePath}/built_assets/dlls`;
         const dllStyleChunks = DllCompiler.getRawDllConfig().chunks.map(
-          chunk => `${dllBundlePath}/vendors${chunk}.style.dll.css`
+          (chunk) => `${dllBundlePath}/vendors${chunk}.style.dll.css`
         );
         const dllJsChunks = DllCompiler.getRawDllConfig().chunks.map(
-          chunk => `${dllBundlePath}/vendors${chunk}.bundle.dll.js`
+          (chunk) => `${dllBundlePath}/vendors${chunk}.bundle.dll.js`
         );
         const styleSheetPaths = [
           ...dllStyleChunks,
@@ -126,8 +126,8 @@ export function uiRenderMixin(kbnServer, server, config) {
           `${regularBundlePath}/commons.style.css`,
           ...(!isCore ? [`${regularBundlePath}/${app.getId()}.style.css`] : []),
           ...kbnServer.uiExports.styleSheetPaths
-            .filter(path => path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light'))
-            .map(path =>
+            .filter((path) => path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light'))
+            .map((path) =>
               path.localPath.endsWith('.scss')
                 ? `${basePath}/built_assets/css/${path.publicPath}`
                 : `${basePath}/${path.publicPath}`
@@ -203,17 +203,14 @@ export function uiRenderMixin(kbnServer, server, config) {
       vars,
     });
 
-    return h
-      .response(content)
-      .type('text/html')
-      .header('content-security-policy', http.csp.header);
+    return h.response(content).type('text/html').header('content-security-policy', http.csp.header);
   }
 
-  server.decorate('toolkit', 'renderApp', function(app, overrides) {
+  server.decorate('toolkit', 'renderApp', function (app, overrides) {
     return renderApp(this, app, true, overrides);
   });
 
-  server.decorate('toolkit', 'renderAppWithDefaultConfig', function(app) {
+  server.decorate('toolkit', 'renderAppWithDefaultConfig', function (app) {
     return renderApp(this, app, false);
   });
 }

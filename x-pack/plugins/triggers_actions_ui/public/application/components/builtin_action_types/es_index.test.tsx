@@ -168,10 +168,7 @@ describe('IndexActionConnectorFields renders', () => {
     const indexComboBox = wrapper.find('#indexConnectorSelectSearchBox');
     indexComboBox.first().simulate('click');
     const event = { target: { value: 'indexPattern1' } };
-    indexComboBox
-      .find('input')
-      .first()
-      .simulate('change', event);
+    indexComboBox.find('input').first().simulate('change', event);
 
     const indexSearchBoxValueBeforeEnterData = wrapper.find(
       '[data-test-subj="comboBoxSearchInput"]'
@@ -208,12 +205,7 @@ describe('IndexParamsFields renders', () => {
         index={0}
       />
     );
-    expect(
-      wrapper
-        .find('[data-test-subj="actionIndexDoc"]')
-        .first()
-        .prop('value')
-    ).toBe(`{
+    expect(wrapper.find('[data-test-subj="actionIndexDoc"]').first().prop('value')).toBe(`{
   "test": 123
 }`);
     expect(wrapper.find('[data-test-subj="documentsAddVariableButton"]').length > 0).toBeTruthy();

@@ -43,7 +43,7 @@ type Refetch = (
 
 const getAllTimeline = memoizeOne(
   (variables: string, timelines: TimelineResult[]): OpenTimelineResult[] =>
-    timelines.map(timeline => ({
+    timelines.map((timeline) => ({
       created: timeline.created,
       description: timeline.description,
       eventIdToNoteIds:
@@ -60,7 +60,7 @@ const getAllTimeline = memoizeOne(
       noteIds: timeline.noteIds,
       notes:
         timeline.notes != null
-          ? timeline.notes.map(note => ({ ...note, savedObjectId: note.noteId }))
+          ? timeline.notes.map((note) => ({ ...note, savedObjectId: note.noteId }))
           : null,
       pinnedEventIds:
         timeline.pinnedEventIds != null

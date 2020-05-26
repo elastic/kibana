@@ -11,7 +11,7 @@ import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import {
   Breadcrumb,
   ProvideBreadcrumbs,
-  BreadcrumbRoute
+  BreadcrumbRoute,
 } from './ProvideBreadcrumbs';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
@@ -32,7 +32,7 @@ class UpdateBreadcrumbsComponent extends React.Component<Props> {
   public updateHeaderBreadcrumbs() {
     const breadcrumbs = this.props.breadcrumbs.map(({ value, match }) => ({
       text: value,
-      href: getAPMHref(match.url, this.props.location.search)
+      href: getAPMHref(match.url, this.props.location.search),
     }));
 
     document.title = getTitleFromBreadCrumbs(this.props.breadcrumbs);

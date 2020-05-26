@@ -52,9 +52,9 @@ export function TableHeaderColumn({
   onRemoveColumn,
   sortOrder,
 }: Props) {
-  const [, sortDirection = ''] = sortOrder.find(sortPair => name === sortPair[0]) || [];
-  const currentSortWithoutColumn = sortOrder.filter(pair => pair[0] !== name);
-  const currentColumnSort = sortOrder.find(pair => pair[0] === name);
+  const [, sortDirection = ''] = sortOrder.find((sortPair) => name === sortPair[0]) || [];
+  const currentSortWithoutColumn = sortOrder.filter((pair) => pair[0] !== name);
+  const currentColumnSort = sortOrder.find((pair) => pair[0] === name);
   const currentColumnSortDirection = (currentColumnSort && currentColumnSort[1]) || '';
 
   const btnSortIcon = sortDirectionToIcon[sortDirection];
@@ -172,7 +172,7 @@ export function TableHeaderColumn({
       <span data-test-subj={`docTableHeader-${name}`}>
         {displayName}
         {buttons
-          .filter(button => button.active)
+          .filter((button) => button.active)
           .map((button, idx) => (
             <EuiToolTip
               id={`docTableHeader-${name}-tt`}

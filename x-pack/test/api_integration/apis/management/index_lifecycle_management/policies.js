@@ -12,7 +12,7 @@ import { getPolicyPayload } from './fixtures';
 import { initElasticsearchHelpers, getPolicyNames } from './lib';
 import { DEFAULT_POLICY_NAME } from './constants';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
 
   const es = getService('legacyEs');
@@ -34,7 +34,7 @@ export default function({ getService }) {
     describe('list', () => {
       it('should have a default policy to manage the Watcher history indices', async () => {
         const { body } = await loadPolicies().expect(200);
-        const policy = body.find(policy => policy.name === DEFAULT_POLICY_NAME);
+        const policy = body.find((policy) => policy.name === DEFAULT_POLICY_NAME);
 
         // We manually set the date for deterministic test
         const modifiedDate = '2019-04-30T14:30:00.000Z';
@@ -69,7 +69,7 @@ export default function({ getService }) {
         await addPolicyToIndex(policyName, indexName);
 
         const { body } = await loadPolicies(true);
-        const fetchedPolicy = body.find(p => p.name === policyName);
+        const fetchedPolicy = body.find((p) => p.name === policyName);
         expect(fetchedPolicy.linkedIndices).to.eql([indexName]);
       });
     });

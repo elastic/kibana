@@ -106,7 +106,7 @@ export const flattenCaseSavedObjects = (
       flattenCaseSavedObject(
         savedObject,
         [],
-        totalCommentByCase.find(tc => tc.caseId === savedObject.id)?.totalComments ?? 0
+        totalCommentByCase.find((tc) => tc.caseId === savedObject.id)?.totalComments ?? 0
       ),
     ];
   }, []);

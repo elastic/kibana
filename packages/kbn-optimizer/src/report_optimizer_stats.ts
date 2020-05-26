@@ -29,7 +29,7 @@ export function reportOptimizerStats(reporter: CiStatsReporter, name: string) {
     let lastState: OptimizerState | undefined;
     return update$.pipe(
       materialize(),
-      mergeMap(async n => {
+      mergeMap(async (n) => {
         if (n.kind === 'N' && n.value?.state) {
           lastState = n.value?.state;
         }

@@ -27,22 +27,14 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
         const jobGroups = [];
         for (const el of $jobGroups.toArray()) {
           // collect this group in our array
-          jobGroups.push(
-            $(el)
-              .text()
-              .trim()
-          );
+          jobGroups.push($(el).text().trim());
 
           // remove this element from $description so it doesn't pollute it's text value
           $(el).remove();
         }
 
         rows.push({
-          id: $tr
-            .findTestSubject('mlJobListColumnId')
-            .find('.euiTableCellContent')
-            .text()
-            .trim(),
+          id: $tr.findTestSubject('mlJobListColumnId').find('.euiTableCellContent').text().trim(),
           description: $description
             .text()
             .replace(/(&nbsp;$)/g, '')
@@ -97,17 +89,9 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
           const vars: Record<string, string> = {};
 
           for (const row of $('tr').toArray()) {
-            const [name, value] = $(row)
-              .find('td')
-              .toArray();
+            const [name, value] = $(row).find('td').toArray();
 
-            vars[
-              $(name)
-                .text()
-                .trim()
-            ] = $(value)
-              .text()
-              .trim();
+            vars[$(name).text().trim()] = $(value).text().trim();
           }
 
           return vars;
@@ -178,7 +162,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     public async assertJobRowFields(jobId: string, expectedRow: object) {
       await this.refreshJobList();
       const rows = await this.parseJobTable();
-      const jobRow = rows.filter(row => row.id === jobId)[0];
+      const jobRow = rows.filter((row) => row.id === jobId)[0];
       expect(jobRow).to.eql(expectedRow);
     }
 

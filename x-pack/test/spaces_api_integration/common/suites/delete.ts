@@ -166,10 +166,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         // and can't include a config document with the correct id in the
         // archive we read the settings to trigger an automatic upgrade
         // in each space
-        await supertest
-          .get('/api/kibana/settings')
-          .auth(user.username, user.password)
-          .expect(200);
+        await supertest.get('/api/kibana/settings').auth(user.username, user.password).expect(200);
         await supertest
           .get('/s/space_1/api/kibana/settings')
           .auth(user.username, user.password)

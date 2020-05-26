@@ -26,7 +26,7 @@ import { Axis } from '../../../lib/axis';
 import { VisConfig } from '../../../lib/vis_config';
 import { getMockUiState } from '../fixtures/_vis_fixture';
 
-describe('Vislib Axis Class Test Suite', function() {
+describe('Vislib Axis Class Test Suite', function () {
   let mockUiState;
   let yAxis;
   let el;
@@ -93,7 +93,7 @@ describe('Vislib Axis Class Test Suite', function() {
         ],
       },
     ],
-    xAxisFormatter: function(thing) {
+    xAxisFormatter: function (thing) {
       return new Date(thing);
     },
     xAxisLabel: 'Date Histogram',
@@ -102,11 +102,7 @@ describe('Vislib Axis Class Test Suite', function() {
 
   beforeEach(() => {
     mockUiState = getMockUiState();
-    el = d3
-      .select('body')
-      .append('div')
-      .attr('class', 'visAxis--x')
-      .style('height', '40px');
+    el = d3.select('body').append('div').attr('class', 'visAxis--x').style('height', '40px');
 
     fixture = el.append('div').attr('class', 'x-axis-div');
 
@@ -124,18 +120,18 @@ describe('Vislib Axis Class Test Suite', function() {
       id: 'ValueAxis-1',
     });
 
-    seriesData = data.series.map(series => {
+    seriesData = data.series.map((series) => {
       return series.values;
     });
   });
 
-  afterEach(function() {
+  afterEach(function () {
     fixture.remove();
     el.remove();
   });
 
-  describe('_stackNegAndPosVals Method', function() {
-    it('should correctly stack positive values', function() {
+  describe('_stackNegAndPosVals Method', function () {
+    it('should correctly stack positive values', function () {
       const expectedResult = [
         {
           x: 1408734060000,
@@ -167,7 +163,7 @@ describe('Vislib Axis Class Test Suite', function() {
       expect(stackedData[1]).to.eql(expectedResult);
     });
 
-    it('should correctly stack pos and neg values', function() {
+    it('should correctly stack pos and neg values', function () {
       const expectedResult = [
         {
           x: 1408734060000,
@@ -196,14 +192,14 @@ describe('Vislib Axis Class Test Suite', function() {
         },
       ];
       const dataClone = _.cloneDeep(seriesData);
-      dataClone[0].forEach(value => {
+      dataClone[0].forEach((value) => {
         value.y = -value.y;
       });
       const stackedData = yAxis._stackNegAndPosVals(dataClone);
       expect(stackedData[1]).to.eql(expectedResult);
     });
 
-    it('should correctly stack mixed pos and neg values', function() {
+    it('should correctly stack mixed pos and neg values', function () {
       const expectedResult = [
         {
           x: 1408734060000,

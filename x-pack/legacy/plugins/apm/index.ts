@@ -12,14 +12,14 @@ import { LegacyPluginInitializer } from '../../../../src/legacy/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import mappings from './mappings.json';
 
-export const apm: LegacyPluginInitializer = kibana => {
+export const apm: LegacyPluginInitializer = (kibana) => {
   return new kibana.Plugin({
     require: [
       'kibana',
       'elasticsearch',
       'xpack_main',
       'apm_oss',
-      'task_manager'
+      'task_manager',
     ],
     id: 'apm',
     configPrefix: 'xpack.apm',
@@ -28,13 +28,13 @@ export const apm: LegacyPluginInitializer = kibana => {
       app: {
         title: 'APM',
         description: i18n.translate('xpack.apm.apmForESDescription', {
-          defaultMessage: 'APM for the Elastic Stack'
+          defaultMessage: 'APM for the Elastic Stack',
         }),
         main: 'plugins/apm/index',
         icon: 'plugins/apm/icon.svg',
         euiIconType: 'apmApp',
         order: 8100,
-        category: DEFAULT_APP_CATEGORIES.observability
+        category: DEFAULT_APP_CATEGORIES.observability,
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       home: ['plugins/apm/legacy_register_feature'],
@@ -46,18 +46,18 @@ export const apm: LegacyPluginInitializer = kibana => {
           apmUiEnabled: config.get('xpack.apm.ui.enabled'),
           // TODO: rename to apm_oss.indexPatternTitle in 7.0 (breaking change)
           apmIndexPatternTitle: config.get('apm_oss.indexPattern'),
-          apmServiceMapEnabled: config.get('xpack.apm.serviceMapEnabled')
+          apmServiceMapEnabled: config.get('xpack.apm.serviceMapEnabled'),
         };
       },
       savedObjectSchemas: {
         'apm-services-telemetry': {
-          isNamespaceAgnostic: true
+          isNamespaceAgnostic: true,
         },
         'apm-indices': {
-          isNamespaceAgnostic: true
-        }
+          isNamespaceAgnostic: true,
+        },
       },
-      mappings
+      mappings,
     },
 
     // TODO: get proper types
@@ -67,7 +67,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         ui: Joi.object({
           enabled: Joi.boolean().default(true),
           transactionGroupBucketSize: Joi.number().default(100),
-          maxTraceItems: Joi.number().default(1000)
+          maxTraceItems: Joi.number().default(1000),
         }).default(),
 
         // enable plugin
@@ -85,7 +85,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         serviceMapMaxTracesPerRequest: Joi.number().default(50),
 
         // telemetry
-        telemetryCollectionEnabled: Joi.boolean().default(true)
+        telemetryCollectionEnabled: Joi.boolean().default(true),
       }).default();
     },
 
@@ -94,7 +94,7 @@ export const apm: LegacyPluginInitializer = kibana => {
       server.plugins.xpack_main.registerFeature({
         id: 'apm',
         name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
-          defaultMessage: 'APM'
+          defaultMessage: 'APM',
         }),
         order: 900,
         icon: 'apmApp',
@@ -111,12 +111,12 @@ export const apm: LegacyPluginInitializer = kibana => {
               'actions-read',
               'actions-all',
               'alerting-read',
-              'alerting-all'
+              'alerting-all',
             ],
             catalogue: ['apm'],
             savedObject: {
               all: ['alert', 'action', 'action_task_params'],
-              read: []
+              read: [],
             },
             ui: [
               'show',
@@ -126,8 +126,8 @@ export const apm: LegacyPluginInitializer = kibana => {
               'alerting:save',
               'actions:save',
               'alerting:delete',
-              'actions:delete'
-            ]
+              'actions:delete',
+            ],
           },
           read: {
             app: ['apm', 'kibana'],
@@ -136,12 +136,12 @@ export const apm: LegacyPluginInitializer = kibana => {
               'actions-read',
               'actions-all',
               'alerting-read',
-              'alerting-all'
+              'alerting-all',
             ],
             catalogue: ['apm'],
             savedObject: {
               all: ['alert', 'action', 'action_task_params'],
-              read: []
+              read: [],
             },
             ui: [
               'show',
@@ -150,17 +150,17 @@ export const apm: LegacyPluginInitializer = kibana => {
               'alerting:save',
               'actions:save',
               'alerting:delete',
-              'actions:delete'
-            ]
-          }
-        }
+              'actions:delete',
+            ],
+          },
+        },
       });
       const apmPlugin = server.newPlatform.setup.plugins
         .apm as APMPluginContract;
 
       apmPlugin.registerLegacyAPI({
-        server
+        server,
       });
-    }
+    },
   });
 };

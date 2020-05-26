@@ -25,7 +25,7 @@ export function ConsolePageProvider({ getService }) {
 
   async function getVisibleTextFromAceEditor(editor) {
     const lines = await editor.findAllByClassName('ace_line_group');
-    const linesText = await Bluebird.map(lines, l => l.getVisibleText());
+    const linesText = await Bluebird.map(lines, (l) => l.getVisibleText());
     return linesText.join('\n');
   }
 

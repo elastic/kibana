@@ -8,7 +8,7 @@ import { uiModules } from 'ui/modules';
 import { MonitoringService } from './monitoring_service';
 import '../cluster';
 
-uiModules.get('xpack/logstash').factory('xpackLogstashMonitoringService', $injector => {
+uiModules.get('xpack/logstash').factory('xpackLogstashMonitoringService', ($injector) => {
   const $http = $injector.get('$http');
   const Promise = $injector.get('Promise');
   const monitoringUiEnabled =

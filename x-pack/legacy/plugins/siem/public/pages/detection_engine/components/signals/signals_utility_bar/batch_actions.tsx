@@ -85,7 +85,7 @@ export const uniqueRuleCount = (
   signals: Readonly<Record<string, TimelineNonEcsData[]>>
 ): number => {
   const ruleIds = Object.values(signals).flatMap(
-    data => data.find(d => d.field === 'signal.rule.id')?.value
+    (data) => data.find((d) => d.field === 'signal.rule.id')?.value
   );
 
   return Array.from(new Set(ruleIds)).length;

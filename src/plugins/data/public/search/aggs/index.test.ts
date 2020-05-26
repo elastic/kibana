@@ -31,7 +31,7 @@ const metricAggs = aggTypes.metrics;
 describe('AggTypesComponent', () => {
   describe('bucket aggs', () => {
     it('all extend BucketAggType', () => {
-      bucketAggs.forEach(bucketAgg => {
+      bucketAggs.forEach((bucketAgg) => {
         expect(isBucketAggType(bucketAgg)).toBeTruthy();
       });
     });
@@ -39,7 +39,7 @@ describe('AggTypesComponent', () => {
 
   describe('metric aggs', () => {
     it('all extend MetricAggType', () => {
-      metricAggs.forEach(metricAgg => {
+      metricAggs.forEach((metricAgg) => {
         expect(isMetricAggType(metricAgg)).toBeTruthy();
       });
     });

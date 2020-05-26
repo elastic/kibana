@@ -17,7 +17,7 @@ function fieldsToOptions(fields) {
   }
 
   return fields
-    .map(field => {
+    .map((field) => {
       return {
         value: field,
         label: 'label' in field ? field.label : field.name,
@@ -42,7 +42,7 @@ function renderOption(option, searchValue, contentClassName) {
 }
 
 export function SingleFieldSelect({ fields, onChange, value, placeholder, ...rest }) {
-  const onSelection = selectedOptions => {
+  const onSelection = (selectedOptions) => {
     onChange(_.get(selectedOptions, '0.value.name'));
   };
 

@@ -310,7 +310,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
         throw new Error(`Unrecognized history action: ${action}`);
       }
 
-      [...this.listeners].forEach(listener => {
+      [...this.listeners].forEach((listener) => {
         listener(this.stripBasePath(location), action);
       });
     });

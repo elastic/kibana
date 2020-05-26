@@ -24,7 +24,7 @@ const describeWithContext = describe.each([
   [{ dev: true, dist: true }],
 ]);
 
-describeWithContext('config schema with context %j', context => {
+describeWithContext('config schema with context %j', (context) => {
   it('produces correct config', async () => {
     const schema = await getConfigSchema(reporting);
     const value = await schema.validate({}, { context });

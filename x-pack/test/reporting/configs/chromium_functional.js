@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../../functional/config.js'));
 
   return {

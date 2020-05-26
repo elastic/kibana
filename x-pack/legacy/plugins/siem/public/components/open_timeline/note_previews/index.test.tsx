@@ -25,12 +25,8 @@ describe('NotePreviews', () => {
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
     note1updated = moment('2019-03-24T04:12:33.000Z').valueOf();
-    note2updated = moment(note1updated)
-      .add(1, 'minute')
-      .valueOf();
-    note3updated = moment(note2updated)
-      .add(1, 'minute')
-      .valueOf();
+    note2updated = moment(note1updated).add(1, 'minute').valueOf();
+    note3updated = moment(note2updated).add(1, 'minute').valueOf();
   });
 
   test('it renders a note preview for each note when isModal is false', () => {
@@ -107,12 +103,7 @@ describe('NotePreviews', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="updated-by"]`)
-        .at(2)
-        .text()
-    ).toEqual('bob');
+    expect(wrapper.find(`[data-test-subj="updated-by"]`).at(2).text()).toEqual('bob');
   });
 
   test('it filters-out null savedObjectIds', () => {
@@ -143,12 +134,7 @@ describe('NotePreviews', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="updated-by"]`)
-        .at(2)
-        .text()
-    ).toEqual('bob');
+    expect(wrapper.find(`[data-test-subj="updated-by"]`).at(2).text()).toEqual('bob');
   });
 
   test('it filters-out undefined savedObjectIds', () => {
@@ -178,11 +164,6 @@ describe('NotePreviews', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="updated-by"]`)
-        .at(2)
-        .text()
-    ).toEqual('bob');
+    expect(wrapper.find(`[data-test-subj="updated-by"]`).at(2).text()).toEqual('bob');
   });
 });

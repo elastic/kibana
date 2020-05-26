@@ -52,6 +52,6 @@ export function updateSavedDashboard(
   // save only unpinned filters
   const unpinnedFilters = savedDashboard
     .getFilters()
-    .filter(filter => !esFilters.isFilterPinned(filter));
+    .filter((filter) => !esFilters.isFilterPinned(filter));
   savedDashboard.searchSource.setField('filter', unpinnedFilters);
 }

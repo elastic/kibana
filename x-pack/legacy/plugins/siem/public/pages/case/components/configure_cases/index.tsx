@@ -155,7 +155,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
       setActionBarVisible(false);
       persistCaseConfigure({
         connectorId,
-        connectorName: connectors.find(c => c.id === connectorId)?.name ?? '',
+        connectorName: connectors.find((c) => c.id === connectorId)?.name ?? '',
         closureType,
       });
     },
@@ -207,9 +207,9 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     if (
       !isEmpty(connectors) &&
       connectorId !== 'none' &&
-      connectors.some(c => c.id === connectorId)
+      connectors.some((c) => c.id === connectorId)
     ) {
-      const myConnector = connectors.find(c => c.id === connectorId);
+      const myConnector = connectors.find((c) => c.id === connectorId);
       const myMapping = myConnector?.config?.casesConfiguration?.mapping ?? [];
       setMapping(
         myMapping.map((m: CCMapsCombinedActionAttributes) => ({
@@ -225,12 +225,12 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     if (
       !isLoadingConnectors &&
       connectorId !== 'none' &&
-      !connectors.some(c => c.id === connectorId)
+      !connectors.some((c) => c.id === connectorId)
     ) {
       setConnectorIsValid(false);
     } else if (
       !isLoadingConnectors &&
-      (connectorId === 'none' || connectors.some(c => c.id === connectorId))
+      (connectorId === 'none' || connectors.some((c) => c.id === connectorId))
     ) {
       setConnectorIsValid(true);
     }
@@ -239,7 +239,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   useEffect(() => {
     if (!isLoadingConnectors && connectorId !== 'none') {
       setEditedConnectorItem(
-        connectors.find(c => c.id === connectorId) as ActionConnectorTableItem
+        connectors.find((c) => c.id === connectorId) as ActionConnectorTableItem
       );
     }
   }, [connectors, connectorId]);

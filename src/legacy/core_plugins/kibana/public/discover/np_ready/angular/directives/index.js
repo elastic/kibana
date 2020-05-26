@@ -24,12 +24,12 @@ import { getAngularModule, wrapInI18nContext } from '../../../kibana_services';
 
 const app = getAngularModule();
 
-app.directive('discoverNoResults', reactDirective =>
+app.directive('discoverNoResults', (reactDirective) =>
   reactDirective(wrapInI18nContext(DiscoverNoResults))
 );
 
-app.directive('discoverUninitialized', reactDirective =>
+app.directive('discoverUninitialized', (reactDirective) =>
   reactDirective(wrapInI18nContext(DiscoverUninitialized))
 );
 
-app.directive('discoverHistogram', reactDirective => reactDirective(DiscoverHistogram));
+app.directive('discoverHistogram', (reactDirective) => reactDirective(DiscoverHistogram));

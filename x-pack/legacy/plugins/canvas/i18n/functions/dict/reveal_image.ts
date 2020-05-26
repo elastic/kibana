@@ -39,7 +39,7 @@ export const help: FunctionHelp<FunctionFactory<typeof revealImage>> = {
       values: {
         list: Object.values(Position)
           .slice(0, -1)
-          .map(position => `\`"${position}"\``)
+          .map((position) => `\`"${position}"\``)
           .join(', '),
         end: Object.values(Position).slice(-1)[0],
       },

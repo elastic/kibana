@@ -56,7 +56,7 @@ export const ColorStopsOrdinal = ({
     );
   };
 
-  const canDeleteStop = colorStops => {
+  const canDeleteStop = (colorStops) => {
     return colorStops.length > 1;
   };
 

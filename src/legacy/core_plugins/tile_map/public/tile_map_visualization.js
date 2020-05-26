@@ -73,7 +73,7 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
       let precisionChange = false;
 
       const uiState = this.vis.getUiState();
-      uiState.on('change', prop => {
+      uiState.on('change', (prop) => {
         if (prop === 'mapZoom' || prop === 'mapCenter') {
           this.updateGeohashAgg();
         }
@@ -104,11 +104,11 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
       });
 
       this._kibanaMap.addDrawControl();
-      this._kibanaMap.on('drawCreated:rectangle', event => {
+      this._kibanaMap.on('drawCreated:rectangle', (event) => {
         const geohashAgg = this._getGeoHashAgg();
         this.addSpatialFilter(geohashAgg, 'geo_bounding_box', event.bounds);
       });
-      this._kibanaMap.on('drawCreated:polygon', event => {
+      this._kibanaMap.on('drawCreated:polygon', (event) => {
         const geohashAgg = this._getGeoHashAgg();
         this.addSpatialFilter(geohashAgg, 'geo_polygon', { points: event.points });
       });

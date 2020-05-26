@@ -133,7 +133,7 @@ export const BeatsTableType: TableType = {
       }),
       render: (value: string, beat: CMBeat & { tags: BeatTag[] }) => (
         <EuiFlexGroup wrap responsive={true} gutterSize="xs">
-          {(sortBy(beat.tags, 'id') || []).map(tag => (
+          {(sortBy(beat.tags, 'id') || []).map((tag) => (
             <EuiFlexItem key={tag.id} grow={false}>
               <ConnectedLink path={`/tag/edit/${tag.id}`}>
                 <TagBadge tag={tag} />

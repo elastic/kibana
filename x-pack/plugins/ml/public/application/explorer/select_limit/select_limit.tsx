@@ -15,7 +15,7 @@ import { EuiSelect } from '@elastic/eui';
 
 const limitOptions = [5, 10, 25, 50];
 
-const euiOptions = limitOptions.map(limit => ({
+const euiOptions = limitOptions.map((limit) => ({
   value: limit,
   text: `${limit}`,
 }));

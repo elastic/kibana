@@ -24,13 +24,13 @@ function filterFieldsForAgg(fields, aggType) {
     return getTermsFields(fields);
   }
 
-  return fields.filter(field => {
+  return fields.filter((field) => {
     return field.aggregatable && field.type === 'number';
   });
 }
 
 export function MetricEditor({ fields, metricsFilter, metric, onChange, removeButton }) {
-  const onAggChange = metricAggregationType => {
+  const onAggChange = (metricAggregationType) => {
     const newMetricProps = {
       ...metric,
       type: metricAggregationType,
@@ -39,7 +39,7 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
     // unset field when new agg type does not support currently selected field.
     if (metric.field && metricAggregationType !== AGG_TYPE.COUNT) {
       const fieldsForNewAggType = filterFieldsForAgg(fields, metricAggregationType);
-      const found = fieldsForNewAggType.find(field => {
+      const found = fieldsForNewAggType.find((field) => {
         return field.name === metric.field;
       });
       if (!found) {
@@ -49,13 +49,13 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
 
     onChange(newMetricProps);
   };
-  const onFieldChange = fieldName => {
+  const onFieldChange = (fieldName) => {
     onChange({
       ...metric,
       field: fieldName,
     });
   };
-  const onLabelChange = e => {
+  const onLabelChange = (e) => {
     onChange({
       ...metric,
       label: e.target.value,

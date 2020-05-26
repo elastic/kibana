@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  describe('overview page alert flyout controls', function() {
+  describe('overview page alert flyout controls', function () {
     const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
     const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
     const pageObjects = getPageObjects(['common', 'uptime']);
@@ -69,10 +69,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         '{"bool":{"should":[{"match_phrase":{"monitor.id":"0001-up"}}],"minimum_should_match":1}}'
       );
 
-      await supertest
-        .delete(`/api/alert/${id}`)
-        .set('kbn-xsrf', 'true')
-        .expect(204);
+      await supertest.delete(`/api/alert/${id}`).set('kbn-xsrf', 'true').expect(204);
     });
   });
 };

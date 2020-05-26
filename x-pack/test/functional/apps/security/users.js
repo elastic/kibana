@@ -6,12 +6,12 @@
 
 import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['security', 'settings']);
   const config = getService('config');
   const log = getService('log');
 
-  describe('users', function() {
+  describe('users', function () {
     this.tags('smoke');
     before(async () => {
       log.debug('users');
@@ -19,7 +19,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.security.clickElasticsearchUsers();
     });
 
-    it('should show the default elastic and kibana users', async function() {
+    it('should show the default elastic and kibana users', async function () {
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.info('actualUsers = %j', users);
       log.info('config = %j', config.get('servers.elasticsearch.hostname'));
@@ -34,7 +34,7 @@ export default function({ getService, getPageObjects }) {
       }
     });
 
-    it('should add new user', async function() {
+    it('should add new user', async function () {
       await PageObjects.security.addUser({
         username: 'Lee',
         password: 'LeePwd',
@@ -52,7 +52,7 @@ export default function({ getService, getPageObjects }) {
       expect(users.Lee.reserved).to.be(false);
     });
 
-    it('should add new user with optional fields left empty', async function() {
+    it('should add new user with optional fields left empty', async function () {
       await PageObjects.security.addUser({
         username: 'OptionalUser',
         password: 'OptionalUserPwd',
@@ -68,7 +68,7 @@ export default function({ getService, getPageObjects }) {
       expect(users.OptionalUser.reserved).to.be(false);
     });
 
-    it('should delete user', async function() {
+    it('should delete user', async function () {
       const alertMsg = await PageObjects.security.deleteUser('Lee');
       log.debug('alertMsg = %s', alertMsg);
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
@@ -76,7 +76,7 @@ export default function({ getService, getPageObjects }) {
       expect(users).to.not.have.key('Lee');
     });
 
-    it('should show the default roles', async function() {
+    it('should show the default roles', async function () {
       await PageObjects.security.clickElasticsearchRoles();
       const roles = indexBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);

@@ -22,7 +22,7 @@ import { IUiSettingsClient } from '../../../../../core/public';
 
 function getConfigStub(config: any = {}) {
   return {
-    get: key => config[key],
+    get: (key) => config[key],
   } as IUiSettingsClient;
 }
 

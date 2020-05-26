@@ -9,20 +9,20 @@ import expect from '@kbn/expect';
 import { deprecations as deprecationsModule } from '../deprecations';
 import sinon from 'sinon';
 
-describe('monitoring plugin deprecations', function() {
+describe('monitoring plugin deprecations', function () {
   let transformDeprecations;
   const rename = sinon.stub().returns(() => {});
   const fromPath = 'monitoring';
 
-  before(function() {
+  before(function () {
     const deprecations = deprecationsModule({ rename });
     transformDeprecations = (settings, fromPath, log = noop) => {
-      deprecations.forEach(deprecation => deprecation(settings, fromPath, log));
+      deprecations.forEach((deprecation) => deprecation(settings, fromPath, log));
     };
   });
 
-  describe('cluster_alerts.email_notifications.email_address', function() {
-    it(`shouldn't log when email notifications are disabled`, function() {
+  describe('cluster_alerts.email_notifications.email_address', function () {
+    it(`shouldn't log when email notifications are disabled`, function () {
       const settings = {
         cluster_alerts: {
           email_notifications: {
@@ -36,7 +36,7 @@ describe('monitoring plugin deprecations', function() {
       expect(log.called).to.be(false);
     });
 
-    it(`shouldn't log when cluster alerts are disabled`, function() {
+    it(`shouldn't log when cluster alerts are disabled`, function () {
       const settings = {
         cluster_alerts: {
           enabled: false,
@@ -51,7 +51,7 @@ describe('monitoring plugin deprecations', function() {
       expect(log.called).to.be(false);
     });
 
-    it(`shouldn't log when email_address is specified`, function() {
+    it(`shouldn't log when email_address is specified`, function () {
       const settings = {
         cluster_alerts: {
           enabled: true,
@@ -67,7 +67,7 @@ describe('monitoring plugin deprecations', function() {
       expect(log.called).to.be(false);
     });
 
-    it(`should log when email_address is missing, but alerts/notifications are both enabled`, function() {
+    it(`should log when email_address is missing, but alerts/notifications are both enabled`, function () {
       const settings = {
         cluster_alerts: {
           enabled: true,
@@ -83,7 +83,7 @@ describe('monitoring plugin deprecations', function() {
     });
   });
 
-  describe('elasticsearch.username', function() {
+  describe('elasticsearch.username', function () {
     it('logs a warning if elasticsearch.username is set to "elastic"', () => {
       const settings = { elasticsearch: { username: 'elastic' } };
 

@@ -23,7 +23,7 @@ export interface FilterPopoverProps {
 }
 
 const isItemSelected = (selectedItems: string[], item: string): 'on' | undefined =>
-  selectedItems.find(selected => selected === item) ? 'on' : undefined;
+  selectedItems.find((selected) => selected === item) ? 'on' : undefined;
 
 export const FilterPopover = ({
   fieldName,
@@ -42,7 +42,7 @@ export const FilterPopover = ({
 
   useEffect(() => {
     if (searchQuery !== '') {
-      const toDisplay = items.filter(item => item.indexOf(searchQuery) >= 0);
+      const toDisplay = items.filter((item) => item.indexOf(searchQuery) >= 0);
       setItemsToDisplay(toDisplay);
     } else {
       setItemsToDisplay(items);
@@ -79,7 +79,7 @@ export const FilterPopover = ({
         <EuiFieldSearch
           incremental={true}
           disabled={items.length === 0}
-          onSearch={query => setSearchQuery(query)}
+          onSearch={(query) => setSearchQuery(query)}
           placeholder={
             loading
               ? i18n.translate('xpack.uptime.filterPopout.loadingMessage', {
@@ -95,7 +95,7 @@ export const FilterPopover = ({
         />
       </EuiPopoverTitle>
       {!loading &&
-        itemsToDisplay.map(item => (
+        itemsToDisplay.map((item) => (
           <EuiFilterSelectItem
             checked={isItemSelected(tempSelectedItems, item)}
             data-test-subj={`filter-popover-item_${item}`}

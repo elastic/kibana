@@ -79,7 +79,7 @@ export abstract class Container<
   }
 
   public reload() {
-    Object.values(this.children).forEach(child => child.reload());
+    Object.values(this.children).forEach((child) => child.reload());
   }
 
   public async addNewEmbeddable<
@@ -141,7 +141,7 @@ export abstract class Container<
     // to default back to inherited input. However, if the particular value is not part of the container, then
     // the caller may be trying to explicitly tell the child to clear out a given value, so in that case, we want
     // to pass it along.
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (explicitInput[key] === undefined && containerInput[key] !== undefined) {
         return;
       }
@@ -159,7 +159,7 @@ export abstract class Container<
 
   public destroy() {
     super.destroy();
-    Object.values(this.children).forEach(child => child.destroy());
+    Object.values(this.children).forEach((child) => child.destroy());
     this.subscription.unsubscribe();
   }
 
@@ -261,7 +261,7 @@ export abstract class Container<
     // Container input overrides defaults.
     const explicitInput: Partial<TEmbeddableInput> = partial;
 
-    getKeys(defaults).forEach(key => {
+    getKeys(defaults).forEach((key) => {
       // @ts-ignore We know this key might not exist on inheritedInput.
       const inheritedValue = inheritedInput[key];
       if (inheritedValue === undefined && explicitInput[key] === undefined) {
@@ -355,7 +355,7 @@ export abstract class Container<
 
   private maybeUpdateChildren() {
     const allIds = Object.keys({ ...this.input.panels, ...this.output.embeddableLoaded });
-    allIds.forEach(id => {
+    allIds.forEach((id) => {
       if (this.input.panels[id] !== undefined && this.output.embeddableLoaded[id] === undefined) {
         this.onPanelAdded(this.input.panels[id]);
       } else if (

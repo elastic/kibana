@@ -34,7 +34,7 @@ export class XYZTMSSource extends AbstractTMSSource {
   }
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSourceConfigChange = sourceConfig => {
+    const onSourceConfigChange = (sourceConfig) => {
       const sourceDescriptor = XYZTMSSource.createDescriptor(sourceConfig);
       const source = new XYZTMSSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
@@ -94,7 +94,7 @@ class XYZTMSEditor extends React.Component {
     attributionUrl: '',
   };
 
-  _sourceConfigChange = _.debounce(updatedSourceConfig => {
+  _sourceConfigChange = _.debounce((updatedSourceConfig) => {
     if (this.state.tmsCanPreview) {
       this.props.onSourceConfigChange(updatedSourceConfig);
     }
@@ -136,7 +136,7 @@ class XYZTMSEditor extends React.Component {
         <EuiFormRow label="Url">
           <EuiFieldText
             placeholder={'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'}
-            onChange={e => this._handleTMSInputChange(e)}
+            onChange={(e) => this._handleTMSInputChange(e)}
           />
         </EuiFormRow>
         <EuiFormRow

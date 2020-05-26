@@ -54,7 +54,7 @@ describe('TOCEntry', () => {
     const component = shallowWithIntl(<TOCEntry {...defaultProps} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -66,7 +66,7 @@ describe('TOCEntry', () => {
       const component = shallowWithIntl(<TOCEntry {...defaultProps} isReadOnly={true} />);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -77,7 +77,7 @@ describe('TOCEntry', () => {
       const component = shallowWithIntl(<TOCEntry {...defaultProps} isLegendDetailsOpen={true} />);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 

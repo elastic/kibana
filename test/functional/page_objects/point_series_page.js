@@ -46,12 +46,9 @@ export function PointSeriesPageProvider({ getService }) {
       const $ = await grid.parseDomContent();
       return $('path')
         .toArray()
-        .map(line => {
+        .map((line) => {
           const dAttribute = $(line).attr('d');
-          const firstPoint = dAttribute
-            .split('L')[0]
-            .replace('M', '')
-            .split(',');
+          const firstPoint = dAttribute.split('L')[0].replace('M', '').split(',');
           return {
             x: parseFloat(firstPoint[0]),
             y: parseFloat(firstPoint[1]),

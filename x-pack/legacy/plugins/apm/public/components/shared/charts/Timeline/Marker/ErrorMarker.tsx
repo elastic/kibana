@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import {
   TRACE_ID,
-  TRANSACTION_ID
+  TRANSACTION_ID,
 } from '../../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { useUrlParams } from '../../../../../hooks/useUrlParams';
 import { px, unit, units } from '../../../../../style/variables';
@@ -65,7 +65,7 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
       `${TRACE_ID} : "${error.trace?.id}" and ${TRANSACTION_ID} : "${error.transaction?.id}"`
     ),
     rangeFrom,
-    rangeTo
+    rangeTo,
   };
 
   return (

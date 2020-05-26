@@ -28,7 +28,7 @@ const taskByIdQuery = (id: string) => ({
 });
 
 // eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
+export default function (kibana: any) {
   return new kibana.Plugin({
     name: 'taskManagerHelpers',
     require: ['elasticsearch', 'task_manager'],

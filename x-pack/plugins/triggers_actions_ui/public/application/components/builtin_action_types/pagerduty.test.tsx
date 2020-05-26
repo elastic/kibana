@@ -132,12 +132,9 @@ describe('PagerDutyActionConnectorFields renders', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="pagerdutyApiUrlInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="pagerdutyApiUrlInput"]')
-        .first()
-        .prop('value')
-    ).toBe('http:\\test');
+    expect(wrapper.find('[data-test-subj="pagerdutyApiUrlInput"]').first().prop('value')).toBe(
+      'http:\\test'
+    );
     expect(wrapper.find('[data-test-subj="pagerdutyRoutingKeyInput"]').length > 0).toBeTruthy();
   });
 });
@@ -171,12 +168,9 @@ describe('PagerDutyParamsFields renders', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="severitySelect"]')
-        .first()
-        .prop('value')
-    ).toStrictEqual('critical');
+    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toStrictEqual(
+      'critical'
+    );
     expect(wrapper.find('[data-test-subj="eventActionSelect"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="timestampInput"]').length > 0).toBeTruthy();

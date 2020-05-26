@@ -6,11 +6,11 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('page navigation', function() {
+  describe('page navigation', function () {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('empty_kibana');

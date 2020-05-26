@@ -13,7 +13,7 @@ import {
   getWaterfall,
   IWaterfallItem,
   IWaterfallTransaction,
-  IWaterfallError
+  IWaterfallError,
 } from './waterfall_helpers';
 import { APMError } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/apm_error';
 
@@ -27,9 +27,9 @@ describe('waterfall_helpers', () => {
         transaction: {
           duration: { us: 49660 },
           name: 'GET /api',
-          id: 'myTransactionId1'
+          id: 'myTransactionId1',
         },
-        timestamp: { us: 1549324795784006 }
+        timestamp: { us: 1549324795784006 },
       } as Transaction,
       {
         parent: { id: 'mySpanIdA' },
@@ -41,8 +41,8 @@ describe('waterfall_helpers', () => {
         span: {
           duration: { us: 481 },
           name: 'SELECT FROM products',
-          id: 'mySpanIdB'
-        }
+          id: 'mySpanIdB',
+        },
       } as Span,
       {
         parent: { id: 'myTransactionId2' },
@@ -53,9 +53,9 @@ describe('waterfall_helpers', () => {
         span: {
           duration: { us: 6161 },
           name: 'Api::ProductsController#index',
-          id: 'mySpanIdA'
+          id: 'mySpanIdA',
         },
-        timestamp: { us: 1549324795824504 }
+        timestamp: { us: 1549324795824504 },
       } as Span,
       {
         parent: { id: 'mySpanIdA' },
@@ -66,9 +66,9 @@ describe('waterfall_helpers', () => {
         span: {
           duration: { us: 532 },
           name: 'SELECT FROM product',
-          id: 'mySpanIdC'
+          id: 'mySpanIdC',
         },
-        timestamp: { us: 1549324795827905 }
+        timestamp: { us: 1549324795827905 },
       } as Span,
       {
         parent: { id: 'myTransactionId1' },
@@ -79,9 +79,9 @@ describe('waterfall_helpers', () => {
         span: {
           duration: { us: 47557 },
           name: 'GET opbeans-ruby:3000/api/products',
-          id: 'mySpanIdD'
+          id: 'mySpanIdD',
         },
-        timestamp: { us: 1549324795785760 }
+        timestamp: { us: 1549324795785760 },
       } as Span,
       ({
         parent: { id: 'mySpanIdD' },
@@ -96,12 +96,12 @@ describe('waterfall_helpers', () => {
             agent: {
               domInteractive: 382,
               domComplete: 383,
-              timeToFirstByte: 14
-            }
-          }
+              timeToFirstByte: 14,
+            },
+          },
         },
-        timestamp: { us: 1549324795823304 }
-      } as unknown) as Transaction
+        timestamp: { us: 1549324795823304 },
+      } as unknown) as Transaction,
     ];
     const errorDocs = [
       ({
@@ -114,27 +114,27 @@ describe('waterfall_helpers', () => {
           id: 'error1',
           grouping_key: 'errorGroupingKey1',
           log: {
-            message: 'error message'
-          }
+            message: 'error message',
+          },
         },
         service: { name: 'opbeans-ruby' },
         agent: {
           name: 'ruby',
-          version: '2'
-        }
-      } as unknown) as APMError
+          version: '2',
+        },
+      } as unknown) as APMError,
     ];
 
     it('should return full waterfall', () => {
       const entryTransactionId = 'myTransactionId1';
       const errorsPerTransaction = {
         myTransactionId1: 2,
-        myTransactionId2: 3
+        myTransactionId2: 3,
       };
       const waterfall = getWaterfall(
         {
           trace: { items: hits, errorDocs, exceedsMax: false },
-          errorsPerTransaction
+          errorsPerTransaction,
         },
         entryTransactionId
       );
@@ -150,12 +150,12 @@ describe('waterfall_helpers', () => {
       const entryTransactionId = 'myTransactionId2';
       const errorsPerTransaction = {
         myTransactionId1: 2,
-        myTransactionId2: 3
+        myTransactionId2: 3,
       };
       const waterfall = getWaterfall(
         {
           trace: { items: hits, errorDocs, exceedsMax: false },
-          errorsPerTransaction
+          errorsPerTransaction,
         },
         entryTransactionId
       );
@@ -177,19 +177,19 @@ describe('waterfall_helpers', () => {
             parent: { id: 'c' },
             service: { name: 'opbeans-java' },
             transaction: {
-              id: 'c'
+              id: 'c',
             },
             timestamp: { us: 1536763736371000 },
             span: {
               id: 'd',
-              name: 'SELECT'
-            }
+              name: 'SELECT',
+            },
           } as Span,
           id: 'd',
           parentId: 'c',
           duration: 210,
           offset: 0,
-          skew: 0
+          skew: 0,
         },
         {
           docType: 'span',
@@ -197,19 +197,19 @@ describe('waterfall_helpers', () => {
             parent: { id: 'a' },
             service: { name: 'opbeans-java' },
             transaction: {
-              id: 'a'
+              id: 'a',
             },
             timestamp: { us: 1536763736368000 },
             span: {
               id: 'b',
-              name: 'GET [0:0:0:0:0:0:0:1]'
-            }
+              name: 'GET [0:0:0:0:0:0:0:1]',
+            },
           } as Span,
           id: 'b',
           parentId: 'a',
           duration: 4694,
           offset: 0,
-          skew: 0
+          skew: 0,
         },
         {
           docType: 'span',
@@ -217,19 +217,19 @@ describe('waterfall_helpers', () => {
             parent: { id: 'a' },
             service: { name: 'opbeans-java' },
             transaction: {
-              id: 'a'
+              id: 'a',
             },
             timestamp: { us: 1536763736367000 },
             span: {
               id: 'b2',
-              name: 'GET [0:0:0:0:0:0:0:1]'
-            }
+              name: 'GET [0:0:0:0:0:0:0:1]',
+            },
           } as Span,
           id: 'b2',
           parentId: 'a',
           duration: 4694,
           offset: 0,
-          skew: 0
+          skew: 0,
         },
         {
           docType: 'transaction',
@@ -237,13 +237,13 @@ describe('waterfall_helpers', () => {
             parent: { id: 'b' },
             service: { name: 'opbeans-java' },
             timestamp: { us: 1536763736369000 },
-            transaction: { id: 'c', name: 'APIRestController#productsRemote' }
+            transaction: { id: 'c', name: 'APIRestController#productsRemote' },
           } as Transaction,
           id: 'c',
           parentId: 'b',
           duration: 3581,
           offset: 0,
-          skew: 0
+          skew: 0,
         },
         {
           docType: 'transaction',
@@ -252,17 +252,17 @@ describe('waterfall_helpers', () => {
             timestamp: { us: 1536763736366000 },
             transaction: {
               id: 'a',
-              name: 'APIRestController#products'
-            }
+              name: 'APIRestController#products',
+            },
           } as Transaction,
           id: 'a',
           duration: 9480,
           offset: 0,
-          skew: 0
-        }
+          skew: 0,
+        },
       ];
 
-      const childrenByParentId = groupBy(items, hit =>
+      const childrenByParentId = groupBy(items, (hit) =>
         hit.parentId ? hit.parentId : 'root'
       );
       const entryTransactionItem = childrenByParentId
@@ -280,8 +280,8 @@ describe('waterfall_helpers', () => {
           id: 'a',
           doc: ({
             transaction: { id: 'a' },
-            timestamp: { us: 10 }
-          } as unknown) as Transaction
+            timestamp: { us: 10 },
+          } as unknown) as Transaction,
         } as IWaterfallItem,
         {
           docType: 'span',
@@ -289,14 +289,14 @@ describe('waterfall_helpers', () => {
           parentId: 'a',
           doc: ({
             span: {
-              id: 'b'
+              id: 'b',
             },
             parent: { id: 'a' },
-            timestamp: { us: 20 }
-          } as unknown) as Span
-        } as IWaterfallItem
+            timestamp: { us: 20 },
+          } as unknown) as Span,
+        } as IWaterfallItem,
       ];
-      const childrenByParentId = groupBy(items, hit =>
+      const childrenByParentId = groupBy(items, (hit) =>
         hit.parentId ? hit.parentId : 'root'
       );
       const entryTransactionItem = childrenByParentId
@@ -312,18 +312,18 @@ describe('waterfall_helpers', () => {
       const child = {
         docType: 'transaction',
         doc: {
-          timestamp: { us: 0 }
+          timestamp: { us: 0 },
         },
-        duration: 50
+        duration: 50,
       } as IWaterfallItem;
 
       const parent = {
         docType: 'transaction',
         doc: {
-          timestamp: { us: 100 }
+          timestamp: { us: 100 },
         },
         duration: 100,
-        skew: 5
+        skew: 5,
       } as IWaterfallItem;
 
       expect(getClockSkew(child, parent)).toBe(130);
@@ -333,18 +333,18 @@ describe('waterfall_helpers', () => {
       const child = {
         docType: 'transaction',
         doc: {
-          timestamp: { us: 250 }
+          timestamp: { us: 250 },
         },
-        duration: 50
+        duration: 50,
       } as IWaterfallItem;
 
       const parent = {
         docType: 'transaction',
         doc: {
-          timestamp: { us: 100 }
+          timestamp: { us: 100 },
         },
         duration: 100,
-        skew: 5
+        skew: 5,
       } as IWaterfallItem;
 
       expect(getClockSkew(child, parent)).toBe(0);
@@ -354,18 +354,18 @@ describe('waterfall_helpers', () => {
       const child = {
         docType: 'transaction',
         doc: {
-          timestamp: { us: 150 }
+          timestamp: { us: 150 },
         },
-        duration: 50
+        duration: 50,
       } as IWaterfallItem;
 
       const parent = {
         docType: 'transaction',
         doc: {
-          timestamp: { us: 100 }
+          timestamp: { us: 100 },
         },
         duration: 100,
-        skew: 5
+        skew: 5,
       } as IWaterfallItem;
 
       expect(getClockSkew(child, parent)).toBe(0);
@@ -373,16 +373,16 @@ describe('waterfall_helpers', () => {
 
     it('should return parent skew for spans', () => {
       const child = {
-        docType: 'span'
+        docType: 'span',
       } as IWaterfallItem;
 
       const parent = {
         docType: 'span',
         doc: {
-          timestamp: { us: 100 }
+          timestamp: { us: 100 },
         },
         duration: 100,
-        skew: 5
+        skew: 5,
       } as IWaterfallItem;
 
       expect(getClockSkew(child, parent)).toBe(5);
@@ -390,16 +390,16 @@ describe('waterfall_helpers', () => {
 
     it('should return parent skew for errors', () => {
       const child = {
-        docType: 'error'
+        docType: 'error',
       } as IWaterfallError;
 
       const parent = {
         docType: 'transaction',
         doc: {
-          timestamp: { us: 100 }
+          timestamp: { us: 100 },
         },
         duration: 100,
-        skew: 5
+        skew: 5,
       } as IWaterfallItem;
 
       expect(getClockSkew(child, parent)).toBe(5);
@@ -407,7 +407,7 @@ describe('waterfall_helpers', () => {
 
     it('should handle missing parent', () => {
       const child = {
-        docType: 'transaction'
+        docType: 'transaction',
       } as IWaterfallItem;
 
       const parent = undefined;

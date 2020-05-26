@@ -22,18 +22,18 @@ import expect from '@kbn/expect';
 
 import VislibProvider from '..';
 
-describe('Vislib Index Test Suite', function() {
+describe('Vislib Index Test Suite', function () {
   let vislib;
 
   beforeEach(() => {
     vislib = new VislibProvider();
   });
 
-  it('should return an object', function() {
+  it('should return an object', function () {
     expect(_.isObject(vislib)).to.be(true);
   });
 
-  it('should return a Vis function', function() {
+  it('should return a Vis function', function () {
     expect(_.isFunction(vislib.Vis)).to.be(true);
   });
 });

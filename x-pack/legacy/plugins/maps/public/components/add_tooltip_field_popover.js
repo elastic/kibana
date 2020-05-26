@@ -29,14 +29,14 @@ function getOptions(fields, selectedFields) {
   }
 
   return fields
-    .filter(field => {
+    .filter((field) => {
       // remove selected fields
-      const isFieldSelected = !!selectedFields.find(selectedField => {
+      const isFieldSelected = !!selectedFields.find((selectedField) => {
         return field.name === selectedField.name;
       });
       return !isFieldSelected;
     })
-    .map(field => {
+    .map((field) => {
       return {
         value: field.name,
         prepend:
@@ -83,12 +83,12 @@ export class AddTooltipFieldPopover extends Component {
     });
   };
 
-  _onSelect = options => {
+  _onSelect = (options) => {
     const checkedFields = options
-      .filter(option => {
+      .filter((option) => {
         return option.checked === 'on';
       })
-      .map(option => {
+      .map((option) => {
         return option.value;
       });
 

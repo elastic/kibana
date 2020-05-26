@@ -16,7 +16,7 @@ export function editAgentConfigurationHref(
     // ignoring because `name` has not been added to url params. Related: https://github.com/elastic/kibana/issues/51963
     // @ts-ignore
     name: configService.name,
-    environment: configService.environment
+    environment: configService.environment,
   });
 }
 

@@ -37,9 +37,7 @@ export class FilterUtils {
    */
   public static convertTimeToUTCString(time?: string | Moment): undefined | string {
     if (moment(time).isValid()) {
-      return moment(time)
-        .utc()
-        .format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+      return moment(time).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
     } else {
       // If it's not a valid moment date, then it should be a string representing a relative time
       // like 'now' or 'now-15m'.
@@ -66,7 +64,7 @@ export class FilterUtils {
    * @returns {Array.<Object>}
    */
   public static cleanFiltersForComparison(filters: Filter[]) {
-    return _.map(filters, filter => {
+    return _.map(filters, (filter) => {
       const f: Partial<Filter> = _.omit(filter, ['$$hashKey', '$state']);
       if (f.meta) {
         // f.meta.value is the value displayed in the filter bar.

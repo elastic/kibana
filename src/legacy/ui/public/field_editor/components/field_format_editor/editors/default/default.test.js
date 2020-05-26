@@ -32,7 +32,7 @@ const onError = jest.fn();
 
 describe('DefaultFormatEditor', () => {
   describe('convertSampleInput', () => {
-    const converter = input => {
+    const converter = (input) => {
       if (isNaN(input)) {
         throw {
           message: 'Input is not a number',

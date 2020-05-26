@@ -52,7 +52,7 @@ export class UrlParams {
     _.defaults(description, defaults);
     _.each(
       description,
-      function(pDescription, param) {
+      function (pDescription, param) {
         const component = new ParamComponent(param, this.rootComponent, pDescription);
         if (Array.isArray(pDescription)) {
           new ListComponent(param, pDescription, component);

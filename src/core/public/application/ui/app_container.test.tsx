@@ -30,14 +30,14 @@ describe('AppContainer', () => {
   const setAppLeaveHandler = jest.fn();
 
   const flushPromises = async () => {
-    await new Promise(async resolve => {
+    await new Promise(async (resolve) => {
       setImmediate(() => resolve());
     });
   };
 
   const createResolver = (): [Promise<void>, () => void] => {
     let resolve: () => void | undefined;
-    const promise = new Promise<void>(r => {
+    const promise = new Promise<void>((r) => {
       resolve = r;
     });
     return [promise, resolve!];

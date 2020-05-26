@@ -28,7 +28,7 @@ export function SyncBadge({ sync }: SyncBadgeProps) {
       return (
         <SpanBadge>
           {i18n.translate('xpack.apm.transactionDetails.syncBadgeBlocking', {
-            defaultMessage: 'blocking'
+            defaultMessage: 'blocking',
           })}
         </SpanBadge>
       );
@@ -36,7 +36,7 @@ export function SyncBadge({ sync }: SyncBadgeProps) {
       return (
         <SpanBadge>
           {i18n.translate('xpack.apm.transactionDetails.syncBadgeAsync', {
-            defaultMessage: 'async'
+            defaultMessage: 'async',
           })}
         </SpanBadge>
       );

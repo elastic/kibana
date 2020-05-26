@@ -24,7 +24,7 @@ import { UrlFormatEditor } from './url';
 
 const fieldType = 'string';
 const format = {
-  getConverterFor: jest.fn().mockImplementation(() => input => `converted url for ${input}`),
+  getConverterFor: jest.fn().mockImplementation(() => (input) => `converted url for ${input}`),
   type: {
     urlTypes: [
       { kind: 'a', text: 'Link' },

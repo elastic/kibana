@@ -29,7 +29,7 @@ uiRoutes.when('/loading', {
         this.renderReact();
       });
 
-      monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE]).then(clusters => {
+      monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE]).then((clusters) => {
         if (clusters && clusters.length) {
           kbnUrl.changePath('/home');
           return;

@@ -21,10 +21,10 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 import { buildPointSeriesData } from '../point_series';
 
-describe('pointSeriesChartDataFromTable', function() {
+describe('pointSeriesChartDataFromTable', function () {
   this.slow(1000);
 
-  it('handles a table with just a count', function() {
+  it('handles a table with just a count', function () {
     const table = {
       columns: [{ id: '0' }],
       rows: [{ '0': 100 }],
@@ -43,12 +43,10 @@ describe('pointSeriesChartDataFromTable', function() {
     expect(chartData.series).to.have.length(1);
     const series = chartData.series[0];
     expect(series.values).to.have.length(1);
-    expect(series.values[0])
-      .to.have.property('x', '_all')
-      .and.have.property('y', 100);
+    expect(series.values[0]).to.have.property('x', '_all').and.have.property('y', 100);
   });
 
-  it('handles a table with x and y column', function() {
+  it('handles a table with x and y column', function () {
     const table = {
       columns: [
         { id: '0', name: 'x' },
@@ -76,7 +74,7 @@ describe('pointSeriesChartDataFromTable', function() {
     expect(series.values).to.have.length(3);
   });
 
-  it('handles a table with an x and two y aspects', function() {
+  it('handles a table with an x and two y aspects', function () {
     const table = {
       columns: [{ id: '0' }, { id: '1', name: 'Count-0' }, { id: '2', name: 'Count-1' }],
       rows: [
@@ -98,13 +96,13 @@ describe('pointSeriesChartDataFromTable', function() {
     expect(chartData).to.be.an('object');
     expect(chartData.series).to.be.an('array');
     expect(chartData.series).to.have.length(2);
-    chartData.series.forEach(function(siri, i) {
+    chartData.series.forEach(function (siri, i) {
       expect(siri).to.have.property('label', `Count-${i}`);
       expect(siri.values).to.have.length(3);
     });
   });
 
-  it('handles a table with an x, a series, and two y aspects', function() {
+  it('handles a table with an x, a series, and two y aspects', function () {
     const table = {
       columns: [
         { id: '0', name: 'x' },
@@ -134,7 +132,7 @@ describe('pointSeriesChartDataFromTable', function() {
     expect(chartData.series).to.be.an('array');
     // one series for each extension, and then one for each metric inside
     expect(chartData.series).to.have.length(4);
-    chartData.series.forEach(function(siri) {
+    chartData.series.forEach(function (siri) {
       expect(siri.values).to.have.length(2);
     });
   });

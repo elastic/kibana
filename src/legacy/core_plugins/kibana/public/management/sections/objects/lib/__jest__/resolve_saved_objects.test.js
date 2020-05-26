@@ -223,7 +223,7 @@ describe('resolveSavedObjects', () => {
         {
           obj: {
             searchSource: {
-              getOwnField: field => {
+              getOwnField: (field) => {
                 return field === 'index' ? '1' : undefined;
               },
             },
@@ -234,7 +234,7 @@ describe('resolveSavedObjects', () => {
         {
           obj: {
             searchSource: {
-              getOwnField: field => {
+              getOwnField: (field) => {
                 return field === 'index' ? '3' : undefined;
               },
             },
@@ -277,7 +277,7 @@ describe('resolveSavedObjects', () => {
         {
           obj: {
             searchSource: {
-              getOwnField: field => {
+              getOwnField: (field) => {
                 return field === 'index' ? '1' : [{ meta: { index: 'filterIndex' } }];
               },
               setField: jest.fn(),
@@ -289,7 +289,7 @@ describe('resolveSavedObjects', () => {
         {
           obj: {
             searchSource: {
-              getOwnField: field => {
+              getOwnField: (field) => {
                 return field === 'index' ? '3' : undefined;
               },
             },

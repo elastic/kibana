@@ -52,8 +52,6 @@ export const IndexParameter = ({
           },
         }}
       />
-    ) : (
-      undefined
-    )}
+    ) : undefined}
   </EditFieldFormRow>
 );

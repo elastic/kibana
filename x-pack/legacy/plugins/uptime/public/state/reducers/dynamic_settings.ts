@@ -27,7 +27,7 @@ const initialState: DynamicSettingsState = {
 
 export const dynamicSettingsReducer = handleActions<DynamicSettingsState, any>(
   {
-    [String(getDynamicSettings)]: state => ({
+    [String(getDynamicSettings)]: (state) => ({
       ...state,
       loading: true,
     }),
@@ -43,7 +43,7 @@ export const dynamicSettingsReducer = handleActions<DynamicSettingsState, any>(
         loadError: action.payload,
       };
     },
-    [String(setDynamicSettings)]: state => ({
+    [String(setDynamicSettings)]: (state) => ({
       ...state,
       loading: true,
     }),

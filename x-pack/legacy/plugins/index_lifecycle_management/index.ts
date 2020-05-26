@@ -36,9 +36,7 @@ export function indexLifecycleManagement(kibana: any) {
         // enable plugin
         enabled: Joi.boolean().default(true),
 
-        filteredNodeAttributes: Joi.array()
-          .items(Joi.string())
-          .default([]),
+        filteredNodeAttributes: Joi.array().items(Joi.string()).default([]),
       }).default();
     },
     isEnabled(config: any) {

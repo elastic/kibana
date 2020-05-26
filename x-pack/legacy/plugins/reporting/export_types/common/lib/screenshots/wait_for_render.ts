@@ -33,13 +33,13 @@ export const waitForRenderComplete = async (
           const renderedTasks = [];
 
           function waitForRender(visualization: Element) {
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
               visualization.addEventListener('renderComplete', () => resolve());
             });
           }
 
           function waitForRenderDelay() {
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
               setTimeout(resolve, visLoadDelay);
             });
           }
@@ -61,7 +61,7 @@ export const waitForRenderComplete = async (
           // capture the first visualization before it was actually in the DOM.
           // Note: 100 proved too short, see https://github.com/elastic/kibana/issues/22581,
           // bumping to 250.
-          const hackyWaitForVisualizations = () => new Promise(r => setTimeout(r, 250));
+          const hackyWaitForVisualizations = () => new Promise((r) => setTimeout(r, 250));
 
           return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
         },

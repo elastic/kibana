@@ -33,7 +33,7 @@ export function GetEnabledScriptingLanguagesProvider($http) {
   return () => {
     return $http
       .get(chrome.addBasePath('/api/kibana/scripts/languages'))
-      .then(res => res.data)
+      .then((res) => res.data)
       .catch(() => {
         toastNotifications.addDanger(
           i18n.translate('common.ui.scriptingLanguages.errorFetchingToastDescription', {

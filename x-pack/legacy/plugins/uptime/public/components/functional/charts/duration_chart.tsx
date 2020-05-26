@@ -66,9 +66,9 @@ export const DurationChartComponent = ({
 
   const legendToggleVisibility = (legendItem: SeriesIdentifier | null) => {
     if (legendItem) {
-      setHiddenLegends(prevState => {
+      setHiddenLegends((prevState) => {
         if (prevState.includes(legendItem.specId)) {
-          return [...prevState.filter(item => item !== legendItem.specId)];
+          return [...prevState.filter((item) => item !== legendItem.specId)];
         } else {
           return [...prevState, legendItem.specId];
         }
@@ -127,7 +127,7 @@ export const DurationChartComponent = ({
                 domain={{ min: 0 }}
                 id="left"
                 position={Position.Left}
-                tickFormat={d => getTickFormat(d)}
+                tickFormat={(d) => getTickFormat(d)}
                 title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
                   defaultMessage: 'Duration ms',
                 })}

@@ -16,7 +16,7 @@ export class PipelineService {
   }
 
   loadPipeline(id) {
-    return this.$http.get(`${this.basePath}/pipeline/${id}`).then(response => {
+    return this.$http.get(`${this.basePath}/pipeline/${id}`).then((response) => {
       return Pipeline.fromUpstreamJSON(response.data);
     });
   }
@@ -24,7 +24,7 @@ export class PipelineService {
   savePipeline(pipelineModel) {
     return this.$http
       .put(`${this.basePath}/pipeline/${pipelineModel.id}`, pipelineModel.upstreamJSON)
-      .catch(e => {
+      .catch((e) => {
         throw e.data.message;
       });
   }
@@ -33,7 +33,7 @@ export class PipelineService {
     return this.$http
       .delete(`${this.basePath}/pipeline/${id}`)
       .then(() => this.pipelinesService.addToRecentlyDeleted(id))
-      .catch(e => {
+      .catch((e) => {
         throw e.data.message;
       });
   }

@@ -88,7 +88,7 @@ export const buildMlJobDescription = (
   label: string,
   siemJobs: SiemJob[]
 ): ListItems => {
-  const siemJob = siemJobs.find(job => job.id === jobId);
+  const siemJob = siemJobs.find((job) => job.id === jobId);
 
   return {
     title: label,

@@ -79,7 +79,7 @@ export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
     this.deserialize = config.deserialize;
     this.options = config.options;
     this.modifyAggConfigOnSearchRequestStart =
-      config.modifyAggConfigOnSearchRequestStart || function() {};
+      config.modifyAggConfigOnSearchRequestStart || function () {};
     this.valueType = config.valueType || config.type;
   }
 }

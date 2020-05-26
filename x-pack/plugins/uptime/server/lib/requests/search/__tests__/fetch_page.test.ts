@@ -54,8 +54,8 @@ const simpleFetcher = (monitorGroups: MonitorGroups[]): MonitorGroupsFetcher => 
 
 const simpleEnricher = (monitorGroups: MonitorGroups[]): MonitorEnricher => {
   return async (queryContext: QueryContext, checkGroups: string[]): Promise<MonitorSummary[]> => {
-    return checkGroups.map(cg => {
-      const monitorGroup = monitorGroups.find(mg => mg.groups.some(g => g.checkGroup === cg))!;
+    return checkGroups.map((cg) => {
+      const monitorGroup = monitorGroups.find((mg) => mg.groups.some((g) => g.checkGroup === cg))!;
       return {
         monitor_id: monitorGroup.id,
         state: { summary: {}, timestamp: new Date(Date.parse('1999-12-31')).toISOString() },

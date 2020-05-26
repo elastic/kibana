@@ -17,7 +17,7 @@ describe('Reporting: Validate config', () => {
     logger.warning.resetHistory();
   });
 
-  [undefined, null].forEach(value => {
+  [undefined, null].forEach((value) => {
     it(`should log a warning and set xpack.reporting.encryptionKey if encryptionKey is ${value}`, () => {
       const config = {
         get: sinon.stub().returns(value),

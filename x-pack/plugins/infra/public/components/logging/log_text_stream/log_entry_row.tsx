@@ -107,7 +107,7 @@ export const LogEntryRow = memo(
         onMouseLeave={setItemIsNotHovered}
         scale={scale}
       >
-        {columnConfigurations.map(columnConfiguration => {
+        {columnConfigurations.map((columnConfiguration) => {
           if (isTimestampLogColumnConfiguration(columnConfiguration)) {
             const column = logEntryColumnsById[columnConfiguration.timestampColumn.id];
             const columnWidth = columnWidths[columnConfiguration.timestampColumn.id];
@@ -196,12 +196,12 @@ export const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
   role: 'row',
 }))<LogEntryRowWrapperProps>`
   align-items: stretch;
-  color: ${props => props.theme.eui.euiTextColor};
+  color: ${(props) => props.theme.eui.euiTextColor};
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   justify-content: flex-start;
   overflow: hidden;
 
-  ${props => monospaceTextStyle(props.scale)};
+  ${(props) => monospaceTextStyle(props.scale)};
 `;

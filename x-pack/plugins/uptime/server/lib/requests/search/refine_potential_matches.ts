@@ -36,7 +36,7 @@ export const refinePotentialMatches = async (
     .map((id: string) => {
       return { id, groups: recentGroupsMatchingStatus.get(id) || [] };
     })
-    .filter(mrg => mrg.groups.length > 0);
+    .filter((mrg) => mrg.groups.length > 0);
 
   // Sort matches by ID
   matches.sort((a: MonitorGroups, b: MonitorGroups) => {
@@ -83,7 +83,7 @@ const fullyMatchingIds = async (
     }
 
     // We only truly match the monitor if one of the most recent check groups was found in the potential matches phase
-    if (groups.some(g => potentialMatchCheckGroups.has(g.checkGroup))) {
+    if (groups.some((g) => potentialMatchCheckGroups.has(g.checkGroup))) {
       matching.set(monitorId, groups);
     }
   }

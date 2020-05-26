@@ -15,7 +15,7 @@ export class ClusterService {
   }
 
   loadCluster() {
-    return this.$http.get(`${this.basePath}/cluster`).then(response => {
+    return this.$http.get(`${this.basePath}/cluster`).then((response) => {
       if (!response.data) {
         return;
       }
@@ -25,7 +25,7 @@ export class ClusterService {
 
   isClusterInfoAvailable() {
     return this.loadCluster()
-      .then(cluster => Boolean(cluster))
+      .then((cluster) => Boolean(cluster))
       .catch(() => false);
   }
 }

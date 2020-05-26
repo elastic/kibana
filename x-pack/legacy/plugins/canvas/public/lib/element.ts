@@ -40,7 +40,7 @@ export class Element {
 
     this.tags = tags || [];
 
-    this.tags.forEach(tag => {
+    this.tags.forEach((tag) => {
       if (!tagsRegistry.get(tag)) {
         tagsRegistry.register(() => ({ name: tag, color: '#666666' }));
       }

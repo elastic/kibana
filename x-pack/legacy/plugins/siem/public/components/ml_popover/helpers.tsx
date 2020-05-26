@@ -30,10 +30,10 @@ export const filterJobs = ({
 }): SiemJob[] =>
   searchFilter(
     jobs
-      .filter(job => !showCustomJobs || (showCustomJobs && !job.isElasticJob))
-      .filter(job => !showElasticJobs || (showElasticJobs && job.isElasticJob))
+      .filter((job) => !showCustomJobs || (showCustomJobs && !job.isElasticJob))
+      .filter((job) => !showElasticJobs || (showElasticJobs && job.isElasticJob))
       .filter(
-        job => selectedGroups.length === 0 || selectedGroups.some(g => job.groups.includes(g))
+        (job) => selectedGroups.length === 0 || selectedGroups.some((g) => job.groups.includes(g))
       ),
     filterQuery
   );
@@ -45,7 +45,7 @@ export const filterJobs = ({
  * @param filterQuery user-provided search string to filter for occurrence in job names/description
  */
 export const searchFilter = (jobs: SiemJob[], filterQuery?: string): SiemJob[] =>
-  jobs.filter(job =>
+  jobs.filter((job) =>
     filterQuery == null
       ? true
       : job.id.includes(filterQuery) || job.description.includes(filterQuery)

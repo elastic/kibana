@@ -111,7 +111,7 @@ describe('ui/new_platform', () => {
       controller(scopeMock, elementMock);
       // Flush promise queue. Must be done this way because the controller cannot return a Promise without breaking
       // angular.
-      await new Promise(resolve => setTimeout(resolve, 1));
+      await new Promise((resolve) => setTimeout(resolve, 1));
 
       const [event, eventHandler] = scopeMock.$on.mock.calls[0];
       expect(event).toEqual('$destroy');
@@ -122,9 +122,9 @@ describe('ui/new_platform', () => {
 
   describe('service getters', () => {
     const services: Record<string, Function> = dataServices;
-    const getters = Object.keys(services).filter(k => k.substring(0, 3) === 'get');
+    const getters = Object.keys(services).filter((k) => k.substring(0, 3) === 'get');
 
-    getters.forEach(g => {
+    getters.forEach((g) => {
       it(`sets a value for ${g}`, () => {
         __reset__();
         __setup__(

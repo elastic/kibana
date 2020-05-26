@@ -10,7 +10,7 @@ import { GetOverviewHostQuery } from '../../../../legacy/plugins/siem/public/gra
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { defaultIndexPattern } from '../../../../legacy/plugins/siem/default_index_pattern';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('Overview Host', () => {
@@ -55,7 +55,7 @@ export default function({ getService }: FtrProviderContext) {
               inspect: false,
             },
           })
-          .then(resp => {
+          .then((resp) => {
             const overviewHost = resp.data.source.OverviewHost;
             expect(overviewHost).to.eql(expectedResult);
           });

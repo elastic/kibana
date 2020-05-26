@@ -29,9 +29,9 @@ import { makeFakeXAspect } from './_fake_x_aspect';
  */
 export function getAspects(table, dimensions) {
   const aspects = {};
-  Object.keys(dimensions).forEach(name => {
+  Object.keys(dimensions).forEach((name) => {
     const dimension = Array.isArray(dimensions[name]) ? dimensions[name] : [dimensions[name]];
-    dimension.forEach(d => {
+    dimension.forEach((d) => {
       if (!d) {
         return;
       }

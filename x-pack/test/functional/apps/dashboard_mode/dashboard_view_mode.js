@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
@@ -31,7 +31,7 @@ export default function({ getService, getPageObjects }) {
   const dashboardName = 'Dashboard View Mode Test Dashboard';
   const savedSearchName = 'Saved search for dashboard';
 
-  describe('Dashboard View Mode', function() {
+  describe('Dashboard View Mode', function () {
     this.tags(['skipFirefox']);
 
     before('initialize tests', async () => {

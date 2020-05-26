@@ -127,7 +127,7 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
 function createLocalIconModule() {
   angular
     .module('app/dashboard/icon', ['react'])
-    .directive('icon', reactDirective => reactDirective(EuiIcon));
+    .directive('icon', (reactDirective) => reactDirective(EuiIcon));
 }
 
 function createLocalConfigModule(core: AppMountContext['core']) {

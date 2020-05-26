@@ -10,7 +10,7 @@ import { MetricExpressionParams } from '../../../../plugins/infra/server/lib/ale
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const client = getService('legacyEs');
   const index = 'test-index';
   const getSearchParams = (aggType: string) =>

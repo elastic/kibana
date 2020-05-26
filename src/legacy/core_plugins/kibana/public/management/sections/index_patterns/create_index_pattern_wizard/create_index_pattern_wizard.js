@@ -69,7 +69,7 @@ export class CreateIndexPatternWizard extends Component {
     try {
       return await asyncFn;
     } catch (errors) {
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         toasts: prevState.toasts.concat([
           {
             title: errorMsg,
@@ -113,7 +113,7 @@ export class CreateIndexPatternWizard extends Component {
         [],
         indicesFailMsg
       )
-    ).then(allIndices => this.setState({ allIndices, isInitiallyLoadingIndices: false }));
+    ).then((allIndices) => this.setState({ allIndices, isInitiallyLoadingIndices: false }));
 
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
@@ -121,7 +121,7 @@ export class CreateIndexPatternWizard extends Component {
       getIndices(services.es, this.indexPatternCreationType, `*:*`, 1),
       ['a'],
       clustersFailMsg
-    ).then(remoteIndices => this.setState({ remoteClustersExist: !!remoteIndices.length }));
+    ).then((remoteIndices) => this.setState({ remoteClustersExist: !!remoteIndices.length }));
   };
 
   createIndexPattern = async (timeFieldName, indexPatternId) => {
@@ -165,7 +165,7 @@ export class CreateIndexPatternWizard extends Component {
     services.changeUrl(`/management/kibana/index_patterns/${createdId}`);
   };
 
-  goToTimeFieldStep = indexPattern => {
+  goToTimeFieldStep = (indexPattern) => {
     this.setState({ step: 2, indexPattern });
   };
 
@@ -174,7 +174,7 @@ export class CreateIndexPatternWizard extends Component {
   };
 
   onChangeIncludingSystemIndices = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       isIncludingSystemIndices: !state.isIncludingSystemIndices,
     }));
   };
@@ -245,9 +245,9 @@ export class CreateIndexPatternWizard extends Component {
     return null;
   }
 
-  removeToast = removedToast => {
-    this.setState(prevState => ({
-      toasts: prevState.toasts.filter(toast => toast.id !== removedToast.id),
+  removeToast = (removedToast) => {
+    this.setState((prevState) => ({
+      toasts: prevState.toasts.filter((toast) => toast.id !== removedToast.id),
     }));
   };
 

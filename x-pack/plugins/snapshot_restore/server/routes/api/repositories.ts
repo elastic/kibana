@@ -44,7 +44,7 @@ export function registerRepositoriesRoutes({
           repository: '_all',
         });
         repositoryNames = Object.keys(repositoriesByName);
-        repositories = repositoryNames.map(name => {
+        repositories = repositoryNames.map((name) => {
           const { type = '', settings = {} } = repositoriesByName[name];
           return {
             name,
@@ -125,7 +125,7 @@ export function registerRepositoriesRoutes({
       const { snapshots } = await callAsCurrentUser('snapshot.get', {
         repository: name,
         snapshot: '_all',
-      }).catch(e => ({
+      }).catch((e) => ({
         snapshots: null,
       }));
 
@@ -171,8 +171,8 @@ export function registerRepositoriesRoutes({
 
         // Filter list of plugins to repository-related ones
         if (plugins && plugins.length) {
-          const pluginNames: string[] = [...new Set(plugins.map(plugin => plugin.component))];
-          pluginNames.forEach(pluginName => {
+          const pluginNames: string[] = [...new Set(plugins.map((plugin) => plugin.component))];
+          pluginNames.forEach((pluginName) => {
             if (REPOSITORY_PLUGINS_MAP[pluginName]) {
               types.push(REPOSITORY_PLUGINS_MAP[pluginName]);
             }
@@ -205,7 +205,7 @@ export function registerRepositoriesRoutes({
       try {
         const verificationResults = await callAsCurrentUser('snapshot.verifyRepository', {
           repository: name,
-        }).catch(e => ({
+        }).catch((e) => ({
           valid: false,
           error: e.response ? JSON.parse(e.response) : e,
         }));
@@ -246,7 +246,7 @@ export function registerRepositoriesRoutes({
       try {
         const cleanupResults = await callAsCurrentUser('sr.cleanupRepository', {
           name,
-        }).catch(e => ({
+        }).catch((e) => ({
           cleaned: false,
           error: e.response ? JSON.parse(e.response) : e,
         }));
@@ -375,10 +375,10 @@ export function registerRepositoriesRoutes({
 
       try {
         await Promise.all(
-          repositoryNames.map(repoName => {
+          repositoryNames.map((repoName) => {
             return callAsCurrentUser('snapshot.deleteRepository', { repository: repoName })
               .then(() => response.itemsDeleted.push(repoName))
-              .catch(e =>
+              .catch((e) =>
                 response.errors.push({
                   name: repoName,
                   error: wrapEsError(e),

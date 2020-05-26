@@ -155,9 +155,7 @@ describe('utils', () => {
 
     test('it returns expected drift tolerance when "from" is an ISO string', () => {
       const drift = getDriftTolerance({
-        from: moment()
-          .subtract(10, 'minutes')
-          .toISOString(),
+        from: moment().subtract(10, 'minutes').toISOString(),
         to: 'now',
         interval: moment.duration(5, 'minutes'),
       });
@@ -179,10 +177,7 @@ describe('utils', () => {
   describe('getGapBetweenRuns', () => {
     test('it returns a gap of 0 when "from" and interval match each other and the previous started was from the previous interval time', () => {
       const gap = getGapBetweenRuns({
-        previousStartedAt: nowDate
-          .clone()
-          .subtract(5, 'minutes')
-          .toDate(),
+        previousStartedAt: nowDate.clone().subtract(5, 'minutes').toDate(),
         interval: '5m',
         from: 'now-5m',
         to: 'now',
@@ -194,10 +189,7 @@ describe('utils', () => {
 
     test('it returns a negative gap of 1 minute when "from" overlaps to by 1 minute and the previousStartedAt was 5 minutes ago', () => {
       const gap = getGapBetweenRuns({
-        previousStartedAt: nowDate
-          .clone()
-          .subtract(5, 'minutes')
-          .toDate(),
+        previousStartedAt: nowDate.clone().subtract(5, 'minutes').toDate(),
         interval: '5m',
         from: 'now-6m',
         to: 'now',
@@ -209,10 +201,7 @@ describe('utils', () => {
 
     test('it returns a negative gap of 5 minutes when "from" overlaps to by 1 minute and the previousStartedAt was 5 minutes ago', () => {
       const gap = getGapBetweenRuns({
-        previousStartedAt: nowDate
-          .clone()
-          .subtract(5, 'minutes')
-          .toDate(),
+        previousStartedAt: nowDate.clone().subtract(5, 'minutes').toDate(),
         interval: '5m',
         from: 'now-10m',
         to: 'now',
@@ -224,10 +213,7 @@ describe('utils', () => {
 
     test('it returns a negative gap of 1 minute when "from" overlaps to by 1 minute and the previousStartedAt was 10 minutes ago and so was the interval', () => {
       const gap = getGapBetweenRuns({
-        previousStartedAt: nowDate
-          .clone()
-          .subtract(10, 'minutes')
-          .toDate(),
+        previousStartedAt: nowDate.clone().subtract(10, 'minutes').toDate(),
         interval: '10m',
         from: 'now-11m',
         to: 'now',
@@ -239,11 +225,7 @@ describe('utils', () => {
 
     test('it returns a gap of only -30 seconds when the from overlaps with now by 1 minute, the interval is 5 minutes but the previous started is 30 seconds more', () => {
       const gap = getGapBetweenRuns({
-        previousStartedAt: nowDate
-          .clone()
-          .subtract(5, 'minutes')
-          .subtract(30, 'seconds')
-          .toDate(),
+        previousStartedAt: nowDate.clone().subtract(5, 'minutes').subtract(30, 'seconds').toDate(),
         interval: '5m',
         from: 'now-6m',
         to: 'now',
@@ -255,10 +237,7 @@ describe('utils', () => {
 
     test('it returns an exact 0 gap when the from overlaps with now by 1 minute, the interval is 5 minutes but the previous started is one minute late', () => {
       const gap = getGapBetweenRuns({
-        previousStartedAt: nowDate
-          .clone()
-          .subtract(6, 'minutes')
-          .toDate(),
+        previousStartedAt: nowDate.clone().subtract(6, 'minutes').toDate(),
         interval: '5m',
         from: 'now-6m',
         to: 'now',
@@ -270,11 +249,7 @@ describe('utils', () => {
 
     test('it returns a gap of 30 seconds when the from overlaps with now by 1 minute, the interval is 5 minutes but the previous started is one minute and 30 seconds late', () => {
       const gap = getGapBetweenRuns({
-        previousStartedAt: nowDate
-          .clone()
-          .subtract(6, 'minutes')
-          .subtract(30, 'seconds')
-          .toDate(),
+        previousStartedAt: nowDate.clone().subtract(6, 'minutes').subtract(30, 'seconds').toDate(),
         interval: '5m',
         from: 'now-6m',
         to: 'now',
@@ -286,10 +261,7 @@ describe('utils', () => {
 
     test('it returns a gap of 1 minute when the from overlaps with now by 1 minute, the interval is 5 minutes but the previous started is two minutes late', () => {
       const gap = getGapBetweenRuns({
-        previousStartedAt: nowDate
-          .clone()
-          .subtract(7, 'minutes')
-          .toDate(),
+        previousStartedAt: nowDate.clone().subtract(7, 'minutes').toDate(),
         interval: '5m',
         from: 'now-6m',
         to: 'now',
@@ -323,10 +295,7 @@ describe('utils', () => {
 
     test('it returns the expected result when "from" is an invalid string such as "invalid"', () => {
       const gap = getGapBetweenRuns({
-        previousStartedAt: nowDate
-          .clone()
-          .subtract(7, 'minutes')
-          .toDate(),
+        previousStartedAt: nowDate.clone().subtract(7, 'minutes').toDate(),
         interval: '5m',
         from: 'invalid',
         to: 'now',
@@ -338,10 +307,7 @@ describe('utils', () => {
 
     test('it returns the expected result when "to" is an invalid string such as "invalid"', () => {
       const gap = getGapBetweenRuns({
-        previousStartedAt: nowDate
-          .clone()
-          .subtract(7, 'minutes')
-          .toDate(),
+        previousStartedAt: nowDate.clone().subtract(7, 'minutes').toDate(),
         interval: '5m',
         from: 'now-6m',
         to: 'invalid',

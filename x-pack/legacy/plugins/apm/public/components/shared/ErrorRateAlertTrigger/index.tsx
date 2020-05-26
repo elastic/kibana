@@ -30,12 +30,12 @@ export function ErrorRateAlertTrigger(props: Props) {
   const defaults = {
     threshold: 25,
     windowSize: 1,
-    windowUnit: 'm'
+    windowUnit: 'm',
   };
 
   const params = {
     ...defaults,
-    ...alertParams
+    ...alertParams,
   };
 
   const threshold = isFinite(params.threshold) ? params.threshold : '';
@@ -43,36 +43,36 @@ export function ErrorRateAlertTrigger(props: Props) {
   const fields = [
     <PopoverExpression
       title={i18n.translate('xpack.apm.errorRateAlertTrigger.isAbove', {
-        defaultMessage: 'is above'
+        defaultMessage: 'is above',
       })}
       value={threshold.toString()}
     >
       <EuiFieldNumber
         value={threshold}
         step={0}
-        onChange={e =>
+        onChange={(e) =>
           setAlertParams('threshold', parseInt(e.target.value, 10))
         }
         compressed
         append={i18n.translate('xpack.apm.errorRateAlertTrigger.errors', {
-          defaultMessage: 'errors'
+          defaultMessage: 'errors',
         })}
       />
     </PopoverExpression>,
     <ForLastExpression
-      onChangeWindowSize={windowSize =>
+      onChangeWindowSize={(windowSize) =>
         setAlertParams('windowSize', windowSize || '')
       }
-      onChangeWindowUnit={windowUnit =>
+      onChangeWindowUnit={(windowUnit) =>
         setAlertParams('windowUnit', windowUnit)
       }
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
       errors={{
         timeWindowSize: [],
-        timeWindowUnit: []
+        timeWindowUnit: [],
       }}
-    />
+    />,
   ];
 
   return (

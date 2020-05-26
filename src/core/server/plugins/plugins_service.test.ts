@@ -51,7 +51,7 @@ const logger = loggingServiceMock.create();
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
-['path-1', 'path-2', 'path-3', 'path-4', 'path-5'].forEach(path => {
+['path-1', 'path-2', 'path-3', 'path-4', 'path-5'].forEach((path) => {
   jest.doMock(join(path, 'server'), () => ({}), {
     virtual: true,
   });
@@ -199,7 +199,7 @@ describe('PluginsService', () => {
     it('properly detects plugins that should be disabled.', async () => {
       jest
         .spyOn(configService, 'isEnabledAtPath')
-        .mockImplementation(path => Promise.resolve(!path.includes('disabled')));
+        .mockImplementation((path) => Promise.resolve(!path.includes('disabled')));
 
       mockPluginSystem.setupPlugins.mockResolvedValue(new Map());
       mockPluginSystem.uiPlugins.mockReturnValue(new Map());

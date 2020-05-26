@@ -33,12 +33,9 @@ describe('OpenTimelineModalButton', () => {
 
     wrapper.update();
 
-    expect(
-      wrapper
-        .find('[data-test-subj="open-timeline-button"]')
-        .first()
-        .text()
-    ).toEqual(i18n.OPEN_TIMELINE);
+    expect(wrapper.find('[data-test-subj="open-timeline-button"]').first().text()).toEqual(
+      i18n.OPEN_TIMELINE
+    );
   });
 
   describe('onClick prop', () => {
@@ -56,10 +53,7 @@ describe('OpenTimelineModalButton', () => {
 
       await wait();
 
-      wrapper
-        .find('[data-test-subj="open-timeline-button"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="open-timeline-button"]').first().simulate('click');
 
       wrapper.update();
 

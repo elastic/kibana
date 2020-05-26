@@ -32,7 +32,7 @@ jest.mock(
   () => ({
     ...require.requireActual('lodash'),
     // mock debounce to fire immediately with no internal timer
-    debounce: func => {
+    debounce: (func) => {
       function debounced(...args) {
         return func.apply(this, args);
       }
@@ -47,7 +47,7 @@ import { shallow } from 'enzyme';
 
 import { DashboardListing } from './dashboard_listing';
 
-const find = num => {
+const find = (num) => {
   const hits = [];
   for (let i = 0; i < num; i++) {
     hits.push({
@@ -95,7 +95,7 @@ describe('after fetch', () => {
     );
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -117,7 +117,7 @@ describe('after fetch', () => {
     );
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -139,7 +139,7 @@ describe('after fetch', () => {
     );
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -161,7 +161,7 @@ describe('after fetch', () => {
     );
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -183,7 +183,7 @@ describe('after fetch', () => {
     );
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 

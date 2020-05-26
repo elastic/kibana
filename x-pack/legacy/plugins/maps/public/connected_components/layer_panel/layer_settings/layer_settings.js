@@ -15,7 +15,7 @@ import { ValidatedDualRange } from '../../../../../../../../src/plugins/kibana_r
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 
 export function LayerSettings(props) {
-  const onLabelChange = event => {
+  const onLabelChange = (event) => {
     const label = event.target.value;
     props.updateLabel(props.layerId, label);
   };
@@ -25,7 +25,7 @@ export function LayerSettings(props) {
     props.updateMaxZoom(props.layerId, Math.min(MAX_ZOOM, parseInt(max, 10)));
   };
 
-  const onAlphaChange = alpha => {
+  const onAlphaChange = (alpha) => {
     const alphaDecimal = alpha / 100;
     props.updateAlpha(props.layerId, alphaDecimal);
   };

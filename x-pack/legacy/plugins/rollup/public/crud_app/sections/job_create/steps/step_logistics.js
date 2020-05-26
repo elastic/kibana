@@ -158,7 +158,7 @@ export class StepLogistics extends Component {
           >
             <EuiFieldText
               value={rollupCron}
-              onChange={e => onFieldsChange({ rollupCron: e.target.value })}
+              onChange={(e) => onFieldsChange({ rollupCron: e.target.value })}
               isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
               fullWidth
               data-test-subj="rollupAdvancedCron"
@@ -307,7 +307,7 @@ export class StepLogistics extends Component {
               <EuiFieldText
                 isInvalid={Boolean(areStepErrorsVisible && errorId)}
                 value={id}
-                onChange={e => onFieldsChange({ id: e.target.value })}
+                onChange={(e) => onFieldsChange({ id: e.target.value })}
                 fullWidth
                 data-test-subj="rollupJobName"
               />
@@ -352,7 +352,7 @@ export class StepLogistics extends Component {
             >
               <EuiFieldText
                 value={indexPattern}
-                onChange={e => onFieldsChange({ indexPattern: e.target.value })}
+                onChange={(e) => onFieldsChange({ indexPattern: e.target.value })}
                 isInvalid={
                   Boolean(areStepErrorsVisible && errorIndexPattern) ||
                   Boolean(indexPatternAsyncErrors)
@@ -383,7 +383,7 @@ export class StepLogistics extends Component {
             >
               <EuiFieldText
                 value={rollupIndex}
-                onChange={e => onFieldsChange({ rollupIndex: e.target.value })}
+                onChange={(e) => onFieldsChange({ rollupIndex: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorRollupIndex)}
                 fullWidth
                 data-test-subj="rollupIndexName"
@@ -445,7 +445,7 @@ export class StepLogistics extends Component {
             >
               <EuiFieldNumber
                 value={rollupPageSize ? Number(rollupPageSize) : ''}
-                onChange={e => onFieldsChange({ rollupPageSize: e.target.value })}
+                onChange={(e) => onFieldsChange({ rollupPageSize: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorRollupPageSize)}
                 fullWidth
                 min={0}
@@ -498,7 +498,7 @@ export class StepLogistics extends Component {
             >
               <EuiFieldText
                 value={rollupDelay || ''}
-                onChange={e => onFieldsChange({ rollupDelay: e.target.value })}
+                onChange={(e) => onFieldsChange({ rollupDelay: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorRollupDelay)}
                 fullWidth
                 data-test-subj="rollupDelay"

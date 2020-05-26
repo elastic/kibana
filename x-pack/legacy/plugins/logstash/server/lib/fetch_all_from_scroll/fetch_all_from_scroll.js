@@ -19,7 +19,7 @@ export function fetchAllFromScroll(response, callWithRequest, hits = []) {
         scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
         scroll_id: scrollId,
       },
-    }).then(innerResponse => {
+    }).then((innerResponse) => {
       return fetchAllFromScroll(innerResponse, callWithRequest, hits);
     });
   }

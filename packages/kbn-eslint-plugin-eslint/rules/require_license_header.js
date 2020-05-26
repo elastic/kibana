@@ -40,10 +40,10 @@ module.exports = {
       },
     ],
   },
-  create: context => {
+  create: (context) => {
     return {
       Program(program) {
-        const license = init(context, program, function() {
+        const license = init(context, program, function () {
           const options = context.options[0] || {};
           const license = options.license;
 
@@ -69,7 +69,7 @@ module.exports = {
         const sourceCode = context.getSourceCode();
         const comment = sourceCode
           .getAllComments()
-          .find(node => normalizeWhitespace(node.value) === license.nodeValue);
+          .find((node) => normalizeWhitespace(node.value) === license.nodeValue);
 
         // no licence comment
         if (!comment) {

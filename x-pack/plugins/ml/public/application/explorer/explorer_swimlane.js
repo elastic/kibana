@@ -94,7 +94,7 @@ export class ExplorerSwimlane extends React.Component {
             // immediately clear the selection, otherwise trigger
             // a reload with the updated selected cells.
             if (selectedData.bucketScore === 0) {
-              elements.map(e => d3.select(e).classed('ds-selected', false));
+              elements.map((e) => d3.select(e).classed('ds-selected', false));
               this.selectCell([], selectedData);
               previousSelectedData = null;
             } else {
@@ -175,7 +175,7 @@ export class ExplorerSwimlane extends React.Component {
 
   highlightOverall(times) {
     const overallSwimlane = d3.select('.ml-swimlane-overall');
-    times.forEach(time => {
+    times.forEach((time) => {
       const overallCell = overallSwimlane
         .selectAll(`div[data-time="${time}"]`)
         .selectAll('.sl-cell-inner,.sl-cell-inner-dragselect');
@@ -205,7 +205,7 @@ export class ExplorerSwimlane extends React.Component {
       .classed('sl-cell-inner-selected', true);
 
     const rootParent = d3.select(this.rootNode.parentNode);
-    rootParent.selectAll('.lane-label').classed('lane-label-masked', function() {
+    rootParent.selectAll('.lane-label').classed('lane-label-masked', function () {
       return laneLabels.indexOf(d3.select(this).text()) === -1;
     });
 
@@ -307,7 +307,7 @@ export class ExplorerSwimlane extends React.Component {
     function cellMouseOverFactory(time, i) {
       // Don't use an arrow function here because we need access to `this`,
       // which is where d3 supplies a reference to the corresponding DOM element.
-      return function(lane) {
+      return function (lane) {
         const bucketScore = getBucketScore(lane, time);
         if (bucketScore !== 0) {
           lane = lane === '' ? EMPTY_FIELD_VALUE_LABEL : lane;
@@ -361,16 +361,13 @@ export class ExplorerSwimlane extends React.Component {
     }
 
     const d3Lanes = swimlanes.selectAll('.lane').data(lanes);
-    const d3LanesEnter = d3Lanes
-      .enter()
-      .append('div')
-      .classed('lane', true);
+    const d3LanesEnter = d3Lanes.enter().append('div').classed('lane', true);
 
     d3LanesEnter
       .append('div')
       .classed('lane-label', true)
       .style('width', `${laneLabelWidth}px`)
-      .html(label => {
+      .html((label) => {
         const showFilterContext = filterActive === true && label === 'Overall';
         if (showFilterContext) {
           return i18n.translate('xpack.ml.explorer.overallSwimlaneUnfilteredLabel', {
@@ -386,10 +383,10 @@ export class ExplorerSwimlane extends React.Component {
           swimlaneCellClick({});
         }
       })
-      .each(function() {
+      .each(function () {
         if (swimlaneData.fieldName !== undefined) {
           d3.select(this)
-            .on('mouseover', value => {
+            .on('mouseover', (value) => {
               mlChartTooltipService.show(
                 [
                   { skipHeader: true },
@@ -410,7 +407,10 @@ export class ExplorerSwimlane extends React.Component {
             .on('mouseout', () => {
               mlChartTooltipService.hide();
             })
-            .attr('aria-label', value => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(value)}`);
+            .attr(
+              'aria-label',
+              (value) => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(value)}`
+            );
         }
       });
 
@@ -418,7 +418,7 @@ export class ExplorerSwimlane extends React.Component {
 
     function getBucketScore(lane, time) {
       let bucketScore = 0;
-      const point = points.find(p => {
+      const point = points.find((p) => {
         return p.value > 0 && p.laneLabel === lane && p.time === time;
       });
       if (typeof point !== 'undefined') {
@@ -436,16 +436,16 @@ export class ExplorerSwimlane extends React.Component {
           .append('div')
           .classed('sl-cell', true)
           .style('width', `${cellWidth}px`)
-          .attr('data-lane-label', label => mlEscape(label))
+          .attr('data-lane-label', (label) => mlEscape(label))
           .attr('data-time', time)
-          .attr('data-bucket-score', lane => {
+          .attr('data-bucket-score', (lane) => {
             return getBucketScore(lane, time);
           })
           // use a factory here to bind the `time` and `i` values
           // of this iteration to the event.
           .on('mouseover', cellMouseOverFactory(time, i))
           .on('mouseleave', cellMouseleave)
-          .each(function(laneLabel) {
+          .each(function (laneLabel) {
             this.__clickData__ = {
               bucketScore: getBucketScore(laneLabel, time),
               laneLabel,
@@ -455,13 +455,13 @@ export class ExplorerSwimlane extends React.Component {
           });
 
         // calls itself with each() to get access to lane (= d3 data)
-        cell.append('div').each(function(lane) {
+        cell.append('div').each(function (lane) {
           const el = d3.select(this);
 
           let color = 'none';
           let bucketScore = 0;
 
-          const point = points.find(p => {
+          const point = points.find((p) => {
             return p.value > 0 && p.laneLabel === lane && p.time === time;
           });
 
@@ -487,31 +487,22 @@ export class ExplorerSwimlane extends React.Component {
 
     // height of .time-tick-labels
     const svgHeight = 25;
-    const svg = laneTimes
-      .append('svg')
-      .attr('width', chartWidth)
-      .attr('height', svgHeight);
+    const svg = laneTimes.append('svg').attr('width', chartWidth).attr('height', svgHeight);
 
     const xAxis = d3.svg
       .axis()
       .scale(xAxisScale)
       .ticks(numTicksForDateFormat(chartWidth, xAxisTickFormat))
-      .tickFormat(tick => moment(tick).format(xAxisTickFormat));
+      .tickFormat((tick) => moment(tick).format(xAxisTickFormat));
 
-    const gAxis = svg
-      .append('g')
-      .attr('class', 'x axis')
-      .call(xAxis);
+    const gAxis = svg.append('g').attr('class', 'x axis').call(xAxis);
 
     // remove overlapping labels
     let overlapCheck = 0;
-    gAxis.selectAll('g.tick').each(function() {
+    gAxis.selectAll('g.tick').each(function () {
       const tick = d3.select(this);
       const xTransform = d3.transform(tick.attr('transform')).translate[0];
-      const tickWidth = tick
-        .select('text')
-        .node()
-        .getBBox().width;
+      const tickWidth = tick.select('text').node().getBBox().width;
       const xMinOffset = xTransform - tickWidth / 2;
       const xMaxOffset = xTransform + tickWidth / 2;
       // if the tick label overlaps the previous label
@@ -558,7 +549,7 @@ export class ExplorerSwimlane extends React.Component {
     const selectedTimes = _.get(selectionState, 'times', []);
     const selectedTimeExtent = d3.extent(selectedTimes);
 
-    selectedLanes.forEach(selectedLane => {
+    selectedLanes.forEach((selectedLane) => {
       if (
         lanes.indexOf(selectedLane) > -1 &&
         selectedTimeExtent[0] >= startTime &&
@@ -570,7 +561,7 @@ export class ExplorerSwimlane extends React.Component {
           `div[data-lane-label="${mlEscape(selectedLane)}"]`
         );
 
-        laneCells.each(function() {
+        laneCells.each(function () {
           const cell = d3.select(this);
           const cellTime = cell.attr('data-time');
           if (cellTime >= selectedTimeExtent[0] && cellTime <= selectedTimeExtent[1]) {
@@ -584,7 +575,7 @@ export class ExplorerSwimlane extends React.Component {
       return Math.max(maxBucketScore, +d3.select(cell).attr('data-bucket-score') || 0);
     }, 0);
 
-    const selectedCellTimes = cellsToSelect.map(e => {
+    const selectedCellTimes = cellsToSelect.map((e) => {
       return d3.select(e).node().__clickData__.time;
     });
 

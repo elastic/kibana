@@ -89,7 +89,7 @@ function getMetricData(
         interval
       )
       .pipe(
-        map(resp => {
+        map((resp) => {
           _.each(resp.results, (value, time) => {
             // @ts-ignore
             obj.results[time] = {
@@ -127,7 +127,7 @@ function getChartDetails(
     }
     obj.results.functionLabel = functionLabel;
 
-    const blankEntityFields = _.filter(entityFields, entity => {
+    const blankEntityFields = _.filter(entityFields, (entity) => {
       return entity.fieldValue === null;
     });
 
@@ -148,7 +148,7 @@ function getChartDetails(
         latestMs,
       })
         .then((results: any) => {
-          _.each(blankEntityFields, field => {
+          _.each(blankEntityFields, (field) => {
             // results will not contain keys for non-aggregatable fields,
             // so store as 0 to indicate over all field values.
             obj.results.entityData.entities.push({

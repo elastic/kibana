@@ -143,9 +143,7 @@ export const kqlQuery = Joi.object({
     serializedQuery: allowEmptyString,
   }).allow(null),
 });
-export const pinnedEventIds = Joi.array()
-  .items(allowEmptyString)
-  .allow(null);
+export const pinnedEventIds = Joi.array().items(allowEmptyString).allow(null);
 export const sort = Joi.object({
   columnId: allowEmptyString,
   sortDirection: allowEmptyString,

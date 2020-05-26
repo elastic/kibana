@@ -28,14 +28,14 @@ let $scope;
 
 let $elem;
 
-const init = function(expandable) {
+const init = function (expandable) {
   // Load the application
   pluginInstance.initializeServices();
   pluginInstance.initializeInnerAngular();
   ngMock.module('app/discover');
 
   // Create the scope
-  ngMock.inject(function($rootScope, $compile) {
+  ngMock.inject(function ($rootScope, $compile) {
     // Give us a scope
     $parentScope = $rootScope;
 
@@ -57,19 +57,19 @@ const init = function(expandable) {
   });
 };
 
-describe('cssTruncate directive', function() {
-  describe('expandable', function() {
-    beforeEach(function() {
+describe('cssTruncate directive', function () {
+  describe('expandable', function () {
+    beforeEach(function () {
       init(true);
     });
 
-    it('should set text-overflow to ellipsis and whitespace to nowrap', function(done) {
+    it('should set text-overflow to ellipsis and whitespace to nowrap', function (done) {
       expect($elem.css('text-overflow')).to.be('ellipsis');
       expect($elem.css('white-space')).to.be('nowrap');
       done();
     });
 
-    it('should set white-space to normal when clicked, and back to nowrap when clicked again', function(done) {
+    it('should set white-space to normal when clicked, and back to nowrap when clicked again', function (done) {
       $scope.toggle();
       expect($elem.css('white-space')).to.be('normal');
 

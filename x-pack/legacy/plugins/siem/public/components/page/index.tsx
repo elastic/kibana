@@ -67,7 +67,7 @@ export const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
   height: 100%;
   padding: 1rem;
   overflow: hidden;
@@ -81,7 +81,7 @@ export const PageContent = styled.div`
   height: 100%;
   position: relative;
   overflow-y: hidden;
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
   margin-top: 62px;
 `;
 
@@ -94,7 +94,7 @@ export const FlexPage = styled(EuiPage)`
 FlexPage.displayName = 'FlexPage';
 
 export const PageHeader = styled.div`
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
   display: flex;
   user-select: none;
   padding: 1rem 1rem 0rem 1rem;
@@ -182,7 +182,7 @@ export const OverviewWrapper = styled(EuiFlexGroup)`
 
   .euiButtonIcon {
     position: absolute;
-    right: ${props => props.theme.eui.euiSizeM};
+    right: ${(props) => props.theme.eui.euiSizeM};
     top: 6px;
     z-index: 2;
   }

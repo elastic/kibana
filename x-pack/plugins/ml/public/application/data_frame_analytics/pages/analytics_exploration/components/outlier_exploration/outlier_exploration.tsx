@@ -56,7 +56,7 @@ const getFeatureCount = (resultsField: string, tableItems: TableItem[] = []) => 
     return 0;
   }
 
-  return Object.keys(tableItems[0]).filter(key =>
+  return Object.keys(tableItems[0]).filter((key) =>
     key.includes(`${resultsField}.${FEATURE_INFLUENCE}.`)
   ).length;
 };
@@ -92,7 +92,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     const resultsField = jobConfig.dest.results_field;
     const removePrefix = new RegExp(`^${resultsField}\.${FEATURE_INFLUENCE}\.`, 'g');
     columns.push(
-      ...tableFields.sort(sortColumns(tableItems[0], resultsField)).map(id => {
+      ...tableFields.sort(sortColumns(tableItems[0], resultsField)).map((id) => {
         const idWithoutPrefix = id.replace(removePrefix, '');
         const field = indexPattern.fields.getByName(idWithoutPrefix);
 

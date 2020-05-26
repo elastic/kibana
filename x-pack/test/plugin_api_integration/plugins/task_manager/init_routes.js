@@ -170,9 +170,7 @@ export function initRoutes(server, taskManager, legacyTaskManager, taskTestingEv
       validate: {
         payload: Joi.object({
           event: Joi.string().required(),
-          data: Joi.object()
-            .optional()
-            .default({}),
+          data: Joi.object().optional().default({}),
         }),
       },
     },
@@ -225,7 +223,7 @@ export function initRoutes(server, taskManager, legacyTaskManager, taskTestingEv
             query: taskManagerQuery,
           });
           tasksFound = tasks.length;
-          await Promise.all(tasks.map(task => taskManager.remove(task.id)));
+          await Promise.all(tasks.map((task) => taskManager.remove(task.id)));
         } while (tasksFound > 0);
         return 'OK';
       } catch (err) {

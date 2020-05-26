@@ -23,7 +23,7 @@ jest.mock('../../../app/app_dependencies');
 
 describe('Transform: <PivotPreview />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
-  test('Minimal initialization', async done => {
+  test('Minimal initialization', async (done) => {
     // Arrange
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,

@@ -82,7 +82,7 @@ const isPickFieldsConfigWithSummaryCountField = (
 };
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
@@ -165,7 +165,7 @@ export default function({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('job on data set with date_nanos time field', function() {
+  describe('job on data set with date_nanos time field', function () {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/event_rate_nanos');
@@ -178,7 +178,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function() {
+      describe(`${testData.suiteTitle}`, function () {
         it('job creation loads the job management page', async () => {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToJobManagement();
@@ -378,7 +378,7 @@ export default function({ getService }: FtrProviderContext) {
           await ml.jobTable.refreshJobList();
           await ml.jobTable.filterWithSearchString(testData.jobId);
           const rows = await ml.jobTable.parseJobTable();
-          expect(rows.filter(row => row.id === testData.jobId)).to.have.length(1);
+          expect(rows.filter((row) => row.id === testData.jobId)).to.have.length(1);
         });
 
         it('job creation displays details for the created job in the job list', async () => {

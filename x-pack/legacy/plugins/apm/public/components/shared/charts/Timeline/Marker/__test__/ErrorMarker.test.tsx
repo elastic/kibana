@@ -19,9 +19,9 @@ describe('ErrorMarker', () => {
       trace: { id: '123' },
       transaction: { id: '456' },
       error: { grouping_key: '123' },
-      service: { name: 'bar' }
+      service: { name: 'bar' },
     },
-    serviceColor: '#fff'
+    serviceColor: '#fff',
   } as ErrorMark;
   it('renders', () => {
     const component = shallow(<ErrorMarker mark={mark} />);

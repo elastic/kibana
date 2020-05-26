@@ -26,7 +26,7 @@ import {
 } from '../../page_objects/dashboard_page';
 import { VisualizeConstants } from '../../../../src/legacy/core_plugins/kibana/public/visualize/np_ready/visualize_constants';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -45,12 +45,12 @@ export default function({ getService, getPageObjects }) {
   describe('dashboard panel controls', function viewEditModeTests() {
     this.tags('smoke');
 
-    before(async function() {
+    before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
     });
 
-    after(async function() {
+    after(async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
@@ -64,7 +64,7 @@ export default function({ getService, getPageObjects }) {
         intialDimensions = await PageObjects.dashboard.getPanelDimensions();
       });
 
-      after(async function() {
+      after(async function () {
         await PageObjects.dashboard.gotoDashboardLandingPage();
       });
 
@@ -113,14 +113,14 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('panel edit controls', function() {
+    describe('panel edit controls', function () {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setHistoricalDataRange();
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
       });
 
-      it('are hidden in view mode', async function() {
+      it('are hidden in view mode', async function () {
         await PageObjects.dashboard.saveDashboard(dashboardName);
 
         await dashboardPanelActions.openContextMenu();
@@ -128,7 +128,7 @@ export default function({ getService, getPageObjects }) {
         await dashboardPanelActions.expectMissingRemovePanelAction();
       });
 
-      it('are shown in edit mode', async function() {
+      it('are shown in edit mode', async function () {
         await PageObjects.dashboard.switchToEditMode();
 
         const isContextMenuIconVisible = await dashboardPanelActions.isContextMenuIconVisible();
@@ -157,8 +157,8 @@ export default function({ getService, getPageObjects }) {
         await browser.get(currentUrl.toString(), false);
       });
 
-      describe('on an expanded panel', function() {
-        it('are hidden in view mode', async function() {
+      describe('on an expanded panel', function () {
+        it('are hidden in view mode', async function () {
           await renderable.waitForRender();
           await PageObjects.dashboard.saveDashboard(dashboardName);
           await dashboardPanelActions.openContextMenu();
@@ -169,7 +169,7 @@ export default function({ getService, getPageObjects }) {
           await dashboardPanelActions.expectMissingRemovePanelAction();
         });
 
-        it('in edit mode hides remove icons ', async function() {
+        it('in edit mode hides remove icons ', async function () {
           await PageObjects.dashboard.switchToEditMode();
           await dashboardPanelActions.openContextMenu();
           await dashboardPanelActions.expectExistsEditPanelAction();
@@ -236,8 +236,8 @@ export default function({ getService, getPageObjects }) {
     });
 
     // Panel expand should also be shown in view mode, but only on mouse hover.
-    describe('panel expand control', function() {
-      it('shown in edit mode', async function() {
+    describe('panel expand control', function () {
+      it('shown in edit mode', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.expectExistsToggleExpandAction();

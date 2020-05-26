@@ -8,11 +8,11 @@ import { HttpSetup } from 'kibana/public';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
-  TRANSACTION_TYPE
+  TRANSACTION_TYPE,
 } from '../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import {
   getMlJobId,
-  getMlPrefix
+  getMlPrefix,
 } from '../../../../../../plugins/apm/common/ml_job_constants';
 import { callApi } from './callApi';
 import { ESFilter } from '../../../../../../plugins/apm/typings/elasticsearch';
@@ -38,7 +38,7 @@ interface StartedMLJobApiResponse {
 async function getTransactionIndices(http: HttpSetup) {
   const indices = await callApmApi({
     method: 'GET',
-    pathname: `/api/apm/settings/apm-indices`
+    pathname: `/api/apm/settings/apm-indices`,
   });
   return indices['apm_oss.transactionIndices'];
 }
@@ -46,7 +46,7 @@ async function getTransactionIndices(http: HttpSetup) {
 export async function startMLJob({
   serviceName,
   transactionType,
-  http
+  http,
 }: {
   serviceName: string;
   transactionType: string;
@@ -57,7 +57,7 @@ export async function startMLJob({
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [PROCESSOR_EVENT]: 'transaction' } },
-    { term: { [TRANSACTION_TYPE]: transactionType } }
+    { term: { [TRANSACTION_TYPE]: transactionType } },
   ];
   groups.push(transactionType.toLowerCase());
   return callApi<StartedMLJobApiResponse>(http, {
@@ -70,10 +70,10 @@ export async function startMLJob({
       startDatafeed: true,
       query: {
         bool: {
-          filter
-        }
-      }
-    }
+          filter,
+        },
+      },
+    },
   });
 }
 
@@ -88,7 +88,7 @@ export interface MLJobApiResponse {
 export async function getHasMLJob({
   serviceName,
   transactionType,
-  http
+  http,
 }: {
   serviceName: string;
   transactionType: string;
@@ -100,7 +100,7 @@ export async function getHasMLJob({
       pathname: `/api/ml/anomaly_detectors/${getMlJobId(
         serviceName,
         transactionType
-      )}`
+      )}`,
     });
     return true;
   } catch (e) {

@@ -54,7 +54,7 @@ export function createRegionMapVisualization({ serviceSettings, $injector, uiSet
       if (!this._hasColumns() || !table.rows.length) {
         results = [];
       } else {
-        results = table.rows.map(row => {
+        results = table.rows.map((row) => {
           const term = row[termColumn.id];
           const value = row[valueColumn.id];
           return { term: term, value: value };
@@ -163,9 +163,9 @@ export function createRegionMapVisualization({ serviceSettings, $injector, uiSet
         );
       }
 
-      this._choroplethLayer.on('select', event => {
+      this._choroplethLayer.on('select', (event) => {
         const { rows, columns } = this._chartData;
-        const rowIndex = rows.findIndex(row => row[columns[0].id] === event);
+        const rowIndex = rows.findIndex((row) => row[columns[0].id] === event);
         this._vis.API.events.filter({
           table: this._chartData,
           column: 0,
@@ -174,7 +174,7 @@ export function createRegionMapVisualization({ serviceSettings, $injector, uiSet
         });
       });
 
-      this._choroplethLayer.on('styleChanged', event => {
+      this._choroplethLayer.on('styleChanged', (event) => {
         const shouldShowWarning =
           this._params.isDisplayWarning && uiSettings.get('visualization:regionmap:showWarnings');
         if (event.mismatches.length > 0 && shouldShowWarning) {

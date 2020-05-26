@@ -47,8 +47,8 @@ class AggTypeFieldFilters {
    */
   public filter(fields: IndexPatternField[], aggConfig: IAggConfig) {
     const allFilters = Array.from(this.filters);
-    const allowedAggTypeFields = fields.filter(field => {
-      const isAggTypeFieldAllowed = allFilters.every(filter => filter(field, aggConfig));
+    const allowedAggTypeFields = fields.filter((field) => {
+      const isAggTypeFieldAllowed = allFilters.every((filter) => filter(field, aggConfig));
       return isAggTypeFieldAllowed;
     });
     return allowedAggTypeFields;

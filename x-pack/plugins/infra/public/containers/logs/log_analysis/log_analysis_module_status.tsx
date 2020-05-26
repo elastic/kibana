@@ -117,17 +117,17 @@ const createStatusReducer = <JobType extends string>(jobTypes: JobType[]) => (
         {} as Record<JobType, JobStatus>
       );
       const nextSetupStatus = Object.values<JobStatus>(nextJobStatus).every(
-        jobState => jobState === 'started'
+        (jobState) => jobState === 'started'
       )
         ? 'succeeded'
         : 'failed';
       const nextErrorMessages = [
         ...Object.values(datafeeds)
           .filter(hasError)
-          .map(datafeed => datafeed.error.msg),
+          .map((datafeed) => datafeed.error.msg),
         ...Object.values(jobs)
           .filter(hasError)
-          .map(job => job.error.msg),
+          .map((job) => job.error.msg),
       ];
       return {
         ...state,
@@ -262,7 +262,7 @@ const hasSuccessfullyCreatedJob = (jobId: string) => (
   jobSetupResponses: SetupMlModuleResponsePayload['jobs']
 ) =>
   jobSetupResponses.filter(
-    jobSetupResponse =>
+    (jobSetupResponse) =>
       jobSetupResponse.id === jobId && jobSetupResponse.success && !jobSetupResponse.error
   ).length > 0;
 
@@ -270,7 +270,7 @@ const hasSuccessfullyStartedDatafeed = (datafeedId: string) => (
   datafeedSetupResponses: SetupMlModuleResponsePayload['datafeeds']
 ) =>
   datafeedSetupResponses.filter(
-    datafeedSetupResponse =>
+    (datafeedSetupResponse) =>
       datafeedSetupResponse.id === datafeedId &&
       datafeedSetupResponse.success &&
       datafeedSetupResponse.started &&
@@ -279,7 +279,7 @@ const hasSuccessfullyStartedDatafeed = (datafeedId: string) => (
 
 const getJobStatus = (jobId: string) => (jobSummaries: FetchJobStatusResponsePayload): JobStatus =>
   jobSummaries
-    .filter(jobSummary => jobSummary.id === jobId)
+    .filter((jobSummary) => jobSummary.id === jobId)
     .map(
       (jobSummary): JobStatus => {
         if (jobSummary.jobState === 'failed' || jobSummary.datafeedState === '') {
@@ -353,9 +353,9 @@ const isJobRevisionCurrent = (jobId: string, currentRevision: number) => (
   jobSummaries: FetchJobStatusResponsePayload
 ): boolean =>
   jobSummaries
-    .filter(jobSummary => jobSummary.id === jobId)
+    .filter((jobSummary) => jobSummary.id === jobId)
     .every(
-      jobSummary => (jobSummary?.fullJob?.custom_settings?.job_revision ?? 0) >= currentRevision
+      (jobSummary) => (jobSummary?.fullJob?.custom_settings?.job_revision ?? 0) >= currentRevision
     );
 
 const isJobConfigurationConsistent = (
@@ -367,8 +367,8 @@ const isJobConfigurationConsistent = (
   }
 ) => (jobSummaries: FetchJobStatusResponsePayload): boolean =>
   jobSummaries
-    .filter(jobSummary => jobSummary.id === jobId)
-    .every(jobSummary => {
+    .filter((jobSummary) => jobSummary.id === jobId)
+    .every((jobSummary) => {
       if (!jobSummary.fullJob || !jobSummary.fullJob.custom_settings) {
         return false;
       }
@@ -388,7 +388,7 @@ const isIndexPatternSubset = (indexPatternSubset: string, indexPatternSuperset: 
   const subsetSubPatterns = indexPatternSubset.split(',');
   const supersetSubPatterns = new Set(indexPatternSuperset.split(','));
 
-  return subsetSubPatterns.every(subPattern => supersetSubPatterns.has(subPattern));
+  return subsetSubPatterns.every((subPattern) => supersetSubPatterns.has(subPattern));
 };
 
 const hasError = <Value extends any>(value: Value): value is MandatoryProperty<Value, 'error'> =>

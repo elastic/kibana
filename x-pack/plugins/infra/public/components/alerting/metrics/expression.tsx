@@ -83,7 +83,7 @@ const defaultExpression = {
   timeUnit: 'm',
 } as MetricExpression;
 
-export const Expressions: React.FC<Props> = props => {
+export const Expressions: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors, alertsContext } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
@@ -159,7 +159,7 @@ export const Expressions: React.FC<Props> = props => {
 
   const updateTimeSize = useCallback(
     (ts: number | undefined) => {
-      const criteria = alertParams.criteria.map(c => ({
+      const criteria = alertParams.criteria.map((c) => ({
         ...c,
         timeSize: ts,
       }));
@@ -171,7 +171,7 @@ export const Expressions: React.FC<Props> = props => {
 
   const updateTimeUnit = useCallback(
     (tu: string) => {
-      const criteria = alertParams.criteria.map(c => ({
+      const criteria = alertParams.criteria.map((c) => ({
         ...c,
         timeUnit: tu,
       }));
@@ -187,7 +187,7 @@ export const Expressions: React.FC<Props> = props => {
       if (md.currentOptions?.metrics) {
         setAlertParams(
           'criteria',
-          md.currentOptions.metrics.map(metric => ({
+          md.currentOptions.metrics.map((metric) => ({
             metric: metric.field,
             comparator: Comparator.GT,
             threshold: [],
@@ -352,7 +352,7 @@ const StyledExpression = euiStyled.div`
   padding: 0 4px;
 `;
 
-export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
+export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const { setAlertParams, expression, errors, expressionId, remove, fields, canDelete } = props;
   const {
     aggType = AGGREGATION_TYPES.MAX,
@@ -387,7 +387,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
   );
 
   const updateThreshold = useCallback(
-    t => {
+    (t) => {
       if (t.join() !== expression.threshold.join()) {
         setAlertParams(expressionId, { ...expression, threshold: t });
       }
@@ -412,7 +412,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
                 <OfExpression
                   customAggTypesOptions={aggregationType}
                   aggField={metric}
-                  fields={fields.map(f => ({
+                  fields={fields.map((f) => ({
                     normalizedType: f.type,
                     name: f.name,
                   }))}

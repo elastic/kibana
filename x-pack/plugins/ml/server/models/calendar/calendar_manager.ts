@@ -57,11 +57,11 @@ export class CalendarManager {
 
       const events: CalendarEvent[] = await this._eventManager.getAllEvents();
       const calendars: Calendar[] = calendarsResp.calendars;
-      calendars.forEach(cal => (cal.events = []));
+      calendars.forEach((cal) => (cal.events = []));
 
       // loop events and combine with related calendars
-      events.forEach(event => {
-        const calendar = calendars.find(cal => cal.calendar_id === event.calendar_id);
+      events.forEach((event) => {
+        const calendar = calendars.find((cal) => cal.calendar_id === event.calendar_id);
         if (calendar) {
           calendar.events.push(event);
         }
@@ -80,7 +80,7 @@ export class CalendarManager {
   async getCalendarsByIds(calendarIds: string) {
     try {
       const calendars: Calendar[] = await this.getAllCalendars();
-      return calendars.filter(calendar => calendarIds.includes(calendar.calendar_id));
+      return calendars.filter((calendar) => calendarIds.includes(calendar.calendar_id));
     } catch (error) {
       throw Boom.badRequest(error);
     }
@@ -118,12 +118,13 @@ export class CalendarManager {
       // workout the differences between the original events list and the new one
       // if an event has no event_id, it must be new
       const eventsToAdd = calendar.events.filter(
-        event => origCalendar.events.find(e => this._eventManager.isEqual(e, event)) === undefined
+        (event) =>
+          origCalendar.events.find((e) => this._eventManager.isEqual(e, event)) === undefined
       );
 
       // if an event in the original calendar cannot be found, it must have been deleted
       const eventsToRemove: CalendarEvent[] = origCalendar.events.filter(
-        event => calendar.events.find(e => this._eventManager.isEqual(e, event)) === undefined
+        (event) => calendar.events.find((e) => this._eventManager.isEqual(e, event)) === undefined
       );
 
       // note, both of the loops below could be removed if the add and delete endpoints
@@ -152,7 +153,7 @@ export class CalendarManager {
 
       // remove all removed events
       await Promise.all(
-        eventsToRemove.map(async event => {
+        eventsToRemove.map(async (event) => {
           await this._eventManager.deleteEvent(calendarId, event.event_id);
         })
       );

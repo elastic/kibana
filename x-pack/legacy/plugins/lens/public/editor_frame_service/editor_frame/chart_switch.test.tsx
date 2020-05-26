@@ -28,7 +28,7 @@ describe('chart_switch', () => {
       initialize: jest.fn((_frame, state?: unknown) => {
         return state || `${id} initial state`;
       }),
-      getSuggestions: jest.fn(options => {
+      getSuggestions: jest.fn((options) => {
         return [
           {
             score: 1,
@@ -112,18 +112,12 @@ describe('chart_switch', () => {
   }
 
   function showFlyout(component: ReactWrapper) {
-    component
-      .find('[data-test-subj="lnsChartSwitchPopover"]')
-      .first()
-      .simulate('click');
+    component.find('[data-test-subj="lnsChartSwitchPopover"]').first().simulate('click');
   }
 
   function switchTo(subType: string, component: ReactWrapper) {
     showFlyout(component);
-    component
-      .find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`)
-      .first()
-      .simulate('click');
+    component.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).first().simulate('click');
   }
 
   function getMenuItem(subType: string, component: ReactWrapper) {
@@ -507,7 +501,7 @@ describe('chart_switch', () => {
     showFlyout(component);
 
     const allDisplayed = ['subvisA', 'subvisB', 'subvisC1', 'subvisC2'].every(
-      subType => component.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).length > 0
+      (subType) => component.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).length > 0
     );
 
     expect(allDisplayed).toBeTruthy();

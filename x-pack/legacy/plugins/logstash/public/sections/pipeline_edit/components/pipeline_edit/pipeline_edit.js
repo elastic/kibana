@@ -18,7 +18,7 @@ import 'ace';
 
 const app = uiModules.get('xpack/logstash');
 
-app.directive('pipelineEdit', function($injector) {
+app.directive('pipelineEdit', function ($injector) {
   const pipelineService = $injector.get('pipelineService');
   const licenseService = $injector.get('logstashLicenseService');
   const kbnUrl = $injector.get('kbnUrl');
@@ -28,7 +28,7 @@ app.directive('pipelineEdit', function($injector) {
     restrict: 'E',
     link: async (scope, el) => {
       const close = () => scope.$evalAsync(kbnUrl.change('/management/logstash/pipelines', {}));
-      const open = id =>
+      const open = (id) =>
         scope.$evalAsync(kbnUrl.change(`/management/logstash/pipelines/${id}/edit`));
 
       const userResource = logstashSecurity.isSecurityEnabled()

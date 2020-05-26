@@ -22,7 +22,7 @@ import React from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 
 export class SelfChangingEditor extends React.Component {
-  onCounterChange = ev => {
+  onCounterChange = (ev) => {
     this.props.setValue('counter', parseInt(ev.target.value));
   };
 

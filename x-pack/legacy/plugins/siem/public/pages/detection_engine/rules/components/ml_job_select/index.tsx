@@ -96,7 +96,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
     disabled: true,
   };
 
-  const jobOptions = siemJobs.map(job => ({
+  const jobOptions = siemJobs.map((job) => ({
     value: job.id,
     inputDisplay: job.id,
     dropdownDisplay: <JobDisplay title={job.id} description={job.description} />,
@@ -107,7 +107,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
   const isJobRunning = useMemo(() => {
     // If the selected job is not found in the list, it means the placeholder is selected
     // and so we don't want to show the warning, thus isJobRunning will be true when 'job == null'
-    const job = siemJobs.find(j => j.id === jobId);
+    const job = siemJobs.find((j) => j.id === jobId);
     return job == null || isJobStarted(job.jobState, job.datafeedState);
   }, [siemJobs, jobId]);
 

@@ -415,7 +415,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             ]}
           >
             <EuiFieldText
-              inputRef={input => {
+              inputRef={(input) => {
                 if (input) {
                   forceInput.current = input;
                 }
@@ -425,7 +425,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                 defaultMessage: 'Job ID',
               })}
               value={jobId}
-              onChange={e => setFormState({ jobId: e.target.value })}
+              onChange={(e) => setFormState({ jobId: e.target.value })}
               aria-label={i18n.translate(
                 'xpack.ml.dataframe.analytics.create.jobIdInputAriaLabel',
                 {
@@ -529,7 +529,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               disabled={isJobCreated}
               placeholder="destination index"
               value={destinationIndex}
-              onChange={e => setFormState({ destinationIndex: e.target.value })}
+              onChange={(e) => setFormState({ destinationIndex: e.target.value })}
               aria-label={i18n.translate(
                 'xpack.ml.dataframe.analytics.create.destinationIndexInputAriaLabel',
                 {
@@ -617,7 +617,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   singleSelection={true}
                   options={dependentVariableOptions}
                   selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
-                  onChange={selectedOptions =>
+                  onChange={(selectedOptions) =>
                     setFormState({
                       dependentVariable: selectedOptions[0].label || '',
                     })
@@ -641,7 +641,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   showValue
                   value={trainingPercent}
                   // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
-                  onChange={e => setFormState({ trainingPercent: +e.target.value })}
+                  onChange={(e) => setFormState({ trainingPercent: +e.target.value })}
                   data-test-subj="mlAnalyticsCreateJobFlyoutTrainingPercentSlider"
                 />
               </EuiFormRow>
@@ -679,12 +679,12 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               isDisabled={isJobCreated}
               isLoading={loadingFieldOptions}
               options={excludesOptions}
-              selectedOptions={excludes.map(field => ({
+              selectedOptions={excludes.map((field) => ({
                 label: field,
               }))}
               onCreateOption={onCreateOption}
-              onChange={selectedOptions =>
-                setFormState({ excludes: selectedOptions.map(option => option.label) })
+              onChange={(selectedOptions) =>
+                setFormState({ excludes: selectedOptions.map((option) => option.label) })
               }
               isClearable={true}
               data-test-subj="mlAnalyticsCreateJobFlyoutExcludesSelect"
@@ -705,7 +705,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               }
               disabled={isJobCreated}
               value={modelMemoryLimit || ''}
-              onChange={e => setFormState({ modelMemoryLimit: e.target.value })}
+              onChange={(e) => setFormState({ modelMemoryLimit: e.target.value })}
               isInvalid={modelMemoryLimitValidationResult !== null}
               data-test-subj="mlAnalyticsCreateJobFlyoutModelMemoryInput"
             />

@@ -31,7 +31,7 @@ const renderUseMetricsExplorerDataHook = () => {
     return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
   };
   return renderHook(
-    props =>
+    (props) =>
       useMetricsExplorerData(
         props.options,
         props.source,

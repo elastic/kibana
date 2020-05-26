@@ -138,7 +138,7 @@ export const getXyChartRenderer = (dependencies: {
 });
 
 function getIconForSeriesType(seriesType: SeriesType): IconType {
-  return visualizationTypes.find(c => c.id === seriesType)!.icon || 'empty';
+  return visualizationTypes.find((c) => c.id === seriesType)!.icon || 'empty';
 }
 
 const MemoizedChart = React.memo(XYChart);
@@ -171,7 +171,7 @@ export function XYChart({
 }: XYChartRenderProps) {
   const { legend, layers } = args;
 
-  if (Object.values(data.tables).every(table => table.rows.length === 0)) {
+  if (Object.values(data.tables).every((table) => table.rows.length === 0)) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
     return (
       <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
@@ -212,12 +212,12 @@ export function XYChart({
 
   // add minInterval only for single row value as it cannot be determined from dataset
 
-  const minInterval = layers.every(layer => data.tables[layer.layerId].rows.length <= 1)
+  const minInterval = layers.every((layer) => data.tables[layer.layerId].rows.length <= 1)
     ? parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds()
     : undefined;
 
   const xDomain =
-    data.dateRange && layers.every(l => l.xScaleType === 'time')
+    data.dateRange && layers.every((l) => l.xScaleType === 'time')
       ? {
           min: data.dateRange.fromDate.getTime(),
           max: data.dateRange.toDate.getTime(),
@@ -238,7 +238,7 @@ export function XYChart({
           const xySeries = series as XYChartSeriesIdentifier;
           const xyGeometry = geometry as GeometryValue;
 
-          const layer = layers.find(l =>
+          const layer = layers.find((l) =>
             xySeries.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
           );
           if (!layer) {
@@ -250,9 +250,9 @@ export function XYChart({
           const points = [
             {
               row: table.rows.findIndex(
-                row => layer.xAccessor && row[layer.xAccessor] === xyGeometry.x
+                (row) => layer.xAccessor && row[layer.xAccessor] === xyGeometry.x
               ),
-              column: table.columns.findIndex(col => col.id === layer.xAccessor),
+              column: table.columns.findIndex((col) => col.id === layer.xAccessor),
               value: xyGeometry.x,
             },
           ];
@@ -262,22 +262,22 @@ export function XYChart({
 
             points.push({
               row: table.rows.findIndex(
-                row => layer.splitAccessor && row[layer.splitAccessor] === pointValue
+                (row) => layer.splitAccessor && row[layer.splitAccessor] === pointValue
               ),
-              column: table.columns.findIndex(col => col.id === layer.splitAccessor),
+              column: table.columns.findIndex((col) => col.id === layer.splitAccessor),
               value: pointValue,
             });
           }
 
           const xAxisFieldName: string | undefined = table.columns.find(
-            col => col.id === layer.xAccessor
+            (col) => col.id === layer.xAccessor
           )?.meta?.aggConfigParams?.field;
 
           const timeFieldName = xDomain && xAxisFieldName;
 
           const context: EmbeddableVisTriggerContext = {
             data: {
-              data: points.map(point => ({
+              data: points.map((point) => ({
                 row: point.row,
                 column: point.column,
                 value: point.value,
@@ -297,7 +297,7 @@ export function XYChart({
         title={xTitle}
         showGridLines={false}
         hide={layers[0].hide}
-        tickFormat={d => xAxisFormatter.convert(d)}
+        tickFormat={(d) => xAxisFormatter.convert(d)}
       />
 
       <Axis
@@ -306,7 +306,7 @@ export function XYChart({
         title={args.yTitle}
         showGridLines={false}
         hide={layers[0].hide}
-        tickFormat={d => yAxisFormatter.convert(d)}
+        tickFormat={(d) => yAxisFormatter.convert(d)}
       />
 
       {layers.map(
@@ -329,7 +329,7 @@ export function XYChart({
             !accessors.length ||
             !data.tables[layerId] ||
             data.tables[layerId].rows.length === 0 ||
-            data.tables[layerId].rows.every(row => typeof row[xAccessor] === 'undefined')
+            data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')
           ) {
             return;
           }
@@ -343,8 +343,12 @@ export function XYChart({
           // For date histogram chart type, we're getting the rows that represent intervals without data.
           // To not display them in the legend, they need to be filtered out.
           const rows = table.rows.filter(
-            row =>
-              !(splitAccessor && !row[splitAccessor] && accessors.every(accessor => !row[accessor]))
+            (row) =>
+              !(
+                splitAccessor &&
+                !row[splitAccessor] &&
+                accessors.every((accessor) => !row[accessor])
+              )
           );
 
           const seriesProps: SeriesSpec = {
@@ -359,7 +363,7 @@ export function XYChart({
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             timeZone,
             name(d) {
-              const splitHint = table.columns.find(col => col.id === splitAccessor)?.formatHint;
+              const splitHint = table.columns.find((col) => col.id === splitAccessor)?.formatHint;
 
               // For multiple y series, the name of the operation is used on each, either:
               // * Key - Y name

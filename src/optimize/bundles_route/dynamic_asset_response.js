@@ -66,9 +66,9 @@ export async function createDynamicAssetResponse(options) {
     // we use and manage a file descriptor mostly because
     // that's what Inert does, and since we are accessing
     // the file 2 or 3 times per request it seems logical
-    fd = await fcb(cb => open(path, 'r', cb));
+    fd = await fcb((cb) => open(path, 'r', cb));
 
-    const stat = await fcb(cb => fstat(fd, cb));
+    const stat = await fcb((cb) => fstat(fd, cb));
     const hash = await getFileHash(fileHashCache, path, stat, fd);
 
     const read = createReadStream(null, {
@@ -88,7 +88,7 @@ export async function createDynamicAssetResponse(options) {
   } catch (error) {
     if (fd) {
       try {
-        await fcb(cb => close(fd, cb));
+        await fcb((cb) => close(fd, cb));
       } catch (error) {
         // ignore errors from close, we already have one to report
         // and it's very likely they are the same

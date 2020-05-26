@@ -69,7 +69,7 @@ export const SettingsPageComponent = ({
   const fieldErrors = formFields && {
     heartbeatIndices: formFields.heartbeatIndices.match(/^\S+$/) ? null : 'May not be blank',
   };
-  const isFormValid = !(fieldErrors && Object.values(fieldErrors).find(v => !!v));
+  const isFormValid = !(fieldErrors && Object.values(fieldErrors).find((v) => !!v));
 
   const onChangeFormField = (field: keyof DynamicSettings, value: any) => {
     if (formFields) {

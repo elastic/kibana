@@ -52,11 +52,11 @@ const testDataList = [
 ];
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('anomaly explorer', function() {
+  describe('anomaly explorer', function () {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/farequote');
@@ -68,7 +68,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     for (const testData of testDataList) {
-      describe(testData.suiteSuffix, function() {
+      describe(testData.suiteSuffix, function () {
         before(async () => {
           await ml.api.createAndRunAnomalyDetectionLookbackJob(
             testData.jobConfig,
@@ -87,7 +87,7 @@ export default function({ getService }: FtrProviderContext) {
           await ml.jobTable.waitForJobsToLoad();
           await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id);
           const rows = await ml.jobTable.parseJobTable();
-          expect(rows.filter(row => row.id === testData.jobConfig.job_id)).to.have.length(1);
+          expect(rows.filter((row) => row.id === testData.jobConfig.job_id)).to.have.length(1);
 
           await ml.jobTable.clickOpenJobInAnomalyExplorerButton(testData.jobConfig.job_id);
           await ml.common.waitForMlLoadingIndicatorToDisappear();

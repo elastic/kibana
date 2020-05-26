@@ -57,13 +57,13 @@ const mockPlugins = {
 const getHits = (...sources) => {
   return {
     hits: {
-      hits: sources.map(source => ({ _source: source })),
+      hits: sources.map((source) => ({ _source: source })),
     },
   };
 };
 
-const getErrorsFromRequest = request =>
-  request.logs.filter(log => log.tags.includes('error')).map(log => log.error);
+const getErrorsFromRequest = (request) =>
+  request.logs.filter((log) => log.tags.includes('error')).map((log) => log.error);
 
 test(`returns 404 if job not found`, async () => {
   mockPlugins.elasticsearch.adminClient = {

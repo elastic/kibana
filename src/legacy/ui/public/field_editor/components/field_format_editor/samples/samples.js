@@ -48,7 +48,7 @@ export class FormatEditorSamples extends PureComponent {
         name: i18n.translate('common.ui.fieldEditor.samples.inputHeader', {
           defaultMessage: 'Input',
         }),
-        render: input => {
+        render: (input) => {
           return typeof input === 'object' ? JSON.stringify(input) : input;
         },
       },
@@ -57,7 +57,7 @@ export class FormatEditorSamples extends PureComponent {
         name: i18n.translate('common.ui.fieldEditor.samples.outputHeader', {
           defaultMessage: 'Output',
         }),
-        render: output => {
+        render: (output) => {
           return sampleType === 'html' ? (
             <div
               /*

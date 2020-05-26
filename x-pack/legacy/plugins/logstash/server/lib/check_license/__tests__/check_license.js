@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { set } from 'lodash';
 import { checkLicense } from '../check_license';
 
-describe('check_license', function() {
+describe('check_license', function () {
   let mockLicenseInfo;
   beforeEach(() => (mockLicenseInfo = {}));
 

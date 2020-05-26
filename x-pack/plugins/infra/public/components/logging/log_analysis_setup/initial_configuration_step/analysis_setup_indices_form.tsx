@@ -22,7 +22,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   const handleCheckboxChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onChangeSelectedIndices(
-        indices.map(index => {
+        indices.map((index) => {
           const checkbox = event.currentTarget;
           return index.name === checkbox.id ? { ...index, isSelected: checkbox.checked } : index;
         })
@@ -33,7 +33,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
 
   const choices = useMemo(
     () =>
-      indices.map(index => {
+      indices.map((index) => {
         const checkbox = (
           <EuiCheckbox
             key={index.name}
@@ -87,7 +87,7 @@ const indicesSelectionLabel = i18n.translate('xpack.infra.analysisSetup.indicesS
 });
 
 const formatValidationError = (errors: ValidationIndicesUIError[]): React.ReactNode => {
-  return errors.map(error => {
+  return errors.map((error) => {
     switch (error.error) {
       case 'INDEX_NOT_FOUND':
         return (

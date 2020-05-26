@@ -26,8 +26,8 @@ export class SavedObjectsManagement {
   public getImportableAndExportableTypes() {
     return this.registry
       .getAllTypes()
-      .map(type => type.name)
-      .filter(type => this.isImportAndExportable(type));
+      .map((type) => type.name)
+      .filter((type) => this.isImportAndExportable(type));
   }
 
   public isImportAndExportable(type: string) {

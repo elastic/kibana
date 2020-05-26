@@ -28,7 +28,7 @@ export const FormCreateDrilldown: React.FC<FormCreateDrilldownProps> = ({
         placeholder={txtUntitledDrilldown}
         value={name}
         disabled={onNameChange === noop}
-        onChange={event => onNameChange(event.target.value)}
+        onChange={(event) => onNameChange(event.target.value)}
         data-test-subj="dynamicActionNameInput"
       />
     </EuiFormRow>

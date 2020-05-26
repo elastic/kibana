@@ -106,7 +106,7 @@ export const ConnectorAddFlyout = ({
       ...actionTypeModel?.validateConnector(connector).errors,
       ...validateBaseProperties(connector).errors,
     } as IErrorObject;
-    hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+    hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
     currentForm = (
       <ActionConnectorForm
@@ -122,7 +122,7 @@ export const ConnectorAddFlyout = ({
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
-      .then(savedConnector => {
+      .then((savedConnector) => {
         if (toastNotifications) {
           toastNotifications.addSuccess(
             i18n.translate(
@@ -138,7 +138,7 @@ export const ConnectorAddFlyout = ({
         }
         return savedConnector;
       })
-      .catch(errorRes => {
+      .catch((errorRes) => {
         toastNotifications.addDanger(
           errorRes.body?.message ??
             i18n.translate(

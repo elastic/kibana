@@ -58,7 +58,7 @@ function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
     [setValueAxisLabels]
   );
 
-  const setColor = useCallback(value => setValueAxisLabels('color', value), [setValueAxisLabels]);
+  const setColor = useCallback((value) => setValueAxisLabels('color', value), [setValueAxisLabels]);
 
   return (
     <EuiPanel paddingSize="s">

@@ -40,7 +40,7 @@ const secretSchemaProps = {
   password: schema.nullable(schema.string()),
 };
 const SecretsSchema = schema.object(secretSchemaProps, {
-  validate: secrets => {
+  validate: (secrets) => {
     // user and password must be set together (or not at all)
     if (!secrets.password && !secrets.user) return;
     if (secrets.password && secrets.user) return;
@@ -147,7 +147,7 @@ export async function executor(
       if (status === 429) {
         return pipe(
           getRetryAfterIntervalFromHeaders(responseHeaders),
-          map(retry => retryResultSeconds(actionId, message, retry)),
+          map((retry) => retryResultSeconds(actionId, message, retry)),
           getOrElse(() => retryResult(actionId, message))
         );
       }

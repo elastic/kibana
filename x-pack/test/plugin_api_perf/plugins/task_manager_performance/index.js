@@ -39,8 +39,9 @@ export default function TaskManagerPerformanceAPI(kibana) {
         const title = `[Perf${performanceState.capturing ? ' (capturing)' : ''}]`;
         const seconds = parseInt((lastFlush - prevFlush) / 1000);
         console.log(
-          `${title} I have processed ${tasks} tasks in the past ${seconds}s (${tasks /
-            seconds} per second)`
+          `${title} I have processed ${tasks} tasks in the past ${seconds}s (${
+            tasks / seconds
+          } per second)`
         );
         if (tasks > 0) {
           const latestAverage = avg(performanceState.leadTimeQueue.splice(0, tasks)).mean;
@@ -180,7 +181,7 @@ export default function TaskManagerPerformanceAPI(kibana) {
           performance.mark('perfTest.start');
         },
         endCapture() {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             performanceState.performance.summarize.push([resolve, perfApi.summarize]);
 
             performance.mark('perfTest.end');
@@ -290,7 +291,7 @@ function resetPerfState(target) {
   });
 
   performanceState.performanceObserver = new PerformanceObserver((list, observer) => {
-    list.getEntries().forEach(entry => {
+    list.getEntries().forEach((entry) => {
       const { name, duration } = entry;
       switch (name) {
         // Elasticsearch Api Calls

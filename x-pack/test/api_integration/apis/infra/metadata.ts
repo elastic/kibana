@@ -12,7 +12,7 @@ import {
 } from '../../../../plugins/infra/common/http_api/metadata_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const fetchMetadata = async (body: InfraMetadataRequest): Promise<InfraMetadata | undefined> => {
@@ -117,7 +117,7 @@ export default function({ getService }: FtrProviderContext) {
           });
           if (metadata) {
             expect(metadata.features.length).to.be(19);
-            expect(metadata.features.some(f => f.name === 'aws.ec2')).to.be(true);
+            expect(metadata.features.some((f) => f.name === 'aws.ec2')).to.be(true);
             expect(metadata.name).to.equal('ip-172-31-47-9.us-east-2.compute.internal');
             expect(metadata.info).to.eql({
               cloud: {

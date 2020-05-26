@@ -46,7 +46,7 @@ export const cardinalityMetricAgg = new MetricAggType({
       name: 'field',
       type: 'field',
       filterFieldTypes: Object.values(KBN_FIELD_TYPES).filter(
-        type => type !== KBN_FIELD_TYPES.HISTOGRAM
+        (type) => type !== KBN_FIELD_TYPES.HISTOGRAM
       ),
     },
   ],

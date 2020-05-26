@@ -22,7 +22,7 @@ export const callJobsSummaryAPI = async <JobType extends string>(
     method: 'POST',
     body: JSON.stringify(
       fetchJobStatusRequestPayloadRT.encode({
-        jobIds: jobTypes.map(jobType => getJobId(spaceId, sourceId, jobType)),
+        jobIds: jobTypes.map((jobType) => getJobId(spaceId, sourceId, jobType)),
       })
     ),
   });

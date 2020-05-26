@@ -20,27 +20,15 @@ export async function config(Joi: any) {
     queue: Joi.object({
       indexInterval: Joi.string().default('week'),
       pollEnabled: Joi.boolean().default(true),
-      pollInterval: Joi.number()
-        .integer()
-        .default(3000),
-      pollIntervalErrorMultiplier: Joi.number()
-        .integer()
-        .default(10),
-      timeout: Joi.number()
-        .integer()
-        .default(120000),
+      pollInterval: Joi.number().integer().default(3000),
+      pollIntervalErrorMultiplier: Joi.number().integer().default(10),
+      timeout: Joi.number().integer().default(120000),
     }).default(),
     capture: Joi.object({
       timeouts: Joi.object({
-        openUrl: Joi.number()
-          .integer()
-          .default(30000),
-        waitForElements: Joi.number()
-          .integer()
-          .default(30000),
-        renderComplete: Joi.number()
-          .integer()
-          .default(30000),
+        openUrl: Joi.number().integer().default(30000),
+        waitForElements: Joi.number().integer().default(30000),
+        renderComplete: Joi.number().integer().default(30000),
       }).default(),
       networkPolicy: Joi.object({
         enabled: Joi.boolean().default(true),
@@ -61,33 +49,17 @@ export async function config(Joi: any) {
             { allow: false }, // Default action is to deny!
           ]),
       }).default(),
-      zoom: Joi.number()
-        .integer()
-        .default(2),
+      zoom: Joi.number().integer().default(2),
       viewport: Joi.object({
-        width: Joi.number()
-          .integer()
-          .default(1950),
-        height: Joi.number()
-          .integer()
-          .default(1200),
+        width: Joi.number().integer().default(1950),
+        height: Joi.number().integer().default(1200),
       }).default(),
-      timeout: Joi.number()
-        .integer()
-        .default(20000), // deprecated
-      loadDelay: Joi.number()
-        .integer()
-        .default(3000),
-      settleTime: Joi.number()
-        .integer()
-        .default(1000), // deprecated
-      concurrency: Joi.number()
-        .integer()
-        .default(appConfig.concurrency), // deprecated
+      timeout: Joi.number().integer().default(20000), // deprecated
+      loadDelay: Joi.number().integer().default(3000),
+      settleTime: Joi.number().integer().default(1000), // deprecated
+      concurrency: Joi.number().integer().default(appConfig.concurrency), // deprecated
       browser: Joi.object({
-        type: Joi.any()
-          .valid(BROWSER_TYPE)
-          .default(BROWSER_TYPE),
+        type: Joi.any().valid(BROWSER_TYPE).default(BROWSER_TYPE),
         autoDownload: Joi.boolean().when('$dist', {
           is: true,
           then: Joi.default(false),
@@ -119,9 +91,7 @@ export async function config(Joi: any) {
                 else: Joi.default([]),
               }),
           }).default(),
-          maxScreenshotDimension: Joi.number()
-            .integer()
-            .default(1950),
+          maxScreenshotDimension: Joi.number().integer().default(1950),
         }).default(),
       }).default(),
       maxAttempts: Joi.number()
@@ -144,9 +114,7 @@ export async function config(Joi: any) {
         duration: Joi.string()
           .regex(/^[0-9]+(d|h|m|s|ms|micros|nanos)$/, { name: 'DurationString' })
           .default('30s'),
-        size: Joi.number()
-          .integer()
-          .default(500),
+        size: Joi.number().integer().default(500),
       }).default(),
     }).default(),
     encryptionKey: Joi.when(Joi.ref('$dist'), {
@@ -155,27 +123,17 @@ export async function config(Joi: any) {
       otherwise: Joi.string().default('a'.repeat(32)),
     }),
     roles: Joi.object({
-      allow: Joi.array()
-        .items(Joi.string())
-        .default(['reporting_user']),
+      allow: Joi.array().items(Joi.string()).default(['reporting_user']),
     }).default(),
     index: Joi.string().default('.reporting'),
     poll: Joi.object({
       jobCompletionNotifier: Joi.object({
-        interval: Joi.number()
-          .integer()
-          .default(10000),
-        intervalErrorMultiplier: Joi.number()
-          .integer()
-          .default(5),
+        interval: Joi.number().integer().default(10000),
+        intervalErrorMultiplier: Joi.number().integer().default(5),
       }).default(),
       jobsRefresh: Joi.object({
-        interval: Joi.number()
-          .integer()
-          .default(5000),
-        intervalErrorMultiplier: Joi.number()
-          .integer()
-          .default(5),
+        interval: Joi.number().integer().default(5000),
+        intervalErrorMultiplier: Joi.number().integer().default(5),
       }).default(),
     }).default(),
   }).default();

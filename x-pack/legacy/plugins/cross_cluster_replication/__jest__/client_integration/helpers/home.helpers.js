@@ -15,7 +15,7 @@ const testBedConfig = {
   memoryRouter: {
     initialEntries: [`${BASE_PATH}/follower_indices`],
     componentRoutePath: `${BASE_PATH}/:section`,
-    onRouter: router => (routing.reactRouter = router),
+    onRouter: (router) => (routing.reactRouter = router),
   },
 };
 

@@ -95,8 +95,8 @@ export function getArgValueSuggestions() {
           perPage: 25,
         });
         return resp.savedObjects
-          .filter(savedObject => !savedObject.get('type'))
-          .map(savedObject => {
+          .filter((savedObject) => !savedObject.get('type'))
+          .map((savedObject) => {
             return { name: savedObject.attributes.title };
           });
       },
@@ -120,7 +120,7 @@ export function getArgValueSuggestions() {
 
         const valueSplit = partial.split(':');
         return indexPattern.fields
-          .filter(field => {
+          .filter((field) => {
             return (
               field.aggregatable &&
               'number' === field.type &&
@@ -128,7 +128,7 @@ export function getArgValueSuggestions() {
               !indexPatternsUtils.isNestedField(field)
             );
           })
-          .map(field => {
+          .map((field) => {
             return { name: `${valueSplit[0]}:${field.name}`, help: field.type };
           });
       },
@@ -139,7 +139,7 @@ export function getArgValueSuggestions() {
         }
 
         return indexPattern.fields
-          .filter(field => {
+          .filter((field) => {
             return (
               field.aggregatable &&
               ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type) &&
@@ -147,7 +147,7 @@ export function getArgValueSuggestions() {
               !indexPatternsUtils.isNestedField(field)
             );
           })
-          .map(field => {
+          .map((field) => {
             return { name: field.name, help: field.type };
           });
       },
@@ -158,14 +158,14 @@ export function getArgValueSuggestions() {
         }
 
         return indexPattern.fields
-          .filter(field => {
+          .filter((field) => {
             return (
               'date' === field.type &&
               containsFieldName(partial, field) &&
               !indexPatternsUtils.isNestedField(field)
             );
           })
-          .map(field => {
+          .map((field) => {
             return { name: field.name };
           });
       },
@@ -212,7 +212,7 @@ export function getArgValueSuggestions() {
       staticSuggestions: TimelionFunctionArgs['suggestions'] = []
     ) => {
       if (partialInput) {
-        return staticSuggestions.filter(suggestion => {
+        return staticSuggestions.filter((suggestion) => {
           return suggestion.name.includes(partialInput);
         });
       }

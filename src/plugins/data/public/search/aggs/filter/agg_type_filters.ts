@@ -59,8 +59,8 @@ class AggTypeFilters {
     aggFilter: string[]
   ) {
     const allFilters = Array.from(this.filters);
-    const allowedAggTypes = aggTypes.filter(aggType => {
-      const isAggTypeAllowed = allFilters.every(filter =>
+    const allowedAggTypes = aggTypes.filter((aggType) => {
+      const isAggTypeAllowed = allFilters.every((filter) =>
         filter(aggType, indexPattern, aggConfig, aggFilter)
       );
       return isAggTypeAllowed;

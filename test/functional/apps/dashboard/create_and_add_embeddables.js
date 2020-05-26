@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 
 import { VisualizeConstants } from '../../../../src/legacy/core_plugins/kibana/public/visualize/np_ready/visualize_constants';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
   const browser = getService('browser');

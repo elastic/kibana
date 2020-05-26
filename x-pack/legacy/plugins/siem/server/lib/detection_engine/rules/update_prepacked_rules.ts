@@ -17,7 +17,7 @@ export const updatePrepackagedRules = async (
   rules: PrepackagedRules[],
   outputIndex: string
 ): Promise<void> => {
-  await rules.forEach(async rule => {
+  await rules.forEach(async (rule) => {
     const {
       description,
       false_positives: falsePositives,

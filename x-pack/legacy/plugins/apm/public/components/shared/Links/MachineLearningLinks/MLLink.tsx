@@ -38,7 +38,7 @@ export function MLLink({ children, path = '', query = {} }: Props) {
 
   const href = url.format({
     pathname: core.http.basePath.prepend('/app/ml'),
-    hash: `${path}?_g=${rison.encode(risonQuery as RisonValue)}`
+    hash: `${path}?_g=${rison.encode(risonQuery as RisonValue)}`,
   });
 
   return <EuiLink children={children} href={href} />;

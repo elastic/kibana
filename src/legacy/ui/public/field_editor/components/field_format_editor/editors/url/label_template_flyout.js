@@ -125,7 +125,7 @@ export const LabelTemplateFlyout = ({ isVisible = false, onClose = () => {} }) =
                 name: i18n.translate('common.ui.fieldEditor.labelTemplate.outputHeader', {
                   defaultMessage: 'Output',
                 }),
-                render: value => {
+                render: (value) => {
                   return (
                     <span
                       /*

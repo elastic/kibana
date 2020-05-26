@@ -24,8 +24,8 @@ import { ToastsStart } from '../../../../../core/public';
 const APP_REDIRECT_MESSAGE_PARAM = 'app_redirect_message';
 
 export function addAppRedirectMessageToUrl(url: string, message: string) {
-  return modifyUrl(url, urlParts => {
-    urlParts.hash = modifyUrl(urlParts.hash || '', hashParts => {
+  return modifyUrl(url, (urlParts) => {
+    urlParts.hash = modifyUrl(urlParts.hash || '', (hashParts) => {
       hashParts.query[APP_REDIRECT_MESSAGE_PARAM] = message;
     });
   });

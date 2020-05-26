@@ -15,7 +15,7 @@ import {
   asInteger,
   asDynamicBytes,
   getFixedByteFormatter,
-  asDuration
+  asDuration,
 } from '../../../../utils/formatters';
 import { Coordinate } from '../../../../../../../../plugins/apm/typings/timeseries';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
@@ -32,9 +32,9 @@ export function MetricsChart({ chart }: Props) {
   const formatYValue = getYTickFormatter(chart);
   const formatTooltip = getTooltipFormatter(chart);
 
-  const transformedSeries = chart.series.map(series => ({
+  const transformedSeries = chart.series.map((series) => ({
     ...series,
-    legendValue: formatYValue(series.overallValue)
+    legendValue: formatYValue(series.overallValue),
   }));
 
   const syncedChartProps = useChartsSync();
@@ -59,8 +59,8 @@ function getYTickFormatter(chart: GenericMetricsChart) {
   switch (chart.yUnit) {
     case 'bytes': {
       const max = Math.max(
-        ...chart.series.flatMap(series =>
-          series.data.map(coord => coord.y || 0)
+        ...chart.series.flatMap((series) =>
+          series.data.map((coord) => coord.y || 0)
         )
       );
       return getFixedByteFormatter(max);

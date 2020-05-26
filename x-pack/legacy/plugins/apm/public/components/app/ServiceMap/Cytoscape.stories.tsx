@@ -22,31 +22,31 @@ storiesOf('app/ServiceMap/Cytoscape', module).add(
         data: {
           id: 'opbeans-python',
           'service.name': 'opbeans-python',
-          'agent.name': 'python'
-        }
+          'agent.name': 'python',
+        },
       },
       {
         data: {
           id: 'opbeans-node',
           'service.name': 'opbeans-node',
-          'agent.name': 'nodejs'
-        }
+          'agent.name': 'nodejs',
+        },
       },
       {
         data: {
           id: 'opbeans-ruby',
           'service.name': 'opbeans-ruby',
-          'agent.name': 'ruby'
-        }
+          'agent.name': 'ruby',
+        },
       },
       { data: { source: 'opbeans-python', target: 'opbeans-node' } },
       {
         data: {
           bidirectional: true,
           source: 'opbeans-python',
-          target: 'opbeans-ruby'
-        }
-      }
+          target: 'opbeans-ruby',
+        },
+      },
     ];
     const height = 300;
     const width = 1340;
@@ -63,8 +63,8 @@ storiesOf('app/ServiceMap/Cytoscape', module).add(
   {
     info: {
       propTables: false,
-      source: false
-    }
+      source: false,
+    },
   }
 );
 
@@ -81,8 +81,8 @@ storiesOf('app/ServiceMap/Cytoscape', module)
           data: {
             id: 'elasticsearch',
             'span.type': 'db',
-            'span.subtype': 'elasticsearch'
-          }
+            'span.subtype': 'elasticsearch',
+          },
         },
         { data: { id: 'external', 'span.type': 'external' } },
         { data: { id: 'ext', 'span.type': 'ext' } },
@@ -91,71 +91,71 @@ storiesOf('app/ServiceMap/Cytoscape', module)
           data: {
             id: 'dotnet',
             'service.name': 'dotnet service',
-            'agent.name': 'dotnet'
-          }
+            'agent.name': 'dotnet',
+          },
         },
         {
           data: {
             id: 'go',
             'service.name': 'go service',
-            'agent.name': 'go'
-          }
+            'agent.name': 'go',
+          },
         },
         {
           data: {
             id: 'java',
             'service.name': 'java service',
-            'agent.name': 'java'
-          }
+            'agent.name': 'java',
+          },
         },
         {
           data: {
             id: 'RUM (js-base)',
             'service.name': 'RUM service',
-            'agent.name': 'js-base'
-          }
+            'agent.name': 'js-base',
+          },
         },
         {
           data: {
             id: 'RUM (rum-js)',
             'service.name': 'RUM service',
-            'agent.name': 'rum-js'
-          }
+            'agent.name': 'rum-js',
+          },
         },
         {
           data: {
             id: 'nodejs',
             'service.name': 'nodejs service',
-            'agent.name': 'nodejs'
-          }
+            'agent.name': 'nodejs',
+          },
         },
         {
           data: {
             id: 'php',
             'service.name': 'php service',
-            'agent.name': 'php'
-          }
+            'agent.name': 'php',
+          },
         },
         {
           data: {
             id: 'python',
             'service.name': 'python service',
-            'agent.name': 'python'
-          }
+            'agent.name': 'python',
+          },
         },
         {
           data: {
             id: 'ruby',
             'service.name': 'ruby service',
-            'agent.name': 'ruby'
-          }
-        }
+            'agent.name': 'ruby',
+          },
+        },
       ];
       cy.add(elements);
 
       return (
         <EuiFlexGroup gutterSize="l" wrap={true}>
-          {cy.nodes().map(node => (
+          {cy.nodes().map((node) => (
             <EuiFlexItem key={node.data('id')}>
               <EuiCard
                 description={
@@ -183,8 +183,8 @@ storiesOf('app/ServiceMap/Cytoscape', module)
     {
       info: {
         propTables: false,
-        source: false
-      }
+        source: false,
+      },
     }
   )
   .add(
@@ -205,8 +205,8 @@ storiesOf('app/ServiceMap/Cytoscape', module)
     },
     {
       info: {
-        source: false
-      }
+        source: false,
+      },
     }
   )
   .addParameters({ options: { showPanel: false } });

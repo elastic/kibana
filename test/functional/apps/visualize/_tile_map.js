@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
@@ -35,9 +35,9 @@ export default function({ getService, getPageObjects }) {
     'tileMap',
   ]);
 
-  describe('tile map visualize app', function() {
+  describe('tile map visualize app', function () {
     describe('incomplete config', function describeIndexTests() {
-      before(async function() {
+      before(async function () {
         await browser.setWindowSize(1280, 1000);
 
         log.debug('navigateToApp visualize');
@@ -57,7 +57,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('complete config', function describeIndexTests() {
-      before(async function() {
+      before(async function () {
         await browser.setWindowSize(1280, 1000);
 
         log.debug('navigateToApp visualize');
@@ -84,7 +84,7 @@ export default function({ getService, getPageObjects }) {
         log.debug('comparing expected: ', expected);
         log.debug('with actual: ', actual);
 
-        const roundedValues = actual.map(row => {
+        const roundedValues = actual.map((row) => {
           // Parse last element in each row as JSON and floor the lat/long value
           const coords = JSON.parse(row[row.length - 1]);
           row[row.length - 1] = {
@@ -98,11 +98,11 @@ export default function({ getService, getPageObjects }) {
       }
 
       describe('tile map chart', function indexPatternCreation() {
-        it('should have inspector enabled', async function() {
+        it('should have inspector enabled', async function () {
           await inspector.expectIsEnabled();
         });
 
-        it('should show correct tile map data on default zoom level', async function() {
+        it('should show correct tile map data on default zoom level', async function () {
           const expectedTableData = [
             ['-', '9', '5,787', { lat: 37, lon: -104 }],
             ['-', 'd', '5,600', { lat: 37, lon: -82 }],
@@ -123,14 +123,14 @@ export default function({ getService, getPageObjects }) {
           compareTableData(actualTableData, expectedTableData);
         });
 
-        it('should not be able to zoom out beyond 0', async function() {
+        it('should not be able to zoom out beyond 0', async function () {
           await PageObjects.tileMap.zoomAllTheWayOut();
           const enabled = await PageObjects.tileMap.getMapZoomOutEnabled();
           expect(enabled).to.be(false);
         });
 
         // See https://github.com/elastic/kibana/issues/13137 if this test starts failing intermittently
-        it('Fit data bounds should zoom to level 3', async function() {
+        it('Fit data bounds should zoom to level 3', async function () {
           const expectedPrecision2DataTable = [
             ['-', 'dn', '1,429', { lat: 36, lon: -85 }],
             ['-', 'dp', '1,418', { lat: 41, lon: -85 }],
@@ -237,7 +237,7 @@ export default function({ getService, getPageObjects }) {
       let last = false;
       const toastDefaultLife = 6000;
 
-      before(async function() {
+      before(async function () {
         await browser.setWindowSize(1280, 1000);
 
         log.debug('navigateToApp visualize');
@@ -255,11 +255,11 @@ export default function({ getService, getPageObjects }) {
         }
       });
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         await PageObjects.tileMap.clickMapZoomIn(waitForLoading);
       });
 
-      afterEach(async function() {
+      afterEach(async function () {
         if (!last) {
           await PageObjects.common.sleep(toastDefaultLife);
           await PageObjects.tileMap.clickMapZoomOut(waitForLoading);

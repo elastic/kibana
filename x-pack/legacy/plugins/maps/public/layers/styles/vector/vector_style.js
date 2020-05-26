@@ -150,17 +150,17 @@ export class VectorStyle extends AbstractStyle {
       onStyleDescriptorChange(vectorStyleDescriptor);
     };
 
-    const onIsTimeAwareChange = isTimeAware => {
+    const onIsTimeAwareChange = (isTimeAware) => {
       const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, isTimeAware);
       onStyleDescriptorChange(vectorStyleDescriptor);
     };
 
-    const propertiesWithFieldMeta = this.getDynamicPropertiesArray().filter(dynamicStyleProp => {
+    const propertiesWithFieldMeta = this.getDynamicPropertiesArray().filter((dynamicStyleProp) => {
       return dynamicStyleProp.isFieldMetaEnabled();
     });
 
     const styleProperties = {};
-    this.getAllStyleProperties().forEach(styleProperty => {
+    this.getAllStyleProperties().forEach((styleProperty) => {
       styleProperties[styleProperty.getStyleName()] = styleProperty;
     });
 
@@ -194,12 +194,12 @@ export class VectorStyle extends AbstractStyle {
     const originalProperties = this.getRawProperties();
     const updatedProperties = {};
 
-    const dynamicProperties = Object.keys(originalProperties).filter(key => {
+    const dynamicProperties = Object.keys(originalProperties).filter((key) => {
       const { type, options } = originalProperties[key] || {};
       return type === STYLE_TYPE.DYNAMIC && options.field && options.field.name;
     });
 
-    dynamicProperties.forEach(key => {
+    dynamicProperties.forEach((key) => {
       const dynamicProperty = originalProperties[key];
       const fieldName =
         dynamicProperty && dynamicProperty.options.field && dynamicProperty.options.field.name;
@@ -207,7 +207,7 @@ export class VectorStyle extends AbstractStyle {
         return;
       }
 
-      const matchingOrdinalField = nextFields.find(ordinalField => {
+      const matchingOrdinalField = nextFields.find((ordinalField) => {
         return fieldName === ordinalField.getName();
       });
 
@@ -297,7 +297,7 @@ export class VectorStyle extends AbstractStyle {
       return styleMeta;
     }
 
-    dynamicProperties.forEach(dynamicProperty => {
+    dynamicProperties.forEach((dynamicProperty) => {
       const categoricalStyleMeta = dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
       const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
       const name = dynamicProperty.getField().getName();
@@ -318,7 +318,7 @@ export class VectorStyle extends AbstractStyle {
 
   getSourceFieldNames() {
     const fieldNames = [];
-    this.getDynamicPropertiesArray().forEach(styleProperty => {
+    this.getDynamicPropertiesArray().forEach((styleProperty) => {
       if (styleProperty.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
         fieldNames.push(styleProperty.getField().getName());
       }
@@ -337,7 +337,7 @@ export class VectorStyle extends AbstractStyle {
   getDynamicPropertiesArray() {
     const styleProperties = this.getAllStyleProperties();
     return styleProperties.filter(
-      styleProperty => styleProperty.isDynamic() && styleProperty.isComplete()
+      (styleProperty) => styleProperty.isDynamic() && styleProperty.isComplete()
     );
   }
 
@@ -355,7 +355,7 @@ export class VectorStyle extends AbstractStyle {
 
   _getDynamicPropertyByFieldName(fieldName) {
     const dynamicProps = this.getDynamicPropertiesArray();
-    return dynamicProps.find(dynamicProp => {
+    return dynamicProps.find((dynamicProp) => {
       return fieldName === dynamicProp.getField().getName();
     });
   }
@@ -364,7 +364,7 @@ export class VectorStyle extends AbstractStyle {
     return this._styleMeta;
   }
 
-  _getFieldFormatter = fieldName => {
+  _getFieldFormatter = (fieldName) => {
     const dynamicProp = this._getDynamicPropertyByFieldName(fieldName);
     if (!dynamicProp) {
       return null;
@@ -374,7 +374,7 @@ export class VectorStyle extends AbstractStyle {
     if (dynamicProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
       dataRequestId = SOURCE_FORMATTERS_ID_ORIGIN;
     } else {
-      const join = this._layer.getValidJoins().find(join => {
+      const join = this._layer.getValidJoins().find((join) => {
         return join.getRightJoinSource().hasMatchingMetricField(fieldName);
       });
       if (join) {
@@ -434,7 +434,7 @@ export class VectorStyle extends AbstractStyle {
   };
 
   _getLegendDetailStyleProperties = () => {
-    return this.getDynamicPropertiesArray().filter(styleProperty => {
+    return this.getDynamicPropertiesArray().filter((styleProperty) => {
       const styleName = styleProperty.getStyleName();
       if ([VECTOR_STYLES.ICON_ORIENTATION, VECTOR_STYLES.LABEL_TEXT].includes(styleName)) {
         return false;
@@ -519,7 +519,7 @@ export class VectorStyle extends AbstractStyle {
     //this return-value is used in an optimization for style-updates with mapbox-gl.
     //`true` indicates the entire data needs to reset on the source (otherwise the style-rules will not be reapplied)
     //`false` indicates the data does not need to be reset on the store, because styles are re-evaluated if they use featureState
-    return dynamicStyleProps.some(dynamicStyleProp => !dynamicStyleProp.supportsMbFeatureState());
+    return dynamicStyleProps.some((dynamicStyleProp) => !dynamicStyleProp.supportsMbFeatureState());
   }
 
   arePointsSymbolizedAsCircles() {
@@ -576,7 +576,7 @@ export class VectorStyle extends AbstractStyle {
     if (fieldDescriptor.origin === FIELD_ORIGIN.SOURCE) {
       return this._source.getFieldByName(fieldDescriptor.name);
     } else if (fieldDescriptor.origin === FIELD_ORIGIN.JOIN) {
-      const join = this._layer.getValidJoins().find(join => {
+      const join = this._layer.getValidJoins().find((join) => {
         return join.getRightJoinSource().hasMatchingMetricField(fieldDescriptor.name);
       });
       return join ? join.getRightJoinSource().getMetricFieldForName(fieldDescriptor.name) : null;

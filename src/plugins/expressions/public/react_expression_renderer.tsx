@@ -103,11 +103,11 @@ export const ReactExpressionRenderer = ({
     subs.push(
       expressionLoaderRef.current.loading$.subscribe(() => {
         hasHandledErrorRef.current = false;
-        setState(prevState => ({ ...prevState, isLoading: true }));
+        setState((prevState) => ({ ...prevState, isLoading: true }));
       }),
       expressionLoaderRef.current.render$
         .pipe(filter(() => !hasHandledErrorRef.current))
-        .subscribe(item => {
+        .subscribe((item) => {
           setState(() => ({
             ...defaultState,
             isEmpty: false,
@@ -116,7 +116,7 @@ export const ReactExpressionRenderer = ({
     );
 
     return () => {
-      subs.forEach(s => s.unsubscribe());
+      subs.forEach((s) => s.unsubscribe());
       if (expressionLoaderRef.current) {
         expressionLoaderRef.current.destroy();
         expressionLoaderRef.current = null;

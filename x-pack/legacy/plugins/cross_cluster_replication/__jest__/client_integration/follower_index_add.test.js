@@ -123,7 +123,7 @@ describe('Create Follower index', () => {
       test('should not allow invalid characters', () => {
         actions.clickSaveForm(); // Make all errors visible
 
-        const expectInvalidChar = char => {
+        const expectInvalidChar = (char) => {
           form.setInputValue('leaderIndexInput', `with${char}`);
           expect(form.getErrorsMessages()).toContain(
             `Remove the characters ${char} from your leader index.`
@@ -152,7 +152,7 @@ describe('Create Follower index', () => {
       test('should not allow invalid characters', () => {
         actions.clickSaveForm(); // Make all errors visible
 
-        const expectInvalidChar = char => {
+        const expectInvalidChar = (char) => {
           form.setInputValue('followerIndexInput', `with${char}`);
           expect(form.getErrorsMessages()).toContain(
             `Remove the characters ${char} from your name.`
@@ -238,7 +238,7 @@ describe('Create Follower index', () => {
       };
 
       test('should have a toggle to activate advanced settings', () => {
-        const expectDoesNotExist = testSubject => {
+        const expectDoesNotExist = (testSubject) => {
           try {
             expect(exists(testSubject)).toBe(false);
           } catch {
@@ -246,7 +246,7 @@ describe('Create Follower index', () => {
           }
         };
 
-        const expectDoesExist = testSubject => {
+        const expectDoesExist = (testSubject) => {
           try {
             expect(exists(testSubject)).toBe(true);
           } catch {

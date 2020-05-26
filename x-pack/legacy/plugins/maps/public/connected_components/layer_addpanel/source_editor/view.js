@@ -20,7 +20,7 @@ export const SourceEditor = ({
     onPreviewSource: previewLayer,
     inspectorAdapters,
   };
-  const Source = ALL_SOURCES.find(Source => {
+  const Source = ALL_SOURCES.find((Source) => {
     return Source.type === sourceType;
   });
   if (!Source) {

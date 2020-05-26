@@ -65,7 +65,7 @@ describe('DateRangesParamEditor component', () => {
     expect(setValue).toHaveBeenCalledWith([{}]);
   });
 
-  it('should validate range values with date math', function() {
+  it('should validate range values with date math', function () {
     const component = mountWithIntl(<DateRangesWrapped {...defaultProps} />);
 
     // should allow empty values

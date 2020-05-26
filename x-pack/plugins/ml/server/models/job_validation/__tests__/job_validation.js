@@ -9,20 +9,20 @@ import { validateJob } from '../job_validation';
 
 // mock callWithRequest
 const callWithRequest = () => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     resolve({});
   });
 };
 
 describe('ML - validateJob', () => {
-  it('calling factory without payload throws an error', done => {
+  it('calling factory without payload throws an error', (done) => {
     validateJob(callWithRequest).then(
       () => done(new Error('Promise should not resolve for this test without payload.')),
       () => done()
     );
   });
 
-  it('calling factory with incomplete payload throws an error', done => {
+  it('calling factory with incomplete payload throws an error', (done) => {
     const payload = {};
 
     validateJob(callWithRequest, payload).then(
@@ -31,7 +31,7 @@ describe('ML - validateJob', () => {
     );
   });
 
-  it('throws an error because job.analysis_config is not an object', done => {
+  it('throws an error because job.analysis_config is not an object', (done) => {
     const payload = { job: {} };
 
     validateJob(callWithRequest, payload).then(
@@ -45,7 +45,7 @@ describe('ML - validateJob', () => {
     );
   });
 
-  it('throws an error because job.analysis_config.detectors is not an Array', done => {
+  it('throws an error because job.analysis_config.detectors is not an Array', (done) => {
     const payload = { job: { analysis_config: {} } };
 
     validateJob(callWithRequest, payload).then(
@@ -58,8 +58,8 @@ describe('ML - validateJob', () => {
   it('basic validation messages', () => {
     const payload = { job: { analysis_config: { detectors: [] } } };
 
-    return validateJob(callWithRequest, payload).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateJob(callWithRequest, payload).then((messages) => {
+      const ids = messages.map((m) => m.id);
 
       expect(ids).to.eql([
         'job_id_empty',
@@ -71,7 +71,7 @@ describe('ML - validateJob', () => {
   });
 
   const jobIdTests = (testIds, messageId) => {
-    const promises = testIds.map(id => {
+    const promises = testIds.map((id) => {
       const payload = { job: { analysis_config: { detectors: [] } } };
       payload.job.job_id = id;
       return validateJob(callWithRequest, payload).catch(() => {
@@ -79,9 +79,9 @@ describe('ML - validateJob', () => {
       });
     });
 
-    return Promise.all(promises).then(testResults => {
-      testResults.forEach(messages => {
-        const ids = messages.map(m => m.id);
+    return Promise.all(promises).then((testResults) => {
+      testResults.forEach((messages) => {
+        const ids = messages.map((m) => m.id);
         expect(ids.includes(messageId)).to.equal(true);
       });
     });
@@ -91,8 +91,8 @@ describe('ML - validateJob', () => {
     const payload = { job: { analysis_config: { detectors: [] } } };
     payload.job.groups = testIds;
 
-    return validateJob(callWithRequest, payload).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateJob(callWithRequest, payload).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids.includes(messageId)).to.equal(true);
     });
   };
@@ -127,7 +127,7 @@ describe('ML - validateJob', () => {
   });
 
   const bucketSpanFormatTests = (testFormats, messageId) => {
-    const promises = testFormats.map(format => {
+    const promises = testFormats.map((format) => {
       const payload = { job: { analysis_config: { detectors: [] } } };
       payload.job.analysis_config.bucket_span = format;
       return validateJob(callWithRequest, payload).catch(() => {
@@ -135,9 +135,9 @@ describe('ML - validateJob', () => {
       });
     });
 
-    return Promise.all(promises).then(testResults => {
-      testResults.forEach(messages => {
-        const ids = messages.map(m => m.id);
+    return Promise.all(promises).then((testResults) => {
+      testResults.forEach((messages) => {
+        const ids = messages.map((m) => m.id);
         expect(ids.includes(messageId)).to.equal(true);
       });
     });
@@ -163,8 +163,8 @@ describe('ML - validateJob', () => {
       function: undefined,
     });
 
-    return validateJob(callWithRequest, payload).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateJob(callWithRequest, payload).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids.includes('detectors_function_empty')).to.equal(true);
     });
   });
@@ -175,8 +175,8 @@ describe('ML - validateJob', () => {
       function: 'count',
     });
 
-    return validateJob(callWithRequest, payload).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateJob(callWithRequest, payload).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids.includes('detectors_function_not_empty')).to.equal(true);
     });
   });
@@ -187,8 +187,8 @@ describe('ML - validateJob', () => {
       fields: {},
     };
 
-    return validateJob(callWithRequest, payload).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateJob(callWithRequest, payload).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids.includes('index_fields_invalid')).to.equal(true);
     });
   });
@@ -199,8 +199,8 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     };
 
-    return validateJob(callWithRequest, payload).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateJob(callWithRequest, payload).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids.includes('index_fields_valid')).to.equal(true);
     });
   });
@@ -223,7 +223,7 @@ describe('ML - validateJob', () => {
     fields: { testField: {} },
   });
 
-  it('throws an error because job.analysis_config.influencers is not an Array', done => {
+  it('throws an error because job.analysis_config.influencers is not an Array', (done) => {
     const payload = getBasicPayload();
     delete payload.job.analysis_config.influencers;
 
@@ -239,8 +239,8 @@ describe('ML - validateJob', () => {
   it('detect duplicate detectors', () => {
     const payload = getBasicPayload();
     payload.job.analysis_config.detectors.push({ function: 'count' });
-    return validateJob(callWithRequest, payload).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateJob(callWithRequest, payload).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql([
         'job_id_valid',
         'detectors_function_not_empty',
@@ -262,8 +262,8 @@ describe('ML - validateJob', () => {
       { function: 'count', by_field_name: 'airline' },
       { function: 'count', partition_field_name: 'airline' },
     ];
-    return validateJob(callWithRequest, payload).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateJob(callWithRequest, payload).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql([
         'job_id_valid',
         'detectors_function_not_empty',
@@ -276,8 +276,8 @@ describe('ML - validateJob', () => {
 
   it('basic validation passes, extended checks return some messages', () => {
     const payload = getBasicPayload();
-    return validateJob(callWithRequest, payload).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateJob(callWithRequest, payload).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql([
         'job_id_valid',
         'detectors_function_not_empty',
@@ -308,8 +308,8 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     };
 
-    return validateJob(callWithRequest, payload).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateJob(callWithRequest, payload).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql([
         'job_id_valid',
         'detectors_function_not_empty',
@@ -341,8 +341,8 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     };
 
-    return validateJob(callWithRequest, payload).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateJob(callWithRequest, payload).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql([
         'job_id_valid',
         'detectors_function_not_empty',
@@ -383,8 +383,8 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     };
 
-    return validateJob(callWithRequest, payload).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateJob(callWithRequest, payload).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql([
         'job_id_valid',
         'detectors_function_not_empty',
@@ -402,15 +402,15 @@ describe('ML - validateJob', () => {
   const docsTestPayload = getBasicPayload();
   docsTestPayload.job.analysis_config.detectors = [{ function: 'count', by_field_name: 'airline' }];
   it('creates a docs url pointing to the current docs version', () => {
-    return validateJob(callWithRequest, docsTestPayload).then(messages => {
-      const message = messages[messages.findIndex(m => m.id === 'field_not_aggregatable')];
+    return validateJob(callWithRequest, docsTestPayload).then((messages) => {
+      const message = messages[messages.findIndex((m) => m.id === 'field_not_aggregatable')];
       expect(message.url.search('/current/')).not.to.be(-1);
     });
   });
 
   it('creates a docs url pointing to the master docs version', () => {
-    return validateJob(callWithRequest, docsTestPayload, 'master').then(messages => {
-      const message = messages[messages.findIndex(m => m.id === 'field_not_aggregatable')];
+    return validateJob(callWithRequest, docsTestPayload, 'master').then((messages) => {
+      const message = messages[messages.findIndex((m) => m.id === 'field_not_aggregatable')];
       expect(message.url.search('/master/')).not.to.be(-1);
     });
   });

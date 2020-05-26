@@ -37,11 +37,11 @@ jest.mock('../../../services/ml_api_service', () => ({
 
 jest.mock('react', () => {
   const r = jest.requireActual('react');
-  return { ...r, memo: x => x };
+  return { ...r, memo: (x) => x };
 });
 
 jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
-  withKibana: node => {
+  withKibana: (node) => {
     return node;
   },
 }));

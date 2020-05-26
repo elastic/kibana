@@ -38,7 +38,7 @@ const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
 const getUnsupportedRenderers = (state: State) => {
   const renderers: string[] = [];
   const expressions = getRenderedWorkpadExpressions(state);
-  expressions.forEach(expression => {
+  expressions.forEach((expression) => {
     if (!renderFunctionNames.includes(expression)) {
       renderers.push(expression);
     }
@@ -76,7 +76,7 @@ export const ShareWebsiteFlyout = compose<ComponentProps, Pick<Props, 'onClose'>
       onCopy: () => {
         notify.info(strings.getCopyShareConfigMessage());
       },
-      onDownload: type => {
+      onDownload: (type) => {
         switch (type) {
           case 'share':
             downloadRenderedWorkpad(renderedWorkpad);
@@ -88,7 +88,7 @@ export const ShareWebsiteFlyout = compose<ComponentProps, Pick<Props, 'onClose'>
             const basePath = kibana.services.http.basePath.get();
             arrayBufferFetch
               .post(`${basePath}${API_ROUTE_SHAREABLE_ZIP}`, JSON.stringify(renderedWorkpad))
-              .then(blob => downloadZippedRuntime(blob.data))
+              .then((blob) => downloadZippedRuntime(blob.data))
               .catch((err: Error) => {
                 notify.error(err, { title: strings.getShareableZipErrorTitle(workpad.name) });
               });

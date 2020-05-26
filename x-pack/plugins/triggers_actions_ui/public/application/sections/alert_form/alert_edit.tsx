@@ -67,7 +67,7 @@ export const AlertEdit = ({
     ...(alertType ? alertType.validate(alert.params).errors : []),
     ...validateBaseProperties(alert).errors,
   } as IErrorObject;
-  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  const hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
   const actionsErrors: Array<{
     errors: IErrorObject;
@@ -79,7 +79,7 @@ export const AlertEdit = ({
     actionsErrors.find(
       (errorObj: { errors: IErrorObject }) =>
         errorObj &&
-        !!Object.keys(errorObj.errors).find(errorKey => errorObj.errors[errorKey].length >= 1)
+        !!Object.keys(errorObj.errors).find((errorKey) => errorObj.errors[errorKey].length >= 1)
     ) !== undefined;
 
   async function onSaveAlert(): Promise<Alert | undefined> {

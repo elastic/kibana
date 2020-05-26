@@ -28,11 +28,11 @@ export const dashboardDrilldownActionFactory: ActionFactory<{
       useCurrentDashboardFilters: true,
     };
   },
-  isValid: config => {
+  isValid: (config) => {
     if (!config.dashboardId) return false;
     return true;
   },
-  wizard: props => {
+  wizard: (props) => {
     const config = props.config ?? {
       dashboardId: undefined,
       useCurrentDashboardDataRange: true,
@@ -46,7 +46,7 @@ export const dashboardDrilldownActionFactory: ActionFactory<{
             hasNoInitialSelection={true}
             options={dashboards.map(({ id, title }) => ({ value: id, text: title }))}
             value={config.dashboardId}
-            onChange={e => {
+            onChange={(e) => {
               props.onConfig({ ...config, dashboardId: e.target.value });
             }}
           />
@@ -92,11 +92,11 @@ export const urlDrilldownActionFactory: ActionFactory<{ url: string; openInNewTa
       openInNewTab: false,
     };
   },
-  isValid: config => {
+  isValid: (config) => {
     if (!config.url) return false;
     return true;
   },
-  wizard: props => {
+  wizard: (props) => {
     const config = props.config ?? {
       url: '',
       openInNewTab: false,
@@ -108,7 +108,7 @@ export const urlDrilldownActionFactory: ActionFactory<{ url: string; openInNewTa
             placeholder="Enter URL"
             name="url"
             value={config.url}
-            onChange={event => props.onConfig({ ...config, url: event.target.value })}
+            onChange={(event) => props.onConfig({ ...config, url: event.target.value })}
           />
         </EuiFormRow>
         <EuiFormRow hasChildLabel={false}>
@@ -147,13 +147,13 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
       <ActionWizard
         actionFactories={actionFactories}
         config={state.config}
-        onConfigChange={newConfig => {
+        onConfigChange={(newConfig) => {
           setState({
             ...state,
             config: newConfig,
           });
         }}
-        onActionFactoryChange={newActionFactory => {
+        onActionFactoryChange={(newActionFactory) => {
           changeActionFactory(newActionFactory);
         }}
         currentActionFactory={state.currentActionFactory}

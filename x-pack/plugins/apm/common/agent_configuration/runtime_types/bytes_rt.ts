@@ -14,7 +14,7 @@ export const bytesRt = new t.Type<string, string, unknown>(
   'bytesRt',
   t.string.is,
   (input, context) => {
-    return either.chain(t.string.validate(input, context), inputAsString => {
+    return either.chain(t.string.validate(input, context), (inputAsString) => {
       const { amount, unit } = amountAndUnitToObject(inputAsString);
       const amountAsInt = parseInt(amount, 10);
       const isValidUnit = BYTE_UNITS.includes(unit);

@@ -63,7 +63,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   id: 'xpack.uptime.alerts.monitorStatus',
   name: 'Uptime monitor status',
   iconClass: 'uptimeApp',
-  alertParamsExpression: params => {
+  alertParamsExpression: (params) => {
     return <AlertMonitorStatus {...params} autocomplete={autocomplete} />;
   },
   validate,

@@ -52,7 +52,7 @@ export const findActionRoute = (router: IRouter, licenseState: ILicenseState) =>
         tags: ['access:actions-read'],
       },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, TypeOf<typeof querySchema>, any, any>,
       res: KibanaResponseFactory

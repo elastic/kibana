@@ -39,7 +39,7 @@ const DEBOUNCE_DELAY = 50;
 export function timechartFn(dependencies: TimelionVisualizationDependencies) {
   const { $rootScope, $compile, uiSettings } = dependencies;
 
-  return function() {
+  return function () {
     return {
       help: 'Draw a timeseries chart',
       render($scope: any, $elem: any) {
@@ -153,7 +153,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
           });
           drawPlot($scope.chart);
         }
-        $scope.highlightSeries = _.debounce(function(id: any) {
+        $scope.highlightSeries = _.debounce(function (id: any) {
           if (highlightedSeries === id) {
             return;
           }
@@ -168,50 +168,50 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
           });
           drawPlot($scope.chart);
         }, DEBOUNCE_DELAY);
-        $scope.focusSeries = function(id: any) {
+        $scope.focusSeries = function (id: any) {
           focusedSeries = id;
           $scope.highlightSeries(id);
         };
 
-        $scope.toggleSeries = function(id: any) {
+        $scope.toggleSeries = function (id: any) {
           const series = $scope.chart[id];
           series._hide = !series._hide;
           drawPlot($scope.chart);
         };
 
-        const cancelResize = observeResize($elem, function() {
+        const cancelResize = observeResize($elem, function () {
           drawPlot($scope.chart);
         });
 
-        $scope.$on('$destroy', function() {
+        $scope.$on('$destroy', function () {
           cancelResize();
           $elem.off('plothover');
           $elem.off('plotselected');
           $elem.off('mouseleave');
         });
 
-        $elem.on('plothover', function(event: any, pos: any, item: any) {
+        $elem.on('plothover', function (event: any, pos: any, item: any) {
           $rootScope.$broadcast('timelionPlotHover', event, pos, item);
         });
 
-        $elem.on('plotselected', function(event: any, ranges: any) {
+        $elem.on('plotselected', function (event: any, ranges: any) {
           timefilter.setTime({
             from: moment(ranges.xaxis.from),
             to: moment(ranges.xaxis.to),
           });
         });
 
-        $elem.on('mouseleave', function() {
+        $elem.on('mouseleave', function () {
           $rootScope.$broadcast('timelionPlotLeave');
         });
 
-        $scope.$on('timelionPlotHover', function(angularEvent: any, flotEvent: any, pos: any) {
+        $scope.$on('timelionPlotHover', function (angularEvent: any, flotEvent: any, pos: any) {
           if (!$scope.plot) return;
           $scope.plot.setCrosshair(pos);
           debouncedSetLegendNumbers(pos);
         });
 
-        $scope.$on('timelionPlotLeave', function() {
+        $scope.$on('timelionPlotLeave', function () {
           if (!$scope.plot) return;
           $scope.plot.clearCrosshair();
           clearLegendNumbers();
@@ -273,7 +273,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
           if (legendCaption) {
             legendCaption.html(emptyCaption);
           }
-          _.each(legendValueNumbers, function(num) {
+          _.each(legendValueNumbers, function (num) {
             $(num).empty();
           });
         }
@@ -289,10 +289,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
             return;
           }
 
-          const title = _(plotConfig)
-            .map('_title')
-            .compact()
-            .last() as any;
+          const title = _(plotConfig).map('_title').compact().last() as any;
           $('.chart-top-title', $elem).text(title == null ? '' : title);
 
           const options = _.cloneDeep(defaultOptions) as any;
@@ -309,7 +306,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
           const format = getxAxisFormatter(interval);
 
           // Use moment to format ticks so we get timezone correction
-          options.xaxis.tickFormatter = function(val: any) {
+          options.xaxis.tickFormatter = function (val: any) {
             return moment(val).format(format);
           };
 
@@ -320,7 +317,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
             $elem.width() / (format.length * tickLetterWidth + tickPadding)
           );
 
-          const series = _.map(plotConfig, function(serie: any, index) {
+          const series = _.map(plotConfig, function (serie: any, index) {
             serie = _.cloneDeep(
               _.defaults(serie, {
                 shadowSize: 0,
@@ -345,7 +342,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
             }
 
             if (serie._global) {
-              _.merge(options, serie._global, function(objVal, srcVal) {
+              _.merge(options, serie._global, function (objVal, srcVal) {
                 // This is kind of gross, it means that you can't replace a global value with a null
                 // best you can do is an empty string. Deal with it.
                 if (objVal == null) return srcVal;
@@ -379,7 +376,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
           legendScope = $scope.$new();
           // Used to toggle the series, and for displaying values on hover
           legendValueNumbers = canvasElem.find('.ngLegendValueNumber');
-          _.each(canvasElem.find('.ngLegendValue'), function(elem) {
+          _.each(canvasElem.find('.ngLegendValue'), function (elem) {
             $compile(elem)(legendScope);
           });
 

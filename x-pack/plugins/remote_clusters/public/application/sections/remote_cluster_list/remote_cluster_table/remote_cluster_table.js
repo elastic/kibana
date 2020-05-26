@@ -57,14 +57,14 @@ export class RemoteClusterTable extends Component {
     const { queryText } = this.state;
 
     if (queryText) {
-      return clusters.filter(cluster => {
+      return clusters.filter((cluster) => {
         const { name, seeds } = cluster;
         const normalizedName = name.toLowerCase();
         if (normalizedName.toLowerCase().includes(queryText)) {
           return true;
         }
 
-        return seeds.some(seed => seed.includes(queryText));
+        return seeds.some((seed) => seed.includes(queryText));
       });
     } else {
       return clusters.slice(0);
@@ -170,7 +170,7 @@ export class RemoteClusterTable extends Component {
           defaultMessage: 'Mode',
         }),
         sortable: true,
-        render: mode =>
+        render: (mode) =>
           mode === PROXY_MODE
             ? mode
             : i18n.translate('xpack.remoteClusters.remoteClusterList.table.sniffModeDescription', {
@@ -263,7 +263,7 @@ export class RemoteClusterTable extends Component {
               return (
                 <EuiToolTip content={label} delay="long">
                   <RemoveClusterButtonProvider clusterNames={[name]}>
-                    {removeCluster => (
+                    {(removeCluster) => (
                       <EuiButtonIcon
                         data-test-subj="remoteClusterTableRowRemoveButton"
                         aria-label={label}
@@ -292,7 +292,7 @@ export class RemoteClusterTable extends Component {
     const search = {
       toolsLeft: selectedItems.length ? (
         <RemoveClusterButtonProvider clusterNames={selectedItems.map(({ name }) => name)}>
-          {removeCluster => (
+          {(removeCluster) => (
             <EuiButton
               color="danger"
               onClick={removeCluster}
@@ -308,9 +308,7 @@ export class RemoteClusterTable extends Component {
             </EuiButton>
           )}
         </RemoveClusterButtonProvider>
-      ) : (
-        undefined
-      ),
+      ) : undefined,
       onChange: this.onSearch,
       box: {
         incremental: true,
@@ -323,7 +321,7 @@ export class RemoteClusterTable extends Component {
     };
 
     const selection = {
-      onSelectionChange: selectedItems => this.setState({ selectedItems }),
+      onSelectionChange: (selectedItems) => this.setState({ selectedItems }),
       selectable: ({ isConfiguredByNode }) => !isConfiguredByNode,
     };
 

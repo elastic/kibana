@@ -176,10 +176,10 @@ export class Execution<
     this.invokeChain(this.state.get().ast.chain, input).then(resolve, reject);
 
     this.firstResultFuture.promise.then(
-      result => {
+      (result) => {
         this.state.transitions.setResult(result);
       },
-      error => {
+      (error) => {
         this.state.transitions.setError(error);
       }
     );
@@ -378,7 +378,7 @@ export class Execution<
 
     // Actually resolve unless the argument definition says not to
     const resolvedArgValues = await Promise.all(
-      argNames.map(argName => {
+      argNames.map((argName) => {
         const interpretFns = resolveArgFns[argName];
         if (!argDefs[argName].resolve) return interpretFns;
         return Promise.all(interpretFns.map((fn: any) => fn()));

@@ -27,7 +27,7 @@ const { ScriptHighlightRules } = require('./script_highlight_rules');
 const { JsonHighlightRules } = ace.acequire('ace/mode/json_highlight_rules');
 const oop = ace.acequire('ace/lib/oop');
 
-const jsonRules = function(root) {
+const jsonRules = function (root) {
   root = root ? root : 'json';
   const rules = {};
   const xJsonRules = [

@@ -88,7 +88,7 @@ const savedObjectTypes = convertLegacyTypes(
 );
 
 const typeRegistry = new SavedObjectTypeRegistry();
-savedObjectTypes.forEach(type => typeRegistry.registerType(type));
+savedObjectTypes.forEach((type) => typeRegistry.registerType(type));
 
 const migrator = mockKibanaMigrator.create({
   types: savedObjectTypes,
@@ -103,7 +103,7 @@ describe('Saved Objects Mixin', () => {
     'kibana.index': 'kibana.index',
     'savedObjects.maxImportExportSize': 10000,
   };
-  const stubConfig = jest.fn(key => {
+  const stubConfig = jest.fn((key) => {
     return config[key];
   });
 

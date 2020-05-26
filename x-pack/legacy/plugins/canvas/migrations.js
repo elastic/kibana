@@ -8,7 +8,7 @@ import { CANVAS_TYPE } from './common/lib';
 
 export const migrations = {
   [CANVAS_TYPE]: {
-    '7.0.0': doc => {
+    '7.0.0': (doc) => {
       if (doc.attributes) {
         delete doc.attributes.id;
       }

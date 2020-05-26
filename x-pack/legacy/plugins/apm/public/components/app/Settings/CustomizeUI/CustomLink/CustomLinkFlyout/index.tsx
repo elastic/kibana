@@ -10,7 +10,7 @@ import {
   EuiPortal,
   EuiSpacer,
   EuiText,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -42,7 +42,7 @@ export const CustomLinkFlyout = ({
   onSave,
   onDelete,
   defaults,
-  customLinkId
+  customLinkId,
 }: Props) => {
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
@@ -67,7 +67,7 @@ export const CustomLinkFlyout = ({
       label,
       url,
       filters,
-      toasts
+      toasts,
     });
     setIsSaving(false);
     onSave();
@@ -83,7 +83,7 @@ export const CustomLinkFlyout = ({
                 {i18n.translate(
                   'xpack.apm.settings.customizeUI.customLink.flyout.title',
                   {
-                    defaultMessage: 'Create link'
+                    defaultMessage: 'Create link',
                   }
                 )}
               </h2>
@@ -96,14 +96,14 @@ export const CustomLinkFlyout = ({
                   'xpack.apm.settings.customizeUI.customLink.flyout.label',
                   {
                     defaultMessage:
-                      'Links will be available in the context of transaction details throughout the APM app. You can create an unlimited number of links. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. More information, including examples, are available in the'
+                      'Links will be available in the context of transaction details throughout the APM app. You can create an unlimited number of links. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. More information, including examples, are available in the',
                   }
                 )}{' '}
                 <Documentation
                   label={i18n.translate(
                     'xpack.apm.settings.customizeUI.customLink.flyout.label.doc',
                     {
-                      defaultMessage: 'documentation.'
+                      defaultMessage: 'documentation.',
                     }
                   )}
                 />

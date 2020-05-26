@@ -23,6 +23,6 @@ window.__coreProvider = {
   setup: npSetup,
   start: npStart,
   testUtils: {
-    delay: (ms: number) => new Promise(res => setTimeout(res, ms)),
+    delay: (ms: number) => new Promise((res) => setTimeout(res, ms)),
   },
 };

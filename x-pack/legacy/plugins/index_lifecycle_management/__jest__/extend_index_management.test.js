@@ -23,7 +23,7 @@ import { init as initUiMetric } from '../public/np_ready/application/services/ui
 // We need to init the http with a mock for any tests that depend upon the http service.
 // For example, add_lifecycle_confirm_modal makes an API request in its componentDidMount
 // lifecycle method. If we don't mock this, CI will fail with "Call retries were exceeded".
-initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
+initHttp(axios.create({ adapter: axiosXhrAdapter }), (path) => path);
 initUiMetric(() => () => {});
 
 jest.mock('ui/new_platform');

@@ -27,8 +27,8 @@ describe('durationRt', () => {
       's',
       'm',
       '0ms',
-      '-1ms'
-    ].map(input => {
+      '-1ms',
+    ].map((input) => {
       it(`${JSON.stringify(input)}`, () => {
         expect(isRight(durationRt.decode(input))).toBe(false);
       });
@@ -36,7 +36,7 @@ describe('durationRt', () => {
   });
 
   describe('it should accept', () => {
-    ['1000ms', '2s', '3m', '1s'].map(input => {
+    ['1000ms', '2s', '3m', '1s'].map((input) => {
       it(`${JSON.stringify(input)}`, () => {
         expect(isRight(durationRt.decode(input))).toBe(true);
       });
@@ -48,7 +48,7 @@ describe('getDurationRt', () => {
   const customDurationRt = getDurationRt({ min: -1 });
   describe('it should not accept', () => {
     [undefined, null, '', 0, 'foo', true, false, '100', 's', 'm', '-2ms'].map(
-      input => {
+      (input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(customDurationRt.decode(input))).toBe(false);
         });
@@ -57,7 +57,7 @@ describe('getDurationRt', () => {
   });
 
   describe('it should accept', () => {
-    ['1000ms', '2s', '3m', '1s', '-1s', '0ms'].map(input => {
+    ['1000ms', '2s', '3m', '1s', '-1s', '0ms'].map((input) => {
       it(`${JSON.stringify(input)}`, () => {
         expect(isRight(customDurationRt.decode(input))).toBe(true);
       });

@@ -51,11 +51,11 @@ describe('AggTypeFilters', () => {
     expect(filtered).toEqual(aggTypes);
 
     registry.addFilter(() => true);
-    registry.addFilter(aggType => aggType.name !== 'count');
+    registry.addFilter((aggType) => aggType.name !== 'count');
     filtered = registry.filter(aggTypes, indexPattern, aggConfig, []);
     expect(filtered).toEqual([aggTypes[1], aggTypes[2]]);
 
-    registry.addFilter(aggType => aggType.name !== 'avg');
+    registry.addFilter((aggType) => aggType.name !== 'avg');
     filtered = registry.filter(aggTypes, indexPattern, aggConfig, []);
     expect(filtered).toEqual([aggTypes[1]]);
   });

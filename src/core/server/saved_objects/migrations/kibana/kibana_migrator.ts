@@ -123,7 +123,7 @@ export class KibanaMigrator {
       registry: this.typeRegistry,
     });
 
-    const migrators = Object.keys(indexMap).map(index => {
+    const migrators = Object.keys(indexMap).map((index) => {
       return new IndexMigrator({
         batchSize: this.savedObjectsConfig.batchSize,
         callCluster: this.callCluster,
@@ -141,7 +141,7 @@ export class KibanaMigrator {
       });
     });
 
-    return Promise.all(migrators.map(migrator => migrator.migrate()));
+    return Promise.all(migrators.map((migrator) => migrator.migrate()));
   }
 
   /**

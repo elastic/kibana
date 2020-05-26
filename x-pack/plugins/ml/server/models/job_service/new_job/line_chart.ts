@@ -50,7 +50,7 @@ export function newJobLineChartProvider(callWithRequest: callWithRequestType) {
     const results = await callWithRequest('search', json);
     return processSearchResults(
       results,
-      aggFieldNamePairs.map(af => af.field)
+      aggFieldNamePairs.map((af) => af.field)
     );
   }
 

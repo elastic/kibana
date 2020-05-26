@@ -38,7 +38,7 @@ const getRoute = (routerMock: MockServer['router']): Route => {
   return { config, handler };
 };
 
-const buildResultMock = () => ({ ok: jest.fn(x => x), badRequest: jest.fn(x => x) });
+const buildResultMock = () => ({ ok: jest.fn((x) => x), badRequest: jest.fn((x) => x) });
 
 class MockServer {
   constructor(
