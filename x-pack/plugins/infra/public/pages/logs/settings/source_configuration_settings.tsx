@@ -7,6 +7,7 @@
 import {
   EuiButton,
   EuiCallOut,
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -74,7 +75,7 @@ export const LogsSettingsPage = () => {
   }
 
   return (
-    <>
+    <EuiErrorBoundary>
       <EuiPage>
         <EuiPageBody
           className="eui-displayBlock"
@@ -181,7 +182,7 @@ export const LogsSettingsPage = () => {
           </EuiFlexGroup>
         </EuiPageBody>
       </EuiPage>
-    </>
+    </EuiErrorBoundary>
   );
 };
 

@@ -16,7 +16,7 @@ import {
   SHOW_TOC_DETAILS,
   HIDE_TOC_DETAILS,
   UPDATE_INDEXING_STAGE,
-} from '../actions/ui_actions';
+} from '../actions';
 
 export enum FLYOUT_STATE {
   NONE = 'NONE',
@@ -44,7 +44,7 @@ export type MapUiState = {
 
 export const DEFAULT_IS_LAYER_TOC_OPEN = true;
 
-const INITIAL_STATE = {
+export const DEFAULT_MAP_UI_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
   isFullScreen: false,
   isReadOnly: false,
@@ -57,7 +57,7 @@ const INITIAL_STATE = {
 };
 
 // Reducer
-export function ui(state: MapUiState = INITIAL_STATE, action: any) {
+export function ui(state: MapUiState = DEFAULT_MAP_UI_STATE, action: any) {
   switch (action.type) {
     case UPDATE_FLYOUT:
       return { ...state, flyoutDisplay: action.display };

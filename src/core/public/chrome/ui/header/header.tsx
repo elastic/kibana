@@ -23,7 +23,6 @@ import {
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
   EuiIcon,
-  // @ts-ignore
   EuiNavDrawer,
   EuiShowFor,
   htmlIdGenerator,
@@ -167,7 +166,7 @@ export class Header extends Component<HeaderProps, State> {
         aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.toggleSideNavAriaLabel', {
           defaultMessage: 'Toggle side navigation',
         })}
-        onClick={() => this.navDrawerRef.current.toggleOpen()}
+        onClick={() => this.navDrawerRef.current?.toggleOpen()}
       >
         <EuiIcon type="apps" size="m" />
       </EuiHeaderSectionItemButton>
@@ -247,6 +246,7 @@ export class Header extends Component<HeaderProps, State> {
                 href={this.props.homeHref}
                 forceNavigation={this.state.forceNavigation}
                 navLinks={navLinks}
+                navigateToApp={this.props.application.navigateToApp}
               />
             </EuiHeaderSectionItem>
 
@@ -287,6 +287,7 @@ export class Header extends Component<HeaderProps, State> {
                 this.toggleCollapsibleNavRef.current.focus();
               }
             }}
+            navigateToApp={this.props.application.navigateToApp}
           />
         ) : (
           // TODO #64541

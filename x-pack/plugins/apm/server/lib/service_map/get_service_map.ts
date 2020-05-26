@@ -9,16 +9,15 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME
 } from '../../../common/elasticsearch_fieldnames';
+import { getMlIndex } from '../../../common/ml_job_constants';
 import { getServicesProjection } from '../../../common/projections/services';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { PromiseReturnType } from '../../../typings/common';
+import { rangeFilter } from '../helpers/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { dedupeConnections } from './dedupe_connections';
+import { transformServiceMapResponses } from './transform_service_map_responses';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
-import { addAnomaliesToServicesData } from './ml_helpers';
-import { getMlIndex } from '../../../common/ml_job_constants';
-import { rangeFilter } from '../helpers/range_filter';
 
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange;
@@ -179,13 +178,9 @@ export async function getServiceMap(options: IEnvOptions) {
     getAnomaliesData(options)
   ]);
 
-  const servicesDataWithAnomalies = addAnomaliesToServicesData(
-    servicesData,
-    anomaliesData
-  );
-
-  return dedupeConnections({
+  return transformServiceMapResponses({
     ...connectionData,
-    services: servicesDataWithAnomalies
+    anomalies: anomaliesData,
+    services: servicesData
   });
 }

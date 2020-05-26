@@ -114,7 +114,9 @@ export class ApplicationService {
     context,
     http: { basePath },
     injectedMetadata,
-    redirectTo = (path: string) => (window.location.href = path),
+    redirectTo = (path: string) => {
+      window.location.assign(path);
+    },
     history,
   }: SetupDeps): InternalApplicationSetup {
     const basename = basePath.get();
@@ -196,6 +198,7 @@ export class ApplicationService {
           appBasePath: basePath.prepend(app.appRoute!),
           mount: wrapMount(plugin, app),
           unmountBeforeMounting: false,
+          legacy: false,
         });
       },
       registerLegacyApp: app => {
@@ -210,7 +213,10 @@ export class ApplicationService {
         }
 
         const appBasePath = basePath.prepend(appRoute);
-        const mount: LegacyAppMounter = () => redirectTo(appBasePath);
+        const mount: LegacyAppMounter = ({ history: appHistory }) => {
+          redirectTo(appHistory.createHref(appHistory.location));
+          window.location.reload();
+        };
 
         const { updater$, ...appProps } = app;
         this.apps.set(app.id, {
@@ -227,6 +233,7 @@ export class ApplicationService {
           appBasePath,
           mount,
           unmountBeforeMounting: true,
+          legacy: true,
         });
       },
       registerAppUpdater: (appUpdater$: Observable<AppUpdater>) =>

@@ -28,7 +28,7 @@ import stripAnsi from 'strip-ansi';
 
 import jestDiff from 'jest-diff';
 import jsonStable from 'json-stable-stringify';
-import { ascending, WorkerConfig } from '../common';
+import { ascending, CacheableWorkerConfig } from '../common';
 
 import { getMtimes } from './get_mtimes';
 import { getChanges } from './get_changes';
@@ -36,6 +36,16 @@ import { OptimizerConfig } from './optimizer_config';
 
 const OPTIMIZER_DIR = Path.dirname(require.resolve('../../package.json'));
 const RELATIVE_DIR = Path.relative(REPO_ROOT, OPTIMIZER_DIR);
+
+function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
+  const result: any = {};
+  for (const [key, value] of Object.entries(obj) as any) {
+    if (!keys.includes(key)) {
+      result[key] = value;
+    }
+  }
+  return result as Omit<T, K>;
+}
 
 export function diffCacheKey(expected?: unknown, actual?: unknown) {
   if (jsonStable(expected) === jsonStable(actual)) {
@@ -119,7 +129,7 @@ export function reformatJestDiff(diff: string | null) {
 export interface OptimizerCacheKey {
   readonly lastCommit: string | undefined;
   readonly bootstrap: string | undefined;
-  readonly workerConfig: WorkerConfig;
+  readonly workerConfig: CacheableWorkerConfig;
   readonly deletedPaths: string[];
   readonly modifiedTimes: Record<string, number>;
 }
@@ -164,11 +174,11 @@ export async function getOptimizerCacheKey(config: OptimizerConfig) {
   }
 
   const cacheKeys: OptimizerCacheKey = {
-    workerConfig: config.getWorkerConfig('♻'),
     lastCommit,
     bootstrap,
     deletedPaths,
     modifiedTimes: {} as Record<string, number>,
+    workerConfig: omit(config.getWorkerConfig('♻'), ['watch', 'profileWebpack']),
   };
 
   const mtimes = await getMtimes(modifiedPaths);

@@ -87,7 +87,7 @@ describe('status check alert', () => {
           Object {
             "callES": [MockFunction],
             "dynamicSettings": Object {
-              "certAgeThreshold": 365,
+              "certAgeThreshold": 730,
               "certExpirationThreshold": 30,
               "heartbeatIndices": "heartbeat-8*",
             },
@@ -132,7 +132,7 @@ describe('status check alert', () => {
           Object {
             "callES": [MockFunction],
             "dynamicSettings": Object {
-              "certAgeThreshold": 365,
+              "certAgeThreshold": 730,
               "certExpirationThreshold": 30,
               "heartbeatIndices": "heartbeat-8*",
             },

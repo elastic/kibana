@@ -4,9 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
 import { ViewMode } from '../../../../../src/plugins/embeddable/public';
 import { EnhancedEmbeddableContext, EnhancedEmbeddable } from '../types';
+
+export const txtOneDrilldown = i18n.translate(
+  'xpack.embeddableEnhanced.actions.panelNotifications.oneDrilldown',
+  {
+    defaultMessage: 'Panel has 1 drilldown',
+  }
+);
+
+export const txtManyDrilldowns = (count: number) =>
+  i18n.translate('xpack.embeddableEnhanced.actions.panelNotifications.manyDrilldowns', {
+    defaultMessage: 'Panel has {count} drilldowns',
+    values: {
+      count: String(count),
+    },
+  });
 
 export const ACTION_PANEL_NOTIFICATIONS = 'ACTION_PANEL_NOTIFICATIONS';
 
@@ -23,6 +39,11 @@ export class PanelNotificationsAction implements ActionDefinition<EnhancedEmbedd
 
   public readonly getDisplayName = ({ embeddable }: EnhancedEmbeddableContext) => {
     return String(this.getEventCount(embeddable));
+  };
+
+  public readonly getDisplayNameTooltip = ({ embeddable }: EnhancedEmbeddableContext) => {
+    const count = this.getEventCount(embeddable);
+    return !count ? '' : count === 1 ? txtOneDrilldown : txtManyDrilldowns(count);
   };
 
   public readonly isCompatible = async ({ embeddable }: EnhancedEmbeddableContext) => {

@@ -28,7 +28,7 @@ export const spacesManagementApp = Object.freeze({
   create({ getStartServices, spacesManager, securityLicense }: CreateParams) {
     return {
       id: this.id,
-      order: 10,
+      order: 2,
       title: i18n.translate('xpack.spaces.displayName', {
         defaultMessage: 'Spaces',
       }),

@@ -5,7 +5,7 @@
  */
 
 import { first } from 'rxjs/operators';
-import { Logger, PluginInitializerContext } from 'kibana/server';
+import { Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 import { CoreSetup } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
@@ -13,13 +13,22 @@ import { SpacesServiceSetup } from '../../spaces/server';
 
 import { ConfigType } from './config';
 import { initRoutes } from './routes/init_routes';
-import { ListClient } from './services/lists/client';
-import { ContextProvider, ContextProviderReturn, PluginsSetup } from './types';
+import { ListClient } from './services/lists/list_client';
+import {
+  ContextProvider,
+  ContextProviderReturn,
+  ListPluginSetup,
+  ListsPluginStart,
+  PluginsSetup,
+} from './types';
 import { createConfig$ } from './create_config';
 import { getSpaceId } from './get_space_id';
 import { getUser } from './get_user';
+import { initSavedObjects } from './saved_objects';
+import { ExceptionListClient } from './services/exception_lists/exception_list_client';
 
-export class ListPlugin {
+export class ListPlugin
+  implements Plugin<Promise<ListPluginSetup>, ListsPluginStart, PluginsSetup> {
   private readonly logger: Logger;
   private spaces: SpacesServiceSetup | undefined | null;
   private config: ConfigType | undefined | null;
@@ -29,7 +38,7 @@ export class ListPlugin {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup, plugins: PluginsSetup): Promise<void> {
+  public async setup(core: CoreSetup, plugins: PluginsSetup): Promise<ListPluginSetup> {
     const config = await createConfig$(this.initializerContext)
       .pipe(first())
       .toPromise();
@@ -41,9 +50,28 @@ export class ListPlugin {
     this.config = config;
     this.security = plugins.security;
 
+    initSavedObjects(core.savedObjects);
+
     core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
     const router = core.http.createRouter();
     initRoutes(router);
+
+    return {
+      getExceptionListClient: (savedObjectsClient, user): ExceptionListClient => {
+        return new ExceptionListClient({
+          savedObjectsClient,
+          user,
+        });
+      },
+      getListClient: (callCluster, spaceId, user): ListClient => {
+        return new ListClient({
+          callCluster,
+          config,
+          spaceId,
+          user,
+        });
+      },
+    };
   }
 
   public start(): void {
@@ -59,8 +87,9 @@ export class ListPlugin {
       const { spaces, config, security } = this;
       const {
         core: {
+          savedObjects: { client: savedObjectsClient },
           elasticsearch: {
-            dataClient: { callAsCurrentUser },
+            dataClient: { callAsCurrentUser: callCluster },
           },
         },
       } = context;
@@ -70,12 +99,15 @@ export class ListPlugin {
         const spaceId = getSpaceId({ request, spaces });
         const user = getUser({ request, security });
         return {
+          getExceptionListClient: (): ExceptionListClient =>
+            new ExceptionListClient({
+              savedObjectsClient,
+              user,
+            }),
           getListClient: (): ListClient =>
             new ListClient({
-              callCluster: callAsCurrentUser,
+              callCluster,
               config,
-              request,
-              security,
               spaceId,
               user,
             }),

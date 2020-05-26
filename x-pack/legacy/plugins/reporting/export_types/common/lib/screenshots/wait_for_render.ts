@@ -5,18 +5,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { LevelLogger } from '../../../../server/lib';
+import { LevelLogger, startTrace } from '../../../../server/lib';
+import { HeadlessChromiumDriver } from '../../../../server/browsers';
 import { CaptureConfig } from '../../../../server/types';
-import { LayoutInstance } from '../../layouts/layout';
+import { LayoutInstance } from '../../layouts';
 import { CONTEXT_WAITFORRENDER } from './constants';
 
 export const waitForRenderComplete = async (
   captureConfig: CaptureConfig,
-  browser: HeadlessBrowser,
+  browser: HeadlessChromiumDriver,
   layout: LayoutInstance,
   logger: LevelLogger
 ) => {
+  const endTrace = startTrace('wait_for_render', 'wait');
+
   logger.debug(
     i18n.translate('xpack.reporting.screencapture.waitingForRenderComplete', {
       defaultMessage: 'waiting for rendering to complete',
@@ -76,5 +78,7 @@ export const waitForRenderComplete = async (
           defaultMessage: 'rendering is complete',
         })
       );
+
+      endTrace();
     });
 };

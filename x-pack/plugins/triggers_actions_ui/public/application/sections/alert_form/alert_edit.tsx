@@ -31,15 +31,10 @@ import { PLUGIN } from '../../constants/plugin';
 
 interface AlertEditProps {
   initialAlert: Alert;
-  editFlyoutVisible: boolean;
-  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose(): void;
 }
 
-export const AlertEdit = ({
-  initialAlert,
-  editFlyoutVisible,
-  setEditFlyoutVisibility,
-}: AlertEditProps) => {
+export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
@@ -57,14 +52,10 @@ export const AlertEdit = ({
   } = useAlertsContext();
 
   const closeFlyout = useCallback(() => {
-    setEditFlyoutVisibility(false);
+    onClose();
     setAlert('alert', initialAlert);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setEditFlyoutVisibility]);
-
-  if (!editFlyoutVisible) {
-    return null;
-  }
+  }, [onClose]);
 
   const alertType = alertTypeRegistry.get(alert.alertTypeId);
 
@@ -210,3 +201,6 @@ export const AlertEdit = ({
     </EuiPortal>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AlertEdit as default };

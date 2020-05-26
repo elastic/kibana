@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 export const CheckMonitorType = t.intersection([
   t.partial({
     name: t.string,
-    ip: t.union([t.array(t.string), t.string]),
+    ip: t.union([t.array(t.union([t.string, t.null])), t.string, t.null]),
   }),
   t.type({
     status: t.string,

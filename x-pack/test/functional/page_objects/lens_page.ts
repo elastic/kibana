@@ -134,6 +134,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Save the current Lens visualization.
      */
     async save(title: string, saveAsNew?: boolean, redirectToOrigin?: boolean) {
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
       await testSubjects.setValue('savedObjectTitle', title);
 
@@ -150,7 +151,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       await testSubjects.click('confirmSaveSavedObjectButton');
-      retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
         testSubjects
           .missingOrFail('confirmSaveSavedObjectButton')
           .then(() => true)

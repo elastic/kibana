@@ -17,7 +17,8 @@ export const getSeverityColor = (nodeSeverity: string) => {
   switch (nodeSeverity) {
     case severity.warning:
       return theme.euiColorVis0;
-    case severity.minor || severity.major:
+    case severity.minor:
+    case severity.major:
       return theme.euiColorVis5;
     case severity.critical:
       return theme.euiColorVis9;
@@ -57,9 +58,9 @@ const getBorderWidth = (el: cytoscape.NodeSingular) => {
   if (nodeSeverity === severity.minor || nodeSeverity === severity.major) {
     return 4;
   } else if (nodeSeverity === severity.critical) {
-    return 12;
+    return 8;
   } else {
-    return 2;
+    return 4;
   }
 };
 
@@ -116,7 +117,7 @@ const style: cytoscape.Stylesheet[] = [
       // theme.euiFontFamily doesn't work here for some reason, so we're just
       // specifying a subset of the fonts for the label text.
       'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
-      'font-size': theme.euiFontSizeXS,
+      'font-size': theme.euiFontSizeS,
       ghost: 'yes',
       'ghost-offset-x': 0,
       'ghost-offset-y': 2,
@@ -126,7 +127,7 @@ const style: cytoscape.Stylesheet[] = [
         isService(el)
           ? el.data(SERVICE_NAME)
           : el.data(SPAN_DESTINATION_SERVICE_RESOURCE),
-      'min-zoomed-font-size': parseInt(theme.euiSizeL, 10),
+      'min-zoomed-font-size': parseInt(theme.euiSizeS, 10),
       'overlay-opacity': 0,
       shape: (el: cytoscape.NodeSingular) =>
         isService(el) ? (isIE11 ? 'rectangle' : 'ellipse') : 'diamond',

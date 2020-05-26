@@ -53,15 +53,19 @@ export function MachineLearningFlyoutView({
 
   const { http } = useApmPluginContext().core;
 
-  const { data: hasMLJob = false, status } = useFetcher(() => {
-    if (serviceName && selectedTransactionType) {
-      return getHasMLJob({
-        serviceName,
-        transactionType: selectedTransactionType,
-        http
-      });
-    }
-  }, [serviceName, selectedTransactionType, http]);
+  const { data: hasMLJob, status } = useFetcher(
+    () => {
+      if (serviceName && selectedTransactionType) {
+        return getHasMLJob({
+          serviceName,
+          transactionType: selectedTransactionType,
+          http
+        });
+      }
+    },
+    [serviceName, selectedTransactionType, http],
+    { showToastOnError: false }
+  );
 
   // update selectedTransactionType when list of transaction types has loaded
   useEffect(() => {
@@ -73,6 +77,7 @@ export function MachineLearningFlyoutView({
   }
 
   const isLoadingMLJob = status === FETCH_STATUS.LOADING;
+  const isMlAvailable = status !== FETCH_STATUS.FAILURE;
 
   return (
     <EuiFlyout onClose={onClose} size="s">
@@ -90,6 +95,31 @@ export function MachineLearningFlyoutView({
         <EuiSpacer size="s" />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {!isMlAvailable && (
+          <div>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.mlNotAvailable',
+                {
+                  defaultMessage: 'Machine learning not available'
+                }
+              )}
+              color="warning"
+              iconType="alert"
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.mlNotAvailableDescription',
+                  {
+                    defaultMessage:
+                      'Unable to connect to Machine learning. Make sure it is enabled in Kibana to use anomaly detection.'
+                  }
+                )}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </div>
+        )}
         {hasMLJob && (
           <div>
             <EuiCallOut
@@ -134,9 +164,11 @@ export function MachineLearningFlyoutView({
           <p>
             <FormattedMessage
               id="xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createMLJobDescription"
-              defaultMessage="Here you can create a machine learning job to calculate anomaly scores on durations for APM transactions
-                    within the {serviceName} service. Once enabled, {transactionDurationGraphText} will show the expected bounds and annotate
-                    the graph once the anomaly score is &gt;=75."
+              defaultMessage="Create a machine learning job to calculate anomaly scores on APM transaction durations
+                    within the {serviceName} service. When enabled, anomalies are show in two places:
+                    The {transactionDurationGraphText} graph will show the expected bounds and annotate
+                    the graph if the anomaly score is &gt;=75, and {serviceMapAnnotationText} will display color
+                    coded service indicators based on the active anomaly score."
               values={{
                 serviceName,
                 transactionDurationGraphText: (
@@ -144,7 +176,17 @@ export function MachineLearningFlyoutView({
                     {i18n.translate(
                       'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createMLJobDescription.transactionDurationGraphText',
                       {
-                        defaultMessage: 'the transaction duration graph'
+                        defaultMessage: 'transaction duration'
+                      }
+                    )}
+                  </b>
+                ),
+                serviceMapAnnotationText: (
+                  <b>
+                    {i18n.translate(
+                      'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createMLJobDescription.serviceMapAnnotationText',
+                      {
+                        defaultMessage: 'service maps'
                       }
                     )}
                   </b>
@@ -155,15 +197,15 @@ export function MachineLearningFlyoutView({
           <p>
             <FormattedMessage
               id="xpack.apm.serviceDetails.enableAnomalyDetectionPanel.manageMLJobDescription"
-              defaultMessage="Jobs can be created for each service + transaction type combination.
-                    Once a job is created, you can manage it and see more details in the {mlJobsPageLink}."
+              defaultMessage="Jobs can be created for each service and transaction type.
+                    Once a job is created, you can manage it and see more details on the {mlJobsPageLink}."
               values={{
                 mlJobsPageLink: (
                   <MLLink>
                     {i18n.translate(
                       'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.manageMLJobDescription.mlJobsPageLinkText',
                       {
-                        defaultMessage: 'Machine Learning jobs management page'
+                        defaultMessage: 'Machine Learning Job Management page'
                       }
                     )}
                   </MLLink>

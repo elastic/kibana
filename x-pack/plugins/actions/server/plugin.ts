@@ -150,12 +150,14 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     const actionsConfig = (await this.config) as ActionsConfig;
     const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig);
 
-    this.preconfiguredActions.push(
-      ...actionsConfig.preconfigured.map(
-        preconfiguredAction =>
-          ({ ...preconfiguredAction, isPreconfigured: true } as PreConfiguredAction)
-      )
-    );
+    for (const preconfiguredId of Object.keys(actionsConfig.preconfigured)) {
+      this.preconfiguredActions.push({
+        ...actionsConfig.preconfigured[preconfiguredId],
+        id: preconfiguredId,
+        isPreconfigured: true,
+      });
+    }
+
     const actionTypeRegistry = new ActionTypeRegistry({
       taskRunnerFactory,
       taskManager: plugins.taskManager,
@@ -230,12 +232,14 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       preconfiguredActions,
     } = this;
 
+    const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient();
+
     actionExecutor!.initialize({
       logger,
       eventLogger: this.eventLogger!,
       spaces: this.spaces,
       getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
-      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
+      encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
       preconfiguredActions,
     });
@@ -243,7 +247,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     taskRunnerFactory!.initialize({
       logger,
       actionTypeRegistry: actionTypeRegistry!,
-      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
+      encryptedSavedObjectsClient,
       getBasePath: this.getBasePath,
       spaceIdToNamespace: this.spaceIdToNamespace,
       getScopedSavedObjectsClient: core.savedObjects.getScopedClient,

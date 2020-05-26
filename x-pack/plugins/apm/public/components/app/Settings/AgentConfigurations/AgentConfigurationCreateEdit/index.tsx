@@ -132,7 +132,10 @@ export function AgentConfigurationCreateEdit({
         <ServicePage
           newConfig={newConfig}
           setNewConfig={setNewConfig}
-          onClickNext={() => setPage('choose-settings-step')}
+          onClickNext={() => {
+            resetSettings();
+            setPage('choose-settings-step');
+          }}
         />
       )}
 

@@ -157,6 +157,7 @@ class CreateWatchService {
             id,
             type: 'json',
             isNew: false, // Set to false, as we want to allow watches to be overwritten.
+            isActive: true,
             watch,
           },
         };
@@ -166,7 +167,7 @@ class CreateWatchService {
           saveWatch(watchModel)
             .then(() => {
               this.status.watch = this.STATUS.SAVED;
-              this.config.watcherEditURL = `${basePath.get()}/app/kibana#/management/elasticsearch/watcher/watches/watch/${id}/edit?_g=()`;
+              this.config.watcherEditURL = `${basePath.get()}/app/kibana#/management/insightsAndAlerting/watcher/watches/watch/${id}/edit?_g=()`;
               resolve({
                 id,
                 url: this.config.watcherEditURL,

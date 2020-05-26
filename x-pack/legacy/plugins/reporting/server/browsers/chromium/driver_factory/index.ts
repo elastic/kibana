@@ -21,7 +21,7 @@ import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
 import { BROWSER_TYPE } from '../../../../common/constants';
 import { CaptureConfig } from '../../../../server/types';
-import { LevelLogger as Logger } from '../../../lib/level_logger';
+import { LevelLogger } from '../../../lib';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { getChromeLogLocation } from '../paths';
@@ -39,7 +39,7 @@ export class HeadlessChromiumDriverFactory {
   private userDataDir: string;
   private getChromiumArgs: (viewport: ViewportConfig) => string[];
 
-  constructor(binaryPath: binaryPath, logger: Logger, captureConfig: CaptureConfig) {
+  constructor(binaryPath: binaryPath, logger: LevelLogger, captureConfig: CaptureConfig) {
     this.binaryPath = binaryPath;
     this.captureConfig = captureConfig;
     this.browserConfig = captureConfig.browser.chromium;
@@ -56,7 +56,7 @@ export class HeadlessChromiumDriverFactory {
 
   type = BROWSER_TYPE;
 
-  test(logger: Logger) {
+  test(logger: LevelLogger) {
     const chromiumArgs = args({
       userDataDir: this.userDataDir,
       viewport: { width: 800, height: 600 },
@@ -84,7 +84,7 @@ export class HeadlessChromiumDriverFactory {
    */
   createPage(
     { viewport, browserTimezone }: { viewport: ViewportConfig; browserTimezone: string },
-    pLogger: Logger
+    pLogger: LevelLogger
   ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
     return Rx.Observable.create(async (observer: InnerSubscriber<any, any>) => {
       const logger = pLogger.clone(['browser-driver']);
@@ -172,7 +172,7 @@ export class HeadlessChromiumDriverFactory {
     });
   }
 
-  getBrowserLogger(page: Page, logger: Logger): Rx.Observable<void> {
+  getBrowserLogger(page: Page, logger: LevelLogger): Rx.Observable<void> {
     const consoleMessages$ = Rx.fromEvent<ConsoleMessage>(page, 'console').pipe(
       map(line => {
         if (line.type() === 'error') {
@@ -197,7 +197,7 @@ export class HeadlessChromiumDriverFactory {
     return Rx.merge(consoleMessages$, pageRequestFailed$);
   }
 
-  getProcessLogger(browser: Browser, logger: Logger): Rx.Observable<void> {
+  getProcessLogger(browser: Browser, logger: LevelLogger): Rx.Observable<void> {
     const childProcess = browser.process();
     // NOTE: The browser driver can not observe stdout and stderr of the child process
     // Puppeteer doesn't give a handle to the original ChildProcess object

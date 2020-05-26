@@ -64,10 +64,7 @@ export const xpackMain = kibana => {
 
       mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
 
-      featuresPlugin.registerLegacyAPI({
-        xpackInfo: setupXPackMain(server),
-        savedObjectTypes: server.savedObjects.types,
-      });
+      setupXPackMain(server);
 
       // register routes
       xpackInfoRoute(server);

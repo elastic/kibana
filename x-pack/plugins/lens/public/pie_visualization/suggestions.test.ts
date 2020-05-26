@@ -508,7 +508,7 @@ describe('suggestions', () => {
                 metric: 'b',
 
                 numberDisplay: 'hidden',
-                categoryDisplay: 'inside',
+                categoryDisplay: 'default', // This is changed
                 legendDisplay: 'show',
                 percentDecimals: 0,
                 nestedLegend: true,
