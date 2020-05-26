@@ -173,7 +173,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
       <EuiTitle size="xs">
         <h4>
           {i18n.translate('xpack.siem.endpoint.resolver.panel.title', {
-            defaultMessage: 'Processes',
+            defaultMessage: 'Events',
           })}
         </h4>
       </EuiTitle>
