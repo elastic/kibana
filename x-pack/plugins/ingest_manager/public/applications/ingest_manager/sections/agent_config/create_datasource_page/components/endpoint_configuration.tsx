@@ -12,7 +12,7 @@ import { EuiLink } from '@elastic/eui';
 export const EndpointConfiguration = memo<{ editMode: boolean }>(({ editMode }) => {
   const pathname = useLocation().pathname.split('/');
   const policyId = pathname[pathname.length - 1];
-  const linky = `/app/siem#/policy/${policyId}`;
+  const linkToSiemApp = `/app/siem#/policy/${policyId}`;
   return (
     <>
       {editMode === true ? (
@@ -21,7 +21,7 @@ export const EndpointConfiguration = memo<{ editMode: boolean }>(({ editMode }) 
             id="xpack.ingestManager.editDatasource.stepConfigure.endpointConfiguration"
             defaultMessage="See security app policy tab for additional configuration options: "
           />
-          <EuiLink href={linky}>Click me to configure</EuiLink>
+          <EuiLink href={linkToSiemApp}>Click me to configure</EuiLink>
         </>
       ) : (
         <FormattedMessage
