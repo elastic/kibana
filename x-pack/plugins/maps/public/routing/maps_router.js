@@ -18,16 +18,22 @@ export function renderApp(context, params) {
   const I18nContext = getCoreI18n().Context;
   render(
     <I18nContext>
-      <Router basename={params.appBasePath}>
-        <Switch>
-          <Route path="/map">
-            <MapsCreateEditView />
-          </Route>
-          <Route path="/">
-            <MapsListView />
-          </Route>
-        </Switch>
-      </Router>
+      <div id="maps-plugin" ng-class="{mapFullScreen: isFullScreen}">
+        <div id="maps-top-nav" />
+        <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
+        <div id="react-maps-root">
+          <Router basename={params.appBasePath}>
+            <Switch>
+              <Route path="/map">
+                <MapsCreateEditView />
+              </Route>
+              <Route path="/">
+                <MapsListView />
+              </Route>
+            </Switch>
+          </Router>
+        </div>
+      </div>
     </I18nContext>,
     params.element
   );
