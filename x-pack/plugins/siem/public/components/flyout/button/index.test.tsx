@@ -7,8 +7,8 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { TestProviders } from '../../../../common/mock/test_providers';
-import { twoGroups } from '../../timeline/data_providers/mock/mock_and_providers';
+import { TestProviders } from '../../../mock/test_providers';
+import { twoGroups } from '../../data_providers/mock/mock_and_providers';
 
 import { FlyoutButton, getBadgeCount } from '.';
 

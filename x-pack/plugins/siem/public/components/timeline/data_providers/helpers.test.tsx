@@ -31,7 +31,7 @@ import {
   providerE,
   providerF,
   twoGroups,
-} from './mock/mock_and_providers';
+} from '../../data_providers/mock/mock_and_providers';
 
 const timelineId = 'timeline-1';
 

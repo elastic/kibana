@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataProvider, DataProvidersAnd, IS_OPERATOR } from '../data_provider';
+import {
+  DataProvider,
+  DataProvidersAnd,
+  IS_OPERATOR,
+} from '../../timeline/data_providers/data_provider';
 
 export const providerA: DataProvidersAnd = {
   enabled: true,
