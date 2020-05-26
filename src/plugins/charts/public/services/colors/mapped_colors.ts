@@ -73,7 +73,7 @@ export class MappedColors {
     const oldColors = _.values(this._oldMap);
 
     const keysToMap: Array<string | number> = [];
-    _.each(keys, key => {
+    _.each(keys, (key) => {
       // If this key is mapped in the config, it's unnecessary to have it mapped here
       if (configMapping[key]) delete this._mapping[key];
 
@@ -88,11 +88,7 @@ export class MappedColors {
     });
 
     // Generate a color palette big enough that all new keys can have unique color values
-    const allColors = _(this._mapping)
-      .values()
-      .union(configColors)
-      .union(oldColors)
-      .value();
+    const allColors = _(this._mapping).values().union(configColors).union(oldColors).value();
     const colorPalette = createColorPalette(allColors.length + keysToMap.length);
     let newColors = _.difference(colorPalette, allColors);
 

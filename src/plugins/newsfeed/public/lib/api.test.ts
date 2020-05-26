@@ -481,9 +481,9 @@ describe('getApi', () => {
     } as unknown) as HttpSetup;
   });
 
-  it('creates a result', done => {
+  it('creates a result', (done) => {
     mockHttpGet.mockImplementationOnce(() => Promise.resolve({ items: [] }));
-    getApi(httpMock, configMock, '6.8.2').subscribe(result => {
+    getApi(httpMock, configMock, '6.8.2').subscribe((result) => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "error": null,
@@ -496,7 +496,7 @@ describe('getApi', () => {
     });
   });
 
-  it('hasNew is true when the service returns hashes not in the cache', done => {
+  it('hasNew is true when the service returns hashes not in the cache', (done) => {
     const mockApiItems: ApiItem[] = [
       {
         title: {
@@ -528,7 +528,7 @@ describe('getApi', () => {
 
     mockHttpGet.mockImplementationOnce(getHttpMockWithItems(mockApiItems));
 
-    getApi(httpMock, configMock, '6.8.2').subscribe(result => {
+    getApi(httpMock, configMock, '6.8.2').subscribe((result) => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "error": null,
@@ -552,7 +552,7 @@ describe('getApi', () => {
     });
   });
 
-  it('hasNew is false when service returns hashes that are all stored', done => {
+  it('hasNew is false when service returns hashes that are all stored', (done) => {
     localStorageGet.throws('Wrong key passed!');
     localStorageGet.withArgs(NEWSFEED_HASH_SET_STORAGE_KEY).returns('happyness');
     const mockApiItems: ApiItem[] = [
@@ -568,7 +568,7 @@ describe('getApi', () => {
       },
     ];
     mockHttpGet.mockImplementationOnce(getHttpMockWithItems(mockApiItems));
-    getApi(httpMock, configMock, '6.8.2').subscribe(result => {
+    getApi(httpMock, configMock, '6.8.2').subscribe((result) => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "error": null,
@@ -592,10 +592,10 @@ describe('getApi', () => {
     });
   });
 
-  it('forwards an error', done => {
+  it('forwards an error', (done) => {
     mockHttpGet.mockImplementationOnce((arg1, arg2) => Promise.reject('sorry, try again later!'));
 
-    getApi(httpMock, configMock, '6.8.2').subscribe(result => {
+    getApi(httpMock, configMock, '6.8.2').subscribe((result) => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "error": "sorry, try again later!",
@@ -622,7 +622,7 @@ describe('getApi', () => {
       },
     ];
 
-    it("retries until fetch doesn't error", done => {
+    it("retries until fetch doesn't error", (done) => {
       configMock.mainInterval = moment.duration(10); // fast retry for testing
       mockHttpGet
         .mockImplementationOnce(() => Promise.reject('Sorry, try again later!'))
@@ -632,7 +632,7 @@ describe('getApi', () => {
 
       getApi(httpMock, configMock, '6.8.2')
         .pipe(take(4), toArray())
-        .subscribe(result => {
+        .subscribe((result) => {
           expect(result).toMatchInlineSnapshot(`
             Array [
               Object {
@@ -676,7 +676,7 @@ describe('getApi', () => {
         });
     });
 
-    it("doesn't retry if fetch succeeds", done => {
+    it("doesn't retry if fetch succeeds", (done) => {
       configMock.mainInterval = moment.duration(10); // fast retry for testing
       mockHttpGet.mockImplementation(getHttpMockWithItems(successItems));
 

@@ -64,7 +64,7 @@ export function initRoutes(
         }),
       },
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -97,7 +97,7 @@ export function initRoutes(
         }),
       },
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -128,7 +128,7 @@ export function initRoutes(
         }),
       },
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -160,7 +160,7 @@ export function initRoutes(
         }),
       },
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -180,7 +180,7 @@ export function initRoutes(
       path: `/api/sample_tasks`,
       validate: {},
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -207,7 +207,7 @@ export function initRoutes(
         }),
       },
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -228,7 +228,7 @@ export function initRoutes(
       path: `/api/sample_tasks`,
       validate: {},
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -241,7 +241,7 @@ export function initRoutes(
             query: taskManagerQuery,
           });
           tasksFound = tasks.length;
-          await Promise.all(tasks.map(task => taskManager.remove(task.id)));
+          await Promise.all(tasks.map((task) => taskManager.remove(task.id)));
         } while (tasksFound > 0);
         return res.ok({ body: 'OK' });
       } catch (err) {

@@ -41,13 +41,13 @@ const CPU_STATS_FILE = 'cpu.stat';
 const readFile = promisify(fs.readFile);
 
 export function readControlGroups() {
-  return readFile(PROC_SELF_CGROUP_FILE).then(data => {
+  return readFile(PROC_SELF_CGROUP_FILE).then((data) => {
     const response = {};
 
     data
       .toString()
       .split(/\n/)
-      .forEach(line => {
+      .forEach((line) => {
         const matches = line.match(CONTROL_GROUP_RE);
 
         if (matches === null) {
@@ -55,7 +55,7 @@ export function readControlGroups() {
         }
 
         const controllers = matches[1].split(CONTROLLER_SEPARATOR_RE);
-        controllers.forEach(controller => {
+        controllers.forEach((controller) => {
           response[controller] = matches[2];
         });
       });
@@ -65,7 +65,7 @@ export function readControlGroups() {
 }
 
 function fileContentsToInteger(path) {
-  return readFile(path).then(data => {
+  return readFile(path).then((data) => {
     return parseInt(data.toString(), 10);
   });
 }
@@ -91,11 +91,11 @@ export function readCPUStat(controlGroup) {
     };
 
     readFile(joinPath(PROC_CGROUP_CPU_DIR, controlGroup, CPU_STATS_FILE))
-      .then(data => {
+      .then((data) => {
         data
           .toString()
           .split(/\n/)
-          .forEach(line => {
+          .forEach((line) => {
             const fields = line.split(/\s+/);
 
             switch (fields[0]) {
@@ -115,7 +115,7 @@ export function readCPUStat(controlGroup) {
 
         resolve(stat);
       })
-      .catch(err => {
+      .catch((err) => {
         if (err.code === 'ENOENT') {
           return resolve(stat);
         }
@@ -128,7 +128,7 @@ export function readCPUStat(controlGroup) {
 export function getAllStats(options = {}) {
   return new Promise((resolve, reject) => {
     readControlGroups()
-      .then(groups => {
+      .then((groups) => {
         const cpuPath = options.cpuPath || groups[GROUP_CPU];
         const cpuAcctPath = options.cpuAcctPath || groups[GROUP_CPUACCT];
 

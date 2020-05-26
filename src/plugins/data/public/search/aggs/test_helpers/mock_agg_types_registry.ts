@@ -45,7 +45,7 @@ export function mockAggTypesRegistry<T extends BucketAggType<any> | MetricAggTyp
   const registrySetup = registry.setup();
 
   if (types) {
-    types.forEach(type => {
+    types.forEach((type) => {
       if (type instanceof BucketAggType) {
         registrySetup.registerBucket(type);
       } else if (type instanceof MetricAggType) {
@@ -68,8 +68,8 @@ export function mockAggTypesRegistry<T extends BucketAggType<any> | MetricAggTyp
         } as unknown) as InternalStartServices),
     });
 
-    aggTypes.buckets.forEach(type => registrySetup.registerBucket(type));
-    aggTypes.metrics.forEach(type => registrySetup.registerMetric(type));
+    aggTypes.buckets.forEach((type) => registrySetup.registerBucket(type));
+    aggTypes.metrics.forEach((type) => registrySetup.registerMetric(type));
   }
 
   return registry.start();

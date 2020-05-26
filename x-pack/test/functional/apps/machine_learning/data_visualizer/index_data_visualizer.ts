@@ -28,7 +28,7 @@ interface TestData {
 
 function getFieldTypes(cards: FieldVisConfig[]) {
   const fieldTypes: ML_JOB_FIELD_TYPES[] = [];
-  cards.forEach(card => {
+  cards.forEach((card) => {
     const fieldType = card.type;
     if (fieldTypes.includes(fieldType) === false) {
       fieldTypes.push(fieldType);
@@ -39,7 +39,7 @@ function getFieldTypes(cards: FieldVisConfig[]) {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
@@ -375,7 +375,7 @@ export default function({ getService }: FtrProviderContext) {
     }
   }
 
-  describe('index based', function() {
+  describe('index based', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
@@ -391,7 +391,7 @@ export default function({ getService }: FtrProviderContext) {
     //  - validating metrics displayed inside the cards
     //  - selecting a document sample size
 
-    describe('with farequote', function() {
+    describe('with farequote', function () {
       // Run tests on full farequote index.
       it(`${farequoteIndexPatternTestData.suiteTitle} loads the data visualizer selector page`, async () => {
         // Start navigation from the base of the ML app.

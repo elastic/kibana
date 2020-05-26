@@ -110,7 +110,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           },
         ]}
         idSelected={'enabled'}
-        onChange={id => {}}
+        onChange={(id) => {}}
         legend={{
           children: (
             <EuiTitle size="xs">
@@ -149,7 +149,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           },
         ]}
         idSelected={'enabled'}
-        onChange={id => {}}
+        onChange={(id) => {}}
         legend={{
           children: (
             <EuiTitle size="xs">

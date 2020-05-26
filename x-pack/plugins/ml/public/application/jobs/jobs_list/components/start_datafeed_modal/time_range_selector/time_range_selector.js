@@ -28,7 +28,7 @@ export class TimeRangeSelector extends Component {
     this.now = this.props.now;
   }
 
-  setStartTab = tab => {
+  setStartTab = (tab) => {
     this.setState({ startTab: tab });
     switch (tab) {
       case 0:
@@ -42,7 +42,7 @@ export class TimeRangeSelector extends Component {
     }
   };
 
-  setEndTab = tab => {
+  setEndTab = (tab) => {
     this.setState({ endTab: tab });
     switch (tab) {
       case 0:
@@ -56,11 +56,11 @@ export class TimeRangeSelector extends Component {
     }
   };
 
-  setStartTime = time => {
+  setStartTime = (time) => {
     this.props.setStartTime(time);
   };
 
-  setEndTime = time => {
+  setEndTime = (time) => {
     this.props.setEndTime(time);
   };
 
