@@ -32,7 +32,11 @@ const StyledPanel = styled(Panel)`
 const StyledResolverContainer = styled.div`
   display: flex;
   flex-grow: 1;
-  contain: layout;
+  contain: strict;
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+  }
 `;
 
 const bgColor = NamedColors.resolverBackground;
