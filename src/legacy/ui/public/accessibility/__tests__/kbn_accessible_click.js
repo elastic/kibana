@@ -31,7 +31,7 @@ describe('kbnAccessibleClick directive', () => {
   beforeEach(ngMock.module('kibana'));
 
   beforeEach(
-    ngMock.inject(function(_$compile_, _$rootScope_) {
+    ngMock.inject(function (_$compile_, _$rootScope_) {
       $compile = _$compile_;
       $rootScope = _$rootScope_;
     })
@@ -103,7 +103,7 @@ describe('kbnAccessibleClick directive', () => {
     let scope;
     let element;
 
-    beforeEach(function() {
+    beforeEach(function () {
       scope = $rootScope.$new();
       scope.handleClick = sinon.stub();
       const html = `<div ng-click="handleClick()" kbn-accessible-click></div>`;

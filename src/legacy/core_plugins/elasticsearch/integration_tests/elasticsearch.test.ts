@@ -43,7 +43,7 @@ describe('Elasticsearch plugin', () => {
     kibanaVersion: '8.0.0',
   });
 
-  beforeAll(async function() {
+  beforeAll(async function () {
     const settings = {
       elasticsearch: {},
       adjustTimeout: (t: any) => {
@@ -72,12 +72,12 @@ describe('Elasticsearch plugin', () => {
     await root.shutdown();
   }, 30000);
 
-  it("should set it's status to green when all nodes are compatible", done => {
+  it("should set it's status to green when all nodes are compatible", (done) => {
     jest.setTimeout(30000);
     elasticsearch.status.on('green', () => done());
   });
 
-  it("should set it's status to red when some nodes aren't compatible", done => {
+  it("should set it's status to red when some nodes aren't compatible", (done) => {
     esNodesCompatibility$.next({
       isCompatible: false,
       incompatibleNodes: [],

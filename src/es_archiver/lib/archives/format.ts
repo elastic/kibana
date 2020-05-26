@@ -26,7 +26,7 @@ import { RECORD_SEPARATOR } from './constants';
 
 export function createFormatArchiveStreams({ gzip = false }: { gzip?: boolean } = {}) {
   return [
-    createMapStream(record => stringify(record, { space: '  ' })),
+    createMapStream((record) => stringify(record, { space: '  ' })),
     createIntersperseStream(RECORD_SEPARATOR),
     gzip ? createGzip({ level: Z_BEST_COMPRESSION }) : new PassThrough(),
   ];

@@ -42,9 +42,7 @@ export class NewEventModal extends Component {
     super(props);
 
     const startDate = moment().startOf('day');
-    const endDate = moment()
-      .startOf('day')
-      .add(1, 'days');
+    const endDate = moment().startOf('day').add(1, 'days');
 
     this.state = {
       startDate,
@@ -55,7 +53,7 @@ export class NewEventModal extends Component {
     };
   }
 
-  onDescriptionChange = e => {
+  onDescriptionChange = (e) => {
     this.setState({
       description: e.target.value,
     });
@@ -76,7 +74,7 @@ export class NewEventModal extends Component {
     this.props.addEvent(event);
   };
 
-  handleChangeStart = date => {
+  handleChangeStart = (date) => {
     let start = null;
     let end = this.state.endDate;
 
@@ -96,7 +94,7 @@ export class NewEventModal extends Component {
     });
   };
 
-  handleChangeEnd = date => {
+  handleChangeEnd = (date) => {
     let start = this.state.startDate;
     let end = null;
 
@@ -116,7 +114,7 @@ export class NewEventModal extends Component {
     });
   };
 
-  handleTimeStartChange = event => {
+  handleTimeStartChange = (event) => {
     const dateString = event.target.value;
     let isValidDate = false;
 
@@ -136,7 +134,7 @@ export class NewEventModal extends Component {
     }
   };
 
-  handleTimeEndChange = event => {
+  handleTimeEndChange = (event) => {
     const dateString = event.target.value;
     let isValidDate = false;
 

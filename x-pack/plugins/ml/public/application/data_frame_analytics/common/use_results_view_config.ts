@@ -34,7 +34,7 @@ export const useResultsViewConfig = (jobId: string) => {
 
   // get analytics configuration, index pattern and field caps
   useEffect(() => {
-    (async function() {
+    (async function () {
       setIsLoadingJobConfig(false);
 
       try {

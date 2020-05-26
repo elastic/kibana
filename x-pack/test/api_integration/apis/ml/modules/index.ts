@@ -5,8 +5,8 @@
  */
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('modules', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('modules', function () {
     loadTestFile(require.resolve('./get_module'));
     loadTestFile(require.resolve('./recognize_module'));
     loadTestFile(require.resolve('./setup_module'));
