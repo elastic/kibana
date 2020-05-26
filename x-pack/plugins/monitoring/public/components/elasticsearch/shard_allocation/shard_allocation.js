@@ -68,7 +68,7 @@ export const ShardAllocation = ({ scope, kbnUrl, type, shardStats }) => {
       </EuiTitle>
       <EuiSpacer size="xs" />
       <EuiFlexGroup wrap responsive={false} gutterSize="s">
-        {types.map(type => (
+        {types.map((type) => (
           <EuiFlexItem grow={false} key={type.label}>
             <EuiBadge color={type.color}>{type.label}</EuiBadge>
           </EuiFlexItem>

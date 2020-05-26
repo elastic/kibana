@@ -96,10 +96,7 @@ describe('Footer Timeline Component', () => {
         />
       );
 
-      const loadButton = wrapper
-        .find('[data-test-subj="TimelineMoreButton"]')
-        .dive()
-        .text();
+      const loadButton = wrapper.find('[data-test-subj="TimelineMoreButton"]').dive().text();
       expect(wrapper.find('[data-test-subj="LoadingPanelTimeline"]').exists()).toBeFalsy();
       expect(loadButton).toContain('Loading...');
     });
@@ -113,10 +110,7 @@ describe('Footer Timeline Component', () => {
         />
       );
 
-      const loadButton = wrapper
-        .find('[data-test-subj="TimelineMoreButton"]')
-        .dive()
-        .text();
+      const loadButton = wrapper.find('[data-test-subj="TimelineMoreButton"]').dive().text();
       expect(loadButton).toContain('Load more');
     });
 
@@ -163,10 +157,7 @@ describe('Footer Timeline Component', () => {
         </TestProviders>
       );
 
-      wrapper
-        .find('[data-test-subj="timelineSizeRowPopover"] button')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="timelineSizeRowPopover"] button').first().simulate('click');
       expect(wrapper.find('[data-test-subj="timelinePickSizeRow"]').exists()).toBeTruthy();
     });
   });
@@ -193,10 +184,7 @@ describe('Footer Timeline Component', () => {
         </TestProviders>
       );
 
-      wrapper
-        .find('[data-test-subj="TimelineMoreButton"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="TimelineMoreButton"]').first().simulate('click');
 
       expect(loadMore).toBeCalled();
     });
@@ -222,15 +210,9 @@ describe('Footer Timeline Component', () => {
         </TestProviders>
       );
 
-      wrapper
-        .find('[data-test-subj="timelineSizeRowPopover"] button')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="timelineSizeRowPopover"] button').first().simulate('click');
       wrapper.update();
-      wrapper
-        .find('[data-test-subj="timelinePickSizeRow"] button')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="timelinePickSizeRow"] button').first().simulate('click');
       expect(onChangeItemsPerPage).toBeCalled();
     });
 

@@ -60,7 +60,7 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('if successful iteration of while loop with maxDocs', async () => {
     const sampleParams = sampleRuleAlertParams(30);
-    const someGuids = Array.from({ length: 13 }).map(x => uuid.v4());
+    const someGuids = Array.from({ length: 13 }).map((x) => uuid.v4());
     mockService.callCluster
       .mockResolvedValueOnce({
         took: 100,
@@ -135,7 +135,7 @@ describe('searchAfterAndBulkCreate', () => {
   });
 
   test('if unsuccessful first bulk create', async () => {
-    const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
+    const someGuids = Array.from({ length: 4 }).map((x) => uuid.v4());
     const sampleParams = sampleRuleAlertParams(10);
     mockService.callCluster.mockResolvedValue(sampleBulkCreateDuplicateResult);
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
@@ -255,7 +255,7 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('if successful iteration of while loop with maxDocs and search after returns results with no sort ids', async () => {
     const sampleParams = sampleRuleAlertParams(10);
-    const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
+    const someGuids = Array.from({ length: 4 }).map((x) => uuid.v4());
     mockService.callCluster
       .mockResolvedValueOnce({
         took: 100,
@@ -301,7 +301,7 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('if successful iteration of while loop with maxDocs and search after returns empty results with no sort ids', async () => {
     const sampleParams = sampleRuleAlertParams(10);
-    const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
+    const someGuids = Array.from({ length: 4 }).map((x) => uuid.v4());
     mockService.callCluster
       .mockResolvedValueOnce({
         took: 100,
@@ -347,7 +347,7 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('if returns false when singleSearchAfter throws an exception', async () => {
     const sampleParams = sampleRuleAlertParams(10);
-    const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
+    const someGuids = Array.from({ length: 4 }).map((x) => uuid.v4());
     mockService.callCluster
       .mockResolvedValueOnce({
         took: 100,

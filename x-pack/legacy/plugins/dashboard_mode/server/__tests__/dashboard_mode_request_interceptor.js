@@ -24,7 +24,7 @@ function setup() {
   server.ext(createDashboardModeRequestInterceptor());
 
   // allow the extension to fake "render an app"
-  server.decorate('toolkit', 'renderApp', function(app) {
+  server.decorate('toolkit', 'renderApp', function (app) {
     // `this` is the `h` response toolkit
     return this.response({ renderApp: true, app });
   });
@@ -93,13 +93,10 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
           },
         });
 
-        expect(response)
-          .to.have.property('statusCode', 200)
-          .and.have.property('result')
-          .eql({
-            catchAll: true,
-            path: '/foo/bar',
-          });
+        expect(response).to.have.property('statusCode', 200).and.have.property('result').eql({
+          catchAll: true,
+          path: '/foo/bar',
+        });
       });
     });
   });

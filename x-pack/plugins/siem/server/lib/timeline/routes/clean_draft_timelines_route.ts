@@ -10,8 +10,10 @@ import { transformError, buildSiemResponse } from '../../detection_engine/routes
 import { TIMELINE_DRAFT_URL } from '../../../../common/constants';
 import { buildFrameworkRequest } from './utils/common';
 import { SetupPlugins } from '../../../plugin';
+import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { getDraftTimeline, resetTimeline, getTimeline, persistTimeline } from '../saved_object';
 import { draftTimelineDefaults } from '../default_timeline';
+import { cleanDraftTimelineSchema } from './schemas/clean_draft_timelines_schema';
 
 export const cleanDraftTimelinesRoute = (
   router: IRouter,
@@ -21,7 +23,9 @@ export const cleanDraftTimelinesRoute = (
   router.post(
     {
       path: TIMELINE_DRAFT_URL,
-      validate: {},
+      validate: {
+        body: buildRouteValidation(cleanDraftTimelineSchema),
+      },
       options: {
         tags: ['access:siem'],
       },
@@ -33,7 +37,7 @@ export const cleanDraftTimelinesRoute = (
       try {
         const {
           timeline: [draftTimeline],
-        } = await getDraftTimeline(frameworkRequest);
+        } = await getDraftTimeline(frameworkRequest, request.body.timelineType);
 
         if (draftTimeline?.savedObjectId) {
           await resetTimeline(frameworkRequest, [draftTimeline.savedObjectId]);

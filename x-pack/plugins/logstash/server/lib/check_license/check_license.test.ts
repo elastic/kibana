@@ -6,7 +6,7 @@
 import { licensingMock } from '../../../../licensing/server/mocks';
 import { checkLicense } from './check_license';
 
-describe('check_license', function() {
+describe('check_license', function () {
   describe('returns "valid": false & message when', () => {
     it('license information is not available', () => {
       const license = licensingMock.createLicenseMock();

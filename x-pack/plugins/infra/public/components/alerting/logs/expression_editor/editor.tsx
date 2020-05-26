@@ -57,7 +57,7 @@ const DEFAULT_EXPRESSION = {
   timeUnit: 'm',
 };
 
-export const ExpressionEditor: React.FC<Props> = props => {
+export const ExpressionEditor: React.FC<Props> = (props) => {
   const isInternal = props.alertsContext.metadata?.isInternal;
   const [sourceId] = useSourceId();
 
@@ -78,7 +78,7 @@ export const ExpressionEditor: React.FC<Props> = props => {
   );
 };
 
-export const SourceStatusWrapper: React.FC<Props> = props => {
+export const SourceStatusWrapper: React.FC<Props> = (props) => {
   const {
     initialize,
     isLoadingSourceStatus,
@@ -121,7 +121,7 @@ export const SourceStatusWrapper: React.FC<Props> = props => {
   );
 };
 
-export const Editor: React.FC<Props> = props => {
+export const Editor: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors } = props;
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('m');
@@ -137,7 +137,7 @@ export const Editor: React.FC<Props> = props => {
 
   const supportedFields = useMemo(() => {
     if (sourceStatus?.logIndexFields) {
-      return sourceStatus.logIndexFields.filter(field => {
+      return sourceStatus.logIndexFields.filter((field) => {
         return (field.type === 'string' || field.type === 'number') && field.searchable;
       });
     } else {
@@ -146,7 +146,7 @@ export const Editor: React.FC<Props> = props => {
   }, [sourceStatus]);
 
   const updateCount = useCallback(
-    countParams => {
+    (countParams) => {
       const nextCountParams = { ...alertParams.count, ...countParams };
       setAlertParams('count', nextCountParams);
     },
@@ -187,7 +187,7 @@ export const Editor: React.FC<Props> = props => {
   }, [alertParams, setAlertParams]);
 
   const removeCriterion = useCallback(
-    idx => {
+    (idx) => {
       const nextCriteria = alertParams?.criteria?.filter((criterion, index) => {
         return index !== idx;
       });

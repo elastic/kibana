@@ -12,7 +12,7 @@ export interface ITooltipProperty {
   getPropertyKey(): string;
   getPropertyName(): string;
   getHtmlDisplayValue(): string;
-  getRawValue(): string | undefined;
+  getRawValue(): string | string[] | undefined;
   isFilterable(): boolean;
   getESFilters(): Promise<Filter[]>;
 }
@@ -41,10 +41,10 @@ export type RenderToolTipContent = (params: RenderTooltipContentParams) => JSX.E
 
 export class TooltipProperty implements ITooltipProperty {
   private readonly _propertyKey: string;
-  private readonly _rawValue: string | undefined;
+  private readonly _rawValue: string | string[] | undefined;
   private readonly _propertyName: string;
 
-  constructor(propertyKey: string, propertyName: string, rawValue: string | undefined) {
+  constructor(propertyKey: string, propertyName: string, rawValue: string | string[] | undefined) {
     this._propertyKey = propertyKey;
     this._propertyName = propertyName;
     this._rawValue = rawValue;
@@ -59,10 +59,10 @@ export class TooltipProperty implements ITooltipProperty {
   }
 
   getHtmlDisplayValue(): string {
-    return _.escape(this._rawValue);
+    return _.escape(Array.isArray(this._rawValue) ? this._rawValue.join() : this._rawValue);
   }
 
-  getRawValue(): string | undefined {
+  getRawValue(): string | string[] | undefined {
     return this._rawValue;
   }
 

@@ -27,11 +27,11 @@ import { REPO_ROOT } from '../../constants';
 const FIXTURE1_ROOT = resolve(__dirname, '__fixtures__/fixture1');
 
 describe('src/dev/npm/installed_packages', () => {
-  describe('getInstalledPackages()', function() {
+  describe('getInstalledPackages()', function () {
     let kibanaPackages: InstalledPackage[];
     let fixture1Packages: InstalledPackage[];
 
-    beforeAll(async function() {
+    beforeAll(async function () {
       [kibanaPackages, fixture1Packages] = await Promise.all([
         getInstalledPackages({
           directory: REPO_ROOT,
@@ -76,16 +76,16 @@ describe('src/dev/npm/installed_packages', () => {
     });
 
     it('returns a single entry for every package/version combo', () => {
-      const tags = kibanaPackages.map(pkg => `${pkg.name}@${pkg.version}`);
+      const tags = kibanaPackages.map((pkg) => `${pkg.name}@${pkg.version}`);
       expect(tags).toEqual(uniq(tags));
     });
 
     it('does not include root package in the list', () => {
-      if (kibanaPackages.find(pkg => pkg.name === 'kibana')) {
+      if (kibanaPackages.find((pkg) => pkg.name === 'kibana')) {
         throw new Error('Expected getInstalledPackages(kibana) to not include kibana pkg');
       }
 
-      if (fixture1Packages.find(pkg => pkg.name === 'fixture1')) {
+      if (fixture1Packages.find((pkg) => pkg.name === 'fixture1')) {
         throw new Error('Expected getInstalledPackages(fixture1) to not include fixture1 pkg');
       }
     });

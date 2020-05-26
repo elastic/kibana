@@ -43,7 +43,7 @@ export const UrlStateRedux = compose<React.ComponentClass<UrlStateProps & RouteS
   )
 );
 
-const UseUrlStateComponent: React.FC<UrlStateProps> = props => {
+const UseUrlStateComponent: React.FC<UrlStateProps> = (props) => {
   const [routeProps] = useRouteSpy();
   const urlStateReduxProps: RouteSpyState & UrlStateProps = {
     ...routeProps,
