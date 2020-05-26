@@ -24,3 +24,11 @@ export interface ManagementPluginState {
 export interface ManagementPluginReducer {
   management: ImmutableReducer<ManagementState, AppAction>;
 }
+
+/**
+ * The management list of sub-tabs. Changes to these will impact the Router routes.
+ */
+export enum ManagementSubTab {
+  endpoints = 'endpoints',
+  policies = 'policy',
+}

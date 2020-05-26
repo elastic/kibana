@@ -5,35 +5,36 @@
  */
 
 import React, { memo } from 'react';
-import { Route, Switch, useRouteMatch } from 'react-router-dom';
-import { PageView } from '../../common/components/endpoint/page_view';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { PolicyContainer } from './policy';
+import {
+  MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+  MANAGEMENT_ROUTING_POLICIES_PATH,
+  MANAGEMENT_ROUTING_ROOT_PATH,
+} from '../common/constants';
+import { ManagementPageView } from '../components/management_page_view';
+
+const TmpEndpoints = () => {
+  return (
+    <ManagementPageView viewType="list" headerLeft="Test">
+      <h1>{'Endpoints will go here'}</h1>
+      <SpyRoute />
+    </ManagementPageView>
+  );
+};
 
 export const ManagementContainer = memo(() => {
-  const match = useRouteMatch();
-
   return (
     <Switch>
-      <Route path={`${match.path}/policy`} component={PolicyContainer} />
-
+      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} exact component={TmpEndpoints} />
+      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyContainer} />
       <Route
-        path={match.path}
-        render={() => {
-          return (
-            <PageView viewType="list" headerLeft="Test">
-              {'Its a test!'}
-              <div>
-                <a href="#/management/policy">{'Policy List'}</a>
-              </div>
-              <div>
-                <a href="#/management/policy/123">{'Policy details'}</a>
-              </div>
-              <SpyRoute />
-            </PageView>
-          );
-        }}
+        path={MANAGEMENT_ROUTING_ROOT_PATH}
+        exact
+        render={() => <Redirect to="/management/endpoints" />}
       />
+      {/* TODO: add page not found route here */}
     </Switch>
   );
 });

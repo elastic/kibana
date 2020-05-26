@@ -9,7 +9,7 @@ import { managementReducer, getManagementInitialState } from './store';
 import { getManagementRoutes } from './routes';
 import { StartPlugins } from '../types';
 import { managementMiddlewareFactory } from './store/middleware';
-import { MANAGEMENT_STORE_GLOBAL_NAMESPACE } from './constants';
+import { MANAGEMENT_STORE_GLOBAL_NAMESPACE } from './common/constants';
 
 export class Management {
   public setup() {}

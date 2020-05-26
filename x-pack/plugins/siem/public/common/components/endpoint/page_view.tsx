@@ -18,7 +18,7 @@ import {
   EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
-import React, { memo, ReactNode, useMemo } from 'react';
+import React, { memo, MouseEventHandler, ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 
@@ -100,7 +100,14 @@ export type PageViewProps = EuiPageProps & {
   /**
    * The list of tab navigation items
    */
-  tabs?: Array<EuiTabProps & { name: ReactNode; id: string }>;
+  tabs?: Array<
+    EuiTabProps & {
+      name: ReactNode;
+      id: string;
+      href?: string;
+      onClick?: MouseEventHandler<HTMLAnchorElement | HTMLButtonElement>;
+    }
+  >;
   children?: ReactNode;
 };
 

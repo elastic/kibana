@@ -5,15 +5,18 @@
  */
 
 import React, { memo } from 'react';
-import { Route, Switch, useRouteMatch } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import { PolicyDetails, PolicyList } from './view';
+import {
+  MANAGEMENT_ROUTING_POLICIES_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
+} from '../../common/constants';
 
 export const PolicyContainer = memo(() => {
-  const { path } = useRouteMatch();
   return (
     <Switch>
-      <Route path={path} exact component={PolicyList} />
-      <Route path={`${path}/:policyId`} exact component={PolicyDetails} />
+      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} exact component={PolicyList} />
+      <Route path={MANAGEMENT_ROUTING_POLICY_DETAILS_PATH} exact component={PolicyDetails} />
     </Switch>
   );
 });

@@ -11,7 +11,7 @@ import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
-} from '../../../constants';
+} from '../../../common/constants';
 
 /**
  * Narrows global state down to the PolicyListState before calling the provided Policy List Selector

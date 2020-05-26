@@ -3,10 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SiemPageName } from '../app/types';
+import { SiemPageName } from '../../app/types';
+import { ManagementSubTab } from '../types';
 
 // --[ ROUTING ]---------------------------------------------------------------------------
 export const MANAGEMENT_ROUTING_ROOT_PATH = `/:pageName(${SiemPageName.management})`;
+export const MANAGEMENT_ROUTING_ENDPOINTS_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${ManagementSubTab.endpoints})`;
+export const MANAGEMENT_ROUTING_POLICIES_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${ManagementSubTab.policies})`;
+export const MANAGEMENT_ROUTING_POLICY_DETAILS_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${ManagementSubTab.policies})/:policyId`;
 
 // --[ STORE ]---------------------------------------------------------------------------
 /** The SIEM global store namespace where the management state will be mounted */

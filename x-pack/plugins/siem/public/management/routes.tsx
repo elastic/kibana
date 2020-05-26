@@ -7,7 +7,7 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { ManagementContainer } from './pages';
-import { MANAGEMENT_ROUTING_ROOT_PATH } from './constants';
+import { MANAGEMENT_ROUTING_ROOT_PATH } from './common/constants';
 
 /**
  * Returns the React Router Routes for the management area

@@ -12,7 +12,7 @@ import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
-} from '../constants';
+} from '../common/constants';
 
 export const managementMiddlewareFactory = (coreStart, depsStart) => {
   return [

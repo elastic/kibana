@@ -37,6 +37,7 @@ import { AppAction } from '../../../../common/store/actions';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { PageViewHeaderTitle } from '../../../../common/components/endpoint/page_view';
 import { ManagementPageView } from '../../../components/management_page_view';
+import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -112,6 +113,7 @@ export const PolicyDetails = React.memo(() => {
             {policyApiError?.message}
           </EuiCallOut>
         ) : null}
+        <SpyRoute />
       </ManagementPageView>
     );
   }
@@ -213,6 +215,7 @@ export const PolicyDetails = React.memo(() => {
         <EuiSpacer size="l" />
         <LinuxEvents />
       </ManagementPageView>
+      <SpyRoute />
     </>
   );
 });
