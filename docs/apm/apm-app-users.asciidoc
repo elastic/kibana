@@ -36,7 +36,8 @@ In general, there are three types of privileges you'll work with:
 <titleabbrev>Create an APM reader user</titleabbrev>
 ++++
 
-*Full APM reader*
+[[apm-app-reader-full]]
+==== Full APM reader
 
 APM reader users typically need to view the APM app, dashboards, and visualizations that contain APM data.
 These users might also need to create and edit dashboards, visualizations, and machine learning jobs.
@@ -57,7 +58,8 @@ These users might also need to create and edit dashboards, visualizations, and m
 |Grants the privileges required to create, update, and view machine learning jobs
 |====
 
-*Partial APM reader*
+[[apm-app-reader-partial]]
+==== Partial APM reader
 
 In some instances, you may wish to restrict certain Kibana apps that a user has access to.
 
@@ -108,7 +110,8 @@ Here are two examples:
 <titleabbrev>Create a central config user</titleabbrev>
 ++++
 
-*Central configuration manager*
+[[apm-app-central-config-manager]]
+==== Central configuration manager
 
 Central configuration users need to be able to view, create, update, and delete Agent configurations.
 
@@ -133,7 +136,8 @@ Central configuration users need to be able to view, create, update, and delete 
 |Allow full use of the {beat_kib_app}
 |====
 
-*Central configuration reader*
+[[apm-app-central-config-reader]]
+==== Central configuration reader
 
 In some instances, you may wish to create a user that can only read central configurations,
 but not create, update, or delete them.
@@ -158,7 +162,8 @@ but not create, update, or delete them.
 |Allow read access to the {beat_kib_app}
 |====
 
-*Central configuration API*
+[[apm-app-central-config-api]]
+==== Central configuration API
 
 See <<apm-app-api-user>>.
 
@@ -174,7 +179,8 @@ See <<apm-app-api-user>>.
 <titleabbrev>Create an API user</titleabbrev>
 ++++
 
-*Central configuration API*
+[[apm-app-api-config-manager]]
+==== Central configuration API
 
 Users can list, search, create, update, and delete central configurations via the APM app API.
 
@@ -189,7 +195,8 @@ Users can list, search, create, update, and delete central configurations via th
 |Allow all access to the {beat_kib_app}
 |====
 
-*Central configuration API reader*
+[[apm-app-api-config-reader]]
+==== Central configuration API reader
 
 Sometimes a user only needs to list and search central configurations via the APM app API.
 
@@ -204,7 +211,8 @@ Sometimes a user only needs to list and search central configurations via the AP
 |Allow read access to the {beat_kib_app}
 |====
 
-*Annotation API*
+[[apm-app-api-annotation-manager]]
+==== Annotation API
 
 Users can use the annotation API to create annotations on their APM data.
 
