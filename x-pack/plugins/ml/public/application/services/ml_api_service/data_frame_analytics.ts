@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
 import { http } from '../http_service';
 
 import { basePath } from './index';
@@ -32,14 +33,15 @@ interface GetDataFrameAnalyticsResponse {
   data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
-export interface DeleteDataFrameAnalyticsWithIndexError {
-  msg: string;
+export interface DeleteDataFrameAnalyticsWithIndexStatus {
+  success: boolean;
+  error?: CustomHttpResponseOptions<ResponseError>;
 }
-interface DeleteDataFrameAnalyticsWithIndexReponse {
+interface DeleteDataFrameAnalyticsWithIndexResponse {
   acknowledged: boolean;
-  deleteTargetIndexAcknowledged: boolean;
-  deleteIndexPatternAcknowledged: boolean;
-  errors: DeleteDataFrameAnalyticsWithIndexError[];
+  analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
+  targetIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
+  targetIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
 }
 
 export const dataFrameAnalytics = {
@@ -101,7 +103,7 @@ export const dataFrameAnalytics = {
     deleteTargetIndex: boolean,
     deleteIndexPattern: boolean
   ) {
-    return http<DeleteDataFrameAnalyticsWithIndexReponse>({
+    return http<DeleteDataFrameAnalyticsWithIndexResponse>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}`,
       query: { deleteTargetIndex, deleteIndexPattern },
       method: 'DELETE',

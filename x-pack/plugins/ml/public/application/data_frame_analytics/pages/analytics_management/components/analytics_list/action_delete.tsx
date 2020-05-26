@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   deleteAnalytics,
   deleteAnalyticsAndTargetIndex,
-  checkUserCanDeleteIndex,
+  canDeleteIndex,
 } from '../../services/analytics_service';
 import {
   checkPermission,
@@ -81,7 +81,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
   };
   const checkUserIndexPermission = () => {
     try {
-      const userCanDelete = checkUserCanDeleteIndex(indexName);
+      const userCanDelete = canDeleteIndex(indexName);
       if (userCanDelete) {
         setUserCanDeleteIndex(true);
       }

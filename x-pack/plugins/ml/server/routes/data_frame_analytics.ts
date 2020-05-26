@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
+import { CustomHttpResponseOptions, RequestHandlerContext, ResponseError } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { RouteInitialization } from '../types';
@@ -17,6 +17,11 @@ import {
   deleteDataFrameAnalyticsJobSchema,
 } from './schemas/data_analytics_schema';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
+
+export interface DeleteDataFrameAnalyticsWithIndexStatus {
+  success: boolean;
+  error?: CustomHttpResponseOptions<ResponseError>;
+}
 
 function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
   const iph = new IndexPatternHandler(context.core.savedObjects.client);
@@ -320,10 +325,13 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       try {
         const { analyticsId } = request.params;
         const { deleteTargetIndex, deleteIndexPattern } = request.query;
-        const errorsEncountered = [];
+
         let destinationIndex: string | undefined;
-        let deleteTargetIndexAcknowledged: boolean = false;
-        let deleteIndexPatternAcknowledged: boolean = false;
+        const analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
+        const targetIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
+        const targetIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus = {
+          success: false,
+        };
 
         // Check if analyticsId is valid and get destination index
         if (deleteTargetIndex || deleteIndexPattern) {
@@ -348,11 +356,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
                 await context.ml!.mlClient.callAsCurrentUser('indices.delete', {
                   index: destinationIndex,
                 });
-                deleteTargetIndexAcknowledged = true;
+                targetIndexDeleted.success = true;
               } catch (deleteIndexError) {
-                errorsEncountered.push({
-                  msg: `An error occurred deleting destination index ${destinationIndex}`,
-                });
+                targetIndexDeleted.error = wrapError(deleteIndexError);
               }
             } else {
               return response.forbidden();
@@ -366,27 +372,29 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
               if (indexPatternId) {
                 await deleteIndexPatternById(context, indexPatternId);
               }
-              deleteIndexPatternAcknowledged = true;
             } catch (deleteIndexPatternError) {
-              errorsEncountered.push({
-                msg: `An error occurred deleting index pattern ${destinationIndex}`,
-              });
+              targetIndexPatternDeleted.error = wrapError(deleteIndexPatternError);
             }
           }
         }
         // Grab the target index from the data frame analytics job id
         // Delete the data frame analytics
-        let results = await context.ml!.mlClient.callAsCurrentUser('ml.deleteDataFrameAnalytics', {
-          analyticsId,
-        });
+        let results;
 
+        try {
+          results = await context.ml!.mlClient.callAsCurrentUser('ml.deleteDataFrameAnalytics', {
+            analyticsId,
+          });
+          analyticsJobDeleted.success = true;
+        } catch (deleteDFAError) {
+          analyticsJobDeleted.error = wrapError(deleteDFAError);
+        }
         results = {
           ...results,
-          deleteTargetIndexAcknowledged,
-          deleteIndexPatternAcknowledged,
-          errors: errorsEncountered,
+          analyticsJobDeleted,
+          targetIndexDeleted,
+          targetIndexPatternDeleted,
         };
-
         return response.ok({
           body: results,
         });
