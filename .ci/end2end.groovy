@@ -78,14 +78,7 @@ pipeline {
       steps{
         notifyStatus('Running smoke tests', 'PENDING')
         dir("${BASE_DIR}"){
-          // As long as the kibana in dev mode is not reliable we need to run the tests
-          // a few times.
-          // TODO: APM-UI to provide the kibana run command that works at first.
-          sh "${E2E_DIR}/ci/run-e2e.sh || true"
-          retry(5) {
-            sleep 30
-            sh "${E2E_DIR}/ci/rerun-e2e.sh"
-          }
+          sh "${E2E_DIR}/ci/run-e2e.sh"
         }
       }
       post {

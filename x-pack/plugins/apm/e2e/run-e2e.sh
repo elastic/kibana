@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-if [ -n "${JENKINS_URL}" ] ; then
-    set -x
-fi
-
 # variables
 KIBANA_PORT=5701
 ELASTICSEARCH_PORT=9201
