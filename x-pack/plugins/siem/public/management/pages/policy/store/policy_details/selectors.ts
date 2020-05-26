@@ -5,6 +5,7 @@
  */
 
 import { createSelector } from 'reselect';
+import { matchPath } from 'react-router-dom';
 import { PolicyDetailsState } from '../../types';
 import {
   Immutable,
@@ -13,6 +14,8 @@ import {
   UIPolicyConfig,
 } from '../../../../../../common/endpoint/types';
 import { factory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
+import { MANAGEMENT_ROUTING_POLICY_DETAILS_PATH } from '../../../../common/constants';
+import { ManagementRoutePolicyDetailsParams } from '../../../../types';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
@@ -31,22 +34,24 @@ export const policyDetailsForUpdate: (
 
 /** Returns a boolean of whether the user is on the policy details page or not */
 export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) => {
-  if (state.location) {
-    const pathnameParts = state.location.pathname.split('/');
-    return pathnameParts[1] === 'policy' && pathnameParts[2];
-  } else {
-    return false;
-  }
+  return (
+    matchPath(state.location?.pathname ?? '', {
+      path: MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
+      exact: true,
+    }) !== null
+  );
 };
 
 /** Returns the policyId from the url */
 export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => string = createSelector(
   (state) => state.location,
   (location: PolicyDetailsState['location']) => {
-    if (location) {
-      return location.pathname.split('/')[2];
-    }
-    return '';
+    return (
+      matchPath<ManagementRoutePolicyDetailsParams>(location?.pathname ?? '', {
+        path: MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
+        exact: true,
+      })?.params.policyId ?? ''
+    );
   }
 );
 

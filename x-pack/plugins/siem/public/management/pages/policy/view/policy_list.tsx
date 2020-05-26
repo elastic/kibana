@@ -26,6 +26,7 @@ import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoi
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { ManagementPageView } from '../../../components/management_page_view';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
+import { getManagementUrl } from '../../../common/routing';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -94,14 +95,8 @@ export const PolicyList = React.memo(() => {
         }),
         // eslint-disable-next-line react/display-name
         render: (value: string, item: Immutable<PolicyData>) => {
-          const routeUri = `/policy/${item.id}`;
-          return (
-            <PolicyLink
-              name={value}
-              route={routeUri}
-              href={services.application.getUrlForApp('endpoint') + routeUri}
-            />
-          );
+          const routeUri = getManagementUrl('policyDetails', { policyId: item.id });
+          return <PolicyLink name={value} route={routeUri} href={`#${routeUri}`} />;
         },
         truncateText: true,
       },

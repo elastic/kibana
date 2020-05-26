@@ -24,6 +24,7 @@ export type getManagementUrlArgs =
  * @param options
  */
 export const getManagementUrl = (...args: getManagementUrlArgs): string => {
+  // FIXME: should this method be renamed `getManagementRelativeUrl()` since it only return the value after the `#`?
   if (args[0] === 'endpointList') {
     return generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
       pageName: SiemPageName.management,

@@ -6,8 +6,10 @@
 
 import { createSelector } from 'reselect';
 import { parse } from 'query-string';
+import { matchPath } from 'react-router-dom';
 import { PolicyListState, PolicyListUrlSearchParams } from '../../types';
 import { Immutable } from '../../../../../../common/endpoint/types';
+import { MANAGEMENT_ROUTING_POLICIES_PATH } from '../../../../common/constants';
 
 const PAGE_SIZES = Object.freeze([10, 20, 50]);
 
@@ -24,7 +26,12 @@ export const selectIsLoading = (state: Immutable<PolicyListState>) => state.isLo
 export const selectApiError = (state: Immutable<PolicyListState>) => state.apiError;
 
 export const isOnPolicyListPage = (state: Immutable<PolicyListState>) => {
-  return state.location?.pathname === '/policy';
+  return (
+    matchPath(state.location?.pathname ?? '', {
+      path: MANAGEMENT_ROUTING_POLICIES_PATH,
+      exact: true,
+    }) !== null
+  );
 };
 
 const routeLocation = (state: Immutable<PolicyListState>) => state.location;
