@@ -93,7 +93,7 @@ export function replaceLayerList(newLayerList: LayerDescriptor[]) {
       });
     }
 
-    newLayerList.forEach(layerDescriptor => {
+    newLayerList.forEach((layerDescriptor) => {
       dispatch<any>(addLayer(layerDescriptor));
     });
   };
@@ -338,7 +338,7 @@ function removeLayerFromLayerList(layerId: string | null) {
       return;
     }
 
-    layerGettingRemoved.getInFlightRequestTokens().forEach(requestToken => {
+    layerGettingRemoved.getInFlightRequestTokens().forEach((requestToken) => {
       dispatch(cancelRequest(requestToken));
     });
     dispatch<any>(cleanTooltipStateForLayer(layerId!));
@@ -421,7 +421,7 @@ export function setHiddenLayers(hiddenLayerIds: string[]) {
     if (!isMapReady) {
       dispatch({ type: SET_WAITING_FOR_READY_HIDDEN_LAYERS, hiddenLayerIds });
     } else {
-      getLayerListRaw(getState()).forEach(layer =>
+      getLayerListRaw(getState()).forEach((layer) =>
         dispatch<any>(setLayerVisibility(layer.id, !hiddenLayerIds.includes(layer.id)))
       );
     }

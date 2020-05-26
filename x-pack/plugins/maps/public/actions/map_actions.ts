@@ -93,7 +93,7 @@ export function mapReady() {
       type: MAP_READY,
     });
 
-    getWaitingForMapReadyLayerListRaw(getState()).forEach(layerDescriptor => {
+    getWaitingForMapReadyLayerListRaw(getState()).forEach((layerDescriptor) => {
       dispatch<any>(addLayer(layerDescriptor));
     });
 
@@ -207,7 +207,7 @@ export function fitToDataBounds() {
     }
 
     const dataFilters = getDataFilters(getState());
-    const boundsPromises = layerList.map(async layer => {
+    const boundsPromises = layerList.map(async (layer) => {
       return layer.getBounds(dataFilters);
     });
 
