@@ -6,15 +6,13 @@
 
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { SiemPageName } from '../app/types';
 import { ManagementContainer } from './pages';
-
-const MANAGEMENT_ROOT_PATH = `/:pageName(${SiemPageName.management})`;
+import { MANAGEMENT_ROUTING_ROOT_PATH } from './constants';
 
 /**
  * Returns the React Router Routes for the management area
  */
 export const getManagementRoutes = () => [
   // Mounts the Management interface on `/management`
-  <Route path={MANAGEMENT_ROOT_PATH} component={ManagementContainer} />,
+  <Route path={MANAGEMENT_ROUTING_ROOT_PATH} component={ManagementContainer} />,
 ];

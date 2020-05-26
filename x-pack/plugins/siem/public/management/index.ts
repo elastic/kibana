@@ -8,8 +8,8 @@ import { CoreStart } from 'kibana/public';
 import { managementReducer, getManagementInitialState } from './store';
 import { getManagementRoutes } from './routes';
 import { StartPlugins } from '../types';
-import { MANAGEMENT_GLOBAL_STORE_NAMESPACE } from './store/constants';
 import { managementMiddlewareFactory } from './store/middleware';
+import { MANAGEMENT_STORE_GLOBAL_NAMESPACE } from './constants';
 
 export class Management {
   public setup() {}
@@ -22,10 +22,10 @@ export class Management {
       routes: getManagementRoutes(),
       store: {
         initialState: {
-          [MANAGEMENT_GLOBAL_STORE_NAMESPACE]: getManagementInitialState(),
+          [MANAGEMENT_STORE_GLOBAL_NAMESPACE]: getManagementInitialState(),
         },
         reducer: {
-          [MANAGEMENT_GLOBAL_STORE_NAMESPACE]: managementReducer,
+          [MANAGEMENT_STORE_GLOBAL_NAMESPACE]: managementReducer,
         },
         middleware: managementMiddlewareFactory(core, plugins),
       },

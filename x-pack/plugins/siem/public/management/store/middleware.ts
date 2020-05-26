@@ -9,21 +9,21 @@ import { ManagementState } from '../types';
 import { policyListMiddlewareFactory } from '../pages/policy/store/policy_list';
 import { policyDetailsMiddlewareFactory } from '../pages/policy/store/policy_details';
 import {
-  MANAGEMENT_GLOBAL_STORE_NAMESPACE,
+  MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
-} from './constants';
+} from '../constants';
 
 export const managementMiddlewareFactory = (coreStart, depsStart) => {
   return [
     substateMiddlewareFactory(
       globalState =>
-        globalState[MANAGEMENT_GLOBAL_STORE_NAMESPACE][MANAGEMENT_STORE_POLICY_LIST_NAMESPACE],
+        globalState[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_POLICY_LIST_NAMESPACE],
       policyListMiddlewareFactory(coreStart, depsStart)
     ),
     substateMiddlewareFactory(
       globalState =>
-        globalState[MANAGEMENT_GLOBAL_STORE_NAMESPACE][MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE],
+        globalState[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE],
       policyDetailsMiddlewareFactory(coreStart, depsStart)
     ),
   ];

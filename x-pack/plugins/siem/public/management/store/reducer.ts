@@ -17,7 +17,7 @@ import {
 import {
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
-} from './constants';
+} from '../constants';
 
 /**
  * Returns the initial state of the store for the SIEM Management section
