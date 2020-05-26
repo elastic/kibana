@@ -48,7 +48,7 @@ export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
       router,
       license: this.license,
       config: {
-        isSecurityEnabled: security !== undefined && security.license.isEnabled(),
+        isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
       },
       lib: {
         isEsError,
