@@ -78,7 +78,7 @@ export async function importSavedObjectsFromStream({
 
   return {
     success: errorAccumulator.length === 0,
-    successCount: bulkCreateResult.saved_objects.filter(obj => !obj.error).length,
+    successCount: bulkCreateResult.saved_objects.filter((obj) => !obj.error).length,
     ...(errorAccumulator.length ? { errors: errorAccumulator } : {}),
   };
 }

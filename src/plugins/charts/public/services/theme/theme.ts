@@ -57,7 +57,7 @@ export class ThemeService {
     this._chartsTheme$ = uiSettings
       .get$('theme:darkMode')
       .pipe(
-        map(darkMode => (darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme))
+        map((darkMode) => (darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme))
       );
   }
 }

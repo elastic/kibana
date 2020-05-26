@@ -67,7 +67,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
   ] => {
     const namespacesValues: string[] = [];
     const inputTypesValues: string[] = [];
-    const mappedDatasources = originalDatasources.map<InMemoryDatasource>(datasource => {
+    const mappedDatasources = originalDatasources.map<InMemoryDatasource>((datasource) => {
       if (datasource.namespace && !namespacesValues.includes(datasource.namespace)) {
         namespacesValues.push(datasource.namespace);
       }
@@ -84,7 +84,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
 
           streamSummary.total += input.streams.length;
           streamSummary.enabled += input.enabled
-            ? input.streams.filter(stream => stream.enabled).length
+            ? input.streams.filter((stream) => stream.enabled).length
             : 0;
 
           return streamSummary;
@@ -233,7 +233,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
                   //   />
                   // </EuiContextMenuItem>,
                   <DatasourceDeleteProvider agentConfig={config} key="datasourceDelete">
-                    {deleteDatasourcePrompt => {
+                    {(deleteDatasourcePrompt) => {
                       return (
                         <DangerEuiContextMenuItem
                           disabled={!hasWriteCapabilities}

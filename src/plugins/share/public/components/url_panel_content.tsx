@@ -52,7 +52,7 @@ interface Props {
   post: HttpStart['post'];
 }
 
-enum ExportUrlAsType {
+export enum ExportUrlAsType {
   EXPORT_URL_AS_SAVED_OBJECT = 'savedObject',
   EXPORT_URL_AS_SNAPSHOT = 'snapshot',
 }
@@ -181,7 +181,7 @@ export class UrlPanelContent extends Component<Props, State> {
       }),
     });
     if (this.props.isEmbedded) {
-      formattedUrl = this.makeUrlEmbeddable(url);
+      formattedUrl = this.makeUrlEmbeddable(formattedUrl);
     }
 
     return formattedUrl;
@@ -336,9 +336,7 @@ export class UrlPanelContent extends Component<Props, State> {
         defaultMessage="Can't share as saved object until the {objectType} has been saved."
         values={{ objectType: this.props.objectType }}
       />
-    ) : (
-      undefined
-    );
+    ) : undefined;
     return (
       <EuiFormRow
         label={

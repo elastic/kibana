@@ -11,7 +11,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint']);
   const testSubjects = getService('testSubjects');
 
-  describe('Header nav', function() {
+  describe('Header nav', function () {
     this.tags('ciGroup7');
     before(async () => {
       await pageObjects.common.navigateToApp('endpoint');

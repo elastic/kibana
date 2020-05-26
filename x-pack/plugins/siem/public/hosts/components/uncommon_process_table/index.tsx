@@ -79,7 +79,7 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
     type,
   }) => {
     const updateLimitPagination = useCallback(
-      newLimit =>
+      (newLimit) =>
         updateTableLimit({
           hostsType: type,
           limit: newLimit,
@@ -89,7 +89,7 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
     );
 
     const updateActivePage = useCallback(
-      newPage =>
+      (newPage) =>
         updateTableActivePage({
           activePage: newPage,
           hostsType: type,
@@ -182,7 +182,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
         rowItems: getHostNames(node),
         attrName: 'host.name',
         idPrefix: `uncommon-process-table-${node._id}-processHost`,
-        render: item => <HostDetailsLink hostName={item} />,
+        render: (item) => <HostDetailsLink hostName={item} />,
       }),
     width: '25%',
   },
@@ -215,8 +215,8 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
 export const getHostNames = (node: UncommonProcessItem): string[] => {
   if (node.hosts != null) {
     return node.hosts
-      .filter(host => host.name != null && host.name[0] != null)
-      .map(host => (host.name != null && host.name[0] != null ? host.name[0] : ''));
+      .filter((host) => host.name != null && host.name[0] != null)
+      .map((host) => (host.name != null && host.name[0] != null ? host.name[0] : ''));
   } else {
     return [];
   }
@@ -227,7 +227,7 @@ export const getUncommonColumnsCurated = (pageType: HostsType): UncommonProcessT
   if (pageType === HostsType.details) {
     return [i18n.HOSTS, i18n.NUMBER_OF_HOSTS].reduce((acc, name) => {
       acc.splice(
-        acc.findIndex(column => column.name === name),
+        acc.findIndex((column) => column.name === name),
         1
       );
       return acc;

@@ -25,7 +25,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', undefined);
 
       const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/state`
@@ -51,7 +51,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
           params: {},
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', undefined);
 
       // wait for alert to actually execute
       await retry.try(async () => {

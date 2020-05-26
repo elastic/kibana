@@ -33,7 +33,7 @@ export const __bundleProvider__ = wrap(alias('uiBundleProviders'), flatConcatAtT
 export const __webpackPluginProvider__ = wrap(alias('webpackPluginProviders'), flatConcatAtType);
 export const noParse = wrap(
   alias('webpackNoParseRules'),
-  mapSpec(rule => {
+  mapSpec((rule) => {
     if (typeof rule === 'string') {
       return new RegExp(`${isAbsolute(rule) ? '^' : ''}${escapeRegExp(rule)}`);
     }

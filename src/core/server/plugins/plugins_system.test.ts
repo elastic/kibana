@@ -342,7 +342,7 @@ test('`uiPlugins` returns ordered Maps of all plugin manifests', async () => {
     ],
   ] as Array<[PluginWrapper, Record<PluginName, unknown>]>);
 
-  [...plugins.keys()].forEach(plugin => {
+  [...plugins.keys()].forEach((plugin) => {
     pluginsSystem.addPlugin(plugin);
   });
 
@@ -371,7 +371,7 @@ test('`uiPlugins` returns only ui plugin dependencies', async () => {
     createPlugin('opt-no-ui', { ui: false, server: true }),
   ];
 
-  plugins.forEach(plugin => {
+  plugins.forEach((plugin) => {
     pluginsSystem.addPlugin(plugin);
   });
 
@@ -424,7 +424,7 @@ describe('setup', () => {
   });
   it('throws timeout error if "setup" was not completed in 30 sec.', async () => {
     const plugin: PluginWrapper = createPlugin('timeout-setup');
-    jest.spyOn(plugin, 'setup').mockImplementation(() => new Promise(i => i));
+    jest.spyOn(plugin, 'setup').mockImplementation(() => new Promise((i) => i));
     pluginsSystem.addPlugin(plugin);
     mockCreatePluginSetupContext.mockImplementation(() => ({}));
 
@@ -447,7 +447,7 @@ describe('start', () => {
   it('throws timeout error if "start" was not completed in 30 sec.', async () => {
     const plugin: PluginWrapper = createPlugin('timeout-start');
     jest.spyOn(plugin, 'setup').mockResolvedValue({});
-    jest.spyOn(plugin, 'start').mockImplementation(() => new Promise(i => i));
+    jest.spyOn(plugin, 'start').mockImplementation(() => new Promise((i) => i));
 
     pluginsSystem.addPlugin(plugin);
     mockCreatePluginSetupContext.mockImplementation(() => ({}));
