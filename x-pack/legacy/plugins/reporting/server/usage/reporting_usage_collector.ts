@@ -7,8 +7,6 @@
 import { first, map } from 'rxjs/operators';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Collector } from 'src/plugins/usage_collection/server/collector';
 import { ReportingCore } from '../';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
 import { ReportingConfig } from '../../server';
@@ -16,18 +14,10 @@ import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { ReportingSetupDeps } from '../types';
 import { GetLicense } from './';
 import { getReportingUsage } from './get_reporting_usage';
-import { RangeStats, ReportingUsageType } from './types';
+import { RangeStats } from './types';
 
 // places the reporting data as kibana stats
 const METATYPE = 'kibana_stats';
-
-interface StatsPayloadFormat {
-  usage: {
-    xpack: {
-      reporting: RangeStats;
-    };
-  };
-}
 
 /*
  * @return {Object} kibana usage stats type collection object
@@ -38,7 +28,7 @@ export function getReportingUsageCollector(
   getLicense: GetLicense,
   exportTypesRegistry: ExportTypesRegistry,
   isReady: () => Promise<boolean>
-): Collector<ReportingUsageType, StatsPayloadFormat> {
+) {
   return usageCollection.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
     fetch: (callCluster: CallCluster) =>
@@ -78,14 +68,12 @@ export function registerReportingUsageCollector(
   const getLicense = async () => {
     return await licensing.license$
       .pipe(
-        map((license) => {
-          return {
-            isAvailable: () => true,
-            license: {
-              getType: () => license.type,
-            },
-          };
-        }),
+        map(({ isAvailable, type }) => ({
+          isAvailable: () => isAvailable,
+          license: {
+            getType: () => type,
+          },
+        })),
         first()
       )
       .toPromise();
