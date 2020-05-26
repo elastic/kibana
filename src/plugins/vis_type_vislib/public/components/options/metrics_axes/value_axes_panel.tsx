@@ -55,9 +55,9 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
     (axis: ValueAxis) => {
       const isFirst = valueAxes[0].id === axis.id;
       const series = seriesParams.filter(
-        serie => serie.valueAxis === axis.id || (isFirst && !serie.valueAxis)
+        (serie) => serie.valueAxis === axis.id || (isFirst && !serie.valueAxis)
       );
-      return series.map(serie => serie.data.label).join(', ');
+      return series.map((serie) => serie.data.label).join(', ');
     },
     [seriesParams, valueAxes]
   );

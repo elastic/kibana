@@ -17,11 +17,14 @@
  * under the License.
  */
 
+import { ReactElement } from 'react';
+
 import { ManagementSection } from './management_section';
+import { managementSections } from './management_sections';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 // @ts-ignore
-import { LegacyManagementSection } from './legacy';
-import { CreateSection } from './types';
+import { LegacyManagementSection, sections } from './legacy';
+import { CreateSection, ManagementSectionId } from './types';
 import { StartServicesAccessor, CoreStart } from '../../../core/public';
 
 export class ManagementService {
@@ -48,8 +51,9 @@ export class ManagementService {
       return newSection;
     };
   }
-  private getSection(sectionId: ManagementSection['id']) {
-    return this.sections.find(section => section.id === sectionId);
+
+  private getSection(sectionId: ManagementSectionId) {
+    return this.sections.find((section) => section.id === sectionId);
   }
 
   private getAllSections() {
@@ -58,12 +62,18 @@ export class ManagementService {
 
   private getSectionsEnabled() {
     return this.sections
-      .filter(section => section.getAppsEnabled().length > 0)
+      .filter((section) => section.getAppsEnabled().length > 0)
       .sort((a, b) => a.order - b.order);
   }
 
   private sharedInterface = {
-    getSection: this.getSection.bind(this),
+    getSection: (sectionId: ManagementSectionId) => {
+      const section = this.getSection(sectionId);
+      if (!section) {
+        throw new Error(`Management section with id ${sectionId} is undefined`);
+      }
+      return section;
+    },
     getSectionsEnabled: this.getSectionsEnabled.bind(this),
     getAllSections: this.getAllSections.bind(this),
   };
@@ -79,16 +89,13 @@ export class ManagementService {
       getStartServices
     );
 
-    register({ id: 'kibana', title: 'Kibana', order: 30, euiIconType: 'logoKibana' });
-    register({
-      id: 'elasticsearch',
-      title: 'Elasticsearch',
-      order: 20,
-      euiIconType: 'logoElasticsearch',
-    });
+    managementSections.forEach(
+      ({ id, title }: { id: ManagementSectionId; title: ReactElement }, idx: number) => {
+        register({ id, title, order: idx });
+      }
+    );
 
     return {
-      register,
       ...this.sharedInterface,
     };
   }

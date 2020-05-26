@@ -85,7 +85,7 @@ export class CollectConfigContainer extends React.Component<
         keepRange={config.useCurrentDateRange}
         isLoading={isLoading}
         error={error}
-        onDashboardSelect={dashboardId => {
+        onDashboardSelect={(dashboardId) => {
           onConfig({ ...config, dashboardId });
           if (this.state.error) {
             this.setState({ error: undefined });

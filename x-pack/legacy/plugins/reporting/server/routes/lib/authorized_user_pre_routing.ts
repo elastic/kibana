@@ -8,9 +8,9 @@ import Boom from 'boom';
 import { Legacy } from 'kibana';
 import { AuthenticatedUser } from '../../../../../../plugins/security/server';
 import { ReportingConfig } from '../../../server';
-import { Logger } from '../../../types';
+import { LevelLogger as Logger } from '../../../server/lib';
+import { ReportingSetupDeps } from '../../../server/types';
 import { getUserFactory } from '../../lib/get_user';
-import { ReportingSetupDeps } from '../../types';
 
 const superuserRole = 'superuser';
 
@@ -46,7 +46,7 @@ export const authorizedUserPreRoutingFactory = function authorizedUserPreRouting
     }
 
     const authorizedRoles = [superuserRole, ...(config.get('roles', 'allow') as string[])];
-    if (!user.roles.find(role => authorizedRoles.includes(role))) {
+    if (!user.roles.find((role) => authorizedRoles.includes(role))) {
       return Boom.forbidden(`Sorry, you don't have access to Reporting`);
     }
 

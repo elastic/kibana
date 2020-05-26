@@ -9,7 +9,7 @@ import { TestReadable } from '../../../common/test_readable.mock';
 import { BufferLines } from './buffer_lines';
 
 describe('buffer_lines', () => {
-  test('it can read a single line', done => {
+  test('it can read a single line', (done) => {
     const input = new TestReadable();
     input.push('line one\n');
     input.push(null);
@@ -24,7 +24,7 @@ describe('buffer_lines', () => {
     });
   });
 
-  test('it can read two lines', done => {
+  test('it can read two lines', (done) => {
     const input = new TestReadable();
     input.push('line one\n');
     input.push('line two\n');
@@ -40,7 +40,7 @@ describe('buffer_lines', () => {
     });
   });
 
-  test('two identical lines are collapsed into just one line without duplicates', done => {
+  test('two identical lines are collapsed into just one line without duplicates', (done) => {
     const input = new TestReadable();
     input.push('line one\n');
     input.push('line one\n');
@@ -56,7 +56,7 @@ describe('buffer_lines', () => {
     });
   });
 
-  test('it can close out without writing any lines', done => {
+  test('it can close out without writing any lines', (done) => {
     const input = new TestReadable();
     input.push(null);
     const bufferedLine = new BufferLines({ input });
@@ -70,12 +70,12 @@ describe('buffer_lines', () => {
     });
   });
 
-  test('it can read 200 lines', done => {
+  test('it can read 200 lines', (done) => {
     const input = new TestReadable();
     const bufferedLine = new BufferLines({ input });
     let linesToTest: string[] = [];
     const size200: string[] = new Array(200).fill(null).map((_, index) => `${index}\n`);
-    size200.forEach(element => input.push(element));
+    size200.forEach((element) => input.push(element));
     input.push(null);
     bufferedLine.on('lines', (lines: string[]) => {
       linesToTest = [...linesToTest, ...lines];

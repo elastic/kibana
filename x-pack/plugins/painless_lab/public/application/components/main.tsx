@@ -74,7 +74,7 @@ export const Main: React.FunctionComponent = () => {
             </h1>
           </EuiTitle>
 
-          <Editor code={payload.code} onChange={nextCode => updatePayload({ code: nextCode })} />
+          <Editor code={payload.code} onChange={(nextCode) => updatePayload({ code: nextCode })} />
         </EuiFlexItem>
 
         <EuiFlexItem>

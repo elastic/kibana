@@ -239,7 +239,7 @@ describe('import_rules_route', () => {
     });
 
     test('returns 200 with errors if all rules are missing rule_ids and import fails on validation', async () => {
-      const rulesWithoutRuleIds = ['rule-1', 'rule-2'].map(ruleId => getSimpleRuleWithId(ruleId));
+      const rulesWithoutRuleIds = ['rule-1', 'rule-2'].map((ruleId) => getSimpleRuleWithId(ruleId));
       const badPayload = buildHapiStream(rulesToNdJsonString(rulesWithoutRuleIds));
       const badRequest = getImportRulesRequest(badPayload);
 

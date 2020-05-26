@@ -32,7 +32,7 @@ import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '../../../plugins/security/server';
-import { EncryptedSavedObjectsPluginStart } from '../../../plugins/encrypted_saved_objects/server';
+import { EncryptedSavedObjectsClient } from '../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../plugins/task_manager/server';
 import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 import { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
@@ -50,7 +50,7 @@ interface ConstructorOptions {
   taskManager: TaskManagerStartContract;
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceId?: string;
   namespace?: string;
   getUserName: () => Promise<string | null>;
@@ -126,7 +126,7 @@ export class AlertsClient {
     params: InvalidateAPIKeyParams
   ) => Promise<InvalidateAPIKeyResult>;
   private preconfiguredActions: PreConfiguredAction[];
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
 
   constructor({
     alertTypeRegistry,
@@ -138,7 +138,7 @@ export class AlertsClient {
     getUserName,
     createAPIKey,
     invalidateAPIKey,
-    encryptedSavedObjectsPlugin,
+    encryptedSavedObjectsClient,
     preconfiguredActions,
   }: ConstructorOptions) {
     this.logger = logger;
@@ -150,7 +150,7 @@ export class AlertsClient {
     this.savedObjectsClient = savedObjectsClient;
     this.createAPIKey = createAPIKey;
     this.invalidateAPIKey = invalidateAPIKey;
-    this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
+    this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.preconfiguredActions = preconfiguredActions;
   }
 
@@ -250,7 +250,7 @@ export class AlertsClient {
     let apiKeyToInvalidate: string | null = null;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
         RawAlert
       >('alert', id, { namespace: this.namespace });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
@@ -279,7 +279,7 @@ export class AlertsClient {
     let alertSavedObject: SavedObject<RawAlert>;
 
     try {
-      alertSavedObject = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+      alertSavedObject = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
         RawAlert
       >('alert', id, { namespace: this.namespace });
     } catch (e) {
@@ -375,7 +375,7 @@ export class AlertsClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
         RawAlert
       >('alert', id, { namespace: this.namespace });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
@@ -415,9 +415,7 @@ export class AlertsClient {
     }
 
     try {
-      const apiKeyId = Buffer.from(apiKey, 'base64')
-        .toString()
-        .split(':')[0];
+      const apiKeyId = Buffer.from(apiKey, 'base64').toString().split(':')[0];
       const response = await this.invalidateAPIKey({ id: apiKeyId });
       if (response.apiKeysEnabled === true && response.result.error_count > 0) {
         this.logger.error(`Failed to invalidate API Key [id="${apiKeyId}"]`);
@@ -433,7 +431,7 @@ export class AlertsClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
         RawAlert
       >('alert', id, { namespace: this.namespace });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
@@ -477,7 +475,7 @@ export class AlertsClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
         RawAlert
       >('alert', id, { namespace: this.namespace });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
@@ -541,7 +539,7 @@ export class AlertsClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const { attributes, version } = await this.savedObjectsClient.get('alert', alertId);
+    const { attributes, version } = await this.savedObjectsClient.get<Alert>('alert', alertId);
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
       mutedInstanceIds.push(alertInstanceId);
@@ -564,7 +562,7 @@ export class AlertsClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const { attributes, version } = await this.savedObjectsClient.get('alert', alertId);
+    const { attributes, version } = await this.savedObjectsClient.get<Alert>('alert', alertId);
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
       await this.savedObjectsClient.update(
@@ -601,7 +599,7 @@ export class AlertsClient {
     references: SavedObjectReference[]
   ) {
     return actions.map((action, i) => {
-      const reference = references.find(ref => ref.name === action.actionRef);
+      const reference = references.find((ref) => ref.name === action.actionRef);
       if (!reference) {
         throw new Error(`Reference ${action.actionRef} not found`);
       }
@@ -646,10 +644,10 @@ export class AlertsClient {
 
   private validateActions(alertType: AlertType, actions: NormalizedAlertAction[]): void {
     const { actionGroups: alertTypeActionGroups } = alertType;
-    const usedAlertActionGroups = actions.map(action => action.group);
+    const usedAlertActionGroups = actions.map((action) => action.group);
     const availableAlertTypeActionGroups = new Set(pluck(alertTypeActionGroups, 'id'));
     const invalidActionGroups = usedAlertActionGroups.filter(
-      group => !availableAlertTypeActionGroups.has(group)
+      (group) => !availableAlertTypeActionGroups.has(group)
     );
     if (invalidActionGroups.length) {
       throw Boom.badRequest(
@@ -670,7 +668,7 @@ export class AlertsClient {
     // map preconfigured actions
     for (const alertAction of alertActions) {
       const action = this.preconfiguredActions.find(
-        preconfiguredAction => preconfiguredAction.id === alertAction.id
+        (preconfiguredAction) => preconfiguredAction.id === alertAction.id
       );
       if (action !== undefined) {
         actionMap.set(action.id, action);
@@ -681,12 +679,12 @@ export class AlertsClient {
     const actionIds = [
       ...new Set(
         alertActions
-          .filter(alertAction => !actionMap.has(alertAction.id))
-          .map(alertAction => alertAction.id)
+          .filter((alertAction) => !actionMap.has(alertAction.id))
+          .map((alertAction) => alertAction.id)
       ),
     ];
     if (actionIds.length > 0) {
-      const bulkGetOpts = actionIds.map(id => ({ id, type: 'action' }));
+      const bulkGetOpts = actionIds.map((id) => ({ id, type: 'action' }));
       const bulkGetResult = await this.savedObjectsClient.bulkGet(bulkGetOpts);
 
       for (const action of bulkGetResult.saved_objects) {
@@ -710,7 +708,7 @@ export class AlertsClient {
       const actionMapValue = actionMap.get(id);
       // if action is a save object, than actionTypeId should be under attributes property
       // if action is a preconfigured, than actionTypeId is the action property
-      const actionTypeId = actionIds.find(actionId => actionId === id)
+      const actionTypeId = actionIds.find((actionId) => actionId === id)
         ? (actionMapValue as SavedObject<Record<string, string>>).attributes.actionTypeId
         : (actionMapValue as RawAlertAction).actionTypeId;
       return {

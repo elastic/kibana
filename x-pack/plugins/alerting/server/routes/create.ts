@@ -52,7 +52,7 @@ export const createAlertRoute = (router: IRouter, licenseState: LicenseState) =>
       },
     },
     handleDisabledApiKeysError(
-      router.handleLegacyErrors(async function(
+      router.handleLegacyErrors(async function (
         context: RequestHandlerContext,
         req: KibanaRequest<unknown, unknown, TypeOf<typeof bodySchema>>,
         res: KibanaResponseFactory

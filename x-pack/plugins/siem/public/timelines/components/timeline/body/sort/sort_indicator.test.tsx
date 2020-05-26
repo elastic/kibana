@@ -21,12 +21,9 @@ describe('SortIndicator', () => {
     test('it renders the sort indicator', () => {
       const wrapper = mount(<SortIndicator sortDirection={Direction.desc} />);
 
-      expect(
-        wrapper
-          .find('[data-test-subj="sortIndicator"]')
-          .first()
-          .prop('type')
-      ).toEqual('sortDown');
+      expect(wrapper.find('[data-test-subj="sortIndicator"]').first().prop('type')).toEqual(
+        'sortDown'
+      );
     });
   });
 
