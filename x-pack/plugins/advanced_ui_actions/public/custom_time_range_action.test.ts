@@ -34,7 +34,7 @@ const createOpenModalMock = () => {
   return mock;
 };
 
-test('Custom time range action prevents embeddable from using container time', async done => {
+test('Custom time range action prevents embeddable from using container time', async (done) => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -98,7 +98,7 @@ test('Custom time range action prevents embeddable from using container time', a
   container.updateInput({ timeRange: { from: 'now-30m', to: 'now-1m' } });
 });
 
-test('Removing custom time range action resets embeddable back to container time', async done => {
+test('Removing custom time range action resets embeddable back to container time', async (done) => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -172,7 +172,7 @@ test('Removing custom time range action resets embeddable back to container time
   container.updateInput({ timeRange: { from: 'now-10m', to: 'now-5m' } });
 });
 
-test('Cancelling custom time range action leaves state alone', async done => {
+test('Cancelling custom time range action leaves state alone', async (done) => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },

@@ -28,7 +28,7 @@ describe('Except All rule', () => {
 
     const rule = new ExceptAllRule() as RuleGroup;
     expect(rule.canContainRules(subRules)).toEqual(true);
-    subRules.forEach(sr => rule.addRule(sr));
+    subRules.forEach((sr) => rule.addRule(sr));
     expect(rule.getRules()).toEqual([...subRules]);
   });
 

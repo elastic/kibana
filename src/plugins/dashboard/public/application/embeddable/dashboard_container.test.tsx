@@ -53,7 +53,7 @@ beforeEach(() => {
   options.embeddable = doStart();
 });
 
-test('DashboardContainer initializes embeddables', async done => {
+test('DashboardContainer initializes embeddables', async (done) => {
   const initialInput = getSampleDashboardInput({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -64,7 +64,7 @@ test('DashboardContainer initializes embeddables', async done => {
   });
   const container = new DashboardContainer(initialInput, options);
 
-  const subscription = container.getOutput$().subscribe(output => {
+  const subscription = container.getOutput$().subscribe((output) => {
     if (container.getOutput().embeddableLoaded['123']) {
       const embeddable = container.getChild<ContactCardEmbeddable>('123');
       expect(embeddable).toBeDefined();

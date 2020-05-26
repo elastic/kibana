@@ -7,7 +7,7 @@
 import { connect } from 'react-redux';
 import { StyleSettings } from './style_settings';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
-import { updateLayerStyleForSelectedLayer } from '../../../actions/map_actions';
+import { updateLayerStyleForSelectedLayer } from '../../../actions';
 
 function mapStateToProps(state = {}) {
   return {
@@ -17,7 +17,7 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    updateStyleDescriptor: styleDescriptor => {
+    updateStyleDescriptor: (styleDescriptor) => {
       dispatch(updateLayerStyleForSelectedLayer(styleDescriptor));
     },
   };

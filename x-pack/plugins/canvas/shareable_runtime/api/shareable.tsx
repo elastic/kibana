@@ -63,7 +63,7 @@ const VALID_ATTRIBUTES = ['url', 'page', 'height', 'width', 'autoplay', 'interva
 // Collect and then remove valid data attributes.
 const getAttributes = (element: Element, attributes: string[]) => {
   const result: { [key: string]: string } = {};
-  attributes.forEach(attribute => {
+  attributes.forEach((attribute) => {
     const key = `${PREFIX}-${attribute}`;
     const value = element.getAttribute(key);
 
@@ -150,7 +150,7 @@ const updateArea = async (area: Element) => {
 export const share = () => {
   const shareAreas = document.querySelectorAll(`[${SHAREABLE}]`);
   const validAreas = Array.from(shareAreas).filter(
-    area => area.getAttribute(SHAREABLE) === 'canvas'
+    (area) => area.getAttribute(SHAREABLE) === 'canvas'
   );
 
   validAreas.forEach(updateArea);

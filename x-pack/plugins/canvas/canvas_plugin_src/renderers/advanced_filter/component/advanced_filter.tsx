@@ -22,7 +22,7 @@ export interface Props {
 
 export const AdvancedFilter: FunctionComponent<Props> = ({ value = '', onChange, commit }) => (
   <form
-    onSubmit={e => {
+    onSubmit={(e) => {
       e.preventDefault();
       commit(value);
     }}
@@ -35,7 +35,7 @@ export const AdvancedFilter: FunctionComponent<Props> = ({ value = '', onChange,
           className="canvasAdvancedFilter__input"
           placeholder={strings.getInputPlaceholder()}
           value={value}
-          onChange={e => onChange(e.target.value)}
+          onChange={(e) => onChange(e.target.value)}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

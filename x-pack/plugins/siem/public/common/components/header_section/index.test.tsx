@@ -25,12 +25,7 @@ describe('HeaderSection', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-section-title"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="header-section-title"]').first().exists()).toBe(true);
   });
 
   test('it renders the subtitle when provided', () => {
@@ -40,12 +35,7 @@ describe('HeaderSection', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-section-subtitle"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="header-section-subtitle"]').first().exists()).toBe(true);
   });
 
   test('renders the subtitle when not provided (to prevent layout thrash)', () => {
@@ -55,12 +45,7 @@ describe('HeaderSection', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-section-subtitle"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="header-section-subtitle"]').first().exists()).toBe(true);
   });
 
   test('it renders supplements when children provided', () => {
@@ -72,12 +57,9 @@ describe('HeaderSection', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-section-supplements"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="header-section-supplements"]').first().exists()).toBe(
+      true
+    );
   });
 
   test('it DOES NOT render supplements when children not provided', () => {
@@ -87,12 +69,9 @@ describe('HeaderSection', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-section-supplements"]')
-        .first()
-        .exists()
-    ).toBe(false);
+    expect(wrapper.find('[data-test-subj="header-section-supplements"]').first().exists()).toBe(
+      false
+    );
   });
 
   test('it applies border styles when border is true', () => {

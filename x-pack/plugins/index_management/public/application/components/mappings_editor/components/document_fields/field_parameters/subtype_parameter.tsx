@@ -47,8 +47,8 @@ export const SubTypeParameter = ({
 
   // Field sub type (if any)
   const subTypeOptions = typeDefinition
-    .subTypes!.types.map(_subType => TYPE_DEFINITION[_subType])
-    .map(_subType => ({ value: _subType.value, label: _subType.label }));
+    .subTypes!.types.map((_subType) => TYPE_DEFINITION[_subType])
+    .map((_subType) => ({ value: _subType.value, label: _subType.label }));
 
   const defaultValueSubType = typeDefinition.subTypes!.types.includes(defaultValueType as SubType)
     ? defaultValueType // we use the default value provided
@@ -64,7 +64,7 @@ export const SubTypeParameter = ({
           label: typeDefinition.subTypes!.label,
         }}
       >
-        {subTypeField => {
+        {(subTypeField) => {
           return (
             <EuiFormRow label={subTypeField.label}>
               <EuiComboBox

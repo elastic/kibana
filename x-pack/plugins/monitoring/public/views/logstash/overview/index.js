@@ -31,8 +31,8 @@ function getPageData($injector) {
         max: timeBounds.max.toISOString(),
       },
     })
-    .then(response => response.data)
-    .catch(err => {
+    .then((response) => response.data)
+    .catch((err) => {
       const Private = $injector.get('Private');
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
@@ -42,7 +42,7 @@ function getPageData($injector) {
 uiRoutes.when('/logstash', {
   template,
   resolve: {
-    clusters: function(Private) {
+    clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_LOGSTASH] });
     },
@@ -60,7 +60,7 @@ uiRoutes.when('/logstash', {
 
       $scope.$watch(
         () => this.data,
-        data => {
+        (data) => {
           this.renderReact(
             <Overview
               stats={data.clusterStatus}

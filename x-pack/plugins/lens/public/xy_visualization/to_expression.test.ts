@@ -25,7 +25,7 @@ describe('#toExpression', () => {
       { columnId: 'c' },
     ]);
 
-    mockDatasource.publicAPIMock.getOperationForColumnId.mockImplementation(col => {
+    mockDatasource.publicAPIMock.getOperationForColumnId.mockImplementation((col) => {
       return { label: `col_${col}`, dataType: 'number' } as Operation;
     });
 

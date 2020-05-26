@@ -21,7 +21,7 @@ function isReservedSystemTemplate(templateName: string, indexPatterns: string[])
   return (
     templateName.startsWith('kibana_index_template') ||
     (templateName.startsWith('.') &&
-      indexPatterns.every(pattern => {
+      indexPatterns.every((pattern) => {
         return !pattern.includes('*');
       }))
   );
