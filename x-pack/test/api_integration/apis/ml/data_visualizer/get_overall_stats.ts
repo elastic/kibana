@@ -127,7 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('get_overall_stats', function() {
+  describe('get_overall_stats', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();

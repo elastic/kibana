@@ -40,7 +40,7 @@ import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];
 
-const StandardDeviationAggUi = props => {
+const StandardDeviationAggUi = (props) => {
   const { series, panel, fields, intl } = props;
   const defaults = { sigma: '' };
   const model = { ...defaults, ...props.model };
@@ -86,7 +86,7 @@ const StandardDeviationAggUi = props => {
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
   const htmlId = htmlIdGenerator();
-  const selectedModeOption = modeOptions.find(option => {
+  const selectedModeOption = modeOptions.find((option) => {
     return model.mode === option.value;
   });
 

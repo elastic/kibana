@@ -134,10 +134,7 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
 
 describe('config formatting', () => {
   test(`lowercases server.host`, async () => {
-    const mockConfigGet = sinon
-      .stub()
-      .withArgs('server', 'host')
-      .returns('COOL-HOSTNAME');
+    const mockConfigGet = sinon.stub().withArgs('server', 'host').returns('COOL-HOSTNAME');
     mockConfig = getMockConfig(mockConfigGet);
 
     const conditionalHeaders = await getConditionalHeaders({

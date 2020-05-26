@@ -142,7 +142,7 @@ export const buildListItems = (
   );
 
 export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
-  return filters.map(filter => {
+  return filters.map((filter) => {
     if (filter.$state == null) {
       return { $state: { store: esFilters.FilterStateStore.APP_STATE }, ...filter };
     } else {

@@ -37,9 +37,9 @@ const env = {
   NODE_ENV: 'integration_test',
   COVERAGE_INGESTION_KIBANA_ROOT: '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana',
 };
-const includesSiteUrlPredicate = x => x.includes('staticSiteUrl');
+const includesSiteUrlPredicate = (x) => x.includes('staticSiteUrl');
 const siteUrlLines = specificLinesOnly(includesSiteUrlPredicate);
-const splitByNewLine = x => x.split('\n');
+const splitByNewLine = (x) => x.split('\n');
 const siteUrlsSplitByNewLine = siteUrlLines(splitByNewLine);
 const siteUrlsSplitByNewLineWithoutBlanks = siteUrlsSplitByNewLine(notBlankLines);
 const verboseArgs = [
@@ -56,7 +56,7 @@ describe('Ingesting coverage', () => {
   describe(`to the coverage index`, () => {
     const mutableCoverageIndexChunks = [];
 
-    beforeAll(done => {
+    beforeAll((done) => {
       const ingestAndMutateAsync = ingestAndMutate(done);
       const ingestAndMutateAsyncWithPath = ingestAndMutateAsync(bothIndexesPath);
       const verboseIngestAndMutateAsyncWithPath = ingestAndMutateAsyncWithPath(verboseArgs);
@@ -78,19 +78,19 @@ describe('Ingesting coverage', () => {
 });
 
 function ingestAndMutate(done) {
-  return summaryPathSuffix => args => xs => {
+  return (summaryPathSuffix) => (args) => (xs) => {
     const coverageSummaryPath = resolve(MOCKS_DIR, summaryPathSuffix);
     const opts = [...args, coverageSummaryPath];
     const ingest = spawn(process.execPath, opts, { cwd: ROOT_DIR, env });
 
-    ingest.stdout.on('data', x => xs.push(x + ''));
+    ingest.stdout.on('data', (x) => xs.push(x + ''));
     ingest.on('close', done);
   };
 }
 
 function specificLinesOnly(predicate) {
-  return splitByNewLine => notBlankLines => xs =>
-    xs.filter(predicate).map(x => splitByNewLine(x).reduce(notBlankLines));
+  return (splitByNewLine) => (notBlankLines) => (xs) =>
+    xs.filter(predicate).map((x) => splitByNewLine(x).reduce(notBlankLines));
 }
 
 function notBlankLines(acc, item) {
@@ -99,8 +99,8 @@ function notBlankLines(acc, item) {
 }
 
 function expectAllRegexesToPass(staticSiteUrlRegexes) {
-  return urlLine =>
-    Object.entries(staticSiteUrlRegexes).forEach(regexTuple => {
+  return (urlLine) =>
+    Object.entries(staticSiteUrlRegexes).forEach((regexTuple) => {
       if (!regexTuple[1].test(urlLine))
         throw new Error(
           `\n### ${green('FAILED')}\nAsserting: [\n\t${green(

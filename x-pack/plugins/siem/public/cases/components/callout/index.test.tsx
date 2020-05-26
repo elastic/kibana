@@ -22,12 +22,7 @@ describe('CaseCallOut ', () => {
 
     const wrapper = mount(<CaseCallOut {...props} />);
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="callout-message-primary"]`)
-        .last()
-        .exists()
-    ).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="callout-message-primary"]`).last().exists()).toBeTruthy();
   });
 
   it('Renders multi message callout', () => {
@@ -39,17 +34,9 @@ describe('CaseCallOut ', () => {
       ],
     };
     const wrapper = mount(<CaseCallOut {...props} />);
+    expect(wrapper.find(`[data-test-subj="callout-message-primary"]`).last().exists()).toBeFalsy();
     expect(
-      wrapper
-        .find(`[data-test-subj="callout-message-primary"]`)
-        .last()
-        .exists()
-    ).toBeFalsy();
-    expect(
-      wrapper
-        .find(`[data-test-subj="callout-messages-primary"]`)
-        .last()
-        .exists()
+      wrapper.find(`[data-test-subj="callout-messages-primary"]`).last().exists()
     ).toBeTruthy();
   });
 
@@ -66,18 +53,10 @@ describe('CaseCallOut ', () => {
       ],
     };
     const wrapper = mount(<CaseCallOut {...props} />);
-    expect(
-      wrapper
-        .find(`[data-test-subj="callout-messages-danger"]`)
-        .last()
-        .exists()
-    ).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="callout-messages-danger"]`).last().exists()).toBeTruthy();
 
     expect(
-      wrapper
-        .find(`[data-test-subj="callout-messages-primary"]`)
-        .last()
-        .exists()
+      wrapper.find(`[data-test-subj="callout-messages-primary"]`).last().exists()
     ).toBeTruthy();
   });
 
@@ -88,10 +67,7 @@ describe('CaseCallOut ', () => {
     };
     const wrapper = mount(<CaseCallOut {...props} />);
     expect(wrapper.find(`[data-test-subj="case-call-out-primary"]`).exists()).toBeTruthy();
-    wrapper
-      .find(`[data-test-subj="callout-dismiss-primary"]`)
-      .last()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="callout-dismiss-primary"]`).last().simulate('click');
     expect(wrapper.find(`[data-test-subj="case-call-out-primary"]`).exists()).toBeFalsy();
   });
 });

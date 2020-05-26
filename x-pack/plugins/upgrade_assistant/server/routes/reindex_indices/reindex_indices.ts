@@ -154,7 +154,7 @@ export function registerReindexIndicesRoutes(
         const inProgressOps = await reindexActions.findAllByStatus(ReindexStatus.inProgress);
         const { queue } = sortAndOrderReindexOperations(inProgressOps);
         const result: GetBatchQueueResponse = {
-          queue: queue.map(savedObject => savedObject.attributes),
+          queue: queue.map((savedObject) => savedObject.attributes),
         };
         return response.ok({
           body: result,

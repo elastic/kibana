@@ -44,7 +44,7 @@ export const useFilterUpdate = (fieldName?: string, values?: string[]): Selected
       // add new term to filter map, toggle it off if already present
       const updatedFilterMap = new Map<string, string[] | undefined>(filterKueries);
       updatedFilterMap.set(fieldName, values);
-      Array.from(updatedFilterMap.keys()).forEach(key => {
+      Array.from(updatedFilterMap.keys()).forEach((key) => {
         const value = updatedFilterMap.get(key);
         if (value && value.length === 0) {
           updatedFilterMap.delete(key);

@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('calculate model memory limit', function() {
+  describe('calculate model memory limit', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
       await ml.testResources.setKibanaTimeZoneToUTC();
