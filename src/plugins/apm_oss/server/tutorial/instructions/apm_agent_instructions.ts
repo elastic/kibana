@@ -644,8 +644,9 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
     commands: `{curlyOpen}
     "ElasticApm": {curlyOpen}
     "SecretToken": "${secretToken}",
-    "ServerUrls": "${apmServerUrl ||
-      'http://localhost:8200'}", //Set custom APM Server URL (default: http://localhost:8200)
+    "ServerUrls": "${
+      apmServerUrl || 'http://localhost:8200'
+    }", //Set custom APM Server URL (default: http://localhost:8200)
     "ServiceName" : "MyApp", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application
   {curlyClose}
 {curlyClose}`.split('\n'),

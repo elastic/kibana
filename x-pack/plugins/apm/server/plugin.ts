@@ -9,7 +9,7 @@ import {
   Plugin,
   CoreSetup,
   CoreStart,
-  Logger
+  Logger,
 } from 'src/core/server';
 import { Observable, combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
@@ -77,7 +77,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       registerApmAlerts({
         alerting: plugins.alerting,
         actions: plugins.actions,
-        config$: mergedConfig$
+        config$: mergedConfig$,
       });
     }
 
@@ -93,7 +93,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
         config$: mergedConfig$,
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
-        logger: this.logger
+        logger: this.logger,
       });
     }
 
@@ -107,15 +107,15 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
           label: i18n.translate(
             'xpack.apm.tutorial.specProvider.artifacts.application.label',
             {
-              defaultMessage: 'Launch APM'
+              defaultMessage: 'Launch APM',
             }
-          )
+          ),
         };
       }
 
       return {
         ...ossPart,
-        elasticCloud: createElasticCloudInstructions(plugins.cloud)
+        elasticCloud: createElasticCloudInstructions(plugins.cloud),
       };
     });
     plugins.features.registerFeature(APM_FEATURE);
@@ -125,8 +125,8 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       logger: this.logger!,
       plugins: {
         observability: plugins.observability,
-        security: plugins.security
-      }
+        security: plugins.security,
+      },
     });
 
     return {
@@ -134,8 +134,8 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       getApmIndices: async () =>
         getApmIndices({
           savedObjectsClient: await getInternalSavedObjectsClient(core),
-          config: await mergedConfig$.pipe(take(1)).toPromise()
-        })
+          config: await mergedConfig$.pipe(take(1)).toPromise(),
+        }),
     };
   }
 
@@ -148,13 +148,13 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
     createApmAgentConfigurationIndex({
       esClient: core.elasticsearch.legacy.client,
       config: this.currentConfig,
-      logger: this.logger
+      logger: this.logger,
     });
     // create custom action index without blocking start lifecycle
     createApmCustomLinkIndex({
       esClient: core.elasticsearch.legacy.client,
       config: this.currentConfig,
-      logger: this.logger
+      logger: this.logger,
     });
   }
 
