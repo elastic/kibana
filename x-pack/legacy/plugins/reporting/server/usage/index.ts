@@ -13,3 +13,4 @@ export interface FeaturesAvailability {
   };
 }
 export type GetLicense = () => Promise<FeaturesAvailability>;
+export { registerReportingUsageCollector } from './reporting_usage_collector';

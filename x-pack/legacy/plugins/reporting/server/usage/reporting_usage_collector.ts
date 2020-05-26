@@ -78,7 +78,7 @@ export function registerReportingUsageCollector(
   const getLicense = async () => {
     return await licensing.license$
       .pipe(
-        map(license => {
+        map((license) => {
           return {
             isAvailable: () => true,
             license: {
