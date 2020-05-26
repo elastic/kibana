@@ -54,7 +54,7 @@ class SlackNotificationsTest extends KibanaBasePipelineTest {
     )
 
     assertEquals(
-      "*Test Failures*\n• <https://localhost/|x-pack/test/functional/apps/fake/test·ts.Fake test should pass>",
+      "*Test Failures*\n• <https://localhost/|x-pack/test/functional/apps/fake/test·ts.Fake test &lt;Component&gt; should pass &amp;>",
       args.blocks[2].text.text.toString()
     )
   }
