@@ -6,7 +6,7 @@
 
 import { noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
@@ -29,13 +29,14 @@ import {
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
-import { useTimelineTypeContext } from '../timeline_context';
 import { getColumnHeaders } from './column_headers/helpers';
 import { getEventIdToDataMapping } from './helpers';
 import { Body } from './index';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
+import { useManageTimeline } from '../../manage_timeline';
+import * as i18n from '../../../../common/components/events_viewer/translations';
 
 interface OwnProps {
   browserFields: BrowserFields;
@@ -80,7 +81,16 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     updateNote,
     updateSort,
   }) => {
-    const timelineTypeContext = useTimelineTypeContext();
+    const [manageTimeline] = useManageTimeline();
+    const timelineTypeContext = useMemo(
+      () =>
+        manageTimeline[id] && manageTimeline[id].timelineTypeContext
+          ? manageTimeline[id].timelineTypeContext
+          : {
+              loadingText: i18n.LOADING_EVENTS,
+            },
+      [manageTimeline[id]]
+    );
 
     const getNotesByIds = useCallback(
       (noteIds: string[]): Note[] => appSelectors.getNotes(notesById, noteIds),

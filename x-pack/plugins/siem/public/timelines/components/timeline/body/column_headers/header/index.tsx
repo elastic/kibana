@@ -5,7 +5,7 @@
  */
 
 import { noop } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
 import { OnColumnRemoved, OnColumnSorted, OnFilterChange } from '../../../events';
@@ -14,6 +14,7 @@ import { Actions } from '../actions';
 import { Filter } from '../filter';
 import { getNewSortDirectionOnClick } from './helpers';
 import { HeaderContent } from './header_content';
+import { useManageTimeline } from '../../../../manage_timeline';
 
 interface Props {
   header: ColumnHeaderOptions;
@@ -30,6 +31,7 @@ export const HeaderComponent: React.FC<Props> = ({
   onColumnSorted,
   onFilterChange = noop,
   sort,
+  timelineId,
 }) => {
   const onClick = useCallback(() => {
     onColumnSorted!({
@@ -40,11 +42,29 @@ export const HeaderComponent: React.FC<Props> = ({
       }),
     });
   }, [onColumnSorted, header, sort]);
-
+  const [manageTimeline] = useManageTimeline();
+  const timelineContextState = useMemo(
+    () =>
+      manageTimeline[timelineId] && manageTimeline[timelineId].timelineContextState
+        ? manageTimeline[timelineId].timelineContextState
+        : { isLoading: false },
+    [manageTimeline[timelineId]]
+  );
   return (
     <>
-      <HeaderContent header={header} isResizing={false} onClick={onClick} sort={sort}>
-        <Actions header={header} onColumnRemoved={onColumnRemoved} sort={sort} />
+      <HeaderContent
+        header={header}
+        isLoading={timelineContextState.isLoading}
+        isResizing={false}
+        onClick={onClick}
+        sort={sort}
+      >
+        <Actions
+          header={header}
+          isLoading={timelineContextState.isLoading}
+          onColumnRemoved={onColumnRemoved}
+          sort={sort}
+        />
       </HeaderContent>
 
       <Filter header={header} onFilterChange={onFilterChange} />

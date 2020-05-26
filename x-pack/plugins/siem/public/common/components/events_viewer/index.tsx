@@ -22,9 +22,7 @@ import { Filter } from '../../../../../../../src/plugins/data/public';
 import { useUiSetting } from '../../lib/kibana';
 import { EventsViewer } from './events_viewer';
 import { useFetchIndexPatterns } from '../../../alerts/containers/detection_engine/rules/fetch_index_patterns';
-import { TimelineTypeContextProps } from '../../../timelines/components/timeline/timeline_context';
 import { InspectButtonContainer } from '../inspect';
-import * as i18n from './translations';
 
 export interface OwnProps {
   defaultIndices?: string[];
@@ -34,15 +32,10 @@ export interface OwnProps {
   start: number;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
-  timelineTypeContext?: TimelineTypeContextProps;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
 
 type Props = OwnProps & PropsFromRedux;
-
-const defaultTimelineTypeContext = {
-  loadingText: i18n.LOADING_EVENTS,
-};
 
 const StatefulEventsViewerComponent: React.FC<Props> = ({
   createTimeline,
@@ -66,7 +59,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   showCheckboxes,
   showRowRenderers,
   sort,
-  timelineTypeContext = defaultTimelineTypeContext,
   updateItemsPerPage,
   upsertColumn,
   utilityBar,
@@ -133,7 +125,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         query={query}
         start={start}
         sort={sort!}
-        timelineTypeContext={timelineTypeContext}
         toggleColumn={toggleColumn}
         utilityBar={utilityBar}
       />
@@ -213,7 +204,6 @@ export const StatefulEventsViewer = connector(
       prevProps.showCheckboxes === nextProps.showCheckboxes &&
       prevProps.showRowRenderers === nextProps.showRowRenderers &&
       prevProps.start === nextProps.start &&
-      deepEqual(prevProps.timelineTypeContext, nextProps.timelineTypeContext) &&
       prevProps.utilityBar === nextProps.utilityBar
   )
 );

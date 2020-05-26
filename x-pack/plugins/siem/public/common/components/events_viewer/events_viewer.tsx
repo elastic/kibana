@@ -6,7 +6,7 @@
 
 import { EuiPanel } from '@elastic/eui';
 import { getOr, isEmpty, union } from 'lodash/fp';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
@@ -24,10 +24,6 @@ import { OnChangeItemsPerPage } from '../../../timelines/components/timeline/eve
 import { Footer, footerHeight } from '../../../timelines/components/timeline/footer';
 import { combineQueries } from '../../../timelines/components/timeline/helpers';
 import { TimelineRefetch } from '../../../timelines/components/timeline/refetch_timeline';
-import {
-  ManageTimelineContext,
-  TimelineTypeContextProps,
-} from '../../../timelines/components/timeline/timeline_context';
 import { EventDetailsWidthProvider } from './event_details_width_context';
 import * as i18n from './translations';
 import {
@@ -37,6 +33,7 @@ import {
   Query,
 } from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../store';
+import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
 
@@ -68,7 +65,6 @@ interface Props {
   query: Query;
   start: number;
   sort: Sort;
-  timelineTypeContext: TimelineTypeContextProps;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
@@ -92,13 +88,34 @@ const EventsViewerComponent: React.FC<Props> = ({
   query,
   start,
   sort,
-  timelineTypeContext,
   toggleColumn,
   utilityBar,
 }) => {
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
   const { filterManager } = useKibana().services.data.query;
+  const [isQueryLoading, setIsQueryLoading] = useState(false);
+  const [manageTimeline, dispatchTimeline] = useManageTimeline();
+  const timelineTypeContext = useMemo(
+    () =>
+      manageTimeline[id] && manageTimeline[id].timelineTypeContext
+        ? manageTimeline[id].timelineTypeContext
+        : {
+            loadingText: i18n.LOADING_EVENTS,
+          },
+    [manageTimeline[id]]
+  );
+  useEffect(() => {
+    dispatchTimeline({
+      type: 'setTimelineContextState',
+      id,
+      timelineContextState: {
+        filterManager,
+        isLoading: isQueryLoading,
+      },
+    });
+  }, [filterManager, isQueryLoading]);
+
   const combinedQueries = combineQueries({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
     dataProviders,
@@ -150,6 +167,7 @@ const EventsViewerComponent: React.FC<Props> = ({
               refetch,
               totalCount = 0,
             }) => {
+              setIsQueryLoading(loading);
               const totalCountMinusDeleted =
                 totalCount > 0 ? totalCount - deletedEventIds.length : 0;
 
@@ -171,45 +189,40 @@ const EventsViewerComponent: React.FC<Props> = ({
                   {utilityBar?.(refetch, totalCountMinusDeleted)}
 
                   <EventsContainerLoading data-test-subj={`events-container-loading-${loading}`}>
-                    <ManageTimelineContext
-                      filterManager={filterManager}
+                    <TimelineRefetch
+                      id={id}
+                      inputId="global"
+                      inspect={inspect}
                       loading={loading}
-                      type={timelineTypeContext}
-                    >
-                      <TimelineRefetch
-                        id={id}
-                        inputId="global"
-                        inspect={inspect}
-                        loading={loading}
-                        refetch={refetch}
-                      />
+                      refetch={refetch}
+                    />
 
-                      <StatefulBody
-                        browserFields={browserFields}
-                        data={events.filter((e) => !deletedEventIds.includes(e._id))}
-                        id={id}
-                        isEventViewer={true}
-                        height={height}
-                        sort={sort}
-                        toggleColumn={toggleColumn}
-                      />
+                    <StatefulBody
+                      browserFields={browserFields}
+                      data={events.filter((e) => !deletedEventIds.includes(e._id))}
+                      id={id}
+                      isEventViewer={true}
+                      height={height}
+                      sort={sort}
+                      toggleColumn={toggleColumn}
+                    />
 
-                      <Footer
-                        getUpdatedAt={getUpdatedAt}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                        height={footerHeight}
-                        isLive={isLive}
-                        isLoading={loading}
-                        itemsCount={events.length}
-                        itemsPerPage={itemsPerPage}
-                        itemsPerPageOptions={itemsPerPageOptions}
-                        onChangeItemsPerPage={onChangeItemsPerPage}
-                        onLoadMore={loadMore}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                        serverSideEventCount={totalCountMinusDeleted}
-                        tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                      />
-                    </ManageTimelineContext>
+                    <Footer
+                      getUpdatedAt={getUpdatedAt}
+                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                      height={footerHeight}
+                      id={id}
+                      isLive={isLive}
+                      isLoading={loading}
+                      itemsCount={events.length}
+                      itemsPerPage={itemsPerPage}
+                      itemsPerPageOptions={itemsPerPageOptions}
+                      onChangeItemsPerPage={onChangeItemsPerPage}
+                      onLoadMore={loadMore}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                      serverSideEventCount={totalCountMinusDeleted}
+                      tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                    />
                   </EventsContainerLoading>
                 </>
               );
@@ -240,6 +253,5 @@ export const EventsViewer = React.memo(
     deepEqual(prevProps.query, nextProps.query) &&
     prevProps.start === nextProps.start &&
     prevProps.sort === nextProps.sort &&
-    deepEqual(prevProps.timelineTypeContext, nextProps.timelineTypeContext) &&
     prevProps.utilityBar === nextProps.utilityBar
 );

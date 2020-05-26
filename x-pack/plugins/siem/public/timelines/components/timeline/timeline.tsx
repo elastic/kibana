@@ -240,19 +240,20 @@ export const TimelineComponent: React.FC<Props> = ({
                 className="timeline-flyout-footer"
               >
                 <Footer
-                  serverSideEventCount={totalCount}
+                  getUpdatedAt={getUpdatedAt}
                   hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                   height={footerHeight}
+                  id={id}
                   isLive={isLive}
                   isLoading={loading || loadingIndexName}
                   itemsCount={events.length}
                   itemsPerPage={itemsPerPage}
                   itemsPerPageOptions={itemsPerPageOptions}
+                  nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                   onChangeItemsPerPage={onChangeItemsPerPage}
                   onLoadMore={loadMore}
-                  nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                  serverSideEventCount={totalCount}
                   tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                  getUpdatedAt={getUpdatedAt}
                 />
               </StyledEuiFlyoutFooter>
             </ManageTimelineContext>

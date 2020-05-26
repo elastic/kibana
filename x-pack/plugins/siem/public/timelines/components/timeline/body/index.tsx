@@ -29,7 +29,7 @@ import { Events } from './events';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
-import { useTimelineTypeContext } from '../timeline_context';
+import { useManageTimeline } from '../../manage_timeline';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -95,7 +95,15 @@ export const Body = React.memo<BodyProps>(
     updateNote,
   }) => {
     const containerElementRef = useRef<HTMLDivElement>(null);
-    const timelineTypeContext = useTimelineTypeContext();
+    const [manageTimeline] = useManageTimeline();
+    const timelineTypeContext = useMemo(
+      () =>
+        manageTimeline[id] && manageTimeline[id].timelineTypeContext
+          ? manageTimeline[id].timelineTypeContext
+          : {},
+      [manageTimeline[id]]
+    );
+
     const additionalActionWidth = useMemo(
       () => timelineTypeContext.timelineActions?.reduce((acc, v) => acc + v.width, 0) ?? 0,
       [timelineTypeContext.timelineActions]

@@ -20,6 +20,7 @@ import { inputsSelectors, State, inputsModel } from '../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { useApolloClient } from '../../../common/utils/apollo_context';
 
 import { updateSignalStatusAction } from './actions';
@@ -268,19 +269,22 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
       ];
     }
   }, [defaultFilters, filterGroup]);
-
-  const timelineTypeContext = useMemo(
-    () => ({
-      documentType: i18n.SIGNALS_DOCUMENT_TYPE,
-      footerText: i18n.TOTAL_COUNT_OF_SIGNALS,
-      loadingText: i18n.LOADING_SIGNALS,
-      queryFields: requiredFieldsForActions,
-      timelineActions: additionalActions,
-      title: i18n.SIGNALS_TABLE_TITLE,
-      selectAll: canUserCRUD ? selectAll : false,
-    }),
-    [additionalActions, canUserCRUD, selectAll]
-  );
+  const [, dispatchTimeline] = useManageTimeline();
+  useEffect(() => {
+    dispatchTimeline({
+      id: SIGNALS_PAGE_TIMELINE_ID,
+      type: 'setTimelineTypeContext',
+      timelineTypeContext: {
+        documentType: i18n.SIGNALS_DOCUMENT_TYPE,
+        footerText: i18n.TOTAL_COUNT_OF_SIGNALS,
+        loadingText: i18n.LOADING_SIGNALS,
+        queryFields: requiredFieldsForActions,
+        timelineActions: additionalActions,
+        title: i18n.SIGNALS_TABLE_TITLE,
+        selectAll: canUserCRUD ? selectAll : false,
+      },
+    });
+  }, [additionalActions, canUserCRUD, selectAll]);
 
   const headerFilterGroup = useMemo(
     () => <SignalsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,
@@ -305,7 +309,6 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
       headerFilterGroup={headerFilterGroup}
       id={SIGNALS_PAGE_TIMELINE_ID}
       start={from}
-      timelineTypeContext={timelineTypeContext}
       utilityBar={utilityBarCallback}
     />
   );

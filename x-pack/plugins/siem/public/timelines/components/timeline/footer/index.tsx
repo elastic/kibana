@@ -27,8 +27,8 @@ import { OnChangeItemsPerPage, OnLoadMore } from '../events';
 
 import { LastUpdatedAt } from './last_updated';
 import * as i18n from './translations';
-import { useTimelineTypeContext } from '../timeline_context';
 import { useEventDetailsWidthContext } from '../../../../common/components/events_viewer/event_details_width_context';
+import { useManageTimeline, TimelineTypeContext } from '../../manage_timeline';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
 
@@ -116,6 +116,7 @@ export const EventsCountComponent = ({
   itemsCount,
   onClick,
   serverSideEventCount,
+  timelineTypeContext,
 }: {
   closePopover: () => void;
   isOpen: boolean;
@@ -123,8 +124,8 @@ export const EventsCountComponent = ({
   itemsCount: number;
   onClick: () => void;
   serverSideEventCount: number;
+  timelineTypeContext: TimelineTypeContext;
 }) => {
-  const timelineTypeContext = useTimelineTypeContext();
   return (
     <h5>
       <PopoverRowItems
@@ -207,6 +208,7 @@ interface FooterProps {
   getUpdatedAt: () => number;
   hasNextPage: boolean;
   height: number;
+  id: string;
   isLive: boolean;
   isLoading: boolean;
   itemsCount: number;
@@ -224,6 +226,7 @@ export const FooterComponent = ({
   getUpdatedAt,
   hasNextPage,
   height,
+  id,
   isLive,
   isLoading,
   itemsCount,
@@ -238,7 +241,14 @@ export const FooterComponent = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
-  const timelineTypeContext = useTimelineTypeContext();
+  const [manageTimeline] = useManageTimeline();
+  const timelineTypeContext = useMemo(
+    () =>
+      manageTimeline[id] && manageTimeline[id].timelineTypeContext
+        ? manageTimeline[id].timelineTypeContext
+        : {},
+    [manageTimeline[id]]
+  );
 
   const loadMore = useCallback(() => {
     setPaginationLoading(true);
@@ -320,6 +330,7 @@ export const FooterComponent = ({
               itemsCount={itemsCount}
               onClick={onButtonClick}
               serverSideEventCount={serverSideEventCount}
+              timelineTypeContext={timelineTypeContext}
             />
           </EuiFlexGroup>
         </EuiFlexItem>

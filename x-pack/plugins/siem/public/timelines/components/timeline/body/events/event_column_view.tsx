@@ -17,7 +17,7 @@ import { Actions } from '../actions';
 import { DataDrivenColumns } from '../data_driven_columns';
 import { eventHasNotes, getPinOnClick } from '../helpers';
 import { ColumnRenderer } from '../renderers/column_renderer';
-import { useTimelineTypeContext } from '../../timeline_context';
+import { useManageTimeline } from '../../../manage_timeline';
 
 interface Props {
   id: string;
@@ -79,17 +79,24 @@ export const EventColumnView = React.memo<Props>(
     toggleShowNotes,
     updateNote,
   }) => {
-    const timelineTypeContext = useTimelineTypeContext();
+    const [manageTimeline] = useManageTimeline();
+    const timelineTypeContext = useMemo(
+      () =>
+        manageTimeline[timelineId] && manageTimeline[timelineId].timelineTypeContext
+          ? manageTimeline[timelineId].timelineTypeContext
+          : {},
+      [manageTimeline[timelineId]]
+    );
 
-    const additionalActions = useMemo<JSX.Element[]>(() => {
-      return (
+    const additionalActions = useMemo<JSX.Element[]>(
+      () =>
         timelineTypeContext.timelineActions?.map((action) => (
           <EventsTdContent key={action.id} textAlign="center">
             {action.getAction({ eventId: id, ecsData })}
           </EventsTdContent>
-        )) ?? []
-      );
-    }, [ecsData, timelineTypeContext.timelineActions]);
+        )) ?? [],
+      [ecsData, timelineTypeContext.timelineActions]
+    );
 
     return (
       <EventsTrData data-test-subj="event-column-view">

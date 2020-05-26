@@ -8,7 +8,6 @@ import React, { useMemo } from 'react';
 
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { StatefulEventsViewer } from '../events_viewer';
-import * as i18n from './translations';
 import { alertsDefaultModel } from './default_headers';
 
 export interface OwnProps {
@@ -59,16 +58,6 @@ interface Props {
 
 const AlertsTableComponent: React.FC<Props> = ({ endDate, startDate, pageFilters = [] }) => {
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
-  const timelineTypeContext = useMemo(
-    () => ({
-      documentType: i18n.ALERTS_DOCUMENT_TYPE,
-      footerText: i18n.TOTAL_COUNT_OF_ALERTS,
-      title: i18n.ALERTS_TABLE_TITLE,
-      unit: i18n.UNIT,
-    }),
-    []
-  );
-
   return (
     <StatefulEventsViewer
       pageFilters={alertsFilter}
@@ -76,7 +65,6 @@ const AlertsTableComponent: React.FC<Props> = ({ endDate, startDate, pageFilters
       end={endDate}
       id={ALERTS_TABLE_ID}
       start={startDate}
-      timelineTypeContext={timelineTypeContext}
     />
   );
 };

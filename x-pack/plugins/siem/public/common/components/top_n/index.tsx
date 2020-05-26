@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { GlobalTime } from '../../containers/global_time';
@@ -17,10 +17,10 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { combineQueries } from '../../../timelines/components/timeline/helpers';
-import { useTimelineTypeContext } from '../../../timelines/components/timeline/timeline_context';
 
 import { getOptions } from './helpers';
 import { TopN } from './top_n';
+import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 
 /** The currently active timeline always has this Redux ID */
 export const ACTIVE_TIMELINE_REDUX_ID = 'timeline-1';
@@ -103,7 +103,17 @@ const StatefulTopNComponent: React.FC<Props> = ({
   //    this component is rendered in the context of the active timeline. This
   //    behavior enables the 'All events' view by appending the signals index
   //    to the index pattern.
-  const { documentType, id: timelineId, indexToAdd } = useTimelineTypeContext();
+  const [manageTimeline] = useManageTimeline();
+
+  const timelineTypeContext = useMemo(
+    () =>
+      manageTimeline[ACTIVE_TIMELINE_REDUX_ID] &&
+      manageTimeline[ACTIVE_TIMELINE_REDUX_ID].timelineTypeContext
+        ? manageTimeline[ACTIVE_TIMELINE_REDUX_ID].timelineTypeContext
+        : {},
+    [manageTimeline[ACTIVE_TIMELINE_REDUX_ID].timelineTypeContext]
+  );
+  const { documentType, id: timelineId, indexToAdd } = timelineTypeContext;
 
   const options = getOptions(
     timelineId === ACTIVE_TIMELINE_REDUX_ID ? activeTimelineEventType : undefined
