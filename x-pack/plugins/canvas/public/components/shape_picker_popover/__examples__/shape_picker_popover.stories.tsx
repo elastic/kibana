@@ -20,7 +20,7 @@ class Interactive extends React.Component<{}, { value: string }> {
     return (
       <ShapePickerPopover
         shapes={shapes}
-        onChange={value => this.setState({ value })}
+        onChange={(value) => this.setState({ value })}
         value={this.state.value}
       />
     );

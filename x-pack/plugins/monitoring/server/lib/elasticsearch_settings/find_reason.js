@@ -10,7 +10,7 @@ import { get } from 'lodash';
  * Return true if the settings property is enabled or is using its default state of enabled
  * Note: this assumes that a 0 corresponds to disabled
  */
-const isEnabledOrDefault = property => {
+const isEnabledOrDefault = (property) => {
   return property === undefined || (Boolean(property) && property !== 'false');
 };
 
@@ -67,7 +67,7 @@ export function findReason(settingsSource, context, isCloudEnabled) {
         /*
          * find if all exporters are disabled or if all enabled exporters are remote
          */
-        const allEnabled = exporterKeys.filter(key => {
+        const allEnabled = exporterKeys.filter((key) => {
           return isEnabledOrDefault(exportersFromPacked[key].enabled);
         });
 
@@ -81,12 +81,12 @@ export function findReason(settingsSource, context, isCloudEnabled) {
           };
         }
 
-        const allEnabledLocal = exporterKeys.filter(key => {
+        const allEnabledLocal = exporterKeys.filter((key) => {
           const exporter = exportersFromPacked[key];
           return exporter.type === 'local' && isEnabledOrDefault(exporter.enabled);
         });
 
-        const allEnabledRemote = exporterKeys.filter(key => {
+        const allEnabledRemote = exporterKeys.filter((key) => {
           const exporter = exportersFromPacked[key];
           return exporter.type !== 'local' && isEnabledOrDefault(exporter.enabled);
         });

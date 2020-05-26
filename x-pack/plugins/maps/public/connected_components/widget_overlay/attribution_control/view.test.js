@@ -24,7 +24,7 @@ describe('AttributionControl', () => {
     const component = shallowWithIntl(<AttributionControl layerList={[mockLayer1, mockLayer2]} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 

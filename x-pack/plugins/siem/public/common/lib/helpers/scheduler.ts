@@ -89,7 +89,4 @@ export const requestIdleCallbackViaScheduler = (
  * delayMax setting value meaning at most beyond 25 elements to display, they will take at most
  * 2 seconds to delay before show up.
  */
-export const maxDelay = scaleLog()
-  .domain([1, 25])
-  .range([100, 2000])
-  .clamp(true);
+export const maxDelay = scaleLog().domain([1, 25]).range([100, 2000]).clamp(true);

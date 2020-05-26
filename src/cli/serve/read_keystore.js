@@ -30,7 +30,7 @@ export function readKeystore(dataPath = getDataPath()) {
   const keys = Object.keys(keystore.data);
   const data = {};
 
-  keys.forEach(key => {
+  keys.forEach((key) => {
     set(data, key, keystore.data[key]);
   });
 

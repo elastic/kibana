@@ -39,7 +39,7 @@ export class BootstrapCacheFile {
       // sort deps by name so that the key is stable
       .sort((a, b) => a.name.localeCompare(b.name))
       // get the cacheKey for each project, return undefined if the cache key couldn't be determined
-      .map(p => {
+      .map((p) => {
         const cacheKey = checksums.get(p.name);
         if (cacheKey) {
           return `${p.name}:${cacheKey}`;
@@ -47,7 +47,7 @@ export class BootstrapCacheFile {
       });
 
     // if any of the relevant cache keys are undefined then the projectCacheKey must be too
-    this.expectedValue = projectAndDepCacheKeys.some(k => !k)
+    this.expectedValue = projectAndDepCacheKeys.some((k) => !k)
       ? undefined
       : [
           `# this is only human readable for debugging, please don't try to parse this`,

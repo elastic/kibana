@@ -13,7 +13,7 @@ import { policyConfig } from '../../../store/policy_details/selectors';
 import { PolicyDetailsAction } from '../../../store/policy_details';
 import { UIPolicyConfig } from '../../../../../common/endpoint/types';
 
-export const EventsCheckbox = React.memo(function({
+export const EventsCheckbox = React.memo(function ({
   name,
   setter,
   getter,

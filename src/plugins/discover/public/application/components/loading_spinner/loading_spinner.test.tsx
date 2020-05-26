@@ -16,11 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { ReactWrapper } from 'enzyme';
+import { LoadingSpinner } from './loading_spinner';
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
 
-export { mountWithIntl } from './enzyme_helpers';
+describe('loading spinner', function () {
+  let component: ReactWrapper;
 
-export { findTestSubject } from './find_test_subject';
-
-export { WithStore } from './redux_helpers';
-
-export { WithMemoryRouter, WithRoute, reactRouterMock } from './router_helpers';
+  it('LoadingSpinner renders a Searching text and a spinner', () => {
+    component = mountWithIntl(<LoadingSpinner />);
+    expect(findTestSubject(component, 'loadingSpinnerText').text()).toBe('Searching');
+    expect(findTestSubject(component, 'loadingSpinner').length).toBe(1);
+  });
+});

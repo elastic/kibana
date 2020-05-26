@@ -21,11 +21,11 @@ import { getAggValue, getLastMetric, getSplits } from '../../helpers';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
 export function stdDeviationBands(resp, panel, series, meta) {
-  return next => results => {
+  return (next) => (results) => {
     const metric = getLastMetric(series);
     if (metric.type === METRIC_TYPES.STD_DEVIATION && metric.mode === 'band') {
       getSplits(resp, panel, series, meta).forEach(({ id, color, label, timeseries }) => {
-        const data = timeseries.buckets.map(bucket => [
+        const data = timeseries.buckets.map((bucket) => [
           bucket.key,
           getAggValue(bucket, { ...metric, mode: 'upper' }),
           getAggValue(bucket, { ...metric, mode: 'lower' }),

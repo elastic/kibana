@@ -54,12 +54,7 @@ describe('StatefulEventsViewer', () => {
     await wait();
     wrapper.update();
 
-    expect(
-      wrapper
-        .find('[data-test-subj="events-viewer-panel"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="events-viewer-panel"]').first().exists()).toBe(true);
   });
 
   // InspectButtonContainer controls displaying InspectButton components

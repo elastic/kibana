@@ -76,7 +76,7 @@ const distanceBetweenNodes = distanceBetweenNodesInUnits * unit;
  */
 export const graphableProcesses = createSelector(
   ({ results }: DataState) => results,
-  function(results: DataState['results']) {
+  function (results: DataState['results']) {
     return results.filter(isGraphableProcess);
   }
 );
@@ -412,7 +412,7 @@ export const indexedProcessTree = createSelector(graphableProcesses, function in
 /**
  * Process events that will be graphed.
  */
-export const relatedEventResults = function(data: DataState) {
+export const relatedEventResults = function (data: DataState) {
   return data.resultsEnrichedWithRelatedEventInfo;
 };
 

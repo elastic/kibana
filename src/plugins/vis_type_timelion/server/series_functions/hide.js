@@ -39,7 +39,7 @@ export default new Chainable('hide', {
     defaultMessage: 'Hide the series by default',
   }),
   fn: function hideFn(args) {
-    return alter(args, function(eachSeries, hide) {
+    return alter(args, function (eachSeries, hide) {
       eachSeries._hide = hide == null ? true : hide;
       return eachSeries;
     });

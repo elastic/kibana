@@ -37,7 +37,7 @@ const DATA_PATHS = [
 ].filter(isString);
 
 function findFile(paths: string[]) {
-  const availablePath = paths.find(configPath => {
+  const availablePath = paths.find((configPath) => {
     try {
       accessSync(configPath, constants.R_OK);
       return true;
