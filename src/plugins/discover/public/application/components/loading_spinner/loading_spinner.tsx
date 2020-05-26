@@ -16,27 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { EuiLoadingSpinner, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 
-import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
+export function LoadingSpinner() {
+  return (
+    <I18nProvider>
+      <>
+        <EuiTitle size="s" data-test-subj="loadingSpinnerText">
+          <h2>
+            <FormattedMessage id="discover.searchingTitle" defaultMessage="Searching" />
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiLoadingSpinner size="l" data-test-subj="loadingSpinner" />
+      </>
+    </I18nProvider>
+  );
+}
 
-export const MockCapabilitiesService = capabilitiesServiceMock.create();
-export const CapabilitiesServiceConstructor = jest
-  .fn()
-  .mockImplementation(() => MockCapabilitiesService);
-jest.doMock('./capabilities', () => ({
-  CapabilitiesService: CapabilitiesServiceConstructor,
-}));
-
-export const MockHistory = {
-  push: jest.fn(),
-};
-export const createBrowserHistoryMock = jest.fn().mockReturnValue(MockHistory);
-jest.doMock('history', () => ({
-  createBrowserHistory: createBrowserHistoryMock,
-}));
-
-export const parseAppUrlMock = jest.fn();
-jest.doMock('./utils', () => ({
-  ...jest.requireActual('./utils'),
-  parseAppUrl: parseAppUrlMock,
-}));
+export function createLoadingSpinnerDirective(reactDirective: any) {
+  return reactDirective(LoadingSpinner);
+}

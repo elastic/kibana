@@ -16,27 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { ReactWrapper } from 'enzyme';
+import { LoadingSpinner } from './loading_spinner';
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
+describe('loading spinner', function () {
+  let component: ReactWrapper;
 
-export const MockCapabilitiesService = capabilitiesServiceMock.create();
-export const CapabilitiesServiceConstructor = jest
-  .fn()
-  .mockImplementation(() => MockCapabilitiesService);
-jest.doMock('./capabilities', () => ({
-  CapabilitiesService: CapabilitiesServiceConstructor,
-}));
-
-export const MockHistory = {
-  push: jest.fn(),
-};
-export const createBrowserHistoryMock = jest.fn().mockReturnValue(MockHistory);
-jest.doMock('history', () => ({
-  createBrowserHistory: createBrowserHistoryMock,
-}));
-
-export const parseAppUrlMock = jest.fn();
-jest.doMock('./utils', () => ({
-  ...jest.requireActual('./utils'),
-  parseAppUrl: parseAppUrlMock,
-}));
+  it('LoadingSpinner renders a Searching text and a spinner', () => {
+    component = mountWithIntl(<LoadingSpinner />);
+    expect(findTestSubject(component, 'loadingSpinnerText').text()).toBe('Searching');
+    expect(findTestSubject(component, 'loadingSpinner').length).toBe(1);
+  });
+});
