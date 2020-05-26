@@ -17,7 +17,7 @@ describe('CertificatesPage', () => {
 
     const spy1 = jest.spyOn(redux, 'useSelector');
 
-    jest.spyOn(moment.fn, 'diff').mockReturnValue(55555);
+    jest.spyOn(moment.fn, 'diff').mockReturnValue(555555);
 
     spy1.mockReturnValue({
       data: {
