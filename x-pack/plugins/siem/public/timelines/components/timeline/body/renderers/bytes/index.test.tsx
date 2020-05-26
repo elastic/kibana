@@ -21,11 +21,6 @@ describe('Bytes', () => {
         <Bytes contextId="test" eventId="abc" fieldName="network.bytes" value={`1234567`} />
       </TestProviders>
     );
-    expect(
-      wrapper
-        .find(PreferenceFormattedBytes)
-        .first()
-        .text()
-    ).toEqual('1.2MB');
+    expect(wrapper.find(PreferenceFormattedBytes).first().text()).toEqual('1.2MB');
   });
 });

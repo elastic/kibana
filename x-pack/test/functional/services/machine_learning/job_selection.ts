@@ -16,7 +16,7 @@ export function MachineLearningJobSelectionProvider({ getService }: FtrProviderC
         'mlJobSelectionBadges > ~mlJobSelectionBadge'
       );
       const actualJobOrGroupLabels = await Promise.all(
-        selectedJobsOrGroups.map(async badge => await badge.getVisibleText())
+        selectedJobsOrGroups.map(async (badge) => await badge.getVisibleText())
       );
       expect(actualJobOrGroupLabels).to.eql(
         jobOrGroupIds,

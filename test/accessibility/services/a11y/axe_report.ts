@@ -66,4 +66,4 @@ ${title}
   [${result.id}]: ${result.description}
     Help: ${result.helpUrl}
     Elements:
-      - ${result.nodes.map(node => node.target).join('\n      - ')}`;
+      - ${result.nodes.map((node) => node.target).join('\n      - ')}`;

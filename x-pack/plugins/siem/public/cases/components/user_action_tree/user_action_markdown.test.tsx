@@ -40,10 +40,7 @@ describe('UserActionMarkdown ', () => {
         </Router>
       </TestProviders>
     );
-    wrapper
-      .find(`[data-test-subj="markdown-timeline-link"]`)
-      .first()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="markdown-timeline-link"]`).first().simulate('click');
 
     expect(queryTimelineByIdSpy).toBeCalledWith({
       apolloClient: mockUseApolloClient(),
@@ -61,14 +58,8 @@ describe('UserActionMarkdown ', () => {
         </Router>
       </TestProviders>
     );
-    wrapper
-      .find(`[data-test-subj="preview-tab"]`)
-      .first()
-      .simulate('click');
-    wrapper
-      .find(`[data-test-subj="markdown-timeline-link"]`)
-      .first()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="preview-tab"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="markdown-timeline-link"]`).first().simulate('click');
     expect(queryTimelineByIdSpy).toBeCalledWith({
       apolloClient: mockUseApolloClient(),
       timelineId,

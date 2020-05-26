@@ -16,8 +16,8 @@ storiesOf('app/TransactionDetails/SyncBadge', module)
     },
     {
       info: {
-        source: false
-      }
+        source: false,
+      },
     }
   )
   .add(
@@ -27,8 +27,8 @@ storiesOf('app/TransactionDetails/SyncBadge', module)
     },
     {
       info: {
-        source: false
-      }
+        source: false,
+      },
     }
   )
   .add(
@@ -38,7 +38,7 @@ storiesOf('app/TransactionDetails/SyncBadge', module)
     },
     {
       info: {
-        source: false
-      }
+        source: false,
+      },
     }
   );

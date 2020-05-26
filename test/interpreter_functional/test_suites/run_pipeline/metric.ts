@@ -20,7 +20,7 @@
 import { ExpectExpression, expectExpressionProvider, ExpressionResult } from './helpers';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default function({
+export default function ({
   getService,
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {

@@ -14,8 +14,8 @@ import { type as ruleActionsType } from './lib/detection_engine/rule_actions/sav
 
 const types = [noteType, pinnedEventType, ruleActionsType, ruleStatusType, timelineType];
 
-export const savedObjectTypes = types.map(type => type.name);
+export const savedObjectTypes = types.map((type) => type.name);
 
 export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']) => {
-  types.forEach(type => savedObjects.registerType(type));
+  types.forEach((type) => savedObjects.registerType(type));
 };

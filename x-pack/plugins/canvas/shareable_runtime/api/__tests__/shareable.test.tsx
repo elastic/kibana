@@ -14,7 +14,7 @@ jest.mock('../../supported_renderers');
 
 describe('Canvas Shareable Workpad API', () => {
   // Mock the AJAX load of the workpad.
-  beforeEach(function() {
+  beforeEach(function () {
     // @ts-ignore Applying a global in Jest is alright.
     global.fetch = jest.fn().mockImplementation(() => {
       const p = new Promise((resolve, _reject) => {

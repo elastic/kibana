@@ -39,7 +39,7 @@ export async function getTranslationPaths({ cwd, glob }: { cwd: string; glob: st
       const content = await readFileAsync(entryFullPath, 'utf8');
       const { translations } = JSON.parse(content) as I18NRCFileStructure;
       if (translations && translations.length) {
-        translations.forEach(translation => {
+        translations.forEach((translation) => {
           const translationFullPath = resolve(pluginBasePath, translation);
           translationPaths.push(translationFullPath);
         });

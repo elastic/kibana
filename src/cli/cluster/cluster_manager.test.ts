@@ -153,7 +153,7 @@ describe('CLI cluster manager', () => {
           const events: Array<string | Error> = [];
           delayUntil().subscribe(
             () => events.push('next'),
-            error => events.push(error),
+            (error) => events.push(error),
             () => events.push('complete')
           );
 

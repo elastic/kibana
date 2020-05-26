@@ -31,7 +31,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
   const location = useLocation();
   const history = useHistory();
 
-  const updateUrlParams: UpdateUrlParams = updatedParams => {
+  const updateUrlParams: UpdateUrlParams = (updatedParams) => {
     if (!history || !location) return;
     const { pathname, search } = location;
     const currentParams = getParsedParams(search);

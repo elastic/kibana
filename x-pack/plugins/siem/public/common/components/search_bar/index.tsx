@@ -128,7 +128,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
             updateSearchBar.end = payload.dateRange.to;
             updateSearchBar.start = payload.dateRange.from;
           } else {
-            queries.forEach(q => q.refetch && (q.refetch as inputsModel.Refetch)());
+            queries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
           }
         }
 
@@ -150,7 +150,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
             filterManager,
           });
         } else {
-          queries.forEach(q => q.refetch && (q.refetch as inputsModel.Refetch)());
+          queries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
         }
       },
       [id, queries, filterManager]

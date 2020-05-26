@@ -10,7 +10,7 @@ import { JOB_PARAMS_RISON } from '../fixtures';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertestSvc = getService('supertest');
   const reportingAPI = getService('reportingAPI');

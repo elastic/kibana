@@ -78,7 +78,7 @@ export class ImageComparator {
         document.body.removeChild(sourceCanvas);
         resolve(mismatch);
       };
-      sourceImage.onerror = e => {
+      sourceImage.onerror = (e) => {
         reject(e.message);
       };
       sourceImage.src = 'data:image/svg+xml;base64,' + btoa(sourceData);
@@ -151,7 +151,7 @@ export class ImageComparator {
           resolve(mismatchedPixels);
         };
 
-        expectedImage.onerror = e => {
+        expectedImage.onerror = (e) => {
           reject(e.message);
         };
 
