@@ -50,7 +50,7 @@ export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => strin
       matchPath<ManagementRoutePolicyDetailsParams>(location?.pathname ?? '', {
         path: MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
         exact: true,
-      })?.params.policyId ?? ''
+      })?.params?.policyId ?? ''
     );
   }
 );

@@ -38,10 +38,11 @@ import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoi
 import { PageViewHeaderTitle } from '../../../../common/components/endpoint/page_view';
 import { ManagementPageView } from '../../../components/management_page_view';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
+import { getManagementUrl } from '../../../common/routing';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
-  const { notifications, services } = useKibana();
+  const { notifications } = useKibana();
 
   // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
@@ -83,7 +84,7 @@ export const PolicyDetails = React.memo(() => {
     }
   }, [notifications.toasts, policyName, policyUpdateStatus]);
 
-  const handleBackToListOnClick = useNavigateByRouterEventHandler('/policy');
+  const handleBackToListOnClick = useNavigateByRouterEventHandler(getManagementUrl('policyList'));
 
   const handleSaveOnClick = useCallback(() => {
     setShowConfirm(true);
@@ -125,7 +126,7 @@ export const PolicyDetails = React.memo(() => {
         iconType="arrowLeft"
         contentProps={{ style: { paddingLeft: '0' } }}
         onClick={handleBackToListOnClick}
-        href={`${services.http.basePath.get()}/app/endpoint/policy`}
+        href={`#${getManagementUrl('policyList')}`}
       >
         <FormattedMessage
           id="xpack.siem.endpoint.policy.details.backToListTitle"
