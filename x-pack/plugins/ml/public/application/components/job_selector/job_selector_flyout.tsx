@@ -85,7 +85,7 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
     const allNewSelection: string[] = [];
     const groupSelection: Array<{ groupId: string; jobIds: string[] }> = [];
 
-    newSelection.forEach(id => {
+    newSelection.forEach((id) => {
       if (jobGroupsMaps.groupsMap[id] !== undefined) {
         // Push all jobs from selected groups into the newSelection list
         allNewSelection.push(...jobGroupsMaps.groupsMap[id]);
@@ -111,7 +111,7 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
   }
 
   function removeId(id: string) {
-    setNewSelection(newSelection.filter(item => item !== id));
+    setNewSelection(newSelection.filter((item) => item !== id));
   }
 
   function toggleTimerangeSwitch() {

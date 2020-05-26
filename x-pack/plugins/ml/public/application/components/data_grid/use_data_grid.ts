@@ -37,15 +37,15 @@ export const useDataGrid = (
   const [pagination, setPagination] = useState(defaultPagination);
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
 
-  const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(pageSize => {
-    setPagination(p => {
+  const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback((pageSize) => {
+    setPagination((p) => {
       const pageIndex = Math.floor((p.pageSize * p.pageIndex) / pageSize);
       return { pageIndex, pageSize };
     });
   }, []);
 
   const onChangePage: OnChangePage = useCallback(
-    pageIndex => setPagination(p => ({ ...p, pageIndex })),
+    (pageIndex) => setPagination((p) => ({ ...p, pageIndex })),
     []
   );
 
@@ -54,7 +54,7 @@ export const useDataGrid = (
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<ColumnId[]>([]);
 
-  const columnIds = columns.map(c => c.id);
+  const columnIds = columns.map((c) => c.id);
   const filteredColumnIds =
     defaultVisibleColumnsFilter !== undefined
       ? columnIds.filter(defaultVisibleColumnsFilter)
@@ -69,10 +69,10 @@ export const useDataGrid = (
   const [invalidSortingColumnns, setInvalidSortingColumnns] = useState<string[]>([]);
 
   const onSort: OnSort = useCallback(
-    sc => {
+    (sc) => {
       // Check if an unsupported column type for sorting was selected.
       const updatedInvalidSortingColumnns = sc.reduce<string[]>((arr, current) => {
-        const columnType = columns.find(dgc => dgc.id === current.id);
+        const columnType = columns.find((dgc) => dgc.id === current.id);
         if (columnType?.schema === 'json') {
           arr.push(current.id);
         }

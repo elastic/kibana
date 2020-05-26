@@ -42,7 +42,7 @@ export const useLogFlyout = () => {
         }
         return await fetchLogEntriesItem({ sourceId, id: flyoutRef.id, index: flyoutRef.index });
       },
-      onResolve: response => {
+      onResolve: (response) => {
         if (response) {
           const { data } = response;
           setFlyoutItem(data || null);
@@ -96,7 +96,7 @@ export const WithFlyoutOptionsUrlState = () => {
       }}
       urlStateKey="flyoutOptions"
       mapToUrlState={mapToUrlState}
-      onChange={newUrlState => {
+      onChange={(newUrlState) => {
         if (newUrlState && newUrlState.flyoutId && newUrlState.flyoutIndex) {
           setFlyoutRef({ id: newUrlState.flyoutId, index: newUrlState.flyoutIndex });
         }
@@ -110,7 +110,7 @@ export const WithFlyoutOptionsUrlState = () => {
           setFlyoutVisibility(false);
         }
       }}
-      onInitialize={initialUrlState => {
+      onInitialize={(initialUrlState) => {
         if (initialUrlState && initialUrlState.flyoutId && initialUrlState.flyoutIndex) {
           setFlyoutRef({ id: initialUrlState.flyoutId, index: initialUrlState.flyoutIndex });
         }

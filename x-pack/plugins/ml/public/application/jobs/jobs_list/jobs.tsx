@@ -18,7 +18,7 @@ interface JobsPageProps {
   lastRefresh?: number;
 }
 
-export const JobsPage: FC<JobsPageProps> = props => {
+export const JobsPage: FC<JobsPageProps> = (props) => {
   return (
     <div data-test-subj="mlPageJobManagement">
       <NavigationMenu tabId="jobs" />

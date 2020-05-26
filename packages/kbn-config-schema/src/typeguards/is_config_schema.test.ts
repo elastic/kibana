@@ -47,7 +47,7 @@ describe('isConfigSchema', () => {
     expect(isConfigSchema(undefined)).toBe(false);
     expect(isConfigSchema([1, 2, 3])).toBe(false);
     expect(isConfigSchema({ foo: 'bar' })).toBe(false);
-    expect(isConfigSchema(function() {})).toBe(false);
+    expect(isConfigSchema(function () {})).toBe(false);
   });
 
   it('returns true as long as `__isKbnConfigSchemaType` is true', () => {

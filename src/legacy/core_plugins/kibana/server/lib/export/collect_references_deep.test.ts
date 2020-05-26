@@ -103,13 +103,13 @@ const data: Array<SavedObject<SavedObjectAttributes>> = [
 
 test('collects dashboard and all dependencies', async () => {
   const savedObjectClient = savedObjectsClientMock.create();
-  savedObjectClient.bulkGet.mockImplementation(objects => {
+  savedObjectClient.bulkGet.mockImplementation((objects) => {
     if (!objects) {
       throw new Error('Invalid test data');
     }
     return Promise.resolve({
       saved_objects: objects.map(
-        (obj: any) => data.find(row => row.id === obj.id && row.type === obj.type)!
+        (obj: any) => data.find((row) => row.id === obj.id && row.type === obj.type)!
       ),
     });
   });

@@ -52,6 +52,7 @@ if (showHelp) {
         --rpm                   {dim Only build the rpm package}
         --deb                   {dim Only build the deb package}
         --docker                {dim Only build the docker image}
+        --skip-docker-ubi       {dim Don't build the docker ubi image}
         --release               {dim Produce a release-ready distributable}
         --version-qualifier     {dim Suffix version with a qualifier}
         --skip-node-download    {dim Reuse existing downloads of node.js}
@@ -62,7 +63,7 @@ if (showHelp) {
   process.exit(1);
 }
 
-buildDistributables({ log, ...buildArgs }).catch(error => {
+buildDistributables({ log, ...buildArgs }).catch((error) => {
   if (!isErrorLogged(error)) {
     log.error('Uncaught error');
     log.error(error);

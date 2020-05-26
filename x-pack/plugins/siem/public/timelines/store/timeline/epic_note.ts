@@ -103,7 +103,7 @@ export const epicPersistNote = (
         endTimelineSaving({
           id: action.payload.id,
         }),
-      ].filter(item => item != null);
+      ].filter((item) => item != null);
     }),
     startWith(startTimelineSaving({ id: action.payload.id })),
     takeUntil(
@@ -131,10 +131,10 @@ export const epicPersistNote = (
     )
   );
 
-export const createTimelineNoteEpic = <State>(): Epic<Action, Action, State> => action$ =>
+export const createTimelineNoteEpic = <State>(): Epic<Action, Action, State> => (action$) =>
   action$.pipe(
-    filter(action => timelineNoteActionsType.includes(action.type)),
-    switchMap(action => {
+    filter((action) => timelineNoteActionsType.includes(action.type)),
+    switchMap((action) => {
       dispatcherTimelinePersistQueue.next({ action });
       return empty();
     })

@@ -38,7 +38,7 @@ function counter({ async = true }: { async?: boolean } = {}) {
     completedCounts += 1;
   }
 
-  return new Rx.Observable<string>(subscriber => {
+  return new Rx.Observable<string>((subscriber) => {
     if (!async) {
       sendCount(subscriber);
       return;
@@ -53,7 +53,7 @@ async function record<T>(observable: Rx.Observable<T>) {
   return observable
     .pipe(
       materialize(),
-      map(n => (n.kind === 'N' ? `N:${n.value}` : n.kind === 'E' ? `E:${n.error.message}` : 'C')),
+      map((n) => (n.kind === 'N' ? `N:${n.value}` : n.kind === 'E' ? `E:${n.error.message}` : 'C')),
       toArray()
     )
     .toPromise();

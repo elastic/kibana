@@ -140,15 +140,15 @@ export async function getDailyEvents(
   const byDateByType: Record<string, Record<string, number>> = {};
   const suggestionsByDate: Record<string, Record<string, number>> = {};
 
-  metrics.aggregations!.daily.buckets.forEach(daily => {
+  metrics.aggregations!.daily.buckets.forEach((daily) => {
     const byType: Record<string, number> = byDateByType[daily.key] || {};
-    daily.groups.buckets.regularEvents.names.buckets.forEach(bucket => {
+    daily.groups.buckets.regularEvents.names.buckets.forEach((bucket) => {
       byType[bucket.key] = (bucket.sums.value || 0) + (byType[daily.key] || 0);
     });
     byDateByType[daily.key] = byType;
 
     const suggestionsByType: Record<string, number> = suggestionsByDate[daily.key] || {};
-    daily.groups.buckets.suggestionEvents.names.buckets.forEach(bucket => {
+    daily.groups.buckets.suggestionEvents.names.buckets.forEach((bucket) => {
       suggestionsByType[bucket.key] =
         (bucket.sums.value || 0) + (suggestionsByType[daily.key] || 0);
     });
@@ -208,7 +208,7 @@ export function telemetryTaskRunner(
               runAt: getNextMidnight(),
             };
           })
-          .catch(errMsg => logger.warn(`Error executing lens telemetry task: ${errMsg}`));
+          .catch((errMsg) => logger.warn(`Error executing lens telemetry task: ${errMsg}`));
       },
       async cancel() {},
     };
@@ -216,8 +216,5 @@ export function telemetryTaskRunner(
 }
 
 function getNextMidnight() {
-  return moment()
-    .add(1, 'day')
-    .startOf('day')
-    .toDate();
+  return moment().add(1, 'day').startOf('day').toDate();
 }

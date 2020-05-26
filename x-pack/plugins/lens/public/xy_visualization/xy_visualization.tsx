@@ -27,11 +27,11 @@ const isBucketed = (op: OperationMetadata) => op.isBucketed;
 function getVisualizationType(state: State): VisualizationType | 'mixed' {
   if (!state.layers.length) {
     return (
-      visualizationTypes.find(t => t.id === state.preferredSeriesType) ?? visualizationTypes[0]
+      visualizationTypes.find((t) => t.id === state.preferredSeriesType) ?? visualizationTypes[0]
     );
   }
-  const visualizationType = visualizationTypes.find(t => t.id === state.layers[0].seriesType);
-  const seriesTypes = _.unique(state.layers.map(l => l.seriesType));
+  const visualizationType = visualizationTypes.find((t) => t.id === state.layers[0].seriesType);
+  const seriesTypes = _.unique(state.layers.map((l) => l.seriesType));
 
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
 }
@@ -84,18 +84,18 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   },
 
   getLayerIds(state) {
-    return state.layers.map(l => l.layerId);
+    return state.layers.map((l) => l.layerId);
   },
 
   removeLayer(state, layerId) {
     return {
       ...state,
-      layers: state.layers.filter(l => l.layerId !== layerId),
+      layers: state.layers.filter((l) => l.layerId !== layerId),
     };
   },
 
   appendLayer(state, layerId) {
-    const usedSeriesTypes = _.uniq(state.layers.map(layer => layer.seriesType));
+    const usedSeriesTypes = _.uniq(state.layers.map((layer) => layer.seriesType));
     return {
       ...state,
       layers: [
@@ -111,7 +111,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   clearLayer(state, layerId) {
     return {
       ...state,
-      layers: state.layers.map(l =>
+      layers: state.layers.map((l) =>
         l.layerId !== layerId ? l : newLayerState(state.preferredSeriesType, layerId)
       ),
     };
@@ -134,7 +134,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     return {
       ...state,
       preferredSeriesType: seriesType as SeriesType,
-      layers: state.layers.map(layer => ({ ...layer, seriesType: seriesType as SeriesType })),
+      layers: state.layers.map((layer) => ({ ...layer, seriesType: seriesType as SeriesType })),
     };
   },
 
@@ -159,10 +159,10 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     );
   },
 
-  getPersistableState: state => state,
+  getPersistableState: (state) => state,
 
   getConfiguration(props) {
-    const layer = props.state.layers.find(l => l.layerId === props.layerId)!;
+    const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     return {
       groups: [
         {
@@ -204,7 +204,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   },
 
   setDimension({ prevState, layerId, columnId, groupId }) {
-    const newLayer = prevState.layers.find(l => l.layerId === layerId);
+    const newLayer = prevState.layers.find((l) => l.layerId === layerId);
     if (!newLayer) {
       return prevState;
     }
@@ -213,7 +213,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
       newLayer.xAccessor = columnId;
     }
     if (groupId === 'y') {
-      newLayer.accessors = [...newLayer.accessors.filter(a => a !== columnId), columnId];
+      newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
     }
     if (groupId === 'breakdown') {
       newLayer.splitAccessor = columnId;
@@ -221,12 +221,12 @@ export const xyVisualization: Visualization<State, PersistableState> = {
 
     return {
       ...prevState,
-      layers: prevState.layers.map(l => (l.layerId === layerId ? newLayer : l)),
+      layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
     };
   },
 
   removeDimension({ prevState, layerId, columnId }) {
-    const newLayer = prevState.layers.find(l => l.layerId === layerId);
+    const newLayer = prevState.layers.find((l) => l.layerId === layerId);
     if (!newLayer) {
       return prevState;
     }
@@ -236,18 +236,18 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     } else if (newLayer.splitAccessor === columnId) {
       delete newLayer.splitAccessor;
     } else if (newLayer.accessors.includes(columnId)) {
-      newLayer.accessors = newLayer.accessors.filter(a => a !== columnId);
+      newLayer.accessors = newLayer.accessors.filter((a) => a !== columnId);
     }
 
     return {
       ...prevState,
-      layers: prevState.layers.map(l => (l.layerId === layerId ? newLayer : l)),
+      layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
     };
   },
 
   getLayerContextMenuIcon({ state, layerId }) {
-    const layer = state.layers.find(l => l.layerId === layerId);
-    return visualizationTypes.find(t => t.id === layer?.seriesType)?.icon;
+    const layer = state.layers.find((l) => l.layerId === layerId);
+    return visualizationTypes.find((t) => t.id === layer?.seriesType)?.icon;
   },
 
   renderLayerContextMenu(domElement, props) {

@@ -28,11 +28,11 @@ import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 
 function getColors(props) {
   const { model, visData } = props;
-  const series = get(visData, `${model.id}.series`, []).filter(s => !isUndefined(s));
+  const series = get(visData, `${model.id}.series`, []).filter((s) => !isUndefined(s));
   let color;
   let background;
   if (model.background_color_rules) {
-    model.background_color_rules.forEach(rule => {
+    model.background_color_rules.forEach((rule) => {
       if (rule.operator && rule.value != null) {
         const value = (series[0] && getLastValue(series[0].data)) || 0;
         if (_[rule.operator](value, rule.value)) {
@@ -49,9 +49,9 @@ function MetricVisualization(props) {
   const { backgroundColor, model, visData } = props;
   const colors = getColors(props);
   const series = get(visData, `${model.id}.series`, [])
-    .filter(row => row)
+    .filter((row) => row)
     .map((row, i) => {
-      const seriesDef = model.series.find(s => includes(row.id, s.id));
+      const seriesDef = model.series.find((s) => includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
         newProps.formatter = createTickFormatter(

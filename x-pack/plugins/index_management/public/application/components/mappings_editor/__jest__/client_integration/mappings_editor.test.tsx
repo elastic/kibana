@@ -279,7 +279,7 @@ describe.skip('Mappings editor: core', () => {
        * Mapped fields
        */
       // Test that root-level mappings "properties" are rendered as root-level "DOM tree items"
-      const fields = find('fieldsListItem.fieldName').map(item => item.text());
+      const fields = find('fieldsListItem.fieldName').map((item) => item.text());
       expect(fields).toEqual(Object.keys(defaultMappings.properties).sort());
 
       /**

@@ -16,9 +16,25 @@ const TitleStyle = styled(EuiTitle)`
   margin-left: auto;
 `;
 
+const FlexGroupContainer = styled(EuiFlexGroup)`
+  && {
+    @media only screen and (max-width: 768px) {
+      > :first-child {
+        flex-basis: 40% !important;
+      }
+      > :nth-child(2) {
+        order: 3;
+      }
+      > :nth-child(3) {
+        flex-basis: 60% !important;
+      }
+    }
+  }
+`;
+
 export const MonitorListHeader: React.FC = () => {
   return (
-    <EuiFlexGroup alignItems="center">
+    <FlexGroupContainer alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
           <h5>
@@ -44,6 +60,6 @@ export const MonitorListHeader: React.FC = () => {
           </h5>
         </TitleStyle>
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </FlexGroupContainer>
   );
 };
