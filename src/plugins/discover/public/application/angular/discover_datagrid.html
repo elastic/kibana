@@ -56,7 +56,7 @@
 
         <div ng-hide="fetchError" class="dscOverlay">
           <h2
-            i18n-id="kbn.discover.searchingTitle"
+            i18n-id="discover.searchingTitle"
             i18n-default-message="Searching"
             class="euiTitle euiTitle--small"
           ></h2>
@@ -79,7 +79,7 @@
           </hits-counter>
 
           <section
-            aria-label="{{::'kbn.discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
+            aria-label="{{::'discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
             class="dscTimechart"
             ng-if="opts.timefield"
           >
@@ -104,11 +104,11 @@
             ></discover-histogram>
           </section>
 
-          <section class="dscTable" fixed-scroll aria-labelledby="documentsAriaLabel">
+          <section class="dscTable" aria-labelledby="documentsAriaLabel">
             <h2
               class="euiScreenReaderOnly"
               id="documentsAriaLabel"
-              i18n-id="kbn.discover.documentsAriaLabel"
+              i18n-id="discover.documentsAriaLabel"
               i18n-default-message="Documents"
             ></h2>
             <discover-grid
