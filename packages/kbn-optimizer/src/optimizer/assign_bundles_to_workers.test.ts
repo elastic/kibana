@@ -21,11 +21,11 @@ jest.mock('fs');
 
 import { Bundle } from '../common';
 
-import { assignBundlesToWorkers, Assignments } from './assign_bundles_to_workers';
+import { assignBundlesToWorkers, Assignment } from './assign_bundles_to_workers';
 
 const hasModuleCount = (b: Bundle) => b.cache.getModuleCount() !== undefined;
 const noModuleCount = (b: Bundle) => b.cache.getModuleCount() === undefined;
-const summarizeBundles = (w: Assignments) =>
+const summarizeBundles = (w: Assignment) =>
   [
     w.moduleCount ? `${w.moduleCount} known modules` : '',
     w.newBundles ? `${w.newBundles} new bundles` : '',
@@ -33,12 +33,12 @@ const summarizeBundles = (w: Assignments) =>
     .filter(Boolean)
     .join(', ');
 
-const readConfigs = (workers: Assignments[]) =>
+const readConfigs = (workers: Assignment[]) =>
   workers.map(
     (w, i) => `worker ${i} (${summarizeBundles(w)}) => ${w.bundles.map((b) => b.id).join(',')}`
   );
 
-const assertReturnVal = (workers: Assignments[]) => {
+const assertReturnVal = (workers: Assignment[]) => {
   expect(workers).toBeInstanceOf(Array);
   for (const worker of workers) {
     expect(worker).toEqual({
