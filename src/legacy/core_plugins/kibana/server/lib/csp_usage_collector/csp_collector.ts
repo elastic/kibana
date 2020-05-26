@@ -45,13 +45,13 @@ export function createCspCollector(server: Server) {
     },
     mapping: {
       strict: {
-        type: 'boolean',
+        type: 'boolean' as 'boolean',
       },
       warnLegacyBrowsers: {
-        type: 'boolean',
+        type: 'boolean' as 'boolean',
       },
       rulesChangedFromDefault: {
-        type: 'boolean',
+        type: 'boolean' as 'boolean',
       },
     },
   };

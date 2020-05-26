@@ -17,9 +17,10 @@
  * under the License.
  */
 import { CollectorSet } from '../../../plugins/usage_collection/server/collector';
+import { loggingServiceMock } from '../../../core/server/mocks';
 
 const { makeUsageCollector } = new CollectorSet({
-  logger: null,
+  logger: loggingServiceMock.createLogger(),
   maximumWaitTimeForAllCollectorsInS: 0,
 });
 

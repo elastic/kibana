@@ -17,15 +17,11 @@
  * under the License.
  */
 
-import esMapping from './__fixture__/mock_mapping.json';
-import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
-import {
-  checkCollectorIntegrity,
-  checkCompatibleTypeDescriptor,
-  checkMatchingMapping,
-} from './check_collector_integrity';
 import * as _ from 'lodash';
 import * as ts from 'typescript';
+import esMapping from './__fixture__/mock_mapping.json';
+import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
+import { checkCompatibleTypeDescriptor, checkMatchingMapping } from './check_collector_integrity';
 
 describe('checkMatchingMapping', () => {
   it('returns no diff on matching parsedCollections and stored mapping', () => {
@@ -70,7 +66,9 @@ describe('checkMatchingMapping', () => {
 
 describe('checkCompatibleTypeDescriptor', () => {
   it('returns no diff on compatible type descriptor with mapping', () => {
-    const { diff, message } = checkCompatibleTypeDescriptor([parsedWorkingCollector]);
+    const incompatibles = checkCompatibleTypeDescriptor([parsedWorkingCollector]);
+    expect(incompatibles).toHaveLength(1);
+    const { diff, message } = incompatibles[0];
     expect(diff).toEqual({});
     expect(message).toHaveLength(0);
   });
@@ -79,7 +77,9 @@ describe('checkCompatibleTypeDescriptor', () => {
     it('returns diff on incompatible type descriptor with mapping', () => {
       const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
       malformedParsedCollector[1].fetch.typeDescriptor.flat.kind = ts.SyntaxKind.BooleanKeyword;
-      const { diff, message } = checkCompatibleTypeDescriptor([malformedParsedCollector]);
+      const incompatibles = checkCompatibleTypeDescriptor([malformedParsedCollector]);
+      expect(incompatibles).toHaveLength(1);
+      const { diff, message } = incompatibles[0];
       expect(diff).toEqual({ 'flat.kind': ts.SyntaxKind.BooleanKeyword });
       expect(message).toHaveLength(1);
       expect(message).toEqual([
@@ -94,7 +94,9 @@ describe('checkCompatibleTypeDescriptor', () => {
     it('returns no diff when mapping change between text and keyword', () => {
       const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
       malformedParsedCollector[1].mapping.value.flat.type = 'text';
-      const { diff, message } = checkCompatibleTypeDescriptor([malformedParsedCollector]);
+      const incompatibles = checkCompatibleTypeDescriptor([malformedParsedCollector]);
+      expect(incompatibles).toHaveLength(1);
+      const { diff, message } = incompatibles[0];
       expect(diff).toEqual({});
       expect(message).toHaveLength(0);
     });
@@ -102,7 +104,9 @@ describe('checkCompatibleTypeDescriptor', () => {
     it('returns diff on incompatible type descriptor with mapping', () => {
       const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
       malformedParsedCollector[1].mapping.value.flat.type = 'boolean';
-      const { diff, message } = checkCompatibleTypeDescriptor([malformedParsedCollector]);
+      const incompatibles = checkCompatibleTypeDescriptor([malformedParsedCollector]);
+      expect(incompatibles).toHaveLength(1);
+      const { diff, message } = incompatibles[0];
       expect(diff).toEqual({ 'flat.kind': ts.SyntaxKind.StringKeyword });
       expect(message).toHaveLength(1);
       expect(message).toEqual([
@@ -113,10 +117,3 @@ describe('checkCompatibleTypeDescriptor', () => {
     it.todo('returns diff when missing mapping');
   });
 });
-
-// describe('checkCollectorIntegrity', () => {
-//   it('checks file integrity', () => {
-//     const result = checkCollectorIntegrity([parsedWorkingCollector], esMapping);
-//     console.log('result::', result)
-//   })
-// })

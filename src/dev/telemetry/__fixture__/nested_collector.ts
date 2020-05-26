@@ -17,9 +17,10 @@
  * under the License.
  */
 import { CollectorSet, UsageCollector } from '../../../plugins/usage_collection/server/collector';
+import { loggingServiceMock } from '../../../core/server/mocks';
 
 const collectorSet = new CollectorSet({
-  logger: null,
+  logger: loggingServiceMock.createLogger(),
   maximumWaitTimeForAllCollectorsInS: 0,
 });
 
@@ -28,10 +29,11 @@ interface Usage {
 }
 
 export class NestedInside {
-  collector?: UsageCollector<Usage>;
+  collector?: UsageCollector<Usage, Usage>;
   createMyCollector() {
     this.collector = collectorSet.makeUsageCollector<Usage>({
       type: 'my_nested_collector',
+      isReady: () => true,
       fetch: async () => {
         return {
           locale: 'en',

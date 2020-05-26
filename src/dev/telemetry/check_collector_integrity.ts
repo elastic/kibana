@@ -28,8 +28,8 @@ export function checkMatchingMapping(UsageCollections: ParsedUsageCollection[], 
   return difference(generatedMapping, esMapping);
 }
 
-export function checkCompatibleTypeDescriptor(UsageCollections: ParsedUsageCollection[]) {
-  for (const [, collectorDetails] of UsageCollections) {
+export function checkCompatibleTypeDescriptor(usageCollections: ParsedUsageCollection[]) {
+  return usageCollections.map(([, collectorDetails]) => {
     const typeDescriptorKinds = flattenKeys(
       pickDeep(collectorDetails.fetch.typeDescriptor, 'kind')
     );
@@ -37,25 +37,25 @@ export function checkCompatibleTypeDescriptor(UsageCollections: ParsedUsageColle
 
     const transformedMappingKinds = _.reduce(
       mappingTypes,
-      (acc, type, key) => {
+      (acc: any, type: string, key: string) => {
         acc[key.replace('.type', '.kind')] = getMappingTypeToKind(type);
         return acc;
       },
       {} as any
     );
 
-    const diff = difference(typeDescriptorKinds, transformedMappingKinds);
+    const diff: any[] = difference(typeDescriptorKinds, transformedMappingKinds);
 
     return {
       diff,
-      message: Object.entries(diff).map(([key, kind]) => {
+      message: Object.entries(diff).map(([key]) => {
         const interfaceKey = key.replace('.kind', '');
         const expectedDescriptorType = kindToDescriptorName(_.get(transformedMappingKinds, key));
         const actualDescriptorType = kindToDescriptorName(_.get(typeDescriptorKinds, key));
         return `incompatible Type key (${collectorDetails.fetch.typeName}.${interfaceKey}): expected (${expectedDescriptorType}) got (${actualDescriptorType}).`;
       }),
     };
-  }
+  });
 }
 
 export function checkCollectorIntegrity(UsageCollections: ParsedUsageCollection[], esMapping: any) {

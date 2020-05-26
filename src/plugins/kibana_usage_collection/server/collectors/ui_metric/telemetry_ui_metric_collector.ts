@@ -23,7 +23,6 @@ import {
   SavedObjectsServiceSetup,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { UI_METRIC_USAGE_TYPE } from '../../../common/constants';
 import { findAll } from '../find_all';
 
 interface UIMetricsSavedObjects extends SavedObjectAttributes {

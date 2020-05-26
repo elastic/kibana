@@ -17,9 +17,10 @@
  * under the License.
  */
 import { CollectorSet } from '../../../plugins/usage_collection/server/collector';
+import { loggingServiceMock } from '../../../core/server/mocks';
 
 const collectorSet = new CollectorSet({
-  logger: null,
+  logger: loggingServiceMock.createLogger(),
   maximumWaitTimeForAllCollectorsInS: 0,
 });
 
@@ -38,7 +39,7 @@ function createCollector() {
     },
     mapping: {
       locale: {
-        type: 'keyword',
+        type: 'keyword' as 'keyword',
       },
     },
   };
@@ -55,7 +56,7 @@ export function defineCollectorFromVariable() {
     },
     mapping: {
       locale: {
-        type: 'keyword',
+        type: 'keyword' as 'keyword',
       },
     },
   };

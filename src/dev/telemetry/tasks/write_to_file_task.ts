@@ -18,18 +18,15 @@
  */
 
 import * as path from 'path';
-import { ErrorReporter, serializeToJson, serializeToJson5, writeFileAsync } from '../utils';
-
+import { writeFileAsync } from '../utils';
 import { TaskContext } from './task_context';
-import { generateMapping } from '../manage_mapping';
 
 export function writeToFileTask({ roots }: TaskContext) {
   return roots.map((root) => ({
     task: async () => {
       const fullPath = path.resolve(process.cwd(), root.config.output);
-      const mapping = generateMapping(root.parsedCollections);
-      if (Object.keys(mapping.properties).length > 0) {
-        const serializedMapping = JSON.stringify(mapping, null, 2).concat('\n');
+      if (root.mapping && Object.keys(root.mapping.properties).length > 0) {
+        const serializedMapping = JSON.stringify(root.mapping, null, 2).concat('\n');
         await writeFileAsync(fullPath, serializedMapping);
       }
     },

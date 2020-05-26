@@ -24,6 +24,9 @@ import { generateMapping } from '../manage_mapping';
 export function generateMappingsTask({ roots }: TaskContext) {
   return roots.map((root) => ({
     task: () => {
+      if (!root.parsedCollections || !root.parsedCollections.length) {
+        return;
+      }
       const mapping = generateMapping(root.parsedCollections);
       root.mapping = mapping;
     },

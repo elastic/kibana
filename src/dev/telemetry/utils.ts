@@ -97,13 +97,13 @@ export function pickDeep(collection: any, identity: any, thisArg?: any) {
   return picked;
 }
 
-export const flattenKeys = (obj: any, keyPath = []) => {
+export const flattenKeys = (obj: any, keyPath: any[] = []): any => {
   if (_.isObject(obj)) {
     return _.reduce(
       obj,
       (cum, next, key) => {
         const keys = [...keyPath, key];
-        return _.merge(cum, flattenKeys(next, keys as any));
+        return _.merge(cum, flattenKeys(next, keys));
       },
       {}
     );
@@ -112,9 +112,9 @@ export const flattenKeys = (obj: any, keyPath = []) => {
 };
 
 export function difference(actual: any, expected: any) {
-  function changes(obj, base) {
+  function changes(obj: any, base: any) {
     return _.transform(obj, function (result, value, key) {
-      if (!_.isEqual(value, base[key])) {
+      if (key && !_.isEqual(value, base[key])) {
         result[key] =
           _.isObject(value) && _.isObject(base[key]) ? changes(value, base[key]) : value;
       }

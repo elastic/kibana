@@ -17,12 +17,9 @@
  * under the License.
  */
 
-import chalk from 'chalk';
 import Listr from 'listr';
-import { resolve } from 'path';
+import { run } from '@kbn/dev-utils';
 
-import { createFailError, run } from '@kbn/dev-utils';
-// import { ErrorReporter, serializeToJson, serializeToJson5, writeFileAsync } from './telemetry';
 import {
   createTaskContext,
   ErrorReporter,
@@ -33,9 +30,7 @@ import {
 } from './telemetry/tasks';
 
 run(
-  async ({ flags: { 'output-format': outputFormat }, log }) => {
-    // const srcPaths = Array().concat(path || ['./src', './x-pack']);
-
+  async ({ flags: {}, log }) => {
     const list = new Listr([
       {
         title: 'Parsing .telemetryrc.json files',

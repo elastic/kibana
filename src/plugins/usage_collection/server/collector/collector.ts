@@ -21,7 +21,7 @@ import { Logger, APICaller } from 'kibana/server';
 
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
 
-type AllowedMappingTypes = 'keyword' | 'text' | 'number';
+type AllowedMappingTypes = 'keyword' | 'text' | 'number' | 'boolean';
 
 type Purify<T extends string> = { [P in T]: T }[T];
 
