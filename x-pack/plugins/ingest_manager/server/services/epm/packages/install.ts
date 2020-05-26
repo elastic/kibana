@@ -140,7 +140,7 @@ export async function installPackage(options: {
   const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.datasets);
 
   // get template refs to save
-  const installedTemplateRefs = installedTemplates.map(template => ({
+  const installedTemplateRefs = installedTemplates.map((template) => ({
     id: template.templateName,
     type: IngestAssetType.IndexTemplate,
   }));
@@ -191,13 +191,13 @@ export async function installKibanaAssets(options: {
 
   // Only install Kibana assets during package installation.
   const kibanaAssetTypes = Object.values(KibanaAssetType);
-  const installationPromises = kibanaAssetTypes.map(async assetType =>
+  const installationPromises = kibanaAssetTypes.map(async (assetType) =>
     installKibanaSavedObjects({ savedObjectsClient, pkgName, pkgVersion, assetType })
   );
 
   // installKibanaSavedObjects returns AssetReference[], so .map creates AssetReference[][]
   // call .flat to flatten into one dimensional array
-  return Promise.all(installationPromises).then(results => results.flat());
+  return Promise.all(installationPromises).then((results) => results.flat());
 }
 
 export async function saveInstallationReferences(options: {

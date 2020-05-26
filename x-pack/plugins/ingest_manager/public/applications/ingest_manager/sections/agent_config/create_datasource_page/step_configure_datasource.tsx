@@ -46,8 +46,10 @@ export const StepConfigureDatasource: React.FunctionComponent<{
     packageInfo.datasources[0].inputs &&
     packageInfo.datasources[0].inputs.length ? (
       <EuiFlexGroup direction="column">
-        {packageInfo.datasources[0].inputs.map(packageInput => {
-          const datasourceInput = datasource.inputs.find(input => input.type === packageInput.type);
+        {packageInfo.datasources[0].inputs.map((packageInput) => {
+          const datasourceInput = datasource.inputs.find(
+            (input) => input.type === packageInput.type
+          );
           return datasourceInput ? (
             <EuiFlexItem key={packageInput.type}>
               <DatasourceInputPanel
@@ -55,7 +57,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
                 datasourceInput={datasourceInput}
                 updateDatasourceInput={(updatedInput: Partial<DatasourceInput>) => {
                   const indexOfUpdatedInput = datasource.inputs.findIndex(
-                    input => input.type === packageInput.type
+                    (input) => input.type === packageInput.type
                   );
                   const newInputs = [...datasource.inputs];
                   newInputs[indexOfUpdatedInput] = {

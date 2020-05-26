@@ -9,13 +9,13 @@ import { parse } from 'url';
 import { USERS_PATH } from '../../../../../plugins/security/public/management/management_urls';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['security', 'common']);
 
-  describe('Login Selector', function() {
+  describe('Login Selector', function () {
     this.tags('includeFirefox');
 
     before(async () => {

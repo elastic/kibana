@@ -17,7 +17,7 @@ import { IS_OPERATOR } from '../../../timelines/components/timeline/data_provide
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 
 const Subtext = styled.div`
-  font-size: ${props => props.theme.eui.euiFontSizeXS};
+  font-size: ${(props) => props.theme.eui.euiFontSizeXS};
 `;
 
 export const getRowItemDraggable = ({
@@ -154,7 +154,7 @@ export const getRowItemOverflow = (
             <ul>
               {rowItems
                 .slice(overflowIndexStart, overflowIndexStart + maxOverflowItems)
-                .map(rowItem => (
+                .map((rowItem) => (
                   <li key={`${idPrefix}-${rowItem}`}>{defaultToEmptyTag(rowItem)}</li>
                 ))}
             </ul>

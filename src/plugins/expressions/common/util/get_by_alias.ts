@@ -30,7 +30,7 @@ export function getByAlias<T extends { name?: string; aliases?: string[] }>(
   return Object.values(node).find(({ name, aliases }) => {
     if (!name) return false;
     if (name.toLowerCase() === lowerCaseName) return true;
-    return (aliases || []).some(alias => {
+    return (aliases || []).some((alias) => {
       return alias.toLowerCase() === lowerCaseName;
     });
   });

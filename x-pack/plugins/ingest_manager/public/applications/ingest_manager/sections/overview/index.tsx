@@ -25,7 +25,7 @@ import { OverviewDatastreamSection } from './components/datastream_section';
 
 const AlphaBadge = styled(EuiBetaBadge)`
   vertical-align: top;
-  margin-left: ${props => props.theme.eui.paddingSizes.s};
+  margin-left: ${(props) => props.theme.eui.paddingSizes.s};
 `;
 
 export const IngestManagerOverview: React.FunctionComponent = () => {

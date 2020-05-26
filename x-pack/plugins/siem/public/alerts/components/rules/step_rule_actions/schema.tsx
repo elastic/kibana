@@ -40,7 +40,7 @@ export const validateRuleActionsField = (actionTypeRegistry: ActionTypeRegistryC
 
     if (errorsArray.length) {
       const actionTypeName = getActionTypeName(actionItem.actionTypeId);
-      const errorsListItems = errorsArray.map(error => `*   ${error}\n`);
+      const errorsListItems = errorsArray.map((error) => `*   ${error}\n`);
 
       return [...acc, `\n**${actionTypeName}:**\n${errorsListItems.join('')}`];
     }

@@ -54,7 +54,7 @@ const installPreBuiltTemplates = async (
     pkgVersion,
     (entry: Registry.ArchiveEntry) => isTemplate(entry)
   );
-  const templateInstallPromises = templatePaths.map(async path => {
+  const templateInstallPromises = templatePaths.map(async (path) => {
     const { file } = Registry.pathParts(path);
     const templateName = file.substr(0, file.lastIndexOf('.'));
     const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
@@ -104,7 +104,7 @@ const installPreBuiltComponentTemplates = async (
     pkgVersion,
     (entry: Registry.ArchiveEntry) => isComponentTemplate(entry)
   );
-  const templateInstallPromises = templatePaths.map(async path => {
+  const templateInstallPromises = templatePaths.map(async (path) => {
     const { file } = Registry.pathParts(path);
     const templateName = file.substr(0, file.lastIndexOf('.'));
     const content = JSON.parse(Registry.getAsset(path).toString('utf8'));

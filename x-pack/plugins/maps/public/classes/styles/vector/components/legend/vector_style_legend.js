@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 
 export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId }) {
-  return styles.map(style => {
+  return styles.map((style) => {
     return (
       <Fragment key={style.getStyleName()}>
         {style.renderLegendDetailRow({

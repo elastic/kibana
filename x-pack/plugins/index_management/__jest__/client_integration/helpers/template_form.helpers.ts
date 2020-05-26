@@ -34,10 +34,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
   };
 
   const clickEditButtonAtField = (index: number) => {
-    testBed
-      .find('editFieldButton')
-      .at(index)
-      .simulate('click');
+    testBed.find('editFieldButton').at(index).simulate('click');
   };
 
   const clickEditFieldUpdateButton = () => {
@@ -45,10 +42,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
   };
 
   const deleteMappingsFieldAt = (index: number) => {
-    testBed
-      .find('removeFieldButton')
-      .at(index)
-      .simulate('click');
+    testBed.find('removeFieldButton').at(index).simulate('click');
 
     testBed.find('confirmModalConfirmButton').simulate('click');
   };
@@ -143,11 +137,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
   const selectSummaryTab = (tab: 'summary' | 'request') => {
     const tabs = ['summary', 'request'];
 
-    testBed
-      .find('summaryTabContent')
-      .find('.euiTab')
-      .at(tabs.indexOf(tab))
-      .simulate('click');
+    testBed.find('summaryTabContent').find('.euiTab').at(tabs.indexOf(tab)).simulate('click');
   };
 
   const addMappingField = async (name: string, type: string) => {

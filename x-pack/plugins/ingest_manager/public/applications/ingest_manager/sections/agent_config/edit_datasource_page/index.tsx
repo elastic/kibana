@@ -105,11 +105,11 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
           // Remove `agent_stream` from all stream info, we assign this after saving
           const newDatasource = {
             ...restOfDatasource,
-            inputs: inputs.map(input => {
+            inputs: inputs.map((input) => {
               const { streams, ...restOfInput } = input;
               return {
                 ...restOfInput,
-                streams: streams.map(stream => {
+                streams: streams.map((stream) => {
                   const { agent_stream, ...restOfStream } = stream;
                   return restOfStream;
                 }),

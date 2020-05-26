@@ -14,7 +14,7 @@ interface Resolvable<T> {
  */
 export function resolvable<T>(): Promise<T> & Resolvable<T> {
   let resolve: (arg: T) => void;
-  return Object.assign(new Promise<T>(r => (resolve = r)), {
+  return Object.assign(new Promise<T>((r) => (resolve = r)), {
     resolve(arg: T) {
       return setTimeout(() => resolve(arg), 0);
     },

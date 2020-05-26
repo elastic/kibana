@@ -43,28 +43,28 @@ export async function deletePolicy(policyName) {
   return response;
 }
 
-export const retryLifecycleForIndex = async indexNames => {
+export const retryLifecycleForIndex = async (indexNames) => {
   const response = await sendPost(`index/retry`, { indexNames });
   // Only track successful actions.
   trackUiMetric('count', UIM_INDEX_RETRY_STEP);
   return response;
 };
 
-export const removeLifecycleForIndex = async indexNames => {
+export const removeLifecycleForIndex = async (indexNames) => {
   const response = await sendPost(`index/remove`, { indexNames });
   // Only track successful actions.
   trackUiMetric('count', UIM_POLICY_DETACH_INDEX);
   return response;
 };
 
-export const addLifecyclePolicyToIndex = async body => {
+export const addLifecyclePolicyToIndex = async (body) => {
   const response = await sendPost(`index/add`, body);
   // Only track successful actions.
   trackUiMetric('count', UIM_POLICY_ATTACH_INDEX);
   return response;
 };
 
-export const addLifecyclePolicyToTemplate = async body => {
+export const addLifecyclePolicyToTemplate = async (body) => {
   const response = await sendPost(`template`, body);
   // Only track successful actions.
   trackUiMetric('count', UIM_POLICY_ATTACH_INDEX_TEMPLATE);

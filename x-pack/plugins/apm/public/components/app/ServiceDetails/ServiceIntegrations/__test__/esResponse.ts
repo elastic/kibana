@@ -11,12 +11,12 @@ export const esResponse = {
     total: 10,
     successful: 10,
     skipped: 0,
-    failed: 0
+    failed: 0,
   },
   hits: {
     total: 23287,
     max_score: 0,
-    hits: []
+    hits: [],
   },
   aggregations: {
     error_groups: {
@@ -39,16 +39,16 @@ export const esResponse = {
                     '@timestamp': '2018-04-25T17:03:02.296Z',
                     error: {
                       log: {
-                        message: 'this is a string'
+                        message: 'this is a string',
                       },
-                      grouping_key: '63925d00b445cdf4b532dd09d185f5c6'
-                    }
+                      grouping_key: '63925d00b445cdf4b532dd09d185f5c6',
+                    },
                   },
-                  sort: [1524675782296]
-                }
-              ]
-            }
-          }
+                  sort: [1524675782296],
+                },
+              ],
+            },
+          },
         },
         {
           key: '89bb1a1f644c7f4bbe8d1781b5cb5fd5',
@@ -68,18 +68,18 @@ export const esResponse = {
                       exception: [
                         {
                           handled: true,
-                          message: 'foo'
-                        }
+                          message: 'foo',
+                        },
                       ],
                       culprit: '<anonymous> (server/coffee.js)',
-                      grouping_key: '89bb1a1f644c7f4bbe8d1781b5cb5fd5'
-                    }
+                      grouping_key: '89bb1a1f644c7f4bbe8d1781b5cb5fd5',
+                    },
                   },
-                  sort: [1524675843504]
-                }
-              ]
-            }
-          }
+                  sort: [1524675843504],
+                },
+              ],
+            },
+          },
         },
         {
           key: '7a17ea60604e3531bd8de58645b8631f',
@@ -99,18 +99,18 @@ export const esResponse = {
                       exception: [
                         {
                           handled: false,
-                          message: 'socket hang up'
-                        }
+                          message: 'socket hang up',
+                        },
                       ],
                       culprit: 'createHangUpError (_http_client.js)',
-                      grouping_key: '7a17ea60604e3531bd8de58645b8631f'
-                    }
+                      grouping_key: '7a17ea60604e3531bd8de58645b8631f',
+                    },
                   },
-                  sort: [1524675854575]
-                }
-              ]
-            }
-          }
+                  sort: [1524675854575],
+                },
+              ],
+            },
+          },
         },
         {
           key: 'b9e1027f29c221763f864f6fa2ad9f5e',
@@ -130,20 +130,20 @@ export const esResponse = {
                       exception: [
                         {
                           handled: false,
-                          message: 'this will not get captured by express'
-                        }
+                          message: 'this will not get captured by express',
+                        },
                       ],
                       culprit: '<anonymous> (server/coffee.js)',
-                      grouping_key: 'b9e1027f29c221763f864f6fa2ad9f5e'
-                    }
+                      grouping_key: 'b9e1027f29c221763f864f6fa2ad9f5e',
+                    },
                   },
-                  sort: [1524675854533]
-                }
-              ]
-            }
-          }
-        }
-      ]
-    }
-  }
+                  sort: [1524675854533],
+                },
+              ],
+            },
+          },
+        },
+      ],
+    },
+  },
 };
