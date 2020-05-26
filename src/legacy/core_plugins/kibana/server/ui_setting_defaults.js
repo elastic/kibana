@@ -32,7 +32,7 @@ export function getUiSettingDefaults() {
   // default fallback in case the locale is not found.
   const numeralLanguageIds = [
     'en',
-    ...numeralLanguages.map(function(numeralLanguage) {
+    ...numeralLanguages.map(function (numeralLanguage) {
       return numeralLanguage.id;
     }),
   ];
@@ -655,7 +655,7 @@ export function getUiSettingDefaults() {
       type: 'select',
       options: numeralLanguageIds,
       optionLabels: Object.fromEntries(
-        numeralLanguages.map(language => [language.id, language.name])
+        numeralLanguages.map((language) => [language.id, language.name])
       ),
       description: i18n.translate('kbn.advancedSettings.format.formattingLocaleText', {
         defaultMessage: `{numeralLanguageLink} locale`,
@@ -807,6 +807,18 @@ export function getUiSettingDefaults() {
       value: false,
       description: i18n.translate('kbn.advancedSettings.darkModeText', {
         defaultMessage: `Enable a dark mode for the Kibana UI. A page refresh is required for the setting to be applied.`,
+      }),
+      requiresPageReload: true,
+    },
+    'theme:version': {
+      name: i18n.translate('kbn.advancedSettings.themeVersionTitle', {
+        defaultMessage: 'Theme version',
+      }),
+      value: 'v7',
+      type: 'select',
+      options: ['v7', 'v8 (beta)'],
+      description: i18n.translate('kbn.advancedSettings.themeVersionText', {
+        defaultMessage: `Switch between the theme used for the current and next version of Kibana. A page refresh is required for the setting to be applied.`,
       }),
       requiresPageReload: true,
     },

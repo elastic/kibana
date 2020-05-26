@@ -198,20 +198,23 @@ export interface SavedObjectsServiceStart {
    * Elasticsearch.
    *
    * @param req - The request to create the scoped repository from.
-   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    *
    * @remarks
    * Prefer using `getScopedClient`. This should only be used when using methods
    * not exposed on {@link SavedObjectsClientContract}
    */
-  createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+  createScopedRepository: (
+    req: KibanaRequest,
+    includedHiddenTypes?: string[]
+  ) => ISavedObjectsRepository;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the internal Kibana user for authenticating with Elasticsearch.
    *
-   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    */
-  createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+  createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
   /**
    * Creates a {@link SavedObjectsSerializer | serializer} that is aware of all registered types.
    */
@@ -246,16 +249,19 @@ export interface SavedObjectsRepositoryFactory {
    * uses the credentials from the passed in request to authenticate with
    * Elasticsearch.
    *
-   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    */
-  createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+  createScopedRepository: (
+    req: KibanaRequest,
+    includedHiddenTypes?: string[]
+  ) => ISavedObjectsRepository;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the internal Kibana user for authenticating with Elasticsearch.
    *
-   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    */
-  createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+  createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
 }
 
 /** @internal */
@@ -304,7 +310,7 @@ export class SavedObjectsService
       setupDeps.legacyPlugins.uiExports,
       setupDeps.legacyPlugins.pluginExtendedConfig
     );
-    legacyTypes.forEach(type => this.typeRegistry.registerType(type));
+    legacyTypes.forEach((type) => this.typeRegistry.registerType(type));
     this.validations = setupDeps.legacyPlugins.uiExports.savedObjectValidations || {};
 
     const savedObjectsConfig = await this.coreContext.configService
@@ -326,10 +332,10 @@ export class SavedObjectsService
 
     return {
       status$: calculateStatus$(
-        this.migrator$.pipe(switchMap(migrator => migrator.getStatus$())),
+        this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
         setupDeps.elasticsearch.status$
       ),
-      setClientFactoryProvider: provider => {
+      setClientFactoryProvider: (provider) => {
         if (this.started) {
           throw new Error('cannot call `setClientFactoryProvider` after service startup.');
         }
@@ -348,7 +354,7 @@ export class SavedObjectsService
           factory,
         });
       },
-      registerType: type => {
+      registerType: (type) => {
         if (this.started) {
           throw new Error('cannot call `registerType` after service startup.');
         }
@@ -409,7 +415,7 @@ export class SavedObjectsService
       });
 
       await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
-        filter(nodes => nodes.isCompatible),
+        filter((nodes) => nodes.isCompatible),
         take(1)
       ).toPromise();
 
@@ -417,26 +423,26 @@ export class SavedObjectsService
       await migrator.runMigrations();
     }
 
-    const createRepository = (callCluster: APICaller, extraTypes: string[] = []) => {
+    const createRepository = (callCluster: APICaller, includedHiddenTypes: string[] = []) => {
       return SavedObjectsRepository.createRepository(
         migrator,
         this.typeRegistry,
         kibanaConfig.index,
         callCluster,
-        extraTypes
+        includedHiddenTypes
       );
     };
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
-      createInternalRepository: (extraTypes?: string[]) =>
-        createRepository(adminClient.callAsInternalUser, extraTypes),
-      createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) =>
-        createRepository(adminClient.asScoped(req).callAsCurrentUser, extraTypes),
+      createInternalRepository: (includedHiddenTypes?: string[]) =>
+        createRepository(adminClient.callAsInternalUser, includedHiddenTypes),
+      createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) =>
+        createRepository(adminClient.asScoped(req).callAsCurrentUser, includedHiddenTypes),
     };
 
     const clientProvider = new SavedObjectsClientProvider({
-      defaultClientFactory({ request }) {
-        const repository = repositoryFactory.createScopedRepository(request);
+      defaultClientFactory({ request, includedHiddenTypes }) {
+        const repository = repositoryFactory.createScopedRepository(request, includedHiddenTypes);
         return new SavedObjectsClient(repository);
       },
       typeRegistry: this.typeRegistry,

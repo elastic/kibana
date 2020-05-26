@@ -34,3 +34,9 @@ export const createBrowserHistoryMock = jest.fn().mockReturnValue(MockHistory);
 jest.doMock('history', () => ({
   createBrowserHistory: createBrowserHistoryMock,
 }));
+
+export const parseAppUrlMock = jest.fn();
+jest.doMock('./utils', () => ({
+  ...jest.requireActual('./utils'),
+  parseAppUrl: parseAppUrlMock,
+}));

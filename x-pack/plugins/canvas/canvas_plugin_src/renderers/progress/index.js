@@ -30,7 +30,7 @@ export const progress = () => ({
       const initialViewBox = shapeSvg
         .getAttribute('viewBox')
         .split(' ')
-        .map(v => parseInt(v, 10));
+        .map((v) => parseInt(v, 10));
       let [minX, minY, width, height] = initialViewBox;
 
       if (shape !== 'horizontalBar') {

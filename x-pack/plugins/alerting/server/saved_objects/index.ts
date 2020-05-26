@@ -14,7 +14,7 @@ export function setupSavedObjects(
 ) {
   savedObjects.registerType({
     name: 'alert',
-    hidden: false,
+    hidden: true,
     namespaceType: 'single',
     mappings: mappings.alert,
   });

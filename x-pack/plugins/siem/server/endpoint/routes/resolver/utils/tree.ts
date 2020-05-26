@@ -121,7 +121,7 @@ export class Tree {
     this.tree.ancestry.nextAncestor = ancestorInfo.nextAncestor;
 
     // the ancestry info holds the lifecycle events for the root of the tree too, so we need to pull that out
-    ancestorInfo.ancestors.forEach(node => {
+    ancestorInfo.ancestors.forEach((node) => {
       if (node.entityID === this.id) {
         this.tree.lifecycle = node.lifecycle;
         return;
@@ -151,7 +151,7 @@ export class Tree {
 
     this.tree.children = children;
 
-    children.childNodes.forEach(child => {
+    children.childNodes.forEach((child) => {
       this.cache.set(child.entityID, child);
     });
   }

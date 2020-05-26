@@ -69,7 +69,7 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
           </div>
         )}
 
-        {items.map(item => (
+        {items.map((item) => (
           <div key={item.title || item.body}>
             <EuiText>
               {item.title && <h6>{item.title}</h6>}

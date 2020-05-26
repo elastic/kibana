@@ -8,8 +8,8 @@ import { sample } from 'lodash';
 export const randomEUIColor = (euiVars: any) => {
   const rgb = sample(
     Object.keys(euiVars)
-      .filter(key => key.startsWith('euiColorVis'))
-      .map(key => (euiVars as any)[key])
+      .filter((key) => key.startsWith('euiColorVis'))
+      .map((key) => (euiVars as any)[key])
   );
 
   const matchedrgb = rgb.match(

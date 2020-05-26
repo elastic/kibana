@@ -44,7 +44,7 @@ export const readTags = async ({
   alertsClient: AlertsClient;
 }): Promise<string[]> => {
   const tags = await readRawTags({ alertsClient });
-  return tags.filter(tag => !tag.startsWith(INTERNAL_IDENTIFIER));
+  return tags.filter((tag) => !tag.startsWith(INTERNAL_IDENTIFIER));
 };
 
 export const readRawTags = async ({

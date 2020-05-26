@@ -18,7 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ciRunUrl } from '../transforms';
+import { ciRunUrl, coveredFilePath, itemizeVcs } from '../transforms';
 
 describe(`Transform fn`, () => {
   describe(`ciRunUrl`, () => {
@@ -29,6 +29,34 @@ describe(`Transform fn`, () => {
     it(`should not include the url if not present in the environment`, () => {
       process.env.CI_RUN_URL = void 0;
       expect(ciRunUrl({ a: 'a' })).not.to.have.property('ciRunUrl');
+    });
+  });
+  describe(`coveredFilePath`, () => {
+    it(`should remove the jenkins workspace path`, () => {
+      const obj = {
+        staticSiteUrl:
+          '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/x-pack/legacy/plugins/reporting/server/browsers/extract/unzip.js',
+        COVERAGE_INGESTION_KIBANA_ROOT:
+          '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana',
+      };
+      expect(coveredFilePath(obj)).to.have.property(
+        'coveredFilePath',
+        'x-pack/legacy/plugins/reporting/server/browsers/extract/unzip.js'
+      );
+    });
+  });
+  describe(`itemizeVcs`, () => {
+    it(`should return a sha url`, () => {
+      const vcsInfo = [
+        'origin/ingest-code-coverage',
+        'f07b34f6206',
+        `Tre' Seymour`,
+        `Lorem :) ipsum Tre' λ dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`,
+      ];
+      expect(itemizeVcs(vcsInfo)({}).vcs).to.have.property(
+        'vcsUrl',
+        `https://github.com/elastic/kibana/commit/${vcsInfo[1]}`
+      );
     });
   });
 });
