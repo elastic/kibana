@@ -9,18 +9,19 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { Dispatch } from 'redux';
-
-import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
+import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
 import { useGetAllTimeline } from '../../containers/timeline/all';
 import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../graphql/types';
-import { State, timelineSelectors } from '../../store';
+import { State } from '../../store';
 import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
+import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import {
   createTimeline as dispatchCreateNewTimeline,
   updateIsLoading as dispatchUpdateIsLoading,
 } from '../../store/timeline/actions';
+
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById, dispatchUpdateTimeline } from './helpers';
 import { OpenTimelineModalBody } from './open_timeline_modal/open_timeline_modal_body';
@@ -51,6 +52,12 @@ interface OwnProps<TCache = object> {
   hideActions?: ActionTimelineToShow[];
   onOpenTimeline?: (timeline: TimelineModel) => void;
 }
+
+/**
+ * CreateTemplateTimelineBtn
+ * Remove the comment here to enable template timeline
+ */
+export const disableTemplate = true;
 
 export type OpenTimelineOwnProps = OwnProps &
   Pick<
@@ -275,7 +282,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
-        tabs={timelineTabs}
+        tabs={!disableTemplate ? timelineTabs : undefined}
         title={title}
         totalSearchResultsCount={totalCount}
       />
@@ -302,7 +309,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
-        tabs={timelineFilters}
+        tabs={!disableTemplate ? timelineFilters : undefined}
         title={title}
         totalSearchResultsCount={totalCount}
       />

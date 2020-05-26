@@ -11,7 +11,7 @@ import { createGlobalStyle } from 'styled-components';
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
-import { TimelineType, TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { TimelineType, TimelineTypeLiteral } from '../../../../common/types/timeline';
 
 const SearchTimelineSuperSelectGlobalStyle = createGlobalStyle`
   .euiPopover__panel.euiPopover__panel-isOpen.timeline-search-super-select-popover__popoverPanel {

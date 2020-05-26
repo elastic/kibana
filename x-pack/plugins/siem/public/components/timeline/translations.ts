@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TimelineTypeLiteral, TimelineType } from '../../../../common/types/timeline';
+import { TimelineTypeLiteral, TimelineType } from '../../../common/types/timeline';
 
 export const DEFAULT_TIMELINE_TITLE = i18n.translate('xpack.siem.timeline.defaultTimelineTitle', {
   defaultMessage: 'None',

@@ -7,14 +7,16 @@
 import ApolloClient from 'apollo-client';
 import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
-
 import { EuiButton } from '@elastic/eui';
+
+import { useKibana } from '../../lib/kibana';
+import { SpyRoute } from '../../utils/route/spy_routes';
+
 import { HeaderPage } from '../../components/header_page';
 import { StatefulOpenTimeline } from '../../components/open_timeline';
 import { WrapperPage } from '../../components/wrapper_page';
-import { SpyRoute } from '../../utils/route/spy_routes';
+
 import * as i18n from './translations';
-import { useKibana } from '../../lib/kibana';
 
 const TimelinesContainer = styled.div`
   width: 100%;

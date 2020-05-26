@@ -5,8 +5,8 @@
  */
 import React from 'react';
 import { shallow, ShallowWrapper, mount } from 'enzyme';
-import { TimelineType } from '../../../../../common/types/timeline';
-import { SortFieldTimeline, Direction } from '../../../../graphql/types';
+import { TimelineType } from '../../../../common/types/timeline';
+import { SortFieldTimeline, Direction } from '../../../graphql/types';
 import { SearchProps } from './';
 
 describe('SelectableTimeline', () => {
@@ -21,7 +21,7 @@ describe('SelectableTimeline', () => {
     };
   });
 
-  jest.doMock('../../../containers/all', () => {
+  jest.doMock('../../../containers/timeline/all', () => {
     return {
       useGetAllTimeline: jest.fn(() => ({
         fetchAllTimeline: mockFetchAllTimeline,

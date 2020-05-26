@@ -9,10 +9,13 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
+import { TimelineType } from '../../../../common/types/timeline';
+import { timelineActions } from '../../../store/timeline';
+
 import { OpenTimelineResult } from '../../open_timeline/types';
+
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
-import { timelineActions } from '../../../store/timeline';
 
 interface InsertTimelinePopoverProps {
   isDisabled: boolean;
@@ -107,6 +110,7 @@ export const InsertTimelinePopoverComponent: React.FC<Props> = ({
         getSelectableOptions={handleGetSelectableOptions}
         onClosePopover={handleClosePopover}
         onTimelineChange={onTimelineChange}
+        timelineType={TimelineType.default}
       />
     </EuiPopover>
   );
