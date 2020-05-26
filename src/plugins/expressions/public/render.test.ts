@@ -128,8 +128,8 @@ describe('ExpressionRenderHandler', () => {
     it('sends a next observable once rendering is complete', () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
       expect.assertions(1);
-      return new Promise(resolve => {
-        expressionRenderHandler.render$.subscribe(renderCount => {
+      return new Promise((resolve) => {
+        expressionRenderHandler.render$.subscribe((renderCount) => {
           expect(renderCount).toBe(1);
           resolve();
         });

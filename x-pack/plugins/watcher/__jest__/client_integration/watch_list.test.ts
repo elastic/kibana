@@ -158,14 +158,10 @@ describe('<WatchList />', () => {
                 .getAttribute('disabled')
             ).toEqual('');
             expect(
-              findTestSubject(lastColumn, 'editWatchButton')
-                .getDOMNode()
-                .getAttribute('disabled')
+              findTestSubject(lastColumn, 'editWatchButton').getDOMNode().getAttribute('disabled')
             ).toEqual('');
             expect(
-              findTestSubject(lastColumn, 'deleteWatchButton')
-                .getDOMNode()
-                .getAttribute('disabled')
+              findTestSubject(lastColumn, 'deleteWatchButton').getDOMNode().getAttribute('disabled')
             ).toEqual('');
           });
         });

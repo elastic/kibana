@@ -66,7 +66,7 @@ beforeEach(async () => {
   }
 });
 
-test('Updates the embeddable title when given', async done => {
+test('Updates the embeddable title when given', async (done) => {
   const getUserData = () => Promise.resolve({ title: 'What is up?' });
   const customizePanelAction = new CustomizePanelTitleAction(getUserData);
   expect(embeddable.getInput().title).toBeUndefined();

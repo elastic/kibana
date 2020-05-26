@@ -210,7 +210,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
           render: ({ snapshot, repository }: SnapshotDetails) => {
             return (
               <SnapshotDeleteProvider>
-                {deleteSnapshotPrompt => {
+                {(deleteSnapshotPrompt) => {
                   const isDeleteDisabled = Boolean(lastSuccessfulManagedSnapshot)
                     ? snapshot === lastSuccessfulManagedSnapshot!.snapshot
                     : false;
@@ -330,9 +330,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
           );
         }}
       </SnapshotDeleteProvider>
-    ) : (
-      undefined
-    ),
+    ) : undefined,
     toolsRight: (
       <EuiButton
         color="secondary"
@@ -358,7 +356,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
           defaultMessage: 'Repository',
         }),
         multiSelect: false,
-        options: repositories.map(repository => ({
+        options: repositories.map((repository) => ({
           value: repository,
           view: repository,
         })),

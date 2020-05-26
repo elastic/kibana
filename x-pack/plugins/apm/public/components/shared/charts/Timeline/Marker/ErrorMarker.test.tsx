@@ -21,9 +21,9 @@ describe('ErrorMarker', () => {
       trace: { id: '123' },
       transaction: { id: '456' },
       error: { grouping_key: '123' },
-      service: { name: 'bar' }
+      service: { name: 'bar' },
     },
-    serviceColor: '#fff'
+    serviceColor: '#fff',
   } as ErrorMark;
 
   function openPopover(errorMark: ErrorMark) {
@@ -48,7 +48,7 @@ describe('ErrorMarker', () => {
     const { transaction, ...withoutTransaction } = mark.error;
     const newMark = {
       ...mark,
-      error: withoutTransaction
+      error: withoutTransaction,
     } as ErrorMark;
     const component = openPopover(newMark);
     const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
@@ -58,7 +58,7 @@ describe('ErrorMarker', () => {
     const { trace, ...withoutTrace } = mark.error;
     const newMark = {
       ...mark,
-      error: withoutTrace
+      error: withoutTrace,
     } as ErrorMark;
     const component = openPopover(newMark);
     const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
@@ -70,7 +70,7 @@ describe('ErrorMarker', () => {
     const { trace, transaction, ...withoutTraceAndTransaction } = mark.error;
     const newMark = {
       ...mark,
-      error: withoutTraceAndTransaction
+      error: withoutTraceAndTransaction,
     } as ErrorMark;
     const component = openPopover(newMark);
     const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;

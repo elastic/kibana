@@ -126,7 +126,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
       <EuiComboBox
         async
         isLoading={isLoading}
-        inputRef={input => {
+        inputRef={(input) => {
           if (input) {
             this.inputRef = input;
           }

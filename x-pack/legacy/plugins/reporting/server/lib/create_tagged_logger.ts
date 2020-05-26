@@ -11,13 +11,13 @@ export function createTaggedLogger(logger: LevelLogger, tags: string[]) {
     const allTags = [...tags, ...additionalTags];
 
     if (allTags.includes('info')) {
-      const newTags = allTags.filter(t => t !== 'info'); // Ensure 'info' is not included twice
+      const newTags = allTags.filter((t) => t !== 'info'); // Ensure 'info' is not included twice
       logger.info(msg, newTags);
     } else if (allTags.includes('debug')) {
-      const newTags = allTags.filter(t => t !== 'debug');
+      const newTags = allTags.filter((t) => t !== 'debug');
       logger.debug(msg, newTags);
     } else if (allTags.includes('warn') || allTags.includes('warning')) {
-      const newTags = allTags.filter(t => t !== 'warn' && t !== 'warning');
+      const newTags = allTags.filter((t) => t !== 'warn' && t !== 'warning');
       logger.warn(msg, newTags);
     } else {
       logger.error(msg, allTags);

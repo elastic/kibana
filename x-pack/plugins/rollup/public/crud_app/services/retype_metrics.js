@@ -14,9 +14,11 @@
  * @returns { { : string, type: string, types: string[] }[] }
  */
 export function retypeMetrics({ metrics, typeMaps }) {
-  return metrics.map(metric => {
+  return metrics.map((metric) => {
     const { name: metricName } = metric;
-    const { type } = typeMaps.find(type => type.fields.some(field => field.name === metricName));
+    const { type } = typeMaps.find((type) =>
+      type.fields.some((field) => field.name === metricName)
+    );
     return {
       ...metric,
       type,

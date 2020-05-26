@@ -190,7 +190,7 @@
     "@elastic/apm-rum-react": "^1.1.1",
     "@elastic/datemath": "5.0.3",
     "@elastic/ems-client": "7.8.0",
-    "@elastic/eui": "22.3.1",
+    "@elastic/eui": "23.3.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/maki": "6.3.0",
     "@elastic/node-crypto": "1.1.1",

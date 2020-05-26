@@ -34,9 +34,9 @@ const units = Object.keys(unitsMap).sort((a, b) => unitsMap[b].weight - unitsMap
 const unitsDesc = [...units];
 const unitsAsc = [...units].reverse();
 
-const isDate = d => Object.prototype.toString.call(d) === '[object Date]';
+const isDate = (d) => Object.prototype.toString.call(d) === '[object Date]';
 
-const isValidDate = d => isDate(d) && !isNaN(d.valueOf());
+const isValidDate = (d) => isDate(d) && !isNaN(d.valueOf());
 
 /*
  * This is a simplified version of elasticsearch's date parser.

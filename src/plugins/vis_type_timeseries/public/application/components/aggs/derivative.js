@@ -36,7 +36,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const DerivativeAgg = props => {
+export const DerivativeAgg = (props) => {
   const { siblings } = props;
 
   const defaults = { unit: '' };

@@ -43,14 +43,14 @@ export const Wizard: FC<Props> = ({
   firstWizardStep = WIZARD_STEPS.TIME_RANGE,
 }) => {
   const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number, action: any) => number>(
-    s => s + 1,
+    (s) => s + 1,
     0
   );
   const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
 
   const [jobValidatorUpdated, setJobValidatorUpdate] = useReducer<
     (s: number, action: any) => number
-  >(s => s + 1, 0);
+  >((s) => s + 1, 0);
 
   const jobCreatorContext: JobCreatorContextValue = {
     jobCreatorUpdated,

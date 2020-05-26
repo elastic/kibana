@@ -12,7 +12,7 @@ import { gutterTimeline } from '../../lib/helpers';
 import { AppGlobalStyle } from '../page/index';
 
 const Wrapper = styled.div<{ noPadding?: boolean }>`
-  padding: ${props =>
+  padding: ${(props) =>
     props.noPadding
       ? '0'
       : `${props.theme.eui.paddingSizes.l} ${gutterTimeline} ${props.theme.eui.paddingSizes.l}

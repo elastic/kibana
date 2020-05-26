@@ -102,7 +102,7 @@ export class ActionsClient {
    */
   public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
     if (
-      this.preconfiguredActions.find(preconfiguredAction => preconfiguredAction.id === id) !==
+      this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
       undefined
     ) {
       throw new PreconfiguredActionDisabledModificationError(
@@ -145,7 +145,7 @@ export class ActionsClient {
    */
   public async get({ id }: { id: string }): Promise<ActionResult> {
     const preconfiguredActionsList = this.preconfiguredActions.find(
-      preconfiguredAction => preconfiguredAction.id === id
+      (preconfiguredAction) => preconfiguredAction.id === id
     );
     if (preconfiguredActionsList !== undefined) {
       return {
@@ -179,7 +179,7 @@ export class ActionsClient {
 
     const mergedResult = [
       ...savedObjectsActions,
-      ...this.preconfiguredActions.map(preconfiguredAction => ({
+      ...this.preconfiguredActions.map((preconfiguredAction) => ({
         id: preconfiguredAction.id,
         actionTypeId: preconfiguredAction.actionTypeId,
         name: preconfiguredAction.name,
@@ -198,7 +198,7 @@ export class ActionsClient {
    */
   public async delete({ id }: { id: string }) {
     if (
-      this.preconfiguredActions.find(preconfiguredAction => preconfiguredAction.id === id) !==
+      this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
       undefined
     ) {
       throw new PreconfiguredActionDisabledModificationError(
@@ -272,7 +272,7 @@ async function injectExtraFindData(
       },
     },
   });
-  return actionResults.map(actionResult => ({
+  return actionResults.map((actionResult) => ({
     ...actionResult,
     referencedByCount: aggregationResult.aggregations[actionResult.id].doc_count,
   }));

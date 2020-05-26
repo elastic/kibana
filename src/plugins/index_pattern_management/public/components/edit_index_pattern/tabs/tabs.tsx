@@ -31,9 +31,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '../../../../../kibana_utils/public';
-import { IndexPatternManagementStart } from '../../../../../index_pattern_management/public';
-import { IndexPattern, IndexPatternField } from '../../../../../data/public';
-import { META_FIELDS_SETTING } from '../../../../../data/common';
+import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
+import { useKibana } from '../../../../../../plugins/kibana_react/public';
+import { IndexPatternManagmentContext } from '../../../types';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
 import { SourceFiltersTable } from '../source_filters_table';
@@ -43,12 +43,7 @@ import { getTabs, getPath, convertToEuiSelectOption } from './utils';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   indexPattern: IndexPattern;
-  config: Record<string, any>;
   fields: IndexPatternField[];
-  services: {
-    indexPatternManagement: IndexPatternManagementStart;
-    painlessDocLink: string;
-  };
 }
 
 const searchAriaLabel = i18n.translate(
@@ -72,7 +67,10 @@ const filterPlaceholder = i18n.translate(
   }
 );
 
-export function Tabs({ config, indexPattern, fields, services, history, location }: TabsProps) {
+export function Tabs({ indexPattern, fields, history, location }: TabsProps) {
+  const { uiSettings, indexPatternManagementStart, docLinks } = useKibana<
+    IndexPatternManagmentContext
+  >().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
   const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string>('');
@@ -85,7 +83,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
     const tempScriptedFieldLanguages: string[] = [];
-    indexPattern.fields.forEach(field => {
+    indexPattern.fields.forEach((field) => {
       if (field.scripted) {
         if (field.lang) {
           tempScriptedFieldLanguages.push(field.lang);
@@ -106,8 +104,8 @@ export function Tabs({ config, indexPattern, fields, services, history, location
   }, [indexPattern, indexPattern.fields, refreshFilters]);
 
   const fieldWildcardMatcherDecorated = useCallback(
-    (filters: string[]) => fieldWildcardMatcher(filters, config.get(META_FIELDS_SETTING)),
-    [config]
+    (filters: string[]) => fieldWildcardMatcher(filters, uiSettings.get('metaFields')),
+    [uiSettings]
   );
 
   const getFilterSection = useCallback(
@@ -118,7 +116,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
             <EuiFieldSearch
               placeholder={filterPlaceholder}
               value={fieldFilter}
-              onChange={e => setFieldFilter(e.target.value)}
+              onChange={(e) => setFieldFilter(e.target.value)}
               data-test-subj="indexPatternFieldFilter"
               aria-label={searchAriaLabel}
             />
@@ -128,7 +126,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
               <EuiSelect
                 options={indexedFieldTypes}
                 value={indexedFieldTypeFilter}
-                onChange={e => setIndexedFieldTypeFilter(e.target.value)}
+                onChange={(e) => setIndexedFieldTypeFilter(e.target.value)}
                 data-test-subj="indexedFieldTypeFilterDropdown"
                 aria-label={filterAriaLabel}
               />
@@ -139,7 +137,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
               <EuiSelect
                 options={scriptedFieldLanguages}
                 value={scriptedFieldLanguageFilter}
-                onChange={e => setScriptedFieldLanguageFilter(e.target.value)}
+                onChange={(e) => setScriptedFieldLanguageFilter(e.target.value)}
                 data-test-subj="scriptedFieldLanguageFilterDropdown"
               />
             </EuiFlexItem>
@@ -175,7 +173,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
                   redirectToRoute: (field: IndexPatternField) => {
                     history.push(getPath(field));
                   },
-                  getFieldInfo: services.indexPatternManagement.list.getFieldInfo,
+                  getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
                 }}
               />
             </Fragment>
@@ -196,7 +194,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
                   },
                 }}
                 onRemoveField={refreshFilters}
-                painlessDocLink={services.painlessDocLink}
+                painlessDocLink={docLinks.links.scriptedFields.painless}
               />
             </Fragment>
           );
@@ -217,23 +215,23 @@ export function Tabs({ config, indexPattern, fields, services, history, location
       }
     },
     [
+      docLinks.links.scriptedFields.painless,
       fieldFilter,
       fieldWildcardMatcherDecorated,
       fields,
       getFilterSection,
       history,
       indexPattern,
+      indexPatternManagementStart.list.getFieldInfo,
       indexedFieldTypeFilter,
       refreshFilters,
       scriptedFieldLanguageFilter,
-      services.indexPatternManagement.list.getFieldInfo,
-      services.painlessDocLink,
     ]
   );
 
   const euiTabs: EuiTabbedContentTab[] = useMemo(
     () =>
-      getTabs(indexPattern, fieldFilter, services.indexPatternManagement.list).map(
+      getTabs(indexPattern, fieldFilter, indexPatternManagementStart.list).map(
         (tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
           return {
             ...tab,
@@ -241,7 +239,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
           };
         }
       ),
-    [fieldFilter, getContent, indexPattern, services.indexPatternManagement.list]
+    [fieldFilter, getContent, indexPattern, indexPatternManagementStart.list]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);
@@ -253,7 +251,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
       setCurrentTab,
       getCurrentTab,
     } = createEditIndexPatternPageStateContainer({
-      useHashedUrl: config.get('state:storeInSessionStorage'),
+      useHashedUrl: uiSettings.get('state:storeInSessionStorage'),
       defaultTab: TAB_INDEXED_FIELDS,
     });
 
@@ -267,13 +265,13 @@ export function Tabs({ config, indexPattern, fields, services, history, location
     return () => {
       stopSyncingState();
     };
-  }, [config]);
+  }, [uiSettings]);
 
   return (
     <EuiTabbedContent
       tabs={euiTabs}
-      selectedTab={euiTabs.find(tab => tab.id === selectedTabId)}
-      onTabClick={tab => {
+      selectedTab={euiTabs.find((tab) => tab.id === selectedTabId)}
+      onTabClick={(tab) => {
         setSelectedTabId(tab.id);
         syncingStateFunc.setCurrentTab(tab.id);
       }}

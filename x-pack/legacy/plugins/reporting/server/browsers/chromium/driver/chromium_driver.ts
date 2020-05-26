@@ -178,7 +178,7 @@ export class HeadlessChromiumDriver {
           `Timed out waiting for the items selected to equal ${toEqual}. Found: ${result}. Context: ${context.context}`
         );
       }
-      await new Promise(r => setTimeout(r, WAIT_FOR_DELAY_MS));
+      await new Promise((r) => setTimeout(r, WAIT_FOR_DELAY_MS));
     }
   }
 

@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
@@ -14,7 +14,7 @@ export default function({ getPageObjects, getService }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens']);
 
-  describe('empty dashboard', function() {
+  describe('empty dashboard', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('lens/basic');
