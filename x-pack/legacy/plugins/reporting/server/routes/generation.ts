@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import boom from 'boom';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { IRouter, IBasePath, kibanaResponseFactory } from 'src/core/server';
-import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { LevelLogger as Logger } from '../lib';
-import { ReportingSetupDeps, RequestFacade } from '../types';
+import { ReportingSetupDeps } from '../types';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
+import { HandlerFunction } from './types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 
@@ -32,23 +31,15 @@ export function registerJobGenerationRoutes(
   /*
    * Generates enqueued job details to use in responses
    */
-  async function handler(
-    exportTypeId: string,
-    jobParams: object,
-    r: RequestFacade,
-    h: typeof kibanaResponseFactory
-  ) {
+  const handler: HandlerFunction = async (username, exportTypeId, jobParams, r, h) => {
     const licenseInfo = reporting.getLicenseInfo();
     const licenseResults = licenseInfo[exportTypeId];
 
     if (!licenseResults.enableLinks) {
-      throw boom.forbidden(licenseResults.message);
+      return h.forbidden({ body: licenseResults.message });
     }
 
-    const getUser = authorizedUserPreRoutingFactory(config, plugins, logger);
-    const { username } = getUser(r.getRawRequest());
     const { headers } = r;
-
     const enqueueJob = await reporting.getEnqueueJob();
     const job = await enqueueJob(exportTypeId, jobParams, username, headers, r);
 
@@ -64,22 +55,33 @@ export function registerJobGenerationRoutes(
         job: jobJson,
       },
     });
-  }
+  };
 
-  function handleError(exportTypeId: string, err: Error) {
+  function handleError(exportTypeId: string, err: Error, res: typeof kibanaResponseFactory) {
     if (err instanceof esErrors['401']) {
-      throw boom.unauthorized(`Sorry, you aren't authenticated`);
+      return res.unauthorized({
+        body: `Sorry, you aren't authenticated`,
+      });
     }
+
     if (err instanceof esErrors['403']) {
-      throw boom.forbidden(`Sorry, you are not authorized to create ${exportTypeId} reports`);
+      return res.forbidden({
+        body: `Sorry, you are not authorized to create ${exportTypeId} reports`,
+      });
     }
+
     if (err instanceof esErrors['404']) {
-      throw boom.boomify(err, { statusCode: 404 });
+      return res.notFound({
+        body: err.message,
+      });
     }
-    throw err;
+
+    return res.badRequest({
+      body: err.message,
+    });
   }
 
-  registerGenerateFromJobParams(reporting, plugins, router, basePath, handler, handleError, logger);
+  registerGenerateFromJobParams(reporting, plugins, router, basePath, handler, handleError);
 
   // Register beta panel-action download-related API's
   if (config.get('csv', 'enablePanelActionDownload')) {

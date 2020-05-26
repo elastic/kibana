@@ -5,10 +5,9 @@
  */
 
 import Boom from 'boom';
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest, RequestHandler, RouteMethod } from 'src/core/server';
 import { AuthenticatedUser } from '../../../../../../plugins/security/server';
 import { ReportingConfig } from '../../../server';
-import { LevelLogger as Logger } from '../../../server/lib';
 import { getUserFactory } from '../../lib/get_user';
 import { ReportingSetupDeps } from '../../types';
 
@@ -18,26 +17,36 @@ export type PreRoutingFunction = (
   request: KibanaRequest
 ) => Promise<Boom<null> | AuthenticatedUser | null>;
 
+export type RequestHandlerUser = RequestHandler extends (...a: infer U) => infer R
+  ? (user: AuthenticatedUser, ...a: U) => R
+  : never;
+
 export const authorizedUserPreRoutingFactory = function authorizedUserPreRoutingFn(
   config: ReportingConfig,
-  plugins: ReportingSetupDeps,
-  logger: Logger
+  plugins: ReportingSetupDeps
 ) {
   const getUser = getUserFactory(plugins.security);
 
-  return function authorizedUserPreRouting(request: KibanaRequest) {
-    const user = getUser(request);
+  return <P, Q, B>(handler: RequestHandlerUser): RequestHandler<P, Q, B, RouteMethod> => {
+    return (context, req, res) => {
+      const user = getUser(req);
 
-    if (!user) {
-      throw Boom.unauthorized(`Sorry, you aren't authenticated`);
-    }
-    const allowedRoles = config.get('roles', 'allow') || [];
-    const authorizedRoles = [superuserRole, ...allowedRoles];
+      if (!user) {
+        return res.unauthorized({
+          body: `Sorry, you aren't authenticated`,
+        });
+      }
 
-    if (!user.roles.find(role => authorizedRoles.includes(role))) {
-      throw Boom.forbidden(`Sorry, you don't have access to Reporting`);
-    }
+      const allowedRoles = config.get('roles', 'allow') || [];
+      const authorizedRoles = [superuserRole, ...allowedRoles];
 
-    return user;
+      if (!user.roles.find((role) => authorizedRoles.includes(role))) {
+        return res.forbidden({
+          body: `Sorry, you don't have access to Reporting`,
+        });
+      }
+
+      return handler(user, context, req, res);
+    };
   };
 };

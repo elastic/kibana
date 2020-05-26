@@ -9,14 +9,12 @@ import { IRouter, IBasePath } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { LevelLogger as Logger } from '../lib';
 import { jobsQueryFactory } from '../lib/jobs_query';
 import { ReportingSetupDeps } from '../types';
 import {
   deleteJobResponseHandlerFactory,
   downloadJobResponseHandlerFactory,
 } from './lib/job_response_handler';
-import { makeRequestFacade } from './lib/make_request_facade';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 
 interface ListQuery {
@@ -29,12 +27,10 @@ const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 export async function registerJobInfoRoutes(
   reporting: ReportingCore,
   plugins: ReportingSetupDeps,
-  router: IRouter,
-  basePath: IBasePath['get'],
-  logger: Logger
+  router: IRouter
 ) {
   const config = reporting.getConfig();
-  const getUser = authorizedUserPreRoutingFactory(config, plugins, logger);
+  const userHandler = authorizedUserPreRoutingFactory(config, plugins);
   const { elasticsearch } = plugins;
   const jobsQuery = jobsQueryFactory(config, elasticsearch);
 
@@ -44,13 +40,16 @@ export async function registerJobInfoRoutes(
       path: `${MAIN_ENTRY}/list`,
       validate: false,
     },
-    router.handleLegacyErrors(async (context, req, res) => {
-      const request = makeRequestFacade(context, req, basePath);
+    userHandler(async (user, context, req, res) => {
       const {
         management: { jobTypes = [] },
       } = reporting.getLicenseInfo();
-      const { username } = getUser(request.getRawRequest());
-      const { page: queryPage, size: querySize, ids: queryIds } = request.query as ListQuery;
+      const { username } = user;
+      const {
+        page: queryPage = '0',
+        size: querySize = '10',
+        ids: queryIds = null,
+      } = req.query as ListQuery;
       const page = parseInt(queryPage, 10) || 0;
       const size = Math.min(100, parseInt(querySize, 10) || 10);
       const jobIds = queryIds ? queryIds.split(',') : null;
@@ -71,9 +70,8 @@ export async function registerJobInfoRoutes(
       path: `${MAIN_ENTRY}/count`,
       validate: false,
     },
-    router.handleLegacyErrors(async (context, req, res) => {
-      const request = makeRequestFacade(context, req, basePath);
-      const { username } = getUser(request.getRawRequest());
+    userHandler(async (user, context, req, res) => {
+      const { username } = user;
       const {
         management: { jobTypes = [] },
       } = reporting.getLicenseInfo();
@@ -99,10 +97,9 @@ export async function registerJobInfoRoutes(
         }),
       },
     },
-    router.handleLegacyErrors(async (context, req, res) => {
-      const request = makeRequestFacade(context, req, basePath);
-      const { username } = getUser(request.getRawRequest());
-      const { docId } = req.params;
+    userHandler(async (user, context, req, res) => {
+      const { username } = user;
+      const { docId } = req.params as { docId: string };
       const {
         management: { jobTypes = [] },
       } = reporting.getLicenseInfo();
@@ -140,10 +137,9 @@ export async function registerJobInfoRoutes(
         }),
       },
     },
-    router.handleLegacyErrors(async (context, req, res) => {
-      const request = makeRequestFacade(context, req, basePath);
-      const { username } = getUser(request.getRawRequest());
-      const { docId } = req.params;
+    userHandler(async (user, context, req, res) => {
+      const { username } = user;
+      const { docId } = req.params as { docId: string };
       const {
         management: { jobTypes = [] },
       } = reporting.getLicenseInfo();
@@ -193,9 +189,9 @@ export async function registerJobInfoRoutes(
         }),
       },
     },
-    router.handleLegacyErrors(async (context, req, res) => {
-      const { username } = getUser(req);
-      const { docId } = req.params;
+    userHandler(async (user, context, req, res) => {
+      const { username } = user;
+      const { docId } = req.params as { docId: string };
       const {
         management: { jobTypes = [] },
       } = reporting.getLicenseInfo();
@@ -225,9 +221,9 @@ export async function registerJobInfoRoutes(
         }),
       },
     },
-    router.handleLegacyErrors(async (context, req, res) => {
-      const { username } = getUser(req);
-      const { docId } = req.params;
+    userHandler(async (user, context, req, res) => {
+      const { username } = user;
+      const { docId } = req.params as { docId: string };
       const {
         management: { jobTypes = [] },
       } = reporting.getLicenseInfo();

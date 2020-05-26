@@ -8,13 +8,18 @@ import { kibanaResponseFactory } from 'src/core/server';
 import { JobDocPayload, RequestFacade } from '../types';
 
 export type HandlerFunction = (
+  username: string,
   exportType: string,
   jobParams: object,
   request: RequestFacade,
   h: typeof kibanaResponseFactory
 ) => any;
 
-export type HandlerErrorFunction = (exportType: string, err: Error) => any;
+export type HandlerErrorFunction = (
+  exportType: string,
+  err: Error,
+  res: typeof kibanaResponseFactory
+) => any;
 
 export interface QueuedJobPayload<JobParamsType> {
   error?: boolean;

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SecurityPluginSetup } from '../../../../../plugins/security/server';
 import { KibanaRequest } from '../../../../../../src/core/server';
-import { ReportingSetupDeps } from '../types';
 
-export function getUserFactory(security: ReportingSetupDeps['security']) {
+export function getUserFactory(security?: SecurityPluginSetup) {
   return (request: KibanaRequest) => {
     return security?.authc.getCurrentUser(request) ?? null;
   };
