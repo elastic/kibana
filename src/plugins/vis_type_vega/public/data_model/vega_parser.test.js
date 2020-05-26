@@ -82,7 +82,7 @@ describe('VegaParser._resolveEsQueries', () => {
     return async () => {
       const vp = new VegaParser(spec, { search: async () => [[42]] }, 0, 0, {
         getFileLayers: async () => [{ name: 'file1', url: 'url1' }],
-        getUrlForRegionLayer: async layer => {
+        getUrlForRegionLayer: async (layer) => {
           return layer.url;
         },
       });

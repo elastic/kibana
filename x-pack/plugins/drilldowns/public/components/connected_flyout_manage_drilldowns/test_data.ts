@@ -48,8 +48,8 @@ class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> 
     const state = this.state.get();
     let events = state.events;
 
-    eventIds.forEach(id => {
-      events = events.filter(e => e.eventId !== id);
+    eventIds.forEach((id) => {
+      events = events.filter((e) => e.eventId !== id);
     });
 
     this.state.set({
@@ -65,7 +65,7 @@ class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> 
   ) {
     const state = this.state.get();
     const events = state.events;
-    const idx = events.findIndex(e => e.eventId === eventId);
+    const idx = events.findIndex((e) => e.eventId === eventId);
     const event = {
       eventId,
       action,

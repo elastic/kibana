@@ -7,15 +7,15 @@
 import * as t from 'io-ts';
 
 export const formatErrors = (errors: t.Errors): string[] => {
-  return errors.map(error => {
+  return errors.map((error) => {
     if (error.message != null) {
       return error.message;
     } else {
       const mappedContext = error.context
         .filter(
-          entry => entry.key != null && !Number.isInteger(+entry.key) && entry.key.trim() !== ''
+          (entry) => entry.key != null && !Number.isInteger(+entry.key) && entry.key.trim() !== ''
         )
-        .map(entry => entry.key)
+        .map((entry) => entry.key)
         .join(',');
       return `Invalid value "${error.value}" supplied to "${mappedContext}"`;
     }

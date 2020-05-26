@@ -115,8 +115,8 @@ export class LegacyPlatformService {
     // Initialize legacy sub urls
     core.chrome.navLinks
       .getAll()
-      .filter(link => link.legacy)
-      .forEach(navLink => {
+      .filter((link) => link.legacy)
+      .forEach((navLink) => {
         const lastSubUrl = lastSubUrlStorage.getItem(`lastSubUrl:${navLink.baseUrl}`);
         core.chrome.navLinks.update(navLink.id, {
           url: lastSubUrl || navLink.url || navLink.baseUrl,
@@ -135,6 +135,7 @@ export class LegacyPlatformService {
         capabilities: core.application.capabilities,
         getUrlForApp: core.application.getUrlForApp,
         navigateToApp: core.application.navigateToApp,
+        navigateToUrl: core.application.navigateToUrl,
         registerMountContext: notSupported(`core.application.registerMountContext()`),
       },
     };

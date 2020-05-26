@@ -8,10 +8,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/machine_learning/security_common';
-
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-};
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/machine_learning/common';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -45,19 +42,19 @@ export default ({ getService }: FtrProviderContext) => {
     const { body } = await supertest
       .get(`/api/ml/modules/recognize/${indexPattern}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_HEADERS)
+      .set(COMMON_REQUEST_HEADERS)
       .expect(rspCode);
 
     return body;
   }
 
-  describe('module recognizer', function() {
+  describe('module recognizer', function () {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
     for (const testData of testDataList) {
-      describe('lists matching modules', function() {
+      describe('lists matching modules', function () {
         before(async () => {
           if (testData.hasOwnProperty('sourceDataArchive')) {
             await esArchiver.loadIfNeeded(testData.sourceDataArchive!);

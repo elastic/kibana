@@ -99,10 +99,10 @@ export class Root {
     const update$ = configService.getConfig$().pipe(
       // always read the logging config when the underlying config object is re-read
       switchMap(() => configService.atPath<LoggingConfigType>('logging')),
-      map(config => this.loggingService.upgrade(config)),
+      map((config) => this.loggingService.upgrade(config)),
       // This specifically console.logs because we were not able to configure the logger.
       // eslint-disable-next-line no-console
-      tap({ error: err => console.error('Configuring logger failed:', err) }),
+      tap({ error: (err) => console.error('Configuring logger failed:', err) }),
       publishReplay(1)
     ) as ConnectableObservable<void>;
 
@@ -112,7 +112,7 @@ export class Root {
 
     // Send subsequent update failures to this.shutdown(), stopped via loggingConfigSubscription.
     this.loggingConfigSubscription = update$.subscribe({
-      error: err => this.shutdown(err),
+      error: (err) => this.shutdown(err),
     });
 
     // Add subscription we got from `connect` so that we can dispose both of them

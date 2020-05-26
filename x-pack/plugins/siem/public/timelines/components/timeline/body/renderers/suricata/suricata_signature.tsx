@@ -45,7 +45,7 @@ LinkFlexItem.displayName = 'LinkFlexItem';
 
 export const Tokens = React.memo<{ tokens: string[] }>(({ tokens }) => (
   <>
-    {tokens.map(token => (
+    {tokens.map((token) => (
       <TokensFlexItem key={token} grow={false}>
         <EuiBadge iconType="tag" color="hollow" title="">
           {token}
@@ -120,10 +120,7 @@ export const SuricataSignature = React.memo<{
         >
           <div>
             <GoogleLink link={signature}>
-              {signature
-                .split(' ')
-                .splice(tokens.length)
-                .join(' ')}
+              {signature.split(' ').splice(tokens.length).join(' ')}
             </GoogleLink>
             <ExternalLinkIcon />
           </div>

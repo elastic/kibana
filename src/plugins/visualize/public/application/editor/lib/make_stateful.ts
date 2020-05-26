@@ -32,7 +32,7 @@ export function makeStateful(
   const persistedState = new PersistedState();
 
   // update the appState when the stateful instance changes
-  const updateOnChange = function() {
+  const updateOnChange = function () {
     stateContainer.transitions.set(prop, persistedState.getChanges());
   };
 
@@ -43,7 +43,7 @@ export function makeStateful(
   const unsubscribePersisted = () => handlerOnChange('off');
 
   // update the stateful object when the app state changes
-  const persistOnChange = function(state: VisualizeAppState) {
+  const persistOnChange = function (state: VisualizeAppState) {
     if (state[prop]) {
       persistedState.set(state[prop]);
     }

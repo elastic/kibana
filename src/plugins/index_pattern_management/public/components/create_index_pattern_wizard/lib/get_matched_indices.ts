@@ -41,7 +41,7 @@ function filterSystemIndices(indices: MatchedIndex[], isIncludingSystemIndices: 
   const acceptableIndices = isIncludingSystemIndices
     ? indices
     : // All system indices begin with a period.
-      indices.filter(index => !isSystemIndex(index.name));
+      indices.filter((index) => !isSystemIndex(index.name));
 
   return acceptableIndices.slice(0, MAX_NUMBER_OF_MATCHING_INDICES);
 }

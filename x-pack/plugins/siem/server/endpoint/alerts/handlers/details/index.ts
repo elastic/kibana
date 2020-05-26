@@ -12,7 +12,7 @@ import { AlertDetailsPagination } from './lib/pagination';
 import { getHostData } from '../../../routes/metadata';
 import { AlertId, AlertIdError } from '../lib';
 
-export const alertDetailsHandlerWrapper = function(
+export const alertDetailsHandlerWrapper = function (
   endpointAppContext: EndpointAppContext
 ): RequestHandler<AlertDetailsRequestParams, unknown, unknown> {
   const alertDetailsHandler: RequestHandler<AlertDetailsRequestParams, unknown, unknown> = async (

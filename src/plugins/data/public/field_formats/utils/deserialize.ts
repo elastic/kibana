@@ -60,7 +60,7 @@ const getFieldFormat = (
   return new DefaultFieldFormat();
 };
 
-export const deserializeFieldFormat: FormatFactory = function(
+export const deserializeFieldFormat: FormatFactory = function (
   this: DataPublicPluginStart['fieldFormats'],
   mapping?: SerializedFieldFormat
 ) {

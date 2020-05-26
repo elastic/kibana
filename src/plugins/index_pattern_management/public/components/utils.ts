@@ -32,9 +32,9 @@ export async function getIndexPatterns(
         fields: ['title', 'type'],
         perPage: 10000,
       })
-      .then(response =>
+      .then((response) =>
         response.savedObjects
-          .map(pattern => {
+          .map((pattern) => {
             const id = pattern.id;
             const title = pattern.get('title');
             const isDefault = defaultIndex === id;

@@ -23,8 +23,8 @@ export class PipelinesService {
         // Monitoring will report centrally-managed pipelines as well, including recently-deleted centrally-managed ones.
         // If there's a recently-deleted pipeline we're keeping track of BUT monitoring doesn't report it, that means
         // it's not running in Logstash any more. So we can stop tracking it as a recently-deleted pipeline.
-        const monitoringPipelineIds = monitoringPipelines.map(pipeline => pipeline.id);
-        this.getRecentlyDeleted().forEach(recentlyDeletedPipeline => {
+        const monitoringPipelineIds = monitoringPipelines.map((pipeline) => pipeline.id);
+        this.getRecentlyDeleted().forEach((recentlyDeletedPipeline) => {
           // We don't want to stop tracking the recently-deleted pipeline until Monitoring has had some
           // time to report on it. Otherwise, if we stop tracking first, *then* Monitoring reports it, we'll
           // still end up showing it in the list until Monitoring stops reporting it.
@@ -43,10 +43,10 @@ export class PipelinesService {
         // Merge centrally-managed pipelines with pipelines reported by monitoring. Take care to dedupe
         // while merging because monitoring will (rightly) report centrally-managed pipelines as well,
         // including recently-deleted ones!
-        const managementPipelineIds = managementPipelines.map(pipeline => pipeline.id);
+        const managementPipelineIds = managementPipelines.map((pipeline) => pipeline.id);
         return managementPipelines.concat(
           monitoringPipelines.filter(
-            monitoringPipeline =>
+            (monitoringPipeline) =>
               !managementPipelineIds.includes(monitoringPipeline.id) &&
               !this.isRecentlyDeleted(monitoringPipeline.id)
           )
@@ -56,8 +56,8 @@ export class PipelinesService {
   }
 
   getManagementPipelineList() {
-    return this.http.get(`${ROUTES.API_ROOT}/pipelines`).then(response => {
-      return response.pipelines.map(pipeline => PipelineListItem.fromUpstreamJSON(pipeline));
+    return this.http.get(`${ROUTES.API_ROOT}/pipelines`).then((response) => {
+      return response.pipelines.map((pipeline) => PipelineListItem.fromUpstreamJSON(pipeline));
     });
   }
 
@@ -75,7 +75,7 @@ export class PipelinesService {
     const body = JSON.stringify({
       pipelineIds,
     });
-    return this.http.post(`${ROUTES.API_ROOT}/pipelines/delete`, { body }).then(response => {
+    return this.http.post(`${ROUTES.API_ROOT}/pipelines/delete`, { body }).then((response) => {
       this.addToRecentlyDeleted(...pipelineIds);
       return response.results;
     });
@@ -83,8 +83,8 @@ export class PipelinesService {
 
   addToRecentlyDeleted(...pipelineIds) {
     const recentlyDeletedPipelines = this.getRecentlyDeleted();
-    const recentlyDeletedPipelineIds = recentlyDeletedPipelines.map(pipeline => pipeline.id);
-    pipelineIds.forEach(pipelineId => {
+    const recentlyDeletedPipelineIds = recentlyDeletedPipelines.map((pipeline) => pipeline.id);
+    pipelineIds.forEach((pipelineId) => {
       if (!recentlyDeletedPipelineIds.includes(pipelineId)) {
         recentlyDeletedPipelines.push({
           id: pipelineId,
@@ -97,14 +97,14 @@ export class PipelinesService {
 
   removeFromRecentlyDeleted(...pipelineIds) {
     const recentlyDeletedPipelinesToKeep = this.getRecentlyDeleted().filter(
-      recentlyDeletedPipeline => !pipelineIds.includes(recentlyDeletedPipeline.id)
+      (recentlyDeletedPipeline) => !pipelineIds.includes(recentlyDeletedPipeline.id)
     );
     this.setRecentlyDeleted(recentlyDeletedPipelinesToKeep);
   }
 
   isRecentlyDeleted(pipelineId) {
     return this.getRecentlyDeleted()
-      .map(pipeline => pipeline.id)
+      .map((pipeline) => pipeline.id)
       .includes(pipelineId);
   }
 

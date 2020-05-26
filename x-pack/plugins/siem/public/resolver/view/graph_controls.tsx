@@ -71,7 +71,7 @@ const GraphControlsComponent = React.memo(
         [0, -1],
         [-1, 0],
       ];
-      return directionVectors.map(direction => {
+      return directionVectors.map((direction) => {
         return () => {
           const action: ResolverAction = {
             type: 'userNudgedCamera',

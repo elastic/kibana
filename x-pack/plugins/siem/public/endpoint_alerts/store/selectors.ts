@@ -61,7 +61,7 @@ export const isAlertPageTabChange = (state: Immutable<AlertListState>): boolean 
 export const uiQueryParams: (
   state: Immutable<AlertListState>
 ) => Immutable<AlertingIndexUIQueryParams> = createSelector(
-  state => state.location,
+  (state) => state.location,
   (location: Immutable<AlertListState>['location']) => {
     const data: AlertingIndexUIQueryParams = {};
     if (location) {
@@ -128,7 +128,7 @@ export const encodedSearchBarDateRange: (
  */
 export const searchBarDateRange: (state: Immutable<AlertListState>) => TimeRange = createSelector(
   encodedSearchBarDateRange,
-  encodedDateRange => {
+  (encodedDateRange) => {
     return (decode(encodedDateRange) as unknown) as TimeRange;
   }
 );
