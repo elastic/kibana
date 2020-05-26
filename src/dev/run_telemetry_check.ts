@@ -18,34 +18,54 @@
  */
 
 import Listr from 'listr';
-import { run } from '@kbn/dev-utils';
+import chalk from 'chalk';
+import { createFailError, run } from '@kbn/dev-utils';
 
 import {
   createTaskContext,
   ErrorReporter,
   parseConfigsTask,
   extractCollectorsTask,
+  checkMatchingMappingTask,
   generateMappingsTask,
+  checkCompatibleTypesTask,
   writeToFileTask,
+  TaskContext,
 } from './telemetry/tasks';
 
 run(
-  async ({ flags: {}, log }) => {
+  async ({ flags: { fix = false }, log }) => {
+    if (typeof fix !== 'boolean') {
+      throw createFailError(`${chalk.white.bgRed(' TELEMETRY ERROR ')} --fix can't have a value`);
+    }
+
     const list = new Listr([
       {
-        title: 'Parsing .telemetryrc.json files',
+        title: 'Checking .telemetryrc.json files',
         task: () => new Listr(parseConfigsTask(), { exitOnError: true }),
       },
       {
-        title: 'Extracting Telemetry Collectors',
+        title: 'Extracting Collectors',
         task: (context) => new Listr(extractCollectorsTask(context), { exitOnError: true }),
       },
       {
-        title: 'Generating Mapping files',
+        title: 'Checking Compatible collector.mapping with collector.fetch type',
+        task: (context) => new Listr(checkCompatibleTypesTask(context), { exitOnError: true }),
+      },
+      {
+        title: 'Checking Matching collector.mapping with mapped json file',
+        task: (context) => new Listr(checkMatchingMappingTask(context), { exitOnError: true }),
+      },
+      {
+        skip: ({ roots }: TaskContext) =>
+          !fix && roots.every((root) => !root.esMappingDiffs || !root.esMappingDiffs.length),
+        title: 'Generating new telemetry mappings',
         task: (context) => new Listr(generateMappingsTask(context), { exitOnError: true }),
       },
       {
-        title: 'Writing to file',
+        skip: ({ roots }: TaskContext) =>
+          !fix && roots.every((root) => !root.esMappingDiffs || !root.esMappingDiffs.length),
+        title: 'Updating telemetry mapping files',
         task: (context) => new Listr(writeToFileTask(context), { exitOnError: true }),
       },
     ]);
@@ -58,7 +78,7 @@ run(
       if (error instanceof ErrorReporter) {
         error.errors.forEach((e: string | Error) => log.error(e));
       } else {
-        log.error('Unhandled exception');
+        log.error('Unhandled exception!');
         log.error(error);
       }
     }

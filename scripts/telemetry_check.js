@@ -17,12 +17,5 @@
  * under the License.
  */
 
-export { ErrorReporter } from './error_reporter';
-export { TaskContext, createTaskContext } from './task_context';
-
-export { parseConfigsTask } from './parse_configs_task';
-export { extractCollectorsTask } from './extract_collectors_task';
-export { generateMappingsTask } from './generate_mappings_task';
-export { writeToFileTask } from './write_to_file_task';
-export { checkMatchingMappingTask } from './check_matching_mapping_task';
-export { checkCompatibleTypesTask } from './check_compatible_types_task';
+require('../src/setup_node_env');
+require('../src/dev/run_telemetry_check');

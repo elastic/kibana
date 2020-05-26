@@ -23,7 +23,10 @@ import { ParsedUsageCollection } from './ts_parser';
 import { generateMapping, getMappingTypeToKind } from './manage_mapping';
 import { kindToDescriptorName } from './serializer';
 
-export function checkMatchingMapping(UsageCollections: ParsedUsageCollection[], esMapping: any) {
+export function checkMatchingMapping(
+  UsageCollections: ParsedUsageCollection[],
+  esMapping: any
+): any[] {
   const generatedMapping = generateMapping(UsageCollections);
   return difference(generatedMapping, esMapping);
 }

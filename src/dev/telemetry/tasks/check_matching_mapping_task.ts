@@ -17,12 +17,23 @@
  * under the License.
  */
 
-export { ErrorReporter } from './error_reporter';
-export { TaskContext, createTaskContext } from './task_context';
+import * as path from 'path';
+import { TaskContext } from './task_context';
+import { checkMatchingMapping } from '../check_collector_integrity';
+import { readFileAsync } from '../utils';
 
-export { parseConfigsTask } from './parse_configs_task';
-export { extractCollectorsTask } from './extract_collectors_task';
-export { generateMappingsTask } from './generate_mappings_task';
-export { writeToFileTask } from './write_to_file_task';
-export { checkMatchingMappingTask } from './check_matching_mapping_task';
-export { checkCompatibleTypesTask } from './check_compatible_types_task';
+export function checkMatchingMappingTask({ roots }: TaskContext) {
+  return roots.map((root) => ({
+    task: async () => {
+      const fullPath = path.resolve(process.cwd(), root.config.output);
+      const esMappingString = await readFileAsync(fullPath, 'utf-8');
+      const esMapping = JSON.parse(esMappingString);
+
+      if (root.parsedCollections) {
+        const differences = checkMatchingMapping(root.parsedCollections, esMapping);
+        root.esMappingDiffs = differences;
+      }
+    },
+    title: `Checking in ${root.config.root}`,
+  }));
+}

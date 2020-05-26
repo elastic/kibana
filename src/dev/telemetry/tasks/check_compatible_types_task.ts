@@ -17,12 +17,21 @@
  * under the License.
  */
 
-export { ErrorReporter } from './error_reporter';
-export { TaskContext, createTaskContext } from './task_context';
+import { TaskContext } from './task_context';
+import { checkCompatibleTypeDescriptor } from '../check_collector_integrity';
 
-export { parseConfigsTask } from './parse_configs_task';
-export { extractCollectorsTask } from './extract_collectors_task';
-export { generateMappingsTask } from './generate_mappings_task';
-export { writeToFileTask } from './write_to_file_task';
-export { checkMatchingMappingTask } from './check_matching_mapping_task';
-export { checkCompatibleTypesTask } from './check_compatible_types_task';
+export function checkCompatibleTypesTask({ reporter, roots }: TaskContext) {
+  return roots.map((root) => ({
+    task: async () => {
+      if (root.parsedCollections) {
+        const differences = checkCompatibleTypeDescriptor(root.parsedCollections);
+        const reporterWithContext = reporter.withContext({ name: root.config.root });
+        if (differences.length) {
+          reporterWithContext.report(differences);
+          throw reporter;
+        }
+      }
+    },
+    title: `Checking in ${root.config.root}`,
+  }));
+}
