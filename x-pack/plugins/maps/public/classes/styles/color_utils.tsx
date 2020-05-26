@@ -146,7 +146,6 @@ const COLOR_PALETTES_CONFIGS: ColorPalette[] = [
   },
 ];
 
-
 export function getColorPalette(paletteId: string): string[] | null {
   const palette = COLOR_PALETTES_CONFIGS.find(({ id }: ColorPalette) => id === paletteId);
   return palette ? palette.colors : null;
