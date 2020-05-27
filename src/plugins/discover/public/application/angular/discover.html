@@ -59,18 +59,7 @@
             fetch-error="fetchError"
           ></discover-fetch-error>
 
-          <div ng-hide="fetchError" class="dscOverlay">
-            <h2
-              i18n-id="discover.searchingTitle"
-              i18n-default-message="Searching"
-              class="euiTitle euiTitle--small"
-            ></h2>
-            <div class="euiSpacer euiSpacer--m"></div>
-            <div
-              class="euiLoadingSpinner euiLoadingSpinner--large"
-              data-test-subj="loadingSpinner"
-            ></div>
-          </div>
+          <loading-spinner ng-hide="fetchError" class="dscOverlay"></loading-spinner>
         </div>
 
         <div class="dscWrapper__content" ng-show="resultState === 'ready'">
