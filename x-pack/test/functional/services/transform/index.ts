@@ -4,20 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-import {
-  TransformAPIProvider,
-  TransformManagementProvider,
-  TransformNavigationProvider,
-  TransformSecurityCommonProvider,
-  TransformSecurityUIProvider,
-  TransformSourceSelectionProvider,
-  TransformTableProvider,
-  TransformWizardProvider,
-} from './transform_ui';
+import { TransformAPIProvider } from './api';
+import { TransformManagementProvider } from './management';
+import { TransformNavigationProvider } from './navigation';
+import { TransformSecurityCommonProvider } from './security_common';
+import { TransformSecurityUIProvider } from './security_ui';
+import { TransformSourceSelectionProvider } from './source_selection';
+import { TransformTableProvider } from './transform_table';
+import { TransformWizardProvider } from './wizard';
 
-import { MachineLearningTestResourcesProvider } from './machine_learning';
+import { MachineLearningTestResourcesProvider } from '../ml/test_resources';
 
 export function TransformProvider(context: FtrProviderContext) {
   const api = TransformAPIProvider(context);
