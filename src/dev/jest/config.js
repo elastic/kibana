@@ -78,7 +78,7 @@ export default {
   ],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
   coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html', 'text'],
-  moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
+  moduleFileExtensions: ['js', 'json', 'ts', 'tsx', 'node'],
   modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
   testMatch: ['**/*.test.{js,ts,tsx}'],
   testPathIgnorePatterns: [
