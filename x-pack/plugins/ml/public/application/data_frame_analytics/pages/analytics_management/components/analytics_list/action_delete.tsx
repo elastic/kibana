@@ -170,8 +170,9 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
     <Fragment>
       {deleteButton}
       {isModalVisible && (
-        <EuiOverlayMask>
+        <EuiOverlayMask data-test-subj="mlAnalyticsJobDeleteOverlay">
           <EuiConfirmModal
+            data-test-subj="mlAnalyticsJobDeleteModal"
             title={i18n.translate('xpack.ml.dataframe.analyticsList.deleteModalTitle', {
               defaultMessage: 'Delete {analyticsId}',
               values: { analyticsId: item.config.id },

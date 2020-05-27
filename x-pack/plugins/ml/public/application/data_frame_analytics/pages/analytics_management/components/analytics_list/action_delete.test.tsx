@@ -5,13 +5,15 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-
+import { fireEvent, render } from '@testing-library/react';
 import * as CheckPrivilige from '../../../../../capabilities/check_capabilities';
-
-import { DeleteAction } from './action_delete';
-import { coreMock as mockCoreServices } from '../../../../../../../../../../src/core/public/mocks';
 import mockAnalyticsListItem from './__mocks__/analytics_list_item.json';
+import { DeleteAction } from './action_delete';
+import { I18nProvider } from '@kbn/i18n/react';
+import {
+  coreMock as mockCoreServices,
+  i18nServiceMock,
+} from '../../../../../../../../../../src/core/public/mocks';
 
 jest.mock('../../../../../capabilities/check_capabilities', () => ({
   checkPermission: jest.fn(() => false),
@@ -27,8 +29,17 @@ jest.mock('../../../../../contexts/kibana', () => ({
     services: mockCoreServices.createStart(),
   }),
 }));
+export const MockI18nService = i18nServiceMock.create();
+export const I18nServiceConstructor = jest.fn().mockImplementation(() => MockI18nService);
+jest.doMock('@kbn/i18n', () => ({
+  I18nService: I18nServiceConstructor,
+}));
 
 describe('DeleteAction', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('When canDeleteDataFrameAnalytics permission is false, button should be disabled.', () => {
     const { getByTestId } = render(<DeleteAction item={mockAnalyticsListItem} />);
     expect(getByTestId('mlAnalyticsJobDeleteButton')).toHaveAttribute('disabled');
@@ -55,5 +66,23 @@ describe('DeleteAction', () => {
     );
 
     expect(getByTestId('mlAnalyticsJobDeleteButton')).toHaveAttribute('disabled');
+  });
+
+  test('When delete modal is open, modal lets user delete target index by default.', () => {
+    const mock = jest.spyOn(CheckPrivilige, 'checkPermission');
+    mock.mockImplementation((p) => p === 'canDeleteDataFrameAnalytics');
+    const { getByTestId, queryByTestId } = render(
+      <I18nProvider>
+        <DeleteAction item={mockAnalyticsListItem} />
+      </I18nProvider>
+    );
+    const deleteButton = getByTestId('mlAnalyticsJobDeleteButton');
+    fireEvent.click(deleteButton);
+    expect(getByTestId('mlAnalyticsJobDeleteModal')).toBeInTheDocument();
+    expect(getByTestId('mlAnalyticsJobDeleteIndexSwitch')).toBeInTheDocument();
+    const mlAnalyticsJobDeleteIndexSwitch = getByTestId('mlAnalyticsJobDeleteIndexSwitch');
+    expect(mlAnalyticsJobDeleteIndexSwitch).toHaveAttribute('aria-checked', 'true');
+    expect(queryByTestId('mlAnalyticsJobDeleteIndexPatternSwitch')).toBeNull();
+    mock.mockRestore();
   });
 });
