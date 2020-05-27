@@ -12,6 +12,10 @@ interface SetValueOptions {
   typeCharByChar?: boolean;
 }
 
+export const COMMON_REQUEST_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+};
+
 export type MlCommon = ProvidedType<typeof MachineLearningCommonProvider>;
 
 export function MachineLearningCommonProvider({ getService }: FtrProviderContext) {
