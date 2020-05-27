@@ -24,7 +24,7 @@ import { ConfigSchema, createConfig } from './config';
 import { defineRoutes } from './routes';
 import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
 import { setupSavedObjects } from './saved_objects';
-import { AuditLogger, AuditService, SecurityAuditLogger } from './audit';
+import { AuditService, SecurityAuditLogger, AuditServiceSetup } from './audit';
 import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
 
 export type SpacesService = Pick<
@@ -50,8 +50,7 @@ export interface SecurityPluginSetup {
   >;
   authz: Pick<Authorization, 'actions' | 'checkPrivilegesWithRequest' | 'mode'>;
   license: SecurityLicense;
-
-  audit: { getLogger: (id: string) => AuditLogger };
+  audit: Pick<AuditServiceSetup, 'getLogger'>;
 
   /**
    * If Spaces plugin is available it's supposed to register its SpacesService with Security plugin

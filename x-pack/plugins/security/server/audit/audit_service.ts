@@ -13,7 +13,11 @@ export interface AuditLogger {
   log: (eventType: string, message: string, data?: Record<string, any>) => void;
 }
 
-export interface AuditServiceSetupParams {
+export interface AuditServiceSetup {
+  getLogger: (id?: string) => AuditLogger;
+}
+
+interface AuditServiceSetupParams {
   license: SecurityLicense;
   config: ConfigType['audit'];
 }
@@ -24,7 +28,7 @@ export class AuditService {
 
   constructor(private readonly logger: Logger) {}
 
-  setup({ license, config }: AuditServiceSetupParams) {
+  setup({ license, config }: AuditServiceSetupParams): AuditServiceSetup {
     if (config.enabled) {
       this.licenseFeaturesSubscription = license.features$.subscribe(({ allowAuditLogging }) => {
         this.auditLoggingEnabled = allowAuditLogging;
