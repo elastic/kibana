@@ -124,6 +124,7 @@ describe('signals default_config', () => {
           status: 'open',
           setEventsLoading,
           setEventsDeleted,
+          dispatchToaster,
         });
       });
 
@@ -179,6 +180,7 @@ describe('signals default_config', () => {
           status: 'closed',
           setEventsLoading,
           setEventsDeleted,
+          dispatchToaster,
         });
       });
 
