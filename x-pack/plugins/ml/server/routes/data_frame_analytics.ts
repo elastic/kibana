@@ -325,7 +325,6 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       try {
         const { analyticsId } = request.params;
         const { deleteTargetIndex, deleteIndexPattern } = request.query;
-
         let destinationIndex: string | undefined;
         const analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
         const targetIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
@@ -372,6 +371,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
               if (indexPatternId) {
                 await deleteIndexPatternById(context, indexPatternId);
               }
+              targetIndexPatternDeleted.success = true;
             } catch (deleteIndexPatternError) {
               targetIndexPatternDeleted.error = wrapError(deleteIndexPatternError);
             }

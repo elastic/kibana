@@ -113,7 +113,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
   const deleteAndCloseModal = () => {
     setModalVisible(false);
 
-    if (userCanDeleteIndex && deleteTargetIndex) {
+    if ((userCanDeleteIndex && deleteTargetIndex) || (userCanDeleteIndex && deleteIndexPattern)) {
       deleteAnalyticsAndTargetIndex(
         item,
         deleteTargetIndex,
@@ -204,6 +204,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
               <EuiFlexItem>
                 {userCanDeleteIndex && (
                   <EuiSwitch
+                    data-test-subj="mlAnalyticsJobDeleteIndexSwitch"
                     style={{ paddingBottom: 10 }}
                     label={i18n.translate(
                       'xpack.ml.dataframe.analyticsList.deleteDestinationIndexTitle',
@@ -220,6 +221,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
               <EuiFlexItem>
                 {userCanDeleteIndex && indexPatternExists && (
                   <EuiSwitch
+                    data-test-subj="mlAnalyticsJobDeleteIndexPatternSwitch"
                     label={i18n.translate(
                       'xpack.ml.dataframe.analyticsList.deleteTargetIndexPatternTitle',
                       {

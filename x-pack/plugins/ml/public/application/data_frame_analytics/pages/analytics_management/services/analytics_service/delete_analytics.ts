@@ -62,7 +62,8 @@ export const deleteAnalyticsAndTargetIndex = async (
             values: { analyticsId: d.config.id },
           })
         );
-      } else {
+      }
+      if (status.targetIndexDeleted.error) {
         const error = extractErrorMessage(status.targetIndexDeleted.error);
         toastNotifications.addDanger(
           i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsErrorMessage', {
@@ -86,7 +87,8 @@ export const deleteAnalyticsAndTargetIndex = async (
             }
           )
         );
-      } else {
+      }
+      if (status.targetIndexDeleted.error) {
         const error = extractErrorMessage(status.targetIndexDeleted.error);
         toastNotifications.addDanger(
           i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexErrorMessage', {
@@ -98,8 +100,8 @@ export const deleteAnalyticsAndTargetIndex = async (
       }
     }
 
-    if (status.targetIndexDeleted) {
-      if (status.targetIndexDeleted.success) {
+    if (status.targetIndexPatternDeleted) {
+      if (status.targetIndexPatternDeleted.success) {
         toastNotifications.addSuccess(
           i18n.translate(
             'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexPatternSuccessMessage',
@@ -109,8 +111,9 @@ export const deleteAnalyticsAndTargetIndex = async (
             }
           )
         );
-      } else {
-        const error = extractErrorMessage(status.targetIndexDeleted.error);
+      }
+      if (status.targetIndexPatternDeleted.error) {
+        const error = extractErrorMessage(status.targetIndexPatternDeleted.error);
         toastNotifications.addDanger(
           i18n.translate(
             'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexPatternSuccessMessage',

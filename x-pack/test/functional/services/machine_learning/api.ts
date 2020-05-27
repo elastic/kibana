@@ -9,9 +9,9 @@ import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/applicat
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { JOB_STATE, DATAFEED_STATE } from '../../../../plugins/ml/common/constants/states';
+import { DATAFEED_STATE, JOB_STATE } from '../../../../plugins/ml/common/constants/states';
 import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
-import { Job, Datafeed } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
+import { Datafeed, Job } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 
@@ -386,6 +386,17 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .expect(200);
 
       await this.waitForDataFrameAnalyticsJobToExist(analyticsId);
+    },
+
+    async startDataFrameAnalyticsJob(analyticsId: string) {
+      log.debug(`Start data frame analytic job with id '${analyticsId}'...`);
+      const startResponse = await esSupertest
+        .post(`/_ml/data_frame/analytics/${analyticsId}/_start`)
+        .set({ 'Content-Type': 'application/json' })
+        .expect(200)
+        .then((res: any) => res.body);
+
+      expect(startResponse).to.have.property('acknowledged').eql(true);
     },
 
     async getADJobRecordCount(jobId: string): Promise<number> {
