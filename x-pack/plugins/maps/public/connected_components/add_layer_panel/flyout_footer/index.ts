@@ -22,7 +22,7 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
-    closeFlyout: () => dispatch(clearTransientLayerStateAndCloseFlyout()),
+    closeFlyout: () => dispatch<any>(clearTransientLayerStateAndCloseFlyout()),
   };
 }
 

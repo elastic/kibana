@@ -40,7 +40,7 @@ export function registerAppRoutes({
         },
       };
 
-      if (!isSecurityEnabled) {
+      if (!isSecurityEnabled()) {
         // If security isn't enabled, let the user use app.
         return res.ok({ body: privilegesResult });
       }
