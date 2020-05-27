@@ -116,6 +116,7 @@ export function savedMap(): ExpressionFunction<'savedMap', Filter | null, Argume
           hiddenLayers: args.hideLayer || [],
         },
         embeddableType: EmbeddableTypes.map,
+        generatedAt: Date.now(),
       };
     },
   };
