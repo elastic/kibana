@@ -155,7 +155,7 @@ describe('Field', function () {
     expect(field.type).toEqual('_source');
   });
 
-  it('calculates seaarchable', () => {
+  it('calculates searchable', () => {
     const field = getField({ searchable: true, scripted: false });
     expect(field.searchable).toEqual(true);
 
