@@ -31,12 +31,12 @@ export const registerDeleteRoute = ({ router, license }: RouteDependencies): voi
       };
 
       await Promise.all(
-        componentNames.map(componentName => {
+        componentNames.map((componentName) => {
           return callAsCurrentUser('dataManagement.deleteComponentTemplate', {
             name: componentName,
           })
             .then(() => response.itemsDeleted.push(componentName))
-            .catch(e =>
+            .catch((e) =>
               response.errors.push({
                 name: componentName,
                 error: e,

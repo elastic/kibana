@@ -34,11 +34,11 @@ export const initElasticsearchHelpers = (es) => {
 
   const catTemplate = (name) => es.cat.templates({ name, format: 'json' });
 
-  const createComponentTemplate = componentTemplate => {
+  const createComponentTemplate = (componentTemplate) => {
     return es.dataManagement.saveComponentTemplate(componentTemplate);
   };
 
-  const deleteComponentTemplate = componentTemplateName => {
+  const deleteComponentTemplate = (componentTemplateName) => {
     return es.dataManagement.deleteComponentTemplate({ name: componentTemplateName });
   };
 
