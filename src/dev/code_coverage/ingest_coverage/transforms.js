@@ -100,20 +100,26 @@ export const ciRunUrl = (obj) =>
   fromNullable(process.env.CI_RUN_URL).fold(always(obj), (ciRunUrl) => ({ ...obj, ciRunUrl }));
 
 const size = 50;
-const truncateCommitMsg = (x) => (x.length > size ? `${x.slice(0, 50)}...` : x);
+const truncateMsg = (msg) => (msg.length > size ? `${msg.slice(0, 50)}...` : msg);
 
 export const itemizeVcs = (vcsInfo) => (obj) => {
   const [branch, sha, author, commitMsg] = vcsInfo;
-  return {
-    ...obj,
-    vcs: {
-      branch,
-      sha,
-      author,
-      commitMsg: truncateCommitMsg(commitMsg),
-      vcsUrl: `https://github.com/elastic/kibana/commit/${sha}`,
-    },
+
+  // Extra logging
+  console.log(`\n### VCS INFO:`);
+  console.dir(vcsInfo);
+  console.log('');
+
+  const vcs = {
+    branch,
+    sha,
+    author,
+    vcsUrl: `https://github.com/elastic/kibana/commit/${sha}`,
   };
+  return fromNullable(commitMsg).fold(always({ ...obj, vcs }), (msg) => {
+    const vcsWithTruncated = { ...vcs, commitMsg: truncateMsg(msg) };
+    return { ...obj, vcsWithTruncated };
+  });
 };
 export const testRunner = (obj) => {
   const { jsonSummaryPath } = obj;
