@@ -9,6 +9,13 @@ export function isLegacyEvent(event: ResolverEvent): event is LegacyEndpointEven
   return (event as LegacyEndpointEvent).endgame !== undefined;
 }
 
+export function isProcessStart(event: ResolverEvent): boolean {
+  if (isLegacyEvent(event)) {
+    return event.event?.type === 'process_start' || event.event?.action === 'fork_event';
+  }
+  return event.event.type === 'start';
+}
+
 export function eventTimestamp(event: ResolverEvent): string | undefined | number {
   if (isLegacyEvent(event)) {
     return event.endgame.timestamp_utc;
