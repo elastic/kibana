@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createBrowserHistory } from 'history';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HashRouter as Router, Switch, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import { getCoreI18n } from '../kibana_services';
 import { MapsListView } from './list_view';
 import { MapsCreateEditView } from './create_edit_view';
-
-const history = createBrowserHistory();
 
 export function renderApp(context, params) {
   const I18nContext = getCoreI18n().Context;
@@ -20,12 +17,13 @@ export function renderApp(context, params) {
     <I18nContext>
       <Router basename={params.appBasePath}>
         <Switch>
-          <Route path="/map/:savedMapId">
-            <MapsCreateEditView />
-          </Route>
-          <Route path="/">
-            <MapsListView />
-          </Route>
+          <Route path={`/map/:savedMapId`} component={MapsCreateEditView} />
+          <Route path={`/map`} component={MapsCreateEditView} />
+          <Route component={MapsListView} />
+          <Route
+            path="#/map"
+            render={({ location }) => <Redirect to={location.hash.replace('#', '')} />}
+          />
         </Switch>
       </Router>
     </I18nContext>,

@@ -214,7 +214,7 @@ export const MapsCreateEditView = withRouter(
     }
 
     async getSavedMap(savedMapId) {
-      let savedMap;
+      let savedMap = {};
       let savedMapFilters = {};
       if (savedMapId) {
         savedMap = await this._fetchSavedMap(savedMapId);
