@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import {
   COLOR_GRADIENTS,
   getColorRampCenterColor,
-  getOrdinalColorRampStops,
+  getOrdinalMbColorRampStops,
   getHexColorRangeStrings,
   getLinearGradient,
   getRGBColorRangeStrings,
@@ -25,7 +24,7 @@ describe('COLOR_GRADIENTS', () => {
 
 describe('getRGBColorRangeStrings', () => {
   it('Should create RGB color ramp', () => {
-    expect(getRGBColorRangeStrings('Blues')).toEqual([
+    expect(getRGBColorRangeStrings('Blues', 8)).toEqual([
       'rgb(247,250,255)',
       'rgb(221,234,247)',
       'rgb(197,218,238)',
@@ -61,7 +60,7 @@ describe('getColorRampCenterColor', () => {
 
 describe('getColorRampStops', () => {
   it('Should create color stops for custom range', () => {
-    expect(getOrdinalColorRampStops('Blues', 0, 1000)).toEqual([
+    expect(getOrdinalMbColorRampStops('Blues', 0, 1000, 8)).toEqual([
       0,
       '#f7faff',
       125,
@@ -82,7 +81,7 @@ describe('getColorRampStops', () => {
   });
 
   it('Should snap to end of color stops for identical range', () => {
-    expect(getOrdinalColorRampStops('Blues', 23, 23)).toEqual([23, '#072f6b']);
+    expect(getOrdinalMbColorRampStops('Blues', 23, 23, 8)).toEqual([23, '#072f6b']);
   });
 });
 

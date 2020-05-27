@@ -46,7 +46,9 @@ export function registerDetailsRoute({ router, license, lib }: RouteDependencies
       const { nodeAttrs } = params;
 
       try {
-        const stats = await fetchNodeStats(context.core.elasticsearch.dataClient.callAsCurrentUser);
+        const stats = await fetchNodeStats(
+          context.core.elasticsearch.legacy.client.callAsCurrentUser
+        );
         const okResponse = { body: findMatchingNodes(stats, nodeAttrs) };
         return response.ok(okResponse);
       } catch (e) {

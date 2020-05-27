@@ -57,6 +57,7 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./data_shared_attributes'));
       loadTestFile(require.resolve('./embed_mode'));
       loadTestFile(require.resolve('./dashboard_back_button'));
+      loadTestFile(require.resolve('./dashboard_error_handling'));
 
       // Note: This one must be last because it unloads some data for one of its tests!
       // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched
