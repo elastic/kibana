@@ -23,7 +23,7 @@ export const FLYOUT_BUTTON_CLASS_NAME = 'timeline-flyout-button';
 export const getBadgeCount = (dataProviders: DataProvider[]): number =>
   flattenIntoAndGroups(dataProviders).reduce((total, group) => total + group.length, 0);
 
-const SHOW_HIDE_TRANSLATE_X = 497; // px
+const SHOW_HIDE_TRANSLATE_X = 501; // px
 
 const Container = styled.div`
   padding-top: 8px;
@@ -132,7 +132,6 @@ export const FlyoutButton = React.memo<FlyoutButtonProps>(
                 onDataProviderRemoved={noop}
                 onToggleDataProviderEnabled={noop}
                 onToggleDataProviderExcluded={noop}
-                show={show}
               />
             )}
           </WithSource>

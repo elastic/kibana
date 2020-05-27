@@ -44,7 +44,7 @@ describe('Header', () => {
       expect(wrapper).toMatchSnapshot();
     });
 
-    test('it renders the data providers', () => {
+    test('it renders the data providers when show is true', () => {
       const wrapper = mount(
         <TestProviders>
           <TimelineHeader
@@ -64,6 +64,28 @@ describe('Header', () => {
       );
 
       expect(wrapper.find('[data-test-subj="dataProviders"]').exists()).toEqual(true);
+    });
+
+    test('it does NOT render the data providers when show is false', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <TimelineHeader
+            browserFields={{}}
+            dataProviders={mockDataProviders}
+            filterManager={new FilterManager(mockUiSettingsForFilterManager)}
+            id="foo"
+            indexPattern={indexPattern}
+            onDataProviderEdited={jest.fn()}
+            onDataProviderRemoved={jest.fn()}
+            onToggleDataProviderEnabled={jest.fn()}
+            onToggleDataProviderExcluded={jest.fn()}
+            show={false}
+            showCallOutUnauthorizedMsg={false}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="dataProviders"]').exists()).toEqual(false);
     });
 
     test('it renders the unauthorized call out providers', () => {
