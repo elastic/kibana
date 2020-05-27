@@ -84,7 +84,7 @@ Array [
   },
   Object {
     "key": "profiling_inferred_spans_min_duration",
-    "min": "1ms",
+    "min": "0ms",
     "type": "duration",
     "units": Array [
       "ms",

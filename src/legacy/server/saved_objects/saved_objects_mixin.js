@@ -50,17 +50,17 @@ export function savedObjectsMixin(kbnServer, server) {
 
   const serializer = kbnServer.newPlatform.start.core.savedObjects.createSerializer();
 
-  const createRepository = (callCluster, extraTypes = []) => {
+  const createRepository = (callCluster, includedHiddenTypes = []) => {
     if (typeof callCluster !== 'function') {
       throw new TypeError('Repository requires a "callCluster" function to be provided.');
     }
     // throw an exception if an extraType is not defined.
-    extraTypes.forEach(type => {
+    includedHiddenTypes.forEach(type => {
       if (!allTypes.includes(type)) {
         throw new Error(`Missing mappings for saved objects type '${type}'`);
       }
     });
-    const combinedTypes = visibleTypes.concat(extraTypes);
+    const combinedTypes = visibleTypes.concat(includedHiddenTypes);
     const allowedTypes = [...new Set(combinedTypes)];
 
     const config = server.config();

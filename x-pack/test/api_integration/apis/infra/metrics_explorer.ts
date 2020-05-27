@@ -36,11 +36,9 @@ export default function({ getService }: FtrProviderContext) {
             {
               aggregation: 'avg',
               field: 'system.cpu.user.pct',
-              rate: false,
             },
             {
               aggregation: 'count',
-              rate: false,
             },
           ],
         };
@@ -52,7 +50,7 @@ export default function({ getService }: FtrProviderContext) {
         const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
         expect(body.series).length(1);
         const firstSeries = first(body.series);
-        expect(firstSeries).to.have.property('id', 'ALL');
+        expect(firstSeries).to.have.property('id', 'Everything');
         expect(firstSeries.columns).to.eql([
           { name: 'timestamp', type: 'date' },
           { name: 'metric_0', type: 'number' },
@@ -81,7 +79,6 @@ export default function({ getService }: FtrProviderContext) {
             {
               aggregation: 'avg',
               field: 'system.cpu.user.pct',
-              rate: false,
             },
           ],
         };
@@ -93,7 +90,7 @@ export default function({ getService }: FtrProviderContext) {
         const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
         expect(body.series).length(1);
         const firstSeries = first(body.series);
-        expect(firstSeries).to.have.property('id', 'ALL');
+        expect(firstSeries).to.have.property('id', 'Everything');
         expect(firstSeries.columns).to.eql([
           { name: 'timestamp', type: 'date' },
           { name: 'metric_0', type: 'number' },
@@ -124,7 +121,7 @@ export default function({ getService }: FtrProviderContext) {
         const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
         expect(body.series).length(1);
         const firstSeries = first(body.series);
-        expect(firstSeries).to.have.property('id', 'ALL');
+        expect(firstSeries).to.have.property('id', 'Everything');
         expect(firstSeries.columns).to.eql([]);
         expect(firstSeries.rows).to.have.length(0);
       });
@@ -144,7 +141,6 @@ export default function({ getService }: FtrProviderContext) {
           metrics: [
             {
               aggregation: 'count',
-              rate: false,
             },
           ],
         };
@@ -169,8 +165,53 @@ export default function({ getService }: FtrProviderContext) {
           timestamp: 1547571300000,
         });
         expect(body.pageInfo).to.eql({
-          afterKey: 'system.fsstat',
+          afterKey: { groupBy0: 'system.fsstat' },
           total: 12,
+        });
+      });
+
+      it('should work with multiple groupBy', async () => {
+        const postBody = {
+          timerange: {
+            field: '@timestamp',
+            to: max,
+            from: min,
+            interval: '>=1m',
+          },
+          indexPattern: 'metricbeat-*',
+          groupBy: ['host.name', 'system.network.name'],
+          limit: 3,
+          afterKey: null,
+          metrics: [
+            {
+              aggregation: 'rate',
+              field: 'system.network.out.bytes',
+            },
+          ],
+        };
+        const response = await supertest
+          .post('/api/infra/metrics_explorer')
+          .set('kbn-xsrf', 'xxx')
+          .send(postBody)
+          .expect(200);
+        const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
+        expect(body.series).length(3);
+        const firstSeries = first(body.series);
+        expect(firstSeries).to.have.property('id', 'demo-stack-mysql-01 / eth0');
+        expect(firstSeries.columns).to.eql([
+          { name: 'timestamp', type: 'date' },
+          { name: 'metric_0', type: 'number' },
+          { name: 'groupBy', type: 'string' },
+        ]);
+        expect(firstSeries.rows).to.have.length(9);
+        expect(firstSeries.rows![1]).to.eql({
+          groupBy: 'demo-stack-mysql-01 / eth0',
+          metric_0: 53577.683333333334,
+          timestamp: 1547571300000,
+        });
+        expect(body.pageInfo).to.eql({
+          afterKey: { groupBy0: 'demo-stack-mysql-01', groupBy1: 'eth2' },
+          total: 4,
         });
       });
     });
@@ -191,7 +232,6 @@ export default function({ getService }: FtrProviderContext) {
             {
               aggregation: 'avg',
               field: 'system.cpu.user.pct',
-              rate: false,
             },
           ],
         };
@@ -225,7 +265,6 @@ export default function({ getService }: FtrProviderContext) {
             {
               aggregation: 'avg',
               field: 'system.cpu.user.pct',
-              rate: false,
             },
           ],
         };

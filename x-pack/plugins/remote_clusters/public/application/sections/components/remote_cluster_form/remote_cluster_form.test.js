@@ -10,7 +10,6 @@ import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 import { RemoteClusterForm } from './remote_cluster_form';
 
 // Make sure we have deterministic aria IDs.
-jest.mock('@elastic/eui/lib/components/form/form_row/make_id', () => () => 'mockId');
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: (prefix = 'staticGenerator') => (suffix = 'staticId') => `${prefix}_${suffix}`,
 }));
