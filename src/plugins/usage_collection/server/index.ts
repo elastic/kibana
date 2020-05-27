@@ -20,7 +20,7 @@
 import { PluginInitializerContext } from 'kibana/server';
 import { UsageCollectionPlugin } from './plugin';
 
-export { UsageCollectionSetup } from './plugin';
+export { UsageCollectionSetup, UsageCollectionStart } from './plugin';
 export { config } from './config';
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new UsageCollectionPlugin(initializerContext);

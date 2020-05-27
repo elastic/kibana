@@ -31,9 +31,11 @@ import { CollectorSet } from './collector';
 import { setupRoutes } from './routes';
 
 export type UsageCollectionSetup = CollectorSet;
-export class UsageCollectionPlugin implements Plugin<CollectorSet> {
+export type UsageCollectionStart = CollectorSet;
+export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, UsageCollectionStart> {
   private readonly logger: Logger;
   private savedObjects?: ISavedObjectsRepository;
+  private collectorSet?: CollectorSet;
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
@@ -44,7 +46,7 @@ export class UsageCollectionPlugin implements Plugin<CollectorSet> {
       .pipe(first())
       .toPromise();
 
-    const collectorSet = new CollectorSet({
+    this.collectorSet = new CollectorSet({
       logger: this.logger.get('collector-set'),
       maximumWaitTimeForAllCollectorsInS: config.maximumWaitTimeForAllCollectorsInS,
     });
@@ -52,12 +54,13 @@ export class UsageCollectionPlugin implements Plugin<CollectorSet> {
     const router = core.http.createRouter();
     setupRoutes(router, () => this.savedObjects);
 
-    return collectorSet;
+    return this.collectorSet;
   }
 
   public start({ savedObjects }: CoreStart) {
     this.logger.debug('Starting plugin');
     this.savedObjects = savedObjects.createInternalRepository();
+    return this.collectorSet!;
   }
 
   public stop() {
