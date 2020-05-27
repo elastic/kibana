@@ -5,7 +5,7 @@ kibanaLibrary.load()
 
 kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true) {
   catchErrors {
-    error "Test Error"
+    unstable "Test Error"
   }
 
   slackNotifications.sendFailedBuild(
