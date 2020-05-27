@@ -55,6 +55,36 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
     }
   );
 
+  const valueActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.valueActionVariableDescription',
+    {
+      defaultMessage:
+        'The value of a metric for the specified condition. Usage (ctx.value.condition0).',
+    }
+  );
+
+  const metricActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.metricActionVariableDescription',
+    {
+      defaultMessage: 'The metric name for the specified condition. Usage (ctx.metric.condition0).',
+    }
+  );
+
+  const thresholdActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.thresholdActionVariableDescription',
+    {
+      defaultMessage:
+        'The threshold value for a metric for the specified condition. Usage (ctx.threshold.condition0).',
+    }
+  );
+
+  const timestampActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.timestampDescription',
+    {
+      defaultMessage: 'A timestamp of when the alert was detected.',
+    }
+  );
+
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: 'Metric threshold',
@@ -82,6 +112,9 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
         { name: 'group', description: groupActionVariableDescription },
         { name: 'alertState', description: alertStateActionVariableDescription },
         { name: 'reason', description: reasonActionVariableDescription },
+        { name: 'value', description: valueActionVariableDescription },
+        { name: 'metric', description: metricActionVariableDescription },
+        { name: 'threshold', description: thresholdActionVariableDescription },
       ],
     },
     producer: 'metrics',
