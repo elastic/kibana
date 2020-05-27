@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/machine_learning/common';
-import { USER } from '../../../../functional/services/machine_learning/security_common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { USER } from '../../../../functional/services/ml/security_common';
 import { MULTI_METRIC_JOB_CONFIG, SINGLE_METRIC_JOB_CONFIG } from './common_jobs';
 
 // eslint-disable-next-line import/no-default-export
