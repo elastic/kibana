@@ -4,37 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-import {
-  MachineLearningAnomaliesTableProvider,
-  MachineLearningAnomalyExplorerProvider,
-  MachineLearningAPIProvider,
-  MachineLearningCommonProvider,
-  MachineLearningCustomUrlsProvider,
-  MachineLearningDataFrameAnalyticsProvider,
-  MachineLearningDataFrameAnalyticsCreationProvider,
-  MachineLearningDataFrameAnalyticsTableProvider,
-  MachineLearningDataVisualizerProvider,
-  MachineLearningDataVisualizerFileBasedProvider,
-  MachineLearningDataVisualizerIndexBasedProvider,
-  MachineLearningJobManagementProvider,
-  MachineLearningJobSelectionProvider,
-  MachineLearningJobSourceSelectionProvider,
-  MachineLearningJobTableProvider,
-  MachineLearningJobTypeSelectionProvider,
-  MachineLearningJobWizardAdvancedProvider,
-  MachineLearningJobWizardCategorizationProvider,
-  MachineLearningJobWizardCommonProvider,
-  MachineLearningJobWizardMultiMetricProvider,
-  MachineLearningJobWizardPopulationProvider,
-  MachineLearningNavigationProvider,
-  MachineLearningSecurityCommonProvider,
-  MachineLearningSecurityUIProvider,
-  MachineLearningSettingsProvider,
-  MachineLearningSingleMetricViewerProvider,
-  MachineLearningTestResourcesProvider,
-} from './machine_learning';
+import { MachineLearningAnomaliesTableProvider } from './anomalies_table';
+import { MachineLearningAnomalyExplorerProvider } from './anomaly_explorer';
+import { MachineLearningAPIProvider } from './api';
+import { MachineLearningCommonProvider } from './common';
+import { MachineLearningCustomUrlsProvider } from './custom_urls';
+import { MachineLearningDataFrameAnalyticsProvider } from './data_frame_analytics';
+import { MachineLearningDataFrameAnalyticsCreationProvider } from './data_frame_analytics_creation';
+import { MachineLearningDataFrameAnalyticsTableProvider } from './data_frame_analytics_table';
+import { MachineLearningDataVisualizerProvider } from './data_visualizer';
+import { MachineLearningDataVisualizerFileBasedProvider } from './data_visualizer_file_based';
+import { MachineLearningDataVisualizerIndexBasedProvider } from './data_visualizer_index_based';
+import { MachineLearningJobManagementProvider } from './job_management';
+import { MachineLearningJobSelectionProvider } from './job_selection';
+import { MachineLearningJobSourceSelectionProvider } from './job_source_selection';
+import { MachineLearningJobTableProvider } from './job_table';
+import { MachineLearningJobTypeSelectionProvider } from './job_type_selection';
+import { MachineLearningJobWizardAdvancedProvider } from './job_wizard_advanced';
+import { MachineLearningJobWizardCommonProvider } from './job_wizard_common';
+import { MachineLearningJobWizardCategorizationProvider } from './job_wizard_categorization';
+import { MachineLearningJobWizardMultiMetricProvider } from './job_wizard_multi_metric';
+import { MachineLearningJobWizardPopulationProvider } from './job_wizard_population';
+import { MachineLearningNavigationProvider } from './navigation';
+import { MachineLearningSecurityCommonProvider } from './security_common';
+import { MachineLearningSecurityUIProvider } from './security_ui';
+import { MachineLearningSettingsProvider } from './settings';
+import { MachineLearningSingleMetricViewerProvider } from './single_metric_viewer';
+import { MachineLearningTestResourcesProvider } from './test_resources';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const common = MachineLearningCommonProvider(context);
