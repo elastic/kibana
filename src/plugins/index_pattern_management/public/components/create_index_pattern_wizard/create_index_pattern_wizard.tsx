@@ -23,41 +23,19 @@ import { EuiGlobalToastList, EuiGlobalToastListToast, EuiPanel } from '@elastic/
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-
-import {
-  SavedObjectsClientContract,
-  IUiSettingsClient,
-  OverlayStart,
-  ChromeDocTitle,
-  IBasePath,
-} from 'src/core/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { ManagementAppMountParams } from '../../../../management/public';
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
 import { LoadingState } from './components/loading_state';
 import { EmptyState } from './components/empty_state';
 
+import { context as contextType } from '../../../../kibana_react/public';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { MAX_SEARCH_SIZE } from './constants';
 import { ensureMinimumTime, getIndices } from './lib';
-import { IndexPatternCreationConfig, IndexPatternManagementStart } from '../..';
+import { IndexPatternCreationConfig } from '../..';
+import { IndexPatternManagmentContextValue } from '../../types';
 import { MatchedIndex } from './types';
-
-export interface CreateIndexPatternWizardProps extends RouteComponentProps {
-  services: {
-    indexPatternCreation: IndexPatternManagementStart['creation'];
-    es: DataPublicPluginStart['search']['__LEGACY']['esClient'];
-    indexPatterns: DataPublicPluginStart['indexPatterns'];
-    savedObjectsClient: SavedObjectsClientContract;
-    uiSettings: IUiSettingsClient;
-    openConfirm: OverlayStart['openConfirm'];
-    setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
-    docTitle: ChromeDocTitle;
-    prependBasePath: IBasePath['prepend'];
-  };
-}
 
 interface CreateIndexPatternWizardState {
   step: number;
@@ -71,19 +49,19 @@ interface CreateIndexPatternWizardState {
 }
 
 export class CreateIndexPatternWizard extends Component<
-  CreateIndexPatternWizardProps,
+  RouteComponentProps,
   CreateIndexPatternWizardState
 > {
-  constructor(props: CreateIndexPatternWizardProps) {
-    super(props);
-    const {
-      services: { indexPatternCreation, setBreadcrumbs },
-      location,
-    } = props;
+  static contextType = contextType;
 
-    setBreadcrumbs(getCreateBreadcrumbs());
+  public readonly context!: IndexPatternManagmentContextValue;
 
-    const type = new URLSearchParams(location.search).get('type') || undefined;
+  constructor(props: RouteComponentProps, context: IndexPatternManagmentContextValue) {
+    super(props, context);
+
+    context.services.setBreadcrumbs(getCreateBreadcrumbs());
+
+    const type = new URLSearchParams(props.location.search).get('type') || undefined;
 
     this.state = {
       step: 1,
@@ -93,7 +71,7 @@ export class CreateIndexPatternWizard extends Component<
       isInitiallyLoadingIndices: true,
       isIncludingSystemIndices: false,
       toasts: [],
-      indexPatternCreationType: indexPatternCreation.getType(type),
+      indexPatternCreationType: context.services.indexPatternManagementStart.creation.getType(type),
     };
   }
 
@@ -124,8 +102,6 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   fetchData = async () => {
-    const { services } = this.props;
-
     this.setState({
       allIndices: [],
       isInitiallyLoadingIndices: true,
@@ -149,7 +125,12 @@ export class CreateIndexPatternWizard extends Component<
     // query local and remote indices, updating state independently
     ensureMinimumTime(
       this.catchAndWarn(
-        getIndices(services.es, this.state.indexPatternCreationType, `*`, MAX_SEARCH_SIZE),
+        getIndices(
+          this.context.services.data.search.__LEGACY.esClient,
+          this.state.indexPatternCreationType,
+          `*`,
+          MAX_SEARCH_SIZE
+        ),
         [],
         indicesFailMsg
       )
@@ -160,7 +141,12 @@ export class CreateIndexPatternWizard extends Component<
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
-      getIndices(services.es, this.state.indexPatternCreationType, `*:*`, 1),
+      getIndices(
+        this.context.services.data.search.__LEGACY.esClient,
+        this.state.indexPatternCreationType,
+        `*:*`,
+        1
+      ),
       ['a'],
       clustersFailMsg
     ).then((remoteIndices: string[] | MatchedIndex[]) =>
@@ -169,10 +155,10 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   createIndexPattern = async (timeFieldName: string | undefined, indexPatternId: string) => {
-    const { services, history } = this.props;
+    const { history } = this.props;
     const { indexPattern } = this.state;
 
-    const emptyPattern = await services.indexPatterns.make();
+    const emptyPattern = await this.context.services.data.indexPatterns.make();
 
     Object.assign(emptyPattern, {
       id: indexPatternId,
@@ -191,7 +177,7 @@ export class CreateIndexPatternWizard extends Component<
         }
       );
 
-      const isConfirmed = await services.openConfirm(confirmMessage, {
+      const isConfirmed = await this.context.services.overlays.openConfirm(confirmMessage, {
         confirmButtonText: i18n.translate(
           'indexPatternManagement.indexPattern.goToPatternButtonLabel',
           {
@@ -207,11 +193,11 @@ export class CreateIndexPatternWizard extends Component<
       }
     }
 
-    if (!services.uiSettings.get('defaultIndex')) {
-      await services.uiSettings.set('defaultIndex', createdId);
+    if (!this.context.services.uiSettings.get('defaultIndex')) {
+      await this.context.services.uiSettings.set('defaultIndex', createdId);
     }
 
-    services.indexPatterns.clearCache(createdId);
+    this.context.services.data.indexPatterns.clearCache(createdId);
     history.push(`/patterns/${createdId}`);
   };
 
@@ -231,7 +217,6 @@ export class CreateIndexPatternWizard extends Component<
 
   renderHeader() {
     const { isIncludingSystemIndices } = this.state;
-    const { services } = this.props;
 
     return (
       <Header
@@ -241,7 +226,6 @@ export class CreateIndexPatternWizard extends Component<
         onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
         indexPatternName={this.state.indexPatternCreationType.getIndexPatternName()}
         isBeta={this.state.indexPatternCreationType.getIsBeta()}
-        changeTitle={services.docTitle.change}
       />
     );
   }
@@ -265,13 +249,13 @@ export class CreateIndexPatternWizard extends Component<
       return (
         <EmptyState
           onRefresh={this.fetchData}
-          prependBasePath={this.props.services.prependBasePath}
+          prependBasePath={this.context.services.http.basePath.prepend}
         />
       );
     }
 
     if (step === 1) {
-      const { services, location } = this.props;
+      const { location } = this.props;
       const initialQuery = new URLSearchParams(location.search).get('id') || undefined;
 
       return (
@@ -279,21 +263,16 @@ export class CreateIndexPatternWizard extends Component<
           allIndices={allIndices}
           initialQuery={indexPattern || initialQuery}
           isIncludingSystemIndices={isIncludingSystemIndices}
-          esService={services.es}
-          savedObjectsClient={services.savedObjectsClient}
           indexPatternCreationType={this.state.indexPatternCreationType}
           goToNextStep={this.goToTimeFieldStep}
-          uiSettings={services.uiSettings}
         />
       );
     }
 
     if (step === 2) {
-      const { services } = this.props;
       return (
         <StepTimeField
           indexPattern={indexPattern}
-          indexPatternsService={services.indexPatterns}
           goToPreviousStep={this.goToIndexPatternStep}
           createIndexPattern={this.createIndexPattern}
           indexPatternCreationType={this.state.indexPatternCreationType}
