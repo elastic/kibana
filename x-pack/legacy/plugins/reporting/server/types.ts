@@ -209,12 +209,12 @@ export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
 export type CreateJobFactory<CreateJobFnType> = (
   reporting: ReportingCore,
-  deps: ReportingInternalSetup
+  setupDeps: ReportingInternalSetup
 ) => CreateJobFnType;
 
 export type ExecuteJobFactory<ExecuteJobFnType> = (
   reporting: ReportingCore,
-  deps: ReportingInternalSetup
+  setupDeps: ReportingInternalSetup
 ) => Promise<ExecuteJobFnType>; // FIXME: does not "need" to be async
 
 export interface ExportTypeDefinition<

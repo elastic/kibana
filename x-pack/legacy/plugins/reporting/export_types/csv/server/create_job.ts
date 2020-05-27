@@ -13,7 +13,7 @@ import { ReportingInternalSetup } from '../../../server/core';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsDiscoverCsv
->> = function createJobFactoryFn(reporting: ReportingCore, deps: ReportingInternalSetup) {
+>> = function createJobFactoryFn(reporting: ReportingCore, setupDeps: ReportingInternalSetup) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
@@ -33,7 +33,7 @@ export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
     return {
       headers: serializedEncryptedHeaders,
       indexPatternSavedObject,
-      basePath: deps.basePath(request),
+      basePath: setupDeps.basePath(request),
       ...jobParams,
     };
   };

@@ -25,12 +25,12 @@ import { ReportingInternalSetup } from '../core';
  */
 export function registerGenerateCsvFromSavedObject(
   reporting: ReportingCore,
-  deps: ReportingInternalSetup,
+  setupDeps: ReportingInternalSetup,
   handleRoute: HandlerFunction,
   handleRouteError: HandlerErrorFunction
 ) {
-  const userHandler = authorizedUserPreRoutingFactory(reporting, deps);
-  const { router } = deps;
+  const userHandler = authorizedUserPreRoutingFactory(reporting, setupDeps);
+  const { router } = setupDeps;
   router.post(
     {
       path: `${API_BASE_GENERATE_V1}/csv/saved-object/{savedObjectType}:{savedObjectId}`,

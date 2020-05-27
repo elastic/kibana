@@ -52,7 +52,7 @@ const getUiSettings = async (config: IUiSettingsClient) => {
 
 export async function generateCsvSearch(
   reporting: ReportingCore,
-  deps: ReportingInternalSetup,
+  setupDeps: ReportingInternalSetup,
   context: RequestHandlerContext,
   req: KibanaRequest,
   searchPanel: SearchPanel,
@@ -170,7 +170,7 @@ export async function generateCsvSearch(
     },
   };
 
-  const generateCsv = createGenerateCsv(deps.logger);
+  const generateCsv = createGenerateCsv(setupDeps.logger);
 
   return {
     type: 'CSV from Saved Search',

@@ -42,10 +42,10 @@ interface VisData {
 
 export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
   JobParamsPanelCsv
->> = function createJobFactoryFn(reporting: ReportingCore, deps: ReportingInternalSetup) {
+>> = function createJobFactoryFn(reporting: ReportingCore, setupDeps: ReportingInternalSetup) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
-  const logger = deps.logger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
+  const logger = setupDeps.logger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
   return async function createJob(
     jobParams: JobParamsPanelCsv,

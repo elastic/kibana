@@ -35,13 +35,13 @@ export type EnqueueJobFn = <JobParamsType>(
 
 export function enqueueJobFactory(
   reporting: ReportingCore,
-  deps: ReportingInternalSetup
+  setupDeps: ReportingInternalSetup
 ): EnqueueJobFn {
   const config = reporting.getConfig();
   const queueTimeout = config.get('queue', 'timeout');
   const browserType = config.get('capture', 'browser', 'type');
   const maxAttempts = config.get('capture', 'maxAttempts');
-  const logger = deps.logger.clone(['queue-job']);
+  const logger = setupDeps.logger.clone(['queue-job']);
 
   return async function enqueueJob<JobParamsType>(
     exportTypeId: string,
@@ -59,7 +59,7 @@ export function enqueueJobFactory(
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    const createJob = exportType.createJobFactory(reporting, deps) as CreateJobFn;
+    const createJob = exportType.createJobFactory(reporting, setupDeps) as CreateJobFn;
     const payload = await createJob(jobParams, context, request);
 
     const options = {

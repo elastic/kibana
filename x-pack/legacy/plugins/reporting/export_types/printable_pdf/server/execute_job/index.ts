@@ -25,12 +25,12 @@ type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocP
 
 export const executeJobFactory: QueuedPdfExecutorFactory = async function executeJobFactoryFn(
   reporting: ReportingCore,
-  deps: ReportingInternalSetup
+  setupDeps: ReportingInternalSetup
 ) {
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
 
-  const logger = deps.logger.clone([PDF_JOB_TYPE, 'execute']);
+  const logger = setupDeps.logger.clone([PDF_JOB_TYPE, 'execute']);
 
   return async function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
     const apmTrans = apm.startTransaction('reporting execute_job pdf', 'reporting');

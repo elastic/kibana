@@ -11,7 +11,7 @@ import { ReportingCore } from '../../../../server';
 import { FakeRequest, JobParamsPanelCsv, SearchPanel, VisPanel } from '../../types';
 import { generateCsvSearch } from './generate_csv_search';
 
-export function createGenerateCsv(reporting: ReportingCore, deps: ReportingInternalSetup) {
+export function createGenerateCsv(reporting: ReportingCore, setupDeps: ReportingInternalSetup) {
   return async function generateCsv(
     context: RequestHandlerContext,
     request: KibanaRequest | FakeRequest,
@@ -28,7 +28,7 @@ export function createGenerateCsv(reporting: ReportingCore, deps: ReportingInter
       case 'search':
         return await generateCsvSearch(
           reporting,
-          deps,
+          setupDeps,
           context,
           request as KibanaRequest,
           panel as SearchPanel,

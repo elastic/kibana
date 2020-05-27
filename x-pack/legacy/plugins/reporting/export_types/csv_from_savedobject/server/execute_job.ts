@@ -28,11 +28,14 @@ export type ImmediateExecuteFn<JobParamsType> = (
 
 export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
   JobParamsPanelCsv
->> = async function executeJobFactoryFn(reporting: ReportingCore, deps: ReportingInternalSetup) {
+>> = async function executeJobFactoryFn(
+  reporting: ReportingCore,
+  setupDeps: ReportingInternalSetup
+) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
-  const logger = deps.logger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
-  const generateCsv = createGenerateCsv(reporting, deps);
+  const logger = setupDeps.logger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
+  const generateCsv = createGenerateCsv(reporting, setupDeps);
 
   return async function executeJob(
     jobId: string | null,

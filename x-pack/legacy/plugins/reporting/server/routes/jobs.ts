@@ -25,11 +25,11 @@ const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
 export async function registerJobInfoRoutes(
   reporting: ReportingCore,
-  deps: ReportingInternalSetup
+  setupDeps: ReportingInternalSetup
 ) {
   const config = reporting.getConfig();
-  const userHandler = authorizedUserPreRoutingFactory(reporting, deps);
-  const { elasticsearch, router } = deps;
+  const userHandler = authorizedUserPreRoutingFactory(reporting, setupDeps);
+  const { elasticsearch, router } = setupDeps;
   const jobsQuery = jobsQueryFactory(config, elasticsearch);
 
   // list jobs in the queue, paginated

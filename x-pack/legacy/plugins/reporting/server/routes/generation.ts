@@ -18,7 +18,7 @@ const esErrors = elasticsearchErrors as Record<string, any>;
 
 export function registerJobGenerationRoutes(
   reporting: ReportingCore,
-  deps: ReportingInternalSetup
+  setupDeps: ReportingInternalSetup
 ) {
   const config = reporting.getConfig();
   const downloadBaseUrl =
@@ -76,11 +76,11 @@ export function registerJobGenerationRoutes(
     });
   }
 
-  registerGenerateFromJobParams(reporting, deps, handler, handleError);
+  registerGenerateFromJobParams(reporting, setupDeps, handler, handleError);
 
   // Register beta panel-action download-related API's
   if (config.get('csv', 'enablePanelActionDownload')) {
-    registerGenerateCsvFromSavedObject(reporting, deps, handler, handleError);
-    registerGenerateCsvFromSavedObjectImmediate(reporting, deps);
+    registerGenerateCsvFromSavedObject(reporting, setupDeps, handler, handleError);
+    registerGenerateCsvFromSavedObjectImmediate(reporting, setupDeps);
   }
 }

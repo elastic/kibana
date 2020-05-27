@@ -15,7 +15,7 @@ import { ReportingInternalSetup } from '../core';
 
 export function createWorkerFactory<JobParamsType>(
   reporting: ReportingCore,
-  deps: ReportingInternalSetup
+  setupDeps: ReportingInternalSetup
 ) {
   const config = reporting.getConfig();
   const queueConfig = config.get('queue');
@@ -30,7 +30,7 @@ export function createWorkerFactory<JobParamsType>(
     for (const exportType of reporting.getExportTypesRegistry().getAll() as Array<
       ExportTypeDefinition<JobParamsType, unknown, unknown, ESQueueWorkerExecuteFn<unknown>>
     >) {
-      const jobExecutor = await exportType.executeJobFactory(reporting, deps); // FIXME: does not "need" to be async
+      const jobExecutor = await exportType.executeJobFactory(reporting, setupDeps); // FIXME: does not "need" to be async
       jobExecutors.set(exportType.jobType, jobExecutor);
     }
 
@@ -66,13 +66,13 @@ export function createWorkerFactory<JobParamsType>(
     const worker = queue.registerWorker(PLUGIN_ID, workerFn, workerOptions);
 
     worker.on(esqueueEvents.EVENT_WORKER_COMPLETE, (res: any) => {
-      deps.logger.debug(`Worker completed: (${res.job.id})`);
+      setupDeps.logger.debug(`Worker completed: (${res.job.id})`);
     });
     worker.on(esqueueEvents.EVENT_WORKER_JOB_EXECUTION_ERROR, (res: any) => {
-      deps.logger.debug(`Worker error: (${res.job.id})`);
+      setupDeps.logger.debug(`Worker error: (${res.job.id})`);
     });
     worker.on(esqueueEvents.EVENT_WORKER_JOB_TIMEOUT, (res: any) => {
-      deps.logger.debug(`Job timeout exceeded: (${res.job.id})`);
+      setupDeps.logger.debug(`Job timeout exceeded: (${res.job.id})`);
     });
   };
 }

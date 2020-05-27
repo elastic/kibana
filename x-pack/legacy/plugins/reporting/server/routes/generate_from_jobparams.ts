@@ -16,12 +16,12 @@ const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerGenerateFromJobParams(
   reporting: ReportingCore,
-  deps: ReportingInternalSetup,
+  setupDeps: ReportingInternalSetup,
   handler: HandlerFunction,
   handleError: HandlerErrorFunction
 ) {
-  const userHandler = authorizedUserPreRoutingFactory(reporting, deps);
-  const { router } = deps;
+  const userHandler = authorizedUserPreRoutingFactory(reporting, setupDeps);
+  const { router } = setupDeps;
 
   router.post(
     {

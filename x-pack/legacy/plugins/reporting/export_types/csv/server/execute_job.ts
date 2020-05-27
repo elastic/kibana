@@ -19,10 +19,13 @@ import { ReportingInternalSetup } from '../../../server/core';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadDiscoverCsv
->> = async function executeJobFactoryFn(reporting: ReportingCore, deps: ReportingInternalSetup) {
+>> = async function executeJobFactoryFn(
+  reporting: ReportingCore,
+  setupDeps: ReportingInternalSetup
+) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
-  const logger = deps.logger.clone([CSV_JOB_TYPE, 'execute-job']);
+  const logger = setupDeps.logger.clone([CSV_JOB_TYPE, 'execute-job']);
   const serverBasePath = config.kbnConfig.get('server', 'basePath');
 
   return async function executeJob(

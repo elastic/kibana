@@ -26,10 +26,10 @@ import { ReportingInternalSetup } from '../core';
  */
 export function registerGenerateCsvFromSavedObjectImmediate(
   reporting: ReportingCore,
-  deps: ReportingInternalSetup
+  setupDeps: ReportingInternalSetup
 ) {
-  const userHandler = authorizedUserPreRoutingFactory(reporting, deps);
-  const { router } = deps;
+  const userHandler = authorizedUserPreRoutingFactory(reporting, setupDeps);
+  const { router } = setupDeps;
 
   /*
    * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:
@@ -59,10 +59,10 @@ export function registerGenerateCsvFromSavedObjectImmediate(
       },
     },
     userHandler(async (user, context, req, res) => {
-      const logger = deps.logger.clone(['savedobject-csv']);
+      const logger = setupDeps.logger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(req, { isImmediate: true });
-      const createJobFn = createJobFactory(reporting, deps);
-      const executeJobFn = await executeJobFactory(reporting, deps); // FIXME: does not "need" to be async
+      const createJobFn = createJobFactory(reporting, setupDeps);
+      const executeJobFn = await executeJobFactory(reporting, setupDeps); // FIXME: does not "need" to be async
       const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
         jobParams,
         req.headers,

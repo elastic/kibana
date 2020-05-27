@@ -17,10 +17,10 @@ export type RequestHandlerUser = RequestHandler extends (...a: infer U) => infer
 
 export const authorizedUserPreRoutingFactory = function authorizedUserPreRoutingFn(
   core: ReportingCore,
-  deps: ReportingInternalSetup
+  setupDeps: ReportingInternalSetup
 ) {
   const config = core.getConfig();
-  const getUser = getUserFactory(deps.security);
+  const getUser = getUserFactory(setupDeps.security);
 
   return <P, Q, B>(handler: RequestHandlerUser): RequestHandler<P, Q, B, RouteMethod> => {
     return (context, req, res) => {
