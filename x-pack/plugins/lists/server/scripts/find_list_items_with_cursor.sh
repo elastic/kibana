@@ -11,8 +11,8 @@ set -e
 
 PAGE=${1-1}
 PER_PAGE=${2-20}
-CURSOR=${3-invalid}
-LIST_ID=${4-list-ip}
+LIST_ID=${3-list-ip}
+CURSOR=${4-invalid}
 
 # Example:
 #    ./find_list_items.sh 1 20 | jq .cursor

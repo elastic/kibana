@@ -63,7 +63,7 @@ export const decodeCursor = ({
       isValid: true,
     };
   } else {
-    const fromBuffer = Buffer.from(cursor, 'base64').toString('ascii');
+    const fromBuffer = Buffer.from(cursor, 'base64').toString();
     const parsed = parseOrUndefined(fromBuffer);
     if (parsed == null) {
       return {
