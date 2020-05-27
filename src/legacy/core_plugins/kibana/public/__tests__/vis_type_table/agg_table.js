@@ -277,29 +277,29 @@ describe('Table Vis - AggTable Directive', function () {
       expect(raw).to.be(
         '"extension: Descending","Average bytes","geo.src: Descending","Average bytes","machine.os: Descending","Average bytes"' +
           '\r\n' +
-          'png,IT,win,412032,9299,0' +
+          'png,412032,IT,9299,win,0' +
           '\r\n' +
-          'png,IT,mac,412032,9299,9299' +
+          'png,412032,IT,9299,mac,9299' +
           '\r\n' +
-          'png,US,linux,412032,8293,3992' +
+          'png,412032,US,8293,linux,3992' +
           '\r\n' +
-          'png,US,mac,412032,8293,3029' +
+          'png,412032,US,8293,mac,3029' +
           '\r\n' +
-          'css,MX,win,412032,9299,4992' +
+          'css,412032,MX,9299,win,4992' +
           '\r\n' +
-          'css,MX,mac,412032,9299,5892' +
+          'css,412032,MX,9299,mac,5892' +
           '\r\n' +
-          'css,US,linux,412032,8293,3992' +
+          'css,412032,US,8293,linux,3992' +
           '\r\n' +
-          'css,US,mac,412032,8293,3029' +
+          'css,412032,US,8293,mac,3029' +
           '\r\n' +
-          'html,CN,win,412032,9299,4992' +
+          'html,412032,CN,9299,win,4992' +
           '\r\n' +
-          'html,CN,mac,412032,9299,5892' +
+          'html,412032,CN,9299,mac,5892' +
           '\r\n' +
-          'html,FR,win,412032,8293,3992' +
+          'html,412032,FR,8293,win,3992' +
           '\r\n' +
-          'html,FR,mac,412032,8293,3029' +
+          'html,412032,FR,8293,mac,3029' +
           '\r\n'
       );
     });
@@ -335,29 +335,29 @@ describe('Table Vis - AggTable Directive', function () {
       expect(formatted).to.be(
         '"extension: Descending","Average bytes","geo.src: Descending","Average bytes","machine.os: Descending","Average bytes"' +
           '\r\n' +
-          '"png_formatted",IT,win,412032,9299,0' +
+          '"png_formatted",412032,IT,9299,win,0' +
           '\r\n' +
-          '"png_formatted",IT,mac,412032,9299,9299' +
+          '"png_formatted",412032,IT,9299,mac,9299' +
           '\r\n' +
-          '"png_formatted",US,linux,412032,8293,3992' +
+          '"png_formatted",412032,US,8293,linux,3992' +
           '\r\n' +
-          '"png_formatted",US,mac,412032,8293,3029' +
+          '"png_formatted",412032,US,8293,mac,3029' +
           '\r\n' +
-          '"css_formatted",MX,win,412032,9299,4992' +
+          '"css_formatted",412032,MX,9299,win,4992' +
           '\r\n' +
-          '"css_formatted",MX,mac,412032,9299,5892' +
+          '"css_formatted",412032,MX,9299,mac,5892' +
           '\r\n' +
-          '"css_formatted",US,linux,412032,8293,3992' +
+          '"css_formatted",412032,US,8293,linux,3992' +
           '\r\n' +
-          '"css_formatted",US,mac,412032,8293,3029' +
+          '"css_formatted",412032,US,8293,mac,3029' +
           '\r\n' +
-          '"html_formatted",CN,win,412032,9299,4992' +
+          '"html_formatted",412032,CN,9299,win,4992' +
           '\r\n' +
-          '"html_formatted",CN,mac,412032,9299,5892' +
+          '"html_formatted",412032,CN,9299,mac,5892' +
           '\r\n' +
-          '"html_formatted",FR,win,412032,8293,3992' +
+          '"html_formatted",412032,FR,8293,win,3992' +
           '\r\n' +
-          '"html_formatted",FR,mac,412032,8293,3029' +
+          '"html_formatted",412032,FR,8293,mac,3029' +
           '\r\n'
       );
     });
