@@ -15,10 +15,10 @@ export function renderApp(context, { appBasePath, element }) {
   const I18nContext = getCoreI18n().Context;
   render(
     <I18nContext>
-      <Router>
+      <Router basename={appBasePath}>
         <Switch>
-          <Route path={`${appBasePath}/map/:savedMapId`} component={MapsCreateEditView} />
-          <Route path={`${appBasePath}/map`} component={MapsCreateEditView} />
+          <Route path={`/map/:savedMapId`} component={MapsCreateEditView} />
+          <Route path={`/map`} component={MapsCreateEditView} />
           <Route
             path={``}
             render={({ location }) => {
