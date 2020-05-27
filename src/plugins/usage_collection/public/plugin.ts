@@ -83,7 +83,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
       reportUiStats: this.reporter.reportUiStats,
       METRIC_TYPE,
       __LEGACY: {
-        appChanged: appId => this.legacyAppId$.next(appId),
+        appChanged: (appId) => this.legacyAppId$.next(appId),
       },
     };
   }

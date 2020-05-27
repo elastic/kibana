@@ -70,8 +70,8 @@ function reduceMetric(metricName, metricBuckets, { min: startTime, max: endTime,
   const metric = metrics[metricName];
   const mappedData = metricBuckets
     .filter(partialBucketFilter) // buckets with whole start/end time range
-    .map(bucket => mapBuckets(bucket, metric))
-    .filter(result => Boolean(result.y) || result.y === 0); // take only non-null values
+    .map((bucket) => mapBuckets(bucket, metric))
+    .filter((result) => Boolean(result.y) || result.y === 0); // take only non-null values
 
   /* it's possible that no data exists for the type of metric. For example,
    * node_cgroup_throttled data could be completely null if there is no cgroup
@@ -94,7 +94,7 @@ function reduceMetric(metricName, metricBuckets, { min: startTime, max: endTime,
 
 function reduceAllMetrics(metricSet, timeOptions) {
   const metrics = {};
-  Object.keys(metricSet).forEach(metricName => {
+  Object.keys(metricSet).forEach((metricName) => {
     const metricBuckets = get(metricSet, [metricName, 'buckets']);
     metrics[metricName] = reduceMetric(metricName, metricBuckets, timeOptions); // append summarized metric data
   });
@@ -113,7 +113,7 @@ function reduceAllMetrics(metricSet, timeOptions) {
  */
 export function mapNodesMetrics(metricsForNodes, nodesInfo, timeOptions) {
   const metricRows = {};
-  Object.keys(metricsForNodes).forEach(nodeId => {
+  Object.keys(metricsForNodes).forEach((nodeId) => {
     if (nodesInfo[nodeId].isOnline) {
       // only do the work of mapping metrics if the node is online
       const metricSet = metricsForNodes[nodeId];

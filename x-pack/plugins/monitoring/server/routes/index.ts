@@ -12,7 +12,7 @@ import { RouteDependencies } from '../types';
 export function requireUIRoutes(server: any, npRoute: RouteDependencies) {
   const routes = Object.keys(uiRoutes);
 
-  routes.forEach(route => {
+  routes.forEach((route) => {
     const registerRoute = uiRoutes[route]; // computed reference to module objects imported via namespace
     registerRoute(server, npRoute);
   });

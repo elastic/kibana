@@ -164,7 +164,7 @@ export const TemplateDeleteModal = ({
                   />
                 }
                 checked={isDeleteConfirmed}
-                onChange={e => setIsDeleteConfirmed(e.target.checked)}
+                onChange={(e) => setIsDeleteConfirmed(e.target.checked)}
               />
             </EuiCallOut>
           )}

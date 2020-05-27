@@ -24,7 +24,7 @@ export async function fetchStatus(
 ): Promise<any> {
   const byType: { [type: string]: CommonAlertStatus } = {};
   await Promise.all(
-    alertTypes.map(async type => {
+    alertTypes.map(async (type) => {
       const alert = await AlertsFactory.getByType(type, alertsClient);
       const result: CommonAlertStatus = {
         exists: false,

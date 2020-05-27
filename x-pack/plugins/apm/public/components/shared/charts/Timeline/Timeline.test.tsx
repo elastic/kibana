@@ -25,7 +25,7 @@ describe('Timeline', () => {
         top: 100,
         left: 50,
         right: 50,
-        bottom: 0
+        bottom: 0,
       },
       animation: null,
       marks: [
@@ -33,21 +33,21 @@ describe('Timeline', () => {
           id: 'timeToFirstByte',
           offset: 100000,
           type: 'agentMark',
-          verticalLine: true
+          verticalLine: true,
         },
         {
           id: 'domInteractive',
           offset: 110000,
           type: 'agentMark',
-          verticalLine: true
+          verticalLine: true,
         },
         {
           id: 'domComplete',
           offset: 190000,
           type: 'agentMark',
-          verticalLine: true
-        }
-      ]
+          verticalLine: true,
+        },
+      ],
     };
 
     const wrapper = mount(
@@ -69,8 +69,8 @@ describe('Timeline', () => {
         top: 100,
         left: 50,
         right: 50,
-        bottom: 0
-      }
+        bottom: 0,
+      },
     };
 
     const mountTimeline = () =>

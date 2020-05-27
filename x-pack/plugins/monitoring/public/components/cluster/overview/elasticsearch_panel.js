@@ -44,7 +44,7 @@ import { AlertMenu } from '../../alert';
 import { AlertSeverity } from '../../../../common/enums';
 import { CommonAlertSeverityColorMap } from '../../../../common/types';
 
-const calculateShards = shards => {
+const calculateShards = (shards) => {
   const total = get(shards, 'total', 0);
   let primaries = get(shards, 'primaries', 'N/A');
   let replicas = 'N/A';
@@ -62,7 +62,7 @@ const calculateShards = shards => {
   };
 };
 
-const formatDateLocal = input => moment.tz(input, moment.tz.guess()).format('LL');
+const formatDateLocal = (input) => moment.tz(input, moment.tz.guess()).format('LL');
 
 function getBadgeColorFromLogLevel(level) {
   switch (level) {

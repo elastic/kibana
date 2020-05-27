@@ -50,7 +50,7 @@ export function initializeFindCustomElementsRoute(deps: RouteInitializerDeps) {
         return response.ok({
           body: {
             total: customElements.total,
-            customElements: customElements.saved_objects.map(hit => ({
+            customElements: customElements.saved_objects.map((hit) => ({
               id: hit.id,
               ...hit.attributes,
             })),

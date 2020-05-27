@@ -120,7 +120,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     }
   }, [form]);
 
-  const updateThrottle = useCallback(throttle => setMyStepData({ ...myStepData, throttle }), [
+  const updateThrottle = useCallback((throttle) => setMyStepData({ ...myStepData, throttle }), [
     myStepData,
     setMyStepData,
   ]);

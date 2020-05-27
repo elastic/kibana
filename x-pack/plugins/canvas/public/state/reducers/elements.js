@@ -11,28 +11,28 @@ import * as actions from '../actions/elements';
 
 const { assign, push, del, set } = immutable;
 
-const getLocation = type => (type === 'group' ? 'groups' : 'elements');
+const getLocation = (type) => (type === 'group' ? 'groups' : 'elements');
 const firstOccurrence = (element, index, array) => array.indexOf(element) === index;
 
 const getLocationFromIds = (workpadState, pageId, nodeId) => {
-  const page = workpadState.pages.find(p => p.id === pageId);
+  const page = workpadState.pages.find((p) => p.id === pageId);
   const groups = page == null ? [] : page.groups || [];
-  return groups.find(e => e.id === nodeId) ? 'groups' : 'elements';
+  return groups.find((e) => e.id === nodeId) ? 'groups' : 'elements';
 };
 
 function getPageIndexById(workpadState, pageId) {
-  return get(workpadState, 'pages', []).findIndex(page => page.id === pageId);
+  return get(workpadState, 'pages', []).findIndex((page) => page.id === pageId);
 }
 
 function getNodeIndexById(page, nodeId, location) {
-  return page[location].findIndex(node => node.id === nodeId);
+  return page[location].findIndex((node) => node.id === nodeId);
 }
 
 export function assignNodeProperties(workpadState, pageId, nodeId, props) {
   const pageIndex = getPageIndexById(workpadState, pageId);
   const location = getLocationFromIds(workpadState, pageId, nodeId);
   const nodesPath = `pages.${pageIndex}.${location}`;
-  const nodeIndex = get(workpadState, nodesPath, []).findIndex(node => node.id === nodeId);
+  const nodeIndex = get(workpadState, nodesPath, []).findIndex((node) => node.id === nodeId);
 
   if (pageIndex === -1 || nodeIndex === -1) {
     return workpadState;
@@ -47,7 +47,7 @@ function moveNodeLayer(workpadState, pageId, nodeId, movement, location) {
   const nodes = get(workpadState, ['pages', pageIndex, location]);
   const from = nodeIndex;
 
-  const to = (function() {
+  const to = (function () {
     if (movement < Infinity && movement > -Infinity) {
       return nodeIndex + movement;
     }
@@ -88,8 +88,8 @@ const trimElement = ({ id, position, expression, filter }) => ({
 });
 
 const getPageWithElementId = (workpad, elementId) => {
-  const matchingPage = workpad.pages.find(page =>
-    page.elements.map(element => element.id).includes(elementId)
+  const matchingPage = workpad.pages.find((page) =>
+    page.elements.map((element) => element.id).includes(elementId)
   );
 
   if (matchingPage) {
@@ -131,7 +131,7 @@ export const elementsReducer = handleActions(
       if (
         // don't add a group that is already persisted
         workpadState.pages[pageIndex][getLocation(element.position.type)].find(
-          e => e.id === element.id
+          (e) => e.id === element.id
         )
       ) {
         return workpadState;
@@ -165,7 +165,7 @@ export const elementsReducer = handleActions(
 
       const nodeIndices = elementIds
         .filter(firstOccurrence)
-        .map(nodeId => {
+        .map((nodeId) => {
           const location = getLocationFromIds(workpadState, pageId, nodeId);
           return {
             location,

@@ -10,7 +10,7 @@ export const getHostNameFromInfluencers = (
   influencers: Array<Record<string, string>> = [],
   hostName?: string
 ): string | null => {
-  const recordFound = influencers.find(influencer => {
+  const recordFound = influencers.find((influencer) => {
     const [influencerName, influencerValue] = getEntries(influencer);
     if (influencerName === 'host.name') {
       if (hostName == null) {

@@ -25,7 +25,7 @@ const ErrorToastDispatcherComponent = ({
   const [{ toasts }, dispatchToaster] = useStateToaster();
   useEffect(() => {
     errors.forEach(({ id, title, message }) => {
-      if (!toasts.some(toast => toast.id === id)) {
+      if (!toasts.some((toast) => toast.id === id)) {
         dispatchToaster({
           type: 'addToaster',
           toast: {

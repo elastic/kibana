@@ -34,7 +34,7 @@ import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { AlertMenu } from '../../alert';
 import { CommonAlertSeverityColorMap } from '../../../../common/types';
 
-const getNodeTooltip = node => {
+const getNodeTooltip = (node) => {
   const { nodeTypeLabel, nodeTypeClass } = node;
 
   const nodeTypeLabelContent =
@@ -57,7 +57,7 @@ const getNodeTooltip = node => {
   return null;
 };
 
-const getSortHandler = type => item => _.get(item, [type, 'summary', 'lastVal']);
+const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
 const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, alerts) => {
   const cols = [];
 
@@ -151,7 +151,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
     }),
     field: 'isOnline',
     sortable: true,
-    render: value => {
+    render: (value) => {
       const status = value
         ? i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumn.onlineLabel', {
             defaultMessage: 'Online',
@@ -476,7 +476,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             }}
             onTableChange={onTableChange}
             fetchMoreData={fetchMoreData}
-            rowProps={row => {
+            rowProps={(row) => {
               for (const { states } of Object.values(alerts)) {
                 for (const { state } of states) {
                   if (state.nodeId === row.resolver) {

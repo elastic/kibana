@@ -12,7 +12,7 @@ import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertPopover } from '../../alert';
 
-const formatDateLocal = input => moment.tz(input, moment.tz.guess()).format('LL');
+const formatDateLocal = (input) => moment.tz(input, moment.tz.guess()).format('LL');
 
 export function LicenseText({ license, showLicenseExpiration, alert }) {
   if (!showLicenseExpiration) {

@@ -12,7 +12,7 @@ import { CreateAnalyticsAdvancedEditor } from '../create_analytics_advanced_edit
 import { CreateAnalyticsForm } from '../create_analytics_form';
 import { CreateAnalyticsFlyout } from '../create_analytics_flyout';
 
-export const CreateAnalyticsFlyoutWrapper: FC<CreateAnalyticsFormProps> = props => {
+export const CreateAnalyticsFlyoutWrapper: FC<CreateAnalyticsFormProps> = (props) => {
   const { isAdvancedEditorEnabled, isModalVisible } = props.state;
 
   if (isModalVisible === false) {

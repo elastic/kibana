@@ -25,7 +25,7 @@ const buildStatuses = (n: number) =>
 describe('buildRuleStatusAttributes', () => {
   it('generates a new date on each call', async () => {
     const { statusDate } = buildRuleStatusAttributes('going to run');
-    await new Promise(resolve => setTimeout(resolve, 10)); // ensure time has passed
+    await new Promise((resolve) => setTimeout(resolve, 10)); // ensure time has passed
     const { statusDate: statusDate2 } = buildRuleStatusAttributes('going to run');
 
     expect(statusDate).toEqual(expectIsoDateString);

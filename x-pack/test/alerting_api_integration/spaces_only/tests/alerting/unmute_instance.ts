@@ -31,7 +31,7 @@ export default function createUnmuteInstanceTests({ getService }: FtrProviderCon
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: false }))
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', undefined);
 
       await alertUtils.muteInstance(createdAlert.id, '1');
       await alertUtils.unmuteInstance(createdAlert.id, '1');

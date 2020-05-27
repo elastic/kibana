@@ -49,7 +49,7 @@ export const MetricExpression = ({ metric, metrics, errors, onChange, popupPosit
     value: '',
   };
 
-  const availablefieldsOptions = metrics.map(m => {
+  const availablefieldsOptions = metrics.map((m) => {
     return { label: m.text, value: m.value };
   }, []);
 
@@ -99,10 +99,10 @@ export const MetricExpression = ({ metric, metrics, errors, onChange, popupPosit
                 options={availablefieldsOptions}
                 noSuggestions={!availablefieldsOptions.length}
                 selectedOptions={
-                  metric ? availablefieldsOptions.filter(a => a.value === metric.value) : []
+                  metric ? availablefieldsOptions.filter((a) => a.value === metric.value) : []
                 }
                 renderOption={(o: any) => o.label}
-                onChange={selectedOptions => {
+                onChange={(selectedOptions) => {
                   if (selectedOptions.length > 0) {
                     onChange(selectedOptions[0].value as SnapshotMetricType);
                     setAggFieldPopoverOpen(false);

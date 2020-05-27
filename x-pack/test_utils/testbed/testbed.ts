@@ -76,7 +76,7 @@ export const registerTestBed = <T extends string = string>(
    */
   onRouter(reactRouterMock);
 
-  const setup: SetupFunc<T> = props => {
+  const setup: SetupFunc<T> = (props) => {
     // If a function is provided we execute it
     const storeToMount = typeof store === 'function' ? store() : store!;
     const mountConfig = {
@@ -124,7 +124,7 @@ export const registerTestBed = <T extends string = string>(
       const exists: TestBed<T>['exists'] = (testSubject, count = 1) =>
         find(testSubject).length === count;
 
-      const setProps: TestBed<T>['setProps'] = updatedProps => {
+      const setProps: TestBed<T>['setProps'] = (updatedProps) => {
         if (memoryRouter.wrapComponent !== false) {
           throw new Error(
             'setProps() can only be called on a component **not** wrapped by a router route.'
@@ -158,7 +158,7 @@ export const registerTestBed = <T extends string = string>(
             throw new Error(errMessage);
           }
 
-          return new Promise(resolve => setTimeout(resolve, WAIT_INTERVAL)).then(() => {
+          return new Promise((resolve) => setTimeout(resolve, WAIT_INTERVAL)).then(() => {
             component.update();
             return process();
           });
@@ -196,7 +196,7 @@ export const registerTestBed = <T extends string = string>(
         if (!isAsync) {
           return;
         }
-        return new Promise(resolve => setTimeout(resolve));
+        return new Promise((resolve) => setTimeout(resolve));
       };
 
       const setSelectValue: TestBed<T>['form']['setSelectValue'] = (
@@ -228,7 +228,7 @@ export const registerTestBed = <T extends string = string>(
         checkBox.simulate('change', { target: { checked: isChecked } });
       };
 
-      const toggleEuiSwitch: TestBed<T>['form']['toggleEuiSwitch'] = testSubject => {
+      const toggleEuiSwitch: TestBed<T>['form']['toggleEuiSwitch'] = (testSubject) => {
         const checkBox = find(testSubject);
         if (!checkBox.length) {
           throw new Error(`"${testSubject}" was not found.`);
@@ -251,7 +251,7 @@ export const registerTestBed = <T extends string = string>(
 
       const getErrorsMessages: TestBed<T>['form']['getErrorsMessages'] = () => {
         const errorMessagesWrappers = component.find('.euiFormErrorText');
-        return errorMessagesWrappers.map(err => err.text());
+        return errorMessagesWrappers.map((err) => err.text());
       };
 
       /**
@@ -265,7 +265,7 @@ export const registerTestBed = <T extends string = string>(
        *
        * @param tableTestSubject The data test subject of the EUI table
        */
-      const getMetaData: TestBed<T>['table']['getMetaData'] = tableTestSubject => {
+      const getMetaData: TestBed<T>['table']['getMetaData'] = (tableTestSubject) => {
         const table = find(tableTestSubject);
 
         if (!table.length) {
@@ -275,9 +275,9 @@ export const registerTestBed = <T extends string = string>(
         const rows = table
           .find('tr')
           .slice(1) // we remove the first row as it is the table header
-          .map(row => ({
+          .map((row) => ({
             reactWrapper: row,
-            columns: row.find('td').map(col => ({
+            columns: row.find('td').map((col) => ({
               reactWrapper: col,
               // We can't access the td value with col.text() because
               // eui adds an extra div in td on mobile => (.euiTableRowCell__mobileHeader)
@@ -286,7 +286,7 @@ export const registerTestBed = <T extends string = string>(
           }));
 
         // Also output the raw cell values, in the following format: [[td0, td1, td2], [td0, td1, td2]]
-        const tableCellsValues = rows.map(({ columns }) => columns.map(col => col.value));
+        const tableCellsValues = rows.map(({ columns }) => columns.map((col) => col.value));
         return { rows, tableCellsValues };
       };
 

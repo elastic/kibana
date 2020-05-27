@@ -22,7 +22,7 @@ import { WithAppDependencies, services } from './setup_environment';
 const testBedConfig: TestBedConfig = {
   store: () => indexManagementStore(services as any),
   memoryRouter: {
-    initialEntries: [`${BASE_PATH}indices`],
+    initialEntries: [`${BASE_PATH}indices?includeHidden=true`],
     componentRoutePath: `${BASE_PATH}:section(indices|templates)`,
   },
   doMountAsync: true,
@@ -44,6 +44,8 @@ export interface IdxMgmtHomeTestBed extends TestBed<IdxMgmtTestSubjects> {
     clickTemplateAt: (index: number) => void;
     clickCloseDetailsButton: () => void;
     clickActionMenu: (name: TemplateDeserialized['name']) => void;
+    getIncludeHiddenIndicesToggleStatus: () => boolean;
+    clickIncludeHiddenIndicesToggle: () => void;
   };
 }
 
@@ -71,10 +73,7 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
   const selectDetailsTab = (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => {
     const tabs = ['summary', 'settings', 'mappings', 'aliases'];
 
-    testBed
-      .find('templateDetails.tab')
-      .at(tabs.indexOf(tab))
-      .simulate('click');
+    testBed.find('templateDetails.tab').at(tabs.indexOf(tab)).simulate('click');
   };
 
   const clickReloadButton = () => {
@@ -99,10 +98,7 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
 
     clickActionMenu(templateName);
 
-    component
-      .find('.euiContextMenuItem')
-      .at(actions.indexOf(action))
-      .simulate('click');
+    component.find('.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
   };
 
   const clickTemplateAt = async (index: number) => {
@@ -124,15 +120,24 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
     find('closeDetailsButton').simulate('click');
   };
 
+  const clickIncludeHiddenIndicesToggle = () => {
+    const { find } = testBed;
+    find('indexTableIncludeHiddenIndicesToggle').simulate('click');
+  };
+
+  const getIncludeHiddenIndicesToggleStatus = () => {
+    const { find } = testBed;
+    const props = find('indexTableIncludeHiddenIndicesToggle').props();
+    return Boolean(props['aria-checked']);
+  };
+
   const selectIndexDetailsTab = async (
     tab: 'settings' | 'mappings' | 'stats' | 'edit_settings'
   ) => {
     const indexDetailsTabs = ['settings', 'mappings', 'stats', 'edit_settings'];
     const { find, component } = testBed;
     await act(async () => {
-      find('detailPanelTab')
-        .at(indexDetailsTabs.indexOf(tab))
-        .simulate('click');
+      find('detailPanelTab').at(indexDetailsTabs.indexOf(tab)).simulate('click');
     });
     component.update();
   };
@@ -149,6 +154,8 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
       clickTemplateAt,
       clickCloseDetailsButton,
       clickActionMenu,
+      getIncludeHiddenIndicesToggleStatus,
+      clickIncludeHiddenIndicesToggle,
     },
   };
 };
@@ -173,6 +180,7 @@ export type TestSubjects =
   | 'noSettingsCallout'
   | 'indicesList'
   | 'indicesTab'
+  | 'indexTableIncludeHiddenIndicesToggle'
   | 'indexTableIndexNameLink'
   | 'reloadButton'
   | 'reloadIndicesButton'
