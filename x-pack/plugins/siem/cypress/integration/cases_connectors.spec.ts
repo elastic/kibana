@@ -20,7 +20,7 @@ import { CASES } from '../urls/navigation';
 describe('Cases connectors', () => {
   before(() => {
     cy.server();
-    cy.route('POST', '**/api/action').as('createConnector');
+    cy.route('POST', '**/api/actions/action').as('createConnector');
     cy.route('POST', '**/api/cases/configure').as('saveConnector');
   });
 
