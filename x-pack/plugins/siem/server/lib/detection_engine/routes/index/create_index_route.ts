@@ -29,7 +29,7 @@ export const createIndexRoute = (router: IRouter) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const clusterClient = context.core.elasticsearch.dataClient;
+        const clusterClient = context.core.elasticsearch.legacy.client;
         const siemClient = context.siem?.getSiemClient();
         const callCluster = clusterClient.callAsCurrentUser;
 
