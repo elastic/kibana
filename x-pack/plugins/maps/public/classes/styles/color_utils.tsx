@@ -80,7 +80,7 @@ export function getColorRampCenterColor(colorRampName: string): string | null {
 
 // Returns an array of color stops
 // [ stop_input_1: number, stop_output_1: color, stop_input_n: number, stop_output_n: color ]
-export function getOrdinalColorRampStops(
+export function getOrdinalMbColorRampStops(
   colorRampName: string,
   min: number,
   max: number,
