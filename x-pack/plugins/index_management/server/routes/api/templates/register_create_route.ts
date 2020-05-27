@@ -22,7 +22,7 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
   router.put(
     { path: addBasePath('/templates'), validate: { body: bodySchema, query: querySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       const { include_type_name } = req.query as TypeOf<typeof querySchema>;
       const template = req.body as TemplateDeserialized;
       const {
