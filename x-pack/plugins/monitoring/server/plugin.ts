@@ -241,7 +241,7 @@ export class Plugin {
       // Start kibana internal collection
       const serverInfo = this.serverInfo!;
       this.bulkUploader = initBulkUploader({
-        elasticsearch: core.elasticsearch,
+        elasticsearch: core.elasticsearch.legacy,
         config,
         log: kibanaMonitoringLog,
         kibanaStats: {
