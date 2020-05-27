@@ -50,17 +50,6 @@ This table includes information like the most recent status, when the monitor wa
 ID and URL, its IP address, and a dedicated sparkline showing its check status over time.
 
 [float]
-=== Creating and managing alerts
-
-[role="screenshot"]
-image::uptime/images/alert-flyout.png[Create alert flyout]
-
-To receive alerts when a monitor goes down, use the alerting menu at the top of the 
-overview page. Use a query in the alert flyout to determine which monitors to check
-with your alert. If you already have a query in the overview page search bar it will
-be carried over into this box.
-
-[float]
 === Observability integrations
 
 [role="screenshot"]

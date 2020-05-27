@@ -15,13 +15,25 @@ const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } =
     return privileges;
   }, []);
 
-export const registerPrivilegesRoute = ({ license, router }: RouteDependencies) => {
+export const registerPrivilegesRoute = ({ license, router, config }: RouteDependencies) => {
   router.get(
     {
       path: `${API_BASE_PATH}/privileges`,
       validate: false,
     },
     license.guardApiRoute(async (ctx, req, res) => {
+      const privilegesResult: Privileges = {
+        hasAllPrivileges: true,
+        missingPrivileges: {
+          cluster: [],
+        },
+      };
+
+      // Skip the privileges check if security is not enabled
+      if (!config.isSecurityEnabled()) {
+        return res.ok({ body: privilegesResult });
+      }
+
       const {
         core: {
           elasticsearch: {
@@ -29,13 +41,6 @@ export const registerPrivilegesRoute = ({ license, router }: RouteDependencies) 
           },
         },
       } = ctx;
-
-      const privilegesResult: Privileges = {
-        hasAllPrivileges: true,
-        missingPrivileges: {
-          cluster: [],
-        },
-      };
 
       try {
         const { has_all_requested: hasAllPrivileges, cluster } = await client.callAsCurrentUser(
@@ -57,7 +62,7 @@ export const registerPrivilegesRoute = ({ license, router }: RouteDependencies) 
 
         return res.ok({ body: privilegesResult });
       } catch (e) {
-        return res.internalError(e);
+        return res.internalError({ body: e });
       }
     })
   );
