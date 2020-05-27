@@ -13,17 +13,18 @@ import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { useKibana } from '../../lib/kibana';
 import { createFilter } from '../add_filter_to_global_search_bar';
-import { useTimelineContext } from '../../../timelines/components/timeline/timeline_context';
 import { StatefulTopN } from '../top_n';
 
 import { allowTopN } from './helpers';
 import * as i18n from './translations';
+import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 
 interface Props {
   draggableId?: DraggableId;
   field: string;
   onFilterAdded?: () => void;
   showTopN: boolean;
+  timelineId?: string;
   toggleTopN: () => void;
   value?: string[] | string | null;
 }
@@ -33,20 +34,30 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   field,
   onFilterAdded,
   showTopN,
+  timelineId,
   toggleTopN,
   value,
 }) => {
   const startDragToTimeline = useAddToTimeline({ draggableId, fieldName: field });
   const kibana = useKibana();
-  const { filterManager: timelineFilterManager } = useTimelineContext();
-  const filterManager = useMemo(() => kibana.services.data.query.filterManager, [
+  const filterManagerBackup = useMemo(() => kibana.services.data.query.filterManager, [
     kibana.services.data.query.filterManager,
   ]);
-
+  const [manageTimeline] = useManageTimeline();
+  const { filterManager } = useMemo(
+    () =>
+      timelineId && manageTimeline[timelineId] && manageTimeline[timelineId].timelineContextState
+        ? { filterManager: filterManagerBackup, ...manageTimeline[timelineId].timelineContextState }
+        : {
+            filterManager: filterManagerBackup,
+            isLoading: false,
+          },
+    [timelineId, manageTimeline[timelineId ?? 0], filterManagerBackup]
+  );
   const filterForValue = useCallback(() => {
     const filter =
       value?.length === 0 ? createFilter(field, undefined) : createFilter(field, value);
-    const activeFilterManager = timelineFilterManager ?? filterManager;
+    const activeFilterManager = filterManager;
 
     if (activeFilterManager != null) {
       activeFilterManager.addFilters(filter);
@@ -55,12 +66,12 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
         onFilterAdded();
       }
     }
-  }, [field, value, timelineFilterManager, filterManager, onFilterAdded]);
+  }, [field, value, filterManager, onFilterAdded]);
 
   const filterOutValue = useCallback(() => {
     const filter =
       value?.length === 0 ? createFilter(field, null, false) : createFilter(field, value, true);
-    const activeFilterManager = timelineFilterManager ?? filterManager;
+    const activeFilterManager = filterManager;
 
     if (activeFilterManager != null) {
       activeFilterManager.addFilters(filter);
@@ -69,7 +80,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
         onFilterAdded();
       }
     }
-  }, [field, value, timelineFilterManager, filterManager, onFilterAdded]);
+  }, [field, value, filterManager, onFilterAdded]);
 
   return (
     <>

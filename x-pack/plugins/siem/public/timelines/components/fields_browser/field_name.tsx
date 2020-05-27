@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiHighlight, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useContext, useState, useMemo } from 'react';
+import { EuiHighlight, EuiText } from '@elastic/eui';
+import React, { useCallback, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { OnUpdateColumns } from '../timeline/events';
-import { TimelineContext } from '../timeline/timeline_context';
 import { WithHoverActions } from '../../../common/components/with_hover_actions';
-import { LoadingSpinner } from './helpers';
-import * as i18n from './translations';
 import { DraggableWrapperHoverContent } from '../../../common/components/drag_and_drop/draggable_wrapper_hover_content';
 
 /**
@@ -73,43 +70,6 @@ export const FieldNameContainer = styled.span`
 
 FieldNameContainer.displayName = 'FieldNameContainer';
 
-const ViewCategoryIcon = styled(EuiIcon)`
-  margin-left: 5px;
-`;
-
-ViewCategoryIcon.displayName = 'ViewCategoryIcon';
-
-interface ToolTipProps {
-  categoryId: string;
-  onUpdateColumns: OnUpdateColumns;
-  categoryColumns: ColumnHeaderOptions[];
-}
-
-const ViewCategory = React.memo<ToolTipProps>(
-  ({ categoryId, onUpdateColumns, categoryColumns }) => {
-    const { isLoading } = useContext(TimelineContext);
-    return (
-      <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
-        {!isLoading ? (
-          <EuiButtonIcon
-            aria-label={i18n.VIEW_CATEGORY(categoryId)}
-            color="text"
-            data-test-subj="view-category"
-            onClick={() => {
-              onUpdateColumns(categoryColumns);
-            }}
-            iconType="visTable"
-          />
-        ) : (
-          <LoadingSpinner size="m" />
-        )}
-      </EuiToolTip>
-    );
-  }
-);
-
-ViewCategory.displayName = 'ViewCategory';
-
 /** Renders a field name in it's non-dragging state */
 export const FieldName = React.memo<{
   categoryId: string;
@@ -117,7 +77,8 @@ export const FieldName = React.memo<{
   fieldId: string;
   highlight?: string;
   onUpdateColumns: OnUpdateColumns;
-}>(({ fieldId, highlight = '' }) => {
+  timelineId: string;
+}>(({ fieldId, highlight = '', timelineId }) => {
   const [showTopN, setShowTopN] = useState<boolean>(false);
   const toggleTopN = useCallback(() => {
     setShowTopN(!showTopN);
@@ -125,9 +86,14 @@ export const FieldName = React.memo<{
 
   const hoverContent = useMemo(
     () => (
-      <DraggableWrapperHoverContent field={fieldId} showTopN={showTopN} toggleTopN={toggleTopN} />
+      <DraggableWrapperHoverContent
+        field={fieldId}
+        showTopN={showTopN}
+        toggleTopN={toggleTopN}
+        timelineId={timelineId}
+      />
     ),
-    [fieldId, showTopN, toggleTopN]
+    [fieldId, showTopN, toggleTopN, timelineId]
   );
 
   const render = useCallback(

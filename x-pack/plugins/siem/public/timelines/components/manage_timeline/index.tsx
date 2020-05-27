@@ -27,16 +27,16 @@ export interface TimelineTypeContext {
   title?: string;
   unit?: (totalCount: number) => string;
 }
-export interface ManageTimeline {
-  timelineContextState: TimelineContextState;
-  timelineTypeContext: TimelineTypeContext;
+interface ManageTimeline {
+  timelineContextState?: TimelineContextState;
+  timelineTypeContext?: TimelineTypeContext;
 }
 
-export interface ManageTimelineById {
+interface ManageTimelineById {
   [id: string]: ManageTimeline;
 }
 const initManageTimeline: ManageTimelineById = {};
-export type ActionManageTimeline =
+type ActionManageTimeline =
   | {
       type: 'setTimelineContextState';
       id: string;
@@ -48,28 +48,45 @@ export type ActionManageTimeline =
       timelineTypeContext: TimelineTypeContext;
     };
 
-export const ManageTimelineContext = createContext<
-  [ManageTimelineById, Dispatch<ActionManageTimeline>]
->([initManageTimeline, () => noop]);
+const ManageTimelineContext = createContext<[ManageTimelineById, Dispatch<ActionManageTimeline>]>([
+  initManageTimeline,
+  () => noop,
+]);
 
 export const useManageTimeline = () => useContext(ManageTimelineContext);
 
 interface ManageGlobalTimelineProps {
   children: React.ReactNode;
+  manageTimelineForTesting?: ManageTimelineById;
 }
 
-export const ManageGlobalTimeline = ({ children }: ManageGlobalTimelineProps) => {
+export const ManageGlobalTimeline = ({
+  children,
+  manageTimelineForTesting,
+}: ManageGlobalTimelineProps) => {
   const reducerManageTimeline = (state: ManageTimelineById, action: ActionManageTimeline) => {
     switch (action.type) {
       case 'setTimelineContextState':
         return {
           ...state,
-          [action.id]: { ...state[action.id], timelineContextState: action.timelineContextState },
+          [action.id]: {
+            ...state[action.id],
+            timelineContextState:
+              state[action.id] && state[action.id].timelineContextState
+                ? { ...state[action.id].timelineContextState, ...action.timelineContextState }
+                : action.timelineContextState,
+          },
         };
       case 'setTimelineTypeContext':
         return {
           ...state,
-          [action.id]: { ...state[action.id], timelineTypeContext: action.timelineTypeContext },
+          [action.id]: {
+            ...state[action.id],
+            timelineTypeContext:
+              state[action.id] && state[action.id].timelineTypeContext
+                ? { ...state[action.id].timelineTypeContext, ...action.timelineTypeContext }
+                : action.timelineTypeContext,
+          },
         };
       default:
         return state;
@@ -77,21 +94,10 @@ export const ManageGlobalTimeline = ({ children }: ManageGlobalTimelineProps) =>
   };
 
   return (
-    <ManageTimelineContext.Provider value={useReducer(reducerManageTimeline, initManageTimeline)}>
+    <ManageTimelineContext.Provider
+      value={useReducer(reducerManageTimeline, manageTimelineForTesting ?? initManageTimeline)}
+    >
       {children}
     </ManageTimelineContext.Provider>
   );
 };
-//
-// interface ManageGlobalTimelineProps {
-// }
-//
-// export const ManageGlobalTimeline = () => {
-//   const [state, dispatch] = useManageTimeline();
-//
-//   return (
-//     <>
-//         <p>What goes here???</p>
-//     </>
-//   );
-// };

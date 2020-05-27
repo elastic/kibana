@@ -111,7 +111,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       manageTimeline[ACTIVE_TIMELINE_REDUX_ID].timelineTypeContext
         ? manageTimeline[ACTIVE_TIMELINE_REDUX_ID].timelineTypeContext
         : {},
-    [manageTimeline[ACTIVE_TIMELINE_REDUX_ID].timelineTypeContext]
+    [manageTimeline[ACTIVE_TIMELINE_REDUX_ID]]
   );
   const { documentType, id: timelineId, indexToAdd } = timelineTypeContext;
 

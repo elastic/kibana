@@ -59,6 +59,7 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
           itemsCount={2}
           onClick={[Function]}
           serverSideEventCount={15546}
+          timelineTypeContext={Object {}}
         />
       </EuiFlexGroup>
     </EuiFlexItem>

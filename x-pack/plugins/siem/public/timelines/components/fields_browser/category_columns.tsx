@@ -7,17 +7,17 @@
 /* eslint-disable react/display-name */
 
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../common/containers/source';
 import { getColumnsWithTimestamp } from '../../../common/components/event_details/helpers';
 import { CountBadge } from '../../../common/components/page';
 import { OnUpdateColumns } from '../timeline/events';
-import { TimelineContext } from '../timeline/timeline_context';
 import { WithHoverActions } from '../../../common/components/with_hover_actions';
 import { LoadingSpinner, getCategoryPaneCategoryClassName, getFieldCount } from './helpers';
 import * as i18n from './translations';
+import { useManageTimeline } from '../manage_timeline';
 
 const CategoryName = styled.span<{ bold: boolean }>`
   .euiText {
@@ -44,32 +44,47 @@ interface ToolTipProps {
   categoryId: string;
   browserFields: BrowserFields;
   onUpdateColumns: OnUpdateColumns;
+  timelineId: string;
 }
 
-const ToolTip = React.memo<ToolTipProps>(({ categoryId, browserFields, onUpdateColumns }) => {
-  const { isLoading } = useContext(TimelineContext);
-  return (
-    <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
-      {!isLoading ? (
-        <EuiIcon
-          aria-label={i18n.VIEW_CATEGORY(categoryId)}
-          color="text"
-          onClick={() => {
-            onUpdateColumns(
-              getColumnsWithTimestamp({
-                browserFields,
-                category: categoryId,
-              })
-            );
-          }}
-          type="visTable"
-        />
-      ) : (
-        <LoadingSpinner size="m" />
-      )}
-    </EuiToolTip>
-  );
-});
+const ToolTip = React.memo<ToolTipProps>(
+  ({ categoryId, browserFields, onUpdateColumns, timelineId }) => {
+    const [manageTimeline] = useManageTimeline();
+    const { isLoading } = useMemo(
+      () =>
+        manageTimeline[timelineId] && manageTimeline[timelineId].timelineContextState
+          ? {
+              isLoading: false,
+              ...manageTimeline[timelineId].timelineContextState,
+            }
+          : {
+              isLoading: false,
+            },
+      [manageTimeline[timelineId]]
+    );
+    return (
+      <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
+        {!isLoading ? (
+          <EuiIcon
+            aria-label={i18n.VIEW_CATEGORY(categoryId)}
+            color="text"
+            onClick={() => {
+              onUpdateColumns(
+                getColumnsWithTimestamp({
+                  browserFields,
+                  category: categoryId,
+                })
+              );
+            }}
+            type="visTable"
+          />
+        ) : (
+          <LoadingSpinner size="m" />
+        )}
+      </EuiToolTip>
+    );
+  }
+);
 
 ToolTip.displayName = 'ToolTip';
 
@@ -107,6 +122,7 @@ export const getCategoryColumns = ({
                     categoryId={categoryId}
                     browserFields={browserFields}
                     onUpdateColumns={onUpdateColumns}
+                    timelineId={timelineId}
                   />
                 }
                 render={() => (

@@ -19,7 +19,7 @@ const initTimelineContext: TimelineContextState = { filterManager: undefined, is
 export const TimelineContext = createContext<TimelineContextState>(initTimelineContext);
 export const useTimelineContext = () => useContext(TimelineContext);
 
-export interface TimelineTypeContextProps {
+interface TimelineTypeContextProps {
   documentType?: string;
   footerText?: string;
   id?: string;

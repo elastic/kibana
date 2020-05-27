@@ -10,6 +10,7 @@ exports[`Header renders correctly against snapshot 1`] = `
         "width": 190,
       }
     }
+    isLoading={false}
     isResizing={false}
     onClick={[Function]}
     sort={
@@ -27,6 +28,7 @@ exports[`Header renders correctly against snapshot 1`] = `
           "width": 190,
         }
       }
+      isLoading={false}
       onColumnRemoved={[MockFunction]}
       sort={
         Object {

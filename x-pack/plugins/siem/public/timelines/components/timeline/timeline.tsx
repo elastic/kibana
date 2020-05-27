@@ -6,7 +6,7 @@
 
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
@@ -31,13 +31,13 @@ import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
 import { combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
-import { ManageTimelineContext } from './timeline_context';
 import {
   esQuery,
   Filter,
   FilterManager,
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
+import { useManageTimeline } from '../manage_timeline';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -163,6 +163,26 @@ export const TimelineComponent: React.FC<Props> = ({
     }),
     [sort.columnId, sort.sortDirection]
   );
+  const [isQueryLoading, setIsQueryLoading] = useState(false);
+  const [, dispatchTimeline] = useManageTimeline();
+  useEffect(() => {
+    dispatchTimeline({
+      type: 'setTimelineContextState',
+      id,
+      timelineContextState: {
+        filterManager,
+        isLoading: isQueryLoading || loadingIndexName,
+      },
+    });
+    dispatchTimeline({
+      type: 'setTimelineTypeContext',
+      id,
+      timelineTypeContext: {
+        indexToAdd,
+        id,
+      },
+    });
+  }, [filterManager, isQueryLoading]);
 
   return (
     <TimelineContainer data-test-subj="timeline">
@@ -209,55 +229,53 @@ export const TimelineComponent: React.FC<Props> = ({
             loadMore,
             getUpdatedAt,
             refetch,
-          }) => (
-            <ManageTimelineContext
-              filterManager={filterManager}
-              indexToAdd={indexToAdd}
-              loading={loading || loadingIndexName}
-              type={{ id }}
-            >
-              <TimelineRefetch
-                id={id}
-                inputId="timeline"
-                inspect={inspect}
-                loading={loading}
-                refetch={refetch}
-              />
-              <StyledEuiFlyoutBody
-                data-test-subj="eui-flyout-body"
-                className="timeline-flyout-body"
-              >
-                <StatefulBody
-                  browserFields={browserFields}
-                  data={events}
+          }) => {
+            setIsQueryLoading(loading);
+            return (
+              <>
+                <TimelineRefetch
                   id={id}
-                  sort={sort}
-                  toggleColumn={toggleColumn}
+                  inputId="timeline"
+                  inspect={inspect}
+                  loading={loading}
+                  refetch={refetch}
                 />
-              </StyledEuiFlyoutBody>
-              <StyledEuiFlyoutFooter
-                data-test-subj="eui-flyout-footer"
-                className="timeline-flyout-footer"
-              >
-                <Footer
-                  getUpdatedAt={getUpdatedAt}
-                  hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                  height={footerHeight}
-                  id={id}
-                  isLive={isLive}
-                  isLoading={loading || loadingIndexName}
-                  itemsCount={events.length}
-                  itemsPerPage={itemsPerPage}
-                  itemsPerPageOptions={itemsPerPageOptions}
-                  nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                  onChangeItemsPerPage={onChangeItemsPerPage}
-                  onLoadMore={loadMore}
-                  serverSideEventCount={totalCount}
-                  tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                />
-              </StyledEuiFlyoutFooter>
-            </ManageTimelineContext>
-          )}
+                <StyledEuiFlyoutBody
+                  data-test-subj="eui-flyout-body"
+                  className="timeline-flyout-body"
+                >
+                  <StatefulBody
+                    browserFields={browserFields}
+                    data={events}
+                    id={id}
+                    sort={sort}
+                    toggleColumn={toggleColumn}
+                  />
+                </StyledEuiFlyoutBody>
+                <StyledEuiFlyoutFooter
+                  data-test-subj="eui-flyout-footer"
+                  className="timeline-flyout-footer"
+                >
+                  <Footer
+                    getUpdatedAt={getUpdatedAt}
+                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                    height={footerHeight}
+                    id={id}
+                    isLive={isLive}
+                    isLoading={loading || loadingIndexName}
+                    itemsCount={events.length}
+                    itemsPerPage={itemsPerPage}
+                    itemsPerPageOptions={itemsPerPageOptions}
+                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                    onChangeItemsPerPage={onChangeItemsPerPage}
+                    onLoadMore={loadMore}
+                    serverSideEventCount={totalCount}
+                    tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                  />
+                </StyledEuiFlyoutFooter>
+              </>
+            );
+          }}
         </TimelineQuery>
       ) : null}
     </TimelineContainer>

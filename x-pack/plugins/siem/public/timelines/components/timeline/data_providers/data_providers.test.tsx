@@ -13,7 +13,12 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { DataProviders } from '.';
 import { DataProvider } from './data_provider';
 import { mockDataProviders } from './mock/mock_data_providers';
+import { ManageGlobalTimeline } from '../../manage_timeline';
+import { FilterManager } from '../../../../../../../../src/plugins/data/public/query/filter_manager';
+import { createKibanaCoreStartMock } from '../../../../common/mock/kibana_core';
+const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
 
+const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 describe('DataProviders', () => {
   const mount = useMountAppended();
 
@@ -21,18 +26,31 @@ describe('DataProviders', () => {
     const dropMessage = ['Drop', 'query', 'build', 'here'];
 
     test('renders correctly against snapshot', () => {
+      const manageTimelineForTesting = {
+        foo: {
+          timelineContextState: {
+            filterManager,
+            isLoading: false,
+          },
+        },
+      };
       const wrapper = shallow(
-        <DataProviders
-          browserFields={{}}
-          id="foo"
-          dataProviders={mockDataProviders}
-          onDataProviderEdited={jest.fn()}
-          onDataProviderRemoved={jest.fn()}
-          onToggleDataProviderEnabled={jest.fn()}
-          onToggleDataProviderExcluded={jest.fn()}
-        />
+        <TestProviders>
+          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
+            <DataProviders
+              browserFields={{}}
+              id="foo"
+              data-test-subj="dataProviders-container"
+              dataProviders={mockDataProviders}
+              onDataProviderEdited={jest.fn()}
+              onDataProviderRemoved={jest.fn()}
+              onToggleDataProviderEnabled={jest.fn()}
+              onToggleDataProviderExcluded={jest.fn()}
+            />
+          </ManageGlobalTimeline>
+        </TestProviders>
       );
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find(`[data-test-subj="dataProviders-container"]`).dive()).toMatchSnapshot();
     });
 
     test('it should render a placeholder when there are zero data providers', () => {
