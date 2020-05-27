@@ -55,6 +55,13 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
     }
   );
 
+  const timestampActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.timestampDescription',
+    {
+      defaultMessage: 'A timestamp of when the alert was detected.',
+    }
+  );
+
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: 'Metric threshold',
@@ -82,6 +89,7 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
         { name: 'group', description: groupActionVariableDescription },
         { name: 'alertState', description: alertStateActionVariableDescription },
         { name: 'reason', description: reasonActionVariableDescription },
+        { name: 'timestamp', description: timestampActionVariableDescription },
       ],
     },
     producer: 'metrics',

@@ -5,6 +5,7 @@
  */
 import { mapValues, first } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { InfraDatabaseSearchResponse } from '../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../utils/create_afterkey_handler';
 import { getAllCompositeData } from '../../../utils/get_all_composite_data';
@@ -336,6 +337,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
           group,
           alertState: stateToAlertMessage[nextState],
           reason,
+          timestamp: moment().toISOString(),
         });
       }
 
