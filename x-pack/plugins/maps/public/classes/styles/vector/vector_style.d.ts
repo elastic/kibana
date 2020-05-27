@@ -12,11 +12,13 @@ import {
   VectorStyleDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../common/descriptor_types';
+import { StyleMeta } from './style_meta';
 
 export interface IVectorStyle extends IStyle {
   getAllStyleProperties(): IStyleProperty[];
   getDynamicPropertiesArray(): IDynamicStyleProperty[];
   getSourceFieldNames(): string[];
+  getStyleMeta(): StyleMeta;
 }
 
 export class VectorStyle extends AbstractStyle implements IVectorStyle {
@@ -26,4 +28,5 @@ export class VectorStyle extends AbstractStyle implements IVectorStyle {
   getSourceFieldNames(): string[];
   getAllStyleProperties(): IStyleProperty[];
   getDynamicPropertiesArray(): IDynamicStyleProperty[];
+  getStyleMeta(): StyleMeta;
 }

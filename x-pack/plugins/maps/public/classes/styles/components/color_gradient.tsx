@@ -5,7 +5,13 @@
  */
 
 import React from 'react';
-import { COLOR_RAMP_NAMES, getRGBColorRangeStrings, getLinearGradient } from '../color_utils';
+import {
+  COLOR_RAMP_NAMES,
+  GRADIENT_INTERVALS,
+  getRGBColorRangeStrings,
+  getLinearGradient,
+} from '../color_utils';
+import classNames from 'classnames';
 
 interface Props {
   colorRamp?: string[];
@@ -17,7 +23,7 @@ export const ColorGradient = ({ colorRamp, colorRampName }: Props) => {
     return null;
   }
 
-  const rgbColorStrings = colorRampName ? getRGBColorRangeStrings(colorRampName) : colorRamp!;
+  const rgbColorStrings = colorRampName ? getRGBColorRangeStrings(colorRampName, GRADIENT_INTERVALS) : colorRamp!;
   const background = getLinearGradient(rgbColorStrings);
   return <div className="mapColorGradient" style={{ background }} />;
 };
