@@ -26,6 +26,9 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { clearTransientLayerStateAndCloseFlyout } from '../actions';
 import { updateBreadcrumbs } from './breadcrumbs';
 
+/**
+ * @return {null}
+ */
 export function MapsTopNavMenu(props) {
   const { TopNavMenu } = getNavigation().ui;
   const {
@@ -42,7 +45,6 @@ export function MapsTopNavMenu(props) {
   const [indexPatterns, setIndexPatterns] = useState([]);
   const [savedQuery, setSavedQuery] = useState(null);
   const { filterManager } = getData().query;
-  const showDatePicker = true;
   const showSaveQuery = getMapsCapabilities().saveQuery;
   const onClearSavedQuery = () => {
     setSavedQuery(null);
@@ -58,48 +60,52 @@ export function MapsTopNavMenu(props) {
   };
 
   return (
-    <TopNavMenu
-      appName="maps"
-      config={topNavConfig(store, savedMap, initialLayerListConfig)}
-      indexPatterns={indexPatterns}
-      filters={filterManager.getFilters()}
-      query={query}
-      onQuerySubmit={function ({ dateRange, query }) {
-        onQueryChange({
-          query,
-          time: dateRange,
-          refresh: true,
-        });
-      }}
-      onFiltersUpdated={function (filters) {
-        onQueryChange({
-          filters,
-        });
-      }}
-      dateRangeFrom={time.from}
-      dateRangeTo={time.to}
-      isRefreshPaused={refreshConfig.isPaused}
-      refreshInterval={refreshConfig.interval}
-      onRefreshChange={function ({ isPaused, refreshInterval }) {
-        setRefreshConfig(
-          {
-            isPaused,
-            interval: refreshInterval ? refreshInterval : refreshConfig.interval,
-          },
-          () => store.dispatch(setRefreshConfig(refreshConfig))
-        );
-        // TODO: Global sync state
-        // syncAppAndGlobalState();
-      }}
-      showSearchBar={isVisible}
-      showFilterBar={isVisible}
-      showDatePicker={showDatePicker}
-      showSaveQuery={showSaveQuery}
-      savedQuery={savedQuery}
-      onSaved={setSavedQuery}
-      onSavedQueryUpdated={(savedQuery) => setSavedQuery({ ...savedQuery })}
-      onClearSavedQuery={onClearSavedQuery}
-    />
+    isVisible
+    ? (
+      <TopNavMenu
+        appName="maps"
+        config={topNavConfig(store, savedMap, initialLayerListConfig)}
+        indexPatterns={indexPatterns}
+        filters={filterManager.getFilters()}
+        query={query}
+        onQuerySubmit={function ({ dateRange, query }) {
+          onQueryChange({
+            query,
+            time: dateRange,
+            refresh: true,
+          });
+        }}
+        onFiltersUpdated={function (filters) {
+          onQueryChange({
+            filters,
+          });
+        }}
+        dateRangeFrom={time.from}
+        dateRangeTo={time.to}
+        isRefreshPaused={refreshConfig.isPaused}
+        refreshInterval={refreshConfig.interval}
+        onRefreshChange={function ({ isPaused, refreshInterval }) {
+          setRefreshConfig(
+            {
+              isPaused,
+              interval: refreshInterval ? refreshInterval : refreshConfig.interval,
+            },
+            () => store.dispatch(setRefreshConfig(refreshConfig))
+          );
+          // TODO: Global sync state
+          // syncAppAndGlobalState();
+        }}
+        showSearchBar={true}
+        showFilterBar={true}
+        showDatePicker={true}
+        showSaveQuery={showSaveQuery}
+        savedQuery={savedQuery}
+        onSaved={setSavedQuery}
+        onSavedQueryUpdated={(savedQuery) => setSavedQuery({ ...savedQuery })}
+        onClearSavedQuery={onClearSavedQuery}
+      />
+    )
+    : null
   );
 }
 
