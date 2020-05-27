@@ -87,7 +87,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       const fileLayers = await emsClient.getFileLayers();
-      const layer = fileLayers.find(layer => layer.getId() === request.query.id);
+      const layer = fileLayers.find((layer) => layer.getId() === request.query.id);
       if (!layer) {
         return null;
       }
@@ -124,7 +124,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       const tmsServices = await emsClient.getTMSServices();
-      const tmsService = tmsServices.find(layer => layer.getId() === request.query.id);
+      const tmsService = tmsServices.find((layer) => layer.getId() === request.query.id);
       if (!tmsService) {
         return null;
       }
@@ -155,8 +155,8 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       };
 
       //rewrite the urls to the submanifest
-      const tileService = main.services.find(service => service.type === 'tms');
-      const fileService = main.services.find(service => service.type === 'file');
+      const tileService = main.services.find((service) => service.type === 'tms');
+      const fileService = main.services.find((service) => service.type === 'file');
       if (tileService) {
         proxiedManifest.services.push({
           ...tileService,
@@ -186,7 +186,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       const file = await emsClient.getDefaultFileManifest();
-      const layers = file.layers.map(layer => {
+      const layers = file.layers.map((layer) => {
         const newLayer = { ...layer };
         const id = encodeURIComponent(layer.layer_id);
         const newUrl = `${EMS_FILES_DEFAULT_JSON_PATH}?id=${id}`;
@@ -216,13 +216,13 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       const tilesManifest = await emsClient.getDefaultTMSManifest();
-      const newServices = tilesManifest.services.map(service => {
+      const newServices = tilesManifest.services.map((service) => {
         const newService = {
           ...service,
         };
 
         newService.formats = [];
-        const rasterFormats = service.formats.filter(format => format.format === 'raster');
+        const rasterFormats = service.formats.filter((format) => format.format === 'raster');
         if (rasterFormats.length) {
           const newUrl = `${EMS_TILES_RASTER_STYLE_PATH}?id=${service.id}`;
           newService.formats.push({
@@ -230,7 +230,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
             url: newUrl,
           });
         }
-        const vectorFormats = service.formats.filter(format => format.format === 'vector');
+        const vectorFormats = service.formats.filter((format) => format.format === 'vector');
         if (vectorFormats.length) {
           const newUrl = `${EMS_TILES_VECTOR_STYLE_PATH}?id=${service.id}`;
           newService.formats.push({
@@ -269,7 +269,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       const tmsServices = await emsClient.getTMSServices();
-      const tmsService = tmsServices.find(layer => layer.getId() === request.query.id);
+      const tmsService = tmsServices.find((layer) => layer.getId() === request.query.id);
       if (!tmsService) {
         return null;
       }
@@ -305,7 +305,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       const tmsServices = await emsClient.getTMSServices();
-      const tmsService = tmsServices.find(layer => layer.getId() === request.query.id);
+      const tmsService = tmsServices.find((layer) => layer.getId() === request.query.id);
       if (!tmsService) {
         return null;
       }
@@ -355,7 +355,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       const tmsServices = await emsClient.getTMSServices();
-      const tmsService = tmsServices.find(layer => layer.getId() === request.query.id);
+      const tmsService = tmsServices.find((layer) => layer.getId() === request.query.id);
       if (!tmsService) {
         return null;
       }
@@ -403,7 +403,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       const tmsServices = await emsClient.getTMSServices();
-      const tmsService = tmsServices.find(layer => layer.getId() === request.query.id);
+      const tmsService = tmsServices.find((layer) => layer.getId() === request.query.id);
       if (!tmsService) {
         return null;
       }
@@ -455,7 +455,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       const tmsServices = await emsClient.getTMSServices();
-      const tmsService = tmsServices.find(layer => layer.getId() === request.params.id);
+      const tmsService = tmsServices.find((layer) => layer.getId() === request.params.id);
       if (!tmsService) {
         return null;
       }
@@ -502,7 +502,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       try {
-        const resp = await con.core.elasticsearch.dataClient.callAsCurrentUser(
+        const resp = await con.core.elasticsearch.legacy.client.callAsCurrentUser(
           'indices.getSettings',
           {
             index: query.indexPatternTitle,

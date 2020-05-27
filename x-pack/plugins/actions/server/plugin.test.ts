@@ -83,7 +83,9 @@ describe('Actions Plugin', () => {
                 client: {},
               },
               elasticsearch: {
-                adminClient: jest.fn(),
+                legacy: {
+                  client: jest.fn(),
+                },
               },
             },
           } as unknown) as RequestHandlerContext,

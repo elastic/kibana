@@ -119,7 +119,7 @@ export class ReportingNotifierStreamHandler {
 
         return { completed: completedJobs, failed: failedJobs };
       }),
-      catchError(err => {
+      catchError((err) => {
         // show connection refused toast
         this.notifications.toasts.addDanger(
           getGeneralErrorToast(

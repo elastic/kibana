@@ -26,8 +26,8 @@ export function SearchPackages({ searchTerm, localSearchRef, allPackages }: Sear
   if (!localSearchRef.current) return <div>Still fetching matches. Try again in a moment.</div>;
 
   const matches = localSearchRef.current.search(searchTerm) as PackageList;
-  const matchingIds = matches.map(match => match[searchIdField]);
-  const filtered = allPackages.filter(item => matchingIds.includes(item[searchIdField]));
+  const matchingIds = matches.map((match) => match[searchIdField]);
+  const filtered = allPackages.filter((item) => matchingIds.includes(item[searchIdField]));
 
   return <SearchResults term={searchTerm} results={filtered} />;
 }

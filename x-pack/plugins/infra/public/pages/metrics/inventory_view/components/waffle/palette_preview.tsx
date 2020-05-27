@@ -19,7 +19,7 @@ export const PalettePreview = ({ steps, palette, reverse }: Props) => {
   const colors = getColorPalette(palette, steps, reverse);
   return (
     <Swatches>
-      {colors.map(color => (
+      {colors.map((color) => (
         <Swatch key={color} style={{ backgroundColor: color }} />
       ))}
     </Swatches>
@@ -31,11 +31,11 @@ const Swatch = euiStyled.div`
   height: 12px;
   flex: 0 0 auto;
   &:first-child {
-    border-radius: ${props => props.theme.eui.euiBorderRadius} 0 0 ${props =>
+    border-radius: ${(props) => props.theme.eui.euiBorderRadius} 0 0 ${(props) =>
   props.theme.eui.euiBorderRadius};
   }
   &:last-child {
-    border-radius: 0 ${props => props.theme.eui.euiBorderRadius} ${props =>
+    border-radius: 0 ${(props) => props.theme.eui.euiBorderRadius} ${(props) =>
   props.theme.eui.euiBorderRadius} 0;
 `;
 

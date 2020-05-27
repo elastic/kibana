@@ -27,8 +27,8 @@ import { extract, getPackData } from './pack';
 import { _downloadSingle } from './download';
 import { join } from 'path';
 
-describe('kibana cli', function() {
-  describe('pack', function() {
+describe('kibana cli', function () {
+  describe('pack', function () {
     let testNum = 0;
     const workingPathRoot = join(__dirname, '.test.data.pack');
     let testWorkingPath;
@@ -37,7 +37,7 @@ describe('kibana cli', function() {
     let logger;
     let settings;
 
-    beforeEach(function() {
+    beforeEach(function () {
       //These tests are dependent on the file system, and I had some inconsistent
       //behavior with del.sync show up. Until these tests are re-written to not
       //depend on the file system, I make sure that each test uses a different
@@ -60,7 +60,7 @@ describe('kibana cli', function() {
       Fs.mkdirSync(testWorkingPath, { recursive: true });
     });
 
-    afterEach(function() {
+    afterEach(function () {
       logger.log.restore();
       logger.error.restore();
       del.sync(workingPathRoot);
@@ -77,10 +77,10 @@ describe('kibana cli', function() {
       throw new Error('expected the promise to reject');
     }
 
-    describe('extract', function() {
+    describe('extract', function () {
       //Also only extracts the content from the kibana folder.
       //Ignores the others.
-      it('successfully extract a valid zip', function() {
+      it('successfully extract a valid zip', function () {
         return copyReplyFile('test_plugin.zip')
           .then(() => {
             return getPackData(settings, logger);
@@ -104,8 +104,8 @@ describe('kibana cli', function() {
       });
     });
 
-    describe('getPackData', function() {
-      it('populate settings.plugins', function() {
+    describe('getPackData', function () {
+      it('populate settings.plugins', function () {
         return copyReplyFile('test_plugin.zip')
           .then(() => {
             return getPackData(settings, logger);
@@ -118,7 +118,7 @@ describe('kibana cli', function() {
           });
       });
 
-      it('populate settings.plugin.kibanaVersion', function() {
+      it('populate settings.plugin.kibanaVersion', function () {
         //kibana.version is defined in this package.json and is different than plugin version
         return copyReplyFile('test_plugin_different_version.zip')
           .then(() => {
@@ -129,7 +129,7 @@ describe('kibana cli', function() {
           });
       });
 
-      it('populate settings.plugin.kibanaVersion (default to plugin version)', function() {
+      it('populate settings.plugin.kibanaVersion (default to plugin version)', function () {
         //kibana.version is not defined in this package.json, defaults to plugin version
         return copyReplyFile('test_plugin.zip')
           .then(() => {
@@ -140,7 +140,7 @@ describe('kibana cli', function() {
           });
       });
 
-      it('populate settings.plugins with multiple plugins', function() {
+      it('populate settings.plugins with multiple plugins', function () {
         return copyReplyFile('test_plugin_many.zip')
           .then(() => {
             return getPackData(settings, logger);
@@ -172,32 +172,32 @@ describe('kibana cli', function() {
           });
       });
 
-      it('throw an error if there is no kibana plugin', function() {
+      it('throw an error if there is no kibana plugin', function () {
         return copyReplyFile('test_plugin_no_kibana.zip')
           .then(() => {
             return getPackData(settings, logger);
           })
-          .then(shouldReject, err => {
+          .then(shouldReject, (err) => {
             expect(err.message).toMatch(/No kibana plugins found in archive/i);
           });
       });
 
-      it('throw an error with a corrupt zip', function() {
+      it('throw an error with a corrupt zip', function () {
         return copyReplyFile('corrupt.zip')
           .then(() => {
             return getPackData(settings, logger);
           })
-          .then(shouldReject, err => {
+          .then(shouldReject, (err) => {
             expect(err.message).toMatch(/error retrieving/i);
           });
       });
 
-      it('throw an error if there an invalid plugin name', function() {
+      it('throw an error if there an invalid plugin name', function () {
         return copyReplyFile('invalid_name.zip')
           .then(() => {
             return getPackData(settings, logger);
           })
-          .then(shouldReject, err => {
+          .then(shouldReject, (err) => {
             expect(err.message).toMatch(/invalid plugin name/i);
           });
       });

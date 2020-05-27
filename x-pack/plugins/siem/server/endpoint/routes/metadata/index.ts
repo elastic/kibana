@@ -75,7 +75,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           endpointAppContext,
           index
         );
-        const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
+        const response = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
           'search',
           queryParams
         )) as SearchResponse<HostMetadata>;
@@ -129,7 +129,7 @@ export async function getHostData(
     .getIndexPatternRetriever()
     .getMetadataIndexPattern(metadataRequestContext.requestHandlerContext);
   const query = getESQueryHostMetadataByID(id, index);
-  const response = (await metadataRequestContext.requestHandlerContext.core.elasticsearch.dataClient.callAsCurrentUser(
+  const response = (await metadataRequestContext.requestHandlerContext.core.elasticsearch.legacy.client.callAsCurrentUser(
     'search',
     query
   )) as SearchResponse<HostMetadata>;
@@ -154,9 +154,9 @@ async function mapToHostResultList(
       request_page_index: queryParams.from,
       hosts: await Promise.all(
         searchResponse.hits.hits
-          .map(response => response.inner_hits.most_recent.hits.hits)
-          .flatMap(data => data as HitSource)
-          .map(async entry => enrichHostMetadata(entry._source, metadataRequestContext))
+          .map((response) => response.inner_hits.most_recent.hits.hits)
+          .flatMap((data) => data as HitSource)
+          .map(async (entry) => enrichHostMetadata(entry._source, metadataRequestContext))
       ),
       total: totalNumberOfHosts,
     };

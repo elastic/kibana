@@ -117,12 +117,12 @@ export function updateSidebar(legacySections, id) {
   );
 }
 
-export const destroyReact = id => {
+export const destroyReact = (id) => {
   const node = document.getElementById(id);
   node && unmountComponentAtNode(node);
 };
 
-uiModules.get('apps/management').directive('kbnManagementApp', function($location) {
+uiModules.get('apps/management').directive('kbnManagementApp', function ($location) {
   return {
     restrict: 'E',
     template: appTemplate,
@@ -133,14 +133,14 @@ uiModules.get('apps/management').directive('kbnManagementApp', function($locatio
       pageTitle: '=',
     },
 
-    link: function($scope) {
+    link: function ($scope) {
       timefilter.disableAutoRefreshSelector();
       timefilter.disableTimeRangeSelector();
       $scope.sections = management.visibleItems;
       $scope.section = management.getSection($scope.sectionName) || management;
 
       if ($scope.section) {
-        $scope.section.items.forEach(item => {
+        $scope.section.items.forEach((item) => {
           item.active = `#${$location.path()}`.indexOf(item.url) > -1;
         });
       }
@@ -155,10 +155,10 @@ uiModules.get('apps/management').directive('kbnManagementApp', function($locatio
   };
 });
 
-uiModules.get('apps/management').directive('kbnManagementLanding', function(kbnVersion) {
+uiModules.get('apps/management').directive('kbnManagementLanding', function (kbnVersion) {
   return {
     restrict: 'E',
-    link: function($scope) {
+    link: function ($scope) {
       $scope.sections = management.visibleItems;
       $scope.kbnVersion = kbnVersion;
     },

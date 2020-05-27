@@ -24,19 +24,21 @@ import { initRegistries, populateRegistries, destroyRegistries } from './registr
 import { getDocumentationLinks } from './lib/documentation_links';
 // @ts-ignore untyped component
 import { HelpMenu } from './components/help_menu/help_menu';
-import { createStore, destroyStore } from './store';
+import { createStore } from './store';
 
 /* eslint-enable */
 import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
 
-import { startServices, stopServices, services } from './services';
+import { startServices, services } from './services';
 // @ts-ignore Untyped local
 import { destroyHistory } from './lib/history_provider';
 // @ts-ignore Untyped local
 import { stopRouter } from './lib/router_provider';
 import { initFunctions } from './functions';
+// @ts-ignore Untyped local
+import { appUnload } from './state/actions/app';
 
 import './style/index.scss';
 
@@ -68,6 +70,7 @@ export const renderApp = (
   );
   return () => {
     ReactDOM.unmountComponentAtNode(element);
+    canvasStore.dispatch(appUnload());
   };
 };
 
@@ -139,9 +142,14 @@ export const initializeCanvas = async (
 };
 
 export const teardownCanvas = (coreStart: CoreStart, startPlugins: CanvasStartDeps) => {
-  stopServices();
   destroyRegistries();
-  destroyStore();
+
+  // TODO: Not cleaning these up temporarily.
+  // We have an issue where if requests are inflight, and you navigate away,
+  // those requests could still be trying to act on the store and possibly require services.
+  // stopServices();
+  // resetInterpreter();
+  // destroyStore();
 
   coreStart.chrome.setBadge(undefined);
   coreStart.chrome.setHelpExtension(undefined);

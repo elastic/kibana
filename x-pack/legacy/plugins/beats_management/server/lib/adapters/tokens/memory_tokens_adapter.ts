@@ -15,7 +15,7 @@ export class MemoryTokensAdapter implements CMTokensAdapter {
   }
 
   public async deleteEnrollmentToken(user: FrameworkUser, enrollmentToken: string) {
-    const index = this.tokenDB.findIndex(token => token.token === enrollmentToken);
+    const index = this.tokenDB.findIndex((token) => token.token === enrollmentToken);
 
     if (index > -1) {
       this.tokenDB.splice(index, 1);
@@ -26,14 +26,14 @@ export class MemoryTokensAdapter implements CMTokensAdapter {
     user: FrameworkUser,
     tokenString: string
   ): Promise<TokenEnrollmentData> {
-    return new Promise<TokenEnrollmentData>(resolve => {
-      return resolve(this.tokenDB.find(token => token.token === tokenString));
+    return new Promise<TokenEnrollmentData>((resolve) => {
+      return resolve(this.tokenDB.find((token) => token.token === tokenString));
     });
   }
 
   public async insertTokens(user: FrameworkAuthenticatedUser, tokens: TokenEnrollmentData[]) {
-    tokens.forEach(token => {
-      const existingIndex = this.tokenDB.findIndex(t => t.token === token.token);
+    tokens.forEach((token) => {
+      const existingIndex = this.tokenDB.findIndex((t) => t.token === token.token);
       if (existingIndex !== -1) {
         this.tokenDB[existingIndex] = token;
       } else {

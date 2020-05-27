@@ -12,7 +12,7 @@ module.exports = {
   plugins: [
     prefixer({
       prefix: '.kbnCanvas',
-      transform: function(prefix, selector, prefixedSelector) {
+      transform: function (prefix, selector, prefixedSelector) {
         if (selector === 'body' || selector === 'html') {
           return prefix;
         } else {

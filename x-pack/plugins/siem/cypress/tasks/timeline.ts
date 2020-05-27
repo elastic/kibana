@@ -29,10 +29,7 @@ export const hostExistsQuery = 'host.name: *';
 
 export const addDescriptionToTimeline = (description: string) => {
   cy.get(TIMELINE_DESCRIPTION).type(`${description}{enter}`);
-  cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE)
-    .click()
-    .invoke('text')
-    .should('not.equal', 'Updating');
+  cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).click().invoke('text').should('not.equal', 'Updating');
 };
 
 export const addNameToTimeline = (name: string) => {
@@ -63,9 +60,7 @@ export const executeTimelineKQL = (query: string) => {
 };
 
 export const expandFirstTimelineEventDetails = () => {
-  cy.get(TOGGLE_TIMELINE_EXPAND_EVENT)
-    .first()
-    .click({ force: true });
+  cy.get(TOGGLE_TIMELINE_EXPAND_EVENT).first().click({ force: true });
 };
 
 export const openTimelineFieldsBrowser = () => {
@@ -85,7 +80,7 @@ export const populateTimeline = () => {
   executeTimelineKQL(hostExistsQuery);
   cy.get(SERVER_SIDE_EVENT_COUNT)
     .invoke('text')
-    .then(strCount => {
+    .then((strCount) => {
       const intCount = +strCount;
       cy.wrap(intCount).should('be.above', 0);
     });
@@ -100,9 +95,9 @@ export const uncheckTimestampToggleField = () => {
 export const dragAndDropIdToggleFieldToTimeline = () => {
   cy.get(ID_HEADER_FIELD).should('not.exist');
 
-  cy.get(ID_FIELD).then(field => drag(field));
+  cy.get(ID_FIELD).then((field) => drag(field));
 
-  cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`).then(headersDropArea =>
+  cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`).then((headersDropArea) =>
     drop(headersDropArea)
   );
 };
