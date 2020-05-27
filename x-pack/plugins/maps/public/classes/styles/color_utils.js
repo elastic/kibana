@@ -11,15 +11,11 @@ import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { ColorGradient } from './components/color_gradient';
 import { vislibColorMaps } from '../../../../../../src/plugins/charts/public';
 
-const GRADIENT_INTERVALS = 8;
+export const GRADIENT_INTERVALS = 8;
 
 export const DEFAULT_FILL_COLORS = euiPaletteColorBlind();
 export const DEFAULT_LINE_COLORS = [
-  ...DEFAULT_FILL_COLORS.map(color =>
-    tinycolor(color)
-      .darken()
-      .toHexString()
-  ),
+  ...DEFAULT_FILL_COLORS.map((color) => tinycolor(color).darken().toHexString()),
   // Explicitly add black & white as border color options
   '#000',
   '#FFF',
@@ -61,7 +57,7 @@ export function getRGBColorRangeStrings(colorRampName, numberColors = GRADIENT_I
 }
 
 export function getHexColorRangeStrings(colorRampName, numberColors = GRADIENT_INTERVALS) {
-  return getRGBColorRangeStrings(colorRampName, numberColors).map(rgbColor =>
+  return getRGBColorRangeStrings(colorRampName, numberColors).map((rgbColor) =>
     chroma(rgbColor).hex()
   );
 }
@@ -77,7 +73,7 @@ export function getColorRampCenterColor(colorRampName) {
 
 // Returns an array of color stops
 // [ stop_input_1: number, stop_output_1: color, stop_input_n: number, stop_output_n: color ]
-export function getOrdinalColorRampStops(colorRampName, min, max) {
+export function getOrdinalMbColorRampStops(colorRampName, min, max, numberColors) {
   if (!colorRampName) {
     return null;
   }
@@ -86,7 +82,7 @@ export function getOrdinalColorRampStops(colorRampName, min, max) {
     return null;
   }
 
-  const hexColors = getHexColorRangeStrings(colorRampName, GRADIENT_INTERVALS);
+  const hexColors = getHexColorRangeStrings(colorRampName, numberColors);
   if (max === min) {
     //just return single stop value
     return [max, hexColors[hexColors.length - 1]];
@@ -99,7 +95,7 @@ export function getOrdinalColorRampStops(colorRampName, min, max) {
   }, []);
 }
 
-export const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map(colorRampName => ({
+export const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map((colorRampName) => ({
   value: colorRampName,
   inputDisplay: <ColorGradient colorRampName={colorRampName} />,
 }));
@@ -132,12 +128,12 @@ const COLOR_PALETTES_CONFIGS = [
 ];
 
 export function getColorPalette(paletteId) {
-  const palette = COLOR_PALETTES_CONFIGS.find(palette => palette.id === paletteId);
+  const palette = COLOR_PALETTES_CONFIGS.find((palette) => palette.id === paletteId);
   return palette ? palette.colors : null;
 }
 
-export const COLOR_PALETTES = COLOR_PALETTES_CONFIGS.map(palette => {
-  const paletteDisplay = palette.colors.map(color => {
+export const COLOR_PALETTES = COLOR_PALETTES_CONFIGS.map((palette) => {
+  const paletteDisplay = palette.colors.map((color) => {
     const style = {
       backgroundColor: color,
       width: `${100 / palette.colors.length}%`,

@@ -22,14 +22,14 @@ export function handleAncestry(
     try {
       const indexRetriever = endpointAppContext.service.getIndexPatternRetriever();
 
-      const client = context.core.elasticsearch.dataClient;
+      const client = context.core.elasticsearch.legacy.client;
       const indexPattern = await indexRetriever.getEventIndexPattern(context);
 
       const fetcher = new Fetcher(client, id, indexPattern, endpointID);
-      const tree = await fetcher.ancestors(ancestors + 1);
+      const ancestorInfo = await fetcher.ancestors(ancestors);
 
       return res.ok({
-        body: tree.render(),
+        body: ancestorInfo,
       });
     } catch (err) {
       log.warn(err);

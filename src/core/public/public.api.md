@@ -116,6 +116,7 @@ export interface ApplicationStart {
         path?: string;
         state?: any;
     }): Promise<void>;
+    navigateToUrl(url: string): Promise<void>;
     // @deprecated
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }

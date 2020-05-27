@@ -115,9 +115,7 @@ export const FormattedRelativePreferenceDate = ({ value }: { value?: string | nu
   const date = maybeDate.toDate();
   return (
     <LocalizedDateTooltip date={date}>
-      {moment(date)
-        .add(1, 'hours')
-        .isBefore(new Date()) ? (
+      {moment(date).add(1, 'hours').isBefore(new Date()) ? (
         <PreferenceFormattedDate data-test-subj="preference-time" value={date} />
       ) : (
         <FormattedRelative data-test-subj="relative-time" value={date} />
@@ -146,9 +144,7 @@ export const FormattedRelativePreferenceLabel = ({
   if (!maybeDate.isValid()) {
     return null;
   }
-  return moment(maybeDate.toDate())
-    .add(1, 'hours')
-    .isBefore(new Date()) ? (
+  return moment(maybeDate.toDate()).add(1, 'hours').isBefore(new Date()) ? (
     <>{preferenceLabel}</>
   ) : (
     <>{relativeLabel}</>

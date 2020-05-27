@@ -48,7 +48,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
   constructor(descriptor: Partial<EMSFileSourceDescriptor>, inspectorAdapters?: Adapters) {
     super(EMSFileSource.createDescriptor(descriptor), inspectorAdapters);
     this._descriptor = EMSFileSource.createDescriptor(descriptor);
-    this._tooltipFields = this._descriptor.tooltipProperties.map(propertyKey =>
+    this._tooltipFields = this._descriptor.tooltipProperties.map((propertyKey) =>
       this.createField({ fieldName: propertyKey })
     );
   }
@@ -77,8 +77,10 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     const emsClient = getEMSClient();
     // @ts-ignore
     const emsFileLayers = await emsClient.getFileLayers();
-    // @ts-ignore
-    const emsFileLayer = emsFileLayers.find(fileLayer => fileLayer.getId() === this._descriptor.id);
+    const emsFileLayer = emsFileLayers.find(
+      // @ts-ignore
+      (fileLayer) => fileLayer.getId() === this._descriptor.id
+    );
     if (!emsFileLayer) {
       throw new Error(
         i18n.translate('xpack.maps.source.emsFile.unableToFindIdErrorMessage', {
@@ -104,7 +106,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     });
 
     // @ts-ignore
-    const emsIdField = emsFileLayer._config.fields.find(field => {
+    const emsIdField = emsFileLayer._config.fields.find((field) => {
       return field.type === 'id';
     });
     featureCollection.features.forEach((feature: Feature, index: number) => {
@@ -163,7 +165,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     // @ts-ignore
     const fields = emsFileLayer.getFieldsInLanguage();
     // @ts-ignore
-    return fields.map(f => this.createField({ fieldName: f.name }));
+    return fields.map((f) => this.createField({ fieldName: f.name }));
   }
 
   canFormatFeatureProperties() {
@@ -171,7 +173,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
   }
 
   async filterAndFormatPropertiesToHtml(properties: unknown): Promise<ITooltipProperty[]> {
-    const promises = this._tooltipFields.map(field => {
+    const promises = this._tooltipFields.map((field) => {
       // @ts-ignore
       const value = properties[field.getName()];
       return field.createTooltipProperty(value);

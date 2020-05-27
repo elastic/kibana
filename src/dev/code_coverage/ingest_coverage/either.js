@@ -20,9 +20,9 @@
 /* eslint new-cap: 0 */
 /* eslint no-unused-vars: 0 */
 
-export const Right = x => ({
-  chain: f => f(x),
-  map: f => Right(f(x)),
+export const Right = (x) => ({
+  chain: (f) => f(x),
+  map: (f) => Right(f(x)),
   fold: (f, g) => g(x),
   inspect: () => `Right(${x})`,
 });
@@ -35,9 +35,9 @@ export function right(x) {
   return Right.of(x);
 }
 
-export const Left = x => ({
-  chain: f => Left(x),
-  map: f => Left(x),
+export const Left = (x) => ({
+  chain: (f) => Left(x),
+  map: (f) => Left(x),
   fold: (f, g) => f(x),
   inspect: () => `Left(${x})`,
 });
@@ -50,10 +50,10 @@ export function left(x) {
   return Left.of(x);
 }
 
-export const fromNullable = x =>
+export const fromNullable = (x) =>
   x !== null && x !== undefined && x !== false && x !== 'undefined' ? Right(x) : Left(null);
 
-export const tryCatch = f => {
+export const tryCatch = (f) => {
   try {
     return Right(f());
   } catch (e) {

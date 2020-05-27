@@ -66,7 +66,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     const { limit } = options.pagination;
     const totalCount = getOr(0, 'hits.total.value', response);
     const hits = response.hits.hits;
-    const timelineEdges: TimelineEdges[] = hits.map(hit =>
+    const timelineEdges: TimelineEdges[] = hits.map((hit) =>
       formatTimelineData(options.fieldRequested, options.fields, hit, eventFieldsMap)
     );
     const hasNextPage = timelineEdges.length === limit + 1;

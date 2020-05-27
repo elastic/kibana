@@ -64,7 +64,7 @@ class Plugin {
     router.get(
       { path: '/requestcontext/elasticsearch', validate: false },
       async (context, req, res) => {
-        const response = await context.core.elasticsearch.adminClient.callAsInternalUser('ping');
+        const response = await context.core.elasticsearch.legacy.client.callAsInternalUser('ping');
         return res.ok({ body: `Elasticsearch: ${response}` });
       }
     );
@@ -79,12 +79,15 @@ class Plugin {
 
     return {
       data$: this.initializerContext.config.create<ConfigType>().pipe(
-        map(configValue => {
+        map((configValue) => {
           this.log.debug(`I've got value from my config: ${configValue.secret}`);
           return `Some exposed data derived from config: ${configValue.secret}`;
         })
       ),
-      pingElasticsearch: () => core.elasticsearch.adminClient.callAsInternalUser('ping'),
+      pingElasticsearch: async () => {
+        const [coreStart] = await core.getStartServices();
+        return coreStart.elasticsearch.legacy.client.callAsInternalUser('ping');
+      },
     };
   }
 

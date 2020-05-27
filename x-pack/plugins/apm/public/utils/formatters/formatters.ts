@@ -17,10 +17,10 @@ export function asInteger(value: number) {
 export function tpmUnit(type?: string) {
   return type === 'request'
     ? i18n.translate('xpack.apm.formatters.requestsPerMinLabel', {
-        defaultMessage: 'rpm'
+        defaultMessage: 'rpm',
       })
     : i18n.translate('xpack.apm.formatters.transactionsPerMinLabel', {
-        defaultMessage: 'tpm'
+        defaultMessage: 'tpm',
       });
 }
 

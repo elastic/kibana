@@ -25,7 +25,7 @@ import { EuiPanel } from '@elastic/eui';
 
 export class ParameterForm extends React.Component {
   renderInputs = () => {
-    return this.props.params.map(param => {
+    return this.props.params.map((param) => {
       switch (param.type) {
         case 'number':
           return (

@@ -88,20 +88,14 @@ describe('#get', () => {
 describe('#get$', () => {
   it('emits the current value when called', async () => {
     const { client } = setup();
-    const values = await client
-      .get$('dateFormat')
-      .pipe(take(1), toArray())
-      .toPromise();
+    const values = await client.get$('dateFormat').pipe(take(1), toArray()).toPromise();
 
     expect(values).toEqual(['Browser']);
   });
 
   it('emits an error notification if the key is unknown', async () => {
     const { client } = setup();
-    const values = await client
-      .get$('unknown key')
-      .pipe(materialize())
-      .toPromise();
+    const values = await client.get$('unknown key').pipe(materialize()).toPromise();
 
     expect(values).toMatchInlineSnapshot(`
 Notification {
@@ -124,10 +118,7 @@ You can use \`IUiSettingsClient.get("unknown key", defaultValue)\`, which will j
       client.set('dateFormat', 'new format');
     }, 10);
 
-    const values = await client
-      .get$('dateFormat')
-      .pipe(take(2), toArray())
-      .toPromise();
+    const values = await client.get$('dateFormat').pipe(take(2), toArray()).toPromise();
 
     expect(values).toEqual(['Browser', 'new format']);
   });

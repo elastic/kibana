@@ -23,12 +23,13 @@ import { alertMiddlewareFactory } from './middleware';
 import { alertListReducer } from './reducer';
 import { uiQueryParams } from './selectors';
 import { urlFromQueryParams } from '../view/url_from_query_params';
+import { AppLocation } from './../../../common/endpoint/types';
 
 describe('alert list pagination', () => {
   let store: Store;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let depsStart: DepsStartMock;
-  let history: History<never>;
+  let history: History<AppLocation['state']>;
   let queryParams: () => AlertingIndexUIQueryParams;
   /**
    * Update the history with a new `AlertingIndexUIQueryParams`
@@ -42,7 +43,7 @@ describe('alert list pagination', () => {
     const middleware = alertMiddlewareFactory(coreStart, depsStart);
     store = createStore(alertListReducer, applyMiddleware(middleware));
 
-    history.listen(location => {
+    history.listen((location) => {
       store.dispatch({ type: 'userChangedUrl', payload: location });
     });
 
