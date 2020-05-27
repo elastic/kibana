@@ -19,7 +19,7 @@ With *Elastic Maps*, you can:
 
 [float]
 === Create maps with multiple layers and indices
-You can use multiple layers and indices to show all your data in a single map. This enables your map to show how data sits relative to physical features like weather patterns, human-made features like international borders, and business-specific features like sales regions. You can plot individual documents or use aggregations to play any data set, no matter how large.
+You can use multiple layers and indices to show all your data in a single map. This enables your map to show how data sits relative to physical features like weather patterns, human-made features like international borders, and business-specific features like sales regions. You can plot individual documents or use aggregations to plot any data set, no matter how large.
 
 [role="screenshot"]
 image::maps/images/sample_data_ecommerce.png[]
