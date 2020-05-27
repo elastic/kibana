@@ -144,6 +144,13 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
 
       rules: [
         {
+          include: Path.join(bundle.contextDir, bundle.entry),
+          loader: UiSharedDeps.publicPathLoader,
+          options: {
+            key: bundle.id,
+          },
+        },
+        {
           test: /\.css$/,
           include: /node_modules/,
           use: [
@@ -260,13 +267,6 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
           loader: 'url-loader',
           options: {
             limit: 8192,
-          },
-        },
-        {
-          include: Path.join(bundle.contextDir, bundle.entry),
-          loader: UiSharedDeps.publicPathLoader,
-          options: {
-            key: bundle.id,
           },
         },
         {
