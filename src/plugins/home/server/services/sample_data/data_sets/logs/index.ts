@@ -31,7 +31,7 @@ const logsDescription = i18n.translate('home.sampleData.logsSpecDescription', {
 });
 const initialAppLinks = [] as AppLinkSchema[];
 
-export const logsSpecProvider = function(): SampleDatasetSchema {
+export const logsSpecProvider = function (): SampleDatasetSchema {
   return {
     id: 'logs',
     name: logsName,

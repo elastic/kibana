@@ -31,12 +31,12 @@ export default function RouteManager() {
   const defaults = [];
   let otherwise;
 
-  self.config = function($routeProvider) {
-    when.forEach(function(args) {
+  self.config = function ($routeProvider) {
+    when.forEach(function (args) {
       const path = args[0];
       const route = args[1] || {};
 
-      defaults.forEach(def => {
+      defaults.forEach((def) => {
         if (def.regex.test(path)) {
           defaultsDeep(route, cloneDeep(def.value));
         }
@@ -56,7 +56,7 @@ export default function RouteManager() {
     }
   };
 
-  self.run = function($location, $route, $injector, $rootScope) {
+  self.run = function ($location, $route, $injector, $rootScope) {
     if (window.elasticApm && typeof window.elasticApm.startTransaction === 'function') {
       /**
        * capture route-change events as transactions which happens after
@@ -89,24 +89,24 @@ export default function RouteManager() {
   this.afterSetupWork = wrap(setup.afterSetupWork, wrapSetupAndChain);
   this.afterWork = wrap(setup.afterWork, wrapSetupAndChain);
 
-  self.when = function(path, route) {
+  self.when = function (path, route) {
     when.push([path, route]);
     return self;
   };
 
   // before attaching the routes to the routeProvider, test the RE
   // against the .when() path and add/override the resolves if there is a match
-  self.defaults = function(regex, value) {
+  self.defaults = function (regex, value) {
     defaults.push({ regex, value });
     return self;
   };
 
-  self.otherwise = function(route) {
+  self.otherwise = function (route) {
     otherwise = route;
     return self;
   };
 
-  self.getBreadcrumbs = function() {
+  self.getBreadcrumbs = function () {
     // overwritten in self.run();
     return [];
   };

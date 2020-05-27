@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'header', 'home']);

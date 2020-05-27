@@ -35,7 +35,7 @@ export function getRangeTypeMessage(
       rangeType: getRangeType(
         typeof min === 'string' ? amountAndUnitToObject(min).amount : min,
         typeof max === 'string' ? amountAndUnitToObject(max).amount : max
-      )
-    }
+      ),
+    },
   });
 }

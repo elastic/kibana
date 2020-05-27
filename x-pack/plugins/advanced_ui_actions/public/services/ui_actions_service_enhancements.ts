@@ -82,13 +82,13 @@ export class UiActionsServiceEnhancements {
       getDisplayName,
       getIconType: () => euiIcon,
       isCompatible: async () => true,
-      create: serializedAction => ({
+      create: (serializedAction) => ({
         id: '',
         type: factoryId,
         getIconType: () => euiIcon,
         getDisplayName: () => serializedAction.name,
-        execute: async context => await execute(serializedAction.config, context),
-        getHref: getHref ? async context => getHref(serializedAction.config, context) : undefined,
+        execute: async (context) => await execute(serializedAction.config, context),
+        getHref: getHref ? async (context) => getHref(serializedAction.config, context) : undefined,
       }),
     } as ActionFactoryDefinition<Config, object, ExecutionContext>;
 

@@ -114,7 +114,7 @@ export const createLegacyServerEndpoints = (
    * Register an endpoint that executes a batch of functions, and streams the
    * results back using ND-JSON.
    */
-  plugins.bfetch.addBatchProcessingRoute(`/api/interpreter/fns`, request => {
+  plugins.bfetch.addBatchProcessingRoute(`/api/interpreter/fns`, (request) => {
     return {
       onBatchItem: async (fnCall: any) => {
         const [coreStart] = await core.getStartServices();

@@ -38,12 +38,7 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('.siemHeaderPage__linkBack')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('.siemHeaderPage__linkBack').first().exists()).toBe(true);
   });
 
   test('it DOES NOT render the back link when not provided', () => {
@@ -53,12 +48,7 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('.siemHeaderPage__linkBack')
-        .first()
-        .exists()
-    ).toBe(false);
+    expect(wrapper.find('.siemHeaderPage__linkBack').first().exists()).toBe(false);
   });
 
   test('it renders the first subtitle when provided', () => {
@@ -68,12 +58,7 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-page-subtitle"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="header-page-subtitle"]').first().exists()).toBe(true);
   });
 
   test('it DOES NOT render the first subtitle when not provided', () => {
@@ -83,12 +68,7 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-section-subtitle"]')
-        .first()
-        .exists()
-    ).toBe(false);
+    expect(wrapper.find('[data-test-subj="header-section-subtitle"]').first().exists()).toBe(false);
   });
 
   test('it renders the second subtitle when provided', () => {
@@ -98,12 +78,7 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-page-subtitle-2"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="header-page-subtitle-2"]').first().exists()).toBe(true);
   });
 
   test('it DOES NOT render the second subtitle when not provided', () => {
@@ -113,12 +88,9 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-section-subtitle-2"]')
-        .first()
-        .exists()
-    ).toBe(false);
+    expect(wrapper.find('[data-test-subj="header-section-subtitle-2"]').first().exists()).toBe(
+      false
+    );
   });
 
   test('it renders supplements when children provided', () => {
@@ -130,12 +102,7 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-page-supplements"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="header-page-supplements"]').first().exists()).toBe(true);
   });
 
   test('it DOES NOT render supplements when children not provided', () => {
@@ -145,12 +112,7 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-page-supplements"]')
-        .first()
-        .exists()
-    ).toBe(false);
+    expect(wrapper.find('[data-test-subj="header-page-supplements"]').first().exists()).toBe(false);
   });
 
   test('it applies border styles when border is true', () => {

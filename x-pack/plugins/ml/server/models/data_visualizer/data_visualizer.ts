@@ -142,7 +142,7 @@ export class DataVisualizer {
     // To avoid checking for the existence of too many aggregatable fields in one request,
     // split the check into multiple batches (max 200 fields per request).
     const batches: string[][] = [[]];
-    _.each(aggregatableFields, field => {
+    _.each(aggregatableFields, (field) => {
       let lastArray: string[] = _.last(batches);
       if (lastArray.length === AGGREGATABLE_EXISTS_REQUEST_BATCH_SIZE) {
         lastArray = [];
@@ -152,7 +152,7 @@ export class DataVisualizer {
     });
 
     await Promise.all(
-      batches.map(async fields => {
+      batches.map(async (fields) => {
         const batchStats = await this.checkAggregatableFieldsExist(
           indexPatternTitle,
           query,
@@ -173,7 +173,7 @@ export class DataVisualizer {
     );
 
     await Promise.all(
-      nonAggregatableFields.map(async field => {
+      nonAggregatableFields.map(async (field) => {
         const existsInDocs = await this.checkNonAggregatableFieldExists(
           indexPatternTitle,
           query,
@@ -217,7 +217,7 @@ export class DataVisualizer {
     // Batch up fields by type, getting stats for multiple fields at a time.
     const batches: Field[][] = [];
     const batchedFields: { [key: string]: Field[][] } = {};
-    _.each(fields, field => {
+    _.each(fields, (field) => {
       if (field.fieldName === undefined) {
         // undefined fieldName is used for a document count request.
         // getDocumentCountStats requires timeField - don't add to batched requests if not defined
@@ -238,13 +238,13 @@ export class DataVisualizer {
       }
     });
 
-    _.each(batchedFields, lists => {
+    _.each(batchedFields, (lists) => {
       batches.push(...lists);
     });
 
     let results: BatchStats[] = [];
     await Promise.all(
-      batches.map(async batch => {
+      batches.map(async (batch) => {
         let batchStats: BatchStats[] = [];
         const first = batch[0];
         switch (first.type) {
@@ -313,7 +313,7 @@ export class DataVisualizer {
             // Use an exists filter on the the field name to get
             // examples of the field, so cannot batch up.
             await Promise.all(
-              batch.map(async field => {
+              batch.map(async (field) => {
                 const stats = await this.getFieldExamples(
                   indexPatternTitle,
                   query,
@@ -492,7 +492,7 @@ export class DataVisualizer {
       ['aggregations', 'eventRate', 'buckets'],
       []
     );
-    _.each(dataByTimeBucket, dataForTime => {
+    _.each(dataByTimeBucket, (dataForTime) => {
       const time = dataForTime.key;
       buckets[time] = dataForTime.doc_count;
     });
@@ -867,7 +867,7 @@ export class DataVisualizer {
         [...aggsPath, `${safeFieldName}_values`, 'buckets'],
         []
       );
-      _.each(valueBuckets, bucket => {
+      _.each(valueBuckets, (bucket) => {
         stats[`${bucket.key_as_string}Count`] = bucket.doc_count;
       });
 

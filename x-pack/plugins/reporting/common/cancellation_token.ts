@@ -30,7 +30,7 @@ export class CancellationToken {
 
   public cancel = () => {
     this._isCancelled = true;
-    this._callbacks.forEach(callback => callback());
+    this._callbacks.forEach((callback) => callback());
   };
 
   public isCancelled() {
