@@ -180,7 +180,7 @@ export class IndexPattern implements IIndexPattern {
 
   private async updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
     if (!response.found) {
-      throw new SavedObjectNotFound(type, this.id, '#/management/kibana/indexPatterns');
+      throw new SavedObjectNotFound(type, this.id, 'kibana#/management/kibana/indexPatterns');
     }
 
     _.forOwn(this.mapping, (fieldMapping: FieldMappingSpec, name: string | undefined) => {
