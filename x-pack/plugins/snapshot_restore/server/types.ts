@@ -21,7 +21,7 @@ export interface RouteDependencies {
   license: License;
   config: {
     isSlmEnabled: boolean;
-    isSecurityEnabled: boolean;
+    isSecurityEnabled: () => boolean;
     isCloudEnabled: boolean;
   };
   lib: {
