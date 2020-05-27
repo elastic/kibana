@@ -6,11 +6,7 @@
 const isoValidationMessage = `value must be a valid ISO format`;
 
 export const isoStringValidate = (input: string): string | undefined => {
-  if (!/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/.test(input)) {
-    return isoValidationMessage;
-  }
-
-  if (new Date(input).toISOString() !== input) {
+  if (!/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}-\d{2}:\d{2}/.test(input)) {
     return isoValidationMessage;
   }
 };
