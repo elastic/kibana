@@ -49,7 +49,7 @@ your own data with Kibana.
 
 * See {kibana-ref}/discover.html[Discover] for information about searching and filtering
 your data.
-* See {kibana-ref}/visualize.html[Visualize] for information about the visualization
+* See {kibana-ref}/visualize.html[*Visualize*] for information about the visualization
 types Kibana has to offer.
 * See {kibana-ref}/management.html[Management] for information about configuring Kibana
 and managing your saved objects.

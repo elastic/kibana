@@ -179,4 +179,4 @@ image::images/lens_tutorial_3.png[Lens tutorial]
 [[lens-tutorial-next-steps]]
 ==== Next steps
 
-Now that you've created your visualization in Lens, you can add it to a <<dashboard,Dashboard>> or <<canvas-add-object,Canvas workpad>>.
+Now that you've created your visualization in Lens, you can add it to a <<dashboard,dashboard>> or <<canvas-add-object,Canvas workpad>>.
