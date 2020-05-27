@@ -43,4 +43,4 @@ export const renderFunctions = [
   text,
 ];
 
-export const renderFunctionNames = renderFunctions.map(fn => fn.name);
+export const renderFunctionNames = renderFunctions.map((fn) => fn.name);

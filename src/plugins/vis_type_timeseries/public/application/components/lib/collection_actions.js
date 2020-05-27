@@ -25,7 +25,7 @@ export function handleChange(props, doc) {
   const { model, name } = props;
   const collection = model[name] || [];
   const part = {};
-  part[name] = collection.map(row => {
+  part[name] = collection.map((row) => {
     if (row.id === doc.id) return doc;
     return row;
   });
@@ -36,7 +36,7 @@ export function handleDelete(props, doc) {
   const { model, name } = props;
   const collection = model[name] || [];
   const part = {};
-  part[name] = collection.filter(row => row.id !== doc.id);
+  part[name] = collection.filter((row) => row.id !== doc.id);
   props.onChange?.({ ...model, ...part });
 }
 

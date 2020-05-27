@@ -10,6 +10,7 @@ import * as Rx from 'rxjs';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 import { ReportingPluginSpecOptions } from '../';
 import { CancellationToken } from '../../../../plugins/reporting/common';
 import { JobStatus } from '../../../../plugins/reporting/common/types';
@@ -160,6 +161,7 @@ export type ScreenshotsObservableFn = ({
 
 export interface ReportingSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
+  licensing: LicensingPluginSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
   __LEGACY: LegacySetup;

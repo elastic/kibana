@@ -153,8 +153,9 @@ export const EventsCountComponent = ({
         <EuiContextMenuPanel items={items} data-test-subj="timelinePickSizeRow" />
       </PopoverRowItems>
       <EuiToolTip
-        content={`${serverSideEventCount} ${timelineTypeContext.footerText ??
-          i18n.TOTAL_COUNT_OF_EVENTS}`}
+        content={`${serverSideEventCount} ${
+          timelineTypeContext.footerText ?? i18n.TOTAL_COUNT_OF_EVENTS
+        }`}
       >
         <ServerSideEventCount>
           <EuiBadge color="hollow" data-test-subj="server-side-event-count">
@@ -277,7 +278,7 @@ export const FooterComponent = ({
 
   const rowItems =
     itemsPerPageOptions &&
-    itemsPerPageOptions.map(item => (
+    itemsPerPageOptions.map((item) => (
       <EuiContextMenuItem
         key={item}
         icon={itemsPerPage === item ? 'check' : 'empty'}

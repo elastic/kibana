@@ -96,7 +96,7 @@ test('Clone adds a new embeddable', async () => {
   await action.execute({ embeddable });
   expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount + 1);
   const newPanelId = Object.keys(container.getInput().panels).find(
-    key => !originalPanelKeySet.has(key)
+    (key) => !originalPanelKeySet.has(key)
   );
   expect(newPanelId).toBeDefined();
   const newPanel = container.getInput().panels[newPanelId!];

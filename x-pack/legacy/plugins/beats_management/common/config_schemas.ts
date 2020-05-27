@@ -353,7 +353,7 @@ export const configBlockSchemas: ConfigBlockSchema[] = [
         validation: 'isHosts',
         error: 'outputConfig.hosts.error',
         errorId: 'outputConfig.hosts.error',
-        parseValidResult: v => v.split('\n'),
+        parseValidResult: (v) => v.split('\n'),
       },
       {
         id: 'username',

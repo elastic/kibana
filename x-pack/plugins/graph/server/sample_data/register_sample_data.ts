@@ -25,7 +25,7 @@ export function registerSampleData(
     throw new Error('License state has to be initialized before registering sample data');
   }
   let registered = false;
-  licenseUpdates.subscribe(licenseInformation => {
+  licenseUpdates.subscribe((licenseInformation) => {
     if (!registered && licenseInformation.showAppLink) {
       registered = true;
       registerEcommerceSampleDataLink(sampleDataRegistry);

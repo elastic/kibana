@@ -39,11 +39,11 @@ export function singleSeriesCheckerFactory(callAsCurrentUser) {
         const start = () => {
           // run all tests, returns a suggested interval
           this.runTests()
-            .then(interval => {
+            .then((interval) => {
               this.interval = interval;
               resolve(this.interval);
             })
-            .catch(resp => {
+            .catch((resp) => {
               reject(resp);
             });
         };
@@ -56,7 +56,7 @@ export function singleSeriesCheckerFactory(callAsCurrentUser) {
             .then(() => {
               start();
             })
-            .catch(resp => {
+            .catch((resp) => {
               mlLog.warn('SingleSeriesChecker: Could not load metric reference data');
               reject(resp);
             });
@@ -105,10 +105,10 @@ export function singleSeriesCheckerFactory(callAsCurrentUser) {
         // recursive function called with the index of the INTERVALS array
         // each time one of the checks fails, the index is increased and
         // the tests are repeated.
-        const runTest = i => {
+        const runTest = (i) => {
           const interval = intervals[i];
           this.performSearch(interval.ms)
-            .then(resp => {
+            .then((resp) => {
               const buckets = resp.aggregations.non_empty_buckets.buckets;
               const fullBuckets = this.getFullBuckets(buckets);
               if (fullBuckets.length) {
@@ -149,7 +149,7 @@ export function singleSeriesCheckerFactory(callAsCurrentUser) {
                 reject('runTest stopped because fullBuckets is empty');
               }
             })
-            .catch(resp => {
+            .catch((resp) => {
               // do something better with this
               reject(resp);
             });
@@ -265,7 +265,7 @@ export function singleSeriesCheckerFactory(callAsCurrentUser) {
         }
 
         this.performSearch(intervalMs) // 1h
-          .then(resp => {
+          .then((resp) => {
             const buckets = resp.aggregations.non_empty_buckets.buckets;
             const fullBuckets = this.getFullBuckets(buckets);
             if (fullBuckets.length) {
@@ -275,7 +275,7 @@ export function singleSeriesCheckerFactory(callAsCurrentUser) {
 
             resolve();
           })
-          .catch(resp => {
+          .catch((resp) => {
             reject(resp);
           });
       });

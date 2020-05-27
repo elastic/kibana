@@ -51,7 +51,7 @@ export function serverExtensionsMixin(kbnServer, server) {
     }
 
     const requestCache = new WeakMap();
-    server.decorate('request', methodName, function() {
+    server.decorate('request', methodName, function () {
       const request = this;
 
       if (!requestCache.has(request)) {

@@ -6,7 +6,6 @@ exports[`CreateIndexPatternWizard defaults to the loading state 1`] = `
 >
   <div>
     <Header
-      changeTitle={[MockFunction]}
       indexPatternName="name"
       isBeta={false}
       isIncludingSystemIndices={false}
@@ -30,7 +29,6 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
 >
   <div>
     <Header
-      changeTitle={[MockFunction]}
       indexPatternName="name"
       isBeta={false}
       isIncludingSystemIndices={false}
@@ -46,12 +44,6 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
           },
         ]
       }
-      esService={
-        Object {
-          "msearch": [MockFunction],
-          "search": [MockFunction],
-        }
-      }
       goToNextStep={[Function]}
       indexPatternCreationType={
         IndexPatternCreationConfig {
@@ -64,35 +56,6 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
         }
       }
       isIncludingSystemIndices={false}
-      savedObjectsClient={
-        Object {
-          "bulkCreate": [MockFunction],
-          "bulkGet": [MockFunction],
-          "bulkUpdate": [MockFunction],
-          "create": [MockFunction],
-          "delete": [MockFunction],
-          "find": [MockFunction],
-          "get": [MockFunction],
-          "update": [MockFunction],
-        }
-      }
-      uiSettings={
-        Object {
-          "get": [MockFunction],
-          "get$": [MockFunction],
-          "getAll": [MockFunction],
-          "getSaved$": [MockFunction],
-          "getUpdate$": [MockFunction],
-          "getUpdateErrors$": [MockFunction],
-          "isCustom": [MockFunction],
-          "isDeclared": [MockFunction],
-          "isDefault": [MockFunction],
-          "isOverridden": [MockFunction],
-          "overrideLocalDefault": [MockFunction],
-          "remove": [MockFunction],
-          "set": [MockFunction],
-        }
-      }
     />
   </div>
   <EuiGlobalToastList
@@ -109,7 +72,6 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
 >
   <div>
     <Header
-      changeTitle={[MockFunction]}
       indexPatternName="name"
       isBeta={false}
       isIncludingSystemIndices={false}
@@ -136,7 +98,6 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
 >
   <div>
     <Header
-      changeTitle={[MockFunction]}
       indexPatternName="name"
       isBeta={false}
       isIncludingSystemIndices={false}
@@ -158,16 +119,6 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
           "type": "default",
         }
       }
-      indexPatternsService={
-        Object {
-          "clearCache": [MockFunction],
-          "createField": [MockFunction],
-          "createFieldList": [MockFunction],
-          "ensureDefaultIndexPattern": [MockFunction],
-          "get": [MockFunction],
-          "make": [Function],
-        }
-      }
     />
   </div>
   <EuiGlobalToastList
@@ -184,7 +135,6 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
 >
   <div>
     <Header
-      changeTitle={[MockFunction]}
       indexPatternName="name"
       isBeta={false}
       isIncludingSystemIndices={false}
@@ -194,12 +144,6 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
     />
     <StepIndexPattern
       allIndices={Array []}
-      esService={
-        Object {
-          "msearch": [MockFunction],
-          "search": [MockFunction],
-        }
-      }
       goToNextStep={[Function]}
       indexPatternCreationType={
         IndexPatternCreationConfig {
@@ -212,35 +156,6 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
         }
       }
       isIncludingSystemIndices={false}
-      savedObjectsClient={
-        Object {
-          "bulkCreate": [MockFunction],
-          "bulkGet": [MockFunction],
-          "bulkUpdate": [MockFunction],
-          "create": [MockFunction],
-          "delete": [MockFunction],
-          "find": [MockFunction],
-          "get": [MockFunction],
-          "update": [MockFunction],
-        }
-      }
-      uiSettings={
-        Object {
-          "get": [MockFunction],
-          "get$": [MockFunction],
-          "getAll": [MockFunction],
-          "getSaved$": [MockFunction],
-          "getUpdate$": [MockFunction],
-          "getUpdateErrors$": [MockFunction],
-          "isCustom": [MockFunction],
-          "isDeclared": [MockFunction],
-          "isDefault": [MockFunction],
-          "isOverridden": [MockFunction],
-          "overrideLocalDefault": [MockFunction],
-          "remove": [MockFunction],
-          "set": [MockFunction],
-        }
-      }
     />
   </div>
   <EuiGlobalToastList
@@ -257,7 +172,6 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
 >
   <div>
     <Header
-      changeTitle={[MockFunction]}
       indexPatternName="name"
       isBeta={false}
       isIncludingSystemIndices={true}
@@ -273,12 +187,6 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
           },
         ]
       }
-      esService={
-        Object {
-          "msearch": [MockFunction],
-          "search": [MockFunction],
-        }
-      }
       goToNextStep={[Function]}
       indexPatternCreationType={
         IndexPatternCreationConfig {
@@ -291,35 +199,6 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
         }
       }
       isIncludingSystemIndices={true}
-      savedObjectsClient={
-        Object {
-          "bulkCreate": [MockFunction],
-          "bulkGet": [MockFunction],
-          "bulkUpdate": [MockFunction],
-          "create": [MockFunction],
-          "delete": [MockFunction],
-          "find": [MockFunction],
-          "get": [MockFunction],
-          "update": [MockFunction],
-        }
-      }
-      uiSettings={
-        Object {
-          "get": [MockFunction],
-          "get$": [MockFunction],
-          "getAll": [MockFunction],
-          "getSaved$": [MockFunction],
-          "getUpdate$": [MockFunction],
-          "getUpdateErrors$": [MockFunction],
-          "isCustom": [MockFunction],
-          "isDeclared": [MockFunction],
-          "isDefault": [MockFunction],
-          "isOverridden": [MockFunction],
-          "overrideLocalDefault": [MockFunction],
-          "remove": [MockFunction],
-          "set": [MockFunction],
-        }
-      }
     />
   </div>
   <EuiGlobalToastList
