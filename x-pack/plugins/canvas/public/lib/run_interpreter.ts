@@ -16,10 +16,7 @@ interface Options {
  * Meant to be a replacement for plugins/interpreter/interpretAST
  */
 export async function interpretAst(ast: ExpressionAstExpression): Promise<ExpressionValue> {
-  return await expressionsService
-    .getService()
-    .execute(ast)
-    .getData();
+  return await expressionsService.getService().execute(ast).getData();
 }
 
 /**
@@ -37,10 +34,7 @@ export async function runInterpreter(
   options: Options = {}
 ): Promise<ExpressionValue> {
   try {
-    const renderable = await expressionsService
-      .getService()
-      .execute(ast, input)
-      .getData();
+    const renderable = await expressionsService.getService().execute(ast, input).getData();
 
     if (getType(renderable) === 'render') {
       return renderable;

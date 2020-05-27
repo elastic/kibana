@@ -80,7 +80,7 @@ export const startServices = async (
   canvasStartPlugins: CanvasStartDeps,
   appUpdater: BehaviorSubject<AppUpdater>
 ) => {
-  const startPromises = Object.values(services).map(provider =>
+  const startPromises = Object.values(services).map((provider) =>
     provider.start(coreSetup, coreStart, canvasSetupPlugins, canvasStartPlugins, appUpdater)
   );
 
