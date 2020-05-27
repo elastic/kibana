@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-sortOrder?: string | string[];
+sortOrder?: string;
 ```

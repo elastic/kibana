@@ -70,8 +70,8 @@ export interface SavedObjectsFindOptions {
   type: string | string[];
   page?: number;
   perPage?: number;
-  sortField?: string | string[];
-  sortOrder?: string | string[];
+  sortField?: string;
+  sortOrder?: string;
   /**
    * An array of fields to include in the results
    * @example

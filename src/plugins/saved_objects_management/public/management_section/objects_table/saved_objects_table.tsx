@@ -224,9 +224,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       type: allowedTypes.filter((type) => !visibleTypes || visibleTypes.includes(type)),
     };
     if (findOptions.type.length > 1) {
-      findOptions.sortField = ['type', '_id'];
-    } else {
-      findOptions.sortField = '_id';
+      findOptions.sortField = 'type';
     }
 
     try {

@@ -29,9 +29,6 @@ const MAPPINGS = {
         },
       },
     },
-    updated_at: {
-      type: 'date',
-    },
     pending: {
       properties: {
         title: {
@@ -67,187 +64,174 @@ const MAPPINGS = {
 };
 
 describe('searchDsl/getSortParams', () => {
-  describe('errors', () => {
-    it('throws an error when multiple types are used and a sort field is not a valid root property', () => {
-      expect(() =>
-        getSortingParams(MAPPINGS, ['saved', 'pending'], ['title'], [])
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to sort multiple types by field title, not a root property"`
-      );
-    });
-
-    it('throws an error a single type is used and a sort field is not a valid simple property', () => {
-      expect(() =>
-        getSortingParams(MAPPINGS, ['saved'], ['type'], [])
-      ).toThrowErrorMatchingInlineSnapshot(`"Unknown sort field type"`);
-      expect(() =>
-        getSortingParams(MAPPINGS, ['saved'], ['foo'], [])
-      ).toThrowErrorMatchingInlineSnapshot(`"Unknown sort field foo"`);
+  describe('type, no sortField', () => {
+    it('returns no params', () => {
+      expect(getSortingParams(MAPPINGS, 'pending')).toEqual({});
     });
   });
 
-  describe('results', () => {
-    it('returns an empty object when `sortFields` is empty', () => {
-      expect(getSortingParams(MAPPINGS, 'pending', [], [])).toEqual({});
+  describe('type, order, no sortField', () => {
+    it('returns no params', () => {
+      expect(getSortingParams(MAPPINGS, 'saved', undefined, 'desc')).toEqual({});
     });
+  });
 
-    describe('top-level fields', () => {
-      const type = 'saved'; // specific type doesn't matter for these test cases, it just needs to be valid
-
-      it('single sort field without a sort order', () => {
-        const { sort } = getSortingParams(MAPPINGS, type, ['_id'], []);
-        expect(sort).toEqual([{ _id: { order: undefined } }]);
-      });
-
-      it('single sort field with a single sort order', () => {
-        const { sort } = getSortingParams(MAPPINGS, type, ['_id'], ['foo']);
-        expect(sort).toEqual([{ _id: { order: 'foo' } }]);
-      });
-
-      it('single sort field with multiple sort orders', () => {
-        const { sort } = getSortingParams(MAPPINGS, type, ['_id'], ['foo', 'bar']);
-        expect(sort).toEqual([{ _id: { order: 'foo' } }]);
-      });
-
-      it('multiple sort fields without a sort order', () => {
-        const { sort } = getSortingParams(MAPPINGS, type, ['_id', '_score'], []);
-        expect(sort).toEqual([{ _id: { order: undefined } }, { _score: { order: undefined } }]);
-      });
-
-      it('multiple sort fields with a single sort order', () => {
-        const { sort } = getSortingParams(MAPPINGS, type, ['_id', '_score'], ['foo']);
-        expect(sort).toEqual([{ _id: { order: 'foo' } }, { _score: { order: undefined } }]);
-      });
-
-      it('multiple sort fields with multiple sort orders', () => {
-        const { sort } = getSortingParams(MAPPINGS, type, ['_id', '_score'], ['foo', 'bar']);
-        expect(sort).toEqual([{ _id: { order: 'foo' } }, { _score: { order: 'bar' } }]);
+  describe('sortField no direction', () => {
+    describe('sortField is simple property with single type', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, 'saved', 'title')).toEqual({
+          sort: [
+            {
+              'saved.title': {
+                order: undefined,
+                unmapped_type: 'text',
+              },
+            },
+          ],
+        });
       });
     });
-
-    describe('root properties', () => {
-      const types = ['saved', 'pending'];
-
-      it('single sort field without a sort order', () => {
-        const { sort } = getSortingParams(MAPPINGS, types, ['type'], []);
-        expect(sort).toEqual([{ type: { order: undefined, unmapped_type: 'text' } }]);
-      });
-
-      it('single sort field with a single sort order', () => {
-        const { sort } = getSortingParams(MAPPINGS, types, ['type'], ['foo']);
-        expect(sort).toEqual([{ type: { order: 'foo', unmapped_type: 'text' } }]);
-      });
-
-      it('single sort field with multiple sort orders', () => {
-        const { sort } = getSortingParams(MAPPINGS, types, ['type'], ['foo', 'bar']);
-        expect(sort).toEqual([{ type: { order: 'foo', unmapped_type: 'text' } }]);
-      });
-
-      it('multiple sort fields without a sort order', () => {
-        const { sort } = getSortingParams(MAPPINGS, types, ['type', 'updated_at'], []);
-        expect(sort).toEqual([
-          { type: { order: undefined, unmapped_type: 'text' } },
-          { updated_at: { order: undefined, unmapped_type: 'date' } },
-        ]);
-      });
-
-      it('multiple sort fields with a single sort order', () => {
-        const { sort } = getSortingParams(MAPPINGS, types, ['type', 'updated_at'], ['foo']);
-        expect(sort).toEqual([
-          { type: { order: 'foo', unmapped_type: 'text' } },
-          { updated_at: { order: undefined, unmapped_type: 'date' } },
-        ]);
-      });
-
-      it('multiple sort fields with multiple sort orders', () => {
-        const { sort } = getSortingParams(MAPPINGS, types, ['type', 'updated_at'], ['foo', 'bar']);
-        expect(sort).toEqual([
-          { type: { order: 'foo', unmapped_type: 'text' } },
-          { updated_at: { order: 'bar', unmapped_type: 'date' } },
-        ]);
+    describe('sortField is simple root property with multiple types', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'type')).toEqual({
+          sort: [
+            {
+              type: {
+                order: undefined,
+                unmapped_type: 'text',
+              },
+            },
+          ],
+        });
       });
     });
-
-    describe('simple properties', () => {
-      const types = 'saved';
-
-      it('single sort field without a sort order', () => {
-        const { sort } = getSortingParams(MAPPINGS, types, ['title'], []);
-        expect(sort).toEqual([{ ['saved.title']: { order: undefined, unmapped_type: 'text' } }]);
-      });
-
-      it('single sort field with a single sort order', () => {
-        const { sort } = getSortingParams(MAPPINGS, types, ['title'], ['foo']);
-        expect(sort).toEqual([{ ['saved.title']: { order: 'foo', unmapped_type: 'text' } }]);
-      });
-
-      it('single sort field with multiple sort orders', () => {
-        const { sort } = getSortingParams(MAPPINGS, types, ['title'], ['foo', 'bar']);
-        expect(sort).toEqual([{ ['saved.title']: { order: 'foo', unmapped_type: 'text' } }]);
-      });
-
-      it('multiple sort fields without a sort order', () => {
-        const { sort } = getSortingParams(MAPPINGS, types, ['title', 'obj.key1'], []);
-        expect(sort).toEqual([
-          { ['saved.title']: { order: undefined, unmapped_type: 'text' } },
-          { ['saved.obj.key1']: { order: undefined, unmapped_type: 'text' } },
-        ]);
-      });
-
-      it('multiple sort fields with a single sort order', () => {
-        const { sort } = getSortingParams(MAPPINGS, types, ['title', 'obj.key1'], ['foo']);
-        expect(sort).toEqual([
-          { ['saved.title']: { order: 'foo', unmapped_type: 'text' } },
-          { ['saved.obj.key1']: { order: undefined, unmapped_type: 'text' } },
-        ]);
-      });
-
-      it('multiple sort fields with multiple sort orders', () => {
-        const { sort } = getSortingParams(MAPPINGS, types, ['title', 'obj.key1'], ['foo', 'bar']);
-        expect(sort).toEqual([
-          { ['saved.title']: { order: 'foo', unmapped_type: 'text' } },
-          { ['saved.obj.key1']: { order: 'bar', unmapped_type: 'text' } },
-        ]);
+    describe('sortField is simple non-root property with multiple types', () => {
+      it('returns correct params', () => {
+        expect(() =>
+          getSortingParams(MAPPINGS, ['saved', 'pending'], 'title')
+        ).toThrowErrorMatchingSnapshot();
       });
     });
-
-    describe('mixed properties, single type', () => {
-      const type = 'saved';
-
-      it('without a sort order', () => {
-        const { sort } = getSortingParams(MAPPINGS, type, ['_id', 'title'], []);
-        expect(sort).toEqual([
-          { _id: { order: undefined } },
-          { ['saved.title']: { order: undefined, unmapped_type: 'text' } },
-        ]);
-      });
-
-      it('with multiple sort orders', () => {
-        const { sort } = getSortingParams(MAPPINGS, type, ['_id', 'title'], ['foo', 'bar']);
-        expect(sort).toEqual([
-          { _id: { order: 'foo' } },
-          { ['saved.title']: { order: 'bar', unmapped_type: 'text' } },
-        ]);
+    describe('sortField is multi-field with single type', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, 'saved', 'title.raw')).toEqual({
+          sort: [
+            {
+              'saved.title.raw': {
+                order: undefined,
+                unmapped_type: 'keyword',
+              },
+            },
+          ],
+        });
       });
     });
-
-    describe('mixed properties, multiple types', () => {
-      const types = ['saved', 'pending'];
-
-      it('without a sort order', () => {
-        const { sort } = getSortingParams(MAPPINGS, types, ['_id', 'type'], []);
-        expect(sort).toEqual([
-          { _id: { order: undefined } },
-          { type: { order: undefined, unmapped_type: 'text' } },
-        ]);
+    describe('sortField is multi-field with single type as array', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, ['saved'], 'title.raw')).toEqual({
+          sort: [
+            {
+              'saved.title.raw': {
+                order: undefined,
+                unmapped_type: 'keyword',
+              },
+            },
+          ],
+        });
       });
+    });
+    describe('sortField is root multi-field with multiple types', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'type.raw')).toEqual({
+          sort: [
+            {
+              'type.raw': {
+                order: undefined,
+                unmapped_type: 'keyword',
+              },
+            },
+          ],
+        });
+      });
+    });
+    describe('sortField is not-root multi-field with multiple types', () => {
+      it('returns correct params', () => {
+        expect(() =>
+          getSortingParams(MAPPINGS, ['saved', 'pending'], 'title.raw')
+        ).toThrowErrorMatchingSnapshot();
+      });
+    });
+  });
 
-      it('with multiple sort orders', () => {
-        const { sort } = getSortingParams(MAPPINGS, types, ['_id', 'type'], ['foo', 'bar']);
-        expect(sort).toEqual([
-          { _id: { order: 'foo' } },
-          { type: { order: 'bar', unmapped_type: 'text' } },
-        ]);
+  describe('sort with direction', () => {
+    describe('sortField is simple property with single type', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, 'saved', 'title', 'desc')).toEqual({
+          sort: [
+            {
+              'saved.title': {
+                order: 'desc',
+                unmapped_type: 'text',
+              },
+            },
+          ],
+        });
+      });
+    });
+    describe('sortField is root simple property with multiple type', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'type', 'desc')).toEqual({
+          sort: [
+            {
+              type: {
+                order: 'desc',
+                unmapped_type: 'text',
+              },
+            },
+          ],
+        });
+      });
+    });
+    describe('sortFields is non-root simple property with multiple types', () => {
+      it('returns correct params', () => {
+        expect(() =>
+          getSortingParams(MAPPINGS, ['saved', 'pending'], 'title', 'desc')
+        ).toThrowErrorMatchingSnapshot();
+      });
+    });
+    describe('sortField is multi-field with single type', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, 'saved', 'title.raw', 'asc')).toEqual({
+          sort: [
+            {
+              'saved.title.raw': {
+                order: 'asc',
+                unmapped_type: 'keyword',
+              },
+            },
+          ],
+        });
+      });
+    });
+    describe('sortField is root multi-field with multiple types', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'type.raw', 'asc')).toEqual({
+          sort: [
+            {
+              'type.raw': {
+                order: 'asc',
+                unmapped_type: 'keyword',
+              },
+            },
+          ],
+        });
+      });
+    });
+    describe('sortField is non-root multi-field with multiple types', () => {
+      it('returns correct params', () => {
+        expect(() =>
+          getSortingParams(MAPPINGS, ['saved', 'pending'], 'title.raw', 'asc')
+        ).toThrowErrorMatchingSnapshot();
       });
     });
   });

@@ -25,41 +25,62 @@ const TOP_LEVEL_FIELDS = ['_id', '_score'];
 export function getSortingParams(
   mappings: IndexMapping,
   type: string | string[],
-  sortFields: string[],
-  sortOrders: string[]
+  sortField?: string,
+  sortOrder?: string
 ) {
-  if (sortFields.length === 0) {
+  if (!sortField) {
     return {};
   }
 
   const types = Array.isArray(type) ? type : [type];
 
-  const sort = sortFields.map((sortField, i) => {
-    const sortOrder = sortOrders[i];
+  if (TOP_LEVEL_FIELDS.includes(sortField)) {
+    return {
+      sort: [
+        {
+          [sortField]: {
+            order: sortOrder,
+          },
+        },
+      ],
+    };
+  }
 
-    if (TOP_LEVEL_FIELDS.includes(sortField)) {
-      return { [sortField]: { order: sortOrder } };
+  if (types.length > 1) {
+    const rootField = getProperty(mappings, sortField);
+    if (!rootField) {
+      throw Boom.badRequest(
+        `Unable to sort multiple types by field ${sortField}, not a root property`
+      );
     }
 
-    if (types.length > 1) {
-      const rootField = getProperty(mappings, sortField);
-      if (!rootField) {
-        throw Boom.badRequest(
-          `Unable to sort multiple types by field ${sortField}, not a root property`
-        );
-      }
-      return { [sortField]: { order: sortOrder, unmapped_type: rootField.type } };
-    }
+    return {
+      sort: [
+        {
+          [sortField]: {
+            order: sortOrder,
+            unmapped_type: rootField.type,
+          },
+        },
+      ],
+    };
+  }
 
-    const [typeField] = types;
-    const key = `${typeField}.${sortField}`;
-    const field = getProperty(mappings, key);
-    if (!field) {
-      throw Boom.badRequest(`Unknown sort field ${sortField}`);
-    }
+  const [typeField] = types;
+  const key = `${typeField}.${sortField}`;
+  const field = getProperty(mappings, key);
+  if (!field) {
+    throw Boom.badRequest(`Unknown sort field ${sortField}`);
+  }
 
-    return { [key]: { order: sortOrder, unmapped_type: field.type } };
-  });
-
-  return { sort };
+  return {
+    sort: [
+      {
+        [key]: {
+          order: sortOrder,
+          unmapped_type: field.type,
+        },
+      },
+    ],
+  };
 }
