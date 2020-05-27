@@ -19,13 +19,13 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'settings']);
 
   describe('visualize lab mode', () => {
     it('disabling does not break loading saved searches', async () => {
-      await PageObjects.common.navigateToUrl('discover', '');
+      await PageObjects.common.navigateToUrl('discover', '', { useActualUrl: true });
       await PageObjects.discover.saveSearch('visualize_lab_mode_test');
       await PageObjects.discover.openLoadSavedSearchPanel();
       const hasSaved = await PageObjects.discover.hasSavedSearch('visualize_lab_mode_test');

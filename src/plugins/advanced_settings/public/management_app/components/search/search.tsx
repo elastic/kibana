@@ -19,19 +19,14 @@
 
 import React, { Fragment, PureComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  // @ts-ignore
-  EuiSearchBar,
-  EuiFormErrorText,
-} from '@elastic/eui';
-import { IQuery } from '../../types';
+import { EuiSearchBar, EuiFormErrorText, Query } from '@elastic/eui';
 
 import { getCategoryName } from '../../lib';
 
 interface SearchProps {
   categories: string[];
-  query: IQuery;
-  onQueryChange: ({ query }: { query: IQuery }) => void;
+  query: Query;
+  onQueryChange: ({ query }: { query: Query }) => void;
 }
 
 export class Search extends PureComponent<SearchProps> {
@@ -40,7 +35,7 @@ export class Search extends PureComponent<SearchProps> {
   constructor(props: SearchProps) {
     super(props);
     const { categories } = props;
-    this.categories = categories.map(category => {
+    this.categories = categories.map((category) => {
       return {
         value: category,
         name: getCategoryName(category),
@@ -53,7 +48,7 @@ export class Search extends PureComponent<SearchProps> {
     parseErrorMessage: null,
   };
 
-  onChange = ({ query, error }: { query: IQuery; error: { message: string } }) => {
+  onChange = ({ query, error }: { query: Query | null; error: { message: string } | null }) => {
     if (error) {
       this.setState({
         isSearchTextValid: false,
@@ -66,7 +61,7 @@ export class Search extends PureComponent<SearchProps> {
       isSearchTextValid: true,
       parseErrorMessage: null,
     });
-    this.props.onQueryChange({ query });
+    this.props.onQueryChange({ query: query! });
   };
 
   render() {
@@ -82,12 +77,12 @@ export class Search extends PureComponent<SearchProps> {
 
     const filters = [
       {
-        type: 'field_value_selection',
+        type: 'field_value_selection' as const,
         field: 'category',
         name: i18n.translate('advancedSettings.categorySearchLabel', {
           defaultMessage: 'Category',
         }),
-        multiSelect: 'or',
+        multiSelect: 'or' as const,
         options: this.categories,
       },
     ];

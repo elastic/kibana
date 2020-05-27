@@ -20,8 +20,9 @@ import {
   logEntriesSummaryResponseRT,
 } from '../../../common/http_api/log_entries';
 import { parseFilterQuery } from '../../utils/serialized_query';
+import { UsageCollector } from '../../usage/usage_collector';
 
-const escapeHatch = schema.object({}, { allowUnknowns: true });
+const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initLogEntriesSummaryRoute = ({ framework, logEntries }: InfraBackendLibs) => {
   framework.registerRoute(
@@ -36,22 +37,24 @@ export const initLogEntriesSummaryRoute = ({ framework, logEntries }: InfraBacke
           logEntriesSummaryRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
-        const { sourceId, startDate, endDate, bucketSize, query } = payload;
+        const { sourceId, startTimestamp, endTimestamp, bucketSize, query } = payload;
 
         const buckets = await logEntries.getLogSummaryBucketsBetween(
           requestContext,
           sourceId,
-          startDate,
-          endDate,
+          startTimestamp,
+          endTimestamp,
           bucketSize,
           parseFilterQuery(query)
         );
 
+        UsageCollector.countLogs();
+
         return response.ok({
           body: logEntriesSummaryResponseRT.encode({
             data: {
-              start: startDate,
-              end: endDate,
+              start: startTimestamp,
+              end: endTimestamp,
               buckets,
             },
           }),

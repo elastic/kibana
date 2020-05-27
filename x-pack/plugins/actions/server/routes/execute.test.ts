@@ -5,13 +5,12 @@
  */
 
 import { executeActionRoute } from './execute';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
-import { mockLicenseState } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { httpServiceMock } from 'src/core/server/mocks';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { ActionExecutorContract } from '../lib';
+import { ActionExecutorContract, verifyApiAccess, ActionTypeDisabledError } from '../lib';
 
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -21,8 +20,8 @@ beforeEach(() => {
 
 describe('executeActionRoute', () => {
   it('executes an action with proper parameters', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     const [context, req, res] = mockHandlerArguments(
       {},
@@ -54,7 +53,7 @@ describe('executeActionRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/action/{id}/_execute"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/action/{id}/_execute"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [
@@ -77,8 +76,8 @@ describe('executeActionRoute', () => {
   });
 
   it('returns a "204 NO CONTENT" when the executor returns a nullish value', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     const [context, req, res] = mockHandlerArguments(
       {},
@@ -115,8 +114,8 @@ describe('executeActionRoute', () => {
   });
 
   it('ensures the license allows action execution', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     const [context, req, res] = mockHandlerArguments(
       {},
@@ -147,8 +146,8 @@ describe('executeActionRoute', () => {
   });
 
   it('ensures the license check prevents action execution', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('OMG');
@@ -180,5 +179,34 @@ describe('executeActionRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  it('ensures the action type gets validated for the license', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    const [context, req, res] = mockHandlerArguments(
+      {},
+      {
+        body: {},
+        params: {},
+      },
+      ['ok', 'forbidden']
+    );
+
+    const actionExecutor = {
+      initialize: jest.fn(),
+      execute: jest.fn().mockImplementation(() => {
+        throw new ActionTypeDisabledError('Fail', 'license_invalid');
+      }),
+    } as jest.Mocked<ActionExecutorContract>;
+
+    executeActionRoute(router, licenseState, actionExecutor);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
   });
 });

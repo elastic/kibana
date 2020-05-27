@@ -7,10 +7,15 @@
 import * as _ from 'lodash';
 import { parse } from 'url';
 
-interface FirewallRule {
+interface NetworkPolicyRule {
   allow: boolean;
-  host?: string;
   protocol?: string;
+  host?: string;
+}
+
+export interface NetworkPolicy {
+  enabled: boolean;
+  rules: NetworkPolicyRule[];
 }
 
 const isHostMatch = (actualHost: string, ruleHost: string) => {
@@ -20,7 +25,7 @@ const isHostMatch = (actualHost: string, ruleHost: string) => {
   return _.every(ruleParts, (part, idx) => part === hostParts[idx]);
 };
 
-export const allowRequest = (url: string, rules: FirewallRule[]) => {
+export const allowRequest = (url: string, rules: NetworkPolicyRule[]) => {
   const parsed = parse(url);
 
   if (!rules.length) {

@@ -7,10 +7,10 @@
 import { merge } from 'lodash';
 import { Server } from 'hapi';
 import { SavedObjectsClient } from 'src/core/server';
-import { PromiseReturnType } from '../../../../typings/common';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   APM_INDICES_SAVED_OBJECT_TYPE,
-  APM_INDICES_SAVED_OBJECT_ID
+  APM_INDICES_SAVED_OBJECT_ID,
 } from '../../../../common/apm_saved_object_constants';
 import { APMConfig } from '../../..';
 import { APMRequestHandlerContext } from '../../../routes/typings';
@@ -25,6 +25,7 @@ export interface ApmIndicesConfig {
   'apm_oss.transactionIndices': string;
   'apm_oss.metricsIndices': string;
   apmAgentConfigurationIndex: string;
+  apmCustomLinkIndex: string;
 }
 
 export type ApmIndicesName = keyof ApmIndicesConfig;
@@ -52,13 +53,14 @@ export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
     'apm_oss.transactionIndices': config['apm_oss.transactionIndices'],
     'apm_oss.metricsIndices': config['apm_oss.metricsIndices'],
     // system indices, not configurable
-    apmAgentConfigurationIndex: '.apm-agent-configuration'
+    apmAgentConfigurationIndex: '.apm-agent-configuration',
+    apmCustomLinkIndex: '.apm-custom-link',
   };
 }
 
 export async function getApmIndices({
   config,
-  savedObjectsClient
+  savedObjectsClient,
 }: {
   config: APMConfig;
   savedObjectsClient: ISavedObjectsClient;
@@ -80,11 +82,11 @@ const APM_UI_INDICES: ApmIndicesName[] = [
   'apm_oss.onboardingIndices',
   'apm_oss.spanIndices',
   'apm_oss.transactionIndices',
-  'apm_oss.metricsIndices'
+  'apm_oss.metricsIndices',
 ];
 
 export async function getApmIndexSettings({
-  context
+  context,
 }: {
   context: APMRequestHandlerContext;
 }) {
@@ -102,9 +104,9 @@ export async function getApmIndexSettings({
   }
   const apmIndicesConfig = getApmIndicesConfig(context.config);
 
-  return APM_UI_INDICES.map(configurationName => ({
+  return APM_UI_INDICES.map((configurationName) => ({
     configurationName,
     defaultValue: apmIndicesConfig[configurationName], // value defined in kibana[.dev].yml
-    savedValue: apmIndicesSavedObject[configurationName] // value saved via Saved Objects service
+    savedValue: apmIndicesSavedObject[configurationName], // value saved via Saved Objects service
   }));
 }

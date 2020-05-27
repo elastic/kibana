@@ -29,6 +29,9 @@ jest.mock('../kibana_services', () => ({
     getBasePath: () => 'path',
     tutorialVariables: () => ({}),
     homeConfig: { disableWelcomeScreen: false },
+    chrome: {
+      setBreadcrumbs: () => {},
+    },
   }),
 }));
 
@@ -56,7 +59,7 @@ describe('home', () => {
         decrement: sinon.mock(),
       },
       localStorage: {
-        getItem: sinon.spy(path => {
+        getItem: sinon.spy((path) => {
           expect(path).toEqual('home:welcome:show');
           return 'false';
         }),
@@ -74,11 +77,11 @@ describe('home', () => {
     const component = shallow(<Home {...defaultProps} {...props} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
 
     return component;
   }

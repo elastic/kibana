@@ -19,7 +19,7 @@ import {
 import { throwErrors } from '../../../../common/runtime_types';
 import { NoLogAnalysisResultsIndexError } from '../../../lib/log_analysis';
 
-const anyObject = schema.object({}, { allowUnknowns: true });
+const anyObject = schema.object({}, { unknowns: 'allow' });
 
 export const initGetLogEntryCategoriesRoute = ({
   framework,
@@ -60,7 +60,7 @@ export const initGetLogEntryCategoriesRoute = ({
           endTime,
           categoryCount,
           datasets ?? [],
-          histograms.map(histogram => ({
+          histograms.map((histogram) => ({
             bucketCount: histogram.bucketCount,
             endTime: histogram.timeRange.endTime,
             id: histogram.id,

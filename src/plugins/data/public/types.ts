@@ -17,11 +17,14 @@
  * under the License.
  */
 
+import React from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
+import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternSelectProps } from './ui/index_pattern_select';
@@ -29,6 +32,7 @@ import { IndexPatternsContract } from './index_patterns';
 import { StatefulSearchBarProps } from './ui/search_bar/create_search_bar';
 
 export interface DataSetupDependencies {
+  expressions: ExpressionsSetup;
   uiActions: UiActionsSetup;
 }
 
@@ -44,6 +48,10 @@ export interface DataPublicPluginSetup {
 }
 
 export interface DataPublicPluginStart {
+  actions: {
+    createFiltersFromValueClickAction: typeof createFiltersFromValueClickAction;
+    createFiltersFromRangeSelectAction: typeof createFiltersFromRangeSelectAction;
+  };
   autocomplete: AutocompleteStart;
   indexPatterns: IndexPatternsContract;
   search: ISearchStart;
@@ -64,3 +72,15 @@ export interface IDataPluginServices extends Partial<CoreStart> {
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
 }
+
+/** @internal **/
+export interface InternalStartServices {
+  readonly fieldFormats: FieldFormatsStart;
+  readonly notifications: CoreStart['notifications'];
+  readonly uiSettings: CoreStart['uiSettings'];
+  readonly searchService: DataPublicPluginStart['search'];
+  readonly injectedMetadata: CoreStart['injectedMetadata'];
+}
+
+/** @internal **/
+export type GetInternalStartServicesFn = () => InternalStartServices;

@@ -4,16 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve as resolvePath } from 'path';
 import { existsSync } from 'fs';
-
-import { chromium } from '../index';
-import { BrowserDownload, BrowserType } from '../types';
-
+import { resolve as resolvePath } from 'path';
+import { BrowserDownload, chromium } from '../';
+import { BROWSER_TYPE } from '../../../common/constants';
 import { md5 } from './checksum';
-import { asyncMap } from './util';
-import { download } from './download';
 import { clean } from './clean';
+import { download } from './download';
+import { asyncMap } from './util';
 
 /**
  * Check for the downloaded archive of each requested browser type and
@@ -21,7 +19,7 @@ import { clean } from './clean';
  * @param  {String} browserType
  * @return {Promise<undefined>}
  */
-export async function ensureBrowserDownloaded(browserType: BrowserType) {
+export async function ensureBrowserDownloaded(browserType = BROWSER_TYPE) {
   await ensureDownloaded([chromium]);
 }
 
@@ -41,12 +39,12 @@ export async function ensureAllBrowsersDownloaded() {
  * @return {Promise<undefined>}
  */
 async function ensureDownloaded(browsers: BrowserDownload[]) {
-  await asyncMap(browsers, async browser => {
+  await asyncMap(browsers, async (browser) => {
     const { archivesPath } = browser.paths;
 
     await clean(
       archivesPath,
-      browser.paths.packages.map(p => resolvePath(archivesPath, p.archiveFilename))
+      browser.paths.packages.map((p) => resolvePath(archivesPath, p.archiveFilename))
     );
 
     const invalidChecksums: string[] = [];

@@ -26,7 +26,7 @@ export class ToolingLogCollectingWriter extends ToolingLogTextWriter {
     super({
       level: 'verbose',
       writeTo: {
-        write: msg => {
+        write: (msg) => {
           // trim trailing new line
           this.messages.push(msg.slice(0, -1));
         },

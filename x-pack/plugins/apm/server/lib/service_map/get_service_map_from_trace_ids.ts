@@ -3,24 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { uniq, find } from 'lodash';
-import { Setup } from '../helpers/setup_request';
+import { find, uniq } from 'lodash';
 import {
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
   TRACE_ID,
-  PROCESSOR_EVENT
 } from '../../../common/elasticsearch_fieldnames';
 import {
   Connection,
-  ServiceConnectionNode,
   ConnectionNode,
-  ExternalConnectionNode
+  ExternalConnectionNode,
+  ServiceConnectionNode,
 } from '../../../common/service_map';
+import { Setup } from '../helpers/setup_request';
 
 export async function getServiceMapFromTraceIds({
   setup,
   traceIds,
   serviceName,
-  environment
+  environment,
 }: {
   setup: Setup;
   traceIds: string[];
@@ -32,7 +34,7 @@ export async function getServiceMapFromTraceIds({
   const serviceMapParams = {
     index: [
       indices['apm_oss.spanIndices'],
-      indices['apm_oss.transactionIndices']
+      indices['apm_oss.transactionIndices'],
     ],
     body: {
       size: 0,
@@ -41,16 +43,16 @@ export async function getServiceMapFromTraceIds({
           filter: [
             {
               terms: {
-                [PROCESSOR_EVENT]: ['span', 'transaction']
-              }
+                [PROCESSOR_EVENT]: ['span', 'transaction'],
+              },
             },
             {
               terms: {
-                [TRACE_ID]: traceIds
-              }
-            }
-          ]
-        }
+                [TRACE_ID]: traceIds,
+              },
+            },
+          ],
+        },
       },
       aggs: {
         service_map: {
@@ -63,14 +65,14 @@ export async function getServiceMapFromTraceIds({
                   'parent.id',
                   'service.name',
                   'service.environment',
-                  'destination.address',
+                  'span.destination.service.resource',
                   'trace.id',
                   'processor.event',
                   'span.type',
                   'span.subtype',
                   'agent.name'
                 };
-                state.fieldsToCopy = fieldsToCopy;`
+                state.fieldsToCopy = fieldsToCopy;`,
             },
             map_script: {
               lang: 'painless',
@@ -90,18 +92,18 @@ export async function getServiceMapFromTraceIds({
                   }
                 }
 
-                state.eventsById[id] = copy`
+                state.eventsById[id] = copy`,
             },
             combine_script: {
               lang: 'painless',
-              source: `return state.eventsById;`
+              source: `return state.eventsById;`,
             },
             reduce_script: {
               lang: 'painless',
               source: `
               def getDestination ( def event ) {
                 def destination = new HashMap();
-                destination['destination.address'] = event['destination.address'];
+                destination['span.destination.service.resource'] = event['span.destination.service.resource'];
                 destination['span.type'] = event['span.type'];
                 destination['span.subtype'] = event['span.subtype'];
                 return destination;
@@ -136,13 +138,11 @@ export async function getServiceMapFromTraceIds({
                     /* flag parent path for removal, as it has children */
                     context.locationsToRemove.add(parent.path);
 
-                    /* if the parent has 'destination.address' set, and the service is different,
+                    /* if the parent has 'span.destination.service.resource' set, and the service is different,
                     we've discovered a service */
 
-                    if (parent['destination.address'] != null
-                      && parent['destination.address'] != ""
-                      && (parent['span.type'] == 'external'
-                        || parent['span.type'] == 'messaging')
+                    if (parent['span.destination.service.resource'] != null
+                      && parent['span.destination.service.resource'] != ""
                       && (parent['service.name'] != event['service.name']
                         || parent['service.environment'] != event['service.environment']
                       )
@@ -163,8 +163,8 @@ export async function getServiceMapFromTraceIds({
                 }
 
                 /* if there is an outgoing span, create a new path */
-                if (event['destination.address'] != null
-                  && event['destination.address'] != '') {
+                if (event['span.destination.service.resource'] != null
+                  && event['span.destination.service.resource'] != '') {
                   def outgoingLocation = getDestination(event);
                   def outgoingPath = new ArrayList(basePath);
                   outgoingPath.add(outgoingLocation);
@@ -215,12 +215,12 @@ export async function getServiceMapFromTraceIds({
               }
               response.discoveredServices = discoveredServices;
 
-              return response;`
-            }
-          }
-        }
-      }
-    }
+              return response;`,
+            },
+          },
+        },
+      },
+    },
   };
 
   const serviceMapResponse = await client.search(serviceMapParams);
@@ -236,20 +236,21 @@ export async function getServiceMapFromTraceIds({
   let paths = scriptResponse.paths;
 
   if (serviceName || environment) {
-    paths = paths.filter(path => {
-      return path.some(node => {
+    paths = paths.filter((path) => {
+      return path.some((node) => {
         let matches = true;
         if (serviceName) {
           matches =
             matches &&
-            'service.name' in node &&
-            node['service.name'] === serviceName;
+            SERVICE_NAME in node &&
+            (node as ServiceConnectionNode)[SERVICE_NAME] === serviceName;
         }
         if (environment) {
           matches =
             matches &&
-            'service.environment' in node &&
-            node['service.environment'] === environment;
+            SERVICE_ENVIRONMENT in node &&
+            (node as ServiceConnectionNode)[SERVICE_ENVIRONMENT] ===
+              environment;
         }
         return matches;
       });
@@ -257,13 +258,13 @@ export async function getServiceMapFromTraceIds({
   }
 
   const connections = uniq(
-    paths.flatMap(path => {
+    paths.flatMap((path) => {
       return path.reduce((conns, location, index) => {
         const prev = path[index - 1];
         if (prev) {
           return conns.concat({
             source: prev,
-            destination: location
+            destination: location,
           });
         }
         return conns;
@@ -276,6 +277,6 @@ export async function getServiceMapFromTraceIds({
 
   return {
     connections,
-    discoveredServices: scriptResponse.discoveredServices
+    discoveredServices: scriptResponse.discoveredServices,
   };
 }

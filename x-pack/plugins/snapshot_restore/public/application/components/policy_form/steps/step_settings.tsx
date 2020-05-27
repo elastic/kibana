@@ -20,7 +20,7 @@ import {
   EuiComboBox,
   EuiToolTip,
 } from '@elastic/eui';
-import { Option } from '@elastic/eui/src/components/selectable/types';
+import { EuiSelectableOption } from '@elastic/eui';
 import { SlmPolicyPayload, SnapshotConfig } from '../../../../../common/types';
 import { documentationLinksService } from '../../../services/documentation';
 import { useServices } from '../../../app_context';
@@ -45,9 +45,9 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
   // States for choosing all indices, or a subset, including caching previously chosen subset list
   const [isAllIndices, setIsAllIndices] = useState<boolean>(!Boolean(config.indices));
   const [indicesSelection, setIndicesSelection] = useState<SnapshotConfig['indices']>([...indices]);
-  const [indicesOptions, setIndicesOptions] = useState<Option[]>(
+  const [indicesOptions, setIndicesOptions] = useState<EuiSelectableOption[]>(
     indices.map(
-      (index): Option => ({
+      (index): EuiSelectableOption => ({
         label: index,
         checked:
           isAllIndices ||
@@ -88,7 +88,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
         checked={isAllIndices}
         disabled={isManagedPolicy}
         data-test-subj="allIndicesToggle"
-        onChange={e => {
+        onChange={(e) => {
           const isChecked = e.target.checked;
           setIsAllIndices(isChecked);
           if (isChecked) {
@@ -210,7 +210,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                                 data-test-subj="deselectIndicesLink"
                                 onClick={() => {
                                   // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
-                                  indicesOptions.forEach((option: Option) => {
+                                  indicesOptions.forEach((option: EuiSelectableOption) => {
                                     option.checked = undefined;
                                   });
                                   updatePolicyConfig({ indices: [] });
@@ -226,7 +226,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                               <EuiLink
                                 onClick={() => {
                                   // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
-                                  indicesOptions.forEach((option: Option) => {
+                                  indicesOptions.forEach((option: EuiSelectableOption) => {
                                     option.checked = 'on';
                                   });
                                   updatePolicyConfig({ indices: [...indices] });
@@ -250,7 +250,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                     <EuiSelectable
                       allowExclusions={false}
                       options={indicesOptions}
-                      onChange={options => {
+                      onChange={(options) => {
                         const newSelectedIndices: string[] = [];
                         options.forEach(({ label, checked }) => {
                           if (checked === 'on') {
@@ -273,14 +273,14 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                     </EuiSelectable>
                   ) : (
                     <EuiComboBox
-                      options={indices.map(index => ({ label: index }))}
+                      options={indices.map((index) => ({ label: index }))}
                       placeholder={i18n.translate(
                         'xpack.snapshotRestore.policyForm.stepSettings.indicesPatternPlaceholder',
                         {
                           defaultMessage: 'Enter index patterns, i.e. logstash-*',
                         }
                       )}
-                      selectedOptions={indexPatterns.map(pattern => ({ label: pattern }))}
+                      selectedOptions={indexPatterns.map((pattern) => ({ label: pattern }))}
                       onCreateOption={(pattern: string) => {
                         if (!pattern.trim().length) {
                           return;
@@ -339,7 +339,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
             />
           }
           checked={Boolean(config.ignoreUnavailable)}
-          onChange={e => {
+          onChange={(e) => {
             updatePolicyConfig({
               ignoreUnavailable: e.target.checked,
             });
@@ -379,7 +379,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
             />
           }
           checked={Boolean(config.partial)}
-          onChange={e => {
+          onChange={(e) => {
             updatePolicyConfig({
               partial: e.target.checked,
             });
@@ -419,7 +419,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
             />
           }
           checked={config.includeGlobalState === undefined || config.includeGlobalState}
-          onChange={e => {
+          onChange={(e) => {
             updatePolicyConfig({
               includeGlobalState: e.target.checked,
             });

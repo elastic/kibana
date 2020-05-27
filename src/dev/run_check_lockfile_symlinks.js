@@ -35,7 +35,9 @@ const IGNORE_FILE_GLOBS = [
   // fixtures aren't used in production, ignore them
   '**/*fixtures*/**/*',
   // cypress isn't used in production, ignore it
-  'x-pack/legacy/plugins/apm/e2e/*',
+  'x-pack/plugins/apm/e2e/*',
+  // apm scripts aren't used in production, ignore them
+  'x-pack/plugins/apm/scripts/*',
 ];
 
 run(async ({ log }) => {
@@ -53,13 +55,15 @@ run(async ({ log }) => {
     ],
   });
 
-  const files = paths.map(path => new File(path));
+  const files = paths.map((path) => new File(path));
 
   await checkLockfileSymlinks(log, files);
 });
 
 async function checkLockfileSymlinks(log, files) {
-  const filtered = files.filter(file => !matchesAnyGlob(file.getRelativePath(), IGNORE_FILE_GLOBS));
+  const filtered = files.filter(
+    (file) => !matchesAnyGlob(file.getRelativePath(), IGNORE_FILE_GLOBS)
+  );
   await checkOnlyLockfileAtProjectRoot(filtered);
   await checkSuperfluousSymlinks(log, filtered);
   await checkMissingSymlinks(log, filtered);
@@ -70,8 +74,8 @@ async function checkOnlyLockfileAtProjectRoot(files) {
   const errorPaths = [];
 
   files
-    .filter(file => matchesAnyGlob(file.getRelativePath(), LOCKFILE_GLOBS))
-    .forEach(file => {
+    .filter((file) => matchesAnyGlob(file.getRelativePath(), LOCKFILE_GLOBS))
+    .forEach((file) => {
       const path = file.getRelativePath();
       const parent = dirname(path);
       const stats = lstatSync(path);
@@ -91,8 +95,8 @@ async function checkSuperfluousSymlinks(log, files) {
   const errorPaths = [];
 
   files
-    .filter(file => matchesAnyGlob(file.getRelativePath(), LOCKFILE_GLOBS))
-    .forEach(file => {
+    .filter((file) => matchesAnyGlob(file.getRelativePath(), LOCKFILE_GLOBS))
+    .forEach((file) => {
       const path = file.getRelativePath();
       const parent = dirname(path);
       const stats = lstatSync(path);
@@ -144,8 +148,8 @@ async function checkMissingSymlinks(log, files) {
   const errorPaths = [];
 
   files
-    .filter(file => matchesAnyGlob(file.getRelativePath(), MANIFEST_GLOBS))
-    .forEach(file => {
+    .filter((file) => matchesAnyGlob(file.getRelativePath(), MANIFEST_GLOBS))
+    .forEach((file) => {
       const path = file.getRelativePath();
       const parent = dirname(path);
       const lockfilePath = `${parent}/yarn.lock`;
@@ -183,8 +187,8 @@ async function checkIncorrectSymlinks(log, files) {
   const errorPaths = [];
 
   files
-    .filter(file => matchesAnyGlob(file.getRelativePath(), LOCKFILE_GLOBS))
-    .forEach(file => {
+    .filter((file) => matchesAnyGlob(file.getRelativePath(), LOCKFILE_GLOBS))
+    .forEach((file) => {
       const path = file.getRelativePath();
       const stats = lstatSync(path);
       if (!stats.isSymbolicLink()) {
@@ -216,5 +220,5 @@ function getCorrectSymlink(path) {
 }
 
 function listPaths(paths) {
-  return paths.map(path => ` - ${path}`).join('\n');
+  return paths.map((path) => ` - ${path}`).join('\n');
 }

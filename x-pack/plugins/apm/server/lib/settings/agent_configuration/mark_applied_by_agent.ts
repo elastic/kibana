@@ -5,12 +5,12 @@
  */
 
 import { Setup } from '../../helpers/setup_request';
-import { AgentConfiguration } from './configuration_types';
+import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 
 export async function markAppliedByAgent({
   id,
   body,
-  setup
+  setup,
 }: {
   id: string;
   body: AgentConfiguration;
@@ -23,8 +23,8 @@ export async function markAppliedByAgent({
     id, // by specifying the `id` elasticsearch will do an "upsert"
     body: {
       ...body,
-      applied_by_agent: true
-    }
+      applied_by_agent: true,
+    },
   };
 
   return internalClient.index<AgentConfiguration>(params);

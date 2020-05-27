@@ -70,7 +70,7 @@ export class RemoteClusterEdit extends Component {
     this.props.stopEditingCluster();
   }
 
-  save = clusterConfig => {
+  save = (clusterConfig) => {
     this.props.editCluster(clusterConfig);
   };
 
@@ -158,7 +158,7 @@ export class RemoteClusterEdit extends Component {
       );
     }
 
-    const { isConfiguredByNode } = cluster;
+    const { isConfiguredByNode, hasDeprecatedProxySetting } = cluster;
 
     if (isConfiguredByNode) {
       return (
@@ -178,14 +178,36 @@ export class RemoteClusterEdit extends Component {
     }
 
     return (
-      <RemoteClusterForm
-        fields={cluster}
-        disabledFields={disabledFields}
-        isSaving={isEditingCluster}
-        saveError={getEditClusterError}
-        save={this.save}
-        cancel={this.cancel}
-      />
+      <>
+        {hasDeprecatedProxySetting ? (
+          <>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.remoteClusters.edit.deprecatedSettingsTitle"
+                  defaultMessage="Proceed with caution"
+                />
+              }
+              color="warning"
+              iconType="help"
+            >
+              <FormattedMessage
+                id="xpack.remoteClusters.edit.deprecatedSettingsMessage"
+                defaultMessage="This remote cluster has deprecated settings that we tried to resolve. Verify all changes before saving."
+              />
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        ) : null}
+        <RemoteClusterForm
+          fields={cluster}
+          disabledFields={disabledFields}
+          isSaving={isEditingCluster}
+          saveError={getEditClusterError}
+          save={this.save}
+          cancel={this.cancel}
+        />
+      </>
     );
   }
 

@@ -12,13 +12,13 @@ For this tutorial, you'll need to add the <<add-sample-data, Sample eCommerce or
 [float]
 === Create and personalize your workpad
 
-Your first step to working with Canvas is to create a workpad. 
+Your first step to working with Canvas is to create a workpad.
 
 . Open *Canvas*.
 
 . Click *Create workpad*.
 
-. To add a *Name* for your workpad, use the editor on the right. For example, `My Canvas Workpad`.
+. To add a *Name* for your workpad, use the editor. For example, `My Canvas Workpad`.
 
 [float]
 === Customize your workpad with images
@@ -29,7 +29,7 @@ To customize your workpad to look the way you want, add your own images.
 +
 The default Elastic logo image appears on your page.
 
-. To replace the Elastic logo with your own image, select the image, then use the editor on the right.
+. To replace the Elastic logo with your own image, select the image, then use the editor.
 
 . To move the image, click and drag it to your preferred location.
 
@@ -43,7 +43,7 @@ You'll notice that the image is tagged as an asset, which allows you to reuse th
 
 Customize your data by connecting it to the Sample eCommerce orders data.
 
-. Click *Add element*, then click *Metric*. 
+. Click *Add element*, then click *Metric*.
 +
 By default, the *Metric* element is connected to a demo data source, which enables you to experiment with the element before you connect it to your own data source.
 
@@ -73,7 +73,7 @@ You'll notice that the error is gone, but the number could use some formatting.
 
 . To format the number, use the Canvas expression language.
 
-.. In the lower right corner, click *Expression editor*.
+.. Click *Expression editor*.
 +
 You're now looking at the raw data syntax that Canvas uses to display the element.
 
@@ -89,7 +89,7 @@ image::images/canvas-metric-element.png[]
 
 To show what your data can do, add charts, graphs, progress monitors, and more to your workpad.
 
-. Click *Add element*, then click *Area chart*. 
+. Click *Add element*, then click *Area chart*.
 
 . To connect the element to your own data source, make sure that the element is selected, then click *Data*.
 
@@ -117,7 +117,7 @@ image::images/canvas-chart-element.png[]
 [float]
 === Show how your data changes over time
 
-To focus your data on a specific time range, add a time filter to your workpad. 
+To focus your data on a specific time range, add a time filter to your workpad.
 
 . Click *Add element*, then click *Time filter*.
 
@@ -132,26 +132,30 @@ image::images/canvas-timefilter-element.png[]
 
 To see how the data changes, set the time filter to *Last 7 days*. As you change the time filter options, the metrics dynamically update.
 
-Your workpad is now complete! Use the icons in the upper left corner to:
-
-* Display your workpad in fullscreen mode
-
-* Download your workpad as a PDF report or JSON object
+Your workpad is now complete! From the workpad menu, use the icons to:
 
 * Configure the refresh rate for your data
 
+* Refresh the data that displays on your workpad
+
+* Display your workpad in fullscreen mode
+
+* Control the zoom options
+
 * Share your workpad
+
+* Hide the editing controls
 
 [float]
 === Next steps
-Now that you know the Canvas basics, you're ready to explore on your own. 
+Now that you know the Canvas basics, you're ready to explore on your own.
 
 Here are some things to try:
 
-* Play with the {kibana-ref}/add-sample-data.html[sample Canvas workpads]. 
+* Play with the {kibana-ref}/add-sample-data.html[sample Canvas workpads].
 
-* Learn more about <<create-canvas-workpad,Workpads>>.
+* Build presentations of your own live data with <<create-canvas-workpad,workpads>>.
 
-* Learn more about <<element-intro,Elements>>.
+* Learn more about <<add-canvas-elements,elements>> &mdash; the building blocks of your workpad.
 
 * Deep dive into the {kibana-ref}/canvas-function-reference.html[expression language and functions] that drive Canvas.

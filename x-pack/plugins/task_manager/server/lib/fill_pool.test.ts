@@ -10,7 +10,7 @@ import { fillPool } from './fill_pool';
 import { TaskPoolRunResult } from '../task_pool';
 
 describe('fillPool', () => {
-  test('stops filling when there are no more tasks in the store', async () => {
+  test('stops filling when pool runs all claimed tasks, even if there is more capacity', async () => {
     const tasks = [
       [1, 2, 3],
       [4, 5],
@@ -22,7 +22,7 @@ describe('fillPool', () => {
 
     await fillPool(fetchAvailableTasks, converter, run);
 
-    expect(_.flattenDeep(run.args)).toEqual([1, 2, 3, 4, 5]);
+    expect(_.flattenDeep(run.args)).toEqual([1, 2, 3]);
   });
 
   test('stops filling when the pool has no more capacity', async () => {

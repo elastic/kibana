@@ -13,7 +13,7 @@ import { pageObjects } from './page_objects';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );
@@ -38,7 +38,7 @@ export default async function({ readConfigFile }) {
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
-      resolve(__dirname, './apps/machine_learning'),
+      resolve(__dirname, './apps/ml'),
       resolve(__dirname, './apps/rollup_job'),
       resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
@@ -49,14 +49,17 @@ export default async function({ readConfigFile }) {
       resolve(__dirname, './apps/saved_objects_management'),
       resolve(__dirname, './apps/dev_tools'),
       resolve(__dirname, './apps/apm'),
+      resolve(__dirname, './apps/api_keys'),
       resolve(__dirname, './apps/index_patterns'),
       resolve(__dirname, './apps/index_management'),
       resolve(__dirname, './apps/index_lifecycle_management'),
+      resolve(__dirname, './apps/ingest_pipelines'),
       resolve(__dirname, './apps/snapshot_restore'),
       resolve(__dirname, './apps/cross_cluster_replication'),
       resolve(__dirname, './apps/remote_clusters'),
       resolve(__dirname, './apps/transform'),
-      resolve(__dirname, './apps/endpoint'),
+      resolve(__dirname, './apps/reporting_management'),
+
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
     ],
@@ -69,7 +72,7 @@ export default async function({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: ['path.repo=/tmp/'],
+      serverArgs: ['path.repo=/tmp/', 'xpack.security.authc.api_key.enabled=true'],
     },
 
     kbnTestServer: {
@@ -85,9 +88,7 @@ export default async function({ readConfigFile }) {
         '--stats.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
-        '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
-        '--xpack.endpoint.enabled=true',
       ],
     },
     uiSettings: {
@@ -113,7 +114,7 @@ export default async function({ readConfigFile }) {
       },
       logstashPipelines: {
         pathname: '/app/kibana',
-        hash: '/management/logstash/pipelines',
+        hash: '/management/ingest/pipelines',
       },
       maps: {
         pathname: '/app/maps',
@@ -122,12 +123,12 @@ export default async function({ readConfigFile }) {
         pathname: '/app/graph',
       },
       grokDebugger: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/grokdebugger',
+        pathname: '/app/dev_tools',
+        hash: '/grokdebugger',
       },
       searchProfiler: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/searchprofiler',
+        pathname: '/app/dev_tools',
+        hash: '/searchprofiler',
       },
       spaceSelector: {
         pathname: '/',
@@ -145,9 +146,6 @@ export default async function({ readConfigFile }) {
       uptime: {
         pathname: '/app/uptime',
       },
-      apm: {
-        pathname: '/app/apm',
-      },
       ml: {
         pathname: '/app/ml',
       },
@@ -157,45 +155,54 @@ export default async function({ readConfigFile }) {
       },
       rollupJob: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/rollup_jobs/',
+        hash: '/management/data/rollup_jobs/',
+      },
+      apiKeys: {
+        pathname: '/app/kibana',
+        hash: '/management/security/api_keys/',
       },
       licenseManagement: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/license_management',
+        hash: '/management/stack/license_management',
       },
       indexManagement: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/index_management',
+        hash: '/management/data/index_management',
       },
       indexLifecycleManagement: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/index_lifecycle_management',
+        hash: '/management/data/index_lifecycle_management',
+      },
+      ingestPipelines: {
+        pathname: '/app/kibana',
+        hash: '/management/ingest/ingest_pipelines',
       },
       snapshotRestore: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/snapshot_restore',
+        hash: '/management/data/snapshot_restore',
       },
       crossClusterReplication: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/cross_cluster_replication',
+        hash: '/management/data/cross_cluster_replication',
       },
       remoteClusters: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/remote_clusters',
+        hash: '/management/data/remote_clusters',
       },
       apm: {
         pathname: '/app/apm',
       },
       watcher: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/watcher/watches/',
+        hash: '/management/insightsAndAlerting/watcher/watches/',
       },
       transform: {
         pathname: '/app/kibana/',
-        hash: '/management/elasticsearch/transform',
+        hash: '/management/data/transform',
       },
-      endpoint: {
-        pathname: '/app/endpoint',
+      reporting: {
+        pathname: '/app/kibana/',
+        hash: '/management/insightsAndAlerting/reporting',
       },
     },
 
@@ -211,6 +218,51 @@ export default async function({ readConfigFile }) {
 
     junit: {
       reportName: 'Chrome X-Pack UI Functional Tests',
+    },
+    security: {
+      roles: {
+        test_logstash_reader: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['logstash*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        global_discover_read: {
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
+        test_api_keys: {
+          elasticsearch: {
+            cluster: ['manage_security', 'manage_api_key'],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['default'],
+            },
+          ],
+        },
+      },
+      defaultRoles: ['superuser'],
     },
   };
 }

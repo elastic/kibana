@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { defineAccessAgreementRoutes } from './access_agreement';
 import { defineAccountManagementRoutes } from './account_management';
 import { defineLoggedOutRoutes } from './logged_out';
 import { defineLoginRoutes } from './login';
@@ -12,10 +13,15 @@ import { defineOverwrittenSessionRoutes } from './overwritten_session';
 import { RouteDefinitionParams } from '..';
 
 export function defineViewRoutes(params: RouteDefinitionParams) {
-  if (params.authc.isProviderEnabled('basic') || params.authc.isProviderEnabled('token')) {
+  if (
+    params.config.authc.selector.enabled ||
+    params.authc.isProviderTypeEnabled('basic') ||
+    params.authc.isProviderTypeEnabled('token')
+  ) {
     defineLoginRoutes(params);
   }
 
+  defineAccessAgreementRoutes(params);
   defineAccountManagementRoutes(params);
   defineLoggedOutRoutes(params);
   defineLogoutRoutes(params);

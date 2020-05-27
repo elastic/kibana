@@ -94,6 +94,7 @@ export class ReindexPollingService {
         errorMessage: null,
         cancelLoadingState: undefined,
       });
+
       const data = await this.http.post<ReindexOperation>(
         `/api/upgrade_assistant/reindex/${this.indexName}`
       );

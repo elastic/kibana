@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { importDataProvider } from '../models/import_data';
 import { updateTelemetry } from '../telemetry/telemetry';
 import { MAX_BYTES } from '../../common/constants/file_import';
@@ -28,12 +27,12 @@ export const bodySchema = schema.object(
         {},
         {
           defaultValue: {},
-          allowUnknowns: true,
+          unknowns: 'allow',
         }
       )
     ),
   },
-  { allowUnknowns: true }
+  { unknowns: 'allow' }
 );
 
 const options = {
@@ -48,7 +47,7 @@ export const idConditionalValidation = (body, boolHasId) =>
     .object(
       {
         data: boolHasId
-          ? schema.arrayOf(schema.object({}, { allowUnknowns: true }), { minSize: 1 })
+          ? schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { minSize: 1 })
           : schema.any(),
         settings: boolHasId
           ? schema.any()
@@ -58,7 +57,7 @@ export const idConditionalValidation = (body, boolHasId) =>
                 defaultValue: {
                   number_of_shards: 1,
                 },
-                allowUnknowns: true,
+                unknowns: 'allow',
               }
             ),
         mappings: boolHasId
@@ -67,11 +66,11 @@ export const idConditionalValidation = (body, boolHasId) =>
               {},
               {
                 defaultValue: {},
-                allowUnknowns: true,
+                unknowns: 'allow',
               }
             ),
       },
-      { allowUnknowns: true }
+      { unknowns: 'allow' }
     )
     .validate(body);
 
@@ -86,7 +85,7 @@ const finishValidationAndProcessReq = () => {
     let resp;
     try {
       const validIdReqData = idConditionalValidation(body, boolHasId);
-      const callWithRequest = callWithRequestFactory(req);
+      const callWithRequest = con.core.elasticsearch.legacy.client.callAsCurrentUser;
       const { importData: importDataFunc } = importDataProvider(callWithRequest);
 
       const { index, settings, mappings, ingestPipeline, data } = validIdReqData;
@@ -115,7 +114,7 @@ const finishValidationAndProcessReq = () => {
   };
 };
 
-export const initRoutes = router => {
+export const initRoutes = (router) => {
   router.post(
     {
       path: `${IMPORT_ROUTE}{id?}`,

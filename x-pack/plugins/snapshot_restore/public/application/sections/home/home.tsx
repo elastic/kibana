@@ -41,7 +41,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
   },
   history,
 }) => {
-  const { slmUi } = useConfig();
+  const { slm_ui: slmUi } = useConfig();
 
   const tabs: Array<{
     id: Section;
@@ -139,7 +139,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
         <EuiSpacer size="m" />
 
         <EuiTabs>
-          {tabs.map(tab => (
+          {tabs.map((tab) => (
             <EuiTab
               onClick={() => onSectionChange(tab.id)}
               isSelected={tab.id === section}

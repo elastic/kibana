@@ -42,10 +42,8 @@ export { kbnTestConfig, kibanaServerTestUser, kibanaTestUser, adminTestUser } fr
 // @ts-ignore not typed yet
 export { setupUsers, DEFAULT_SUPERUSER_PASS } from './functional_tests/lib/auth';
 
-// @ts-ignore not typed yet
 export { readConfigFile } from './functional_test_runner/lib/config/read_config_file';
 
-// @ts-ignore not typed yet
 export { runFtrCli } from './functional_test_runner/cli';
 
 export {
@@ -58,3 +56,5 @@ export {
 export { runFailedTestsReporterCli } from './failed_tests_reporter';
 
 export { makeJunitReportPath } from './junit_report_path';
+
+export { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';

@@ -18,27 +18,39 @@
  */
 
 import { createServer } from 'http';
-import { resolve } from 'path';
-import { readFileSync } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
+import { mkdirp, readFileSync } from 'fs-extra';
 
 import del from 'del';
 import sinon from 'sinon';
+import { CI_PARALLEL_PROCESS_PREFIX } from '@kbn/test';
 import expect from '@kbn/expect';
 import Wreck from '@hapi/wreck';
 
 import { ToolingLog } from '@kbn/dev-utils';
 import { download } from '../download';
 
-const TMP_DESTINATION = resolve(__dirname, '__tmp__');
-beforeEach(async () => {
-  await del(TMP_DESTINATION);
-});
-after(async () => {
-  await del(TMP_DESTINATION);
-});
+const getTempFolder = async () => {
+  const dir = join(tmpdir(), CI_PARALLEL_PROCESS_PREFIX, 'download-js-test-tmp-dir');
+  console.log(dir);
+  await mkdirp(dir);
+  return dir;
+};
 
 describe('src/dev/build/tasks/nodejs/download', () => {
   const sandbox = sinon.createSandbox();
+  let TMP_DESTINATION;
+  let TMP_DIR;
+
+  beforeEach(async () => {
+    TMP_DIR = await getTempFolder();
+    TMP_DESTINATION = join(TMP_DIR, '__tmp_download_js_test_file__');
+  });
+
+  afterEach(async () => {
+    await del(TMP_DIR, { force: true });
+  });
   afterEach(() => sandbox.reset());
 
   const onLogLine = sandbox.stub();
@@ -50,7 +62,7 @@ describe('src/dev/build/tasks/nodejs/download', () => {
   });
 
   const FOO_SHA256 = '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae';
-  const createSendHandler = send => (req, res) => {
+  const createSendHandler = (send) => (req, res) => {
     res.statusCode = 200;
     res.end(send);
   };
@@ -79,7 +91,7 @@ describe('src/dev/build/tasks/nodejs/download', () => {
       new Promise((resolve, reject) => {
         server.once('error', reject);
       }),
-      new Promise(resolve => {
+      new Promise((resolve) => {
         server.listen(resolve);
       }),
     ]);
@@ -194,9 +206,7 @@ describe('src/dev/build/tasks/nodejs/download', () => {
         });
         throw new Error('Expected download() to reject');
       } catch (error) {
-        expect(error)
-          .to.have.property('message')
-          .contain('Request failed with status code 500');
+        expect(error).to.have.property('message').contain('Request failed with status code 500');
         expect(reqCount).to.be(6);
       }
     });
@@ -220,9 +230,7 @@ describe('src/dev/build/tasks/nodejs/download', () => {
 
         throw new Error('expected download() to reject');
       } catch (error) {
-        expect(error)
-          .to.have.property('message')
-          .contain('refusing to download');
+        expect(error).to.have.property('message').contain('refusing to download');
       }
     });
   });

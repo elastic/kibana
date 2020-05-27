@@ -26,10 +26,8 @@ function prepSetParams(key: PersistedStateKey, value: any, path: PersistedStateP
   // key must be the value, set the entire state using it
   if (value === undefined && (isPlainObject(key) || path.length > 0)) {
     // setting entire tree, swap the key and value to write to the state
-    return {
-      value: key,
-      key: undefined,
-    };
+    value = key;
+    key = undefined;
   }
 
   // ensure the value being passed in is never mutated
@@ -87,13 +85,13 @@ export class PersistedState extends EventEmitter {
   setSilent(key: PersistedStateKey | any, value?: any) {
     const params = prepSetParams(key, value, this._path);
 
-    if (params.key) {
+    if (params.key || params.value) {
       return this.setValue(params.key, params.value, true);
     }
   }
 
   clearAllKeys() {
-    Object.getOwnPropertyNames(this._changedState).forEach(key => {
+    Object.getOwnPropertyNames(this._changedState).forEach((key) => {
       this.set(key, null);
     });
   }
@@ -231,7 +229,7 @@ export class PersistedState extends EventEmitter {
     const sourceObj = merge({}, this._changedState);
 
     // handler arguments are (targetValue, sourceValue, key, target, source)
-    const mergeMethod = function(targetValue: any, sourceValue: any, mergeKey: string) {
+    const mergeMethod = function (targetValue: any, sourceValue: any, mergeKey: string) {
       // if not initial state, skip default merge method (ie. return value, see note below)
       if (!initialState && isEqual(keyPath, self.getIndex(mergeKey))) {
         // use the sourceValue or fall back to targetValue

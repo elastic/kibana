@@ -18,8 +18,8 @@
  */
 
 import * as React from 'react';
+import { EuiFlyout } from '@elastic/eui';
 import { AddPanelFlyout } from './add_panel_flyout';
-import { GetEmbeddableFactory } from '../../../../types';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
@@ -32,6 +32,7 @@ import { ReactWrapper } from 'enzyme';
 import { coreMock } from '../../../../../../../../core/public/mocks';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { embeddablePluginMock } from '../../../../../mocks';
 
 function DummySavedObjectFinder(props: { children: React.ReactNode }) {
   return (
@@ -43,10 +44,10 @@ function DummySavedObjectFinder(props: { children: React.ReactNode }) {
 }
 
 test('createNewEmbeddable() add embeddable to container', async () => {
+  const { setup, doStart } = embeddablePluginMock.createInstance();
   const core = coreMock.createStart();
   const { overlays } = core;
   const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
-    {},
     (() => null) as any,
     overlays
   );
@@ -55,7 +56,9 @@ test('createNewEmbeddable() add embeddable to container', async () => {
       firstName: 'foo',
       lastName: 'bar',
     } as any);
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => contactCardEmbeddableFactory;
+  setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, contactCardEmbeddableFactory);
+  const start = doStart();
+  const getEmbeddableFactory = start.getEmbeddableFactory;
   const input: ContainerInput<{ firstName: string; lastName: string }> = {
     id: '1',
     panels: {},
@@ -67,15 +70,18 @@ test('createNewEmbeddable() add embeddable to container', async () => {
       container={container}
       onClose={onClose}
       getFactory={getEmbeddableFactory}
-      getAllFactories={() => new Set<any>([contactCardEmbeddableFactory]).values()}
+      getAllFactories={start.getEmbeddableFactories}
       notifications={core.notifications}
       SavedObjectFinder={() => null}
     />
   ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
 
+  // https://github.com/elastic/kibana/issues/64789
+  expect(component.exists(EuiFlyout)).toBe(false);
+
   expect(Object.values(container.getInput().panels).length).toBe(0);
   component.instance().createNewEmbeddable(CONTACT_CARD_EMBEDDABLE);
-  await new Promise(r => setTimeout(r, 1));
+  await new Promise((r) => setTimeout(r, 1));
 
   const ids = Object.keys(container.getInput().panels);
   const embeddableId = ids[0];
@@ -88,10 +94,10 @@ test('createNewEmbeddable() add embeddable to container', async () => {
 });
 
 test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()', async () => {
+  const { setup, doStart } = embeddablePluginMock.createInstance();
   const core = coreMock.createStart();
   const { overlays } = core;
   const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
-    {},
     (() => null) as any,
     overlays
   );
@@ -100,7 +106,10 @@ test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()'
       firstName: 'foo',
       lastName: 'bar',
     } as any);
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => contactCardEmbeddableFactory;
+
+  setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, contactCardEmbeddableFactory);
+  const start = doStart();
+  const getEmbeddableFactory = start.getEmbeddableFactory;
   const input: ContainerInput<{ firstName: string; lastName: string }> = {
     id: '1',
     panels: {},
@@ -112,9 +121,9 @@ test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()'
       container={container}
       onClose={onClose}
       getFactory={getEmbeddableFactory}
-      getAllFactories={() => new Set<any>([contactCardEmbeddableFactory]).values()}
+      getAllFactories={start.getEmbeddableFactories}
       notifications={core.notifications}
-      SavedObjectFinder={props => <DummySavedObjectFinder {...props} />}
+      SavedObjectFinder={(props) => <DummySavedObjectFinder {...props} />}
     />
   ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
 

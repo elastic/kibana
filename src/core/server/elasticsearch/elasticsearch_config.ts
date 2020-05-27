@@ -21,7 +21,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { Duration } from 'moment';
 import { readFileSync } from 'fs';
 import { ConfigDeprecationProvider } from 'src/core/server';
-import { readPkcs12Keystore, readPkcs12Truststore } from '../../utils';
+import { readPkcs12Keystore, readPkcs12Truststore } from '../utils';
 import { ServiceConfigDescriptor } from '../internal_types';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
@@ -51,11 +51,11 @@ export const configSchema = schema.object({
       schema.contextRef('dist'),
       false,
       schema.string({
-        validate: rawConfig => {
+        validate: (rawConfig) => {
           if (rawConfig === 'elastic') {
             return (
               'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
-              'privilege-related issues. You should use the "kibana" user instead.'
+              'privilege-related issues. You should use the "kibana_system" user instead.'
             );
           }
         },
@@ -96,7 +96,7 @@ export const configSchema = schema.object({
       alwaysPresentCertificate: schema.boolean({ defaultValue: false }),
     },
     {
-      validate: rawConfig => {
+      validate: (rawConfig) => {
         if (rawConfig.key && rawConfig.keystore.path) {
           return 'cannot use [key] when [keystore.path] is specified';
         }
@@ -112,7 +112,7 @@ export const configSchema = schema.object({
     schema.contextRef('dev'),
     false,
     schema.boolean({
-      validate: rawValue => {
+      validate: (rawValue) => {
         if (rawValue === true) {
           return '"ignoreVersionMismatch" can only be set to true in development mode';
         }
@@ -131,7 +131,11 @@ const deprecations: ConfigDeprecationProvider = () => [
     }
     if (es.username === 'elastic') {
       log(
-        `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana" user instead.`
+        `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`
+      );
+    } else if (es.username === 'kibana') {
+      log(
+        `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`
       );
     }
     if (es.ssl?.key !== undefined && es.ssl?.certificate === undefined) {

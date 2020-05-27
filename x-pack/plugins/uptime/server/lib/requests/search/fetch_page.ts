@@ -7,12 +7,8 @@
 import { flatten } from 'lodash';
 import { CursorPagination } from './types';
 import { QueryContext } from './query_context';
-import { QUERY } from '../../../../../../legacy/plugins/uptime/common/constants';
-import {
-  CursorDirection,
-  MonitorSummary,
-  SortOrder,
-} from '../../../../../../legacy/plugins/uptime/common/graphql/types';
+import { QUERY } from '../../../../common/constants';
+import { CursorDirection, MonitorSummary, SortOrder } from '../../../../common/runtime_types';
 import { enrichMonitorGroups } from './enrich_monitor_groups';
 import { MonitorGroupIterator } from './monitor_group_iterator';
 
@@ -36,7 +32,7 @@ export const fetchPage = async (
   const monitorPage = await monitorGroupFetcher(queryContext, size);
 
   const checkGroups: string[] = flatten(
-    monitorPage.monitorGroups.map(monitorGroups => monitorGroups.groups.map(g => g.checkGroup))
+    monitorPage.monitorGroups.map((monitorGroups) => monitorGroups.groups.map((g) => g.checkGroup))
   );
 
   const enrichedMonitors = await monitorEnricher(queryContext, checkGroups);

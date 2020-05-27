@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+import Boom from 'boom';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { get } from 'lodash';
-import { JobSource, ServerFacade } from '../../types';
+import { ReportingConfig } from '../';
+import { JobSource } from '../types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 const defaultSize = 10;
@@ -37,8 +40,11 @@ interface CountAggResult {
   count: number;
 }
 
-export function jobsQueryFactory(server: ServerFacade, elasticsearch: ElasticsearchServiceSetup) {
-  const index = server.config().get('xpack.reporting.index');
+export function jobsQueryFactory(
+  config: ReportingConfig,
+  elasticsearch: ElasticsearchServiceSetup
+) {
+  const index = config.get('index');
   const { callAsInternalUser } = elasticsearch.adminClient;
 
   function getUsername(user: any) {
@@ -61,7 +67,7 @@ export function jobsQueryFactory(server: ServerFacade, elasticsearch: Elasticsea
       body: Object.assign(defaultBody[queryType] || {}, body),
     };
 
-    return callAsInternalUser(queryType, query).catch(err => {
+    return callAsInternalUser(queryType, query).catch((err) => {
       if (err instanceof esErrors['401']) return;
       if (err instanceof esErrors['403']) return;
       if (err instanceof esErrors['404']) return;
@@ -72,7 +78,7 @@ export function jobsQueryFactory(server: ServerFacade, elasticsearch: Elasticsea
   type Result = number;
 
   function getHits(query: Promise<Result>) {
-    return query.then(res => get(res, 'hits.hits', []));
+    return query.then((res) => get(res, 'hits.hits', []));
   }
 
   return {
@@ -147,10 +153,26 @@ export function jobsQueryFactory(server: ServerFacade, elasticsearch: Elasticsea
         };
       }
 
-      return getHits(execQuery('search', body)).then(hits => {
+      return getHits(execQuery('search', body)).then((hits) => {
         if (hits.length !== 1) return;
         return hits[0];
       });
+    },
+
+    async delete(deleteIndex: string, id: string) {
+      try {
+        const query = { id, index: deleteIndex };
+        return callAsInternalUser('delete', query);
+      } catch (error) {
+        const wrappedError = new Error(
+          i18n.translate('xpack.reporting.jobsQuery.deleteError', {
+            defaultMessage: 'Could not delete the report: {error}',
+            values: { error: error.message },
+          })
+        );
+
+        throw Boom.boomify(wrappedError, { statusCode: error.status });
+      }
     },
   };
 }

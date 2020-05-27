@@ -234,7 +234,7 @@ export interface HttpServiceSetup {
    *    'myApp',
    *    (context, req) => {
    *     async function search (id: string) {
-   *       return await context.elasticsearch.adminClient.callAsInternalUser('endpoint', id);
+   *       return await context.elasticsearch.legacy.client.callAsInternalUser('endpoint', id);
    *     }
    *     return { search };
    *    }
@@ -265,6 +265,7 @@ export interface InternalHttpServiceSetup
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
   createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+  registerStaticDir: (path: string, dirPath: string) => void;
   getAuthHeaders: GetAuthHeaders;
   registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
     pluginOpaqueId: PluginOpaqueId,

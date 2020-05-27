@@ -107,7 +107,7 @@ describe('PluginsService', () => {
   });
 
   it("properly resolves `getStartServices` in plugin's lifecycle", async () => {
-    expect.assertions(5);
+    expect.assertions(6);
 
     const pluginPath = 'plugin-path';
 
@@ -125,20 +125,25 @@ describe('PluginsService', () => {
     let contextFromStart: any = null;
     let contextFromStartService: any = null;
 
+    const pluginStartContract = {
+      someApi: () => 'foo',
+    };
+
     const pluginInitializer = () =>
       ({
         setup: async (coreSetup, deps) => {
-          coreSetup.getStartServices().then(([core, plugins]) => {
+          coreSetup.getStartServices().then(([core, plugins, pluginStart]) => {
             startDependenciesResolved = true;
-            contextFromStartService = { core, plugins };
+            contextFromStartService = { core, plugins, pluginStart };
           });
         },
         start: async (core, plugins) => {
           contextFromStart = { core, plugins };
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise((resolve) => setTimeout(resolve, 10));
           expect(startDependenciesResolved).toBe(false);
+          return pluginStartContract;
         },
-      } as Plugin);
+      } as Plugin<void, typeof pluginStartContract, {}, {}>);
 
     jest.doMock(
       join(pluginPath, 'server'),
@@ -163,5 +168,6 @@ describe('PluginsService', () => {
     expect(startDependenciesResolved).toBe(true);
     expect(contextFromStart!.core).toEqual(contextFromStartService!.core);
     expect(contextFromStart!.plugins).toEqual(contextFromStartService!.plugins);
+    expect(contextFromStartService!.pluginStart).toEqual(pluginStartContract);
   });
 });

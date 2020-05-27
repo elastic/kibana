@@ -20,7 +20,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should return 200 when creating an email action successfully', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',
@@ -39,6 +39,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       createdActionId = createdAction.id;
       expect(createdAction).to.eql({
         id: createdActionId,
+        isPreconfigured: false,
         name: 'An email action',
         actionTypeId: '.email',
         config: {
@@ -53,11 +54,12 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(typeof createdActionId).to.be('string');
 
       const { body: fetchedAction } = await supertest
-        .get(`/api/action/${createdActionId}`)
+        .get(`/api/actions/action/${createdActionId}`)
         .expect(200);
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
+        isPreconfigured: false,
         name: 'An email action',
         actionTypeId: '.email',
         config: {
@@ -72,7 +74,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should return the message data when firing the __json service', async () => {
       await supertest
-        .post(`/api/action/${createdActionId}/_execute`)
+        .post(`/api/actions/action/${createdActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -115,7 +117,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should render html from markdown', async () => {
       await supertest
-        .post(`/api/action/${createdActionId}/_execute`)
+        .post(`/api/actions/action/${createdActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -136,7 +138,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should respond with a 400 Bad Request when creating an email action with an invalid config', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',
@@ -156,7 +158,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should respond with a 400 Bad Request when creating an email action with non-whitelisted server', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',
@@ -181,7 +183,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         });
 
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',
@@ -209,7 +211,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should handle creating an email action with a whitelisted server', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',
@@ -226,6 +228,62 @@ export default function emailTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(typeof createdAction.id).to.be('string');
+    });
+
+    it('should handle an email action with no auth', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An email action with no auth',
+          actionTypeId: '.email',
+          config: {
+            service: '__json',
+            from: 'jim@example.com',
+          },
+        })
+        .expect(200);
+
+      await supertest
+        .post(`/api/actions/action/${createdAction.id}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: ['kibana-action-test@elastic.co'],
+            subject: 'email-subject',
+            message: 'email-message',
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body.data.message.messageId).to.be.a('string');
+          expect(resp.body.data.messageId).to.be.a('string');
+
+          delete resp.body.data.message.messageId;
+          delete resp.body.data.messageId;
+
+          expect(resp.body.data).to.eql({
+            envelope: {
+              from: 'jim@example.com',
+              to: ['kibana-action-test@elastic.co'],
+            },
+            message: {
+              from: { address: 'jim@example.com', name: '' },
+              to: [
+                {
+                  address: 'kibana-action-test@elastic.co',
+                  name: '',
+                },
+              ],
+              cc: null,
+              bcc: null,
+              subject: 'email-subject',
+              html: '<p>email-message</p>\n',
+              text: 'email-message',
+              headers: {},
+            },
+          });
+        });
     });
   });
 }

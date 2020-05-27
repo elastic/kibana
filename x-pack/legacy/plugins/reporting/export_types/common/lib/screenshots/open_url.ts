@@ -4,23 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConditionalHeaders } from '../../../../types';
-import { LevelLogger } from '../../../../server/lib';
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { WAITFOR_SELECTOR } from '../../constants';
+import { i18n } from '@kbn/i18n';
+import { HeadlessChromiumDriver } from '../../../../server/browsers';
+import { LevelLogger, startTrace } from '../../../../server/lib';
+import { CaptureConfig, ConditionalHeaders } from '../../../../server/types';
 
 export const openUrl = async (
-  browser: HeadlessBrowser,
+  captureConfig: CaptureConfig,
+  browser: HeadlessChromiumDriver,
   url: string,
+  pageLoadSelector: string,
   conditionalHeaders: ConditionalHeaders,
   logger: LevelLogger
 ): Promise<void> => {
-  await browser.open(
-    url,
-    {
-      conditionalHeaders,
-      waitForSelector: WAITFOR_SELECTOR,
-    },
-    logger
-  );
+  const endTrace = startTrace('open_url', 'wait');
+  try {
+    await browser.open(
+      url,
+      {
+        conditionalHeaders,
+        waitForSelector: pageLoadSelector,
+        timeout: captureConfig.timeouts.openUrl,
+      },
+      logger
+    );
+  } catch (err) {
+    throw new Error(
+      i18n.translate('xpack.reporting.screencapture.couldntLoadKibana', {
+        defaultMessage: `An error occurred when trying to open the Kibana URL. You may need to increase '{configKey}'. {error}`,
+        values: { configKey: 'xpack.reporting.capture.timeouts.openUrl', error: err },
+      })
+    );
+  }
+
+  endTrace();
 };

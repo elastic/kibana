@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { useCapabilities } from './use_capabilities';
 export { useCore, CoreContext } from './use_core';
 export { useConfig, ConfigContext } from './use_config';
-export { useDeps, DepsContext } from './use_deps';
+export { useSetupDeps, useStartDeps, DepsContext } from './use_deps';
+export { useBreadcrumbs } from './use_breadcrumbs';
 export { useLink } from './use_link';
-export { usePagination } from './use_pagination';
+export { usePackageIconType, UsePackageIconType } from './use_package_icon_type';
+export { usePagination, Pagination } from './use_pagination';
 export { useDebounce } from './use_debounce';
 export * from './use_request';
+export * from './use_input';
+export * from './use_url_params';
+export * from './use_fleet_status';

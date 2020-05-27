@@ -4,5 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ConnectorAddFlyout } from './connector_add_flyout';
-export { ConnectorEditFlyout } from './connector_edit_flyout';
+import { lazy } from 'react';
+import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
+
+export const ConnectorAddFlyout = suspendedComponentWithProps(
+  lazy(() => import('./connector_add_flyout'))
+);
+export const ConnectorEditFlyout = suspendedComponentWithProps(
+  lazy(() => import('./connector_edit_flyout'))
+);
+export const ActionForm = suspendedComponentWithProps(lazy(() => import('./action_form')));

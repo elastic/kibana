@@ -17,13 +17,13 @@
  * under the License.
  */
 
+import { IUiSettingsClient } from '../../../../../core/public';
+
 const defaultSessionId = `${Date.now()}`;
 
-export function getEsPreference(
-  setRequestPreference: string,
-  customRequestPreference?: string,
-  sessionId: string = defaultSessionId
-) {
-  if (setRequestPreference === 'sessionId') return `${sessionId}`;
-  return setRequestPreference === 'custom' ? customRequestPreference : undefined;
+export function getEsPreference(uiSettings: IUiSettingsClient, sessionId = defaultSessionId) {
+  const setPreference = uiSettings.get('courier:setRequestPreference');
+  if (setPreference === 'sessionId') return `${sessionId}`;
+  const customPreference = uiSettings.get('courier:customRequestPreference');
+  return setPreference === 'custom' ? customPreference : undefined;
 }

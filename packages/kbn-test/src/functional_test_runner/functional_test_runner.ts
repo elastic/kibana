@@ -30,6 +30,7 @@ import {
   setupMocha,
   runTests,
   Config,
+  SuiteTracker,
 } from './lib';
 
 export class FunctionalTestRunner {
@@ -52,6 +53,8 @@ export class FunctionalTestRunner {
 
   async run() {
     return await this._run(async (config, coreProviders) => {
+      SuiteTracker.startTracking(this.lifecycle, this.configFile);
+
       const providers = new ProviderCollection(this.log, [
         ...coreProviders,
         ...readProviderSpec('Service', config.get('services')),
@@ -86,7 +89,7 @@ export class FunctionalTestRunner {
       // promise-like objects which never resolve, essentially disabling them
       // allowing us to load the test files and populate the mocha suites
       const readStubbedProviderSpec = (type: string, providers: any) =>
-        readProviderSpec(type, providers).map(p => ({
+        readProviderSpec(type, providers).map((p) => ({
           ...p,
           fn: () => ({
             then: () => {},

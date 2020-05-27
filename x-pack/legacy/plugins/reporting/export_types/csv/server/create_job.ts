@@ -5,20 +5,20 @@
  */
 
 import { ReportingCore } from '../../../server';
-import { cryptoFactory } from '../../../server/lib/crypto';
+import { cryptoFactory } from '../../../server/lib';
 import {
   ConditionalHeaders,
   CreateJobFactory,
   ESQueueCreateJobFn,
   RequestFacade,
-  ServerFacade,
-} from '../../../types';
+} from '../../../server/types';
 import { JobParamsDiscoverCsv } from '../types';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsDiscoverCsv
->> = function createJobFactoryFn(reporting: ReportingCore, server: ServerFacade) {
-  const crypto = cryptoFactory(server);
+>> = function createJobFactoryFn(reporting: ReportingCore) {
+  const config = reporting.getConfig();
+  const crypto = cryptoFactory(config.get('encryptionKey'));
 
   return async function createJob(
     jobParams: JobParamsDiscoverCsv,

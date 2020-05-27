@@ -9,31 +9,34 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState, Fragment } from 'react';
 import {
   EuiBasicTable,
+  EuiBadge,
   EuiButton,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
-  EuiEmptyPrompt,
   EuiLink,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
+import { isEmpty } from 'lodash';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
-import { AlertAdd, AlertEdit } from '../../alert_form';
+import { AlertAdd } from '../../alert_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { AlertQuickEditButtonsWithApi as AlertQuickEditButtons } from '../../common/components/alert_quick_edit_buttons';
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
-import { loadAlerts, loadAlertTypes } from '../../../lib/alert_api';
+import { loadAlerts, loadAlertTypes, deleteAlerts } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib/capabilities';
 import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
+import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
 
 const ENTER_KEY = 13;
 
@@ -52,18 +55,17 @@ export const AlertsList: React.FunctionComponent = () => {
   const history = useHistory();
   const {
     http,
-    injectedMetadata,
     toastNotifications,
     capabilities,
     alertTypeRegistry,
     actionTypeRegistry,
     uiSettings,
+    docLinks,
     charts,
     dataPlugin,
   } = useAppDependencies();
   const canDelete = hasDeleteAlertsCapability(capabilities);
   const canSave = hasSaveAlertsCapability(capabilities);
-  const createAlertUiEnabled = injectedMetadata.getInjectedVar('createAlertUiEnabled');
 
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -84,8 +86,7 @@ export const AlertsList: React.FunctionComponent = () => {
     data: [],
     totalItemCount: 0,
   });
-  const [editedAlertItem, setEditedAlertItem] = useState<AlertTableItem | undefined>(undefined);
-  const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const [alertsToDelete, setAlertsToDelete] = useState<string[]>([]);
 
   useEffect(() => {
     loadAlertsData();
@@ -119,7 +120,7 @@ export const AlertsList: React.FunctionComponent = () => {
     (async () => {
       try {
         const result = await loadActionTypes({ http });
-        setActionTypes(result);
+        setActionTypes(result.filter((actionType) => actionTypeRegistry.has(actionType.id)));
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
@@ -160,11 +161,6 @@ export const AlertsList: React.FunctionComponent = () => {
     }
   }
 
-  async function editItem(alertTableItem: AlertTableItem) {
-    setEditedAlertItem(alertTableItem);
-    setEditFlyoutVisibility(true);
-  }
-
   const alertsTableColumns = [
     {
       field: 'name',
@@ -198,6 +194,22 @@ export const AlertsList: React.FunctionComponent = () => {
       'data-test-subj': 'alertsTableCell-tagsText',
     },
     {
+      field: 'actionsText',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsText',
+        { defaultMessage: 'Actions' }
+      ),
+      render: (count: number, item: AlertTableItem) => {
+        return (
+          <EuiBadge color="hollow" key={item.id}>
+            {count}
+          </EuiBadge>
+        );
+      },
+      sortable: false,
+      'data-test-subj': 'alertsTableCell-actionsText',
+    },
+    {
       field: 'alertType',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.alertTypeTitle',
@@ -218,36 +230,16 @@ export const AlertsList: React.FunctionComponent = () => {
       'data-test-subj': 'alertsTableCell-interval',
     },
     {
-      field: '',
-      name: '',
-      width: '50px',
-      actions: canSave
-        ? [
-            {
-              render: (item: AlertTableItem) => {
-                return (
-                  <EuiLink
-                    data-test-subj="alertsTableCell-editLink"
-                    color="primary"
-                    onClick={() => editItem(item)}
-                  >
-                    <FormattedMessage
-                      defaultMessage="Edit"
-                      id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editLinkTitle"
-                    />
-                  </EuiLink>
-                );
-              },
-            },
-          ]
-        : [],
-    },
-    {
       name: '',
       width: '40px',
       render(item: AlertTableItem) {
         return (
-          <CollapsedItemActions key={item.id} item={item} onAlertChanged={() => loadAlertsData()} />
+          <CollapsedItemActions
+            key={item.id}
+            item={item}
+            onAlertChanged={() => loadAlertsData()}
+            setAlertsToDelete={setAlertsToDelete}
+          />
         );
       },
     },
@@ -258,7 +250,7 @@ export const AlertsList: React.FunctionComponent = () => {
       key="type-filter"
       onChange={(types: string[]) => setTypesFilter(types)}
       options={Object.values(alertTypesState.data)
-        .map(alertType => ({
+        .map((alertType) => ({
           value: alertType.id,
           name: alertType.name,
         }))
@@ -271,61 +263,21 @@ export const AlertsList: React.FunctionComponent = () => {
     />,
   ];
 
-  if (canSave && createAlertUiEnabled) {
+  if (canSave) {
     toolsRight.push(
       <EuiButton
         key="create-alert"
         data-test-subj="createAlertButton"
         fill
-        iconType="plusInCircle"
-        iconSide="left"
         onClick={() => setAlertFlyoutVisibility(true)}
       >
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.alertsList.addActionButtonLabel"
-          defaultMessage="Create"
+          defaultMessage="Create alert"
         />
       </EuiButton>
     );
   }
-
-  const emptyPrompt = (
-    <EuiEmptyPrompt
-      iconType="watchesApp"
-      data-test-subj="createFirstAlertEmptyPrompt"
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.emptyTitle"
-            defaultMessage="Create your first alert"
-          />
-        </h2>
-      }
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.emptyDesc"
-            defaultMessage="Recieve an alert through email, slack or other connectors when a certain trigger is hit"
-          />
-        </p>
-      }
-      actions={
-        <EuiButton
-          data-test-subj="createFirstAlertButton"
-          key="create-action"
-          fill
-          iconType="plusInCircle"
-          iconSide="left"
-          onClick={() => setAlertFlyoutVisibility(true)}
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.emptyButton"
-            defaultMessage="Create alert"
-          />
-        </EuiButton>
-      }
-    />
-  );
 
   const table = (
     <Fragment>
@@ -343,6 +295,7 @@ export const AlertsList: React.FunctionComponent = () => {
                   loadAlertsData();
                   setIsPerformingAction(false);
                 }}
+                setAlertsToDelete={setAlertsToDelete}
               />
             </BulkOperationPopover>
           </EuiFlexItem>
@@ -352,8 +305,8 @@ export const AlertsList: React.FunctionComponent = () => {
             fullWidth
             data-test-subj="alertSearchField"
             prepend={<EuiIcon type="search" />}
-            onChange={e => setInputText(e.target.value)}
-            onKeyUp={e => {
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyUp={(e) => {
               if (e.keyCode === ENTER_KEY) {
                 setSearchText(inputText);
               }
@@ -405,7 +358,7 @@ export const AlertsList: React.FunctionComponent = () => {
           canDelete
             ? {
                 onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
-                  setSelectedIds(updatedSelectedItemsList.map(item => item.id));
+                  setSelectedIds(updatedSelectedItemsList.map((item) => item.id));
                 },
               }
             : undefined
@@ -417,15 +370,60 @@ export const AlertsList: React.FunctionComponent = () => {
     </Fragment>
   );
 
+  const loadedItems = convertAlertsToTableItems(alertsState.data, alertTypesState.data);
+
+  const isFilterApplied = !(
+    isEmpty(searchText) &&
+    isEmpty(typesFilter) &&
+    isEmpty(actionTypesFilter)
+  );
+
   return (
     <section data-test-subj="alertsList">
+      <DeleteModalConfirmation
+        onDeleted={(deleted: string[]) => {
+          if (selectedIds.length === 0 || selectedIds.length === deleted.length) {
+            const updatedAlerts = alertsState.data.filter(
+              (alert) => alert.id && !alertsToDelete.includes(alert.id)
+            );
+            setAlertsState({
+              isLoading: false,
+              data: updatedAlerts,
+              totalItemCount: alertsState.totalItemCount - deleted.length,
+            });
+            setSelectedIds([]);
+          }
+          setAlertsToDelete([]);
+        }}
+        onErrors={async () => {
+          // Refresh the alerts from the server, some alerts may have beend deleted
+          await loadAlertsData();
+          setAlertsToDelete([]);
+        }}
+        onCancel={async () => {
+          setAlertsToDelete([]);
+        }}
+        apiDeleteCall={deleteAlerts}
+        idsToDelete={alertsToDelete}
+        singleTitle={i18n.translate('xpack.triggersActionsUI.sections.alertsList.singleTitle', {
+          defaultMessage: 'alert',
+        })}
+        multipleTitle={i18n.translate('xpack.triggersActionsUI.sections.alertsList.multipleTitle', {
+          defaultMessage: 'alerts',
+        })}
+      />
       <EuiSpacer size="m" />
-      {convertAlertsToTableItems(alertsState.data, alertTypesState.data).length !== 0 && table}
-      {convertAlertsToTableItems(alertsState.data, alertTypesState.data).length === 0 &&
-        !alertTypesState.isLoading &&
-        !alertsState.isLoading &&
-        emptyPrompt}
-      {(alertTypesState.isLoading || alertsState.isLoading) && <EuiLoadingSpinner size="xl" />}
+      {loadedItems.length || isFilterApplied ? (
+        table
+      ) : alertTypesState.isLoading || alertsState.isLoading ? (
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <EmptyPrompt onCTAClicked={() => setAlertFlyoutVisibility(true)} />
+      )}
       <AlertsContextProvider
         value={{
           reloadAlerts: loadAlertsData,
@@ -434,8 +432,10 @@ export const AlertsList: React.FunctionComponent = () => {
           alertTypeRegistry,
           toastNotifications,
           uiSettings,
+          docLinks,
           charts,
           dataFieldsFormats: dataPlugin.fieldFormats,
+          capabilities,
         }}
       >
         <AlertAdd
@@ -443,26 +443,19 @@ export const AlertsList: React.FunctionComponent = () => {
           addFlyoutVisible={alertFlyoutVisible}
           setAddFlyoutVisibility={setAlertFlyoutVisibility}
         />
-        {editedAlertItem ? (
-          <AlertEdit
-            key={editedAlertItem.id}
-            initialAlert={editedAlertItem}
-            editFlyoutVisible={editFlyoutVisible}
-            setEditFlyoutVisibility={setEditFlyoutVisibility}
-          />
-        ) : null}
       </AlertsContextProvider>
     </section>
   );
 };
 
 function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
-  return alerts.filter(alert => ids.includes(alert.id));
+  return alerts.filter((alert) => ids.includes(alert.id));
 }
 
 function convertAlertsToTableItems(alerts: Alert[], alertTypesIndex: AlertTypeIndex) {
-  return alerts.map(alert => ({
+  return alerts.map((alert) => ({
     ...alert,
+    actionsText: alert.actions.length,
     tagsText: alert.tags.join(', '),
     alertType: alertTypesIndex[alert.alertTypeId]?.name ?? alert.alertTypeId,
   }));

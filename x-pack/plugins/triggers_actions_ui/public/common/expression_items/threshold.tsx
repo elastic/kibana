@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
   EuiPopover,
-  EuiPopoverTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -19,10 +18,12 @@ import {
 } from '@elastic/eui';
 import { builtInComparators } from '../constants';
 import { Comparator } from '../types';
+import { IErrorObject } from '../../types';
+import { ClosablePopoverTitle } from './components';
 
 interface ThresholdExpressionProps {
   thresholdComparator: string;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
   onChangeSelectedThresholdComparator: (selectedThresholdComparator?: string) => void;
   onChangeSelectedThreshold: (selectedThreshold?: number[]) => void;
   customComparators?: {
@@ -97,14 +98,21 @@ export const ThresholdExpression = ({
       anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>
-        <EuiPopoverTitle>{comparators[thresholdComparator].text}</EuiPopoverTitle>
+        <ClosablePopoverTitle onClose={() => setAlertThresholdPopoverOpen(false)}>
+          <>{comparators[thresholdComparator].text}</>
+        </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiSelect
               data-test-subj="comparatorOptionsComboBox"
               value={thresholdComparator}
-              onChange={e => {
+              onChange={(e) => {
                 onChangeSelectedThresholdComparator(e.target.value);
+                const thresholdValues = threshold.slice(
+                  0,
+                  comparators[e.target.value].requiredValues
+                );
+                onChangeSelectedThreshold(thresholdValues);
               }}
               options={Object.values(comparators).map(({ text, value }) => {
                 return { text, value };
@@ -123,18 +131,23 @@ export const ThresholdExpression = ({
                   </EuiFlexItem>
                 ) : null}
                 <EuiFlexItem grow={false}>
-                  <EuiFormRow>
+                  <EuiFormRow
+                    isInvalid={errors[`threshold${i}`].length > 0 || !threshold[i]}
+                    error={errors[`threshold${i}`]}
+                  >
                     <EuiFieldNumber
                       data-test-subj="alertThresholdInput"
-                      value={!threshold || threshold[i] === null ? 0 : threshold[i]}
                       min={0}
-                      step={0.1}
-                      onChange={e => {
+                      value={!threshold || threshold[i] === undefined ? '' : threshold[i]}
+                      isInvalid={errors[`threshold${i}`].length > 0 || !threshold[i]}
+                      onChange={(e) => {
                         const { value } = e.target;
                         const thresholdVal = value !== '' ? parseFloat(value) : undefined;
                         const newThreshold = [...threshold];
-                        if (thresholdVal) {
+                        if (thresholdVal !== undefined) {
                           newThreshold[i] = thresholdVal;
+                        } else {
+                          delete newThreshold[i];
                         }
                         onChangeSelectedThreshold(newThreshold);
                       }}

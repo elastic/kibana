@@ -110,29 +110,19 @@ export function RollupPageProvider({ getService, getPageObjects }) {
 
     async getJobList() {
       const jobs = await testSubjects.findAll('jobTableRow');
-      return mapAsync(jobs, async job => {
-        const jobNameElement = await job.findByCssSelector('[data-test-subj="jobTableCell-id"]');
-        const jobStatusElement = await job.findByCssSelector(
-          '[data-test-subj="jobTableCell-status"]'
+      return mapAsync(jobs, async (job) => {
+        const jobNameElement = await job.findByTestSubject('jobTableCell-id');
+        const jobStatusElement = await job.findByTestSubject('jobTableCell-status');
+        const jobIndexPatternElement = await job.findByTestSubject('jobTableCell-indexPattern');
+        const jobRollUpIndexPatternElement = await job.findByTestSubject(
+          'jobTableCell-rollupIndex'
         );
-        const jobIndexPatternElement = await job.findByCssSelector(
-          '[data-test-subj="jobTableCell-indexPattern"]'
+        const jobDelayElement = await job.findByTestSubject('jobTableCell-rollupDelay');
+        const jobIntervalElement = await job.findByTestSubject(
+          'jobTableCell-dateHistogramInterval'
         );
-        const jobRollUpIndexPatternElement = await job.findByCssSelector(
-          '[data-test-subj="jobTableCell-rollupIndex"]'
-        );
-        const jobDelayElement = await job.findByCssSelector(
-          '[data-test-subj="jobTableCell-rollupDelay"]'
-        );
-        const jobIntervalElement = await job.findByCssSelector(
-          '[data-test-subj="jobTableCell-dateHistogramInterval"]'
-        );
-        const jobGroupElement = await job.findByCssSelector(
-          '[data-test-subj="jobTableCell-groups"]'
-        );
-        const jobMetricsElement = await job.findByCssSelector(
-          '[data-test-subj="jobTableCell-metrics"]'
-        );
+        const jobGroupElement = await job.findByTestSubject('jobTableCell-groups');
+        const jobMetricsElement = await job.findByTestSubject('jobTableCell-metrics');
 
         return {
           jobName: await jobNameElement.getVisibleText(),

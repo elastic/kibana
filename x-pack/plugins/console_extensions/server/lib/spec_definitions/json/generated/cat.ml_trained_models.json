@@ -1,0 +1,44 @@
+{
+  "cat.ml_trained_models": {
+    "url_params": {
+      "allow_no_match": "__flag__",
+      "from": 0,
+      "size": 0,
+      "bytes": [
+        "b",
+        "k",
+        "kb",
+        "m",
+        "mb",
+        "g",
+        "gb",
+        "t",
+        "tb",
+        "p",
+        "pb"
+      ],
+      "format": "",
+      "h": [],
+      "help": "__flag__",
+      "s": [],
+      "time": [
+        "d",
+        "h",
+        "m",
+        "s",
+        "ms",
+        "micros",
+        "nanos"
+      ],
+      "v": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/ml/trained_models",
+      "_cat/ml/trained_models/{model_id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-trained-model.html"
+  }
+}

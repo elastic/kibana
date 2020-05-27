@@ -190,6 +190,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                 isHollow={true}
                 number={1}
                 status="incomplete"
+                titleSize="s"
               >
                 <div
                   aria-label="Incomplete Step 1"
@@ -490,6 +491,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                 isHollow={false}
                 number={1}
                 status="complete"
+                titleSize="s"
               >
                 <div
                   aria-label="Step 1"
@@ -502,32 +504,15 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                     <EuiIcon
                       aria-label="complete"
                       className="euiStepNumber__icon"
+                      size="m"
                       type="check"
                     >
-                      <EuiIconCheck
+                      <div
                         aria-label="complete"
-                        className="euiIcon euiIcon--medium euiIcon-isLoaded euiStepNumber__icon"
-                        focusable="false"
-                        role="img"
-                        style={null}
-                      >
-                        <svg
-                          aria-label="complete"
-                          className="euiIcon euiIcon--medium euiIcon-isLoaded euiStepNumber__icon"
-                          focusable="false"
-                          height={16}
-                          role="img"
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M6.5 12a.502.502 0 01-.354-.146l-4-4a.502.502 0 01.708-.708L6.5 10.793l6.646-6.647a.502.502 0 01.708.708l-7 7A.502.502 0 016.5 12"
-                            fillRule="evenodd"
-                          />
-                        </svg>
-                      </EuiIconCheck>
+                        className="euiStepNumber__icon"
+                        data-euiicon-type="check"
+                        size="m"
+                      />
                     </EuiIcon>
                   </EuiI18n>
                 </div>

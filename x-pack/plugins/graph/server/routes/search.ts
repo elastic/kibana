@@ -21,7 +21,7 @@ export function registerSearchRoute({
       validate: {
         body: schema.object({
           index: schema.string(),
-          body: schema.object({}, { allowUnknowns: true }),
+          body: schema.object({}, { unknowns: 'allow' }),
         }),
       },
     },
@@ -31,7 +31,9 @@ export function registerSearchRoute({
           core: {
             uiSettings: { client: uiSettings },
             elasticsearch: {
-              dataClient: { callAsCurrentUser: callCluster },
+              legacy: {
+                client: { callAsCurrentUser: callCluster },
+              },
             },
           },
         },

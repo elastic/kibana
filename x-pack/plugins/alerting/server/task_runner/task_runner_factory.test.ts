@@ -8,7 +8,10 @@ import sinon from 'sinon';
 import { ConcreteTaskInstance, TaskStatus } from '../../../../plugins/task_manager/server';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '../../../../plugins/encrypted_saved_objects/server/mocks';
-import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { actionsMock } from '../../../actions/server/mocks';
+import { alertsMock } from '../mocks';
+import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 
 const alertType = {
   id: 'test',
@@ -16,6 +19,7 @@ const alertType = {
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
   executor: jest.fn(),
+  producer: 'alerting',
 };
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -46,21 +50,17 @@ describe('Task Runner Factory', () => {
 
   afterAll(() => fakeTimer.restore());
 
-  const savedObjectsClient = savedObjectsClientMock.create();
   const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
-  const services = {
-    log: jest.fn(),
-    callCluster: jest.fn(),
-    savedObjectsClient,
-  };
+  const services = alertsMock.createAlertServices();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
     getServices: jest.fn().mockReturnValue(services),
-    executeAction: jest.fn(),
-    encryptedSavedObjectsPlugin,
+    actionsPlugin: actionsMock.createStart(),
+    encryptedSavedObjectsClient: encryptedSavedObjectsPlugin.getClient(),
     logger: loggingServiceMock.create().get(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     getBasePath: jest.fn().mockReturnValue(undefined),
+    eventLogger: eventLoggerMock.create(),
   };
 
   beforeEach(() => {

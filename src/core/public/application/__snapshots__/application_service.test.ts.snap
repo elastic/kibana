@@ -80,5 +80,6 @@ exports[`#start() getComponent returns renderable JSX tree 1`] = `
   }
   mounters={Map {}}
   setAppLeaveHandler={[Function]}
+  setIsMounting={[Function]}
 />
 `;

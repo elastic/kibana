@@ -1,3 +1,18 @@
 ---
+  - "Feature:Embedding":
+    - "src/plugins/embeddable/**/*.*"
+    - "src/plugins/dashboard_embeddable_container/**/*.*"
   - "Feature:Drilldowns":
     - "x-pack/plugins/drilldowns/**/*.*"
+    - "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/**/*.*"
+  - "Feature:ExpressionLanguage":
+    - "src/plugins/expressions/**/*.*"
+    - "src/plugins/bfetch/**/*.*"
+  - "Team:apm":
+    - "x-pack/plugins/apm/**/*.*"
+  - "Team:Ingest Management":
+    - "x-pack/plugins/ingest_manager/**/*.*"
+    - "x-pack/test/api_integration/apis/fleet/**/*.*"
+    - "x-pack/test/epm_api_integration/**/*.*"
+  - "Team:uptime":
+    - "x-pack/plugins/uptime/**/*.*"

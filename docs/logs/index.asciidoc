@@ -16,6 +16,8 @@ In this case, you will only see the logs for the selected component.
 * <<xpack-logs-getting-started>>
 * <<xpack-logs-using>>
 * <<xpack-logs-configuring>>
+* <<xpack-logs-analysis>>
+* <<xpack-logs-alerting>>
 
 [role="screenshot"]
 image::logs/images/logs-console.png[Log Console in Kibana]
@@ -29,3 +31,5 @@ include::using.asciidoc[]
 include::configuring.asciidoc[]
 
 include::log-rate.asciidoc[]
+
+include::logs-alerting.asciidoc[]

@@ -49,6 +49,11 @@ const ELASTIC_LICENSE_HEADER = `
  */
 `;
 
+const allMochaRulesOff = {};
+Object.keys(require('eslint-plugin-mocha').rules).forEach((k) => {
+  allMochaRulesOff['mocha/' + k] = 'off';
+});
+
 module.exports = {
   root: true,
 
@@ -62,32 +67,6 @@ module.exports = {
       files: ['packages/kbn-ui-framework/**/*.{js,ts,tsx}'],
       rules: {
         'jsx-a11y/no-onchange': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/core_plugins/data/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/core_plugins/expressions/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: [
-        'src/legacy/core_plugins/vis_default_editor/public/components/controls/**/*.{ts,tsx}',
-      ],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/ui/public/vis/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
       },
     },
     {
@@ -110,14 +89,14 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/canvas/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/canvas/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
         'jsx-a11y/click-events-have-key-events': 'off',
       },
     },
     {
-      files: ['x-pack/legacy/plugins/cross_cluster_replication/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/cross_cluster_replication/**/*.{js,ts,tsx}'],
       rules: {
         'jsx-a11y/click-events-have-key-events': 'off',
       },
@@ -130,14 +109,13 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/lens/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/lens/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
       },
     },
     {
-      files: ['x-pack/legacy/plugins/ml/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/ml/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
@@ -155,7 +133,7 @@ module.exports = {
      * Licence headers
      */
     {
-      files: ['**/*.{js,ts,tsx}'],
+      files: ['**/*.{js,ts,tsx}', '!plugins/**/*'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -169,6 +147,16 @@ module.exports = {
             licenses: [ELASTIC_LICENSE_HEADER],
           },
         ],
+      },
+    },
+
+    /**
+     * New Platform client-side
+     */
+    {
+      files: ['{src,x-pack}/plugins/*/public/**/*.{js,ts,tsx}'],
+      rules: {
+        'import/no-commonjs': 'error',
       },
     },
 
@@ -205,33 +193,58 @@ module.exports = {
             basePath: __dirname,
             zones: [
               {
+                target: ['(src|x-pack)/**/*', '!src/core/**/*'],
+                from: ['src/core/utils/**/*'],
+                errorMessage: `Plugins may only import from src/core/server and src/core/public.`,
+              },
+              {
+                target: ['(src|x-pack)/plugins/*/public/**/*'],
+                from: ['(src|x-pack)/plugins/*/server/**/*'],
+                errorMessage: `Public code can not import from server, use a common directory.`,
+              },
+              {
                 target: [
-                  'src/legacy/**/*',
-                  'x-pack/**/*',
-                  '!x-pack/**/*.test.*',
-                  '!x-pack/test/**/*',
+                  '(src|x-pack)/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
-                  'src/core/(public|server)/**/*',
                   'examples/**/*',
                 ],
                 from: [
                   'src/core/public/**/*',
-                  '!src/core/public/index.ts',
-                  '!src/core/public/mocks.ts',
-                  '!src/core/public/*.test.mocks.ts',
+                  '!src/core/public/index.ts', // relative import
+                  '!src/core/public/mocks{,.ts}',
+                  '!src/core/server/types{,.ts}',
                   '!src/core/public/utils/**/*',
+                  '!src/core/public/*.test.mocks{,.ts}',
 
                   'src/core/server/**/*',
-                  '!src/core/server/index.ts',
-                  '!src/core/server/mocks.ts',
-                  '!src/core/server/types.ts',
-                  '!src/core/server/test_utils.ts',
+                  '!src/core/server/index.ts', // relative import
+                  '!src/core/server/mocks{,.ts}',
+                  '!src/core/server/types{,.ts}',
+                  '!src/core/server/test_utils',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
-                  '!src/core/server/types',
-                  '!src/core/server/*.test.mocks.ts',
+                  '!src/core/server/*.test.mocks{,.ts}',
 
+                  'target/types/**',
+                ],
+                allowSameFolder: true,
+                errorMessage:
+                  'Plugins may only import from top-level public and server modules in core.',
+              },
+              {
+                target: [
+                  '(src|x-pack)/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
+                  'examples/**/*',
+                  '!(src|x-pack)/**/*.test.*',
+                  '!(x-pack/)?test/**/*',
+                  // next folder contains legacy browser tests which can't be migrated to jest
+                  // which import np files
+                  '!src/legacy/core_plugins/kibana/public/__tests__/**/*',
+                ],
+                from: [
+                  '(src|x-pack)/plugins/**/(public|server)/**/*',
+                  '!(src|x-pack)/plugins/**/(public|server)/mocks/index.{js,ts}',
                   '!(src|x-pack)/plugins/**/(public|server)/(index|mocks).{js,ts,tsx}',
                 ],
                 allowSameFolder: true,
@@ -315,8 +328,9 @@ module.exports = {
     {
       files: [
         'x-pack/test/functional/apps/**/*.js',
-        'x-pack/legacy/plugins/apm/**/*.js',
+        'x-pack/plugins/apm/**/*.js',
         'test/*/config.ts',
+        'test/*/config_open.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
         'test/visual_regression/tests/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
@@ -401,7 +415,7 @@ module.exports = {
         'x-pack/**/*.test.js',
         'x-pack/test_utils/**/*',
         'x-pack/gulpfile.js',
-        'x-pack/legacy/plugins/apm/public/utils/testHelpers.js',
+        'x-pack/plugins/apm/public/utils/testHelpers.js',
       ],
       rules: {
         'import/no-extraneous-dependencies': [
@@ -484,13 +498,13 @@ module.exports = {
         '.eslintrc.js',
         '**/webpackShims/**/*.js',
         'packages/kbn-plugin-generator/**/*.js',
-        'packages/kbn-plugin-helpers/**/*.js',
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/dev-tools/mocha/setup_mocha.js',
         'x-pack/scripts/*.js',
       ],
+      excludedFiles: ['**/integration_tests/**/*'],
       rules: {
         'import/no-commonjs': 'off',
         'prefer-object-spread/prefer-object-spread': 'off',
@@ -515,10 +529,18 @@ module.exports = {
     },
 
     /**
+     * Harden specific rules
+     */
+    {
+      files: ['test/harden/*.js'],
+      rules: allMochaRulesOff,
+    },
+
+    /**
      * APM overrides
      */
     {
-      files: ['x-pack/legacy/plugins/apm/**/*.js'],
+      files: ['x-pack/plugins/apm/**/*.js'],
       rules: {
         'no-unused-vars': ['error', { ignoreRestSiblings: true }],
         'no-console': ['warn', { allow: ['error'] }],
@@ -526,7 +548,7 @@ module.exports = {
     },
     {
       plugins: ['react-hooks'],
-      files: ['x-pack/legacy/plugins/apm/**/*.{ts,tsx}'],
+      files: ['x-pack/plugins/apm/**/*.{ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
         'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
@@ -544,35 +566,18 @@ module.exports = {
     },
 
     /**
-     * Graph overrides
-     */
-    {
-      files: ['x-pack/legacy/plugins/graph/**/*.js'],
-      globals: {
-        angular: true,
-        $: true,
-      },
-      rules: {
-        'block-scoped-var': 'off',
-        camelcase: 'off',
-        eqeqeq: 'off',
-        'guard-for-in': 'off',
-        'new-cap': 'off',
-        'no-loop-func': 'off',
-        'no-redeclare': 'off',
-        'no-shadow': 'off',
-        'no-unused-vars': 'off',
-        'one-var': 'off',
-      },
-    },
-
-    /**
      * ML overrides
      */
     {
-      files: ['x-pack/legacy/plugins/ml/**/*.js'],
+      files: ['x-pack/plugins/ml/**/*.js'],
       rules: {
         'no-shadow': 'error',
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            packageDir: './x-pack',
+          },
+        ],
       },
     },
 
@@ -581,7 +586,7 @@ module.exports = {
      */
     {
       // front end typescript and javascript files only
-      files: ['x-pack/legacy/plugins/siem/public/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/siem/public/**/*.{js,ts,tsx}'],
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-restricted-imports': [
@@ -595,7 +600,7 @@ module.exports = {
     },
     {
       // typescript only for front and back end
-      files: ['x-pack/legacy/plugins/siem/**/*.{ts,tsx}'],
+      files: ['x-pack/{,legacy/}plugins/siem/**/*.{ts,tsx}'],
       rules: {
         // This will be turned on after bug fixes are complete
         // '@typescript-eslint/explicit-member-accessibility': 'warn',
@@ -630,7 +635,7 @@ module.exports = {
     // {
     //   // will introduced after the other warns are fixed
     //   // typescript and javascript for front end react performance
-    //   files: ['x-pack/legacy/plugins/siem/public/**/!(*.test).{js,ts,tsx}'],
+    //   files: ['x-pack/plugins/siem/public/**/!(*.test).{js,ts,tsx}'],
     //   plugins: ['react-perf'],
     //   rules: {
     //     // 'react-perf/jsx-no-new-object-as-prop': 'error',
@@ -641,7 +646,7 @@ module.exports = {
     // },
     {
       // typescript and javascript for front and back end
-      files: ['x-pack/legacy/plugins/siem/**/*.{js,ts,tsx}'],
+      files: ['x-pack/{,legacy/}plugins/siem/**/*.{js,ts,tsx}'],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
         mocha: true,
@@ -759,10 +764,118 @@ module.exports = {
     },
 
     /**
+     * Lists overrides
+     */
+    {
+      // typescript and javascript for front and back end
+      files: ['x-pack/plugins/lists/**/*.{js,ts,tsx}'],
+      plugins: ['eslint-plugin-node'],
+      env: {
+        mocha: true,
+        jest: true,
+      },
+      rules: {
+        'accessor-pairs': 'error',
+        'array-callback-return': 'error',
+        'no-array-constructor': 'error',
+        complexity: 'error',
+        'consistent-return': 'error',
+        'func-style': ['error', 'expression'],
+        'import/order': [
+          'error',
+          {
+            groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+            'newlines-between': 'always',
+          },
+        ],
+        'sort-imports': [
+          'error',
+          {
+            ignoreDeclarationSort: true,
+          },
+        ],
+        'node/no-deprecated-api': 'error',
+        'no-bitwise': 'error',
+        'no-continue': 'error',
+        'no-dupe-keys': 'error',
+        'no-duplicate-case': 'error',
+        'no-duplicate-imports': 'error',
+        'no-empty-character-class': 'error',
+        'no-empty-pattern': 'error',
+        'no-ex-assign': 'error',
+        'no-extend-native': 'error',
+        'no-extra-bind': 'error',
+        'no-extra-boolean-cast': 'error',
+        'no-extra-label': 'error',
+        'no-func-assign': 'error',
+        'no-implicit-globals': 'error',
+        'no-implied-eval': 'error',
+        'no-invalid-regexp': 'error',
+        'no-inner-declarations': 'error',
+        'no-lone-blocks': 'error',
+        'no-multi-assign': 'error',
+        'no-misleading-character-class': 'error',
+        'no-new-symbol': 'error',
+        'no-obj-calls': 'error',
+        'no-param-reassign': ['error', { props: true }],
+        'no-process-exit': 'error',
+        'no-prototype-builtins': 'error',
+        'no-return-await': 'error',
+        'no-self-compare': 'error',
+        'no-shadow-restricted-names': 'error',
+        'no-sparse-arrays': 'error',
+        'no-this-before-super': 'error',
+        'no-undef': 'error',
+        'no-unreachable': 'error',
+        'no-unsafe-finally': 'error',
+        'no-useless-call': 'error',
+        'no-useless-catch': 'error',
+        'no-useless-concat': 'error',
+        'no-useless-computed-key': 'error',
+        'no-useless-escape': 'error',
+        'no-useless-rename': 'error',
+        'no-useless-return': 'error',
+        'no-void': 'error',
+        'one-var-declaration-per-line': 'error',
+        'prefer-object-spread': 'error',
+        'prefer-promise-reject-errors': 'error',
+        'prefer-rest-params': 'error',
+        'prefer-spread': 'error',
+        'prefer-template': 'error',
+        'require-atomic-updates': 'error',
+        'symbol-description': 'error',
+        'vars-on-top': 'error',
+        '@typescript-eslint/explicit-member-accessibility': 'error',
+        '@typescript-eslint/no-this-alias': 'error',
+        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/no-useless-constructor': 'error',
+        '@typescript-eslint/unified-signatures': 'error',
+        '@typescript-eslint/explicit-function-return-type': 'error',
+        '@typescript-eslint/no-non-null-assertion': 'error',
+        '@typescript-eslint/no-unused-vars': 'error',
+        'no-template-curly-in-string': 'error',
+        'sort-keys': 'error',
+        'prefer-destructuring': 'error',
+      },
+    },
+    /**
+     * Alerting Services overrides
+     */
+    {
+      // typescript only for front and back end
+      files: [
+        'x-pack/{,legacy/}plugins/{alerting,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+
+    /**
      * Lens overrides
      */
     {
-      files: ['x-pack/legacy/plugins/lens/**/*.ts', 'x-pack/legacy/plugins/lens/**/*.tsx'],
+      files: ['x-pack/plugins/lens/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -786,7 +899,7 @@ module.exports = {
      * Canvas overrides
      */
     {
-      files: ['x-pack/legacy/plugins/canvas/**/*.js'],
+      files: ['x-pack/plugins/canvas/**/*.js'],
       rules: {
         radix: 'error',
 
@@ -830,12 +943,12 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/legacy/plugins/canvas/gulpfile.js',
-        'x-pack/legacy/plugins/canvas/scripts/*.js',
-        'x-pack/legacy/plugins/canvas/tasks/*.js',
-        'x-pack/legacy/plugins/canvas/tasks/**/*.js',
-        'x-pack/legacy/plugins/canvas/__tests__/**/*.js',
-        'x-pack/legacy/plugins/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
+        'x-pack/plugins/canvas/gulpfile.js',
+        'x-pack/plugins/canvas/scripts/*.js',
+        'x-pack/plugins/canvas/tasks/*.js',
+        'x-pack/plugins/canvas/tasks/**/*.js',
+        'x-pack/plugins/canvas/__tests__/**/*.js',
+        'x-pack/plugins/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
       ],
       rules: {
         'import/no-extraneous-dependencies': [
@@ -848,7 +961,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/canvas/canvas_plugin_src/**/*.js'],
+      files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*.js'],
       globals: { canvas: true, $: true },
       rules: {
         'import/no-unresolved': [
@@ -860,13 +973,19 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/canvas/public/**/*.js'],
+      files: ['x-pack/plugins/canvas/public/**/*.js'],
       env: {
         browser: true,
       },
     },
     {
-      files: ['x-pack/legacy/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
+      files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
+      env: {
+        jquery: true,
+      },
+    },
+    {
+      files: ['x-pack/plugins/monitoring/public/lib/jquery_flot/**/*.js'],
       env: {
         jquery: true,
       },
@@ -876,8 +995,10 @@ module.exports = {
      * TSVB overrides
      */
     {
-      files: ['src/legacy/core_plugins/metrics/**/*.js'],
-      excludedFiles: 'src/legacy/core_plugins/metrics/index.js',
+      files: [
+        'src/plugins/vis_type_timeseries/**/*.{js,ts,tsx}',
+        'src/legacy/core_plugins/vis_type_timeseries/**/*.{js,ts,tsx}',
+      ],
       rules: {
         'import/no-default-export': 'error',
       },

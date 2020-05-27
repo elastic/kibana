@@ -21,12 +21,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
-import { DataPublicPluginStart, Filter, Query, TimeRange, SavedQuery } from '../..';
-import { QueryStart } from '../../query';
+import { QueryStart, SavedQuery } from '../../query';
 import { SearchBarOwnProps, SearchBar } from './search_bar';
 import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
+import { DataPublicPluginStart } from '../../types';
+import { Filter, Query, TimeRange } from '../../../common';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
@@ -123,7 +124,8 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
     const defaultQuery = {
       query: '',
-      language: core.uiSettings.get('search:queryLanguage'),
+      language:
+        storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage'),
     };
     const [query, setQuery] = useState<Query>(props.query || defaultQuery);
 
@@ -160,7 +162,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
       setQuery,
       savedQueryId: props.savedQueryId,
       notifications: core.notifications,
-      uiSettings: core.uiSettings,
+      defaultLanguage: defaultQuery.language,
     });
 
     // Fire onQuerySubmit on query or timerange change

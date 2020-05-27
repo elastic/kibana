@@ -6,7 +6,7 @@
 
 import { DAY } from '../../shared_imports';
 
-export const BASE_PATH = '/management/elasticsearch/snapshot_restore';
+export const BASE_PATH = '/management/data/snapshot_restore';
 export const DEFAULT_SECTION: Section = 'snapshots';
 export type Section = 'repositories' | 'snapshots' | 'restore_status' | 'policies';
 
@@ -14,10 +14,10 @@ export type Section = 'repositories' | 'snapshots' | 'restore_status' | 'policie
 export const MINIMUM_TIMEOUT_MS = 300;
 
 export enum REPOSITORY_DOC_PATHS {
-  default = 'modules-snapshots.html',
-  fs = 'modules-snapshots.html#_shared_file_system_repository',
-  url = 'modules-snapshots.html#_read_only_url_repository',
-  source = 'modules-snapshots.html#_source_only_repository',
+  default = 'snapshot-restore.html',
+  fs = 'snapshots-register-repository.html#snapshots-filesystem-repository',
+  url = 'snapshots-register-repository.html#snapshots-read-only-repository',
+  source = 'snapshots-register-repository.html#snapshots-source-only-repository',
   s3 = 'repository-s3.html',
   hdfs = 'repository-hdfs.html',
   azure = 'repository-azure.html',
@@ -81,11 +81,11 @@ export const UNREMOVABLE_INDEX_SETTINGS: string[] = [
 ];
 
 export const MODIFY_INDEX_SETTINGS_SUGGESTIONS: string[] = INDEX_SETTING_SUGGESTIONS.filter(
-  setting => !UNMODIFIABLE_INDEX_SETTINGS.includes(setting)
+  (setting) => !UNMODIFIABLE_INDEX_SETTINGS.includes(setting)
 );
 
 export const REMOVE_INDEX_SETTINGS_SUGGESTIONS: string[] = INDEX_SETTING_SUGGESTIONS.filter(
-  setting => !UNREMOVABLE_INDEX_SETTINGS.includes(setting)
+  (setting) => !UNREMOVABLE_INDEX_SETTINGS.includes(setting)
 );
 
 export const DEFAULT_POLICY_SCHEDULE = '0 30 1 * * ?';

@@ -20,7 +20,7 @@ import {
   EuiTitle,
   EuiComboBox,
 } from '@elastic/eui';
-import { Option } from '@elastic/eui/src/components/selectable/types';
+import { EuiSelectableOption } from '@elastic/eui';
 import { RestoreSettings } from '../../../../../common/types';
 import { documentationLinksService } from '../../../services/documentation';
 import { useServices } from '../../../app_context';
@@ -48,9 +48,9 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
 
   // States for choosing all indices, or a subset, including caching previously chosen subset list
   const [isAllIndices, setIsAllIndices] = useState<boolean>(!Boolean(restoreIndices));
-  const [indicesOptions, setIndicesOptions] = useState<Option[]>(
+  const [indicesOptions, setIndicesOptions] = useState<EuiSelectableOption[]>(
     snapshotIndices.map(
-      (index): Option => ({
+      (index): EuiSelectableOption => ({
         label: index,
         checked:
           isAllIndices ||
@@ -151,7 +151,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                 />
               }
               checked={isAllIndices}
-              onChange={e => {
+              onChange={(e) => {
                 const isChecked = e.target.checked;
                 setIsAllIndices(isChecked);
                 if (isChecked) {
@@ -230,7 +230,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                               <EuiLink
                                 onClick={() => {
                                   // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
-                                  indicesOptions.forEach((option: Option) => {
+                                  indicesOptions.forEach((option: EuiSelectableOption) => {
                                     option.checked = undefined;
                                   });
                                   updateRestoreSettings({ indices: [] });
@@ -249,7 +249,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                               <EuiLink
                                 onClick={() => {
                                   // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
-                                  indicesOptions.forEach((option: Option) => {
+                                  indicesOptions.forEach((option: EuiSelectableOption) => {
                                     option.checked = 'on';
                                   });
                                   updateRestoreSettings({ indices: [...snapshotIndices] });
@@ -276,7 +276,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                     <EuiSelectable
                       allowExclusions={false}
                       options={indicesOptions}
-                      onChange={options => {
+                      onChange={(options) => {
                         const newSelectedIndices: string[] = [];
                         options.forEach(({ label, checked }) => {
                           if (checked === 'on') {
@@ -302,14 +302,14 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                     </EuiSelectable>
                   ) : (
                     <EuiComboBox
-                      options={snapshotIndices.map(index => ({ label: index }))}
+                      options={snapshotIndices.map((index) => ({ label: index }))}
                       placeholder={i18n.translate(
                         'xpack.snapshotRestore.restoreForm.stepLogistics.indicesPatternPlaceholder',
                         {
                           defaultMessage: 'Enter index patterns, i.e. logstash-*',
                         }
                       )}
-                      selectedOptions={restoreIndexPatterns.map(pattern => ({ label: pattern }))}
+                      selectedOptions={restoreIndexPatterns.map((pattern) => ({ label: pattern }))}
                       onCreateOption={(pattern: string) => {
                         if (!pattern.trim().length) {
                           return;
@@ -366,7 +366,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                 />
               }
               checked={isRenamingIndices}
-              onChange={e => {
+              onChange={(e) => {
                 const isChecked = e.target.checked;
                 setIsRenamingIndices(isChecked);
                 if (isChecked) {
@@ -406,7 +406,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                       <EuiFieldText
                         value={renamePattern}
                         placeholder="index_(.+)"
-                        onChange={e => {
+                        onChange={(e) => {
                           setCachedRestoreSettings({
                             ...cachedRestoreSettings,
                             renamePattern: e.target.value,
@@ -432,7 +432,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                       <EuiFieldText
                         value={renameReplacement}
                         placeholder="restored_index_$1"
-                        onChange={e => {
+                        onChange={(e) => {
                           setCachedRestoreSettings({
                             ...cachedRestoreSettings,
                             renameReplacement: e.target.value,
@@ -480,7 +480,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               />
             }
             checked={partial === undefined ? false : partial}
-            onChange={e => updateRestoreSettings({ partial: e.target.checked })}
+            onChange={(e) => updateRestoreSettings({ partial: e.target.checked })}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -526,7 +526,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               />
             }
             checked={includeGlobalState === undefined ? false : includeGlobalState}
-            onChange={e => updateRestoreSettings({ includeGlobalState: e.target.checked })}
+            onChange={(e) => updateRestoreSettings({ includeGlobalState: e.target.checked })}
             disabled={!snapshotIncludeGlobalState}
           />
         </EuiFormRow>

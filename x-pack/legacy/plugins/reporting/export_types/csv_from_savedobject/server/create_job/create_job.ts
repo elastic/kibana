@@ -5,18 +5,11 @@
  */
 
 import { notFound, notImplemented } from 'boom';
-import { ElasticsearchServiceSetup } from 'kibana/server';
 import { get } from 'lodash';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
-import { cryptoFactory } from '../../../../server/lib';
-import {
-  CreateJobFactory,
-  ImmediateCreateJobFn,
-  Logger,
-  RequestFacade,
-  ServerFacade,
-} from '../../../../types';
+import { cryptoFactory, LevelLogger } from '../../../../server/lib';
+import { CreateJobFactory, RequestFacade, TimeRangeParams } from '../../../../server/types';
 import {
   JobDocPayloadPanelCsv,
   JobParamsPanelCsv,
@@ -24,10 +17,19 @@ import {
   SavedObjectServiceError,
   SavedSearchObjectAttributesJSON,
   SearchPanel,
-  TimeRangeParams,
   VisObjectAttributesJSON,
 } from '../../types';
 import { createJobSearch } from './create_job_search';
+
+export type ImmediateCreateJobFn<JobParamsType> = (
+  jobParams: JobParamsType,
+  headers: Record<string, string>,
+  req: RequestFacade
+) => Promise<{
+  type: string | null;
+  title: string;
+  jobParams: JobParamsType;
+}>;
 
 interface VisData {
   title: string;
@@ -37,13 +39,9 @@ interface VisData {
 
 export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
   JobParamsPanelCsv
->> = function createJobFactoryFn(
-  reporting: ReportingCore,
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
-  parentLogger: Logger
-) {
-  const crypto = cryptoFactory(server);
+>> = function createJobFactoryFn(reporting: ReportingCore, parentLogger: LevelLogger) {
+  const config = reporting.getConfig();
+  const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
   return async function createJob(

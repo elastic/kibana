@@ -26,21 +26,44 @@ export type Props = Record<string, Type<any>>;
 
 export type TypeOf<RT extends Type<any>> = RT['type'];
 
+type OptionalProperties<Base extends Props> = Pick<
+  Base,
+  {
+    [Key in keyof Base]: undefined extends TypeOf<Base[Key]> ? Key : never;
+  }[keyof Base]
+>;
+
+type RequiredProperties<Base extends Props> = Pick<
+  Base,
+  {
+    [Key in keyof Base]: undefined extends TypeOf<Base[Key]> ? never : Key;
+  }[keyof Base]
+>;
+
 // Because of https://github.com/Microsoft/TypeScript/issues/14041
 // this might not have perfect _rendering_ output, but it will be typed.
-export type ObjectResultType<P extends Props> = Readonly<{ [K in keyof P]: TypeOf<P[K]> }>;
+export type ObjectResultType<P extends Props> = Readonly<
+  { [K in keyof OptionalProperties<P>]?: TypeOf<P[K]> } &
+    { [K in keyof RequiredProperties<P>]: TypeOf<P[K]> }
+>;
 
-export type ObjectTypeOptions<P extends Props = any> = TypeOptions<
-  { [K in keyof P]: TypeOf<P[K]> }
-> & {
-  /** Should uknown keys not be defined in the schema be allowed. Defaults to `false` */
-  allowUnknowns?: boolean;
-};
+interface UnknownOptions {
+  /**
+   * Options for dealing with unknown keys:
+   * - allow: unknown keys will be permitted
+   * - ignore: unknown keys will not fail validation, but will be stripped out
+   * - forbid (default): unknown keys will fail validation
+   */
+  unknowns?: 'allow' | 'ignore' | 'forbid';
+}
+
+export type ObjectTypeOptions<P extends Props = any> = TypeOptions<ObjectResultType<P>> &
+  UnknownOptions;
 
 export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
   private props: Record<string, AnySchema>;
 
-  constructor(props: P, { allowUnknowns = false, ...typeOptions }: ObjectTypeOptions<P> = {}) {
+  constructor(props: P, { unknowns = 'forbid', ...typeOptions }: ObjectTypeOptions<P> = {}) {
     const schemaKeys = {} as Record<string, AnySchema>;
     for (const [key, value] of Object.entries(props)) {
       schemaKeys[key] = value.getSchema();
@@ -50,7 +73,8 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       .keys(schemaKeys)
       .default()
       .optional()
-      .unknown(Boolean(allowUnknowns));
+      .unknown(unknowns === 'allow')
+      .options({ stripUnknown: { objects: unknowns === 'ignore' } });
 
     super(schema, typeOptions);
     this.props = schemaKeys;
@@ -62,7 +86,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       case 'object.base':
         return `expected a plain object value, but found [${typeDetect(value)}] instead.`;
       case 'object.parse':
-        return `could not parse object value from [${value}]`;
+        return `could not parse object value from json input`;
       case 'object.allowUnknown':
         return `definition for this key is missing`;
       case 'object.child':

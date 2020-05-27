@@ -4,46 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { ElasticsearchServiceSetup } from 'kibana/server';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { ReportingCore } from '../../../../server';
-import { ServerFacade, ExecuteJobFactory, ESQueueWorkerExecuteFn, Logger } from '../../../../types';
-import { JobDocPayloadPDF } from '../../types';
 import { PDF_JOB_TYPE } from '../../../../common/constants';
-import { generatePdfObservableFactory } from '../lib/generate_pdf';
+import { ReportingCore } from '../../../../server';
+import { LevelLogger } from '../../../../server/lib';
+import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput } from '../../../../server/types';
 import {
   decryptJobHeaders,
-  omitBlacklistedHeaders,
   getConditionalHeaders,
-  getFullUrls,
   getCustomLogo,
+  getFullUrls,
+  omitBlacklistedHeaders,
 } from '../../../common/execute_job/';
+import { JobDocPayloadPDF } from '../../types';
+import { generatePdfObservableFactory } from '../lib/generate_pdf';
 
 type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPDF>>;
 
 export const executeJobFactory: QueuedPdfExecutorFactory = async function executeJobFactoryFn(
   reporting: ReportingCore,
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
-  parentLogger: Logger
+  parentLogger: LevelLogger
 ) {
-  const browserDriverFactory = await reporting.getBrowserDriverFactory();
-  const generatePdfObservable = generatePdfObservableFactory(server, browserDriverFactory);
+  const config = reporting.getConfig();
+  const encryptionKey = config.get('encryptionKey');
+
   const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
 
-  return function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
-    const jobLogger = logger.clone([jobId]);
+  return async function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
+    const apmTrans = apm.startTransaction('reporting execute_job pdf', 'reporting');
+    const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
+    let apmGeneratePdf: { end: () => void } | null | undefined;
 
-    const process$ = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders({ server, job, logger })),
-      map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
-      map(filteredHeaders => getConditionalHeaders({ server, job, filteredHeaders })),
-      mergeMap(conditionalHeaders => getCustomLogo({ reporting, server, job, conditionalHeaders })),
+    const generatePdfObservable = await generatePdfObservableFactory(reporting);
+
+    const jobLogger = logger.clone([jobId]);
+    const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
+      mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
+      map((decryptedHeaders) => omitBlacklistedHeaders({ job, decryptedHeaders })),
+      map((filteredHeaders) => getConditionalHeaders({ config, job, filteredHeaders })),
+      mergeMap((conditionalHeaders) =>
+        getCustomLogo({ reporting, config, job, conditionalHeaders })
+      ),
       mergeMap(({ logo, conditionalHeaders }) => {
-        const urls = getFullUrls({ server, job });
+        const urls = getFullUrls({ config, job });
 
         const { browserTimezone, layout, title } = job;
+        if (apmGetAssets) apmGetAssets.end();
+
+        apmGeneratePdf = apmTrans?.startSpan('generate_pdf_pipeline', 'execute');
         return generatePdfObservable(
           jobLogger,
           title,
@@ -54,18 +64,29 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
           logo
         );
       }),
-      map((buffer: Buffer) => ({
-        content_type: 'application/pdf',
-        content: buffer.toString('base64'),
-        size: buffer.byteLength,
-      })),
-      catchError(err => {
+      map(({ buffer, warnings }) => {
+        if (apmGeneratePdf) apmGeneratePdf.end();
+
+        const apmEncode = apmTrans?.startSpan('encode_pdf', 'output');
+        const content = buffer?.toString('base64') || null;
+        if (apmEncode) apmEncode.end();
+
+        return {
+          content_type: 'application/pdf',
+          content,
+          size: buffer?.byteLength || 0,
+          warnings,
+        };
+      }),
+      catchError((err) => {
         jobLogger.error(err);
         return Rx.throwError(err);
       })
     );
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);
+
+    if (apmTrans) apmTrans.end();
     return process$.pipe(takeUntil(stop$)).toPromise();
   };
 };

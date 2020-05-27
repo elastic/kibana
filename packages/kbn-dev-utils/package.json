@@ -10,9 +10,10 @@
     "kbn:watch": "yarn build --watch"
   },
   "dependencies": {
+    "axios": "^0.19.0",
     "chalk": "^2.4.2",
     "dedent": "^0.7.0",
-    "execa": "^3.2.0",
+    "execa": "^4.0.0",
     "exit-hook": "^2.2.0",
     "getopts": "^2.2.5",
     "load-json-file": "^6.2.0",

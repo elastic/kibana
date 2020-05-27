@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { defaultsDeep } from 'lodash';
+import { defaultsDeep, omit } from 'lodash';
 
 import { SavedObjectsErrorHelpers } from '../saved_objects';
 import { SavedObjectsClientContract } from '../saved_objects/types';
 import { Logger } from '../logging';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
-import { IUiSettingsClient, UiSettingsParams } from './types';
+import { IUiSettingsClient, UiSettingsParams, PublicUiSettingsParams } from './types';
 import { CannotOverrideError } from './ui_settings_errors';
 
 export interface UiSettingsServiceOptions {
@@ -40,14 +40,14 @@ interface ReadOptions {
   autoCreateOrUpgradeIfMissing?: boolean;
 }
 
-interface UserProvidedValue<T = any> {
+interface UserProvidedValue<T = unknown> {
   userValue?: T;
   isOverridden?: boolean;
 }
 
 type UiSettingsRawValue = UiSettingsParams & UserProvidedValue;
 
-type UserProvided<T = any> = Record<string, UserProvidedValue<T>>;
+type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
 type UiSettingsRaw = Record<string, UiSettingsRawValue>;
 
 export class UiSettingsClient implements IUiSettingsClient {
@@ -72,7 +72,11 @@ export class UiSettingsClient implements IUiSettingsClient {
   }
 
   getRegistered() {
-    return this.defaults;
+    const copiedDefaults: Record<string, PublicUiSettingsParams> = {};
+    for (const [key, value] of Object.entries(this.defaults)) {
+      copiedDefaults[key] = omit(value, 'schema');
+    }
+    return copiedDefaults;
   }
 
   async get<T = any>(key: string): Promise<T> {
@@ -90,29 +94,21 @@ export class UiSettingsClient implements IUiSettingsClient {
     }, {} as Record<string, T>);
   }
 
-  async getUserProvided<T = any>(): Promise<UserProvided<T>> {
-    const userProvided: UserProvided = {};
-
-    // write the userValue for each key stored in the saved object that is not overridden
-    for (const [key, userValue] of Object.entries(await this.read())) {
-      if (userValue !== null && !this.isOverridden(key)) {
-        userProvided[key] = {
-          userValue,
-        };
-      }
-    }
+  async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
+    const userProvided: UserProvided<T> = this.onReadHook<T>(await this.read());
 
     // write all overridden keys, dropping the userValue is override is null and
     // adding keys for overrides that are not in saved object
-    for (const [key, userValue] of Object.entries(this.overrides)) {
+    for (const [key, value] of Object.entries(this.overrides)) {
       userProvided[key] =
-        userValue === null ? { isOverridden: true } : { isOverridden: true, userValue };
+        value === null ? { isOverridden: true } : { isOverridden: true, userValue: value };
     }
 
     return userProvided;
   }
 
   async setMany(changes: Record<string, any>) {
+    this.onWriteHook(changes);
     await this.write({ changes });
   }
 
@@ -126,7 +122,7 @@ export class UiSettingsClient implements IUiSettingsClient {
 
   async removeMany(keys: string[]) {
     const changes: Record<string, null> = {};
-    keys.forEach(key => {
+    keys.forEach((key) => {
       changes[key] = null;
     });
     await this.setMany(changes);
@@ -147,6 +143,43 @@ export class UiSettingsClient implements IUiSettingsClient {
     return defaultsDeep(userProvided, this.defaults);
   }
 
+  private validateKey(key: string, value: unknown) {
+    const definition = this.defaults[key];
+    if (value === null || definition === undefined) return;
+    if (definition.schema) {
+      definition.schema.validate(value, {}, `validation [${key}]`);
+    }
+  }
+
+  private onWriteHook(changes: Record<string, unknown>) {
+    for (const key of Object.keys(changes)) {
+      this.assertUpdateAllowed(key);
+    }
+
+    for (const [key, value] of Object.entries(changes)) {
+      this.validateKey(key, value);
+    }
+  }
+
+  private onReadHook<T = unknown>(values: Record<string, unknown>) {
+    // write the userValue for each key stored in the saved object that is not overridden
+    // validate value read from saved objects as it can be changed via SO API
+    const filteredValues: UserProvided<T> = {};
+    for (const [key, userValue] of Object.entries(values)) {
+      if (userValue === null || this.isOverridden(key)) continue;
+      try {
+        this.validateKey(key, userValue);
+        filteredValues[key] = {
+          userValue: userValue as T,
+        };
+      } catch (error) {
+        this.log.warn(`Ignore invalid UiSettings value. ${error}.`);
+      }
+    }
+
+    return filteredValues;
+  }
+
   private async write({
     changes,
     autoCreateOrUpgradeIfMissing = true,
@@ -154,10 +187,6 @@ export class UiSettingsClient implements IUiSettingsClient {
     changes: Record<string, any>;
     autoCreateOrUpgradeIfMissing?: boolean;
   }) {
-    for (const key of Object.keys(changes)) {
-      this.assertUpdateAllowed(key);
-    }
-
     try {
       await this.savedObjectsClient.update(this.type, this.id, changes);
     } catch (error) {

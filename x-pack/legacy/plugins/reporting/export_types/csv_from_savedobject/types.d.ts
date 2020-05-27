@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JobParamPostPayload, JobDocPayload, ServerFacade } from '../../types';
+import { JobDocPayload, JobParamPostPayload, TimeRangeParams } from '../../server/types';
 
 export interface FakeRequest {
-  headers: any;
-  server: ServerFacade;
+  headers: Record<string, unknown>;
 }
 
 export interface JobParamsPostPayloadPanelCsv extends JobParamPostPayload {
@@ -113,12 +112,6 @@ export interface IndexPatternSavedObject {
     fieldFormatMap: string;
     fields: string;
   };
-}
-
-export interface TimeRangeParams {
-  timezone: string;
-  min: Date | string | number;
-  max: Date | string | number;
 }
 
 export interface VisPanel {

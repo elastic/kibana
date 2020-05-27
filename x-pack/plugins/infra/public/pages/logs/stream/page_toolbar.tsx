@@ -13,30 +13,21 @@ import { Toolbar } from '../../../components/eui';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
-import { LogMinimapScaleControls } from '../../../components/logging/log_minimap_scale_controls';
 import { LogTextScaleControls } from '../../../components/logging/log_text_scale_controls';
 import { LogTextWrapControls } from '../../../components/logging/log_text_wrap_controls';
-import { LogTimeControls } from '../../../components/logging/log_time_controls';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { LogFilterState } from '../../../containers/logs/log_filter';
 import { LogPositionState } from '../../../containers/logs/log_position';
-import { Source } from '../../../containers/source';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
+import { LogDatepicker } from '../../../components/logging/log_datepicker';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 
 export const LogsToolbar = () => {
-  const { createDerivedIndexPattern } = useContext(Source.Context);
-  const derivedIndexPattern = createDerivedIndexPattern('logs');
-  const {
-    availableIntervalSizes,
-    availableTextScales,
-    intervalSize,
-    setIntervalSize,
-    setTextScale,
-    setTextWrap,
-    textScale,
-    textWrap,
-  } = useContext(LogViewConfiguration.Context);
+  const { derivedIndexPattern } = useLogSourceContext();
+  const { availableTextScales, setTextScale, setTextWrap, textScale, textWrap } = useContext(
+    LogViewConfiguration.Context
+  );
   const {
     filterQueryDraft,
     isFilterQueryDraftValid,
@@ -55,12 +46,14 @@ export const LogsToolbar = () => {
     goToNextHighlight,
   } = useContext(LogHighlightsState.Context);
   const {
-    visibleMidpointTime,
-    isAutoReloading,
-    jumpToTargetPositionTime,
+    isStreaming,
     startLiveStreaming,
     stopLiveStreaming,
+    startDateExpression,
+    endDateExpression,
+    updateDateRange,
   } = useContext(LogPositionState.Context);
+
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
@@ -71,6 +64,7 @@ export const LogsToolbar = () => {
                 isLoadingSuggestions={isLoadingSuggestions}
                 isValid={isFilterQueryDraftValid}
                 loadSuggestions={loadSuggestions}
+                disabled={isStreaming}
                 onChange={(expression: string) => {
                   setSurroundingLogsId(null);
                   setLogFilterQueryDraft(expression);
@@ -94,11 +88,6 @@ export const LogsToolbar = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LogCustomizationMenu>
-            <LogMinimapScaleControls
-              availableIntervalSizes={availableIntervalSizes}
-              setIntervalSize={setIntervalSize}
-              intervalSize={intervalSize}
-            />
             <LogTextWrapControls wrap={textWrap} setTextWrap={setTextWrap} />
             <LogTextScaleControls
               availableTextScales={availableTextScales}
@@ -112,7 +101,7 @@ export const LogsToolbar = () => {
             onChange={setHighlightTerms}
             isLoading={loadLogEntryHighlightsRequest.state === 'pending'}
             activeHighlights={
-              highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length > 0
+              highlightTerms.filter((highlightTerm) => highlightTerm.length > 0).length > 0
             }
             goToPreviousHighlight={goToPreviousHighlight}
             goToNextHighlight={goToNextHighlight}
@@ -121,15 +110,13 @@ export const LogsToolbar = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <LogTimeControls
-            currentTime={visibleMidpointTime}
-            isLiveStreaming={isAutoReloading}
-            jumpToTime={jumpToTargetPositionTime}
-            startLiveStreaming={() => {
-              startLiveStreaming();
-              setSurroundingLogsId(null);
-            }}
-            stopLiveStreaming={stopLiveStreaming}
+          <LogDatepicker
+            startDateExpression={startDateExpression}
+            endDateExpression={endDateExpression}
+            onStartStreaming={startLiveStreaming}
+            onStopStreaming={stopLiveStreaming}
+            isStreaming={isStreaming}
+            onUpdateDateRange={updateDateRange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

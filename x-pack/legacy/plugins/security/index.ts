@@ -51,10 +51,7 @@ export const security = (kibana: Record<string, any>) =>
     uiExports: {
       hacks: ['plugins/security/hacks/legacy'],
       injectDefaultVars: (server: Server) => {
-        return {
-          secureCookies: getSecurityPluginSetup(server).__legacyCompat.config.secureCookies,
-          enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled'),
-        };
+        return { enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled') };
       },
     },
 
@@ -74,16 +71,6 @@ export const security = (kibana: Record<string, any>) =>
       securityPlugin.__legacyCompat.registerLegacyAPI({
         auditLogger: new AuditLogger(server, 'security', server.config(), xpackInfo),
       });
-
-      // Legacy xPack Info endpoint returns whatever we return in a callback for `registerLicenseCheckResultsGenerator`
-      // and the result is consumed by the legacy plugins all over the place, so we should keep it here for now. We assume
-      // that when legacy callback is called license has been already propagated to the new platform security plugin and
-      // features are up to date.
-      xpackInfo
-        .feature(this.id)
-        .registerLicenseCheckResultsGenerator(() =>
-          securityPlugin.__legacyCompat.license.getFeatures()
-        );
 
       server.expose({
         getUser: async (request: LegacyRequest) =>

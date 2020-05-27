@@ -4,41 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as rt from 'io-ts';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
-import url from 'url';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
-import { getTraceUrl } from '../../../../../../legacy/plugins/apm/public/components/shared/Links/apm/ExternalLinks';
+import { getTraceUrl } from '../../../../../apm/public';
 import { LogEntriesItem } from '../../../../common/http_api';
+import { useLinkProps, LinkDescriptor } from '../../../hooks/use_link_props';
+import { decodeOrThrow } from '../../../../common/runtime_types';
 
 const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
 
 export const LogEntryActionsMenu: React.FunctionComponent<{
   logItem: LogEntriesItem;
 }> = ({ logItem }) => {
-  const prependBasePath = useKibana().services.http?.basePath?.prepend;
   const { hide, isVisible, show } = useVisibilityState(false);
 
-  const uptimeLink = useMemo(() => {
-    const link = getUptimeLink(logItem);
-    return prependBasePath && link ? prependBasePath(link) : link;
-  }, [logItem, prependBasePath]);
+  const apmLinkDescriptor = useMemo(() => getAPMLink(logItem), [logItem]);
+  const uptimeLinkDescriptor = useMemo(() => getUptimeLink(logItem), [logItem]);
 
-  const apmLink = useMemo(() => {
-    const link = getAPMLink(logItem);
-    return prependBasePath && link ? prependBasePath(link) : link;
-  }, [logItem, prependBasePath]);
+  const uptimeLinkProps = useLinkProps({
+    app: 'uptime',
+    ...(uptimeLinkDescriptor ? uptimeLinkDescriptor : {}),
+  });
+
+  const apmLinkProps = useLinkProps({
+    app: 'apm',
+    ...(apmLinkDescriptor ? apmLinkDescriptor : {}),
+  });
 
   const menuItems = useMemo(
     () => [
       <EuiContextMenuItem
         data-test-subj="logEntryActionsMenuItem uptimeLogEntryActionsMenuItem"
-        disabled={!uptimeLink}
-        href={uptimeLink}
+        disabled={!uptimeLinkDescriptor}
         icon="uptimeApp"
         key="uptimeLink"
+        {...uptimeLinkProps}
       >
         <FormattedMessage
           id="xpack.infra.logEntryActionsMenu.uptimeActionLabel"
@@ -47,10 +50,10 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         data-test-subj="logEntryActionsMenuItem apmLogEntryActionsMenuItem"
-        disabled={!apmLink}
-        href={apmLink}
+        disabled={!apmLinkDescriptor}
         icon="apmApp"
         key="apmLink"
+        {...apmLinkProps}
       >
         <FormattedMessage
           id="xpack.infra.logEntryActionsMenu.apmActionLabel"
@@ -58,7 +61,7 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
         />
       </EuiContextMenuItem>,
     ],
-    [apmLink, uptimeLink]
+    [uptimeLinkDescriptor, apmLinkDescriptor, apmLinkProps, uptimeLinkProps]
   );
 
   const hasMenuItems = useMemo(() => menuItems.length > 0, [menuItems]);
@@ -89,22 +92,32 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
   );
 };
 
-const getUptimeLink = (logItem: LogEntriesItem) => {
+const getUptimeLink = (logItem: LogEntriesItem): LinkDescriptor | undefined => {
   const searchExpressions = logItem.fields
     .filter(({ field, value }) => value != null && UPTIME_FIELDS.includes(field))
-    .map(({ field, value }) => `${field}:${value}`);
+    .reduce<string[]>((acc, fieldItem) => {
+      const { field, value } = fieldItem;
+      try {
+        const parsedValue = decodeOrThrow(rt.array(rt.string))(JSON.parse(value));
+        return acc.concat(parsedValue.map((val) => `${field}:${val}`));
+      } catch (e) {
+        return acc.concat([`${field}:${value}`]);
+      }
+    }, []);
 
   if (searchExpressions.length === 0) {
     return undefined;
   }
-
-  return url.format({
-    pathname: '/app/uptime',
-    hash: `/?search=(${searchExpressions.join(' OR ')})`,
-  });
+  return {
+    app: 'uptime',
+    hash: '/',
+    search: {
+      search: `${searchExpressions.join(' or ')}`,
+    },
+  };
 };
 
-const getAPMLink = (logItem: LogEntriesItem) => {
+const getAPMLink = (logItem: LogEntriesItem): LinkDescriptor | undefined => {
   const traceIdEntry = logItem.fields.find(
     ({ field, value }) => value != null && field === 'trace.id'
   );
@@ -127,8 +140,8 @@ const getAPMLink = (logItem: LogEntriesItem) => {
       })()
     : { rangeFrom: 'now-1y', rangeTo: 'now' };
 
-  return url.format({
-    pathname: '/app/apm',
+  return {
+    app: 'apm',
     hash: getTraceUrl({ traceId: traceIdEntry.value, rangeFrom, rangeTo }),
-  });
+  };
 };

@@ -22,6 +22,7 @@ A high level overview of our contributing guidelines.
     - [Setting Up SSL](#setting-up-ssl)
   - [Linting](#linting)
   - [Internationalization](#internationalization)
+  - [Localization](#localization)
   - [Testing and Building](#testing-and-building)
     - [Debugging server code](#debugging-server-code)
     - [Instrumenting with Elastic APM](#instrumenting-with-elastic-apm)
@@ -170,6 +171,8 @@ Bootstrap Kibana and install all the dependencies
 ```bash
 yarn kbn bootstrap
 ```
+
+> Node.js native modules could be in use and node-gyp is the tool used to build them. There are tools you need to install per platform and python versions you need to be using. Please see https://github.com/nodejs/node-gyp#installation and follow the guide according your platform.
 
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
@@ -391,9 +394,9 @@ Note that for VSCode, to enable "live" linting of TypeScript (and other) file ty
 
 All user-facing labels and info texts in Kibana should be internationalized. Please take a look at the [readme](packages/kbn-i18n/README.md) and the [guideline](packages/kbn-i18n/GUIDELINE.md) of the i18n package on how to do so.
 
-In order to enable translations in the React parts of the application, the top most component of every `ReactDOM.render` call should be an `I18nContext`:
+In order to enable translations in the React parts of the application, the top most component of every `ReactDOM.render` call should be the `Context` component from the `i18n` core service:
 ```jsx
-import { I18nContext } from 'ui/i18n';
+const I18nContext = coreStart.i18n.Context;
 
 ReactDOM.render(
   <I18nContext>
@@ -405,6 +408,39 @@ ReactDOM.render(
 
 There are a number of tools created to support internationalization in Kibana that would allow one to validate internationalized labels,
 extract them to a `JSON` file or integrate translations back to Kibana. To know more, please read corresponding [readme](src/dev/i18n/README.md) file.
+
+### Localization
+
+We cannot support accepting contributions to the translations from any source other than the translators we have engaged to do the work.
+We are still to develop a proper process to accept any contributed translations. We certainly appreciate that people care enough about the localization effort to want to help improve the quality. We aim to build out a more comprehensive localization process for the future and will notify you once contributions can be supported, but for the time being, we are not able to incorporate suggestions.
+
+### Syling with SASS
+
+When writing a new component, create a sibling SASS file of the same name and import directly into the JS/TS component file. Doing so ensures the styles are never separated or lost on import and allows for better modularization (smaller individual plugin asset footprint).
+
+Any JavaScript (or TypeScript) file that imports SASS (.scss) files will automatically build with the [EUI](https://elastic.github.io/eui/#/guidelines/sass) & Kibana invisibles (SASS variables, mixins, functions) from the [`styling_constants.scss` file](https://github.com/elastic/kibana/blob/master/src/legacy/ui/public/styles/_styling_constants.scss). However, any Legacy (file path includes `/legacy`) files will not.
+
+**Example:**
+
+```tsx
+// component.tsx
+
+import './component.scss';
+
+export const Component = () => {
+  return (
+    <div className="plgComponent" />
+  );
+}
+```
+
+```scss
+// component.scss
+
+.plgComponent { ... }
+```
+
+Do not use the underscore `_` SASS file naming pattern when importing directly into a javascript file.
 
 ### Testing and Building
 
@@ -452,6 +488,14 @@ Example `config/apm.dev.js` file:
 module.exports = {
   active: true,
 };
+```
+
+APM [Real User Monitoring agent](https://www.elastic.co/guide/en/apm/agent/rum-js/current/index.html) is not available in the Kibana distributables,
+however the agent can be enabled by setting `ELASTIC_APM_ACTIVE` to `true`.
+flags
+```
+ELASTIC_APM_ACTIVE=true yarn start
+// activates both Node.js and RUM agent
 ```
 
 Once the agent is active, it will trace all incoming HTTP requests to Kibana, monitor for errors, and collect process-level metrics.

@@ -12,7 +12,24 @@ import {
 } from '../../../../plugins/infra/common/http_api/metadata_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+import { DATES } from './constants';
+
+const timeRange700 = {
+  from: DATES['7.0.0'].hosts.min,
+  to: DATES[`7.0.0`].hosts.max,
+};
+
+const timeRange660 = {
+  from: DATES['6.6.0'].docker.min,
+  to: DATES[`6.6.0`].docker.max,
+};
+
+const timeRange800withAws = {
+  from: DATES['8.0.0'].logs_and_metrics_with_aws.min,
+  to: DATES[`8.0.0`].logs_and_metrics_with_aws.max,
+};
+
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const fetchMetadata = async (body: InfraMetadataRequest): Promise<InfraMetadata | undefined> => {
@@ -34,6 +51,7 @@ export default function({ getService }: FtrProviderContext) {
           sourceId: 'default',
           nodeId: 'demo-stack-mysql-01',
           nodeType: InfraNodeType.host,
+          timeRange: timeRange700,
         });
         if (metadata) {
           expect(metadata.features.length).to.be(12);
@@ -53,6 +71,7 @@ export default function({ getService }: FtrProviderContext) {
           sourceId: 'default',
           nodeId: '631f36a845514442b93c3fdd2dc91bcd8feb680b8ac5832c7fb8fdc167bb938e',
           nodeType: InfraNodeType.container,
+          timeRange: timeRange660,
         });
         if (metadata) {
           expect(metadata.features.length).to.be(10);
@@ -74,6 +93,7 @@ export default function({ getService }: FtrProviderContext) {
             sourceId: 'default',
             nodeId: 'gke-observability-8--observability-8--bc1afd95-f0zc',
             nodeType: InfraNodeType.host,
+            timeRange: timeRange800withAws,
           });
           if (metadata) {
             expect(metadata.features.length).to.be(58);
@@ -114,10 +134,11 @@ export default function({ getService }: FtrProviderContext) {
             sourceId: 'default',
             nodeId: 'ip-172-31-47-9.us-east-2.compute.internal',
             nodeType: InfraNodeType.host,
+            timeRange: timeRange800withAws,
           });
           if (metadata) {
             expect(metadata.features.length).to.be(19);
-            expect(metadata.features.some(f => f.name === 'aws.ec2')).to.be(true);
+            expect(metadata.features.some((f) => f.name === 'aws.ec2')).to.be(true);
             expect(metadata.name).to.equal('ip-172-31-47-9.us-east-2.compute.internal');
             expect(metadata.info).to.eql({
               cloud: {
@@ -155,6 +176,7 @@ export default function({ getService }: FtrProviderContext) {
             sourceId: 'default',
             nodeId: '14887487-99f8-11e9-9a96-42010a84004d',
             nodeType: InfraNodeType.pod,
+            timeRange: timeRange800withAws,
           });
           if (metadata) {
             expect(metadata.features.length).to.be(29);
@@ -200,6 +222,7 @@ export default function({ getService }: FtrProviderContext) {
             sourceId: 'default',
             nodeId: 'c74b04834c6d7cc1800c3afbe31d0c8c0c267f06e9eb45c2b0c2df3e6cee40c5',
             nodeType: InfraNodeType.container,
+            timeRange: timeRange800withAws,
           });
           if (metadata) {
             expect(metadata.features.length).to.be(26);
@@ -236,40 +259,6 @@ export default function({ getService }: FtrProviderContext) {
                 containerized: false,
               },
             });
-          } else {
-            throw new Error('Metadata should never be empty');
-          }
-        });
-      });
-      describe('APM metrics', () => {
-        const archiveName = 'infra/8.0.0/metrics_and_apm';
-        before(() => esArchiver.load(archiveName));
-        after(() => esArchiver.unload(archiveName));
-
-        it('host without APM data', async () => {
-          const metadata = await fetchMetadata({
-            sourceId: 'default',
-            nodeId: 'gke-observability-8--observability-8--bc1afd95-f0zc',
-            nodeType: 'host',
-          });
-          if (metadata) {
-            expect(
-              metadata.features.some(f => f.name === 'apm.transaction' && f.source === 'apm')
-            ).to.be(false);
-          } else {
-            throw new Error('Metadata should never be empty');
-          }
-        });
-        it('pod with APM data', async () => {
-          const metadata = await fetchMetadata({
-            sourceId: 'default',
-            nodeId: 'c1031331-9ae0-11e9-9a96-42010a84004d',
-            nodeType: 'pod',
-          });
-          if (metadata) {
-            expect(
-              metadata.features.some(f => f.name === 'apm.transaction' && f.source === 'apm')
-            ).to.be(true);
           } else {
             throw new Error('Metadata should never be empty');
           }

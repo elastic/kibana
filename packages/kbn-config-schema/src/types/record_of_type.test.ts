@@ -73,8 +73,8 @@ test('fails when not receiving expected key type', () => {
 
   expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(`
 "[key(\\"name\\")]: types that failed validation:
-- [0]: expected value to equal [nickName] but got [name]
-- [1]: expected value to equal [lastName] but got [name]"
+- [0]: expected value to equal [nickName]
+- [1]: expected value to equal [lastName]"
 `);
 });
 
@@ -88,8 +88,8 @@ test('fails after parsing when not receiving expected key type', () => {
 
   expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(`
 "[key(\\"name\\")]: types that failed validation:
-- [0]: expected value to equal [nickName] but got [name]
-- [1]: expected value to equal [lastName] but got [name]"
+- [0]: expected value to equal [nickName]
+- [1]: expected value to equal [lastName]"
 `);
 });
 
@@ -118,7 +118,7 @@ test('includes namespace in failure when wrong key type', () => {
   };
 
   expect(() => type.validate(value, {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace.key(\\"name\\")]: value is [name] but it must have a minimum length of [10]."`
+    `"[foo-namespace.key(\\"name\\")]: value has length [4] but it must have a minimum length of [10]."`
   );
 });
 
@@ -159,6 +159,24 @@ test('object within recordOf', () => {
   expect(type.validate(value)).toEqual({ foo: { bar: 123 } });
 });
 
+test('enforces required object fields within recordOf', () => {
+  const type = schema.recordOf(
+    schema.string(),
+    schema.object({
+      bar: schema.object({
+        baz: schema.number(),
+      }),
+    })
+  );
+  const value = {
+    foo: {},
+  };
+
+  expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
+    `"[foo.bar.baz]: expected value of type [number] but got [undefined]"`
+  );
+});
+
 test('error preserves full path', () => {
   const type = schema.object({
     grandParentKey: schema.object({
@@ -169,7 +187,7 @@ test('error preserves full path', () => {
   expect(() =>
     type.validate({ grandParentKey: { parentKey: { a: 'some-value' } } })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[grandParentKey.parentKey.key(\\"a\\")]: value is [a] but it must have a minimum length of [2]."`
+    `"[grandParentKey.parentKey.key(\\"a\\")]: value has length [1] but it must have a minimum length of [2]."`
   );
 
   expect(() =>

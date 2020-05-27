@@ -17,28 +17,14 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-
-export default function({ getService }) {
+export default function ({ getService }) {
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
   const pieChart = getService('pieChart');
   const dashboardExpect = getService('dashboardExpect');
 
   describe('dashboard container', () => {
     before(async () => {
       await testSubjects.click('embedExplorerTab-dashboardContainer');
-    });
-
-    it('hello world embeddable renders', async () => {
-      await retry.try(async () => {
-        const text = await testSubjects.getVisibleText('helloWorldEmbeddable');
-        expect(text).to.be('HELLO WORLD!');
-      });
-    });
-
-    it('contact card embeddable renders', async () => {
-      await testSubjects.existOrFail('embeddablePanelHeading-HelloSue');
     });
 
     it('pie charts', async () => {

@@ -7,7 +7,6 @@
 /* eslint-disable @typescript-eslint/array-type */
 
 import { GraphQLSchema } from 'graphql';
-import { Legacy } from 'kibana';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
@@ -71,12 +70,15 @@ export class KibanaFramework {
       case 'put':
         this.router.put(routeConfig, handler);
         break;
+      case 'patch':
+        this.router.patch(routeConfig, handler);
+        break;
     }
   }
 
   public registerGraphQLEndpoint(routePath: string, gqlSchema: GraphQLSchema) {
     // These endpoints are validated by GraphQL at runtime and with GraphQL generated types
-    const body = schema.object({}, { allowUnknowns: true });
+    const body = schema.object({}, { unknowns: 'allow' });
     type Body = TypeOf<typeof body>;
 
     const routeOptions = {
@@ -179,6 +181,11 @@ export class KibanaFramework {
   ): Promise<InfraDatabaseGetIndicesResponse>;
   callWithRequest(
     requestContext: RequestHandlerContext,
+    method: 'transport.request',
+    options?: CallWithRequestParams
+  ): Promise<unknown>;
+  callWithRequest(
+    requestContext: RequestHandlerContext,
     endpoint: string,
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse>;
@@ -206,19 +213,17 @@ export class KibanaFramework {
         }
       : {};
 
-    return elasticsearch.dataClient.callAsCurrentUser(endpoint, {
+    return elasticsearch.legacy.client.callAsCurrentUser(endpoint, {
       ...params,
       ...frozenIndicesParams,
     });
   }
 
-  public getIndexPatternsService(
-    requestContext: RequestHandlerContext
-  ): Legacy.IndexPatternsService {
+  public getIndexPatternsService(requestContext: RequestHandlerContext): IndexPatternsFetcher {
     return new IndexPatternsFetcher((...rest: Parameters<APICaller>) => {
       rest[1] = rest[1] || {};
       rest[1].allowNoIndices = true;
-      return requestContext.core.elasticsearch.adminClient.callAsCurrentUser(...rest);
+      return requestContext.core.elasticsearch.legacy.client.callAsCurrentUser(...rest);
     });
   }
 
@@ -243,7 +248,7 @@ export class KibanaFramework {
     timerange: { min: number; max: number },
     filters: any[]
   ): Promise<InfraTSVBResponse> {
-    const { getVisData } = this.plugins.metrics;
+    const { getVisData } = this.plugins.visTypeTimeseries;
     if (typeof getVisData !== 'function') {
       throw new Error('TSVB is not available');
     }

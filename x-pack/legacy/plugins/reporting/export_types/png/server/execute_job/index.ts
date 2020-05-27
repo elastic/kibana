@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { ElasticsearchServiceSetup } from 'kibana/server';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { ReportingCore } from '../../../../server';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
-import { ServerFacade, ExecuteJobFactory, ESQueueWorkerExecuteFn, Logger } from '../../../../types';
+import { ReportingCore } from '../../../../server';
+import { LevelLogger } from '../../../../server/lib';
+import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput } from '../../../../server/types';
 import {
   decryptJobHeaders,
-  omitBlacklistedHeaders,
   getConditionalHeaders,
   getFullUrls,
+  omitBlacklistedHeaders,
 } from '../../../common/execute_job/';
 import { JobDocPayloadPNG } from '../../types';
 import { generatePngObservableFactory } from '../lib/generate_png';
@@ -23,23 +24,29 @@ type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocP
 
 export const executeJobFactory: QueuedPngExecutorFactory = async function executeJobFactoryFn(
   reporting: ReportingCore,
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
-  parentLogger: Logger
+  parentLogger: LevelLogger
 ) {
-  const browserDriverFactory = await reporting.getBrowserDriverFactory();
-  const generatePngObservable = generatePngObservableFactory(server, browserDriverFactory);
+  const config = reporting.getConfig();
+  const encryptionKey = config.get('encryptionKey');
   const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);
 
-  return function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
+  return async function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
+    const apmTrans = apm.startTransaction('reporting execute_job png', 'reporting');
+    const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
+    let apmGeneratePng: { end: () => void } | null | undefined;
+
+    const generatePngObservable = await generatePngObservableFactory(reporting);
     const jobLogger = logger.clone([jobId]);
-    const process$ = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders({ server, job, logger })),
-      map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
-      map(filteredHeaders => getConditionalHeaders({ server, job, filteredHeaders })),
-      mergeMap(conditionalHeaders => {
-        const urls = getFullUrls({ server, job });
+    const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
+      mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
+      map((decryptedHeaders) => omitBlacklistedHeaders({ job, decryptedHeaders })),
+      map((filteredHeaders) => getConditionalHeaders({ config, job, filteredHeaders })),
+      mergeMap((conditionalHeaders) => {
+        const urls = getFullUrls({ config, job });
         const hashUrl = urls[0];
+        if (apmGetAssets) apmGetAssets.end();
+
+        apmGeneratePng = apmTrans?.startSpan('generate_png_pipeline', 'execute');
         return generatePngObservable(
           jobLogger,
           hashUrl,
@@ -48,14 +55,18 @@ export const executeJobFactory: QueuedPngExecutorFactory = async function execut
           job.layout
         );
       }),
-      map((buffer: Buffer) => {
+      map(({ base64, warnings }) => {
+        if (apmGeneratePng) apmGeneratePng.end();
+
         return {
           content_type: 'image/png',
-          content: buffer.toString('base64'),
-          size: buffer.byteLength,
+          content: base64,
+          size: (base64 && base64.length) || 0,
+
+          warnings,
         };
       }),
-      catchError(err => {
+      catchError((err) => {
         jobLogger.error(err);
         return Rx.throwError(err);
       })

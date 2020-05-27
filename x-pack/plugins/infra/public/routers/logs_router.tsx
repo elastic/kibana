@@ -8,7 +8,7 @@ import React from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 
 import { NotFoundPage } from '../pages/404';
-import { LinkToPage } from '../pages/link_to';
+import { LinkToLogsPage } from '../pages/link_to';
 import { LogsPage } from '../pages/logs';
 import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
@@ -19,7 +19,7 @@ export const LogsRouter: AppRouter = ({ history }) => {
   return (
     <Router history={history}>
       <Switch>
-        <Route path="/link-to" component={LinkToPage} />
+        <Route path="/link-to" component={LinkToLogsPage} />
         {uiCapabilities?.logs?.show && (
           <RedirectWithQueryParams from="/" exact={true} to="/stream" />
         )}

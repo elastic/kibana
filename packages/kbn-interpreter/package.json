@@ -9,16 +9,17 @@
     "kbn:watch": "node scripts/build --dev --watch"
   },
   "dependencies": {
-    "@babel/runtime": "^7.5.5",
+    "@babel/runtime": "^7.9.2",
     "@kbn/i18n": "1.0.0",
     "lodash": "npm:@elastic/lodash@3.10.1-kibana4",
     "lodash.clone": "^4.5.0",
     "uuid": "3.3.2"
   },
   "devDependencies": {
-    "@babel/cli": "^7.5.5",
-    "@babel/core": "^7.5.5",
-    "@babel/plugin-transform-runtime": "^7.5.5",
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.9.0",
+    "@babel/plugin-transform-runtime": "^7.9.0",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/dev-utils": "1.0.0",
     "babel-loader": "^8.0.6",

@@ -17,11 +17,13 @@
  * under the License.
  */
 import { schema, TypeOf } from '@kbn/config-schema';
+import apmIndexPattern from './tutorial/index_pattern.json';
 import { PluginInitializerContext } from '../../../core/server';
 import { APMOSSPlugin } from './plugin';
 
 export const config = {
   schema: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
     transactionIndices: schema.string({ defaultValue: 'apm-*' }),
     spanIndices: schema.string({ defaultValue: 'apm-*' }),
     errorIndices: schema.string({ defaultValue: 'apm-*' }),
@@ -39,3 +41,19 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export type APMOSSConfig = TypeOf<typeof config.schema>;
 
 export { APMOSSPluginSetup } from './plugin';
+
+export { apmIndexPattern };
+
+export { APM_STATIC_INDEX_PATTERN_ID } from '../common/index_pattern_constants';
+
+export {
+  createNodeAgentInstructions,
+  createDjangoAgentInstructions,
+  createFlaskAgentInstructions,
+  createRailsAgentInstructions,
+  createRackAgentInstructions,
+  createJsAgentInstructions,
+  createGoAgentInstructions,
+  createJavaAgentInstructions,
+  createDotNetAgentInstructions,
+} from './tutorial/instructions/apm_agent_instructions';

@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const retry = getService('retry');
   const PageObjects = getPageObjects([
@@ -32,7 +32,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     'visChart',
   ]);
 
-  describe('visualize app', function describeIndexTests() {
+  describe('saved search visualizations from visualize app', function describeIndexTests() {
     describe('linked saved searched', () => {
       const savedSearchName = 'vis_saved_search';
 

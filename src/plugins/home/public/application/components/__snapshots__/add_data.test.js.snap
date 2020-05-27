@@ -73,7 +73,7 @@ exports[`apmUiEnabled 1`] = `
               <EuiButton
                 aria-describedby="aria-describedby.addAmpButtonLabel"
                 className="homAddData__button"
-                href="#/home/tutorial/apm"
+                href="#/tutorial/apm"
               >
                 <FormattedMessage
                   defaultMessage="Add APM"
@@ -104,7 +104,8 @@ exports[`apmUiEnabled 1`] = `
               <EuiButton
                 aria-describedby="aria-describedby.addLogDataButtonLabel"
                 className="homAddData__button"
-                href="#/home/tutorial_directory/logging"
+                data-test-subj="logsData"
+                href="#/tutorial_directory/logging"
               >
                 <FormattedMessage
                   defaultMessage="Add log data"
@@ -135,7 +136,7 @@ exports[`apmUiEnabled 1`] = `
               <EuiButton
                 aria-describedby="aria-describedby.addMetricsButtonLabel"
                 className="homAddData__button"
-                href="#/home/tutorial_directory/metrics"
+                href="#/tutorial_directory/metrics"
               >
                 <FormattedMessage
                   defaultMessage="Add metric data"
@@ -201,7 +202,7 @@ exports[`apmUiEnabled 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
-            href="#/home/tutorial_directory/siem"
+            href="#/tutorial_directory/siem"
           >
             <FormattedMessage
               defaultMessage="Add events"
@@ -240,7 +241,7 @@ exports[`apmUiEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/home/tutorial_directory/sampleData"
+          href="#/tutorial_directory/sampleData"
           style={
             Object {
               "display": "block",
@@ -276,7 +277,7 @@ exports[`apmUiEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/management/kibana/index_pattern"
+          href="#/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",
@@ -369,7 +370,8 @@ exports[`isNewKibanaInstance 1`] = `
               <EuiButton
                 aria-describedby="aria-describedby.addLogDataButtonLabel"
                 className="homAddData__button"
-                href="#/home/tutorial_directory/logging"
+                data-test-subj="logsData"
+                href="#/tutorial_directory/logging"
               >
                 <FormattedMessage
                   defaultMessage="Add log data"
@@ -400,7 +402,7 @@ exports[`isNewKibanaInstance 1`] = `
               <EuiButton
                 aria-describedby="aria-describedby.addMetricsButtonLabel"
                 className="homAddData__button"
-                href="#/home/tutorial_directory/metrics"
+                href="#/tutorial_directory/metrics"
               >
                 <FormattedMessage
                   defaultMessage="Add metric data"
@@ -466,7 +468,7 @@ exports[`isNewKibanaInstance 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
-            href="#/home/tutorial_directory/siem"
+            href="#/tutorial_directory/siem"
           >
             <FormattedMessage
               defaultMessage="Add events"
@@ -505,7 +507,7 @@ exports[`isNewKibanaInstance 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/home/tutorial_directory/sampleData"
+          href="#/tutorial_directory/sampleData"
           style={
             Object {
               "display": "block",
@@ -541,7 +543,7 @@ exports[`isNewKibanaInstance 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/management/kibana/index_pattern"
+          href="#/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",
@@ -634,7 +636,7 @@ exports[`mlEnabled 1`] = `
               <EuiButton
                 aria-describedby="aria-describedby.addAmpButtonLabel"
                 className="homAddData__button"
-                href="#/home/tutorial/apm"
+                href="#/tutorial/apm"
               >
                 <FormattedMessage
                   defaultMessage="Add APM"
@@ -665,7 +667,8 @@ exports[`mlEnabled 1`] = `
               <EuiButton
                 aria-describedby="aria-describedby.addLogDataButtonLabel"
                 className="homAddData__button"
-                href="#/home/tutorial_directory/logging"
+                data-test-subj="logsData"
+                href="#/tutorial_directory/logging"
               >
                 <FormattedMessage
                   defaultMessage="Add log data"
@@ -696,7 +699,7 @@ exports[`mlEnabled 1`] = `
               <EuiButton
                 aria-describedby="aria-describedby.addMetricsButtonLabel"
                 className="homAddData__button"
-                href="#/home/tutorial_directory/metrics"
+                href="#/tutorial_directory/metrics"
               >
                 <FormattedMessage
                   defaultMessage="Add metric data"
@@ -762,7 +765,7 @@ exports[`mlEnabled 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
-            href="#/home/tutorial_directory/siem"
+            href="#/tutorial_directory/siem"
           >
             <FormattedMessage
               defaultMessage="Add events"
@@ -801,7 +804,7 @@ exports[`mlEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/home/tutorial_directory/sampleData"
+          href="#/tutorial_directory/sampleData"
           style={
             Object {
               "display": "block",
@@ -873,7 +876,7 @@ exports[`mlEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/management/kibana/index_pattern"
+          href="#/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",
@@ -966,7 +969,8 @@ exports[`render 1`] = `
               <EuiButton
                 aria-describedby="aria-describedby.addLogDataButtonLabel"
                 className="homAddData__button"
-                href="#/home/tutorial_directory/logging"
+                data-test-subj="logsData"
+                href="#/tutorial_directory/logging"
               >
                 <FormattedMessage
                   defaultMessage="Add log data"
@@ -997,7 +1001,7 @@ exports[`render 1`] = `
               <EuiButton
                 aria-describedby="aria-describedby.addMetricsButtonLabel"
                 className="homAddData__button"
-                href="#/home/tutorial_directory/metrics"
+                href="#/tutorial_directory/metrics"
               >
                 <FormattedMessage
                   defaultMessage="Add metric data"
@@ -1063,7 +1067,7 @@ exports[`render 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
-            href="#/home/tutorial_directory/siem"
+            href="#/tutorial_directory/siem"
           >
             <FormattedMessage
               defaultMessage="Add events"
@@ -1102,7 +1106,7 @@ exports[`render 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/home/tutorial_directory/sampleData"
+          href="#/tutorial_directory/sampleData"
           style={
             Object {
               "display": "block",
@@ -1138,7 +1142,7 @@ exports[`render 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/management/kibana/index_pattern"
+          href="#/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",

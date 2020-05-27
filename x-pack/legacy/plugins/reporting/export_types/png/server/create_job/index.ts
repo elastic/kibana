@@ -6,20 +6,20 @@
 
 import { validateUrls } from '../../../../common/validate_urls';
 import { ReportingCore } from '../../../../server';
-import { cryptoFactory } from '../../../../server/lib/crypto';
+import { cryptoFactory } from '../../../../server/lib';
 import {
   ConditionalHeaders,
   CreateJobFactory,
   ESQueueCreateJobFn,
   RequestFacade,
-  ServerFacade,
-} from '../../../../types';
+} from '../../../../server/types';
 import { JobParamsPNG } from '../../types';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPNG
->> = function createJobFactoryFn(reporting: ReportingCore, server: ServerFacade) {
-  const crypto = cryptoFactory(server);
+>> = function createJobFactoryFn(reporting: ReportingCore) {
+  const config = reporting.getConfig();
+  const crypto = cryptoFactory(config.get('encryptionKey'));
 
   return async function createJob(
     { objectType, title, relativeUrl, browserTimezone, layout }: JobParamsPNG,

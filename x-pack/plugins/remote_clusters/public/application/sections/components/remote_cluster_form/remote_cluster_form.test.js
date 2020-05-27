@@ -10,7 +10,6 @@ import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 import { RemoteClusterForm } from './remote_cluster_form';
 
 // Make sure we have deterministic aria IDs.
-jest.mock('@elastic/eui/lib/components/form/form_row/make_id', () => () => 'mockId');
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: (prefix = 'staticGenerator') => (suffix = 'staticId') => `${prefix}_${suffix}`,
 }));
@@ -19,6 +18,16 @@ describe('RemoteClusterForm', () => {
   test(`renders untouched state`, () => {
     const component = renderWithIntl(<RemoteClusterForm save={() => {}} />);
     expect(component).toMatchSnapshot();
+  });
+
+  describe('proxy mode', () => {
+    test('renders correct connection settings when user enables proxy mode', () => {
+      const component = mountWithIntl(<RemoteClusterForm save={() => {}} />);
+
+      findTestSubject(component, 'remoteClusterFormConnectionModeToggle').simulate('click');
+
+      expect(component).toMatchSnapshot();
+    });
   });
 
   describe('validation', () => {
@@ -32,7 +41,7 @@ describe('RemoteClusterForm', () => {
         'remoteClusterFormSeedNodesFormRow',
         'remoteClusterFormSkipUnavailableFormRow',
         'remoteClusterFormGlobalError',
-      ].map(testSubject => {
+      ].map((testSubject) => {
         const mountedField = findTestSubject(component, testSubject);
         return takeMountedSnapshot(mountedField);
       });

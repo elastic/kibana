@@ -42,7 +42,8 @@ jest.mock('@elastic/eui', () => ({
   ),
 }));
 
-describe('<TemplateClone />', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/59849
+describe.skip('<TemplateClone />', () => {
   let testBed: TemplateFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -54,21 +55,17 @@ describe('<TemplateClone />', () => {
   const templateToClone = getTemplate({
     name: TEMPLATE_NAME,
     indexPatterns: ['indexPattern1'],
-    mappings: {
-      ...MAPPINGS,
-      _meta: {},
-      _source: {},
+    template: {
+      mappings: MAPPINGS,
     },
   });
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setLoadTemplateResponse(templateToClone);
 
-    testBed = await setup();
-
     await act(async () => {
-      await nextTick();
-      testBed.component.update();
+      testBed = await setup();
+      await testBed.waitFor('templateForm');
     });
   });
 

@@ -62,6 +62,7 @@ const WarningCheckbox: React.FunctionComponent<{
 );
 
 interface WarningsConfirmationFlyoutProps {
+  renderGlobalCallouts: () => React.ReactNode;
   closeFlyout: () => void;
   warnings: ReindexWarning[];
   advanceNextStep: () => void;
@@ -91,15 +92,16 @@ export class WarningsFlyoutStep extends React.Component<
   }
 
   public render() {
-    const { warnings, closeFlyout, advanceNextStep } = this.props;
+    const { warnings, closeFlyout, advanceNextStep, renderGlobalCallouts } = this.props;
     const { checkedIds } = this.state;
 
     // Do not allow to proceed until all checkboxes are checked.
-    const blockAdvance = Object.values(checkedIds).filter(v => v).length < warnings.length;
+    const blockAdvance = Object.values(checkedIds).filter((v) => v).length < warnings.length;
 
     return (
       <Fragment>
         <EuiFlyoutBody>
+          {renderGlobalCallouts()}
           <EuiCallOut
             title={
               <FormattedMessage

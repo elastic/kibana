@@ -6,6 +6,7 @@ APIs to their New Platform equivalents.
 - [Migration Examples](#migration-examples)
   - [Configuration](#configuration)
     - [Declaring config schema](#declaring-config-schema)
+    - [Using New Platform config in a new plugin](#using-new-platform-config-in-a-new-plugin)
     - [Using New Platform config from a Legacy plugin](#using-new-platform-config-from-a-legacy-plugin)
       - [Create a New Platform plugin](#create-a-new-platform-plugin)
   - [HTTP Routes](#http-routes)
@@ -15,11 +16,17 @@ APIs to their New Platform equivalents.
       - [4. New Platform plugin](#4-new-platform-plugin)
     - [Accessing Services](#accessing-services)
     - [Migrating Hapi "pre" handlers](#migrating-hapi-pre-handlers)
+      - [Simple example](#simple-example)
+      - [Full Example](#full-example)
   - [Chrome](#chrome)
-    - [Updating an application navlink](#updating-application-navlink)
+    - [Updating an application navlink](#updating-an-application-navlink)
   - [Chromeless Applications](#chromeless-applications)
   - [Render HTML Content](#render-html-content)
   - [Saved Objects types](#saved-objects-types)
+    - [Concrete example](#concrete-example)
+    - [Changes in structure compared to legacy](#changes-in-structure-compared-to-legacy)
+    - [Remarks](#remarks)
+  - [UiSettings](#uisettings)
 
 ## Configuration
 
@@ -64,7 +71,7 @@ export type MyPluginConfig = TypeOf<typeof config.schema>;
 ### Using New Platform config in a new plugin
 
 After setting the config schema for your plugin, you might want to reach the configuration in the plugin.
-It is provided as part of the [PluginInitializerContext](../../docs/development/core/server/kibana-plugin-server.plugininitializercontext.md)
+It is provided as part of the [PluginInitializerContext](../../docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.md)
 in the *constructor* of the plugin:
 
 ```ts
@@ -209,9 +216,9 @@ new kibana.Plugin({
 In the legacy platform, plugins have direct access to the Hapi `server` object
 which gives full access to all of Hapi's API. In the New Platform, plugins have
 access to the
-[HttpServiceSetup](/docs/development/core/server/kibana-plugin-server.httpservicesetup.md)
+[HttpServiceSetup](/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.md)
 interface, which is exposed via the
-[CoreSetup](/docs/development/core/server/kibana-plugin-server.coresetup.md)
+[CoreSetup](/docs/development/core/server/kibana-plugin-core-server.coresetup.md)
 object injected into the `setup` method of server-side plugins.
 
 This interface has a different API with slightly different behaviors.
@@ -414,7 +421,7 @@ Services in the Legacy Platform were typically available via methods on either
 `server.plugins.*`, `server.*`, or `req.*`. In the New Platform, all services
 are available via the `context` argument to the route handler. The type of this
 argument is the
-[RequestHandlerContext](/docs/development/core/server/kibana-plugin-server.requesthandlercontext.md).
+[RequestHandlerContext](/docs/development/core/server/kibana-plugin-core-server.requesthandlercontext.md).
 The APIs available here will include all Core services and any services
 registered by plugins this plugin depends on.
 
@@ -699,21 +706,15 @@ application.register({
 ## Render HTML Content
 
 You can return a blank HTML page bootstrapped with the core application bundle from an HTTP route handler
-via the `rendering` context. You may wish to do this if you are rendering a chromeless application with a
+via the `httpResources` service. You may wish to do this if you are rendering a chromeless application with a
 custom application route or have other custom rendering needs.
 
-```ts
-router.get(
+```typescript
+httpResources.register(
   { path: '/chromeless', validate: false },
   (context, request, response) => {
-    const { http, rendering } = context.core;
-
-    return response.ok({
-      body: await rendering.render(), // generates an HTML document
-      headers: {
-        'content-security-policy': http.csp.header,
-      },
-    });
+    //... some logic
+    return response.renderCoreApp();
   }
 );
 ```
@@ -723,18 +724,12 @@ comprises all UI Settings that are *user provided*, then injected into the page.
 You may wish to exclude fetching this data if not authorized or to slim the page
 size.
 
-```ts
-router.get(
-  { path: '/', validate: false },
+```typescript
+httpResources.register(
+  { path: '/', validate: false, options: { authRequired: false } },
   (context, request, response) => {
-    const { http, rendering } = context.core;
-
-    return response.ok({
-      body: await rendering.render({ includeUserSettings: false }),
-      headers: {
-        'content-security-policy': http.csp.header,
-      },
-    });
+    //... some logic
+    return response.renderAnonymousCoreApp();
   }
 );
 ```
@@ -749,7 +744,7 @@ using the core `savedObjects`'s `registerType` setup API.
 
 The most notable difference is that in the new platform, the type registration is performed in a single call to 
 `registerType`, passing a new `SavedObjectsType` structure that is a superset of the legacy `schema`, `migrations` 
-and `mappings`.
+`mappings` and `savedObjectsManagement`.
 
 ### Concrete example
 
@@ -773,6 +768,32 @@ new kibana.Plugin({
       },
       'second-type': {
         isHidden: true,
+      },
+    },
+    savedObjectsManagement: {
+      'first-type': {
+        isImportableAndExportable: true,
+        icon: 'myFirstIcon',
+        defaultSearchField: 'title',
+        getTitle(obj) {
+          return obj.attributes.title;
+        },
+        getEditUrl(obj) {
+          return `/some-url/${encodeURIComponent(obj.id)}`;
+        },
+      },
+      'second-type': {
+        isImportableAndExportable: false,
+        icon: 'mySecondIcon',
+        getTitle(obj) {
+          return obj.attributes.myTitleField;
+        },
+        getInAppUrl(obj) {
+          return {
+            path: `/some-url/${encodeURIComponent(obj.id)}`,
+            uiCapabilitiesPath: 'myPlugin.myType.show',
+          };
+        },
       },
     },
   },
@@ -844,6 +865,17 @@ export const firstType: SavedObjectsType = {
     '1.0.0': migrateFirstTypeToV1,
     '2.0.0': migrateFirstTypeToV2,
   },
+  management: {
+    importableAndExportable: true,
+    icon: 'myFirstIcon',
+    defaultSearchField: 'title',
+    getTitle(obj) {
+      return obj.attributes.title;
+    },
+    getEditUrl(obj) {
+      return `/some-url/${encodeURIComponent(obj.id)}`;
+    },
+  },
 };
 ```
 
@@ -870,6 +902,19 @@ export const secondType: SavedObjectsType = {
   migrations: {
     '1.5.0': migrateSecondTypeToV15,
   },
+  management: {
+    importableAndExportable: false,
+    icon: 'mySecondIcon',
+    getTitle(obj) {
+      return obj.attributes.myTitleField;
+    },
+    getInAppUrl(obj) {
+      return {
+        path: `/some-url/${encodeURIComponent(obj.id)}`,
+        uiCapabilitiesPath: 'myPlugin.myType.show',
+      };
+    },
+  },
 };
 ```
 
@@ -895,6 +940,8 @@ The NP `registerType` expected input is very close to the legacy format. However
 
 - The `schema.indexPattern` was accepting either a `string` or a `(config: LegacyConfig) => string`. `SavedObjectsType.indexPattern` only accepts a string, as you can access the configuration during your plugin's setup phase.
 
+- The `savedObjectsManagement.isImportableAndExportable` property has been renamed: `SavedObjectsType.management.importableAndExportable`
+
 - The migration function signature has changed:
 In legacy, it was `(doc: SavedObjectUnsanitizedDoc, log: SavedObjectsMigrationLogger) => SavedObjectUnsanitizedDoc;`
 In new platform, it is now `(doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;`
@@ -916,7 +963,7 @@ const migration = (doc, log) => {...}
 Would be converted to:
 
 ```typescript
-const migration: SavedObjectMigrationFn = (doc, { log }) => {...}
+const migration: SavedObjectMigrationFn<OldAttributes, MigratedAttributes> = (doc, { log }) => {...}
 ```
 
 ### Remarks
@@ -924,3 +971,36 @@ const migration: SavedObjectMigrationFn = (doc, { log }) => {...}
 The `registerType` API will throw if called after the service has started, and therefor cannot be used from 
 legacy plugin code. Legacy plugins should use the legacy savedObjects service and the legacy way to register
 saved object types until migrated.
+
+## UiSettings
+UiSettings defaults registration performed during `setup` phase via `core.uiSettings.register` API.
+
+```js
+// Before:
+uiExports: {
+  uiSettingDefaults: {
+    'my-plugin:my-setting': {
+      name: 'just-work',
+      value: true,
+      description: 'make it work',
+      category: ['my-category'],
+    },
+  }
+}
+```
+
+```ts
+// After:
+// src/plugins/my-plugin/server/plugin.ts
+setup(core: CoreSetup){
+  core.uiSettings.register({
+    'my-plugin:my-setting': {
+      name: 'just-work',
+      value: true,
+      description: 'make it work',
+      category: ['my-category'],
+      schema: schema.boolean(),
+    },
+  })
+}
+```

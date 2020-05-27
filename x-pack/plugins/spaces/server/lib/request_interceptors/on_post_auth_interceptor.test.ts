@@ -11,7 +11,6 @@ import { kibanaTestUser } from '@kbn/test';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 import {
   CoreSetup,
-  SavedObjectsLegacyService,
   SavedObjectsErrorHelpers,
   IBasePath,
   IRouter,
@@ -19,9 +18,10 @@ import {
 import {
   elasticsearchServiceMock,
   loggingServiceMock,
+  coreMock,
 } from '../../../../../../src/core/server/mocks';
 import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
-import { LegacyAPI, PluginsSetup } from '../../plugin';
+import { PluginsSetup } from '../../plugin';
 import { SpacesService } from '../../spaces_service';
 import { SpacesAuditLogger } from '../audit_logger';
 import { convertSavedObjectToSpace } from '../../routes/lib';
@@ -121,10 +121,7 @@ describe.skip('onPostAuthInterceptor', () => {
     // Mock esNodesCompatibility$ to prevent `root.start()` from blocking on ES version check
     elasticsearch.esNodesCompatibility$ = elasticsearchServiceMock.createInternalSetup().esNodesCompatibility$;
 
-    const loggingMock = loggingServiceMock
-      .create()
-      .asLoggerFactory()
-      .get('xpack', 'spaces');
+    const loggingMock = loggingServiceMock.create().asLoggerFactory().get('xpack', 'spaces');
 
     const featuresPlugin = {
       getFeatures: () =>
@@ -152,35 +149,30 @@ describe.skip('onPostAuthInterceptor', () => {
         ] as Feature[],
     } as PluginsSetup['features'];
 
-    const savedObjectsService = {
-      SavedObjectsClient: {
-        errors: SavedObjectsErrorHelpers,
-      },
-      getSavedObjectsRepository: jest.fn().mockImplementation(() => {
-        return {
-          get: (type: string, id: string) => {
-            if (type === 'space') {
-              const space = availableSpaces.find(s => s.id === id);
-              if (space) {
-                return space;
-              }
-              throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    const mockRepository = jest.fn().mockImplementation(() => {
+      return {
+        get: (type: string, id: string) => {
+          if (type === 'space') {
+            const space = availableSpaces.find((s) => s.id === id);
+            if (space) {
+              return space;
             }
-          },
-          create: () => null,
-        };
-      }),
-    };
+            throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+          }
+        },
+        create: () => null,
+      };
+    });
 
-    const legacyAPI = {
-      savedObjects: (savedObjectsService as unknown) as SavedObjectsLegacyService,
-    } as LegacyAPI;
+    const coreStart = coreMock.createStart();
+    coreStart.savedObjects.createInternalRepository.mockImplementation(mockRepository);
+    coreStart.savedObjects.createScopedRepository.mockImplementation(mockRepository);
 
-    const service = new SpacesService(loggingMock, () => legacyAPI);
+    const service = new SpacesService(loggingMock);
 
     const spacesService = await service.setup({
       http: (http as unknown) as CoreSetup['http'],
-      elasticsearch: elasticsearchServiceMock.createSetup(),
+      getStartServices: async () => [coreStart, {}, {}],
       authorization: securityMock.createSetup().authz,
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of(spacesConfig),
@@ -197,7 +189,7 @@ describe.skip('onPostAuthInterceptor', () => {
         if (testOptions.simulateGetSingleSpaceFailure) {
           throw Boom.unauthorized('missing credendials', 'Protected Elasticsearch');
         }
-        const space = availableSpaces.find(s => s.id === spaceId);
+        const space = availableSpaces.find((s) => s.id === spaceId);
         if (!space) {
           throw SavedObjectsErrorHelpers.createGenericNotFoundError('space', spaceId);
         }

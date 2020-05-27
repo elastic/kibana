@@ -7,10 +7,12 @@
 import fs from 'fs';
 import Boom from 'boom';
 import numeral from '@elastic/numeral';
-import { CallAPIOptions, RequestHandlerContext, SavedObjectsClientContract } from 'kibana/server';
+import { APICaller, SavedObjectsClientContract } from 'kibana/server';
+import moment from 'moment';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { merge } from 'lodash';
-import { MlJob } from '../../../../../legacy/plugins/ml/common/types/jobs';
+import { AnalysisLimits, CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
+import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import {
   KibanaObjects,
   ModuleDataFeed,
@@ -18,20 +20,26 @@ import {
   Module,
   JobOverride,
   DatafeedOverride,
-  GeneralOverride,
+  GeneralJobsOverride,
   DatafeedResponse,
   JobResponse,
   KibanaObjectResponse,
   DataRecognizerConfigResponse,
-} from '../../../../../legacy/plugins/ml/common/types/modules';
+  GeneralDatafeedsOverride,
+  JobSpecificOverride,
+  isGeneralJobOverride,
+} from '../../../common/types/modules';
 import {
   getLatestDataOrBucketTimestamp,
   prefixDatafeedId,
-} from '../../../../../legacy/plugins/ml/common/util/job_utils';
+  splitIndexPatternNames,
+} from '../../../common/util/job_utils';
 import { mlLog } from '../../client/log';
-// @ts-ignore
+import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
+import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
+import { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -61,7 +69,7 @@ interface RawModuleConfig {
 }
 
 interface MlJobStats {
-  jobs: MlJob[];
+  jobs: CombinedJobWithStats[];
 }
 
 interface Config {
@@ -69,24 +77,12 @@ interface Config {
   json: RawModuleConfig;
 }
 
-interface Result {
+export interface RecognizeResult {
   id: string;
   title: string;
   query: any;
   description: string;
   logo: { icon: string } | null;
-}
-
-interface JobStat {
-  id: string;
-  earliestTimestampMs: number;
-  latestTimestampMs: number;
-  latestResultsTimestampMs: number;
-}
-
-interface JobExistResult {
-  jobsExist: boolean;
-  jobs: JobStat[];
 }
 
 interface ObjectExistResult {
@@ -111,18 +107,15 @@ export class DataRecognizer {
   modulesDir = `${__dirname}/modules`;
   indexPatternName: string = '';
   indexPatternId: string | undefined = undefined;
-  savedObjectsClient: SavedObjectsClientContract;
+  /**
+   * List of the module jobs that require model memory estimation
+   */
+  jobsForModelMemoryEstimation: Array<{ job: ModuleJob; query: any }> = [];
 
-  callAsCurrentUser: (
-    endpoint: string,
-    clientParams?: Record<string, any>,
-    options?: CallAPIOptions
-  ) => Promise<any>;
-
-  constructor(context: RequestHandlerContext) {
-    this.callAsCurrentUser = context.ml!.mlClient.callAsCurrentUser;
-    this.savedObjectsClient = context.core.savedObjects.client;
-  }
+  constructor(
+    private callAsCurrentUser: APICaller,
+    private savedObjectsClient: SavedObjectsClientContract
+  ) {}
 
   // list all directories under the given directory
   async listDirs(dirName: string): Promise<string[]> {
@@ -132,7 +125,7 @@ export class DataRecognizer {
         if (err) {
           reject(err);
         }
-        fileNames.forEach(fileName => {
+        fileNames.forEach((fileName) => {
           const path = `${dirName}/${fileName}`;
           if (fs.lstatSync(path).isDirectory()) {
             dirs.push(fileName);
@@ -159,7 +152,7 @@ export class DataRecognizer {
     const configs: Config[] = [];
     const dirs = await this.listDirs(this.modulesDir);
     await Promise.all(
-      dirs.map(async dir => {
+      dirs.map(async (dir) => {
         let file: string | undefined;
         try {
           file = await this.readFile(`${this.modulesDir}/${dir}/manifest.json`);
@@ -186,16 +179,16 @@ export class DataRecognizer {
   // get the manifest.json file for a specified id, e.g. "nginx"
   async getManifestFile(id: string) {
     const manifestFiles = await this.loadManifestFiles();
-    return manifestFiles.find(i => i.json.id === id);
+    return manifestFiles.find((i) => i.json.id === id);
   }
 
   // called externally by an endpoint
-  async findMatches(indexPattern: string): Promise<Result[]> {
+  async findMatches(indexPattern: string): Promise<RecognizeResult[]> {
     const manifestFiles = await this.loadManifestFiles();
-    const results: Result[] = [];
+    const results: RecognizeResult[] = [];
 
     await Promise.all(
-      manifestFiles.map(async i => {
+      manifestFiles.map(async (i) => {
         const moduleConfig = i.json;
         let match = false;
         try {
@@ -285,7 +278,7 @@ export class DataRecognizer {
     const kibana: KibanaObjects = {};
     // load all of the job configs
     await Promise.all(
-      manifestJSON.jobs.map(async job => {
+      manifestJSON.jobs.map(async (job) => {
         try {
           const jobConfig = await this.readFile(
             `${this.modulesDir}/${dirName}/${ML_DIR}/${job.file}`
@@ -305,7 +298,7 @@ export class DataRecognizer {
 
     // load all of the datafeed configs
     await Promise.all(
-      manifestJSON.datafeeds.map(async datafeed => {
+      manifestJSON.datafeeds.map(async (datafeed) => {
         try {
           const datafeedConfig = await this.readFile(
             `${this.modulesDir}/${dirName}/${ML_DIR}/${datafeed.file}`
@@ -330,10 +323,10 @@ export class DataRecognizer {
     if (manifestJSON.kibana !== undefined) {
       const kKeys = Object.keys(manifestJSON.kibana) as Array<keyof RawModuleConfig['kibana']>;
       await Promise.all(
-        kKeys.map(async key => {
+        kKeys.map(async (key) => {
           kibana[key] = [];
           await Promise.all(
-            manifestJSON!.kibana[key].map(async obj => {
+            manifestJSON!.kibana[key].map(async (obj) => {
               try {
                 const kConfig = await this.readFile(
                   `${this.modulesDir}/${dirName}/${KIBANA_DIR}/${key}/${obj.file}`
@@ -371,16 +364,17 @@ export class DataRecognizer {
   // if any of the savedObjects already exist, they will not be overwritten.
   async setupModuleItems(
     moduleId: string,
-    jobPrefix: string,
-    groups: string[],
-    indexPatternName: string,
-    query: any,
-    useDedicatedIndex: boolean,
-    startDatafeed: boolean,
-    start: number,
-    end: number,
-    jobOverrides: JobOverride[],
-    datafeedOverrides: DatafeedOverride[]
+    jobPrefix?: string,
+    groups?: string[],
+    indexPatternName?: string,
+    query?: any,
+    useDedicatedIndex?: boolean,
+    startDatafeed?: boolean,
+    start?: number,
+    end?: number,
+    jobOverrides?: JobOverride | JobOverride[],
+    datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
+    estimateModelMemory: boolean = true
   ) {
     // load the config from disk
     const moduleConfig = await this.getModule(moduleId, jobPrefix);
@@ -422,22 +416,27 @@ export class DataRecognizer {
       savedObjects: [] as KibanaObjectResponse[],
     };
 
+    this.jobsForModelMemoryEstimation = moduleConfig.jobs.map((job) => ({
+      job,
+      query: moduleConfig.datafeeds.find((d) => d.config.job_id === job.id)?.config.query ?? null,
+    }));
+
     this.applyJobConfigOverrides(moduleConfig, jobOverrides, jobPrefix);
     this.applyDatafeedConfigOverrides(moduleConfig, datafeedOverrides, jobPrefix);
     this.updateDatafeedIndices(moduleConfig);
     this.updateJobUrlIndexPatterns(moduleConfig);
-    await this.updateModelMemoryLimits(moduleConfig);
+    await this.updateModelMemoryLimits(moduleConfig, estimateModelMemory, start, end);
 
     // create the jobs
     if (moduleConfig.jobs && moduleConfig.jobs.length) {
       if (Array.isArray(groups)) {
         // update groups list for each job
-        moduleConfig.jobs.forEach(job => (job.config.groups = groups));
+        moduleConfig.jobs.forEach((job) => (job.config.groups = groups));
       }
 
       // Set the results_index_name property for each job if useDedicatedIndex is true
       if (useDedicatedIndex === true) {
-        moduleConfig.jobs.forEach(job => (job.config.results_index_name = job.id));
+        moduleConfig.jobs.forEach((job) => (job.config.results_index_name = job.id));
       }
       saveResults.jobs = await this.saveJobs(moduleConfig.jobs);
     }
@@ -445,20 +444,20 @@ export class DataRecognizer {
     // create the datafeeds
     if (moduleConfig.datafeeds && moduleConfig.datafeeds.length) {
       if (typeof query === 'object' && query !== null) {
-        moduleConfig.datafeeds.forEach(df => {
+        moduleConfig.datafeeds.forEach((df) => {
           df.config.query = query;
         });
       }
       saveResults.datafeeds = await this.saveDatafeeds(moduleConfig.datafeeds);
 
       if (startDatafeed) {
-        const savedDatafeeds = moduleConfig.datafeeds.filter(df => {
-          const datafeedResult = saveResults.datafeeds.find(d => d.id === df.id);
+        const savedDatafeeds = moduleConfig.datafeeds.filter((df) => {
+          const datafeedResult = saveResults.datafeeds.find((d) => d.id === df.id);
           return datafeedResult !== undefined && datafeedResult.success === true;
         });
 
         const startResults = await this.startDatafeeds(savedDatafeeds, start, end);
-        saveResults.datafeeds.forEach(df => {
+        saveResults.datafeeds.forEach((df) => {
           const startedDatafeed = startResults[df.id];
           if (startedDatafeed !== undefined) {
             df.started = startedDatafeed.started;
@@ -495,7 +494,7 @@ export class DataRecognizer {
     if (module && module.jobs) {
       // Add a wildcard at the front of each of the job IDs in the module,
       // as a prefix may have been supplied when creating the jobs in the module.
-      const jobIds = module.jobs.map(job => `*${job.id}`);
+      const jobIds = module.jobs.map((job) => `*${job.id}`);
       const { jobsExist } = jobServiceProvider(this.callAsCurrentUser);
       const jobInfo = await jobsExist(jobIds);
 
@@ -508,11 +507,11 @@ export class DataRecognizer {
         const jobStats: MlJobStats = await this.callAsCurrentUser('ml.jobStats', { jobId: jobIds });
         const jobStatsJobs: JobStat[] = [];
         if (jobStats.jobs && jobStats.jobs.length > 0) {
-          const foundJobIds = jobStats.jobs.map(job => job.job_id);
+          const foundJobIds = jobStats.jobs.map((job) => job.job_id);
           const { getLatestBucketTimestampByJob } = resultsServiceProvider(this.callAsCurrentUser);
           const latestBucketTimestampsByJob = await getLatestBucketTimestampByJob(foundJobIds);
 
-          jobStats.jobs.forEach(job => {
+          jobStats.jobs.forEach((job) => {
             const jobStat = {
               id: job.job_id,
             } as JobStat;
@@ -549,7 +548,7 @@ export class DataRecognizer {
       if (indexPatterns === undefined || indexPatterns.saved_objects === undefined) {
         return;
       }
-      const ip = indexPatterns.saved_objects.find(i => i.attributes.title === name);
+      const ip = indexPatterns.saved_objects.find((i) => i.attributes.title === name);
       return ip !== undefined ? ip.id : undefined;
     } catch (error) {
       mlLog.warn(`Error loading index patterns, ${error}`);
@@ -564,10 +563,10 @@ export class DataRecognizer {
     // first check if the saved objects already exist.
     const savedObjectExistResults = await this.checkIfSavedObjectsExist(moduleConfig.kibana);
     // loop through the kibanaSaveResults and update
-    Object.keys(moduleConfig.kibana).forEach(type => {
+    Object.keys(moduleConfig.kibana).forEach((type) => {
       // type e.g. dashboard, search ,visualization
-      moduleConfig.kibana[type]!.forEach(configItem => {
-        const existsResult = savedObjectExistResults.find(o => o.id === configItem.id);
+      moduleConfig.kibana[type]!.forEach((configItem) => {
+        const existsResult = savedObjectExistResults.find((o) => o.id === configItem.id);
         if (existsResult !== undefined) {
           configItem.exists = existsResult.exists;
           if (existsResult.exists === false) {
@@ -591,9 +590,9 @@ export class DataRecognizer {
     objectExistResults: ObjectExistResult[]
   ) {
     (Object.keys(kibanaSaveResults) as Array<keyof DataRecognizerConfigResponse['kibana']>).forEach(
-      type => {
-        kibanaSaveResults[type].forEach(resultItem => {
-          const i = objectExistResults.find(o => o.id === resultItem.id && o.type === type);
+      (type) => {
+        kibanaSaveResults[type].forEach((resultItem) => {
+          const i = objectExistResults.find((o) => o.id === resultItem.id && o.type === type);
           resultItem.exists = i !== undefined;
         });
       }
@@ -607,11 +606,11 @@ export class DataRecognizer {
   async checkIfSavedObjectsExist(kibanaObjects: KibanaObjects): Promise<ObjectExistResponse[]> {
     const types = Object.keys(kibanaObjects);
     const results: ObjectExistResponse[][] = await Promise.all(
-      types.map(async type => {
+      types.map(async (type) => {
         const existingObjects = await this.loadExistingSavedObjects(type);
-        return kibanaObjects[type]!.map(obj => {
+        return kibanaObjects[type]!.map((obj) => {
           const existingObject = existingObjects.saved_objects.find(
-            o => o.attributes && o.attributes.title === obj.title
+            (o) => o.attributes && o.attributes.title === obj.title
           );
           return {
             id: obj.id,
@@ -635,13 +634,16 @@ export class DataRecognizer {
   async saveKibanaObjects(objectExistResults: ObjectExistResponse[]) {
     let results = { saved_objects: [] as any[] };
     const filteredSavedObjects = objectExistResults
-      .filter(o => o.exists === false)
-      .map(o => o.savedObject);
+      .filter((o) => o.exists === false)
+      .map((o) => o.savedObject);
     if (filteredSavedObjects.length) {
       results = await this.savedObjectsClient.bulkCreate(
         // Add an empty migrationVersion attribute to each saved object to ensure
         // it is automatically migrated to the 7.0+ format with a references attribute.
-        filteredSavedObjects.map(doc => ({ ...doc, migrationVersion: doc.migrationVersion || {} }))
+        filteredSavedObjects.map((doc) => ({
+          ...doc,
+          migrationVersion: doc.migrationVersion || {},
+        }))
       );
     }
     return results.saved_objects;
@@ -652,7 +654,7 @@ export class DataRecognizer {
   // as success: false
   async saveJobs(jobs: ModuleJob[]): Promise<JobResponse[]> {
     return await Promise.all(
-      jobs.map(async job => {
+      jobs.map(async (job) => {
         const jobId = job.id;
         try {
           job.id = jobId;
@@ -675,7 +677,7 @@ export class DataRecognizer {
   // as success: false
   async saveDatafeeds(datafeeds: ModuleDataFeed[]) {
     return await Promise.all(
-      datafeeds.map(async datafeed => {
+      datafeeds.map(async (datafeed) => {
         try {
           await this.saveDatafeed(datafeed);
           return { id: datafeed.id, success: true, started: false };
@@ -693,8 +695,8 @@ export class DataRecognizer {
 
   async startDatafeeds(
     datafeeds: ModuleDataFeed[],
-    start: number,
-    end: number
+    start?: number,
+    end?: number
   ): Promise<{ [key: string]: DatafeedResponse }> {
     const results = {} as { [key: string]: DatafeedResponse };
     for (const datafeed of datafeeds) {
@@ -749,8 +751,8 @@ export class DataRecognizer {
   // which is returned from the endpoint
   async updateResults(results: DataRecognizerConfigResponse, saveResults: SaveResults) {
     // update job results
-    results.jobs.forEach(j => {
-      saveResults.jobs.forEach(j2 => {
+    results.jobs.forEach((j) => {
+      saveResults.jobs.forEach((j2) => {
         if (j.id === j2.id) {
           j.success = j2.success;
           if (j2.error !== undefined) {
@@ -761,8 +763,8 @@ export class DataRecognizer {
     });
 
     // update datafeed results
-    results.datafeeds.forEach(d => {
-      saveResults.datafeeds.forEach(d2 => {
+    results.datafeeds.forEach((d) => {
+      saveResults.datafeeds.forEach((d2) => {
         if (d.id === d2.id) {
           d.success = d2.success;
           d.started = d2.started;
@@ -775,9 +777,9 @@ export class DataRecognizer {
 
     // update savedObjects results
     (Object.keys(results.kibana) as Array<keyof DataRecognizerConfigResponse['kibana']>).forEach(
-      category => {
-        results.kibana[category].forEach(item => {
-          const result = saveResults.savedObjects.find(o => o.id === item.id);
+      (category) => {
+        results.kibana[category].forEach((item) => {
+          const result = saveResults.savedObjects.find((o) => o.id === item.id);
           if (result !== undefined) {
             item.exists = result.exists;
 
@@ -809,7 +811,7 @@ export class DataRecognizer {
       index: string | number
     ): void {
       resultItems[index] = [];
-      configItems.forEach(j => {
+      configItems.forEach((j) => {
         resultItems[index].push({
           id: j.id,
           success: false,
@@ -817,12 +819,12 @@ export class DataRecognizer {
       });
     }
 
-    (Object.keys(reducedConfig) as Array<keyof typeof reducedConfig>).forEach(i => {
+    (Object.keys(reducedConfig) as Array<keyof typeof reducedConfig>).forEach((i) => {
       if (Array.isArray(reducedConfig[i])) {
         createResultsItems(reducedConfig[i] as any[], results, i);
       } else {
         results[i] = {} as any;
-        Object.keys(reducedConfig[i]).forEach(k => {
+        Object.keys(reducedConfig[i]).forEach((k) => {
           createResultsItems((reducedConfig[i] as Module['kibana'])[k] as any[], results[i], k);
         });
       }
@@ -836,17 +838,15 @@ export class DataRecognizer {
   updateDatafeedIndices(moduleConfig: Module) {
     // if the supplied index pattern contains a comma, split into multiple indices and
     // add each one to the datafeed
-    const indexPatternNames = this.indexPatternName.includes(',')
-      ? this.indexPatternName.split(',').map(i => i.trim())
-      : [this.indexPatternName];
+    const indexPatternNames = splitIndexPatternNames(this.indexPatternName);
 
-    moduleConfig.datafeeds.forEach(df => {
+    moduleConfig.datafeeds.forEach((df) => {
       const newIndices: string[] = [];
       // the datafeed can contain indexes and indices
       const currentIndices =
         df.config.indexes !== undefined ? df.config.indexes : df.config.indices;
 
-      currentIndices.forEach(index => {
+      currentIndices.forEach((index) => {
         if (index === INDEX_PATTERN_NAME) {
           // the datafeed index is INDEX_PATTERN_NAME, so replace it with index pattern(s)
           // supplied by the user or the default one from the manifest
@@ -867,11 +867,11 @@ export class DataRecognizer {
   // marker for the id of the specified index pattern
   updateJobUrlIndexPatterns(moduleConfig: Module) {
     if (Array.isArray(moduleConfig.jobs)) {
-      moduleConfig.jobs.forEach(job => {
+      moduleConfig.jobs.forEach((job) => {
         // if the job has custom_urls
         if (job.config.custom_settings && job.config.custom_settings.custom_urls) {
           // loop through each url, replacing the INDEX_PATTERN_ID marker
-          job.config.custom_settings.custom_urls.forEach(cUrl => {
+          job.config.custom_settings.custom_urls.forEach((cUrl) => {
             const url = cUrl.url_value;
             if (url.match(INDEX_PATTERN_ID)) {
               const newUrl = url.replace(
@@ -909,8 +909,8 @@ export class DataRecognizer {
   // INDEX_PATTERN_NAME markers for the id or name of the specified index pattern
   updateSavedObjectIndexPatterns(moduleConfig: Module) {
     if (moduleConfig.kibana) {
-      Object.keys(moduleConfig.kibana).forEach(category => {
-        moduleConfig.kibana[category]!.forEach(item => {
+      Object.keys(moduleConfig.kibana).forEach((category) => {
+        moduleConfig.kibana[category]!.forEach((item) => {
           let jsonString = item.config.kibanaSavedObjectMeta!.searchSourceJSON;
           if (jsonString.match(INDEX_PATTERN_ID)) {
             jsonString = jsonString.replace(
@@ -937,28 +937,121 @@ export class DataRecognizer {
     }
   }
 
-  // ensure the model memory limit for each job is not greater than
-  // the max model memory setting for the cluster
-  async updateModelMemoryLimits(moduleConfig: Module) {
-    const { limits } = await this.callAsCurrentUser('ml.info');
-    const maxMml = limits.max_model_memory_limit;
-    if (maxMml !== undefined) {
-      // @ts-ignore
-      const maxBytes: number = numeral(maxMml.toUpperCase()).value();
+  /**
+   * Provides a time range of the last 3 months of data
+   */
+  async getFallbackTimeRange(
+    timeField: string,
+    query?: any
+  ): Promise<{ start: number; end: number }> {
+    const fieldsService = fieldsServiceProvider(this.callAsCurrentUser);
 
-      if (Array.isArray(moduleConfig.jobs)) {
-        moduleConfig.jobs.forEach(job => {
-          const mml = job.config?.analysis_limits?.model_memory_limit;
-          if (mml !== undefined) {
-            // @ts-ignore
-            const mmlBytes: number = numeral(mml.toUpperCase()).value();
-            if (mmlBytes > maxBytes) {
-              // if the job's mml is over the max,
-              // so set the jobs mml to be the max
-              job.config.analysis_limits!.model_memory_limit = maxMml;
-            }
+    const timeFieldRange = await fieldsService.getTimeFieldRange(
+      this.indexPatternName,
+      timeField,
+      query
+    );
+
+    return {
+      start: timeFieldRange.end.epoch - moment.duration(3, 'months').asMilliseconds(),
+      end: timeFieldRange.end.epoch,
+    };
+  }
+
+  /**
+   * Ensure the model memory limit for each job is not greater than
+   * the max model memory setting for the cluster
+   */
+  async updateModelMemoryLimits(
+    moduleConfig: Module,
+    estimateMML: boolean,
+    start?: number,
+    end?: number
+  ) {
+    if (!Array.isArray(moduleConfig.jobs)) {
+      return;
+    }
+
+    if (estimateMML && this.jobsForModelMemoryEstimation.length > 0) {
+      try {
+        const calculateModelMemoryLimit = calculateModelMemoryLimitProvider(this.callAsCurrentUser);
+
+        // Checks if all jobs in the module have the same time field configured
+        const firstJobTimeField = this.jobsForModelMemoryEstimation[0].job.config.data_description
+          .time_field;
+        const isSameTimeFields = this.jobsForModelMemoryEstimation.every(
+          ({ job }) => job.config.data_description.time_field === firstJobTimeField
+        );
+
+        if (isSameTimeFields && (start === undefined || end === undefined)) {
+          // In case of time range is not provided and the time field is the same
+          // set the fallback range for all jobs
+          // as there may not be a common query, we use a match_all
+          const {
+            start: fallbackStart,
+            end: fallbackEnd,
+          } = await this.getFallbackTimeRange(firstJobTimeField, { match_all: {} });
+          start = fallbackStart;
+          end = fallbackEnd;
+        }
+
+        for (const { job, query } of this.jobsForModelMemoryEstimation) {
+          let earliestMs = start;
+          let latestMs = end;
+          if (earliestMs === undefined || latestMs === undefined) {
+            const timeFieldRange = await this.getFallbackTimeRange(
+              job.config.data_description.time_field,
+              query
+            );
+            earliestMs = timeFieldRange.start;
+            latestMs = timeFieldRange.end;
           }
-        });
+
+          const { modelMemoryLimit } = await calculateModelMemoryLimit(
+            job.config.analysis_config,
+            this.indexPatternName,
+            query,
+            job.config.data_description.time_field,
+            earliestMs,
+            latestMs
+          );
+
+          if (!job.config.analysis_limits) {
+            job.config.analysis_limits = {} as AnalysisLimits;
+          }
+
+          job.config.analysis_limits.model_memory_limit = modelMemoryLimit;
+        }
+      } catch (error) {
+        mlLog.warn(`Data recognizer could not estimate model memory limit ${error}`);
+      }
+    }
+
+    const { limits } = await this.callAsCurrentUser<MlInfoResponse>('ml.info');
+    const maxMml = limits.max_model_memory_limit;
+
+    if (!maxMml) {
+      return;
+    }
+
+    // @ts-ignore
+    const maxBytes: number = numeral(maxMml.toUpperCase()).value();
+
+    for (const job of moduleConfig.jobs) {
+      const mml = job.config?.analysis_limits?.model_memory_limit;
+      if (mml !== undefined) {
+        // @ts-ignore
+        const mmlBytes: number = numeral(mml.toUpperCase()).value();
+        if (mmlBytes > maxBytes) {
+          // if the job's mml is over the max,
+          // so set the jobs mml to be the max
+
+          if (!job.config.analysis_limits) {
+            job.config.analysis_limits = {} as AnalysisLimits;
+          }
+
+          job.config.analysis_limits.model_memory_limit = maxMml;
+        }
       }
     }
   }
@@ -979,7 +1072,11 @@ export class DataRecognizer {
     return false;
   }
 
-  applyJobConfigOverrides(moduleConfig: Module, jobOverrides: JobOverride[], jobPrefix = '') {
+  applyJobConfigOverrides(
+    moduleConfig: Module,
+    jobOverrides?: JobOverride | JobOverride[],
+    jobPrefix = ''
+  ) {
     if (jobOverrides === undefined || jobOverrides === null) {
       return;
     }
@@ -997,23 +1094,38 @@ export class DataRecognizer {
 
     // separate all the overrides.
     // the overrides which don't contain a job id will be applied to all jobs in the module
-    const generalOverrides: GeneralOverride[] = [];
-    const jobSpecificOverrides: JobOverride[] = [];
+    const generalOverrides: GeneralJobsOverride[] = [];
+    const jobSpecificOverrides: JobSpecificOverride[] = [];
 
-    overrides.forEach(override => {
-      if (override.job_id === undefined) {
+    overrides.forEach((override) => {
+      if (isGeneralJobOverride(override)) {
         generalOverrides.push(override);
       } else {
         jobSpecificOverrides.push(override);
       }
     });
 
+    if (generalOverrides.some((override) => !!override.analysis_limits?.model_memory_limit)) {
+      this.jobsForModelMemoryEstimation = [];
+    } else {
+      this.jobsForModelMemoryEstimation = moduleConfig.jobs
+        .filter((job) => {
+          const override = jobSpecificOverrides.find((o) => `${jobPrefix}${o.job_id}` === job.id);
+          return override?.analysis_limits?.model_memory_limit === undefined;
+        })
+        .map((job) => ({
+          job,
+          query:
+            moduleConfig.datafeeds.find((d) => d.config.job_id === job.id)?.config.query || null,
+        }));
+    }
+
     function processArrayValues(source: any, update: any) {
       if (typeof source !== 'object' || typeof update !== 'object') {
         return;
       }
 
-      Object.keys(source).forEach(key => {
+      Object.keys(source).forEach((key) => {
         const sourceValue = source[key];
         const updateValue = update[key];
 
@@ -1034,17 +1146,17 @@ export class DataRecognizer {
       });
     }
 
-    generalOverrides.forEach(generalOverride => {
-      jobs.forEach(job => {
+    generalOverrides.forEach((generalOverride) => {
+      jobs.forEach((job) => {
         merge(job.config, generalOverride);
         processArrayValues(job.config, generalOverride);
       });
     });
 
-    jobSpecificOverrides.forEach(jobSpecificOverride => {
+    jobSpecificOverrides.forEach((jobSpecificOverride) => {
       // for each override, find the relevant job.
       // note, the job id already has the prefix prepended to it
-      const job = jobs.find(j => j.id === `${jobPrefix}${jobSpecificOverride.job_id}`);
+      const job = jobs.find((j) => j.id === `${jobPrefix}${jobSpecificOverride.job_id}`);
       if (job !== undefined) {
         // delete the job_id in the override as this shouldn't be overridden
         delete jobSpecificOverride.job_id;
@@ -1056,7 +1168,7 @@ export class DataRecognizer {
 
   applyDatafeedConfigOverrides(
     moduleConfig: Module,
-    datafeedOverrides: DatafeedOverride | DatafeedOverride[],
+    datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
     jobPrefix = ''
   ) {
     if (datafeedOverrides !== undefined && datafeedOverrides !== null) {
@@ -1073,9 +1185,9 @@ export class DataRecognizer {
 
       // separate all the overrides.
       // the overrides which don't contain a datafeed id or a job id will be applied to all jobs in the module
-      const generalOverrides: GeneralOverride[] = [];
+      const generalOverrides: GeneralDatafeedsOverride[] = [];
       const datafeedSpecificOverrides: DatafeedOverride[] = [];
-      overrides.forEach(o => {
+      overrides.forEach((o) => {
         if (o.datafeed_id === undefined && o.job_id === undefined) {
           generalOverrides.push(o);
         } else {
@@ -1083,20 +1195,20 @@ export class DataRecognizer {
         }
       });
 
-      generalOverrides.forEach(o => {
+      generalOverrides.forEach((o) => {
         datafeeds.forEach(({ config }) => {
           merge(config, o);
         });
       });
 
       // collect all the overrides which contain either a job id or a datafeed id
-      datafeedSpecificOverrides.forEach(o => {
+      datafeedSpecificOverrides.forEach((o) => {
         // either a job id or datafeed id has been specified, so create a new id
         // containing either one plus the prefix
         const tempId: string = String(o.datafeed_id !== undefined ? o.datafeed_id : o.job_id);
         const dId = prefixDatafeedId(tempId, jobPrefix);
 
-        const datafeed = datafeeds.find(d => d.id === dId);
+        const datafeed = datafeeds.find((d) => d.id === dId);
         if (datafeed !== undefined) {
           delete o.job_id;
           delete o.datafeed_id;

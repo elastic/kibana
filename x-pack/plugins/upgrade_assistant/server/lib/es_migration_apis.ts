@@ -8,6 +8,8 @@ import { IScopedClusterClient } from 'src/core/server';
 import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';
 import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../common/types';
 
+import { esIndicesStateCheck } from './es_indices_state_check';
+
 export async function getUpgradeAssistantStatus(
   dataClient: IScopedClusterClient,
   isCloudEnabled: boolean
@@ -20,7 +22,23 @@ export async function getUpgradeAssistantStatus(
   const cluster = getClusterDeprecations(deprecations, isCloudEnabled);
   const indices = getCombinedIndexInfos(deprecations);
 
-  const criticalWarnings = cluster.concat(indices).filter(d => d.level === 'critical');
+  const indexNames = indices.map(({ index }) => index!);
+
+  // If we have found deprecation information for index/indices check whether the index is
+  // open or closed.
+  if (indexNames.length) {
+    const indexStates = await esIndicesStateCheck(
+      dataClient.callAsCurrentUser.bind(dataClient),
+      indexNames
+    );
+
+    indices.forEach((indexData) => {
+      indexData.blockerForReindexing =
+        indexStates[indexData.index!] === 'close' ? 'index-closed' : undefined;
+    });
+  }
+
+  const criticalWarnings = cluster.concat(indices).filter((d) => d.level === 'critical');
 
   return {
     readyForUpgrade: criticalWarnings.length === 0,
@@ -34,7 +52,7 @@ const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse) =>
   Object.keys(deprecations.index_settings).reduce((indexDeprecations, indexName) => {
     return indexDeprecations.concat(
       deprecations.index_settings[indexName].map(
-        d =>
+        (d) =>
           ({
             ...d,
             index: indexName,
@@ -51,7 +69,7 @@ const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEna
 
   if (isCloudEnabled) {
     // In Cloud, this is changed at upgrade time. Filter it out to improve upgrade UX.
-    return combined.filter(d => d.message !== 'Security realm settings structure changed');
+    return combined.filter((d) => d.message !== 'Security realm settings structure changed');
   } else {
     return combined;
   }

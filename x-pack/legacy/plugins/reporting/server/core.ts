@@ -7,30 +7,36 @@
 import * as Rx from 'rxjs';
 import { first, mapTo } from 'rxjs/operators';
 import {
-  IUiSettingsClient,
+  ElasticsearchServiceSetup,
   KibanaRequest,
   SavedObjectsClient,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
 } from 'src/core/server';
+import { ReportingPluginSpecOptions } from '../';
 // @ts-ignore no module definition
 import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import { PLUGIN_ID } from '../common/constants';
-import { EnqueueJobFn, ESQueueInstance, ReportingPluginSpecOptions, ServerFacade } from '../types';
+import { screenshotsObservableFactory } from '../export_types/common/lib/screenshots';
+import { ServerFacade } from '../server/types';
+import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
 import { checkLicenseFactory, getExportTypesRegistry, LevelLogger } from './lib';
+import { ESQueueInstance } from './lib/create_queue';
+import { EnqueueJobFn } from './lib/enqueue_job';
 import { registerRoutes } from './routes';
 import { ReportingSetupDeps } from './types';
 
 interface ReportingInternalSetup {
   browserDriverFactory: HeadlessChromiumDriverFactory;
+  elasticsearch: ElasticsearchServiceSetup;
 }
 interface ReportingInternalStart {
+  enqueueJob: EnqueueJobFn;
+  esqueue: ESQueueInstance;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
-  esqueue: ESQueueInstance;
-  enqueueJob: EnqueueJobFn;
 }
 
 export class ReportingCore {
@@ -40,7 +46,7 @@ export class ReportingCore {
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>();
   private exportTypesRegistry = getExportTypesRegistry();
 
-  constructor(private logger: LevelLogger) {}
+  constructor(private logger: LevelLogger, private config: ReportingConfig) {}
 
   legacySetup(
     xpackMainPlugin: XPackMainPlugin,
@@ -48,14 +54,18 @@ export class ReportingCore {
     __LEGACY: ServerFacade,
     plugins: ReportingSetupDeps
   ) {
+    // legacy plugin status
     mirrorPluginStatus(xpackMainPlugin, reporting);
+
+    // legacy license check
     const checkLicense = checkLicenseFactory(this.exportTypesRegistry);
     (xpackMainPlugin as any).status.once('green', () => {
       // Register a function that is called whenever the xpack info changes,
       // to re-compute the license check results for this plugin
       xpackMainPlugin.info.feature(PLUGIN_ID).registerLicenseCheckResultsGenerator(checkLicense);
     });
-    // Reporting routes
+
+    // legacy routes
     registerRoutes(this, __LEGACY, plugins, this.logger);
   }
 
@@ -78,20 +88,24 @@ export class ReportingCore {
     return this.exportTypesRegistry;
   }
 
-  public async getEsqueue(): Promise<ESQueueInstance> {
+  public async getEsqueue() {
     return (await this.getPluginStartDeps()).esqueue;
   }
 
-  public async getEnqueueJob(): Promise<EnqueueJobFn> {
+  public async getEnqueueJob() {
     return (await this.getPluginStartDeps()).enqueueJob;
   }
 
-  public async getBrowserDriverFactory(): Promise<HeadlessChromiumDriverFactory> {
-    return (await this.getPluginSetupDeps()).browserDriverFactory;
+  public getConfig() {
+    return this.config;
+  }
+  public async getScreenshotsObservable() {
+    const { browserDriverFactory } = await this.getPluginSetupDeps();
+    return screenshotsObservableFactory(this.config.get('capture'), browserDriverFactory);
   }
 
   /*
-   * Kibana core module dependencies
+   * Outside dependencies
    */
   private async getPluginSetupDeps() {
     if (this.pluginSetupDeps) {
@@ -107,14 +121,16 @@ export class ReportingCore {
     return await this.pluginStart$.pipe(first()).toPromise();
   }
 
-  public async getSavedObjectsClient(fakeRequest: KibanaRequest): Promise<SavedObjectsClient> {
+  public async getElasticsearchService() {
+    return (await this.getPluginSetupDeps()).elasticsearch;
+  }
+
+  public async getSavedObjectsClient(fakeRequest: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
     return savedObjects.getScopedClient(fakeRequest) as SavedObjectsClient;
   }
 
-  public async getUiSettingsServiceFactory(
-    savedObjectsClient: SavedObjectsClient
-  ): Promise<IUiSettingsClient> {
+  public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClient) {
     const { uiSettings: uiSettingsService } = await this.getPluginStartDeps();
     const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
     return scopedUiSettingsService;

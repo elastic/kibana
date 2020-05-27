@@ -5,12 +5,9 @@
  */
 
 import { get } from 'lodash';
-import {
-  AggFieldNamePair,
-  EVENT_RATE_FIELD_ID,
-} from '../../../../../../legacy/plugins/ml/common/types/fields';
-import { callWithRequestType } from '../../../../../../legacy/plugins/ml/common/types/kibana';
-import { ML_MEDIAN_PERCENTS } from '../../../../../../legacy/plugins/ml/common/util/job_utils';
+import { AggFieldNamePair, EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
+import { callWithRequestType } from '../../../../common/types/kibana';
+import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 type DtrIndex = number;
 type TimeStamp = number;
@@ -53,7 +50,7 @@ export function newJobLineChartProvider(callWithRequest: callWithRequestType) {
     const results = await callWithRequest('search', json);
     return processSearchResults(
       results,
-      aggFieldNamePairs.map(af => af.field)
+      aggFieldNamePairs.map((af) => af.field)
     );
   }
 
@@ -158,7 +155,7 @@ function getSearchJsonFromConfig(
 
   json.body.query = query;
 
-  const aggs: Record<number, Record<string, { field: string; percents?: number[] }>> = {};
+  const aggs: Record<number, Record<string, { field: string; percents?: string[] }>> = {};
 
   aggFieldNamePairs.forEach(({ agg, field }, i) => {
     if (field !== null && field !== EVENT_RATE_FIELD_ID) {

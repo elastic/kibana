@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }) {
-  describe('upgrade assistant', function() {
+export default function ({ loadTestFile }) {
+  describe('upgrade assistant', function () {
     this.tags('ciGroup7');
 
     loadTestFile(require.resolve('./reindexing'));
+    loadTestFile(require.resolve('./status'));
   });
 }

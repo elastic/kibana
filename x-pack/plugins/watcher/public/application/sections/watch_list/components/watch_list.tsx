@@ -242,7 +242,7 @@ export const WatchList = () => {
           return (
             <EuiLink
               data-test-subj={`watchIdColumn-${id}`}
-              href={`#/management/elasticsearch/watcher/watches/watch/${id}/status`}
+              href={`#/management/insightsAndAlerting/watcher/watches/watch/${id}/status`}
             >
               {id}
             </EuiLink>
@@ -326,7 +326,7 @@ export const WatchList = () => {
                     )}
                     iconType="pencil"
                     color="primary"
-                    href={`#/management/elasticsearch/watcher/watches/watch/${watch.id}/edit`}
+                    href={`#/management/insightsAndAlerting/watcher/watches/watch/${watch.id}/edit`}
                     data-test-subj="editWatchButton"
                   />
                 </EuiToolTip>
@@ -380,27 +380,28 @@ export const WatchList = () => {
       box: {
         incremental: true,
       },
-      toolsLeft: selection.length && (
-        <EuiButton
-          data-test-subj="btnDeleteWatches"
-          onClick={() => {
-            setWatchesToDelete(selection.map((selected: any) => selected.id));
-          }}
-          color="danger"
-        >
-          {selection.length > 1 ? (
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.deleteMultipleWatchesButtonLabel"
-              defaultMessage="Delete watches"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.deleteSingleWatchButtonLabel"
-              defaultMessage="Delete watch"
-            />
-          )}
-        </EuiButton>
-      ),
+      toolsLeft:
+        selection.length > 0 ? (
+          <EuiButton
+            data-test-subj="btnDeleteWatches"
+            onClick={() => {
+              setWatchesToDelete(selection.map((selected: any) => selected.id));
+            }}
+            color="danger"
+          >
+            {selection.length > 1 ? (
+              <FormattedMessage
+                id="xpack.watcher.sections.watchList.deleteMultipleWatchesButtonLabel"
+                defaultMessage="Delete watches"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.watcher.sections.watchList.deleteSingleWatchButtonLabel"
+                defaultMessage="Delete watch"
+              />
+            )}
+          </EuiButton>
+        ) : undefined,
       toolsRight: createWatchContextMenu,
     };
 

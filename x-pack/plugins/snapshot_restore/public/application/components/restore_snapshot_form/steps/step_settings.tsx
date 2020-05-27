@@ -51,7 +51,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
   >(
     [
       ...new Set((ignoreIndexSettings || []).concat([...REMOVE_INDEX_SETTINGS_SUGGESTIONS].sort())),
-    ].map(setting => ({
+    ].map((setting) => ({
       label: setting,
     }))
   );
@@ -131,7 +131,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                 />
               }
               checked={isUsingIndexSettings}
-              onChange={e => {
+              onChange={(e) => {
                 const isChecked = e.target.checked;
                 if (isChecked) {
                   setIsUsingIndexSettings(true);
@@ -183,12 +183,10 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                     showGutter={false}
                     minLines={6}
                     maxLines={15}
-                    aria-label={
-                      <FormattedMessage
-                        id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsAriaLabel"
-                        defaultMessage="Index settings to modify"
-                      />
-                    }
+                    aria-label={i18n.translate(
+                      'xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsAriaLabel',
+                      { defaultMessage: 'Index settings to modify' }
+                    )}
                     onChange={(value: string) => {
                       updateRestoreSettings({
                         indexSettings: value,
@@ -239,7 +237,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                 />
               }
               checked={isUsingIgnoreIndexSettings}
-              onChange={e => {
+              onChange={(e) => {
                 const isChecked = e.target.checked;
                 if (isChecked) {
                   setIsUsingIgnoreIndexSettings(true);
@@ -280,7 +278,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                           )
                         : []
                     }
-                    onChange={selectedOptions => {
+                    onChange={(selectedOptions) => {
                       const newIgnoreIndexSettings = selectedOptions.map(({ label }) => label);
                       updateRestoreSettings({ ignoreIndexSettings: newIgnoreIndexSettings });
                       setCachedRestoreSettings({

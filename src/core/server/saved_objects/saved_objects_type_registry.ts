@@ -25,10 +25,7 @@ import { SavedObjectsType } from './types';
  *
  * @public
  */
-export type ISavedObjectTypeRegistry = Pick<
-  SavedObjectTypeRegistry,
-  'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden'
->;
+export type ISavedObjectTypeRegistry = Omit<SavedObjectTypeRegistry, 'registerType'>;
 
 /**
  * Registry holding information about all the registered {@link SavedObjectsType | saved object types}.
@@ -64,11 +61,35 @@ export class SavedObjectTypeRegistry {
   }
 
   /**
-   * Returns the `namespaceAgnostic` property for given type, or `false` if
-   * the type is not registered.
+   * Return all {@link SavedObjectsType | types} currently registered that are importable/exportable.
+   */
+  public getImportableAndExportableTypes() {
+    return this.getAllTypes().filter((type) => this.isImportableAndExportable(type.name));
+  }
+
+  /**
+   * Returns whether the type is namespace-agnostic (global);
+   * resolves to `false` if the type is not registered
    */
   public isNamespaceAgnostic(type: string) {
-    return this.types.get(type)?.namespaceAgnostic ?? false;
+    return this.types.get(type)?.namespaceType === 'agnostic';
+  }
+
+  /**
+   * Returns whether the type is single-namespace (isolated);
+   * resolves to `true` if the type is not registered
+   */
+  public isSingleNamespace(type: string) {
+    // in the case we somehow registered a type with an invalid `namespaceType`, treat it as single-namespace
+    return !this.isNamespaceAgnostic(type) && !this.isMultiNamespace(type);
+  }
+
+  /**
+   * Returns whether the type is multi-namespace (shareable);
+   * resolves to `false` if the type is not registered
+   */
+  public isMultiNamespace(type: string) {
+    return this.types.get(type)?.namespaceType === 'multiple';
   }
 
   /**
@@ -85,5 +106,13 @@ export class SavedObjectTypeRegistry {
    */
   public getIndex(type: string) {
     return this.types.get(type)?.indexPattern;
+  }
+
+  /**
+   * Returns the `management.importableAndExportable` property for given type, or
+   * `false` if the type is not registered or does not define a management section.
+   */
+  public isImportableAndExportable(type: string) {
+    return this.types.get(type)?.management?.importableAndExportable ?? false;
   }
 }

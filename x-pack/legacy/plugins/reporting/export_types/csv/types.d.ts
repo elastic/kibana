@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CancellationToken } from '../../common/cancellation_token';
-import { JobDocPayload, JobParamPostPayload, ConditionalHeaders, RequestFacade } from '../../types';
+import { CancellationToken } from '../../../../../plugins/reporting/common';
+import { JobDocPayload, JobParamPostPayload, ScrollConfig } from '../../server/types';
+
+export type RawValue = string | object | null | undefined;
 
 interface DocValueField {
   field: string;
@@ -86,6 +88,7 @@ export interface SavedSearchGeneratorResult {
   size: number;
   maxSizeReached: boolean;
   csvContainsFormulas?: boolean;
+  warnings: string[];
 }
 
 export interface CsvResultFromSearch {
@@ -106,7 +109,8 @@ export interface GenerateCsvParams {
     quoteValues: boolean;
     timezone: string | null;
     maxSizeBytes: number;
-    scroll: { duration: string; size: number };
+    scroll: ScrollConfig;
     checkForFormulas?: boolean;
+    escapeFormulaValues: boolean;
   };
 }

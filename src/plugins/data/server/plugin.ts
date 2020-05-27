@@ -21,11 +21,13 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 import { IndexPatternsService } from './index_patterns';
 import { ISearchSetup } from './search';
 import { SearchService } from './search/search_service';
+import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
 import { KqlTelemetryService } from './kql_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { AutocompleteService } from './autocomplete';
 import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
+import { uiSettings } from './ui_settings';
 
 export interface DataPluginSetup {
   search: ISearchSetup;
@@ -47,6 +49,7 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
   private readonly autocompleteService: AutocompleteService;
   private readonly indexPatterns = new IndexPatternsService();
   private readonly fieldFormats = new FieldFormatsService();
+  private readonly queryService = new QueryService();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.searchService = new SearchService(initializerContext);
@@ -58,8 +61,10 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
   public setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies) {
     this.indexPatterns.setup(core);
     this.scriptsService.setup(core);
+    this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
+    core.uiSettings.register(uiSettings);
 
     return {
       fieldFormats: this.fieldFormats.setup(),

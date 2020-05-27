@@ -18,7 +18,7 @@ import {
 } from '../../../common/http_api/node_details_api';
 import { throwErrors } from '../../../common/runtime_types';
 
-const escapeHatch = schema.object({}, { allowUnknowns: true });
+const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initNodeDetailsRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;
@@ -37,7 +37,10 @@ export const initNodeDetailsRoute = (libs: InfraBackendLibs) => {
           NodeDetailsRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
-        const source = await libs.sources.getSourceConfiguration(requestContext, sourceId);
+        const source = await libs.sources.getSourceConfiguration(
+          requestContext.core.savedObjects.client,
+          sourceId
+        );
 
         UsageCollector.countNode(nodeType);
 

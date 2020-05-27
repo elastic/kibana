@@ -22,32 +22,21 @@ import { SavedObjectMetaData } from '../../../../saved_objects/public';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { ErrorEmbeddable } from './error_embeddable';
 import { IContainer } from '../containers/i_container';
+import { PropertySpec } from '../types';
 
 export interface EmbeddableInstanceConfiguration {
   id: string;
   savedObjectId?: string;
 }
 
-export interface PropertySpec {
-  displayName: string;
-  accessPath: string;
-  id: string;
-  description: string;
-  value?: string;
-}
-
 export interface OutputSpec {
   [key: string]: PropertySpec;
 }
 
-export interface EmbeddableFactoryOptions<T extends SavedObjectAttributes> {
-  savedObjectMetaData?: SavedObjectMetaData<T>;
-}
-
 /**
- * The EmbeddableFactory creates and initializes an embeddable instance
+ * EmbeddableFactories create and initialize an embeddable instance
  */
-export abstract class EmbeddableFactory<
+export interface EmbeddableFactory<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput,
   TEmbeddable extends IEmbeddable<TEmbeddableInput, TEmbeddableOutput> = IEmbeddable<
@@ -58,9 +47,15 @@ export abstract class EmbeddableFactory<
 > {
   // A unique identified for this factory, which will be used to map an embeddable spec to
   // a factory that can generate an instance of it.
-  public abstract readonly type: string;
+  readonly type: string;
 
-  public readonly savedObjectMetaData?: SavedObjectMetaData<TSavedObjectAttributes>;
+  /**
+   * Returns whether the current user should be allowed to edit this type of
+   * embeddable. Most of the time this should be based off the capabilities service, hence it's async.
+   */
+  readonly isEditable: () => Promise<boolean>;
+
+  readonly savedObjectMetaData?: SavedObjectMetaData<TSavedObjectAttributes>;
 
   /**
    * True if is this factory create embeddables that are Containers. Used in the add panel to
@@ -68,33 +63,19 @@ export abstract class EmbeddableFactory<
    * supported right now, but once nested containers are officially supported we can probably get
    * rid of this interface.
    */
-  public readonly isContainerType: boolean = false;
-
-  constructor({ savedObjectMetaData }: EmbeddableFactoryOptions<TSavedObjectAttributes> = {}) {
-    this.savedObjectMetaData = savedObjectMetaData;
-  }
-
-  // TODO: Can this be a property? If this "...should be based of capabilities service...",
-  // TODO: maybe then it should be *async*?
-  /**
-   * Returns whether the current user should be allowed to edit this type of
-   * embeddable. Most of the time this should be based off the capabilities service.
-   */
-  public abstract isEditable(): boolean;
+  readonly isContainerType: boolean;
 
   /**
    * Returns a display name for this type of embeddable. Used in "Create new... " options
    * in the add panel for containers.
    */
-  public abstract getDisplayName(): string;
+  getDisplayName(): string;
 
   /**
    * If false, this type of embeddable can't be created with the "createNew" functionality. Instead,
    * use createFromSavedObject, where an existing saved object must first exist.
    */
-  public canCreateNew() {
-    return true;
-  }
+  canCreateNew(): boolean;
 
   /**
    * Can be used to get any default input, to be passed in to during the creation process. Default
@@ -102,18 +83,14 @@ export abstract class EmbeddableFactory<
    * default input parameters.
    * @param partial
    */
-  public getDefaultInput(partial: Partial<TEmbeddableInput>): Partial<TEmbeddableInput> {
-    return {};
-  }
+  getDefaultInput(partial: Partial<TEmbeddableInput>): Partial<TEmbeddableInput>;
 
   /**
    * Can be used to request explicit input from the user, to be passed in to `EmbeddableFactory:create`.
    * Explicit input is stored on the parent container for this embeddable. It overrides any inherited
    * input passed down from the parent container.
    */
-  public async getExplicitInput(): Promise<Partial<TEmbeddableInput>> {
-    return {};
-  }
+  getExplicitInput(): Promise<Partial<TEmbeddableInput>>;
 
   /**
    * Creates a new embeddable instance based off the saved object id.
@@ -122,13 +99,11 @@ export abstract class EmbeddableFactory<
    * range of the parent container.
    * @param parent
    */
-  public createFromSavedObject(
+  createFromSavedObject(
     savedObjectId: string,
     input: Partial<TEmbeddableInput>,
     parent?: IContainer
-  ): Promise<TEmbeddable | ErrorEmbeddable> {
-    throw new Error(`Creation from saved object not supported by type ${this.type}`);
-  }
+  ): Promise<TEmbeddable | ErrorEmbeddable>;
 
   /**
    * Resolves to undefined if a new Embeddable cannot be directly created and the user will instead be redirected
@@ -136,7 +111,7 @@ export abstract class EmbeddableFactory<
    *
    * This will likely change in future iterations when we improve in place editing capabilities.
    */
-  public abstract create(
+  create(
     initialInput: TEmbeddableInput,
     parent?: IContainer
   ): Promise<TEmbeddable | ErrorEmbeddable | undefined>;

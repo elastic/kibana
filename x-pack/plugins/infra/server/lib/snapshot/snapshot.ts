@@ -3,11 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { RequestHandlerContext } from 'src/core/server';
-import { InfraDatabaseSearchResponse } from '../adapters/framework';
-import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
-import { InfraSources } from '../sources';
+import { InfraDatabaseSearchResponse, CallWithRequestParams } from '../adapters/framework';
 
 import { JsonObject } from '../../../common/typed_json';
 import { SNAPSHOT_COMPOSITE_REQUEST_SIZE } from './constants';
@@ -31,36 +27,26 @@ import { InfraSnapshotRequestOptions } from './types';
 import { createTimeRangeWithInterval } from './create_timerange_with_interval';
 import { SnapshotNode } from '../../../common/http_api/snapshot_api';
 
+export type ESSearchClient = <Hit = {}, Aggregation = undefined>(
+  options: CallWithRequestParams
+) => Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
 export class InfraSnapshot {
-  constructor(private readonly libs: { sources: InfraSources; framework: KibanaFramework }) {}
-
   public async getNodes(
-    requestContext: RequestHandlerContext,
+    client: ESSearchClient,
     options: InfraSnapshotRequestOptions
   ): Promise<{ nodes: SnapshotNode[]; interval: string }> {
     // Both requestGroupedNodes and requestNodeMetrics may send several requests to elasticsearch
     // in order to page through the results of their respective composite aggregations.
     // Both chains of requests are supposed to run in parallel, and their results be merged
     // when they have both been completed.
-    const timeRangeWithIntervalApplied = await createTimeRangeWithInterval(
-      this.libs.framework,
-      requestContext,
-      options
-    );
+    const timeRangeWithIntervalApplied = await createTimeRangeWithInterval(client, options);
     const optionsWithTimerange = { ...options, timerange: timeRangeWithIntervalApplied };
-    const groupedNodesPromise = requestGroupedNodes(
-      requestContext,
-      optionsWithTimerange,
-      this.libs.framework
-    );
-    const nodeMetricsPromise = requestNodeMetrics(
-      requestContext,
-      optionsWithTimerange,
-      this.libs.framework
-    );
+    const groupedNodesPromise = requestGroupedNodes(client, optionsWithTimerange);
+    const nodeMetricsPromise = requestNodeMetrics(client, optionsWithTimerange);
 
     const groupedNodeBuckets = await groupedNodesPromise;
     const nodeMetricBuckets = await nodeMetricsPromise;
+
     return {
       nodes: mergeNodeBuckets(groupedNodeBuckets, nodeMetricBuckets, options),
       interval: timeRangeWithIntervalApplied.interval,
@@ -74,13 +60,15 @@ const bucketSelector = (
 
 const handleAfterKey = createAfterKeyHandler(
   'body.aggregations.nodes.composite.after',
-  input => input?.aggregations?.nodes?.after_key
+  (input) => input?.aggregations?.nodes?.after_key
 );
 
+const callClusterFactory = (search: ESSearchClient) => (opts: any) =>
+  search<{}, InfraSnapshotAggregationResponse>(opts);
+
 const requestGroupedNodes = async (
-  requestContext: RequestHandlerContext,
-  options: InfraSnapshotRequestOptions,
-  framework: KibanaFramework
+  client: ESSearchClient,
+  options: InfraSnapshotRequestOptions
 ): Promise<InfraSnapshotNodeGroupByBucket[]> => {
   const inventoryModel = findInventoryModel(options.nodeType);
   const query = {
@@ -119,13 +107,12 @@ const requestGroupedNodes = async (
   return await getAllCompositeData<
     InfraSnapshotAggregationResponse,
     InfraSnapshotNodeGroupByBucket
-  >(framework, requestContext, query, bucketSelector, handleAfterKey);
+  >(callClusterFactory(client), query, bucketSelector, handleAfterKey);
 };
 
 const requestNodeMetrics = async (
-  requestContext: RequestHandlerContext,
-  options: InfraSnapshotRequestOptions,
-  framework: KibanaFramework
+  client: ESSearchClient,
+  options: InfraSnapshotRequestOptions
 ): Promise<InfraSnapshotNodeMetricsBucket[]> => {
   const index =
     options.metric.type === 'logRate'
@@ -154,7 +141,7 @@ const requestNodeMetrics = async (
               date_histogram: {
                 field: options.sourceConfiguration.fields.timestamp,
                 interval: options.timerange.interval || '1m',
-                offset: getDateHistogramOffset(options),
+                offset: getDateHistogramOffset(options.timerange.from, options.timerange.interval),
                 extended_bounds: {
                   min: options.timerange.from,
                   max: options.timerange.to,
@@ -170,7 +157,7 @@ const requestNodeMetrics = async (
   return await getAllCompositeData<
     InfraSnapshotAggregationResponse,
     InfraSnapshotNodeMetricsBucket
-  >(framework, requestContext, query, bucketSelector, handleAfterKey);
+  >(callClusterFactory(client), query, bucketSelector, handleAfterKey);
 };
 
 // buckets can be InfraSnapshotNodeGroupByBucket[] or InfraSnapshotNodeMetricsBucket[]
@@ -189,7 +176,7 @@ const mergeNodeBuckets = (
 ): SnapshotNode[] => {
   const nodeMetricsForLookup = getNodeMetricsForLookup(nodeMetricsBuckets);
 
-  return nodeGroupByBuckets.map(node => {
+  return nodeGroupByBuckets.map((node) => {
     return {
       path: getNodePath(node, options),
       metric: getNodeMetrics(nodeMetricsForLookup[node.key.id], options),

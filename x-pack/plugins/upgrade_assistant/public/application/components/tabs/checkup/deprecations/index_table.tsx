@@ -11,12 +11,14 @@ import { EuiBasicTable } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import { ReindexButton } from './reindex';
 import { AppContext } from '../../../../app_context';
+import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 
 const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 
 export interface IndexDeprecationDetails {
   index: string;
   reindex: boolean;
+  blockerForReindexing?: EnrichedDeprecationInfo['blockerForReindexing'];
   details?: string;
 }
 
@@ -68,9 +70,10 @@ export class IndexDeprecationTableUI extends React.Component<
       },
     ];
 
-    if (this.actionsColumn) {
-      // @ts-ignore
-      columns.push(this.actionsColumn);
+    const actionsColumn = this.generateActionsColumn();
+
+    if (actionsColumn) {
+      columns.push(actionsColumn as any);
     }
 
     const sorting = {
@@ -134,11 +137,11 @@ export class IndexDeprecationTableUI extends React.Component<
     return { totalItemCount, pageSizeOptions, hidePerPageOptions: false };
   }
 
-  private get actionsColumn() {
+  private generateActionsColumn() {
     // NOTE: this naive implementation assumes all indices in the table are
     // should show the reindex button. This should work for known usecases.
     const { indices } = this.props;
-    if (!indices.find(i => i.reindex === true)) {
+    if (!indices.find((i) => i.reindex === true)) {
       return null;
     }
 
@@ -148,7 +151,16 @@ export class IndexDeprecationTableUI extends React.Component<
           render(indexDep: IndexDeprecationDetails) {
             return (
               <AppContext.Consumer>
-                {({ http }) => <ReindexButton indexName={indexDep.index!} http={http} />}
+                {({ http, docLinks }) => {
+                  return (
+                    <ReindexButton
+                      docLinks={docLinks}
+                      reindexBlocker={indexDep.blockerForReindexing}
+                      indexName={indexDep.index!}
+                      http={http}
+                    />
+                  );
+                }}
               </AppContext.Consumer>
             );
           },

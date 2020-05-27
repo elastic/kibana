@@ -16,9 +16,10 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiText,
 } from '@elastic/eui';
 import { NewAgentConfig } from '../../../../types';
-import { useCore, sendCreateAgentConfig } from '../../../../hooks';
+import { useCapabilities, useCore, sendCreateAgentConfig } from '../../../../hooks';
 import { AgentConfigForm, agentConfigFormValidation } from '../../components';
 
 interface Props {
@@ -27,13 +28,16 @@ interface Props {
 
 export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   const { notifications } = useCore();
-
+  const hasWriteCapabilites = useCapabilities().write;
   const [agentConfig, setAgentConfig] = useState<NewAgentConfig>({
     name: '',
     description: '',
-    namespace: '',
+    namespace: 'default',
+    is_default: undefined,
+    monitoring_enabled: ['logs', 'metrics'],
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
   const validation = agentConfigFormValidation(agentConfig);
 
   const updateAgentConfig = (updatedFields: Partial<NewAgentConfig>) => {
@@ -44,7 +48,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
   };
 
   const createAgentConfig = async () => {
-    return await sendCreateAgentConfig(agentConfig);
+    return await sendCreateAgentConfig(agentConfig, { withSysMonitoring });
   };
 
   const header = (
@@ -53,10 +57,16 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
         <h2 id="CreateAgentConfigFlyoutTitle">
           <FormattedMessage
             id="xpack.ingestManager.createAgentConfig.flyoutTitle"
-            defaultMessage="Create new agent config"
+            defaultMessage="Create agent configuration"
           />
         </h2>
       </EuiTitle>
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.ingestManager.createAgentConfig.flyoutTitleDescription"
+          defaultMessage="Agent configurations are used to manage settings across a group of agents. You can add data sources to your agent configuration to specify what data your agents collect. When you edit an agent configuration, you can use Fleet to deploy updates to a specified group of agents."
+        />
+      </EuiText>
     </EuiFlyoutHeader>
   );
 
@@ -65,6 +75,8 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
       <AgentConfigForm
         agentConfig={agentConfig}
         updateAgentConfig={updateAgentConfig}
+        withSysMonitoring={withSysMonitoring}
+        updateSysMonitoring={(newValue) => setWithSysMonitoring(newValue)}
         validation={validation}
       />
     </EuiFlyoutBody>
@@ -85,11 +97,12 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
           <EuiButton
             fill
             isLoading={isLoading}
-            disabled={isLoading || Object.keys(validation).length > 0}
+            isDisabled={!hasWriteCapabilites || isLoading || Object.keys(validation).length > 0}
             onClick={async () => {
               setIsLoading(true);
               try {
                 const { data, error } = await createAgentConfig();
+                setIsLoading(false);
                 if (data?.success) {
                   notifications.toasts.addSuccess(
                     i18n.translate(
@@ -100,6 +113,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
                       }
                     )
                   );
+                  onClose();
                 } else {
                   notifications.toasts.addDanger(
                     error
@@ -113,19 +127,18 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
                   );
                 }
               } catch (e) {
+                setIsLoading(false);
                 notifications.toasts.addDanger(
                   i18n.translate('xpack.ingestManager.createAgentConfig.errorNotificationTitle', {
                     defaultMessage: 'Unable to create agent config',
                   })
                 );
               }
-              setIsLoading(false);
-              onClose();
             }}
           >
             <FormattedMessage
               id="xpack.ingestManager.createAgentConfig.submitButtonLabel"
-              defaultMessage="Continue"
+              defaultMessage="Create agent configuration"
             />
           </EuiButton>
         </EuiFlexItem>
@@ -134,7 +147,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
   );
 
   return (
-    <EuiFlyout onClose={onClose} size="m" maxWidth={400}>
+    <EuiFlyout onClose={onClose} size="l" maxWidth={400}>
       {header}
       {body}
       {footer}

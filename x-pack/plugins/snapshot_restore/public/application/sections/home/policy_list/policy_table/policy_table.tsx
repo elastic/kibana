@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
+import { Error } from '../../../../../shared_imports';
 import { UIM_POLICY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import {
@@ -28,7 +29,6 @@ import {
   PolicyExecuteProvider,
   PolicyDeleteProvider,
 } from '../../../../components';
-import { Error } from '../../../../components/section_error';
 import { linkToAddPolicy, linkToEditPolicy } from '../../../../services/navigation';
 import { SendRequestResponse } from '../../../../../shared_imports';
 
@@ -198,7 +198,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <PolicyExecuteProvider>
-                    {executePolicyPrompt => {
+                    {(executePolicyPrompt) => {
                       return (
                         <EuiToolTip
                           content={
@@ -256,7 +256,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <PolicyDeleteProvider>
-                    {deletePolicyPrompt => {
+                    {(deletePolicyPrompt) => {
                       const label = !isManagedPolicy
                         ? i18n.translate(
                             'xpack.snapshotRestore.policyList.table.actionDeleteTooltip',
@@ -357,9 +357,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
           );
         }}
       </PolicyDeleteProvider>
-    ) : (
-      undefined
-    ),
+    ) : undefined,
     toolsRight: [
       <EuiButton
         key="reloadPolicies"
@@ -403,7 +401,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
             repositoriesMap[policy.repository] = true;
             return repositoriesMap;
           }, {})
-        ).map(repository => {
+        ).map((repository) => {
           return {
             value: repository,
             view: repository,

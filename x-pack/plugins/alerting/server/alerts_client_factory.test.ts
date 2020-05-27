@@ -11,25 +11,23 @@ import { taskManagerMock } from '../../../plugins/task_manager/server/task_manag
 import { KibanaRequest } from '../../../../src/core/server';
 import { loggingServiceMock, savedObjectsClientMock } from '../../../../src/core/server/mocks';
 import { encryptedSavedObjectsMock } from '../../../plugins/encrypted_saved_objects/server/mocks';
+import { AuthenticatedUser } from '../../../plugins/security/public';
+import { securityMock } from '../../../plugins/security/server/mocks';
 
 jest.mock('./alerts_client');
 
 const savedObjectsClient = savedObjectsClientMock.create();
-const securityPluginSetup = {
-  authc: {
-    createAPIKey: jest.fn(),
-    getCurrentUser: jest.fn(),
-  },
-};
+const securityPluginSetup = securityMock.createSetup();
 const alertsClientFactoryParams: jest.Mocked<AlertsClientFactoryOpts> = {
   logger: loggingServiceMock.create().get(),
   taskManager: taskManagerMock.start(),
   alertTypeRegistry: alertTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
   spaceIdToNamespace: jest.fn(),
-  encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.createStart(),
+  encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+  preconfiguredActions: [],
 };
-const fakeRequest: Request = {
+const fakeRequest = ({
   headers: {},
   getBasePath: () => '',
   path: '/',
@@ -43,7 +41,7 @@ const fakeRequest: Request = {
     },
   },
   getSavedObjectsClient: () => savedObjectsClient,
-} as any;
+} as unknown) as Request;
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -66,7 +64,8 @@ test('creates an alerts client with proper constructor arguments', async () => {
     getUserName: expect.any(Function),
     createAPIKey: expect.any(Function),
     invalidateAPIKey: expect.any(Function),
-    encryptedSavedObjectsPlugin: alertsClientFactoryParams.encryptedSavedObjectsPlugin,
+    encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
+    preconfiguredActions: [],
   });
 });
 
@@ -84,12 +83,14 @@ test('getUserName() returns a name when security is enabled', async () => {
   const factory = new AlertsClientFactory();
   factory.initialize({
     ...alertsClientFactoryParams,
-    securityPluginSetup: securityPluginSetup as any,
+    securityPluginSetup,
   });
   factory.create(KibanaRequest.from(fakeRequest), savedObjectsClient);
   const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
 
-  securityPluginSetup.authc.getCurrentUser.mockReturnValueOnce({ username: 'bob' });
+  securityPluginSetup.authc.getCurrentUser.mockReturnValueOnce(({
+    username: 'bob',
+  } as unknown) as AuthenticatedUser);
   const userNameResult = await constructorCall.getUserName();
   expect(userNameResult).toEqual('bob');
 });
@@ -110,7 +111,7 @@ test('createAPIKey() returns { apiKeysEnabled: false } when security is enabled 
   factory.create(KibanaRequest.from(fakeRequest), savedObjectsClient);
   const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
 
-  securityPluginSetup.authc.createAPIKey.mockResolvedValueOnce(null);
+  securityPluginSetup.authc.grantAPIKeyAsInternalUser.mockResolvedValueOnce(null);
   const createAPIKeyResult = await constructorCall.createAPIKey();
   expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
 });
@@ -119,16 +120,20 @@ test('createAPIKey() returns an API key when security is enabled', async () => {
   const factory = new AlertsClientFactory();
   factory.initialize({
     ...alertsClientFactoryParams,
-    securityPluginSetup: securityPluginSetup as any,
+    securityPluginSetup,
   });
   factory.create(KibanaRequest.from(fakeRequest), savedObjectsClient);
   const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
 
-  securityPluginSetup.authc.createAPIKey.mockResolvedValueOnce({ api_key: '123', id: 'abc' });
+  securityPluginSetup.authc.grantAPIKeyAsInternalUser.mockResolvedValueOnce({
+    api_key: '123',
+    id: 'abc',
+    name: '',
+  });
   const createAPIKeyResult = await constructorCall.createAPIKey();
   expect(createAPIKeyResult).toEqual({
     apiKeysEnabled: true,
-    result: { api_key: '123', id: 'abc' },
+    result: { api_key: '123', id: 'abc', name: '' },
   });
 });
 
@@ -136,12 +141,14 @@ test('createAPIKey() throws when security plugin createAPIKey throws an error', 
   const factory = new AlertsClientFactory();
   factory.initialize({
     ...alertsClientFactoryParams,
-    securityPluginSetup: securityPluginSetup as any,
+    securityPluginSetup,
   });
   factory.create(KibanaRequest.from(fakeRequest), savedObjectsClient);
   const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
 
-  securityPluginSetup.authc.createAPIKey.mockRejectedValueOnce(new Error('TLS disabled'));
+  securityPluginSetup.authc.grantAPIKeyAsInternalUser.mockRejectedValueOnce(
+    new Error('TLS disabled')
+  );
   await expect(constructorCall.createAPIKey()).rejects.toThrowErrorMatchingInlineSnapshot(
     `"TLS disabled"`
   );

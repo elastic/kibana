@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
+import { PreConfiguredAction } from '../../actions/server';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { KibanaRequest, Logger, SavedObjectsClientContract } from '../../../../src/core/server';
 import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../../plugins/security/server';
-import { EncryptedSavedObjectsPluginStart } from '../../../plugins/encrypted_saved_objects/server';
+import { EncryptedSavedObjectsClient } from '../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../plugins/task_manager/server';
 
 export interface AlertsClientFactoryOpts {
@@ -19,7 +19,8 @@ export interface AlertsClientFactoryOpts {
   securityPluginSetup?: SecurityPluginSetup;
   getSpaceId: (request: KibanaRequest) => string | undefined;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  preconfiguredActions: PreConfiguredAction[];
 }
 
 export class AlertsClientFactory {
@@ -30,7 +31,8 @@ export class AlertsClientFactory {
   private securityPluginSetup?: SecurityPluginSetup;
   private getSpaceId!: (request: KibanaRequest) => string | undefined;
   private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
-  private encryptedSavedObjectsPlugin!: EncryptedSavedObjectsPluginStart;
+  private encryptedSavedObjectsClient!: EncryptedSavedObjectsClient;
+  private preconfiguredActions!: PreConfiguredAction[];
 
   public initialize(options: AlertsClientFactoryOpts) {
     if (this.isInitialized) {
@@ -43,7 +45,8 @@ export class AlertsClientFactory {
     this.alertTypeRegistry = options.alertTypeRegistry;
     this.securityPluginSetup = options.securityPluginSetup;
     this.spaceIdToNamespace = options.spaceIdToNamespace;
-    this.encryptedSavedObjectsPlugin = options.encryptedSavedObjectsPlugin;
+    this.encryptedSavedObjectsClient = options.encryptedSavedObjectsClient;
+    this.preconfiguredActions = options.preconfiguredActions;
   }
 
   public create(
@@ -59,7 +62,7 @@ export class AlertsClientFactory {
       alertTypeRegistry: this.alertTypeRegistry,
       savedObjectsClient,
       namespace: this.spaceIdToNamespace(spaceId),
-      encryptedSavedObjectsPlugin: this.encryptedSavedObjectsPlugin,
+      encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       async getUserName() {
         if (!securityPluginSetup) {
           return null;
@@ -71,10 +74,12 @@ export class AlertsClientFactory {
         if (!securityPluginSetup) {
           return { apiKeysEnabled: false };
         }
-        const createAPIKeyResult = await securityPluginSetup.authc.createAPIKey(request, {
-          name: `source: alerting, generated uuid: "${uuid.v4()}"`,
-          role_descriptors: {},
-        });
+        // Create an API key using the new grant API - in this case the Kibana system user is creating the
+        // API key for the user, instead of having the user create it themselves, which requires api_key
+        // privileges
+        const createAPIKeyResult = await securityPluginSetup.authc.grantAPIKeyAsInternalUser(
+          request
+        );
         if (!createAPIKeyResult) {
           return { apiKeysEnabled: false };
         }
@@ -87,8 +92,7 @@ export class AlertsClientFactory {
         if (!securityPluginSetup) {
           return { apiKeysEnabled: false };
         }
-        const invalidateAPIKeyResult = await securityPluginSetup.authc.invalidateAPIKey(
-          request,
+        const invalidateAPIKeyResult = await securityPluginSetup.authc.invalidateAPIKeyAsInternalUser(
           params
         );
         // Null when Elasticsearch security is disabled
@@ -100,6 +104,7 @@ export class AlertsClientFactory {
           result: invalidateAPIKeyResult,
         };
       },
+      preconfiguredActions: this.preconfiguredActions,
     });
   }
 }

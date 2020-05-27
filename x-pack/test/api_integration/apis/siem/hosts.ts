@@ -12,10 +12,10 @@ import {
   GetHostFirstLastSeenQuery,
   GetHostsTableQuery,
   HostsFields,
-} from '../../../../legacy/plugins/siem/public/graphql/types';
-import { HostOverviewQuery } from '../../../../legacy/plugins/siem/public/containers/hosts/overview/host_overview.gql_query';
-import { HostFirstLastSeenGqlQuery } from './../../../../legacy/plugins/siem/public/containers/hosts/first_last_seen/first_last_seen.gql_query';
-import { HostsTableQuery } from './../../../../legacy/plugins/siem/public/containers/hosts/hosts_table.gql_query';
+} from '../../../../plugins/siem/public/graphql/types';
+import { HostOverviewQuery } from '../../../../plugins/siem/public/hosts/containers/hosts/overview/host_overview.gql_query';
+import { HostFirstLastSeenGqlQuery } from '../../../../plugins/siem/public/hosts/containers/hosts/first_last_seen/first_last_seen.gql_query';
+import { HostsTableQuery } from '../../../../plugins/siem/public/hosts/containers/hosts/hosts_table.gql_query';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
@@ -27,7 +27,7 @@ const TOTAL_COUNT = 7;
 const EDGE_LENGTH = 1;
 const CURSOR_ID = '2ab45fc1c41e4c84bbd02202a7e5761f';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -60,7 +60,7 @@ export default function({ getService }: FtrProviderContext) {
             inspect: false,
           },
         })
-        .then(resp => {
+        .then((resp) => {
           const hosts = resp.data.source.Hosts;
           expect(hosts.edges.length).to.be(EDGE_LENGTH);
           expect(hosts.totalCount).to.be(TOTAL_COUNT);
@@ -93,7 +93,7 @@ export default function({ getService }: FtrProviderContext) {
             inspect: false,
           },
         })
-        .then(resp => {
+        .then((resp) => {
           const hosts = resp.data.source.Hosts;
 
           expect(hosts.edges.length).to.be(EDGE_LENGTH);
@@ -152,7 +152,7 @@ export default function({ getService }: FtrProviderContext) {
             inspect: false,
           },
         })
-        .then(resp => {
+        .then((resp) => {
           const hosts = resp.data.source.HostOverview;
           expect(hosts).to.eql(expectedHost);
         });
@@ -168,7 +168,7 @@ export default function({ getService }: FtrProviderContext) {
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           },
         })
-        .then(resp => {
+        .then((resp) => {
           const firstLastSeenHost = resp.data.source.HostFirstLastSeen;
           expect(firstLastSeenHost).to.eql({
             __typename: 'FirstLastSeenHost',

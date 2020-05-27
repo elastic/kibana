@@ -51,6 +51,7 @@ describe('ReindexActions', () => {
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: 'myIndex',
         newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
+        reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -66,6 +67,7 @@ describe('ReindexActions', () => {
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: '.internalIndex',
         newIndexName: `.reindexed-v${CURRENT_MAJOR_VERSION}-internalIndex`,
+        reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -83,6 +85,7 @@ describe('ReindexActions', () => {
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName,
         newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
+        reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -98,6 +101,7 @@ describe('ReindexActions', () => {
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: `reindexed-v${PREV_MAJOR_VERSION}-myIndex`,
         newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
+        reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -148,7 +152,7 @@ describe('ReindexActions', () => {
   describe('runWhileLocked', () => {
     it('locks and unlocks if object is unlocked', async () => {
       const reindexOp = { id: '1', attributes: { locked: null } } as ReindexSavedObject;
-      await actions.runWhileLocked(reindexOp, op => Promise.resolve(op));
+      await actions.runWhileLocked(reindexOp, (op) => Promise.resolve(op));
 
       expect(client.update).toHaveBeenCalledTimes(2);
 
@@ -170,13 +174,10 @@ describe('ReindexActions', () => {
         id: '1',
         attributes: {
           // Set locked timestamp to timeout + 10 seconds ago
-          locked: moment()
-            .subtract(LOCK_WINDOW)
-            .subtract(moment.duration(10, 'seconds'))
-            .format(),
+          locked: moment().subtract(LOCK_WINDOW).subtract(moment.duration(10, 'seconds')).format(),
         },
       } as ReindexSavedObject;
-      await actions.runWhileLocked(reindexOp, op => Promise.resolve(op));
+      await actions.runWhileLocked(reindexOp, (op) => Promise.resolve(op));
 
       expect(client.update).toHaveBeenCalledTimes(2);
 
@@ -197,7 +198,7 @@ describe('ReindexActions', () => {
       const reindexOp = { id: '1', attributes: { locked: null } } as ReindexSavedObject;
 
       await expect(
-        actions.runWhileLocked(reindexOp, op => Promise.reject(new Error('IT FAILED!')))
+        actions.runWhileLocked(reindexOp, (op) => Promise.reject(new Error('IT FAILED!')))
       ).rejects.toThrow('IT FAILED!');
 
       expect(client.update).toHaveBeenCalledTimes(2);
@@ -220,7 +221,9 @@ describe('ReindexActions', () => {
         id: '1',
         attributes: { locked: moment().format() },
       } as ReindexSavedObject;
-      await expect(actions.runWhileLocked(reindexOp, op => Promise.resolve(op))).rejects.toThrow();
+      await expect(
+        actions.runWhileLocked(reindexOp, (op) => Promise.resolve(op))
+      ).rejects.toThrow();
     });
   });
 
@@ -313,7 +316,7 @@ describe('ReindexActions', () => {
           );
 
           let flip = false;
-          await actions.runWhileIndexGroupLocked(consumerType, async mlDoc => {
+          await actions.runWhileIndexGroupLocked(consumerType, async (mlDoc) => {
             expect(mlDoc.id).toEqual(consumerType);
             expect(mlDoc.attributes.runningReindexCount).toEqual(0);
             flip = true;
@@ -333,7 +336,7 @@ describe('ReindexActions', () => {
           client.update.mockRejectedValue(new Error('NO LOCKING!'));
 
           await expect(
-            actions.runWhileIndexGroupLocked(consumerType, async m => m)
+            actions.runWhileIndexGroupLocked(consumerType, async (m) => m)
           ).rejects.toThrow('Could not acquire lock for ML jobs');
           expect(client.update).toHaveBeenCalledTimes(10);
 

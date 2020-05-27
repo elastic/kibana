@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler } from 'kibana/server';
-import { datasourceService } from '../../services';
+import Boom from 'boom';
+import { RequestHandler } from 'src/core/server';
+import { appContextService, datasourceService } from '../../services';
+import { ensureInstalledPackage, getPackageInfo } from '../../services/epm/packages';
 import {
   GetDatasourcesRequestSchema,
   GetOneDatasourceRequestSchema,
   CreateDatasourceRequestSchema,
   UpdateDatasourceRequestSchema,
   DeleteDatasourcesRequestSchema,
-  DeleteDatasourcesResponse,
 } from '../../types';
+import { CreateDatasourceResponse, DeleteDatasourcesResponse } from '../../../common';
 
 export const getDatasourcesHandler: RequestHandler<
   undefined,
@@ -72,10 +74,33 @@ export const createDatasourceHandler: RequestHandler<
   TypeOf<typeof CreateDatasourceRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const newData = { ...request.body };
   try {
-    const datasource = await datasourceService.create(soClient, request.body);
+    // Make sure the datasource package is installed
+    if (request.body.package?.name) {
+      await ensureInstalledPackage({
+        savedObjectsClient: soClient,
+        pkgName: request.body.package.name,
+        callCluster,
+      });
+      const pkgInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: request.body.package.name,
+        pkgVersion: request.body.package.version,
+      });
+      newData.inputs = (await datasourceService.assignPackageStream(
+        pkgInfo,
+        request.body.inputs
+      )) as TypeOf<typeof CreateDatasourceRequestSchema.body>['inputs'];
+    }
+
+    // Create datasource
+    const datasource = await datasourceService.create(soClient, newData, { user });
+    const body: CreateDatasourceResponse = { item: datasource, success: true };
     return response.ok({
-      body: { item: datasource, success: true },
+      body,
     });
   } catch (e) {
     return response.customError({
@@ -91,14 +116,36 @@ export const updateDatasourceHandler: RequestHandler<
   TypeOf<typeof UpdateDatasourceRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
-    const datasource = await datasourceService.update(
+    const datasource = await datasourceService.get(soClient, request.params.datasourceId);
+
+    if (!datasource) {
+      throw Boom.notFound('Datasource not found');
+    }
+
+    const newData = { ...request.body };
+    const pkg = newData.package || datasource.package;
+    const inputs = newData.inputs || datasource.inputs;
+    if (pkg && (newData.inputs || newData.package)) {
+      const pkgInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: pkg.name,
+        pkgVersion: pkg.version,
+      });
+      newData.inputs = (await datasourceService.assignPackageStream(pkgInfo, inputs)) as TypeOf<
+        typeof CreateDatasourceRequestSchema.body
+      >['inputs'];
+    }
+
+    const updatedDatasource = await datasourceService.update(
       soClient,
       request.params.datasourceId,
-      request.body
+      newData,
+      { user }
     );
     return response.ok({
-      body: { item: datasource, success: true },
+      body: { item: updatedDatasource, success: true },
     });
   } catch (e) {
     return response.customError({
@@ -108,16 +155,18 @@ export const updateDatasourceHandler: RequestHandler<
   }
 };
 
-export const deleteDatasourcesHandler: RequestHandler<
+export const deleteDatasourceHandler: RequestHandler<
   unknown,
   unknown,
   TypeOf<typeof DeleteDatasourcesRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
     const body: DeleteDatasourcesResponse = await datasourceService.delete(
       soClient,
-      request.body.datasourceIds
+      request.body.datasourceIds,
+      { user }
     );
     return response.ok({
       body,

@@ -3,6 +3,15 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "server": true,
-  "ui": false,
-  "optionalPlugins": ["usageCollection", "taskManager"]
+  "ui": true,
+  "requiredPlugins": [
+    "data",
+    "expressions",
+    "navigation",
+    "kibanaLegacy",
+    "visualizations",
+    "dashboard"
+  ],
+  "optionalPlugins": ["embeddable", "usageCollection", "taskManager", "uiActions"],
+  "configPath": ["xpack", "lens"]
 }

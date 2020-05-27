@@ -12,23 +12,18 @@ import {
   PluginInitializerContext,
   AppMountParameters,
 } from 'kibana/public';
-import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
-import ApolloClient from 'apollo-client';
-import { ApolloLink } from 'apollo-link';
-import { createHttpLink } from 'apollo-link-http';
-import { withClientState } from 'apollo-link-state';
-import { HttpFetchOptions } from 'src/core/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
-import { InfraFrontendLibs } from './lib/lib';
-import introspectionQueryResultData from './graphql/introspection.json';
-import { InfraKibanaObservableApiAdapter } from './lib/adapters/observable_api/kibana_observable_api';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { registerStartSingleton } from './legacy_singletons';
 import { registerFeatures } from './register_feature';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
-import { LogsRouter, MetricsRouter } from './routers';
+
+import { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
+import { getAlertType as getLogsAlertType } from './components/alerting/logs/log_threshold_alert_type';
+import { getInventoryMetricAlertType } from './components/alerting/inventory/metric_inventory_threshold_alert_type';
+import { createMetricThresholdAlertType } from './alerting/metric_threshold';
 
 export type ClientSetup = void;
 export type ClientStart = void;
@@ -38,6 +33,7 @@ export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
   dataEnhanced: DataEnhancedSetup;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface ClientPluginsStart {
@@ -58,25 +54,31 @@ export class Plugin
   setup(core: CoreSetup, pluginsSetup: ClientPluginsSetup) {
     registerFeatures(pluginsSetup.home);
 
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getInventoryMetricAlertType());
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getLogsAlertType());
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(createMetricThresholdAlertType());
+
     core.application.register({
       id: 'logs',
       title: i18n.translate('xpack.infra.logs.pluginTitle', {
         defaultMessage: 'Logs',
       }),
       euiIconType: 'logsApp',
-      order: 8001,
+      order: 8000,
       appRoute: '/app/logs',
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
-        const { startApp } = await import('./apps/start_app');
+        const { startApp, composeLibs, LogsRouter } = await this.downloadAssets();
+
         return startApp(
-          this.composeLibs(coreStart, plugins),
+          composeLibs(coreStart),
           coreStart,
           plugins,
           params,
-          LogsRouter
+          LogsRouter,
+          pluginsSetup.triggers_actions_ui
         );
       },
     });
@@ -87,19 +89,21 @@ export class Plugin
         defaultMessage: 'Metrics',
       }),
       euiIconType: 'metricsApp',
-      order: 8000,
+      order: 8001,
       appRoute: '/app/metrics',
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
-        const { startApp } = await import('./apps/start_app');
+        const { startApp, composeLibs, MetricsRouter } = await this.downloadAssets();
+
         return startApp(
-          this.composeLibs(coreStart, plugins),
+          composeLibs(coreStart),
           coreStart,
           plugins,
           params,
-          MetricsRouter
+          MetricsRouter,
+          pluginsSetup.triggers_actions_ui
         );
       },
     });
@@ -122,87 +126,18 @@ export class Plugin
     registerStartSingleton(core);
   }
 
-  composeLibs(core: CoreStart, plugins: ClientPluginsStart) {
-    const cache = new InMemoryCache({
-      addTypename: false,
-      fragmentMatcher: new IntrospectionFragmentMatcher({
-        introspectionQueryResultData,
-      }),
-    });
+  private async downloadAssets() {
+    const [{ startApp }, { composeLibs }, { LogsRouter, MetricsRouter }] = await Promise.all([
+      import('./apps/start_app'),
+      import('./compose_libs'),
+      import('./routers'),
+    ]);
 
-    const observableApi = new InfraKibanaObservableApiAdapter({
-      basePath: core.http.basePath.get(),
-    });
-
-    const wrappedFetch = (path: string, options: HttpFetchOptions) => {
-      return new Promise<Response>(async (resolve, reject) => {
-        // core.http.fetch isn't 100% compatible with the Fetch API and will
-        // throw Errors on 401s. This top level try / catch handles those scenarios.
-        try {
-          core.http
-            .fetch(path, {
-              ...options,
-              // Set headers to undefined due to this bug: https://github.com/apollographql/apollo-link/issues/249,
-              // Apollo will try to set a "content-type" header which will conflict with the "Content-Type" header that
-              // core.http.fetch correctly sets.
-              headers: undefined,
-              asResponse: true,
-            })
-            .then(res => {
-              if (!res.response) {
-                return reject();
-              }
-              // core.http.fetch will parse the Response and set a body before handing it back. As such .text() / .json()
-              // will have already been called on the Response instance. However, Apollo will also want to call
-              // .text() / .json() on the instance, as it expects the raw Response instance, rather than core's wrapper.
-              // .text() / .json() can only be called once, and an Error will be thrown if those methods are accessed again.
-              // This hacks around that by setting up a new .text() method that will restringify the JSON response we already have.
-              // This does result in an extra stringify / parse cycle, which isn't ideal, but as we only have a few endpoints left using
-              // GraphQL this shouldn't create excessive overhead.
-              // Ref: https://github.com/apollographql/apollo-link/blob/master/packages/apollo-link-http/src/httpLink.ts#L134
-              // and
-              // https://github.com/apollographql/apollo-link/blob/master/packages/apollo-link-http-common/src/index.ts#L125
-              return resolve({
-                ...res.response,
-                text: () => {
-                  return new Promise(async (resolveText, rejectText) => {
-                    if (res.body) {
-                      return resolveText(JSON.stringify(res.body));
-                    } else {
-                      return rejectText();
-                    }
-                  });
-                },
-              });
-            });
-        } catch (error) {
-          reject(error);
-        }
-      });
+    return {
+      startApp,
+      composeLibs,
+      LogsRouter,
+      MetricsRouter,
     };
-
-    const HttpLink = createHttpLink({
-      fetch: wrappedFetch,
-      uri: `/api/infra/graphql`,
-    });
-
-    const graphQLOptions = {
-      cache,
-      link: ApolloLink.from([
-        withClientState({
-          cache,
-          resolvers: {},
-        }),
-        HttpLink,
-      ]),
-    };
-
-    const apolloClient = new ApolloClient(graphQLOptions);
-
-    const libs: InfraFrontendLibs = {
-      apolloClient,
-      observableApi,
-    };
-    return libs;
   }
 }

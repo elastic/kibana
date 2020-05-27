@@ -6,13 +6,13 @@
 
 import { chunk } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
-import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../../../legacy/plugins/ml/common/constants/new_job';
+import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/categorization_job';
 import {
   Token,
   CategorizationAnalyzer,
   CategoryFieldExample,
-} from '../../../../../../../legacy/plugins/ml/common/types/categories';
-import { callWithRequestType } from '../../../../../../../legacy/plugins/ml/common/types/kibana';
+} from '../../../../../common/types/categories';
+import { callWithRequestType } from '../../../../../common/types/kibana';
 import { ValidationResults } from './validation_results';
 
 const CHUNK_SIZE = 100;
@@ -92,7 +92,7 @@ export function categorizationExamplesProvider(
         return { examples: examplesWithTokens };
       } catch (error) {
         validationResults.createTooManyTokensResult(error, halfChunkSize);
-        return { examples: halfExamples.map(e => ({ text: e, tokens: [] })) };
+        return { examples: halfExamples.map((e) => ({ text: e, tokens: [] })) };
       }
     }
   }
@@ -119,10 +119,10 @@ export function categorizationExamplesProvider(
       },
     });
 
-    const lengths = examples.map(e => e.length);
-    const sumLengths = lengths.map((s => (a: number) => (s += a))(0));
+    const lengths = examples.map((e) => e.length);
+    const sumLengths = lengths.map(((s) => (a: number) => (s += a))(0));
 
-    const tokensPerExample: Token[][] = examples.map(e => []);
+    const tokensPerExample: Token[][] = examples.map((e) => []);
 
     tokens.forEach((t, i) => {
       for (let g = 0; g < sumLengths.length; g++) {
@@ -193,7 +193,7 @@ export function categorizationExamplesProvider(
     // sort back into original order and remove origIndex property
     const processedExamples = filteredExamples
       .sort((a, b) => a.origIndex - b.origIndex)
-      .map(e => ({ text: e.text, tokens: e.tokens }));
+      .map((e) => ({ text: e.text, tokens: e.tokens }));
 
     return {
       overallValidStatus: validationResults.overallResult,

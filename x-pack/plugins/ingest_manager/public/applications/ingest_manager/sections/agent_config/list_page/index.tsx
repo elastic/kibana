@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
+import React, { CSSProperties, memo, useCallback, useMemo, useState } from 'react';
 import {
   EuiSpacer,
   EuiText,
@@ -11,21 +11,38 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiEmptyPrompt,
-  // @ts-ignore
-  EuiSearchBar,
   EuiBasicTable,
   EuiLink,
-  EuiBadge,
+  EuiTableActionsColumnType,
+  EuiTableFieldDataColumnType,
+  EuiTextColor,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
+import { useHistory } from 'react-router-dom';
 import { AgentConfig } from '../../../types';
-import { DEFAULT_AGENT_CONFIG_ID, AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
+import { AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
-// import { SearchBar } from '../../../components';
-import { useGetAgentConfigs, usePagination, useLink } from '../../../hooks';
-import { AgentConfigDeleteProvider } from '../components';
+import {
+  useCapabilities,
+  useGetAgentConfigs,
+  usePagination,
+  useLink,
+  useConfig,
+  useUrlParams,
+  useBreadcrumbs,
+} from '../../../hooks';
 import { CreateAgentConfigFlyout } from './components';
+import { SearchBar } from '../../../components/search_bar';
+import { LinkedAgentCount } from '../components';
+import { TableRowActions } from '../components/table_row_actions';
+
+const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
 
 const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
   <WithHeaderLayout
@@ -58,97 +75,218 @@ const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
   </WithHeaderLayout>
 );
 
+const ConfigRowActions = memo<{ config: AgentConfig; onDelete: () => void }>(
+  ({ config, onDelete }) => {
+    const { getHref } = useLink();
+    const hasWriteCapabilities = useCapabilities().write;
+
+    return (
+      <TableRowActions
+        items={[
+          <EuiContextMenuItem
+            icon="inspect"
+            href={getHref('configuration_details', { configId: config.id })}
+            key="viewConfig"
+          >
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfigList.viewConfigActionText"
+              defaultMessage="View configuration"
+            />
+          </EuiContextMenuItem>,
+
+          <EuiContextMenuItem
+            disabled={!hasWriteCapabilities}
+            icon="plusInCircle"
+            href={getHref('add_datasource_from_configuration', { configId: config.id })}
+            key="createDataSource"
+          >
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfigList.createDatasourceActionText"
+              defaultMessage="Create data source"
+            />
+          </EuiContextMenuItem>,
+          // <EuiContextMenuItem disabled={true} icon="copy" key="copyConfig">
+          //   <FormattedMessage
+          //     id="xpack.ingestManager.agentConfigList.copyConfigActionText"
+          //     defaultMessage="Copy configuration"
+          //   />
+          // </EuiContextMenuItem>,
+        ]}
+      />
+    );
+  }
+);
+
 export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
-  // Create agent config flyout state
-  const [isCreateAgentConfigFlyoutOpen, setIsCreateAgentConfigFlyoutOpen] = useState<boolean>(
-    false
-  );
+  useBreadcrumbs('configurations_list');
+  const { getHref, getPath } = useLink();
+  // Config information
+  const hasWriteCapabilites = useCapabilities().write;
+  const {
+    fleet: { enabled: isFleetEnabled },
+  } = useConfig();
 
   // Table and search states
-  const [search, setSearch] = useState<string>('');
-  const { pagination, setPagination } = usePagination();
-  const [selectedAgentConfigs, setSelectedAgentConfigs] = useState<AgentConfig[]>([]);
+  const { urlParams, toUrlParams } = useUrlParams();
+  const [search, setSearch] = useState<string>(
+    Array.isArray(urlParams.kuery)
+      ? urlParams.kuery[urlParams.kuery.length - 1]
+      : urlParams.kuery ?? ''
+  );
+  const { pagination, pageSizeOptions, setPagination } = usePagination();
+  const history = useHistory();
+  const isCreateAgentConfigFlyoutOpen = 'create' in urlParams;
+  const setIsCreateAgentConfigFlyoutOpen = useCallback(
+    (isOpen: boolean) => {
+      if (isOpen !== isCreateAgentConfigFlyoutOpen) {
+        if (isOpen) {
+          history.push(
+            `${getPath('configurations_list')}?${toUrlParams({ ...urlParams, create: null })}`
+          );
+        } else {
+          const { create, ...params } = urlParams;
+          history.push(`${getPath('configurations_list')}?${toUrlParams(params)}`);
+        }
+      }
+    },
+    [getPath, history, isCreateAgentConfigFlyoutOpen, toUrlParams, urlParams]
+  );
 
   // Fetch agent configs
-  const { isLoading, data: agentConfigData, sendRequest } = useGetAgentConfigs();
-
-  // Base path for config details
-  const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
+  const { isLoading, data: agentConfigData, sendRequest } = useGetAgentConfigs({
+    page: pagination.currentPage,
+    perPage: pagination.pageSize,
+    kuery: search,
+  });
 
   // Some configs retrieved, set up table props
-  const columns = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.ingestManager.agentConfigList.nameColumnTitle', {
-        defaultMessage: 'Name',
-      }),
-      render: (name: string, agentConfig: AgentConfig) => name || agentConfig.id,
-    },
-    {
-      field: 'namespace',
-      name: i18n.translate('xpack.ingestManager.agentConfigList.namespaceColumnTitle', {
-        defaultMessage: 'Namespace',
-      }),
-      render: (namespace: string) => (namespace ? <EuiBadge>{namespace}</EuiBadge> : null),
-    },
-    {
-      field: 'description',
-      name: i18n.translate('xpack.ingestManager.agentConfigList.descriptionColumnTitle', {
-        defaultMessage: 'Description',
-      }),
-    },
-    {
-      field: 'datasources',
-      name: i18n.translate('xpack.ingestManager.agentConfigList.datasourcesCountColumnTitle', {
-        defaultMessage: 'Datasources',
-      }),
-      render: (datasources: AgentConfig['datasources']) => (datasources ? datasources.length : 0),
-    },
-    {
-      name: i18n.translate('xpack.ingestManager.agentConfigList.actionsColumnTitle', {
-        defaultMessage: 'Actions',
-      }),
-      actions: [
-        {
-          render: ({ id }: AgentConfig) => {
-            return (
-              <EuiLink href={`${DETAILS_URI}${id}`}>
-                <FormattedMessage
-                  id="xpack.ingestManager.agentConfigList.viewActionLinkText"
-                  defaultMessage="view"
-                />
+  const columns = useMemo(() => {
+    const cols: Array<
+      EuiTableFieldDataColumnType<AgentConfig> | EuiTableActionsColumnType<AgentConfig>
+    > = [
+      {
+        field: 'name',
+        name: i18n.translate('xpack.ingestManager.agentConfigList.nameColumnTitle', {
+          defaultMessage: 'Name',
+        }),
+        width: '20%',
+        render: (name: string, agentConfig: AgentConfig) => (
+          <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
+            <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
+              <EuiLink
+                href={getHref('configuration_details', { configId: agentConfig.id })}
+                style={NO_WRAP_TRUNCATE_STYLE}
+                title={name || agentConfig.id}
+              >
+                {name || agentConfig.id}
               </EuiLink>
-            );
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
+                <FormattedMessage
+                  id="xpack.ingestManager.agentConfigList.revisionNumber"
+                  defaultMessage="rev. {revNumber}"
+                  values={{ revNumber: agentConfig.revision }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      },
+      {
+        field: 'description',
+        name: i18n.translate('xpack.ingestManager.agentConfigList.descriptionColumnTitle', {
+          defaultMessage: 'Description',
+        }),
+        width: '35%',
+        truncateText: true,
+        render: (description: AgentConfig['description']) => (
+          <EuiTextColor color="subdued" style={NO_WRAP_TRUNCATE_STYLE}>
+            {description}
+          </EuiTextColor>
+        ),
+      },
+      {
+        field: 'updated_at',
+        name: i18n.translate('xpack.ingestManager.agentConfigList.updatedOnColumnTitle', {
+          defaultMessage: 'Last updated on',
+        }),
+        render: (date: AgentConfig['updated_at']) => (
+          <FormattedDate value={date} year="numeric" month="short" day="2-digit" />
+        ),
+      },
+      {
+        field: 'agents',
+        name: i18n.translate('xpack.ingestManager.agentConfigList.agentsColumnTitle', {
+          defaultMessage: 'Agents',
+        }),
+        dataType: 'number',
+        render: (agents: number, config: AgentConfig) => (
+          <LinkedAgentCount count={agents} agentConfigId={config.id} />
+        ),
+      },
+      {
+        field: 'datasources',
+        name: i18n.translate('xpack.ingestManager.agentConfigList.datasourcesCountColumnTitle', {
+          defaultMessage: 'Data sources',
+        }),
+        dataType: 'number',
+        render: (datasources: AgentConfig['datasources']) => (datasources ? datasources.length : 0),
+      },
+      {
+        name: i18n.translate('xpack.ingestManager.agentConfigList.actionsColumnTitle', {
+          defaultMessage: 'Actions',
+        }),
+        actions: [
+          {
+            render: (config: AgentConfig) => (
+              <ConfigRowActions config={config} onDelete={() => sendRequest()} />
+            ),
           },
-        },
-      ],
-      width: '100px',
-    },
-  ];
+        ],
+      },
+    ];
 
-  const emptyPrompt = (
-    <EuiEmptyPrompt
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.ingestManager.agentConfigList.noAgentConfigsPrompt"
-            defaultMessage="No agent configurations"
-          />
-        </h2>
-      }
-      actions={
-        <EuiButton
-          fill
-          iconType="plusInCircle"
-          onClick={() => setIsCreateAgentConfigFlyoutOpen(true)}
-        >
-          <FormattedMessage
-            id="xpack.ingestManager.agentConfigList.addButton"
-            defaultMessage="Create new agent configuration"
-          />
-        </EuiButton>
-      }
-    />
+    // If Fleet is not enabled, then remove the `agents` column
+    if (!isFleetEnabled) {
+      return cols.filter((col) => ('field' in col ? col.field !== 'agents' : true));
+    }
+
+    return cols;
+  }, [getHref, isFleetEnabled, sendRequest]);
+
+  const createAgentConfigButton = useMemo(
+    () => (
+      <EuiButton
+        fill
+        iconType="plusInCircle"
+        isDisabled={!hasWriteCapabilites}
+        onClick={() => setIsCreateAgentConfigFlyoutOpen(true)}
+      >
+        <FormattedMessage
+          id="xpack.ingestManager.agentConfigList.addButton"
+          defaultMessage="Create agent configuration"
+        />
+      </EuiButton>
+    ),
+    [hasWriteCapabilites, setIsCreateAgentConfigFlyoutOpen]
+  );
+
+  const emptyPrompt = useMemo(
+    () => (
+      <EuiEmptyPrompt
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfigList.noAgentConfigsPrompt"
+              defaultMessage="No agent configurations"
+            />
+          </h2>
+        }
+        actions={createAgentConfigButton}
+      />
+    ),
+    [createAgentConfigButton]
   );
 
   return (
@@ -162,79 +300,41 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         />
       ) : null}
       <EuiFlexGroup alignItems={'center'} gutterSize="m">
-        {selectedAgentConfigs.length ? (
-          <EuiFlexItem>
-            <AgentConfigDeleteProvider>
-              {deleteAgentConfigsPrompt => (
-                <EuiButton
-                  color="danger"
-                  onClick={() => {
-                    deleteAgentConfigsPrompt(
-                      selectedAgentConfigs.map(agentConfig => agentConfig.id),
-                      () => {
-                        sendRequest();
-                        setSelectedAgentConfigs([]);
-                      }
-                    );
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.ingestManager.agentConfigList.deleteButton"
-                    defaultMessage="Delete {count, plural, one {# agent config} other {# agent configs}}"
-                    values={{
-                      count: selectedAgentConfigs.length,
-                    }}
-                  />
-                </EuiButton>
-              )}
-            </AgentConfigDeleteProvider>
-          </EuiFlexItem>
-        ) : null}
         <EuiFlexItem grow={4}>
-          {/* <SearchBar
-              value={search}
-              onChange={newSearch => {
-                setPagination({
-                  ...pagination,
-                  currentPage: 1,
-                });
-                setSearch(newSearch);
-              }}
-              fieldPrefix={AGENT_CONFIG_SAVED_OBJECT_TYPE}
-            /> */}
+          <SearchBar
+            value={search}
+            onChange={(newSearch) => {
+              setPagination({
+                ...pagination,
+                currentPage: 1,
+              });
+              setSearch(newSearch);
+            }}
+            fieldPrefix={AGENT_CONFIG_SAVED_OBJECT_TYPE}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton color="secondary" iconType="refresh" onClick={() => sendRequest()}>
+          <EuiButton color="primary" iconType="refresh" onClick={() => sendRequest()}>
             <FormattedMessage
               id="xpack.ingestManager.agentConfigList.reloadAgentConfigsButtonText"
               defaultMessage="Reload"
             />
           </EuiButton>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            iconType="plusInCircle"
-            onClick={() => setIsCreateAgentConfigFlyoutOpen(true)}
-          >
-            <FormattedMessage
-              id="xpack.ingestManager.agentConfigList.addButton"
-              defaultMessage="Create new agent configuration"
-            />
-          </EuiButton>
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{createAgentConfigButton}</EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
       <EuiBasicTable
         loading={isLoading}
+        hasActions={true}
         noItemsMessage={
           isLoading ? (
             <FormattedMessage
               id="xpack.ingestManager.agentConfigList.loadingAgentConfigsMessage"
               defaultMessage="Loading agent configurations…"
             />
-          ) : !search.trim() && agentConfigData?.total === 0 ? (
+          ) : !search.trim() && (agentConfigData?.total ?? 0) === 0 ? (
             emptyPrompt
           ) : (
             <FormattedMessage
@@ -256,17 +356,12 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         items={agentConfigData ? agentConfigData.items : []}
         itemId="id"
         columns={columns}
-        isSelectable={true}
-        selection={{
-          selectable: (agentConfig: AgentConfig) => agentConfig.id !== DEFAULT_AGENT_CONFIG_ID,
-          onSelectionChange: (newSelectedAgentConfigs: AgentConfig[]) => {
-            setSelectedAgentConfigs(newSelectedAgentConfigs);
-          },
-        }}
+        isSelectable={false}
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,
           totalItemCount: agentConfigData ? agentConfigData.total : 0,
+          pageSizeOptions,
         }}
         onChange={({ page }: { page: { index: number; size: number } }) => {
           const newPagination = {
@@ -275,7 +370,6 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
             pageSize: page.size,
           };
           setPagination(newPagination);
-          sendRequest(); // todo: fix this to send pagination options
         }}
       />
     </AgentConfigListPageLayout>

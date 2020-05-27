@@ -14,8 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const pageObjects = getPageObjects(['common', 'infraHome']);
 
-  describe('Infrastructure Source Configuration', function() {
-    this.tags('smoke');
+  describe('Infrastructure Source Configuration', function () {
     before(async () => {
       await esArchiver.load('empty_kibana');
     });

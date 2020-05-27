@@ -7,7 +7,7 @@
 import { getAnomalySeries } from '.';
 import { mlAnomalyResponse } from './mock_responses/ml_anomaly_response';
 import { mlBucketSpanResponse } from './mock_responses/ml_bucket_span_response';
-import { PromiseReturnType } from '../../../../../typings/common';
+import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { APMConfig } from '../../../..';
 
 describe('getAnomalySeries', () => {
@@ -31,7 +31,7 @@ describe('getAnomalySeries', () => {
         config: new Proxy(
           {},
           {
-            get: () => 'myIndex'
+            get: () => 'myIndex',
           }
         ) as APMConfig,
         uiFiltersES: [],
@@ -42,31 +42,32 @@ describe('getAnomalySeries', () => {
           'apm_oss.spanIndices': 'myIndex',
           'apm_oss.transactionIndices': 'myIndex',
           'apm_oss.metricsIndices': 'myIndex',
-          apmAgentConfigurationIndex: 'myIndex'
+          apmAgentConfigurationIndex: 'myIndex',
+          apmCustomLinkIndex: 'myIndex',
         },
-        dynamicIndexPattern: null as any
-      }
+        dynamicIndexPattern: null as any,
+      },
     });
   });
 
   it('should remove buckets lower than threshold and outside date range from anomalyScore', () => {
     expect(avgAnomalies!.anomalyScore).toEqual([
       { x0: 15000, x: 25000 },
-      { x0: 25000, x: 35000 }
+      { x0: 25000, x: 35000 },
     ]);
   });
 
   it('should remove buckets outside date range from anomalyBoundaries', () => {
     expect(
       avgAnomalies!.anomalyBoundaries!.filter(
-        bucket => bucket.x < 100 || bucket.x > 100000
+        (bucket) => bucket.x < 100 || bucket.x > 100000
       ).length
     ).toBe(0);
   });
 
   it('should remove buckets with null from anomalyBoundaries', () => {
     expect(
-      avgAnomalies!.anomalyBoundaries!.filter(p => p.y === null).length
+      avgAnomalies!.anomalyBoundaries!.filter((p) => p.y === null).length
     ).toBe(0);
   });
 

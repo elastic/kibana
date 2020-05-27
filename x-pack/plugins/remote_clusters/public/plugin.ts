@@ -6,6 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, CoreStart, PluginInitializerContext } from 'kibana/public';
+
+import { ManagementSectionId } from '../../../../src/plugins/management/public';
 import { init as initBreadcrumbs } from './application/services/breadcrumb';
 import { init as initDocumentation } from './application/services/documentation';
 import { init as initHttp } from './application/services/http';
@@ -14,25 +16,31 @@ import { init as initNotification } from './application/services/notification';
 import { init as initRedirect } from './application/services/redirect';
 import { Dependencies, ClientConfigType } from './types';
 
-export class RemoteClustersUIPlugin implements Plugin<void, void, Dependencies, any> {
+export interface RemoteClustersPluginSetup {
+  isUiEnabled: boolean;
+}
+
+export class RemoteClustersUIPlugin
+  implements Plugin<RemoteClustersPluginSetup, void, Dependencies, any> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   setup(
     { notifications: { toasts }, http, getStartServices }: CoreSetup,
-    { management, usageCollection }: Dependencies
+    { management, usageCollection, cloud }: Dependencies
   ) {
     const {
       ui: { enabled: isRemoteClustersUiEnabled },
     } = this.initializerContext.config.get<ClientConfigType>();
 
     if (isRemoteClustersUiEnabled) {
-      const esSection = management.sections.getSection('elasticsearch');
+      const esSection = management.sections.getSection(ManagementSectionId.Data);
 
-      esSection!.registerApp({
+      esSection.registerApp({
         id: 'remote_clusters',
         title: i18n.translate('xpack.remoteClusters.appTitle', {
           defaultMessage: 'Remote Clusters',
         }),
+        order: 7,
         mount: async ({ element, setBreadcrumbs }) => {
           const [core] = await getStartServices();
           const {
@@ -48,11 +56,17 @@ export class RemoteClustersUIPlugin implements Plugin<void, void, Dependencies, 
           initNotification(toasts, fatalErrors);
           initHttp(http);
 
+          const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
+
           const { renderApp } = await import('./application');
-          return renderApp(element, i18nContext);
+          return renderApp(element, i18nContext, { isCloudEnabled });
         },
       });
     }
+
+    return {
+      isUiEnabled: isRemoteClustersUiEnabled,
+    };
   }
 
   start({ application }: CoreStart) {

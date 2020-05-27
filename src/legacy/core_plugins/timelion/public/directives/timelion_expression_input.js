@@ -43,7 +43,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import PEG from 'pegjs';
-import grammar from 'raw-loader!../../../../../plugins/timelion/common/chain.peg';
+import grammar from 'raw-loader!../../../../../plugins/vis_type_timelion/common/chain.peg';
 import timelionExpressionInputTemplate from './timelion_expression_input.html';
 import {
   SUGGESTION_TYPE,
@@ -52,7 +52,7 @@ import {
   insertAtLocation,
 } from './timelion_expression_input_helpers';
 import { comboBoxKeyCodes } from '@elastic/eui';
-import { getArgValueSuggestions } from '../../../vis_type_timelion/public/helpers/arg_value_suggestions';
+import { npStart } from 'ui/new_platform';
 
 const Parser = PEG.generate(grammar);
 
@@ -67,8 +67,8 @@ export function TimelionExpInput($http, $timeout) {
     },
     replace: true,
     template: timelionExpressionInputTemplate,
-    link: function(scope, elem) {
-      const argValueSuggestions = getArgValueSuggestions();
+    link: function (scope, elem) {
+      const argValueSuggestions = npStart.plugins.visTypeTimelion.getArgValueSuggestions();
       const expressionInput = elem.find('[data-expression-input]');
       const functionReference = {};
       let suggestibleFunctionLocation = {};
@@ -76,7 +76,7 @@ export function TimelionExpInput($http, $timeout) {
       scope.suggestions = new Suggestions();
 
       function init() {
-        $http.get('../api/timelion/functions').then(function(resp) {
+        $http.get('../api/timelion/functions').then(function (resp) {
           Object.assign(functionReference, {
             byName: _.indexBy(resp.data, 'name'),
             list: resp.data,
@@ -193,7 +193,7 @@ export function TimelionExpInput($http, $timeout) {
         scope.suggestions.hide();
       };
 
-      scope.onKeyDownInput = e => {
+      scope.onKeyDownInput = (e) => {
         // If we've pressed any non-navigational keys, then the user has typed something and we
         // can exit early without doing any navigation. The keyup handler will pull up suggestions.
         if (!isNavigationalKey(e.keyCode)) {
@@ -253,7 +253,7 @@ export function TimelionExpInput($http, $timeout) {
         }
       };
 
-      scope.onKeyUpInput = e => {
+      scope.onKeyUpInput = (e) => {
         // If the user isn't navigating, then we should update the suggestions based on their input.
         if (!isNavigationalKey(e.keyCode)) {
           getSuggestions();
@@ -264,7 +264,7 @@ export function TimelionExpInput($http, $timeout) {
         getSuggestions();
       };
 
-      scope.onClickSuggestion = index => {
+      scope.onClickSuggestion = (index) => {
         insertSuggestionIntoExpression(index);
       };
 

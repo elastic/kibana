@@ -4,15 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './index.scss';
 import { PluginInitializer, PluginInitializerContext } from 'src/core/public';
-import { SecurityPlugin, SecurityPluginSetup, SecurityPluginStart } from './plugin';
+import {
+  SecurityPlugin,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies,
+} from './plugin';
 
 export { SecurityPluginSetup, SecurityPluginStart };
-export { SessionInfo } from './types';
 export { AuthenticatedUser } from '../common/model';
 export { SecurityLicense, SecurityLicenseFeatures } from '../common/licensing';
 
-export const plugin: PluginInitializer<SecurityPluginSetup, SecurityPluginStart> = (
-  initializerContext: PluginInitializerContext
-) => new SecurityPlugin(initializerContext);
+export const plugin: PluginInitializer<
+  SecurityPluginSetup,
+  SecurityPluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies
+> = (initializerContext: PluginInitializerContext) => new SecurityPlugin(initializerContext);

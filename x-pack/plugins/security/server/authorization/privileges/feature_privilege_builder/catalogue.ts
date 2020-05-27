@@ -9,13 +9,13 @@ import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 export class FeaturePrivilegeCatalogueBuilder extends BaseFeaturePrivilegeBuilder {
   public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
-    const catalogueEntries = privilegeDefinition.catalogue || feature.catalogue;
+    const catalogueEntries = privilegeDefinition.catalogue;
 
     if (!catalogueEntries) {
       return [];
     }
 
-    return catalogueEntries.map(catalogueEntryId =>
+    return catalogueEntries.map((catalogueEntryId) =>
       this.actions.ui.get('catalogue', catalogueEntryId)
     );
   }

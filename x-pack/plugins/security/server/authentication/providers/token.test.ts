@@ -36,7 +36,7 @@ describe('TokenAuthenticationProvider', () => {
   let provider: TokenAuthenticationProvider;
   let mockOptions: MockAuthenticationProviderOptions;
   beforeEach(() => {
-    mockOptions = mockAuthenticationProviderOptions();
+    mockOptions = mockAuthenticationProviderOptions({ name: 'token' });
     provider = new TokenAuthenticationProvider(mockOptions);
   });
 
@@ -163,6 +163,12 @@ describe('TokenAuthenticationProvider', () => {
       ).resolves.toEqual(AuthenticationResult.notHandled());
     });
 
+    it('does not redirect requests that do not require authentication to the login page.', async () => {
+      await expect(
+        provider.authenticate(httpServerMock.createKibanaRequest({ routeAuthRequired: false }))
+      ).resolves.toEqual(AuthenticationResult.notHandled());
+    });
+
     it('redirects non-AJAX requests that can not be authenticated to the login page.', async () => {
       await expect(
         provider.authenticate(
@@ -205,7 +211,7 @@ describe('TokenAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockOptions.client.asScoped.mockImplementation(scopeableRequest => {
+      mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
         if (scopeableRequest?.headers.authorization === `Bearer ${tokenPair.accessToken}`) {
           const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
           mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
@@ -346,12 +352,41 @@ describe('TokenAuthenticationProvider', () => {
       expect(request.headers).not.toHaveProperty('authorization');
     });
 
+    it('does not redirect non-AJAX requests that do not require authentication if token token cannot be refreshed', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: {},
+        routeAuthRequired: false,
+        path: '/some-path',
+      });
+      const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
+      const authorization = `Bearer ${tokenPair.accessToken}`;
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
+        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      mockOptions.tokens.refresh.mockResolvedValue(null);
+
+      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+        AuthenticationResult.failed(Boom.badRequest('Both access and refresh tokens are expired.'))
+      );
+
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
+
+      expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
+
+      expect(request.headers).not.toHaveProperty('authorization');
+    });
+
     it('fails if new access token is rejected after successful refresh', async () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       const authenticationError = new errors.AuthenticationException('Some error');
-      mockOptions.client.asScoped.mockImplementation(scopeableRequest => {
+      mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
         if (scopeableRequest?.headers.authorization === `Bearer ${tokenPair.accessToken}`) {
           const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
           mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
@@ -386,15 +421,13 @@ describe('TokenAuthenticationProvider', () => {
   });
 
   describe('`logout` method', () => {
-    it('returns `redirected` if state is not presented.', async () => {
+    it('returns `notHandled` if state is not presented.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      await expect(provider.logout(request)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/base-path/login?msg=LOGGED_OUT')
-      );
+      await expect(provider.logout(request)).resolves.toEqual(DeauthenticationResult.notHandled());
 
       await expect(provider.logout(request, null)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/base-path/login?msg=LOGGED_OUT')
+        DeauthenticationResult.notHandled()
       );
 
       expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();

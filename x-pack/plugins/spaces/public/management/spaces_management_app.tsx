@@ -8,7 +8,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { HashRouter as Router, Route, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from 'src/core/public';
+import { StartServicesAccessor } from 'src/core/public';
 import { SecurityLicense } from '../../../security/public';
 import { RegisterManagementAppArgs } from '../../../../../src/plugins/management/public';
 import { PluginsStart } from '../plugin';
@@ -18,7 +18,7 @@ import { ManageSpacePage } from './edit_space';
 import { Space } from '..';
 
 interface CreateParams {
-  getStartServices: CoreSetup<PluginsStart>['getStartServices'];
+  getStartServices: StartServicesAccessor<PluginsStart>;
   spacesManager: SpacesManager;
   securityLicense?: SecurityLicense;
 }
@@ -28,12 +28,15 @@ export const spacesManagementApp = Object.freeze({
   create({ getStartServices, spacesManager, securityLicense }: CreateParams) {
     return {
       id: this.id,
-      order: 10,
+      order: 2,
       title: i18n.translate('xpack.spaces.displayName', {
         defaultMessage: 'Spaces',
       }),
       async mount({ basePath, element, setBreadcrumbs }) {
-        const [{ http, notifications, i18n: i18nStart, application }] = await getStartServices();
+        const [
+          { notifications, i18n: i18nStart, application },
+          { features },
+        ] = await getStartServices();
         const spacesBreadcrumbs = [
           {
             text: i18n.translate('xpack.spaces.management.breadcrumb', {
@@ -48,7 +51,7 @@ export const spacesManagementApp = Object.freeze({
           return (
             <SpacesGridPage
               capabilities={application.capabilities}
-              http={http}
+              getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
               securityEnabled={securityLicense?.getFeatures().showLinks ?? false}
@@ -69,7 +72,7 @@ export const spacesManagementApp = Object.freeze({
           return (
             <ManageSpacePage
               capabilities={application.capabilities}
-              http={http}
+              getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
               securityEnabled={securityLicense?.getFeatures().showLinks ?? false}
@@ -93,7 +96,7 @@ export const spacesManagementApp = Object.freeze({
           return (
             <ManageSpacePage
               capabilities={application.capabilities}
-              http={http}
+              getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
               spaceId={spaceId}

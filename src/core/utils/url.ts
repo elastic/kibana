@@ -23,6 +23,8 @@ import { format as formatUrl, parse as parseUrl, UrlObject } from 'url';
  * We define our own typings because the current version of @types/node
  * declares properties to be optional "hostname?: string".
  * Although, parse call returns "hostname: null | string".
+ *
+ * @public
  */
 export interface URLMeaningfulParts {
   auth?: string | null;
@@ -63,6 +65,7 @@ export interface URLMeaningfulParts {
  *  @param url The string url to parse.
  *  @param urlModifier A function that will modify the parsed url, or return a new one.
  *  @returns The modified and reformatted url
+ *  @public
  */
 export function modifyUrl(
   url: string,
@@ -98,4 +101,26 @@ export function modifyUrl(
     query: modifiedParts.query,
     slashes: modifiedParts.slashes,
   } as UrlObject);
+}
+
+/**
+ * Determine if a url is relative. Any url including a protocol, hostname, or
+ * port is not considered relative. This means that absolute *paths* are considered
+ * to be relative *urls*
+ * @public
+ */
+export function isRelativeUrl(candidatePath: string) {
+  // validate that `candidatePath` is not attempting a redirect to somewhere
+  // outside of this Kibana install
+  const all = parseUrl(candidatePath, false /* parseQueryString */, true /* slashesDenoteHost */);
+  const { protocol, hostname, port } = all;
+  // We should explicitly compare `protocol`, `port` and `hostname` to null to make sure these are not
+  // detected in the URL at all. For example `hostname` can be empty string for Node URL parser, but
+  // browser (because of various bwc reasons) processes URL differently (e.g. `///abc.com` - for browser
+  // hostname is `abc.com`, but for Node hostname is an empty string i.e. everything between schema (`//`)
+  // and the first slash that belongs to path.
+  if (protocol !== null || hostname !== null || port !== null) {
+    return false;
+  }
+  return true;
 }

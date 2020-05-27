@@ -11,29 +11,31 @@ jest.mock('../server/browsers');
 jest.mock('../server/lib/create_queue');
 jest.mock('../server/lib/enqueue_job');
 jest.mock('../server/lib/validate');
-jest.mock('../log_configuration');
 
 import { EventEmitter } from 'events';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { coreMock } from 'src/core/server/mocks';
-import { ReportingPlugin, ReportingCore } from '../server';
+import { ReportingConfig, ReportingCore, ReportingPlugin } from '../server';
 import { ReportingSetupDeps, ReportingStartDeps } from '../server/types';
 
-export const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => ({
-  elasticsearch: setupMock.elasticsearch,
-  security: setupMock.security,
-  usageCollection: {} as any,
-  __LEGACY: { plugins: { xpack_main: { status: new EventEmitter() } } } as any,
-});
+const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => {
+  return {
+    elasticsearch: setupMock.elasticsearch,
+    security: setupMock.security,
+    licensing: {} as any,
+    usageCollection: {} as any,
+    __LEGACY: { plugins: { xpack_main: { status: new EventEmitter() } } } as any,
+  };
+};
 
 export const createMockStartDeps = (startMock?: any): ReportingStartDeps => ({
   data: startMock.data,
-  elasticsearch: startMock.elasticsearch,
   __LEGACY: {} as any,
 });
 
-const createMockReportingPlugin = async (config = {}): Promise<ReportingPlugin> => {
-  const plugin = new ReportingPlugin(coreMock.createPluginInitializerContext(config));
+const createMockReportingPlugin = async (config: ReportingConfig): Promise<ReportingPlugin> => {
+  config = config || {};
+  const plugin = new ReportingPlugin(coreMock.createPluginInitializerContext(config), config);
   const setupMock = coreMock.createSetup();
   const coreStartMock = coreMock.createStart();
   const startMock = {
@@ -47,7 +49,8 @@ const createMockReportingPlugin = async (config = {}): Promise<ReportingPlugin> 
   return plugin;
 };
 
-export const createMockReportingCore = async (config = {}): Promise<ReportingCore> => {
+export const createMockReportingCore = async (config: ReportingConfig): Promise<ReportingCore> => {
+  config = config || {};
   const plugin = await createMockReportingPlugin(config);
   return plugin.getReportingCore();
 };

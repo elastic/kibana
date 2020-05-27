@@ -27,7 +27,7 @@ import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { registerExportRoute } from '../export';
-import { setupServer } from './test_utils';
+import { setupServer, createExportableType } from './test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const exportSavedObjectsToStream = exportMock.exportSavedObjectsToStream as jest.Mock;
@@ -40,12 +40,16 @@ const config = {
 describe('POST /api/saved_objects/_export', () => {
   let server: setupServerReturn['server'];
   let httpSetup: setupServerReturn['httpSetup'];
+  let handlerContext: setupServerReturn['handlerContext'];
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer());
+    ({ server, httpSetup, handlerContext } = await setupServer());
+    handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
+      allowedTypes.map(createExportableType)
+    );
 
     const router = httpSetup.createRouter('/api/saved_objects/');
-    registerExportRoute(router, config, allowedTypes);
+    registerExportRoute(router, config);
 
     await server.start();
   });
@@ -94,7 +98,7 @@ describe('POST /api/saved_objects/_export', () => {
       })
     );
 
-    const objects = (result.text as string).split('\n').map(row => JSON.parse(row));
+    const objects = (result.text as string).split('\n').map((row) => JSON.parse(row));
     expect(objects).toEqual(sortedObjects);
     expect(exportSavedObjectsToStream.mock.calls[0][0]).toEqual(
       expect.objectContaining({

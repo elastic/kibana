@@ -11,6 +11,7 @@ import { Field } from '../models/data_visualizer/data_visualizer';
 import {
   dataVisualizerFieldStatsSchema,
   dataVisualizerOverallStatsSchema,
+  indexPatternTitleSchema,
 } from './schemas/data_visualizer_schema';
 import { RouteInitialization } from '../types';
 
@@ -73,14 +74,23 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
    *
    * @api {post} /api/ml/data_visualizer/get_field_stats/:indexPatternTitle Get stats for fields
    * @apiName GetStatsForFields
-   * @apiDescription Returns fields stats of the index pattern.
+   * @apiDescription Returns the stats on individual fields in the specified index pattern.
    *
-   * @apiParam {String} indexPatternTitle Index pattern title.
+   * @apiSchema (params) indexPatternTitleSchema
+   * @apiSchema (body) dataVisualizerFieldStatsSchema
+   *
+   * @apiSuccess {Object} fieldName stats by field, keyed on the name of the field.
    */
   router.post(
     {
       path: '/api/ml/data_visualizer/get_field_stats/{indexPatternTitle}',
-      validate: dataVisualizerFieldStatsSchema,
+      validate: {
+        params: indexPatternTitleSchema,
+        body: dataVisualizerFieldStatsSchema,
+      },
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -125,14 +135,27 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
    *
    * @api {post} /api/ml/data_visualizer/get_overall_stats/:indexPatternTitle Get overall stats
    * @apiName GetOverallStats
-   * @apiDescription Returns overall stats of the index pattern.
+   * @apiDescription Returns the top level overall stats for the specified index pattern.
    *
-   * @apiParam {String} indexPatternTitle Index pattern title.
+   * @apiSchema (params) indexPatternTitleSchema
+   * @apiSchema (body) dataVisualizerOverallStatsSchema
+   *
+   * @apiSuccess {number} totalCount total count of documents.
+   * @apiSuccess {Object} aggregatableExistsFields stats on aggregatable fields that exist in documents.
+   * @apiSuccess {Object} aggregatableNotExistsFields stats on aggregatable fields that do not exist in documents.
+   * @apiSuccess {Object} nonAggregatableExistsFields stats on non-aggregatable fields that exist in documents.
+   * @apiSuccess {Object} nonAggregatableNotExistsFields stats on non-aggregatable fields that do not exist in documents.
    */
   router.post(
     {
       path: '/api/ml/data_visualizer/get_overall_stats/{indexPatternTitle}',
-      validate: dataVisualizerOverallStatsSchema,
+      validate: {
+        params: indexPatternTitleSchema,
+        body: dataVisualizerOverallStatsSchema,
+      },
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {

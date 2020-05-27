@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { FieldHook, VALIDATION_TYPES, FieldValidateResponse } from '../../hook_form_lib';
 
@@ -69,8 +69,8 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
     field.setValue(newValue);
   };
 
-  const onComboChange = (options: EuiComboBoxOptionProps[]) => {
-    field.setValue(options.map(option => option.label));
+  const onComboChange = (options: EuiComboBoxOptionOption[]) => {
+    field.setValue(options.map((option) => option.label));
   };
 
   const onSearchComboChange = (value: string) => {
@@ -95,7 +95,7 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
         placeholder={i18n.translate('esUi.forms.comboBoxField.placeHolderText', {
           defaultMessage: 'Type and then hit "ENTER"',
         })}
-        selectedOptions={(field.value as any[]).map(v => ({ label: v }))}
+        selectedOptions={(field.value as any[]).map((v) => ({ label: v }))}
         onCreateOption={onCreateComboOption}
         onChange={onComboChange}
         onSearchChange={onSearchComboChange}

@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { first, map } from 'rxjs/operators';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { ReportingCore } from '../';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
-import { ReportingCore } from '../../server';
-import { ESCallCluster, ExportTypesRegistry, ServerFacade } from '../../types';
+import { ReportingConfig } from '../../server';
+import { ExportTypesRegistry } from '../lib/export_types_registry';
+import { ReportingSetupDeps } from '../types';
+import { GetLicense } from './';
 import { getReportingUsage } from './get_reporting_usage';
 import { RangeStats } from './types';
 
@@ -15,19 +20,19 @@ import { RangeStats } from './types';
 const METATYPE = 'kibana_stats';
 
 /*
- * @param {Object} server
  * @return {Object} kibana usage stats type collection object
  */
 export function getReportingUsageCollector(
-  server: ServerFacade,
+  config: ReportingConfig,
   usageCollection: UsageCollectionSetup,
+  getLicense: GetLicense,
   exportTypesRegistry: ExportTypesRegistry,
   isReady: () => Promise<boolean>
 ) {
   return usageCollection.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
-    fetch: (callCluster: ESCallCluster) =>
-      getReportingUsage(server, callCluster, exportTypesRegistry),
+    fetch: (callCluster: CallCluster) =>
+      getReportingUsage(config, getLicense, callCluster, exportTypesRegistry),
     isReady,
 
     /*
@@ -52,15 +57,33 @@ export function getReportingUsageCollector(
 
 export function registerReportingUsageCollector(
   reporting: ReportingCore,
-  server: ServerFacade,
-  usageCollection: UsageCollectionSetup
+  { licensing, usageCollection }: ReportingSetupDeps
 ) {
+  if (!usageCollection) {
+    return;
+  }
+
+  const config = reporting.getConfig();
   const exportTypesRegistry = reporting.getExportTypesRegistry();
+  const getLicense = async () => {
+    return await licensing.license$
+      .pipe(
+        map(({ isAvailable, type }) => ({
+          isAvailable: () => isAvailable,
+          license: {
+            getType: () => type,
+          },
+        })),
+        first()
+      )
+      .toPromise();
+  };
   const collectionIsReady = reporting.pluginHasStarted.bind(reporting);
 
   const collector = getReportingUsageCollector(
-    server,
+    config,
     usageCollection,
+    getLicense,
     exportTypesRegistry,
     collectionIsReady
   );

@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getPageObjects, getService, updateBaselines }) {
+export default function ({ getPageObjects, getService, updateBaselines }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
   const screenshot = getService('screenshots');
 
@@ -30,7 +30,9 @@ export default function({ getPageObjects, getService, updateBaselines }) {
     // Skipped because EMS vectors are not accessible in CI
     describe('ecommerce', () => {
       before(async () => {
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+          useActualUrl: true,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('ecommerce');
         await PageObjects.maps.loadSavedMap('[eCommerce] Orders by Country');
@@ -45,7 +47,9 @@ export default function({ getPageObjects, getService, updateBaselines }) {
 
       after(async () => {
         await PageObjects.maps.existFullScreen();
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+          useActualUrl: true,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.removeSampleDataSet('ecommerce');
       });
@@ -61,7 +65,9 @@ export default function({ getPageObjects, getService, updateBaselines }) {
 
     describe('flights', () => {
       before(async () => {
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+          useActualUrl: true,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('flights');
         await PageObjects.maps.loadSavedMap('[Flights] Origin and Destination Flight Time');
@@ -72,7 +78,9 @@ export default function({ getPageObjects, getService, updateBaselines }) {
 
       after(async () => {
         await PageObjects.maps.existFullScreen();
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+          useActualUrl: true,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.removeSampleDataSet('flights');
       });
@@ -89,7 +97,9 @@ export default function({ getPageObjects, getService, updateBaselines }) {
     // Skipped because EMS vectors are not accessible in CI
     describe('web logs', () => {
       before(async () => {
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+          useActualUrl: true,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('logs');
         await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
@@ -101,7 +111,9 @@ export default function({ getPageObjects, getService, updateBaselines }) {
 
       after(async () => {
         await PageObjects.maps.existFullScreen();
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+          useActualUrl: true,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.removeSampleDataSet('logs');
       });

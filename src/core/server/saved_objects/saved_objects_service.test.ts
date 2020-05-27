@@ -23,7 +23,7 @@ import {
   clientProviderInstanceMock,
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
-
+import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
@@ -34,8 +34,11 @@ import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service
 import { legacyServiceMock } from '../legacy/legacy_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
-import { BehaviorSubject } from 'rxjs';
 import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
+import { SavedObjectsRepository } from './service/lib/repository';
+import { KibanaRequest } from '../http';
+
+jest.mock('./service/lib/repository');
 
 describe('SavedObjectsService', () => {
   const createCoreContext = ({
@@ -43,7 +46,7 @@ describe('SavedObjectsService', () => {
     env,
   }: { skipMigration?: boolean; env?: Env } = {}) => {
     const configService = configServiceMock.create({ atPath: { skip: true } });
-    configService.atPath.mockImplementation(path => {
+    configService.atPath.mockImplementation((path) => {
       if (path === 'migrations') {
         return new BehaviorSubject({ skip: skipMigration });
       }
@@ -139,7 +142,7 @@ describe('SavedObjectsService', () => {
         const type = {
           name: 'someType',
           hidden: false,
-          namespaceAgnostic: false,
+          namespaceType: 'single' as 'single',
           mappings: { properties: {} },
         };
         setup.registerType(type);
@@ -172,14 +175,12 @@ describe('SavedObjectsService', () => {
       return expect(KibanaMigratorMock.mock.calls[0][0].callCluster()).resolves.toMatch('success');
     });
 
-    it('skips KibanaMigrator migrations when --optimize=true', async () => {
-      const coreContext = createCoreContext({
-        env: ({ cliArgs: { optimize: true }, packageInfo: { version: 'x.x.x' } } as unknown) as Env,
-      });
+    it('skips KibanaMigrator migrations when pluginsInitialized=false', async () => {
+      const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);
 
       await soService.setup(createSetupDeps());
-      await soService.start({});
+      await soService.start({ pluginsInitialized: false });
       expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
     });
 
@@ -191,7 +192,7 @@ describe('SavedObjectsService', () => {
       expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
     });
 
-    it('waits for all es nodes to be compatible before running migrations', async done => {
+    it('waits for all es nodes to be compatible before running migrations', async (done) => {
       expect.assertions(2);
       const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);
@@ -254,7 +255,7 @@ describe('SavedObjectsService', () => {
         setup.registerType({
           name: 'someType',
           hidden: false,
-          namespaceAgnostic: false,
+          namespaceType: 'single' as 'single',
           mappings: { properties: {} },
         });
       }).toThrowErrorMatchingInlineSnapshot(
@@ -270,6 +271,87 @@ describe('SavedObjectsService', () => {
         const { getTypeRegistry } = await soService.start({});
 
         expect(getTypeRegistry()).toBe(typeRegistryInstanceMock);
+      });
+    });
+
+    describe('#createScopedRepository', () => {
+      it('creates a respository scoped to the user', async () => {
+        const coreContext = createCoreContext({ skipMigration: false });
+        const soService = new SavedObjectsService(coreContext);
+        const coreSetup = createSetupDeps();
+        await soService.setup(coreSetup);
+        const { createScopedRepository } = await soService.start({});
+
+        const req = {} as KibanaRequest;
+        createScopedRepository(req);
+
+        expect(coreSetup.elasticsearch.adminClient.asScoped).toHaveBeenCalledWith(req);
+
+        const [
+          {
+            value: { callAsCurrentUser },
+          },
+        ] = coreSetup.elasticsearch.adminClient.asScoped.mock.results;
+
+        const [
+          [, , , callCluster, includedHiddenTypes],
+        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+
+        expect(callCluster).toBe(callAsCurrentUser);
+        expect(includedHiddenTypes).toEqual([]);
+      });
+
+      it('creates a respository including hidden types when specified', async () => {
+        const coreContext = createCoreContext({ skipMigration: false });
+        const soService = new SavedObjectsService(coreContext);
+        const coreSetup = createSetupDeps();
+        await soService.setup(coreSetup);
+        const { createScopedRepository } = await soService.start({});
+
+        const req = {} as KibanaRequest;
+        createScopedRepository(req, ['someHiddenType']);
+
+        const [
+          [, , , , includedHiddenTypes],
+        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+
+        expect(includedHiddenTypes).toEqual(['someHiddenType']);
+      });
+    });
+
+    describe('#createInternalRepository', () => {
+      it('creates a respository using the admin user', async () => {
+        const coreContext = createCoreContext({ skipMigration: false });
+        const soService = new SavedObjectsService(coreContext);
+        const coreSetup = createSetupDeps();
+        await soService.setup(coreSetup);
+        const { createInternalRepository } = await soService.start({});
+
+        createInternalRepository();
+
+        const [
+          [, , , callCluster, includedHiddenTypes],
+        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+
+        expect(coreSetup.elasticsearch.adminClient.callAsInternalUser).toBe(callCluster);
+        expect(callCluster).toBe(coreSetup.elasticsearch.adminClient.callAsInternalUser);
+        expect(includedHiddenTypes).toEqual([]);
+      });
+
+      it('creates a respository including hidden types when specified', async () => {
+        const coreContext = createCoreContext({ skipMigration: false });
+        const soService = new SavedObjectsService(coreContext);
+        const coreSetup = createSetupDeps();
+        await soService.setup(coreSetup);
+        const { createInternalRepository } = await soService.start({});
+
+        createInternalRepository(['someHiddenType']);
+
+        const [
+          [, , , , includedHiddenTypes],
+        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+
+        expect(includedHiddenTypes).toEqual(['someHiddenType']);
       });
     });
   });

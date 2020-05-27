@@ -4,24 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ElasticsearchServiceSetup,
-  KibanaRequest,
-  IUiSettingsClient,
-} from '../../../../../../../../src/core/server';
+import { IUiSettingsClient, KibanaRequest } from '../../../../../../../../src/core/server';
 import {
   esQuery,
   EsQueryConfig,
   Filter,
   IIndexPattern,
   Query,
-  // Reporting uses an unconventional directory structure so the linter marks this as a violation, server files should
-  // be moved under reporting/server/
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../../src/plugins/data/server';
-import { CancellationToken } from '../../../../common/cancellation_token';
+import { CancellationToken } from '../../../../../../../plugins/reporting/common';
 import { ReportingCore } from '../../../../server';
-import { Logger, RequestFacade, ServerFacade } from '../../../../types';
+import { LevelLogger } from '../../../../server/lib';
+import { RequestFacade } from '../../../../server/types';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import {
   CsvResultFromSearch,
@@ -62,9 +56,7 @@ const getUiSettings = async (config: IUiSettingsClient) => {
 export async function generateCsvSearch(
   req: RequestFacade,
   reporting: ReportingCore,
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
-  logger: Logger,
+  logger: LevelLogger,
   searchPanel: SearchPanel,
   jobParams: JobParamsDiscoverCsv
 ): Promise<CsvResultFromSearch> {
@@ -159,11 +151,12 @@ export async function generateCsvSearch(
     },
   };
 
+  const config = reporting.getConfig();
+  const elasticsearch = await reporting.getElasticsearchService();
   const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(
     KibanaRequest.from(req.getRawRequest())
   );
   const callCluster = (...params: [string, object]) => callAsCurrentUser(...params);
-  const config = server.config();
   const uiSettings = await getUiSettings(uiConfig);
 
   const generateCsvParams: GenerateCsvParams = {
@@ -176,8 +169,9 @@ export async function generateCsvSearch(
     cancellationToken: new CancellationToken(),
     settings: {
       ...uiSettings,
-      maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),
-      scroll: config.get('xpack.reporting.csv.scroll'),
+      maxSizeBytes: config.get('csv', 'maxSizeBytes'),
+      scroll: config.get('csv', 'scroll'),
+      escapeFormulaValues: config.get('csv', 'escapeFormulaValues'),
       timezone,
     },
   };

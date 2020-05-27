@@ -29,17 +29,18 @@ import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from '../panel';
 import { IContainer } from './i_container';
-import { GetEmbeddableFactory, GetEmbeddableFactories } from '../types';
+import { EmbeddableStart } from '../../plugin';
 
 export interface EmbeddableChildPanelProps {
   embeddableId: string;
   className?: string;
   container: IContainer;
   getActions: UiActionsService['getTriggerCompatibleActions'];
-  getEmbeddableFactory: GetEmbeddableFactory;
-  getAllEmbeddableFactories: GetEmbeddableFactories;
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
+  application: CoreStart['application'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
 }
@@ -101,6 +102,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
             getEmbeddableFactory={this.props.getEmbeddableFactory}
             getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
             overlays={this.props.overlays}
+            application={this.props.application}
             notifications={this.props.notifications}
             inspector={this.props.inspector}
             SavedObjectFinder={this.props.SavedObjectFinder}

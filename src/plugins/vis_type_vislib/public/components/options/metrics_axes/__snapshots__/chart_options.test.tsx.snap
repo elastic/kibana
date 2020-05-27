@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ChartOptions component should init with the default set of props 1`] = `
+<Fragment>
+  <SelectOption
+    id="seriesValueAxis0"
+    label="Value axis"
+    options={
+      Array [
+        Object {
+          "text": "ValueAxis-1",
+          "value": "ValueAxis-1",
+        },
+        Object {
+          "text": "New axis…",
+          "value": "new",
+        },
+      ]
+    }
+    paramName="valueAxis"
+    setValue={[Function]}
+    value="ValueAxis-1"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    gutterSize="s"
+  >
+    <EuiFlexItem>
+      <SelectOption
+        id="seriesType0"
+        label="Chart type"
+        paramName="type"
+        setValue={[Function]}
+        value="histogram"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <SelectOption
+        id="seriesMode0"
+        label="Mode"
+        paramName="mode"
+        setValue={[Function]}
+        value="stacked"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;

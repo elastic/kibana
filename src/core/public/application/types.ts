@@ -67,6 +67,13 @@ export interface AppBase {
   navLinkStatus?: AppNavLinkStatus;
 
   /**
+   * Allow to define the default path a user should be directed to when navigating to the app.
+   * When defined, this value will be used as a default for the `path` option when calling {@link ApplicationStart.navigateToApp | navigateToApp}`,
+   * and will also be appended to the {@link ChromeNavLink | application navLink} in the navigation bar.
+   */
+  defaultPath?: string;
+
+  /**
    * An {@link AppUpdater} observable that can be used to update the application {@link AppUpdatableFields} at runtime.
    *
    * @example
@@ -187,7 +194,10 @@ export enum AppNavLinkStatus {
  * Defines the list of fields that can be updated via an {@link AppUpdater}.
  * @public
  */
-export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip'>;
+export type AppUpdatableFields = Pick<
+  AppBase,
+  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'
+>;
 
 /**
  * Updater for applications.
@@ -539,6 +549,7 @@ export type Mounter<T = App | LegacyApp> = SelectivePartial<
     appRoute: string;
     appBasePath: string;
     mount: T extends LegacyApp ? LegacyAppMounter : AppMounter;
+    legacy: boolean;
     unmountBeforeMounting: T extends LegacyApp ? true : boolean;
   },
   T extends LegacyApp ? never : 'unmountBeforeMounting'
@@ -642,17 +653,47 @@ export interface ApplicationStart {
    * Navigate to a given app
    *
    * @param appId
-   * @param options.path - optional path inside application to deep link to
+   * @param options.path - optional path inside application to deep link to.
+   *                       If undefined, will use {@link AppBase.defaultPath | the app's default path}` as default.
    * @param options.state - optional state to forward to the application
    */
   navigateToApp(appId: string, options?: { path?: string; state?: any }): Promise<void>;
+
+  /**
+   * Navigate to given url, which can either be an absolute url or a relative path, in a SPA friendly way when possible.
+   *
+   * If all these criteria are true for the given url:
+   * - (only for absolute URLs) The origin of the URL matches the origin of the browser's current location
+   * - The pathname of the URL starts with the current basePath (eg. /mybasepath/s/my-space)
+   * - The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)
+   *
+   * Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path.
+   * Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`
+   *
+   * @example
+   * ```ts
+   * // current url: `https://kibana:8080/base-path/s/my-space/app/dashboard`
+   *
+   * // will call `application.navigateToApp('discover', { path: '/some-path?foo=bar'})`
+   * application.navigateToUrl('https://kibana:8080/base-path/s/my-space/app/discover/some-path?foo=bar')
+   * application.navigateToUrl('/base-path/s/my-space/app/discover/some-path?foo=bar')
+   *
+   * // will perform a full page reload using `window.location.assign`
+   * application.navigateToUrl('https://elsewhere:8080/base-path/s/my-space/app/discover/some-path') // origin does not match
+   * application.navigateToUrl('/app/discover/some-path') // does not include the current basePath
+   * application.navigateToUrl('/base-path/s/my-space/app/unknown-app/some-path') // unknown application
+   * ```
+   *
+   * @param url - an absolute url, or a relative path, to navigate to.
+   */
+  navigateToUrl(url: string): Promise<void>;
 
   /**
    * Returns an URL to a given app, including the global base path.
    * By default, the URL is relative (/basePath/app/my-app).
    * Use the `absolute` option to generate an absolute url (http://host:port/basePath/app/my-app)
    *
-   * Note that when generating absolute urls, the protocol, host and port are determined from the browser location.
+   * Note that when generating absolute urls, the origin (protocol, host and port) are determined from the browser's location.
    *
    * @param appId
    * @param options.path - optional path inside application to deep link to
@@ -665,7 +706,6 @@ export interface ApplicationStart {
    * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
    *
    * @deprecated
-   * @param pluginOpaqueId - The opaque ID of the plugin that is registering the context.
    * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
    * @param provider - A {@link IContextProvider} function
    */
@@ -684,7 +724,7 @@ export interface ApplicationStart {
 export interface InternalApplicationStart
   extends Pick<
     ApplicationStart,
-    'capabilities' | 'navigateToApp' | 'getUrlForApp' | 'currentAppId$'
+    'capabilities' | 'navigateToApp' | 'navigateToUrl' | 'getUrlForApp' | 'currentAppId$'
   > {
   /**
    * Apps available based on the current capabilities.

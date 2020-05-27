@@ -7,7 +7,7 @@
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/helpers/setup_request';
 import { SERVICE_NODE_NAME } from '../elasticsearch_fieldnames';
@@ -17,7 +17,7 @@ import { getMetricsProjection } from './metrics';
 export function getServiceNodesProjection({
   setup,
   serviceName,
-  serviceNodeName
+  serviceNodeName,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
@@ -27,18 +27,18 @@ export function getServiceNodesProjection({
     getMetricsProjection({
       setup,
       serviceName,
-      serviceNodeName
+      serviceNodeName,
     }),
     {
       body: {
         aggs: {
           nodes: {
             terms: {
-              field: SERVICE_NODE_NAME
-            }
-          }
-        }
-      }
+              field: SERVICE_NODE_NAME,
+            },
+          },
+        },
+      },
     }
   );
 }

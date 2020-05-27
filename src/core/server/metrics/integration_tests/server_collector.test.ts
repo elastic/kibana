@@ -34,7 +34,7 @@ describe('ServerMetricsCollector', () => {
   let hapiServer: HapiServer;
   let router: IRouter;
 
-  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const sendGet = (path: string) => supertest(hapiServer.listener).get(path);
 
   beforeEach(async () => {
@@ -81,7 +81,7 @@ describe('ServerMetricsCollector', () => {
   });
 
   it('collect disconnects requests infos', async () => {
-    const never = new Promise(resolve => undefined);
+    const never = new Promise((resolve) => undefined);
     const hitSubject = new BehaviorSubject(0);
 
     router.get({ path: '/', validate: false }, async (ctx, req, res) => {
@@ -100,7 +100,7 @@ describe('ServerMetricsCollector', () => {
 
     await hitSubject
       .pipe(
-        filter(count => count >= 2),
+        filter((count) => count >= 2),
         take(1)
       )
       .toPromise();
@@ -177,7 +177,7 @@ describe('ServerMetricsCollector', () => {
     const waitForHits = (hits: number) =>
       hitSubject
         .pipe(
-          filter(count => count >= hits),
+          filter((count) => count >= hits),
           take(1)
         )
         .toPromise();
@@ -185,19 +185,99 @@ describe('ServerMetricsCollector', () => {
     let metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(0);
 
-    sendGet('/').end(() => null);
+    // supertest requests are executed when calling `.then` (or awaiting them).
+    // however in this test we need to send the request now and await for it later in the code.
+    // also using `.end` is not possible as it would execute the request twice.
+    // so the only option is this noop `.then`.
+    const res1 = sendGet('/').then((res) => res);
     await waitForHits(1);
     metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(1);
 
-    sendGet('/').end(() => null);
+    const res2 = sendGet('/').then((res) => res);
     await waitForHits(2);
     metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(2);
 
     waitSubject.next('go');
-    await delay(requestWaitDelay);
+    await Promise.all([res1, res2]);
     metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(0);
+  });
+
+  describe('#reset', () => {
+    it('reset the requests state', async () => {
+      router.get({ path: '/', validate: false }, async (ctx, req, res) => {
+        return res.ok({ body: '' });
+      });
+      await server.start();
+
+      await sendGet('/');
+      await sendGet('/');
+      await sendGet('/not-found');
+
+      let metrics = await collector.collect();
+
+      expect(metrics.requests).toEqual({
+        total: 3,
+        disconnects: 0,
+        statusCodes: {
+          '200': 2,
+          '404': 1,
+        },
+      });
+
+      collector.reset();
+      metrics = await collector.collect();
+
+      expect(metrics.requests).toEqual({
+        total: 0,
+        disconnects: 0,
+        statusCodes: {},
+      });
+
+      await sendGet('/');
+      await sendGet('/not-found');
+
+      metrics = await collector.collect();
+
+      expect(metrics.requests).toEqual({
+        total: 2,
+        disconnects: 0,
+        statusCodes: {
+          '200': 1,
+          '404': 1,
+        },
+      });
+    });
+
+    it('resets the response times', async () => {
+      router.get({ path: '/no-delay', validate: false }, async (ctx, req, res) => {
+        return res.ok({ body: '' });
+      });
+      router.get({ path: '/500-ms', validate: false }, async (ctx, req, res) => {
+        await delay(500);
+        return res.ok({ body: '' });
+      });
+
+      await server.start();
+
+      await Promise.all([sendGet('/no-delay'), sendGet('/500-ms')]);
+      let metrics = await collector.collect();
+
+      expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(250);
+      expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(500);
+
+      collector.reset();
+      metrics = await collector.collect();
+      expect(metrics.response_times.avg_in_millis).toBe(0);
+      expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(0);
+
+      await Promise.all([sendGet('/500-ms'), sendGet('/500-ms')]);
+      metrics = await collector.collect();
+
+      expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(500);
+      expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(500);
+    });
   });
 });

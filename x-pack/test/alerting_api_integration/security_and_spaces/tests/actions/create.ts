@@ -24,7 +24,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle create action request appropriately', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -52,9 +52,10 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'action');
+              objectRemover.add(space.id, response.body.id, 'action', 'actions');
               expect(response.body).to.eql({
                 id: response.body.id,
+                isPreconfigured: false,
                 name: 'My action',
                 actionTypeId: 'test.index-record',
                 config: {
@@ -77,7 +78,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
         it(`should handle create action request appropriately when action type isn't registered`, async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -113,7 +114,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
         it('should handle create action request appropriately when payload is empty and invalid', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({});
@@ -145,7 +146,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
         it(`should handle create action request appropriately when config isn't valid`, async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -184,7 +185,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
         it(`should handle create action requests for action types that are not enabled`, async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -205,10 +206,10 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(response.statusCode).to.eql(400);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 400,
-                error: 'Bad Request',
+                statusCode: 403,
+                error: 'Forbidden',
                 message:
                   'action type "test.not-enabled" is not enabled in the Kibana config xpack.actions.enabledActionTypes',
               });

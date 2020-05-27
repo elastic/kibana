@@ -7,10 +7,12 @@
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
+import { API_URLS } from '../../../common/constants';
 
 export const createGetMonitorDurationRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/monitor/duration',
+  path: API_URLS.MONITOR_DURATION,
+
   validate: {
     query: schema.object({
       monitorId: schema.string(),
@@ -18,15 +20,13 @@ export const createGetMonitorDurationRoute: UMRestApiRouteFactory = (libs: UMSer
       dateEnd: schema.string(),
     }),
   },
-  options: {
-    tags: ['access:uptime'],
-  },
-  handler: async ({ callES }, _context, request, response): Promise<any> => {
+  handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
     const { monitorId, dateStart, dateEnd } = request.query;
     return response.ok({
       body: {
         ...(await libs.requests.getMonitorDurationChart({
           callES,
+          dynamicSettings,
           monitorId,
           dateStart,
           dateEnd,

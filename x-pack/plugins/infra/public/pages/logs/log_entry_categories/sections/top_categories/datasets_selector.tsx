@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 
-type DatasetOptionProps = EuiComboBoxOptionProps<string>;
+type DatasetOptionProps = EuiComboBoxOptionOption<string>;
 
 export const DatasetsSelector: React.FunctionComponent<{
   availableDatasets: string[];
@@ -20,7 +20,7 @@ export const DatasetsSelector: React.FunctionComponent<{
 }> = ({ availableDatasets, isLoading = false, onChangeDatasetSelection, selectedDatasets }) => {
   const options = useMemo<DatasetOptionProps[]>(
     () =>
-      availableDatasets.map(dataset => ({
+      availableDatasets.map((dataset) => ({
         value: dataset,
         label: getFriendlyNameForPartitionId(dataset),
       })),

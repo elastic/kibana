@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { TelemetryPlugin } from './plugin';
+import { PluginInitializerContext } from 'kibana/public';
+import { TelemetryPlugin, TelemetryPluginConfig } from './plugin';
 export { TelemetryPluginStart, TelemetryPluginSetup } from './plugin';
 
-export function plugin() {
-  return new TelemetryPlugin();
+export function plugin(initializerContext: PluginInitializerContext<TelemetryPluginConfig>) {
+  return new TelemetryPlugin(initializerContext);
 }

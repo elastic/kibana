@@ -37,11 +37,11 @@ import {
   IHttpFetchError,
   NotificationsStart,
 } from 'src/core/public';
+import { FeaturesPluginStart } from '../../../../../features/public';
+import { Feature } from '../../../../../features/common';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
 import { Space } from '../../../../../spaces/public';
-import { Feature } from '../../../../../features/public';
 import {
-  KibanaPrivileges,
   RawKibanaPrivileges,
   Role,
   BuiltinESPrivileges,
@@ -64,6 +64,7 @@ import { DocumentationLinksService } from '../documentation_links';
 import { IndicesAPIClient } from '../indices_api_client';
 import { RolesAPIClient } from '../roles_api_client';
 import { PrivilegesAPIClient } from '../privileges_api_client';
+import { KibanaPrivileges } from '../model';
 
 interface Props {
   action: 'edit' | 'clone';
@@ -73,6 +74,7 @@ interface Props {
   indicesAPIClient: PublicMethodsOf<IndicesAPIClient>;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   privilegesAPIClient: PublicMethodsOf<PrivilegesAPIClient>;
+  getFeatures: FeaturesPluginStart['getFeatures'];
   docLinks: DocumentationLinksService;
   http: HttpStart;
   license: SecurityLicense;
@@ -89,8 +91,8 @@ function useRunAsUsers(
   const [userNames, setUserNames] = useState<string[] | null>(null);
   useEffect(() => {
     userAPIClient.getUsers().then(
-      users => setUserNames(users.map(user => user.username)),
-      err => fatalErrors.add(err)
+      (users) => setUserNames(users.map((user) => user.username)),
+      (err) => fatalErrors.add(err)
     );
   }, [fatalErrors, userAPIClient]);
 
@@ -141,7 +143,7 @@ function usePrivileges(
     ]).then(
       ([kibanaPrivileges, builtInESPrivileges]) =>
         setPrivileges([kibanaPrivileges, builtInESPrivileges]),
-      err => fatalErrors.add(err)
+      (err) => fatalErrors.add(err)
     );
   }, [privilegesAPIClient, fatalErrors]);
 
@@ -168,7 +170,7 @@ function useRole(
         } as Role);
 
     rolePromise
-      .then(fetchedRole => {
+      .then((fetchedRole) => {
         if (action === 'clone' && checkIfRoleReserved(fetchedRole)) {
           backToRoleList();
           return;
@@ -223,19 +225,21 @@ function useSpaces(http: HttpStart, fatalErrors: FatalErrorsSetup, spacesEnabled
   const [spaces, setSpaces] = useState<Space[] | null>(null);
   useEffect(() => {
     (spacesEnabled ? http.get('/api/spaces/space') : Promise.resolve([])).then(
-      fetchedSpaces => setSpaces(fetchedSpaces),
-      err => fatalErrors.add(err)
+      (fetchedSpaces) => setSpaces(fetchedSpaces),
+      (err) => fatalErrors.add(err)
     );
   }, [http, fatalErrors, spacesEnabled]);
 
   return spaces;
 }
 
-function useFeatures(http: HttpStart, fatalErrors: FatalErrorsSetup) {
+function useFeatures(
+  getFeatures: FeaturesPluginStart['getFeatures'],
+  fatalErrors: FatalErrorsSetup
+) {
   const [features, setFeatures] = useState<Feature[] | null>(null);
   useEffect(() => {
-    http
-      .get('/api/features')
+    getFeatures()
       .catch((err: IHttpFetchError) => {
         // Currently, the `/api/features` endpoint effectively requires the "Global All" kibana privilege (e.g., what
         // the `kibana_user` grants), because it returns information about all registered features (#35841). It's
@@ -246,14 +250,15 @@ function useFeatures(http: HttpStart, fatalErrors: FatalErrorsSetup) {
         // 404 here, and respond in a way that still allows the UI to render itself.
         const unauthorizedForFeatures = err.response?.status === 404;
         if (unauthorizedForFeatures) {
-          return [];
+          return [] as Feature[];
         }
 
         fatalErrors.add(err);
-        throw err;
       })
-      .then(setFeatures);
-  }, [http, fatalErrors]);
+      .then((retrievedFeatures) => {
+        setFeatures(retrievedFeatures);
+      });
+  }, [fatalErrors, getFeatures]);
 
   return features;
 }
@@ -268,6 +273,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   rolesAPIClient,
   indicesAPIClient,
   privilegesAPIClient,
+  getFeatures,
   http,
   roleName,
   action,
@@ -287,7 +293,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const indexPatternsTitles = useIndexPatternsTitles(indexPatterns, fatalErrors, notifications);
   const privileges = usePrivileges(privilegesAPIClient, fatalErrors);
   const spaces = useSpaces(http, fatalErrors, spacesEnabled);
-  const features = useFeatures(http, fatalErrors);
+  const features = useFeatures(getFeatures, fatalErrors);
   const [role, setRole] = useRole(
     rolesAPIClient,
     fatalErrors,
@@ -374,9 +380,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
                 id="xpack.security.management.editRole.roleNameFormRowHelpText"
                 defaultMessage="A role's name cannot be changed once it has been created."
               />
-            ) : (
-              undefined
-            )
+            ) : undefined
           }
           {...validator.validateRoleName(role)}
         >
@@ -425,11 +429,11 @@ export const EditRolePage: FunctionComponent<Props> = ({
       <div>
         <EuiSpacer />
         <KibanaPrivilegesRegion
-          kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges)}
+          kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}
           spaces={spaces}
           spacesEnabled={spacesEnabled}
-          features={features}
           uiCapabilities={uiCapabilities}
+          canCustomizeSubFeaturePrivileges={license.getFeatures().allowSubFeaturePrivileges}
           editable={!isRoleReadOnly}
           role={role}
           onChange={onRoleChange}

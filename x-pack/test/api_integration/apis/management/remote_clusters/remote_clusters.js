@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { API_BASE_PATH } from './constants';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
@@ -16,7 +16,7 @@ export default function({ getService }) {
     : '9300';
   const NODE_SEED = `localhost:${esTransportPort}`;
 
-  describe('Remote Clusters', function() {
+  describe('Remote Clusters', function () {
     this.tags(['skipCloud']);
 
     describe('Empty List', () => {
@@ -40,6 +40,7 @@ export default function({ getService }) {
             name: 'test_cluster',
             seeds: [NODE_SEED],
             skipUnavailable: true,
+            mode: 'sniff',
           })
           .expect(200);
 
@@ -58,6 +59,7 @@ export default function({ getService }) {
             name: 'test_cluster',
             seeds: [NODE_SEED],
             skipUnavailable: false,
+            mode: 'sniff',
           })
           .expect(409);
 
@@ -79,6 +81,7 @@ export default function({ getService }) {
           .send({
             skipUnavailable: false,
             seeds: [NODE_SEED],
+            mode: 'sniff',
           })
           .expect(200);
 
@@ -87,6 +90,7 @@ export default function({ getService }) {
           skipUnavailable: 'false', // ES issue #35671
           seeds: [NODE_SEED],
           isConfiguredByNode: false,
+          mode: 'sniff',
         });
       });
     });
@@ -109,6 +113,7 @@ export default function({ getService }) {
               initialConnectTimeout: '30s',
               skipUnavailable: false,
               isConfiguredByNode: false,
+              mode: 'sniff',
             },
           ]);
         });
@@ -119,10 +124,7 @@ export default function({ getService }) {
       it('should allow us to delete a remote cluster', async () => {
         const uri = `${API_BASE_PATH}/test_cluster`;
 
-        const { body } = await supertest
-          .delete(uri)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
+        const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
 
         expect(body).to.eql({
           itemsDeleted: ['test_cluster'],
@@ -139,6 +141,7 @@ export default function({ getService }) {
             name: 'test_cluster1',
             seeds: [NODE_SEED],
             skipUnavailable: true,
+            mode: 'sniff',
           })
           .expect(200);
 
@@ -149,6 +152,7 @@ export default function({ getService }) {
             name: 'test_cluster2',
             seeds: [NODE_SEED],
             skipUnavailable: true,
+            mode: 'sniff',
           })
           .expect(200);
 
@@ -156,16 +160,13 @@ export default function({ getService }) {
 
         const {
           body: { itemsDeleted, errors },
-        } = await supertest
-          .delete(uri)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
+        } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
 
         expect(errors).to.eql([]);
 
         // The order isn't guaranteed, so we assert against individual names instead of asserting
         // against the value of the array itself.
-        ['test_cluster1', 'test_cluster2'].forEach(clusterName => {
+        ['test_cluster1', 'test_cluster2'].forEach((clusterName) => {
           expect(itemsDeleted.includes(clusterName)).to.be(true);
         });
       });
@@ -173,10 +174,7 @@ export default function({ getService }) {
       it(`should tell us which remote clusters couldn't be deleted`, async () => {
         const uri = `${API_BASE_PATH}/test_cluster_doesnt_exist`;
 
-        const { body } = await supertest
-          .delete(uri)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
+        const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
 
         expect(body).to.eql({
           itemsDeleted: [],

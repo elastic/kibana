@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge, EuiButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
-import { Option } from '@elastic/eui/src/components/selectable/types';
+import { EuiSelectableOption } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -15,7 +15,7 @@ import { useVisibilityState } from '../../utils/use_visibility_state';
 import { euiStyled } from '../../../../observability/public';
 
 interface SelectableColumnOption {
-  optionProps: Option;
+  optionProps: EuiSelectableOption;
   columnConfiguration: LogColumnConfiguration;
 }
 
@@ -58,7 +58,7 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
           },
         },
       },
-      ...availableFields.map<SelectableColumnOption>(field => ({
+      ...availableFields.map<SelectableColumnOption>((field) => ({
         optionProps: {
           'data-test-subj': `addFieldLogColumn addFieldLogColumn:${field}`,
           // this key works around EuiSelectable using a lowercased label as
@@ -78,17 +78,17 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
     [availableFields]
   );
 
-  const availableOptions = useMemo<Option[]>(
-    () => availableColumnOptions.map(availableColumnOption => availableColumnOption.optionProps),
+  const availableOptions = useMemo<EuiSelectableOption[]>(
+    () => availableColumnOptions.map((availableColumnOption) => availableColumnOption.optionProps),
     [availableColumnOptions]
   );
 
   const handleColumnSelection = useCallback(
-    (selectedOptions: Option[]) => {
+    (selectedOptions: EuiSelectableOption[]) => {
       closePopover();
 
       const selectedOptionIndex = selectedOptions.findIndex(
-        selectedOption => selectedOption.checked === 'on'
+        (selectedOption) => selectedOption.checked === 'on'
       );
       const selectedOption = availableColumnOptions[selectedOptionIndex];
 

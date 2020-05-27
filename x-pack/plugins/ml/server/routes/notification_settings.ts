@@ -22,6 +22,9 @@ export function notificationRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/notification_settings',
       validate: false,
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {

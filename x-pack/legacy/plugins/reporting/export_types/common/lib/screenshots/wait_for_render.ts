@@ -4,19 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CaptureConfig } from '../../../../types';
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { LevelLogger } from '../../../../server/lib';
-import { LayoutInstance } from '../../layouts/layout';
+import { i18n } from '@kbn/i18n';
+import { LevelLogger, startTrace } from '../../../../server/lib';
+import { HeadlessChromiumDriver } from '../../../../server/browsers';
+import { CaptureConfig } from '../../../../server/types';
+import { LayoutInstance } from '../../layouts';
 import { CONTEXT_WAITFORRENDER } from './constants';
 
 export const waitForRenderComplete = async (
   captureConfig: CaptureConfig,
-  browser: HeadlessBrowser,
+  browser: HeadlessChromiumDriver,
   layout: LayoutInstance,
   logger: LevelLogger
 ) => {
-  logger.debug('waiting for rendering to complete');
+  const endTrace = startTrace('wait_for_render', 'wait');
+
+  logger.debug(
+    i18n.translate('xpack.reporting.screencapture.waitingForRenderComplete', {
+      defaultMessage: 'waiting for rendering to complete',
+    })
+  );
 
   return await browser
     .evaluate(
@@ -28,13 +35,13 @@ export const waitForRenderComplete = async (
           const renderedTasks = [];
 
           function waitForRender(visualization: Element) {
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
               visualization.addEventListener('renderComplete', () => resolve());
             });
           }
 
           function waitForRenderDelay() {
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
               setTimeout(resolve, visLoadDelay);
             });
           }
@@ -56,7 +63,7 @@ export const waitForRenderComplete = async (
           // capture the first visualization before it was actually in the DOM.
           // Note: 100 proved too short, see https://github.com/elastic/kibana/issues/22581,
           // bumping to 250.
-          const hackyWaitForVisualizations = () => new Promise(r => setTimeout(r, 250));
+          const hackyWaitForVisualizations = () => new Promise((r) => setTimeout(r, 250));
 
           return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
         },
@@ -66,6 +73,12 @@ export const waitForRenderComplete = async (
       logger
     )
     .then(() => {
-      logger.debug('rendering is complete');
+      logger.debug(
+        i18n.translate('xpack.reporting.screencapture.renderIsComplete', {
+          defaultMessage: 'rendering is complete',
+        })
+      );
+
+      endTrace();
     });
 };

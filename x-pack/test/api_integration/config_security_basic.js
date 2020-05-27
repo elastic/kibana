@@ -6,15 +6,16 @@
 
 import { default as createTestConfig } from './config';
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   //security APIs should function the same under a basic or trial license
-  return createTestConfig({ readConfigFile }).then(config => {
+  return createTestConfig({ readConfigFile }).then((config) => {
     config.esTestCluster.license = 'basic';
     config.esTestCluster.serverArgs = [
       'xpack.license.self_generated.type=basic',
       'xpack.security.enabled=true',
+      'xpack.security.authc.api_key.enabled=true',
     ];
-    config.testFiles = [require.resolve('./apis/security')];
+    config.testFiles = [require.resolve('./apis/security/security_basic')];
     return config;
   });
 }

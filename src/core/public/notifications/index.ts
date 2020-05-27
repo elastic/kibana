@@ -19,6 +19,7 @@
 
 export {
   ErrorToastOptions,
+  ToastOptions,
   Toast,
   ToastInput,
   IToasts,

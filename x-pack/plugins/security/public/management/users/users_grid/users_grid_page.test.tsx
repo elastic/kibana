@@ -102,6 +102,38 @@ describe('UsersGridPage', () => {
     expect(findTestSubject(wrapper, 'userDisabled')).toHaveLength(1);
   });
 
+  it('renders deprecated users', async () => {
+    const apiClientMock = userAPIClientMock.create();
+    apiClientMock.getUsers.mockImplementation(() => {
+      return Promise.resolve<User[]>([
+        {
+          username: 'foo',
+          email: 'foo@bar.net',
+          full_name: 'foo bar',
+          roles: ['kibana_user'],
+          enabled: true,
+          metadata: {
+            _reserved: true,
+            _deprecated: true,
+            _deprecated_reason: 'This user is not cool anymore.',
+          },
+        },
+      ]);
+    });
+
+    const wrapper = mountWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={rolesAPIClientMock.create()}
+        notifications={coreMock.createStart().notifications}
+      />
+    );
+
+    await waitForRender(wrapper);
+
+    expect(findTestSubject(wrapper, 'userDeprecated')).toHaveLength(1);
+  });
+
   it('renders a warning when a user is assigned a deprecated role', async () => {
     const apiClientMock = userAPIClientMock.create();
     apiClientMock.getUsers.mockImplementation(() => {

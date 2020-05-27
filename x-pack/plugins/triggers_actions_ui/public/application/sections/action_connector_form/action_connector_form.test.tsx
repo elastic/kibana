@@ -15,33 +15,10 @@ describe('action_connector_form', () => {
   let deps: any;
   beforeAll(async () => {
     const mocks = coreMock.createSetup();
-    const [
-      {
-        chrome,
-        docLinks,
-        application: { capabilities },
-      },
-    ] = await mocks.getStartServices();
     deps = {
-      chrome,
-      docLinks,
-      toastNotifications: mocks.notifications.toasts,
-      injectedMetadata: mocks.injectedMetadata,
       http: mocks.http,
-      uiSettings: mocks.uiSettings,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          delete: true,
-          save: true,
-          show: true,
-        },
-      },
-      legacy: {
-        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
-      },
       actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: {} as any,
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
 
@@ -75,9 +52,10 @@ describe('action_connector_form', () => {
           actionTypeName={'my-action-type-name'}
           connector={initialConnector}
           dispatch={() => {}}
-          serverError={null}
           errors={{ name: [] }}
-          actionTypeRegistry={deps.actionTypeRegistry}
+          http={deps!.http}
+          actionTypeRegistry={deps!.actionTypeRegistry}
+          docLinks={deps!.docLinks}
         />
       );
     }

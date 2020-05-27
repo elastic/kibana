@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-
 import { isSetupStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
@@ -15,32 +14,46 @@ import {
   MissingSetupPrivilegesPrompt,
   MlUnavailablePrompt,
 } from '../../../components/logging/log_analysis_setup';
+import { SourceErrorPage } from '../../../components/source_error_page';
+import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
 import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
 
 export const LogEntryRatePageContent = () => {
   const {
+    hasFailedLoadingSource,
+    isLoading,
+    isUninitialized,
+    loadSource,
+    loadSourceFailureMessage,
+  } = useLogSourceContext();
+
+  const {
     hasLogAnalysisCapabilites,
     hasLogAnalysisReadCapabilities,
     hasLogAnalysisSetupCapabilities,
   } = useLogAnalysisCapabilitiesContext();
 
-  const { fetchJobStatus, fetchModuleDefinition, setupStatus } = useLogEntryRateModuleContext();
+  const { fetchJobStatus, setupStatus } = useLogEntryRateModuleContext();
 
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {
-      fetchModuleDefinition();
       fetchJobStatus();
     }
-  }, [fetchJobStatus, fetchModuleDefinition, hasLogAnalysisReadCapabilities]);
+  }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
 
-  if (!hasLogAnalysisCapabilites) {
+  if (isLoading || isUninitialized) {
+    return <SourceLoadingPage />;
+  } else if (hasFailedLoadingSource) {
+    return <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />;
+  } else if (!hasLogAnalysisCapabilites) {
     return <MlUnavailablePrompt />;
   } else if (!hasLogAnalysisReadCapabilities) {
     return <MissingResultsPrivilegesPrompt />;
-  } else if (setupStatus === 'initializing') {
+  } else if (setupStatus.type === 'initializing') {
     return (
       <LoadingPage
         message={i18n.translate('xpack.infra.logs.analysisPage.loadingMessage', {
@@ -48,7 +61,7 @@ export const LogEntryRatePageContent = () => {
         })}
       />
     );
-  } else if (setupStatus === 'unknown') {
+  } else if (setupStatus.type === 'unknown') {
     return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
   } else if (isSetupStatusWithResults(setupStatus)) {
     return <LogEntryRateResultsContent />;

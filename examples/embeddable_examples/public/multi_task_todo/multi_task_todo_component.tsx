@@ -54,8 +54,8 @@ function wrapSearchTerms(task: string, search?: string) {
   );
 }
 
-function renderTasks(tasks: MultiTaskTodoOutput['tasks'], search?: string) {
-  return tasks.map(task => (
+function renderTasks(tasks: MultiTaskTodoInput['tasks'], search?: string) {
+  return tasks.map((task) => (
     <EuiListGroupItem
       key={task}
       data-test-subj="multiTaskTodoTask"
@@ -65,16 +65,15 @@ function renderTasks(tasks: MultiTaskTodoOutput['tasks'], search?: string) {
 }
 
 export function MultiTaskTodoEmbeddableComponentInner({
-  input: { title, icon, search },
-  output: { tasks },
+  input: { title, icon, search, tasks },
 }: Props) {
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={false}>
         {icon ? <EuiIcon type={icon} size="l" /> : <EuiAvatar name={title} size="l" />}
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGrid columns={1}>
+        <EuiFlexGrid columns={1} gutterSize="none">
           <EuiFlexItem>
             <EuiText data-test-subj="multiTaskTodoTitle">
               <h3>{wrapSearchTerms(title, search)}</h3>
@@ -89,6 +88,8 @@ export function MultiTaskTodoEmbeddableComponentInner({
   );
 }
 
-export const MultiTaskTodoEmbeddableComponent = withEmbeddableSubscription(
-  MultiTaskTodoEmbeddableComponentInner
-);
+export const MultiTaskTodoEmbeddableComponent = withEmbeddableSubscription<
+  MultiTaskTodoInput,
+  MultiTaskTodoOutput,
+  MultiTaskTodoEmbeddable
+>(MultiTaskTodoEmbeddableComponentInner);

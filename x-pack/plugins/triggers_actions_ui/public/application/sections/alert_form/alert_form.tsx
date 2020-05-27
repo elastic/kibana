@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -22,29 +21,23 @@ import {
   EuiFieldNumber,
   EuiSelect,
   EuiIconTip,
-  EuiAccordion,
   EuiButtonIcon,
-  EuiEmptyPrompt,
-  EuiButtonEmpty,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { loadAlertTypes } from '../../lib/alert_api';
-import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
-import { AlertReducerAction } from './alert_reducer';
+import { some, filter, map, fold } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
 import {
-  AlertTypeModel,
-  Alert,
-  IErrorObject,
-  ActionTypeModel,
-  AlertAction,
-  ActionTypeIndex,
-  ActionConnector,
-  AlertTypeIndex,
-} from '../../../types';
-import { SectionLoading } from '../../components/section_loading';
-import { ConnectorAddModal } from '../action_connector_form/connector_add_modal';
+  getDurationNumberInItsUnit,
+  getDurationUnitValue,
+} from '../../../../../alerting/common/parse_duration';
+import { loadAlertTypes } from '../../lib/alert_api';
+import { actionVariablesFromAlertType } from '../../lib/action_variables';
+import { AlertReducerAction } from './alert_reducer';
+import { AlertTypeModel, Alert, IErrorObject, AlertAction, AlertTypeIndex } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { useAlertsContext } from '../../context/alerts_context';
+import { ActionForm } from '../action_connector_form';
 
 export function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
@@ -62,7 +55,7 @@ export function validateBaseProperties(alertObject: Alert) {
       })
     );
   }
-  if (!alertObject.schedule.interval) {
+  if (alertObject.schedule.interval.length < 2) {
     errors.interval.push(
       i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredIntervalText', {
         defaultMessage: 'Check interval is required.',
@@ -83,15 +76,8 @@ interface AlertFormProps {
   alert: Alert;
   dispatch: React.Dispatch<AlertReducerAction>;
   errors: IErrorObject;
-  serverError: {
-    body: { message: string; error: string };
-  } | null;
   canChangeTrigger?: boolean; // to hide Change trigger button
-}
-
-interface ActiveActionConnectorState {
-  actionTypeId: string;
-  index: number;
+  setHasActionsDisabled?: (value: boolean) => void;
 }
 
 export const AlertForm = ({
@@ -99,64 +85,36 @@ export const AlertForm = ({
   canChangeTrigger = true,
   dispatch,
   errors,
-  serverError,
+  setHasActionsDisabled,
 }: AlertFormProps) => {
   const alertsContext = useAlertsContext();
-  const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = alertsContext;
+  const {
+    http,
+    toastNotifications,
+    alertTypeRegistry,
+    actionTypeRegistry,
+    docLinks,
+    capabilities,
+  } = alertsContext;
 
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
     alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null
   );
 
-  const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
-  const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
-  const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
-  const [alertInterval, setAlertInterval] = useState<number>(
-    alert.schedule.interval ? parseInt(alert.schedule.interval.replace(/^[A-Za-z]+$/, ''), 0) : 1
+  const [alertInterval, setAlertInterval] = useState<number | undefined>(
+    alert.schedule.interval ? getDurationNumberInItsUnit(alert.schedule.interval) : undefined
   );
   const [alertIntervalUnit, setAlertIntervalUnit] = useState<string>(
-    alert.schedule.interval ? alert.schedule.interval.replace(alertInterval.toString(), '') : 'm'
+    alert.schedule.interval ? getDurationUnitValue(alert.schedule.interval) : 'm'
   );
   const [alertThrottle, setAlertThrottle] = useState<number | null>(
-    alert.throttle ? parseInt(alert.throttle.replace(/^[A-Za-z]+$/, ''), 0) : null
+    alert.throttle ? getDurationNumberInItsUnit(alert.throttle) : null
   );
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>(
-    alert.throttle ? alert.throttle.replace((alertThrottle ?? '').toString(), '') : 'm'
+    alert.throttle ? getDurationUnitValue(alert.throttle) : 'm'
   );
-  const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
-  const [connectors, setConnectors] = useState<ActionConnector[]>([]);
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
-  const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
-    undefined
-  );
-
-  // load action types
-  useEffect(() => {
-    (async () => {
-      try {
-        setIsLoadingActionTypes(true);
-        const actionTypes = await loadActionTypes({ http });
-        const index: ActionTypeIndex = {};
-        for (const actionTypeItem of actionTypes) {
-          index[actionTypeItem.id] = actionTypeItem;
-        }
-        setActionTypesIndex(index);
-      } catch (e) {
-        if (toastNotifications) {
-          toastNotifications.addDanger({
-            title: i18n.translate(
-              'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage',
-              { defaultMessage: 'Unable to load action types' }
-            ),
-          });
-        }
-      } finally {
-        setIsLoadingActionTypes(false);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // load alert types
   useEffect(() => {
@@ -172,21 +130,14 @@ export const AlertForm = ({
         }
         setAlertTypesIndex(index);
       } catch (e) {
-        if (toastNotifications) {
-          toastNotifications.addDanger({
-            title: i18n.translate(
-              'xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage',
-              { defaultMessage: 'Unable to load alert types' }
-            ),
-          });
-        }
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage',
+            { defaultMessage: 'Unable to load alert types' }
+          ),
+        });
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    loadConnectors();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -202,94 +153,35 @@ export const AlertForm = ({
     dispatch({ command: { type: 'setScheduleProperty' }, payload: { key, value } });
   };
 
-  const setActionParamsProperty = (key: string, value: any, index: number) => {
-    dispatch({ command: { type: 'setAlertActionParams' }, payload: { key, value, index } });
-  };
-
   const setActionProperty = (key: string, value: any, index: number) => {
     dispatch({ command: { type: 'setAlertActionProperty' }, payload: { key, value, index } });
   };
 
+  const setActionParamsProperty = (key: string, value: any, index: number) => {
+    dispatch({ command: { type: 'setAlertActionParams' }, payload: { key, value, index } });
+  };
+
   const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
-
-  async function loadConnectors() {
-    try {
-      const actionsResponse = await loadAllActions({ http });
-      setConnectors(actionsResponse.data);
-    } catch (e) {
-      if (toastNotifications) {
-        toastNotifications.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
-            {
-              defaultMessage: 'Unable to load connectors',
-            }
-          ),
-        });
-      }
-    }
-  }
-
-  const actionsErrors = alert.actions.reduce(
-    (acc: Record<string, { errors: IErrorObject }>, alertAction: AlertAction) => {
-      const actionType = actionTypeRegistry.get(alertAction.actionTypeId);
-      if (!actionType) {
-        return { ...acc };
-      }
-      const actionValidationErrors = actionType.validateParams(alertAction.params);
-      return { ...acc, [alertAction.id]: actionValidationErrors };
-    },
-    {}
-  );
 
   const AlertParamsExpressionComponent = alertTypeModel
     ? alertTypeModel.alertParamsExpression
     : null;
 
-  function addActionType(actionTypeModel: ActionTypeModel) {
-    if (!defaultActionGroupId) {
-      toastNotifications!.addDanger({
-        title: i18n.translate('xpack.triggersActionsUI.sections.alertForm.unableToAddAction', {
-          defaultMessage: 'Unable to add action, because default action group is not defined',
-        }),
-      });
-      return;
-    }
-    setIsAddActionPanelOpen(false);
-    const actionTypeConnectors = connectors.filter(
-      field => field.actionTypeId === actionTypeModel.id
-    );
-    let freeConnectors;
-    if (actionTypeConnectors.length > 0) {
-      // Should we allow adding multiple actions to the same connector under the alert?
-      freeConnectors = actionTypeConnectors.filter(
-        (actionConnector: ActionConnector) =>
-          !alert.actions.find((actionItem: AlertAction) => actionItem.id === actionConnector.id)
-      );
-      if (freeConnectors.length > 0) {
-        alert.actions.push({
-          id: '',
-          actionTypeId: actionTypeModel.id,
-          group: defaultActionGroupId,
-          params: {},
-        });
-        setActionProperty('id', freeConnectors[0].id, alert.actions.length - 1);
-      }
-    }
-    if (actionTypeConnectors.length === 0 || !freeConnectors || freeConnectors.length === 0) {
-      // if no connectors exists or all connectors is already assigned an action under current alert
-      // set actionType as id to be able to create new connector within the alert form
-      alert.actions.push({
-        id: '',
-        actionTypeId: actionTypeModel.id,
-        group: defaultActionGroupId,
-        params: {},
-      });
-      setActionProperty('id', alert.actions.length, alert.actions.length - 1);
-    }
-  }
-
-  const alertTypeNodes = alertTypeRegistry.list().map(function(item, index) {
+  const alertTypeRegistryList =
+    alert.consumer === 'alerting'
+      ? alertTypeRegistry
+          .list()
+          .filter(
+            (alertTypeRegistryItem: AlertTypeModel) => !alertTypeRegistryItem.requiresAppContext
+          )
+      : alertTypeRegistry
+          .list()
+          .filter(
+            (alertTypeRegistryItem: AlertTypeModel) =>
+              alertTypesIndex &&
+              alertTypesIndex[alertTypeRegistryItem.id].producer === alert.consumer
+          );
+  const alertTypeNodes = alertTypeRegistryList.map(function (item, index) {
     return (
       <EuiKeyPadMenuItem
         key={index}
@@ -298,6 +190,7 @@ export const AlertForm = ({
         onClick={() => {
           setAlertProperty('alertTypeId', item.id);
           setAlertTypeModel(item);
+          setAlertProperty('params', {});
           if (alertTypesIndex && alertTypesIndex[item.id]) {
             setDefaultActionGroupId(alertTypesIndex[item.id].defaultActionGroupId);
           }
@@ -307,293 +200,6 @@ export const AlertForm = ({
       </EuiKeyPadMenuItem>
     );
   });
-
-  const actionTypeNodes = actionTypeRegistry.list().map(function(item, index) {
-    return (
-      <EuiKeyPadMenuItem
-        key={index}
-        data-test-subj={`${item.id}-ActionTypeSelectOption`}
-        label={actionTypesIndex ? actionTypesIndex[item.id].name : item.id}
-        onClick={() => addActionType(item)}
-      >
-        <EuiIcon size="xl" type={item.iconClass} />
-      </EuiKeyPadMenuItem>
-    );
-  });
-
-  const getSelectedOptions = (actionItemId: string) => {
-    const val = connectors.find(connector => connector.id === actionItemId);
-    if (!val) {
-      return [];
-    }
-    return [
-      {
-        label: val.name,
-        value: val.name,
-        id: actionItemId,
-      },
-    ];
-  };
-
-  const getActionTypeForm = (
-    actionItem: AlertAction,
-    actionConnector: ActionConnector,
-    index: number
-  ) => {
-    const optionsList = connectors
-      .filter(
-        connectorItem =>
-          connectorItem.actionTypeId === actionItem.actionTypeId &&
-          (connectorItem.id === actionItem.id ||
-            !alert.actions.find(
-              (existingAction: AlertAction) =>
-                existingAction.id === connectorItem.id && existingAction.group === actionItem.group
-            ))
-      )
-      .map(({ name, id }) => ({
-        label: name,
-        key: id,
-        id,
-      }));
-    const actionTypeRegisterd = actionTypeRegistry.get(actionConnector.actionTypeId);
-    if (!actionTypeRegisterd || actionItem.group !== defaultActionGroupId) return null;
-    const ParamsFieldsComponent = actionTypeRegisterd.actionParamsFields;
-    const actionParamsErrors: { errors: IErrorObject } =
-      Object.keys(actionsErrors).length > 0 ? actionsErrors[actionItem.id] : { errors: {} };
-
-    return (
-      <EuiAccordion
-        initialIsOpen={true}
-        key={index}
-        id={index.toString()}
-        className="euiAccordionForm"
-        buttonContentClassName="euiAccordionForm__button"
-        data-test-subj={`alertActionAccordion-${defaultActionGroupId}`}
-        buttonContent={
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={actionTypeRegisterd.iconClass} size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h5>
-                  <FormattedMessage
-                    defaultMessage="Action: {actionConnectorName}"
-                    id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
-                    values={{
-                      actionConnectorName: actionConnector.name,
-                    }}
-                  />
-                </h5>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        extraAction={
-          <EuiButtonIcon
-            iconType="cross"
-            color="danger"
-            className="euiAccordionForm__extraAction"
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertForm.accordion.deleteIconAriaLabel',
-              {
-                defaultMessage: 'Delete',
-              }
-            )}
-            onClick={() => {
-              const updatedActions = alert.actions.filter(
-                (item: AlertAction) => item.id !== actionItem.id
-              );
-              setAlertProperty('actions', updatedActions);
-              setIsAddActionPanelOpen(
-                updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length === 0
-              );
-              setActiveActionItem(undefined);
-            }}
-          />
-        }
-        paddingSize="l"
-      >
-        <EuiFlexGroup component="div">
-          <EuiFlexItem>
-            <EuiFormRow
-              fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.actionIdLabel"
-                  defaultMessage="{connectorInstance} instance"
-                  values={{
-                    connectorInstance: actionTypesIndex
-                      ? actionTypesIndex[actionConnector.actionTypeId].name
-                      : actionConnector.actionTypeId,
-                  }}
-                />
-              }
-              labelAppend={
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={() => {
-                    setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
-                    setAddModalVisibility(true);
-                  }}
-                >
-                  <FormattedMessage
-                    defaultMessage="Add new"
-                    id="xpack.triggersActionsUI.sections.alertForm.addNewConnectorEmptyButton"
-                  />
-                </EuiButtonEmpty>
-              }
-            >
-              <EuiComboBox
-                fullWidth
-                singleSelection={{ asPlainText: true }}
-                options={optionsList}
-                selectedOptions={getSelectedOptions(actionItem.id)}
-                onChange={selectedOptions => {
-                  setActionProperty('id', selectedOptions[0].id, index);
-                }}
-                isClearable={false}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xl" />
-        {ParamsFieldsComponent ? (
-          <ParamsFieldsComponent
-            actionParams={actionItem.params as any}
-            index={index}
-            errors={actionParamsErrors.errors}
-            editAction={setActionParamsProperty}
-            messageVariables={
-              alertTypesIndex && alertTypesIndex[alert.alertTypeId]
-                ? alertTypesIndex[alert.alertTypeId].actionVariables
-                : undefined
-            }
-            defaultMessage={alertTypeModel?.defaultActionMessage ?? undefined}
-          />
-        ) : null}
-      </EuiAccordion>
-    );
-  };
-
-  const getAddConnectorsForm = (actionItem: AlertAction, index: number) => {
-    const actionTypeName = actionTypesIndex
-      ? actionTypesIndex[actionItem.actionTypeId].name
-      : actionItem.actionTypeId;
-    const actionTypeRegisterd = actionTypeRegistry.get(actionItem.actionTypeId);
-    if (!actionTypeRegisterd || actionItem.group !== defaultActionGroupId) return null;
-    return (
-      <EuiAccordion
-        initialIsOpen={true}
-        key={index}
-        id={index.toString()}
-        className="euiAccordionForm"
-        buttonContentClassName="euiAccordionForm__button"
-        data-test-subj={`alertActionAccordion-${defaultActionGroupId}`}
-        buttonContent={
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={actionTypeRegisterd.iconClass} size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h5>
-                  <FormattedMessage
-                    defaultMessage="Action: {actionConnectorName}"
-                    id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
-                    values={{
-                      actionConnectorName: actionTypeRegisterd.actionTypeTitle,
-                    }}
-                  />
-                </h5>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        extraAction={
-          <EuiButtonIcon
-            iconType="cross"
-            color="danger"
-            className="euiAccordionForm__extraAction"
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertForm.accordion.deleteIconAriaLabel',
-              {
-                defaultMessage: 'Delete',
-              }
-            )}
-            onClick={() => {
-              const updatedActions = alert.actions.filter(
-                (item: AlertAction) => item.id !== actionItem.id
-              );
-              setAlertProperty('actions', updatedActions);
-              setIsAddActionPanelOpen(
-                updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length === 0
-              );
-              setActiveActionItem(undefined);
-            }}
-          />
-        }
-        paddingSize="l"
-      >
-        <EuiEmptyPrompt
-          title={
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertForm.emptyConnectorsLabel"
-              defaultMessage="There are no {actionTypeName} connectors"
-              values={{
-                actionTypeName,
-              }}
-            />
-          }
-          actions={[
-            <EuiButton
-              color="primary"
-              fill
-              data-test-subj="createActionConnectorButton"
-              onClick={() => {
-                setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
-                setAddModalVisibility(true);
-              }}
-            >
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertForm.addConnectorButtonLabel"
-                defaultMessage="Add {actionTypeName} connector"
-                values={{
-                  actionTypeName,
-                }}
-              />
-            </EuiButton>,
-          ]}
-        />
-      </EuiAccordion>
-    );
-  };
-
-  const selectedGroupActions = (
-    <Fragment>
-      {alert.actions.map((actionItem: AlertAction, index: number) => {
-        const actionConnector = connectors.find(field => field.id === actionItem.id);
-        // connectors doesn't exists
-        if (!actionConnector) {
-          return getAddConnectorsForm(actionItem, index);
-        }
-        return getActionTypeForm(actionItem, actionConnector, index);
-      })}
-      <EuiSpacer size="m" />
-      {isAddActionPanelOpen === false ? (
-        <EuiButton
-          iconType="plusInCircle"
-          data-test-subj="addAlertActionButton"
-          onClick={() => setIsAddActionPanelOpen(true)}
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertForm.addActionButtonLabel"
-            defaultMessage="Add action"
-          />
-        </EuiButton>
-      ) : null}
-    </Fragment>
-  );
 
   const alertTypeDetails = (
     <Fragment>
@@ -624,46 +230,58 @@ export const AlertForm = ({
               onClick={() => {
                 setAlertProperty('alertTypeId', null);
                 setAlertTypeModel(null);
+                setAlertProperty('params', {});
               }}
             />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
       {AlertParamsExpressionComponent ? (
-        <AlertParamsExpressionComponent
-          alertParams={alert.params}
-          errors={errors}
-          setAlertParams={setAlertParams}
-          setAlertProperty={setAlertProperty}
-          alertsContext={alertsContext}
-        />
+        <Suspense
+          fallback={
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          <AlertParamsExpressionComponent
+            alertParams={alert.params}
+            alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
+            errors={errors}
+            setAlertParams={setAlertParams}
+            setAlertProperty={setAlertProperty}
+            alertsContext={alertsContext}
+          />
+        </Suspense>
       ) : null}
-      <EuiSpacer size="xl" />
-      {selectedGroupActions}
-      {isAddActionPanelOpen ? (
-        <Fragment>
-          <EuiTitle size="xs">
-            <h5 id="alertActionTypeTitle">
-              <FormattedMessage
-                defaultMessage="Actions: Select an action type"
-                id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle"
-              />
-            </h5>
-          </EuiTitle>
-          <EuiSpacer />
-          <EuiFlexGroup gutterSize="s" wrap>
-            {isLoadingActionTypes ? (
-              <SectionLoading>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.loadingActionTypesDescription"
-                  defaultMessage="Loading action types…"
-                />
-              </SectionLoading>
-            ) : (
-              actionTypeNodes
-            )}
-          </EuiFlexGroup>
-        </Fragment>
+      {defaultActionGroupId ? (
+        <ActionForm
+          actions={alert.actions}
+          setHasActionsDisabled={setHasActionsDisabled}
+          messageVariables={
+            alertTypesIndex && alertTypesIndex[alert.alertTypeId]
+              ? actionVariablesFromAlertType(alertTypesIndex[alert.alertTypeId]).map(
+                  (av) => av.name
+                )
+              : undefined
+          }
+          defaultActionGroupId={defaultActionGroupId}
+          setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
+          setAlertProperty={(updatedActions: AlertAction[]) =>
+            setAlertProperty('actions', updatedActions)
+          }
+          setActionParamsProperty={(key: string, value: any, index: number) =>
+            setActionParamsProperty(key, value, index)
+          }
+          http={http}
+          actionTypeRegistry={actionTypeRegistry}
+          defaultActionMessage={alertTypeModel?.defaultActionMessage}
+          toastNotifications={toastNotifications}
+          docLinks={docLinks}
+          capabilities={capabilities}
+        />
       ) : null}
     </Fragment>
   );
@@ -678,7 +296,7 @@ export const AlertForm = ({
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.checkWithTooltip', {
-          defaultMessage: 'This is some help text here for check alert.',
+          defaultMessage: 'Define how often to evaluate the condition.',
         })}
       />
     </>
@@ -688,20 +306,20 @@ export const AlertForm = ({
     <>
       <FormattedMessage
         id="xpack.triggersActionsUI.sections.alertForm.renotifyFieldLabel"
-        defaultMessage="Re-notify every"
+        defaultMessage="Notify every"
       />{' '}
       <EuiIconTip
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.renotifyWithTooltip', {
-          defaultMessage: 'This is some help text here for re-notify alert.',
+          defaultMessage: 'Define how often to repeat the action while the alert is active.',
         })}
       />
     </>
   );
 
   return (
-    <EuiForm isInvalid={serverError !== null} error={serverError?.body.message}>
+    <EuiForm>
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiFormRow
@@ -718,12 +336,13 @@ export const AlertForm = ({
           >
             <EuiFieldText
               fullWidth
+              autoFocus={true}
               isInvalid={errors.name.length > 0 && alert.name !== undefined}
               compressed
               name="name"
               data-test-subj="alertNameInput"
               value={alert.name || ''}
-              onChange={e => {
+              onChange={(e) => {
                 setAlertProperty('name', e.target.value);
               }}
               onBlur={() => {
@@ -754,13 +373,13 @@ export const AlertForm = ({
                 const newOptions = [...tagsOptions, { label: searchValue }];
                 setAlertProperty(
                   'tags',
-                  newOptions.map(newOption => newOption.label)
+                  newOptions.map((newOption) => newOption.label)
                 );
               }}
               onChange={(selectedOptions: Array<{ label: string }>) => {
                 setAlertProperty(
                   'tags',
-                  selectedOptions.map(selectedOption => selectedOption.label)
+                  selectedOptions.map((selectedOption) => selectedOption.label)
                 );
               }}
               onBlur={() => {
@@ -775,19 +394,27 @@ export const AlertForm = ({
       <EuiSpacer size="m" />
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
-          <EuiFormRow fullWidth compressed label={labelForAlertChecked}>
+          <EuiFormRow
+            fullWidth
+            compressed
+            label={labelForAlertChecked}
+            isInvalid={errors.interval.length > 0}
+            error={errors.interval}
+          >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
                 <EuiFieldNumber
                   fullWidth
                   min={1}
+                  isInvalid={errors.interval.length > 0}
                   compressed
-                  value={alertInterval}
+                  value={alertInterval || ''}
                   name="interval"
                   data-test-subj="intervalInput"
-                  onChange={e => {
-                    const interval = e.target.value !== '' ? parseInt(e.target.value, 10) : null;
-                    setAlertInterval(interval ?? 1);
+                  onChange={(e) => {
+                    const interval =
+                      e.target.value !== '' ? parseInt(e.target.value, 10) : undefined;
+                    setAlertInterval(interval);
                     setScheduleProperty('interval', `${e.target.value}${alertIntervalUnit}`);
                   }}
                 />
@@ -797,8 +424,8 @@ export const AlertForm = ({
                   fullWidth
                   compressed
                   value={alertIntervalUnit}
-                  options={getTimeOptions(alertInterval)}
-                  onChange={e => {
+                  options={getTimeOptions(alertInterval ?? 1)}
+                  onChange={(e) => {
                     setAlertIntervalUnit(e.target.value);
                     setScheduleProperty('interval', `${alertInterval}${e.target.value}`);
                   }}
@@ -818,10 +445,24 @@ export const AlertForm = ({
                   value={alertThrottle || ''}
                   name="throttle"
                   data-test-subj="throttleInput"
-                  onChange={e => {
-                    const throttle = e.target.value !== '' ? parseInt(e.target.value, 10) : null;
-                    setAlertThrottle(throttle);
-                    setAlertProperty('throttle', `${e.target.value}${alertThrottleUnit}`);
+                  onChange={(e) => {
+                    pipe(
+                      some(e.target.value.trim()),
+                      filter((value) => value !== ''),
+                      map((value) => parseInt(value, 10)),
+                      filter((value) => !isNaN(value)),
+                      fold(
+                        () => {
+                          // unset throttle
+                          setAlertThrottle(null);
+                          setAlertProperty('throttle', null);
+                        },
+                        (throttle) => {
+                          setAlertThrottle(throttle);
+                          setAlertProperty('throttle', `${throttle}${alertThrottleUnit}`);
+                        }
+                      )
+                    );
                   }}
                 />
               </EuiFlexItem>
@@ -830,7 +471,7 @@ export const AlertForm = ({
                   compressed
                   value={alertThrottleUnit}
                   options={getTimeOptions(alertThrottle ?? 1)}
-                  onChange={e => {
+                  onChange={(e) => {
                     setAlertThrottleUnit(e.target.value);
                     if (alertThrottle) {
                       setAlertProperty('throttle', `${alertThrottle}${e.target.value}`);
@@ -851,7 +492,7 @@ export const AlertForm = ({
           <EuiTitle size="s">
             <h5 id="alertTypeTitle">
               <FormattedMessage
-                defaultMessage="Trigger: Select a trigger type"
+                defaultMessage="Select a trigger type"
                 id="xpack.triggersActionsUI.sections.alertForm.selectAlertTypeTitle"
               />
             </h5>
@@ -862,22 +503,6 @@ export const AlertForm = ({
           </EuiFlexGroup>
         </Fragment>
       )}
-      {actionTypesIndex && activeActionItem ? (
-        <ConnectorAddModal
-          key={activeActionItem.index}
-          actionType={actionTypesIndex[activeActionItem.actionTypeId]}
-          addModalVisible={addModalVisible}
-          setAddModalVisibility={setAddModalVisibility}
-          postSaveEventHandler={(savedAction: ActionConnector) => {
-            connectors.push(savedAction);
-            setActionProperty('id', savedAction.id, activeActionItem.index);
-          }}
-          actionTypeRegistry={actionTypeRegistry}
-          alertTypeRegistry={alertTypeRegistry}
-          http={http}
-          toastNotifications={toastNotifications}
-        />
-      ) : null}
     </EuiForm>
   );
 };

@@ -8,9 +8,11 @@ import { resolve } from 'path';
 
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+
 import { SiemCypressTestRunner } from './runner';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );
@@ -32,6 +34,8 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xpackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
         // define custom es server here
+        // API Keys is enabled at the top level
+        'xpack.security.enabled=true',
       ],
     },
 
@@ -41,6 +45,10 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         ...xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--csp.strict=false',
         // define custom kibana server args here
+        `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+        '--xpack.ingestManager.enabled=true',
+        '--xpack.ingestManager.epm.enabled=true',
+        '--xpack.ingestManager.fleet.enabled=true',
       ],
     },
   };

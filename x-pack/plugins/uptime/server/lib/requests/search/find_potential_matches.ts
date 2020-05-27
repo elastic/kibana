@@ -5,8 +5,7 @@
  */
 
 import { get, set } from 'lodash';
-import { CursorDirection } from '../../../../../../legacy/plugins/uptime/common/graphql/types';
-import { INDEX_NAMES } from '../../../../../../legacy/plugins/uptime/common/constants';
+import { CursorDirection } from '../../../../common/runtime_types';
 import { QueryContext } from './query_context';
 
 // This is the first phase of the query. In it, we find the most recent check groups that matched the given query.
@@ -48,7 +47,7 @@ export const findPotentialMatches = async (
   return {
     monitorIds,
     checkGroups,
-    searchAfter: queryResult.aggregations.monitors.after_key,
+    searchAfter: queryResult.aggregations?.monitors?.after_key,
   };
 };
 
@@ -56,7 +55,7 @@ const query = async (queryContext: QueryContext, searchAfter: any, size: number)
   const body = await queryBody(queryContext, searchAfter, size);
 
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: queryContext.heartbeatIndices,
     body,
   };
 

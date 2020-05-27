@@ -9,8 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 
-import { sendEmail, JSON_TRANSPORT_SERVICE } from './lib/send_email';
-import { nullableType } from './lib/nullable';
+import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
 import { portSchema } from './lib/schemas';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
@@ -20,10 +19,10 @@ import { ActionsConfigurationUtilities } from '../actions_config';
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 const ConfigSchemaProps = {
-  service: nullableType(schema.string()),
-  host: nullableType(schema.string()),
-  port: nullableType(portSchema()),
-  secure: nullableType(schema.boolean()),
+  service: schema.nullable(schema.string()),
+  host: schema.nullable(schema.string()),
+  port: schema.nullable(portSchema()),
+  secure: schema.nullable(schema.boolean()),
   from: schema.string(),
 };
 
@@ -31,10 +30,10 @@ const ConfigSchema = schema.object(ConfigSchemaProps);
 
 function validateConfig(
   configurationUtilities: ActionsConfigurationUtilities,
-  configObject: any
+  configObject: unknown
 ): string | void {
   // avoids circular reference ...
-  const config: ActionTypeConfigType = configObject;
+  const config = configObject as ActionTypeConfigType;
 
   // Make sure service is set, or if not, both host/port must be set.
   // If service is set, host/port are ignored, when the email is sent.
@@ -75,8 +74,8 @@ function validateConfig(
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 
 const SecretsSchema = schema.object({
-  user: schema.string(),
-  password: schema.string(),
+  user: schema.nullable(schema.string()),
+  password: schema.nullable(schema.string()),
 });
 
 // params definition
@@ -96,9 +95,9 @@ const ParamsSchema = schema.object(
   }
 );
 
-function validateParams(paramsObject: any): string | void {
+function validateParams(paramsObject: unknown): string | void {
   // avoids circular reference ...
-  const params: ActionParamsType = paramsObject;
+  const params = paramsObject as ActionParamsType;
 
   const { to, cc, bcc } = params;
   const addrs = to.length + cc.length + bcc.length;
@@ -118,6 +117,7 @@ export function getActionType(params: GetActionTypeParams): ActionType {
   const { logger, configurationUtilities } = params;
   return {
     id: '.email',
+    minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.emailTitle', {
       defaultMessage: 'Email',
     }),
@@ -143,20 +143,25 @@ async function executor(
   const secrets = execOptions.secrets as ActionTypeSecretsType;
   const params = execOptions.params as ActionParamsType;
 
-  const transport: any = {
-    user: secrets.user,
-    password: secrets.password,
-  };
+  const transport: Transport = {};
+
+  if (secrets.user != null) {
+    transport.user = secrets.user;
+  }
+  if (secrets.password != null) {
+    transport.password = secrets.password;
+  }
 
   if (config.service !== null) {
     transport.service = config.service;
   } else {
-    transport.host = config.host;
-    transport.port = config.port;
+    // already validated service or host/port is not null ...
+    transport.host = config.host!;
+    transport.port = config.port!;
     transport.secure = getSecureValue(config.secure, config.port);
   }
 
-  const sendEmailOptions = {
+  const sendEmailOptions: SendEmailOptions = {
     transport,
     routing: {
       from: config.from,

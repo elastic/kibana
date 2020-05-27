@@ -19,17 +19,42 @@ import { getAgentNameByService } from '../../lib/settings/agent_configuration/ge
 import { markAppliedByAgent } from '../../lib/settings/agent_configuration/mark_applied_by_agent';
 import {
   serviceRt,
-  agentConfigurationIntakeRt
-} from '../../../common/runtime_types/agent_configuration_intake_rt';
+  agentConfigurationIntakeRt,
+} from '../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
 import { jsonRt } from '../../../common/runtime_types/json_rt';
 
 // get list of configurations
-export const agentConfigurationRoute = createRoute(core => ({
+export const agentConfigurationRoute = createRoute((core) => ({
   path: '/api/apm/settings/agent-configuration',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return await listConfigurations({ setup });
-  }
+  },
+}));
+
+// get a single configuration
+export const getSingleAgentConfigurationRoute = createRoute(() => ({
+  path: '/api/apm/settings/agent-configuration/view',
+  params: {
+    query: serviceRt,
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { name, environment } = context.params.query;
+
+    const service = { name, environment };
+    const config = await findExactConfiguration({ service, setup });
+
+    if (!config) {
+      context.logger.info(
+        `Config was not found for ${service.name}/${service.environment}`
+      );
+
+      throw Boom.notFound();
+    }
+
+    return config._source;
+  },
 }));
 
 // delete configuration
@@ -37,12 +62,12 @@ export const deleteAgentConfigurationRoute = createRoute(() => ({
   method: 'DELETE',
   path: '/api/apm/settings/agent-configuration',
   options: {
-    tags: ['access:apm', 'access:apm_write']
+    tags: ['access:apm', 'access:apm_write'],
   },
   params: {
     body: t.type({
-      service: serviceRt
-    })
+      service: serviceRt,
+    }),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -63,59 +88,21 @@ export const deleteAgentConfigurationRoute = createRoute(() => ({
 
     return await deleteConfiguration({
       configurationId: config._id,
-      setup
+      setup,
     });
-  }
-}));
-
-// get list of services
-export const listAgentConfigurationServicesRoute = createRoute(() => ({
-  method: 'GET',
-  path: '/api/apm/settings/agent-configuration/services',
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    return await getServiceNames({
-      setup
-    });
-  }
-}));
-
-// get environments for service
-export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
-  path: '/api/apm/settings/agent-configuration/environments',
-  params: {
-    query: t.partial({ serviceName: t.string })
   },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    const { serviceName } = context.params.query;
-    return await getEnvironments({ serviceName, setup });
-  }
 }));
 
-// get agentName for service
-export const agentConfigurationAgentNameRoute = createRoute(() => ({
-  path: '/api/apm/settings/agent-configuration/agent_name',
-  params: {
-    query: t.type({ serviceName: t.string })
-  },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    const { serviceName } = context.params.query;
-    const agentName = await getAgentNameByService({ serviceName, setup });
-    return { agentName };
-  }
-}));
-
+// create/update configuration
 export const createOrUpdateAgentConfigurationRoute = createRoute(() => ({
   method: 'PUT',
   path: '/api/apm/settings/agent-configuration',
   options: {
-    tags: ['access:apm', 'access:apm_write']
+    tags: ['access:apm', 'access:apm_write'],
   },
   params: {
     query: t.partial({ overwrite: jsonRt.pipe(t.boolean) }),
-    body: agentConfigurationIntakeRt
+    body: agentConfigurationIntakeRt,
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -125,7 +112,7 @@ export const createOrUpdateAgentConfigurationRoute = createRoute(() => ({
     // this is to avoid creating two configs with identical service params
     const config = await findExactConfiguration({
       service: body.service,
-      setup
+      setup,
     });
 
     // if the config exists ?overwrite=true is required
@@ -144,28 +131,32 @@ export const createOrUpdateAgentConfigurationRoute = createRoute(() => ({
     return await createOrUpdateConfiguration({
       configurationId: config?._id,
       configurationIntake: body,
-      setup
+      setup,
     });
-  }
+  },
 }));
 
 // Lookup single configuration (used by APM Server)
-export const agentConfigurationSearchRoute = createRoute(core => ({
+export const agentConfigurationSearchRoute = createRoute((core) => ({
   method: 'POST',
   path: '/api/apm/settings/agent-configuration/search',
   params: {
-    body: t.type({
-      service: serviceRt,
-      etag: t.string
-    })
+    body: t.intersection([
+      t.type({ service: serviceRt }),
+      t.partial({ etag: t.string, mark_as_applied_by_agent: t.boolean }),
+    ]),
   },
   handler: async ({ context, request }) => {
-    const { service, etag } = context.params.body;
+    const {
+      service,
+      etag,
+      mark_as_applied_by_agent: markAsAppliedByAgent,
+    } = context.params.body;
 
     const setup = await setupRequest(context, request);
     const config = await searchConfigurations({
       service,
-      setup
+      setup,
     });
 
     if (!config) {
@@ -179,12 +170,60 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
       `Config was found for ${service.name}/${service.environment}`
     );
 
-    // update `applied_by_agent` field if etags match
+    // update `applied_by_agent` field
+    // when `markAsAppliedByAgent` is true (Jaeger agent doesn't have etags)
+    // or if etags match.
     // this happens in the background and doesn't block the response
-    if (etag === config._source.etag && !config._source.applied_by_agent) {
+    if (
+      (markAsAppliedByAgent || etag === config._source.etag) &&
+      !config._source.applied_by_agent
+    ) {
       markAppliedByAgent({ id: config._id, body: config._source, setup });
     }
 
     return config;
-  }
+  },
+}));
+
+/*
+ * Utility endpoints (not documented as part of the public API)
+ */
+
+// get list of services
+export const listAgentConfigurationServicesRoute = createRoute(() => ({
+  method: 'GET',
+  path: '/api/apm/settings/agent-configuration/services',
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    return await getServiceNames({
+      setup,
+    });
+  },
+}));
+
+// get environments for service
+export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
+  path: '/api/apm/settings/agent-configuration/environments',
+  params: {
+    query: t.partial({ serviceName: t.string }),
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.query;
+    return await getEnvironments({ serviceName, setup });
+  },
+}));
+
+// get agentName for service
+export const agentConfigurationAgentNameRoute = createRoute(() => ({
+  path: '/api/apm/settings/agent-configuration/agent_name',
+  params: {
+    query: t.type({ serviceName: t.string }),
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.query;
+    const agentName = await getAgentNameByService({ serviceName, setup });
+    return { agentName };
+  },
 }));

@@ -8,7 +8,7 @@ import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiInMemoryTable, EuiIcon, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
-import { TemplateListItem, Template } from '../../../../../../common/types';
+import { TemplateListItem, IndexTemplateFormatVersion } from '../../../../../../common';
 import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../components';
 import { useServices } from '../../../../app_context';
@@ -18,8 +18,8 @@ import { SendRequestResponse } from '../../../../../shared_imports';
 interface Props {
   templates: TemplateListItem[];
   reload: () => Promise<SendRequestResponse>;
-  editTemplate: (name: Template['name']) => void;
-  cloneTemplate: (name: Template['name']) => void;
+  editTemplate: (name: string, formatVersion: IndexTemplateFormatVersion) => void;
+  cloneTemplate: (name: string, formatVersion: IndexTemplateFormatVersion) => void;
 }
 
 export const TemplateTable: React.FunctionComponent<Props> = ({
@@ -30,7 +30,9 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
 }) => {
   const { uiMetricService } = useServices();
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
-  const [templatesToDelete, setTemplatesToDelete] = useState<Array<TemplateListItem['name']>>([]);
+  const [templatesToDelete, setTemplatesToDelete] = useState<
+    Array<{ name: string; formatVersion: IndexTemplateFormatVersion }>
+  >([]);
 
   const columns: Array<EuiBasicTableColumn<TemplateListItem>> = [
     {
@@ -40,11 +42,11 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      render: (name: TemplateListItem['name']) => {
+      render: (name: TemplateListItem['name'], item: TemplateListItem) => {
         return (
           /* eslint-disable-next-line @elastic/eui/href-or-on-click */
           <EuiLink
-            href={getTemplateDetailsLink(name, true)}
+            href={getTemplateDetailsLink(name, item._kbnMeta.formatVersion, true)}
             data-test-subj="templateDetailsLink"
             onClick={() => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
           >
@@ -133,10 +135,10 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           }),
           icon: 'pencil',
           type: 'icon',
-          onClick: ({ name }: Template) => {
-            editTemplate(name);
+          onClick: ({ name, _kbnMeta: { formatVersion } }: TemplateListItem) => {
+            editTemplate(name, formatVersion);
           },
-          enabled: ({ isManaged }: Template) => !isManaged,
+          enabled: ({ isManaged }: TemplateListItem) => !isManaged,
         },
         {
           type: 'icon',
@@ -147,8 +149,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
             defaultMessage: 'Clone this template',
           }),
           icon: 'copy',
-          onClick: ({ name }: Template) => {
-            cloneTemplate(name);
+          onClick: ({ name, _kbnMeta: { formatVersion } }: TemplateListItem) => {
+            cloneTemplate(name, formatVersion);
           },
         },
         {
@@ -161,11 +163,11 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           icon: 'trash',
           color: 'danger',
           type: 'icon',
-          onClick: ({ name }: Template) => {
-            setTemplatesToDelete([name]);
+          onClick: ({ name, _kbnMeta: { formatVersion } }: TemplateListItem) => {
+            setTemplatesToDelete([{ name, formatVersion }]);
           },
           isPrimary: true,
-          enabled: ({ isManaged }: Template) => !isManaged,
+          enabled: ({ isManaged }: TemplateListItem) => !isManaged,
         },
       ],
     },
@@ -185,7 +187,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
 
   const selectionConfig = {
     onSelectionChange: setSelection,
-    selectable: ({ isManaged }: Template) => !isManaged,
+    selectable: ({ isManaged }: TemplateListItem) => !isManaged,
     selectableMessage: (selectable: boolean) => {
       if (!selectable) {
         return i18n.translate('xpack.idxMgmt.templateList.table.deleteManagedTemplateTooltip', {
@@ -200,21 +202,27 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     box: {
       incremental: true,
     },
-    toolsLeft: selection.length && (
-      <EuiButton
-        data-test-subj="deleteTemplatesButton"
-        onClick={() =>
-          setTemplatesToDelete(selection.map((selected: TemplateListItem) => selected.name))
-        }
-        color="danger"
-      >
-        <FormattedMessage
-          id="xpack.idxMgmt.templateList.table.deleteTemplatesButtonLabel"
-          defaultMessage="Delete {count, plural, one {template} other {templates} }"
-          values={{ count: selection.length }}
-        />
-      </EuiButton>
-    ),
+    toolsLeft:
+      selection.length > 0 ? (
+        <EuiButton
+          data-test-subj="deleteTemplatesButton"
+          onClick={() =>
+            setTemplatesToDelete(
+              selection.map(({ name, _kbnMeta: { formatVersion } }: TemplateListItem) => ({
+                name,
+                formatVersion,
+              }))
+            )
+          }
+          color="danger"
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.templateList.table.deleteTemplatesButtonLabel"
+            defaultMessage="Delete {count, plural, one {template} other {templates} }"
+            values={{ count: selection.length }}
+          />
+        </EuiButton>
+      ) : undefined,
     toolsRight: [
       <EuiButton
         color="secondary"
@@ -247,7 +255,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     <Fragment>
       {templatesToDelete && templatesToDelete.length > 0 ? (
         <TemplateDeleteModal
-          callback={data => {
+          callback={(data) => {
             if (data && data.hasDeletedTemplates) {
               reload();
             } else {

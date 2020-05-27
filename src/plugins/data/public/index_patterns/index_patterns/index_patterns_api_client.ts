@@ -45,7 +45,7 @@ export class IndexPatternsApiClient {
         query,
       })
       .catch((resp: any) => {
-        if (resp.body.statusCode === 404 && resp.body.statuscode === 'no_matching_indices') {
+        if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
           throw new IndexPatternMissingIndices(resp.body.message);
         }
 
@@ -54,13 +54,7 @@ export class IndexPatternsApiClient {
   }
 
   _getUrl(path: string[]) {
-    return (
-      API_BASE_URL +
-      path
-        .filter(Boolean)
-        .map(encodeURIComponent)
-        .join('/')
-    );
+    return API_BASE_URL + path.filter(Boolean).map(encodeURIComponent).join('/');
   }
 
   getFieldsForTimePattern(options: GetFieldsOptions = {}) {

@@ -37,7 +37,11 @@ import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
-import { Template } from '../../../common/types';
+import {
+  TemplateDeserialized,
+  TemplateListItem,
+  IndexTemplateFormatVersion,
+} from '../../../common';
 import { IndexMgmtMetricsType } from '../../types';
 
 // Temporary hack to provide the uiMetricService instance to this file.
@@ -164,26 +168,35 @@ export async function unfreezeIndices(indices: string[]) {
 }
 
 export async function loadIndexSettings(indexName: string) {
-  const response = await httpService.httpClient.get(`${API_BASE_PATH}/settings/${indexName}`);
+  const response = await httpService.httpClient.get(
+    `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`
+  );
   return response;
 }
 
 export async function updateIndexSettings(indexName: string, body: object) {
-  const response = await httpService.httpClient.put(`${API_BASE_PATH}/settings/${indexName}`, {
-    body: JSON.stringify(body),
-  });
+  const response = await httpService.httpClient.put(
+    `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`,
+    {
+      body: JSON.stringify(body),
+    }
+  );
   // Only track successful requests.
   uiMetricService.trackMetric('count', UIM_UPDATE_SETTINGS);
   return response;
 }
 
 export async function loadIndexStats(indexName: string) {
-  const response = await httpService.httpClient.get(`${API_BASE_PATH}/stats/${indexName}`);
+  const response = await httpService.httpClient.get(
+    `${API_BASE_PATH}/stats/${encodeURIComponent(indexName)}`
+  );
   return response;
 }
 
 export async function loadIndexMapping(indexName: string) {
-  const response = await httpService.httpClient.get(`${API_BASE_PATH}/mapping/${indexName}`);
+  const response = await httpService.httpClient.get(
+    `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`
+  );
   return response;
 }
 
@@ -201,33 +214,42 @@ export async function loadIndexData(type: string, indexName: string) {
 }
 
 export function useLoadIndexTemplates() {
-  return useRequest({
+  return useRequest<TemplateListItem[]>({
     path: `${API_BASE_PATH}/templates`,
     method: 'get',
   });
 }
 
-export async function deleteTemplates(names: Array<Template['name']>) {
+export async function deleteTemplates(
+  templates: Array<{ name: string; formatVersion: IndexTemplateFormatVersion }>
+) {
   const result = sendRequest({
-    path: `${API_BASE_PATH}/templates/${names.map(name => encodeURIComponent(name)).join(',')}`,
-    method: 'delete',
+    path: `${API_BASE_PATH}/delete-templates`,
+    method: 'post',
+    body: { templates },
   });
 
-  const uimActionType = names.length > 1 ? UIM_TEMPLATE_DELETE_MANY : UIM_TEMPLATE_DELETE;
+  const uimActionType = templates.length > 1 ? UIM_TEMPLATE_DELETE_MANY : UIM_TEMPLATE_DELETE;
 
   uiMetricService.trackMetric('count', uimActionType);
 
   return result;
 }
 
-export function useLoadIndexTemplate(name: Template['name']) {
-  return useRequest({
+export function useLoadIndexTemplate(
+  name: TemplateDeserialized['name'],
+  formatVersion: IndexTemplateFormatVersion
+) {
+  return useRequest<TemplateDeserialized>({
     path: `${API_BASE_PATH}/templates/${encodeURIComponent(name)}`,
     method: 'get',
+    query: {
+      v: formatVersion,
+    },
   });
 }
 
-export async function saveTemplate(template: Template, isClone?: boolean) {
+export async function saveTemplate(template: TemplateDeserialized, isClone?: boolean) {
   const result = await sendRequest({
     path: `${API_BASE_PATH}/templates`,
     method: 'put',
@@ -241,7 +263,7 @@ export async function saveTemplate(template: Template, isClone?: boolean) {
   return result;
 }
 
-export async function updateTemplate(template: Template) {
+export async function updateTemplate(template: TemplateDeserialized) {
   const { name } = template;
   const result = await sendRequest({
     path: `${API_BASE_PATH}/templates/${encodeURIComponent(name)}`,

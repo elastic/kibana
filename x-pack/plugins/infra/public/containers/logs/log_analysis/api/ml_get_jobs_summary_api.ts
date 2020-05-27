@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
 import { npStart } from '../../../../legacy_singletons';
-import { jobCustomSettingsRT } from './ml_api_types';
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
-import { getJobId } from '../../../../../common/log_analysis';
+
+import { getJobId, jobCustomSettingsRT } from '../../../../../common/log_analysis';
+import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
 
 export const callJobsSummaryAPI = async <JobType extends string>(
   spaceId: string,
@@ -22,7 +22,7 @@ export const callJobsSummaryAPI = async <JobType extends string>(
     method: 'POST',
     body: JSON.stringify(
       fetchJobStatusRequestPayloadRT.encode({
-        jobIds: jobTypes.map(jobType => getJobId(spaceId, sourceId, jobType)),
+        jobIds: jobTypes.map((jobType) => getJobId(spaceId, sourceId, jobType)),
       })
     ),
   });
@@ -54,6 +54,22 @@ const jobStateRT = rt.keyof({
   opening: null,
 });
 
+const jobCategorizationStatusRT = rt.keyof({
+  ok: null,
+  warn: null,
+});
+
+const jobModelSizeStatsRT = rt.type({
+  categorization_status: jobCategorizationStatusRT,
+  categorized_doc_count: rt.number,
+  dead_category_count: rt.number,
+  frequent_category_count: rt.number,
+  rare_category_count: rt.number,
+  total_category_count: rt.number,
+});
+
+export type JobModelSizeStats = rt.TypeOf<typeof jobModelSizeStatsRT>;
+
 export const jobSummaryRT = rt.intersection([
   rt.type({
     id: rt.string,
@@ -65,6 +81,7 @@ export const jobSummaryRT = rt.intersection([
     fullJob: rt.partial({
       custom_settings: jobCustomSettingsRT,
       finished_time: rt.number,
+      model_size_stats: jobModelSizeStatsRT,
     }),
   }),
 ]);

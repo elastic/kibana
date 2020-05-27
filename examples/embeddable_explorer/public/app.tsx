@@ -23,7 +23,7 @@ import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 
 
 import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 
-import { IEmbeddableStart } from '../../../src/plugins/embeddable/public';
+import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { Start as InspectorStartContract } from '../../../src/plugins/inspector/public';
 import {
@@ -51,7 +51,7 @@ type NavProps = RouteComponentProps & {
 };
 
 const Nav = withRouter(({ history, navigateToApp, pages }: NavProps) => {
-  const navItems = pages.map(page => ({
+  const navItems = pages.map((page) => ({
     id: page.id,
     name: page.title,
     onClick: () => history.push(`/${page.id}`),
@@ -74,7 +74,7 @@ const Nav = withRouter(({ history, navigateToApp, pages }: NavProps) => {
 interface Props {
   basename: string;
   navigateToApp: CoreStart['application']['navigateToApp'];
-  embeddableApi: IEmbeddableStart;
+  embeddableApi: EmbeddableStart;
   uiActionsApi: UiActionsStart;
   overlays: OverlayStart;
   notifications: CoreStart['notifications'];
@@ -117,23 +117,12 @@ const EmbeddableExplorerApp = ({
     {
       title: 'Dynamically adding children to a container',
       id: 'embeddablePanelExamplae',
-      component: (
-        <EmbeddablePanelExample
-          uiActionsApi={uiActionsApi}
-          getAllEmbeddableFactories={embeddableApi.getEmbeddableFactories}
-          getEmbeddableFactory={embeddableApi.getEmbeddableFactory}
-          overlays={overlays}
-          uiSettingsClient={uiSettingsClient}
-          savedObject={savedObject}
-          notifications={notifications}
-          inspector={inspector}
-        />
-      ),
+      component: <EmbeddablePanelExample embeddableServices={embeddableApi} />,
     },
   ];
 
   const routes = pages.map((page, i) => (
-    <Route key={i} path={`/${page.id}`} render={props => page.component} />
+    <Route key={i} path={`/${page.id}`} render={(props) => page.component} />
   ));
 
   return (

@@ -21,10 +21,11 @@ import 'source-map-support/register';
 
 import Path from 'path';
 
-import { run, REPO_ROOT, createFlagError } from '@kbn/dev-utils';
+import { run, REPO_ROOT, createFlagError, CiStatsReporter } from '@kbn/dev-utils';
 
 import { logOptimizerState } from './log_optimizer_state';
 import { OptimizerConfig } from './optimizer';
+import { reportOptimizerStats } from './report_optimizer_stats';
 import { runOptimizer } from './run_optimizer';
 
 run(
@@ -42,6 +43,11 @@ run(
     const cache = flags.cache ?? true;
     if (typeof cache !== 'boolean') {
       throw createFlagError('expected --cache to have no value');
+    }
+
+    const includeCoreBundle = flags.core ?? true;
+    if (typeof includeCoreBundle !== 'boolean') {
+      throw createFlagError('expected --core to have no value');
     }
 
     const dist = flags.dist ?? false;
@@ -71,9 +77,14 @@ run(
 
     const extraPluginScanDirs = ([] as string[])
       .concat((flags['scan-dir'] as string | string[]) || [])
-      .map(p => Path.resolve(p));
-    if (!extraPluginScanDirs.every(s => typeof s === 'string')) {
+      .map((p) => Path.resolve(p));
+    if (!extraPluginScanDirs.every((s) => typeof s === 'string')) {
       throw createFlagError('expected --scan-dir to be a string');
+    }
+
+    const reportStats = flags['report-stats'] ?? false;
+    if (typeof reportStats !== 'boolean') {
+      throw createFlagError('expected --report-stats to have no value');
     }
 
     const config = OptimizerConfig.create({
@@ -87,17 +98,39 @@ run(
       profileWebpack,
       extraPluginScanDirs,
       inspectWorkers,
+      includeCoreBundle,
     });
 
-    await runOptimizer(config)
-      .pipe(logOptimizerState(log, config))
-      .toPromise();
+    let update$ = runOptimizer(config);
+
+    if (reportStats) {
+      const reporter = CiStatsReporter.fromEnv(log);
+
+      if (!reporter.isEnabled()) {
+        log.warning('Unable to initialize CiStatsReporter from env');
+      }
+
+      update$ = update$.pipe(reportOptimizerStats(reporter, config));
+    }
+
+    await update$.pipe(logOptimizerState(log, config)).toPromise();
   },
   {
     flags: {
-      boolean: ['watch', 'oss', 'examples', 'dist', 'cache', 'profile', 'inspect-workers'],
+      boolean: [
+        'core',
+        'watch',
+        'oss',
+        'examples',
+        'dist',
+        'cache',
+        'profile',
+        'inspect-workers',
+        'report-stats',
+      ],
       string: ['workers', 'scan-dir'],
       default: {
+        core: true,
         examples: true,
         cache: true,
         'inspect-workers': true,
@@ -107,11 +140,13 @@ run(
         --workers          max number of workers to use
         --oss              only build oss plugins
         --profile          profile the webpack builds and write stats.json files to build outputs
+        --no-core          disable generating the core bundle
         --no-cache         disable the cache
         --no-examples      don't build the example plugins
         --dist             create bundles that are suitable for inclusion in the Kibana distributable
         --scan-dir         add a directory to the list of directories scanned for plugins (specify as many times as necessary)
         --no-inspect-workers  when inspecting the parent process, don't inspect the workers
+        --report-stats     attempt to report stats about this execution of the build to the kibana-ci-stats service using this name
       `,
     },
   }

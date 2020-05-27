@@ -33,7 +33,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useEffect, useState, Fragment, useRef } from 'react';
+import React, { useEffect, useState, Fragment, useRef } from 'react';
 import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
 import { SavedQueryListItem } from './saved_query_list_item';
@@ -49,7 +49,7 @@ interface Props {
   onClearSavedQuery: () => void;
 }
 
-export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
+export function SavedQueryManagementComponent({
   showSaveQuery,
   loadedSavedQuery,
   onSave,
@@ -57,7 +57,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   onLoad,
   onClearSavedQuery,
   savedQueryService,
-}) => {
+}: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
@@ -116,7 +116,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   const onDeleteSavedQuery = async (savedQuery: SavedQuery) => {
     cancelPendingListingRequest.current();
     setSavedQueries(
-      savedQueries.filter(currentSavedQuery => currentSavedQuery.id !== savedQuery.id)
+      savedQueries.filter((currentSavedQuery) => currentSavedQuery.id !== savedQuery.id)
     );
 
     if (loadedSavedQuery && loadedSavedQuery.id === savedQuery.id) {
@@ -146,7 +146,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   );
 
   const savedQueryRows = () => {
-    const savedQueriesWithoutCurrent = savedQueries.filter(savedQuery => {
+    const savedQueriesWithoutCurrent = savedQueries.filter((savedQuery) => {
       if (!loadedSavedQuery) return true;
       return savedQuery.id !== loadedSavedQuery.id;
     });
@@ -154,16 +154,16 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
       loadedSavedQuery && savedQueriesWithoutCurrent.length !== savedQueries.length
         ? [loadedSavedQuery, ...savedQueriesWithoutCurrent]
         : [...savedQueriesWithoutCurrent];
-    return savedQueriesReordered.map(savedQuery => (
+    return savedQueriesReordered.map((savedQuery) => (
       <SavedQueryListItem
         key={savedQuery.id}
         savedQuery={savedQuery}
         isSelected={!!loadedSavedQuery && loadedSavedQuery.id === savedQuery.id}
-        onSelect={savedQueryToSelect => {
+        onSelect={(savedQueryToSelect) => {
           onLoad(savedQueryToSelect);
           setIsOpen(false);
         }}
-        onDelete={savedQueryToDelete => onDeleteSavedQuery(savedQueryToDelete)}
+        onDelete={(savedQueryToDelete) => onDeleteSavedQuery(savedQueryToDelete)}
         showWriteOperations={!!showSaveQuery}
       />
     ));
@@ -180,6 +180,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
         }}
         anchorPosition="downLeft"
         panelPaddingSize="none"
+        buffer={-8}
         ownFocus
       >
         <div
@@ -316,4 +317,4 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
       </EuiPopover>
     </Fragment>
   );
-};
+}

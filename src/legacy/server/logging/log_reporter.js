@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Squeeze } from 'good-squeeze';
+import { Squeeze } from '@hapi/good-squeeze';
 import { createWriteStream as writeStr } from 'fs';
 
 import LogFormatJson from './log_format_json';
@@ -30,7 +30,7 @@ import { LogInterceptor } from './log_interceptor';
 // thrown every time we start the server.
 // In order to keep using the legacy logger until we remove it I'm just adding
 // a new hard limit here.
-process.stdout.setMaxListeners(15);
+process.stdout.setMaxListeners(25);
 
 export function getLoggerStream({ events, config }) {
   const squeeze = new Squeeze(events);
@@ -51,10 +51,7 @@ export function getLoggerStream({ events, config }) {
     });
   }
 
-  logInterceptor
-    .pipe(squeeze)
-    .pipe(format)
-    .pipe(dest);
+  logInterceptor.pipe(squeeze).pipe(format).pipe(dest);
 
   return logInterceptor;
 }

@@ -5,8 +5,9 @@
  */
 
 import Boom from 'boom';
-import { RequestHandlerContext } from 'src/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { RequestHandlerContext } from 'kibana/server';
+import { TypeOf } from '@kbn/config-schema';
+import { AnalysisConfig } from '../../common/types/anomaly_detection_jobs';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -29,23 +30,12 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
     context: RequestHandlerContext,
     payload: CalculateModelMemoryLimitPayload
   ) {
-    const {
-      indexPattern,
-      splitFieldName,
-      query,
-      fieldNames,
-      influencerNames,
-      timeFieldName,
-      earliestMs,
-      latestMs,
-    } = payload;
+    const { analysisConfig, indexPattern, query, timeFieldName, earliestMs, latestMs } = payload;
 
     return calculateModelMemoryLimitProvider(context.ml!.mlClient.callAsCurrentUser)(
+      analysisConfig as AnalysisConfig,
       indexPattern,
-      splitFieldName,
       query,
-      fieldNames,
-      influencerNames,
       timeFieldName,
       earliestMs,
       latestMs
@@ -58,6 +48,8 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
    * @api {post} /api/ml/validate/estimate_bucket_span Estimate bucket span
    * @apiName EstimateBucketSpan
    * @apiDescription  Estimates minimum viable bucket span based on the characteristics of a pre-viewed subset of the data
+   *
+   * @apiSchema (body) estimateBucketSpanSchema
    */
   router.post(
     {
@@ -65,13 +57,16 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       validate: {
         body: estimateBucketSpanSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         let errorResp;
         const resp = await estimateBucketSpanFactory(
           context.ml!.mlClient.callAsCurrentUser,
-          context.core.elasticsearch.adminClient.callAsInternalUser,
+          context.core.elasticsearch.legacy.client.callAsInternalUser,
           mlLicense.isSecurityEnabled() === false
         )(request.body)
           // this catch gets triggered when the estimation code runs without error
@@ -102,7 +97,9 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
    *
    * @api {post} /api/ml/validate/calculate_model_memory_limit Calculates model memory limit
    * @apiName CalculateModelMemoryLimit
-   * @apiDescription Calculates the model memory limit
+   * @apiDescription Calls _estimate_model_memory endpoint to retrieve model memory estimation.
+   *
+   * @apiSchema (body) modelMemoryLimitSchema
    *
    * @apiSuccess {String} modelMemoryLimit
    */
@@ -111,6 +108,9 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       path: '/api/ml/validate/calculate_model_memory_limit',
       validate: {
         body: modelMemoryLimitSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -132,12 +132,17 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
    * @api {post} /api/ml/validate/cardinality Validate cardinality
    * @apiName ValidateCardinality
    * @apiDescription Validates cardinality for the given job configuration
+   *
+   * @apiSchema (body) validateCardinalitySchema
    */
   router.post(
     {
       path: '/api/ml/validate/cardinality',
       validate: {
-        body: schema.object(validateCardinalitySchema),
+        body: validateCardinalitySchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -162,12 +167,17 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
    * @api {post} /api/ml/validate/job Validates job
    * @apiName ValidateJob
    * @apiDescription Validates the given job configuration
+   *
+   * @apiSchema (body) validateJobSchema
    */
   router.post(
     {
       path: '/api/ml/validate/job',
       validate: {
         body: validateJobSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -177,7 +187,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
           context.ml!.mlClient.callAsCurrentUser,
           request.body,
           version,
-          context.core.elasticsearch.adminClient.callAsInternalUser,
+          context.core.elasticsearch.legacy.client.callAsInternalUser,
           mlLicense.isSecurityEnabled() === false
         );
 

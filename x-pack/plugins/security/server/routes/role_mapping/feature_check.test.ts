@@ -11,7 +11,7 @@ import {
   RequestHandlerContext,
   IClusterClient,
 } from '../../../../../../src/core/server';
-import { LICENSE_CHECK_STATE, LicenseCheck } from '../../../../licensing/server';
+import { LicenseCheck } from '../../../../licensing/server';
 import { defineRoleMappingFeatureCheckRoute } from './feature_check';
 
 interface TestOptions {
@@ -62,7 +62,7 @@ describe('GET role mappings feature check', () => {
   const getFeatureCheckTest = (
     description: string,
     {
-      licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
+      licenseCheckResult = { state: 'valid' },
       canManageRoleMappings = true,
       nodeSettingsResponse = {},
       xpackUsageResponse = defaultXpackUsageResponse,

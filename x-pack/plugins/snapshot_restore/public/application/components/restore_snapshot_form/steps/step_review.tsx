@@ -249,7 +249,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
                 <EuiDescriptionListDescription>
                   <EuiText>
                     <ul>
-                      {ignoreIndexSettings.map(setting => (
+                      {ignoreIndexSettings.map((setting) => (
                         <li key={setting}>
                           <EuiTitle size="xs">
                             <span>{setting}</span>
@@ -282,12 +282,10 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
         setOptions={{ maxLines: Infinity }}
         value={JSON.stringify(serializedRestoreSettings, null, 2)}
         editorProps={{ $blockScrolling: Infinity }}
-        aria-label={
-          <FormattedMessage
-            id="xpack.snapshotRestore.restoreForm.stepReview.jsonTab.jsonAriaLabel"
-            defaultMessage="Restore settings to be executed"
-          />
-        }
+        aria-label={i18n.translate(
+          'xpack.snapshotRestore.restoreForm.stepReview.jsonTab.jsonAriaLabel',
+          { defaultMessage: 'Restore settings to be executed' }
+        )}
       />
     </Fragment>
   );

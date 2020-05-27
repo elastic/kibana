@@ -37,7 +37,7 @@ describe('overwrittenSessionApp', () => {
   it('properly sets breadcrumbs and renders application', async () => {
     const coreSetupMock = coreMock.createSetup();
     const coreStartMock = coreMock.createStart();
-    coreSetupMock.getStartServices.mockResolvedValue([coreStartMock, {}]);
+    coreSetupMock.getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
 
     const authcMock = securityMock.createSetup().authc;
     const containerMock = document.createElement('div');

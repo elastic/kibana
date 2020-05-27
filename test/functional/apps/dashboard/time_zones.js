@@ -20,15 +20,14 @@
 import path from 'path';
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
-  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['dashboard', 'timePicker', 'settings', 'common']);
 
-  describe('dashboard time zones', function() {
-    this.tags('smoke');
+  describe('dashboard time zones', function () {
+    this.tags('includeFirefox');
 
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
@@ -48,7 +47,6 @@ export default function({ getService, getPageObjects }) {
 
     after(async () => {
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
-      await browser.refresh();
     });
 
     it('Exported dashboard adjusts EST time to UTC', async () => {

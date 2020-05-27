@@ -16,31 +16,35 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';
+
+import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
+import { IndexTemplateFormatVersion } from '../../../../../common';
 import { SectionError, SectionLoading, Error } from '../../../components';
-import { TemplateTable } from './template_table';
 import { useLoadIndexTemplates } from '../../../services/api';
-import { Template } from '../../../../../common/types';
 import { useServices } from '../../../app_context';
 import {
   getTemplateEditLink,
   getTemplateListLink,
   getTemplateCloneLink,
 } from '../../../services/routing';
-import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
+import { getFormatVersionFromQueryparams } from '../../../lib/index_templates';
+import { TemplateTable } from './template_table';
 import { TemplateDetails } from './template_details';
 
 interface MatchParams {
-  templateName?: Template['name'];
+  templateName?: string;
 }
 
 export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
     params: { templateName },
   },
+  location,
   history,
 }) => {
   const { uiMetricService } = useServices();
   const { error, isLoading, data: templates, sendRequest: reload } = useLoadIndexTemplates();
+  const queryParamsFormatVersion = getFormatVersionFromQueryparams(location);
 
   let content;
 
@@ -48,8 +52,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   // Filter out system index templates
   const filteredTemplates = useMemo(
-    () =>
-      templates ? templates.filter((template: Template) => !template.name.startsWith('.')) : [],
+    () => (templates ? templates.filter((template) => !template.name.startsWith('.')) : []),
     [templates]
   );
 
@@ -57,12 +60,12 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
     history.push(getTemplateListLink());
   };
 
-  const editTemplate = (name: Template['name']) => {
-    history.push(getTemplateEditLink(name));
+  const editTemplate = (name: string, formatVersion: IndexTemplateFormatVersion) => {
+    history.push(getTemplateEditLink(name, formatVersion));
   };
 
-  const cloneTemplate = (name: Template['name']) => {
-    history.push(getTemplateCloneLink(name));
+  const cloneTemplate = (name: string, formatVersion: IndexTemplateFormatVersion) => {
+    history.push(getTemplateCloneLink(name, formatVersion));
   };
 
   // Track component loaded
@@ -125,7 +128,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
               id="checkboxShowSystemIndexTemplates"
               data-test-subj="systemTemplatesSwitch"
               checked={showSystemTemplates}
-              onChange={event => setShowSystemTemplates(event.target.checked)}
+              onChange={(event) => setShowSystemTemplates(event.target.checked)}
               label={
                 <FormattedMessage
                   id="xpack.idxMgmt.indexTemplatesTable.systemIndexTemplatesSwitchLabel"
@@ -149,9 +152,12 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   return (
     <div data-test-subj="templateList">
       {content}
-      {templateName && (
+      {templateName && queryParamsFormatVersion !== undefined && (
         <TemplateDetails
-          templateName={templateName}
+          template={{
+            name: templateName,
+            formatVersion: queryParamsFormatVersion,
+          }}
           onClose={closeTemplateDetails}
           editTemplate={editTemplate}
           cloneTemplate={cloneTemplate}

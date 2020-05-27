@@ -8,7 +8,7 @@ import { of, BehaviorSubject } from 'rxjs';
 import { licensingMock } from '../../../licensing/public/mocks';
 import { SecurityLicenseService } from './license_service';
 
-describe('license features', function() {
+describe('license features', function () {
   it('should display error when ES is unavailable', () => {
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(undefined as any),
@@ -18,10 +18,12 @@ describe('license features', function() {
       allowLogin: false,
       showLinks: false,
       showRoleMappingsManagement: false,
+      allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       layout: 'error-es-unavailable',
       allowRbac: false,
+      allowSubFeaturePrivileges: false,
     });
   });
 
@@ -36,10 +38,12 @@ describe('license features', function() {
       allowLogin: false,
       showLinks: false,
       showRoleMappingsManagement: false,
+      allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       layout: 'error-xpack-unavailable',
       allowRbac: false,
+      allowSubFeaturePrivileges: false,
     });
   });
 
@@ -58,10 +62,12 @@ describe('license features', function() {
       expect(subscriptionHandler.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
+            "allowAccessAgreement": false,
             "allowLogin": false,
             "allowRbac": false,
             "allowRoleDocumentLevelSecurity": false,
             "allowRoleFieldLevelSecurity": false,
+            "allowSubFeaturePrivileges": false,
             "layout": "error-xpack-unavailable",
             "showLinks": false,
             "showLogin": true,
@@ -75,13 +81,15 @@ describe('license features', function() {
       expect(subscriptionHandler.mock.calls[1]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "allowLogin": false,
-            "allowRbac": false,
-            "allowRoleDocumentLevelSecurity": false,
-            "allowRoleFieldLevelSecurity": false,
-            "showLinks": false,
-            "showLogin": false,
-            "showRoleMappingsManagement": false,
+            "allowAccessAgreement": true,
+            "allowLogin": true,
+            "allowRbac": true,
+            "allowRoleDocumentLevelSecurity": true,
+            "allowRoleFieldLevelSecurity": true,
+            "allowSubFeaturePrivileges": true,
+            "showLinks": true,
+            "showLogin": true,
+            "showRoleMappingsManagement": true,
           },
         ]
       `);
@@ -90,7 +98,7 @@ describe('license features', function() {
     }
   });
 
-  it('should show login page and other security elements, allow RBAC but forbid role mappings and document level security if license is basic.', () => {
+  it('should show login page and other security elements, allow RBAC but forbid paid features if license is basic.', () => {
     const mockRawLicense = licensingMock.createLicense({
       features: { security: { isEnabled: true, isAvailable: true } },
     });
@@ -105,9 +113,11 @@ describe('license features', function() {
       allowLogin: true,
       showLinks: true,
       showRoleMappingsManagement: false,
+      allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       allowRbac: true,
+      allowSubFeaturePrivileges: false,
     });
     expect(getFeatureSpy).toHaveBeenCalledTimes(1);
     expect(getFeatureSpy).toHaveBeenCalledWith('security');
@@ -126,13 +136,15 @@ describe('license features', function() {
       allowLogin: false,
       showLinks: false,
       showRoleMappingsManagement: false,
+      allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       allowRbac: false,
+      allowSubFeaturePrivileges: false,
     });
   });
 
-  it('should allow role mappings, but not DLS/FLS if license = gold', () => {
+  it('should allow role mappings, access agreement and sub-feature privileges, but not DLS/FLS if license = gold', () => {
     const mockRawLicense = licensingMock.createLicense({
       license: { mode: 'gold', type: 'gold' },
       features: { security: { isEnabled: true, isAvailable: true } },
@@ -146,13 +158,15 @@ describe('license features', function() {
       allowLogin: true,
       showLinks: true,
       showRoleMappingsManagement: true,
+      allowAccessAgreement: true,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       allowRbac: true,
+      allowSubFeaturePrivileges: true,
     });
   });
 
-  it('should allow to login, allow RBAC, allow role mappings, and document level security if license >= platinum', () => {
+  it('should allow to login, allow RBAC, role mappings, access agreement, sub-feature privileges, and DLS if license >= platinum', () => {
     const mockRawLicense = licensingMock.createLicense({
       license: { mode: 'platinum', type: 'platinum' },
       features: { security: { isEnabled: true, isAvailable: true } },
@@ -166,9 +180,11 @@ describe('license features', function() {
       allowLogin: true,
       showLinks: true,
       showRoleMappingsManagement: true,
+      allowAccessAgreement: true,
       allowRoleDocumentLevelSecurity: true,
       allowRoleFieldLevelSecurity: true,
       allowRbac: true,
+      allowSubFeaturePrivileges: true,
     });
   });
 });

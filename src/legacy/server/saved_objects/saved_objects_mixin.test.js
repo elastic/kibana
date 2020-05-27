@@ -88,7 +88,7 @@ const savedObjectTypes = convertLegacyTypes(
 );
 
 const typeRegistry = new SavedObjectTypeRegistry();
-savedObjectTypes.forEach(type => typeRegistry.registerType(type));
+savedObjectTypes.forEach((type) => typeRegistry.registerType(type));
 
 const migrator = mockKibanaMigrator.create({
   types: savedObjectTypes,
@@ -103,7 +103,7 @@ describe('Saved Objects Mixin', () => {
     'kibana.index': 'kibana.index',
     'savedObjects.maxImportExportSize': 10000,
   };
-  const stubConfig = jest.fn(key => {
+  const stubConfig = jest.fn((key) => {
     return config[key];
   });
 
@@ -116,11 +116,6 @@ describe('Saved Objects Mixin', () => {
       config: () => {
         return {
           get: stubConfig,
-        };
-      },
-      indexPatternsServiceFactory: () => {
-        return {
-          getFieldsForWildcard: jest.fn(),
         };
       },
       plugins: {
@@ -183,7 +178,7 @@ describe('Saved Objects Mixin', () => {
         'kibanaMigrator',
         expect.any(Object)
       );
-      expect(mockServer.decorate).toHaveBeenCalledTimes(2);
+      expect(mockServer.decorate).toHaveBeenCalledTimes(1);
       expect(mockServer.route).not.toHaveBeenCalled();
     });
   });
@@ -201,7 +196,7 @@ describe('Saved Objects Mixin', () => {
 
     it('should return all but hidden types', async () => {
       expect(service).toBeDefined();
-      expect(service.types).toEqual(['config', 'testtype', 'doc1', 'doc2']);
+      expect(service.types).toEqual(['testtype', 'doc1', 'doc2']);
     });
 
     const mockCallEs = jest.fn();
@@ -215,16 +210,12 @@ describe('Saved Objects Mixin', () => {
       it('should create a repository without hidden types', () => {
         const repository = service.getSavedObjectsRepository(mockCallEs);
         expect(repository).toBeDefined();
-        expect(repository._allowedTypes).toEqual(['config', 'testtype', 'doc1', 'doc2']);
+        expect(repository._allowedTypes).toEqual(['testtype', 'doc1', 'doc2']);
       });
 
       it('should create a repository with a unique list of allowed types', () => {
-        const repository = service.getSavedObjectsRepository(mockCallEs, [
-          'config',
-          'config',
-          'config',
-        ]);
-        expect(repository._allowedTypes).toEqual(['config', 'testtype', 'doc1', 'doc2']);
+        const repository = service.getSavedObjectsRepository(mockCallEs, ['doc1', 'doc1', 'doc1']);
+        expect(repository._allowedTypes).toEqual(['testtype', 'doc1', 'doc2']);
       });
 
       it('should create a repository with extraTypes minus duplicate', () => {
@@ -232,13 +223,7 @@ describe('Saved Objects Mixin', () => {
           'hiddentype',
           'hiddentype',
         ]);
-        expect(repository._allowedTypes).toEqual([
-          'config',
-          'testtype',
-          'doc1',
-          'doc2',
-          'hiddentype',
-        ]);
+        expect(repository._allowedTypes).toEqual(['testtype', 'doc1', 'doc2', 'hiddentype']);
       });
 
       it('should not allow a repository without a callCluster function', () => {

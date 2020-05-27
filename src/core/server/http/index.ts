@@ -38,6 +38,7 @@ export {
   LifecycleResponseFactory,
   RedirectResponseOptions,
   RequestHandler,
+  RequestHandlerWrapper,
   ResponseError,
   ResponseErrorAttributes,
   ResponseHeaders,
@@ -67,9 +68,12 @@ export {
   AuthenticationHandler,
   AuthHeaders,
   AuthResultParams,
+  AuthRedirected,
+  AuthRedirectedParams,
   AuthToolkit,
   AuthResult,
   Authenticated,
+  AuthNotHandled,
   AuthResultType,
 } from './lifecycle/auth';
 export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
