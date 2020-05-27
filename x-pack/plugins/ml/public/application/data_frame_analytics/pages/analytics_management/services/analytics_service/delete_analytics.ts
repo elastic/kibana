@@ -107,7 +107,7 @@ export const deleteAnalyticsAndTargetIndex = async (
       const error = extractErrorMessage(status.targetIndexPatternDeleted.error);
       toastNotifications.addDanger(
         i18n.translate(
-          'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexPatternSuccessMessage',
+          'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexPatternErrorMessage',
           {
             defaultMessage: 'An error occurred deleting index pattern {destinationIndex}: {error}',
             values: { destinationIndex, error },
