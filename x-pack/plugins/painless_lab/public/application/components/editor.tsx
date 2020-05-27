@@ -6,6 +6,8 @@
 import React from 'react';
 import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 
+import { monaco } from '../../../../../../src/plugins/es_ui_shared/public';
+
 interface Props {
   code: string;
   onChange: (code: string) => void;
@@ -14,10 +16,13 @@ interface Props {
 export function Editor({ code, onChange }: Props) {
   return (
     <CodeEditor
-      languageId="painless"
+      languageId={monaco.XJsonLang.ID}
       // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
       width="99%"
       height="100%"
+      editorDidMount={(editor) => {
+        monaco.XJsonLang.registerGrammarChecker(editor);
+      }}
       value={code}
       onChange={onChange}
       options={{

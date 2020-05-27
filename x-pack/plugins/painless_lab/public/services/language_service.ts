@@ -23,23 +23,22 @@ export class LanguageService {
   private originalMonacoEnvironment: any;
 
   public setup() {
-    monaco.languages.register({ id: LANGUAGE_ID });
-    monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, monacoPainlessLang);
-
-    if (CAN_CREATE_WORKER) {
-      this.originalMonacoEnvironment = (window as any).MonacoEnvironment;
-      (window as any).MonacoEnvironment = {
-        getWorker: () => {
-          const blob = new Blob([workerSrc], { type: 'application/javascript' });
-          return new Worker(window.URL.createObjectURL(blob));
-        },
-      };
-    }
+    // monaco.languages.register({ id: LANGUAGE_ID });
+    // monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, monacoPainlessLang);
+    // if (CAN_CREATE_WORKER) {
+    //   this.originalMonacoEnvironment = (window as any).MonacoEnvironment;
+    //   (window as any).MonacoEnvironment = {
+    //     getWorker: () => {
+    //       const blob = new Blob([workerSrc], { type: 'application/javascript' });
+    //       return new Worker(window.URL.createObjectURL(blob));
+    //     },
+    //   };
+    // }
   }
 
   public stop() {
-    if (CAN_CREATE_WORKER) {
-      (window as any).MonacoEnvironment = this.originalMonacoEnvironment;
-    }
+    // if (CAN_CREATE_WORKER) {
+    //   (window as any).MonacoEnvironment = this.originalMonacoEnvironment;
+    // }
   }
 }
