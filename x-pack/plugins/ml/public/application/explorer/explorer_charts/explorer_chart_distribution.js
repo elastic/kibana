@@ -25,6 +25,7 @@ import {
   getTickValues,
   numTicksForDateFormat,
   removeLabelOverlap,
+  chartExtendedLimits,
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 import { getTimeBucketsFromCache } from '../../util/time_buckets';
@@ -137,22 +138,20 @@ export class ExplorerChartDistribution extends React.Component {
       });
 
       if (chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
-        const focusData = chartData
-          .filter((d) => {
-            return d.entity === highlight;
-          })
-          .map((d) => d.value);
-        const focusExtent = d3.extent(focusData);
-
+        const focusData = chartData.filter((d) => {
+          return d.entity === highlight;
+        });
+        // calculate the max y domain based on value, typical, and actual
+        const { min: yScaleDomainMin, max: yScaleDomainMax } = chartExtendedLimits(focusData);
         // now again filter chartData to include only the data points within the domain
         chartData = chartData.filter((d) => {
-          return d.value <= focusExtent[1];
+          return d.value <= yScaleDomainMax;
         });
 
         lineChartYScale = d3.scale
           .linear()
           .range([chartHeight, 0])
-          .domain([0, focusExtent[1]])
+          .domain([yScaleDomainMin < 0 ? yScaleDomainMin : 0, yScaleDomainMax])
           .nice();
       } else if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
         // avoid overflowing the border of the highlighted area

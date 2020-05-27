@@ -65,6 +65,38 @@ export function chartLimits(data = []) {
   return limits;
 }
 
+export function chartExtendedLimits(data = []) {
+  let _min = Infinity;
+  let _max = -Infinity;
+  data.forEach((d) => {
+    let metricValue = d.value;
+    const actualValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
+    const typicalValue = Array.isArray(d.typical) ? d.typical[0] : d.typical;
+
+    if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
+      // If an anomaly coincides with a gap in the data, use the anomaly actual value.
+      metricValue = actualValue;
+    }
+
+    if (d.anomalyScore !== undefined) {
+      _min = Math.min(_min, metricValue, actualValue, typicalValue);
+      _max = Math.max(_max, metricValue, actualValue, typicalValue);
+    } else {
+      _min = Math.min(_min, metricValue);
+      _max = Math.max(_max, metricValue);
+    }
+  });
+  const limits = { max: _max, min: _min };
+
+  // add padding of 5% of the difference between max and min
+  // if we ended up with the same value for both of them
+  if (limits.max === limits.min) {
+    const padding = limits.max * 0.05;
+    limits.max += padding;
+    limits.min -= padding;
+  }
+  return limits;
+}
 export function drawLineChartDots(data, lineChartGroup, lineChartValuesLine, radius = 1.5) {
   // We need to do this because when creating a line for a chart which has data gaps,
   // if there are single datapoints without any valid data before and after them,
