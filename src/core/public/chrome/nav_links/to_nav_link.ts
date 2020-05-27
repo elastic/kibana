@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { App, AppNavLinkStatus, AppStatus, LegacyApp } from '../../application';
+import { AppInfo, AppNavLinkStatus, AppStatus, LegacyAppInfo } from '../../application';
 import { IBasePath } from '../../http';
 import { NavLinkWrapper } from './nav_link';
 import { appendAppPath } from '../../application/utils';
 
-export function toNavLink(app: App | LegacyApp, basePath: IBasePath): NavLinkWrapper {
+export function toNavLink(app: AppInfo | LegacyAppInfo, basePath: IBasePath): NavLinkWrapper {
   const useAppStatus = app.navLinkStatus === AppNavLinkStatus.default;
   const baseUrl = isLegacyApp(app) ? basePath.prepend(app.appUrl) : basePath.prepend(app.appRoute!);
   return new NavLinkWrapper({
@@ -48,6 +48,6 @@ function relativeToAbsolute(url: string) {
   return a.href;
 }
 
-function isLegacyApp(app: App | LegacyApp): app is LegacyApp {
+function isLegacyApp(app: AppInfo | LegacyAppInfo): app is LegacyAppInfo {
   return app.legacy === true;
 }

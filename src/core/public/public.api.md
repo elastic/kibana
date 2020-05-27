@@ -61,6 +61,11 @@ export interface AppCategory {
 }
 
 // @public
+export type AppInfo = Omit<App, 'mount' | 'updater$'> & {
+    legacy: false;
+};
+
+// @public
 export type AppLeaveAction = AppLeaveDefaultAction | AppLeaveConfirmAction;
 
 // @public
@@ -106,6 +111,7 @@ export interface ApplicationSetup {
 
 // @public (undocumented)
 export interface ApplicationStart {
+    applications$: Observable<ReadonlyMap<string, AppInfo | LegacyAppInfo>>;
     capabilities: RecursiveReadonly<Capabilities>;
     currentAppId$: Observable<string | undefined>;
     getUrlForApp(appId: string, options?: {
@@ -855,6 +861,25 @@ export interface IUiSettingsClient {
     remove: (key: string) => Promise<boolean>;
     set: (key: string, value: any) => Promise<boolean>;
 }
+
+// @internal (undocumented)
+export interface LegacyApp extends AppBase {
+    // (undocumented)
+    appUrl: string;
+    // (undocumented)
+    disableSubUrlTracking?: boolean;
+    // (undocumented)
+    linkToLastSubUrl?: boolean;
+    // (undocumented)
+    subUrlBase?: string;
+}
+
+// Warning: (ae-incompatible-release-tags) The symbol "LegacyAppInfo" is marked as @public, but its signature references "LegacyApp" which is marked as @internal
+//
+// @public
+export type LegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
+    legacy: true;
+};
 
 // @public @deprecated
 export interface LegacyCoreSetup extends CoreSetup<any, any> {

@@ -17,15 +17,12 @@
  * under the License.
  */
 
-import { App, AppMount, AppNavLinkStatus, AppStatus, LegacyApp } from '../../application';
+import { AppInfo, AppNavLinkStatus, AppStatus, LegacyAppInfo } from '../../application';
 import { toNavLink } from './to_nav_link';
 
 import { httpServiceMock } from '../../mocks';
 
-function mount() {}
-
-const app = (props: Partial<App> = {}): App => ({
-  mount: (mount as unknown) as AppMount,
+const app = (props: Partial<AppInfo> = {}): AppInfo => ({
   id: 'some-id',
   title: 'some-title',
   status: AppStatus.accessible,
@@ -35,7 +32,7 @@ const app = (props: Partial<App> = {}): App => ({
   ...props,
 });
 
-const legacyApp = (props: Partial<LegacyApp> = {}): LegacyApp => ({
+const legacyApp = (props: Partial<LegacyAppInfo> = {}): LegacyAppInfo => ({
   appUrl: '/my-app-url',
   id: 'some-id',
   title: 'some-title',

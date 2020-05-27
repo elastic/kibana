@@ -34,7 +34,15 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
-import { App, AppNavLinkStatus, AppStatus, AppUpdater, LegacyApp } from './types';
+import {
+  App,
+  AppInfo,
+  AppNavLinkStatus,
+  AppStatus,
+  AppUpdater,
+  LegacyApp,
+  LegacyAppInfo,
+} from './types';
 import { act } from 'react-dom/test-utils';
 
 const createApp = (props: Partial<App>): App => {
@@ -366,7 +374,10 @@ describe('#setup()', () => {
       setup.registerAppUpdater(statusUpdater);
 
       const start = await service.start(startDeps);
-      let latestValue: ReadonlyMap<string, App | LegacyApp> = new Map<string, App | LegacyApp>();
+      let latestValue: ReadonlyMap<string, AppInfo | LegacyAppInfo> = new Map<
+        string,
+        AppInfo | LegacyAppInfo
+      >();
       start.applications$.subscribe((apps) => {
         latestValue = apps;
       });

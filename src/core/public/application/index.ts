@@ -22,6 +22,7 @@ export { Capabilities } from './capabilities';
 export { ScopedHistory } from './scoped_history';
 export {
   App,
+  AppInfo,
   AppBase,
   AppMount,
   AppMountDeprecated,
@@ -42,4 +43,5 @@ export {
   // Internal types
   InternalApplicationStart,
   LegacyApp,
+  LegacyAppInfo,
 } from './types';

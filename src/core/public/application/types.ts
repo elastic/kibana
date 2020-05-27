@@ -244,6 +244,24 @@ export interface LegacyApp extends AppBase {
 }
 
 /**
+ * Information about a registered {@link App | application}
+ *
+ * @public
+ */
+export type AppInfo = Omit<App, 'mount' | 'updater$'> & {
+  legacy: false;
+};
+
+/**
+ * Information about a registered {@link LegacyApp | legacy application}
+ *
+ * @public
+ */
+export type LegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
+  legacy: true;
+};
+
+/**
  * A mount function called when the user navigates to this app's route.
  *
  * @param params {@link AppMountParameters}
@@ -650,6 +668,15 @@ export interface ApplicationStart {
   capabilities: RecursiveReadonly<Capabilities>;
 
   /**
+   * Observable emitting the list of currently registered apps and their associated status.
+   *
+   * @remarks
+   * Applications disabled by {@link Capabilities} will not be present in the map. Applications manually disabled from
+   * the client-side using an {@link AppUpdater | application updater} are present, with their status properly set as `inaccessible`.
+   */
+  applications$: Observable<ReadonlyMap<string, AppInfo | LegacyAppInfo>>;
+
+  /**
    * Navigate to a given app
    *
    * @param appId
@@ -721,18 +748,7 @@ export interface ApplicationStart {
 }
 
 /** @internal */
-export interface InternalApplicationStart
-  extends Pick<
-    ApplicationStart,
-    'capabilities' | 'navigateToApp' | 'navigateToUrl' | 'getUrlForApp' | 'currentAppId$'
-  > {
-  /**
-   * Apps available based on the current capabilities.
-   * Should be used to show navigation links and make routing decisions.
-   * Applications manually disabled from the client-side using {@link AppUpdater}
-   */
-  applications$: Observable<ReadonlyMap<string, App | LegacyApp>>;
-
+export interface InternalApplicationStart extends Omit<ApplicationStart, 'registerMountContext'> {
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
    * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.

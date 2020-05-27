@@ -135,6 +135,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AppInfo](./kibana-plugin-core-public.appinfo.md) | Information about a registered [application](./kibana-plugin-core-public.app.md) |
 |  [AppLeaveAction](./kibana-plugin-core-public.appleaveaction.md) | Possible actions to return from a [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md)<!-- -->See [AppLeaveConfirmAction](./kibana-plugin-core-public.appleaveconfirmaction.md) and [AppLeaveDefaultAction](./kibana-plugin-core-public.appleavedefaultaction.md) |
 |  [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md) | A handler that will be executed before leaving the application, either when going to another application or when closing the browser tab or manually changing the url. Should return <code>confirm</code> to to prompt a message to the user before leaving the page, or <code>default</code> to keep the default behavior (doing nothing).<!-- -->See [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) for detailed usage examples. |
 |  [AppMount](./kibana-plugin-core-public.appmount.md) | A mount function called when the user navigates to this app's route. |
@@ -158,6 +159,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpStart](./kibana-plugin-core-public.httpstart.md) | See [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |
 |  [IContextProvider](./kibana-plugin-core-public.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IToasts](./kibana-plugin-core-public.itoasts.md) | Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-core-public.toastsapi.md)<!-- -->. |
+|  [LegacyAppInfo](./kibana-plugin-core-public.legacyappinfo.md) | Information about a registered  |
 |  [MountPoint](./kibana-plugin-core-public.mountpoint.md) | A function that should mount DOM content inside the provided container element and return a handler to unmount it. |
 |  [NavType](./kibana-plugin-core-public.navtype.md) |  |
 |  [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |

@@ -46,7 +46,7 @@ import {
   Mounter,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
-import { appendAppPath, parseAppUrl, relativeToAbsolute } from './utils';
+import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
 
 interface SetupDeps {
   context: ContextSetup;
@@ -291,7 +291,10 @@ export class ApplicationService {
     };
 
     return {
-      applications$,
+      applications$: applications$.pipe(
+        map((apps) => new Map([...apps.entries()].map(([id, app]) => [id, getAppInfo(app)]))),
+        shareReplay(1)
+      ),
       capabilities,
       currentAppId$: this.currentAppId$.pipe(
         filter((appId) => appId !== undefined),
