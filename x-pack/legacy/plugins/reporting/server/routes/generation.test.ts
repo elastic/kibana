@@ -4,140 +4,137 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import { ReportingConfig, ReportingCore } from '../';
-import { createMockReportingCore } from '../../test_helpers';
-import { LevelLogger as Logger } from '../lib';
-import { ReportingSetupDeps, ServerFacade } from '../types';
+import supertest from 'supertest';
+import { UnwrapPromise } from '@kbn/utility-types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setupServer } from 'src/core/server/saved_objects/routes/integration_tests/test_utils';
 import { registerJobGenerationRoutes } from './generation';
+import { createMockReportingCore } from '../../test_helpers';
+import { ReportingCore } from '..';
+import { ExportTypesRegistry } from '../lib/export_types_registry';
+import { ExportTypeDefinition } from '../types';
+import { LevelLogger } from '../lib';
+import { ReportingInternalSetup } from '../core';
 
-jest.mock('./lib/authorized_user_pre_routing', () => ({
-  authorizedUserPreRoutingFactory: () => () => ({}),
-}));
-jest.mock('./lib/reporting_feature_pre_routing', () => ({
-  reportingFeaturePreRoutingFactory: () => () => () => ({
-    jobTypes: ['unencodedJobType', 'base64EncodedJobType'],
-  }),
-}));
+type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
-let mockServer: Hapi.Server;
-let mockReportingPlugin: ReportingCore;
-let mockReportingConfig: ReportingConfig;
+describe('POST /api/reporting/generate', () => {
+  let mockDeps: ReportingInternalSetup;
+  let server: setupServerReturn['server'];
+  let httpSetup: setupServerReturn['httpSetup'];
+  let exportTypesRegistry: ExportTypesRegistry;
+  let core: ReportingCore;
 
-const mockLogger = ({
-  error: jest.fn(),
-  debug: jest.fn(),
-} as unknown) as Logger;
+  const config = {
+    get: jest.fn().mockImplementation((...args) => {
+      const key = args.join('.');
+      switch (key) {
+        case 'queue.indexInterval':
+          return 10000;
+        case 'queue.timeout':
+          return 10000;
+        case 'index':
+          return '.reporting';
+        case 'queue.pollEnabled':
+          return false;
+        default:
+          return;
+      }
+    }),
+    kbnConfig: { get: jest.fn() },
+  };
+  const mockLogger = ({
+    error: jest.fn(),
+    debug: jest.fn(),
+  } as unknown) as jest.Mocked<LevelLogger>;
 
-beforeEach(async () => {
-  mockServer = new Hapi.Server({
-    debug: false,
-    port: 8080,
-    routes: { log: { collect: true } },
+  beforeEach(async () => {
+    core = await createMockReportingCore(config);
+    // @ts-ignore
+    core.license = {
+      isActive: true,
+      isAvailable: true,
+      type: 'gold',
+    };
+    exportTypesRegistry = new ExportTypesRegistry();
+    exportTypesRegistry.register({
+      id: 'printablePdf',
+      jobType: 'printable_pdf',
+      jobContentEncoding: 'base64',
+      jobContentExtension: 'pdf',
+      validLicenses: ['basic', 'gold'],
+    } as ExportTypeDefinition<unknown, unknown, unknown, unknown>);
+    core.getExportTypesRegistry = () => exportTypesRegistry;
+    ({ server, httpSetup } = await setupServer());
+    mockDeps = ({
+      elasticsearch: {
+        adminClient: { callAsInternalUser: jest.fn() },
+      },
+      security: {
+        authc: {
+          getCurrentUser: () => ({
+            id: '123',
+            roles: ['superuser'],
+            username: 'Tom Riddle',
+          }),
+        },
+      },
+      router: httpSetup.createRouter(''),
+    } as unknown) as ReportingInternalSetup;
   });
 
-  mockReportingConfig = { get: jest.fn(), kbnConfig: { get: jest.fn() } };
-  mockReportingPlugin = await createMockReportingCore(mockReportingConfig);
-  mockReportingPlugin.getEnqueueJob = async () =>
-    jest.fn().mockImplementation(() => ({ toJSON: () => '{ "job": "data" }' }));
-});
+  afterEach(async () => {
+    mockLogger.debug.mockReset();
+    mockLogger.error.mockReset();
+    await server.stop();
+  });
 
-const mockPlugins = {
-  elasticsearch: {
-    adminClient: { callAsInternalUser: jest.fn() },
-  },
-  security: null,
-};
+  it('returns 400 if there are no job params', async () => {
+    registerJobGenerationRoutes(core, mockDeps);
 
-const getErrorsFromRequest = (request: Hapi.Request) => {
-  // @ts-ignore error property doesn't exist on RequestLog
-  return request.logs.filter((log) => log.tags.includes('error')).map((log) => log.error); // NOTE: error stack is available
-};
+    await server.start();
 
-test(`returns 400 if there are no job params`, async () => {
-  registerJobGenerationRoutes(
-    mockReportingPlugin,
-    (mockServer as unknown) as ServerFacade,
-    (mockPlugins as unknown) as ReportingSetupDeps,
-    mockLogger
-  );
+    await supertest(httpSetup.server.listener)
+      .post('/api/reporting/generate/printablePdf')
+      .expect(400)
+      .then(({ body }) =>
+        expect(body.message).toMatchInlineSnapshot(
+          '"[request body]: expected a plain object value, but found [null] instead."'
+        )
+      );
+  });
 
-  const options = {
-    method: 'POST',
-    url: '/api/reporting/generate/printablePdf',
-  };
+  it('returns 400 if job params is invalid', async () => {
+    registerJobGenerationRoutes(core, mockDeps);
 
-  const { payload, request } = await mockServer.inject(options);
-  expect(payload).toMatchInlineSnapshot(
-    `"{\\"statusCode\\":400,\\"error\\":\\"Bad Request\\",\\"message\\":\\"A jobParams RISON string is required\\"}"`
-  );
+    await server.start();
 
-  const errorLogs = getErrorsFromRequest(request);
-  expect(errorLogs).toMatchInlineSnapshot(`
-    Array [
-      [Error: A jobParams RISON string is required],
-    ]
-  `);
-});
+    await supertest(httpSetup.server.listener)
+      .post('/api/reporting/generate/printablePdf')
+      .send({ jobParams: `foo:` })
+      .expect(400)
+      .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
+  });
 
-test(`returns 400 if job params is invalid`, async () => {
-  registerJobGenerationRoutes(
-    mockReportingPlugin,
-    (mockServer as unknown) as ServerFacade,
-    (mockPlugins as unknown) as ReportingSetupDeps,
-    mockLogger
-  );
+  it('returns 400 if job handler throws an error', async () => {
+    const errorText = 'you found me';
+    core.getEnqueueJob = async () =>
+      jest.fn().mockImplementation(() => ({
+        toJSON: () => {
+          throw new Error(errorText);
+        },
+      }));
 
-  const options = {
-    method: 'POST',
-    url: '/api/reporting/generate/printablePdf',
-    payload: { jobParams: `foo:` },
-  };
+    registerJobGenerationRoutes(core, mockDeps);
 
-  const { payload, request } = await mockServer.inject(options);
-  expect(payload).toMatchInlineSnapshot(
-    `"{\\"statusCode\\":400,\\"error\\":\\"Bad Request\\",\\"message\\":\\"invalid rison: foo:\\"}"`
-  );
+    await server.start();
 
-  const errorLogs = getErrorsFromRequest(request);
-  expect(errorLogs).toMatchInlineSnapshot(`
-    Array [
-      [Error: invalid rison: foo:],
-    ]
-  `);
-});
-
-test(`returns 500 if job handler throws an error`, async () => {
-  mockReportingPlugin.getEnqueueJob = async () =>
-    jest.fn().mockImplementation(() => ({
-      toJSON: () => {
-        throw new Error('you found me');
-      },
-    }));
-
-  registerJobGenerationRoutes(
-    mockReportingPlugin,
-    (mockServer as unknown) as ServerFacade,
-    (mockPlugins as unknown) as ReportingSetupDeps,
-    mockLogger
-  );
-
-  const options = {
-    method: 'POST',
-    url: '/api/reporting/generate/printablePdf',
-    payload: { jobParams: `abc` },
-  };
-
-  const { payload, request } = await mockServer.inject(options);
-  expect(payload).toMatchInlineSnapshot(
-    `"{\\"statusCode\\":500,\\"error\\":\\"Internal Server Error\\",\\"message\\":\\"An internal server error occurred\\"}"`
-  );
-
-  const errorLogs = getErrorsFromRequest(request);
-  expect(errorLogs).toMatchInlineSnapshot(`
-    Array [
-      [Error: you found me],
-      [Error: you found me],
-    ]
-  `);
+    await supertest(httpSetup.server.listener)
+      .post('/api/reporting/generate/printablePdf')
+      .send({ jobParams: `abc` })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toMatchInlineSnapshot(`"${errorText}"`);
+      });
+  });
 });

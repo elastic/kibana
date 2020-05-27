@@ -40,7 +40,6 @@ describe('GET /api/reporting/jobs/download', () => {
   };
 
   beforeEach(async () => {
-    basePath = () => '/';
     core = await createMockReportingCore(config);
     // @ts-ignore
     core.license = {
@@ -331,12 +330,12 @@ describe('GET /api/reporting/jobs/download', () => {
       await server.start();
       await supertest(httpSetup.server.listener)
         .get('/api/reporting/jobs/download/dank')
-        .expect(500)
+        .expect(400)
         .then(({ body }) => {
           expect(body).toEqual({
-            error: 'Internal Server Error',
-            message: 'An internal server error occurred',
-            statusCode: 500,
+            error: 'Bad Request',
+            message: 'Unsupported content-type of application/html specified by job output',
+            statusCode: 400,
           });
         });
     });
