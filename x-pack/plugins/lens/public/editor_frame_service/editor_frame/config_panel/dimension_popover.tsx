@@ -26,7 +26,7 @@ export function DimensionPopover({
   trigger: React.ReactElement;
   panel: React.ReactElement;
 }) {
-  const noMatch = popoverState.isOpen ? !groups.some(d => d.accessors.includes(accessor)) : false;
+  const noMatch = popoverState.isOpen ? !groups.some((d) => d.accessors.includes(accessor)) : false;
   return (
     <EuiPopover
       className="lnsDimensionPopover"

@@ -62,7 +62,7 @@ const removeLensAutoDate: SavedObjectMigrationFn<LensDocShape, LensDocShape> = (
   }
   try {
     const ast = fromExpression(expression);
-    const newChain: ExpressionFunctionAST[] = ast.chain.map(topNode => {
+    const newChain: ExpressionFunctionAST[] = ast.chain.map((topNode) => {
       if (topNode.function !== 'lens_merge_tables') {
         return topNode;
       }
@@ -70,10 +70,10 @@ const removeLensAutoDate: SavedObjectMigrationFn<LensDocShape, LensDocShape> = (
         ...topNode,
         arguments: {
           ...topNode.arguments,
-          tables: (topNode.arguments.tables as Ast[]).map(middleNode => {
+          tables: (topNode.arguments.tables as Ast[]).map((middleNode) => {
             return {
               type: 'expression',
-              chain: middleNode.chain.map(node => {
+              chain: middleNode.chain.map((node) => {
                 // Check for sub-expression in aggConfigs
                 if (
                   node.function === 'esaggs' &&
@@ -120,7 +120,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShape, LensDocShape> =
 
   try {
     const ast = fromExpression(expression);
-    const newChain: ExpressionFunctionAST[] = ast.chain.map(topNode => {
+    const newChain: ExpressionFunctionAST[] = ast.chain.map((topNode) => {
       if (topNode.function !== 'lens_merge_tables') {
         return topNode;
       }
@@ -128,10 +128,10 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShape, LensDocShape> =
         ...topNode,
         arguments: {
           ...topNode.arguments,
-          tables: (topNode.arguments.tables as Ast[]).map(middleNode => {
+          tables: (topNode.arguments.tables as Ast[]).map((middleNode) => {
             return {
               type: 'expression',
-              chain: middleNode.chain.map(node => {
+              chain: middleNode.chain.map((node) => {
                 // Skip if there are any timeField arguments already, because that indicates
                 // the fix is already applied
                 if (node.function !== 'esaggs' || node.arguments.timeFields) {
@@ -176,7 +176,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShape, LensDocShape> =
 const removeInvalidAccessors: SavedObjectMigrationFn<
   LensDocShape<XYStatePre77>,
   LensDocShape<XYStatePost77>
-> = doc => {
+> = (doc) => {
   const newDoc = cloneDeep(doc);
   if (newDoc.attributes.visualizationType === 'lnsXY') {
     const datasourceLayers = newDoc.attributes.state.datasourceStates.indexpattern.layers || {};
@@ -190,7 +190,7 @@ const removeInvalidAccessors: SavedObjectMigrationFn<
         ...layer,
         xAccessor: datasource?.columns[layer.xAccessor] ? layer.xAccessor : undefined,
         splitAccessor: datasource?.columns[layer.splitAccessor] ? layer.splitAccessor : undefined,
-        accessors: layer.accessors.filter(accessor => !!datasource?.columns[accessor]),
+        accessors: layer.accessors.filter((accessor) => !!datasource?.columns[accessor]),
       };
     });
   }

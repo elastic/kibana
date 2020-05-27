@@ -13,7 +13,7 @@ export default function upgradeAssistantFunctionalTests({
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['upgradeAssistant']);
 
-  describe('Upgrade Checkup', function() {
+  describe('Upgrade Checkup', function () {
     this.tags('includeFirefox');
     before(async () => await esArchiver.load('empty_kibana'));
     after(async () => {

@@ -29,7 +29,7 @@ export const addServiceNowConnector = (connector: Connector) => {
 };
 
 export const openAddNewConnectorOption = () => {
-  cy.get(MAIN_PAGE).then($page => {
+  cy.get(MAIN_PAGE).then(($page) => {
     if ($page.find(SERVICE_NOW_CONNECTOR_CARD).length !== 1) {
       cy.wait(1000);
       cy.get(CONNECTORS_DROPDOWN).click({ force: true });
@@ -42,7 +42,7 @@ export const selectLastConnectorCreated = () => {
   cy.get(CONNECTORS_DROPDOWN).click({ force: true });
   cy.get('@createConnector')
     .its('response')
-    .then(response => {
+    .then((response) => {
       cy.get(CONNECTOR(response.body.id)).click();
     });
 };

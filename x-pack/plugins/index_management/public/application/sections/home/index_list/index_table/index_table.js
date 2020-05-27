@@ -8,6 +8,7 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
+import { parse } from 'query-string';
 
 import {
   EuiButton,
@@ -71,15 +72,15 @@ export class IndexTable extends Component {
   static getDerivedStateFromProps(props, state) {
     // Deselct any indices which no longer exist, e.g. they've been deleted.
     const { selectedIndicesMap } = state;
-    const indexNames = props.indices.map(index => index.name);
+    const indexNames = props.indices.map((index) => index.name);
     const selectedIndexNames = Object.keys(selectedIndicesMap);
-    const missingIndexNames = selectedIndexNames.filter(selectedIndexName => {
+    const missingIndexNames = selectedIndexNames.filter((selectedIndexName) => {
       return !indexNames.includes(selectedIndexName);
     });
 
     if (missingIndexNames.length) {
       const newMap = { ...selectedIndicesMap };
-      missingIndexNames.forEach(missingIndexName => delete newMap[missingIndexName]);
+      missingIndexNames.forEach((missingIndexName) => delete newMap[missingIndexName]);
       return { selectedIndicesMap: newMap };
     }
 
@@ -93,10 +94,18 @@ export class IndexTable extends Component {
       selectedIndicesMap: {},
     };
   }
+
   componentDidMount() {
     this.props.loadIndices();
     this.interval = setInterval(this.props.reloadIndices, REFRESH_RATE_INDEX_LIST);
-    const { filterChanged, filterFromURI } = this.props;
+    const {
+      filterChanged,
+      filterFromURI,
+      showHiddenIndicesChanged,
+      showHiddenIndices,
+      location,
+    } = this.props;
+
     if (filterFromURI) {
       const decodedFilter = decodeURIComponent(filterFromURI);
 
@@ -107,11 +116,18 @@ export class IndexTable extends Component {
         this.setState({ filterError: e });
       }
     }
+
+    // Check if the we have the includeHidden query param
+    const { includeHidden } = parse((location && location.search) || '');
+    const nextValue = includeHidden === 'true';
+    if (nextValue !== showHiddenIndices) {
+      showHiddenIndicesChanged(nextValue);
+    }
   }
   componentWillUnmount() {
     clearInterval(this.interval);
   }
-  onSort = column => {
+  onSort = (column) => {
     const { sortField, isSortAscending, sortChanged } = this.props;
 
     const newIsSortAscending = sortField === column ? !isSortAscending : true;
@@ -148,7 +164,7 @@ export class IndexTable extends Component {
       this.setState({ filterError: null });
     }
   };
-  getFilters = extensionsService => {
+  getFilters = (extensionsService) => {
     const { allIndices } = this.props;
     return extensionsService.filters.reduce((accum, filterExtension) => {
       const filtersToAdd = filterExtension(allIndices);
@@ -170,7 +186,7 @@ export class IndexTable extends Component {
     });
   };
 
-  toggleItem = name => {
+  toggleItem = (name) => {
     this.setState(({ selectedIndicesMap }) => {
       const newMap = { ...selectedIndicesMap };
       if (newMap[name]) {
@@ -184,13 +200,13 @@ export class IndexTable extends Component {
     });
   };
 
-  isItemSelected = name => {
+  isItemSelected = (name) => {
     return !!this.state.selectedIndicesMap[name];
   };
 
   areAllItemsSelected = () => {
     const { indices } = this.props;
-    const indexOfUnselectedItem = indices.findIndex(index => !this.isItemSelected(index.name));
+    const indexOfUnselectedItem = indices.findIndex((index) => !this.isItemSelected(index.name));
     return indexOfUnselectedItem === -1;
   };
 
@@ -237,7 +253,7 @@ export class IndexTable extends Component {
   }
 
   buildRowCells(index, appServices) {
-    return Object.keys(HEADERS).map(fieldName => {
+    return Object.keys(HEADERS).map((fieldName) => {
       const { name } = index;
       const value = index[fieldName];
 
@@ -335,7 +351,7 @@ export class IndexTable extends Component {
 
   buildRows(appServices) {
     const { indices = [], detailPanelIndexName } = this.props;
-    return indices.map(index => {
+    return indices.map((index) => {
       const { name } = index;
       return (
         <EuiTableRow
@@ -378,7 +394,7 @@ export class IndexTable extends Component {
     );
   }
 
-  onItemSelectionChanged = selectedIndices => {
+  onItemSelectionChanged = (selectedIndices) => {
     this.setState({ selectedIndices });
   };
 
@@ -390,7 +406,7 @@ export class IndexTable extends Component {
           id={`checkboxToggles-${name}`}
           data-test-subj={`checkboxToggles-${name}`}
           checked={toggleNameToVisibleMap[name]}
-          onChange={event => toggleChanged(name, event.target.checked)}
+          onChange={(event) => toggleChanged(name, event.target.checked)}
           label={label}
         />
       </EuiFlexItem>
@@ -454,14 +470,15 @@ export class IndexTable extends Component {
                 <EuiFlexItem grow={false}>
                   {(indicesLoading && allIndices.length === 0) || indicesError ? null : (
                     <EuiFlexGroup>
-                      {extensionsService.toggles.map(toggle => {
+                      {extensionsService.toggles.map((toggle) => {
                         return this.renderToggleControl(toggle);
                       })}
                       <EuiFlexItem grow={false}>
                         <EuiSwitch
                           id="checkboxShowHiddenIndices"
+                          data-test-subj="indexTableIncludeHiddenIndicesToggle"
                           checked={showHiddenIndices}
-                          onChange={event => showHiddenIndicesChanged(event.target.checked)}
+                          onChange={(event) => showHiddenIndicesChanged(event.target.checked)}
                           label={
                             <FormattedMessage
                               id="xpack.idxMgmt.indexTable.hiddenIndicesSwitchLabel"

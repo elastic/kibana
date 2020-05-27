@@ -40,7 +40,6 @@ import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
-import { DefaultEditorController } from '../../vis_default_editor/public';
 import { DashboardStart } from '../../dashboard/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
@@ -132,7 +131,6 @@ export class VisualizePlugin
           visualizations: pluginsStart.visualizations,
           I18nContext: coreStart.i18n.Context,
           setActiveUrl,
-          DefaultVisualizationEditor: DefaultEditorController,
           createVisEmbeddableFromObject:
             pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
           dashboard: pluginsStart.dashboard,

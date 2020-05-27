@@ -18,9 +18,10 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
 import { IFieldType } from '../../../../../../../plugins/data/public';
+import { mockManagementPlugin } from '../../../../mocks';
+import { createComponentWithContext } from '../../../test_utils';
 
 import { StepTimeField } from '../step_time_field';
 
@@ -39,13 +40,14 @@ const mockIndexPatternCreationType = new IndexPatternCreationConfig({
 });
 
 const noop = () => {};
+const mockContext = mockManagementPlugin.createIndexPatternManagmentContext();
 const fields = [
   {
     name: '@timestamp',
     type: 'date',
   },
 ];
-const indexPatternsService = {
+mockContext.data.indexPatterns = {
   make: () => ({
     fieldsFetcher: {
       fetchForWildcard: jest.fn().mockReturnValue(Promise.resolve(fields)),
@@ -55,28 +57,30 @@ const indexPatternsService = {
 
 describe('StepTimeField', () => {
   it('should render normally', () => {
-    const component = shallowWithI18nProvider(
-      <StepTimeField
-        indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
-        goToPreviousStep={noop}
-        createIndexPattern={noop}
-        indexPatternCreationType={mockIndexPatternCreationType}
-      />
+    const component = createComponentWithContext(
+      StepTimeField,
+      {
+        indexPattern: 'ki*',
+        goToPreviousStep: noop,
+        createIndexPattern: noop,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
     );
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render timeFields', () => {
-    const component = shallowWithI18nProvider(
-      <StepTimeField
-        indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
-        goToPreviousStep={noop}
-        createIndexPattern={noop}
-        indexPatternCreationType={mockIndexPatternCreationType}
-      />
+    const component = createComponentWithContext(
+      StepTimeField,
+      {
+        indexPattern: 'ki*',
+        goToPreviousStep: noop,
+        createIndexPattern: noop,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
     );
 
     component.setState({
@@ -90,14 +94,15 @@ describe('StepTimeField', () => {
   });
 
   it('should render a selected timeField', () => {
-    const component = shallowWithI18nProvider(
-      <StepTimeField
-        indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
-        goToPreviousStep={noop}
-        createIndexPattern={noop}
-        indexPatternCreationType={mockIndexPatternCreationType}
-      />
+    const component = createComponentWithContext(
+      StepTimeField,
+      {
+        indexPattern: 'ki*',
+        goToPreviousStep: noop,
+        createIndexPattern: noop,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
     );
 
     component.setState({
@@ -113,14 +118,15 @@ describe('StepTimeField', () => {
   });
 
   it('should ensure disabled time field options work properly', () => {
-    const component = shallowWithI18nProvider(
-      <StepTimeField
-        indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
-        goToPreviousStep={noop}
-        createIndexPattern={noop}
-        indexPatternCreationType={mockIndexPatternCreationType}
-      />
+    const component = createComponentWithContext(
+      StepTimeField,
+      {
+        indexPattern: 'ki*',
+        goToPreviousStep: noop,
+        createIndexPattern: noop,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
     );
 
     component.setState({
@@ -146,14 +152,15 @@ describe('StepTimeField', () => {
   });
 
   it('should disable the action button if an invalid time field is selected', () => {
-    const component = shallowWithI18nProvider(
-      <StepTimeField
-        indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
-        goToPreviousStep={noop}
-        createIndexPattern={noop}
-        indexPatternCreationType={mockIndexPatternCreationType}
-      />
+    const component = createComponentWithContext(
+      StepTimeField,
+      {
+        indexPattern: 'ki*',
+        goToPreviousStep: noop,
+        createIndexPattern: noop,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
     );
 
     component.setState({
@@ -172,14 +179,15 @@ describe('StepTimeField', () => {
   });
 
   it('should enable the action button if the user decides to not select a time field', () => {
-    const component = shallowWithI18nProvider(
-      <StepTimeField
-        indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
-        goToPreviousStep={noop}
-        createIndexPattern={noop}
-        indexPatternCreationType={mockIndexPatternCreationType}
-      />
+    const component = createComponentWithContext(
+      StepTimeField,
+      {
+        indexPattern: 'ki*',
+        goToPreviousStep: noop,
+        createIndexPattern: noop,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
     );
 
     component.setState({
@@ -198,14 +206,15 @@ describe('StepTimeField', () => {
   });
 
   it('should render advanced options', () => {
-    const component = shallowWithI18nProvider(
-      <StepTimeField
-        indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
-        goToPreviousStep={noop}
-        createIndexPattern={noop}
-        indexPatternCreationType={mockIndexPatternCreationType}
-      />
+    const component = createComponentWithContext(
+      StepTimeField,
+      {
+        indexPattern: 'ki*',
+        goToPreviousStep: noop,
+        createIndexPattern: noop,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
     );
 
     component.setState({ showingAdvancedOptions: true });
@@ -214,14 +223,15 @@ describe('StepTimeField', () => {
   });
 
   it('should render advanced options with an index pattern id', () => {
-    const component = shallowWithI18nProvider(
-      <StepTimeField
-        indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
-        goToPreviousStep={noop}
-        createIndexPattern={noop}
-        indexPatternCreationType={mockIndexPatternCreationType}
-      />
+    const component = createComponentWithContext(
+      StepTimeField,
+      {
+        indexPattern: 'ki*',
+        goToPreviousStep: noop,
+        createIndexPattern: noop,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
     );
 
     component.setState({
@@ -233,14 +243,15 @@ describe('StepTimeField', () => {
   });
 
   it('should render a loading state when creating the index pattern', () => {
-    const component = shallowWithI18nProvider(
-      <StepTimeField
-        indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
-        goToPreviousStep={noop}
-        createIndexPattern={noop}
-        indexPatternCreationType={mockIndexPatternCreationType}
-      />
+    const component = createComponentWithContext(
+      StepTimeField,
+      {
+        indexPattern: 'ki*',
+        goToPreviousStep: noop,
+        createIndexPattern: noop,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
     );
 
     component.setState({ isCreating: true });
@@ -249,14 +260,15 @@ describe('StepTimeField', () => {
   });
 
   it('should render any error message', () => {
-    const component = shallowWithI18nProvider(
-      <StepTimeField
-        indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
-        goToPreviousStep={noop}
-        createIndexPattern={noop}
-        indexPatternCreationType={mockIndexPatternCreationType}
-      />
+    const component = createComponentWithContext(
+      StepTimeField,
+      {
+        indexPattern: 'ki*',
+        goToPreviousStep: noop,
+        createIndexPattern: noop,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
     );
 
     component.setState({ error: 'foobar' });
@@ -265,14 +277,15 @@ describe('StepTimeField', () => {
   });
 
   it('should render "Custom index pattern ID already exists" when error is "Conflict"', () => {
-    const component = shallowWithI18nProvider(
-      <StepTimeField
-        indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
-        goToPreviousStep={noop}
-        createIndexPattern={noop}
-        indexPatternCreationType={mockIndexPatternCreationType}
-      />
+    const component = createComponentWithContext(
+      StepTimeField,
+      {
+        indexPattern: 'ki*',
+        goToPreviousStep: noop,
+        createIndexPattern: noop,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
     );
 
     component.setState({ error: 'Conflict' });
@@ -284,14 +297,15 @@ describe('StepTimeField', () => {
     const createIndexPattern = async () => {
       throw new Error('foobar');
     };
-    const component = shallowWithI18nProvider(
-      <StepTimeField
-        indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
-        goToPreviousStep={noop}
-        createIndexPattern={createIndexPattern}
-        indexPatternCreationType={mockIndexPatternCreationType}
-      />
+    const component = createComponentWithContext(
+      StepTimeField,
+      {
+        indexPattern: 'ki*',
+        goToPreviousStep: noop,
+        createIndexPattern,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
     );
 
     await (component.instance() as StepTimeField).createIndexPattern();
@@ -305,14 +319,15 @@ describe('StepTimeField', () => {
   it('should call createIndexPattern with undefined time field when no time filter chosen', async () => {
     const createIndexPattern = jest.fn();
 
-    const component = shallowWithI18nProvider(
-      <StepTimeField
-        indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
-        goToPreviousStep={noop}
-        createIndexPattern={createIndexPattern}
-        indexPatternCreationType={mockIndexPatternCreationType}
-      />
+    const component = createComponentWithContext(
+      StepTimeField,
+      {
+        indexPattern: 'ki*',
+        goToPreviousStep: noop,
+        createIndexPattern,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
     );
 
     await (component.instance() as StepTimeField).fetchTimeFields();

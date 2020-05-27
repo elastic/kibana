@@ -48,8 +48,6 @@ describe('makeStatement', () => {
 
   it('throws an error for an unknown type of vertex', () => {
     const unknownVertex = {};
-    expect(makeStatement)
-      .withArgs(unknownVertex, 'output')
-      .to.throwError();
+    expect(makeStatement).withArgs(unknownVertex, 'output').to.throwError();
   });
 });

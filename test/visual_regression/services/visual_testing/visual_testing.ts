@@ -54,7 +54,7 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
   const lifecycle = getService('lifecycle');
 
   let currentTest: Test | undefined;
-  lifecycle.beforeEachTest.add(test => {
+  lifecycle.beforeEachTest.add((test) => {
     currentTest = test;
   });
 

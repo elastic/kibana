@@ -51,7 +51,7 @@ export const getCumulativeSumMetricAgg = ({
       name: METRIC_TYPES.CUMULATIVE_SUM,
       title: cumulativeSumTitle,
       subtype: parentPipelineAggHelper.subtype,
-      makeLabel: agg => makeNestedLabel(agg, cumulativeSumLabel),
+      makeLabel: (agg) => makeNestedLabel(agg, cumulativeSumLabel),
       params: [...parentPipelineAggHelper.params()],
       getFormat: parentPipelineAggHelper.getFormat,
     },
