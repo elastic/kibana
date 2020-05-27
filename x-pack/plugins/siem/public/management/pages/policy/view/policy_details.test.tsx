@@ -10,10 +10,13 @@ import { mount } from 'enzyme';
 import { PolicyDetails } from './policy_details';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import { getManagementUrl } from '../../../common/routing';
 
 describe('Policy Details', () => {
   type FindReactWrapperResponse = ReturnType<ReturnType<typeof render>['find']>;
 
+  const policyDetailsPathUrl = getManagementUrl('policyDetails', { policyId: '1' });
+  const policyListPathUrl = getManagementUrl('policyList');
   const sleep = (ms = 100) => new Promise((wakeup) => setTimeout(wakeup, ms));
   const generator = new EndpointDocGenerator();
   const { history, AppWrapper, coreStart } = createAppRootMockRenderer();
@@ -33,7 +36,7 @@ describe('Policy Details', () => {
   describe('when displayed with invalid id', () => {
     beforeEach(() => {
       http.get.mockReturnValue(Promise.reject(new Error('policy not found')));
-      history.push('/policy/1');
+      history.push(policyDetailsPathUrl);
       policyView = render(<PolicyDetails />);
     });
 
@@ -77,7 +80,7 @@ describe('Policy Details', () => {
 
         return Promise.reject(new Error('unknown API call!'));
       });
-      history.push('/policy/1');
+      history.push(policyDetailsPathUrl);
       policyView = render(<PolicyDetails />);
     });
 
@@ -89,7 +92,7 @@ describe('Policy Details', () => {
 
       const backToListButton = pageHeaderLeft.find('EuiButtonEmpty');
       expect(backToListButton.prop('iconType')).toBe('arrowLeft');
-      expect(backToListButton.prop('href')).toBe('/mock/app/endpoint/policy');
+      expect(backToListButton.prop('href')).toBe(`#${policyListPathUrl}`);
       expect(backToListButton.text()).toBe('Back to policy list');
 
       const pageTitle = pageHeaderLeft.find('[data-test-subj="pageViewHeaderLeftTitle"]');
@@ -101,9 +104,9 @@ describe('Policy Details', () => {
       const backToListButton = policyView.find(
         'EuiPageHeaderSection[data-test-subj="pageViewHeaderLeft"] EuiButtonEmpty'
       );
-      expect(history.location.pathname).toEqual('/policy/1');
+      expect(history.location.pathname).toEqual(policyDetailsPathUrl);
       backToListButton.simulate('click', { button: 0 });
-      expect(history.location.pathname).toEqual('/policy');
+      expect(history.location.pathname).toEqual(policyListPathUrl);
     });
     it('should display agent stats', async () => {
       await asyncActions;
@@ -130,9 +133,9 @@ describe('Policy Details', () => {
       const cancelbutton = policyView.find(
         'EuiButtonEmpty[data-test-subj="policyDetailsCancelButton"]'
       );
-      expect(history.location.pathname).toEqual('/policy/1');
+      expect(history.location.pathname).toEqual(policyDetailsPathUrl);
       cancelbutton.simulate('click', { button: 0 });
-      expect(history.location.pathname).toEqual('/policy');
+      expect(history.location.pathname).toEqual(policyListPathUrl);
     });
     it('should display save button', async () => {
       await asyncActions;

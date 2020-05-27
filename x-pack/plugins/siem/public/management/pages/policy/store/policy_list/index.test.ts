@@ -21,8 +21,10 @@ import {
   createSpyMiddleware,
   MiddlewareActionSpyHelper,
 } from '../../../../../common/store/test_utils';
+import { getManagementUrl } from '../../../../common/routing';
 
 describe('policy list store concerns', () => {
+  const policyListPathUrl = getManagementUrl('policyList');
   let fakeCoreStart: ReturnType<typeof coreMock.createStart>;
   let depsStart: DepsStartMock;
   let store: Store;
@@ -60,7 +62,7 @@ describe('policy list store concerns', () => {
     store.dispatch({
       type: 'userChangedUrl',
       payload: {
-        pathname: '/policy',
+        pathname: policyListPathUrl,
         search: '',
         hash: '',
       },
@@ -73,7 +75,7 @@ describe('policy list store concerns', () => {
     store.dispatch({
       type: 'userChangedUrl',
       payload: {
-        pathname: '/policy',
+        pathname: policyListPathUrl,
         search: '',
         hash: '',
       },
@@ -87,7 +89,7 @@ describe('policy list store concerns', () => {
     store.dispatch({
       type: 'userChangedUrl',
       payload: {
-        pathname: '/policy',
+        pathname: policyListPathUrl,
         search: '',
         hash: '',
       },
@@ -115,7 +117,7 @@ describe('policy list store concerns', () => {
     store.dispatch({
       type: 'userChangedUrl',
       payload: {
-        pathname: '/policy',
+        pathname: policyListPathUrl,
         search: '',
         hash: '',
       },
@@ -135,7 +137,7 @@ describe('policy list store concerns', () => {
       store.dispatch({
         type: 'userChangedUrl',
         payload: {
-          pathname: '/policy',
+          pathname: policyListPathUrl,
           search: searchParams,
           hash: '',
         },
