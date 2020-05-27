@@ -45,8 +45,8 @@ function NavDrawerRenderer(
   ref: React.Ref<EuiNavDrawer>
 ) {
   const appId = useObservable(observables.appId$, '');
-  const navLinks = useObservable(observables.navLinks$, []).filter(link => !link.hidden);
-  const recentNavLinks = useObservable(observables.recentlyAccessed$, []).map(link =>
+  const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
+  const recentNavLinks = useObservable(observables.recentlyAccessed$, []).map((link) =>
     createRecentNavLink(link, navLinks, basePath)
   );
 
@@ -64,7 +64,7 @@ function NavDrawerRenderer(
       <EuiHorizontalRule margin="none" />
       <EuiNavDrawerGroup
         data-test-subj="navDrawerAppsMenu"
-        listItems={navLinks.map(link =>
+        listItems={navLinks.map((link) =>
           createEuiListItem({
             link,
             legacyMode,
