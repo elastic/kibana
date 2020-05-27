@@ -159,7 +159,7 @@ describe('get columns', () => {
       false
     );
 
-    expect(columns.map(c => c.name)).toEqual([
+    expect(columns.map((c) => c.name)).toEqual([
       '@timestamp per 20 seconds',
       'Sum of @timestamp',
       '@timestamp per 10 seconds',

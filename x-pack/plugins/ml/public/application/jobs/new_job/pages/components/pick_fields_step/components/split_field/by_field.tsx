@@ -72,7 +72,7 @@ function useFilteredCategoryFields(
   useEffect(() => {
     const sf = jobCreator.splitField;
     if (sf !== null) {
-      setFields(allCategoryFields.filter(f => f.name !== sf.name));
+      setFields(allCategoryFields.filter((f) => f.name !== sf.name));
     } else {
       setFields(allCategoryFields);
     }

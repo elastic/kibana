@@ -21,10 +21,10 @@
  * These supertest-based tests live in the functional test suite because they depend on the optimizer bundles being built
  * and served
  */
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe('bundle compression', function() {
+  describe('bundle compression', function () {
     this.tags('ciGroup12');
 
     let buildNum;

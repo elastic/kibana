@@ -24,11 +24,11 @@ export class VerticalLines extends PureComponent<VerticalLinesProps> {
       height,
       margins,
       xDomain,
-      tickValues
+      tickValues,
     } = this.props.plotValues;
 
     const markTimes = marks
-      .filter(mark => mark.verticalLine)
+      .filter((mark) => mark.verticalLine)
       .map(({ offset }) => offset);
 
     return (
@@ -36,7 +36,7 @@ export class VerticalLines extends PureComponent<VerticalLinesProps> {
         style={{
           position: 'absolute',
           top: 0,
-          left: 0
+          left: 0,
         }}
       >
         <XYPlot

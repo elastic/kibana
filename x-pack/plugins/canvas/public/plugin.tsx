@@ -74,10 +74,12 @@ export class CanvasPlugin
     this.srcPlugin.setup(core, { canvas: canvasApi });
 
     // Set the nav link to the last saved url if we have one in storage
-    const lastUrl = getSessionStorage().get(SESSIONSTORAGE_LASTPATH);
-    if (lastUrl) {
+    const lastPath = getSessionStorage().get(
+      `${SESSIONSTORAGE_LASTPATH}:${core.http.basePath.get()}`
+    );
+    if (lastPath) {
       this.appUpdater.next(() => ({
-        defaultPath: `#${lastUrl}`,
+        defaultPath: `#${lastPath}`,
       }));
     }
 

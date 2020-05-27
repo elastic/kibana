@@ -4,20 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CancellationToken } from '../../common/cancellation_token';
+import { CancellationToken } from '../../../../../plugins/reporting/common';
 import { PLUGIN_ID } from '../../common/constants';
-import { ReportingCore } from '../../server/types';
-import {
-  ESQueueInstance,
-  ESQueueWorkerExecuteFn,
-  ExportTypeDefinition,
-  JobSource,
-  Logger,
-} from '../../types';
+import { ReportingCore } from '../../server';
+import { LevelLogger } from '../../server/lib';
+import { ESQueueWorkerExecuteFn, ExportTypeDefinition, JobSource } from '../../server/types';
+import { ESQueueInstance } from './create_queue';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
 
-export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, logger: Logger) {
+export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, logger: LevelLogger) {
   const config = reporting.getConfig();
   const queueConfig = config.get('queue');
   const kibanaName = config.kbnConfig.get('server', 'name');

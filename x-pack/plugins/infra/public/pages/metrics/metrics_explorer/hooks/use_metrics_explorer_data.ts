@@ -28,7 +28,7 @@ export function useMetricsExplorerData(
   source: SourceQuery.Query['source']['configuration'] | undefined,
   derivedIndexPattern: IIndexPattern,
   timerange: MetricsExplorerTimeOptions,
-  afterKey: string | null,
+  afterKey: string | null | Record<string, string | null>,
   signal: any,
   fetch?: HttpHandler
 ) {
@@ -64,7 +64,7 @@ export function useMetricsExplorerData(
               metrics:
                 options.aggregation === 'count'
                   ? [{ aggregation: 'count' }]
-                  : options.metrics.map(metric => ({
+                  : options.metrics.map((metric) => ({
                       aggregation: metric.aggregation,
                       field: metric.field,
                     })),

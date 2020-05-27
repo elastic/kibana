@@ -85,7 +85,7 @@ export const LogColumnsConfigurationPanel: React.FunctionComponent<LogColumnsCon
                   draggableId={column.logColumnConfiguration.id}
                   customDragHandle
                 >
-                  {provided => (
+                  {(provided) => (
                     <LogColumnConfigurationPanel
                       dragHandleProps={provided.dragHandleProps}
                       logColumnConfigurationProps={column}
@@ -108,7 +108,9 @@ interface LogColumnConfigurationPanelProps {
   dragHandleProps: DragHandleProps;
 }
 
-const LogColumnConfigurationPanel: React.FunctionComponent<LogColumnConfigurationPanelProps> = props => (
+const LogColumnConfigurationPanel: React.FunctionComponent<LogColumnConfigurationPanelProps> = (
+  props
+) => (
   <>
     <EuiSpacer size="m" />
     {props.logColumnConfigurationProps.type === 'timestamp' ? (

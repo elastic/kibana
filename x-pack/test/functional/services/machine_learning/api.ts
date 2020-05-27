@@ -138,16 +138,22 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async getJobState(jobId: string): Promise<JOB_STATE> {
-      log.debug(`Fetching job state for job ${jobId}`);
-      const jobStats = await esSupertest
-        .get(`/_ml/anomaly_detectors/${jobId}/_stats`)
-        .expect(200)
-        .then((res: any) => res.body);
+      const jobStats = await this.getADJobStats(jobId);
 
       expect(jobStats.jobs).to.have.length(1);
       const state: JOB_STATE = jobStats.jobs[0].state;
 
       return state;
+    },
+
+    async getADJobStats(jobId: string): Promise<any> {
+      log.debug(`Fetching anomaly detection job stats for job ${jobId}...`);
+      const jobStats = await esSupertest
+        .get(`/_ml/anomaly_detectors/${jobId}/_stats`)
+        .expect(200)
+        .then((res: any) => res.body);
+
+      return jobStats;
     },
 
     async waitForJobState(jobId: string, expectedJobState: JOB_STATE) {
@@ -259,10 +265,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async createCalendar(calendarId: string, body = { description: '', job_ids: [] }) {
       log.debug(`Creating calendar with id '${calendarId}'...`);
-      await esSupertest
-        .put(`/_ml/calendars/${calendarId}`)
-        .send(body)
-        .expect(200);
+      await esSupertest.put(`/_ml/calendars/${calendarId}`).send(body).expect(200);
 
       await retry.waitForWithTimeout(`'${calendarId}' to be created`, 30 * 1000, async () => {
         if (await this.getCalendar(calendarId)) {
@@ -287,13 +290,20 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    async waitForAnomalyDetectionJobNotToExist(jobId: string) {
+      await retry.waitForWithTimeout(`'${jobId}' to not exist`, 5 * 1000, async () => {
+        if (await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`).expect(404)) {
+          return true;
+        } else {
+          throw new Error(`expected anomaly detection job '${jobId}' not to exist`);
+        }
+      });
+    },
+
     async createAnomalyDetectionJob(jobConfig: Job) {
       const jobId = jobConfig.job_id;
       log.debug(`Creating anomaly detection job with id '${jobId}'...`);
-      await esSupertest
-        .put(`/_ml/anomaly_detectors/${jobId}`)
-        .send(jobConfig)
-        .expect(200);
+      await esSupertest.put(`/_ml/anomaly_detectors/${jobId}`).send(jobConfig).expect(200);
 
       await this.waitForAnomalyDetectionJobToExist(jobId);
     },
@@ -315,10 +325,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createDatafeed(datafeedConfig: Datafeed) {
       const datafeedId = datafeedConfig.datafeed_id;
       log.debug(`Creating datafeed with id '${datafeedId}'...`);
-      await esSupertest
-        .put(`/_ml/datafeeds/${datafeedId}`)
-        .send(datafeedConfig)
-        .expect(200);
+      await esSupertest.put(`/_ml/datafeeds/${datafeedId}`).send(datafeedConfig).expect(200);
 
       await this.waitForDatafeedToExist(datafeedId);
     },
@@ -356,6 +363,19 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .eql(true, 'Response for start datafeed request should be acknowledged');
     },
 
+    async stopDatafeed(datafeedId: string) {
+      log.debug(`Stopping datafeed '${datafeedId}'...`);
+      const stopResponse = await esSupertest
+        .post(`/_ml/datafeeds/${datafeedId}/_stop`)
+        .set({ 'Content-Type': 'application/json' })
+        .expect(200)
+        .then((res: any) => res.body);
+
+      expect(stopResponse)
+        .to.have.property('stopped')
+        .eql(true, 'Response for stop datafeed request should be acknowledged');
+    },
+
     async createAndRunAnomalyDetectionLookbackJob(jobConfig: Job, datafeedConfig: Datafeed) {
       await this.createAnomalyDetectionJob(jobConfig);
       await this.createDatafeed(datafeedConfig);
@@ -389,6 +409,32 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .expect(200);
 
       await this.waitForDataFrameAnalyticsJobToExist(analyticsId);
+    },
+
+    async getADJobRecordCount(jobId: string): Promise<number> {
+      const jobStats = await this.getADJobStats(jobId);
+
+      expect(jobStats.jobs).to.have.length(1);
+      const processedRecordCount: number = jobStats.jobs[0].data_counts.processed_record_count;
+
+      return processedRecordCount;
+    },
+
+    async waitForADJobRecordCountToBePositive(jobId: string) {
+      await retry.waitForWithTimeout(
+        `'${jobId}' to have processed_record_count > 0`,
+        10 * 1000,
+        async () => {
+          const processedRecordCount = await this.getADJobRecordCount(jobId);
+          if (processedRecordCount > 0) {
+            return true;
+          } else {
+            throw new Error(
+              `expected anomaly detection job '${jobId}' to have processed_record_count > 0 (got ${processedRecordCount})`
+            );
+          }
+        }
+      );
     },
   };
 }

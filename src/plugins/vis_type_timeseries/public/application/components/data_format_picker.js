@@ -58,7 +58,7 @@ class DataFormatPickerUI extends Component {
     this.props.onChange([{ value: (this.custom && this.custom.value) || '' }]);
   };
 
-  handleChange = selectedOptions => {
+  handleChange = (selectedOptions) => {
     if (selectedOptions.length < 1) {
       return;
     }
@@ -78,7 +78,7 @@ class DataFormatPickerUI extends Component {
   };
 
   handleDurationChange(name) {
-    return selectedOptions => {
+    return (selectedOptions) => {
       if (selectedOptions.length < 1) {
         return;
       }
@@ -154,15 +154,15 @@ class DataFormatPickerUI extends Component {
         value: 'custom',
       },
     ];
-    const selectedOption = options.find(option => {
+    const selectedOption = options.find((option) => {
       return defaultValue === option.value;
     });
 
     let custom;
     if (defaultValue === 'duration') {
       const [from, to, decimals] = value.split(',');
-      const selectedFrom = durationInputOptions.find(option => from === option.value);
-      const selectedTo = durationOutputOptions.find(option => to === option.value);
+      const selectedFrom = durationInputOptions.find((option) => from === option.value);
+      const selectedTo = durationOutputOptions.find((option) => to === option.value);
 
       return (
         <EuiFlexGroup responsive={false} gutterSize="s">
@@ -229,7 +229,7 @@ class DataFormatPickerUI extends Component {
               >
                 <EuiFieldText
                   defaultValue={decimals}
-                  inputRef={el => (this.decimals = el)}
+                  inputRef={(el) => (this.decimals = el)}
                   placeholder={DEFAULT_OUTPUT_PRECISION}
                   onChange={this.handleDurationChange('decimals')}
                 />
@@ -267,7 +267,7 @@ class DataFormatPickerUI extends Component {
           >
             <EuiFieldText
               defaultValue={value}
-              inputRef={el => (this.custom = el)}
+              inputRef={(el) => (this.custom = el)}
               onChange={this.handleCustomChange}
             />
           </EuiFormRow>

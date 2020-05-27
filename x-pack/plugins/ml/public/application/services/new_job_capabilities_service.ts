@@ -85,7 +85,7 @@ class NewJobCapsService {
   }
 
   public get categoryFields(): Field[] {
-    return this._fields.filter(f => categoryFieldTypes.includes(f.type));
+    return this._fields.filter((f) => categoryFieldTypes.includes(f.type));
   }
 
   public async initializeFromIndexPattern(
@@ -108,9 +108,9 @@ class NewJobCapsService {
         allFields
       );
       const catFields = fieldsPreferringText.filter(
-        f => f.type === ES_FIELD_TYPES.KEYWORD || f.type === ES_FIELD_TYPES.TEXT
+        (f) => f.type === ES_FIELD_TYPES.KEYWORD || f.type === ES_FIELD_TYPES.TEXT
       );
-      const dateFields = fieldsPreferringText.filter(f => f.type === ES_FIELD_TYPES.DATE);
+      const dateFields = fieldsPreferringText.filter((f) => f.type === ES_FIELD_TYPES.DATE);
       const fields = this._removeTextFields ? fieldsPreferringKeyword : allFields;
 
       // set the main fields list to contain fields which have been filtered to prefer
@@ -127,12 +127,12 @@ class NewJobCapsService {
   }
 
   public getFieldById(id: string): Field | null {
-    const field = this._fields.find(f => f.id === id);
+    const field = this._fields.find((f) => f.id === id);
     return field === undefined ? null : field;
   }
 
   public getAggById(id: string): Aggregation | null {
-    const agg = this._aggs.find(f => f.id === id);
+    const agg = this._aggs.find((f) => f.id === id);
     return agg === undefined ? null : agg;
   }
 }
@@ -190,8 +190,8 @@ function createObjects(resp: any, indexPatternTitle: string) {
 
   // the aggIds and fieldIds lists are no longer needed as we've created
   // lists of real fields and aggs
-  fields.forEach(f => delete f.aggIds);
-  aggs.forEach(a => delete a.fieldIds);
+  fields.forEach((f) => delete f.aggIds);
+  aggs.forEach((a) => delete a.fieldIds);
 
   return {
     fields,
@@ -219,7 +219,7 @@ function addEventRateField(aggs: Aggregation[], fields: Field[]) {
     aggs: [],
   };
 
-  aggs.forEach(a => {
+  aggs.forEach((a) => {
     if (eventRateField.aggs !== undefined && a.fields === undefined) {
       // if the agg's field list is undefined, it is a fieldless aggregation and
       // so can only be used with the event rate field.
@@ -232,17 +232,17 @@ function addEventRateField(aggs: Aggregation[], fields: Field[]) {
 
 // create two lists, one removing text fields if there are keyword equivalents and vice versa
 function processTextAndKeywordFields(fields: Field[]) {
-  const keywordIds = fields.filter(f => f.type === ES_FIELD_TYPES.KEYWORD).map(f => f.id);
-  const textIds = fields.filter(f => f.type === ES_FIELD_TYPES.TEXT).map(f => f.id);
+  const keywordIds = fields.filter((f) => f.type === ES_FIELD_TYPES.KEYWORD).map((f) => f.id);
+  const textIds = fields.filter((f) => f.type === ES_FIELD_TYPES.TEXT).map((f) => f.id);
 
   const fieldsPreferringKeyword = fields.filter(
-    f =>
+    (f) =>
       f.type !== ES_FIELD_TYPES.TEXT ||
       (f.type === ES_FIELD_TYPES.TEXT && keywordIds.includes(`${f.id}.keyword`) === false)
   );
 
   const fieldsPreferringText = fields.filter(
-    f =>
+    (f) =>
       f.type !== ES_FIELD_TYPES.KEYWORD ||
       (f.type === ES_FIELD_TYPES.KEYWORD &&
         textIds.includes(f.id.replace(/\.keyword$/, '')) === false)

@@ -39,7 +39,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-const checkModel = model => Array.isArray(model.variables) && model.script !== undefined;
+const checkModel = (model) => Array.isArray(model.variables) && model.script !== undefined;
 
 export function CalculationAgg(props) {
   const htmlId = htmlIdGenerator();

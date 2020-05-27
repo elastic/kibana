@@ -77,7 +77,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
   if (!alertOptions) {
     selectionItems = [monitorStatusAlertContextMenuItem, tlsAlertContextMenuItem];
   } else {
-    alertOptions.forEach(option => {
+    alertOptions.forEach((option) => {
       if (option === CLIENT_ALERT_TYPES.MONITOR_STATUS)
         selectionItems.push(monitorStatusAlertContextMenuItem);
       else if (option === CLIENT_ALERT_TYPES.TLS) selectionItems.push(tlsAlertContextMenuItem);

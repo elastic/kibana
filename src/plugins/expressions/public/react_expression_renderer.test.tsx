@@ -136,7 +136,7 @@ describe('ExpressionRenderer', () => {
     const instance = mount(
       <ReactExpressionRenderer
         expression=""
-        renderError={message => <div data-test-subj={'custom-error'}>{message}</div>}
+        renderError={(message) => <div data-test-subj={'custom-error'}>{message}</div>}
       />
     );
 

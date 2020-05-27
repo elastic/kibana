@@ -6,10 +6,10 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
-  describe('page navigation', function() {
+  describe('page navigation', function () {
     this.tags(['skipFirefox', 'mlqa']);
     before(async () => {
       await ml.api.cleanMlIndices();
