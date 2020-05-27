@@ -269,7 +269,6 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
             key: bundle.id,
           },
         },
-
         {
           test: /\.(js|tsx?)$/,
           exclude: /node_modules/,
