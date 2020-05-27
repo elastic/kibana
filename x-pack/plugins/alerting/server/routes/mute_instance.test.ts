@@ -29,7 +29,7 @@ describe('muteAlertInstanceRoute', () => {
     const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(
-      `"/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute"`
+      `"/api/alerts/alert/{alert_id}/alert_instance/{alert_instance_id}/_mute"`
     );
     expect(config.options).toMatchInlineSnapshot(`
       Object {
@@ -58,8 +58,8 @@ describe('muteAlertInstanceRoute', () => {
     expect(alertsClient.muteInstance.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "alert_id": "1",
-          "alert_instance_id": "2",
+          "alertId": "1",
+          "alertInstanceId": "2",
         },
       ]
     `);

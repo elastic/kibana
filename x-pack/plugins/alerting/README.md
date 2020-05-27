@@ -30,7 +30,7 @@ Table of Contents
 		- [`POST /api/alerts/alert/{id}/_enable`: Enable an alert](#post-apialertidenable-enable-an-alert)
 		- [`POST /api/alerts/alert/{id}/_disable`: Disable an alert](#post-apialertiddisable-disable-an-alert)
 		- [`POST /api/alerts/alert/{id}/_mute_all`: Mute all alert instances](#post-apialertidmuteall-mute-all-alert-instances)
-		- [`POST /api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`: Mute alert instance](#post-apialertalertidalertinstancealertinstanceidmute-mute-alert-instance)
+		- [`POST /api/alerts/alert/{alert_id}/alert_instance/{alert_instance_id}/_mute`: Mute alert instance](#post-apialertalertidalertinstancealertinstanceidmute-mute-alert-instance)
 		- [`POST /api/alerts/alert/{id}/_unmute_all`: Unmute all alert instances](#post-apialertidunmuteall-unmute-all-alert-instances)
 		- [`POST /api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`: Unmute an alert instance](#post-apialertalertidalertinstancealertinstanceidunmute-unmute-an-alert-instance)
 		- [`POST /api/alerts/alert/{id}/_update_api_key`: Update alert API key](#post-apialertidupdateapikey-update-alert-api-key)
@@ -444,7 +444,7 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to mute all alert instances for.|string|
 
-### `POST /api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`: Mute alert instance
+### `POST /api/alerts/alert/{alert_id}/alert_instance/{alert_instance_id}/_mute`: Mute alert instance
 
 Params:
 

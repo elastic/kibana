@@ -74,9 +74,9 @@ describe('findAlertRoute', () => {
     expect(alertsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "default_search_operator": "OR",
+          "defaultSearchOperator": "OR",
           "page": 1,
-          "per_page": 1,
+          "perPage": 1,
         },
       ]
     `);
