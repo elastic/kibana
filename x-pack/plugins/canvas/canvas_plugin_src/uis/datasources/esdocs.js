@@ -59,12 +59,12 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
     if (commas.length === 0) {
       return [];
     }
-    return commas.split(',').map(str => str.trim());
+    return commas.split(',').map((str) => str.trim());
   };
 
   const getSortBy = () => {
     const commas = getSimpleArg('sort', args)[0] || ', DESC';
-    return commas.split(',').map(str => str.trim());
+    return commas.split(',').map((str) => str.trim());
   };
 
   const fields = getFields();
@@ -88,7 +88,7 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
         helpText={strings.getIndexLabel()}
         display="rowCompressed"
       >
-        <ESIndexSelect value={index} onChange={index => setArg('index', index)} />
+        <ESIndexSelect value={index} onChange={(index) => setArg('index', index)} />
       </EuiFormRow>
 
       <EuiFormRow
@@ -98,7 +98,7 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
       >
         <ESFieldsSelect
           index={index}
-          onChange={fields => setArg('fields', fields.join(', '))}
+          onChange={(fields) => setArg('fields', fields.join(', '))}
           selected={fields}
         />
       </EuiFormRow>
@@ -114,14 +114,14 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
           <ESFieldSelect
             index={index}
             value={sortField}
-            onChange={field => setArg('sort', [field, sortOrder].join(', '))}
+            onChange={(field) => setArg('sort', [field, sortOrder].join(', '))}
           />
         </EuiFormRow>
 
         <EuiFormRow label={strings.getSortOrderTitle()} display="columnCompressed">
           <EuiSelect
             value={sortOrder.toLowerCase()}
-            onChange={e => setArg('sort', [sortField, e.target.value].join(', '))}
+            onChange={(e) => setArg('sort', [sortField, e.target.value].join(', '))}
             options={sortOptions}
             compressed
           />
@@ -140,7 +140,7 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
         >
           <EuiTextArea
             value={getQuery()}
-            onChange={e => setArg(getArgName(), e.target.value)}
+            onChange={(e) => setArg(getArgName(), e.target.value)}
             compressed
           />
         </EuiFormRow>

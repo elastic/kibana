@@ -23,7 +23,7 @@ async function handleResponse(response, req, filebeatIndexPattern, opts) {
   const hits = get(response, 'hits.hits', []);
   if (hits.length) {
     result.enabled = true;
-    result.logs = hits.map(hit => {
+    result.logs = hits.map((hit) => {
       const source = hit._source;
       const type = get(source, 'event.dataset').split('.')[1];
       const utcTimestamp = moment(get(source, '@timestamp')).valueOf();

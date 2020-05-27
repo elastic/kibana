@@ -96,7 +96,7 @@ it('notifies of changes and completes once all bundles have changed', async () =
         // first we change foo and bar, and after 1 second get that change comes though
         if (i === 1) {
           expect(event.bundles).toHaveLength(2);
-          const [bar, foo] = event.bundles.sort(ascending(b => b.id));
+          const [bar, foo] = event.bundles.sort(ascending((b) => b.id));
           expect(bar).toHaveProperty('id', 'bar');
           expect(foo).toHaveProperty('id', 'foo');
         }
@@ -110,7 +110,7 @@ it('notifies of changes and completes once all bundles have changed', async () =
         // finally we change box and car together
         if (i === 5) {
           expect(event.bundles).toHaveLength(2);
-          const [bar, foo] = event.bundles.sort(ascending(b => b.id));
+          const [bar, foo] = event.bundles.sort(ascending((b) => b.id));
           expect(bar).toHaveProperty('id', 'box');
           expect(foo).toHaveProperty('id', 'car');
         }

@@ -46,7 +46,7 @@ export const getAnomaliesNetworkTableColumns = (
         rowItem: ip,
         attrName: anomaliesByNetwork.type,
         idPrefix: `anomalies-network-table-ip-${createCompoundNetworkKey(anomaliesByNetwork)}`,
-        render: item => <IPDetailsLink ip={item} flowTarget={flowTarget} />,
+        render: (item) => <IPDetailsLink ip={item} flowTarget={flowTarget} />,
       }),
   },
   {
@@ -95,7 +95,7 @@ export const getAnomaliesNetworkTableColumns = (
     render: (influencers, anomaliesByNetwork) => (
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
         {influencers &&
-          influencers.map(influencer => {
+          influencers.map((influencer) => {
             const [key, value] = getEntries(influencer);
             const entityName = key != null ? key : '';
             const entityValue = value != null ? value : '';
@@ -121,7 +121,7 @@ export const getAnomaliesNetworkTableColumns = (
     name: i18n.TIME_STAMP,
     field: 'anomaly.time',
     sortable: true,
-    render: time => <FormattedRelativePreferenceDate value={time} />,
+    render: (time) => <FormattedRelativePreferenceDate value={time} />,
   },
 ];
 
@@ -135,7 +135,7 @@ export const getAnomaliesNetworkTableColumnsCurated = (
 
   // Columns to exclude from ip details pages
   if (pageType === NetworkType.details) {
-    return columns.filter(column => column.name !== i18n.NETWORK_NAME);
+    return columns.filter((column) => column.name !== i18n.NETWORK_NAME);
   } else {
     return columns;
   }

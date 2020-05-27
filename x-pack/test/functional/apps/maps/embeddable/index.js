@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }) {
-  describe('embeddable', function() {
+export default function ({ loadTestFile }) {
+  describe('embeddable', function () {
     loadTestFile(require.resolve('./dashboard'));
     loadTestFile(require.resolve('./embeddable_state'));
     loadTestFile(require.resolve('./tooltip_filter_actions'));

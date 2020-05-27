@@ -103,7 +103,7 @@ function getExportTypesRegistryFn(): ExportTypesRegistry {
     getTypePng,
     getTypePrintablePdf,
   ];
-  getTypeFns.forEach(getType => {
+  getTypeFns.forEach((getType) => {
     registry.register(getType());
   });
   return registry;

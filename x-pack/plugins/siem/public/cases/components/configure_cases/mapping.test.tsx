@@ -35,39 +35,23 @@ describe('Mapping', () => {
 
   describe('Common', () => {
     test('it shows mapping form group', () => {
-      expect(
-        wrapper
-          .find('[data-test-subj="case-mapping-form-group"]')
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="case-mapping-form-group"]').first().exists()).toBe(
+        true
+      );
     });
 
     test('it shows mapping form row', () => {
-      expect(
-        wrapper
-          .find('[data-test-subj="case-mapping-form-row"]')
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="case-mapping-form-row"]').first().exists()).toBe(true);
     });
 
     test('it shows the update button', () => {
       expect(
-        wrapper
-          .find('[data-test-subj="case-mapping-update-connector-button"]')
-          .first()
-          .exists()
+        wrapper.find('[data-test-subj="case-mapping-update-connector-button"]').first().exists()
       ).toBe(true);
     });
 
     test('it shows the field mapping', () => {
-      expect(
-        wrapper
-          .find('[data-test-subj="case-mapping-field"]')
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="case-mapping-field"]').first().exists()).toBe(true);
     });
 
     test('it updates thirdParty correctly', () => {
@@ -106,22 +90,13 @@ describe('Mapping', () => {
         .simulate('click');
       wrapper.update();
       expect(
-        wrapper
-          .find('button[data-test-subj="edit-update-option-nothing"]')
-          .first()
-          .exists()
+        wrapper.find('button[data-test-subj="edit-update-option-nothing"]').first().exists()
       ).toBeTruthy();
       expect(
-        wrapper
-          .find('button[data-test-subj="edit-update-option-overwrite"]')
-          .first()
-          .exists()
+        wrapper.find('button[data-test-subj="edit-update-option-overwrite"]').first().exists()
       ).toBeTruthy();
       expect(
-        wrapper
-          .find('button[data-test-subj="edit-update-option-append"]')
-          .first()
-          .exists()
+        wrapper.find('button[data-test-subj="edit-update-option-append"]').first().exists()
       ).toBeTruthy();
     });
   });
@@ -141,16 +116,10 @@ describe('Mapping', () => {
             .exists()
         ).toBeTruthy();
         expect(
-          wrapper
-            .find('button[data-test-subj="dropdown-mapping-description"]')
-            .first()
-            .exists()
+          wrapper.find('button[data-test-subj="dropdown-mapping-description"]').first().exists()
         ).toBeTruthy();
         expect(
-          wrapper
-            .find('button[data-test-subj="dropdown-mapping-not_mapped"]')
-            .first()
-            .exists()
+          wrapper.find('button[data-test-subj="dropdown-mapping-not_mapped"]').first().exists()
         ).toBeTruthy();
       });
 
@@ -167,16 +136,10 @@ describe('Mapping', () => {
             .exists()
         ).toBeTruthy();
         expect(
-          wrapper
-            .find('button[data-test-subj="dropdown-mapping-description"]')
-            .first()
-            .exists()
+          wrapper.find('button[data-test-subj="dropdown-mapping-description"]').first().exists()
         ).toBeTruthy();
         expect(
-          wrapper
-            .find('button[data-test-subj="dropdown-mapping-not_mapped"]')
-            .first()
-            .exists()
+          wrapper.find('button[data-test-subj="dropdown-mapping-not_mapped"]').first().exists()
         ).toBeTruthy();
       });
 
@@ -187,16 +150,10 @@ describe('Mapping', () => {
         wrapper.update();
 
         expect(
-          wrapper
-            .find('button[data-test-subj="dropdown-mapping-comments"]')
-            .first()
-            .exists()
+          wrapper.find('button[data-test-subj="dropdown-mapping-comments"]').first().exists()
         ).toBeTruthy();
         expect(
-          wrapper
-            .find('button[data-test-subj="dropdown-mapping-not_mapped"]')
-            .first()
-            .exists()
+          wrapper.find('button[data-test-subj="dropdown-mapping-not_mapped"]').first().exists()
         ).toBeTruthy();
       });
     });
@@ -215,22 +172,13 @@ describe('Mapping', () => {
         wrapper.update();
 
         expect(
-          wrapper
-            .find('button[data-test-subj="dropdown-mapping-summary"]')
-            .first()
-            .exists()
+          wrapper.find('button[data-test-subj="dropdown-mapping-summary"]').first().exists()
         ).toBeTruthy();
         expect(
-          wrapper
-            .find('button[data-test-subj="dropdown-mapping-description"]')
-            .first()
-            .exists()
+          wrapper.find('button[data-test-subj="dropdown-mapping-description"]').first().exists()
         ).toBeTruthy();
         expect(
-          wrapper
-            .find('button[data-test-subj="dropdown-mapping-not_mapped"]')
-            .first()
-            .exists()
+          wrapper.find('button[data-test-subj="dropdown-mapping-not_mapped"]').first().exists()
         ).toBeTruthy();
       });
 
@@ -241,22 +189,13 @@ describe('Mapping', () => {
         wrapper.update();
 
         expect(
-          wrapper
-            .find('button[data-test-subj="dropdown-mapping-summary"]')
-            .first()
-            .exists()
+          wrapper.find('button[data-test-subj="dropdown-mapping-summary"]').first().exists()
         ).toBeTruthy();
         expect(
-          wrapper
-            .find('button[data-test-subj="dropdown-mapping-description"]')
-            .first()
-            .exists()
+          wrapper.find('button[data-test-subj="dropdown-mapping-description"]').first().exists()
         ).toBeTruthy();
         expect(
-          wrapper
-            .find('button[data-test-subj="dropdown-mapping-not_mapped"]')
-            .first()
-            .exists()
+          wrapper.find('button[data-test-subj="dropdown-mapping-not_mapped"]').first().exists()
         ).toBeTruthy();
       });
 
@@ -267,16 +206,10 @@ describe('Mapping', () => {
         wrapper.update();
 
         expect(
-          wrapper
-            .find('button[data-test-subj="dropdown-mapping-comments"]')
-            .first()
-            .exists()
+          wrapper.find('button[data-test-subj="dropdown-mapping-comments"]').first().exists()
         ).toBeTruthy();
         expect(
-          wrapper
-            .find('button[data-test-subj="dropdown-mapping-not_mapped"]')
-            .first()
-            .exists()
+          wrapper.find('button[data-test-subj="dropdown-mapping-not_mapped"]').first().exists()
         ).toBeTruthy();
       });
     });

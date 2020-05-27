@@ -21,8 +21,8 @@ describe('get_cluster_uuids', () => {
     },
   };
   const expectedUuids = response.aggregations.cluster_uuids.buckets
-    .map(bucket => bucket.key)
-    .map(expectedUuid => ({ clusterUuid: expectedUuid }));
+    .map((bucket) => bucket.key)
+    .map((expectedUuid) => ({ clusterUuid: expectedUuid }));
   const start = new Date().toISOString();
   const end = new Date().toISOString();
 
