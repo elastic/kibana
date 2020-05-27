@@ -179,38 +179,19 @@ export function placePanelBeside({
       break;
     }
   }
-  const [rightPlacement, bottomLeftPlacement] = possiblePlacementDirections;
-  // place to the right if there is space
-  if (rightPlacement.grid.x + rightPlacement.grid.w <= DASHBOARD_GRID_COLUMN_COUNT) {
-    let originalPositionInTheGrid = grid[position + 1].i;
-    const diff =
-      rightPlacement.grid.y +
-      rightPlacement.grid.h -
-      currentPanels[originalPositionInTheGrid].gridData.y;
+  const [_, _, bottomPlacement] = possiblePlacementDirections;
+  // place to the bottom and move all other panels
+  let originalPositionInTheGrid = grid[position + 1].i;
+  const diff =
+    bottomPlacement.grid.y +
+    bottomPlacement.grid.h -
+    currentPanels[originalPositionInTheGrid].gridData.y;
 
-    for (let j = position + 1; j < grid.length; j++) {
-      originalPositionInTheGrid = grid[j].i;
-      const movedPanel = _.cloneDeep(currentPanels[originalPositionInTheGrid]);
-      movedPanel.gridData.y = movedPanel.gridData.y + diff;
-      currentPanels[originalPositionInTheGrid] = movedPanel;
-    }
-    return rightPlacement.grid;
-  } else {
-    // no space, place in the next row leftmost AND move all the subsequent panels
-    const diff = bottomLeftPlacement.grid.h;
-    for (let j = position + 1; j < grid.length; j++) {
-      const originalPositionInTheGrid = grid[j].i;
-      const movedPanel = _.cloneDeep(currentPanels[originalPositionInTheGrid]);
-      if (
-        movedPanel.gridData.y === bottomLeftPlacement.grid.y &&
-        movedPanel.gridData.x > bottomLeftPlacement.grid.x + bottomLeftPlacement.grid.w
-      ) {
-        // panel is in the same row, right to the cloned panel
-        continue;
-      }
-      movedPanel.gridData.y = movedPanel.gridData.y + diff;
-      currentPanels[originalPositionInTheGrid] = movedPanel;
-    }
-    return bottomLeftPlacement.grid;
+  for (let j = position + 1; j < grid.length; j++) {
+    originalPositionInTheGrid = grid[j].i;
+    const movedPanel = _.cloneDeep(currentPanels[originalPositionInTheGrid]);
+    movedPanel.gridData.y = movedPanel.gridData.y + diff;
+    currentPanels[originalPositionInTheGrid] = movedPanel;
   }
+  return bottomPlacement.grid;
 }
