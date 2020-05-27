@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+*<<release-notes-7.7.1>>
 * <<release-notes-7.7.0>>
 * <<release-notes-7.6.2>>
 * <<release-notes-7.6.1>>
@@ -36,6 +37,19 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.7.1]]
+== {kib} 7.7.1
+
+See <<breaking-changes-7.7,breaking changes in 7.7>>.
+
+[float]
+[[bug-7.7.1]]
+=== Bug fixes
+Dashboard::
+* Shows visualization in Safari in dashboard fullscreen {pull}66894[#66894]
+Lens and visualizations::
+* Fixes redirect on reload {pull}66491[#66491]
+
 
 [[release-notes-7.7.0]]
 == {kib} 7.7.0
