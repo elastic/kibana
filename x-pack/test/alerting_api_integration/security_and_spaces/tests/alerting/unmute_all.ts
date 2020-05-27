@@ -36,7 +36,7 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}/_mute_all`)

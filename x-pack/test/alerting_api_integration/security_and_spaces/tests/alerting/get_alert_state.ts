@@ -28,7 +28,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}/state`)
@@ -61,7 +61,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix('other')}/api/alerts/alert/${createdAlert.id}/state`)

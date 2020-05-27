@@ -36,7 +36,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           await supertest
             .post(

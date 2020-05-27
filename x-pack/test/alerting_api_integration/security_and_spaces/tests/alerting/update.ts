@@ -43,7 +43,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const updatedData = {
             name: 'bcd',
@@ -114,7 +114,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           await supertest
             .put(
@@ -197,7 +197,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix('other')}/api/alerts/alert/${createdAlert.id}`)
@@ -244,7 +244,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
@@ -332,7 +332,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
@@ -421,7 +421,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           await retry.try(async () => {
             const alertTask = (await getAlertingTaskById(createdAlert.scheduledTaskId)).docs[0];

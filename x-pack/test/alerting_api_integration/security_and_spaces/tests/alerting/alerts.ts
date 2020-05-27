@@ -374,7 +374,7 @@ instanceStateValue: true
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert', undefined);
+              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
 
               // Wait for the task to be attempted once and idle
               const scheduledActionTask = await retry.try(async () => {
@@ -457,7 +457,7 @@ instanceStateValue: true
               break;
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert', undefined);
+              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
 
               // Wait for test.authorization to index a document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.authorization', reference);
@@ -490,7 +490,7 @@ instanceStateValue: true
               break;
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert', undefined);
+              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
 
               // Wait for test.authorization to index a document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.authorization', reference);
@@ -571,7 +571,7 @@ instanceStateValue: true
               break;
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert', undefined);
+              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
 
               // Ensure test.authorization indexed 1 document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.authorization', reference);
@@ -604,7 +604,7 @@ instanceStateValue: true
               break;
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert', undefined);
+              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
 
               // Ensure test.authorization indexed 1 document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.authorization', reference);

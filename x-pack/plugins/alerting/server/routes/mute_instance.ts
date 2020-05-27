@@ -26,7 +26,7 @@ const paramSchema = schema.object({
 export const muteAlertInstanceRoute = (router: IRouter, licenseState: LicenseState) => {
   router.post(
     {
-      path: `${BASE_ALERT_API_PATH}/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`,
+      path: `${BASE_ALERT_API_PATH}/alert/{alert_id}/alert_instance/{alert_instance_id}/_mute`,
       validate: {
         params: paramSchema,
       },
@@ -46,8 +46,8 @@ export const muteAlertInstanceRoute = (router: IRouter, licenseState: LicenseSta
       const alertsClient = context.alerting.getAlertsClient();
 
       const renameMap = {
-        alertId: 'alert_id',
-        alertInstanceId: 'alert_instance_id',
+        alert_id: 'alertId',
+        alert_instance_id: 'alertInstanceId',
       };
 
       const renamedQuery = renameKeys<MuteOptions, Record<string, unknown>>(renameMap, req.params);

@@ -142,7 +142,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}/api/actions`)

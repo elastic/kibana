@@ -24,7 +24,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', undefined);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
 
       const updatedData = {
         name: 'bcd',
@@ -79,7 +79,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', undefined);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
 
       await supertest
         .put(`${getUrlPrefix(Spaces.other.id)}/api/alerts/alert/${createdAlert.id}`)

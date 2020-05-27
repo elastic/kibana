@@ -65,22 +65,28 @@ export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
       }
       const alertsClient = context.alerting.getAlertsClient();
 
+      const query = req.query;
       const renameMap = {
-        defaultSearchOperator: 'default_search_operator',
+        default_search_operator: 'defaultSearchOperator',
         fields: 'fields',
-        hasReference: 'has_reference',
+        has_reference: 'hasReference',
         page: 'page',
-        perPage: 'per_page',
+        per_page: 'perPage',
         search: 'search',
-        searchFields: 'search_fields',
-        sortField: 'sort_field',
-        sortOrder: 'sort_order',
+        sort_field: 'sortField',
+        sort_order: 'sortOrder',
         filter: 'filter',
       };
 
-      const renamedQuery = renameKeys<FindOptions, Record<string, unknown>>(renameMap, req.query);
+      const options = renameKeys<FindOptions, Record<string, unknown>>(renameMap, query);
 
-      const findResult = await alertsClient.find(renamedQuery);
+      if (query.search_fields) {
+        options.searchFields = Array.isArray(query.search_fields)
+          ? query.search_fields
+          : [query.search_fields];
+      }
+
+      const findResult = await alertsClient.find(options);
       return res.ok({
         body: findResult,
       });
