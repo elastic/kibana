@@ -28,7 +28,7 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
 export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   const { state, layerId } = props;
   const horizontalOnly = isHorizontalChart(state.layers);
-  const index = state.layers.findIndex(l => l.layerId === layerId);
+  const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
 
   if (!layer) {
@@ -49,14 +49,14 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
         className="eui-displayInlineBlock"
         data-test-subj="lnsXY_seriesType"
         options={visualizationTypes
-          .filter(t => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
-          .map(t => ({
+          .filter((t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
+          .map((t) => ({
             id: t.id,
             label: t.label,
             iconType: t.icon || 'empty',
           }))}
         idSelected={layer.seriesType}
-        onChange={seriesType => {
+        onChange={(seriesType) => {
           trackUiEvent('xy_change_layer_display');
           props.setState(
             updateLayer(state, { ...layer, seriesType: seriesType as SeriesType }, index)

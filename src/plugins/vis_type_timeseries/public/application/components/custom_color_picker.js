@@ -61,7 +61,7 @@ class CustomColorPickerUI extends PureComponent {
       },
     };
 
-    const handleSwatchChange = data => {
+    const handleSwatchChange = (data) => {
       if (data.hex) {
         color.isValidHex(data.hex) &&
           this.props.onChange({
@@ -73,7 +73,7 @@ class CustomColorPickerUI extends PureComponent {
       }
     };
 
-    const swatches = this.props.colors.map(c => {
+    const swatches = this.props.colors.map((c) => {
       return <CompactColor key={c} color={c} onClick={handleSwatchChange} />;
     });
 

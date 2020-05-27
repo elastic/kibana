@@ -28,8 +28,8 @@
  */
 export function findTestBundleUrl() {
   const scriptTags = document.querySelectorAll('script[src]');
-  const scriptUrls = [].map.call(scriptTags, el => el.getAttribute('src'));
-  const testBundleUrl = scriptUrls.find(url => url.includes('/tests.bundle.js'));
+  const scriptUrls = [].map.call(scriptTags, (el) => el.getAttribute('src'));
+  const testBundleUrl = scriptUrls.find((url) => url.includes('/tests.bundle.js'));
 
   if (!testBundleUrl) {
     throw new Error("test bundle url couldn't be found");

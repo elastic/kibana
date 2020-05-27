@@ -9,7 +9,7 @@ import { isRight } from 'fp-ts/lib/Either';
 
 describe('captureBodyRt', () => {
   describe('it should not accept', () => {
-    [undefined, null, '', 0, 'foo', true, false].map(input => {
+    [undefined, null, '', 0, 'foo', true, false].map((input) => {
       it(`${JSON.stringify(input)}`, () => {
         expect(isRight(captureBodyRt.decode(input))).toBe(false);
       });
@@ -17,7 +17,7 @@ describe('captureBodyRt', () => {
   });
 
   describe('it should accept', () => {
-    ['off', 'errors', 'transactions', 'all'].map(input => {
+    ['off', 'errors', 'transactions', 'all'].map((input) => {
       it(`${JSON.stringify(input)}`, () => {
         expect(isRight(captureBodyRt.decode(input))).toBe(true);
       });

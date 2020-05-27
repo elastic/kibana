@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { visualBuilder, timePicker } = getPageObjects(['visualBuilder', 'timePicker']);
   const retry = getService('retry');
 
@@ -30,7 +30,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     await visualBuilder.setMarkdownDataVariable('', variableName);
     await visualBuilder.markdownSwitchSubTab('markdown');
     const rerenderedTable = await visualBuilder.getMarkdownTableVariables();
-    rerenderedTable.forEach(row => {
+    rerenderedTable.forEach((row) => {
       // eslint-disable-next-line no-unused-expressions
       variableName === 'label'
         ? expect(row.key).to.include.string(checkedValue)
@@ -91,9 +91,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
         await visualBuilder.enterMarkdown(TABLE);
         const text = await visualBuilder.getMarkdownText();
-        const tableValues = text.split('\n').map(row => row.split(' '))[1]; // [46, 46]
+        const tableValues = text.split('\n').map((row) => row.split(' '))[1]; // [46, 46]
 
-        tableValues.forEach(value => {
+        tableValues.forEach((value) => {
           expect(value).to.be.equal(DATA);
         });
       });

@@ -119,7 +119,7 @@ export const visualization = (): ExpressionFunctionVisualization => ({
           }
         });
 
-        Object.keys(schemas).forEach(key => {
+        Object.keys(schemas).forEach((key) => {
           schemas[key].forEach((i: any) => {
             if (input.columns[i] && input.columns[i].aggConfig) {
               input.columns[i].aggConfig.schema = key;

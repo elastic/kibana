@@ -33,18 +33,8 @@ describe('Modal Inspect', () => {
           />
         </ThemeProvider>
       );
-      expect(
-        wrapper
-          .find('[data-test-subj="modal-inspect-euiModal"]')
-          .first()
-          .exists()
-      ).toBe(true);
-      expect(
-        wrapper
-          .find('.euiModalHeader__title')
-          .first()
-          .text()
-      ).toBe('Inspect My title');
+      expect(wrapper.find('[data-test-subj="modal-inspect-euiModal"]').first().exists()).toBe(true);
+      expect(wrapper.find('.euiModalHeader__title').first().text()).toBe('Inspect My title');
     });
 
     test('when isShowing is negative and request and response are not null', () => {
@@ -57,12 +47,9 @@ describe('Modal Inspect', () => {
           title="My title"
         />
       );
-      expect(
-        wrapper
-          .find('[data-test-subj="modal-inspect-euiModal"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="modal-inspect-euiModal"]').first().exists()).toBe(
+        false
+      );
     });
 
     test('when isShowing is positive and request is null and response is not null', () => {
@@ -75,12 +62,9 @@ describe('Modal Inspect', () => {
           title="My title"
         />
       );
-      expect(
-        wrapper
-          .find('[data-test-subj="modal-inspect-euiModal"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="modal-inspect-euiModal"]').first().exists()).toBe(
+        false
+      );
     });
 
     test('when isShowing is positive and request is not null and response is null', () => {
@@ -93,12 +77,9 @@ describe('Modal Inspect', () => {
           title="My title"
         />
       );
-      expect(
-        wrapper
-          .find('[data-test-subj="modal-inspect-euiModal"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="modal-inspect-euiModal"]').first().exists()).toBe(
+        false
+      );
     });
   });
 
@@ -116,10 +97,7 @@ describe('Modal Inspect', () => {
         </ThemeProvider>
       );
 
-      wrapper
-        .find('.euiTab')
-        .first()
-        .simulate('click');
+      wrapper.find('.euiTab').first().simulate('click');
       wrapper.update();
 
       expect(
@@ -158,20 +136,10 @@ describe('Modal Inspect', () => {
         </ThemeProvider>
       );
 
-      wrapper
-        .find('.euiTab')
-        .at(2)
-        .simulate('click');
+      wrapper.find('.euiTab').at(2).simulate('click');
       wrapper.update();
 
-      expect(
-        JSON.parse(
-          wrapper
-            .find('.euiCodeBlock')
-            .first()
-            .text()
-        )
-      ).toEqual({
+      expect(JSON.parse(wrapper.find('EuiCodeBlock').first().text())).toEqual({
         took: 880,
         timed_out: false,
         _shards: {
@@ -235,20 +203,10 @@ describe('Modal Inspect', () => {
         </ThemeProvider>
       );
 
-      wrapper
-        .find('.euiTab')
-        .at(1)
-        .simulate('click');
+      wrapper.find('.euiTab').at(1).simulate('click');
       wrapper.update();
 
-      expect(
-        JSON.parse(
-          wrapper
-            .find('.euiCodeBlock')
-            .first()
-            .text()
-        )
-      ).toEqual({
+      expect(JSON.parse(wrapper.find('EuiCodeBlock').first().text())).toEqual({
         aggregations: {
           hosts: { cardinality: { field: 'host.name' } },
           hosts_histogram: {

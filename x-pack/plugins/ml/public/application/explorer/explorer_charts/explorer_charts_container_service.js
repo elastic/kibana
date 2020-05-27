@@ -48,10 +48,10 @@ const MAX_CHARTS_PER_ROW = 4;
 
 // callback(getDefaultChartsData());
 
-export const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs, severity = 0) {
+export const anomalyDataChange = function (anomalyRecords, earliestMs, latestMs, severity = 0) {
   const data = getDefaultChartsData();
 
-  const filteredRecords = anomalyRecords.filter(record => {
+  const filteredRecords = anomalyRecords.filter((record) => {
     return Number(record.record_score) >= severity;
   });
   const allSeriesRecords = processRecordsForDisplay(filteredRecords);
@@ -88,7 +88,7 @@ export const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs, 
   data.tooManyBuckets = tooManyBuckets;
 
   // initialize the charts with loading indicators
-  data.seriesToPlot = seriesConfigs.map(config => ({
+  data.seriesToPlot = seriesConfigs.map((config) => ({
     ...config,
     loading: true,
     chartData: null,
@@ -168,15 +168,15 @@ export const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs, 
         return mlResultsService
           .getModelPlotOutput(jobId, detectorIndex, criteriaFields, range.min, range.max, interval)
           .toPromise()
-          .then(resp => {
+          .then((resp) => {
             // Return data in format required by the explorer charts.
             const results = resp.results;
-            Object.keys(results).forEach(time => {
+            Object.keys(results).forEach((time) => {
               obj.results[time] = results[time].actual;
             });
             resolve(obj);
           })
-          .catch(resp => {
+          .catch((resp) => {
             reject(resp);
           });
       });
@@ -225,11 +225,11 @@ export const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs, 
 
     // Define splitField and filterField based on chartType
     if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
-      splitField = config.entityFields.find(f => f.fieldType === 'by');
-      filterField = config.entityFields.find(f => f.fieldType === 'partition');
+      splitField = config.entityFields.find((f) => f.fieldType === 'by');
+      filterField = config.entityFields.find((f) => f.fieldType === 'partition');
     } else if (chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
-      splitField = config.entityFields.find(f => f.fieldType === 'over');
-      filterField = config.entityFields.find(f => f.fieldType === 'partition');
+      splitField = config.entityFields.find((f) => f.fieldType === 'over');
+      filterField = config.entityFields.find((f) => f.fieldType === 'partition');
     }
 
     const datafeedQuery = _.get(config, 'datafeedConfig.query', null);
@@ -251,7 +251,7 @@ export const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs, 
   // only after that trigger data processing and page render.
   // TODO - if query returns no results e.g. source data has been deleted,
   // display a message saying 'No data between earliest/latest'.
-  const seriesPromises = seriesConfigs.map(seriesConfig =>
+  const seriesPromises = seriesConfigs.map((seriesConfig) =>
     Promise.all([
       getMetricData(seriesConfig, chartRange),
       getRecordsForCriteria(seriesConfig, chartRange),
@@ -280,7 +280,7 @@ export const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs, 
     if (metricData !== undefined) {
       if (eventDistribution.length > 0 && records.length > 0) {
         const filterField = records[0].by_field_value || records[0].over_field_value;
-        chartData = eventDistribution.filter(d => d.entity !== filterField);
+        chartData = eventDistribution.filter((d) => d.entity !== filterField);
         _.map(metricData, (value, time) => {
           // The filtering for rare/event_distribution charts needs to be handled
           // differently because of how the source data is structured.
@@ -310,7 +310,7 @@ export const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs, 
     // Iterate through the anomaly records, adding anomalyScore properties
     // to the chartData entries for anomalous buckets.
     const chartDataForPointSearch = getChartDataForPointSearch(chartData, records[0], chartType);
-    _.each(records, record => {
+    _.each(records, (record) => {
       // Look for a chart point with the same time as the record.
       // If none found, insert a point for anomalies due to a gap in the data.
       const recordTime = record[ML_TIME_FIELD_NAME];
@@ -365,7 +365,7 @@ export const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs, 
       chartType === CHART_TYPE.EVENT_DISTRIBUTION ||
       chartType === CHART_TYPE.POPULATION_DISTRIBUTION
     ) {
-      return chartData.filter(d => {
+      return chartData.filter((d) => {
         return d.entity === (record && (record.by_field_value || record.over_field_value));
       });
     }
@@ -374,17 +374,17 @@ export const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs, 
   }
 
   function findChartPointForTime(chartData, time) {
-    return chartData.find(point => point.date === time);
+    return chartData.find((point) => point.date === time);
   }
 
   Promise.all(seriesPromises)
-    .then(response => {
+    .then((response) => {
       // calculate an overall min/max for all series
       const processedData = response.map(processChartData);
       const allDataPoints = _.reduce(
         processedData,
         (datapoints, series) => {
-          _.each(series, d => datapoints.push(d));
+          _.each(series, (d) => datapoints.push(d));
           return datapoints;
         },
         []
@@ -403,7 +403,7 @@ export const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs, 
       }));
       explorerService.setCharts({ ...data });
     })
-    .catch(error => {
+    .catch((error) => {
       console.error(error);
     });
 };
@@ -416,7 +416,7 @@ function processRecordsForDisplay(anomalyRecords) {
 
   // Aggregate by job, detector, and analysis fields (partition, by, over).
   const aggregatedData = {};
-  _.each(anomalyRecords, record => {
+  _.each(anomalyRecords, (record) => {
     // Check if we can plot a chart for this record, depending on whether the source data
     // is chartable, and if model plot is enabled for the job.
     const job = mlJobService.getJob(record.job_id);
@@ -521,20 +521,20 @@ function processRecordsForDisplay(anomalyRecords) {
   console.log('explorer charts aggregatedData is:', aggregatedData);
   let recordsForSeries = [];
   // Convert to an array of the records with the highest record_score per unique series.
-  _.each(aggregatedData, detectorsForJob => {
-    _.each(detectorsForJob, groupsForDetector => {
+  _.each(aggregatedData, (detectorsForJob) => {
+    _.each(detectorsForJob, (groupsForDetector) => {
       if (groupsForDetector.maxScoreRecord !== undefined) {
         // Detector with no partition / by field.
         recordsForSeries.push(groupsForDetector.maxScoreRecord);
       } else {
-        _.each(groupsForDetector, valuesForGroup => {
-          _.each(valuesForGroup, dataForGroupValue => {
+        _.each(groupsForDetector, (valuesForGroup) => {
+          _.each(valuesForGroup, (dataForGroupValue) => {
             if (dataForGroupValue.maxScoreRecord !== undefined) {
               recordsForSeries.push(dataForGroupValue.maxScoreRecord);
             } else {
               // Second level of aggregation for partition and by/over.
-              _.each(dataForGroupValue, splitsForGroup => {
-                _.each(splitsForGroup, dataForSplitValue => {
+              _.each(dataForGroupValue, (splitsForGroup) => {
+                _.each(splitsForGroup, (dataForSplitValue) => {
                   recordsForSeries.push(dataForSplitValue.maxScoreRecord);
                 });
               });
@@ -585,7 +585,7 @@ function calculateChartRange(
     let minMs = recordsToPlot[0][timeFieldName];
     let maxMs = recordsToPlot[0][timeFieldName];
 
-    _.each(recordsToPlot, record => {
+    _.each(recordsToPlot, (record) => {
       const diffMs = maxMs - minMs;
       if (diffMs < maxTimeSpan) {
         const recordTime = record[timeFieldName];

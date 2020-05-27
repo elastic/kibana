@@ -7,9 +7,10 @@
 import { Legacy } from 'kibana';
 import { take } from 'rxjs/operators';
 import { PluginInitializerContext } from 'src/core/server';
+import { ReportingPluginSpecOptions } from '../';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 import { PluginsSetup } from '../../../../plugins/reporting/server';
 import { SecurityPluginSetup } from '../../../../plugins/security/server';
-import { ReportingPluginSpecOptions } from '../types';
 import { buildConfig } from './config';
 import { plugin } from './index';
 import { LegacySetup, ReportingStartDeps } from './types';
@@ -43,6 +44,7 @@ export const legacyInit = async (
   );
   await pluginInstance.setup(coreSetup, {
     elasticsearch: coreSetup.elasticsearch,
+    licensing: server.newPlatform.setup.plugins.licensing as LicensingPluginSetup,
     security: server.newPlatform.setup.plugins.security as SecurityPluginSetup,
     usageCollection: server.newPlatform.setup.plugins.usageCollection,
     __LEGACY,

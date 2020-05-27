@@ -13,14 +13,14 @@ describe('DownNoExpressionSelect component', () => {
     '"{"bool":{"filter":[{"bool":{"should":[{"match":{"observer.geo.name":"US-West"}}],"minimum_should_match":1}},' +
     '{"bool":{"should":[{"match":{"url.port":443}}],"minimum_should_match":1}}]}}"';
 
-  it('should shallow renders against props', function() {
+  it('should shallow renders against props', function () {
     const component = shallowWithIntl(
       <DownNoExpressionSelect filters={filters} setAlertParams={jest.fn()} />
     );
     expect(component).toMatchSnapshot();
   });
 
-  it('should renders against props', function() {
+  it('should renders against props', function () {
     const component = renderWithIntl(
       <DownNoExpressionSelect filters={filters} setAlertParams={jest.fn()} />
     );

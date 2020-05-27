@@ -26,29 +26,20 @@ describe('ClosureOptions', () => {
 
   test('it shows the closure options form group', () => {
     expect(
-      wrapper
-        .find('[data-test-subj="case-closure-options-form-group"]')
-        .first()
-        .exists()
+      wrapper.find('[data-test-subj="case-closure-options-form-group"]').first().exists()
     ).toBe(true);
   });
 
   test('it shows the closure options form row', () => {
-    expect(
-      wrapper
-        .find('[data-test-subj="case-closure-options-form-row"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="case-closure-options-form-row"]').first().exists()).toBe(
+      true
+    );
   });
 
   test('it shows closure options', () => {
-    expect(
-      wrapper
-        .find('[data-test-subj="case-closure-options-radio"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="case-closure-options-radio"]').first().exists()).toBe(
+      true
+    );
   });
 
   test('it pass the correct props to child', () => {

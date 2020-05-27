@@ -83,9 +83,7 @@ export function registerTelemetryOptInRoutes({
       }
 
       const statsGetterConfig: StatsGetterConfig = {
-        start: moment()
-          .subtract(20, 'minutes')
-          .toISOString(),
+        start: moment().subtract(20, 'minutes').toISOString(),
         end: moment().toISOString(),
         unencrypted: false,
       };

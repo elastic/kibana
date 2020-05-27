@@ -38,7 +38,7 @@ export abstract class AbstractActionStorage implements ActionStorage {
 
   public async read(eventId: string): Promise<SerializedEvent> {
     const events = await this.list();
-    const event = events.find(ev => ev.eventId === eventId);
+    const event = events.find((ev) => ev.eventId === eventId);
     if (!event) throw new Error(`Event [eventId = ${eventId}] not found.`);
     return event;
   }
@@ -59,7 +59,7 @@ export class MemoryActionStorage extends AbstractActionStorage {
   }
 
   public async list() {
-    return this.events.map(event => ({ ...event }));
+    return this.events.map((event) => ({ ...event }));
   }
 
   public async create(event: SerializedEvent) {
@@ -73,7 +73,7 @@ export class MemoryActionStorage extends AbstractActionStorage {
   }
 
   public async remove(eventId: string) {
-    const index = this.events.findIndex(ev => eventId === ev.eventId);
+    const index = this.events.findIndex((ev) => eventId === ev.eventId);
     if (index < 0) throw new Error(`Event [eventId = ${eventId}] not found`);
     this.events = [...this.events.slice(0, index), ...this.events.slice(index + 1)];
   }
