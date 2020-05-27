@@ -18,7 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../src/plugins/visualizations/public';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../src/plugins/visualizations/common/constants';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');

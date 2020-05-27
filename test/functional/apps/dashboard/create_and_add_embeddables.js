@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 
 import { VisualizeConstants } from '../../../../src/plugins/visualize/public/application/visualize_constants';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../src/plugins/visualizations/public';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../src/plugins/visualizations/common/constants';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
