@@ -4,14 +4,6 @@ This module adds protection against prototype pollution to the [`set`]
 and [`setWith`] functions from [Lodash] and are API compatible with
 Lodash v4.x.
 
-[![npm](https://img.shields.io/npm/v/@kbn/safer-lodash-set.svg)](https://www.npmjs.com/package/@kbn/safer-lodash-set)
-
-## Installation
-
-```
-npm install @kbn/safer-lodash-set --save
-```
-
 ## Example Usage
 
 ```js

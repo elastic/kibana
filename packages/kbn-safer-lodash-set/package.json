@@ -35,5 +35,6 @@
     "ignore": [
       "/lodash/"
     ]
-  }
+  },
+  "private": true
 }
