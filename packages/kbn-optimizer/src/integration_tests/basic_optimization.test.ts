@@ -130,13 +130,14 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   const foo = config.bundles.find((b) => b.id === 'foo')!;
   expect(foo).toBeTruthy();
   foo.cache.refresh();
-  expect(foo.cache.getModuleCount()).toBe(4);
+  expect(foo.cache.getModuleCount()).toBe(5);
   expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts,
+      <absolute path>/packages/kbn-ui-shared-deps/public_path_module_creator.js,
     ]
   `);
 
@@ -144,8 +145,8 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   expect(bar).toBeTruthy();
   bar.cache.refresh();
   expect(bar.cache.getModuleCount()).toBe(
-    // code + styles + style/css-loader runtimes
-    15
+    // code + styles + style/css-loader runtimes + public path updater
+    16
   );
 
   expect(bar.cache.getReferencedFiles()).toMatchInlineSnapshot(`
@@ -160,6 +161,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/legacy/ui/public/icon.svg,
+      <absolute path>/packages/kbn-ui-shared-deps/public_path_module_creator.js,
     ]
   `);
 });
@@ -217,12 +219,12 @@ it('prepares assets for distribution', async () => {
  * Verifies that the file matches the expected output and has matching compressed variants.
  */
 const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabel: string) => {
-  let raw = Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, filePath), 'utf8');
-  if (filePath.endsWith('.js')) {
-    raw = prettier.format(raw);
-  }
+  const raw = Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, filePath), 'utf8');
+  const pretty = prettier.format(raw, {
+    filepath: filePath,
+  });
 
-  expect(raw).toMatchSnapshot(snapshotLabel);
+  expect(pretty).toMatchSnapshot(snapshotLabel);
 
   // Verify the brotli variant matches
   expect(
