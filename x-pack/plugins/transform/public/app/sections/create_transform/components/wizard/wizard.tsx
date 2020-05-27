@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useEffect, useRef, useState } from 'react';
+import React, { Fragment, FC, useEffect, useRef, useState, createContext } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -28,6 +28,7 @@ import {
   StepDetailsSummary,
 } from '../step_details';
 import { WizardNav } from '../wizard_nav';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
 enum KBN_MANAGEMENT_PAGE_CLASSNAME {
   DEFAULT_BODY = 'mgtPage__body',
@@ -84,6 +85,10 @@ interface WizardProps {
   cloneConfig?: TransformPivotConfig;
   searchItems: SearchItems;
 }
+
+export const CreateTransformWizardContext = createContext<{ indexPattern: IndexPattern | null }>({
+  indexPattern: null,
+});
 
 export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
   // The current WIZARD_STEP
@@ -204,5 +209,9 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
     },
   ];
 
-  return <EuiSteps className="transform__steps" steps={stepsConfig} />;
+  return (
+    <CreateTransformWizardContext.Provider value={{ indexPattern }}>
+      <EuiSteps className="transform__steps" steps={stepsConfig} />
+    </CreateTransformWizardContext.Provider>
+  );
 });

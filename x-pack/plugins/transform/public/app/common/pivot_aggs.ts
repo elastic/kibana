@@ -84,7 +84,8 @@ export interface PivotAggsConfigBase {
 export interface AggFormConfig<T> {
   AggFormComponent: FC<{
     aggConfig: Partial<T>;
-    onChange: (arg: T) => void;
+    onChange: (arg: Partial<T>) => void;
+    selectedField: string;
   }>;
   defaultAggConfig?: Partial<T>;
 }

@@ -90,7 +90,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     const config = getAggFormConfig(agg);
     setAggFormConfig(config);
     setAggForm(config?.defaultAggConfig);
-  }, [agg]);
+  }, [agg, field]);
 
   const availableFields: EuiSelectOption[] = [];
   const availableAggs: EuiSelectOption[] = [];
@@ -225,6 +225,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
       {aggFormConfig && (
         <aggFormConfig.AggFormComponent
           aggConfig={aggForm!}
+          selectedField={field}
           onChange={(update) => {
             setAggForm({
               ...aggForm,
