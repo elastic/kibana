@@ -117,8 +117,8 @@ export const itemizeVcs = (vcsInfo) => (obj) => {
     vcsUrl: `https://github.com/elastic/kibana/commit/${sha}`,
   };
   return fromNullable(commitMsg).fold(always({ ...obj, vcs }), (msg) => {
-    const vcsWithTruncated = { ...vcs, commitMsg: truncateMsg(msg) };
-    return { ...obj, vcsWithTruncated };
+    const vcsInfo = { ...vcs, commitMsg: truncateMsg(msg) };
+    return { ...obj, vcsInfo };
   });
 };
 export const testRunner = (obj) => {
