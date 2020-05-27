@@ -33,15 +33,15 @@ function mapStateToProps(state: MapStoreState) {
 function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
     previewLayer: async (layerDescriptor: LayerDescriptor) => {
-      await dispatch(setSelectedLayer(null));
-      await dispatch(removeTransientLayer());
-      dispatch(addLayer(layerDescriptor));
-      dispatch(setSelectedLayer(layerDescriptor.id));
+      await dispatch<any>(setSelectedLayer(null));
+      await dispatch<any>(removeTransientLayer());
+      dispatch<any>(addLayer(layerDescriptor));
+      dispatch<any>(setSelectedLayer(layerDescriptor.id));
       dispatch(setTransientLayer(layerDescriptor.id));
     },
     removeTransientLayer: () => {
-      dispatch(setSelectedLayer(null));
-      dispatch(removeTransientLayer());
+      dispatch<any>(setSelectedLayer(null));
+      dispatch<any>(removeTransientLayer());
     },
     selectLayerAndAdd: () => {
       dispatch(setTransientLayer(null));

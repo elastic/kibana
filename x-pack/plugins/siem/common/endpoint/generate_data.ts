@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
 import {
@@ -114,6 +113,61 @@ interface NodeState {
   event: Event;
   childrenCreated: number;
   maxChildren: number;
+}
+
+/**
+ * The Tree and TreeNode interfaces define structures to make testing of resolver functionality easier. The `generateTree`
+ * method builds a `Tree` structures which organizes the different parts of the resolver tree. Maps are used to allow
+ * tests to quickly verify if the node they retrieved from ES was actually created by the generator or if there is an
+ * issue with the implementation. The `Tree` structure serves as a source of truth for queries to ES. The entire Tree
+ * is stored in memory so it can be quickly accessed by the tests. The resolver api_integration tests currently leverage
+ * these structures for verifying that its implementation is returning the correct documents from ES and structuring
+ * the response correctly.
+ */
+
+/**
+ * Defines the fields for each node in the tree.
+ */
+export interface TreeNode {
+  /**
+   * The entity_id for the node
+   */
+  id: string;
+  lifecycle: Event[];
+  relatedEvents: Event[];
+}
+
+/**
+ * A resolver tree that makes accessing specific nodes easier for tests.
+ */
+export interface Tree {
+  /**
+   * Map of entity_id to node
+   */
+  children: Map<string, TreeNode>;
+  /**
+   * Map of entity_id to node
+   */
+  ancestry: Map<string, TreeNode>;
+  origin: TreeNode;
+  alertEvent: Event;
+  /**
+   * All events from children, ancestry, origin, and the alert in a single array
+   */
+  allEvents: Event[];
+}
+
+export interface TreeOptions {
+  /**
+   * The value in ancestors does not include the origin/root node
+   */
+  ancestors?: number;
+  generations?: number;
+  children?: number;
+  relatedEvents?: number;
+  percentWithRelated?: number;
+  percentTerminated?: number;
+  alwaysGenMaxChildrenPerNode?: boolean;
 }
 
 export class EndpointDocGenerator {
@@ -320,6 +374,78 @@ export class EndpointDocGenerator {
   }
 
   /**
+   * This generates a full resolver tree and keeps the entire tree in memory. This is useful for tests that want
+   * to compare results from elasticsearch with the actual events created by this generator. Because all the events
+   * are stored in memory do not use this function to generate large trees.
+   *
+   * @param options - options for the layout of the tree, like how many children, generations, and ancestry
+   * @returns a Tree structure that makes accessing specific events easier
+   */
+  public generateTree(options: TreeOptions = {}): Tree {
+    const addEventToMap = (nodeMap: Map<string, TreeNode>, event: Event) => {
+      const nodeId = event.process.entity_id;
+      // if a node already exists for the entity_id we'll use that one, otherwise let's create a new empty node
+      // and add the event to the right array.
+      let node = nodeMap.get(nodeId);
+      if (!node) {
+        node = { id: nodeId, lifecycle: [], relatedEvents: [] };
+      }
+
+      // place the event in the right array depending on its category
+      if (event.event.category === 'process') {
+        node.lifecycle.push(event);
+      } else {
+        node.relatedEvents.push(event);
+      }
+      return nodeMap.set(nodeId, node);
+    };
+
+    const ancestry = this.createAlertEventAncestry(
+      options.ancestors,
+      options.relatedEvents,
+      options.percentWithRelated,
+      options.percentTerminated
+    );
+
+    // create a mapping of entity_id -> lifecycle and related events
+    // slice gets everything but the last item which is an alert
+    const ancestryNodes: Map<string, TreeNode> = ancestry
+      .slice(0, -1)
+      .reduce(addEventToMap, new Map());
+
+    const alert = ancestry[ancestry.length - 1];
+    const origin = ancestryNodes.get(alert.process.entity_id);
+    if (!origin) {
+      throw Error(`could not find origin while building tree: ${alert.process.entity_id}`);
+    }
+
+    // remove the origin node from the ancestry array
+    ancestryNodes.delete(alert.process.entity_id);
+
+    const children = Array.from(
+      this.descendantsTreeGenerator(
+        alert,
+        options.generations,
+        options.children,
+        options.relatedEvents,
+        options.percentWithRelated,
+        options.percentTerminated,
+        options.alwaysGenMaxChildrenPerNode
+      )
+    );
+
+    const childrenNodes: Map<string, TreeNode> = children.reduce(addEventToMap, new Map());
+
+    return {
+      children: childrenNodes,
+      ancestry: ancestryNodes,
+      alertEvent: alert,
+      allEvents: [...ancestry, ...children],
+      origin,
+    };
+  }
+
+  /**
    * Generator function that creates the full set of events needed to render resolver.
    * The number of nodes grows exponentially with the number of generations and children per node.
    * Each node is logically a process, and will have 1 or more process events associated with it.
@@ -328,7 +454,8 @@ export class EndpointDocGenerator {
    * @param maxChildrenPerNode - maximum number of children for any given node in the tree
    * @param relatedEventsPerNode - number of related events (file, registry, etc) to create for each process event in the tree
    * @param percentNodesWithRelated - percent of nodes which should have related events
-   * @param percentChildrenTerminated - percent of nodes which will have process termination events
+   * @param percentTerminated - percent of nodes which will have process termination events
+   * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
    */
   public *fullResolverTreeGenerator(
     alertAncestors?: number,
@@ -336,12 +463,14 @@ export class EndpointDocGenerator {
     maxChildrenPerNode?: number,
     relatedEventsPerNode?: number,
     percentNodesWithRelated?: number,
-    percentChildrenTerminated?: number
+    percentTerminated?: number,
+    alwaysGenMaxChildrenPerNode?: boolean
   ) {
     const ancestry = this.createAlertEventAncestry(
       alertAncestors,
       relatedEventsPerNode,
-      percentNodesWithRelated
+      percentNodesWithRelated,
+      percentTerminated
     );
     for (let i = 0; i < ancestry.length; i++) {
       yield ancestry[i];
@@ -353,24 +482,31 @@ export class EndpointDocGenerator {
       maxChildrenPerNode,
       relatedEventsPerNode,
       percentNodesWithRelated,
-      percentChildrenTerminated
+      percentTerminated,
+      alwaysGenMaxChildrenPerNode
     );
   }
 
   /**
    * Creates an alert event and associated process ancestry. The alert event will always be the last event in the return array.
    * @param alertAncestors - number of ancestor generations to create
+   * @param relatedEventsPerNode - number of related events to add to each process node being created
+   * @param pctWithRelated - percent of ancestors that will have related events
+   * @param pctWithTerminated - percent of ancestors that will have termination events
    */
   public createAlertEventAncestry(
     alertAncestors = 3,
     relatedEventsPerNode = 5,
-    pctWithRelated = 30
+    pctWithRelated = 30,
+    pctWithTerminated = 100
   ): Event[] {
     const events = [];
     const startDate = new Date().getTime();
     const root = this.generateEvent({ timestamp: startDate + 1000 });
     events.push(root);
     let ancestor = root;
+    let timestamp = root['@timestamp'] + 1000;
+
     // generate related alerts for root
     const processDuration: number = 6 * 3600;
     if (this.randomN(100) < pctWithRelated) {
@@ -382,12 +518,41 @@ export class EndpointDocGenerator {
         events.push(relatedEvent);
       }
     }
+
+    // generate the termination event for the root
+    if (this.randomN(100) < pctWithTerminated) {
+      const termProcessDuration = this.randomN(1000000); // This lets termination events be up to 1 million seconds after the creation event (~11 days)
+      events.push(
+        this.generateEvent({
+          timestamp: timestamp + termProcessDuration * 1000,
+          entityID: root.process.entity_id,
+          parentEntityID: root.process.parent?.entity_id,
+          eventCategory: 'process',
+          eventType: 'end',
+        })
+      );
+    }
+
     for (let i = 0; i < alertAncestors; i++) {
       ancestor = this.generateEvent({
-        timestamp: startDate + 1000 * (i + 1),
+        timestamp,
         parentEntityID: ancestor.process.entity_id,
       });
       events.push(ancestor);
+      timestamp = timestamp + 1000;
+
+      if (this.randomN(100) < pctWithTerminated) {
+        const termProcessDuration = this.randomN(1000000); // This lets termination events be up to 1 million seconds after the creation event (~11 days)
+        events.push(
+          this.generateEvent({
+            timestamp: timestamp + termProcessDuration * 1000,
+            entityID: ancestor.process.entity_id,
+            parentEntityID: ancestor.process.parent?.entity_id,
+            eventCategory: 'process',
+            eventType: 'end',
+          })
+        );
+      }
 
       // generate related alerts for ancestor
       if (this.randomN(100) < pctWithRelated) {
@@ -401,11 +566,7 @@ export class EndpointDocGenerator {
       }
     }
     events.push(
-      this.generateAlert(
-        startDate + 1000 * alertAncestors,
-        ancestor.process.entity_id,
-        ancestor.process.parent?.entity_id
-      )
+      this.generateAlert(timestamp, ancestor.process.entity_id, ancestor.process.parent?.entity_id)
     );
     return events;
   }
@@ -418,6 +579,7 @@ export class EndpointDocGenerator {
    * @param relatedEventsPerNode - number of related events (file, registry, etc) to create for each process event in the tree
    * @param percentNodesWithRelated - percent of nodes which should have related events
    * @param percentChildrenTerminated - percent of nodes which will have process termination events
+   * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
    */
   public *descendantsTreeGenerator(
     root: Event,
@@ -425,12 +587,18 @@ export class EndpointDocGenerator {
     maxChildrenPerNode = 2,
     relatedEventsPerNode = 3,
     percentNodesWithRelated = 100,
-    percentChildrenTerminated = 100
+    percentChildrenTerminated = 100,
+    alwaysGenMaxChildrenPerNode = false
   ) {
+    let maxChildren = this.randomN(maxChildrenPerNode + 1);
+    if (alwaysGenMaxChildrenPerNode) {
+      maxChildren = maxChildrenPerNode;
+    }
+
     const rootState: NodeState = {
       event: root,
       childrenCreated: 0,
-      maxChildren: this.randomN(maxChildrenPerNode + 1),
+      maxChildren,
     };
     const lineage: NodeState[] = [rootState];
     let timestamp = root['@timestamp'];
@@ -452,10 +620,15 @@ export class EndpointDocGenerator {
         timestamp,
         parentEntityID: currentState.event.process.entity_id,
       });
+
+      maxChildren = this.randomN(maxChildrenPerNode + 1);
+      if (alwaysGenMaxChildrenPerNode) {
+        maxChildren = maxChildrenPerNode;
+      }
       lineage.push({
         event: child,
         childrenCreated: 0,
-        maxChildren: this.randomN(maxChildrenPerNode + 1),
+        maxChildren,
       });
       yield child;
       let processDuration: number = 6 * 3600;
