@@ -59,12 +59,12 @@ const DropTargetDataProviders = styled.div`
   justify-content: center;
   padding-bottom: 2px;
   position: relative;
-  border: 0.2rem dashed ${props => props.theme.eui.euiColorMediumShade};
+  border: 0.2rem dashed ${(props) => props.theme.eui.euiColorMediumShade};
   border-radius: 5px;
   margin: 2px 0 2px 0;
   min-height: 100px;
   overflow-y: auto;
-  background-color: ${props => props.theme.eui.euiFormBackgroundColor};
+  background-color: ${(props) => props.theme.eui.euiFormBackgroundColor};
 `;
 
 DropTargetDataProviders.displayName = 'DropTargetDataProviders';

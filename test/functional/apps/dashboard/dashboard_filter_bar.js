@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
@@ -39,12 +39,12 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('dashboard');
     });
 
-    describe('Add a filter bar', function() {
+    describe('Add a filter bar', function () {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
       });
 
-      it('should show on an empty dashboard', async function() {
+      it('should show on an empty dashboard', async function () {
         await PageObjects.dashboard.clickNewDashboard();
         const hasAddFilter = await testSubjects.exists('addFilter');
         expect(hasAddFilter).to.be(true);
@@ -57,7 +57,7 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('filter editor field list', function() {
+    describe('filter editor field list', function () {
       this.tags(['skipFirefox']);
 
       before(async () => {
@@ -87,7 +87,7 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('filter pills', function() {
+    describe('filter pills', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -95,12 +95,12 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.timePicker.setDefaultDataRange();
       });
 
-      it('are not selected by default', async function() {
+      it('are not selected by default', async function () {
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(0);
       });
 
-      it('are added when a pie chart slice is clicked', async function() {
+      it('are added when a pie chart slice is clicked', async function () {
         await dashboardAddPanel.addVisualization('Rendering Test: pie');
         await PageObjects.dashboard.waitForRenderComplete();
         await pieChart.filterOnPieSlice('4,886');
@@ -169,7 +169,7 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('saved search filtering', function() {
+    describe('saved search filtering', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -177,7 +177,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.timePicker.setDefaultDataRange();
       });
 
-      it('are added when a cell magnifying glass is clicked', async function() {
+      it('are added when a cell magnifying glass is clicked', async function () {
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await PageObjects.dashboard.waitForRenderComplete();
         await testSubjects.click('docTableCellFilter');
@@ -187,14 +187,14 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('bad filters are loaded properly', function() {
+    describe('bad filters are loaded properly', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.loadSavedDashboard('dashboard with bad filters');
       });
 
-      it('bad filters are loaded in error mode', async function() {
+      it('bad filters are loaded in error mode', async function () {
         const hasBadFieldFilter = await filterBar.hasFilter('baad-field', 'error', false);
         expect(hasBadFieldFilter).to.be(true);
 

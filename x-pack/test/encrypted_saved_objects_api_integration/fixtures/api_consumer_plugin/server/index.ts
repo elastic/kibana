@@ -75,7 +75,7 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
     router.get(
       {
         path: '/api/saved_objects/get-decrypted-as-internal-user/{type}/{id}',
-        validate: { params: value => ({ value }) },
+        validate: { params: (value) => ({ value }) },
       },
       async (context, request, response) => {
         const [, { encryptedSavedObjects }] = await core.getStartServices();

@@ -13,7 +13,7 @@ import { API_BASE_PATH } from '../../common/constants';
 const { setup } = pageHelpers.home;
 
 const removeWhiteSpaceOnArrayValues = (array: any[]) =>
-  array.map(value => {
+  array.map((value) => {
     if (!value.trim) {
       return value;
     }
@@ -216,7 +216,7 @@ describe('<IndexManagementHome />', () => {
           const { rows } = table.getMetaData('templateTable');
 
           expect(rows.length).toEqual(
-            templates.filter(template => !template.name.startsWith('.')).length
+            templates.filter((template) => !template.name.startsWith('.')).length
           );
 
           expect(exists('systemTemplatesSwitch')).toBe(true);
@@ -446,7 +446,7 @@ describe('<IndexManagementHome />', () => {
               await actions.clickTemplateAt(0);
 
               expect(find('templateDetails.tab').length).toBe(4);
-              expect(find('templateDetails.tab').map(t => t.text())).toEqual([
+              expect(find('templateDetails.tab').map((t) => t.text())).toEqual([
                 'Summary',
                 'Settings',
                 'Mappings',
@@ -549,9 +549,7 @@ describe('<IndexManagementHome />', () => {
 
       component.update();
 
-      find('indexTableIndexNameLink')
-        .at(0)
-        .simulate('click');
+      find('indexTableIndexNameLink').at(0).simulate('click');
     });
 
     test('should encode indexName when loading settings in detail panel', async () => {

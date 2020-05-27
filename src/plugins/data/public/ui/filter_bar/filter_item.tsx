@@ -73,7 +73,7 @@ class FilterItemUI extends Component<Props, State> {
     if (filter.meta.index) {
       getIndexPatterns()
         .get(filter.meta.index)
-        .then(indexPattern => {
+        .then((indexPattern) => {
           this.setState({
             indexPatternExists: !!indexPattern,
           });

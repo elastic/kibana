@@ -203,7 +203,7 @@ async function getActionInfo(
 ): Promise<ActionInfo> {
   // check to see if it's a pre-configured action first
   const pcAction = preconfiguredActions.find(
-    preconfiguredAction => preconfiguredAction.id === actionId
+    (preconfiguredAction) => preconfiguredAction.id === actionId
   );
   if (pcAction) {
     return {

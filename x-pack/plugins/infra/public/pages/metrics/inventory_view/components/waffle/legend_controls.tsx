@@ -55,7 +55,7 @@ const PALETTE_NAMES: InventoryColorPalette[] = [
   'negative',
 ];
 
-const PALETTE_OPTIONS = PALETTE_NAMES.map(name => ({ text: PALETTES[name], value: name }));
+const PALETTE_OPTIONS = PALETTE_NAMES.map((name) => ({ text: PALETTES[name], value: name }));
 
 export const LegendControls = ({
   autoBounds,
@@ -99,7 +99,7 @@ export const LegendControls = ({
 
   const handleReverseColors = useCallback(
     (e: EuiSwitchEvent) => {
-      setLegendOptions(previous => ({ ...previous, reverseColors: e.target.checked }));
+      setLegendOptions((previous) => ({ ...previous, reverseColors: e.target.checked }));
     },
     [setLegendOptions]
   );
@@ -140,15 +140,15 @@ export const LegendControls = ({
   }, [autoBounds, boundsOverride, options]);
 
   const handleStepsChange = useCallback(
-    e => {
-      setLegendOptions(previous => ({ ...previous, steps: parseInt(e.target.value, 10) }));
+    (e) => {
+      setLegendOptions((previous) => ({ ...previous, steps: parseInt(e.target.value, 10) }));
     },
     [setLegendOptions]
   );
 
   const handlePaletteChange = useCallback(
-    e => {
-      setLegendOptions(previous => ({ ...previous, palette: e.target.value }));
+    (e) => {
+      setLegendOptions((previous) => ({ ...previous, palette: e.target.value }));
     },
     [setLegendOptions]
   );
