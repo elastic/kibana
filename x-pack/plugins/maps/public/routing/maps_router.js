@@ -11,24 +11,30 @@ import { getCoreI18n } from '../kibana_services';
 import { MapsListView } from './list_view';
 import { MapsCreateEditView } from './create_edit_view';
 
-export function renderApp(context, params) {
+export function renderApp(context, { appBasePath, element }) {
   const I18nContext = getCoreI18n().Context;
   render(
     <I18nContext>
-      <Router basename={params.appBasePath}>
+      <Router>
         <Switch>
-          <Route path={`/map/:savedMapId`} component={MapsCreateEditView} />
-          <Route path={`/map`} component={MapsCreateEditView} />
-          <Route component={MapsListView} />
+          <Route path={`${appBasePath}/map/:savedMapId`} component={MapsCreateEditView} />
+          <Route path={`${appBasePath}/map`} component={MapsCreateEditView} />
           <Route
-            path="#/map"
-            render={({ location }) => <Redirect to={location.hash.replace('#', '')} />}
+            path={``}
+            render={({ location }) => {
+              return location.hash ? (
+                <Redirect to={`${appBasePath}${location.hash.replace('#', '')}`} />
+              ) : (
+                <MapsListView />
+              );
+            }}
           />
+          <Route component={MapsListView} />
         </Switch>
       </Router>
     </I18nContext>,
-    params.element
+    element
   );
 
-  return () => unmountComponentAtNode(params.element);
+  return () => unmountComponentAtNode(element);
 }
