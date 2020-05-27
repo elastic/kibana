@@ -32,6 +32,7 @@ import {
   CONTEXT_DEFAULT_SIZE_SETTING,
   CONTEXT_STEP_SETTING,
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
+  DOC_TABLE_LEGACY_TABLE,
 } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
@@ -162,5 +163,17 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     }),
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
+  },
+  [DOC_TABLE_LEGACY_TABLE]: {
+    name: i18n.translate('discover.advancedSettings.docTableVersionName', {
+      defaultMessage: 'Use legacy table',
+    }),
+    value: true,
+    description: i18n.translate('kbn.advancedSettings.docTableVersionDescription', {
+      defaultMessage:
+        'Prefer the legacy version of the documents table in Discover while available',
+    }),
+    category: ['discover'],
+    schema: schema.boolean(),
   },
 };
