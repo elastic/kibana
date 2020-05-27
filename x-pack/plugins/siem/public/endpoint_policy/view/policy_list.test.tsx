@@ -5,20 +5,21 @@
  */
 
 import React from 'react';
+import * as reactTestingLibrary from '@testing-library/react';
 
 import { PolicyList } from './index';
+import { mockPolicyResultList } from '../store/policy_list/mock_policy_result_list';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../common/mock/endpoint';
+import { AppAction } from '../../common/store/actions';
 
 describe('when on the policies page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
   let store: AppContextTestRender['store'];
-  let coreStart: AppContextTestRender['coreStart'];
-  let middlewareSpy: AppContextTestRender['middlewareSpy'];
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
-    ({ history, store, coreStart, middlewareSpy } = mockedContext);
+    ({ history, store } = mockedContext);
     render = () => mockedContext.render(<PolicyList />);
   });
 
@@ -26,5 +27,31 @@ describe('when on the policies page', () => {
     const renderResult = render();
     const table = await renderResult.findByTestId('policyTable');
     expect(table).not.toBeNull();
+  });
+
+  describe('when list data loads', () => {
+    beforeEach(() => {
+      reactTestingLibrary.act(() => {
+        history.push('/policy');
+      });
+      reactTestingLibrary.act(() => {
+        const policyListData = mockPolicyResultList({ total: 3 });
+        const action: AppAction = {
+          type: 'serverReturnedPolicyListData',
+          payload: {
+            policyItems: policyListData.items,
+            total: policyListData.total,
+            pageSize: policyListData.perPage,
+            pageIndex: policyListData.page,
+          },
+        };
+        store.dispatch(action);
+      });
+    });
+    it('should display rows in the table', async () => {
+      const renderResult = render();
+      const rows = await renderResult.findAllByRole('row');
+      expect(rows).toHaveLength(4);
+    });
   });
 });

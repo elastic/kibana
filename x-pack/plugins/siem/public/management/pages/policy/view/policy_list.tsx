@@ -10,14 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { useLocation, useHistory } from 'react-router-dom';
-import {
-  selectApiError,
-  selectIsLoading,
-  selectPageIndex,
-  selectPageSize,
-  selectPolicyItems,
-  selectTotal,
-} from '../store/policy_list/selectors';
+import { createStructuredSelector } from 'reselect';
+import { CreateStructuredSelector } from '../../common/store';
+import * as selectors from '../store/policy_list/selectors';
 import { usePolicyListSelector } from './policy_hooks';
 import { PolicyListAction } from '../store/policy_list';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -49,18 +44,21 @@ const PolicyLink: React.FC<{ name: string; route: string; href: string }> = ({
   );
 };
 
+const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const PolicyList = React.memo(() => {
   const { services, notifications } = useKibana();
   const history = useHistory();
   const location = useLocation();
 
   const dispatch = useDispatch<(action: PolicyListAction) => void>();
-  const policyItems = usePolicyListSelector(selectPolicyItems);
-  const pageIndex = usePolicyListSelector(selectPageIndex);
-  const pageSize = usePolicyListSelector(selectPageSize);
-  const totalItemCount = usePolicyListSelector(selectTotal);
-  const loading = usePolicyListSelector(selectIsLoading);
-  const apiError = usePolicyListSelector(selectApiError);
+  const {
+    selectPolicyItems: policyItems,
+    selectPageIndex: pageIndex,
+    selectPageSize: pageSize,
+    selectTotal: totalItemCount,
+    selectIsLoading: loading,
+    selectApiError: apiError,
+  } = usePolicyListSelector(selector);
 
   useEffect(() => {
     if (apiError) {

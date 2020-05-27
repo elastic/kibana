@@ -27,11 +27,12 @@ export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
   action
 ) => {
   if (action.type === 'serverReturnedPolicyListData') {
-    return {
+    const result = {
       ...state,
       ...action.payload,
       isLoading: false,
     };
+    return result;
   }
 
   if (action.type === 'serverFailedToReturnPolicyListData') {

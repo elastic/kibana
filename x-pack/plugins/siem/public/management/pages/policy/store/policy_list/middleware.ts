@@ -9,6 +9,7 @@ import { sendGetEndpointSpecificDatasources } from './services/ingest';
 import { isOnPolicyListPage, urlSearchParams } from './selectors';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 import { Immutable } from '../../../../../../common/endpoint/types';
+import { initialPolicyListState } from './reducer';
 
 export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<Immutable<PolicyListState>> = (
   coreStart
@@ -19,6 +20,7 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<Immutable<P
     next(action);
 
     const state = getState();
+    const initialState = initialPolicyListState();
     if (action.type === 'userChangedUrl' && isOnPolicyListPage(state)) {
       const { page_index: pageIndex, page_size: pageSize } = urlSearchParams(state);
       let response: GetPolicyListResponse;
@@ -38,15 +40,13 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<Immutable<P
         return;
       }
 
-      const { items: policyItems, total } = response;
-
       dispatch({
         type: 'serverReturnedPolicyListData',
         payload: {
-          policyItems,
+          policyItems: response ? response.items : initialState.policyItems,
           pageIndex,
           pageSize,
-          total,
+          total: response ? response.total : initialState.total,
         },
       });
     }
