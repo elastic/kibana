@@ -328,9 +328,9 @@ export const getSelectedLayer = createSelector(
   }
 );
 
-export const hasPreviewLayers = createSelector(getLayerListRaw, (layerList) => {
-  return layerList.some((layerDescriptor) => {
-    return !!layerDescriptor.__isPreviewLayer;
+export const hasPreviewLayers = createSelector(getLayerList, (layerList) => {
+  return layerList.some((layer) => {
+    return layer.isPreviewLayer();
   });
 });
 

@@ -35,10 +35,10 @@ export const clustersLayerWizardConfig: LayerWizard = {
     defaultMessage: 'Geospatial data grouped in grids with metrics for each gridded cell',
   }),
   icon: 'logoElasticsearch',
-  renderWizard: ({ previewLayer }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: Partial<ESGeoGridSourceDescriptor>) => {
       if (!sourceConfig) {
-        previewLayer(null);
+        previewLayers([]);
         return;
       }
 
@@ -94,7 +94,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
           },
         }),
       });
-      previewLayer(layerDescriptor);
+      previewLayers([layerDescriptor]);
     };
 
     return (
