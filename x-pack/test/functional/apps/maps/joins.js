@@ -58,11 +58,18 @@ export default function ({ getPageObjects, getService }) {
       const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
       const split = layerTOCDetails.trim().split('\n');
 
-      const min = split[0];
-      expect(min).to.equal('3');
+      //field display name
+      expect(split[0]).to.equal('max prop1');
 
-      const max = split[2];
-      expect(max).to.equal('12');
+      //bands 1-8
+      expect(split[1]).to.equal('3');
+      expect(split[2]).to.equal('4.13');
+      expect(split[3]).to.equal('5.25');
+      expect(split[4]).to.equal('6.38');
+      expect(split[5]).to.equal('7.5');
+      expect(split[6]).to.equal('8.63');
+      expect(split[7]).to.equal('9.75');
+      expect(split[8]).to.equal('11');
     });
 
     it('should decorate feature properties with join property', async () => {
@@ -164,10 +171,10 @@ export default function ({ getPageObjects, getService }) {
         const split = layerTOCDetails.trim().split('\n');
 
         const min = split[0];
-        expect(min).to.equal('12');
+        expect(min).to.equal('max prop1');
 
-        const max = split[2];
-        expect(max).to.equal('12');
+        const max = split[1];
+        expect(max).to.equal('12'); // just single band because single value
       });
 
       it('should flag only the joined features as visible', async () => {
