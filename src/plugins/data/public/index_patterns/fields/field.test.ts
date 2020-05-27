@@ -64,26 +64,12 @@ describe('Field', function () {
     conflictDescriptions: { a: ['b', 'c'], d: ['e'] },
   } as Field;
 
-  it('read only attributes ignore assignment', function () {
-    const field = getField();
-
-    expect(field.name).toEqual('name');
-
-    field.name = 'newName';
-    expect(field.name).toEqual('name');
-  });
-
-  it('writable attributes update on assignment', function () {
+  it('the correct properties are writable', function () {
     const field = getField();
 
     expect(field.count).toEqual(1);
-
     field.count = 2;
     expect(field.count).toEqual(2);
-  });
-
-  it('the correct properties are writable', function () {
-    const field = getField();
 
     expect(field.script).toEqual(fieldValues.script);
     field.script = '1';
@@ -100,6 +86,10 @@ describe('Field', function () {
 
   it('the correct properties are not writable', function () {
     const field = getField();
+
+    expect(field.name).toEqual(fieldValues.name);
+    field.name = 'newName';
+    expect(field.name).toEqual(fieldValues.name);
 
     expect(field.type).toEqual(fieldValues.type);
     field.type = 'newType';
