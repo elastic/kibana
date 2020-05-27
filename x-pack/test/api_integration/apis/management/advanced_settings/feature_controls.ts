@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { CSV_QUOTE_VALUES_SETTING } from '../../../../../../src/plugins/share/public';
+import { CSV_QUOTE_VALUES_SETTING } from '../../../../../../src/plugins/share/common/constants';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest: SuperTest<any> = getService('supertestWithoutAuth');
