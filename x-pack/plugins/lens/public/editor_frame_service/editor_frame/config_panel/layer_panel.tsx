@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NativeRenderer } from '../../../native_renderer';
-import { Visualization, FramePublicAPI, StateSetter } from '../../../types';
+import { StateSetter } from '../../../types';
 import { DragContext, DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
@@ -27,11 +27,8 @@ import { DimensionPopover } from './dimension_popover';
 
 export function LayerPanel(
   props: Exclude<ConfigPanelWrapperProps, 'state' | 'setState'> & {
-    frame: FramePublicAPI;
     layerId: string;
     isOnlyLayer: boolean;
-    activeVisualization: Visualization;
-    visualizationState: unknown;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (datasourceId: string, newState: unknown) => void;
     updateAll: (
@@ -49,11 +46,16 @@ export function LayerPanel(
     addingToGroupId: null,
   });
 
-  const { framePublicAPI, layerId, activeVisualization, isOnlyLayer, onRemoveLayer } = props;
+  const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
-  if (!datasourcePublicAPI) {
+  if (
+    !datasourcePublicAPI ||
+    !props.activeVisualizationId ||
+    !props.visualizationMap[props.activeVisualizationId]
+  ) {
     return null;
   }
+  const activeVisualization = props.visualizationMap[props.activeVisualizationId];
   const layerVisualizationConfigProps = {
     layerId,
     dragDropContext,
@@ -213,15 +215,32 @@ export function LayerPanel(
                         />
                       }
                       panel={
-                        <NativeRenderer
-                          render={props.datasourceMap[datasourceId].renderDimensionEditor}
-                          nativeProps={{
-                            ...layerDatasourceConfigProps,
-                            core: props.core,
-                            columnId: accessor,
-                            filterOperations: group.filterOperations,
-                          }}
-                        />
+                        <>
+                          <NativeRenderer
+                            render={props.datasourceMap[datasourceId].renderDimensionEditor}
+                            nativeProps={{
+                              ...layerDatasourceConfigProps,
+                              core: props.core,
+                              columnId: accessor,
+                              filterOperations: group.filterOperations,
+                            }}
+                          />
+                          {activeVisualization.renderDimensionEditor ? (
+                            <>
+                              <EuiSpacer size="s" />
+
+                              <NativeRenderer
+                                render={activeVisualization.renderDimensionEditor}
+                                nativeProps={{
+                                  ...layerVisualizationConfigProps,
+                                  groupId: group.groupId,
+                                  accessor,
+                                  setState: props.updateVisualization,
+                                }}
+                              />
+                            </>
+                          ) : null}
+                        </>
                       }
                     />
 
@@ -246,7 +265,7 @@ export function LayerPanel(
                             columnId: accessor,
                             prevState: layerDatasourceState,
                           }),
-                          props.activeVisualization.removeDimension({
+                          activeVisualization.removeDimension({
                             layerId,
                             columnId: accessor,
                             prevState: props.visualizationState,
