@@ -196,7 +196,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               name="from"
               value={from || ''}
               data-test-subj="emailFromInput"
-              onChange={e => {
+              onChange={(e) => {
                 editActionConfig('from', e.target.value);
               }}
               onBlur={() => {
@@ -228,7 +228,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               name="host"
               value={host || ''}
               data-test-subj="emailHostInput"
-              onChange={e => {
+              onChange={(e) => {
                 editActionConfig('host', e.target.value);
               }}
               onBlur={() => {
@@ -262,7 +262,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                   name="port"
                   value={port || ''}
                   data-test-subj="emailPortInput"
-                  onChange={e => {
+                  onChange={(e) => {
                     editActionConfig('port', parseInt(e.target.value, 10));
                   }}
                   onBlur={() => {
@@ -284,7 +284,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                       }
                     )}
                     checked={secure || false}
-                    onChange={e => {
+                    onChange={(e) => {
                       editActionConfig('secure', e.target.checked);
                     }}
                   />
@@ -314,7 +314,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               name="user"
               value={user || ''}
               data-test-subj="emailUserInput"
-              onChange={e => {
+              onChange={(e) => {
                 editActionSecrets('user', nullableString(e.target.value));
               }}
             />
@@ -339,7 +339,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               name="password"
               value={password || ''}
               data-test-subj="emailPasswordInput"
-              onChange={e => {
+              onChange={(e) => {
                 editActionSecrets('password', nullableString(e.target.value));
               }}
             />
@@ -426,14 +426,14 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
             const newOptions = [...toOptions, { label: searchValue }];
             editAction(
               'to',
-              newOptions.map(newOption => newOption.label),
+              newOptions.map((newOption) => newOption.label),
               index
             );
           }}
           onChange={(selectedOptions: Array<{ label: string }>) => {
             editAction(
               'to',
-              selectedOptions.map(selectedOption => selectedOption.label),
+              selectedOptions.map((selectedOption) => selectedOption.label),
               index
             );
           }}
@@ -466,14 +466,14 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
               const newOptions = [...ccOptions, { label: searchValue }];
               editAction(
                 'cc',
-                newOptions.map(newOption => newOption.label),
+                newOptions.map((newOption) => newOption.label),
                 index
               );
             }}
             onChange={(selectedOptions: Array<{ label: string }>) => {
               editAction(
                 'cc',
-                selectedOptions.map(selectedOption => selectedOption.label),
+                selectedOptions.map((selectedOption) => selectedOption.label),
                 index
               );
             }}
@@ -507,14 +507,14 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
               const newOptions = [...bccOptions, { label: searchValue }];
               editAction(
                 'bcc',
-                newOptions.map(newOption => newOption.label),
+                newOptions.map((newOption) => newOption.label),
                 index
               );
             }}
             onChange={(selectedOptions: Array<{ label: string }>) => {
               editAction(
                 'bcc',
-                selectedOptions.map(selectedOption => selectedOption.label),
+                selectedOptions.map((selectedOption) => selectedOption.label),
                 index
               );
             }}
@@ -552,7 +552,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
           name="subject"
           data-test-subj="emailSubjectInput"
           value={subject || ''}
-          onChange={e => {
+          onChange={(e) => {
             editAction('subject', e.target.value, index);
           }}
           onBlur={() => {
@@ -588,7 +588,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
           value={message || ''}
           name="message"
           data-test-subj="emailMessageInput"
-          onChange={e => {
+          onChange={(e) => {
             editAction('message', e.target.value, index);
           }}
           onBlur={() => {

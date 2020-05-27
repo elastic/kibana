@@ -11,6 +11,6 @@ import { readableEnd } from './util';
 
 export async function md5(path: string) {
   const hash = createHash('md5');
-  await readableEnd(createReadStream(path).on('data', chunk => hash.update(chunk)));
+  await readableEnd(createReadStream(path).on('data', (chunk) => hash.update(chunk)));
   return hash.digest('hex');
 }

@@ -19,7 +19,7 @@ describe('panning interaction', () => {
     // The time isn't relevant as we don't use animations in this suite.
     time = 0;
     store = createStore(cameraReducer, undefined);
-    translationShouldBeCloseTo = expectedTranslation => {
+    translationShouldBeCloseTo = (expectedTranslation) => {
       const actualTranslation = translation(store.getState())(time);
       expect(expectedTranslation[0]).toBeCloseTo(actualTranslation[0]);
       expect(expectedTranslation[1]).toBeCloseTo(actualTranslation[1]);

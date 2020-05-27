@@ -23,7 +23,7 @@ import { initPlugin as initNewsfeed } from './newsfeed_simulation';
 const NAME = 'newsfeed-FTS-external-service-simulators';
 
 // eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
+export default function (kibana: any) {
   return new kibana.Plugin({
     name: NAME,
     init: (server: Hapi.Server) => {

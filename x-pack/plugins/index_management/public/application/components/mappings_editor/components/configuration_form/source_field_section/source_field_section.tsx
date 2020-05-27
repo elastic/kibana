@@ -78,7 +78,7 @@ export const SourceFieldSection = () => {
                 }
               )}
               selectedOptions={value as ComboBoxOption[]}
-              onChange={newValue => {
+              onChange={(newValue) => {
                 setValue(newValue);
               }}
               onCreateOption={(searchValue: string) => {
@@ -108,7 +108,7 @@ export const SourceFieldSection = () => {
                 }
               )}
               selectedOptions={value as ComboBoxOption[]}
-              onChange={newValue => {
+              onChange={(newValue) => {
                 setValue(newValue);
               }}
               onCreateOption={(searchValue: string) => {
@@ -152,7 +152,7 @@ export const SourceFieldSection = () => {
       }
     >
       <FormDataProvider pathsToWatch={['sourceField.enabled']}>
-        {formData => {
+        {(formData) => {
           const { 'sourceField.enabled': enabled } = formData;
 
           if (enabled === undefined) {

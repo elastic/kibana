@@ -63,7 +63,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       let actualText: string | undefined;
 
       await retry.waitForWithTimeout('assertExpectedText', 1000, async () => {
-        actualText = await find.byCssSelector(selector).then(el => el.getVisibleText());
+        actualText = await find.byCssSelector(selector).then((el) => el.getVisibleText());
         return test(actualText);
       });
 
@@ -79,7 +79,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param expectedText - the expected text
      */
     assertExactText(selector: string, expectedText: string) {
-      return this.assertExpectedText(selector, value => value === expectedText);
+      return this.assertExpectedText(selector, (value) => value === expectedText);
     },
 
     /**

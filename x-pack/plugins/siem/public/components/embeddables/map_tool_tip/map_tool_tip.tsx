@@ -81,7 +81,7 @@ export const MapToolTipComponent = ({
   }, [
     featureIndex,
     features
-      .map(f => `${f.id}-${f.layerId}`)
+      .map((f) => `${f.id}-${f.layerId}`)
       .sort()
       .join(),
   ]);

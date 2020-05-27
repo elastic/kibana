@@ -12,7 +12,7 @@ import { AlertDetailsRequestParams } from '../types';
 import { AlertDetailsPagination } from './lib';
 import { getHostData } from '../../metadata';
 
-export const alertDetailsHandlerWrapper = function(
+export const alertDetailsHandlerWrapper = function (
   endpointAppContext: EndpointAppContext
 ): RequestHandler<AlertDetailsRequestParams, unknown, unknown> {
   const alertDetailsHandler: RequestHandler<AlertDetailsRequestParams, unknown, unknown> = async (

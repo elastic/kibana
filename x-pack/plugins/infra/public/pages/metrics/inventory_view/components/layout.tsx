@@ -137,13 +137,13 @@ const MainContainer = euiStyled.div`
 `;
 
 const TopActionContainer = euiStyled.div`
-  padding: ${props => `12px ${props.theme.eui.paddingSizes.m}`};
+  padding: ${(props) => `12px ${props.theme.eui.paddingSizes.m}`};
 `;
 
 const BottomActionContainer = euiStyled.div`
-  background-color: ${props => props.theme.eui.euiPageBackgroundColor};
-  padding: ${props => props.theme.eui.paddingSizes.m} ${props =>
-  props.theme.eui.paddingSizes.m} ${props => props.theme.eui.paddingSizes.s};
+  background-color: ${(props) => props.theme.eui.euiPageBackgroundColor};
+  padding: ${(props) => props.theme.eui.paddingSizes.m} ${(props) =>
+  props.theme.eui.paddingSizes.m} ${(props) => props.theme.eui.paddingSizes.s};
   position: absolute;
   left: 0;
   bottom: 4px;

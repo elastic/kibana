@@ -51,7 +51,7 @@ export class FieldList extends Array<Field> implements IFieldList {
     this.indexPattern = indexPattern;
     this.shortDotsEnable = shortDotsEnable;
 
-    specs.map(field => this.add(field));
+    specs.map((field) => this.add(field));
   }
 
   getByName = (name: Field['name']) => this.byName.get(name);
@@ -73,7 +73,7 @@ export class FieldList extends Array<Field> implements IFieldList {
 
   update = (field: FieldSpec) => {
     const newField = new Field(this.indexPattern, field, this.shortDotsEnable);
-    const index = this.findIndex(f => f.name === newField.name);
+    const index = this.findIndex((f) => f.name === newField.name);
     this.splice(index, 1, newField);
     this.setByName(newField);
     this.removeByGroup(newField);

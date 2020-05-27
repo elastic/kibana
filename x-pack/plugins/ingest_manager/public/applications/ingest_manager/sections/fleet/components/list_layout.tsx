@@ -31,7 +31,7 @@ const REFRESH_INTERVAL_MS = 5000;
 const Divider = styled.div`
   width: 0;
   height: 100%;
-  border-left: ${props => props.theme.eui.euiBorderThin};
+  border-left: ${(props) => props.theme.eui.euiBorderThin};
   height: 45px;
 `;
 

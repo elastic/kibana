@@ -206,10 +206,8 @@ describe('FieldsBrowser', () => {
     );
 
     expect(
-      wrapper
-        .find('[data-test-subj="field-search"]')
-        .first()
-        .getDOMNode().id === document.activeElement!.id
+      wrapper.find('[data-test-subj="field-search"]').first().getDOMNode().id ===
+        document.activeElement!.id
     ).toBe(true);
   });
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 

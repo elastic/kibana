@@ -73,7 +73,7 @@ export function InnerWorkspacePanel({
     }
 
     const hasData = Object.values(framePublicAPI.datasourceLayers).some(
-      datasource => datasource.getTableSpec().length > 0
+      (datasource) => datasource.getTableSpec().length > 0
     );
 
     const suggestions = getSuggestions({
@@ -88,7 +88,7 @@ export function InnerWorkspacePanel({
       field: dragDropContext.dragging,
     });
 
-    return suggestions.find(s => s.visualizationId === activeVisualizationId) || suggestions[0];
+    return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
   }, [dragDropContext.dragging]);
 
   const [localState, setLocalState] = useState({
@@ -110,7 +110,7 @@ export function InnerWorkspacePanel({
       });
     } catch (e) {
       // Most likely an error in the expression provided by a datasource or visualization
-      setLocalState(s => ({ ...s, expressionBuildError: e.toString() }));
+      setLocalState((s) => ({ ...s, expressionBuildError: e.toString() }));
     }
   }, [
     activeVisualization,
@@ -177,7 +177,7 @@ export function InnerWorkspacePanel({
     useEffect(() => {
       // reset expression error if component attempts to run it again
       if (expression && localState.expressionBuildError) {
-        setLocalState(s => ({
+        setLocalState((s) => ({
           ...s,
           expressionBuildError: undefined,
         }));
@@ -227,7 +227,7 @@ export function InnerWorkspacePanel({
                   <EuiFlexItem className="eui-textBreakAll" grow={false}>
                     <EuiButtonEmpty
                       onClick={() => {
-                        setLocalState(prevState => ({
+                        setLocalState((prevState) => ({
                           ...prevState,
                           expandError: !prevState.expandError,
                         }));

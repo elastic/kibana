@@ -78,7 +78,7 @@ export const eventActionMatches = (eventAction: string | object | undefined | nu
 };
 
 export const netflowRowRenderer: RowRenderer = {
-  isInstance: ecs =>
+  isInstance: (ecs) =>
     eventCategoryMatches(get(EVENT_CATEGORY_FIELD, ecs)) ||
     eventActionMatches(get(EVENT_ACTION_FIELD, ecs)),
   renderRow: ({ data, timelineId }) => (

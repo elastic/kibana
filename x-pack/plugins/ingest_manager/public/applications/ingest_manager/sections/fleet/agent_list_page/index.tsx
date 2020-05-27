@@ -122,7 +122,7 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
             </EuiContextMenuItem>,
 
             <AgentUnenrollProvider>
-              {unenrollAgentsPrompt => (
+              {(unenrollAgentsPrompt) => (
                 <EuiContextMenuItem
                   disabled={!hasWriteCapabilites}
                   icon="cross"
@@ -177,7 +177,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   // Remove a config id from current search
   const removeConfigFilter = (configId: string) => {
-    setSelectedConfigs(selectedConfigs.filter(config => config !== configId));
+    setSelectedConfigs(selectedConfigs.filter((config) => config !== configId));
   };
 
   // Agent enrollment flyout state
@@ -192,7 +192,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       kuery = `(${kuery}) and`;
     }
     kuery = `${kuery} ${AGENT_SAVED_OBJECT_TYPE}.config_id : (${selectedConfigs
-      .map(config => `"${config}"`)
+      .map((config) => `"${config}"`)
       .join(' or ')})`;
   }
 
@@ -202,7 +202,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     }
 
     kuery = selectedStatus
-      .map(status => {
+      .map((status) => {
         switch (status) {
           case 'online':
             return AgentStatusKueryHelper.buildKueryForOnlineAgents();
@@ -269,7 +269,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Configuration',
       }),
       render: (configId: string, agent: Agent) => {
-        const configName = agentConfigs.find(p => p.id === configId)?.name;
+        const configName = agentConfigs.find((p) => p.id === configId)?.name;
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
             <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
@@ -374,7 +374,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     />
   );
 
-  const agentToReassign = agentToReassignId && agents.find(a => a.id === agentToReassignId);
+  const agentToReassign = agentToReassignId && agents.find((a) => a.id === agentToReassignId);
 
   return (
     <>
@@ -399,7 +399,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             <EuiFlexItem grow={6}>
               <SearchBar
                 value={search}
-                onChange={newSearch => {
+                onChange={(newSearch) => {
                   setPagination({
                     ...pagination,
                     currentPage: 1,
@@ -439,7 +439,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                         checked={selectedStatus.includes(status) ? 'on' : undefined}
                         onClick={() => {
                           if (selectedStatus.includes(status)) {
-                            setSelectedStatus([...selectedStatus.filter(s => s !== status)]);
+                            setSelectedStatus([...selectedStatus.filter((s) => s !== status)]);
                           } else {
                             setSelectedStatus([...selectedStatus, status]);
                           }

@@ -22,7 +22,7 @@ export async function fetchClusterState(
           filter: [
             {
               terms: {
-                cluster_uuid: clusters.map(cluster => cluster.clusterUuid),
+                cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
             {

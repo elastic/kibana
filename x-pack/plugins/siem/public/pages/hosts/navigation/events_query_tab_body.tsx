@@ -39,7 +39,7 @@ const DEFAULT_STACK_BY = 'event.action';
 
 export const histogramConfigs: MatrixHisrogramConfigs = {
   defaultStackByOption:
-    eventsStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? eventsStackByOptions[0],
+    eventsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? eventsStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_EVENTS_DATA,
   histogramType: HistogramType.events,
   stackByOptions: eventsStackByOptions,

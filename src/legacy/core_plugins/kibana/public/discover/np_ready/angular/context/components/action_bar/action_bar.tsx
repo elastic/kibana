@@ -131,7 +131,7 @@ export function ActionBar({
                 disabled={isDisabled}
                 min={MIN_CONTEXT_SIZE}
                 max={MAX_CONTEXT_SIZE}
-                onChange={ev => {
+                onChange={(ev) => {
                   setNewDocCount(ev.target.valueAsNumber);
                 }}
                 onBlur={() => {

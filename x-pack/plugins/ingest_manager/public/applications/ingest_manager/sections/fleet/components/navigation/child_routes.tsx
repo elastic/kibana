@@ -23,11 +23,11 @@ export const ChildRoutes: React.FunctionComponent<{
   const Parent = useSwitch ? Switch : React.Fragment;
   return (
     <Parent>
-      {routes.map(route => (
+      {routes.map((route) => (
         <Route
           key={route.path}
           path={route.path}
-          render={routeProps => {
+          render={(routeProps) => {
             const Component = route.component;
             return <Component {...routeProps} routes={route.routes} {...rest} />;
           }}

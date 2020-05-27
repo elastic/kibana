@@ -43,7 +43,7 @@ interface Props {
   totalCount: number;
 }
 
-const searchSizeOptions = [1000, 5000, 10000, 100000, -1].map(v => {
+const searchSizeOptions = [1000, 5000, 10000, 100000, -1].map((v) => {
   return {
     value: String(v),
     inputDisplay:
@@ -150,7 +150,7 @@ export const SearchPanel: FC<Props> = ({
             <EuiSuperSelect
               options={searchSizeOptions}
               valueOfSelected={String(samplerShardSize)}
-              onChange={value => setSamplerShardSize(+value)}
+              onChange={(value) => setSamplerShardSize(+value)}
               aria-label={i18n.translate(
                 'xpack.ml.datavisualizer.searchPanel.sampleSizeAriaLabel',
                 {

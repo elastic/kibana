@@ -24,7 +24,7 @@ export function initManagementSection(
   core: CoreSetup<MlStartDependencies>
 ) {
   const licensing = pluginsSetup.licensing.license$.pipe(take(1));
-  licensing.subscribe(license => {
+  licensing.subscribe((license) => {
     const management = pluginsSetup.management;
     if (
       management !== undefined &&

@@ -21,7 +21,7 @@ const createMockLogger = () => ({
 
 const createMockRequest = () => {
   return {
-    getSavedObjectsClient: once(function() {
+    getSavedObjectsClient: once(function () {
       return {
         get: jest.fn(),
       };

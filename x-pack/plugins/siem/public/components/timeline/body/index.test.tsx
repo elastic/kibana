@@ -76,12 +76,7 @@ describe('Body', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="column-headers"]')
-          .first()
-          .exists()
-      ).toEqual(true);
+      expect(wrapper.find('[data-test-subj="column-headers"]').first().exists()).toEqual(true);
     });
 
     test('it renders the scroll container', () => {
@@ -119,12 +114,7 @@ describe('Body', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="timeline-body"]')
-          .first()
-          .exists()
-      ).toEqual(true);
+      expect(wrapper.find('[data-test-subj="timeline-body"]').first().exists()).toEqual(true);
     });
 
     test('it renders events', () => {
@@ -162,16 +152,11 @@ describe('Body', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="events"]')
-          .first()
-          .exists()
-      ).toEqual(true);
+      expect(wrapper.find('[data-test-subj="events"]').first().exists()).toEqual(true);
     });
 
     test('it renders a tooltip for timestamp', async () => {
-      const headersJustTimestamp = defaultHeaders.filter(h => h.id === '@timestamp');
+      const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
 
       const wrapper = mount(
         <TestProviders>
@@ -226,20 +211,13 @@ describe('Body', () => {
     const dispatchOnPinEvent = jest.fn();
 
     const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
-      wrapper
-        .find('[data-test-subj="add-note"]')
-        .first()
-        .find('button')
-        .simulate('click');
+      wrapper.find('[data-test-subj="add-note"]').first().find('button').simulate('click');
       wrapper.update();
       wrapper
         .find('[data-test-subj="new-note-tabs"] textarea')
         .simulate('change', { target: { value: note } });
       wrapper.update();
-      wrapper
-        .find('button[data-test-subj="add-note"]')
-        .first()
-        .simulate('click');
+      wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
       wrapper.update();
     };
 

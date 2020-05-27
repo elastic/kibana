@@ -15,7 +15,7 @@ import { lookupIndexPattern, appStateToSavedWorkspace } from '../services/persis
 import { settingsSelector } from './advanced_settings';
 import { openSaveModal } from '../services/save_modal';
 
-const waitForPromise = () => new Promise(r => setTimeout(r));
+const waitForPromise = () => new Promise((r) => setTimeout(r));
 
 jest.mock('../services/persistence', () => ({
   lookupIndexPattern: jest.fn(() => ({ id: '123', attributes: { title: 'test-pattern' } })),

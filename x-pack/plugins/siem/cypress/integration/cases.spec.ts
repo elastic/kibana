@@ -85,25 +85,17 @@ describe('Cases', () => {
     const expectedTags = case1.tags.join('');
     cy.get(CASE_DETAILS_PAGE_TITLE).should('have.text', case1.name);
     cy.get(CASE_DETAILS_STATUS).should('have.text', 'open');
-    cy.get(CASE_DETAILS_USER_ACTION)
-      .eq(USER)
-      .should('have.text', case1.reporter);
-    cy.get(CASE_DETAILS_USER_ACTION)
-      .eq(ACTION)
-      .should('have.text', 'added description');
+    cy.get(CASE_DETAILS_USER_ACTION).eq(USER).should('have.text', case1.reporter);
+    cy.get(CASE_DETAILS_USER_ACTION).eq(ACTION).should('have.text', 'added description');
     cy.get(CASE_DETAILS_DESCRIPTION).should(
       'have.text',
       `${case1.description} ${case1.timeline.title}`
     );
-    cy.get(CASE_DETAILS_USERNAMES)
-      .eq(REPORTER)
-      .should('have.text', case1.reporter);
-    cy.get(CASE_DETAILS_USERNAMES)
-      .eq(PARTICIPANTS)
-      .should('have.text', case1.reporter);
+    cy.get(CASE_DETAILS_USERNAMES).eq(REPORTER).should('have.text', case1.reporter);
+    cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('have.text', case1.reporter);
     cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
     cy.get(CASE_DETAILS_PUSH_TO_EXTERNAL_SERVICE_BTN).should('have.attr', 'disabled');
-    cy.get(CASE_DETAILS_TIMELINE_MARKDOWN).then($element => {
+    cy.get(CASE_DETAILS_TIMELINE_MARKDOWN).then(($element) => {
       const timelineLink = $element.prop('href').match(/http(s?):\/\/\w*:\w*(\S*)/)[0];
       openCaseTimeline(timelineLink);
 

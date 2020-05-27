@@ -81,7 +81,7 @@ export function timeBucketsCalcAutoIntervalProvider() {
       return moment.duration(ms, 'ms');
     }
 
-    return function(buckets, duration) {
+    return function (buckets, duration) {
       const interval = pick(buckets, duration);
       if (interval) {
         return moment.duration(interval._data);
@@ -111,7 +111,7 @@ export function timeBucketsCalcAutoIntervalProvider() {
       true
     ),
 
-    lessThan: find(revRoundingRules, function(upperBound, lowerBound, target) {
+    lessThan: find(revRoundingRules, function (upperBound, lowerBound, target) {
       // upperBound - first duration in rule
       // lowerBound - second duration in rule
       // target - target interval in milliseconds. Must not return intervals less than this duration.

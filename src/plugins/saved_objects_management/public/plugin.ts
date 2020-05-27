@@ -97,7 +97,7 @@ export class SavedObjectsManagementPlugin
         defaultMessage: 'Saved Objects',
       }),
       order: 10,
-      mount: async mountParams => {
+      mount: async (mountParams) => {
         const { mountManagementSection } = await import('./management_section');
         return mountManagementSection({
           core,

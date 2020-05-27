@@ -117,7 +117,7 @@ export function initializeInnerAngularModule(
         'discoverPromise',
       ])
       .config(watchMultiDecorator)
-      .directive('icon', reactDirective => reactDirective(EuiIcon))
+      .directive('icon', (reactDirective) => reactDirective(EuiIcon))
       .directive('renderComplete', createRenderCompleteDirective)
       .service('debounce', ['$timeout', DebounceProviderTimeout]);
   }
@@ -139,7 +139,7 @@ export function initializeInnerAngularModule(
     ])
     .config(watchMultiDecorator)
     .run(registerListenEventListener)
-    .directive('icon', reactDirective => reactDirective(EuiIcon))
+    .directive('icon', (reactDirective) => reactDirective(EuiIcon))
     .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
     .directive('collapsibleSidebar', CollapsibleSidebarProvider)
     .directive('fixedScroll', FixedScrollProvider)
@@ -178,8 +178,8 @@ function createLocalStorageModule() {
     .service('sessionStorage', createLocalStorageService('sessionStorage'));
 }
 
-const createLocalStorageService = function(type: string) {
-  return function($window: any) {
+const createLocalStorageService = function (type: string) {
+  return function ($window: any) {
     return new Storage($window[type]);
   };
 };

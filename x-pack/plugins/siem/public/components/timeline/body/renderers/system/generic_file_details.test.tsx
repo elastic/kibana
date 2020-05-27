@@ -1170,7 +1170,7 @@ describe('SystemGenericFileDetails', () => {
       expect(wrapper.text()).toEqual('[fileName]in[filePath]an unknown process');
     });
 
-    ['file_create_event', 'created', 'file_delete_event', 'deleted'].forEach(eventAction => {
+    ['file_create_event', 'created', 'file_delete_event', 'deleted'].forEach((eventAction) => {
       test(`it renders the text "via" when eventAction is ${eventAction}`, () => {
         const wrapper = mount(
           <TestProviders>

@@ -39,7 +39,7 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       throw new Error('Supported schemes should be specified');
     }
     this.supportedSchemes = new Set(
-      [...httpOptions.supportedSchemes].map(scheme => scheme.toLowerCase())
+      [...httpOptions.supportedSchemes].map((scheme) => scheme.toLowerCase())
     );
   }
 

@@ -14,7 +14,7 @@ import { columnRenderers } from '../renderers';
 import { DataDrivenColumns } from '.';
 
 describe('Columns', () => {
-  const headersSansTimestamp = defaultHeaders.filter(h => h.id !== '@timestamp');
+  const headersSansTimestamp = defaultHeaders.filter((h) => h.id !== '@timestamp');
 
   test('it renders the expected columns', () => {
     const wrapper = shallow(

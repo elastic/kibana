@@ -29,7 +29,7 @@ export class SearchProfilerServerPlugin implements Plugin {
       log: this.log,
     });
 
-    licensing.license$.subscribe(license => {
+    licensing.license$.subscribe((license) => {
       const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
       const hasRequiredLicense = state === 'valid';
       if (hasRequiredLicense) {

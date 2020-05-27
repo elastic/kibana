@@ -259,7 +259,7 @@ export class AlertingPlugin {
     savedObjects: SavedObjectsServiceStart,
     elasticsearch: ElasticsearchServiceStart
   ): (request: KibanaRequest) => Services {
-    return request => ({
+    return (request) => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: savedObjects.getScopedClient(request),
       getScopedCallCluster(clusterClient: IClusterClient) {

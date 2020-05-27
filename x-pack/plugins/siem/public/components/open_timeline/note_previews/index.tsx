@@ -12,7 +12,7 @@ import { NotePreview } from './note_preview';
 import { TimelineResultNote } from '../types';
 
 const NotePreviewsContainer = styled.section`
-  padding: ${props =>
+  padding: ${(props) =>
     `${props.theme.eui.euiSizeS} 0 ${props.theme.eui.euiSizeS} ${props.theme.eui.euiSizeXXL}`};
 `;
 

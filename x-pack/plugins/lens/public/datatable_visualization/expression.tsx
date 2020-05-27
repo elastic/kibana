@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -16,15 +16,15 @@ import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../../src/plugins/expressions/public';
-import { VisualizationContainer } from '../visualization_container';
 import { ValueClickTriggerContext } from '../../../../../src/plugins/embeddable/public';
+import { VisualizationContainer } from '../visualization_container';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { getExecuteTriggerActions } from '../services';
+import { EmptyPlaceholder } from '../shared_components';
 export interface DatatableColumns {
   columnIds: string[];
 }
-
 interface Args {
   title: string;
   columns: DatatableColumns & { type: 'lens_datatable_columns' };
@@ -152,32 +152,53 @@ export function DatatableComponent(props: DatatableRenderProps) {
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  firstTable.columns.forEach(column => {
+  firstTable.columns.forEach((column) => {
     formatters[column.id] = props.formatFactory(column.formatHint);
   });
 
-  const handleFilterClick = (field: string, value: unknown, colIndex: number, negate = false) => {
-    const col = firstTable.columns[colIndex];
-    const isDateHistogram = col.meta?.type === 'date_histogram';
-    const timeFieldName = negate && isDateHistogram ? undefined : col?.meta?.aggConfigParams?.field;
-    const rowIndex = firstTable.rows.findIndex(row => row[field] === value);
+  const handleFilterClick = useMemo(
+    () => (field: string, value: unknown, colIndex: number, negate: boolean = false) => {
+      const col = firstTable.columns[colIndex];
+      const isDateHistogram = col.meta?.type === 'date_histogram';
+      const timeFieldName =
+        negate && isDateHistogram ? undefined : col?.meta?.aggConfigParams?.field;
+      const rowIndex = firstTable.rows.findIndex((row) => row[field] === value);
 
-    const context: ValueClickTriggerContext = {
-      data: {
-        negate,
-        data: [
-          {
-            row: rowIndex,
-            column: colIndex,
-            value,
-            table: firstTable,
-          },
-        ],
-      },
-      timeFieldName,
-    };
-    props.executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
-  };
+      const context: ValueClickTriggerContext = {
+        data: {
+          negate,
+          data: [
+            {
+              row: rowIndex,
+              column: colIndex,
+              value,
+              table: firstTable,
+            },
+          ],
+        },
+        timeFieldName,
+      };
+      props.executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
+    },
+    [firstTable]
+  );
+
+  const bucketColumns = firstTable.columns
+    .filter((col) => {
+      return col?.meta?.type && props.getType(col.meta.type)?.type === 'buckets';
+    })
+    .map((col) => col.id);
+
+  const isEmpty =
+    firstTable.rows.length === 0 ||
+    (bucketColumns.length &&
+      firstTable.rows.every((row) =>
+        bucketColumns.every((col) => typeof row[col] === 'undefined')
+      ));
+
+  if (isEmpty) {
+    return <EmptyPlaceholder icon="visTable" />;
+  }
 
   return (
     <VisualizationContainer>
@@ -186,11 +207,10 @@ export function DatatableComponent(props: DatatableRenderProps) {
         data-test-subj="lnsDataTable"
         tableLayout="auto"
         columns={props.args.columns.columnIds
-          .map(field => {
-            const col = firstTable.columns.find(c => c.id === field);
-            const colIndex = firstTable.columns.findIndex(c => c.id === field);
-
-            const filterable = col?.meta?.type && props.getType(col.meta.type)?.type === 'buckets';
+          .map((field) => {
+            const col = firstTable.columns.find((c) => c.id === field);
+            const filterable = bucketColumns.includes(field);
+            const colIndex = firstTable.columns.findIndex((c) => c.id === field);
             return {
               field,
               name: (col && col.name) || '',

@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('get_module', function() {
+  describe('get_module', function () {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
     });

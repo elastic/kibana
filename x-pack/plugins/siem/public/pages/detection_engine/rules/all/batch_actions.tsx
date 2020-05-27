@@ -40,14 +40,14 @@ export const getBatchItems = ({
   selectedRuleIds,
 }: GetBatchItems) => {
   const containsEnabled = selectedRuleIds.some(
-    id => rules.find(r => r.id === id)?.enabled ?? false
+    (id) => rules.find((r) => r.id === id)?.enabled ?? false
   );
   const containsDisabled = selectedRuleIds.some(
-    id => !rules.find(r => r.id === id)?.enabled ?? false
+    (id) => !rules.find((r) => r.id === id)?.enabled ?? false
   );
-  const containsLoading = selectedRuleIds.some(id => loadingRuleIds.includes(id));
+  const containsLoading = selectedRuleIds.some((id) => loadingRuleIds.includes(id));
   const containsImmutable = selectedRuleIds.some(
-    id => rules.find(r => r.id === id)?.immutable ?? false
+    (id) => rules.find((r) => r.id === id)?.immutable ?? false
   );
 
   return [
@@ -58,11 +58,11 @@ export const getBatchItems = ({
       onClick={async () => {
         closePopover();
         const deactivatedIds = selectedRuleIds.filter(
-          id => !rules.find(r => r.id === id)?.enabled ?? false
+          (id) => !rules.find((r) => r.id === id)?.enabled ?? false
         );
 
         const deactivatedIdsNoML = deactivatedIds.filter(
-          id => rules.find(r => r.id === id)?.type !== 'machine_learning' ?? false
+          (id) => rules.find((r) => r.id === id)?.type !== 'machine_learning' ?? false
         );
 
         const mlRuleCount = deactivatedIds.length - deactivatedIdsNoML.length;
@@ -87,7 +87,7 @@ export const getBatchItems = ({
       onClick={async () => {
         closePopover();
         const activatedIds = selectedRuleIds.filter(
-          id => rules.find(r => r.id === id)?.enabled ?? false
+          (id) => rules.find((r) => r.id === id)?.enabled ?? false
         );
         await enableRulesAction(activatedIds, false, dispatch, dispatchToaster);
       }}
@@ -101,7 +101,7 @@ export const getBatchItems = ({
       onClick={() => {
         closePopover();
         exportRulesAction(
-          rules.filter(r => selectedRuleIds.includes(r.id)).map(r => r.rule_id),
+          rules.filter((r) => selectedRuleIds.includes(r.id)).map((r) => r.rule_id),
           dispatch
         );
       }}
@@ -115,7 +115,7 @@ export const getBatchItems = ({
       onClick={async () => {
         closePopover();
         await duplicateRulesAction(
-          rules.filter(r => selectedRuleIds.includes(r.id)),
+          rules.filter((r) => selectedRuleIds.includes(r.id)),
           selectedRuleIds,
           dispatch,
           dispatchToaster

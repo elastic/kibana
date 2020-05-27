@@ -90,7 +90,7 @@ export function createUrlOverrides(overrides: InputOverrides, originalSettings: 
         value = '';
       }
 
-      const snakeCaseO = o.replace(/([A-Z])/g, $1 => `_${$1.toLowerCase()}`);
+      const snakeCaseO = o.replace(/([A-Z])/g, ($1) => `_${$1.toLowerCase()}`);
       formattedOverrides[snakeCaseO] = value;
     }
   }

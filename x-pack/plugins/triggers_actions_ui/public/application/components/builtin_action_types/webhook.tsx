@@ -164,7 +164,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
   const hasHeaderErrors = headerErrors.keyHeader.length > 0 || headerErrors.valueHeader.length > 0;
 
   function addHeader() {
-    if (headers && !!Object.keys(headers).find(key => key === httpHeaderKey)) {
+    if (headers && !!Object.keys(headers).find((key) => key === httpHeaderKey)) {
       return;
     }
     const updatedHeaders = headers
@@ -184,7 +184,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
 
   function removeHeader(keyToRemove: string) {
     const updatedHeaders = Object.keys(headers)
-      .filter(key => key !== keyToRemove)
+      .filter((key) => key !== keyToRemove)
       .reduce((headerToRemove: Record<string, string>, key: string) => {
         headerToRemove[key] = headers[key];
         return headerToRemove;
@@ -225,7 +225,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                 name="keyHeader"
                 value={httpHeaderKey}
                 data-test-subj="webhookHeadersKeyInput"
-                onChange={e => {
+                onChange={(e) => {
                   setHttpHeaderKey(e.target.value);
                 }}
               />
@@ -250,7 +250,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                 name="valueHeader"
                 value={httpHeaderValue}
                 data-test-subj="webhookHeadersValueInput"
-                onChange={e => {
+                onChange={(e) => {
                   setHttpHeaderValue(e.target.value);
                 }}
               />
@@ -318,8 +318,8 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               name="method"
               value={method || 'post'}
               data-test-subj="webhookMethodSelect"
-              options={HTTP_VERBS.map(verb => ({ text: verb.toUpperCase(), value: verb }))}
-              onChange={e => {
+              options={HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb }))}
+              onChange={(e) => {
                 editActionConfig('method', e.target.value);
               }}
             />
@@ -344,7 +344,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               fullWidth
               value={url || ''}
               data-test-subj="webhookUrlText"
-              onChange={e => {
+              onChange={(e) => {
                 editActionConfig('url', e.target.value);
               }}
               onBlur={() => {
@@ -376,7 +376,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               name="user"
               value={user || ''}
               data-test-subj="webhookUserInput"
-              onChange={e => {
+              onChange={(e) => {
                 editActionSecrets('user', e.target.value);
               }}
               onBlur={() => {
@@ -406,7 +406,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               isInvalid={errors.password.length > 0 && password !== undefined}
               value={password || ''}
               data-test-subj="webhookPasswordInput"
-              onChange={e => {
+              onChange={(e) => {
                 editActionSecrets('password', e.target.value);
               }}
               onBlur={() => {

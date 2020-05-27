@@ -18,36 +18,26 @@ import {
 export const setEndDate = (date: string) => {
   cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON).click({ force: true });
 
-  cy.get(DATE_PICKER_ABSOLUTE_TAB)
-    .first()
-    .click({ force: true });
+  cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click({ force: true });
 
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT)
-    .clear()
-    .type(date);
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).clear().type(date);
 };
 
 export const setStartDate = (date: string) => {
   cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).click({ force: true });
 
-  cy.get(DATE_PICKER_ABSOLUTE_TAB)
-    .first()
-    .click({ force: true });
+  cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click({ force: true });
 
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT)
-    .clear()
-    .type(date);
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).clear().type(date);
 };
 
 export const setTimelineEndDate = (date: string) => {
   cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE).click({ force: true });
 
-  cy.get(DATE_PICKER_ABSOLUTE_TAB)
-    .first()
-    .click({ force: true });
+  cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click({ force: true });
 
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).click({ force: true });
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).then($el => {
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).then(($el) => {
     // @ts-ignore
     if (Cypress.dom.isAttached($el)) {
       cy.wrap($el).click({ force: true });
@@ -61,12 +51,10 @@ export const setTimelineStartDate = (date: string) => {
     force: true,
   });
 
-  cy.get(DATE_PICKER_ABSOLUTE_TAB)
-    .first()
-    .click({ force: true });
+  cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click({ force: true });
 
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).click({ force: true });
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).then($el => {
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).then(($el) => {
     // @ts-ignore
     if (Cypress.dom.isAttached($el)) {
       cy.wrap($el).click({ force: true });

@@ -46,7 +46,7 @@ export const authorizedUserPreRoutingFactory = function authorizedUserPreRouting
     }
 
     const authorizedRoles = [superuserRole, ...(config.get('roles', 'allow') as string[])];
-    if (!user.roles.find(role => authorizedRoles.includes(role))) {
+    if (!user.roles.find((role) => authorizedRoles.includes(role))) {
       return Boom.forbidden(`Sorry, you don't have access to Reporting`);
     }
 

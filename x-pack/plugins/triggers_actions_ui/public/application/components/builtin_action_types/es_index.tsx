@@ -154,7 +154,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           }
           onChange={async (selected: EuiComboBoxOptionOption[]) => {
             editActionConfig('index', selected.length > 0 ? selected[0].value : '');
-            const indices = selected.map(s => s.value as string);
+            const indices = selected.map((s) => s.value as string);
 
             // reset time field and expression fields if indices are deleted
             if (indices.length === 0) {
@@ -166,7 +166,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
 
             setTimeFieldOptions([firstFieldOption, ...timeFields]);
           }}
-          onSearchChange={async search => {
+          onSearchChange={async (search) => {
             setIsIndiciesLoading(true);
             setIndexOptions(await getIndexOptions(http!, search, indexPatterns));
             setIsIndiciesLoading(false);
@@ -182,7 +182,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
       <EuiSwitch
         data-test-subj="indexRefreshCheckbox"
         checked={refresh || false}
-        onChange={e => {
+        onChange={(e) => {
           editActionConfig('refresh', e.target.checked);
         }}
         label={
@@ -255,7 +255,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               name="executionTimeField"
               data-test-subj="executionTimeFieldSelect"
               value={executionTimeField ?? ''}
-              onChange={e => {
+              onChange={(e) => {
                 editActionConfig('executionTimeField', nullableString(e.target.value));
               }}
               onBlur={() => {
