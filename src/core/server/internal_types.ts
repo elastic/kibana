@@ -29,7 +29,7 @@ import {
   InternalSavedObjectsServiceStart,
 } from './saved_objects';
 import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
-import { UuidServiceSetup } from './uuid';
+import { UuidServiceSetup, UuidServiceStart } from './uuid';
 import { InternalMetricsServiceSetup } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesSetup } from './http_resources';
@@ -58,6 +58,7 @@ export interface InternalCoreStart {
   elasticsearch: ElasticsearchServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
+  uuid: UuidServiceStart;
 }
 
 /**

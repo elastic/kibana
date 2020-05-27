@@ -201,12 +201,14 @@ export class Server {
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
     const elasticsearchStart = await this.elasticsearch.start();
+    const uuidStart = await this.uuid.start();
 
     this.coreStart = {
       capabilities: capabilitiesStart,
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
+      uuid: uuidStart,
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);

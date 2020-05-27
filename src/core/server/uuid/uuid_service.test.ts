@@ -75,4 +75,12 @@ describe('UuidService', () => {
       expect(setup.getInstanceUuid()).toEqual('SOME_UUID');
     });
   });
+  describe('#start()', () => {
+    it('returns the uuid resolved from resolveInstanceUuid', async () => {
+      const service = new UuidService(coreContext);
+      await service.setup();
+      const start = await service.start();
+      expect(start.getInstanceUuid()).toEqual('SOME_UUID');
+    });
+  });
 });

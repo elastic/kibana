@@ -59,7 +59,7 @@ import {
   SavedObjectsServiceStart,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { UuidServiceSetup } from './uuid';
+import { UuidServiceSetup, UuidServiceStart } from './uuid';
 import { MetricsServiceSetup } from './metrics';
 import { StatusServiceSetup } from './status';
 
@@ -425,6 +425,8 @@ export interface CoreStart {
   savedObjects: SavedObjectsServiceStart;
   /** {@link UiSettingsServiceStart} */
   uiSettings: UiSettingsServiceStart;
+  /** {@link UuidServiceStart} */
+  uuid: UuidServiceStart;
 }
 
 export {
@@ -436,6 +438,7 @@ export {
   PluginsServiceStart,
   PluginOpaqueId,
   UuidServiceSetup,
+  UuidServiceStart,
 };
 
 /**

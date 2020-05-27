@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UuidService, UuidServiceSetup } from './uuid_service';
+import { UuidService, UuidServiceSetup, UuidServiceStart } from './uuid_service';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<UuidServiceSetup> = {
@@ -26,10 +26,18 @@ const createSetupContractMock = () => {
   return setupContract;
 };
 
+const createStartContractMock = () => {
+  const startContract: jest.Mocked<UuidServiceStart> = {
+    getInstanceUuid: jest.fn().mockImplementation(() => 'uuid'),
+  };
+  return startContract;
+};
+
 type UuidServiceContract = PublicMethodsOf<UuidService>;
 const createMock = () => {
   const mocked: jest.Mocked<UuidServiceContract> = {
     setup: jest.fn(),
+    start: jest.fn(),
   };
   mocked.setup.mockResolvedValue(createSetupContractMock());
   return mocked;
@@ -38,4 +46,5 @@ const createMock = () => {
 export const uuidServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };

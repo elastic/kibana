@@ -34,6 +34,18 @@ export interface UuidServiceSetup {
   getInstanceUuid(): string;
 }
 
+/**
+ * APIs to access the application's instance uuid.
+ *
+ * @public
+ */
+export interface UuidServiceStart {
+  /**
+   * Retrieve the Kibana instance uuid.
+   */
+  getInstanceUuid(): string;
+}
+
 /** @internal */
 export class UuidService {
   private readonly log: Logger;
@@ -54,6 +66,12 @@ export class UuidService {
       logger: this.log,
     });
 
+    return {
+      getInstanceUuid: () => this.uuid,
+    };
+  }
+
+  public start() {
     return {
       getInstanceUuid: () => this.uuid,
     };

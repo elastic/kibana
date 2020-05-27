@@ -223,5 +223,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,
     },
+    uuid: deps.uuid,
   };
 }

@@ -160,6 +160,7 @@ function createCoreStartMock() {
     elasticsearch: elasticsearchServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    uuid: uuidServiceMock.createStartContract(),
   };
 
   return mock;
@@ -188,6 +189,7 @@ function createInternalCoreStartMock() {
     elasticsearch: elasticsearchServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    uuid: uuidServiceMock.createStartContract(),
   };
   return startDeps;
 }
