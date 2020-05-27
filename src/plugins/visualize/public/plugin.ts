@@ -42,12 +42,14 @@ import { setServices, VisualizeKibanaServices } from './kibana_services';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
+import { EmbeddableStart } from '../../embeddable/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
   navigation: NavigationStart;
   share?: SharePluginStart;
   visualizations: VisualizationsStart;
+  embeddable: EmbeddableStart;
   kibanaLegacy: KibanaLegacyStart;
   savedObjects: SavedObjectsStart;
 }
@@ -127,6 +129,7 @@ export class VisualizePlugin
           toastNotifications: coreStart.notifications.toasts,
           visualizeCapabilities: coreStart.application.capabilities.visualize,
           visualizations: pluginsStart.visualizations,
+          embeddable: pluginsStart.embeddable,
           I18nContext: coreStart.i18n.Context,
           setActiveUrl,
           createVisEmbeddableFromObject:

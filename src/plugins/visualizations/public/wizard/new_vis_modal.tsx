@@ -28,6 +28,7 @@ import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
 import { TypesStart, VisType, VisTypeAlias } from '../vis_types';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
+import { EmbeddableStart } from '../../../embeddable/public';
 
 interface TypeSelectionProps {
   isOpen: boolean;
@@ -39,8 +40,9 @@ interface TypeSelectionProps {
   savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionSetup;
   application: ApplicationStart;
-  redirectState?: unknown;
   outsideVisualizeApp?: boolean;
+  stateTransfer: EmbeddableStart['stateTransfer'];
+  originatingApp?: string;
 }
 
 interface TypeSelectionState {
@@ -148,9 +150,9 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     if ('aliasPath' in visType) {
       params = visType.aliasPath;
       this.props.onClose();
-      this.props.application.navigateToApp(visType.aliasApp, {
+      this.props.stateTransfer.outgoingOriginatingApp(visType.aliasApp, {
         path: params,
-        state: this.props.redirectState,
+        state: { originatingApp: this.props.originatingApp || '' },
       });
       return;
     }
@@ -164,9 +166,9 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
     this.props.onClose();
     if (this.props.outsideVisualizeApp) {
-      this.props.application.navigateToApp('visualize', {
+      this.props.stateTransfer.outgoingOriginatingApp('visualize', {
         path: `#${basePath}${params.join('&')}`,
-        state: this.props.redirectState,
+        state: { originatingApp: this.props.originatingApp || '' },
       });
     } else {
       location.assign(this.props.addBasePath(`${baseUrl}${params.join('&')}`));

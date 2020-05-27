@@ -48,7 +48,7 @@ interface VisualizationAttributes extends SavedObjectAttributes {
 }
 
 export interface VisualizeEmbeddableFactoryDeps {
-  start: StartServicesGetter<Pick<VisualizationsStartDeps, 'inspector'>>;
+  start: StartServicesGetter<Pick<VisualizationsStartDeps, 'inspector' | 'embeddable'>>;
 }
 
 export class VisualizeEmbeddableFactory
@@ -101,15 +101,7 @@ export class VisualizeEmbeddableFactory
   }
 
   public async getCurrentAppId() {
-    let currentAppId = await this.deps
-      .start()
-      .core.application.currentAppId$.pipe(first())
-      .toPromise();
-    // TODO: Remove this after https://github.com/elastic/kibana/pull/63443
-    if (currentAppId === 'kibana') {
-      currentAppId += `:${window.location.hash.split(/[\/\?]/)[1]}`;
-    }
-    return currentAppId;
+    return await this.deps.start().core.application.currentAppId$.pipe(first()).toPromise();
   }
 
   public async createFromSavedObject(
@@ -134,9 +126,8 @@ export class VisualizeEmbeddableFactory
   public async create() {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
-    const originatingAppParam = await this.getCurrentAppId();
     showNewVisModal({
-      redirectState: { embeddableOriginatingApp: originatingAppParam },
+      originatingApp: await this.getCurrentAppId(),
       outsideVisualizeApp: true,
     });
     return undefined;

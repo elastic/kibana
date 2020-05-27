@@ -24,7 +24,7 @@ import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
-import { IEmbeddable } from '../..';
+import { IEmbeddable, EmbeddableOriginatingAppState } from '../..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
@@ -35,7 +35,7 @@ interface ActionContext {
 interface NavigationContext {
   app: string;
   path: string;
-  state?: unknown;
+  state?: EmbeddableOriginatingAppState;
 }
 
 export class EditPanelAction implements Action<ActionContext> {
@@ -46,7 +46,8 @@ export class EditPanelAction implements Action<ActionContext> {
 
   constructor(
     private readonly getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'],
-    private readonly application: ApplicationStart
+    private readonly application: ApplicationStart,
+    private readonly stateTransfer?: EmbeddableStart['stateTransfer']
   ) {
     if (this.application?.currentAppId$) {
       this.application.currentAppId$
@@ -85,12 +86,18 @@ export class EditPanelAction implements Action<ActionContext> {
 
   public async execute(context: ActionContext) {
     const appTarget = this.getAppTarget(context);
-
     if (appTarget) {
-      await this.application.navigateToApp(appTarget.app, {
-        path: appTarget.path,
-        state: appTarget.state,
-      });
+      if (this.stateTransfer && appTarget.state) {
+        await this.stateTransfer.outgoingOriginatingApp(appTarget.app, {
+          path: appTarget.path,
+          state: appTarget.state,
+        });
+      } else {
+        await this.application.navigateToApp(appTarget.app, {
+          path: appTarget.path,
+          state: appTarget.state,
+        });
+      }
       return;
     }
 
@@ -106,7 +113,7 @@ export class EditPanelAction implements Action<ActionContext> {
     const path = embeddable ? embeddable.getOutput().editPath : undefined;
     if (app && path) {
       if (this.currentAppId) {
-        const state = { embeddableOriginatingApp: this.currentAppId };
+        const state = { originatingApp: this.currentAppId };
         return { app, path, state };
       }
       return { app, path };

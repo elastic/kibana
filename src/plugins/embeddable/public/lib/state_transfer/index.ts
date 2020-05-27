@@ -17,11 +17,8 @@
  * under the License.
  */
 
-export * from './errors';
-export * from './embeddables';
-export * from './types';
-export * from './actions';
-export * from './triggers';
-export * from './containers';
-export * from './panel';
-export * from './state_transfer';
+export {
+  EmbeddableStateTransfer,
+  EmbeddableOriginatingAppState,
+  EmbeddablePackageState,
+} from './embeddable_state_transfer';

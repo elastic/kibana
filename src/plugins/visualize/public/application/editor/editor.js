@@ -71,6 +71,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     I18nContext,
     setActiveUrl,
     visualizations,
+    embeddable,
     scopedHistory,
   } = getServices();
 
@@ -110,11 +111,8 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
   };
 
-  const { embeddableOriginatingApp } = scopedHistory().location.state || {};
-  if (embeddableOriginatingApp) {
-    delete scopedHistory().location.state.embeddableOriginatingApp;
-  }
-  $scope.getOriginatingApp = () => embeddableOriginatingApp;
+  const { originatingApp } = embeddable.stateTransfer.incomingOriginatingApp(scopedHistory()) || {};
+  $scope.getOriginatingApp = () => originatingApp;
 
   const visStateToEditorState = () => {
     const savedVisState = visualizations.convertFromSerializedVis(vis.serialize());

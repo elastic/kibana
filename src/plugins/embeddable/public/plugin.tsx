@@ -32,6 +32,7 @@ import {
   EmbeddablePanel,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
+import { EmbeddableStateTransfer } from './lib/state_transfer';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -60,6 +61,7 @@ export interface EmbeddableStart {
   ) => EmbeddableFactory<I, O, E> | undefined;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
   EmbeddablePanel: React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;
+  stateTransfer: EmbeddableStateTransfer;
 }
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
@@ -69,6 +71,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   > = new Map();
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private customEmbeddableFactoryProvider?: EmbeddableFactoryProvider;
+  private stateTransfer: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -100,9 +103,11 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
           : defaultEmbeddableFactoryProvider(def)
       );
     });
+    this.stateTransfer = new EmbeddableStateTransfer(core);
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
+      stateTransfer: this.stateTransfer,
       EmbeddablePanel: ({
         embeddable,
         hideHeader,
@@ -115,6 +120,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
           embeddable={embeddable}
           getActions={uiActions.getTriggerCompatibleActions}
           getEmbeddableFactory={this.getEmbeddableFactory}
+          stateTransfer={this.stateTransfer}
           getAllEmbeddableFactories={this.getEmbeddableFactories}
           overlays={core.overlays}
           notifications={core.notifications}

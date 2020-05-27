@@ -186,7 +186,11 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.options}>
-          <DashboardViewport renderEmpty={this.renderEmpty} container={this} />
+          <DashboardViewport
+            renderEmpty={this.renderEmpty}
+            container={this}
+            PanelComponent={this.options.embeddable.EmbeddablePanel}
+          />
         </KibanaContextProvider>
       </I18nProvider>,
       dom

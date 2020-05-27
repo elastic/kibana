@@ -69,6 +69,9 @@ export {
   isSavedObjectEmbeddableInput,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
+  EmbeddableStateTransfer,
+  EmbeddableOriginatingAppState,
+  EmbeddablePackageState,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {
