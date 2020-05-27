@@ -45,6 +45,7 @@ export function savedSearch(): ExpressionFunction<'savedSearch', Filter | null, 
           ...buildEmbeddableFilters(filters),
         },
         embeddableType: EmbeddableTypes.search,
+        generatedAt: Date.now(),
       };
     },
   };

@@ -50,6 +50,7 @@ export function savedVisualization(): ExpressionFunction<
           ...buildEmbeddableFilters(filters),
         },
         embeddableType: EmbeddableTypes.visualization,
+        generatedAt: Date.now(),
       };
     },
   };
