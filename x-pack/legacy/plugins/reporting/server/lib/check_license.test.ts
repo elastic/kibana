@@ -8,7 +8,7 @@ import { checkLicense } from './check_license';
 import { ILicense } from '../../../../../plugins/licensing/server';
 import { ExportTypesRegistry } from './export_types_registry';
 
-describe('check_license', function() {
+describe('check_license', () => {
   let exportTypesRegistry: ExportTypesRegistry;
   let license: ILicense;
 
