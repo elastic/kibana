@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Root } from 'joi';
 import { resolve } from 'path';
 import { Server } from 'src/legacy/server/kbn_server';
 import { KibanaRequest, LegacyRequest } from '../../../../src/core/server';
@@ -32,12 +33,20 @@ export const security = (kibana: Record<string, any>) =>
     id: 'security',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'xpack_main'],
-
+    configPrefix: 'xpack.security',
     uiExports: {
       hacks: ['plugins/security/hacks/legacy'],
       injectDefaultVars: (server: Server) => {
         return { enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled') };
       },
+    },
+
+    config(Joi: Root) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      })
+        .unknown()
+        .default();
     },
 
     async postInit(server: Server) {
