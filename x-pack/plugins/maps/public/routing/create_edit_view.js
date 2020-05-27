@@ -42,6 +42,7 @@ import { getInitialTimeFilters } from '../angular/get_initial_time_filters';
 import { getInitialRefreshConfig } from '../angular/get_initial_refresh_config';
 import { getInitialQuery } from '../angular/get_initial_query';
 import { getMapsSavedObjectLoader } from '../angular/services/gis_map_saved_object_loader';
+import { MapsTopNavMenu } from './top_nav_menu';
 
 export const MapsCreateEditView = withRouter(
   class extends React.Component {
@@ -55,6 +56,7 @@ export const MapsCreateEditView = withRouter(
         filters: [],
         showSaveQuery: getMapsCapabilities().saveQuery,
         layerList: [],
+        initialized: false,
       };
     }
 
@@ -215,21 +217,20 @@ export const MapsCreateEditView = withRouter(
         savedMap.layerListJSON,
         this.getInitialLayersFromUrlParam()
       );
-      // Update state
-      this.state = {
-        ...this.state,
+      return {
         ...savedMapFilters,
         initialLayerListConfig: copyPersistentState(layerList),
         layerList,
+        savedMap,
       };
-      return savedMap;
     }
 
     async initMap(savedMapId) {
       let unsubscribe;
-      const savedMap = await this.getSavedMap(savedMapId);
+      const savedMapAndLayerSettings = await this.getSavedMap(savedMapId);
       const { globalState } = this.props;
-      const { store, refreshConfig, layerList } = this.state;
+      const { store } = this.state;
+      const { savedMap, refreshConfig, layerList } = savedMapAndLayerSettings;
 
       // clear old UI state
       store.dispatch(setSelectedLayer(null));
@@ -278,14 +279,41 @@ export const MapsCreateEditView = withRouter(
         ...savedObjectFilters,
       ];
       await this.onQueryChange({ filters: initialFilters });
+      this.setState({
+        ...savedMapAndLayerSettings,
+        initialized: true,
+      });
     }
 
     render() {
-      const { store } = this.state;
+      const { initialized, store, query, time, refreshConfig, savedMap } = this.state;
       return (
-        <Provider store={store}>
-          <GisMap addFilters={null} />
-        </Provider>
+        <div id="maps-plugin" ng-class="{mapFullScreen: isFullScreen}">
+          {initialized ? (
+            <MapsTopNavMenu
+              savedMap={savedMap}
+              store={store}
+              query={query}
+              onQueryChange={this.onQueryChange}
+              time={time}
+              refreshConfig={refreshConfig}
+              setRefreshConfig={(newConfig, callback) => {
+                this.setState(
+                  {
+                    refreshConfig: newConfig,
+                  },
+                  callback
+                );
+              }}
+            />
+          ) : null}
+          <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
+          <div id="react-maps-root">
+            <Provider store={store}>
+              <GisMap addFilters={null} />
+            </Provider>
+          </div>
+        </div>
       );
     }
   }
