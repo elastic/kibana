@@ -128,7 +128,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
                 <EuiSelect
                   options={schemeOptions}
                   value={selectedScheme}
-                  onChange={e => selectScheme(e.target.value)}
+                  onChange={(e) => selectScheme(e.target.value)}
                   aria-controls="readonlyRepositoryUrlHelp"
                   data-test-subj="schemeSelect"
                 />
@@ -151,7 +151,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
                 <EuiFieldText
                   defaultValue={url ? url.split('://')[1] : ''}
                   fullWidth
-                  onChange={e => {
+                  onChange={(e) => {
                     updateRepositorySettings({
                       url: `${selectedScheme}://${e.target.value}`,
                     });

@@ -15,6 +15,6 @@ export class FeaturePrivilegeAppBuilder extends BaseFeaturePrivilegeBuilder {
       return [];
     }
 
-    return appIds.map(appId => this.actions.app.get(appId));
+    return appIds.map((appId) => this.actions.app.get(appId));
   }
 }

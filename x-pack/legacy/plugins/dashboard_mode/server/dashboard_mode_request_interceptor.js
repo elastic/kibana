@@ -40,10 +40,10 @@ export function createDashboardModeRequestInterceptor() {
         return h.continue;
       }
 
-      const isDashboardOnlyModeUser = user.roles.find(role =>
+      const isDashboardOnlyModeUser = user.roles.find((role) =>
         dashboardOnlyModeRoles.includes(role)
       );
-      const isSuperUser = user.roles.find(role => role === superuserRole);
+      const isSuperUser = user.roles.find((role) => role === superuserRole);
 
       const enforceDashboardOnlyMode = isDashboardOnlyModeUser && !isSuperUser;
       if (enforceDashboardOnlyMode) {
@@ -57,10 +57,7 @@ export function createDashboardModeRequestInterceptor() {
           // If the user is in "Dashboard only mode" they should only be allowed to see
           // the dashboard app and none others. If the kibana app is requested, this might be a old
           // url we will migrate on the fly.
-          return h
-            .redirect(url)
-            .permanent()
-            .takeover();
+          return h.redirect(url).permanent().takeover();
         }
         if (url.path.startsWith('/app/dashboard_mode')) {
           // let through requests to the dashboard_mode app

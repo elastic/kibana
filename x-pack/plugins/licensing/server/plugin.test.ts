@@ -14,6 +14,7 @@ import {
   elasticsearchServiceMock,
   loggingServiceMock,
 } from '../../../../src/core/server/mocks';
+import { IClusterClient } from '../../../../src/core/server/';
 
 function buildRawLicense(options: Partial<RawLicense> = {}): RawLicense {
   const defaultRawLicense: RawLicense = {
@@ -26,10 +27,24 @@ function buildRawLicense(options: Partial<RawLicense> = {}): RawLicense {
   return Object.assign(defaultRawLicense, options);
 }
 
-const flushPromises = (ms = 50) => new Promise(res => setTimeout(res, ms));
+const flushPromises = (ms = 50) => new Promise((res) => setTimeout(res, ms));
+
+function createCoreSetupWith(esClient: IClusterClient) {
+  const coreSetup = coreMock.createSetup();
+
+  coreSetup.getStartServices.mockResolvedValue([
+    {
+      ...coreMock.createStart(),
+      elasticsearch: { legacy: { client: esClient, createClient: jest.fn() } },
+    },
+    {},
+    {},
+  ]);
+  return coreSetup;
+}
 
 describe('licensing plugin', () => {
-  describe('#setup', () => {
+  describe('#start', () => {
     describe('#license$', () => {
       let plugin: LicensingPlugin;
       let pluginInitContextMock: ReturnType<typeof coreMock.createPluginInitializerContext>;
@@ -46,15 +61,15 @@ describe('licensing plugin', () => {
       });
 
       it('returns license', async () => {
-        const dataClient = elasticsearchServiceMock.createClusterClient();
-        dataClient.callAsInternalUser.mockResolvedValue({
+        const esClient = elasticsearchServiceMock.createClusterClient();
+        esClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense(),
           features: {},
         });
-        const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient = dataClient;
 
-        const { license$ } = await plugin.setup(coreSetup);
+        const coreSetup = createCoreSetupWith(esClient);
+        await plugin.setup(coreSetup);
+        const { license$ } = await plugin.start();
         const license = await license$.pipe(take(1)).toPromise();
         expect(license.isAvailable).toBe(true);
       });
@@ -62,17 +77,17 @@ describe('licensing plugin', () => {
       it('observable receives updated licenses', async () => {
         const types: LicenseType[] = ['basic', 'gold', 'platinum'];
 
-        const dataClient = elasticsearchServiceMock.createClusterClient();
-        dataClient.callAsInternalUser.mockImplementation(() =>
+        const esClient = elasticsearchServiceMock.createClusterClient();
+        esClient.callAsInternalUser.mockImplementation(() =>
           Promise.resolve({
             license: buildRawLicense({ type: types.shift() }),
             features: {},
           })
         );
-        const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient = dataClient;
 
-        const { license$ } = await plugin.setup(coreSetup);
+        const coreSetup = createCoreSetupWith(esClient);
+        await plugin.setup(coreSetup);
+        const { license$ } = await plugin.start();
         const [first, second, third] = await license$.pipe(take(3), toArray()).toPromise();
 
         expect(first.type).toBe('basic');
@@ -81,26 +96,28 @@ describe('licensing plugin', () => {
       });
 
       it('returns a license with error when request fails', async () => {
-        const dataClient = elasticsearchServiceMock.createClusterClient();
-        dataClient.callAsInternalUser.mockRejectedValue(new Error('test'));
-        const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient = dataClient;
+        const esClient = elasticsearchServiceMock.createClusterClient();
+        esClient.callAsInternalUser.mockRejectedValue(new Error('test'));
 
-        const { license$ } = await plugin.setup(coreSetup);
+        const coreSetup = createCoreSetupWith(esClient);
+        await plugin.setup(coreSetup);
+        const { license$ } = await plugin.start();
+
         const license = await license$.pipe(take(1)).toPromise();
         expect(license.isAvailable).toBe(false);
         expect(license.error).toBeDefined();
       });
 
       it('generate error message when x-pack plugin was not installed', async () => {
-        const dataClient = elasticsearchServiceMock.createClusterClient();
+        const esClient = elasticsearchServiceMock.createClusterClient();
         const error: ElasticsearchError = new Error('reason');
         error.status = 400;
-        dataClient.callAsInternalUser.mockRejectedValue(error);
-        const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient = dataClient;
+        esClient.callAsInternalUser.mockRejectedValue(error);
 
-        const { license$ } = await plugin.setup(coreSetup);
+        const coreSetup = createCoreSetupWith(esClient);
+        await plugin.setup(coreSetup);
+        const { license$ } = await plugin.start();
+
         const license = await license$.pipe(take(1)).toPromise();
         expect(license.isAvailable).toBe(false);
         expect(license.error).toBe('X-Pack plugin is not installed on the Elasticsearch cluster.');
@@ -110,50 +127,50 @@ describe('licensing plugin', () => {
         const error1 = new Error('reason-1');
         const error2 = new Error('reason-2');
 
-        const dataClient = elasticsearchServiceMock.createClusterClient();
+        const esClient = elasticsearchServiceMock.createClusterClient();
 
-        dataClient.callAsInternalUser
+        esClient.callAsInternalUser
           .mockRejectedValueOnce(error1)
           .mockRejectedValueOnce(error2)
           .mockResolvedValue({ license: buildRawLicense(), features: {} });
 
-        const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient = dataClient;
+        const coreSetup = createCoreSetupWith(esClient);
+        await plugin.setup(coreSetup);
+        const { license$ } = await plugin.start();
 
-        const { license$ } = await plugin.setup(coreSetup);
         const [first, second, third] = await license$.pipe(take(3), toArray()).toPromise();
-
         expect(first.error).toBe(error1.message);
         expect(second.error).toBe(error2.message);
         expect(third.type).toBe('basic');
       });
 
       it('fetch license immediately without subscriptions', async () => {
-        const dataClient = elasticsearchServiceMock.createClusterClient();
-        dataClient.callAsInternalUser.mockResolvedValue({
+        const esClient = elasticsearchServiceMock.createClusterClient();
+        esClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense(),
           features: {},
         });
 
-        const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient = dataClient;
-
+        const coreSetup = createCoreSetupWith(esClient);
         await plugin.setup(coreSetup);
+        await plugin.start();
+
         await flushPromises();
-        expect(dataClient.callAsInternalUser).toHaveBeenCalledTimes(1);
+
+        expect(esClient.callAsInternalUser).toHaveBeenCalledTimes(1);
       });
 
       it('logs license details without subscriptions', async () => {
-        const dataClient = elasticsearchServiceMock.createClusterClient();
-        dataClient.callAsInternalUser.mockResolvedValue({
+        const esClient = elasticsearchServiceMock.createClusterClient();
+        esClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense(),
           features: {},
         });
 
-        const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient = dataClient;
-
+        const coreSetup = createCoreSetupWith(esClient);
         await plugin.setup(coreSetup);
+        await plugin.start();
+
         await flushPromises();
 
         const loggedMessages = loggingServiceMock.collect(pluginInitContextMock.logger).debug;
@@ -170,20 +187,19 @@ describe('licensing plugin', () => {
       it('generates signature based on fetched license content', async () => {
         const types: LicenseType[] = ['basic', 'gold', 'basic'];
 
-        const dataClient = elasticsearchServiceMock.createClusterClient();
-        dataClient.callAsInternalUser.mockImplementation(() =>
+        const esClient = elasticsearchServiceMock.createClusterClient();
+        esClient.callAsInternalUser.mockImplementation(() =>
           Promise.resolve({
             license: buildRawLicense({ type: types.shift() }),
             features: {},
           })
         );
 
-        const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient = dataClient;
+        const coreSetup = createCoreSetupWith(esClient);
+        await plugin.setup(coreSetup);
+        const { license$ } = await plugin.start();
 
-        const { license$ } = await plugin.setup(coreSetup);
         const [first, second, third] = await license$.pipe(take(3), toArray()).toPromise();
-
         expect(first.signature === third.signature).toBe(true);
         expect(first.signature === second.signature).toBe(false);
       });
@@ -202,22 +218,24 @@ describe('licensing plugin', () => {
             api_polling_frequency: moment.duration(50000),
           })
         );
-        const dataClient = elasticsearchServiceMock.createClusterClient();
-        dataClient.callAsInternalUser.mockResolvedValue({
+        const esClient = elasticsearchServiceMock.createClusterClient();
+        esClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense(),
           features: {},
         });
-        const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient = dataClient;
-        const { refresh } = await plugin.setup(coreSetup);
 
-        expect(dataClient.callAsInternalUser).toHaveBeenCalledTimes(0);
+        const coreSetup = createCoreSetupWith(esClient);
+        await plugin.setup(coreSetup);
+        const { refresh, license$ } = await plugin.start();
+
+        expect(esClient.callAsInternalUser).toHaveBeenCalledTimes(0);
+
+        await license$.pipe(take(1)).toPromise();
+        expect(esClient.callAsInternalUser).toHaveBeenCalledTimes(1);
 
         refresh();
-        expect(dataClient.callAsInternalUser).toHaveBeenCalledTimes(1);
-
-        refresh();
-        expect(dataClient.callAsInternalUser).toHaveBeenCalledTimes(2);
+        await flushPromises();
+        expect(esClient.callAsInternalUser).toHaveBeenCalledTimes(2);
       });
     });
 
@@ -235,15 +253,15 @@ describe('licensing plugin', () => {
           })
         );
 
-        const dataClient = elasticsearchServiceMock.createClusterClient();
-        dataClient.callAsInternalUser.mockResolvedValue({
+        const esClient = elasticsearchServiceMock.createClusterClient();
+        esClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense(),
           features: {},
         });
-        const coreSetup = coreMock.createSetup();
-        coreSetup.elasticsearch.dataClient = dataClient;
+        const coreSetup = createCoreSetupWith(esClient);
+        await plugin.setup(coreSetup);
+        const { createLicensePoller, license$ } = await plugin.start();
 
-        const { createLicensePoller, license$ } = await plugin.setup(coreSetup);
         const customClient = elasticsearchServiceMock.createClusterClient();
         customClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense({ type: 'gold' }),
@@ -276,7 +294,8 @@ describe('licensing plugin', () => {
         );
 
         const coreSetup = coreMock.createSetup();
-        const { createLicensePoller } = await plugin.setup(coreSetup);
+        await plugin.setup(coreSetup);
+        const { createLicensePoller } = await plugin.start();
 
         const customClient = elasticsearchServiceMock.createClusterClient();
         customClient.callAsInternalUser.mockResolvedValue({
@@ -357,7 +376,8 @@ describe('licensing plugin', () => {
         })
       );
       const coreSetup = coreMock.createSetup();
-      const { license$ } = await plugin.setup(coreSetup);
+      await plugin.setup(coreSetup);
+      const { license$ } = await plugin.start();
 
       let completed = false;
       license$.subscribe({ complete: () => (completed = true) });

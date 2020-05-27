@@ -176,7 +176,7 @@ export class HttpServer {
             // validation applied in ./http_tools#getServerOptions
             // (All NP routes are already required to specify their own validation in order to access the payload)
             validate,
-            payload: [allow, maxBytes, output, parse].some(v => typeof v !== 'undefined')
+            payload: [allow, maxBytes, output, parse].some((v) => typeof v !== 'undefined')
               ? { allow, maxBytes, output, parse }
               : undefined,
           },

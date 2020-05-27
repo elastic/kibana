@@ -265,10 +265,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async createCalendar(calendarId: string, body = { description: '', job_ids: [] }) {
       log.debug(`Creating calendar with id '${calendarId}'...`);
-      await esSupertest
-        .put(`/_ml/calendars/${calendarId}`)
-        .send(body)
-        .expect(200);
+      await esSupertest.put(`/_ml/calendars/${calendarId}`).send(body).expect(200);
 
       await retry.waitForWithTimeout(`'${calendarId}' to be created`, 30 * 1000, async () => {
         if (await this.getCalendar(calendarId)) {
@@ -293,13 +290,20 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    async waitForAnomalyDetectionJobNotToExist(jobId: string) {
+      await retry.waitForWithTimeout(`'${jobId}' to not exist`, 5 * 1000, async () => {
+        if (await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`).expect(404)) {
+          return true;
+        } else {
+          throw new Error(`expected anomaly detection job '${jobId}' not to exist`);
+        }
+      });
+    },
+
     async createAnomalyDetectionJob(jobConfig: Job) {
       const jobId = jobConfig.job_id;
       log.debug(`Creating anomaly detection job with id '${jobId}'...`);
-      await esSupertest
-        .put(`/_ml/anomaly_detectors/${jobId}`)
-        .send(jobConfig)
-        .expect(200);
+      await esSupertest.put(`/_ml/anomaly_detectors/${jobId}`).send(jobConfig).expect(200);
 
       await this.waitForAnomalyDetectionJobToExist(jobId);
     },
@@ -321,10 +325,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createDatafeed(datafeedConfig: Datafeed) {
       const datafeedId = datafeedConfig.datafeed_id;
       log.debug(`Creating datafeed with id '${datafeedId}'...`);
-      await esSupertest
-        .put(`/_ml/datafeeds/${datafeedId}`)
-        .send(datafeedConfig)
-        .expect(200);
+      await esSupertest.put(`/_ml/datafeeds/${datafeedId}`).send(datafeedConfig).expect(200);
 
       await this.waitForDatafeedToExist(datafeedId);
     },
@@ -360,6 +361,19 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       expect(startResponse)
         .to.have.property('started')
         .eql(true, 'Response for start datafeed request should be acknowledged');
+    },
+
+    async stopDatafeed(datafeedId: string) {
+      log.debug(`Stopping datafeed '${datafeedId}'...`);
+      const stopResponse = await esSupertest
+        .post(`/_ml/datafeeds/${datafeedId}/_stop`)
+        .set({ 'Content-Type': 'application/json' })
+        .expect(200)
+        .then((res: any) => res.body);
+
+      expect(stopResponse)
+        .to.have.property('stopped')
+        .eql(true, 'Response for stop datafeed request should be acknowledged');
     },
 
     async createAndRunAnomalyDetectionLookbackJob(jobConfig: Job, datafeedConfig: Datafeed) {

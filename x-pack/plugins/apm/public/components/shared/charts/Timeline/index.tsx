@@ -42,7 +42,7 @@ class TL extends PureComponent<TimelineProps> {
     height: PropTypes.number.isRequired,
     header: PropTypes.node,
     margins: PropTypes.object.isRequired,
-    width: PropTypes.number
+    width: PropTypes.number,
   };
 
   render() {

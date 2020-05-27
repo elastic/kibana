@@ -62,7 +62,7 @@ const setup = (config: TestConfig) => {
 };
 
 describe('FeatureTable', () => {
-  [true, false].forEach(canCustomizeSubFeaturePrivileges => {
+  [true, false].forEach((canCustomizeSubFeaturePrivileges) => {
     describe(`with sub feature privileges ${
       canCustomizeSubFeaturePrivileges ? 'allowed' : 'disallowed'
     }`, () => {
@@ -312,7 +312,7 @@ describe('FeatureTable', () => {
       canCustomizeSubFeaturePrivileges: true,
     });
 
-    kibanaFeatures.forEach(feature => {
+    kibanaFeatures.forEach((feature) => {
       const rowExpander = findTestSubject(wrapper, `expandFeaturePrivilegeRow-${feature.id}`);
       if (!feature.subFeatures || feature.subFeatures.length === 0) {
         expect(rowExpander).toHaveLength(0);
@@ -345,9 +345,7 @@ describe('FeatureTable', () => {
 
     expect(wrapper.find(FeatureTableExpandedRow)).toHaveLength(0);
 
-    findTestSubject(wrapper, 'expandFeaturePrivilegeRow')
-      .first()
-      .simulate('click');
+    findTestSubject(wrapper, 'expandFeaturePrivilegeRow').first().simulate('click');
 
     expect(wrapper.find(FeatureTableExpandedRow)).toHaveLength(1);
   });

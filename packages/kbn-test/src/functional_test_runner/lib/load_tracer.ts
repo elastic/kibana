@@ -22,7 +22,7 @@ const globalLoadPath: Array<{ ident: string; description: string }> = [];
 function getPath(startAt = 0) {
   return globalLoadPath
     .slice(startAt)
-    .map(step => step.description)
+    .map((step) => step.description)
     .join(' -> ');
 }
 
@@ -49,7 +49,7 @@ function addPathToMessage(message: string, startAt?: number) {
  *  @return {Any} the value produced by load()
  */
 export function loadTracer(ident: any, description: string, load: () => Promise<void> | void) {
-  const isCircular = globalLoadPath.find(step => step.ident === ident);
+  const isCircular = globalLoadPath.find((step) => step.ident === ident);
   if (isCircular) {
     throw new Error(addPathToMessage(`Circular reference to "${description}"`));
   }

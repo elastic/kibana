@@ -20,10 +20,7 @@ describe('callClusterFactory', () => {
     mockServer = {
       plugins: {
         elasticsearch: {
-          getCluster: sinon
-            .stub()
-            .withArgs('admin')
-            .returns(mockCluster),
+          getCluster: sinon.stub().withArgs('admin').returns(mockCluster),
         },
       },
       log() {},
