@@ -32,7 +32,7 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
         bool: {
           filter: [
             {
-              match: {
+              term: {
                 'monitor.id': monitorId,
               },
             },

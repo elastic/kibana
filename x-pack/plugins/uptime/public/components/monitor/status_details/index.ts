@@ -10,3 +10,4 @@ export { StatusByLocations } from './monitor_status_bar/status_by_location';
 
 export { MonitorStatusDetails } from './status_details_container';
 export { MonitorStatusBar } from './monitor_status_bar/status_bar_container';
+export { AvailabilityReporting } from './availability_reporting/availability_reporting';

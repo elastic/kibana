@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './location_map';
-export * from '../status_details/availability_reporting/location_status_tags';
+export { AvailabilityReporting } from './availability_reporting';
+export { LocationStatusTags } from './location_status_tags';
+export { TagLabel } from './tag_label';

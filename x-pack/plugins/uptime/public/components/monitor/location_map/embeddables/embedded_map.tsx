@@ -90,11 +90,12 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
       });
 
       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
-        embeddableObject.setLayerList(getLayerList(upPoints, downPoints, colors));
+        await embeddableObject.setLayerList(getLayerList(upPoints, downPoints, colors));
       }
 
       setEmbeddable(embeddableObject);
     }
+
     setupEmbeddable();
 
     // we want this effect to execute exactly once after the component mounts
