@@ -61,9 +61,9 @@ export default ({ getService }: FtrProviderContext): void => {
         .send(getJiraConnector())
         .expect(200);
 
-      actionsRemover.add('default', connectorOne.id, 'action');
-      actionsRemover.add('default', connectorTwo.id, 'action');
-      actionsRemover.add('default', connectorThree.id, 'action');
+      actionsRemover.add('default', connectorOne.id, 'action', 'actions');
+      actionsRemover.add('default', connectorTwo.id, 'action', 'actions');
+      actionsRemover.add('default', connectorThree.id, 'action', 'actions');
 
       const { body: connectors } = await supertest
         .get(`${CASE_CONFIGURE_CONNECTORS_URL}/_find`)
