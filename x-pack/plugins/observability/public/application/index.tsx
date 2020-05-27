@@ -5,24 +5,17 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiThemeProvider } from '../../../../legacy/common/eui_styled_components';
+import { ConfigSchema } from '../';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
-import { Home } from '../pages/home';
-import { PluginContext } from '../context/plugin_context';
+import { PluginSetupDeps } from '../plugin';
 
-export const renderApp = (core: CoreStart, { element }: AppMountParameters) => {
-  const i18nCore = core.i18n;
-  const isDarkMode = core.uiSettings.get('theme:darkMode');
-  ReactDOM.render(
-    <PluginContext.Provider value={{ core }}>
-      <EuiThemeProvider darkMode={isDarkMode}>
-        <i18nCore.Context>
-          <Home />
-        </i18nCore.Context>
-      </EuiThemeProvider>
-    </PluginContext.Provider>,
-    element
-  );
+export const renderApp = (
+  core: CoreStart,
+  deps: PluginSetupDeps,
+  { element }: AppMountParameters,
+  config: ConfigSchema
+) => {
+  ReactDOM.render(<div>Hello observability overview</div>, element);
   return () => {
     ReactDOM.unmountComponentAtNode(element);
   };
