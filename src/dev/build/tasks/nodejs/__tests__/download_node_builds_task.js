@@ -91,9 +91,7 @@ describe('src/dev/build/tasks/nodejs/download_node_builds_task', () => {
       await DownloadNodeBuildsTask.run(config, log);
       throw new Error('Expected DownloadNodeBuildsTask to reject');
     } catch (error) {
-      expect(error)
-        .to.have.property('message')
-        .be('Download failed for reasons');
+      expect(error).to.have.property('message').be('Download failed for reasons');
     }
   });
 });

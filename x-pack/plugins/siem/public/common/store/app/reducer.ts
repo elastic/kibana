@@ -43,6 +43,6 @@ export const appReducer = reducerWithInitialState(initialAppState)
   }))
   .case(removeError, (state, { id }) => ({
     ...state,
-    errors: state.errors.filter(error => error.id !== id),
+    errors: state.errors.filter((error) => error.id !== id),
   }))
   .build();

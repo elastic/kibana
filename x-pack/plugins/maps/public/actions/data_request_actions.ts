@@ -66,13 +66,13 @@ export function clearDataRequests(layer: ILayer) {
 
 export function cancelAllInFlightRequests() {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
-    getLayerList(getState()).forEach(layer => {
+    getLayerList(getState()).forEach((layer) => {
       dispatch<any>(clearDataRequests(layer));
     });
   };
 }
 
-export function updateStyleMeta(layerId: string) {
+export function updateStyleMeta(layerId: string | null) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
     if (!layer) {
@@ -126,7 +126,7 @@ function getDataRequestContext(
 
 export function syncDataForAllLayers() {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    const syncPromises = getLayerList(getState()).map(async layer => {
+    const syncPromises = getLayerList(getState()).map(async (layer) => {
       return dispatch<any>(syncDataForLayer(layer));
     });
     await Promise.all(syncPromises);
@@ -143,7 +143,7 @@ export function syncDataForLayer(layer: ILayer) {
   };
 }
 
-export function syncDataForLayerId(layerId: string) {
+export function syncDataForLayerId(layerId: string | null) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
     if (layer) {
