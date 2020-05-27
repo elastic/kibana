@@ -57,7 +57,8 @@ export async function createApmTelemetry({
 
   const collectAndStore = async () => {
     const config = await config$.pipe(take(1)).toPromise();
-    const esClient = core.elasticsearch.dataClient;
+    const [{ elasticsearch }] = await core.getStartServices();
+    const esClient = elasticsearch.legacy.client;
 
     const indices = await getApmIndices({
       config,
