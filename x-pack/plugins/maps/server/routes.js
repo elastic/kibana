@@ -496,7 +496,8 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
     },
     (context, request, response) => {
       return new Promise((resolve, reject) => {
-        const fontPath = path.join(__dirname, 'fonts', 'open_sans', `${request.params.range}.pbf`);
+        const santizedRange = path.normalize(request.params.range);
+        const fontPath = path.join(__dirname, 'fonts', 'open_sans', `${santizedRange}.pbf`);
         fs.readFile(fontPath, (error, data) => {
           if (error) {
             reject(
