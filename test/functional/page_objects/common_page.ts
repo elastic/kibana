@@ -73,6 +73,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
+      // Disable the welcome screen. This is relevant for environments
+      // which don't allow to use the yml setting, e.g. cloud production.
+      // It is done here so it applies to logins but also to a login re-use.
+      await browser.setLocalStorageItem('home:welcome:show', 'false');
+
       if (loginPage && !wantedLoginPage) {
         log.debug('Found login page');
         if (config.get('security.disableTestUser')) {
