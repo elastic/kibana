@@ -8,6 +8,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import * as api from '../api';
 import { createKibanaCoreStartMock } from '../../common/mocks/kibana_core';
+import { UseExceptionListProps } from '../types';
 
 import { ReturnExceptionListAndItems, useExceptionList } from './use_exception_list';
 
@@ -19,20 +20,23 @@ describe('useExceptionList', () => {
   test('init', async () => {
     const onError = jest.fn();
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnExceptionListAndItems>(() =>
-        useExceptionList({ http: mockKibanaHttpService, id: 'myListId', onError })
-      );
+      const { result, waitForNextUpdate } = renderHook<
+        UseExceptionListProps,
+        ReturnExceptionListAndItems
+      >(() => useExceptionList({ http: mockKibanaHttpService, id: 'myListId', onError }));
       await waitForNextUpdate();
-      expect(result.current).toEqual([true, null]);
+      expect(result.current).toEqual([true, null, result.current[2]]);
+      expect(typeof result.current[2]).toEqual('function');
     });
   });
 
   test('fetch exception list and items', async () => {
     const onError = jest.fn();
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnExceptionListAndItems>(() =>
-        useExceptionList({ http: mockKibanaHttpService, id: 'myListId', onError })
-      );
+      const { result, waitForNextUpdate } = renderHook<
+        UseExceptionListProps,
+        ReturnExceptionListAndItems
+      >(() => useExceptionList({ http: mockKibanaHttpService, id: 'myListId', onError }));
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual([
@@ -43,7 +47,7 @@ describe('useExceptionList', () => {
           created_by: 'user_name',
           description: 'This is a sample endpoint type exception',
           exceptionItems: {
-            data: [
+            items: [
               {
                 _tags: ['endpoint', 'process', 'malware', 'os:linux'],
                 comment: [],
@@ -76,9 +80,11 @@ describe('useExceptionList', () => {
                 updated_by: 'user_name',
               },
             ],
-            page: 1,
-            per_page: 20,
-            total: 1,
+            pagination: {
+              page: 1,
+              perPage: 20,
+              total: 1,
+            },
           },
           id: '1',
           list_id: 'endpoint_list',
@@ -90,25 +96,41 @@ describe('useExceptionList', () => {
           updated_at: '2020-04-23T00:19:13.289Z',
           updated_by: 'user_name',
         },
+        result.current[2],
       ]);
     });
   });
 
   test('fetch a new exception list and its items', async () => {
+    const onErrorMock = jest.fn();
+    const spyOnfetchExceptionListById = jest.spyOn(api, 'fetchExceptionListById');
+    const spyOnfetchExceptionListItemsByListId = jest.spyOn(api, 'fetchExceptionListItemsByListId');
+    await act(async () => {
+      const { rerender, waitForNextUpdate } = renderHook<
+        UseExceptionListProps,
+        ReturnExceptionListAndItems
+      >(({ http, id, onError }) => useExceptionList({ http, id, onError }), {
+        initialProps: { http: mockKibanaHttpService, id: 'myListId', onError: onErrorMock },
+      });
+      await waitForNextUpdate();
+      rerender({ http: mockKibanaHttpService, id: 'newListId', onError: onErrorMock });
+      await waitForNextUpdate();
+      expect(spyOnfetchExceptionListById).toHaveBeenCalledTimes(2);
+      expect(spyOnfetchExceptionListItemsByListId).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  test('fetches list and items when refreshExceptionList callback invoked', async () => {
     const onError = jest.fn();
     const spyOnfetchExceptionListById = jest.spyOn(api, 'fetchExceptionListById');
     const spyOnfetchExceptionListItemsByListId = jest.spyOn(api, 'fetchExceptionListItemsByListId');
     await act(async () => {
-      const { rerender, waitForNextUpdate } = renderHook<string, ReturnExceptionListAndItems>(
-        (id) => useExceptionList({ http: mockKibanaHttpService, id, onError }),
-        {
-          initialProps: 'myListId',
-        }
-      );
+      const { result, waitForNextUpdate } = renderHook<
+        UseExceptionListProps,
+        ReturnExceptionListAndItems
+      >(() => useExceptionList({ http: mockKibanaHttpService, id: 'myListId', onError }));
       await waitForNextUpdate();
-      await waitForNextUpdate();
-      rerender('newListId');
-      await waitForNextUpdate();
+      result.current[2]();
       expect(spyOnfetchExceptionListById).toHaveBeenCalledTimes(2);
       expect(spyOnfetchExceptionListItemsByListId).toHaveBeenCalledTimes(2);
     });

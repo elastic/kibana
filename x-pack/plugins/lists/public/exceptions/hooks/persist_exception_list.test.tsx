@@ -8,6 +8,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import { mockExceptionList } from '../mock';
 import { createKibanaCoreStartMock } from '../../common/mocks/kibana_core';
+import { PersistHookProps } from '../types';
 
 import { ReturnPersistExceptionList, usePersistExceptionList } from './persist_exception_list';
 
@@ -18,7 +19,7 @@ const mockKibanaHttpService = createKibanaCoreStartMock().http;
 describe('usePersistExceptionList', () => {
   test('init', async () => {
     const onError = jest.fn();
-    const { result } = renderHook<unknown, ReturnPersistExceptionList>(() =>
+    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionList>(() =>
       usePersistExceptionList({ http: mockKibanaHttpService, onError })
     );
 
@@ -28,9 +29,10 @@ describe('usePersistExceptionList', () => {
   test('saving exception list with isLoading === true', async () => {
     const onError = jest.fn();
     await act(async () => {
-      const { result, rerender, waitForNextUpdate } = renderHook<void, ReturnPersistExceptionList>(
-        () => usePersistExceptionList({ http: mockKibanaHttpService, onError })
-      );
+      const { result, rerender, waitForNextUpdate } = renderHook<
+        PersistHookProps,
+        ReturnPersistExceptionList
+      >(() => usePersistExceptionList({ http: mockKibanaHttpService, onError }));
       await waitForNextUpdate();
       result.current[1](mockExceptionList);
       rerender();
@@ -41,9 +43,10 @@ describe('usePersistExceptionList', () => {
   test('saved exception list with isSaved === true', async () => {
     const onError = jest.fn();
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, ReturnPersistExceptionList>(() =>
-        usePersistExceptionList({ http: mockKibanaHttpService, onError })
-      );
+      const { result, waitForNextUpdate } = renderHook<
+        PersistHookProps,
+        ReturnPersistExceptionList
+      >(() => usePersistExceptionList({ http: mockKibanaHttpService, onError }));
       await waitForNextUpdate();
       result.current[1](mockExceptionList);
       await waitForNextUpdate();

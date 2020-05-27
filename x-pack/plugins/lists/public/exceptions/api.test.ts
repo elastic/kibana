@@ -165,16 +165,50 @@ describe('Exceptions Lists API', () => {
       fetchMock.mockResolvedValue([mockNewExceptionItem]);
     });
 
-    test('check parameter url, body', async () => {
+    test('check parameter url, query without any filter or perPage options', async () => {
       await fetchExceptionListItemsByListId({
         http: mockKibanaHttpService(),
-        listId: 'endpoint_list',
+        listId: 'myList',
         signal: abortCtrl.signal,
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
         method: 'GET',
         query: {
-          list_id: 'endpoint_list',
+          listId: 'myList',
+          namespaceType: 'single',
+          page: 1,
+          per_page: 20,
+          sort_field: 'enabled',
+          sort_order: 'desc',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('check parameter url, query with a filter', async () => {
+      await fetchExceptionListItemsByListId({
+        filterOptions: {
+          filter: 'hello world',
+          sortField: 'enabled',
+          sortOrder: 'desc',
+          tags: ['malware'],
+        },
+        http: mockKibanaHttpService(),
+        listId: 'myList',
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
+        method: 'GET',
+        query: {
+          filter:
+            'exception-list.attributes.entries.field: hello world AND exception-list.attributes.tags: malware',
+          listId: 'myList',
+          namespaceType: 'single',
+          page: 1,
+          per_page: 20,
+          sort_field: 'enabled',
+          sort_order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -182,8 +216,20 @@ describe('Exceptions Lists API', () => {
 
     test('happy path', async () => {
       const exceptionResponse = await fetchExceptionListItemsByListId({
+        filterOptions: {
+          filter: '',
+          sortField: 'enabled',
+          sortOrder: 'desc',
+          tags: [],
+        },
         http: mockKibanaHttpService(),
         listId: 'endpoint_list',
+        listType: 'siem',
+        pagination: {
+          page: 1,
+          perPage: 20,
+          total: 0,
+        },
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual([mockNewExceptionItem]);

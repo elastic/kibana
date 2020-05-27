@@ -92,13 +92,45 @@ export const fetchExceptionListById = async ({
 export const fetchExceptionListItemsByListId = async ({
   http,
   listId,
+  listType,
+  filterOptions = {
+    filter: '',
+    sortField: 'enabled',
+    sortOrder: 'desc',
+    tags: [],
+  },
+  pagination = {
+    page: 1,
+    perPage: 20,
+    total: 0,
+  },
   signal,
-}: ApiCallByListIdProps): Promise<FoundExceptionListItemSchema> =>
-  http.fetch<FoundExceptionListItemSchema>(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
+}: ApiCallByListIdProps): Promise<FoundExceptionListItemSchema> => {
+  // TODO - figure out if SO space should be determined here or server side
+  const namespaceType = listType === 'endpoint' ? 'agnostic' : 'single';
+  const filters = [
+    ...(filterOptions.filter.length
+      ? [`exception-list.attributes.entries.field: ${filterOptions.filter}`]
+      : []),
+    ...(filterOptions.tags?.map((t) => `exception-list.attributes.tags: ${t}`) ?? []),
+  ];
+
+  const query = {
+    listId,
+    namespaceType,
+    page: pagination.page,
+    per_page: pagination.perPage,
+    sort_field: filterOptions.sortField,
+    sort_order: filterOptions.sortOrder,
+    ...(filters.length ? { filter: filters.join(' AND ') } : {}),
+  };
+
+  return http.fetch<FoundExceptionListItemSchema>(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
     method: 'GET',
-    query: { list_id: listId },
+    query,
     signal,
   });
+};
 
 /**
  * Fetch an ExceptionListItem by providing a ExceptionListItem ID
