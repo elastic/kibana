@@ -58,7 +58,7 @@ export class ObservabilityLayerTemplate extends Component<RenderWizardArguments,
       metric: this.state.metric,
       display: this.state.display,
     });
-    this.props.previewLayers([layerDescriptor]);
+    this.props.previewLayers(layerDescriptor ? [layerDescriptor] : []);
   }
 
   render() {
