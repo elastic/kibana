@@ -77,6 +77,11 @@ class FilterItemUI extends Component<Props, State> {
           this.setState({
             indexPatternExists: !!indexPattern,
           });
+        })
+        .catch(() => {
+          this.setState({
+            indexPatternExists: false,
+          });
         });
     }
   }
@@ -95,7 +100,7 @@ class FilterItemUI extends Component<Props, State> {
 
   private isDisabled(labelConfig: LabelOptions) {
     const { disabled } = this.props.filter.meta;
-    return disabled || !this.isValidLabel(labelConfig);
+    return disabled || labelConfig.status === FILTER_ITEM_ERROR;
   }
 
   private getClasses(negate: boolean, labelConfig: LabelOptions) {
@@ -251,7 +256,7 @@ class FilterItemUI extends Component<Props, State> {
           {
             id: 'data.filter.filterBar.labelWarningInfo',
             defaultMessage:
-              'Filter for index pattern {indexPattern} is not applicable to current view',
+              'Filter for index pattern {indexPattern} might not be applicable to current view',
           },
           {
             indexPattern: filter.meta.index,

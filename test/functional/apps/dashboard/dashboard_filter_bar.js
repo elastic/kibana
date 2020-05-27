@@ -201,6 +201,11 @@ export default function ({ getService, getPageObjects }) {
         const hasBadIndexPatternFilter = await filterBar.hasFilter('name', 'error', false);
         expect(hasBadIndexPatternFilter).to.be(true);
       });
+
+      it('unrelated filters are loaded in warning mode', async function () {
+        const hasWarningFieldFilter = await filterBar.hasFilter('extension', 'warn', true);
+        expect(hasWarningFieldFilter).to.be(true);
+      });
     });
   });
 }
