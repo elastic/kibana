@@ -20,4 +20,5 @@ export interface CoreStart
 |  [elasticsearch](./kibana-plugin-core-server.corestart.elasticsearch.md) | <code>ElasticsearchServiceStart</code> | [ElasticsearchServiceStart](./kibana-plugin-core-server.elasticsearchservicestart.md) |
 |  [savedObjects](./kibana-plugin-core-server.corestart.savedobjects.md) | <code>SavedObjectsServiceStart</code> | [SavedObjectsServiceStart](./kibana-plugin-core-server.savedobjectsservicestart.md) |
 |  [uiSettings](./kibana-plugin-core-server.corestart.uisettings.md) | <code>UiSettingsServiceStart</code> | [UiSettingsServiceStart](./kibana-plugin-core-server.uisettingsservicestart.md) |
+|  [uuid](./kibana-plugin-core-server.corestart.uuid.md) | <code>UuidServiceStart</code> | [UuidServiceStart](./kibana-plugin-core-server.uuidservicestart.md) |
 

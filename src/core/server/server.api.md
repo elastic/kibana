@@ -660,6 +660,8 @@ export interface CoreStart {
     savedObjects: SavedObjectsServiceStart;
     // (undocumented)
     uiSettings: UiSettingsServiceStart;
+    // (undocumented)
+    uuid: UuidServiceStart;
 }
 
 // @public
@@ -2532,6 +2534,11 @@ export interface UserProvidedValues<T = any> {
 
 // @public
 export interface UuidServiceSetup {
+    getInstanceUuid(): string;
+}
+
+// @public
+export interface UuidServiceStart {
     getInstanceUuid(): string;
 }
 

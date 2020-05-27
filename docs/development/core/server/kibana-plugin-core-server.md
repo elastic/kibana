@@ -194,6 +194,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [URLMeaningfulParts](./kibana-plugin-core-server.urlmeaningfulparts.md) | We define our own typings because the current version of @<!-- -->types/node declares properties to be optional "hostname?: string". Although, parse call returns "hostname: null \| string". |
 |  [UserProvidedValues](./kibana-plugin-core-server.userprovidedvalues.md) | Describes the values explicitly set by user. |
 |  [UuidServiceSetup](./kibana-plugin-core-server.uuidservicesetup.md) | APIs to access the application's instance uuid. |
+|  [UuidServiceStart](./kibana-plugin-core-server.uuidservicestart.md) | APIs to access the application's instance uuid. |
 
 ## Variables
 
