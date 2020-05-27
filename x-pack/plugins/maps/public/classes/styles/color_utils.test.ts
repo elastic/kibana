@@ -6,7 +6,7 @@
 import {
   COLOR_GRADIENTS,
   getColorRampCenterColor,
-  getOrdinalMbColorRampStops,
+  getOrdinalColorRampStops,
   getHexColorRangeStrings,
   getLinearGradient,
   getRGBColorRangeStrings,
@@ -60,7 +60,7 @@ describe('getColorRampCenterColor', () => {
 
 describe('getColorRampStops', () => {
   it('Should create color stops for custom range', () => {
-    expect(getOrdinalMbColorRampStops('Blues', 0, 1000, 8)).toEqual([
+    expect(getOrdinalColorRampStops('Blues', 0, 1000, 8)).toEqual([
       0,
       '#f7faff',
       125,
@@ -81,7 +81,7 @@ describe('getColorRampStops', () => {
   });
 
   it('Should snap to end of color stops for identical range', () => {
-    expect(getOrdinalMbColorRampStops('Blues', 23, 23, 8)).toEqual([23, '#072f6b']);
+    expect(getOrdinalColorRampStops('Blues', 23, 23, 8)).toEqual([23, '#072f6b']);
   });
 });
 

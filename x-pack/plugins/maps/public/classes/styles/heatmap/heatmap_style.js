@@ -10,7 +10,7 @@ import { HeatmapStyleEditor } from './components/heatmap_style_editor';
 import { HeatmapLegend } from './components/legend/heatmap_legend';
 import { DEFAULT_HEATMAP_COLOR_RAMP_NAME } from './components/heatmap_constants';
 import { LAYER_STYLE_TYPE, GRID_RESOLUTION } from '../../../../common/constants';
-import { getOrdinalMbColorRampStops, GRADIENT_INTERVALS } from '../color_utils';
+import { getOrdinalColorRampStops, GRADIENT_INTERVALS } from '../color_utils';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 
