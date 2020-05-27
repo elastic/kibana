@@ -65,16 +65,16 @@ export default new Datasource('worldbank_indicators', {
     });
 
     const countries = config.country.split(':');
-    const seriesLists = _.map(countries, function(country) {
+    const seriesLists = _.map(countries, function (country) {
       const code = 'country/' + country + '/indicator/' + config.indicator;
       const wbArgs = [code];
       wbArgs.byName = { code: code };
       return worldbank.timelionFn(wbArgs, tlConfig);
     });
 
-    return Bluebird.map(seriesLists, function(seriesList) {
+    return Bluebird.map(seriesLists, function (seriesList) {
       return seriesList.list[0];
-    }).then(function(list) {
+    }).then(function (list) {
       return {
         type: 'seriesList',
         list: list,

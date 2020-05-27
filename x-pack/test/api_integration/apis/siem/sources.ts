@@ -10,7 +10,7 @@ import { SourceQuery } from '../../../../plugins/siem/public/graphql/types';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -27,7 +27,7 @@ export default function({ getService }: FtrProviderContext) {
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           },
         })
-        .then(resp => {
+        .then((resp) => {
           const sourceStatus = resp.data.source.status;
           // test data in x-pack/test/functional/es_archives/auditbeat_test_data/data.json.gz
           expect(sourceStatus.indexFields.length).to.be(397);

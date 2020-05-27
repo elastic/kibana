@@ -73,7 +73,7 @@ function createStubUiSettings() {
 createStubUiSettings();
 sinon.stub(chrome, 'getUiSettingsClient').callsFake(() => stubUiSettings);
 
-afterEach(function() {
+afterEach(function () {
   createStubUiSettings();
 });
 

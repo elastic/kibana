@@ -98,7 +98,7 @@ export class CreateButton extends Component<Props, State> {
           anchorPosition="downLeft"
         >
           <EuiContextMenuPanel
-            items={options.map(option => {
+            items={options.map((option) => {
               return (
                 <EuiContextMenuItem
                   key={option.text}

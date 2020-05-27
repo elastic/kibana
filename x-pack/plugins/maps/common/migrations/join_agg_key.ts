@@ -96,7 +96,7 @@ export function migrateJoinAggKey({
         });
       });
 
-      Object.keys(vectorLayerDescriptor.style.properties).forEach(key => {
+      Object.keys(vectorLayerDescriptor.style.properties).forEach((key) => {
         const style: any = vectorLayerDescriptor.style!.properties[key as VECTOR_STYLES];
         if (_.get(style, 'options.field.origin') === FIELD_ORIGIN.JOIN) {
           const joinDescriptor = legacyJoinFields.get(style.options.field.name);

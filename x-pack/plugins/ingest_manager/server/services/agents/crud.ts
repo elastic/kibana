@@ -41,8 +41,9 @@ export async function listAgents(
 
   if (showInactive === false) {
     const agentActiveCondition = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true AND not ${AGENT_SAVED_OBJECT_TYPE}.attributes.type:${AGENT_TYPE_EPHEMERAL}`;
-    const recentlySeenEphemeralAgent = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true AND ${AGENT_SAVED_OBJECT_TYPE}.attributes.type:${AGENT_TYPE_EPHEMERAL} AND ${AGENT_SAVED_OBJECT_TYPE}.attributes.last_checkin > ${Date.now() -
-      3 * AGENT_POLLING_THRESHOLD_MS}`;
+    const recentlySeenEphemeralAgent = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true AND ${AGENT_SAVED_OBJECT_TYPE}.attributes.type:${AGENT_TYPE_EPHEMERAL} AND ${AGENT_SAVED_OBJECT_TYPE}.attributes.last_checkin > ${
+      Date.now() - 3 * AGENT_POLLING_THRESHOLD_MS
+    }`;
     filters.push(`(${agentActiveCondition}) OR (${recentlySeenEphemeralAgent})`);
   }
 

@@ -22,7 +22,7 @@ interface Props {
 
 const FilterBadgeList = ({ onRemove, value }: Props) => (
   <EuiFlexGrid gutterSize="s">
-    {value.map(val => (
+    {value.map((val) => (
       <EuiFlexItem key={val} grow={false}>
         <button
           type="button"

@@ -89,10 +89,7 @@ describe('LoadingCountService', () => {
       const countA$ = new Subject<number>();
       const countB$ = new Subject<number>();
       const countC$ = new Subject<number>();
-      const promise = loadingCount
-        .getLoadingCount$()
-        .pipe(toArray())
-        .toPromise();
+      const promise = loadingCount.getLoadingCount$().pipe(toArray()).toPromise();
 
       loadingCount.addLoadingCountSource(countA$);
       loadingCount.addLoadingCountSource(countB$);
@@ -125,10 +122,7 @@ describe('LoadingCountService', () => {
       const { service, loadingCount } = setup();
 
       const count$ = new Subject<number>();
-      const promise = loadingCount
-        .getLoadingCount$()
-        .pipe(toArray())
-        .toPromise();
+      const promise = loadingCount.getLoadingCount$().pipe(toArray()).toPromise();
 
       loadingCount.addLoadingCountSource(count$);
       count$.next(0);

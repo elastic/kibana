@@ -43,15 +43,15 @@ export function newJobCapsProvider(callWithRequest: any) {
 // map of ids to allow it to be stringified for transportation
 // over the network.
 function convertForStringify(aggs: Aggregation[], fields: Field[]): void {
-  fields.forEach(f => {
-    f.aggIds = f.aggs ? f.aggs.map(a => a.id) : [];
+  fields.forEach((f) => {
+    f.aggIds = f.aggs ? f.aggs.map((a) => a.id) : [];
     delete f.aggs;
   });
-  aggs.forEach(a => {
+  aggs.forEach((a) => {
     if (a.fields !== undefined) {
       // if the aggregation supports fields, i.e. it's fields list isn't undefined,
       // create a list of field ids
-      a.fieldIds = a.fields.map(f => f.id);
+      a.fieldIds = a.fields.map((f) => f.id);
     }
     delete a.fields;
   });

@@ -34,11 +34,11 @@ import { EuiText, EuiCodeBlock, EuiSpacer, EuiTitle, EuiCodeEditor } from '@elas
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export class MarkdownEditor extends Component {
-  handleChange = value => {
+  handleChange = (value) => {
     this.props.onChange({ markdown: value });
   };
 
-  handleOnLoad = ace => {
+  handleOnLoad = (ace) => {
     this.ace = ace;
   };
 
@@ -60,7 +60,7 @@ export class MarkdownEditor extends Component {
     const rows = [];
     const rawFormatter = createTickFormatter('0.[0000]', null, this.props.getConfig);
 
-    const createPrimitiveRow = key => {
+    const createPrimitiveRow = (key) => {
       const snippet = `{{ ${key} }}`;
       let value = _.get(variables, key);
       if (/raw$/.test(key)) value = rawFormatter(value);
@@ -76,7 +76,7 @@ export class MarkdownEditor extends Component {
       );
     };
 
-    const createArrayRow = key => {
+    const createArrayRow = (key) => {
       const snippet = `{{# ${key} }}{{/ ${key} }}`;
       const date = _.get(variables, `${key}[0][0]`);
       let value = _.get(variables, `${key}[0][1]`);

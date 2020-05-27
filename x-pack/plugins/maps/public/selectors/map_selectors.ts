@@ -66,7 +66,7 @@ function createLayerInstance(
       const joins: IJoin[] = [];
       const vectorLayerDescriptor = layerDescriptor as VectorLayerDescriptor;
       if (vectorLayerDescriptor.joins) {
-        vectorLayerDescriptor.joins.forEach(joinDescriptor => {
+        vectorLayerDescriptor.joins.forEach((joinDescriptor) => {
           const join = new InnerJoin(joinDescriptor, source);
           joins.push(join);
         });
@@ -183,7 +183,7 @@ export const getQuery = ({ map }: MapStoreState): MapQuery | undefined => map.ma
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
 
 export const isUsingSearch = (state: MapStoreState): boolean => {
-  const filters = getFilters(state).filter(filter => !filter.meta.disabled);
+  const filters = getFilters(state).filter((filter) => !filter.meta.disabled);
   const queryString = _.get(getQuery(state), 'query', '');
   return !!filters.length || !!queryString.length;
 };
@@ -212,7 +212,7 @@ export const getRefreshTimerLastTriggeredAt = ({ map }: MapStoreState): string |
 
 function getLayerDescriptor(state: MapStoreState, layerId: string) {
   const layerListRaw = getLayerListRaw(state);
-  return layerListRaw.find(layer => layer.id === layerId);
+  return layerListRaw.find((layer) => layer.id === layerId);
 }
 
 export function getDataRequestDescriptor(state: MapStoreState, layerId: string, dataId: string) {
@@ -294,20 +294,20 @@ export const getLayerList = createSelector(
   getLayerListRaw,
   getInspectorAdapters,
   (layerDescriptorList, inspectorAdapters) => {
-    return layerDescriptorList.map(layerDescriptor =>
+    return layerDescriptorList.map((layerDescriptor) =>
       createLayerInstance(layerDescriptor, inspectorAdapters)
     );
   }
 );
 
-export function getLayerById(layerId: string, state: MapStoreState): ILayer | undefined {
-  return getLayerList(state).find(layer => {
+export function getLayerById(layerId: string | null, state: MapStoreState): ILayer | undefined {
+  return getLayerList(state).find((layer) => {
     return layerId === layer.getId();
   });
 }
 
-export const getFittableLayers = createSelector(getLayerList, layerList => {
-  return layerList.filter(layer => {
+export const getFittableLayers = createSelector(getLayerList, (layerList) => {
+  return layerList.filter((layer) => {
     // These are the only layer-types that implement bounding-box retrieval reliably
     // This will _not_ work if Maps will allow register custom layer types
     const isFittable =
@@ -319,15 +319,15 @@ export const getFittableLayers = createSelector(getLayerList, layerList => {
   });
 });
 
-export const getHiddenLayerIds = createSelector(getLayerListRaw, layers =>
-  layers.filter(layer => !layer.visible).map(layer => layer.id)
+export const getHiddenLayerIds = createSelector(getLayerListRaw, (layers) =>
+  layers.filter((layer) => !layer.visible).map((layer) => layer.id)
 );
 
 export const getSelectedLayer = createSelector(
   getSelectedLayerId,
   getLayerList,
   (selectedLayerId, layerList) => {
-    return layerList.find(layer => layer.getId() === selectedLayerId);
+    return layerList.find((layer) => layer.getId() === selectedLayerId);
   }
 );
 
@@ -345,7 +345,7 @@ export const getMapColors = createSelector(
     }, [])
 );
 
-export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, selectedLayer => {
+export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, (selectedLayer) => {
   if (!selectedLayer || !('getJoins' in selectedLayer)) {
     return [];
   }
@@ -356,18 +356,18 @@ export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, 
 });
 
 // Get list of unique index patterns used by all layers
-export const getUniqueIndexPatternIds = createSelector(getLayerList, layerList => {
+export const getUniqueIndexPatternIds = createSelector(getLayerList, (layerList) => {
   const indexPatternIds: string[] = [];
-  layerList.forEach(layer => {
+  layerList.forEach((layer) => {
     indexPatternIds.push(...layer.getIndexPatternIds());
   });
   return _.uniq(indexPatternIds).sort();
 });
 
 // Get list of unique index patterns, excluding index patterns from layers that disable applyGlobalQuery
-export const getQueryableUniqueIndexPatternIds = createSelector(getLayerList, layerList => {
+export const getQueryableUniqueIndexPatternIds = createSelector(getLayerList, (layerList) => {
   const indexPatternIds: string[] = [];
-  layerList.forEach(layer => {
+  layerList.forEach((layer) => {
     indexPatternIds.push(...layer.getQueryableIndexPatternIds());
   });
   return _.uniq(indexPatternIds);
@@ -381,7 +381,7 @@ export const hasDirtyState = createSelector(
       return true;
     }
 
-    return layerListRaw.some(layerDescriptor => {
+    return layerListRaw.some((layerDescriptor) => {
       const trackedState = layerDescriptor[TRACKED_LAYER_DESCRIPTOR];
       if (!trackedState) {
         return false;

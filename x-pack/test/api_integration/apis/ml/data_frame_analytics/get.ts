@@ -6,13 +6,10 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { USER } from '../../../../functional/services/machine_learning/security_common';
+import { USER } from '../../../../functional/services/ml/security_common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
 import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
 import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
-
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-};
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -99,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/data_frame/analytics`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(200);
         expect(body.count).to.eql(2);
         expect(body.data_frame_analytics.length).to.eql(2);
@@ -111,7 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/data_frame/analytics`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(404);
 
         expect(body.error).to.eql('Not Found');
@@ -124,7 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/data_frame/analytics/${jobId}_1`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(200);
 
         expect(body.count).to.eql(1);
@@ -136,7 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/data_frame/analytics/${jobId}_1,${jobId}_2`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(200);
 
         expect(body.count).to.eql(2);
@@ -149,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/data_frame/analytics/${jobId}_1`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(404);
 
         expect(body.error).to.eql('Not Found');
@@ -162,7 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/data_frame/analytics/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(200);
 
         expect(body.count).to.eql(2);
@@ -182,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/data_frame/analytics/_stats`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(404);
 
         expect(body.error).to.eql('Not Found');
@@ -195,7 +192,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/data_frame/analytics/${jobId}_1/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(200);
         expect(body.count).to.eql(1);
         expect(body.data_frame_analytics.length).to.eql(1);
@@ -213,7 +210,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/data_frame/analytics/${jobId}_1,${jobId}_2/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(200);
         expect(body.count).to.eql(2);
         expect(body.data_frame_analytics.length).to.eql(2);
@@ -232,7 +229,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`/api/ml/data_frame/analytics/${jobId}_1/_stats`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .expect(404);
         expect(body.error).to.eql('Not Found');
         expect(body.message).to.eql('Not Found');

@@ -33,7 +33,7 @@ export function Readme({
   );
 
   useEffect(() => {
-    sendGetFileByPath(readmePath).then(res => {
+    sendGetFileByPath(readmePath).then((res) => {
       setMarkdown(res.data || '');
     });
   }, [readmePath]);
