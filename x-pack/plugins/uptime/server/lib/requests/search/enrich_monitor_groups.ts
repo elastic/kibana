@@ -6,10 +6,10 @@
 
 import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
-import { QUERY } from '../../../../common/constants';
 import {
   Check,
   Histogram,
+  HistogramPoint,
   MonitorSummary,
   CursorDirection,
   SortOrder,
@@ -344,23 +344,24 @@ const getHistogramForMonitors = async (
   const result = await queryContext.search(params);
 
   const histoBuckets: any[] = result.aggregations.histogram.buckets;
-  const simplified = histoBuckets.map((histoBucket: any): { timestamp: string; byId: any } => {
+  const simplified = histoBuckets.map((histoBucket: any): { timestamp: number; byId: any } => {
     const byId: { [key: string]: number } = {};
     histoBucket.by_id.buckets.forEach((idBucket: any) => {
       byId[idBucket.key] = idBucket.totalDown.value;
     });
     return {
-      timestamp: histoBucket.key,
+      timestamp: parseInt(histoBucket.key, 10),
       byId,
     };
   });
 
-  const histosById: { [key: string]: any } = {};
+  const histosById: { [key: string]: Histogram } = {};
   monitorIds.forEach((id: string) => {
-    const points: any[] = [];
-    simplified.forEach(simpleHisto => {
+    const points: HistogramPoint[] = [];
+    simplified.forEach((simpleHisto) => {
       points.push({
         timestamp: simpleHisto.timestamp,
+        up: undefined,
         down: simpleHisto.byId[id],
       });
     });
