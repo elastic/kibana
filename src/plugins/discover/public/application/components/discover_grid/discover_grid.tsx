@@ -145,7 +145,7 @@ export const DiscoverGrid = function DiscoverGridInner({
   const timeString = i18n.translate('discover.timeLabel', {
     defaultMessage: 'Time',
   });
-  const [flyoutRow, setFlyoutRow] = useState<ElasticSearchHit | undefined>(undefined);
+  const [flyoutRow, setFlyoutRow] = useState<number | undefined>(undefined);
 
   const dataGridColumns = columns.map(
     (columnName): EuiDataGridColumn => {
@@ -233,51 +233,46 @@ export const DiscoverGrid = function DiscoverGridInner({
   /**
    * Cell rendering
    */
-  const renderCellValue = useMemo(() => {
-    const showFilterActions = (isDetails: boolean, fieldName: string) => {
-      return isDetails && indexPattern.fields.getByName(fieldName)?.filterable;
-    };
-    const createFilter = (fieldName: string, row: any, type: '-' | '+') => {
-      return onFilter(
-        indexPattern.fields.getByName(fieldName),
-        indexPattern.flattenHit(row)[fieldName],
-        type
-      );
-    };
-    const formattedField = function (row: any, columnId: string) {
-      const formattedValue = indexPattern.formatField(row, columnId);
+  const showFilterActions = (isDetails: boolean, fieldName: string) => {
+    return isDetails && indexPattern.fields.getByName(fieldName)?.filterable;
+  };
+  const createFilter = (fieldName: string, row: any, type: '-' | '+') => {
+    return onFilter(
+      indexPattern.fields.getByName(fieldName),
+      indexPattern.flattenHit(row)[fieldName],
+      type
+    );
+  };
+  const formattedField = function (row: any, columnId: string) {
+    const formattedValue = indexPattern.formatField(row, columnId);
+    // TODO Field formatters need to be fixed
+    // eslint-disable-next-line react/no-danger
+    return <span dangerouslySetInnerHTML={{ __html: formattedValue }} />;
+  };
 
-      // TODO Field formatters need to be fixed
-      // eslint-disable-next-line react/no-danger
-      return <span dangerouslySetInnerHTML={{ __html: formattedValue }} />;
-    };
+  const renderCellValue = ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
+    const row = rows[rowIndex];
+    let value: string | ReactNode;
+    value = '-';
 
-    return ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
-      const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
-      const row = rows[adjustedRowIndex];
-      let value: string | ReactNode;
-      value = '-';
-
-      if (typeof row === 'undefined') {
-        return value;
-      }
-
-      const fieldName = columnId === timeString ? indexPattern.timeFieldName! : columnId;
-      value = formattedField(row, fieldName);
-
-      if (showFilterActions(isDetails, fieldName)) {
-        return (
-          <CellPopover
-            value={value}
-            onPositiveFilterClick={() => createFilter(fieldName, rows[rowIndex], '+')}
-            onNegativeFilterClick={() => createFilter(fieldName, rows[rowIndex], '-')}
-          />
-        );
-      }
-
+    if (typeof row === 'undefined') {
       return value;
-    };
-  }, [indexPattern, onFilter, pagination.pageIndex, pagination.pageSize, rows, timeString]);
+    }
+
+    const fieldName = columnId === timeString ? indexPattern.timeFieldName! : columnId;
+    value = formattedField(row, fieldName);
+
+    if (showFilterActions(isDetails, fieldName)) {
+      return (
+        <CellPopover
+          value={value}
+          onPositiveFilterClick={() => createFilter(fieldName, rows[rowIndex], '+')}
+          onNegativeFilterClick={() => createFilter(fieldName, rows[rowIndex], '-')}
+        />
+      );
+    }
+    return value;
+  };
 
   /**
    * Render variables
@@ -333,10 +328,10 @@ export const DiscoverGrid = function DiscoverGridInner({
                 aria-label={i18n.translate('discover.grid.viewDoc', {
                   defaultMessage: 'Toggle dialog with details',
                 })}
-                onClick={() => setFlyoutRow(rows[rowIndex])}
+                onClick={() => setFlyoutRow(rowIndex)}
                 className="dscTable__buttonToggle"
               >
-                <EuiIcon type={typeof flyoutRow === 'undefined' ? 'eye' : 'eyeClosed'} size="s" />
+                <EuiIcon type={flyoutRow === rowIndex ? 'eyeClosed' : 'eye'} size="s" />
               </button>
             ),
           },
@@ -352,7 +347,10 @@ export const DiscoverGrid = function DiscoverGridInner({
           pageSizeOptions: [lowestPageSize, 100, 500],
         }}
         toolbarVisibility={{
-          showColumnSelector: false,
+          showColumnSelector: {
+            allowHide: false,
+            allowReorder: true,
+          },
           showStyleSelector: false,
         }}
         gridStyle={{
@@ -420,7 +418,7 @@ export const DiscoverGrid = function DiscoverGridInner({
       )}
       {typeof flyoutRow !== 'undefined' && (
         <EuiPortal>
-          <EuiFlyout onClose={() => setFlyoutRow(undefined)} size="l" ownFocus>
+          <EuiFlyout onClose={() => setFlyoutRow(undefined)} size="m">
             <EuiFlyoutHeader hasBorder>
               <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween">
                 <EuiFlexItem>
@@ -443,7 +441,9 @@ export const DiscoverGrid = function DiscoverGridInner({
                   <EuiFlexGroup justifyContent="flexEnd">
                     {indexPattern.isTimeBased() && (
                       <EuiFlexItem grow={false}>
-                        <EuiLink href={getContextAppHref ? getContextAppHref(flyoutRow._id) : ''}>
+                        <EuiLink
+                          href={getContextAppHref ? getContextAppHref(rows[flyoutRow]._id) : ''}
+                        >
                           {i18n.translate(
                             'discover.grid.tableRow.viewSurroundingDocumentsLinkText',
                             {
@@ -455,9 +455,9 @@ export const DiscoverGrid = function DiscoverGridInner({
                     )}
                     <EuiFlexItem grow={false}>
                       <EuiLink
-                        href={`#/doc/${indexPattern.id}/${flyoutRow._index}?id=${encodeURIComponent(
-                          flyoutRow._id as string
-                        )}`}
+                        href={`#/doc/${indexPattern.id}/${
+                          rows[flyoutRow]._index
+                        }?id=${encodeURIComponent(rows[flyoutRow]._id as string)}`}
                       >
                         {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkText', {
                           defaultMessage: 'View single document',
@@ -470,7 +470,7 @@ export const DiscoverGrid = function DiscoverGridInner({
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
               <DocViewer
-                hit={flyoutRow}
+                hit={rows[flyoutRow]}
                 columns={visibleColumns}
                 indexPattern={indexPattern}
                 filter={onFilter}
