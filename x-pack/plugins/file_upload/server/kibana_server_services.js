@@ -4,13 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-let dataClient;
-
-export const setElasticsearchClientServices = (elasticsearch) => {
-  ({ dataClient } = elasticsearch);
-};
-export const getDataClient = () => dataClient;
-
 let internalRepository;
 export const setInternalRepository = (createInternalRepository) => {
   internalRepository = createInternalRepository();
