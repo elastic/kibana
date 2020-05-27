@@ -94,9 +94,7 @@ describe('searchAfterAndBulkCreate', () => {
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
       listClient: ({
-        getListItemByValues: async () => {
-          return ([] as unknown) as ListItemArraySchema;
-        },
+        getListItemByValues: async () => [],
       } as unknown) as ListClient,
       exceptionsList: [
         {
@@ -172,9 +170,7 @@ describe('searchAfterAndBulkCreate', () => {
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
       listClient: ({
-        getListItemByValues: async () => {
-          return ([] as unknown) as ListItemArraySchema;
-        },
+        getListItemByValues: async () => [],
       } as unknown) as ListClient,
       exceptionsList: [
         {
@@ -257,8 +253,7 @@ describe('searchAfterAndBulkCreate', () => {
           listId: string;
           value: string[];
         }) => {
-          const toReturn = value.map((item) => ({ value: item }));
-          return (toReturn as unknown) as ListItemArraySchema;
+          return value.map((item) => ({ value: item }));
         },
       } as unknown) as ListClient,
       exceptionsList: undefined,
@@ -349,8 +344,7 @@ describe('searchAfterAndBulkCreate', () => {
           listId: string;
           value: string[];
         }) => {
-          const toReturn = value.map((item) => ({ value: item }));
-          return (toReturn as unknown) as ListItemArraySchema;
+          return value.map((item) => ({ value: item }));
         },
       } as unknown) as ListClient,
       exceptionsList: [
@@ -420,8 +414,7 @@ describe('searchAfterAndBulkCreate', () => {
           listId: string;
           value: string[];
         }) => {
-          const toReturn = value.map((item) => ({ value: item }));
-          return (toReturn as unknown) as ListItemArraySchema;
+          return value.map((item) => ({ value: item }));
         },
       } as unknown) as ListClient,
       exceptionsList: [

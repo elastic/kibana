@@ -9,16 +9,15 @@ import { filterEventsAgainstList } from './filter_events_with_list';
 import { mockLogger, repeatedSearchResultsWithSortId } from './__mocks__/es_results';
 
 import { ListClient } from '../../../../../lists/server';
-import { ListItemArraySchema } from '../../../../../lists/common/schemas';
+
+const someGuids = Array.from({ length: 13 }).map((x) => uuid.v4());
 
 describe('filterEventsAgainstList', () => {
-  const someGuids = Array.from({ length: 13 }).map((x) => uuid.v4());
-
   it('should respond with eventSearchResult if exceptionList is empty', async () => {
     const res = await filterEventsAgainstList({
       logger: mockLogger,
       listClient: ({
-        getListItemByValues: async () => ([] as unknown) as ListItemArraySchema,
+        getListItemByValues: async () => [],
       } as unknown) as ListClient,
       exceptionsList: undefined,
       eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3), [
@@ -32,11 +31,12 @@ describe('filterEventsAgainstList', () => {
   });
 
   it('should throw an error if malformed exception list present', async () => {
+    let message = '';
     try {
       await filterEventsAgainstList({
         logger: mockLogger,
         listClient: ({
-          getListItemByValues: async () => ([] as unknown) as ListItemArraySchema,
+          getListItemByValues: async () => [],
         } as unknown) as ListClient,
         exceptionsList: [
           {
@@ -54,16 +54,20 @@ describe('filterEventsAgainstList', () => {
         ]),
       });
     } catch (exc) {
-      expect(exc.message).toContain('Malformed exception list provided');
+      message = exc.message;
     }
+    expect(message).toEqual(
+      'Failed to query lists index. Reason: Malformed exception list provided'
+    );
   });
 
   it('should throw an error if unsupported exception type', async () => {
+    let message = '';
     try {
-      const res = await filterEventsAgainstList({
+      await filterEventsAgainstList({
         logger: mockLogger,
         listClient: ({
-          getListItemByValues: async () => ([] as unknown) as ListItemArraySchema,
+          getListItemByValues: async () => [],
         } as unknown) as ListClient,
         exceptionsList: [
           {
@@ -85,17 +89,19 @@ describe('filterEventsAgainstList', () => {
           '7.7.7.7',
         ]),
       });
-      expect(res.hits.hits.length).toEqual(4);
     } catch (exc) {
-      expect(exc.message).toContain('Unsupported list type used, please use one of');
+      message = exc.message;
     }
+    expect(message).toEqual(
+      'Failed to query lists index. Reason: Unsupported list type used, please use one of ip,keyword'
+    );
   });
 
   it('should respond with same list if no items match value list', async () => {
     const res = await filterEventsAgainstList({
       logger: mockLogger,
       listClient: ({
-        getListItemByValues: async () => ([] as unknown) as ListItemArraySchema,
+        getListItemByValues: async () => [],
       } as unknown) as ListClient,
       exceptionsList: [
         {
@@ -115,6 +121,8 @@ describe('filterEventsAgainstList', () => {
     expect(res.hits.hits.length).toEqual(4);
   });
   it('should respond with less items in the list if some values match', async () => {
+    let outerType = '';
+    let outerListId = '';
     const res = await filterEventsAgainstList({
       logger: mockLogger,
       listClient: ({
@@ -127,12 +135,11 @@ describe('filterEventsAgainstList', () => {
           listId: string;
           value: string[];
         }) => {
-          expect(type).toEqual('ip');
-          expect(listId).toEqual('ci-badguys.txt');
-          const toReturn = value.slice(0, 2).map((item) => ({
+          outerType = type;
+          outerListId = listId;
+          return value.slice(0, 2).map((item) => ({
             value: item,
           }));
-          return (toReturn as unknown) as ListItemArraySchema;
         },
       } as unknown) as ListClient,
       exceptionsList: [
@@ -155,6 +162,8 @@ describe('filterEventsAgainstList', () => {
         '7.7.7.7',
       ]),
     });
+    expect(outerType).toEqual('ip');
+    expect(outerListId).toEqual('ci-badguys.txt');
     expect(res.hits.hits.length).toEqual(2);
   });
 });

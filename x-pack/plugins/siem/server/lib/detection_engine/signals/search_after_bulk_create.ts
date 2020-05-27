@@ -140,19 +140,17 @@ export const searchAfterAndBulkCreate = async ({
 
       // filter out the search results that match with the values found in the list.
       // the resulting set are valid signals that are not on the allowlist.
-      let filteredEvents;
-      if (listClient != null) {
-        filteredEvents = await filterEventsAgainstList({
-          listClient,
-          exceptionsList,
-          logger,
-          eventSearchResult: searchResult,
-        });
-      } else {
-        filteredEvents = searchResult;
-      }
+      const filteredEvents =
+        listClient != null
+          ? await filterEventsAgainstList({
+              listClient,
+              exceptionsList,
+              logger,
+              eventSearchResult: searchResult,
+            })
+          : searchResult;
 
-      if (filteredEvents != null && filteredEvents.hits.hits.length === 0) {
+      if (filteredEvents.hits.hits.length === 0) {
         // everything in the events were allowed, so no need to generate signals
         toReturn.success = true;
         return toReturn;
@@ -196,7 +194,7 @@ export const searchAfterAndBulkCreate = async ({
         toReturn.bulkCreateTimes.push(bulkDuration);
       }
 
-      if (filteredEvents?.hits?.hits[0]?.sort == null) {
+      if (filteredEvents.hits.hits[0].sort == null) {
         logger.debug('sortIds was empty on search');
         toReturn.success = true;
         return toReturn; // no more search results

@@ -12,6 +12,8 @@ import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/c
 import { isJobStarted, isMlRule } from '../../../../common/machine_learning/helpers';
 import { SetupPlugins } from '../../../plugin';
 
+import { ListClient } from '../../../../../lists/server';
+
 import { getInputIndex } from './get_input_output_index';
 import {
   searchAfterAndBulkCreate,
@@ -32,6 +34,7 @@ import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
+import { hasListsFeature } from '../feature_flags';
 
 export const signalRulesAlertType = ({
   logger,
@@ -96,7 +99,6 @@ export const signalRulesAlertType = ({
         'alert',
         alertId
       );
-      // const list = await services. // maybe add lists here?
       const {
         actions,
         name,
@@ -208,11 +210,8 @@ export const signalRulesAlertType = ({
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
         } else {
-          let listClient;
-          if (
-            process.env.ELASTIC_XPACK_SIEM_EXCEPTIONS_LISTS &&
-            process.env.ELASTIC_XPACK_SIEM_EXCEPTIONS_LISTS === 'true'
-          ) {
+          let listClient: ListClient | undefined;
+          if (hasListsFeature()) {
             if (lists == null) {
               throw new Error('lists plugin unavailable during rule execution');
             }

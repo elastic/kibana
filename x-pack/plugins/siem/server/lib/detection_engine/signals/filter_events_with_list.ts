@@ -6,7 +6,6 @@
 import { get } from 'lodash/fp';
 import { Logger } from 'src/core/server';
 
-import { ListItemArraySchema } from '../../../../../lists/common/schemas/response';
 import { type } from '../../../../../lists/common/schemas/common';
 import { ListClient } from '../../../../../lists/server';
 import { SignalSearchResponse, SearchTypes } from './types';
@@ -39,7 +38,9 @@ export const filterEventsAgainstList = async ({
         throw new Error('Malformed exception list provided');
       }
       if (!type.is(exceptionItem.values[0].name)) {
-        throw new Error(`Unsupported list type used, please use one of ${type.keys}`);
+        throw new Error(
+          `Unsupported list type used, please use one of ${Object.keys(type.keys).join()}`
+        );
       }
       if (!exceptionItem.values[0].id) {
         throw new Error(`Missing list id for exception on field ${exceptionItem.field}`);
@@ -47,20 +48,22 @@ export const filterEventsAgainstList = async ({
       // acquire the list values we are checking for.
       const valuesOfGivenType = eventSearchResult.hits.hits.reduce((acc, searchResultItem) => {
         const valueField = get(exceptionItem.field, searchResultItem._source);
-        if (valueField != null && isStringableType(valueField) && !acc.has(valueField.toString())) {
+        if (valueField != null && isStringableType(valueField)) {
           acc.add(valueField.toString());
         }
         return acc;
       }, new Set<string>());
 
-      const listSignals: ListItemArraySchema = await listClient.getListItemByValues({
+      // matched will contain any list items that matched with the
+      // values passed in from the Set.
+      const matchedListItems = await listClient.getListItemByValues({
         listId: exceptionItem.values[0].id,
         type: exceptionItem.values[0].name,
         value: [...valuesOfGivenType],
       });
 
-      // create a set of list values that were a hit
-      const badSet = new Set<SearchTypes>(listSignals.map((item) => item.value));
+      // create a set of list values that were a hit - easier to work with
+      const matchedListItemsSet = new Set<SearchTypes>(matchedListItems.map((item) => item.value));
 
       // do a single search after with these values.
       // painless script to do nested query in elasticsearch
@@ -68,7 +71,7 @@ export const filterEventsAgainstList = async ({
       const filteredEvents = eventSearchResult.hits.hits.filter((item) => {
         const eventItem = get(exceptionItem.field, item._source);
         if (eventItem != null) {
-          return !badSet.has(eventItem);
+          return !matchedListItemsSet.has(eventItem);
         }
         return false;
       });
