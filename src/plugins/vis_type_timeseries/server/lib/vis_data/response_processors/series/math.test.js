@@ -98,7 +98,7 @@ describe('math(resp, panel, series)', () => {
   });
 
   test('creates a series', () => {
-    const next = mathAgg(resp, panel, series)(results => results);
+    const next = mathAgg(resp, panel, series)((results) => results);
     const results = stdMetric(resp, panel, series)(next)([]);
     expect(results).toHaveLength(1);
 
@@ -120,7 +120,7 @@ describe('math(resp, panel, series)', () => {
 
   test('turns division by zero into null values', () => {
     resp.aggregations.test.buckets[0].timeseries.buckets[0].mincpu = 0;
-    const next = mathAgg(resp, panel, series)(results => results);
+    const next = mathAgg(resp, panel, series)((results) => results);
     const results = stdMetric(resp, panel, series)(next)([]);
     expect(results).toHaveLength(1);
 
@@ -137,12 +137,12 @@ describe('math(resp, panel, series)', () => {
   test('throws on actual tinymath expression errors', () => {
     series.metrics[2].script = 'notExistingFn(params.a)';
     expect(() =>
-      stdMetric(resp, panel, series)(mathAgg(resp, panel, series)(results => results))([])
+      stdMetric(resp, panel, series)(mathAgg(resp, panel, series)((results) => results))([])
     ).toThrow();
 
     series.metrics[2].script = 'divide(params.a, params.b';
     expect(() =>
-      stdMetric(resp, panel, series)(mathAgg(resp, panel, series)(results => results))([])
+      stdMetric(resp, panel, series)(mathAgg(resp, panel, series)((results) => results))([])
     ).toThrow();
   });
 });
