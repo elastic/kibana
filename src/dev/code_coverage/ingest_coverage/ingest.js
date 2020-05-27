@@ -39,7 +39,8 @@ export const ingest = (log) => async (body) => {
   } else {
     try {
       log.debug(`### Actually sending to: ${green(index)}`);
-      await client.index({ index, body });
+      const pipeline = process.env.PIPELINE_NAME || 'team_assignment';
+      await client.index({ index, body, pipeline });
       logSuccess(log, index, body);
     } catch (e) {
       throw createFailError(errMsg(index, body, e));
