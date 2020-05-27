@@ -5,11 +5,12 @@
  */
 import Boom from 'boom';
 
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
+import { kibanaResponseFactory } from '../../../../../../src/core/server';
 import { register } from './get_route';
 import { API_BASE_PATH } from '../../../common/constants';
 import { LicenseStatus } from '../../types';
 
+import { xpackMocks } from '../../../../../mocks';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -59,13 +60,8 @@ describe('GET remote clusters', () => {
         headers: { authorization: 'foo' },
       });
 
-      const mockContext = ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClusterClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext;
+      const mockContext = xpackMocks.createRequestHandlerContext();
+      mockContext.core.elasticsearch.legacy.client = mockScopedClusterClient;
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 

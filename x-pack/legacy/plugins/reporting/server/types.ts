@@ -162,6 +162,7 @@ export type ScreenshotsObservableFn = ({
 
 export interface ReportingSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
+  licensing: LicensingPluginSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
