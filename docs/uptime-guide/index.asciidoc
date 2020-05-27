@@ -12,3 +12,13 @@ include::install.asciidoc[]
 
 include::deployment-arch.asciidoc[]
 
+include::app-overview.asciidoc[]
+
+include::monitor.asciidoc[]
+
+include::settings.asciidoc[]
+
+include::certificates.asciidoc[]
+
+include::alerting.asciidoc[]
+

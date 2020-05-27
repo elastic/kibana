@@ -109,5 +109,5 @@ Depending on the features you have installed and configured, you may also be abl
 
 * Select *View APM* to <<traces, view APM traces>> in the *APM* app.
 
-* Select *View Uptime* to <<uptime-overview, view uptime information>> in the *Uptime* app.
+* Select *View Uptime* to {uptime-guide}/uptime-app-overview.html[view uptime information] in the *Uptime* app.
 

@@ -96,5 +96,5 @@ When the machine learning anomaly detection features are enabled, click *Log rat
 To see other actions related to the event, click *Actions* in the log event details.
 Depending on the event and the features you have configured, you may also be able to:
 
-* Select *View status in Uptime* to <<uptime-overview, view related uptime information>> in the *Uptime* app.
+* Select *View status in Uptime* to {uptime-guide}/uptime-app-overview.html[view related uptime information] in the *Uptime* app.
 * Select *View in APM* to <<traces, view related APM traces>> in the *APM* app.
