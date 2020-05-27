@@ -7,8 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-
-import { getToasts } from '../kibana_services';
+import { getToasts, getHttp } from '../kibana_services';
 import {
   EuiTitle,
   EuiFieldSearch,
@@ -28,6 +27,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
+import {
+  createMapPath,
+  MAP_BASE_URL
+} from "../../common/constants";
 
 export const EMPTY_FILTER = '';
 
@@ -307,7 +310,7 @@ export class MapListing extends React.Component {
         sortable: true,
         render: (field, record) => (
           <EuiLink
-            href={`#/map/${record.id}`}
+            href={createMapPath(record.id)}
             data-test-subj={`mapListingTitleLink-${record.title.split(' ').join('-')}`}
           >
             {field}
@@ -369,9 +372,10 @@ export class MapListing extends React.Component {
 
   renderListing() {
     let createButton;
+    let createMapPath = getHttp().basePath.prepend(MAP_BASE_URL);
     if (!this.props.readOnly) {
       createButton = (
-        <EuiButton href={`#/map`} data-test-subj="newMapLink" fill>
+        <EuiButton href={createMapPath} data-test-subj="newMapLink" fill>
           <FormattedMessage
             id="xpack.maps.mapListing.createMapButtonLabel"
             defaultMessage="Create map"
