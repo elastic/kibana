@@ -107,7 +107,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
               event.preventDefault();
               core.application.navigateToApp(app, {
                 path: `${rest.join('/')}${
-                  parsed.search ? `&${parsed.search}` : ''
+                  parsed.search ? `${parsed.search}` : ''
                 }`,
               });
             }
