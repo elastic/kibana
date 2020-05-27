@@ -5,11 +5,11 @@
  */
 
 import { EventEmitter } from 'events';
-import { ConditionalHeaders, ESQueueCreateJobFn, RequestFacade } from '../../server/types';
-import { ReportingCore } from '../core';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { ESQueueCreateJobFn } from '../../server/types';
+import { ReportingCore, ReportingInternalSetup } from '../core';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
-import { LevelLogger } from './level_logger';
 
 interface ConfirmedJob {
   id: string;
@@ -28,28 +28,27 @@ export type Job = EventEmitter & {
 export type EnqueueJobFn = <JobParamsType>(
   exportTypeId: string,
   jobParams: JobParamsType,
-  user: string,
-  headers: Record<string, string>,
-  request: RequestFacade
+  username: string,
+  context: RequestHandlerContext,
+  request: KibanaRequest
 ) => Promise<Job>;
 
 export function enqueueJobFactory(
   reporting: ReportingCore,
-  parentLogger: LevelLogger
+  deps: ReportingInternalSetup
 ): EnqueueJobFn {
   const config = reporting.getConfig();
   const queueTimeout = config.get('queue', 'timeout');
   const browserType = config.get('capture', 'browser', 'type');
   const maxAttempts = config.get('capture', 'maxAttempts');
-
-  const logger = parentLogger.clone(['queue-job']);
+  const logger = deps.logger.clone(['queue-job']);
 
   return async function enqueueJob<JobParamsType>(
     exportTypeId: string,
     jobParams: JobParamsType,
     username: string,
-    headers: ConditionalHeaders['headers'],
-    request: RequestFacade
+    context: RequestHandlerContext,
+    request: KibanaRequest
   ): Promise<Job> {
     type CreateJobFn = ESQueueCreateJobFn<JobParamsType>;
 
@@ -60,8 +59,8 @@ export function enqueueJobFactory(
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    const createJob = exportType.createJobFactory(reporting, logger) as CreateJobFn;
-    const payload = await createJob(jobParams, headers, request);
+    const createJob = exportType.createJobFactory(reporting, deps) as CreateJobFn;
+    const payload = await createJob(jobParams, context, request);
 
     const options = {
       timeout: queueTimeout,

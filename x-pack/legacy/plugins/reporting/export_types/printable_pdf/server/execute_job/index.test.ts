@@ -14,6 +14,7 @@ import { createMockReportingCore } from '../../../../test_helpers';
 import { JobDocPayloadPDF } from '../../types';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { executeJobFactory } from './index';
+import { ReportingInternalSetup } from '../../../../server/core';
 
 let mockReporting: ReportingCore;
 
@@ -28,7 +29,10 @@ const mockLoggerFactory = {
     warn: jest.fn(),
   })),
 };
-const getMockLogger = () => new LevelLogger(mockLoggerFactory);
+const getMockDeps = () =>
+  ({
+    logger: new LevelLogger(mockLoggerFactory),
+  } as ReportingInternalSetup);
 
 const mockEncryptionKey = 'testencryptionkey';
 const encryptHeaders = async (headers: Record<string, string>) => {
@@ -75,7 +79,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
   const generatePdfObservable = (await generatePdfObservableFactory(mockReporting)) as jest.Mock;
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
+  const executeJob = await executeJobFactory(mockReporting, getMockDeps());
   const browserTimezone = 'UTC';
   await executeJob(
     'pdfJobId',
@@ -123,8 +127,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
 });
 
 test(`returns content_type of application/pdf`, async () => {
-  const logger = getMockLogger();
-  const executeJob = await executeJobFactory(mockReporting, logger);
+  const executeJob = await executeJobFactory(mockReporting, getMockDeps());
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = await generatePdfObservableFactory(mockReporting);
@@ -143,7 +146,7 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const generatePdfObservable = await generatePdfObservableFactory(mockReporting);
   (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
-  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
+  const executeJob = await executeJobFactory(mockReporting, getMockDeps());
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await executeJob(
     'pdfJobId',

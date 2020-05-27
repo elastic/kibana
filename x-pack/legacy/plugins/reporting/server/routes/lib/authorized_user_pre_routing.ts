@@ -4,28 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { KibanaRequest, RequestHandler, RouteMethod } from 'src/core/server';
+import { RequestHandler, RouteMethod } from 'src/core/server';
 import { AuthenticatedUser } from '../../../../../../plugins/security/server';
-import { ReportingConfig } from '../../../server';
 import { getUserFactory } from '../../lib/get_user';
-import { ReportingSetupDeps } from '../../types';
+import { ReportingInternalSetup, ReportingCore } from '../../core';
 
 const superuserRole = 'superuser';
-
-export type PreRoutingFunction = (
-  request: KibanaRequest
-) => Promise<Boom<null> | AuthenticatedUser | null>;
 
 export type RequestHandlerUser = RequestHandler extends (...a: infer U) => infer R
   ? (user: AuthenticatedUser, ...a: U) => R
   : never;
 
 export const authorizedUserPreRoutingFactory = function authorizedUserPreRoutingFn(
-  config: ReportingConfig,
-  plugins: ReportingSetupDeps
+  core: ReportingCore,
+  deps: ReportingInternalSetup
 ) {
-  const getUser = getUserFactory(plugins.security);
+  const config = core.getConfig();
+  const getUser = getUserFactory(deps.security);
 
   return <P, Q, B>(handler: RequestHandlerUser): RequestHandler<P, Q, B, RouteMethod> => {
     return (context, req, res) => {

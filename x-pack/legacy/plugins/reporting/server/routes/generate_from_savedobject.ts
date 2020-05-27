@@ -6,16 +6,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { IRouter, IBasePath } from 'src/core/server';
 import { isoStringValidate } from '../lib/iso_string_validate';
 import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
 import { ReportingCore } from '../';
 import { API_BASE_GENERATE_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
-import { LevelLogger as Logger } from '../lib';
-import { ReportingSetupDeps } from '../types';
-import { makeRequestFacade } from './lib/make_request_facade';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
+import { ReportingInternalSetup } from '../core';
 
 /*
  * This function registers API Endpoints for queuing Reporting jobs. The API inputs are:
@@ -28,14 +25,12 @@ import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routi
  */
 export function registerGenerateCsvFromSavedObject(
   reporting: ReportingCore,
-  plugins: ReportingSetupDeps,
-  router: IRouter,
-  basePath: IBasePath['get'],
+  deps: ReportingInternalSetup,
   handleRoute: HandlerFunction,
-  handleRouteError: HandlerErrorFunction,
-  logger: Logger
+  handleRouteError: HandlerErrorFunction
 ) {
-  const userHandler = authorizedUserPreRoutingFactory(reporting.getConfig(), plugins);
+  const userHandler = authorizedUserPreRoutingFactory(reporting, deps);
+  const { router } = deps;
   router.post(
     {
       path: `${API_BASE_GENERATE_V1}/csv/saved-object/{savedObjectType}:{savedObjectId}`,
@@ -59,7 +54,6 @@ export function registerGenerateCsvFromSavedObject(
       },
     },
     userHandler(async (user, context, req, res) => {
-      const requestFacade = makeRequestFacade(context, req, basePath);
       const { username } = user;
 
       /*
@@ -69,12 +63,13 @@ export function registerGenerateCsvFromSavedObject(
        */
       let result: QueuedJobPayload<any>;
       try {
-        const jobParams = getJobParamsFromRequest(requestFacade, { isImmediate: false });
+        const jobParams = getJobParamsFromRequest(req, { isImmediate: false });
         result = await handleRoute(
           username,
           CSV_FROM_SAVEDOBJECT_JOB_TYPE,
           jobParams,
-          requestFacade,
+          context,
+          req,
           res
         );
       } catch (err) {

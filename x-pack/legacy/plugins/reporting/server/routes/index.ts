@@ -4,20 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter, IBasePath } from 'src/core/server';
-import { LevelLogger as Logger } from '../lib';
-import { ReportingSetupDeps } from '../types';
 import { registerJobGenerationRoutes } from './generation';
 import { registerJobInfoRoutes } from './jobs';
-import { ReportingCore } from '..';
+import { ReportingCore, ReportingInternalSetup } from '../core';
 
-export function registerRoutes(
-  reporting: ReportingCore,
-  plugins: ReportingSetupDeps,
-  router: IRouter,
-  basePath: IBasePath['get'],
-  logger: Logger
-) {
-  registerJobGenerationRoutes(reporting, plugins, router, basePath, logger);
-  registerJobInfoRoutes(reporting, plugins, router);
+export function registerRoutes(reporting: ReportingCore, deps: ReportingInternalSetup) {
+  registerJobGenerationRoutes(reporting, deps);
+  registerJobInfoRoutes(reporting, deps);
 }

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter, IBasePath } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { ReportingCore } from '../';
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
@@ -12,10 +11,9 @@ import { createJobFactory, executeJobFactory } from '../../export_types/csv_from
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
 import { isoStringValidate } from '../lib/iso_string_validate';
-import { makeRequestFacade } from './lib/make_request_facade';
-import { LevelLogger as Logger } from '../lib';
-import { JobDocOutput, ReportingSetupDeps } from '../types';
+import { JobDocOutput } from '../types';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
+import { ReportingInternalSetup } from '../core';
 
 /*
  * This function registers API Endpoints for immediate Reporting jobs. The API inputs are:
@@ -28,12 +26,11 @@ import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routi
  */
 export function registerGenerateCsvFromSavedObjectImmediate(
   reporting: ReportingCore,
-  plugins: ReportingSetupDeps,
-  router: IRouter,
-  basePath: IBasePath['get'],
-  parentLogger: Logger
+  deps: ReportingInternalSetup
 ) {
-  const userHandler = authorizedUserPreRoutingFactory(reporting.getConfig(), plugins);
+  const userHandler = authorizedUserPreRoutingFactory(reporting, deps);
+  const { router } = deps;
+
   /*
    * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:
    *  - re-use the createJob function to build up es query config
@@ -62,21 +59,21 @@ export function registerGenerateCsvFromSavedObjectImmediate(
       },
     },
     userHandler(async (user, context, req, res) => {
-      const request = makeRequestFacade(context, req, basePath);
-      const logger = parentLogger.clone(['savedobject-csv']);
-      const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
-      const createJobFn = createJobFactory(reporting, logger);
-      const executeJobFn = await executeJobFactory(reporting, logger); // FIXME: does not "need" to be async
+      const logger = deps.logger.clone(['savedobject-csv']);
+      const jobParams = getJobParamsFromRequest(req, { isImmediate: true });
+      const createJobFn = createJobFactory(reporting, deps);
+      const executeJobFn = await executeJobFactory(reporting, deps); // FIXME: does not "need" to be async
       const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
         jobParams,
-        request.headers,
-        request
+        req.headers,
+        context,
+        req
       );
       const {
         content_type: jobOutputContentType,
         content: jobOutputContent,
         size: jobOutputSize,
-      }: JobDocOutput = await executeJobFn(null, jobDocPayload, request);
+      }: JobDocOutput = await executeJobFn(null, jobDocPayload, context, req);
 
       logger.info(`Job output size: ${jobOutputSize} bytes`);
 

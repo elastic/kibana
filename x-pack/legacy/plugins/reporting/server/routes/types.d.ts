@@ -4,21 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kibanaResponseFactory } from 'src/core/server';
-import { JobDocPayload, RequestFacade } from '../types';
+import { KibanaResponseFactory, KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { JobDocPayload } from '../types';
 
 export type HandlerFunction = (
   username: string,
   exportType: string,
   jobParams: object,
-  request: RequestFacade,
-  h: typeof kibanaResponseFactory
+  context: RequestHandlerContext,
+  req: KibanaRequest,
+  res: KibanaResponseFactory
 ) => any;
 
 export type HandlerErrorFunction = (
   exportType: string,
   err: Error,
-  res: typeof kibanaResponseFactory
+  res: KibanaResponseFactory
 ) => any;
 
 export interface QueuedJobPayload<JobParamsType> {

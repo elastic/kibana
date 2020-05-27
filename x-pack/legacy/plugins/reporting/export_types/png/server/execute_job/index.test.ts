@@ -12,6 +12,7 @@ import { createMockReportingCore } from '../../../../test_helpers';
 import { JobDocPayloadPNG } from '../../types';
 import { generatePngObservableFactory } from '../lib/generate_png';
 import { executeJobFactory } from './index';
+import { ReportingInternalSetup } from '../../../../server/core';
 
 jest.mock('../lib/generate_png', () => ({ generatePngObservableFactory: jest.fn() }));
 
@@ -28,7 +29,10 @@ const mockLoggerFactory = {
     warn: jest.fn(),
   })),
 };
-const getMockLogger = () => new LevelLogger(mockLoggerFactory);
+const getMockDeps = () =>
+  ({
+    logger: new LevelLogger(mockLoggerFactory),
+  } as ReportingInternalSetup);
 
 const mockEncryptionKey = 'abcabcsecuresecret';
 const encryptHeaders = async (headers: Record<string, string>) => {
@@ -77,7 +81,7 @@ test(`passes browserTimezone to generatePng`, async () => {
   const generatePngObservable = (await generatePngObservableFactory(mockReporting)) as jest.Mock;
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
+  const executeJob = await executeJobFactory(mockReporting, getMockDeps());
   const browserTimezone = 'UTC';
   await executeJob(
     'pngJobId',
@@ -121,7 +125,7 @@ test(`passes browserTimezone to generatePng`, async () => {
 });
 
 test(`returns content_type of application/png`, async () => {
-  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
+  const executeJob = await executeJobFactory(mockReporting, getMockDeps());
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePngObservable = await generatePngObservableFactory(mockReporting);
@@ -140,7 +144,7 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   const generatePngObservable = await generatePngObservableFactory(mockReporting);
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ base64: testContent }));
 
-  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
+  const executeJob = await executeJobFactory(mockReporting, getMockDeps());
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await executeJob(
     'pngJobId',

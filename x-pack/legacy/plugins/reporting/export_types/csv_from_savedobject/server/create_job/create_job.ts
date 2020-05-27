@@ -6,10 +6,12 @@
 
 import { notFound, notImplemented } from 'boom';
 import { get } from 'lodash';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { ReportingInternalSetup } from '../../../../server/core';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
-import { cryptoFactory, LevelLogger } from '../../../../server/lib';
-import { CreateJobFactory, RequestFacade, TimeRangeParams } from '../../../../server/types';
+import { cryptoFactory } from '../../../../server/lib';
+import { CreateJobFactory, TimeRangeParams } from '../../../../server/types';
 import {
   JobDocPayloadPanelCsv,
   JobParamsPanelCsv,
@@ -23,8 +25,9 @@ import { createJobSearch } from './create_job_search';
 
 export type ImmediateCreateJobFn<JobParamsType> = (
   jobParams: JobParamsType,
-  headers: Record<string, string>,
-  req: RequestFacade
+  headers: KibanaRequest['headers'],
+  context: RequestHandlerContext,
+  req: KibanaRequest
 ) => Promise<{
   type: string | null;
   title: string;
@@ -39,22 +42,22 @@ interface VisData {
 
 export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
   JobParamsPanelCsv
->> = function createJobFactoryFn(reporting: ReportingCore, parentLogger: LevelLogger) {
+>> = function createJobFactoryFn(reporting: ReportingCore, deps: ReportingInternalSetup) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
-  const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
+  const logger = deps.logger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
   return async function createJob(
     jobParams: JobParamsPanelCsv,
-    headers: any,
-    req: RequestFacade
+    headers: KibanaRequest['headers'],
+    context: RequestHandlerContext,
+    req: KibanaRequest
   ): Promise<JobDocPayloadPanelCsv> {
     const { savedObjectType, savedObjectId } = jobParams;
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
-    const client = req.getSavedObjectsClient();
 
     const { panel, title, visType }: VisData = await Promise.resolve()
-      .then(() => client.get(savedObjectType, savedObjectId))
+      .then(() => context.core.savedObjects.client.get(savedObjectType, savedObjectId))
       .then(async (savedObject: SavedObject) => {
         const { attributes, references } = savedObject;
         const {

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { ElasticsearchServiceSetup, kibanaResponseFactory } from 'kibana/server';
 import { ReportingConfig } from '../../';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';

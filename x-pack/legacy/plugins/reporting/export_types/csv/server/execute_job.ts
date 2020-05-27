@@ -9,19 +9,20 @@ import Hapi from 'hapi';
 import { IUiSettingsClient, KibanaRequest } from '../../../../../../../src/core/server';
 import { CSV_BOM_CHARS, CSV_JOB_TYPE } from '../../../common/constants';
 import { ReportingCore } from '../../../server';
-import { cryptoFactory, LevelLogger } from '../../../server/lib';
+import { cryptoFactory } from '../../../server/lib';
 import { getFieldFormats } from '../../../server/services';
 import { ESQueueWorkerExecuteFn, ExecuteJobFactory } from '../../../server/types';
 import { JobDocPayloadDiscoverCsv } from '../types';
 import { fieldFormatMapFactory } from './lib/field_format_map';
 import { createGenerateCsv } from './lib/generate_csv';
+import { ReportingInternalSetup } from '../../../server/core';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadDiscoverCsv
->> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: LevelLogger) {
+>> = async function executeJobFactoryFn(reporting: ReportingCore, deps: ReportingInternalSetup) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
-  const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job']);
+  const logger = deps.logger.clone([CSV_JOB_TYPE, 'execute-job']);
   const serverBasePath = config.kbnConfig.get('server', 'basePath');
 
   return async function executeJob(

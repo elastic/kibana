@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestFacade } from '../../../../server/types';
+import { KibanaRequest } from 'src/core/server';
 import { JobParamsPanelCsv, JobParamsPostPayloadPanelCsv } from '../../types';
 
 export function getJobParamsFromRequest(
-  request: RequestFacade,
+  request: KibanaRequest,
   opts: { isImmediate: boolean }
 ): JobParamsPanelCsv {
   const { savedObjectType, savedObjectId } = request.params as {

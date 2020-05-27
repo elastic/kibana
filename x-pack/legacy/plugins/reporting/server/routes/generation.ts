@@ -5,24 +5,20 @@
  */
 
 import { errors as elasticsearchErrors } from 'elasticsearch';
-import { IRouter, IBasePath, kibanaResponseFactory } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { LevelLogger as Logger } from '../lib';
-import { ReportingSetupDeps } from '../types';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { HandlerFunction } from './types';
+import { ReportingInternalSetup } from '../core';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 
 export function registerJobGenerationRoutes(
   reporting: ReportingCore,
-  plugins: ReportingSetupDeps,
-  router: IRouter,
-  basePath: IBasePath['get'],
-  logger: Logger
+  deps: ReportingInternalSetup
 ) {
   const config = reporting.getConfig();
   const downloadBaseUrl =
@@ -31,22 +27,21 @@ export function registerJobGenerationRoutes(
   /*
    * Generates enqueued job details to use in responses
    */
-  const handler: HandlerFunction = async (username, exportTypeId, jobParams, r, h) => {
+  const handler: HandlerFunction = async (username, exportTypeId, jobParams, context, req, res) => {
     const licenseInfo = reporting.getLicenseInfo();
     const licenseResults = licenseInfo[exportTypeId];
 
     if (!licenseResults.enableLinks) {
-      return h.forbidden({ body: licenseResults.message });
+      return res.forbidden({ body: licenseResults.message });
     }
 
-    const { headers } = r;
     const enqueueJob = await reporting.getEnqueueJob();
-    const job = await enqueueJob(exportTypeId, jobParams, username, headers, r);
+    const job = await enqueueJob(exportTypeId, jobParams, username, context, req);
 
     // return the queue's job information
     const jobJson = job.toJSON();
 
-    return h.ok({
+    return res.ok({
       headers: {
         'content-type': 'application/json',
       },
@@ -81,20 +76,11 @@ export function registerJobGenerationRoutes(
     });
   }
 
-  registerGenerateFromJobParams(reporting, plugins, router, basePath, handler, handleError);
+  registerGenerateFromJobParams(reporting, deps, handler, handleError);
 
   // Register beta panel-action download-related API's
   if (config.get('csv', 'enablePanelActionDownload')) {
-    registerGenerateCsvFromSavedObject(
-      reporting,
-      plugins,
-      router,
-      basePath,
-      handler,
-      handleError,
-      logger
-    );
-
-    registerGenerateCsvFromSavedObjectImmediate(reporting, plugins, router, basePath, logger);
+    registerGenerateCsvFromSavedObject(reporting, deps, handler, handleError);
+    registerGenerateCsvFromSavedObjectImmediate(reporting, deps);
   }
 }

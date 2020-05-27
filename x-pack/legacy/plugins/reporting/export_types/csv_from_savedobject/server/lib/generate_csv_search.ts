@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IUiSettingsClient } from '../../../../../../../../src/core/server';
+import { ReportingInternalSetup } from '../../../../server/core';
+import {
+  IUiSettingsClient,
+  KibanaRequest,
+  RequestHandlerContext,
+} from '../../../../../../../../src/core/server';
 import {
   esQuery,
   EsQueryConfig,
@@ -14,8 +19,6 @@ import {
 } from '../../../../../../../../src/plugins/data/server';
 import { CancellationToken } from '../../../../../../../plugins/reporting/common';
 import { ReportingCore } from '../../../../server';
-import { LevelLogger } from '../../../../server/lib';
-import { RequestFacade } from '../../../../server/types';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import {
   CsvResultFromSearch,
@@ -48,13 +51,14 @@ const getUiSettings = async (config: IUiSettingsClient) => {
 };
 
 export async function generateCsvSearch(
-  req: RequestFacade,
   reporting: ReportingCore,
-  logger: LevelLogger,
+  deps: ReportingInternalSetup,
+  context: RequestHandlerContext,
+  req: KibanaRequest,
   searchPanel: SearchPanel,
   jobParams: JobParamsDiscoverCsv
 ): Promise<CsvResultFromSearch> {
-  const savedObjectsClient = req.getSavedObjectsClient();
+  const savedObjectsClient = context.core.savedObjects.client;
   const { indexPatternSavedObjectId, timerange } = searchPanel;
   const savedSearchObjectAttr = searchPanel.attributes;
   const { indexPatternSavedObject } = await getDataSource(
@@ -145,7 +149,7 @@ export async function generateCsvSearch(
 
   const config = reporting.getConfig();
   const elasticsearch = await reporting.getElasticsearchService();
-  const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(req.getRawRequest());
+  const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(req);
   const callCluster = (...params: [string, object]) => callAsCurrentUser(...params);
   const uiSettings = await getUiSettings(uiConfig);
 
@@ -166,7 +170,7 @@ export async function generateCsvSearch(
     },
   };
 
-  const generateCsv = createGenerateCsv(logger);
+  const generateCsv = createGenerateCsv(deps.logger);
 
   return {
     type: 'CSV from Saved Search',

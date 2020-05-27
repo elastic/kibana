@@ -5,27 +5,23 @@
  */
 
 import rison from 'rison-node';
-import { IRouter, IBasePath } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { ReportingSetupDeps } from '../types';
-import { makeRequestFacade } from './lib/make_request_facade';
+import { ReportingInternalSetup } from '../core';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerGenerateFromJobParams(
   reporting: ReportingCore,
-  plugins: ReportingSetupDeps,
-  router: IRouter,
-  basePath: IBasePath['get'],
+  deps: ReportingInternalSetup,
   handler: HandlerFunction,
   handleError: HandlerErrorFunction
 ) {
-  const config = reporting.getConfig();
-  const userHandler = authorizedUserPreRoutingFactory(config, plugins);
+  const userHandler = authorizedUserPreRoutingFactory(reporting, deps);
+  const { router } = deps;
 
   router.post(
     {
@@ -48,14 +44,13 @@ export function registerGenerateFromJobParams(
     },
     userHandler(async (user, context, req, res) => {
       const { username } = user;
-      const request = makeRequestFacade(context, req, basePath);
       let jobParamsRison: string | null;
 
-      if (request.body) {
-        const { jobParams: jobParamsPayload } = request.body as { jobParams: string };
+      if (req.body) {
+        const { jobParams: jobParamsPayload } = req.body as { jobParams: string };
         jobParamsRison = jobParamsPayload;
       } else {
-        const { jobParams: queryJobParams } = request.query as { jobParams: string };
+        const { jobParams: queryJobParams } = req.query as { jobParams: string };
         if (queryJobParams) {
           jobParamsRison = queryJobParams;
         } else {
@@ -70,7 +65,7 @@ export function registerGenerateFromJobParams(
         });
       }
 
-      const { exportType } = request.params as { exportType: string };
+      const { exportType } = req.params as { exportType: string };
       let jobParams;
 
       try {
@@ -89,7 +84,7 @@ export function registerGenerateFromJobParams(
       }
 
       try {
-        return await handler(username, exportType, jobParams, request, res);
+        return await handler(username, exportType, jobParams, context, req, res);
       } catch (err) {
         return handleError(exportType, err, res);
       }

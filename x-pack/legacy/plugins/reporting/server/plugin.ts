@@ -22,7 +22,7 @@ export class ReportingPlugin
   constructor(context: PluginInitializerContext, config: ReportingConfig) {
     this.config = config;
     this.logger = new LevelLogger(context.logger.get('reporting'));
-    this.reportingCore = new ReportingCore(this.logger, this.config);
+    this.reportingCore = new ReportingCore(this.config);
   }
 
   public async setup(core: CoreSetup, plugins: ReportingSetupDeps) {
@@ -31,10 +31,12 @@ export class ReportingPlugin
       elasticsearch,
       __LEGACY,
       licensing: { license$ },
+      security,
     } = plugins;
     const router = core.http.createRouter();
     const basePath = core.http.basePath.get;
     const { xpack_main: xpackMainLegacy, reporting: reportingLegacy } = __LEGACY.plugins;
+    const { logger } = this;
 
     this.reportingCore.legacySetup(xpackMainLegacy, reportingLegacy, __LEGACY);
 
@@ -45,19 +47,29 @@ export class ReportingPlugin
     registerReportingUsageCollector(this.reportingCore, plugins);
 
     // regsister setup internals
-    this.reportingCore.pluginSetup({ browserDriverFactory, elasticsearch, license$ });
+    this.reportingCore.pluginSetup({
+      browserDriverFactory,
+      elasticsearch,
+      license$,
+      basePath,
+      router,
+      security,
+      logger,
+    });
 
     // Setup routing
-    this.reportingCore.setupRoutes(plugins, router, basePath);
+    this.reportingCore.setupRoutes();
 
     return {};
   }
 
   public async start(core: CoreStart, plugins: ReportingStartDeps) {
-    const { reportingCore, logger } = this;
+    const { reportingCore } = this;
 
-    const esqueue = await createQueueFactory(reportingCore, logger);
-    const enqueueJob = enqueueJobFactory(reportingCore, logger);
+    const deps = await reportingCore.getPluginSetupDeps();
+    const esqueue = await createQueueFactory(reportingCore, deps);
+
+    const enqueueJob = enqueueJobFactory(reportingCore, deps);
 
     this.reportingCore.pluginStart({
       savedObjects: core.savedObjects,

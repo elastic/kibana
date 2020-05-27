@@ -7,9 +7,9 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { ReportingInternalSetup } from '../../../../server/core';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
-import { LevelLogger } from '../../../../server/lib';
 import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput } from '../../../../server/types';
 import {
   decryptJobHeaders,
@@ -24,11 +24,11 @@ type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocP
 
 export const executeJobFactory: QueuedPngExecutorFactory = async function executeJobFactoryFn(
   reporting: ReportingCore,
-  parentLogger: LevelLogger
+  deps: ReportingInternalSetup
 ) {
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
-  const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);
+  const logger = deps.logger.clone([PNG_JOB_TYPE, 'execute']);
 
   return async function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
     const apmTrans = apm.startTransaction('reporting execute_job png', 'reporting');

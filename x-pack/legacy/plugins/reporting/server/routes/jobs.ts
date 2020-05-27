@@ -5,17 +5,16 @@
  */
 
 import Boom from 'boom';
-import { IRouter } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { jobsQueryFactory } from '../lib/jobs_query';
-import { ReportingSetupDeps } from '../types';
 import {
   deleteJobResponseHandlerFactory,
   downloadJobResponseHandlerFactory,
 } from './lib/job_response_handler';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
+import { ReportingInternalSetup } from '../core';
 
 interface ListQuery {
   page: string;
@@ -26,12 +25,11 @@ const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
 export async function registerJobInfoRoutes(
   reporting: ReportingCore,
-  plugins: ReportingSetupDeps,
-  router: IRouter
+  deps: ReportingInternalSetup
 ) {
   const config = reporting.getConfig();
-  const userHandler = authorizedUserPreRoutingFactory(config, plugins);
-  const { elasticsearch } = plugins;
+  const userHandler = authorizedUserPreRoutingFactory(reporting, deps);
+  const { elasticsearch, router } = deps;
   const jobsQuery = jobsQueryFactory(config, elasticsearch);
 
   // list jobs in the queue, paginated

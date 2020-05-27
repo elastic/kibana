@@ -12,9 +12,10 @@ import {
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
   IRouter,
-  IBasePath,
   SavedObjectsClientContract,
+  BasePath,
 } from 'src/core/server';
+import { SecurityPluginSetup } from '../../../../plugins/security/server';
 import { ReportingPluginSpecOptions } from '../';
 // @ts-ignore no module definition
 import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
@@ -28,12 +29,15 @@ import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
 import { ESQueueInstance } from './lib/create_queue';
 import { EnqueueJobFn } from './lib/enqueue_job';
 import { registerRoutes } from './routes';
-import { ReportingSetupDeps } from './types';
 
-interface ReportingInternalSetup {
+export interface ReportingInternalSetup {
   browserDriverFactory: HeadlessChromiumDriverFactory;
   elasticsearch: ElasticsearchServiceSetup;
   license$: Rx.Observable<ILicense>;
+  basePath: BasePath['get'];
+  router: IRouter;
+  security: SecurityPluginSetup;
+  logger: LevelLogger;
 }
 
 interface ReportingInternalStart {
@@ -51,7 +55,7 @@ export class ReportingCore {
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>();
   private exportTypesRegistry = getExportTypesRegistry();
 
-  constructor(private logger: LevelLogger, private config: ReportingConfig) {}
+  constructor(private config: ReportingConfig) {}
 
   legacySetup(
     xpackMainPlugin: XPackMainPlugin,
@@ -62,13 +66,14 @@ export class ReportingCore {
     mirrorPluginStatus(xpackMainPlugin, reporting);
   }
 
-  public setupRoutes(plugins: ReportingSetupDeps, router: IRouter, basePath: IBasePath['get']) {
-    registerRoutes(this, plugins, router, basePath, this.logger);
+  public async setupRoutes() {
+    const dep = await this.getPluginSetupDeps();
+    registerRoutes(this, dep);
   }
 
   public pluginSetup(reportingSetupDeps: ReportingInternalSetup) {
     this.pluginSetup$.next(reportingSetupDeps);
-    reportingSetupDeps.license$.subscribe(license => (this.license = license));
+    reportingSetupDeps.license$.subscribe((license) => (this.license = license));
   }
 
   public pluginStart(reportingStartDeps: ReportingInternalStart) {
@@ -107,15 +112,16 @@ export class ReportingCore {
     return screenshotsObservableFactory(this.config.get('capture'), browserDriverFactory);
   }
 
-  /*
-   * Outside dependencies
-   */
-  private async getPluginSetupDeps() {
+  public async getPluginSetupDeps() {
     if (this.pluginSetupDeps) {
       return this.pluginSetupDeps;
     }
     return await this.pluginSetup$.pipe(first()).toPromise();
   }
+
+  /*
+   * Outside dependencies
+   */
 
   private async getPluginStartDeps() {
     if (this.pluginStartDeps) {
