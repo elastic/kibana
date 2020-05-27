@@ -85,7 +85,12 @@ export class HeatmapStyle extends AbstractStyle {
 
     const { colorRampName } = this._descriptor;
     if (colorRampName && colorRampName !== DEFAULT_HEATMAP_COLOR_RAMP_NAME) {
-      const colorStops = getOrdinalColorRampStops(colorRampName, MIN_RANGE, MAX_RANGE, GRADIENT_INTERVALS);
+      const colorStops = getOrdinalColorRampStops(
+        colorRampName,
+        MIN_RANGE,
+        MAX_RANGE,
+        GRADIENT_INTERVALS
+      );
       // TODO handle null
       mbMap.setPaintProperty(layerId, 'heatmap-color', [
         'interpolate',
