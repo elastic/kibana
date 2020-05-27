@@ -23,6 +23,7 @@ import {
   MetaOrUndefined,
   Name,
   NameOrUndefined,
+  NamespaceType,
   PageOrUndefined,
   PerPageOrUndefined,
   SortFieldOrUndefined,
@@ -32,8 +33,6 @@ import {
   _Tags,
   _TagsOrUndefined,
 } from '../../../common/schemas';
-
-import { NamespaceType } from './types';
 
 export interface ConstructorOptions {
   user: string;

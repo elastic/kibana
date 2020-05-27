@@ -9,6 +9,7 @@
 import * as t from 'io-ts';
 
 import { DefaultStringArray, NonEmptyString } from '../types';
+import { DefaultNamespace } from '../types/default_namespace';
 
 export const name = t.string;
 export type Name = t.TypeOf<typeof name>;
@@ -129,3 +130,6 @@ export const cursor = t.string;
 export type Cursor = t.TypeOf<typeof cursor>;
 export const cursorOrUndefined = t.union([cursor, t.undefined]);
 export type CursorOrUndefined = t.TypeOf<typeof cursorOrUndefined>;
+
+export const namespace_type = DefaultNamespace;
+export type NamespaceType = t.TypeOf<typeof namespace_type>;

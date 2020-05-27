@@ -5,10 +5,9 @@
  */
 
 import { SavedObjectsClientContract } from '../../../../../../src/core/server/';
-import { ListId } from '../../../common/schemas';
+import { ListId, NamespaceType } from '../../../common/schemas';
 
 import { findExceptionListItem } from './find_exception_list_item';
-import { NamespaceType } from './types';
 import { getSavedObjectType } from './utils';
 
 const PER_PAGE = 100;

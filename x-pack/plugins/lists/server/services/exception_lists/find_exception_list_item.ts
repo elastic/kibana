@@ -11,6 +11,7 @@ import {
   FilterOrUndefined,
   FoundExceptionListItemSchema,
   ListId,
+  NamespaceType,
   PageOrUndefined,
   PerPageOrUndefined,
   SortFieldOrUndefined,
@@ -19,7 +20,6 @@ import {
 import { SavedObjectType } from '../../saved_objects';
 
 import { getSavedObjectType, transformSavedObjectsToFounExceptionListItem } from './utils';
-import { NamespaceType } from './types';
 import { getExceptionList } from './get_exception_list';
 
 interface FindExceptionListItemOptions {
@@ -61,7 +61,10 @@ export const findExceptionListItem = async ({
       sortOrder,
       type: savedObjectType,
     });
-    return transformSavedObjectsToFounExceptionListItem({ savedObjectsFindResponse });
+    return transformSavedObjectsToFounExceptionListItem({
+      namespaceType,
+      savedObjectsFindResponse,
+    });
   }
 };
 
