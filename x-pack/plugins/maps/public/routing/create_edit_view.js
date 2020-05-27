@@ -18,14 +18,12 @@ import {
   replaceLayerList,
   setMapSettings,
   setQuery,
-} from '../actions/map_actions';
-import { DEFAULT_IS_LAYER_TOC_OPEN, FLYOUT_STATE } from '../reducers/ui';
-import {
   updateFlyout,
   setReadOnly,
   setIsLayerTOCOpen,
   setOpenTOCDetails,
-} from '../actions/ui_actions';
+} from '../actions';
+import { DEFAULT_IS_LAYER_TOC_OPEN, FLYOUT_STATE } from '../reducers/ui';
 import { getFlyoutDisplay, getIsFullScreen } from '../selectors/ui_selectors';
 import { getQueryableUniqueIndexPatternIds, hasDirtyState } from '../selectors/map_selectors';
 import {
@@ -34,6 +32,7 @@ import {
   getToasts,
   getData,
   getUiSettings,
+  getCoreChrome,
 } from '../kibana_services';
 import { copyPersistentState } from '../reducers/util';
 import { getInitialLayers } from '../angular/get_initial_layers';
@@ -46,6 +45,8 @@ import { MapsTopNavMenu } from './top_nav_menu';
 
 export const MapsCreateEditView = withRouter(
   class extends React.Component {
+    visibleSubscription = null;
+
     constructor(props) {
       super(props);
       this.state = {
@@ -57,10 +58,16 @@ export const MapsCreateEditView = withRouter(
         showSaveQuery: getMapsCapabilities().saveQuery,
         layerList: [],
         initialized: false,
+        isVisible: true,
       };
     }
 
     componentDidMount() {
+      // Monitor visibility
+      this.visibleSubscription = getCoreChrome()
+        .getIsVisible$()
+        .subscribe((isVisible) => this.setState({ isVisible }));
+
       const { savedMapId } = this.props.match.params;
       this.initMap(savedMapId);
     }
@@ -94,7 +101,7 @@ export const MapsCreateEditView = withRouter(
     async updateIndexPatterns(nextIndexPatternIds) {
       const { prevIndexPatternIds } = this.state;
       const indexPatterns = [];
-      const getIndexPatternPromises = nextIndexPatternIds.map(async indexPatternId => {
+      const getIndexPatternPromises = nextIndexPatternIds.map(async (indexPatternId) => {
         try {
           const indexPattern = await getIndexPatternService().get(indexPatternId);
           indexPatterns.push(indexPattern);
@@ -164,7 +171,7 @@ export const MapsCreateEditView = withRouter(
       );
     }
 
-    async onQueryChange({ filters, query, time, refresh }) {
+    onQueryChange = async ({ filters, query, time, refresh }) => {
       const { filterManager } = getData().query;
       if (filters) {
         filterManager.setFilters(filters); // Maps and merges filters
@@ -180,7 +187,7 @@ export const MapsCreateEditView = withRouter(
       }
       // this.syncAppAndGlobalState();
       this.dispatchSetQuery(refresh);
-    }
+    };
 
     async _fetchSavedMap(savedObjectId) {
       const savedObjectLoader = getMapsSavedObjectLoader();
@@ -294,6 +301,7 @@ export const MapsCreateEditView = withRouter(
         refreshConfig,
         savedMap,
         initialLayerListConfig,
+        isVisible,
       } = this.state;
       return (
         <div id="maps-plugin" ng-class="{mapFullScreen: isFullScreen}">
@@ -314,6 +322,7 @@ export const MapsCreateEditView = withRouter(
                 );
               }}
               initialLayerListConfig={initialLayerListConfig}
+              isVisible={isVisible}
             />
           ) : null}
           <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>

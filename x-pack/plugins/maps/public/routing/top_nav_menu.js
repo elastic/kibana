@@ -14,6 +14,7 @@ import {
   getToasts,
   getCoreI18n,
   getData,
+  getUiSettings,
 } from '../kibana_services';
 import { enableFullScreen, openMapSettings } from '../actions/ui_actions';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
@@ -36,9 +37,25 @@ export function MapsTopNavMenu(props) {
     refreshConfig,
     setRefreshConfig,
     initialLayerListConfig,
+    isVisible,
   } = props;
   const [indexPatterns, setIndexPatterns] = useState([]);
+  const [savedQuery, setSavedQuery] = useState(null);
   const { filterManager } = getData().query;
+  const showDatePicker = true;
+  const showSaveQuery = getMapsCapabilities().saveQuery;
+  const onClearSavedQuery = () => {
+    setSavedQuery(null);
+    // TODO: Update saved query in state
+    // delete $state.savedQuery;
+    onQueryChange({
+      filters: filterManager.getGlobalFilters(),
+      query: {
+        query: '',
+        language: getUiSettings().get('search:queryLanguage'),
+      },
+    });
+  };
 
   return (
     <TopNavMenu
@@ -47,14 +64,14 @@ export function MapsTopNavMenu(props) {
       indexPatterns={indexPatterns}
       filters={filterManager.getFilters()}
       query={query}
-      onQuerySubmit={function({ dateRange, query }) {
+      onQuerySubmit={function ({ dateRange, query }) {
         onQueryChange({
           query,
           time: dateRange,
           refresh: true,
         });
       }}
-      onFiltersUpdated={function(filters) {
+      onFiltersUpdated={function (filters) {
         onQueryChange({
           filters,
         });
@@ -63,7 +80,7 @@ export function MapsTopNavMenu(props) {
       dateRangeTo={time.to}
       isRefreshPaused={refreshConfig.isPaused}
       refreshInterval={refreshConfig.interval}
-      onRefreshChange={function({ isPaused, refreshInterval }) {
+      onRefreshChange={function ({ isPaused, refreshInterval }) {
         setRefreshConfig(
           {
             isPaused,
@@ -74,15 +91,14 @@ export function MapsTopNavMenu(props) {
         // TODO: Global sync state
         // syncAppAndGlobalState();
       }}
-
-      // showSearchBar="isVisible"
-      // showFilterBar="isVisible"
-      // showDatePicker="showDatePicker"
-      // showSaveQuery="showSaveQuery"
-      // savedQuery="savedQuery"
-      // onSaved="onQuerySaved"
-      // onSavedQueryUpdated="onSavedQueryUpdated"
-      // onClearSavedQuery="onClearSavedQuery"
+      showSearchBar={isVisible}
+      showFilterBar={isVisible}
+      showDatePicker={showDatePicker}
+      showSaveQuery={showSaveQuery}
+      savedQuery={savedQuery}
+      onSaved={setSavedQuery}
+      onSavedQueryUpdated={(savedQuery) => setSavedQuery({ ...savedQuery })}
+      onClearSavedQuery={onClearSavedQuery}
     />
   );
 }
@@ -172,7 +188,7 @@ function topNavConfig(store, savedMap, initialLayerListConfig) {
                   onTitleDuplicate,
                 };
                 return doSave(store, savedMap, saveOptions, initialLayerListConfig).then(
-                  response => {
+                  (response) => {
                     // If the save wasn't successful, put the original values back.
                     if (!response.id || response.error) {
                       savedMap.title = currentTitle;

@@ -15,6 +15,5 @@ export function getInitialTimeFilters({ mapStateJSON, globalState = {} }) {
   }
 
   const defaultTime = getUiSettings().get('timepicker:timeDefaults');
-  console.log(defaultTime);
   return { ...defaultTime, ...globalState.time };
 }
