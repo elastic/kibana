@@ -20,6 +20,7 @@
 /**
  * Provides vislib configuration, throws error if invalid property is accessed without providing defaults
  */
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { vislibTypesConfig as visTypes } from './types';
 import { Data } from './data';
@@ -54,6 +55,6 @@ export class VisConfig {
   }
 
   set(property, value) {
-    return _.set(this._values, property, value);
+    return set(this._values, property, value);
   }
 }

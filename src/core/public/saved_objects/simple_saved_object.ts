@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { get, has, set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { get, has } from 'lodash';
 import { SavedObject as SavedObjectType } from '../../server';
 import { SavedObjectsClientContract } from './saved_objects_client';
 

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { get, set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { get } from 'lodash';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { FormattedData } from '../../../../../plugins/inspector/public';
 import { TabbedTable } from '../tabify';
 import { createFilter } from './create_filter';

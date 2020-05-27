@@ -132,6 +132,7 @@
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.4.0",
     "@elastic/request-crypto": "1.1.4",
+    "@elastic/safer-lodash-set": "0.0.0",
     "@elastic/ui-ace": "0.2.3",
     "@hapi/good-squeeze": "5.2.1",
     "@hapi/wreck": "^15.0.2",

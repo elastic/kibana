@@ -6,7 +6,7 @@
 
 import { encode } from 'rison-node';
 import uuid from 'uuid';
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { colorTransformer, MetricsExplorerColor } from '../../../../../../common/color_palette';
 import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
 import {

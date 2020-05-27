@@ -6,7 +6,8 @@
 
 // @ts-ignore no @typed def
 import keyBy from 'lodash.keyby';
-import { groupBy, get, set, map, sortBy } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { groupBy, get, map, sortBy } from 'lodash';
 import { ExpressionFunctionDefinition, Style } from 'src/plugins/expressions';
 // @ts-ignore untyped local
 import { getColorsFromPalette } from '../../../../common/lib/get_colors_from_palette';

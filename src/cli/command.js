@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import Chalk from 'chalk';
 
@@ -86,7 +87,7 @@ Command.prototype.collectUnknownOptions = function () {
         val = opt[1];
       }
 
-      _.set(opts, opt[0].slice(2), val);
+      set(opts, opt[0].slice(2), val);
     }
 
     return opts;

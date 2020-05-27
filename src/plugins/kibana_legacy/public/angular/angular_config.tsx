@@ -28,7 +28,8 @@ import {
   IRootScopeService,
 } from 'angular';
 import $ from 'jquery';
-import { cloneDeep, forOwn, get, set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { cloneDeep, forOwn, get } from 'lodash';
 import React, { Fragment } from 'react';
 import * as Rx from 'rxjs';
 import { ChromeBreadcrumb, EnvironmentMode, PackageInfo } from 'kibana/public';

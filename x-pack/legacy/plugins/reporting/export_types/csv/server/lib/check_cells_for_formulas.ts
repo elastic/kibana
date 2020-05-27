@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as _ from 'lodash';
+import { pick, keys, values, some } from 'lodash';
 import { cellHasFormulas } from './cell_has_formula';
 
 interface IFlattened {
@@ -12,8 +12,8 @@ interface IFlattened {
 }
 
 export const checkIfRowsHaveFormulas = (flattened: IFlattened, fields: string[]) => {
-  const pruned = _.pick(flattened, fields);
-  const cells = [..._.keys(pruned), ...(_.values(pruned) as string[])];
+  const pruned = pick(flattened, fields);
+  const cells = [...keys(pruned), ...(values(pruned) as string[])];
 
-  return _.some(cells, (cell) => cellHasFormulas(cell));
+  return some(cells, (cell) => cellHasFormulas(cell));
 };

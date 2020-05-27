@@ -535,6 +535,85 @@ module.exports = {
       files: ['test/harden/*.js'],
       rules: allMochaRulesOff,
     },
+    {
+      files: ['**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          2,
+          {
+            paths: [
+              {
+                name: 'lodash',
+                importNames: ['set', 'setWith'],
+                message: 'Please use @elastic/safer-lodash-set instead',
+              },
+              {
+                name: 'lodash.set',
+                message: 'Please use @elastic/safer-lodash-set instead',
+              },
+              {
+                name: 'lodash.setwith',
+                message: 'Please use @elastic/safer-lodash-set instead',
+              },
+              {
+                name: 'lodash/set',
+                message: 'Please use @elastic/safer-lodash-set instead',
+              },
+              {
+                name: 'lodash/setWith',
+                message: 'Please use @elastic/safer-lodash-set instead',
+              },
+            ],
+          },
+        ],
+        'no-restricted-modules': [
+          2,
+          {
+            paths: [
+              {
+                name: 'lodash.set',
+                message: 'Please use @elastic/safer-lodash-set instead',
+              },
+              {
+                name: 'lodash.setwith',
+                message: 'Please use @elastic/safer-lodash-set instead',
+              },
+              {
+                name: 'lodash/set',
+                message: 'Please use @elastic/safer-lodash-set instead',
+              },
+              {
+                name: 'lodash/setWith',
+                message: 'Please use @elastic/safer-lodash-set instead',
+              },
+            ],
+          },
+        ],
+        'no-restricted-properties': [
+          2,
+          {
+            object: 'lodash',
+            property: 'set',
+            message: 'Please use @elastic/safer-lodash-set instead',
+          },
+          {
+            object: '_',
+            property: 'set',
+            message: 'Please use @elastic/safer-lodash-set instead',
+          },
+          {
+            object: 'lodash',
+            property: 'setWith',
+            message: 'Please use @elastic/safer-lodash-set instead',
+          },
+          {
+            object: '_',
+            property: 'setWith',
+            message: 'Please use @elastic/safer-lodash-set instead',
+          },
+        ],
+      },
+    },
 
     /**
      * APM overrides

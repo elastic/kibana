@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { checkLicenseFactory } from '../check_license';
 
 describe('check_license', function () {
