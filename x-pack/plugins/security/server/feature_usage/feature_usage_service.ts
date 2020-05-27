@@ -23,17 +23,17 @@ export interface SecurityFeatureUsageServiceStart {
 
 export class SecurityFeatureUsageService {
   public setup({ featureUsage }: SetupDeps) {
-    featureUsage.register('sub_feature_privileges');
-    featureUsage.register('pre_access_agreement');
+    featureUsage.register('security_sub_feature_privileges');
+    featureUsage.register('security_pre_access_agreement');
   }
 
   public start({ featureUsage }: StartDeps): SecurityFeatureUsageServiceStart {
     return {
       recordPreAccessAgreementUsage() {
-        featureUsage.notifyUsage('pre_access_agreement');
+        featureUsage.notifyUsage('security_pre_access_agreement');
       },
       recordSubFeaturePrivilegeUsage(kibanaPrivileges: Array<Optional<RoleKibanaPrivilege>> = []) {
-        featureUsage.notifyUsage('sub_feature_privileges');
+        featureUsage.notifyUsage('security_sub_feature_privileges');
       },
     };
   }
