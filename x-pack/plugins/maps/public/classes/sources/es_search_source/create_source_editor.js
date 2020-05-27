@@ -64,12 +64,10 @@ export class CreateSourceEditor extends Component {
   }
 
   _onIndexPatternSelect = (indexPatternId) => {
-    this.setState(
-      {
-        indexPatternId,
-      },
-      this._loadIndexPattern(indexPatternId)
-    );
+    this.setState({ indexPatternId }, () => {
+      this._previewLayer();
+      this._loadIndexPattern(indexPatternId);
+    });
   };
 
   _loadIndexPattern = (indexPatternId) => {
@@ -112,7 +110,7 @@ export class CreateSourceEditor extends Component {
       geoFields,
     });
 
-    if (geoFields.length) {
+    if (geoFields.length && !this.state.geoFieldName) {
       // make default selection, prefer aggregatable field over the first available
       const firstAggregatableGeoField = geoFields.find((geoField) => {
         return geoField.aggregatable;

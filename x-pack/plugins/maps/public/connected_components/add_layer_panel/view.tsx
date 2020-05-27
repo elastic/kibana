@@ -17,10 +17,9 @@ interface Props {
   isIndexingReady: boolean;
   isIndexingSuccess: boolean;
   isIndexingTriggered: boolean;
-  previewLayer: (layerDescriptor: LayerDescriptor) => void;
-  removeTransientLayer: () => void;
+  addPreviewLayers: (layerDescriptors: LayerDescriptor[]) => void;
+  promotePreviewLayers: () => void;
   resetIndexing: () => void;
-  selectLayerAndAdd: () => void;
   setIndexingTriggered: () => void;
 }
 
@@ -66,12 +65,12 @@ export class AddLayerPanel extends Component<Props, State> {
         layerDescriptor: null,
         isIndexingSource: false,
       });
-      this.props.removeTransientLayer();
+      this.props.addPreviewLayers([]);
       return;
     }
 
     this.setState({ layerDescriptor, isIndexingSource: !!isIndexingSource });
-    this.props.previewLayer(layerDescriptor);
+    this.props.addPreviewLayers([layerDescriptor]);
   };
 
   _clearLayerData = ({ keepSourceType = false }: { keepSourceType: boolean }) => {
@@ -90,7 +89,7 @@ export class AddLayerPanel extends Component<Props, State> {
     // @ts-ignore
     this.setState(newState);
 
-    this.props.removeTransientLayer();
+    this.props.addPreviewLayers([]);
   };
 
   _onWizardSelect = (layerWizard: LayerWizard) => {
@@ -101,7 +100,7 @@ export class AddLayerPanel extends Component<Props, State> {
     if (this.state.isIndexingSource && !this.props.isIndexingTriggered) {
       this.props.setIndexingTriggered();
     } else {
-      this.props.selectLayerAndAdd();
+      this.props.promotePreviewLayers();
       if (this.state.importView) {
         this.setState({
           layerImportAddReady: false,
