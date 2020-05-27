@@ -99,7 +99,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [
         {
           field: 'source.ip',
-          values_operator: 'excluded',
+          values_operator: 'included',
           values_type: 'list',
           values: [
             {
@@ -175,7 +175,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [
         {
           field: 'source.ip',
-          values_operator: 'excluded',
+          values_operator: 'included',
           values_type: 'list',
           values: [
             {
@@ -296,7 +296,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [
         {
           field: 'source.ip',
-          values_operator: 'excluded',
+          values_operator: 'included',
           values_type: 'list',
           values: [
             {
@@ -350,7 +350,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [
         {
           field: 'source.ip',
-          values_operator: 'excluded',
+          values_operator: 'included',
           values_type: 'list',
           values: [
             {
@@ -420,7 +420,7 @@ describe('searchAfterAndBulkCreate', () => {
       exceptionsList: [
         {
           field: 'source.ip',
-          values_operator: 'excluded',
+          values_operator: 'included',
           values_type: 'list',
           values: [
             {
