@@ -105,6 +105,11 @@ node ingest-data/replay.js --server-url http://localhost:$APM_SERVER_PORT --even
 # Stop if not all events were ingested correctly
 if [ $? -ne 0 ]; then
     printf "\n⚠️  Not all events were ingested correctly. This might affect test tests. \n"
+
+    # stop docker containers
+    cd ${APM_IT_DIR} && ./scripts/compose.py stop > /dev/null && cd -
+
+    printf "Aborting. Please try again."
     exit 1
 fi
 
