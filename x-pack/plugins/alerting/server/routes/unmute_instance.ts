@@ -32,7 +32,7 @@ export const unmuteAlertInstanceRoute = (router: IRouter, licenseState: LicenseS
         tags: ['access:alerting-all'],
       },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
       req: KibanaRequest<TypeOf<typeof paramSchema>, unknown, unknown>,
       res: KibanaResponseFactory

@@ -11,7 +11,7 @@ import {
   EuiPagination,
   EuiPanel,
   EuiSpacer,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
@@ -43,7 +43,7 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
   waterfall,
   exceedsMax,
   isLoading,
-  traceSamples
+  traceSamples,
 }) => {
   const [sampleActivePage, setSampleActivePage] = useState(0);
 
@@ -59,8 +59,8 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
       search: fromQuery({
         ...toQuery(history.location.search),
         transactionId: sample.transactionId,
-        traceId: sample.traceId
-      })
+        traceId: sample.traceId,
+      }),
     });
   };
 
@@ -73,7 +73,7 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
         title={
           <div>
             {i18n.translate('xpack.apm.transactionDetails.traceNotFound', {
-              defaultMessage: 'The selected trace cannot be found'
+              defaultMessage: 'The selected trace cannot be found',
             })}
           </div>
         }
@@ -91,7 +91,7 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
           <EuiTitle size="xs">
             <h5>
               {i18n.translate('xpack.apm.transactionDetails.traceSampleTitle', {
-                defaultMessage: 'Trace sample'
+                defaultMessage: 'Trace sample',
               })}
             </h5>
           </EuiTitle>

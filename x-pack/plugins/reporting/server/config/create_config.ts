@@ -21,7 +21,7 @@ import { ConfigSchema } from './schema';
  */
 export function createConfig$(core: CoreSetup, context: PluginInitializerContext, logger: Logger) {
   return context.config.create<TypeOf<typeof ConfigSchema>>().pipe(
-    map(config => {
+    map((config) => {
       // encryption key
       let encryptionKey = config.encryptionKey;
       if (encryptionKey === undefined) {
@@ -70,7 +70,7 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
         },
       };
     }),
-    mergeMap(async config => {
+    mergeMap(async (config) => {
       if (config.capture.browser.chromium.disableSandbox != null) {
         // disableSandbox was set by user
         return config;
@@ -78,10 +78,7 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
 
       // disableSandbox was not set by user, apply default for OS
       const { os, disableSandbox } = await getDefaultChromiumSandboxDisabled();
-      const osName = [os.os, os.dist, os.release]
-        .filter(Boolean)
-        .map(capitalize)
-        .join(' ');
+      const osName = [os.os, os.dist, os.release].filter(Boolean).map(capitalize).join(' ');
 
       logger.debug(
         i18n.translate('xpack.reporting.serverConfig.osDetected', {

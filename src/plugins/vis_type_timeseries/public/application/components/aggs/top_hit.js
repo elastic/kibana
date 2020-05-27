@@ -103,7 +103,7 @@ const getOrderOptions = () => [
 
 const ORDER_DATE_RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 
-const TopHitAggUi = props => {
+const TopHitAggUi = (props) => {
   const { fields, series, panel } = props;
   const defaults = {
     size: 1,
@@ -126,17 +126,17 @@ const TopHitAggUi = props => {
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
 
-  const field = fields[indexPattern].find(f => f.name === model.field);
+  const field = fields[indexPattern].find((f) => f.name === model.field);
   const aggWithOptions = getAggWithOptions(field, aggWithOptionsRestrictFields);
   const orderOptions = getOrderOptions();
 
   const htmlId = htmlIdGenerator();
 
-  const selectedAggWithOption = aggWithOptions.find(option => {
+  const selectedAggWithOption = aggWithOptions.find((option) => {
     return model.agg_with === option.value;
   });
 
-  const selectedOrderOption = orderOptions.find(option => {
+  const selectedOrderOption = orderOptions.find((option) => {
     return model.order === option.value;
   });
 

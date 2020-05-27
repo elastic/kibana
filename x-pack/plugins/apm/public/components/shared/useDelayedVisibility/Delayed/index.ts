@@ -17,7 +17,7 @@ export class Delayed {
   constructor({
     minimumVisibleDuration = 1000,
     showDelayMs = 50,
-    hideDelayMs = 50
+    hideDelayMs = 50,
   } = {}) {
     this.minimumVisibleDuration = minimumVisibleDuration;
     this.hideDelayMs = hideDelayMs;

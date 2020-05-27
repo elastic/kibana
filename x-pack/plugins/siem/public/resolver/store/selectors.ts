@@ -120,5 +120,5 @@ function composeSelectors<OuterState, InnerState, ReturnValue>(
   selector: (state: OuterState) => InnerState,
   secondSelector: (state: InnerState) => ReturnValue
 ): (state: OuterState) => ReturnValue {
-  return state => secondSelector(selector(state));
+  return (state) => secondSelector(selector(state));
 }

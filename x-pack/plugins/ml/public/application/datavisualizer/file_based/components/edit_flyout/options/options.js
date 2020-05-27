@@ -13,7 +13,7 @@ import {
 } from './option_lists';
 
 function getOptions(list) {
-  return list.map(o => ({ label: o }));
+  return list.map((o) => ({ label: o }));
 }
 
 export function getFormatOptions() {

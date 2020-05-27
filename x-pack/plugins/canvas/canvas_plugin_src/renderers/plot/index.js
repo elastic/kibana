@@ -31,7 +31,7 @@ const render = (domNode, config, handlers) => {
     }
 
     if (config.font) {
-      const legendFormatter = label => {
+      const legendFormatter = (label) => {
         const labelSpan = document.createElement('span');
         Object.assign(labelSpan.style, config.font.spec);
         labelSpan.textContent = label;

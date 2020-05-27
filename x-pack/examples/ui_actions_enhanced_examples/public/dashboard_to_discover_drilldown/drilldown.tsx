@@ -36,7 +36,7 @@ export class DashboardToDiscoverDrilldown implements Drilldown<Config, ActionCon
 
   public readonly euiIcon = 'discoverApp';
 
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = props => (
+  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = (props) => (
     <CollectConfigContainer {...props} params={this.params} />
   );
 

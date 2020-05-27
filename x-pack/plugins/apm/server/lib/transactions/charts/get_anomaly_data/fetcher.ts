@@ -18,7 +18,7 @@ export async function anomalySeriesFetcher({
   transactionType,
   intervalString,
   mlBucketSize,
-  setup
+  setup,
 }: {
   serviceName: string;
   transactionType: string;
@@ -45,12 +45,12 @@ export async function anomalySeriesFetcher({
                 timestamp: {
                   gte: newStart,
                   lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ]
-        }
+                  format: 'epoch_millis',
+                },
+              },
+            },
+          ],
+        },
       },
       aggs: {
         ml_avg_response_times: {
@@ -60,17 +60,17 @@ export async function anomalySeriesFetcher({
             min_doc_count: 0,
             extended_bounds: {
               min: newStart,
-              max: end
-            }
+              max: end,
+            },
           },
           aggs: {
             anomaly_score: { max: { field: 'anomaly_score' } },
             lower: { min: { field: 'model_lower' } },
-            upper: { max: { field: 'model_upper' } }
-          }
-        }
-      }
-    }
+            upper: { max: { field: 'model_upper' } },
+          },
+        },
+      },
+    },
   };
 
   try {

@@ -97,13 +97,13 @@ export class TooltipPopover extends Component {
     return await tooltipLayer.getSource().getPreIndexedShape(targetFeature.properties);
   };
 
-  _findLayerById = layerId => {
-    return this.props.layerList.find(layer => {
+  _findLayerById = (layerId) => {
+    return this.props.layerList.find((layer) => {
       return layer.getId() === layerId;
     });
   };
 
-  _getLayerName = async layerId => {
+  _getLayerName = async (layerId) => {
     const layer = this._findLayerById(layerId);
     if (!layer) {
       return null;
