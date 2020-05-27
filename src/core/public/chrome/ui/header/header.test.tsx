@@ -25,14 +25,11 @@ import { NavType } from '.';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { applicationServiceMock } from '../../../mocks';
 import { Header } from './header';
+import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
 }));
-
-interface LocalStore {
-  [key: string]: string;
-}
 
 function mockProps() {
   const http = httpServiceMock.createSetupContract({ basePath: '/test' });
@@ -65,16 +62,8 @@ function mockProps() {
 
 describe('Header', () => {
   beforeAll(() => {
-    const STORE: LocalStore = {};
     Object.defineProperty(window, 'localStorage', {
-      value: {
-        getItem: (key: string) => {
-          return STORE[key] || null;
-        },
-        setItem: (key: string, value: any) => {
-          STORE[key] = value.toString();
-        },
-      },
+      value: new StubBrowserStorage(),
     });
   });
 

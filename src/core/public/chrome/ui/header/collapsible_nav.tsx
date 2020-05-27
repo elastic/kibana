@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import './collapsible_nav.scss';
 import {
   EuiCollapsibleNav,
   EuiCollapsibleNavGroup,
@@ -37,7 +38,6 @@ import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
-import './collapsible_nav.scss';
 import { createEuiListItem, createRecentNavLink } from './nav_link';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {

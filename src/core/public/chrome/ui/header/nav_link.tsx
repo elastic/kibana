@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiImage } from '@elastic/eui';
+import { EuiImage, EuiListGroupItemProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
@@ -50,7 +50,7 @@ export function createEuiListItem({
   onClick = () => {},
   navigateToApp,
   dataTestSubj,
-}: Props) {
+}: Props): EuiListGroupItemProps {
   const { legacy, active, id, title, disabled, euiIconType, icon, tooltip, href } = link;
 
   return {
@@ -102,7 +102,7 @@ export function createRecentNavLink(
   recentLink: ChromeRecentlyAccessedHistoryItem,
   navLinks: ChromeNavLink[],
   basePath: HttpStart['basePath']
-) {
+): EuiListGroupItemProps {
   const { link, label } = recentLink;
   const href = relativeToAbsolute(basePath.prepend(link));
   const navLink = navLinks.find(nl => href.startsWith(nl.baseUrl ?? nl.subUrlBase));
