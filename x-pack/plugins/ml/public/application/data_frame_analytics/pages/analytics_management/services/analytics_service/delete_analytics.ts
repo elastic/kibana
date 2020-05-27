@@ -54,77 +54,66 @@ export const deleteAnalyticsAndTargetIndex = async (
       deleteTargetIndex,
       deleteTargetPattern
     );
-    if (status.analyticsJobDeleted) {
-      if (status.targetIndexDeleted.success) {
-        toastNotifications.addSuccess(
-          i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsSuccessMessage', {
-            defaultMessage: 'Request to delete data frame analytics {analyticsId} acknowledged.',
-            values: { analyticsId: d.config.id },
-          })
-        );
-      }
-      if (status.targetIndexDeleted.error) {
-        const error = extractErrorMessage(status.targetIndexDeleted.error);
-        toastNotifications.addDanger(
-          i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsErrorMessage', {
-            defaultMessage:
-              'An error occurred deleting the data frame analytics {analyticsId}: {error}',
-            values: { analyticsId: d.config.id, error },
-          })
-        );
-      }
+    if (status.analyticsJobDeleted?.success) {
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsSuccessMessage', {
+          defaultMessage: 'Request to delete data frame analytics {analyticsId} acknowledged.',
+          values: { analyticsId: d.config.id },
+        })
+      );
+    }
+    if (status.analyticsJobDeleted?.error) {
+      const error = extractErrorMessage(status.targetIndexDeleted.error);
+      toastNotifications.addDanger(
+        i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsErrorMessage', {
+          defaultMessage:
+            'An error occurred deleting the data frame analytics {analyticsId}: {error}',
+          values: { analyticsId: d.config.id, error },
+        })
+      );
     }
 
-    if (status.targetIndexDeleted) {
-      if (status.targetIndexDeleted.success) {
-        toastNotifications.addSuccess(
-          i18n.translate(
-            'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexSuccessMessage',
-            {
-              defaultMessage:
-                'Request to delete destination index {destinationIndex} acknowledged.',
-              values: { destinationIndex },
-            }
-          )
-        );
-      }
-      if (status.targetIndexDeleted.error) {
-        const error = extractErrorMessage(status.targetIndexDeleted.error);
-        toastNotifications.addDanger(
-          i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexErrorMessage', {
-            defaultMessage:
-              'An error occurred deleting destination index {destinationIndex}: {error}',
+    if (status.targetIndexDeleted?.success) {
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexSuccessMessage', {
+          defaultMessage: 'Request to delete destination index {destinationIndex} acknowledged.',
+          values: { destinationIndex },
+        })
+      );
+    }
+    if (status.targetIndexDeleted?.error) {
+      const error = extractErrorMessage(status.targetIndexDeleted.error);
+      toastNotifications.addDanger(
+        i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexErrorMessage', {
+          defaultMessage:
+            'An error occurred deleting destination index {destinationIndex}: {error}',
+          values: { destinationIndex, error },
+        })
+      );
+    }
+
+    if (status.targetIndexPatternDeleted?.success) {
+      toastNotifications.addSuccess(
+        i18n.translate(
+          'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexPatternSuccessMessage',
+          {
+            defaultMessage: 'Request to delete index pattern {destinationIndex} acknowledged.',
+            values: { destinationIndex },
+          }
+        )
+      );
+    }
+    if (status.targetIndexPatternDeleted?.error) {
+      const error = extractErrorMessage(status.targetIndexPatternDeleted.error);
+      toastNotifications.addDanger(
+        i18n.translate(
+          'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexPatternSuccessMessage',
+          {
+            defaultMessage: 'An error occurred deleting index pattern {destinationIndex}: {error}',
             values: { destinationIndex, error },
-          })
-        );
-      }
-    }
-
-    if (status.targetIndexPatternDeleted) {
-      if (status.targetIndexPatternDeleted.success) {
-        toastNotifications.addSuccess(
-          i18n.translate(
-            'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexPatternSuccessMessage',
-            {
-              defaultMessage: 'Request to delete index pattern {destinationIndex} acknowledged.',
-              values: { destinationIndex },
-            }
-          )
-        );
-      }
-      if (status.targetIndexPatternDeleted.error) {
-        const error = extractErrorMessage(status.targetIndexPatternDeleted.error);
-        toastNotifications.addDanger(
-          i18n.translate(
-            'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexPatternSuccessMessage',
-            {
-              defaultMessage:
-                'An error occurred deleting index pattern {destinationIndex}: {error}',
-              values: { destinationIndex, error },
-            }
-          )
-        );
-      }
+          }
+        )
+      );
     }
   } catch (e) {
     toastNotifications.addDanger(
