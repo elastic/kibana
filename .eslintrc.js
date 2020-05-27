@@ -545,44 +545,44 @@ module.exports = {
               {
                 name: 'lodash',
                 importNames: ['set', 'setWith'],
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
               {
                 name: 'lodash.set',
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
               {
                 name: 'lodash.setwith',
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
               {
                 name: 'lodash/set',
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
               {
                 name: 'lodash/setWith',
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
               {
                 name: 'lodash/fp',
                 importNames: ['set', 'setWith', 'assoc', 'assocPath'],
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
               {
                 name: 'lodash/fp/set',
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
               {
                 name: 'lodash/fp/setWith',
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
               {
                 name: 'lodash/fp/assoc',
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
               {
                 name: 'lodash/fp/assocPath',
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
             ],
           },
@@ -593,19 +593,19 @@ module.exports = {
             paths: [
               {
                 name: 'lodash.set',
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
               {
                 name: 'lodash.setwith',
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
               {
                 name: 'lodash/set',
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
               {
                 name: 'lodash/setWith',
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
             ],
           },
@@ -615,42 +615,42 @@ module.exports = {
           {
             object: 'lodash',
             property: 'set',
-            message: 'Please use @elastic/safer-lodash-set instead',
+            message: 'Please use @kbn/safer-lodash-set instead',
           },
           {
             object: '_',
             property: 'set',
-            message: 'Please use @elastic/safer-lodash-set instead',
+            message: 'Please use @kbn/safer-lodash-set instead',
           },
           {
             object: 'lodash',
             property: 'setWith',
-            message: 'Please use @elastic/safer-lodash-set instead',
+            message: 'Please use @kbn/safer-lodash-set instead',
           },
           {
             object: '_',
             property: 'setWith',
-            message: 'Please use @elastic/safer-lodash-set instead',
+            message: 'Please use @kbn/safer-lodash-set instead',
           },
           {
             object: 'lodash',
             property: 'assoc',
-            message: 'Please use @elastic/safer-lodash-set instead',
+            message: 'Please use @kbn/safer-lodash-set instead',
           },
           {
             object: '_',
             property: 'assoc',
-            message: 'Please use @elastic/safer-lodash-set instead',
+            message: 'Please use @kbn/safer-lodash-set instead',
           },
           {
             object: 'lodash',
             property: 'assocPath',
-            message: 'Please use @elastic/safer-lodash-set instead',
+            message: 'Please use @kbn/safer-lodash-set instead',
           },
           {
             object: '_',
             property: 'assocPath',
-            message: 'Please use @elastic/safer-lodash-set instead',
+            message: 'Please use @kbn/safer-lodash-set instead',
           },
         ],
       },

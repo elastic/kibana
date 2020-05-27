@@ -69,7 +69,7 @@
  *    `appSearchSource`.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { uniqueId, uniq, extend, pick, difference, omit, keys, isFunction } from 'lodash';
 import { map } from 'rxjs/operators';
 import { CoreStart } from 'kibana/public';

@@ -1,5 +1,5 @@
 {
-  "name": "@elastic/safer-lodash-set",
+  "name": "@kbn/safer-lodash-set",
   "version": "0.0.0",
   "description": "A safer version of the lodash set and setWith functions",
   "main": "index.js",

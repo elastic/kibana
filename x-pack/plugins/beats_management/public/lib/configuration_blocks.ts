@@ -5,7 +5,7 @@
  */
 
 import yaml from 'js-yaml';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { get, has, omit } from 'lodash';
 import {
   ConfigBlockSchema,

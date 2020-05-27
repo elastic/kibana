@@ -5,7 +5,7 @@
  */
 
 import { getPings } from '../get_pings';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 describe('getAll', () => {

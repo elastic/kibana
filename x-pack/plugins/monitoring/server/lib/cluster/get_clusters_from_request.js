@@ -5,7 +5,7 @@
  */
 
 import { notFound } from 'boom';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { findIndex } from 'lodash';
 import { getClustersStats } from './get_clusters_stats';
 import { flagSupportedClusters } from './flag_supported_clusters';

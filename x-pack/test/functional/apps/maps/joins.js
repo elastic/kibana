@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 
 import { MAPBOX_STYLES } from './mapbox_styles';
 

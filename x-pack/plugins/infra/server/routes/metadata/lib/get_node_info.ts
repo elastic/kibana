@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { first, startsWith } from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';

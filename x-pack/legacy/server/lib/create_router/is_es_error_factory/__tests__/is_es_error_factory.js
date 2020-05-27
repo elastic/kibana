@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { isEsErrorFactory } from '../is_es_error_factory';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 
 class MockAbstractEsError {}
 

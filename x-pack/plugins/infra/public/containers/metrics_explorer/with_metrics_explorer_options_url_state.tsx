@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { values } from 'lodash';
 import React, { useContext, useMemo } from 'react';
 import * as t from 'io-ts';

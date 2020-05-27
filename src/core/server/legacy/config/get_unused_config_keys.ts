@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { difference, get } from 'lodash';
 // @ts-ignore
 import { getTransform } from '../../../../legacy/deprecation/index';

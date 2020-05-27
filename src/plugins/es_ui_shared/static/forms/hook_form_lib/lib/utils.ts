@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { FieldHook } from '../types';
 
 export const unflattenObject = (object: any) =>

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import { getLastValue } from '../../../../../../plugins/vis_type_timeseries/common/get_last_value';
 import { createTickFormatter } from './tick_formatter';

@@ -195,7 +195,7 @@
     "@elastic/maki": "6.3.0",
     "@elastic/node-crypto": "1.1.1",
     "@elastic/numeral": "2.4.0",
-    "@elastic/safer-lodash-set": "0.0.0",
+    "@kbn/safer-lodash-set": "0.0.0",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/config-schema": "1.0.0",
     "@kbn/i18n": "1.0.0",

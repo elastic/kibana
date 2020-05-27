@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { InfraDatabaseSearchResponse } from '../../../lib/adapters/framework';

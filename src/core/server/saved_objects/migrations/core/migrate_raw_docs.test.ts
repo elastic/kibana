@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsSerializer } from '../../serialization';

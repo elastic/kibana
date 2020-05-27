@@ -28,7 +28,7 @@ import {
   IRootScopeService,
 } from 'angular';
 import $ from 'jquery';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, forOwn, get } from 'lodash';
 import React, { Fragment } from 'react';
 import * as Rx from 'rxjs';

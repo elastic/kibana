@@ -21,7 +21,7 @@
  * Smokescreen tests for core migration logic
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import { assert } from 'chai';
 import {

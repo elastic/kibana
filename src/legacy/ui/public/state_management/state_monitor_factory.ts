@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, isEqual, isPlainObject } from 'lodash';
 import { State } from './state';
 

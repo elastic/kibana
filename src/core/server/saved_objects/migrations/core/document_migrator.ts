@@ -61,7 +61,7 @@
  */
 
 import Boom from 'boom';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import cloneDeep from 'lodash.clonedeep';
 import Semver from 'semver';

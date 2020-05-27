@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { get, find } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';

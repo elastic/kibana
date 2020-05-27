@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';

@@ -37,7 +37,7 @@ target
 /x-pack/legacy/plugins/maps/public/vendor/**
 
 # package overrides
-/packages/elastic-safer-lodash-set/lodash/*
+/packages/kbn-safer-lodash-set/lodash/*
 /packages/eslint-config-kibana
 /packages/kbn-interpreter/src/common/lib/grammar.js
 /packages/kbn-plugin-generator/sao_template/template

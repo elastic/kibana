@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { get, isUndefined, noop } from 'lodash';
 import { unset } from '../../utils';
 

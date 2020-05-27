@@ -18,7 +18,7 @@
  */
 
 import Joi from 'joi';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import { override } from './override';
 import createDefaultSchema from './schema';
