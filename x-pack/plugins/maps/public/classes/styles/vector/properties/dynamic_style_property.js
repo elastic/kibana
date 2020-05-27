@@ -9,8 +9,6 @@ import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import { STYLE_TYPE, SOURCE_META_ID_ORIGIN, FIELD_ORIGIN } from '../../../../../common/constants';
 import React from 'react';
-import { OrdinalLegend } from './components/ordinal_legend';
-import { CategoricalLegend } from './components/categorical_legend';
 import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
 import { CategoricalFieldMetaPopover } from '../components/field_meta/categorical_field_meta_popover';
 
@@ -117,14 +115,6 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
   getNumberOfCategories() {
     return 0;
-  }
-
-  hasOrdinalBreaks() {
-    return false;
-  }
-
-  isOrdinalRanged() {
-    return true;
   }
 
   isComplete() {
@@ -280,47 +270,12 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   getNumericalMbFeatureStateValue(value) {
-    if (typeof value === 'number') {
-      return value;
-    }
-
     const valueAsFloat = parseFloat(value);
     return isNaN(valueAsFloat) ? null : valueAsFloat;
   }
 
-  renderBreakedLegend() {
+  renderLegendDetailRow() {
     return null;
-  }
-
-  _renderCategoricalLegend({ isPointsOnly, isLinesOnly, symbolId }) {
-    return (
-      <CategoricalLegend
-        style={this}
-        isPointsOnly={isPointsOnly}
-        isLinesOnly={isLinesOnly}
-        symbolId={symbolId}
-      />
-    );
-  }
-
-  _renderRangeLegend() {
-    return <OrdinalLegend style={this} />;
-  }
-
-  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
-    if (this.isOrdinal()) {
-      if (this.isOrdinalRanged()) {
-        return this._renderRangeLegend();
-      } else if (this.hasOrdinalBreaks()) {
-        return this._renderCategoricalLegend({ isPointsOnly, isLinesOnly, symbolId });
-      } else {
-        return null;
-      }
-    } else if (this.isCategorical()) {
-      return this._renderCategoricalLegend({ isPointsOnly, isLinesOnly, symbolId });
-    } else {
-      return null;
-    }
   }
 
   renderFieldMetaPopover(onFieldMetaOptionsChange) {
