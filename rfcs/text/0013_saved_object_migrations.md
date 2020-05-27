@@ -215,7 +215,7 @@ id's deterministically with e.g. UUIDv5.
    indicating that a migration needs to be performed. 
 2. Create `.kibana_n+1`, if it already exists, ignore the error and continue.
 3. Migrate documents by reading from `.kibana_n` and creating documents in
-   `.kibana_n+1`. If a document already exists, ignore.
+   `.kibana_n+1`. If a document already exists, don't overwrite it and ignore.
 4. Move the `.kibana` index to point to `.kibana_n+1` (ignore if it has
    already been moved). 
 
