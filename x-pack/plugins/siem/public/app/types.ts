@@ -58,8 +58,6 @@ type SecuritySubPluginKeyStore =
   | 'hostList'
   | 'alertList'
   | 'management';
-// | 'policyDetails'
-// | 'policyList';
 export interface SecuritySubPluginWithStore<K extends SecuritySubPluginKeyStore, T>
   extends SecuritySubPlugin {
   store: SecuritySubPluginStore<K, T>;
@@ -73,12 +71,7 @@ export interface SecuritySubPlugins extends SecuritySubPlugin {
       timeline: TimelineState;
       alertList: Immutable<AlertListState>;
       hostList: Immutable<HostState>;
-
       management: ManagementState;
-
-      // FIXME: cleanup
-      // policyDetails: Immutable<PolicyDetailsState>;
-      // policyList: Immutable<PolicyListState>;
     };
     reducer: {
       hosts: Reducer<HostsState, AnyAction>;
@@ -86,10 +79,7 @@ export interface SecuritySubPlugins extends SecuritySubPlugin {
       timeline: Reducer<TimelineState, AnyAction>;
       alertList: ImmutableReducer<AlertListState, AppAction>;
       hostList: ImmutableReducer<HostState, AppAction>;
-
-      // FIXME: cleanup
-      // policyDetails: ImmutableReducer<PolicyDetailsState, AppAction>;
-      // policyList: ImmutableReducer<PolicyListState, AppAction>;
+      management: ImmutableReducer<ManagementState, AppAction>;
     };
     middlewares: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;
   };

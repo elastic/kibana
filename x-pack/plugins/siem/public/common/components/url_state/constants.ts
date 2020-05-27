@@ -12,6 +12,7 @@ export enum CONSTANTS {
   filters = 'filters',
   hostsDetails = 'hosts.details',
   hostsPage = 'hosts.page',
+  management = 'management',
   networkDetails = 'network.details',
   networkPage = 'network.page',
   overviewPage = 'overview.page',

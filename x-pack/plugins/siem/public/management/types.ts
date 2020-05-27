@@ -11,12 +11,18 @@ import { AppAction } from '../common/store/actions';
 import { SiemPageName } from '../app/types';
 
 /**
+ * The type for the management store global namespace. Used mostly internally to reference
+ * the type while defining more complex interfaces/types
+ */
+export type ManagementStoreGlobalNamespace = 'management';
+
+/**
  * Redux store state for the Management section
  */
-export type ManagementState = Immutable<{
+export interface ManagementState {
   policyDetails: Immutable<PolicyDetailsState>;
   policyList: Immutable<PolicyListState>;
-}>;
+}
 
 export interface ManagementPluginState {
   management: ManagementState;
@@ -32,14 +38,6 @@ export interface ManagementPluginReducer {
 export enum ManagementSubTab {
   endpoints = 'endpoints',
   policies = 'policy',
-}
-
-/**
- * The URL route params for the Management Endpoints section
- */
-export interface ManagementRouteEndpointParams {
-  pageName: SiemPageName.management;
-  tabName: ManagementSubTab.endpoints;
 }
 
 /**

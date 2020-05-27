@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ImmutableMiddlewareFactory, substateMiddlewareFactory } from '../../common/store';
-import { ManagementState } from '../types';
+import { ImmutableMultipleMiddlewareFactory, substateMiddlewareFactory } from '../../common/store';
 import { policyListMiddlewareFactory } from '../pages/policy/store/policy_list';
 import { policyDetailsMiddlewareFactory } from '../pages/policy/store/policy_details';
 import {
@@ -14,7 +13,10 @@ import {
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
 } from '../common/constants';
 
-export const managementMiddlewareFactory = (coreStart, depsStart) => {
+export const managementMiddlewareFactory: ImmutableMultipleMiddlewareFactory = (
+  coreStart,
+  depsStart
+) => {
   return [
     substateMiddlewareFactory(
       globalState =>

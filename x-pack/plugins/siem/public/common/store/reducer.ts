@@ -67,9 +67,6 @@ export type SubPluginsInitReducer = HostsPluginReducer &
   EndpointHostsPluginReducer &
   ManagementPluginReducer;
 
-// EndpointPolicyDetailsStatePluginReducer &
-// EndpointPolicyListStatePluginReducer;
-
 export const createInitialState = (pluginsInitState: SubPluginsInitState): State => ({
   ...initialState,
   ...pluginsInitState,

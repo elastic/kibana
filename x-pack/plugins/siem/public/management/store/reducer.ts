@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { combineReducers } from 'redux';
+import { combineReducers as reduxCombineReducers } from 'redux';
 import { ManagementState } from '../types';
 import {
   initialPolicyDetailsState,
@@ -18,6 +18,11 @@ import {
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
 } from '../common/constants';
+import { ImmutableCombineReducers } from '../../common/store';
+import { AppAction } from '../../common/store/actions';
+
+// Change the type of `combinerReducers` locally
+const combineReducers: ImmutableCombineReducers = reduxCombineReducers;
 
 /**
  * Returns the initial state of the store for the SIEM Management section
@@ -32,7 +37,7 @@ export const getManagementInitialState = (): ManagementState => {
 /**
  * Redux store reducer for the SIEM Management section
  */
-export const managementReducer = combineReducers<ManagementState>({
+export const managementReducer = combineReducers<ManagementState, AppAction>({
   [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: policyListReducer,
   [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: policyDetailsReducer,
 });

@@ -5,4 +5,4 @@
  */
 
 export { managementReducer, getManagementInitialState } from './reducer';
-export { managementMiddleware } from './middleware';
+export { managementMiddlewareFactory } from './middleware';

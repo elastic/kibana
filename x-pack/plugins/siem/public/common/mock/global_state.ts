@@ -25,15 +25,13 @@ import {
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
 import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
-import { initialPolicyListState } from '../../management/pages/policy/store/policy_list/reducer';
 import { initialAlertListState } from '../../endpoint_alerts/store/reducer';
-import { initialPolicyDetailsState } from '../../management/pages/policy/store/policy_details/reducer';
 import { initialHostListState } from '../../endpoint_hosts/store/reducer';
+import { getManagementInitialState } from '../../management/store';
 
-const policyList = initialPolicyListState();
 const alertList = initialAlertListState();
-const policyDetails = initialPolicyDetailsState();
 const hostList = initialHostListState();
+const management = getManagementInitialState();
 
 export const mockGlobalState: State = {
   app: {
@@ -237,6 +235,5 @@ export const mockGlobalState: State = {
   },
   alertList,
   hostList,
-  policyList,
-  policyDetails,
+  management,
 };
