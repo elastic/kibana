@@ -23,6 +23,37 @@ export const getConfigurationOutput = (update = false): Partial<CasesConfigureRe
   };
 };
 
+export const getConnector = () => ({
+  name: 'ServiceNow Connector',
+  actionTypeId: '.servicenow',
+  secrets: {
+    username: 'admin',
+    password: 'password',
+  },
+  config: {
+    apiUrl: 'http://some.non.existent.com',
+    casesConfiguration: {
+      mapping: [
+        {
+          source: 'title',
+          target: 'short_description',
+          actionType: 'overwrite',
+        },
+        {
+          source: 'description',
+          target: 'description',
+          actionType: 'append',
+        },
+        {
+          source: 'comments',
+          target: 'comments',
+          actionType: 'append',
+        },
+      ],
+    },
+  },
+});
+
 export const removeServerGeneratedPropertiesFromConfigure = (
   config: Partial<CasesConfigureResponse>
 ): Partial<CasesConfigureResponse> => {

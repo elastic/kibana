@@ -152,7 +152,7 @@ export const mountHook = <Args extends {}, HookValue extends any>(
   const hookValueCallback = jest.fn();
   let component!: ReactWrapper;
 
-  const act: ReactHookWrapper<Args, HookValue>['act'] = actor => {
+  const act: ReactHookWrapper<Args, HookValue>['act'] = (actor) => {
     reactAct(() => {
       actor(getLastHookValue(), (args: Args) => component.setProps(args));
       component.update();
@@ -171,7 +171,7 @@ export const mountHook = <Args extends {}, HookValue extends any>(
     hookValueCallback(body(props));
     return null;
   };
-  const TestComponent: React.FunctionComponent<Args> = args =>
+  const TestComponent: React.FunctionComponent<Args> = (args) =>
     WrapperComponent ? (
       <WrapperComponent>
         <HookComponent {...args} />
@@ -192,4 +192,4 @@ export const mountHook = <Args extends {}, HookValue extends any>(
   };
 };
 
-export const nextTick = () => new Promise(res => process.nextTick(res));
+export const nextTick = () => new Promise((res) => process.nextTick(res));

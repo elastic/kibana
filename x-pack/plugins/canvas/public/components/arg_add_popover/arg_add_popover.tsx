@@ -45,7 +45,7 @@ export const ArgAddPopover = ({ options }: Props) => {
       button={button}
     >
       {({ closePopover }: PopoverChildrenProps) =>
-        options.map(opt => (
+        options.map((opt) => (
           <ArgAdd
             key={`${opt.arg.name}-add`}
             displayName={opt.arg.displayName}

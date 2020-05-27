@@ -8,7 +8,8 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButtonEmptyProps } from '@elastic/eui';
 import { PackageInfo, entries, DetailViewPanelName, InstallStatus } from '../../../../types';
-import { useLinks, useGetPackageInstallStatus } from '../../hooks';
+import { useLink } from '../../../../hooks';
+import { useGetPackageInstallStatus } from '../../hooks';
 
 export type NavLinkProps = Pick<PackageInfo, 'name' | 'version'> & {
   active: DetailViewPanelName;
@@ -27,7 +28,7 @@ const PanelDisplayNames: Record<DetailViewPanelName, string> = {
 };
 
 export function SideNavLinks({ name, version, active }: NavLinkProps) {
-  const { toDetailView } = useLinks();
+  const { getHref } = useLink();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
 
@@ -35,9 +36,9 @@ export function SideNavLinks({ name, version, active }: NavLinkProps) {
     <Fragment>
       {entries(PanelDisplayNames).map(([panel, display]) => {
         const Link = styled(EuiButtonEmpty).attrs<EuiButtonEmptyProps>({
-          href: toDetailView({ name, version, panel }),
+          href: getHref('integration_details', { pkgkey: `${name}-${version}`, panel }),
         })`
-          font-weight: ${p =>
+          font-weight: ${(p) =>
             active === panel
               ? p.theme.eui.euiFontWeightSemiBold
               : p.theme.eui.euiFontWeightRegular};

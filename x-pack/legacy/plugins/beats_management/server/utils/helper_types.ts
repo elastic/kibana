@@ -8,6 +8,6 @@ export type InterfaceExcept<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 
 export function arrayFromEnum<T extends string | number>(e: any): T[] {
   return Object.keys(e)
-    .filter(key => isNaN(+key))
-    .map(name => e[name]) as T[];
+    .filter((key) => isNaN(+key))
+    .map((name) => e[name]) as T[];
 }

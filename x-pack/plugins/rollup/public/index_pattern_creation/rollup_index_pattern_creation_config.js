@@ -84,13 +84,13 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
           testSubj: `createRollupIndexPatternButton`,
           isBeta: this.isBeta,
           onClick: () => {
-            urlHandler('/management/kibana/index_pattern?type=rollup');
+            urlHandler('/create?type=rollup');
           },
         }
       : null;
   }
 
-  isRollupIndex = indexName => {
+  isRollupIndex = (indexName) => {
     return this.rollupIndices.includes(indexName);
   };
 
@@ -105,14 +105,14 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
       : [];
   }
 
-  checkIndicesForErrors = indices => {
+  checkIndicesForErrors = (indices) => {
     this.rollupIndex = null;
 
     if (!indices || !indices.length) {
       return;
     }
 
-    const rollupIndices = indices.filter(index => this.isRollupIndex(index.name));
+    const rollupIndices = indices.filter((index) => this.isRollupIndex(index.name));
 
     if (!rollupIndices.length) {
       return [rollupIndexPatternNoMatchError];

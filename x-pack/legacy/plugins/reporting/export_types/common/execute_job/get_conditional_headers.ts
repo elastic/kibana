@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReportingConfig } from '../../../server/types';
-import { ConditionalHeaders } from '../../../types';
+import { ReportingConfig } from '../../../server';
+import { ConditionalHeaders } from '../../../server/types';
 
 export const getConditionalHeaders = <JobDocPayloadType>({
   config,

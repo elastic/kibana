@@ -19,7 +19,7 @@ import {
   VerticalRectSeries,
   Voronoi,
   makeWidthFlexible,
-  VerticalGridLines
+  VerticalGridLines,
 } from 'react-vis';
 import { unit } from '../../../../style/variables';
 import Tooltip from '../Tooltip';
@@ -32,7 +32,7 @@ const XY_MARGIN = {
   top: unit,
   left: unit * 5,
   right: unit,
-  bottom: unit * 2
+  bottom: unit * 2,
 };
 
 const X_TICK_TOTAL = 8;
@@ -49,17 +49,17 @@ export class HistogramInner extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      hoveredBucket: {}
+      hoveredBucket: {},
     };
   }
 
-  onClick = bucket => {
+  onClick = (bucket) => {
     if (this.props.onClick) {
       this.props.onClick(bucket);
     }
   };
 
-  onHover = bucket => {
+  onHover = (bucket) => {
     this.setState({ hoveredBucket: bucket });
   };
 
@@ -68,10 +68,10 @@ export class HistogramInner extends PureComponent {
   };
 
   getChartData(items, selectedItem) {
-    const yMax = d3.max(items, d => d.y);
+    const yMax = d3.max(items, (d) => d.y);
     const MINIMUM_BUCKET_SIZE = yMax * 0.02;
 
-    return items.map(item => {
+    return items.map((item) => {
       const padding = (item.x - item.x0) / 20;
       return {
         ...item,
@@ -81,7 +81,7 @@ export class HistogramInner extends PureComponent {
             : tint(0.5, theme.euiColorVis1),
         x0: item.x0 + padding,
         x: item.x - padding,
-        y: item.y > 0 ? Math.max(item.y, MINIMUM_BUCKET_SIZE) : 0
+        y: item.y > 0 ? Math.max(item.y, MINIMUM_BUCKET_SIZE) : 0,
       };
     });
   }
@@ -98,7 +98,7 @@ export class HistogramInner extends PureComponent {
       tooltipFooter,
       tooltipHeader,
       verticalLineHover,
-      width: XY_WIDTH
+      width: XY_WIDTH,
     } = this.props;
     const { hoveredBucket } = this.state;
     if (isEmpty(buckets) || XY_WIDTH === 0) {
@@ -108,10 +108,10 @@ export class HistogramInner extends PureComponent {
     const isTimeSeries =
       this.props.xType === 'time' || this.props.xType === 'time-utc';
 
-    const xMin = d3.min(buckets, d => d.x0);
-    const xMax = d3.max(buckets, d => d.x);
+    const xMin = d3.min(buckets, (d) => d.x0);
+    const xMax = d3.max(buckets, (d) => d.x);
     const yMin = 0;
-    const yMax = d3.max(buckets, d => d.y);
+    const yMax = d3.max(buckets, (d) => d.y);
     const selectedBucket = buckets[bucketIndex];
     const chartData = this.getChartData(buckets, selectedBucket);
 
@@ -119,17 +119,14 @@ export class HistogramInner extends PureComponent {
       .domain([xMin, xMax])
       .range([XY_MARGIN.left, XY_WIDTH - XY_MARGIN.right]);
 
-    const y = scaleLinear()
-      .domain([yMin, yMax])
-      .range([XY_HEIGHT, 0])
-      .nice();
+    const y = scaleLinear().domain([yMin, yMax]).range([XY_HEIGHT, 0]).nice();
 
     const [xMinZone, xMaxZone] = getDomainTZ(xMin, xMax);
     const xTickValues = isTimeSeries
       ? getTimeTicksTZ({
           domain: [xMinZone, xMaxZone],
           totalTicks: X_TICK_TOTAL,
-          width: XY_WIDTH
+          width: XY_WIDTH,
         })
       : undefined;
 
@@ -175,7 +172,7 @@ export class HistogramInner extends PureComponent {
                 x={x(hoveredBucket.x0)}
                 width={x(bucketSize) - x(0)}
                 style={{
-                  fill: theme.euiColorLightestShade
+                  fill: theme.euiColorLightestShade,
                 }}
               />
             )}
@@ -184,7 +181,7 @@ export class HistogramInner extends PureComponent {
               <Tooltip
                 style={{
                   marginLeft: '1%',
-                  marginRight: '1%'
+                  marginRight: '1%',
                 }}
                 header={tooltipHeader(hoveredBucket)}
                 footer={tooltipFooter(hoveredBucket)}
@@ -202,7 +199,7 @@ export class HistogramInner extends PureComponent {
                   fill: 'transparent',
                   stroke: theme.euiColorVis1,
                   rx: '0px',
-                  ry: '0px'
+                  ry: '0px',
                 }}
               />
             )}
@@ -212,7 +209,7 @@ export class HistogramInner extends PureComponent {
               data={chartData}
               style={{
                 rx: '0px',
-                ry: '0px'
+                ry: '0px',
               }}
             />
 
@@ -223,18 +220,18 @@ export class HistogramInner extends PureComponent {
             <Voronoi
               extent={[
                 [XY_MARGIN.left, XY_MARGIN.top],
-                [XY_WIDTH, XY_HEIGHT]
+                [XY_WIDTH, XY_HEIGHT],
               ]}
-              nodes={buckets.map(bucket => {
+              nodes={buckets.map((bucket) => {
                 return {
                   ...bucket,
-                  xCenter: (bucket.x0 + bucket.x) / 2
+                  xCenter: (bucket.x0 + bucket.x) / 2,
                 };
               })}
               onClick={this.onClick}
               onHover={this.onHover}
               onBlur={this.onBlur}
-              x={d => x(d.xCenter)}
+              x={(d) => x(d.xCenter)}
               y={() => 1}
             />
           </XYPlot>
@@ -257,17 +254,17 @@ HistogramInner.propTypes = {
   tooltipHeader: PropTypes.func,
   verticalLineHover: PropTypes.func,
   width: PropTypes.number.isRequired,
-  xType: PropTypes.string
+  xType: PropTypes.string,
 };
 
 HistogramInner.defaultProps = {
   backgroundHover: () => null,
-  formatYLong: value => value,
-  formatYShort: value => value,
+  formatYLong: (value) => value,
+  formatYShort: (value) => value,
   tooltipFooter: () => null,
   tooltipHeader: () => null,
   verticalLineHover: () => null,
-  xType: 'linear'
+  xType: 'linear',
 };
 
 export default makeWidthFlexible(HistogramInner);

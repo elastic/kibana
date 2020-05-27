@@ -27,20 +27,16 @@ import data from '../../../../../../../plugins/vis_type_vislib/public/fixtures/m
 import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
 import { getVis } from '../_vis_fixture';
 
-describe('Vislib Dispatch Class Test Suite', function() {
+describe('Vislib Dispatch Class Test Suite', function () {
   function destroyVis(vis) {
     vis.destroy();
   }
 
   function getEls(element, n, type) {
-    return d3
-      .select(element)
-      .data(new Array(n))
-      .enter()
-      .append(type);
+    return d3.select(element).data(new Array(n)).enter().append(type);
   }
 
-  describe('', function() {
+  describe('', function () {
     let vis;
     let mockUiState;
 
@@ -50,14 +46,14 @@ describe('Vislib Dispatch Class Test Suite', function() {
       vis.render(data, mockUiState);
     });
 
-    afterEach(function() {
+    afterEach(function () {
       destroyVis(vis);
     });
 
-    it('implements on, off, emit methods', function() {
+    it('implements on, off, emit methods', function () {
       const events = _.pluck(vis.handler.charts, 'events');
       expect(events.length).to.be.above(0);
-      events.forEach(function(dispatch) {
+      events.forEach(function (dispatch) {
         expect(dispatch).to.have.property('on');
         expect(dispatch).to.have.property('off');
         expect(dispatch).to.have.property('emit');
@@ -65,7 +61,7 @@ describe('Vislib Dispatch Class Test Suite', function() {
     });
   });
 
-  describe('Stock event handlers', function() {
+  describe('Stock event handlers', function () {
     let vis;
     let mockUiState;
 
@@ -76,19 +72,19 @@ describe('Vislib Dispatch Class Test Suite', function() {
       vis.render(data, mockUiState);
     });
 
-    afterEach(function() {
+    afterEach(function () {
       destroyVis(vis);
     });
 
-    describe('addEvent method', function() {
-      it('returns a function that binds the passed event to a selection', function() {
+    describe('addEvent method', function () {
+      it('returns a function that binds the passed event to a selection', function () {
         const chart = _.first(vis.handler.charts);
         const apply = chart.events.addEvent('event', _.noop);
         expect(apply).to.be.a('function');
 
         const els = getEls(vis.element, 3, 'div');
         apply(els);
-        els.each(function() {
+        els.each(function () {
           expect(d3.select(this).on('event')).to.be(_.noop);
         });
       });
@@ -97,21 +93,21 @@ describe('Vislib Dispatch Class Test Suite', function() {
     // test the addHoverEvent, addClickEvent methods by
     // checking that they return function which bind the events expected
     function checkBoundAddMethod(name, event) {
-      describe(name + ' method', function() {
-        it('should be a function', function() {
-          vis.handler.charts.forEach(function(chart) {
+      describe(name + ' method', function () {
+        it('should be a function', function () {
+          vis.handler.charts.forEach(function (chart) {
             expect(chart.events[name]).to.be.a('function');
           });
         });
 
-        it('returns a function that binds ' + event + ' events to a selection', function() {
+        it('returns a function that binds ' + event + ' events to a selection', function () {
           const chart = _.first(vis.handler.charts);
           const apply = chart.events[name](chart.series[0].chartEl);
           expect(apply).to.be.a('function');
 
           const els = getEls(vis.element, 3, 'div');
           apply(els);
-          els.each(function() {
+          els.each(function () {
             expect(d3.select(this).on(event)).to.be.a('function');
           });
         });
@@ -122,9 +118,9 @@ describe('Vislib Dispatch Class Test Suite', function() {
     checkBoundAddMethod('addMouseoutEvent', 'mouseout');
     checkBoundAddMethod('addClickEvent', 'click');
 
-    describe('addMousePointer method', function() {
-      it('should be a function', function() {
-        vis.handler.charts.forEach(function(chart) {
+    describe('addMousePointer method', function () {
+      it('should be a function', function () {
+        vis.handler.charts.forEach(function (chart) {
           const pointer = chart.events.addMousePointer;
 
           expect(_.isFunction(pointer)).to.be(true);
@@ -177,14 +173,14 @@ describe('Vislib Dispatch Class Test Suite', function() {
     });
   });
 
-  describe('Custom event handlers', function() {
-    it('should attach whatever gets passed on vis.on() to chart.events', function(done) {
+  describe('Custom event handlers', function () {
+    it('should attach whatever gets passed on vis.on() to chart.events', function (done) {
       const vis = getVis();
       const mockUiState = getMockUiState();
       vis.on('someEvent', _.noop);
       vis.render(data, mockUiState);
 
-      vis.handler.charts.forEach(function(chart) {
+      vis.handler.charts.forEach(function (chart) {
         expect(chart.events.listenerCount('someEvent')).to.be(1);
       });
 
@@ -192,13 +188,13 @@ describe('Vislib Dispatch Class Test Suite', function() {
       done();
     });
 
-    it('can be added after rendering', function() {
+    it('can be added after rendering', function () {
       const vis = getVis();
       const mockUiState = getMockUiState();
       vis.render(data, mockUiState);
       vis.on('someEvent', _.noop);
 
-      vis.handler.charts.forEach(function(chart) {
+      vis.handler.charts.forEach(function (chart) {
         expect(chart.events.listenerCount('someEvent')).to.be(1);
       });
 

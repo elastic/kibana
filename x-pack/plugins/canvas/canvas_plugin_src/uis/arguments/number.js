@@ -27,7 +27,7 @@ const NumberArgInput = ({ updateValue, value, confirm, commit, argId }) => (
         compressed
         id={argId}
         value={Number(value)}
-        onChange={confirm ? updateValue : ev => commit(Number(ev.target.value))}
+        onChange={confirm ? updateValue : (ev) => commit(Number(ev.target.value))}
       />
     </EuiFlexItem>
     {confirm && (

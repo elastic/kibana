@@ -75,12 +75,12 @@ export class AggConfig {
   static ensureIds(list: any[]) {
     const have: IAggConfig[] = [];
     const haveNot: AggConfigOptions[] = [];
-    list.forEach(function(obj) {
+    list.forEach(function (obj) {
       (obj.id ? have : haveNot).push(obj);
     });
 
     let nextId = AggConfig.nextId(have);
-    haveNot.forEach(function(obj) {
+    haveNot.forEach(function (obj) {
       obj.id = String(nextId++);
     });
 
@@ -95,7 +95,7 @@ export class AggConfig {
   static nextId(list: IAggConfig[]) {
     return (
       1 +
-      list.reduce(function(max, obj) {
+      list.reduce(function (max, obj) {
         return Math.max(max, +obj.id || 0);
       }, 0)
     );
@@ -154,7 +154,7 @@ export class AggConfig {
     from = from || this.params || {};
     const to = (this.params = {} as any);
 
-    this.getAggParams().forEach(aggParam => {
+    this.getAggParams().forEach((aggParam) => {
       let val = from[aggParam.name];
 
       if (val == null) {
@@ -323,7 +323,7 @@ export class AggConfig {
 
     // Go through each of the params and convert to an array of expression args.
     const params = Object.entries(rest.params).reduce((acc, [key, value]) => {
-      const deserializedParam = this.getAggParams().find(p => p.name === key);
+      const deserializedParam = this.getAggParams().find((p) => p.name === key);
 
       if (deserializedParam && deserializedParam.toExpressionAst) {
         // If the param provides `toExpressionAst`, we call it with the value
@@ -454,7 +454,7 @@ export class AggConfig {
     if (this.__typeDecorations) {
       _.forOwn(
         this.__typeDecorations,
-        function(prop, name: string | undefined) {
+        function (prop, name: string | undefined) {
           // @ts-ignore
           delete this[name];
         },

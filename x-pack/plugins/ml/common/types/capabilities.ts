@@ -73,11 +73,11 @@ export function getPluginPrivileges() {
   return {
     user: {
       ui: userMlCapabilitiesKeys,
-      api: userMlCapabilitiesKeys.map(k => `ml:${k}`),
+      api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
     },
     admin: {
       ui: allMlCapabilities,
-      api: allMlCapabilities.map(k => `ml:${k}`),
+      api: allMlCapabilities.map((k) => `ml:${k}`),
     },
   };
 }
