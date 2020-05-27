@@ -34,8 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     ['geo.src', 'IN'],
   ];
 
-  // FLAKY: https://github.com/elastic/kibana/issues/62497
-  describe.skip('Discover', () => {
+  describe('Discover', () => {
     before(async () => {
       await esArchiver.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
