@@ -54,7 +54,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         );
 
       expect(response.status).to.eql(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'alert', undefined);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'alert', 'alerts');
       expect(response.body).to.eql({
         id: response.body.id,
         name: 'abc',
@@ -109,7 +109,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         .send(getTestAlertData({ enabled: false }));
 
       expect(response.status).to.eql(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'alert', undefined);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'alert', 'alerts');
       expect(response.body.scheduledTaskId).to.eql(undefined);
     });
   });

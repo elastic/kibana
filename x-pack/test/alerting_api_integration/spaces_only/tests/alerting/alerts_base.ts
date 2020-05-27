@@ -211,7 +211,7 @@ instanceStateValue: true
         );
 
       expect(response.statusCode).to.eql(200);
-      objectRemover.add(space.id, response.body.id, 'alert', undefined);
+      objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
       const scheduledActionTask = await retry.try(async () => {
         const searchResult = await es.search({
           index: '.kibana_task_manager',
@@ -271,7 +271,7 @@ instanceStateValue: true
         );
 
       expect(response.statusCode).to.eql(200);
-      objectRemover.add(space.id, response.body.id, 'alert', undefined);
+      objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
       const alertTestRecord = (
         await esTestIndexTool.waitForDocs('alert:test.authorization', reference)
       )[0];
@@ -327,7 +327,7 @@ instanceStateValue: true
         );
 
       expect(response.statusCode).to.eql(200);
-      objectRemover.add(space.id, response.body.id, 'alert', undefined);
+      objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
       const actionTestRecord = (
         await esTestIndexTool.waitForDocs('action:test.authorization', reference)
       )[0];

@@ -372,7 +372,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       expect(status).to.be(200);
 
       const alertId = createdAlert.id;
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', undefined);
+      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
       return alertId;
     }
