@@ -18,10 +18,13 @@ import {
   getServiceNowConnector,
 } from '../../../../common/lib/utils';
 
+import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const actionsRemover = new ActionsRemover(supertest);
 
   describe('get_all_user_actions', () => {
     afterEach(async () => {
@@ -29,6 +32,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteComments(es);
       await deleteConfiguration(es);
       await deleteCasesUserActions(es);
+      await actionsRemover.removeAll();
     });
 
     it(`on new case, user action: 'create' should be called with actionFields: ['description', 'status', 'tags', 'title']`, async () => {
@@ -270,6 +274,8 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send(getServiceNowConnector())
         .expect(200);
+
+      actionsRemover.add('default', connector.id, 'action', 'actions');
 
       const { body: configure } = await supertest
         .post(CASE_CONFIGURE_URL)
