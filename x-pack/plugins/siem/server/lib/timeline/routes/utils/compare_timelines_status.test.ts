@@ -321,57 +321,139 @@ describe('CompareTimelinesStatus', () => {
   });
 
   describe(`Throw error if given title does NOT exists`, () => {
-    const mockGetTimeline: jest.Mock = jest.fn();
-    const mockGetTemplateTimeline: jest.Mock = jest.fn();
-    let timelineObj: TimelinesStatusType;
+    describe('timeline', () => {
+      const mockGetTimeline: jest.Mock = jest.fn();
+      const mockGetTemplateTimeline: jest.Mock = jest.fn();
+      let timelineObj: TimelinesStatusType;
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    afterAll(() => {
-      jest.resetModules();
-    });
-
-    beforeAll(() => {
-      jest.resetModules();
-    });
-
-    beforeEach(async () => {
-      jest.doMock('../../saved_object', () => {
-        return {
-          getTimeline: mockGetTimeline.mockReturnValue(null),
-          getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
-            timeline: [],
-          }),
-        };
+      afterEach(() => {
+        jest.clearAllMocks();
       });
 
-      const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
-        .CompareTimelinesStatus;
-
-      timelineObj = new CompareTimelinesStatus({
-        timelineInput: {
-          id: mockUniqueParsedObjects[0].savedObjectId,
-          type: TimelineType.default,
-          version: mockUniqueParsedObjects[0].version,
-        },
-        timelineType: TimelineType.default,
-        title: null,
-        templateTimelineInput: {
-          id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
-          type: TimelineType.template,
-          version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
-        },
-        frameworkRequest: {} as FrameworkRequest,
+      afterAll(() => {
+        jest.resetModules();
       });
 
-      await timelineObj.init();
+      beforeAll(() => {
+        jest.resetModules();
+      });
+
+      beforeEach(async () => {
+        jest.doMock('../../saved_object', () => {
+          return {
+            getTimeline: mockGetTimeline.mockReturnValue(null),
+            getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
+              timeline: [],
+            }),
+          };
+        });
+
+        const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
+          .CompareTimelinesStatus;
+
+        timelineObj = new CompareTimelinesStatus({
+          timelineInput: {
+            id: mockUniqueParsedObjects[0].savedObjectId,
+            type: TimelineType.default,
+            version: mockUniqueParsedObjects[0].version,
+          },
+          timelineType: TimelineType.default,
+          title: null,
+          templateTimelineInput: {
+            id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
+            type: TimelineType.template,
+            version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
+          },
+          frameworkRequest: {} as FrameworkRequest,
+        });
+
+        await timelineObj.init();
+      });
+
+      test(`create`, () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.create);
+        expect(error?.body).toEqual(EMPTY_TITLE_ERROR_MESSAGE);
+      });
+
+      test(`create via import`, () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.createViaImport);
+        expect(error?.body).toEqual(EMPTY_TITLE_ERROR_MESSAGE);
+      });
+
+      test(`update`, () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.update);
+        expect(error?.body).toEqual(EMPTY_TITLE_ERROR_MESSAGE);
+      });
     });
 
-    test(`create timeline`, () => {
-      const error = timelineObj.checkIsFailureCases(TimelineStatusActions.create);
-      expect(error?.body).toEqual(EMPTY_TITLE_ERROR_MESSAGE);
+    describe('template timeline', () => {
+      const mockGetTimeline: jest.Mock = jest.fn();
+      const mockGetTemplateTimeline: jest.Mock = jest.fn();
+      let timelineObj: TimelinesStatusType;
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      afterAll(() => {
+        jest.resetModules();
+      });
+
+      beforeAll(() => {
+        jest.resetModules();
+      });
+
+      beforeEach(async () => {
+        jest.doMock('../../saved_object', () => {
+          return {
+            getTimeline: mockGetTimeline.mockReturnValue(null),
+            getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
+              timeline: [],
+            }),
+          };
+        });
+
+        const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
+          .CompareTimelinesStatus;
+
+        timelineObj = new CompareTimelinesStatus({
+          timelineInput: {
+            id: mockUniqueParsedObjects[0].savedObjectId,
+            type: TimelineType.default,
+            version: mockUniqueParsedObjects[0].version,
+          },
+          timelineType: TimelineType.default,
+          title: null,
+          templateTimelineInput: {
+            id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
+            type: TimelineType.template,
+            version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
+          },
+          frameworkRequest: {} as FrameworkRequest,
+        });
+
+        await timelineObj.init();
+      });
+
+      test(`create`, () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.create);
+        expect(error?.body).toEqual(EMPTY_TITLE_ERROR_MESSAGE);
+      });
+
+      test(`create via import`, () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.createViaImport);
+        expect(error?.body).toEqual(EMPTY_TITLE_ERROR_MESSAGE);
+      });
+
+      test(`update`, () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.update);
+        expect(error?.body).toEqual(EMPTY_TITLE_ERROR_MESSAGE);
+      });
+
+      test(`update via import`, () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.updateViaImport);
+        expect(error?.body).toEqual(EMPTY_TITLE_ERROR_MESSAGE);
+      });
     });
   });
 });
