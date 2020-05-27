@@ -143,7 +143,6 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
     onDataProviderRemoved={[MockFunction]}
     onToggleDataProviderEnabled={[MockFunction]}
     onToggleDataProviderExcluded={[MockFunction]}
-    show={true}
   />
   <Connect(StatefulSearchOrFilterComponent)
     browserFields={Object {}}

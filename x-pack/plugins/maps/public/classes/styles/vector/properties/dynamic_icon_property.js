@@ -6,19 +6,11 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_utils';
-
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  EuiTextColor,
-} from '@elastic/eui';
-import { Category } from '../components/legend/category';
+import { BreakedLegend } from '../components/legend/breaked_legend';
+import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
+import { EuiTextColor } from '@elastic/eui';
 
 export class DynamicIconProperty extends DynamicStyleProperty {
   isOrdinal() {
@@ -27,6 +19,11 @@ export class DynamicIconProperty extends DynamicStyleProperty {
 
   isCategorical() {
     return true;
+  }
+
+  getNumberOfCategories() {
+    const palette = getIconPalette(this._options.iconPaletteId);
+    return palette ? palette.length : 0;
   }
 
   syncIconWithMb(symbolLayerId, mbMap, iconPixelSize) {
@@ -55,7 +52,7 @@ export class DynamicIconProperty extends DynamicStyleProperty {
       }
 
       return {
-        fallback:
+        fallbackSymbolId:
           this._options.customIconStops.length > 0 ? this._options.customIconStops[0].icon : null,
         stops,
       };
@@ -68,9 +65,9 @@ export class DynamicIconProperty extends DynamicStyleProperty {
   }
 
   _getMbIconImageExpression(iconPixelSize) {
-    const { stops, fallback } = this._getPaletteStops();
+    const { stops, fallbackSymbolId } = this._getPaletteStops();
 
-    if (stops.length < 1 || !fallback) {
+    if (stops.length < 1 || !fallbackSymbolId) {
       //occurs when no data
       return null;
     }
@@ -80,14 +77,17 @@ export class DynamicIconProperty extends DynamicStyleProperty {
       mbStops.push(`${stop}`);
       mbStops.push(getMakiIconId(style, iconPixelSize));
     });
-    mbStops.push(getMakiIconId(fallback, iconPixelSize)); //last item is fallback style for anything that does not match provided stops
+
+    if (fallbackSymbolId) {
+      mbStops.push(getMakiIconId(fallbackSymbolId, iconPixelSize)); //last item is fallback style for anything that does not match provided stops
+    }
     return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
   }
 
   _getMbIconAnchorExpression() {
-    const { stops, fallback } = this._getPaletteStops();
+    const { stops, fallbackSymbolId } = this._getPaletteStops();
 
-    if (stops.length < 1 || !fallback) {
+    if (stops.length < 1 || !fallbackSymbolId) {
       //occurs when no data
       return null;
     }
@@ -97,7 +97,10 @@ export class DynamicIconProperty extends DynamicStyleProperty {
       mbStops.push(`${stop}`);
       mbStops.push(getMakiSymbolAnchor(style));
     });
-    mbStops.push(getMakiSymbolAnchor(fallback)); //last item is fallback style for anything that does not match provided stops
+
+    if (fallbackSymbolId) {
+      mbStops.push(getMakiSymbolAnchor(fallbackSymbolId)); //last item is fallback style for anything that does not match provided stops
+    }
     return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
   }
 
@@ -105,55 +108,34 @@ export class DynamicIconProperty extends DynamicStyleProperty {
     return this._field && this._field.isValid();
   }
 
-  renderBreakedLegend({ fieldLabel, isPointsOnly, isLinesOnly }) {
-    const categories = [];
-    const { stops, fallback } = this._getPaletteStops();
-    stops.map(({ stop, style }) => {
-      categories.push(
-        <Category
-          key={stop}
-          styleName={this.getStyleName()}
-          label={this.formatField(stop)}
-          color="grey"
-          isLinesOnly={isLinesOnly}
-          isPointsOnly={isPointsOnly}
-          symbolId={style}
-        />
-      );
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly }) {
+    const { stops, fallbackSymbolId } = this._getPaletteStops();
+    const breaks = [];
+    stops.forEach(({ stop, style }) => {
+      if (stop) {
+        breaks.push({
+          color: 'grey',
+          label: this.formatField(stop),
+          symbolId: style,
+        });
+      }
     });
 
-    if (fallback) {
-      categories.push(
-        <Category
-          key="fallbackCategory"
-          styleName={this.getStyleName()}
-          label={<EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>}
-          color="grey"
-          isLinesOnly={isLinesOnly}
-          isPointsOnly={isPointsOnly}
-          symbolId={fallback}
-        />
-      );
+    if (fallbackSymbolId) {
+      breaks.push({
+        color: 'grey',
+        label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
+        symbolId: fallbackSymbolId,
+      });
     }
 
     return (
-      <div>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {categories}
-        </EuiFlexGroup>
-        <EuiFlexGroup gutterSize="xs" justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>
-            <EuiToolTip position="top" title={this.getDisplayStyleName()} content={fieldLabel}>
-              <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
-                <small>
-                  <strong>{fieldLabel}</strong>
-                </small>
-              </EuiText>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <BreakedLegend
+        style={this}
+        breaks={breaks}
+        isPointsOnly={isPointsOnly}
+        isLinesOnly={isLinesOnly}
+      />
     );
   }
 }

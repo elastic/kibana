@@ -99,7 +99,7 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
         <EuiTextArea
           className="canvasTextArea__code"
           value={getQuery()}
-          onChange={e => setArg(argName, e.target.value)}
+          onChange={(e) => setArg(argName, e.target.value)}
           rows={15}
         />
       </EuiFormRow>
@@ -115,7 +115,7 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
         <EuiFieldText
           compressed
           value={getInterval()}
-          onChange={e => setArg('interval', e.target.value)}
+          onChange={(e) => setArg('interval', e.target.value)}
         />
       </EuiFormRow>
     </div>

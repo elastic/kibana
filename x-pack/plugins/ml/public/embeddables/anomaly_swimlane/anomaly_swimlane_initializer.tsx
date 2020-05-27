@@ -38,7 +38,7 @@ export interface AnomalySwimlaneInitializerProps {
   onCancel: () => void;
 }
 
-const limitOptions = [5, 10, 25, 50].map(limit => ({
+const limitOptions = [5, 10, 25, 50].map((limit) => ({
   value: limit,
   text: `${limit}`,
 }));
@@ -72,7 +72,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
     },
   ];
 
-  const viewBySwimlaneOptions = ['', ...influencers].map(influencer => {
+  const viewBySwimlaneOptions = ['', ...influencers].map((influencer) => {
     return {
       value: influencer,
       text: influencer,
@@ -112,7 +112,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
               id="panelTitle"
               name="panelTitle"
               value={panelTitle}
-              onChange={e => setPanelTitle(e.target.value)}
+              onChange={(e) => setPanelTitle(e.target.value)}
               isInvalid={!isPanelTitleValid}
             />
           </EuiFormRow>
@@ -135,7 +135,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
               })}
               options={swimlaneTypeOptions}
               idSelected={swimlaneType}
-              onChange={id => setSwimlaneType(id as SWIMLANE_TYPE)}
+              onChange={(id) => setSwimlaneType(id as SWIMLANE_TYPE)}
             />
           </EuiFormRow>
 
@@ -151,7 +151,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
                   name="selectViewBy"
                   options={viewBySwimlaneOptions}
                   value={viewBySwimlaneFieldName}
-                  onChange={e => setViewBySwimlaneFieldName(e.target.value)}
+                  onChange={(e) => setViewBySwimlaneFieldName(e.target.value)}
                 />
               </EuiFormRow>
               <EuiFormRow
@@ -164,7 +164,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
                   name="limit"
                   options={limitOptions}
                   value={limit}
-                  onChange={e => setLimit(Number(e.target.value))}
+                  onChange={(e) => setLimit(Number(e.target.value))}
                 />
               </EuiFormRow>
             </>

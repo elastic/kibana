@@ -12,7 +12,6 @@ import { isRight } from 'fp-ts/lib/Either';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { AlertTypeInitializer } from '.';
 import { StatusCheckExecutorParamsType } from '../../../common/runtime_types';
-import { AlertMonitorStatus } from '../../components/overview/alerts/alerts_containers';
 import { MonitorStatusTitle } from './monitor_status_title';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants';
 import { MonitorStatusTranslations } from './translations';
@@ -58,6 +57,10 @@ export const validate = (alertParams: any) => {
 };
 
 const { defaultActionMessage } = MonitorStatusTranslations;
+
+const AlertMonitorStatus = React.lazy(() =>
+  import('../../components/overview/alerts/alerts_containers/alert_monitor_status')
+);
 
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   store,

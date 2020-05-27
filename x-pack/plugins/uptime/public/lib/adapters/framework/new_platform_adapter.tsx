@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
+import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { get } from 'lodash';
@@ -58,7 +58,6 @@ export const getKibanaFrameworkAdapter = (
     isApmAvailable: apm,
     isInfraAvailable: infrastructure,
     isLogsAvailable: logs,
-    kibanaBreadcrumbs: breadcrumbs,
     plugins,
     startPlugins,
     renderGlobalHelpControls: () =>
@@ -88,6 +87,10 @@ export const getKibanaFrameworkAdapter = (
       if (element) {
         ReactDOM.render(<UptimeApp {...props} />, element);
       }
+
+      return () => {
+        ReactDOM.unmountComponentAtNode(element);
+      };
     },
   };
 };

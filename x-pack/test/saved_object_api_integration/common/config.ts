@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { resolveKibanaPath } from '@kbn/plugin-helpers';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import path from 'path';
@@ -57,7 +56,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--optimize.enabled=false',
           '--server.xsrf.disableProtection=true',
           `--plugin-path=${path.join(__dirname, 'fixtures', 'saved_object_test_plugin')}`,
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
         ],
       },
     };

@@ -17,7 +17,7 @@ export async function fetchStatus(
 ): Promise<any[]> {
   const statuses = await Promise.all(
     alertTypes.map(
-      type =>
+      (type) =>
         new Promise(async (resolve, reject) => {
           // We need to get the id from the alertTypeId
           const alerts = await alertsClient.find({

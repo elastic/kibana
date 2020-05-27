@@ -22,12 +22,8 @@ export const initTlsAlertType: AlertTypeInitializer = ({
 }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.TLS,
   iconClass: 'uptimeApp',
-  alertParamsExpression: () => (
-    <ReduxProvider store={store}>
-      <KibanaContextProvider services={{ ...core, ...plugins }}>
-        <AlertTls />
-      </KibanaContextProvider>
-    </ReduxProvider>
+  alertParamsExpression: React.lazy(() =>
+    import('../../components/overview/alerts/alerts_containers/alert_tls')
   ),
   name,
   validate: () => ({ errors: {} }),

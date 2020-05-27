@@ -10,13 +10,13 @@ import { ReindexStatus, REINDEX_OP_TYPE } from '../../../plugins/upgrade_assista
 import { generateNewIndexName } from '../../../plugins/upgrade_assistant/server/lib/reindexing/index_settings';
 import { getIndexStateFromClusterState } from '../../../plugins/upgrade_assistant/common/get_index_state_from_cluster_state';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
 
   // Utility function that keeps polling API until reindex operation has completed or failed.
-  const waitForReindexToComplete = async indexName => {
+  const waitForReindexToComplete = async (indexName) => {
     console.log(`Waiting for reindex to complete...`);
     let lastState;
 
@@ -27,7 +27,7 @@ export default function({ getService }) {
       if (lastState.status !== ReindexStatus.inProgress && lastState.locked === null) {
         break;
       }
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
     return lastState;
@@ -161,7 +161,7 @@ export default function({ getService }) {
       const test2 = 'batch-reindex-test2';
       const test3 = 'batch-reindex-test3';
 
-      const cleanupReindex = async indexName => {
+      const cleanupReindex = async (indexName) => {
         try {
           await es.indices.delete({ index: generateNewIndexName(indexName) });
         } catch (e) {

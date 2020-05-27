@@ -49,8 +49,8 @@ async function getChangesForProjects(projects: ProjectMap, kbn: Kibana, log: Too
       '--exclude-standard',
       '--',
       ...Array.from(projects.values())
-        .filter(p => kbn.isPartOfRepo(p))
-        .map(p => p.path),
+        .filter((p) => kbn.isPartOfRepo(p))
+        .map((p) => p.path),
     ],
     {
       cwd: kbn.getAbsolute(),
@@ -265,7 +265,7 @@ export async function getAllChecksums(kbn: Kibana, log: ToolingLog) {
   const cacheKeys: ChecksumMap = new Map();
 
   await Promise.all(
-    Array.from(projects.values()).map(async project => {
+    Array.from(projects.values()).map(async (project) => {
       cacheKeys.set(
         project.name,
         await getChecksum(project, changesByProject.get(project), yarnLock, kbn, log)
