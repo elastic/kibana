@@ -119,9 +119,7 @@ class FilterItemUI extends Component<Props, State> {
     const dataTestSubjValue = filter.meta.value
       ? `filter-value-${this.isValidLabel(labelConfig) ? labelConfig.title : labelConfig.status}`
       : '';
-    const dataTestSubjDisabled = `filter-${
-      this.isValidLabel(labelConfig) ? 'enabled' : 'disabled'
-    }`;
+    const dataTestSubjDisabled = `filter-${this.isDisabled(labelConfig) ? 'disabled' : 'enabled'}`;
     const dataTestSubjPinned = `filter-${isFilterPinned(filter) ? 'pinned' : 'unpinned'}`;
     return `filter ${dataTestSubjDisabled} ${dataTestSubjKey} ${dataTestSubjValue} ${dataTestSubjPinned}`;
   }
