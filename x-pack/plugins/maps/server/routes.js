@@ -538,7 +538,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       try {
-        const resp = await context.core.elasticsearch.dataClient.callAsCurrentUser(
+        const resp = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
           'indices.getSettings',
           {
             index: query.indexPatternTitle,
