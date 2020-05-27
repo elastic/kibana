@@ -7,12 +7,12 @@
 import { Request } from 'hapi';
 import { AlertsClientFactory, AlertsClientFactoryOpts } from './alerts_client_factory';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
-import { taskManagerMock } from '../../../plugins/task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { KibanaRequest } from '../../../../src/core/server';
 import { loggingServiceMock, savedObjectsClientMock } from '../../../../src/core/server/mocks';
-import { encryptedSavedObjectsMock } from '../../../plugins/encrypted_saved_objects/server/mocks';
-import { AuthenticatedUser } from '../../../plugins/security/public';
-import { securityMock } from '../../../plugins/security/server/mocks';
+import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
+import { AuthenticatedUser } from '../../security/public';
+import { securityMock } from '../../security/server/mocks';
 
 jest.mock('./alerts_client');
 

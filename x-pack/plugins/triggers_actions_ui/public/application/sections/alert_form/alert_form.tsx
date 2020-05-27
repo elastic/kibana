@@ -30,7 +30,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
-} from '../../../../../alerting/common/parse_duration';
+} from '../../../../../alerts/common/parse_duration';
 import { loadAlertTypes } from '../../lib/alert_api';
 import { actionVariablesFromAlertType } from '../../lib/action_variables';
 import { AlertReducerAction } from './alert_reducer';

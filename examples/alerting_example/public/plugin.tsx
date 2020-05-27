@@ -18,7 +18,7 @@
  */
 
 import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
-import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerting/public';
+import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerts/public';
 import { ChartsPluginStart } from '../../../src/plugins/charts/public';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../x-pack/plugins/triggers_actions_ui/public';
 import { DataPublicPluginStart } from '../../../src/plugins/data/public';

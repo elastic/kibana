@@ -17,7 +17,7 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
-} from '../../alerting/public';
+} from '../../alerts/public';
 import { FeaturesPluginSetup } from '../../features/public';
 import {
   DataPublicPluginSetup,

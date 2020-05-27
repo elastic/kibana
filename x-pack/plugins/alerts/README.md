@@ -78,7 +78,7 @@ Note that the `manage_own_api_key` cluster privilege is not enough - it can be u
 
 ### Methods
 
-**server.newPlatform.setup.plugins.alerting.registerType(options)**
+**server.newPlatform.setup.plugins.alerts.registerType(options)**
 
 The following table describes the properties of the `options` object.
 
@@ -139,7 +139,7 @@ This example receives server and threshold as parameters. It will read the CPU u
 ```typescript
 import { schema } from '@kbn/config-schema';
 ...
-server.newPlatform.setup.plugins.alerting.registerType({
+server.newPlatform.setup.plugins.alerts.registerType({
 	id: 'my-alert-type',
 	name: 'My alert type',
 	validate: {
@@ -220,7 +220,7 @@ server.newPlatform.setup.plugins.alerting.registerType({
 This example only receives threshold as a parameter. It will read the CPU usage of all the servers and schedule individual actions if the reading for a server is greater than the threshold. This is a better implementation than above as only one query is performed for all the servers instead of one query per server.
 
 ```typescript
-server.newPlatform.setup.plugins.alerting.registerType({
+server.newPlatform.setup.plugins.alerts.registerType({
 	id: 'my-alert-type',
 	name: 'My alert type',
 	validate: {

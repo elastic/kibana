@@ -6,7 +6,7 @@
 
 import { Plugin, CoreSetup } from 'kibana/server';
 import { PluginSetupContract as ActionsPluginSetup } from '../../../../../../../plugins/actions/server/plugin';
-import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../../plugins/alerting/server/plugin';
+import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../../plugins/alerts/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
 import { defineAlertTypes } from './alert_types';
@@ -29,9 +29,9 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     { features, actions, alerting }: FixtureSetupDeps
   ) {
     features.registerFeature({
-      id: 'alerting',
+      id: 'alerts',
       name: 'Alerting',
-      app: ['alerting', 'kibana'],
+      app: ['alerts', 'kibana'],
       privileges: {
         all: {
           app: ['alerting', 'kibana'],

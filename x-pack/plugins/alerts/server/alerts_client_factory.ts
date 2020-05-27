@@ -8,9 +8,9 @@ import { PreConfiguredAction } from '../../actions/server';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { KibanaRequest, Logger, SavedObjectsClientContract } from '../../../../src/core/server';
-import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../../plugins/security/server';
-import { EncryptedSavedObjectsClient } from '../../../plugins/encrypted_saved_objects/server';
-import { TaskManagerStartContract } from '../../../plugins/task_manager/server';
+import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../security/server';
+import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
+import { TaskManagerStartContract } from '../../task_manager/server';
 
 export interface AlertsClientFactoryOpts {
   logger: Logger;

@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
-import { PluginSetupContract as AlertingSetup } from '../../../../../../plugins/alerting/public';
-import { AlertType, SanitizedAlert } from '../../../../../../plugins/alerting/common';
+import { PluginSetupContract as AlertingSetup } from '../../../../../../plugins/alerts/public';
+import { AlertType, SanitizedAlert } from '../../../../../../plugins/alerts/common';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../../../../plugins/triggers_actions_ui/public';
 
 export type Setup = void;

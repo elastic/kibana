@@ -15,7 +15,7 @@ import { TypeRegistry } from './application/type_registry';
 import { ManagementStart, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { boot } from './application/boot';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import { PluginStartContract as AlertingStart } from '../../alerting/public';
+import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 export interface TriggersAndActionsUIPublicPluginSetup {

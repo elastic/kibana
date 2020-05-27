@@ -1,10 +1,10 @@
 {
-  "id": "alerting",
+  "id": "alerts",
   "server": true,
   "ui": true,
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["xpack", "alerting"],
+  "configPath": ["xpack", "alerts"],
   "requiredPlugins": ["licensing", "taskManager", "encryptedSavedObjects", "actions", "eventLog"],
   "optionalPlugins": ["usageCollection", "spaces", "security"]
 }

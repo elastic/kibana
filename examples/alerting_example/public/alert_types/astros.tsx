@@ -32,8 +32,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { flatten } from 'lodash';
 import { ALERTING_EXAMPLE_APP_ID, Craft, Operator } from '../../common/constants';
-import { SanitizedAlert } from '../../../../x-pack/plugins/alerting/common';
-import { PluginSetupContract as AlertingSetup } from '../../../../x-pack/plugins/alerting/public';
+import { SanitizedAlert } from '../../../../x-pack/plugins/alerts/common';
+import { PluginSetupContract as AlertingSetup } from '../../../../x-pack/plugins/alerts/public';
 import { AlertTypeModel } from '../../../../x-pack/plugins/triggers_actions_ui/public';
 
 export function registerNavigation(alerting: AlertingSetup) {

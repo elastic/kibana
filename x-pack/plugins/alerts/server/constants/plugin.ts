@@ -7,12 +7,12 @@
 import { LICENSE_TYPE_BASIC, LicenseType } from '../../../../legacy/common/constants';
 
 export const PLUGIN = {
-  ID: 'alerting',
+  ID: 'alerts',
   MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_BASIC as LicenseType, // TODO: supposed to be changed up on requirements
   // all plugins seem to use getI18nName with any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getI18nName: (i18n: any): string =>
-    i18n.translate('xpack.alerting.appName', {
-      defaultMessage: 'Alerting',
+    i18n.translate('xpack.alerts.appName', {
+      defaultMessage: 'Alerts',
     }),
 };

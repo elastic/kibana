@@ -19,8 +19,8 @@
 
 import { registerNavigation as registerPeopleInSpaceNavigation } from './astros';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
-import { SanitizedAlert } from '../../../../x-pack/plugins/alerting/common';
-import { PluginSetupContract as AlertingSetup } from '../../../../x-pack/plugins/alerting/public';
+import { SanitizedAlert } from '../../../../x-pack/plugins/alerts/common';
+import { PluginSetupContract as AlertingSetup } from '../../../../x-pack/plugins/alerts/public';
 
 export function registerNavigation(alerting: AlertingSetup) {
   // register default navigation

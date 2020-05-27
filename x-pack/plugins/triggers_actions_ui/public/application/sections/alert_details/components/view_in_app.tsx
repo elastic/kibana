@@ -16,7 +16,7 @@ import {
   AlertNavigation,
   AlertStateNavigation,
   AlertUrlNavigation,
-} from '../../../../../../alerting/common';
+} from '../../../../../../alerts/common';
 import { Alert } from '../../../../types';
 
 export interface ViewInAppProps {

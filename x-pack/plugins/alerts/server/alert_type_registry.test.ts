@@ -7,7 +7,7 @@
 import { TaskRunnerFactory } from './task_runner';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { AlertType } from './types';
-import { taskManagerMock } from '../../../plugins/task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 
 const taskManager = taskManagerMock.setup();
 const alertTypeRegistryParams = {

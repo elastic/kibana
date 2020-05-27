@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConcreteTaskInstance, TaskStatus } from '../../../../plugins/task_manager/server';
+import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { AlertTaskInstance, taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import uuid from 'uuid';
 import { SanitizedAlert } from '../types';

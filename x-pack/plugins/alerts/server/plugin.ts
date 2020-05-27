@@ -53,7 +53,7 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
-} from '../../../plugins/actions/server';
+} from '../../actions/server';
 import { Services } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';

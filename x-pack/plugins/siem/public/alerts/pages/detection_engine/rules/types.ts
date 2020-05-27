@@ -5,7 +5,7 @@
  */
 
 import { RuleAlertAction, RuleType } from '../../../../../common/detection_engine/types';
-import { AlertAction } from '../../../../../../alerting/common';
+import { AlertAction } from '../../../../../../alerts/common';
 import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { FormData, FormHook } from '../../../../shared_imports';
 import { FieldValueQueryBar } from '../../../components/rules/query_bar';

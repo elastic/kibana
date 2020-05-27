@@ -7,7 +7,7 @@
 import { pick, mapValues, omit, without } from 'lodash';
 import { Logger, SavedObject, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
-import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
+import { ConcreteTaskInstance } from '../../../task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';
 import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
 import { getNextRunAt } from './get_next_run_at';

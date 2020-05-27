@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Logger } from '../../../../../src/core/server';
-import { RunContext } from '../../../../plugins/task_manager/server';
-import { EncryptedSavedObjectsClient } from '../../../../plugins/encrypted_saved_objects/server';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../../plugins/actions/server';
+import { RunContext } from '../../../task_manager/server';
+import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
+import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 import {
   AlertType,
   GetBasePathFunction,

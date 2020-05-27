@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { LicenseState } from './license_state';
-import { licensingMock } from '../../../../plugins/licensing/server/mocks';
+import { licensingMock } from '../../../licensing/server/mocks';
 
 describe('license_state', () => {
   const getRawLicense = jest.fn();

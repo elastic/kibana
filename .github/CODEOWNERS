@@ -180,7 +180,7 @@
 /x-pack/plugins/telemetry_collection_xpack/ @elastic/pulse
 
 # Kibana Alerting Services
-/x-pack/plugins/alerting/ @elastic/kibana-alerting-services
+/x-pack/plugins/alerts/ @elastic/kibana-alerting-services
 /x-pack/plugins/actions/ @elastic/kibana-alerting-services
 /x-pack/plugins/event_log/ @elastic/kibana-alerting-services
 /x-pack/plugins/task_manager/ @elastic/kibana-alerting-services

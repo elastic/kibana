@@ -6,7 +6,7 @@
 import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
-import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
+import { ConcreteTaskInstance } from '../../../task_manager/server';
 import {
   SanitizedAlert,
   AlertTaskState,

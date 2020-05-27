@@ -12,11 +12,11 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { FindOptions } from '../../../alerting/server';
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { BASE_ALERT_API_PATH } from '../../common';
 import { renameKeys } from './lib/rename_keys';
+import { FindOptions } from '..';
 
 // config definition
 const querySchema = schema.object({
