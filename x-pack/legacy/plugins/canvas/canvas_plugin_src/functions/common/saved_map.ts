@@ -120,6 +120,7 @@ export function savedMap(): ExpressionFunctionDefinition<
           hiddenLayers: args.hideLayer || [],
         },
         embeddableType: EmbeddableTypes.map,
+        generatedAt: Date.now(),
       };
     },
   };

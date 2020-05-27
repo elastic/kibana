@@ -93,6 +93,7 @@ export function savedVisualization(): ExpressionFunctionDefinition<
           vis: visOptions,
         },
         embeddableType: EmbeddableTypes.visualization,
+        generatedAt: Date.now(),
       };
     },
   };
