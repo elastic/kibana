@@ -77,7 +77,7 @@ export function getVisData(
           getCluster: () => {
             return {
               callWithRequest: async (req: any, endpoint: string, params: any) => {
-                return await requestContext.core.elasticsearch.dataClient.callAsCurrentUser(
+                return await requestContext.core.elasticsearch.legacy.client.callAsCurrentUser(
                   endpoint,
                   params
                 );

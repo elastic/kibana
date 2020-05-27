@@ -16,7 +16,7 @@ import { RouteDependencies } from '../../types';
 export const register = (deps: RouteDependencies): void => {
   const allHandler: RequestHandler<unknown, unknown, unknown> = async (ctx, request, response) => {
     try {
-      const callAsCurrentUser = await ctx.core.elasticsearch.dataClient.callAsCurrentUser;
+      const callAsCurrentUser = await ctx.core.elasticsearch.legacy.client.callAsCurrentUser;
       const clusterSettings = await callAsCurrentUser('cluster.getSettings');
 
       const transientClusterNames = Object.keys(
