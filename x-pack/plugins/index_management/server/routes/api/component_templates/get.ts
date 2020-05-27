@@ -12,6 +12,13 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
+const getComponentTemplatesInUse = (indexTemplates) => {
+  const componentTemplates = indexTemplates.map(({ index_template: indexTemplate }) => {
+    return indexTemplate.composed_of;
+  });
+  return [].concat.apply([], componentTemplates); // return flattened array
+};
+
 export function registerGetAllRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
   // Get all component templates
   router.get(
@@ -20,9 +27,25 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
       const { callAsCurrentUser } = ctx.dataManagement!.client;
 
       try {
-        const response = await callAsCurrentUser('dataManagement.getComponentTemplates');
+        const { component_templates: componentTemplates } = await callAsCurrentUser(
+          'dataManagement.getComponentTemplates'
+        );
 
-        return res.ok({ body: response.component_templates });
+        const { index_templates: indexTemplates } = await callAsCurrentUser(
+          'dataManagement.getComposableIndexTemplates'
+        );
+
+        const activeComponentTemplates = getComponentTemplatesInUse(indexTemplates);
+
+        const body = componentTemplates.map((component) => {
+          const isActive = activeComponentTemplates.includes(component.name);
+          return {
+            ...component,
+            isActive,
+          };
+        });
+
+        return res.ok({ body });
       } catch (error) {
         if (isEsError(error)) {
           return res.customError({
