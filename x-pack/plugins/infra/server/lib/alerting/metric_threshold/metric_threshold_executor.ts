@@ -336,9 +336,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
           group,
           alertState: stateToAlertMessage[nextState],
           reason,
-          value: mapToConditionsLookup(alertResults, result => result[group].currentValue),
-          threshold: mapToConditionsLookup(criteria, c => c.threshold),
-          metric: mapToConditionsLookup(criteria, c => c.metric),
+          value: mapToConditionsLookup(alertResults, (result) => result[group].currentValue),
+          threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
+          metric: mapToConditionsLookup(criteria, (c) => c.metric),
         });
       }
 
