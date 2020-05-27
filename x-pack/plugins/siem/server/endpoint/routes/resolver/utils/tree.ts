@@ -7,18 +7,26 @@
 import _ from 'lodash';
 import {
   ResolverEvent,
-  ResolverNode,
   ResolverNodeStats,
-  ResolverNodePagination,
+  ResolverRelatedEvents,
+  ResolverAncestry,
+  ResolverTree,
+  ResolverChildren,
 } from '../../../../../common/endpoint/types';
-import { entityId, parentEntityId } from '../../../../../common/endpoint/models/event';
-import { buildPaginationCursor } from './pagination';
+import { createTree } from './node';
 
-type ExtractFunction = (event: ResolverEvent) => string | undefined;
-
-function createNode(id: string): ResolverNode {
-  return { id, children: [], pagination: {}, events: [], lifecycle: [] };
+interface Node {
+  entityID: string;
+  lifecycle: ResolverEvent[];
+  stats?: ResolverNodeStats;
 }
+
+export interface Options {
+  relatedEvents?: ResolverRelatedEvents;
+  ancestry?: ResolverAncestry;
+  children?: ResolverChildren;
+}
+
 /**
  * This class aids in constructing a tree of process events. It works in the following way:
  *
@@ -50,181 +58,101 @@ function createNode(id: string): ResolverNode {
  * what this means is that noisy neighbors for a given level may hide other child process events that occur later
  * temporally in the same level--so, while a heavily forking process might get shown, maybe the actually malicious
  * event doesn't show up in the tree at the beginning.
+ *
+ * This Tree's root/origin could be in the middle of the tree. The origin corresponds to the id passed in when this
+ * Tree object is constructed. The tree can have ancestors and children coming from the origin.
  */
-
 export class Tree {
-  protected cache: Map<string, ResolverNode>;
-  protected root: ResolverNode;
-  protected id: string;
+  protected cache: Map<string, Node> = new Map();
+  protected tree: ResolverTree;
 
-  constructor(id: string) {
-    const root = createNode(id);
-    this.id = id;
-    this.cache = new Map();
-    this.root = root;
-    this.cache.set(id, root);
+  constructor(protected readonly id: string, options: Options = {}) {
+    const tree = createTree(this.id);
+    this.tree = tree;
+    this.cache.set(id, tree);
+
+    this.addRelatedEvents(options.relatedEvents);
+    this.addAncestors(options.ancestry);
+    this.addChildren(options.children);
   }
 
-  public render(): ResolverNode {
-    return this.root;
+  /**
+   * Return the origin node. The origin node is the node with the id that the tree was built using.
+   *
+   * @returns the origin ResolverNode
+   */
+  public render(): ResolverTree {
+    return this.tree;
   }
 
+  /**
+   * Returns an array of all the unique IDs for the nodes stored in this tree.
+   *
+   * @returns an array of strings representing the unique IDs for the nodes in the tree
+   */
   public ids(): string[] {
     return [...this.cache.keys()];
   }
 
-  public static async merge(
-    childrenPromise: Promise<Tree>,
-    ancestorsPromise: Promise<Tree>,
-    eventsPromise: Promise<Tree>
-  ): Promise<Tree> {
-    const [children, ancestors, events] = await Promise.all([
-      childrenPromise,
-      ancestorsPromise,
-      eventsPromise,
-    ]);
-
-    /*
-     * we only allow for merging when we have partial trees that
-     * represent the same root node
-     */
-    const rootID = children.id;
-    if (rootID !== ancestors.id || rootID !== events.id) {
-      throw new Error('cannot merge trees with different roots');
+  /**
+   * Add related events for the tree's origin node. Related events cannot be added for other nodes.
+   *
+   * @param relatedEventsInfo is the related events and pagination information to add to the tree.
+   */
+  private addRelatedEvents(relatedEventsInfo: ResolverRelatedEvents | undefined) {
+    if (!relatedEventsInfo) {
+      return;
     }
 
-    Object.entries(ancestors.cache).forEach(([id, node]) => {
-      if (rootID !== id) {
-        children.cache.set(id, node);
-      }
-    });
-
-    children.root.lifecycle = ancestors.root.lifecycle;
-    children.root.ancestors = ancestors.root.ancestors;
-    children.root.events = events.root.events;
-
-    Object.assign(children.root.pagination, ancestors.root.pagination, events.root.pagination);
-
-    return children;
+    this.tree.relatedEvents.events = relatedEventsInfo.events;
+    this.tree.relatedEvents.nextEvent = relatedEventsInfo.nextEvent;
   }
 
-  public addEvent(...events: ResolverEvent[]): void {
-    events.forEach((event) => {
-      const id = entityId(event);
+  /**
+   * Add ancestors to the tree.
+   *
+   * @param ancestorInfo is the ancestors and pagination information to add to the tree.
+   */
+  private addAncestors(ancestorInfo: ResolverAncestry | undefined) {
+    if (!ancestorInfo) {
+      return;
+    }
 
-      this.ensureCache(id);
-      const currentNode = this.cache.get(id);
-      if (currentNode !== undefined) {
-        currentNode.events.push(event);
-      }
-    });
-  }
+    this.tree.ancestry.nextAncestor = ancestorInfo.nextAncestor;
 
-  public addAncestor(id: string, ...events: ResolverEvent[]): void {
-    events.forEach((event) => {
-      const ancestorID = entityId(event);
-      if (this.cache.get(ancestorID) === undefined) {
-        const newParent = createNode(ancestorID);
-        this.cache.set(ancestorID, newParent);
-        if (!this.root.ancestors) {
-          this.root.ancestors = [];
-        }
-        this.root.ancestors.push(newParent);
+    // the ancestry info holds the lifecycle events for the root of the tree too, so we need to pull that out
+    ancestorInfo.ancestors.forEach((node) => {
+      if (node.entityID === this.id) {
+        this.tree.lifecycle = node.lifecycle;
+        return;
       }
-      const currentAncestor = this.cache.get(ancestorID);
-      if (currentAncestor !== undefined) {
-        currentAncestor.lifecycle.push(event);
-      }
+      this.cache.set(node.entityID, node);
+      this.tree.ancestry.ancestors.push(node);
     });
   }
 
-  public addStats(id: string, stats: ResolverNodeStats): void {
-    this.ensureCache(id);
+  /**
+   * Add statistics to a node.
+   *
+   * @param id unique node ID to add the stats information to
+   * @param stats information indicating how many related events, and alerts exist for the specific node.
+   */
+  public addStats(id: string, stats: ResolverNodeStats) {
     const currentNode = this.cache.get(id);
     if (currentNode !== undefined) {
       currentNode.stats = stats;
     }
   }
 
-  public setNextAncestor(next: string | null): void {
-    this.root.pagination.nextAncestor = next;
-  }
-
-  public setNextEvent(next: string | null): void {
-    this.root.pagination.nextEvent = next;
-  }
-
-  public setNextAlert(next: string | null): void {
-    this.root.pagination.nextAlert = next;
-  }
-
-  public addChild(...events: ResolverEvent[]): void {
-    events.forEach((event) => {
-      const id = entityId(event);
-      const parentID = parentEntityId(event);
-
-      this.ensureCache(parentID);
-      let currentNode = this.cache.get(id);
-
-      if (currentNode === undefined) {
-        currentNode = createNode(id);
-        this.cache.set(id, currentNode);
-        if (parentID !== undefined) {
-          const parentNode = this.cache.get(parentID);
-          if (parentNode !== undefined) {
-            parentNode.children.push(currentNode);
-          }
-        }
-      }
-      currentNode.lifecycle.push(event);
-    });
-  }
-
-  public markLeafNode(...ids: string[]): void {
-    ids.forEach((id) => {
-      this.ensureCache(id);
-      const currentNode = this.cache.get(id);
-      if (currentNode !== undefined && !currentNode.pagination.nextChild) {
-        currentNode.pagination.nextChild = null;
-      }
-    });
-  }
-
-  public paginateEvents(totals: Record<string, number>, events: ResolverEvent[]): void {
-    return this.paginate(entityId, 'nextEvent', totals, events);
-  }
-
-  public paginateChildren(totals: Record<string, number>, children: ResolverEvent[]): void {
-    return this.paginate(parentEntityId, 'nextChild', totals, children);
-  }
-
-  private paginate(
-    grouper: ExtractFunction,
-    attribute: keyof ResolverNodePagination,
-    totals: Record<string, number>,
-    records: ResolverEvent[]
-  ): void {
-    const grouped = _.groupBy(records, grouper);
-    Object.entries(totals).forEach(([id, total]) => {
-      if (this.cache.get(id) !== undefined) {
-        if (grouped[id]) {
-          /*
-           * if we have any results, attempt to build a pagination cursor, the function
-           * below hands back a null value if no cursor is necessary because we have
-           * all of the records.
-           */
-          const currentNode = this.cache.get(id);
-          if (currentNode !== undefined) {
-            currentNode.pagination[attribute] = buildPaginationCursor(total, grouped[id]);
-          }
-        }
-      }
-    });
-  }
-
-  private ensureCache(id: string | undefined): void {
-    if (id === undefined || this.cache.get(id) === undefined) {
-      throw new Error('dangling node');
+  private addChildren(children: ResolverChildren | undefined) {
+    if (!children) {
+      return;
     }
+
+    this.tree.children = children;
+
+    children.childNodes.forEach((child) => {
+      this.cache.set(child.entityID, child);
+    });
   }
 }
