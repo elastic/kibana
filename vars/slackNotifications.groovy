@@ -91,15 +91,17 @@ def getStatusIcon() {
 def sendFailedBuild(Map params = [:]) {
   def config = [
     channel: '#kibana-operations-alerts',
-    title: "${getStatusIcon()} *<${env.BUILD_URL}|${getDefaultDisplayName()}>*",
-    message: "${getStatusIcon()} ${getDefaultDisplayName()}",
+    title: "*<${env.BUILD_URL}|${getDefaultDisplayName()}>*",
+    message: getDefaultDisplayName(),
     color: 'danger',
     icon: ':jenkins:',
     username: 'Kibana Operations',
     context: getDefaultContext(),
   ] + params
 
-  def blocks = [markdownBlock(config.title)]
+  def title = "${getStatusIcon()} ${config.title}"
+
+  def blocks = [markdownBlock(title)]
   getFailedBuildBlocks().each { blocks << it }
   blocks << dividerBlock()
   blocks << config.context
