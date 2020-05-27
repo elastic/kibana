@@ -25,26 +25,20 @@ export const EndpointConfiguration = memo<{ editMode: boolean }>(({ editMode }) 
   return (
     <>
       {editMode === true ? (
-        <>
-          <FormattedMessage
-            id="xpack.ingestManager.editDatasource.stepConfigure.endpointConfiguration"
-            defaultMessage="See security app policy tab for additional configuration options: "
-          />
-          <EuiLink
-            onClick={(ev: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) =>
-              linkToSiemApp(ev)
-            }
-          >
-            {i18n.translate(
-              'xpack.ingestManager.editDatasource.stepConfigure.endpointConfigurationLink',
-              { defaultMessage: 'Click me to configure' }
-            )}
-          </EuiLink>
-        </>
+        <EuiLink
+          onClick={(ev: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) =>
+            linkToSiemApp(ev)
+          }
+        >
+          {i18n.translate(
+            'xpack.ingestManager.editDatasource.stepConfigure.endpointConfigurationLink',
+            { defaultMessage: 'View and configure Security Policy' }
+          )}
+        </EuiLink>
       ) : (
         <FormattedMessage
           id="xpack.ingestManager.createDatasource.stepConfigure.endpointConfiguration"
-          defaultMessage="See security app policy tab for additional configuration"
+          defaultMessage="The recommended Security Policy has been associated with this data source. The Security Policy can be edited in the Security application once your data source has been saved."
         />
       )}
     </>
