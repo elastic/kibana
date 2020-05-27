@@ -20,11 +20,30 @@ export const logEntriesSearchStrategyProvider: TSearchStrategyProvider<typeof LO
     const payload = decodeOrThrow(logEntriesRequestRT)(request);
 
     // something using data.search.search and payload
+    const { firstTotal, firstLoaded, firstResults } = await somethingThatCallsAnotherSearchStrategy(
+      payload
+    );
 
-    return logEntriesResponseRT.encode({
-      data: {
-        // results go here
-      },
-    });
+    // something using data.search.search and the first results
+    const {
+      secondTotal,
+      secondLoaded,
+      secondResults,
+    } = await somethingThatCallsAnotherSearchStrategy(firstResults);
+
+    const total = mergeTotalsSomehow(firstTotal, secondTotal);
+    const loaded = mergeLoadedSomehow(firstLoaded, secondLoaded);
+
+    return {
+      id,
+      total,
+      loaded,
+      ...logEntriesResponseRT.encode({
+        // something using the results
+      }),
+    };
+  },
+  cancel: async (id) => {
+    // signal cancellation to the search function somehow
   },
 });
