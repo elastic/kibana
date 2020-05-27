@@ -222,11 +222,15 @@ __kbnBundles__[\\"plugin/foo\\"] = (function (modules) {
   for (var i = 0; i < jsonpArray.length; i++)
     webpackJsonpCallback(jsonpArray[i]);
   var parentJsonpFunction = oldJsonpFunction;
-  return __webpack_require__((__webpack_require__.s = 0));
+  return __webpack_require__((__webpack_require__.s = 1));
 })([
+  function (module, exports, __webpack_require__) {
+    __webpack_require__.p = window.__kbnPublicPath__[\\"foo\\"];
+  },
   function (module, __webpack_exports__, __webpack_require__) {
     \\"use strict\\";
     __webpack_require__.r(__webpack_exports__);
+    var public_path_module_creator = __webpack_require__(0);
     function fooLibFn() {
       return \\"foo\\";
     }
@@ -240,7 +244,6 @@ __kbnBundles__[\\"plugin/foo\\"] = (function (modules) {
     __webpack_require__.d(__webpack_exports__, \\"ext\\", function () {
       return ext;
     });
-    __webpack_require__.p = window.__kbnPublicPath__[\\"foo\\"];
     function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
       try {
         var info = gen[key](arg);
@@ -300,7 +303,7 @@ __kbnBundles__[\\"plugin/foo\\"] = (function (modules) {
                   _context.next = 2;
                   return __webpack_require__
                     .e(1)
-                    .then(__webpack_require__.bind(null, 1));
+                    .then(__webpack_require__.bind(null, 2));
                 case 2:
                   return _context.abrupt(\\"return\\", _context.sent);
                 case 3:
