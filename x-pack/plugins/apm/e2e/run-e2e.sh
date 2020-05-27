@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # variables
 KIBANA_PORT=5701
@@ -65,6 +65,8 @@ ${APM_IT_DIR}/scripts/compose.py start master \
     --elasticsearch-port $ELASTICSEARCH_PORT \
     --apm-server-port=$APM_SERVER_PORT \
     --elasticsearch-heap 4g \
+    --apm-server-opt queue.mem.events=8192 \
+    --apm-server-opt output.elasticsearch.bulk_max_size=4096 \
     &> ${TMP_DIR}/apm-it.log
 
 # Stop if apm-integration-testing failed to start correctly
@@ -98,7 +100,7 @@ curl --silent --user admin:changeme -XDELETE "localhost:${ELASTICSEARCH_PORT}/.a
 curl --silent --user admin:changeme -XDELETE "localhost:${ELASTICSEARCH_PORT}/apm*" > /dev/null
 
 # Ingest data into APM Server
-node ingest-data/replay.js --server-url http://localhost:$APM_SERVER_PORT --events ${TMP_DIR}/events.json 2> ${TMP_DIR}/ingest-data.log
+node ingest-data/replay.js --server-url http://localhost:$APM_SERVER_PORT --events ${TMP_DIR}/events.json 2>> ${TMP_DIR}/ingest-data.log
 
 # Stop if not all events were ingested correctly
 if [ $? -ne 0 ]; then
@@ -112,6 +114,15 @@ fi
 echo "\n${bold}Waiting for Kibana to start...${normal}"
 echo "Note: you need to start Kibana manually. Find the instructions at the top."
 yarn wait-on -i 500 -w 500 http-get://admin:changeme@localhost:$KIBANA_PORT/api/status > /dev/null
+
+## Workaround to wait for the http server running
+## See: https://github.com/elastic/kibana/issues/66326
+if [ -e kibana.log ] ; then
+    grep -m 1 "http server running" <(tail -f -n +1 kibana.log)
+    echo "\n✅ Kibana server running...\n"
+    grep -m 1 "bundles compiled successfully" <(tail -f -n +1 kibana.log)
+    echo "\n✅ Kibana bundles have been compiled...\n"
+fi
 
 echo "\n✅ Setup completed successfully. Running tests...\n"
 
@@ -129,4 +140,3 @@ ${bold}If you want to run the test interactively, run:${normal}
 
 yarn cypress open --config pageLoadTimeout=100000,watchForFileChanges=true
 "
-
