@@ -127,7 +127,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
         </EuiFlexGroup>
       </EuiFormRow>
       <FieldRowWrapper data-test-subj="case-configure-field-mapping-row-wrapper">
-        {(mapping ?? defaultMapping).map(item => (
+        {(mapping ?? defaultMapping).map((item) => (
           <FieldMappingRow
             key={`${item.source}`}
             id={`${item.source}`}

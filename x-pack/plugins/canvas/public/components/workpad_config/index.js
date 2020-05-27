@@ -12,7 +12,7 @@ import { getWorkpad } from '../../state/selectors/workpad';
 import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
 import { WorkpadConfig as Component } from './workpad_config';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const workpad = getWorkpad(state);
 
   return {
@@ -26,9 +26,9 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps = {
-  setSize: size => sizeWorkpad(size),
-  setName: name => setName(name),
-  setWorkpadCSS: css => setWorkpadCSS(css),
+  setSize: (size) => sizeWorkpad(size),
+  setName: (name) => setName(name),
+  setWorkpadCSS: (css) => setWorkpadCSS(css),
 };
 
 export const WorkpadConfig = connect(mapStateToProps, mapDispatchToProps)(Component);

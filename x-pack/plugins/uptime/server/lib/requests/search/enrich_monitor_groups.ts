@@ -270,7 +270,7 @@ export const enrichMonitorGroups: MonitorEnricher = async (
 
   const histogramMap = await getHistogramForMonitors(queryContext, monitorIds);
 
-  const resItems = summaries.map(summary => ({
+  const resItems = summaries.map((summary) => ({
     ...summary,
     histogram: histogramMap[summary.monitor_id],
   }));

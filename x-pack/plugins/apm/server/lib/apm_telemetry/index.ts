@@ -9,16 +9,16 @@ import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   TaskManagerStartContract,
-  TaskManagerSetupContract
+  TaskManagerSetupContract,
 } from '../../../../task_manager/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
-  APM_TELEMETRY_SAVED_OBJECT_TYPE
+  APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
 import {
   collectDataTelemetry,
-  CollectTelemetryParams
+  CollectTelemetryParams,
 } from './collect_data_telemetry';
 import { APMConfig } from '../..';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
@@ -30,7 +30,7 @@ export async function createApmTelemetry({
   config$,
   usageCollector,
   taskManager,
-  logger
+  logger,
 }: {
   core: CoreSetup;
   config$: Observable<APMConfig>;
@@ -47,21 +47,22 @@ export async function createApmTelemetry({
           run: async () => {
             await collectAndStore();
           },
-          cancel: async () => {}
+          cancel: async () => {},
         };
-      }
-    }
+      },
+    },
   });
 
   const savedObjectsClient = await getInternalSavedObjectsClient(core);
 
   const collectAndStore = async () => {
     const config = await config$.pipe(take(1)).toPromise();
-    const esClient = core.elasticsearch.dataClient;
+    const [{ elasticsearch }] = await core.getStartServices();
+    const esClient = elasticsearch.legacy.client;
 
     const indices = await getApmIndices({
       config,
-      savedObjectsClient
+      savedObjectsClient,
     });
 
     const search = esClient.callAsInternalUser.bind(
@@ -84,7 +85,7 @@ export async function createApmTelemetry({
       indices,
       logger,
       indicesStats,
-      transportRequest
+      transportRequest,
     });
 
     await savedObjectsClient.create(
@@ -114,7 +115,7 @@ export async function createApmTelemetry({
         throw err;
       }
     },
-    isReady: () => true
+    isReady: () => true,
   });
 
   usageCollector.registerCollector(collector);
@@ -128,11 +129,11 @@ export async function createApmTelemetry({
       id: APM_TELEMETRY_TASK_NAME,
       taskType: APM_TELEMETRY_TASK_NAME,
       schedule: {
-        interval: '720m'
+        interval: '720m',
       },
       scope: ['apm'],
       params: {},
-      state: {}
+      state: {},
     });
   });
 }

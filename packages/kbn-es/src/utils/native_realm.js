@@ -77,7 +77,7 @@ exports.NativeRealm = class NativeRealm {
 
     const reservedUsers = await this.getReservedUsers();
     await Promise.all(
-      reservedUsers.map(async user => {
+      reservedUsers.map(async (user) => {
         await this.setPassword(user, options[`password.${user}`]);
       })
     );
@@ -87,7 +87,7 @@ exports.NativeRealm = class NativeRealm {
     return await this._autoRetry(async () => {
       const resp = await this._client.security.getUser();
       const usernames = Object.keys(resp.body).filter(
-        user => resp.body[user].metadata._reserved === true
+        (user) => resp.body[user].metadata._reserved === true
       );
 
       if (!usernames?.length) {
@@ -125,7 +125,7 @@ exports.NativeRealm = class NativeRealm {
 
       const sec = 1.5 * attempt;
       this._log.warning(`assuming ES isn't initialized completely, trying again in ${sec} seconds`);
-      await new Promise(resolve => setTimeout(resolve, sec * 1000));
+      await new Promise((resolve) => setTimeout(resolve, sec * 1000));
       return await this._autoRetry(fn, attempt + 1);
     }
   }

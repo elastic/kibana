@@ -10,8 +10,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { rulesSchema, RulesSchema, removeList } from './rules_schema';
 import { getBaseResponsePayload } from './__mocks__/utils';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
-import { exactCheck } from '../../../../../utils/build_validation/exact_check';
-import { foldLeftRight, getPaths } from '../../../../../utils/build_validation/__mocks__/utils';
+import { foldLeftRight, getPaths } from '../../../../../../common/test_utils';
+import { exactCheck } from '../../../../../../common/exact_check';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 

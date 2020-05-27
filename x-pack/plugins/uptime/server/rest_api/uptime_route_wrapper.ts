@@ -7,7 +7,7 @@
 import { UMKibanaRouteWrapper } from './types';
 import { savedObjectsAdapter } from '../lib/saved_objects';
 
-export const uptimeRouteWrapper: UMKibanaRouteWrapper = uptimeRoute => ({
+export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
   ...uptimeRoute,
   options: {
     tags: ['access:uptime-read', ...(uptimeRoute?.writeAccess ? ['access:uptime-write'] : [])],

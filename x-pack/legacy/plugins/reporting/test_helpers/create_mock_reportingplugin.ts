@@ -15,13 +15,14 @@ jest.mock('../server/lib/validate');
 import { EventEmitter } from 'events';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { coreMock } from 'src/core/server/mocks';
-import { ReportingPlugin, ReportingCore, ReportingConfig } from '../server';
+import { ReportingConfig, ReportingCore, ReportingPlugin } from '../server';
 import { ReportingSetupDeps, ReportingStartDeps } from '../server/types';
 
 const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => {
   return {
     elasticsearch: setupMock.elasticsearch,
     security: setupMock.security,
+    licensing: {} as any,
     usageCollection: {} as any,
     __LEGACY: { plugins: { xpack_main: { status: new EventEmitter() } } } as any,
   };

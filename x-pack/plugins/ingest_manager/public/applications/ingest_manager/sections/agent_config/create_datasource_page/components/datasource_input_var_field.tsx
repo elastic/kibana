@@ -35,7 +35,7 @@ export const DatasourceInputVarField: React.FunctionComponent<{
             onChange([...value, newVal]);
           }}
           onChange={(newVals: any[]) => {
-            onChange(newVals.map(val => val.label));
+            onChange(newVals.map((val) => val.label));
           }}
           onBlur={() => setIsDirty(true)}
         />
@@ -54,7 +54,7 @@ export const DatasourceInputVarField: React.FunctionComponent<{
             showGutter: false,
           }}
           value={value}
-          onChange={newVal => onChange(newVal)}
+          onChange={(newVal) => onChange(newVal)}
           onBlur={() => setIsDirty(true)}
         />
       );
@@ -63,7 +63,7 @@ export const DatasourceInputVarField: React.FunctionComponent<{
       <EuiFieldText
         isInvalid={isInvalid}
         value={value === undefined ? '' : value}
-        onChange={e => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         onBlur={() => setIsDirty(true)}
       />
     );

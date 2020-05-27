@@ -56,7 +56,7 @@ export const Timelines = React.memo(() => {
   return (
     <Switch>
       <Route exact path={timelinesPagePath}>
-        <ApolloConsumer>{client => <TimelinesPage apolloClient={client} />}</ApolloConsumer>
+        <ApolloConsumer>{(client) => <TimelinesPage apolloClient={client} />}</ApolloConsumer>
       </Route>
       <Route
         path={`/${SiemPageName.timelines}/`}
