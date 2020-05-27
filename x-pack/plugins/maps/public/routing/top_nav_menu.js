@@ -27,14 +27,23 @@ import { updateBreadcrumbs } from './breadcrumbs';
 
 export function MapsTopNavMenu(props) {
   const { TopNavMenu } = getNavigation().ui;
-  const { savedMap, store, query, onQueryChange, time, refreshConfig, setRefreshConfig } = props;
+  const {
+    savedMap,
+    store,
+    query,
+    onQueryChange,
+    time,
+    refreshConfig,
+    setRefreshConfig,
+    initialLayerListConfig,
+  } = props;
   const [indexPatterns, setIndexPatterns] = useState([]);
   const { filterManager } = getData().query;
 
   return (
     <TopNavMenu
       appName="maps"
-      config={topNavConfig(store, savedMap)}
+      config={topNavConfig(store, savedMap, initialLayerListConfig)}
       indexPatterns={indexPatterns}
       filters={filterManager.getFilters()}
       query={query}
@@ -78,7 +87,7 @@ export function MapsTopNavMenu(props) {
   );
 }
 
-function topNavConfig(store, savedMap) {
+function topNavConfig(store, savedMap, initialLayerListConfig) {
   const [isOpenSettingsDisabled, setIsOpenSettingsDisabled] = useState(false);
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
   return [
@@ -162,13 +171,15 @@ function topNavConfig(store, savedMap) {
                   isTitleDuplicateConfirmed,
                   onTitleDuplicate,
                 };
-                return doSave(store, savedMap, saveOptions).then(response => {
-                  // If the save wasn't successful, put the original values back.
-                  if (!response.id || response.error) {
-                    savedMap.title = currentTitle;
+                return doSave(store, savedMap, saveOptions, initialLayerListConfig).then(
+                  response => {
+                    // If the save wasn't successful, put the original values back.
+                    if (!response.id || response.error) {
+                      savedMap.title = currentTitle;
+                    }
+                    return response;
                   }
-                  return response;
-                });
+                );
               };
 
               const saveModal = (
@@ -189,7 +200,7 @@ function topNavConfig(store, savedMap) {
   ];
 }
 
-async function doSave(store, savedMap, saveOptions) {
+async function doSave(store, savedMap, saveOptions, initialLayerListConfig) {
   await store.dispatch(clearTransientLayerStateAndCloseFlyout());
   savedMap.syncWithStore(store.getState());
   let id;
@@ -218,7 +229,7 @@ async function doSave(store, savedMap, saveOptions) {
       'data-test-subj': 'saveMapSuccess',
     });
 
-    updateBreadcrumbs(store, savedMap);
+    updateBreadcrumbs(store, savedMap, initialLayerListConfig);
 
     // TODO: handle redirect if id doesn't match
     // if (savedMap.id !== $route.current.params.id) {

@@ -286,7 +286,15 @@ export const MapsCreateEditView = withRouter(
     }
 
     render() {
-      const { initialized, store, query, time, refreshConfig, savedMap } = this.state;
+      const {
+        initialized,
+        store,
+        query,
+        time,
+        refreshConfig,
+        savedMap,
+        initialLayerListConfig,
+      } = this.state;
       return (
         <div id="maps-plugin" ng-class="{mapFullScreen: isFullScreen}">
           {initialized ? (
@@ -305,6 +313,7 @@ export const MapsCreateEditView = withRouter(
                   callback
                 );
               }}
+              initialLayerListConfig={initialLayerListConfig}
             />
           ) : null}
           <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
