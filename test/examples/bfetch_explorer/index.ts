@@ -22,13 +22,12 @@ import { FtrProviderContext } from '../../functional/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
-  const appsMenu = getService('appsMenu');
   const PageObjects = getPageObjects(['common', 'header']);
 
   describe('bfetch explorer', function () {
     before(async () => {
       await browser.setWindowSize(1300, 900);
-      await PageObjects.common.navigateToApp('bfetch-explorer');
+      await PageObjects.common.navigateToApp('bfetch-explorer', { insertTimestamp: false });
     });
 
     loadTestFile(require.resolve('./batched_function'));

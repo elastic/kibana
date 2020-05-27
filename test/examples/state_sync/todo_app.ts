@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       before(async () => {
         base = await PageObjects.common.getHostPort();
-        await PageObjects.common.navigateToApp(appId);
+        await PageObjects.common.navigateToApp(appId, { insertTimestamp: false });
       });
 
       it('links are rendered correctly and state is preserved in links', async () => {
@@ -118,7 +118,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
     describe('TODO app with hash history ', async () => {
       before(async () => {
-        await PageObjects.common.navigateToApp('stateContainersExampleHashHistory');
+        await PageObjects.common.navigateToApp('stateContainersExampleHashHistory', {
+          insertTimestamp: false,
+        });
       });
 
       it('Links are rendered correctly and state is preserved in links', async () => {
