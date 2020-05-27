@@ -11,10 +11,44 @@ import { debounce } from 'lodash';
 import { PivotAggsConfigWithUiBase } from '../../../../../common/pivot_aggs';
 import { CreateTransformWizardContext } from '../../wizard/wizard';
 import { useApi } from '../../../../../hooks';
+import {
+  IndexPattern,
+  KBN_FIELD_TYPES,
+} from '../../../../../../../../../../src/plugins/data/public';
 
-const filterAggOptions = ['term', 'range', 'bool'] as const;
+export const FILTERS = {
+  CUSTOM: 'custom',
+  PHRASES: 'phrases',
+  PHRASE: 'phrase',
+  EXISTS: 'exists',
+  MATCH_ALL: 'match_all',
+  MISSING: 'missing',
+  QUERY_STRING: 'query_string',
+  RANGE: 'range',
+  GEO_BOUNDING_BOX: 'geo_bounding_box',
+  GEO_POLYGON: 'geo_polygon',
+  SPATIAL_FILTER: 'spatial_filter',
+  TERM: 'term',
+  TERMS: 'terms',
+  BOOL: 'bool',
+} as const;
 
-export type FilterAggType = typeof filterAggOptions[number];
+export type FilterAggType = typeof FILTERS[keyof typeof FILTERS];
+
+export const filterAggsFieldSupport: { [key: string]: FilterAggType[] } = {
+  [KBN_FIELD_TYPES.ATTACHMENT]: [],
+  [KBN_FIELD_TYPES.BOOLEAN]: [],
+  [KBN_FIELD_TYPES.DATE]: [FILTERS.RANGE],
+  [KBN_FIELD_TYPES.GEO_POINT]: [FILTERS.GEO_BOUNDING_BOX, FILTERS.GEO_POLYGON],
+  [KBN_FIELD_TYPES.GEO_SHAPE]: [FILTERS.GEO_BOUNDING_BOX, FILTERS.GEO_POLYGON],
+  [KBN_FIELD_TYPES.IP]: [FILTERS.RANGE],
+  [KBN_FIELD_TYPES.MURMUR3]: [],
+  [KBN_FIELD_TYPES.NUMBER]: [FILTERS.RANGE],
+  [KBN_FIELD_TYPES.STRING]: [FILTERS.TERM],
+  [KBN_FIELD_TYPES._SOURCE]: [],
+  [KBN_FIELD_TYPES.UNKNOWN]: [],
+  [KBN_FIELD_TYPES.CONFLICT]: [],
+};
 
 interface FilterAggProps<U> {
   filterAgg: FilterAggType;
@@ -29,10 +63,24 @@ export type PivotAggsConfigFilter<U = undefined> = PivotAggsConfigWithUiBase<Fil
 export function getFilterAggConfig(): PivotAggsConfigFilter['formConfig'] {
   return {
     AggFormComponent: FilterAggForm,
-    defaultAggConfig: {
-      filterAgg: 'term',
-    },
+    defaultAggConfig: {},
   };
+}
+
+/**
+ * Resolves supported filters for provided field.
+ */
+export function getSupportedFilterAggs(
+  fieldName: string,
+  indexPattern: IndexPattern
+): FilterAggType[] {
+  const field = indexPattern.fields.getByName(fieldName);
+
+  if (field === undefined) {
+    throw new Error(`The field ${fieldName} does not exist in the index`);
+  }
+
+  return [FILTERS.BOOL, ...filterAggsFieldSupport[field.type]];
 }
 
 /**
@@ -43,6 +91,9 @@ export const FilterAggForm: PivotAggsConfigFilter['formConfig']['AggFormComponen
   onChange,
   selectedField,
 }) => {
+  const { indexPattern } = useContext(CreateTransformWizardContext);
+  const filterAggsOptions = getSupportedFilterAggs(selectedField, indexPattern!);
+
   const FilterAggTypeForm = getFilterAggTypeForm(aggConfig.filterAgg);
 
   return (
@@ -56,7 +107,9 @@ export const FilterAggForm: PivotAggsConfigFilter['formConfig']['AggFormComponen
         }
       >
         <EuiSelect
-          options={filterAggOptions.map((v) => ({ text: v, value: v }))}
+          options={[{ text: '', value: '' }].concat(
+            filterAggsOptions.map((v) => ({ text: v, value: v }))
+          )}
           value={aggConfig.filterAgg}
           onChange={(e) => {
             onChange({
