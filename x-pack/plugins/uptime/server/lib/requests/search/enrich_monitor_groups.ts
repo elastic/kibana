@@ -328,7 +328,7 @@ const getHistogramForMonitors = async (
             by_id: {
               terms: {
                 field: 'monitor.id',
-                size: monitorIds.length,
+                size: Math.max(monitorIds.length, 1),
               },
               aggs: {
                 totalDown: {
