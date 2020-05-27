@@ -34,16 +34,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
     });
 
-    it('recreate index pattern link works', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.loadSavedDashboard('dashboard with missing index pattern');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const errorEmbeddable = await testSubjects.find('embeddableStackError');
-      await (await errorEmbeddable.findByTagName('a')).click();
-      await browser.switchTab(1);
-      await testSubjects.existOrFail('createIndexPatternButton');
-      await browser.closeCurrentWindow();
-      await browser.switchTab(0);
+    // wrapping into own describe to make sure new tab is cleaned up even if test failed
+    // see: https://github.com/elastic/kibana/pull/67280#discussion_r430528122
+    describe('recreate index pattern link works', () => {
+      let tabsCount = 1;
+      it('recreate index pattern link works', async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.loadSavedDashboard('dashboard with missing index pattern');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const errorEmbeddable = await testSubjects.find('embeddableStackError');
+        await (await errorEmbeddable.findByTagName('a')).click();
+        await browser.switchTab(1);
+        tabsCount++;
+        await testSubjects.existOrFail('createIndexPatternButton');
+      });
+
+      after(async () => {
+        if (tabsCount > 1) {
+          await browser.closeCurrentWindow();
+          await browser.switchTab(0);
+        }
+      });
     });
   });
 }
