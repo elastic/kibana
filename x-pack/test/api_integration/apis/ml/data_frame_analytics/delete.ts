@@ -65,6 +65,13 @@ export default ({ getService }: FtrProviderContext) => {
     }
   }
 
+  async function jobDeleted(analyticsId: string) {
+    return await supertest
+      .get(`/api/ml/data_frame/analytics/${analyticsId}`)
+      .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+      .set(COMMON_HEADERS)
+      .expect(404);
+  }
   describe('DELETE data_frame/analytics', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/bm_classification');
@@ -117,78 +124,113 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.message).to.eql('Not Found');
       });
 
-      it('should delete job and target index by id', async () => {
+      describe('with deleteTargetIndex setting', function () {
         const analyticsId = `${jobId}_2`;
         const destinationIndex = generateDestinationIndex(analyticsId);
 
-        await es.indices.create({ index: destinationIndex });
-        await ml.api.assertIndicesExist(generateDestinationIndex(analyticsId));
-
-        const { body } = await supertest
-          .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
-          .query({ deleteTargetIndex: true })
-          .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_HEADERS)
-          .expect(200);
-
-        expect(body.analyticsJobDeleted.success).to.eql(true);
-        expect(body.targetIndexDeleted.success).to.eql(true);
-        expect(body.targetIndexPatternDeleted.success).to.eql(false);
-
-        const targetIndexExists = await es.indices.exists({
-          index: destinationIndex,
-          allowNoIndices: false,
+        before(async () => {
+          await es.indices.create({ index: destinationIndex });
+          await ml.api.assertIndicesExist(generateDestinationIndex(analyticsId));
         });
-        expect(targetIndexExists).to.eql(false);
-      });
 
-      it('should delete job and index pattern by id', async () => {
-        // Mimic real job by creating index pattern after job is created
+        after(async () => {
+          await es.indices.delete({ index: destinationIndex, ignore: [404] });
+        });
+
+        it('should delete job and target index by id', async () => {
+          const { body } = await supertest
+            .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
+            .query({ deleteTargetIndex: true })
+            .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+            .set(COMMON_HEADERS)
+            .expect(200);
+
+          expect(body.analyticsJobDeleted.success).to.eql(true);
+          expect(body.targetIndexDeleted.success).to.eql(true);
+          expect(body.targetIndexPatternDeleted.success).to.eql(false);
+          expect(jobDeleted(analyticsId)).to.eql(true);
+
+          const targetIndexExists = await es.indices.exists({
+            index: destinationIndex,
+            allowNoIndices: false,
+          });
+          expect(targetIndexExists).to.eql(false);
+        });
+      });
+      describe('with deleteTargetIndex setting', function () {
         const analyticsId = `${jobId}_3`;
         const destinationIndex = generateDestinationIndex(analyticsId);
-        await ml.testResources.createIndexPatternIfNeeded(destinationIndex);
 
-        const { body } = await supertest
-          .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
-          .query({ deleteIndexPattern: true })
-          .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_HEADERS)
-          .expect(200);
-        expect(body.analyticsJobDeleted.success).to.eql(true);
-        expect(body.targetIndexDeleted.success).to.eql(false);
-        expect(body.targetIndexPatternDeleted.success).to.eql(true);
+        before(async () => {
+          // Mimic real job by creating index pattern after job is created
+          await ml.testResources.createIndexPatternIfNeeded(destinationIndex);
+        });
 
-        // Check if index pattern was deleted
-        const indexPatternId = await ml.testResources.getIndexPatternId(analyticsId);
-        expect(indexPatternId).to.eql(undefined);
+        after(async () => {
+          await ml.testResources.deleteIndexPattern(destinationIndex);
+        });
+
+        it('should delete job and index pattern by id', async () => {
+          const { body } = await supertest
+            .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
+            .query({ deleteIndexPattern: true })
+            .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+            .set(COMMON_HEADERS)
+            .expect(200);
+          expect(body.analyticsJobDeleted.success).to.eql(true);
+          expect(body.targetIndexDeleted.success).to.eql(false);
+          expect(body.targetIndexPatternDeleted.success).to.eql(true);
+          expect(jobDeleted(analyticsId)).to.eql(true);
+
+          // Check if index pattern was deleted
+          const indexPatternId = await ml.testResources.getIndexPatternId(analyticsId);
+          expect(indexPatternId).to.eql(undefined);
+        });
       });
 
-      it('should delete job, target index, and index pattern by id', async () => {
-        // Mimic real job by creating target index & index pattern after DFA job is created
+      describe('with deleteTargetIndex & deleteTargetIndex setting', function () {
         const analyticsId = `${jobId}_4`;
         const destinationIndex = generateDestinationIndex(analyticsId);
-        await es.indices.create({ index: destinationIndex });
-        await ml.api.assertIndicesExist(destinationIndex);
-        await ml.testResources.createIndexPatternIfNeeded(destinationIndex);
 
-        const { body } = await supertest
-          .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
-          .query({ deleteTargetIndex: true, deleteIndexPattern: true })
-          .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_HEADERS)
-          .expect(200);
-        expect(body.analyticsJobDeleted.success).to.eql(true);
-        expect(body.targetIndexDeleted.success).to.eql(true);
-        expect(body.targetIndexPatternDeleted.success).to.eql(true);
+        before(async () => {
+          await es.indices.create({ index: destinationIndex });
+          await ml.api.assertIndicesExist(generateDestinationIndex(analyticsId));
 
-        // Check if index pattern was deleted
-        const targetIndexExists = await es.indices.exists({
-          index: destinationIndex,
-          allowNoIndices: false,
+          // Mimic real job by creating index pattern after job is created
+          await ml.testResources.createIndexPatternIfNeeded(destinationIndex);
         });
-        const indexPatternId = await ml.testResources.getIndexPatternId(analyticsId);
-        expect(targetIndexExists).to.eql(false);
-        expect(indexPatternId).to.eql(undefined);
+
+        after(async () => {
+          await es.indices.delete({ index: destinationIndex, ignore: [404] });
+          await ml.testResources.deleteIndexPattern(destinationIndex);
+        });
+
+        it('deletes job, target index, and index pattern by id', async () => {
+          // Mimic real job by creating target index & index pattern after DFA job is created
+          const { body } = await supertest
+            .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
+            .query({ deleteTargetIndex: true, deleteIndexPattern: true })
+            .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+            .set(COMMON_HEADERS)
+            .expect(200);
+          expect(body.analyticsJobDeleted.success).to.eql(true);
+          expect(body.targetIndexDeleted.success).to.eql(true);
+          expect(body.targetIndexPatternDeleted.success).to.eql(true);
+
+          // Check if index was deleted
+          expect(jobDeleted(analyticsId)).to.eql(true);
+
+          // Check if target index was deleted
+          const targetIndexExists = await es.indices.exists({
+            index: destinationIndex,
+            allowNoIndices: false,
+          });
+          expect(targetIndexExists).to.eql(false);
+
+          // Check if index pattern was deleted
+          const indexPatternId = await ml.testResources.getIndexPatternId(analyticsId);
+          expect(indexPatternId).to.eql(undefined);
+        });
       });
     });
   });
