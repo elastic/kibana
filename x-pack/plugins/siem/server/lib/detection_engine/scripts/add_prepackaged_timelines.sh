@@ -9,18 +9,21 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./add_prepackaged_timelines.sh
-file=${1:-../rules/prepackaged_timelines/endpoint.ndjson}
+# Example: ./add_prepackaged_timelines.sh ${file}
+file=${1:-../rules/prepackaged_timelines/index.ndjson}
 url=${KIBANA_URL}${SPACE_URL}/api/timeline/_import
 
 delim="-----MultipartDelimeter$$$RANDOM$RANDOM$RANDOM"
 nl=$'\r\n'
 mime=application/octet-stream
 
+# Generate ndjson for prepackage timelines.
+sh ./regen_prepackage_timelines_index.sh
+
 # Body of the request.
 data() {
     # Also make sure to set the fields you need.
-    printf %s "--$delim${nl}Content-Disposition: form-data; name=\"file\"; filename=\"endpoint.ndjson\"${nl}Content-Type: $mime$nl$nl"
+    printf %s "--$delim${nl}Content-Disposition: form-data; name=\"file\"; filename=\"index.ndjson\"${nl}Content-Type: $mime$nl$nl"
     cat "$file"
     printf %s "$nl--$delim--$nl"
 }
