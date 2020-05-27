@@ -12,6 +12,7 @@ import {
   EuiButton,
   EuiInMemoryTableProps,
   EuiTableFieldDataColumnType,
+  EuiIcon,
 } from '@elastic/eui';
 
 interface ComponentTemplate {
@@ -38,6 +39,13 @@ export const ComponentTable: FunctionComponent<Props> = ({
     sorting: { sort: { field: 'name', direction: 'asc' } },
     selection: {
       onSelectionChange: setSelection,
+      selectable: ({ isActive }) => !isActive,
+      selectableMessage: (selectable) =>
+        !selectable
+          ? i18n.translate('xpack.idxMgmt.componentTemplatesList.table.disabledSelectionLabel', {
+              defaultMessage: 'Component template is in use',
+            })
+          : undefined,
     },
     rowProps: () => ({
       'data-test-subj': 'componentTemplateTableRow',
@@ -63,9 +71,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
               values={{ count: selection.length }}
             />
           </EuiButton>
-        ) : (
-          undefined
-        ),
+        ) : undefined,
       toolsRight: [
         <EuiButton
           key="reloadButton"
@@ -114,6 +120,14 @@ export const ComponentTable: FunctionComponent<Props> = ({
             {name}
           </EuiLink>
         ),
+      },
+      {
+        field: 'isActive',
+        name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isActiveColumnTitle', {
+          defaultMessage: 'Active',
+        }),
+        sortable: true,
+        render: (isActive: boolean) => (isActive ? <EuiIcon type="check" /> : null),
       },
       {
         name: (
@@ -167,6 +181,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
             icon: 'trash',
             color: 'danger',
             onClick: ({ name }) => onDeleteClick([name]),
+            enabled: ({ isActive }) => !isActive,
           },
         ],
       },
