@@ -8,7 +8,7 @@ import { combineLatest } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { has, get } from 'lodash';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup, UsageCollectionStart } from 'src/plugins/usage_collection/server';
 import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import {
   Logger,
@@ -17,12 +17,13 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   CoreSetup,
-  ICustomClusterClient,
   CoreStart,
+  ICustomClusterClient,
   IRouter,
   IClusterClient,
   CustomHttpResponseOptions,
   ResponseError,
+  HttpServerInfo,
 } from 'kibana/server';
 import {
   LOGGING_TAG,
@@ -40,7 +41,7 @@ import { initInfraSource } from './lib/logs/init_infra_source';
 import { instantiateClient } from './es_client/instantiate_client';
 import { registerCollectors } from './kibana_monitoring/collectors';
 import { registerMonitoringCollection } from './telemetry_collection';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { LicenseService } from './license_service';
 import { MonitoringLicenseService } from './types';
@@ -67,6 +68,8 @@ interface PluginsSetup {
 
 interface PluginsStart {
   alerting: AlertingPluginStartContract;
+  licensing: LicensingPluginStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 interface MonitoringCoreConfig {
@@ -87,6 +90,8 @@ interface LegacyShimDependencies {
 }
 
 interface IBulkUploader {
+  handleNotEnabled: () => void;
+  start: (usageCollection: UsageCollectionStart) => void;
   setKibanaStatusGetter: (getter: () => string | undefined) => void;
   getKibanaStats: () => any;
 }
@@ -113,6 +118,7 @@ export class Plugin {
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
   private bulkUploader = {} as IBulkUploader;
+  private serverInfo?: HttpServerInfo;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
@@ -192,50 +198,6 @@ export class Plugin {
       registerCollectors(plugins.usageCollection, config);
     }
 
-    // If collection is enabled, create the bulk uploader
-    const kibanaMonitoringLog = this.getLogger(KIBANA_MONITORING_LOGGING_TAG);
-    const kibanaCollectionEnabled = config.kibana.collection.enabled;
-    if (kibanaCollectionEnabled) {
-      // Start kibana internal collection
-      const serverInfo = core.http.getServerInfo();
-      const bulkUploader = (this.bulkUploader = initBulkUploader({
-        elasticsearch: core.elasticsearch,
-        config,
-        log: kibanaMonitoringLog,
-        kibanaStats: {
-          uuid: core.uuid.getInstanceUuid(),
-          name: serverInfo.name,
-          index: get(legacyConfig, 'kibana.index'),
-          host: serverInfo.host,
-          locale: i18n.getLocale(),
-          port: serverInfo.port.toString(),
-          transport_address: `${serverInfo.host}:${serverInfo.port}`,
-          version: this.initializerContext.env.packageInfo.version,
-          snapshot: snapshotRegex.test(this.initializerContext.env.packageInfo.version),
-        },
-      }));
-
-      // Do not use `this.licenseService` as that looks at the monitoring cluster
-      // whereas we want to check the production cluster here
-      if (plugins.licensing) {
-        plugins.licensing.license$.subscribe((license: any) => {
-          // use updated xpack license info to start/stop bulk upload
-          const mainMonitoring = license.getFeature('monitoring');
-          const monitoringBulkEnabled =
-            mainMonitoring && mainMonitoring.isAvailable && mainMonitoring.isEnabled;
-          if (monitoringBulkEnabled) {
-            bulkUploader.start(plugins.usageCollection);
-          } else {
-            bulkUploader.handleNotEnabled();
-          }
-        });
-      }
-    } else {
-      kibanaMonitoringLog.info(
-        'Internal collection for Kibana monitoring is disabled per configuration.'
-      );
-    }
-
     // If the UI is enabled, then we want to register it so it shows up
     // and start any other UI-related setup tasks
     if (config.ui.enabled) {
@@ -253,19 +215,68 @@ export class Plugin {
       initInfraSource(config, plugins.infra);
     }
 
+    this.serverInfo = core.http.getServerInfo();
+
     return {
       // The legacy plugin calls this to register certain legacy dependencies
       // that are necessary for the plugin to properly run
       registerLegacyAPI: (legacyAPI: LegacyAPI) => {
         this.setupLegacy(legacyAPI);
       },
-      // OSS stats api needs to call this in order to centralize how
-      // we fetch kibana specific stats
-      getKibanaStats: () => this.bulkUploader.getKibanaStats(),
     };
   }
 
-  start() {}
+  async start(core: CoreStart, plugins: PluginsStart) {
+    const [config, legacyConfig] = await combineLatest([
+      this.initializerContext.config.create<MonitoringConfig>(),
+      this.initializerContext.config.legacy.globalConfig$,
+    ])
+      .pipe(first())
+      .toPromise();
+
+    // If collection is enabled, create the bulk uploader
+    const kibanaMonitoringLog = this.getLogger(KIBANA_MONITORING_LOGGING_TAG);
+    const kibanaCollectionEnabled = config.kibana.collection.enabled;
+    if (kibanaCollectionEnabled) {
+      // Start kibana internal collection
+      const serverInfo = this.serverInfo!;
+      this.bulkUploader = initBulkUploader({
+        elasticsearch: core.elasticsearch,
+        config,
+        log: kibanaMonitoringLog,
+        kibanaStats: {
+          uuid: core.uuid.getInstanceUuid(),
+          name: serverInfo.name,
+          index: get(legacyConfig, 'kibana.index'),
+          host: serverInfo.host,
+          locale: i18n.getLocale(),
+          port: serverInfo.port.toString(),
+          transport_address: `${serverInfo.host}:${serverInfo.port}`,
+          version: this.initializerContext.env.packageInfo.version,
+          snapshot: snapshotRegex.test(this.initializerContext.env.packageInfo.version),
+        },
+      });
+    } else {
+      kibanaMonitoringLog.info(
+        'Internal collection for Kibana monitoring is disabled per configuration.'
+      );
+    }
+    // Do not use `this.licenseService` as that looks at the monitoring cluster
+    // whereas we want to check the production cluster here
+    if (plugins.licensing) {
+      plugins.licensing.license$.subscribe((license: any) => {
+        // use updated xpack license info to start/stop bulk upload
+        const mainMonitoring = license.getFeature('monitoring');
+        const monitoringBulkEnabled =
+          mainMonitoring && mainMonitoring.isAvailable && mainMonitoring.isEnabled;
+        if (monitoringBulkEnabled && plugins.usageCollection) {
+          this.bulkUploader.start(plugins.usageCollection);
+        } else {
+          this.bulkUploader.handleNotEnabled();
+        }
+      });
+    }
+  }
 
   stop() {
     if (this.cluster) {
