@@ -256,8 +256,9 @@ export class Server {
             typeRegistry: this.coreStart!.savedObjects.getTypeRegistry(),
           },
           elasticsearch: {
-            adminClient: coreSetup.elasticsearch.adminClient.asScoped(req),
-            dataClient: coreSetup.elasticsearch.dataClient.asScoped(req),
+            legacy: {
+              client: coreSetup.elasticsearch.dataClient.asScoped(req),
+            },
           },
           uiSettings: {
             client: uiSettingsClient,
