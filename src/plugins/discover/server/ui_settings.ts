@@ -169,7 +169,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       defaultMessage: 'Use legacy table',
     }),
     value: true,
-    description: i18n.translate('kbn.advancedSettings.docTableVersionDescription', {
+    description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
       defaultMessage:
         'Prefer the legacy version of the documents table in Discover while available',
     }),
