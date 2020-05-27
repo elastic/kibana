@@ -179,7 +179,7 @@ export function placePanelBeside({
       break;
     }
   }
-  const [_, _, bottomPlacement] = possiblePlacementDirections;
+  const bottomPlacement = possiblePlacementDirections[2];
   // place to the bottom and move all other panels
   let originalPositionInTheGrid = grid[position + 1].i;
   const diff =
