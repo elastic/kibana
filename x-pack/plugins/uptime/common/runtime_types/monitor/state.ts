@@ -82,7 +82,7 @@ export const StateType = t.intersection([
 export const HistogramPointType = t.type({
   timestamp: t.number,
   up: t.union([t.number, t.undefined]),
-  down: t.number,
+  down: t.union([t.number, t.undefined]),
 });
 
 export type HistogramPoint = t.TypeOf<typeof HistogramPointType>;
