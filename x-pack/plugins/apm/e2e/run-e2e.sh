@@ -113,6 +113,12 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# create empty snapshot file if it doesn't exist
+SNAPSHOTS_FILE=cypress/integration/snapshots.js
+if [ ! -f ${SNAPSHOTS_FILE} ]; then
+    echo "{}" > ${SNAPSHOTS_FILE}
+fi
+
 #
 # Wait for Kibana to start
 ##################################################
@@ -128,6 +134,7 @@ if [ -e kibana.log ] ; then
     grep -m 1 "bundles compiled successfully" <(tail -f -n +1 kibana.log)
     printf "\n✅ Kibana bundles have been compiled...\n"
 fi
+
 
 printf "\n✅ Setup completed successfully. Running tests...\n"
 
