@@ -143,5 +143,5 @@ printf "
 
 ${bold}If you want to run the test interactively, run:${normal}
 
-yarn cypress open --config pageLoadTimeout=100000,watchForFileChanges=true
+cd ${E2E_DIR} && yarn cypress open --config pageLoadTimeout=100000,watchForFileChanges=true
 "
