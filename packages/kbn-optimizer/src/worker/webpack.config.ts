@@ -263,6 +263,14 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
           },
         },
         {
+          include: Path.join(bundle.contextDir, bundle.entry),
+          loader: UiSharedDeps.publicPathLoader,
+          options: {
+            key: bundle.id,
+          },
+        },
+
+        {
           test: /\.(js|tsx?)$/,
           exclude: /node_modules/,
           use: {
@@ -279,13 +287,6 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
           test: /\.(html|md|txt|tmpl)$/,
           use: {
             loader: 'raw-loader',
-          },
-        },
-        {
-          include: Path.join(bundle.contextDir, bundle.entry),
-          loader: UiSharedDeps.publicPathLoader,
-          options: {
-            key: bundle.id,
           },
         },
       ],

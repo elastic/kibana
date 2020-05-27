@@ -21,6 +21,7 @@ import Path from 'path';
 import Fs from 'fs';
 import Zlib from 'zlib';
 import { inspect } from 'util';
+import prettier from 'prettier';
 
 import cpy from 'cpy';
 import del from 'del';
@@ -216,7 +217,11 @@ it('prepares assets for distribution', async () => {
  * Verifies that the file matches the expected output and has matching compressed variants.
  */
 const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabel: string) => {
-  const raw = Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, filePath), 'utf8');
+  let raw = Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, filePath), 'utf8');
+  if (filePath.endsWith('.js')) {
+    raw = prettier.format(raw);
+  }
+
   expect(raw).toMatchSnapshot(snapshotLabel);
 
   // Verify the brotli variant matches
