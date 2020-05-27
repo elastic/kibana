@@ -27,6 +27,7 @@ export default async function ({ readConfigFile }) {
     testFiles: [
       require.resolve('./search'),
       require.resolve('./embeddables'),
+      require.resolve('./bfetch_explorer'),
       require.resolve('./ui_actions'),
       require.resolve('./state_sync'),
     ],
