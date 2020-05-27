@@ -10,6 +10,7 @@ import { type } from '../../../../../lists/common/schemas/common';
 import { ListClient } from '../../../../../lists/server';
 import { SignalSearchResponse, SearchTypes } from './types';
 import { RuleAlertParams } from '../types';
+import { List } from '../routes/schemas/types/lists_default_array';
 
 interface FilterEventsAgainstList {
   listClient: ListClient;
@@ -33,8 +34,12 @@ export const filterEventsAgainstList = async ({
     const isStringableType = (val: SearchTypes) =>
       ['string', 'number', 'boolean'].includes(typeof val);
     // grab the signals with values found in the given exception lists.
-    const filteredHitsPromises = exceptionsList.map(async (exceptionItem) => {
-      if (exceptionItem.values == null || exceptionItem.values.length === 0) {
+    const filteredHitsPromises = exceptionsList.map(async (exceptionItem: List) => {
+      if (
+        exceptionItem.values == null ||
+        exceptionItem.values.length === 0 ||
+        exceptionItem.values_type !== 'list'
+      ) {
         throw new Error('Malformed exception list provided');
       }
       if (!type.is(exceptionItem.values[0].name)) {
@@ -68,10 +73,17 @@ export const filterEventsAgainstList = async ({
       // do a single search after with these values.
       // painless script to do nested query in elasticsearch
       // filter out the search results that match with the values found in the list.
+      const operator = exceptionItem.values_operator;
       const filteredEvents = eventSearchResult.hits.hits.filter((item) => {
         const eventItem = get(exceptionItem.field, item._source);
-        if (eventItem != null) {
-          return !matchedListItemsSet.has(eventItem);
+        if (operator === 'included') {
+          if (eventItem != null) {
+            return !matchedListItemsSet.has(eventItem);
+          }
+        } else if (operator === 'excluded') {
+          if (eventItem != null) {
+            return matchedListItemsSet.has(eventItem);
+          }
         }
         return false;
       });

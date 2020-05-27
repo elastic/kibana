@@ -97,73 +97,146 @@ describe('filterEventsAgainstList', () => {
     );
   });
 
-  it('should respond with same list if no items match value list', async () => {
-    const res = await filterEventsAgainstList({
-      logger: mockLogger,
-      listClient: ({
-        getListItemByValues: async () => [],
-      } as unknown) as ListClient,
-      exceptionsList: [
-        {
-          field: 'source.ip',
-          values_operator: 'excluded',
-          values_type: 'list',
-          values: [
-            {
-              id: 'ci-badguys.txt',
-              name: 'ip',
-            },
-          ],
-        },
-      ],
-      eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3)),
+  describe('operator_type is includes', () => {
+    it('should respond with same list if no items match value list', async () => {
+      const res = await filterEventsAgainstList({
+        logger: mockLogger,
+        listClient: ({
+          getListItemByValues: async () => [],
+        } as unknown) as ListClient,
+        exceptionsList: [
+          {
+            field: 'source.ip',
+            values_operator: 'included',
+            values_type: 'list',
+            values: [
+              {
+                id: 'ci-badguys.txt',
+                name: 'ip',
+              },
+            ],
+          },
+        ],
+        eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3)),
+      });
+      expect(res.hits.hits.length).toEqual(4);
     });
-    expect(res.hits.hits.length).toEqual(4);
+    it('should respond with less items in the list if some values match', async () => {
+      let outerType = '';
+      let outerListId = '';
+      const res = await filterEventsAgainstList({
+        logger: mockLogger,
+        listClient: ({
+          getListItemByValues: async ({
+            value,
+            type,
+            listId,
+          }: {
+            type: string;
+            listId: string;
+            value: string[];
+          }) => {
+            outerType = type;
+            outerListId = listId;
+            return value.slice(0, 2).map((item) => ({
+              value: item,
+            }));
+          },
+        } as unknown) as ListClient,
+        exceptionsList: [
+          {
+            field: 'source.ip',
+            values_operator: 'included',
+            values_type: 'list',
+            values: [
+              {
+                id: 'ci-badguys.txt',
+                name: 'ip',
+              },
+            ],
+          },
+        ],
+        eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3), [
+          '1.1.1.1',
+          '2.2.2.2',
+          '3.3.3.3',
+          '7.7.7.7',
+        ]),
+      });
+      expect(outerType).toEqual('ip');
+      expect(outerListId).toEqual('ci-badguys.txt');
+      expect(res.hits.hits.length).toEqual(2);
+    });
   });
-  it('should respond with less items in the list if some values match', async () => {
-    let outerType = '';
-    let outerListId = '';
-    const res = await filterEventsAgainstList({
-      logger: mockLogger,
-      listClient: ({
-        getListItemByValues: async ({
-          value,
-          type,
-          listId,
-        }: {
-          type: string;
-          listId: string;
-          value: string[];
-        }) => {
-          outerType = type;
-          outerListId = listId;
-          return value.slice(0, 2).map((item) => ({
-            value: item,
-          }));
-        },
-      } as unknown) as ListClient,
-      exceptionsList: [
-        {
-          field: 'source.ip',
-          values_operator: 'excluded',
-          values_type: 'list',
-          values: [
-            {
-              id: 'ci-badguys.txt',
-              name: 'ip',
-            },
-          ],
-        },
-      ],
-      eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3), [
-        '1.1.1.1',
-        '2.2.2.2',
-        '3.3.3.3',
-        '7.7.7.7',
-      ]),
+  describe('operator type is excluded', () => {
+    it('should respond with empty list if no items match value list', async () => {
+      const res = await filterEventsAgainstList({
+        logger: mockLogger,
+        listClient: ({
+          getListItemByValues: async () => [],
+        } as unknown) as ListClient,
+        exceptionsList: [
+          {
+            field: 'source.ip',
+            values_operator: 'excluded',
+            values_type: 'list',
+            values: [
+              {
+                id: 'ci-badguys.txt',
+                name: 'ip',
+              },
+            ],
+          },
+        ],
+        eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3)),
+      });
+      expect(res.hits.hits.length).toEqual(0);
     });
-    expect(outerType).toEqual('ip');
-    expect(outerListId).toEqual('ci-badguys.txt');
-    expect(res.hits.hits.length).toEqual(2);
+    it('should respond with less items in the list if some values match', async () => {
+      let outerType = '';
+      let outerListId = '';
+      const res = await filterEventsAgainstList({
+        logger: mockLogger,
+        listClient: ({
+          getListItemByValues: async ({
+            value,
+            type,
+            listId,
+          }: {
+            type: string;
+            listId: string;
+            value: string[];
+          }) => {
+            outerType = type;
+            outerListId = listId;
+            return value.slice(0, 2).map((item) => ({
+              value: item,
+            }));
+          },
+        } as unknown) as ListClient,
+        exceptionsList: [
+          {
+            field: 'source.ip',
+            values_operator: 'excluded',
+            values_type: 'list',
+            values: [
+              {
+                id: 'ci-badguys.txt',
+                name: 'ip',
+              },
+            ],
+          },
+        ],
+        eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3), [
+          '1.1.1.1',
+          '2.2.2.2',
+          '3.3.3.3',
+          '7.7.7.7',
+        ]),
+      });
+      expect(outerType).toEqual('ip');
+      expect(outerListId).toEqual('ci-badguys.txt');
+      expect(res.hits.hits.length).toEqual(2);
+    });
   });
 });
