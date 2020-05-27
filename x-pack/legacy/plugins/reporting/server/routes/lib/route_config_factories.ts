@@ -9,6 +9,8 @@ import { ReportingConfig } from '../../';
 import { LevelLogger as Logger } from '../../lib';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { ReportingSetupDeps } from '../../types';
+import { Logger } from '../../../types';
+import { ReportingConfig, ReportingSetupDeps } from '../../types';
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
 import {
   GetReportingFeatureIdFn,
@@ -50,14 +52,18 @@ export function getRouteConfigFactoryReportingPre(
   };
 }
 
+// TODO move to local fn in server/routes/generate_from_savedobject_immediate.ts
 export function getRouteOptionsCsv(
   config: ReportingConfig,
   plugins: ReportingSetupDeps,
   logger: Logger
 ) {
+  // getRouteConfig needs to return a valid exportTypeId, and
+  // `csv_from_savedobject` is not one. This custom route options handler
+  // hardcodes `csv` as the export type ID so licensing logic can be shared
   const getRouteConfig = getRouteConfigFactoryReportingPre(config, plugins, logger);
   return {
-    ...getRouteConfig(() => CSV_FROM_SAVEDOBJECT_JOB_TYPE),
+    ...getRouteConfig(() => 'csv'),
     validate: {
       params: Joi.object({
         savedObjectType: Joi.string().required(),

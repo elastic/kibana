@@ -7,7 +7,6 @@
 import { isString } from 'lodash';
 import memoizeOne from 'memoize-one';
 import { getExportType as getTypeCsv } from '../../export_types/csv';
-import { getExportType as getTypeCsvFromSavedObject } from '../../export_types/csv_from_savedobject';
 import { getExportType as getTypePng } from '../../export_types/png';
 import { getExportType as getTypePrintablePdf } from '../../export_types/printable_pdf';
 import { ExportTypeDefinition } from '../types';
@@ -99,7 +98,6 @@ function getExportTypesRegistryFn(): ExportTypesRegistry {
    * discovery */
   const getTypeFns: Array<() => ExportTypeDefinition<any, any, any, any>> = [
     getTypeCsv,
-    getTypeCsvFromSavedObject,
     getTypePng,
     getTypePrintablePdf,
   ];

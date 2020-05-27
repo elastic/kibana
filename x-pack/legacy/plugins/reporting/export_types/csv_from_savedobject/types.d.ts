@@ -5,6 +5,9 @@
  */
 
 import { JobDocPayload, JobParamPostPayload, TimeRangeParams } from '../../server/types';
+import { JobDocPayload, JobParamPostPayload, RequestFacade, JobDocOutput } from '../../types';
+import { ReportingCore } from '../../server';
+import { LevelLogger } from '../../server/lib';
 
 export interface FakeRequest {
   headers: Record<string, unknown>;
@@ -27,11 +30,39 @@ export interface JobDocPayloadPanelCsv extends JobDocPayload<JobParamsPanelCsv> 
   jobParams: JobParamsPanelCsv;
 }
 
+// Create Job / Execute Job function types
+
+// This export_type has its own implementation of a factory of a function that
+// returns params to pass to the registered execute job function.
+type ImmediateCreateFn = (
+  jobParams: JobParamsPanelCsv,
+  headers: Record<string, string>,
+  req: RequestFacade
+) => Promise<JobDocPayloadPanelCsv>;
+
+export type ImmediateCreateFnFactory = (
+  reporting: ReportingCore,
+  logger: LevelLogger
+) => ImmediateCreateFn;
+
 export interface SavedObjectServiceError {
   statusCode: number;
   error?: string;
   message?: string;
 }
+
+// This export_type has its own implementation of a factory of a function that
+// to generate the job result,
+type ImmediateExecuteFn = (
+  jobId: any, // is null, but unused
+  job: JobDocPayloadPanelCsv,
+  request?: RequestFacade
+) => Promise<JobDocOutput>;
+
+export type ImmediateExecutionFnFactory = (
+  reporting: ReportingCore,
+  logger: LevelLogger
+) => ImmediateExecuteFn;
 
 export interface SavedObjectMetaJSON {
   searchSourceJSON: string;

@@ -10,9 +10,9 @@ import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
 import { cryptoFactory, LevelLogger } from '../../../../server/lib';
 import { CreateJobFactory, RequestFacade, TimeRangeParams } from '../../../../server/types';
+import { cryptoFactory } from '../../../../server/lib';
 import {
-  JobDocPayloadPanelCsv,
-  JobParamsPanelCsv,
+  ImmediateCreateFnFactory,
   SavedObject,
   SavedObjectServiceError,
   SavedSearchObjectAttributesJSON,
@@ -37,18 +37,12 @@ interface VisData {
   panel: SearchPanel;
 }
 
-export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
-  JobParamsPanelCsv
->> = function createJobFactoryFn(reporting: ReportingCore, parentLogger: LevelLogger) {
+export const createJobFactory: ImmediateCreateFnFactory = function (reporting, parentLogger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
-  return async function createJob(
-    jobParams: JobParamsPanelCsv,
-    headers: any,
-    req: RequestFacade
-  ): Promise<JobDocPayloadPanelCsv> {
+  return async function createJob(jobParams, headers, req) {
     const { savedObjectType, savedObjectId } = jobParams;
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
     const client = req.getSavedObjectsClient();

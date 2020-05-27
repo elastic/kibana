@@ -14,37 +14,22 @@ import {
   JobDocPayload,
   RequestFacade,
 } from '../../../server/types';
+import { cryptoFactory } from '../../../server/lib';
+import { RequestFacade } from '../../../types';
 import { CsvResultFromSearch } from '../../csv/types';
-import { FakeRequest, JobDocPayloadPanelCsv, JobParamsPanelCsv, SearchPanel } from '../types';
+import { FakeRequest, ImmediateExecutionFnFactory, JobParamsPanelCsv, SearchPanel } from '../types';
 import { createGenerateCsv } from './lib';
 
-/*
- * ImmediateExecuteFn receives the job doc payload because the payload was
- * generated in the CreateFn
- */
-export type ImmediateExecuteFn<JobParamsType> = (
-  jobId: null,
-  job: JobDocPayload<JobParamsType>,
-  request: RequestFacade
-) => Promise<JobDocOutput>;
-
-export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
-  JobParamsPanelCsv
->> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: LevelLogger) {
+export const executeJobFactory: ImmediateExecutionFnFactory = function (reporting, parentLogger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
   const generateCsv = createGenerateCsv(reporting, parentLogger);
 
-  return async function executeJob(
-    jobId: string | null,
-    job: JobDocPayloadPanelCsv,
-    realRequest?: RequestFacade
-  ): Promise<JobDocOutput> {
+  return async function executeJob(jobId, job, realRequest) {
     // There will not be a jobID for "immediate" generation.
-    // jobID is only for "queued" jobs
-    // Use the jobID as a logging tag or "immediate"
-    const jobLogger = logger.clone([jobId === null ? 'immediate' : jobId]);
+    // Use "immediate" as the jobID
+    const jobLogger = logger.clone(['immediate']);
 
     const { jobParams } = job;
     const { isImmediate, panel, visType } = jobParams as JobParamsPanelCsv & { panel: SearchPanel };

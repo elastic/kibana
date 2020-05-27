@@ -73,7 +73,7 @@ export function registerJobGenerationRoutes(
 
   // Register beta panel-action download-related API's
   if (config.get('csv', 'enablePanelActionDownload')) {
-    registerGenerateCsvFromSavedObject(reporting, server, plugins, handler, handleError, logger);
+    registerGenerateCsvFromSavedObject(reporting, server, plugins, handler, handleError, logger); // TODO remove this
     registerGenerateCsvFromSavedObjectImmediate(reporting, server, plugins, logger);
   }
 }
