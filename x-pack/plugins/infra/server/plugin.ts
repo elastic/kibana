@@ -17,7 +17,10 @@ import { InfraKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_
 import { KibanaMetricsAdapter } from './lib/adapters/metrics/kibana_metrics_adapter';
 import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_status';
 import { InfraFieldsDomain } from './lib/domains/fields_domain';
-import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
+import {
+  InfraLogEntriesDomain,
+  logEntriesSearchStrategyProvider,
+} from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { LogEntryCategoriesAnalysis, LogEntryRateAnalysis } from './lib/log_analysis';
 import { InfraSnapshot } from './lib/snapshot';
@@ -31,6 +34,7 @@ import { registerAlertTypes } from './lib/alerting';
 import { infraSourceConfigurationSavedObjectType } from './lib/sources';
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
+import { LOG_ENTRIES_SEARCH_STRATEGY } from '../common/log_entries';
 
 export const config = {
   schema: schema.object({
@@ -84,8 +88,8 @@ export class InfraServerPlugin {
   public config = {} as InfraConfig;
   public libs: InfraBackendLibs | undefined;
 
-  constructor(context: PluginInitializerContext) {
-    this.config$ = context.config.create<InfraConfig>();
+  constructor(private initializerContext: PluginInitializerContext) {
+    this.config$ = initializerContext.config.create<InfraConfig>();
   }
 
   async setup(core: CoreSetup, plugins: InfraServerPluginDeps) {
@@ -153,6 +157,19 @@ export class InfraServerPlugin {
 
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);
+
+    // Custom search strategies
+    plugins.data.search.registerSearchStrategyContext(
+      this.initializerContext.opaqueId,
+      'logSources',
+      () => this.libs?.sources
+    );
+
+    plugins.data.search.registerSearchStrategyProvider(
+      this.initializerContext.opaqueId,
+      LOG_ENTRIES_SEARCH_STRATEGY,
+      logEntriesSearchStrategyProvider
+    );
 
     return {
       defineInternalSourceConfiguration(sourceId, sourceProperties) {

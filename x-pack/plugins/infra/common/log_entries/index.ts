@@ -4,5 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './log_entries_domain';
-export * from './log_entries_search_strategy';
+export * from './search_strategy';
+
+export {
+  LogEntry,
+  LogEntriesCursor,
+  logEntriesRequestRT,
+  logEntriesResponseRT,
+} from '../http_api/log_entries';
