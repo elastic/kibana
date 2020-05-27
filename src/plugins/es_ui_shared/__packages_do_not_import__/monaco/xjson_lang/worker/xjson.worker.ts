@@ -17,18 +17,14 @@
  * under the License.
  */
 
-// Lib is intentionally not included in this barrel export file to separate worker logic
-// from being imported with pure functions
+// Please note: this module is intended to be run inside of a webworker.
 
-export { monaco } from '../../__packages_do_not_import__/monaco';
+// @ts-ignore
+import * as worker from 'monaco-editor/esm/vs/editor/editor.worker';
+import { XJsonWorker } from './xjson_worker';
 
-export {
-  ElasticsearchSqlHighlightRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  addXJsonToRules,
-  XJsonMode,
-  installXJsonMode,
-} from './ace/modes';
-
-export { expandLiteralStrings, collapseLiteralStrings } from './lib';
+self.onmessage = () => {
+  worker.initialize((ctx: any, createData: any) => {
+    return new XJsonWorker(ctx);
+  });
+};

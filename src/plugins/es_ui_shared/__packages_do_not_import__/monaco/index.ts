@@ -17,18 +17,8 @@
  * under the License.
  */
 
-// Lib is intentionally not included in this barrel export file to separate worker logic
-// from being imported with pure functions
+import * as XJsonLang from './xjson_lang';
 
-export { monaco } from '../../__packages_do_not_import__/monaco';
-
-export {
-  ElasticsearchSqlHighlightRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  addXJsonToRules,
-  XJsonMode,
-  installXJsonMode,
-} from './ace/modes';
-
-export { expandLiteralStrings, collapseLiteralStrings } from './lib';
+export const monaco = {
+  XJsonLang,
+};

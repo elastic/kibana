@@ -17,18 +17,6 @@
  * under the License.
  */
 
-// Lib is intentionally not included in this barrel export file to separate worker logic
-// from being imported with pure functions
-
-export { monaco } from '../../__packages_do_not_import__/monaco';
-
-export {
-  ElasticsearchSqlHighlightRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  addXJsonToRules,
-  XJsonMode,
-  installXJsonMode,
-} from './ace/modes';
-
-export { expandLiteralStrings, collapseLiteralStrings } from './lib';
+export const globals = {
+  escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
+};

@@ -17,18 +17,35 @@
  * under the License.
  */
 
-// Lib is intentionally not included in this barrel export file to separate worker logic
-// from being imported with pure functions
+const path = require('path');
+const webpack = require('webpack');
 
-export { monaco } from '../../__packages_do_not_import__/monaco';
+const createConfig = (lang) => ({
+  mode: 'production',
+  entry: path.resolve(__dirname, `./worker/${lang}.worker.ts`),
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'bundle.amd.worker.js',
+  },
+  resolve: {
+    modules: ['node_modules'],
+    extensions: ['.js', '.ts', '.tsx'],
+  },
+  module: {
+    rules: [
+      {
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/typescript'],
+          },
+        },
+      },
+    ],
+  },
+  plugins: [new webpack.BannerPlugin('/* eslint-disable */')],
+});
 
-export {
-  ElasticsearchSqlHighlightRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  addXJsonToRules,
-  XJsonMode,
-  installXJsonMode,
-} from './ace/modes';
-
-export { expandLiteralStrings, collapseLiteralStrings } from './lib';
+module.exports = createConfig('xjson');

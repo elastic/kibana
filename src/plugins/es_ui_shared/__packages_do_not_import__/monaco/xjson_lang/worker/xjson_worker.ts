@@ -17,18 +17,18 @@
  * under the License.
  */
 
-// Lib is intentionally not included in this barrel export file to separate worker logic
-// from being imported with pure functions
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import { createParser } from '../grammar';
 
-export { monaco } from '../../__packages_do_not_import__/monaco';
+export class XJsonWorker {
+  constructor(private ctx: monaco.worker.IWorkerContext) {}
+  private parser: any;
 
-export {
-  ElasticsearchSqlHighlightRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  addXJsonToRules,
-  XJsonMode,
-  installXJsonMode,
-} from './ace/modes';
-
-export { expandLiteralStrings, collapseLiteralStrings } from './lib';
+  async parse() {
+    if (!this.parser) {
+      this.parser = createParser();
+    }
+    const [model] = this.ctx.getMirrorModels();
+    return this.parser(model.getValue());
+  }
+}
