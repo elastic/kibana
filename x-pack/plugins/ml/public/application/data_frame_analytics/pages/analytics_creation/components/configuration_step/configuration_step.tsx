@@ -7,12 +7,12 @@
 import React, { FC } from 'react';
 import { EuiForm } from '@elastic/eui';
 
-import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { ConfigurationStepDetails } from './configuration_step_details';
 import { ConfigurationStepForm } from './configuration_step_form';
 import { ANALYTICS_STEPS } from '../../page';
 
-export const ConfigurationStep: FC<CreateAnalyticsFormProps> = ({
+export const ConfigurationStep: FC<CreateAnalyticsStepProps> = ({
   actions,
   state,
   setCurrentStep,

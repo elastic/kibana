@@ -9,12 +9,12 @@ import { EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiSwitch, EuiTextArea } 
 import { i18n } from '@kbn/i18n';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
 import { ContinueButton } from '../continue_button';
 import { ANALYTICS_STEPS } from '../../page';
 
-export const DetailsStepForm: FC<CreateAnalyticsFormProps> = ({
+export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   actions,
   state,
   setCurrentStep,
@@ -92,7 +92,7 @@ export const DetailsStepForm: FC<CreateAnalyticsFormProps> = ({
       >
         <EuiFieldText
           fullWidth
-          inputRef={input => {
+          inputRef={(input) => {
             if (input) {
               forceInput.current = input;
             }
@@ -102,7 +102,7 @@ export const DetailsStepForm: FC<CreateAnalyticsFormProps> = ({
             defaultMessage: 'Job ID',
           })}
           value={jobId}
-          onChange={e => setFormState({ jobId: e.target.value })}
+          onChange={(e) => setFormState({ jobId: e.target.value })}
           aria-label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdInputAriaLabel', {
             defaultMessage: 'Choose a unique analytics job ID.',
           })}
@@ -126,7 +126,7 @@ export const DetailsStepForm: FC<CreateAnalyticsFormProps> = ({
             }
           )}
           rows={2}
-          onChange={e => {
+          onChange={(e) => {
             const value = e.target.value;
             setFormState({ description: value });
           }}
@@ -174,7 +174,7 @@ export const DetailsStepForm: FC<CreateAnalyticsFormProps> = ({
           disabled={isJobCreated}
           placeholder="destination index"
           value={destinationIndex}
-          onChange={e => setFormState({ destinationIndex: e.target.value })}
+          onChange={(e) => setFormState({ destinationIndex: e.target.value })}
           aria-label={i18n.translate(
             'xpack.ml.dataframe.analytics.create.destinationIndexInputAriaLabel',
             {

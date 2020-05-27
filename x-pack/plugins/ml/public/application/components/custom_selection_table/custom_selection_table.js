@@ -91,7 +91,7 @@ export function CustomSelectionTable({
 
   function getCurrentlySelectedItemIdsMap() {
     const selectedIdsMap = { all: false };
-    selectedIds.forEach(id => {
+    selectedIds.forEach((id) => {
       selectedIdsMap[id] = true;
     });
     return selectedIdsMap;
@@ -103,10 +103,10 @@ export function CustomSelectionTable({
 
   function handleTableChange({ isSelected, itemId }) {
     const selectedMapIds = Object.getOwnPropertyNames(itemIdToSelectedMap);
-    const currentItemIds = currentItems.map(item => item[tableItemId]);
+    const currentItemIds = currentItems.map((item) => item[tableItemId]);
 
     let currentSelected = selectedMapIds.filter(
-      id => itemIdToSelectedMap[id] === true && id !== itemId
+      (id) => itemIdToSelectedMap[id] === true && id !== itemId
     );
 
     if (itemId !== 'all') {
@@ -116,7 +116,7 @@ export function CustomSelectionTable({
     } else {
       if (isSelected === false) {
         // don't include any current items in the selection update since we're deselecting 'all'
-        currentSelected = currentSelected.filter(id => currentItemIds.includes(id) === false);
+        currentSelected = currentSelected.filter((id) => currentItemIds.includes(id) === false);
       } else {
         // grab all id's
         currentSelected = [...currentSelected, ...currentItemIds];
@@ -165,7 +165,7 @@ export function CustomSelectionTable({
 
   function areAllItemsSelected() {
     const indexOfUnselectedItem = currentItems.findIndex(
-      item => !isItemSelected(item[tableItemId])
+      (item) => !isItemSelected(item[tableItemId])
     );
     return indexOfUnselectedItem === -1;
   }
@@ -204,7 +204,7 @@ export function CustomSelectionTable({
   function toggleAll() {
     const allSelected = areAllItemsSelected() || itemIdToSelectedMap.all === true;
     const newItemIdToSelectedMap = {};
-    currentItems.forEach(item => (newItemIdToSelectedMap[item[tableItemId]] = !allSelected));
+    currentItems.forEach((item) => (newItemIdToSelectedMap[item[tableItemId]] = !allSelected));
     setItemIdToSelectedMap(newItemIdToSelectedMap);
     handleTableChange({ isSelected: !allSelected, itemId: 'all' });
   }
@@ -249,8 +249,8 @@ export function CustomSelectionTable({
   }
 
   function renderRows() {
-    const renderRow = item => {
-      const cells = columns.map(column => {
+    const renderRow = (item) => {
+      const cells = columns.map((column) => {
         const cell = item[column.id];
 
         let child;
@@ -379,7 +379,7 @@ export function CustomSelectionTable({
           itemsPerPageOptions={[5, 10, 20, 50]}
           pageCount={pager.getTotalPages()}
           onChangeItemsPerPage={handleChangeItemsPerPage}
-          onChangePage={pageIndex => handlePageChange(pageIndex)}
+          onChangePage={(pageIndex) => handlePageChange(pageIndex)}
         />
       )}
     </Fragment>

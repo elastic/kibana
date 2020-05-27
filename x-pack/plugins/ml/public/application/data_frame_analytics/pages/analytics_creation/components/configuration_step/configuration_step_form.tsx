@@ -19,7 +19,7 @@ import {
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
-import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { Messages } from '../../../analytics_management/components/create_analytics_form/messages';
 import {
   DEFAULT_MODEL_MEMORY_LIMIT,
@@ -47,7 +47,7 @@ const requiredFieldsErrorText = i18n.translate(
   }
 );
 
-export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
+export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   actions,
   state,
   setCurrentStep,
@@ -377,7 +377,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
               singleSelection={true}
               options={dependentVariableOptions}
               selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
-              onChange={selectedOptions =>
+              onChange={(selectedOptions) =>
                 setFormState({
                   dependentVariable: selectedOptions[0].label || '',
                 })
@@ -430,7 +430,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
             showValue
             value={trainingPercent}
             // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
-            onChange={e => setFormState({ trainingPercent: +e.target.value })}
+            onChange={(e) => setFormState({ trainingPercent: +e.target.value })}
             data-test-subj="mlAnalyticsCreateJobFlyoutTrainingPercentSlider"
           />
         </EuiFormRow>

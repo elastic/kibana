@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
 import { useEffect } from 'react';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
@@ -33,7 +27,7 @@ export const useIndexData = (indexPattern: IndexPattern, query: any): UseIndexDa
 
   // EuiDataGrid State
   const columns = [
-    ...indexPatternFields.map(id => {
+    ...indexPatternFields.map((id) => {
       const field = indexPattern.fields.getByName(id);
       const schema = getDataGridSchemaFromKibanaFieldType(field);
       return { id, schema };
@@ -59,7 +53,7 @@ export const useIndexData = (indexPattern: IndexPattern, query: any): UseIndexDa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(query)]);
 
-  const getIndexData = async function() {
+  const getIndexData = async function () {
     setErrorMessage('');
     setStatus(INDEX_STATUS.LOADING);
 
@@ -82,7 +76,7 @@ export const useIndexData = (indexPattern: IndexPattern, query: any): UseIndexDa
     try {
       const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
 
-      const docs = resp.hits.hits.map(d => d._source);
+      const docs = resp.hits.hits.map((d) => d._source);
 
       setRowCount(resp.hits.total.value);
       setTableItems(docs);

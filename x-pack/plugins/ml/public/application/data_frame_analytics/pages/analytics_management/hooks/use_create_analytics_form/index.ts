@@ -9,4 +9,5 @@ export {
   AnalyticsCreationStep,
   useCreateAnalyticsForm,
   CreateAnalyticsFormProps,
+  CreateAnalyticsStepProps,
 } from './use_create_analytics_form';

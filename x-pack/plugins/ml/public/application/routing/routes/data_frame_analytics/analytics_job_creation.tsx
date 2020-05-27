@@ -19,7 +19,7 @@ const breadcrumbs = [
     text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameManagementLabel', {
       defaultMessage: 'Data Frame Analytics',
     }),
-    href: '',
+    href: '#/data_frame_analytics',
   },
 ];
 

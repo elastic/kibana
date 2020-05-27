@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HyperParameters } from './hyper_parameters';
-import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { getModelMemoryLimitErrors } from '../../../analytics_management/hooks/use_create_analytics_form/reducer';
 import {
   ANALYSIS_CONFIG_TYPE,
@@ -29,7 +29,7 @@ import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';
 import { OutlierHyperParameters } from './outlier_hyper_parameters';
 
-export const AdvancedStepForm: FC<CreateAnalyticsFormProps> = ({
+export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   actions,
   state,
   setCurrentStep,
@@ -98,7 +98,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsFormProps> = ({
             ]}
             value={computeFeatureInfluence}
             hasNoInitialSelection={false}
-            onChange={e => {
+            onChange={(e) => {
               setFormState({
                 computeFeatureInfluence: e.target.value,
               });
@@ -123,7 +123,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsFormProps> = ({
           )}
         >
           <EuiFieldNumber
-            onChange={e => setFormState({ featureInfluenceThreshold: +e.target.value })}
+            onChange={(e) => setFormState({ featureInfluenceThreshold: +e.target.value })}
             data-test-subj="mlAnalyticsCreateJobWizardFeatureInfluenceThresholdInput"
             min={0}
             max={1}
@@ -177,7 +177,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsFormProps> = ({
             data-test-subj="mlAnalyticsCreateJobFlyoutnumTopFeatureImportanceValuesInput"
             isInvalid={numTopFeatureImportanceValuesValid === false}
             min={NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN}
-            onChange={e => setFormState({ numTopFeatureImportanceValues: +e.target.value })}
+            onChange={(e) => setFormState({ numTopFeatureImportanceValues: +e.target.value })}
             step={1}
             value={numTopFeatureImportanceValues}
           />
@@ -199,7 +199,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsFormProps> = ({
           <EuiFieldText
             disabled={isJobCreated}
             value={predictionFieldName}
-            onChange={e => setFormState({ predictionFieldName: e.target.value })}
+            onChange={(e) => setFormState({ predictionFieldName: e.target.value })}
             data-test-subj="mlAnalyticsCreateJobWizardPredictionFieldNameInput"
           />
         </EuiFormRow>
@@ -243,7 +243,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsFormProps> = ({
                 )}
                 data-test-subj="mlAnalyticsCreateJobWizardnumTopClassesInput"
                 min={0}
-                onChange={e => setFormState({ numTopClasses: +e.target.value })}
+                onChange={(e) => setFormState({ numTopClasses: +e.target.value })}
                 step={1}
                 value={numTopClasses}
               />
@@ -273,7 +273,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsFormProps> = ({
               }
               disabled={isJobCreated}
               value={modelMemoryLimit || ''}
-              onChange={e => setFormState({ modelMemoryLimit: e.target.value })}
+              onChange={(e) => setFormState({ modelMemoryLimit: e.target.value })}
               isInvalid={mmlInvalid}
               data-test-subj="mlAnalyticsCreateJobWizardModelMemoryInput"
             />

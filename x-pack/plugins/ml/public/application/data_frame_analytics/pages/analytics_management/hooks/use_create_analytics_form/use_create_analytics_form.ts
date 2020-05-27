@@ -46,7 +46,10 @@ export interface AnalyticsCreationStep {
 export interface CreateAnalyticsFormProps {
   actions: ActionDispatchers;
   state: State;
-  setCurrentStep?: React.Dispatch<React.SetStateAction<any>>;
+}
+
+export interface CreateAnalyticsStepProps extends CreateAnalyticsFormProps {
+  setCurrentStep: React.Dispatch<React.SetStateAction<any>>;
   step?: ANALYTICS_STEPS;
   stepActivated?: boolean;
 }
@@ -277,7 +280,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   };
 
   const startAnalyticsJob = async () => {
-    // setIsModalButtonDisabled(true);
     try {
       const response = await ml.dataFrameAnalytics.startDataFrameAnalytics(jobId);
       if (response.acknowledged !== true) {
@@ -293,7 +295,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         ),
       });
       setIsJobStarted(true);
-      // setIsModalButtonDisabled(false);
       refresh();
     } catch (e) {
       addRequestMessage({
@@ -305,7 +306,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           }
         ),
       });
-      // setIsModalButtonDisabled(false);
     }
   };
 

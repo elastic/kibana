@@ -17,8 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-// import { useMlKibana } from '../../../../../contexts/kibana';
-import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { Messages } from '../../../analytics_management/components/create_analytics_form/messages';
 import { ANALYTICS_STEPS } from '../../page';
 
@@ -26,7 +25,7 @@ function redirectToAnalyticsManagementPage() {
   window.location.href = '#/data_frame_analytics?';
 }
 
-export const CreateStep: FC<CreateAnalyticsFormProps> = ({ actions, state, step }) => {
+export const CreateStep: FC<CreateAnalyticsStepProps> = ({ actions, state, step }) => {
   const { createAnalyticsJob, startAnalyticsJob } = actions;
   const {
     isAdvancedEditorValidJson,
@@ -37,19 +36,7 @@ export const CreateStep: FC<CreateAnalyticsFormProps> = ({ actions, state, step 
     requestMessages,
   } = state;
 
-  // const {
-  //   services: { notifications },
-  // } = useMlKibana();
-
   const [checked, setChecked] = useState<boolean>(true);
-
-  // useEffect(() => {
-  //   if (requestMessages.length) {
-  //     requestMessages.map(message => {
-  //       notifications.toasts.addSuccess(message.message);
-  //     });
-  //   }
-  // }, [requestMessages.length]);
 
   if (step !== ANALYTICS_STEPS.CREATE) return null;
 
@@ -82,7 +69,7 @@ export const CreateStep: FC<CreateAnalyticsFormProps> = ({ actions, state, step 
                   defaultMessage: 'Start immediately',
                 })}
                 checked={checked}
-                onChange={e => setChecked(e.target.checked)}
+                onChange={(e) => setChecked(e.target.checked)}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -105,6 +92,7 @@ export const CreateStep: FC<CreateAnalyticsFormProps> = ({ actions, state, step 
         <Fragment>
           <EuiHorizontalRule />
           <EuiCard
+            // @ts-ignore
             style={{ width: '300px' }}
             icon={<EuiIcon size="xxl" type="list" />}
             title={i18n.translate('xpack.ml.dataframe.analytics.create.analyticsListCardTitle', {
