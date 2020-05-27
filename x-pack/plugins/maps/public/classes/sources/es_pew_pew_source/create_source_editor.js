@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiFormRow, EuiCallOut } from '@elastic/eui';
-import { AGGREGATABLE_GEO_FIELD_TYPES, getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
+import { getAggregatableGeoFieldTypes, getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
 
 export class CreateSourceEditor extends Component {
   static propTypes = {
@@ -177,7 +177,7 @@ export class CreateSourceEditor extends Component {
           placeholder={i18n.translate('xpack.maps.source.pewPew.indexPatternPlaceholder', {
             defaultMessage: 'Select index pattern',
           })}
-          fieldTypes={AGGREGATABLE_GEO_FIELD_TYPES}
+          fieldTypes={getAggregatableGeoFieldTypes()}
         />
       </EuiFormRow>
     );

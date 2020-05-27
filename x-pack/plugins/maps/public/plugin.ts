@@ -34,6 +34,7 @@ import {
   setMapAppConfig,
   setKibanaCommonConfig,
   setKibanaVersion,
+  setIsGoldPlus,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
@@ -44,6 +45,7 @@ import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
 import { MapsXPackConfig, MapsConfigType } from '../config';
+import { ILicense } from '../../licensing/common/types';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -76,7 +78,17 @@ export const bindSetupCoreAndPlugins = (
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
-  const { fileUpload, data, inspector } = plugins;
+  const { fileUpload, data, inspector, licensing } = plugins;
+
+  console.log('licensing', licensing);
+
+  licensing.license$.subscribe((license: ILicense) => {
+    console.log('l', license);
+    const gold = license.check('maps', 'gold');
+    console.log('g', gold);
+    setIsGoldPlus(gold.state === 'valid');
+  });
+
   setInspector(inspector);
   setFileUpload(fileUpload);
   setIndexPatternSelect(data.ui.IndexPatternSelect);

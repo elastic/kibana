@@ -48,6 +48,7 @@ export function getShowMapsInspectorAdapter(): boolean;
 export function getPreserveDrawingBuffer(): boolean;
 export function getEnableVectorTiles(): boolean;
 export function getProxyElasticMapsServiceInMaps(): boolean;
+export function getIsGoldPlus(): boolean;
 
 export function setLicenseId(args: unknown): void;
 export function setInspector(args: unknown): void;
@@ -74,3 +75,5 @@ export function setSearchService(args: DataPublicPluginStart['search']): void;
 export function setKibanaCommonConfig(config: MapsLegacyConfigType): void;
 export function setMapAppConfig(config: MapsConfigType): void;
 export function setKibanaVersion(version: string): void;
+export function setIsGoldPlus(isGoldPlus: boolean): void;
+
