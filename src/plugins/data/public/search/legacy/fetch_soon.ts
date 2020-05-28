@@ -66,7 +66,7 @@ async function delayedFetch(
   options: FetchOptions,
   fetchHandlers: FetchHandlers,
   ms: number
-) {
+): Promise<SearchResponse> {
   if (ms === 0) {
     return callClient([request], [options], fetchHandlers)[0];
   }
