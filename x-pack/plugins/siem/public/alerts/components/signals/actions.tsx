@@ -23,7 +23,7 @@ import {
   replaceTemplateFieldFromMatchFilters,
   replaceTemplateFieldFromDataProviders,
 } from './helpers';
-import { displaySuccessToast } from '../../../common/components/toasters';
+import { displaySuccessToast, displayErrorToast } from '../../../common/components/toasters';
 import * as i18n from './translations';
 
 export const getUpdateSignalsQuery = (eventIds: Readonly<string[]>) => {
@@ -69,14 +69,18 @@ export const updateSignalStatusAction = async ({
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: signalIds, isDeleted: true });
 
-    const statusMessage =
+    const successTitle =
       status === 'closed'
-        ? i18n.CLOSED_ALERT_TOAST(signalIds.length)
-        : i18n.OPENED_ALERT_TOAST(signalIds.length);
+        ? i18n.CLOSED_ALERT_SUCCESS_TOAST(signalIds.length)
+        : i18n.OPENED_ALERT_SUCCESS_TOAST(signalIds.length);
 
-    displaySuccessToast(statusMessage, dispatchToaster);
+    displaySuccessToast(successTitle, dispatchToaster);
   } catch (e) {
-    // TODO: Show error toasts
+    const errorTitle =
+      status === 'closed'
+        ? i18n.CLOSED_ALERT_FAILED_TOAST(signalIds.length)
+        : i18n.OPENED_ALERT_FAILED_TOAST(signalIds.length);
+    displayErrorToast(errorTitle, [e.message], dispatchToaster);
   } finally {
     setEventsLoading({ eventIds: signalIds, isLoading: false });
   }

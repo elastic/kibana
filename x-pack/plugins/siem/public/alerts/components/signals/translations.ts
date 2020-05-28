@@ -102,16 +102,30 @@ export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
   }
 );
 
-export const CLOSED_ALERT_TOAST = (totalAlerts: number) =>
-  i18n.translate('xpack.siem.detectionEngine.signals.closedAlertToastMessage', {
+export const CLOSED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
+  i18n.translate('xpack.siem.detectionEngine.signals.closedAlertSuccessToastMessage', {
     values: { totalAlerts },
     defaultMessage:
-      'Successfully Closed {totalAlerts} {totalAlerts, plural, =1 {Alert} other {Alerts}}.',
+      'Successfully closed {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
   });
 
-export const OPENED_ALERT_TOAST = (totalAlerts: number) =>
-  i18n.translate('xpack.siem.detectionEngine.signals.openedAlertToastMessage', {
+export const OPENED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
+  i18n.translate('xpack.siem.detectionEngine.signals.openedAlertSuccessToastMessage', {
     values: { totalAlerts },
     defaultMessage:
-      'Successfully Opened {totalAlerts} {totalAlerts, plural, =1 {Alert} other {Alerts}}.',
+      'Successfully opened {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
+  });
+
+export const CLOSED_ALERT_FAILED_TOAST = (totalAlerts: number) =>
+  i18n.translate('xpack.siem.detectionEngine.signals.closedAlertFailedToastMessage', {
+    values: { totalAlerts },
+    defaultMessage:
+      'Failed to close {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
+  });
+
+export const OPENED_ALERT_FAILED_TOAST = (totalAlerts: number) =>
+  i18n.translate('xpack.siem.detectionEngine.signals.openedAlertFailedToastMessage', {
+    values: { totalAlerts },
+    defaultMessage:
+      'Failed to open {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
   });
