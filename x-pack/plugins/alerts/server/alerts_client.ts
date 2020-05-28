@@ -233,7 +233,7 @@ export class AlertsClient {
     }
   }
 
-  public async find(options: FindOptions = {}): Promise<FindResult> {
+  public async find({ options = {} }: { options: FindOptions }): Promise<FindResult> {
     const {
       page,
       per_page: perPage,

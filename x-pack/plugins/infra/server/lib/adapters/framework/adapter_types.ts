@@ -23,7 +23,7 @@ export interface InfraServerPluginDeps {
   visTypeTimeseries: VisTypeTimeseriesSetup;
   features: FeaturesPluginSetup;
   apm: APMPluginSetup;
-  alerting: AlertingPluginContract;
+  alerts: AlertingPluginContract;
 }
 
 export interface CallWithRequestParams extends GenericParams {
