@@ -120,14 +120,14 @@ export async function installPackage(options: {
       pkgName,
       pkgVersion,
     }),
-    installPipelines(registryPackageInfo, callCluster),
+    installPipelines(registryPackageInfo, paths, callCluster),
     // index patterns and ilm policies are not currently associated with a particular package
     // so we do not save them in the package saved object state.
     installIndexPatterns(savedObjectsClient, pkgName, pkgVersion),
     // currenly only the base package has an ILM policy
     // at some point ILM policies can be installed/modified
     // per dataset and we should then save them
-    installILMPolicy(pkgName, pkgVersion, paths, callCluster),
+    installILMPolicy(paths, callCluster),
   ]);
 
   // install or update the templates

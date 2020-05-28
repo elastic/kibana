@@ -7,12 +7,7 @@
 import { CallESAsCurrentUser, ElasticsearchAssetType } from '../../../../types';
 import * as Registry from '../../registry';
 
-export async function installILMPolicy(
-  pkgName: string,
-  pkgVersion: string,
-  paths: string[],
-  callCluster: CallESAsCurrentUser
-) {
+export async function installILMPolicy(paths: string[], callCluster: CallESAsCurrentUser) {
   const ilmPaths = paths.filter((path) => isILMPolicy(path));
   if (!ilmPaths.length) return;
   await Promise.all(
