@@ -43,7 +43,7 @@ export async function getFields(
     payload: {},
     pre: {
       indexPatternsService: new IndexPatternsFetcher(
-        requestContext.core.elasticsearch.dataClient.callAsCurrentUser
+        requestContext.core.elasticsearch.legacy.client.callAsCurrentUser
       ),
     },
     getUiSettingsService: () => requestContext.core.uiSettings.client,
@@ -54,7 +54,7 @@ export async function getFields(
           getCluster: () => {
             return {
               callWithRequest: async (req: any, endpoint: string, params: any) => {
-                return await requestContext.core.elasticsearch.dataClient.callAsCurrentUser(
+                return await requestContext.core.elasticsearch.legacy.client.callAsCurrentUser(
                   endpoint,
                   params
                 );

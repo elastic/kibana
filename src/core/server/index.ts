@@ -354,8 +354,9 @@ export interface RequestHandlerContext {
       typeRegistry: ISavedObjectTypeRegistry;
     };
     elasticsearch: {
-      dataClient: IScopedClusterClient;
-      adminClient: IScopedClusterClient;
+      legacy: {
+        client: IScopedClusterClient;
+      };
     };
     uiSettings: {
       client: IUiSettingsClient;
