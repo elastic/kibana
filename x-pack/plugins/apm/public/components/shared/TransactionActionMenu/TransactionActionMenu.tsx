@@ -105,10 +105,15 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
 
             if (app === 'uptime' || app === 'metrics' || app === 'logs') {
               event.preventDefault();
+              let search = parsed.search || '';
+              if (parsed.hash) {
+                // convert hash to search. passing a hash is broken, either in uptime or in navigateToApp
+                search += parsed.hash.replace('#/?', search ? '&' : '?');
+              }
+
+              const path = `${rest.join('/')}${search}`;
               core.application.navigateToApp(app, {
-                path: `${rest.join('/')}${
-                  parsed.search ? `${parsed.search}` : ''
-                }`,
+                path,
               });
             }
           },
