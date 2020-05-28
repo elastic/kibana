@@ -24,7 +24,6 @@ describe('GET /api/reporting/jobs/download', () => {
   let httpSetup: setupServerReturn['httpSetup'];
   let exportTypesRegistry: ExportTypesRegistry;
   let core: ReportingCore;
-  let basePath: () => string;
 
   const config = { get: jest.fn(), kbnConfig: { get: jest.fn() } };
   const mockLogger = ({

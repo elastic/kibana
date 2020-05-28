@@ -27,12 +27,7 @@ export class ReportingPlugin
 
   public async setup(core: CoreSetup, plugins: ReportingSetupDeps) {
     const { config } = this;
-    const {
-      elasticsearch,
-      __LEGACY,
-      licensing: { license$ },
-      security,
-    } = plugins;
+    const { elasticsearch, __LEGACY, licensing, security } = plugins;
     const router = core.http.createRouter();
     const basePath = core.http.basePath.get;
     const { xpack_main: xpackMainLegacy, reporting: reportingLegacy } = __LEGACY.plugins;
@@ -50,7 +45,7 @@ export class ReportingPlugin
     this.reportingCore.pluginSetup({
       browserDriverFactory,
       elasticsearch,
-      license$,
+      licensing,
       basePath,
       router,
       security,

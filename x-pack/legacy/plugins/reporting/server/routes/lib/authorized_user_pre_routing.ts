@@ -25,9 +25,9 @@ export const authorizedUserPreRoutingFactory = function authorizedUserPreRouting
   return <P, Q, B>(handler: RequestHandlerUser): RequestHandler<P, Q, B, RouteMethod> => {
     return (context, req, res) => {
       // TODO: license checking
-
       let user: AuthenticatedUser | null = null;
-      if (deps.security) {
+
+      if (setupDeps.security) {
         user = getUser(req);
         if (!user) {
           return res.unauthorized({
