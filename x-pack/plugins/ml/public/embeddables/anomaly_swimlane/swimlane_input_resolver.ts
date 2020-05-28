@@ -51,12 +51,12 @@ export function useSwimlaneInputResolver(
   refresh: Observable<any>,
   services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
   chartWidth: number
-) {
+): [string | undefined, OverallSwimlaneData | undefined, TimeBuckets, string | null | undefined] {
   const [{ uiSettings }, , { explorerService, anomalyDetectorService }] = services;
 
   const [swimlaneData, setSwimlaneData] = useState<OverallSwimlaneData>();
   const [swimlaneType, setSwimlaneType] = useState<string>();
-  const [error, setError] = useState<Error | null>();
+  const [error, setError] = useState<string | null>();
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
 
