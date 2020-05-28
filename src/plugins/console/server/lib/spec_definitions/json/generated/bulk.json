@@ -13,7 +13,8 @@
       "_source": [],
       "_source_excludes": [],
       "_source_includes": [],
-      "pipeline": ""
+      "pipeline": "",
+      "prefer_v2_templates": "__flag__"
     },
     "methods": [
       "POST",

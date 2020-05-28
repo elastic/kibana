@@ -4,7 +4,8 @@
       "include_type_name": "__flag__",
       "wait_for_active_shards": "",
       "timeout": "",
-      "master_timeout": ""
+      "master_timeout": "",
+      "prefer_v2_templates": "__flag__"
     },
     "methods": [
       "PUT"

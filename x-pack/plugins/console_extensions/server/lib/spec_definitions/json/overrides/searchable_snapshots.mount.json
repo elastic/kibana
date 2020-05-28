@@ -1,0 +1,11 @@
+{
+  "searchable_snapshots.mount": {
+    "data_autocomplete_rules": {
+      "index": "",
+      "renamed_index": "",
+      "index_settings": {},
+      "ignore_index_settings": [""]
+    }
+  }
+}
+
