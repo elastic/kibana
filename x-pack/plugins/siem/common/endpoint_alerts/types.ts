@@ -175,6 +175,10 @@ export interface AlertingIndexUIQueryParams {
    * If any value is present, show the alert detail view for the selected alert. Should be an ID for an alert event.
    */
   selected_alert?: string;
+  /**
+   * Retain the selected tab through any refreshes. Should be an ID for an alert event.
+   */
+  active_details_tab?: string;
   query?: string;
   date_range?: string;
   filters?: string;

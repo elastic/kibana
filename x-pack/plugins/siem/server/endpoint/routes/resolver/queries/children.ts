@@ -3,72 +3,92 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { SearchResponse } from 'elasticsearch';
+import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { ResolverQuery } from './base';
+import { PaginationBuilder, PaginatedResults } from '../utils/pagination';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
 
-export class ChildrenQuery extends ResolverQuery {
-  protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string) {
-    const paginator = this.paginateBy('endgame.serial_event_id', 'endgame.unique_ppid');
+/**
+ * Builds a query for retrieving descendants of a node.
+ */
+export class ChildrenQuery extends ResolverQuery<PaginatedResults> {
+  constructor(
+    private readonly pagination: PaginationBuilder,
+    indexPattern: string,
+    endpointID?: string
+  ) {
+    super(indexPattern, endpointID);
+  }
+
+  protected legacyQuery(endpointID: string, uniquePIDs: string[]): JsonObject {
     return {
-      body: paginator({
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: { 'endgame.unique_ppid': uniquePIDs },
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: { 'endgame.unique_ppid': uniquePIDs },
+            },
+            {
+              term: { 'agent.id': endpointID },
+            },
+            {
+              term: { 'event.category': 'process' },
+            },
+            {
+              term: { 'event.kind': 'event' },
+            },
+            {
+              bool: {
+                should: [
+                  {
+                    term: { 'event.type': 'process_start' },
+                  },
+                  {
+                    term: { 'event.action': 'fork_event' },
+                  },
+                ],
               },
-              {
-                term: { 'agent.id': endpointID },
-              },
-              {
-                term: { 'event.category': 'process' },
-              },
-              {
-                term: { 'event.kind': 'event' },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      term: { 'event.type': 'process_start' },
-                    },
-                    {
-                      term: { 'event.action': 'fork_event' },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
+            },
+          ],
         },
-      }),
-      index,
+      },
+      ...this.pagination.buildQueryFields(
+        uniquePIDs.length,
+        'endgame.serial_event_id',
+        'endgame.unique_ppid'
+      ),
     };
   }
 
-  protected query(entityIDs: string[], index: string) {
-    const paginator = this.paginateBy('event.id', 'process.parent.entity_id');
+  protected query(entityIDs: string[]): JsonObject {
     return {
-      body: paginator({
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: { 'process.parent.entity_id': entityIDs },
-              },
-              {
-                term: { 'event.category': 'process' },
-              },
-              {
-                term: { 'event.kind': 'event' },
-              },
-              {
-                term: { 'event.type': 'start' },
-              },
-            ],
-          },
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: { 'process.parent.entity_id': entityIDs },
+            },
+            {
+              term: { 'event.category': 'process' },
+            },
+            {
+              term: { 'event.kind': 'event' },
+            },
+            {
+              term: { 'event.type': 'start' },
+            },
+          ],
         },
-      }),
-      index,
+      },
+      ...this.pagination.buildQueryFields(entityIDs.length, 'event.id', 'process.parent.entity_id'),
+    };
+  }
+
+  formatResponse(response: SearchResponse<ResolverEvent>): PaginatedResults {
+    return {
+      results: ResolverQuery.getResults(response),
+      totals: PaginationBuilder.getTotals(response.aggregations),
     };
   }
 }

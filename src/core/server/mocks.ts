@@ -199,8 +199,9 @@ function createCoreRequestHandlerContextMock() {
       typeRegistry: savedObjectsTypeRegistryMock.create(),
     },
     elasticsearch: {
-      adminClient: elasticsearchServiceMock.createScopedClusterClient(),
-      dataClient: elasticsearchServiceMock.createScopedClusterClient(),
+      legacy: {
+        client: elasticsearchServiceMock.createScopedClusterClient(),
+      },
     },
     uiSettings: {
       client: uiSettingsServiceMock.createClient(),
