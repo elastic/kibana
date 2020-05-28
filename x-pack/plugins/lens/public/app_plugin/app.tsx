@@ -10,7 +10,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import { AppMountContext, NotificationsStart } from 'kibana/public';
+import { AppMountContext, AppMountParameters, NotificationsStart } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
@@ -57,6 +57,7 @@ export function App({
   redirectTo,
   originatingAppFromUrl,
   navigation,
+  onAppLeave,
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
@@ -72,6 +73,7 @@ export function App({
     newlyCreated?: boolean
   ) => void;
   originatingAppFromUrl?: string | undefined;
+  onAppLeave: AppMountParameters['onAppLeave'];
 }) {
   const language =
     storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
@@ -93,6 +95,12 @@ export function App({
   });
 
   const { lastKnownDoc } = state;
+
+  const isSaveable =
+    lastKnownDoc &&
+    lastKnownDoc.expression &&
+    lastKnownDoc.expression.length > 0 &&
+    core.application.capabilities.visualize.save;
 
   useEffect(() => {
     // Clear app-specific filters when navigating to Lens. Necessary because Lens
@@ -123,7 +131,21 @@ export function App({
       filterSubscription.unsubscribe();
       timeSubscription.unsubscribe();
     };
-  }, []);
+  }, [data.query.filterManager, data.query.timefilter.timefilter]);
+
+  useEffect(() => {
+    onAppLeave((actions) => {
+      if (isSaveable && !_.isEqual(lastKnownDoc?.expression, state.persistedDoc?.expression)) {
+        return actions.confirm(
+          i18n.translate('xpack.lens.app.unsavedWorkMessage', {
+            defaultMessage: 'Leave Lens with unsaved work?',
+          })
+        );
+      } else {
+        return actions.default();
+      }
+    });
+  }, [isSaveable, lastKnownDoc, onAppLeave, state.persistedDoc]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
@@ -144,7 +166,7 @@ export function App({
           : i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),
       },
     ]);
-  }, [state.persistedDoc && state.persistedDoc.title]);
+  }, [core.application, core.chrome, core.http.basePath, state.persistedDoc]);
 
   useEffect(() => {
     if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
@@ -187,13 +209,16 @@ export function App({
           redirectTo();
         });
     }
-  }, [docId]);
-
-  const isSaveable =
-    lastKnownDoc &&
-    lastKnownDoc.expression &&
-    lastKnownDoc.expression.length > 0 &&
-    core.application.capabilities.visualize.save;
+  }, [
+    core.notifications,
+    data.indexPatterns,
+    data.query.filterManager,
+    docId,
+    // TODO: These dependencies are changing too often
+    // docStorage,
+    // redirectTo,
+    // state.persistedDoc,
+  ]);
 
   const runSave = (
     saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
@@ -257,7 +282,7 @@ export function App({
       core.notifications.toasts.addDanger({
         title: e.message,
       }),
-    []
+    [core.notifications.toasts]
   );
 
   const { TopNavMenu } = navigation.ui;
