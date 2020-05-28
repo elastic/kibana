@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { XJsonLang } from '@kbn/ui-shared-deps/monaco';
+import { Monaco } from '../../../../../../src/plugins/es_ui_shared/public';
 import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
@@ -13,6 +13,7 @@ interface Props {
 }
 
 export function Editor({ code, onChange }: Props) {
+  const { XJsonLang, xJson, convertToJson, setXJson } = Monaco.useXJsonMode(code);
   return (
     <CodeEditor
       languageId={XJsonLang.ID}
@@ -22,8 +23,12 @@ export function Editor({ code, onChange }: Props) {
       editorDidMount={(editor) => {
         XJsonLang.registerGrammarChecker(editor);
       }}
-      value={code}
-      onChange={onChange}
+      value={xJson}
+      onChange={(value) => {
+        console.log(convertToJson(value));
+        setXJson(value);
+        onChange(value);
+      }}
       options={{
         fontSize: 12,
         minimap: {
