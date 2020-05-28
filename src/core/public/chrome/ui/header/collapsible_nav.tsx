@@ -56,7 +56,7 @@ function getOrderedCategories(
 ) {
   return sortBy(
     Object.keys(mainCategories),
-    (categoryName) => categoryDictionary[categoryName]?.order
+    categoryName => categoryDictionary[categoryName]?.order
   );
 }
 
@@ -103,11 +103,11 @@ export function CollapsibleNav({
   navigateToApp,
   ...observables
 }: Props) {
-  const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
+  const navLinks = useObservable(observables.navLinks$, []).filter(link => !link.hidden);
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
   const appId = useObservable(observables.appId$, '');
   const lockRef = useRef<HTMLButtonElement>(null);
-  const groupedNavLinks = groupBy(navLinks, (link) => link?.category?.id);
+  const groupedNavLinks = groupBy(navLinks, link => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
   const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
@@ -180,7 +180,7 @@ export function CollapsibleNav({
         title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
         isCollapsible={true}
         initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
-        onToggle={(isCategoryOpen) => setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)}
+        onToggle={isCategoryOpen => setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)}
         data-test-subj="collapsibleNavGroup-recentlyViewed"
       >
         {recentlyAccessed.length > 0 ? (
@@ -188,7 +188,7 @@ export function CollapsibleNav({
             aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
               defaultMessage: 'Recently viewed links',
             })}
-            listItems={recentlyAccessed.map((link) => {
+            listItems={recentlyAccessed.map(link => {
               // TODO #64541
               // Can remove icon from recent links completely
               const { iconType, ...hydratedLink } = createRecentNavLink(link, navLinks, basePath);
@@ -220,7 +220,7 @@ export function CollapsibleNav({
 
       <EuiFlexItem className="eui-yScroll">
         {/* Kibana, Observability, Security, and Management sections */}
-        {orderedCategories.map((categoryName) => {
+        {orderedCategories.map(categoryName => {
           const category = categoryDictionary[categoryName]!;
 
           return (
@@ -230,7 +230,7 @@ export function CollapsibleNav({
               title={category.label}
               isCollapsible={true}
               initialIsOpen={getIsCategoryOpen(category.id, storage)}
-              onToggle={(isCategoryOpen) => setIsCategoryOpen(category.id, isCategoryOpen, storage)}
+              onToggle={isCategoryOpen => setIsCategoryOpen(category.id, isCategoryOpen, storage)}
               data-test-subj={`collapsibleNavGroup-${category.id}`}
             >
               <EuiListGroup
@@ -238,7 +238,7 @@ export function CollapsibleNav({
                   defaultMessage: 'Primary navigation links, {category}',
                   values: { category: category.label },
                 })}
-                listItems={allCategorizedLinks[categoryName].map((link) => readyForEUI(link))}
+                listItems={allCategorizedLinks[categoryName].map(link => readyForEUI(link))}
                 maxWidth="none"
                 color="subdued"
                 gutterSize="none"

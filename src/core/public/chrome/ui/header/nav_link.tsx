@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiImage, EuiListGroupItemProps } from '@elastic/eui';
+import { EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
@@ -42,6 +42,10 @@ interface Props {
   navigateToApp: CoreStart['application']['navigateToApp'];
 }
 
+// TODO #64541
+// Set return type to EuiListGroupItemProps
+// Currently it's a subset of EuiListGroupItemProps+FlyoutMenuItem for CollapsibleNav and NavDrawer
+// But FlyoutMenuItem isn't exported from EUI
 export function createEuiListItem({
   link,
   legacyMode,
@@ -50,7 +54,7 @@ export function createEuiListItem({
   onClick = () => {},
   navigateToApp,
   dataTestSubj,
-}: Props): EuiListGroupItemProps {
+}: Props) {
   const { legacy, active, id, title, disabled, euiIconType, icon, tooltip, href } = link;
 
   return {
@@ -91,6 +95,7 @@ export interface RecentNavLink {
 
 /**
  * Add saved object type info to recently links
+ * TODO #64541 - set return type to EuiListGroupItemProps
  *
  * Recent nav links are similar to normal nav links but are missing some Kibana Platform magic and
  * because of legacy reasons have slightly different properties.
@@ -102,10 +107,10 @@ export function createRecentNavLink(
   recentLink: ChromeRecentlyAccessedHistoryItem,
   navLinks: ChromeNavLink[],
   basePath: HttpStart['basePath']
-): EuiListGroupItemProps {
+) {
   const { link, label } = recentLink;
   const href = relativeToAbsolute(basePath.prepend(link));
-  const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl ?? nl.subUrlBase));
+  const navLink = navLinks.find(nl => href.startsWith(nl.baseUrl ?? nl.subUrlBase));
   let titleAndAriaLabel = label;
 
   if (navLink) {
