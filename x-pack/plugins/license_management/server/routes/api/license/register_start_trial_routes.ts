@@ -10,7 +10,7 @@ import { addBasePath } from '../../helpers';
 
 export function registerStartTrialRoutes({ router, plugins: { licensing } }: RouteDependencies) {
   router.get({ path: addBasePath('/start_trial'), validate: false }, async (ctx, req, res) => {
-    const { callAsCurrentUser } = ctx.core.elasticsearch.adminClient;
+    const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
     try {
       return res.ok({ body: await canStartTrial(callAsCurrentUser) });
     } catch (e) {
@@ -19,7 +19,7 @@ export function registerStartTrialRoutes({ router, plugins: { licensing } }: Rou
   });
 
   router.post({ path: addBasePath('/start_trial'), validate: false }, async (ctx, req, res) => {
-    const { callAsCurrentUser } = ctx.core.elasticsearch.adminClient;
+    const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
     try {
       return res.ok({
         body: await startTrial({ callAsCurrentUser, licensing }),

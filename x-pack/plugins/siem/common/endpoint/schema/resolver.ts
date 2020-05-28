@@ -51,8 +51,8 @@ export const validateAncestry = {
 export const validateChildren = {
   params: schema.object({ id: schema.string() }),
   query: schema.object({
-    children: schema.number({ defaultValue: 10, min: 10, max: 100 }),
-    generations: schema.number({ defaultValue: 3, min: 0, max: 3 }),
+    children: schema.number({ defaultValue: 10, min: 1, max: 100 }),
+    generations: schema.number({ defaultValue: 3, min: 1, max: 3 }),
     afterChild: schema.maybe(schema.string()),
     legacyEndpointID: schema.maybe(schema.string()),
   }),
