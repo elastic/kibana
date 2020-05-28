@@ -64,12 +64,12 @@ export class CreateSourceEditor extends Component {
   }
 
   _onIndexPatternSelect = (indexPatternId) => {
-    this.setState({ indexPatternId }, () => {
-      if (!indexPatternId) {
-        this._previewLayer();
-      }
-      this._loadIndexPattern(indexPatternId);
-    });
+    this.setState(
+      {
+        indexPatternId,
+      },
+      this._loadIndexPattern(indexPatternId)
+    );
   };
 
   _loadIndexPattern = (indexPatternId) => {
