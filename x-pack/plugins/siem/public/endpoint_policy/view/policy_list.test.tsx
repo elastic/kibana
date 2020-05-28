@@ -30,28 +30,36 @@ describe('when on the policies page', () => {
   });
 
   describe('when list data loads', () => {
+    let firstPolicyID: string;
     beforeEach(() => {
       reactTestingLibrary.act(() => {
         history.push('/policy');
-      });
-      reactTestingLibrary.act(() => {
-        const policyListData = mockPolicyResultList({ total: 3 });
-        const action: AppAction = {
-          type: 'serverReturnedPolicyListData',
-          payload: {
-            policyItems: policyListData.items,
-            total: policyListData.total,
-            pageSize: policyListData.perPage,
-            pageIndex: policyListData.page,
-          },
-        };
-        store.dispatch(action);
+        reactTestingLibrary.act(() => {
+          const policyListData = mockPolicyResultList({ total: 3 });
+          firstPolicyID = policyListData.items[0].id;
+          const action: AppAction = {
+            type: 'serverReturnedPolicyListData',
+            payload: {
+              policyItems: policyListData.items,
+              total: policyListData.total,
+              pageSize: policyListData.perPage,
+              pageIndex: policyListData.page,
+            },
+          };
+          store.dispatch(action);
+        });
       });
     });
     it('should display rows in the table', async () => {
       const renderResult = render();
       const rows = await renderResult.findAllByRole('row');
       expect(rows).toHaveLength(4);
+    });
+    it('should display policy name value as a link', async () => {
+      const renderResult = render();
+      const policyNameLink = (await renderResult.findAllByTestId('policyNameLink'))[0];
+      expect(policyNameLink).not.toBeNull();
+      expect(policyNameLink.getAttribute('href')).toContain(`policy/${firstPolicyID}`);
     });
   });
 });
