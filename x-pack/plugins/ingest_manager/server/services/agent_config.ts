@@ -83,10 +83,7 @@ class AgentConfigService {
       return this.create(soClient, newDefaultAgentConfig);
     }
 
-    return {
-      id: configs.saved_objects[0].id,
-      ...configs.saved_objects[0].attributes,
-    };
+    return configs.saved_objects[0].attributes;
   }
 
   public async create(
@@ -109,10 +106,7 @@ class AgentConfigService {
       await this.triggerAgentConfigUpdatedEvent(soClient, 'created', newSo.id);
     }
 
-    return {
-      id: newSo.id,
-      ...newSo.attributes,
-    };
+    return newSo.attributes;
   }
 
   public async get(
@@ -129,10 +123,7 @@ class AgentConfigService {
       throw new Error(agentConfigSO.error.message);
     }
 
-    const agentConfig: AgentConfig = {
-      id: agentConfigSO.id,
-      ...agentConfigSO.attributes,
-    };
+    const agentConfig = agentConfigSO.attributes;
 
     if (withDatasources) {
       agentConfig.datasources =
@@ -165,12 +156,9 @@ class AgentConfigService {
     });
 
     return {
-      items: agentConfigs.saved_objects.map<AgentConfig>((agentConfigSO) => {
-        return {
-          id: agentConfigSO.id,
-          ...agentConfigSO.attributes,
-        };
-      }),
+      items: agentConfigs.saved_objects.map<AgentConfig>(
+        (agentConfigSO) => agentConfigSO.attributes
+      ),
       total: agentConfigs.total,
       page,
       perPage,
