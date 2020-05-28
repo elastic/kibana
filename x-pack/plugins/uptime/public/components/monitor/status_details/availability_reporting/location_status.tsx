@@ -7,6 +7,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import { TagLabel } from './tag_label';
+import { StatusTag } from './location_status_tags';
 
 const TimeStampSpan = styled.span`
   display: inline-block;
@@ -14,13 +15,17 @@ const TimeStampSpan = styled.span`
   white-space: nowrap;
 `;
 
-export const LocationAvailability = ({ locationStatus }) => {
+interface Props {
+  locationStatus: StatusTag;
+}
+
+export const LocationAvailability: React.FC<Props> = ({ locationStatus }) => {
   return (
     <EuiFlexGroup>
-      <EuiFlexItem style={{ flexBasis: '30%' }}>
+      <EuiFlexItem grow={2}>
         <TagLabel item={locationStatus} />
       </EuiFlexItem>
-      <EuiFlexItem>99.99%</EuiFlexItem>
+      <EuiFlexItem style={{}}>{locationStatus.availability.toFixed(2)}%</EuiFlexItem>
       <EuiFlexItem>
         <TimeStampSpan>
           <EuiText color="subdued">{locationStatus.timestamp}</EuiText>

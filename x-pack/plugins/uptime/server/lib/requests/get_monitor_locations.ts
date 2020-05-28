@@ -70,6 +70,18 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
                 _source: ['monitor', 'summary', 'observer', '@timestamp'],
               },
             },
+            downs: {
+              sum: {
+                field: 'summary.down',
+                missing: 0,
+              },
+            },
+            ups: {
+              sum: {
+                field: 'summary.up',
+                missing: 0,
+              },
+            },
           },
         },
       },
@@ -99,10 +111,17 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
     }
   };
 
+  let totalUps = 0;
+  let totalDowns = 0;
+
   const monLocs: MonitorLocation[] = [];
-  locations.forEach((loc: any) => {
-    const mostRecentLocation = loc.most_recent.hits.hits[0]._source;
+  locations.forEach(({ most_recent: mostRecent, ups, downs }: any) => {
+    const mostRecentLocation = mostRecent.hits.hits[0]._source;
+    totalUps += ups.value;
+    totalDowns += downs.value;
     const location: MonitorLocation = {
+      ups: ups.value,
+      downs: downs.value,
       summary: mostRecentLocation?.summary,
       geo: getGeo(mostRecentLocation?.observer?.geo),
       timestamp: mostRecentLocation['@timestamp'],
@@ -113,5 +132,7 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
   return {
     monitorId,
     locations: monLocs,
+    ups: totalUps,
+    downs: totalDowns,
   };
 };

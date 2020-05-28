@@ -11,13 +11,19 @@ export const MonitorLocationType = t.partial({
   summary: SummaryType,
   geo: CheckGeoType,
   timestamp: t.string,
+  ups: t.number,
+  downs: t.number,
 });
 
 // Typescript type for type checking
 export type MonitorLocation = t.TypeOf<typeof MonitorLocationType>;
 
 export const MonitorLocationsType = t.intersection([
-  t.type({ monitorId: t.string }),
+  t.type({
+    monitorId: t.string,
+    ups: t.number,
+    downs: t.number,
+  }),
   t.partial({ locations: t.array(MonitorLocationType) }),
 ]);
 export type MonitorLocations = t.TypeOf<typeof MonitorLocationsType>;

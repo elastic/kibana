@@ -79,7 +79,11 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
     <EuiErrorBoundary>
       <FlexGroup wrap={true} gutterSize="none" justifyContent="flexEnd">
         <EuiFlexItemTags>
-          <LocationStatusTags locations={monitorLocations?.locations || []} />
+          <LocationStatusTags
+            locations={monitorLocations?.locations || []}
+            ups={monitorLocations?.ups ?? 0}
+            downs={monitorLocations?.downs ?? 0}
+          />
         </EuiFlexItemTags>
         <EuiHideFor sizes={['xs']}>
           <EuiFlexItem grow={false}>

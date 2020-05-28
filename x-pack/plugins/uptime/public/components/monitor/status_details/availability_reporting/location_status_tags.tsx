@@ -29,21 +29,26 @@ const OtherLocationsDiv = styled.div`
 
 interface Props {
   locations: MonitorLocation[];
+  ups: number;
+  downs: number;
 }
 
 export interface StatusTag {
   label: string;
   timestamp: number;
   color: string;
+  availability: number;
 }
 
-export const LocationStatusTags = ({ locations }: Props) => {
+export const LocationStatusTags = ({ locations, ups, downs }: Props) => {
   const {
     colors: { gray, danger },
   } = useContext(UptimeThemeContext);
 
   const allLocations: StatusTag[] = [];
   const prevLocal: string = moment.locale() ?? 'en';
+  const totalUps = 0;
+  const totalDowns = 0;
 
   const shortLocale = moment.locale(SHORT_TS_LOCALE) === SHORT_TS_LOCALE;
   if (!shortLocale) {
@@ -55,6 +60,7 @@ export const LocationStatusTags = ({ locations }: Props) => {
       label: item.geo.name,
       timestamp: moment(new Date(item.timestamp).valueOf()).fromNow(),
       color: item.summary.down === 0 ? gray : danger,
+      availability: (item.ups / (item.ups + item.downs)) * 100,
     });
   });
 
@@ -69,13 +75,11 @@ export const LocationStatusTags = ({ locations }: Props) => {
   return (
     <>
       <TagContainer>
-        <AvailabilityReporting />
+        <AvailabilityReporting ups={ups} downs={downs} />
         <EuiSpacer size="s" />
-        <span>
-          {allLocations.map((item, ind) => (
-            <LocationAvailability locationStatus={item} key={ind} />
-          ))}
-        </span>
+        {allLocations.map((item, ind) => (
+          <LocationAvailability locationStatus={item} key={ind} />
+        ))}
       </TagContainer>
       {locations.length > 7 && (
         <OtherLocationsDiv>

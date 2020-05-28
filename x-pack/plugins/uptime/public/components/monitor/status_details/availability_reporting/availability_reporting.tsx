@@ -7,21 +7,29 @@
 import React from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { StatusTag } from './location_status_tags';
 
 const LastCheck = styled(EuiFlexItem)`
   white-space: nowrap;
 `;
 
-export const AvailabilityReporting: React.FC = () => {
+interface Props {
+  ups: number;
+  downs: number;
+}
+
+export const AvailabilityReporting: React.FC<Props> = ({ ups, downs }) => {
+  const availability = (ups / (ups + downs)) * 100;
+
   return (
     <>
       <EuiTitle size="s">
-        <h3>99.99% Availability</h3>
+        <h3>{availability.toFixed(2)}% Availability</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup>
-        <EuiFlexItem style={{ flexBasis: '30%' }}>Location</EuiFlexItem>
-        <EuiFlexItem>Availability</EuiFlexItem>
+        <EuiFlexItem style={{}}>Location</EuiFlexItem>
+        <EuiFlexItem style={{}}>Availability</EuiFlexItem>
         <LastCheck>Last check</LastCheck>
       </EuiFlexGroup>
     </>
