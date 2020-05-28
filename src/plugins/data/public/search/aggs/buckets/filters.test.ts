@@ -18,29 +18,22 @@
  */
 
 import { Query } from '../../../../common';
-import { coreMock, notificationServiceMock } from '../../../../../../../src/core/public/mocks';
+import { IUiSettingsClient } from 'src/core/public';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { getFiltersBucketAgg, FiltersBucketAggDependencies } from './filters';
-import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
-import { InternalStartServices } from '../../../types';
+import { getFiltersBucketAgg } from './filters';
 
 describe('Filters Agg', () => {
-  let aggTypesDependencies: FiltersBucketAggDependencies;
+  const aggTypesDependencies: { uiSettings: IUiSettingsClient } = {
+    uiSettings: coreMock.createSetup().uiSettings,
+  };
 
   beforeEach(() => {
     jest.resetAllMocks();
     const { uiSettings } = coreMock.createSetup();
-
-    aggTypesDependencies = {
-      uiSettings,
-      getInternalStartServices: () =>
-        (({
-          fieldFormats: fieldFormatsServiceMock.createStartContract(),
-          notifications: notificationServiceMock.createStartContract(),
-        } as unknown) as InternalStartServices),
-    };
+    aggTypesDependencies.uiSettings = uiSettings;
   });
 
   describe('order agg editor UI', () => {
@@ -71,7 +64,6 @@ describe('Filters Agg', () => {
         ],
         {
           typesRegistry: mockAggTypesRegistry([getFiltersBucketAgg(aggTypesDependencies)]),
-          fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
         }
       );
     };
@@ -95,7 +87,8 @@ describe('Filters Agg', () => {
         });
 
         const { [BUCKET_TYPES.FILTERS]: params } = aggConfigs.aggs[0].toDsl();
-        expect(Object.values(params.filters).map((v: any) => v.bool.must)).toMatchInlineSnapshot(`
+        expect(Object.values(params.filters).map((v: any) => v.query.bool.must))
+          .toMatchInlineSnapshot(`
           Array [
             Array [
               Object {
@@ -133,7 +126,8 @@ describe('Filters Agg', () => {
         });
 
         const { [BUCKET_TYPES.FILTERS]: params } = aggConfigs.aggs[0].toDsl();
-        expect(Object.values(params.filters).map((v: any) => v.bool.filter)).toMatchInlineSnapshot(`
+        expect(Object.values(params.filters).map((v: any) => v.query.bool.filter))
+          .toMatchInlineSnapshot(`
           Array [
             Array [
               Object {
@@ -193,7 +187,8 @@ describe('Filters Agg', () => {
         });
 
         const { [BUCKET_TYPES.FILTERS]: params } = aggConfigs.aggs[0].toDsl();
-        expect(Object.values(params.filters).map((v: any) => v.bool.filter)).toMatchInlineSnapshot(`
+        expect(Object.values(params.filters).map((v: any) => v.query.bool.filter))
+          .toMatchInlineSnapshot(`
           Array [
             Array [
               Object {
@@ -236,7 +231,8 @@ describe('Filters Agg', () => {
         });
 
         const { [BUCKET_TYPES.FILTERS]: params } = aggConfigs.aggs[0].toDsl();
-        expect(Object.values(params.filters).map((v: any) => v.bool.filter)).toMatchInlineSnapshot(`
+        expect(Object.values(params.filters).map((v: any) => v.query.bool.filter))
+          .toMatchInlineSnapshot(`
           Array [
             Array [
               Object {
