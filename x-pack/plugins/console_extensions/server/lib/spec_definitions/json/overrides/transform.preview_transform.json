@@ -1,19 +1,15 @@
 {
   "transform.preview_transform": {
     "data_autocomplete_rules": {
-      "source": {
+      "description": "",
+      "dest": {
         "__template": {
-          "index": "SOURCE_INDEX_NAME"
+          "index": "DESTINATION_INDEX_NAME"
         },
-        "index": "",
-        "query": {
-          "__scope_link": "GLOBAL.query"
-       }
+        "index": "DESTINATION_INDEX_NAME",
+        "pipeline": ""
       },
-      "settings": {
-        "docs_per_second": null,
-        "max_page_search_size": 500
-      },
+      "frequency": "1m",
       "pivot": {
         "group_by": {
           "__template": {
@@ -26,6 +22,32 @@
             "NAME": {}
           },
           "__scope_link": "GLOBAL.aggregations"
+        }
+      },
+      "settings": {
+        "__template": {
+          "docs_per_second": null,
+          "max_page_search_size": 500
+        }
+      },
+      "source": {
+        "__template": {
+          "index": "SOURCE_INDEX_NAME"
+        },
+        "index": "SOURCE_INDEX_NAME",
+        "query": {
+          "__scope_link": "GLOBAL.query"
+        }
+      },
+      "sync": {
+        "__template": {
+          "time": {
+            "field": ""
+          }
+        },
+        "time": {
+          "field": "",
+          "delay": "60s"
         }
       }
     }
