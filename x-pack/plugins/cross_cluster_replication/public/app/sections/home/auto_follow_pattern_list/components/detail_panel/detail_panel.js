@@ -31,6 +31,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { routing } from '../../../../../services/routing';
 import {
   AutoFollowPatternIndicesPreview,
   AutoFollowPatternActionMenu,
@@ -296,7 +297,12 @@ export class DetailPanel extends Component {
 
         <EuiSpacer size="l" />
 
-        <EuiLink href={indexManagementUri} data-test-subj="viewIndexManagementLink">
+        <EuiLink
+          href={routing._reactRouter.getUrlForApp('management', {
+            path: `data/index_management${indexManagementUri}`,
+          })}
+          data-test-subj="viewIndexManagementLink"
+        >
           <FormattedMessage
             id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.viewIndicesLink"
             defaultMessage="View your follower indices in Index Management"
