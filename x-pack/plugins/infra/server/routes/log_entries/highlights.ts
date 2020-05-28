@@ -79,11 +79,21 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
 
         return response.ok({
           body: logEntriesHighlightsResponseRT.encode({
-            data: entriesPerHighlightTerm.map((entries) => ({
-              entries,
-              topCursor: entries[0].cursor,
-              bottomCursor: entries[entries.length - 1].cursor,
-            })),
+            data: entriesPerHighlightTerm.map((entries) => {
+              if (entries.length > 0) {
+                return {
+                  entries,
+                  topCursor: entries[0].cursor,
+                  bottomCursor: entries[entries.length - 1].cursor,
+                };
+              } else {
+                return {
+                  entries,
+                  topCursor: null,
+                  bottomCursor: null,
+                };
+              }
+            }),
           }),
         });
       } catch (error) {

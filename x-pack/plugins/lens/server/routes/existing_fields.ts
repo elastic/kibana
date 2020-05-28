@@ -117,7 +117,7 @@ async function fetchFieldExistence({
     fromDate,
     toDate,
     dslQuery,
-    client: context.core.elasticsearch.dataClient,
+    client: context.core.elasticsearch.legacy.client,
     index: indexPatternTitle,
     timeFieldName: timeFieldName || indexPattern.attributes.timeFieldName,
     fields,
@@ -131,7 +131,7 @@ async function fetchFieldExistence({
 
 async function fetchIndexPatternDefinition(indexPatternId: string, context: RequestHandlerContext) {
   const savedObjectsClient = context.core.savedObjects.client;
-  const requestClient = context.core.elasticsearch.dataClient;
+  const requestClient = context.core.elasticsearch.legacy.client;
   const indexPattern = await savedObjectsClient.get<IndexPatternAttributes>(
     'index-pattern',
     indexPatternId
