@@ -355,7 +355,7 @@
     "tinycolor2": "1.4.1",
     "tinymath": "1.2.1",
     "topojson-client": "3.0.0",
-    "tslib": "^1.9.3",
+    "tslib": "^2.0.0",
     "turf": "3.0.14",
     "typescript-fsa": "^3.0.0",
     "typescript-fsa-reducers": "^1.2.1",

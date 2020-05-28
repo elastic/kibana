@@ -70,6 +70,6 @@
     "write-pkg": "^4.0.0"
   },
   "dependencies": {
-    "tslib": "^1.9.3"
+    "tslib": "^2.0.0"
   }
 }
