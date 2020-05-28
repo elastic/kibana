@@ -1,0 +1,16 @@
+{
+  "searchable_snapshots.clear_cache": {
+    "data_autocomplete_rules": {
+        "ignore_unavailable": "__flag__",
+        "allow_no_indices": "__flag__",
+        "expand_wildcards": [
+          "open",
+          "closed",
+          "none",
+          "all"
+        ],
+        "index": []
+    }
+  }
+}
+

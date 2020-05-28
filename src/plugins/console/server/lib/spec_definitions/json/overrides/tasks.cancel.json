@@ -1,0 +1,10 @@
+{
+  "tasks.cancel": {
+    "data_autocomplete_rules": {
+      "nodes": [],
+      "actions": [],
+      "parent_task_id": "",
+      "wait_for_completion": "__flag__"
+    }
+  }
+}

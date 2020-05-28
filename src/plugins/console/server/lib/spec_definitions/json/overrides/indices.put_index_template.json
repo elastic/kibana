@@ -1,0 +1,9 @@
+{
+  "indices.put_index_template": {
+    "data_autocomplete_rules": {
+      "create": "__flag__",
+      "cause": "",
+      "master_timeout": ""
+    }
+  }
+}
