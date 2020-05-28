@@ -17,7 +17,6 @@ import {
   VECTOR_STYLES,
   STYLE_TYPE,
 } from '../../../../common/constants';
-// @ts-ignore
 import { COLOR_GRADIENTS } from '../../styles/color_utils';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
