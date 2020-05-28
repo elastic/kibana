@@ -45,10 +45,6 @@ beforeEach(async () => {
 });
 
 describe('authorized_user_pre_routing', function () {
-  it('should return badRequest when license is undefined', async function () {});
-
-  it(`should return with badRequest when license isn't available`, async function () {});
-
   it('should return from handler with null user when security is disabled', async function () {
     const mockSetupDeps = ({
       ...(await mockCore.getPluginSetupDeps()),
