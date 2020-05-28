@@ -5,28 +5,28 @@
  */
 
 import * as rt from 'io-ts';
-import Boom from 'boom';
+// import Boom from 'boom';
 import { createValidationFunction } from '../../../common/runtime_types';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../lib/alerting/metric_threshold/types';
 import { previewMetricThresholdAlert } from '../../lib/alerting/metric_threshold/preview_metric_threshold_alert';
 import { InfraBackendLibs } from '../../lib/infra_types';
 
-const alertPreviewRequestParamsRT = rt.intersection([
+export const INFRA_ALERT_PREVIEW_PATH = '/api/infra/alerting/preview';
+
+export const alertPreviewRequestParamsRT = rt.intersection([
   rt.partial({
     sourceId: rt.string,
+    groupBy: rt.union([rt.string, rt.array(rt.string), rt.undefined]),
+    filterQuery: rt.union([rt.string, rt.undefined]),
   }),
   rt.type({
-    lookback: rt.union([rt.literal('h'), rt.literal('d'), rt.literal('w'), rt.literal('m')]),
-    params: rt.type({
-      groupBy: rt.union([rt.string, rt.array(rt.string), rt.undefined]),
-      filterQuery: rt.union([rt.string, rt.undefined]),
-      criteria: rt.array(rt.any),
-    }),
+    lookback: rt.union([rt.literal('h'), rt.literal('d'), rt.literal('w'), rt.literal('M')]),
+    criteria: rt.array(rt.any),
     alertType: rt.literal(METRIC_THRESHOLD_ALERT_TYPE_ID),
   }),
 ]);
 
-const alertPreviewSuccessResponsePayloadRT = rt.type({
+export const alertPreviewSuccessResponsePayloadRT = rt.type({
   numberOfGroups: rt.number,
   resultTotals: rt.type({
     fired: rt.number,
@@ -39,17 +39,18 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
   const { callWithRequest } = framework;
   framework.registerRoute(
     {
-      method: 'get',
-      path: '/api/infra/alerting/preview',
+      method: 'post',
+      path: INFRA_ALERT_PREVIEW_PATH,
       validate: {
-        params: createValidationFunction(alertPreviewRequestParamsRT),
+        body: createValidationFunction(alertPreviewRequestParamsRT),
       },
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
-      const { params, lookback, sourceId } = request.params;
+      const { criteria, groupBy, filterQuery, lookback, sourceId } = request.body;
 
-      const callCluster = (endpoint: string, { body, ...opts }: Record<string, any>) =>
-        callWithRequest(requestContext, endpoint, { query: { body }, ...opts });
+      const callCluster = (endpoint: string, opts: Record<string, any>) => {
+        return callWithRequest(requestContext, endpoint, opts);
+      };
 
       const source = await sources.getSourceConfiguration(
         requestContext.core.savedObjects.client,
@@ -59,7 +60,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
       try {
         const previewResult = await previewMetricThresholdAlert({
           callCluster,
-          params,
+          params: { criteria, groupBy, filterQuery },
           lookback,
           config: source.configuration,
         });
@@ -85,9 +86,9 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
           }),
         });
       } catch (error) {
-        if (Boom.isBoom(error)) {
-          throw error;
-        }
+        // if (Boom.isBoom(error)) {
+        //   throw error;
+        // }
 
         return response.customError({
           statusCode: error.statusCode ?? 500,

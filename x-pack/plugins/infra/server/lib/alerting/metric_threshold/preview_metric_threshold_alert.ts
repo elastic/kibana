@@ -19,7 +19,7 @@ interface PreviewMetricThresholdAlertParams {
     filterQuery: string | undefined;
   };
   config: InfraSource['configuration'];
-  lookback: 'h' | 'd' | 'w' | 'm';
+  lookback: 'h' | 'd' | 'w' | 'M';
 }
 
 export const previewMetricThresholdAlert: (
@@ -51,11 +51,11 @@ export const previewMetricThresholdAlert: (
     }
 
     const numberOfBuckets = first(alertResults)[group].shouldFire.length;
-
     // Count the number of buckets that fired for every alert condition
     return [...Array(numberOfBuckets)].reduce(
       (totalFired, _, i) =>
-        totalFired + alertResults.every((alertResult) => alertResult[group].shouldFire[i]) ? 1 : 0,
+        totalFired +
+        (alertResults.every((alertResult) => alertResult[group].shouldFire[i]) ? 1 : 0),
       0
     );
   });
