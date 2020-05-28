@@ -2,6 +2,10 @@
 [[uptime-overview]]
 == Elastic Uptime overview
 
+++++
+<titleabbrev>Overview</titleabbrev>
+++++
+
 Elastic Uptime allows you to monitor the availability and response times of applications and services in real time and to detect problems before they affect users.
 
 Elastic Uptime can help you to understand uptime and response time characteristics for your services and applications.
