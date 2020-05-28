@@ -6,7 +6,7 @@
 
 import { RegistryPackage } from '../../../types';
 import * as Registry from '../registry';
-import { cacheHas } from '../registry/cache';
+import { cacheHas, getCacheKey } from '../registry/cache';
 
 // paths from RegistryPackage are routes to the assets on EPR
 // e.g. `/package/nginx/1.2.0/dataset/access/fields/fields.yml`
@@ -57,8 +57,10 @@ export async function getAssetsData(
   datasetName?: string
 ): Promise<Registry.ArchiveEntry[]> {
   // TODO: Needs to be called to fill the cache but should not be required
-  const pkgkey = packageInfo.name + '-' + packageInfo.version;
-  if (!cacheHas(pkgkey)) await Registry.getArchiveInfo(packageInfo.name, packageInfo.version);
+  const pkgkey = getCacheKey(packageInfo.name + '-' + packageInfo.version);
+  if (!cacheHas(pkgkey)) {
+    await Registry.getArchiveInfo(packageInfo.name, packageInfo.version);
+  }
 
   // Gather all asset data
   const assets = getAssets(packageInfo, filter, datasetName);
