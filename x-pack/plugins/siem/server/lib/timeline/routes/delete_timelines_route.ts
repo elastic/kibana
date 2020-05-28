@@ -36,21 +36,19 @@ export const deleteTimelinesRoute = (
       const frameworkRequest = await buildFrameworkRequest(context, security, request);
       try {
         const siemResponse = buildSiemResponse(response);
-        const { timelines, error } = await getTimelines(frameworkRequest, ids);
+        const { timeline: timelines, error } = await getTimelines(frameworkRequest, ids);
 
         if (timelines != null) {
           const existingTimelineIds = timelines.map((timeline) => timeline.savedObjectId);
-          if (existingTimelineIds.length > 0) {
-            await deleteTimeline(frameworkRequest, existingTimelineIds);
-            return response.ok({
-              body: error ?? `${existingTimelineIds.join(', ')} deleted`,
-            });
-          } else {
-            return siemResponse.error({
-              body: error,
-              statusCode: 404,
-            });
-          }
+          await deleteTimeline(frameworkRequest, existingTimelineIds);
+          return response.ok({
+            body: error ?? `${existingTimelineIds.join(', ')} deleted`,
+          });
+        } else {
+          return siemResponse.error({
+            body: error,
+            statusCode: 404,
+          });
         }
       } catch (err) {
         const error = transformError(err);
