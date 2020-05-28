@@ -22,7 +22,7 @@ export const alertDetailsHandlerWrapper = function (
   ) => {
     try {
       const alertId = AlertId.fromEncoded(req.params.id);
-      const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('get', {
+      const response = (await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('get', {
         index: alertId.index,
         id: alertId.id,
       })) as GetResponse<AlertEvent>;
