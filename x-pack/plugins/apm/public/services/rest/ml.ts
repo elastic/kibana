@@ -8,12 +8,12 @@ import { HttpSetup } from 'kibana/public';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
-  TRANSACTION_TYPE
+  TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import {
   getMlJobId,
   getMlPrefix,
-  encodeForMlApi
+  encodeForMlApi,
 } from '../../../common/ml_job_constants';
 import { callApi } from './callApi';
 import { ESFilter } from '../../../typings/elasticsearch';
@@ -39,7 +39,7 @@ interface StartedMLJobApiResponse {
 async function getTransactionIndices(http: HttpSetup) {
   const indices = await callApmApi({
     method: 'GET',
-    pathname: `/api/apm/settings/apm-indices`
+    pathname: `/api/apm/settings/apm-indices`,
   });
   return indices['apm_oss.transactionIndices'];
 }
@@ -47,7 +47,7 @@ async function getTransactionIndices(http: HttpSetup) {
 export async function startMLJob({
   serviceName,
   transactionType,
-  http
+  http,
 }: {
   serviceName: string;
   transactionType: string;
@@ -57,12 +57,12 @@ export async function startMLJob({
   const groups = [
     'apm',
     encodeForMlApi(serviceName),
-    encodeForMlApi(transactionType)
+    encodeForMlApi(transactionType),
   ];
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [PROCESSOR_EVENT]: 'transaction' } },
-    { term: { [TRANSACTION_TYPE]: transactionType } }
+    { term: { [TRANSACTION_TYPE]: transactionType } },
   ];
   return callApi<StartedMLJobApiResponse>(http, {
     method: 'POST',
@@ -74,10 +74,10 @@ export async function startMLJob({
       startDatafeed: true,
       query: {
         bool: {
-          filter
-        }
-      }
-    }
+          filter,
+        },
+      },
+    },
   });
 }
 
@@ -94,7 +94,7 @@ export type MLError = Error & { body?: { message?: string } };
 export async function getHasMLJob({
   serviceName,
   transactionType,
-  http
+  http,
 }: {
   serviceName: string;
   transactionType: string;
@@ -106,7 +106,7 @@ export async function getHasMLJob({
       pathname: `/api/ml/anomaly_detectors/${getMlJobId(
         serviceName,
         transactionType
-      )}`
+      )}`,
     });
     return true;
   } catch (error) {

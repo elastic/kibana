@@ -466,7 +466,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       newTimelineModel,
     },
   }))
-  .case(showCallOutUnauthorizedMsg, state => ({
+  .case(showCallOutUnauthorizedMsg, (state) => ({
     ...state,
     showCallOutUnauthorizedMsg: true,
   }))

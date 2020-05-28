@@ -15,12 +15,16 @@ import {
   deleteComments,
   deleteConfiguration,
   getConfiguration,
+  getServiceNowConnector,
 } from '../../../../common/lib/utils';
+
+import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const actionsRemover = new ActionsRemover(supertest);
 
   describe('get_all_user_actions', () => {
     afterEach(async () => {
@@ -28,6 +32,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteComments(es);
       await deleteConfiguration(es);
       await deleteCasesUserActions(es);
+      await actionsRemover.removeAll();
     });
 
     it(`on new case, user action: 'create' should be called with actionFields: ['description', 'status', 'tags', 'title']`, async () => {
@@ -244,14 +249,11 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send(postCommentReq);
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
-      await supertest
-        .patch(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send({
-          id: patchedCase.comments[0].id,
-          version: patchedCase.comments[0].version,
-          comment: newComment,
-        });
+      await supertest.patch(`${CASES_URL}/${postedCase.id}/comments`).set('kbn-xsrf', 'true').send({
+        id: patchedCase.comments[0].id,
+        version: patchedCase.comments[0].version,
+        comment: newComment,
+      });
 
       const { body } = await supertest
         .get(`${CASES_URL}/${postedCase.id}/user_actions`)
@@ -267,11 +269,20 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it(`on new push to service, user action: 'push-to-service' should be called with actionFields: ['pushed']`, async () => {
+      const { body: connector } = await supertest
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'true')
+        .send(getServiceNowConnector())
+        .expect(200);
+
+      actionsRemover.add('default', connector.id, 'action', 'actions');
+
       const { body: configure } = await supertest
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
-        .send(getConfiguration())
+        .send(getConfiguration(connector.id))
         .expect(200);
+
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')

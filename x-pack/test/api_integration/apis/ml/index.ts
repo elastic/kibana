@@ -6,11 +6,11 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('Machine Learning', function() {
+  describe('Machine Learning', function () {
     this.tags(['mlqa']);
 
     before(async () => {
@@ -23,10 +23,13 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.cleanMlRoles();
 
       await ml.testResources.deleteIndexPattern('kibana_sample_data_logs');
+      await ml.testResources.deleteIndexPattern('ft_farequote');
 
       await esArchiver.unload('ml/ecommerce');
       await esArchiver.unload('ml/categorization');
       await esArchiver.unload('ml/sample_logs');
+      await esArchiver.unload('ml/farequote');
+      await esArchiver.unload('ml/bm_classification');
 
       await ml.testResources.resetKibanaTimeZone();
     });

@@ -90,7 +90,7 @@ describe('Stat Items Component', () => {
         </ThemeProvider>
       ),
     ],
-  ])('disable charts', wrapper => {
+  ])('disable charts', (wrapper) => {
     test('should render titles', () => {
       expect(wrapper.find('[data-test-subj="stat-title"]')).toBeTruthy();
     });
@@ -248,7 +248,7 @@ describe('useKpiMatrixStatus', () => {
 
     return (
       <div>
-        {statItemsProps.map(mappedStatItemProps => {
+        {statItemsProps.map((mappedStatItemProps) => {
           return <MockChildComponent {...mappedStatItemProps} />;
         })}
       </div>

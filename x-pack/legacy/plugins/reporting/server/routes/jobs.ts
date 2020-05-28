@@ -7,17 +7,11 @@
 import Boom from 'boom';
 import { ResponseObject } from 'hapi';
 import { Legacy } from 'kibana';
+import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import {
-  JobDocOutput,
-  JobSource,
-  ListQuery,
-  Logger,
-  ReportingResponseToolkit,
-  ServerFacade,
-} from '../../types';
+import { LevelLogger as Logger } from '../lib';
 import { jobsQueryFactory } from '../lib/jobs_query';
-import { ReportingCore, ReportingSetupDeps } from '../types';
+import { JobDocOutput, JobSource, ReportingSetupDeps, ServerFacade } from '../types';
 import {
   deleteJobResponseHandlerFactory,
   downloadJobResponseHandlerFactory,
@@ -28,7 +22,13 @@ import {
   getRouteConfigFactoryDownloadPre,
   getRouteConfigFactoryManagementPre,
 } from './lib/route_config_factories';
+import { ReportingResponseToolkit } from './types';
 
+interface ListQuery {
+  page: string;
+  size: string;
+  ids?: string; // optional field forbids us from extending RequestQuery
+}
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
 function isResponse(response: Boom<null> | ResponseObject): response is ResponseObject {

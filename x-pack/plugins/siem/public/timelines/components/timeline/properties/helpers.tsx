@@ -95,7 +95,7 @@ export const Description = React.memo<DescriptionProps>(
           aria-label={i18n.TIMELINE_DESCRIPTION}
           data-test-subj="timeline-description"
           fullWidth={true}
-          onChange={e => updateDescription({ id: timelineId, description: e.target.value })}
+          onChange={(e) => updateDescription({ id: timelineId, description: e.target.value })}
           placeholder={i18n.DESCRIPTION}
           spellCheck={true}
           value={description}
@@ -117,7 +117,7 @@ export const Name = React.memo<NameProps>(({ timelineId, title, updateTitle }) =
     <NameField
       aria-label={i18n.TIMELINE_TITLE}
       data-test-subj="timeline-title"
-      onChange={e => updateTitle({ id: timelineId, title: e.target.value })}
+      onChange={(e) => updateTitle({ id: timelineId, title: e.target.value })}
       placeholder={i18n.UNTITLED_TIMELINE}
       spellCheck={true}
       value={title}

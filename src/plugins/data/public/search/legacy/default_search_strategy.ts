@@ -25,7 +25,7 @@ import { SearchStrategyProvider, SearchStrategySearchParams } from './types';
 export const defaultSearchStrategy: SearchStrategyProvider = {
   id: 'default',
 
-  search: params => {
+  search: (params) => {
     return msearch(params);
   },
 };

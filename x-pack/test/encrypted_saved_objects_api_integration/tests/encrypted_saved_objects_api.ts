@@ -8,12 +8,13 @@ import expect from '@kbn/expect';
 import { SavedObject } from 'src/core/server';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const randomness = getService('randomness');
   const supertest = getService('supertest');
 
   const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';
+  const HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE = 'hidden-saved-object-with-secret';
   const SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE =
     'saved-object-with-secret-and-multiple-spaces';
   const SAVED_OBJECT_WITHOUT_SECRET_TYPE = 'saved-object-without-secret';
@@ -438,7 +439,7 @@ export default function({ getService }: FtrProviderContext) {
     afterEach(async () => {
       await es.deleteByQuery({
         index: '.kibana',
-        q: `type:${SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE} OR type:${SAVED_OBJECT_WITHOUT_SECRET_TYPE}`,
+        q: `type:${SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE} OR type:${SAVED_OBJECT_WITHOUT_SECRET_TYPE}`,
         refresh: true,
       });
     });
@@ -448,6 +449,14 @@ export default function({ getService }: FtrProviderContext) {
         runTests(
           SAVED_OBJECT_WITH_SECRET_TYPE,
           () => '/api/saved_objects/',
+          (id, type) => generateRawId(id, type)
+        );
+      });
+
+      describe('hidden type with `single` namespace saved object', () => {
+        runTests(
+          HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE,
+          () => '/api/hidden_saved_objects/',
           (id, type) => generateRawId(id, type)
         );
       });
@@ -473,10 +482,7 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await supertest
-          .delete(`/api/spaces/space/${SPACE_ID}`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(204);
+        await supertest.delete(`/api/spaces/space/${SPACE_ID}`).set('kbn-xsrf', 'xxx').expect(204);
       });
 
       describe('with `single` namespace saved object', () => {

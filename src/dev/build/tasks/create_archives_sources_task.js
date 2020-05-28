@@ -24,7 +24,7 @@ export const CreateArchivesSourcesTask = {
   description: 'Creating platform-specific archive source directories',
   async run(config, log, build) {
     await Promise.all(
-      config.getTargetPlatforms().map(async platform => {
+      config.getTargetPlatforms().map(async (platform) => {
         // copy all files from generic build source directory into platform-specific build directory
         await scanCopy({
           source: build.resolvePath(),

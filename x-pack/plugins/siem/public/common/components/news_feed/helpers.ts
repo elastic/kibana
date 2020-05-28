@@ -68,7 +68,7 @@ export const getNewsItemsFromApiResponse = (response?: RawNewsApiResponse | null
 
   return response.items
     .filter((x: RawNewsApiItem | null) => x != null)
-    .map<NewsItem>(x => ({
+    .map<NewsItem>((x) => ({
       description:
         get(locale, x.description) ?? get(NEWS_FEED_FALLBACK_LANGUAGE, x.description) ?? '',
       expireOn: new Date(x.expire_on ?? ''),
