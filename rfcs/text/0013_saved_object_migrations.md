@@ -228,7 +228,7 @@ id's deterministically with e.g. UUIDv5.
       kibana node on the same version which didn't have all the plugins that
       the current node has.
 3. Migrate documents by reading from `.kibana_n` and creating documents in
-   `.kibana_n+1`. If a document already exists, ignore.
+   `.kibana_n+1`. If a document already exists, don't overwrite it and ignore.
 4. Move the `.kibana` alias to point to `.kibana_n+1` (ignore if it has
    already been moved).
 5. To prevent lost deletes in step (3) all saved object deletes will be
