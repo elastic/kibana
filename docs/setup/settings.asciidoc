@@ -216,7 +216,9 @@ on the {kib} index at startup. {kib} users still need to authenticate with
   | Enables use of interpreter in Visualize. *Default: `true`*
 
 | `kibana.defaultAppId:`
- | The default application to load. *Default: `"home"`*
+ | *deprecated* This setting is deprecated and will get removed in Kibana 8.0.
+Please use the `defaultRoute` advanced setting instead.
+The default application to load. *Default: `"home"`*
 
 | `kibana.index:`
  | {kib} uses an index in {es} to store saved searches, visualizations, and
