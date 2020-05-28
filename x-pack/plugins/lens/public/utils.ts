@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { LensFilterEvent } from './types';
 
-/** replaces the values `(empty) to empty string for proper filtering` */
+/** replaces the value `(empty) to empty string for proper filtering` */
 export const desanitizeFilterContext = (
   context: LensFilterEvent['data']
 ): LensFilterEvent['data'] => {
@@ -19,9 +19,8 @@ export const desanitizeFilterContext = (
     data: context.data.map((point) =>
       point.value === emptyTextValue
         ? {
+            ...point,
             value: '',
-            row: point.row,
-            column: point.column,
             table: {
               ...point.table,
               rows: point.table.rows.map((row, index) =>
