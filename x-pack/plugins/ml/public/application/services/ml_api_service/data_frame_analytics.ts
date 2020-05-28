@@ -40,8 +40,8 @@ export interface DeleteDataFrameAnalyticsWithIndexStatus {
 interface DeleteDataFrameAnalyticsWithIndexResponse {
   acknowledged: boolean;
   analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
-  targetIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
-  targetIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
+  destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
+  destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
 }
 
 export const dataFrameAnalytics = {
@@ -98,14 +98,14 @@ export const dataFrameAnalytics = {
       method: 'DELETE',
     });
   },
-  deleteDataFrameAnalyticsAndTargetIndex(
+  deleteDataFrameAnalyticsAndDestIndex(
     analyticsId: string,
-    deleteTargetIndex: boolean,
-    deleteIndexPattern: boolean
+    deleteDestIndex: boolean,
+    deleteDestIndexPattern: boolean
   ) {
     return http<DeleteDataFrameAnalyticsWithIndexResponse>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}`,
-      query: { deleteTargetIndex, deleteIndexPattern },
+      query: { deleteDestIndex, deleteDestIndexPattern },
       method: 'DELETE',
     });
   },

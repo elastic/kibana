@@ -22,58 +22,62 @@ export const deleteAnalytics = async (d: DataFrameAnalyticsListRow) => {
     await ml.dataFrameAnalytics.deleteDataFrameAnalytics(d.config.id);
     toastNotifications.addSuccess(
       i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsSuccessMessage', {
-        defaultMessage: 'Request to delete data frame analytics {analyticsId} acknowledged.',
+        defaultMessage: 'Request to delete data frame analytics job {analyticsId} acknowledged.',
         values: { analyticsId: d.config.id },
       })
     );
   } catch (e) {
+    const error = extractErrorMessage(e);
+
     toastNotifications.addDanger(
       i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsErrorMessage', {
         defaultMessage:
-          'An error occurred deleting the data frame analytics {analyticsId}: {error}',
-        values: { analyticsId: d.config.id, error: JSON.stringify(e) },
+          'An error occurred deleting the data frame analytics job {analyticsId}: {error}',
+        values: { analyticsId: d.config.id, error },
       })
     );
   }
   refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.REFRESH);
 };
 
-export const deleteAnalyticsAndTargetIndex = async (
+export const deleteAnalyticsAndDestIndex = async (
   d: DataFrameAnalyticsListRow,
-  deleteTargetIndex: boolean,
-  deleteTargetPattern: boolean
+  deleteDestIndex: boolean,
+  deleteDestIndexPattern: boolean
 ) => {
   const toastNotifications = getToastNotifications();
-  const destinationIndex = d.config.dest.index;
+  const destinationIndex = Array.isArray(d.config.dest.index)
+    ? d.config.dest.index[0]
+    : d.config.dest.index;
   try {
     if (isDataFrameAnalyticsFailed(d.stats.state)) {
       await ml.dataFrameAnalytics.stopDataFrameAnalytics(d.config.id, true);
     }
-    const status = await ml.dataFrameAnalytics.deleteDataFrameAnalyticsAndTargetIndex(
+    const status = await ml.dataFrameAnalytics.deleteDataFrameAnalyticsAndDestIndex(
       d.config.id,
-      deleteTargetIndex,
-      deleteTargetPattern
+      deleteDestIndex,
+      deleteDestIndexPattern
     );
     if (status.analyticsJobDeleted?.success) {
       toastNotifications.addSuccess(
         i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsSuccessMessage', {
-          defaultMessage: 'Request to delete data frame analytics {analyticsId} acknowledged.',
+          defaultMessage: 'Request to delete data frame analytics job {analyticsId} acknowledged.',
           values: { analyticsId: d.config.id },
         })
       );
     }
     if (status.analyticsJobDeleted?.error) {
-      const error = extractErrorMessage(status.targetIndexDeleted.error);
+      const error = extractErrorMessage(status.analyticsJobDeleted.error);
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsErrorMessage', {
           defaultMessage:
-            'An error occurred deleting the data frame analytics {analyticsId}: {error}',
+            'An error occurred deleting the data frame analytics job {analyticsId}: {error}',
           values: { analyticsId: d.config.id, error },
         })
       );
     }
 
-    if (status.targetIndexDeleted?.success) {
+    if (status.destIndexDeleted?.success) {
       toastNotifications.addSuccess(
         i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexSuccessMessage', {
           defaultMessage: 'Request to delete destination index {destinationIndex} acknowledged.',
@@ -81,8 +85,8 @@ export const deleteAnalyticsAndTargetIndex = async (
         })
       );
     }
-    if (status.targetIndexDeleted?.error) {
-      const error = extractErrorMessage(status.targetIndexDeleted.error);
+    if (status.destIndexDeleted?.error) {
+      const error = extractErrorMessage(status.destIndexDeleted.error);
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexErrorMessage', {
           defaultMessage:
@@ -92,7 +96,7 @@ export const deleteAnalyticsAndTargetIndex = async (
       );
     }
 
-    if (status.targetIndexPatternDeleted?.success) {
+    if (status.destIndexPatternDeleted?.success) {
       toastNotifications.addSuccess(
         i18n.translate(
           'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexPatternSuccessMessage',
@@ -103,8 +107,8 @@ export const deleteAnalyticsAndTargetIndex = async (
         )
       );
     }
-    if (status.targetIndexPatternDeleted?.error) {
-      const error = extractErrorMessage(status.targetIndexPatternDeleted.error);
+    if (status.destIndexPatternDeleted?.error) {
+      const error = extractErrorMessage(status.destIndexPatternDeleted.error);
       toastNotifications.addDanger(
         i18n.translate(
           'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexPatternErrorMessage',
@@ -116,11 +120,13 @@ export const deleteAnalyticsAndTargetIndex = async (
       );
     }
   } catch (e) {
+    const error = extractErrorMessage(e);
+
     toastNotifications.addDanger(
       i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsErrorMessage', {
         defaultMessage:
-          'An error occurred deleting the data frame analytics {analyticsId}: {error}',
-        values: { analyticsId: d.config.id, error: JSON.stringify(e) },
+          'An error occurred deleting the data frame analytics job {analyticsId}: {error}',
+        values: { analyticsId: d.config.id, error },
       })
     );
   }
@@ -138,12 +144,16 @@ export const canDeleteIndex = async (indexName: string) => {
         },
       ],
     });
+    if (!privilege) {
+      return false;
+    }
     return privilege.securityDisabled === true || privilege.has_all_requested === true;
   } catch (e) {
+    const error = extractErrorMessage(e);
     toastNotifications.addDanger(
       i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsPrivilegeErrorMessage', {
         defaultMessage: 'User does not have permission to delete index {indexName}: {error}',
-        values: { indexName, error: JSON.stringify(e) },
+        values: { indexName, error },
       })
     );
   }

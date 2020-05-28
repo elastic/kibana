@@ -7,8 +7,12 @@
 import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
 
 export const extractErrorMessage = (
-  error: CustomHttpResponseOptions<ResponseError> | undefined
+  error: CustomHttpResponseOptions<ResponseError> | undefined | string
 ): string | undefined => {
+  if (typeof error === 'string') {
+    return error;
+  }
+
   if (error?.body) {
     if (typeof error.body === 'string') {
       return error.body;

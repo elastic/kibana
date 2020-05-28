@@ -64,8 +64,8 @@ export const deleteDataFrameAnalyticsJobSchema = schema.object({
   /**
    * Analytics Destination Index
    */
-  deleteTargetIndex: schema.maybe(schema.boolean()),
-  deleteIndexPattern: schema.maybe(schema.boolean()),
+  deleteDestIndex: schema.maybe(schema.boolean()),
+  deleteDestIndexPattern: schema.maybe(schema.boolean()),
 });
 
 export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({

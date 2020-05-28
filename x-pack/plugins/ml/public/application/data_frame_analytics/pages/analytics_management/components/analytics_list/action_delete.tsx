@@ -20,7 +20,7 @@ import { IIndexPattern } from 'src/plugins/data/common';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   deleteAnalytics,
-  deleteAnalyticsAndTargetIndex,
+  deleteAnalyticsAndDestIndex,
   canDeleteIndex,
 } from '../../services/analytics_service';
 import {
@@ -29,6 +29,7 @@ import {
 } from '../../../../../capabilities/check_capabilities';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
+import { extractErrorMessage } from '../../../../../util/error_utils';
 
 interface DeleteActionProps {
   item: DataFrameAnalyticsListRow;
@@ -64,16 +65,17 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
       if (ip !== undefined) {
         setIndexPatternExists(true);
       }
-    } catch (error) {
+    } catch (e) {
       const { toasts } = notifications;
+      const error = extractErrorMessage(e);
 
       toasts.addDanger(
         i18n.translate(
           'xpack.ml.dataframe.analyticsList.errorWithCheckingIfIndexPatternExistsNotificationErrorMessage',
           {
             defaultMessage:
-              'An error occurred checking if index pattern ${indexPattern} exists: {error}',
-            values: { indexPattern: indexName, error: JSON.stringify(error) },
+              'An error occurred checking if index pattern {indexPattern} exists: {error}',
+            values: { indexPattern: indexName, error },
           }
         )
       );
@@ -85,15 +87,17 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
       if (userCanDelete) {
         setUserCanDeleteIndex(true);
       }
-    } catch (error) {
+    } catch (e) {
       const { toasts } = notifications;
+      const error = extractErrorMessage(e);
+
       toasts.addDanger(
         i18n.translate(
           'xpack.ml.dataframe.analyticsList.errorWithCheckingIfUserCanDeleteIndexNotificationErrorMessage',
           {
             defaultMessage:
-              'An error occurred checking if user can delete ${destinationIndex} exists: {error}',
-            values: { destinationIndex: indexName, error: JSON.stringify(error) },
+              'An error occurred checking if user can delete {destinationIndex}: {error}',
+            values: { destinationIndex: indexName, error },
           }
         )
       );
@@ -114,7 +118,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
     setModalVisible(false);
 
     if ((userCanDeleteIndex && deleteTargetIndex) || (userCanDeleteIndex && deleteIndexPattern)) {
-      deleteAnalyticsAndTargetIndex(
+      deleteAnalyticsAndDestIndex(
         item,
         deleteTargetIndex,
         indexPatternExists && deleteIndexPattern
