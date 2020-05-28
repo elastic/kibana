@@ -14,13 +14,13 @@ export type Setup = void;
 export type Start = void;
 
 export interface AlertingExamplePublicSetupDeps {
-  alerting: AlertingSetup;
+  alerts: AlertingSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
-  public setup(core: CoreSetup, { alerting, triggers_actions_ui }: AlertingExamplePublicSetupDeps) {
-    alerting.registerNavigation(
+  public setup(core: CoreSetup, { alerts, triggers_actions_ui }: AlertingExamplePublicSetupDeps) {
+    alerts.registerNavigation(
       'consumer-noop',
       'test.noop',
       (alert: SanitizedAlert, alertType: AlertType) => `/alert/${alert.id}`
