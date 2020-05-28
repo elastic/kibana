@@ -54,8 +54,8 @@ export type ReportingRequestPayload = GenerateExportTypePayload | JobParamPostPa
 
 export interface TimeRangeParams {
   timezone: string;
-  min: Date | string | number;
-  max: Date | string | number;
+  min: Date | string | number | null;
+  max: Date | string | number | null;
 }
 
 export interface JobParamPostPayload {
