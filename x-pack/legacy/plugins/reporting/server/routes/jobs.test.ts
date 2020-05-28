@@ -127,24 +127,6 @@ describe('GET /api/reporting/jobs/download', () => {
       );
   });
 
-  it('fails when security is not there', async () => {
-    // @ts-ignore
-    const noSecurityPlugins = ({
-      ...mockDeps,
-      security: null,
-    } as unknown) as ReportingInternalSetup;
-    registerJobInfoRoutes(core, noSecurityPlugins);
-
-    await server.start();
-
-    await supertest(httpSetup.server.listener)
-      .get('/api/reporting/jobs/download/dope')
-      .expect(401)
-      .then(({ body }) =>
-        expect(body.message).toMatchInlineSnapshot(`"Sorry, you aren't authenticated"`)
-      );
-  });
-
   it('fails on users without the appropriate role', async () => {
     // @ts-ignore
     const peasantUser = ({
@@ -270,6 +252,29 @@ describe('GET /api/reporting/jobs/download', () => {
       await server.start();
       await supertest(httpSetup.server.listener)
         .get('/api/reporting/jobs/download/dank')
+        .expect(200)
+        .expect('Content-Type', 'text/plain; charset=utf-8')
+        .expect('content-disposition', 'inline; filename="report.csv"');
+    });
+
+    it('succeeds when security is not there or disabled', async () => {
+      const hits = getCompleteHits();
+      // @ts-ignore
+      mockDeps.elasticsearch.adminClient = {
+        callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
+      };
+
+      // @ts-ignore
+      const noSecurityPlugins = ({
+        ...mockDeps,
+        security: null,
+      } as unknown) as ReportingInternalSetup;
+      registerJobInfoRoutes(core, noSecurityPlugins);
+
+      await server.start();
+
+      await supertest(httpSetup.server.listener)
+        .get('/api/reporting/jobs/download/dope')
         .expect(200)
         .expect('Content-Type', 'text/plain; charset=utf-8')
         .expect('content-disposition', 'inline; filename="report.csv"');

@@ -42,7 +42,6 @@ export async function registerJobInfoRoutes(
       const {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
-      const { username } = user;
       const {
         page: queryPage = '0',
         size: querySize = '10',
@@ -51,7 +50,7 @@ export async function registerJobInfoRoutes(
       const page = parseInt(queryPage, 10) || 0;
       const size = Math.min(100, parseInt(querySize, 10) || 10);
       const jobIds = queryIds ? queryIds.split(',') : null;
-      const results = await jobsQuery.list(jobTypes, username, page, size, jobIds);
+      const results = await jobsQuery.list(jobTypes, user, page, size, jobIds);
 
       return res.ok({
         body: results,
@@ -69,12 +68,11 @@ export async function registerJobInfoRoutes(
       validate: false,
     },
     userHandler(async (user, context, req, res) => {
-      const { username } = user;
       const {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      const count = await jobsQuery.count(jobTypes, username);
+      const count = await jobsQuery.count(jobTypes, user);
 
       return res.ok({
         body: count.toString(),
@@ -96,13 +94,12 @@ export async function registerJobInfoRoutes(
       },
     },
     userHandler(async (user, context, req, res) => {
-      const { username } = user;
       const { docId } = req.params as { docId: string };
       const {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      const result = await jobsQuery.get(username, docId, { includeContent: true });
+      const result = await jobsQuery.get(user, docId, { includeContent: true });
 
       if (!result) {
         throw Boom.notFound();
@@ -136,13 +133,12 @@ export async function registerJobInfoRoutes(
       },
     },
     userHandler(async (user, context, req, res) => {
-      const { username } = user;
       const { docId } = req.params as { docId: string };
       const {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      const result = await jobsQuery.get(username, docId);
+      const result = await jobsQuery.get(user, docId);
 
       if (!result) {
         throw Boom.notFound();
@@ -188,13 +184,12 @@ export async function registerJobInfoRoutes(
       },
     },
     userHandler(async (user, context, req, res) => {
-      const { username } = user;
       const { docId } = req.params as { docId: string };
       const {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      return downloadResponseHandler(res, jobTypes, username, { docId });
+      return downloadResponseHandler(res, jobTypes, user, { docId });
     })
   );
 
@@ -210,13 +205,12 @@ export async function registerJobInfoRoutes(
       },
     },
     userHandler(async (user, context, req, res) => {
-      const { username } = user;
       const { docId } = req.params as { docId: string };
       const {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
-      return deleteResponseHandler(res, jobTypes, username, { docId });
+      return deleteResponseHandler(res, jobTypes, user, { docId });
     })
   );
 }

@@ -5,10 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import Boom from 'boom';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { get } from 'lodash';
+import { AuthenticatedUser } from '../../../../../plugins/security/server';
 import { ReportingConfig } from '../';
 import { JobSource } from '../types';
 
@@ -39,6 +39,8 @@ interface GetOpts {
 interface CountAggResult {
   count: number;
 }
+
+const getUsername = (user: AuthenticatedUser | null) => (user ? user.username : false);
 
 export function jobsQueryFactory(
   config: ReportingConfig,
@@ -80,11 +82,12 @@ export function jobsQueryFactory(
   return {
     list(
       jobTypes: string[],
-      username: string,
+      user: AuthenticatedUser | null,
       page = 0,
       size = defaultSize,
       jobIds: string[] | null
     ) {
+      const username = getUsername(user);
       const body: QueryBody = {
         size,
         from: size * page,
@@ -108,7 +111,8 @@ export function jobsQueryFactory(
       return getHits(execQuery('search', body));
     },
 
-    count(jobTypes: string[], username: string) {
+    count(jobTypes: string[], user: AuthenticatedUser | null) {
+      const username = getUsername(user);
       const body: QueryBody = {
         query: {
           constant_score: {
@@ -127,8 +131,13 @@ export function jobsQueryFactory(
       });
     },
 
-    get(username: string, id: string, opts: GetOpts = {}): Promise<JobSource<unknown> | void> {
+    get(
+      user: AuthenticatedUser | null,
+      id: string,
+      opts: GetOpts = {}
+    ): Promise<JobSource<unknown> | void> {
       if (!id) return Promise.resolve();
+      const username = getUsername(user);
 
       const body: QueryBody = {
         query: {
@@ -160,14 +169,12 @@ export function jobsQueryFactory(
         const query = { id, index: deleteIndex };
         return callAsInternalUser('delete', query);
       } catch (error) {
-        const wrappedError = new Error(
+        throw new Error(
           i18n.translate('xpack.reporting.jobsQuery.deleteError', {
             defaultMessage: 'Could not delete the report: {error}',
             values: { error: error.message },
           })
         );
-
-        throw Boom.boomify(wrappedError, { statusCode: error.status });
       }
     },
   };

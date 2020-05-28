@@ -43,7 +43,6 @@ export function registerGenerateFromJobParams(
       },
     },
     userHandler(async (user, context, req, res) => {
-      const { username } = user;
       let jobParamsRison: string | null;
 
       if (req.body) {
@@ -84,7 +83,7 @@ export function registerGenerateFromJobParams(
       }
 
       try {
-        return await handler(username, exportType, jobParams, context, req, res);
+        return await handler(user, exportType, jobParams, context, req, res);
       } catch (err) {
         return handleError(exportType, err, res);
       }

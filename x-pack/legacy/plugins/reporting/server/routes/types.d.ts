@@ -5,10 +5,11 @@
  */
 
 import { KibanaResponseFactory, KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { AuthenticatedUser } from '../../../../../plugins/security/common/model/authenticated_user';
 import { JobDocPayload } from '../types';
 
 export type HandlerFunction = (
-  username: string,
+  user: AuthenticatedUser | null,
   exportType: string,
   jobParams: object,
   context: RequestHandlerContext,

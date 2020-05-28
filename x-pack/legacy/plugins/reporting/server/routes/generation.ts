@@ -27,7 +27,7 @@ export function registerJobGenerationRoutes(
   /*
    * Generates enqueued job details to use in responses
    */
-  const handler: HandlerFunction = async (username, exportTypeId, jobParams, context, req, res) => {
+  const handler: HandlerFunction = async (user, exportTypeId, jobParams, context, req, res) => {
     const licenseInfo = await reporting.getLicenseInfo();
     const licenseResults = licenseInfo[exportTypeId];
 
@@ -36,7 +36,7 @@ export function registerJobGenerationRoutes(
     }
 
     const enqueueJob = await reporting.getEnqueueJob();
-    const job = await enqueueJob(exportTypeId, jobParams, username, context, req);
+    const job = await enqueueJob(exportTypeId, jobParams, user, context, req);
 
     // return the queue's job information
     const jobJson = job.toJSON();

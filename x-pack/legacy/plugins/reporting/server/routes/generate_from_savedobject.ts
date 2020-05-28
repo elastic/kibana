@@ -54,8 +54,6 @@ export function registerGenerateCsvFromSavedObject(
       },
     },
     userHandler(async (user, context, req, res) => {
-      const { username } = user;
-
       /*
        * 1. Build `jobParams` object: job data that execution will need to reference in various parts of the lifecycle
        * 2. Pass the jobParams and other common params to `handleRoute`, a shared function to enqueue the job with the params
@@ -65,7 +63,7 @@ export function registerGenerateCsvFromSavedObject(
       try {
         const jobParams = getJobParamsFromRequest(req, { isImmediate: false });
         result = await handleRoute(
-          username,
+          user,
           CSV_FROM_SAVEDOBJECT_JOB_TYPE,
           jobParams,
           context,

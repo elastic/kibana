@@ -5,6 +5,7 @@
  */
 
 import { ElasticsearchServiceSetup, kibanaResponseFactory } from 'kibana/server';
+import { AuthenticatedUser } from '../../../../../../plugins/security/server';
 import { ReportingConfig } from '../../';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
 import { ExportTypesRegistry } from '../../lib/export_types_registry';
@@ -30,13 +31,13 @@ export function downloadJobResponseHandlerFactory(
   return async function jobResponseHandler(
     res: typeof kibanaResponseFactory,
     validJobTypes: string[],
-    username: string,
+    user: AuthenticatedUser | null,
     params: JobResponseHandlerParams,
     opts: JobResponseHandlerOpts = {}
   ) {
     const { docId } = params;
 
-    const doc = await jobsQuery.get(username, docId, { includeContent: !opts.excludeContent });
+    const doc = await jobsQuery.get(user, docId, { includeContent: !opts.excludeContent });
     if (!doc) {
       return res.notFound();
     }
@@ -77,11 +78,11 @@ export function deleteJobResponseHandlerFactory(
   return async function deleteJobResponseHander(
     res: typeof kibanaResponseFactory,
     validJobTypes: string[],
-    username: string,
+    user: AuthenticatedUser | null,
     params: JobResponseHandlerParams
   ) {
     const { docId } = params;
-    const doc = await jobsQuery.get(username, docId, { includeContent: false });
+    const doc = await jobsQuery.get(user, docId, { includeContent: false });
 
     if (!doc) {
       return res.notFound();
