@@ -157,13 +157,14 @@ export function TransactionOverview() {
             </EuiTitle>
             <EuiSpacer size="s" />
             <EuiCallOut
-              title="Too many unique transaction names"
+              title="Too many unique transaction names."
               color="primary"
               iconType="help"
             >
               <p>
-                It looks like there&apos;s a lot of unique transaction names.
-                This could be a sign of incorrect setup in your agent.{' '}
+                We have detected a lot of unique transaction names among your
+                transactions. This could be a sign of incorrect setup in your
+                agent.{' '}
                 <EuiLink href="#">Learn more in the documentation</EuiLink>.
               </p>
             </EuiCallOut>
