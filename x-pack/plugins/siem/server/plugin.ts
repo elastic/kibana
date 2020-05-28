@@ -59,9 +59,9 @@ export interface StartPlugins {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginSetup {}
+export interface PluginSetup { }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginStart {}
+export interface PluginStart { }
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
