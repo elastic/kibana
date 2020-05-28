@@ -26,13 +26,6 @@ export interface ResponseReceivedEvent {
   type: string;
 }
 
-export interface LoadingFinishedEvent {
-  encodedDataLength: number;
-  requestId: string;
-  shouldReportCorbBlocking: boolean;
-  timestamp: number;
-}
-
 export interface DataReceivedEvent {
   encodedDataLength: number;
   dataLength: number;

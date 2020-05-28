@@ -5,12 +5,11 @@
  */
 
 import { CiStatsReporter } from '@kbn/dev-utils';
-
+import { capturePageLoadMetrics } from '@kbn/test';
 // @ts-ignore not TS yet
 import getUrl from '../../../src/test_utils/get_url';
 
 import { FtrProviderContext } from './../functional/ftr_provider_context';
-import { capturePageLoadMetrics } from './../../../src/dev/page_load_metrics';
 
 export async function PuppeteerTestRunner({ getService }: FtrProviderContext) {
   const log = getService('log');
