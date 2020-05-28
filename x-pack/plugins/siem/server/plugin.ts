@@ -18,6 +18,7 @@ import {
 import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
+import { ListPluginSetup as ListsSetup } from '../../lists/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
@@ -55,6 +56,7 @@ export interface SetupPlugins {
   spaces?: SpacesSetup;
   taskManager: TaskManagerSetupContract;
   ml?: MlSetup;
+  lists: ListsSetup;
 }
 
 export interface StartPlugins {
@@ -217,6 +219,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       core,
       logger: this.logger,
       taskManager: plugins.taskManager,
+      lists: plugins.lists,
     });
 
     const libs = compose(core, plugins, this.context.env.mode.prod);
@@ -235,7 +238,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     if (this.exceptionsPackagerTask) {
-      this.exceptionsPackagerTask.getTaskRunner(plugins.taskManager).run();
+      this.exceptionsPackagerTask
+        .getTaskRunner({
+          taskManager: plugins.taskManager,
+        })
+        .run();
     } else {
       this.logger.debug('Exceptions Packager not available.');
     }
