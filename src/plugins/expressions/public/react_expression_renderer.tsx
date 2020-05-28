@@ -147,7 +147,7 @@ export const ReactExpressionRenderer = ({
       }
     });
     return () => subscription?.unsubscribe();
-  }, [reload$]);
+  }, [reload$, expression, ...Object.values(expressionLoaderOptions)]);
 
   // Re-fetch data automatically when the inputs change
   useShallowCompareEffect(

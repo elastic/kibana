@@ -136,6 +136,11 @@ export function InnerWorkspacePanel({
     framePublicAPI.filters,
   ]);
 
+  const autoRefreshFetch$ = useMemo(
+    () => plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$(),
+    [plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$]
+  );
+
   useEffect(() => {
     // reset expression error if component attempts to run it again
     if (expression && localState.expressionBuildError) {
@@ -225,7 +230,7 @@ export function InnerWorkspacePanel({
           className="lnsExpressionRenderer__component"
           padding="m"
           expression={expression!}
-          reload$={plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$()}
+          reload$={autoRefreshFetch$}
           onEvent={(event: ExpressionRendererEvent) => {
             if (!plugins.uiActions) {
               // ui actions not available, not handling event...
