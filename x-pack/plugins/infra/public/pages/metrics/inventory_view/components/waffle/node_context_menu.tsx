@@ -87,14 +87,13 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       return { label: '', value: '' };
     }, [nodeType, node.ip, node.id, options.fields]);
 
-    const nodeLogsMenuItemLinkProps = useLinkProps({
-      app: 'logs',
-      ...getNodeLogsUrl({
+    const nodeLogsMenuItemLinkProps = useLinkProps(
+      getNodeLogsUrl({
         nodeType,
         nodeId: node.id,
         time: currentTime,
-      }),
-    });
+      })
+    );
     const nodeDetailMenuItemLinkProps = useLinkProps({
       ...getNodeDetailUrl({
         nodeType,
