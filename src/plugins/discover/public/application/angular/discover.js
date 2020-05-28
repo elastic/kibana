@@ -870,6 +870,7 @@ function discoverController(
       if ($scope.vis.data.aggs.aggs[1]) {
         $scope.bucketInterval = $scope.vis.data.aggs.aggs[1].buckets.getInterval();
       }
+      $scope.updateTime();
     }
 
     $scope.hits = resp.hits.total;
