@@ -235,7 +235,7 @@ export interface App<HistoryLocationState = unknown> extends AppBase {
   appRoute?: string;
 }
 
-/** @internal */
+/** @public */
 export interface LegacyApp extends AppBase {
   appUrl: string;
   subUrlBase?: string;
@@ -244,11 +244,11 @@ export interface LegacyApp extends AppBase {
 }
 
 /**
- * Information about a registered {@link App | application}
+ * Public information about a registered {@link App | application}
  *
  * @public
  */
-export type AppInfo = Omit<App, 'mount' | 'updater$'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
   legacy: false;
 };
 
@@ -257,7 +257,7 @@ export type AppInfo = Omit<App, 'mount' | 'updater$'> & {
  *
  * @public
  */
-export type LegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
+export type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
   legacy: true;
 };
 
@@ -674,7 +674,7 @@ export interface ApplicationStart {
    * Applications disabled by {@link Capabilities} will not be present in the map. Applications manually disabled from
    * the client-side using an {@link AppUpdater | application updater} are present, with their status properly set as `inaccessible`.
    */
-  applications$: Observable<ReadonlyMap<string, AppInfo | LegacyAppInfo>>;
+  applications$: Observable<ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo>>;
 
   /**
    * Navigate to a given app

@@ -36,12 +36,12 @@ import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
 import {
   App,
-  AppInfo,
+  PublicAppInfo,
   AppNavLinkStatus,
   AppStatus,
   AppUpdater,
   LegacyApp,
-  LegacyAppInfo,
+  PublicLegacyAppInfo,
 } from './types';
 import { act } from 'react-dom/test-utils';
 
@@ -374,9 +374,9 @@ describe('#setup()', () => {
       setup.registerAppUpdater(statusUpdater);
 
       const start = await service.start(startDeps);
-      let latestValue: ReadonlyMap<string, AppInfo | LegacyAppInfo> = new Map<
+      let latestValue: ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo> = new Map<
         string,
-        AppInfo | LegacyAppInfo
+        PublicAppInfo | PublicLegacyAppInfo
       >();
       start.applications$.subscribe((apps) => {
         latestValue = apps;

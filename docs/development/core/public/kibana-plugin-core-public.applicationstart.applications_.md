@@ -9,7 +9,7 @@ Observable emitting the list of currently registered apps and their associated s
 <b>Signature:</b>
 
 ```typescript
-applications$: Observable<ReadonlyMap<string, AppInfo | LegacyAppInfo>>;
+applications$: Observable<ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo>>;
 ```
 
 ## Remarks

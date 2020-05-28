@@ -25,8 +25,8 @@ import {
   InternalApplicationStart,
   ApplicationStart,
   InternalApplicationSetup,
-  AppInfo,
-  LegacyAppInfo,
+  PublicAppInfo,
+  PublicLegacyAppInfo,
 } from './types';
 import { ApplicationServiceContract } from './test_types';
 
@@ -47,7 +47,7 @@ const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
   const currentAppId$ = new Subject<string | undefined>();
 
   return {
-    applications$: new BehaviorSubject<Map<string, AppInfo | LegacyAppInfo>>(new Map()),
+    applications$: new BehaviorSubject<Map<string, PublicAppInfo | PublicLegacyAppInfo>>(new Map()),
     currentAppId$: currentAppId$.asObservable(),
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
     navigateToApp: jest.fn(),
@@ -61,7 +61,7 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
   const currentAppId$ = new Subject<string | undefined>();
 
   return {
-    applications$: new BehaviorSubject<Map<string, AppInfo | LegacyAppInfo>>(new Map()),
+    applications$: new BehaviorSubject<Map<string, PublicAppInfo | PublicLegacyAppInfo>>(new Map()),
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
     currentAppId$: currentAppId$.asObservable(),
     getComponent: jest.fn(),

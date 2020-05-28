@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { AppInfo, AppNavLinkStatus, AppStatus, LegacyAppInfo } from '../../application';
+import { PublicAppInfo, AppNavLinkStatus, AppStatus, PublicLegacyAppInfo } from '../../application';
 import { toNavLink } from './to_nav_link';
 
 import { httpServiceMock } from '../../mocks';
 
-const app = (props: Partial<AppInfo> = {}): AppInfo => ({
+const app = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   id: 'some-id',
   title: 'some-title',
   status: AppStatus.accessible,
@@ -32,7 +32,7 @@ const app = (props: Partial<AppInfo> = {}): AppInfo => ({
   ...props,
 });
 
-const legacyApp = (props: Partial<LegacyAppInfo> = {}): LegacyAppInfo => ({
+const legacyApp = (props: Partial<PublicLegacyAppInfo> = {}): PublicLegacyAppInfo => ({
   appUrl: '/my-app-url',
   id: 'some-id',
   title: 'some-title',

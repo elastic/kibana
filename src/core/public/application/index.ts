@@ -22,7 +22,6 @@ export { Capabilities } from './capabilities';
 export { ScopedHistory } from './scoped_history';
 export {
   App,
-  AppInfo,
   AppBase,
   AppMount,
   AppMountDeprecated,
@@ -40,8 +39,9 @@ export {
   AppLeaveAction,
   AppLeaveDefaultAction,
   AppLeaveConfirmAction,
+  LegacyApp,
+  PublicAppInfo,
+  PublicLegacyAppInfo,
   // Internal types
   InternalApplicationStart,
-  LegacyApp,
-  LegacyAppInfo,
 } from './types';

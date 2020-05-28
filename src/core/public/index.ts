@@ -104,7 +104,7 @@ export {
   ApplicationSetup,
   ApplicationStart,
   App,
-  AppInfo,
+  PublicAppInfo,
   AppBase,
   AppMount,
   AppMountDeprecated,
@@ -122,7 +122,7 @@ export {
   AppUpdater,
   ScopedHistory,
   LegacyApp,
-  LegacyAppInfo,
+  PublicLegacyAppInfo,
 } from './application';
 
 export {
