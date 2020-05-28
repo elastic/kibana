@@ -208,7 +208,7 @@ export const QueryBarDefineRule = ({
             ? [...newFilters, getDataProviderFilter(dataProvidersDsl)]
             : newFilters,
         query: newQuery,
-        saved_id: '',
+        saved_id: undefined,
       });
     },
     [browserFields, field, indexPattern]
@@ -253,7 +253,7 @@ export const QueryBarDefineRule = ({
           observerOptions={{ subtree: true, attributes: true, childList: true }}
           onMutation={onMutation}
         >
-          {mutationRef => (
+          {(mutationRef) => (
             <div ref={mutationRef}>
               <QueryBar
                 indexPattern={indexPattern}

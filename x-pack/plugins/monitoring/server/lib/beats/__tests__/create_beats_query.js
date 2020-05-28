@@ -35,7 +35,7 @@ describe('createBeatsQuery', () => {
     const filters1 = [fauxFilter1];
     const filters2 = [fauxFilter2, fauxFilter1];
 
-    [filters1, filters2].forEach(filters => {
+    [filters1, filters2].forEach((filters) => {
       const query = createBeatsQuery({ filters });
       const queryFilters = query.bool.filter;
       const filterCount = queryFilters.length;

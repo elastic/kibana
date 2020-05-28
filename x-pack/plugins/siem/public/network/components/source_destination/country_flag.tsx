@@ -19,7 +19,7 @@ export const getFlag = (countryCode: string): string | null =>
   countryCode && countryCode.length === 2
     ? countryCode
         .toUpperCase()
-        .replace(/./g, c => String.fromCharCode(55356, 56741 + c.charCodeAt(0)))
+        .replace(/./g, (c) => String.fromCharCode(55356, 56741 + c.charCodeAt(0)))
     : null;
 
 /** Renders an emoji flag for the specified country code */

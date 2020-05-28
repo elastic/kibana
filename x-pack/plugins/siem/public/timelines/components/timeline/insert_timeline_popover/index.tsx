@@ -13,6 +13,7 @@ import { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
 import { timelineActions } from '../../../../timelines/store/timeline';
+import { TimelineType } from '../../../../../common/types/timeline';
 
 interface InsertTimelinePopoverProps {
   isDisabled: boolean;
@@ -107,6 +108,7 @@ export const InsertTimelinePopoverComponent: React.FC<Props> = ({
         getSelectableOptions={handleGetSelectableOptions}
         onClosePopover={handleClosePopover}
         onTimelineChange={onTimelineChange}
+        timelineType={TimelineType.default}
       />
     </EuiPopover>
   );

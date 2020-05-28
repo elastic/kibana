@@ -19,8 +19,9 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
+  const retry = getService('retry');
   const a11y = getService('a11y');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -133,7 +134,14 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     // Context view test
     it('should open context view on a doc', async () => {
       await docTable.clickRowToggle();
-      await (await docTable.getRowActions())[0].click();
+      // click the open action
+      await retry.try(async () => {
+        const rowActions = await docTable.getRowActions();
+        if (!rowActions.length) {
+          throw new Error('row actions empty, trying again');
+        }
+        await rowActions[0].click();
+      });
       await a11y.testAppSnapshot();
     });
 

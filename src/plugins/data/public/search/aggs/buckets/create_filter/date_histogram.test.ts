@@ -121,7 +121,7 @@ describe('AggConfig Filters', () => {
     });
 
     test('extends the filter edge to 1ms before the next bucket for all interval options', () => {
-      intervalOptions.forEach(option => {
+      intervalOptions.forEach((option) => {
         let duration;
         if (option.val !== 'custom' && moment(1, option.val).isValid()) {
           // @ts-ignore
@@ -137,12 +137,7 @@ describe('AggConfig Filters', () => {
         const params = filter.range[field.name];
 
         expect(params.gte).toBe(bucketStart.toISOString());
-        expect(params.lt).toBe(
-          bucketStart
-            .clone()
-            .add(interval)
-            .toISOString()
-        );
+        expect(params.lt).toBe(bucketStart.clone().add(interval).toISOString());
       });
     });
   });

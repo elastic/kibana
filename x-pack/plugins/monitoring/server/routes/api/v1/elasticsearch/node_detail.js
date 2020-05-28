@@ -64,7 +64,7 @@ export function esNodeRoute(server) {
         const showCgroupMetricsElasticsearch = config.get(
           'monitoring.ui.container.elasticsearch.enabled'
         );
-        const metricCpu = metricSet.find(m => m.name === 'node_cpu_metric');
+        const metricCpu = metricSet.find((m) => m.name === 'node_cpu_metric');
         if (showCgroupMetricsElasticsearch) {
           metricCpu.keys = ['node_cgroup_quota_as_cpu_utilization'];
         } else {

@@ -31,7 +31,7 @@ export function AdvancedSettingsForm({
   }
 
   function getNumberUpdater<K extends NumberKeys<AdvancedSettings>>(key: K) {
-    return function({ target: { valueAsNumber } }: { target: { valueAsNumber: number } }) {
+    return function ({ target: { valueAsNumber } }: { target: { valueAsNumber: number } }) {
       updateSetting(key, Number.isNaN(valueAsNumber) ? 1 : valueAsNumber);
     };
   }
@@ -125,7 +125,7 @@ export function AdvancedSettingsForm({
             { defaultMessage: 'No diversification' }
           )}
           singleSelection={{ asPlainText: true }}
-          options={allFields.map(field => ({ label: field.name, value: field }))}
+          options={allFields.map((field) => ({ label: field.name, value: field }))}
           selectedOptions={
             advancedSettings.sampleDiversityField
               ? [
@@ -136,7 +136,7 @@ export function AdvancedSettingsForm({
                 ]
               : []
           }
-          onChange={choices => {
+          onChange={(choices) => {
             updateSetting(
               'sampleDiversityField',
               choices.length === 1 ? choices[0].value : undefined

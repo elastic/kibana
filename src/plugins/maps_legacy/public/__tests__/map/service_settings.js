@@ -28,7 +28,7 @@ import EMS_STYLE_ROAD_MAP_DESATURATED from './ems_mocks/sample_style_desaturated
 import EMS_STYLE_DARK_MAP from './ems_mocks/sample_style_dark';
 import { ORIGIN } from '../../common/constants/origin';
 
-describe('service_settings (FKA tilemaptest)', function() {
+describe('service_settings (FKA tilemaptest)', function () {
   let serviceSettings;
   let mapConfig;
   let tilemapsConfig;
@@ -40,7 +40,7 @@ describe('service_settings (FKA tilemaptest)', function() {
   const emsFileApiUrl2 = 'https://files_override.foobar';
 
   beforeEach(
-    ngMock.module('kibana', $provide => {
+    ngMock.module('kibana', ($provide) => {
       $provide.decorator('mapConfig', () => {
         return {
           emsFileApiUrl,
@@ -61,9 +61,9 @@ describe('service_settings (FKA tilemaptest)', function() {
   let tilemapsConfigDeprecatedOriginal;
   let getManifestStub;
   beforeEach(
-    ngMock.inject(function($injector, $rootScope) {
+    ngMock.inject(function ($injector, $rootScope) {
       serviceSettings = $injector.get('serviceSettings');
-      getManifestStub = serviceSettings.__debugStubManifestCalls(async url => {
+      getManifestStub = serviceSettings.__debugStubManifestCalls(async (url) => {
         //simulate network calls
         if (url.startsWith('https://tiles.foobar')) {
           if (url.includes('/manifest')) {
@@ -90,21 +90,21 @@ describe('service_settings (FKA tilemaptest)', function() {
     })
   );
 
-  afterEach(function() {
+  afterEach(function () {
     getManifestStub.removeStub();
     mapConfig.emsTileApiUrl = emsTileApiUrlOriginal;
     mapConfig.emsFileApiUrl = emsFileApiUrlOriginal;
     tilemapsConfig.deprecated = tilemapsConfigDeprecatedOriginal;
   });
 
-  describe('TMS', function() {
-    it('should NOT get url from the config', async function() {
+  describe('TMS', function () {
+    it('should NOT get url from the config', async function () {
       const tmsServices = await serviceSettings.getTMSServices();
       const tmsService = tmsServices[0];
       expect(typeof tmsService.url === 'undefined').to.equal(true);
     });
 
-    it('should get url by resolving dynamically', async function() {
+    it('should get url by resolving dynamically', async function () {
       const tmsServices = await serviceSettings.getTMSServices();
       const tmsService = tmsServices[0];
       expect(typeof tmsService.url === 'undefined').to.equal(true);
@@ -121,23 +121,21 @@ describe('service_settings (FKA tilemaptest)', function() {
       expect(urlObject.query).to.have.property('my_app_version');
     });
 
-    it('should get options', async function() {
+    it('should get options', async function () {
       const tmsServices = await serviceSettings.getTMSServices();
       const tmsService = tmsServices[0];
       expect(tmsService).to.have.property('minZoom');
       expect(tmsService).to.have.property('maxZoom');
-      expect(tmsService)
-        .to.have.property('attribution')
-        .contain('OpenStreetMap');
+      expect(tmsService).to.have.property('attribution').contain('OpenStreetMap');
     });
 
-    describe('modify - url', function() {
+    describe('modify - url', function () {
       let tilemapServices;
 
       async function assertQuery(expected) {
         const attrs = await serviceSettings.getAttributesForTMSLayer(tilemapServices[0]);
         const urlObject = url.parse(attrs.url, true);
-        Object.keys(expected).forEach(key => {
+        Object.keys(expected).forEach((key) => {
           expect(urlObject.query).to.have.property(key, expected[key]);
         });
       }
@@ -215,7 +213,7 @@ describe('service_settings (FKA tilemaptest)', function() {
 
       it('should load appropriate EMS attributes for desaturated and dark theme', async () => {
         tilemapServices = await serviceSettings.getTMSServices();
-        const roadMapService = tilemapServices.find(service => service.id === 'road_map');
+        const roadMapService = tilemapServices.find((service) => service.id === 'road_map');
 
         const desaturationFalse = await serviceSettings.getAttributesForTMSLayer(
           roadMapService,
@@ -290,16 +288,16 @@ describe('service_settings (FKA tilemaptest)', function() {
     });
   });
 
-  describe('File layers', function() {
-    it('should load manifest (all props)', async function() {
+  describe('File layers', function () {
+    it('should load manifest (all props)', async function () {
       serviceSettings.setQueryParams({ foo: 'bar' });
       const fileLayers = await serviceSettings.getFileLayers();
       expect(fileLayers.length).to.be(18);
-      const assertions = fileLayers.map(async function(fileLayer) {
+      const assertions = fileLayers.map(async function (fileLayer) {
         expect(fileLayer.origin).to.be(ORIGIN.EMS);
         const fileUrl = await serviceSettings.getUrlForRegionLayer(fileLayer);
         const urlObject = url.parse(fileUrl, true);
-        Object.keys({ foo: 'bar', elastic_tile_service_tos: 'agree' }).forEach(key => {
+        Object.keys({ foo: 'bar', elastic_tile_service_tos: 'agree' }).forEach((key) => {
           expect(urlObject.query).to.have.property(key);
         });
       });

@@ -40,13 +40,13 @@ function getSwitcher(license$: Observable<ILicense>, logger: Logger): Capabiliti
       const originalCapabilities = cloneDeep(mlCaps);
 
       // not full licence, switch off all capabilities
-      Object.keys(mlCaps).forEach(k => {
+      Object.keys(mlCaps).forEach((k) => {
         mlCaps[k as keyof MlCapabilities] = false;
       });
 
       // for a basic license, reapply the original capabilities for the basic license features
       if (isMinimumLicense(license)) {
-        basicLicenseMlCapabilities.forEach(c => (mlCaps[c] = originalCapabilities[c]));
+        basicLicenseMlCapabilities.forEach((c) => (mlCaps[c] = originalCapabilities[c]));
       }
 
       return capabilities;

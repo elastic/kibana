@@ -28,17 +28,17 @@ export const getAllNodeVersions = async (adminClient: IScopedClusterClient) => {
 
   return uniq(versionStrings)
     .sort()
-    .map(version => new SemVer(version));
+    .map((version) => new SemVer(version));
 };
 
 export const verifyAllMatchKibanaVersion = (allNodeVersions: SemVer[]) => {
   // Determine if all nodes in the cluster are running the same major version as Kibana.
   const numDifferentVersion = allNodeVersions.filter(
-    esNodeVersion => esNodeVersion.major !== CURRENT_VERSION.major
+    (esNodeVersion) => esNodeVersion.major !== CURRENT_VERSION.major
   ).length;
 
   const numSameVersion = allNodeVersions.filter(
-    esNodeVersion => esNodeVersion.major === CURRENT_VERSION.major
+    (esNodeVersion) => esNodeVersion.major === CURRENT_VERSION.major
   ).length;
 
   if (numDifferentVersion) {
@@ -62,11 +62,11 @@ export const esVersionCheck = async (
   ctx: RequestHandlerContext,
   response: KibanaResponseFactory
 ) => {
-  const { adminClient } = ctx.core.elasticsearch;
+  const { client } = ctx.core.elasticsearch.legacy;
   let allNodeVersions: SemVer[];
 
   try {
-    allNodeVersions = await getAllNodeVersions(adminClient);
+    allNodeVersions = await getAllNodeVersions(client);
   } catch (e) {
     if (e.status === 403) {
       return response.forbidden({ body: e.message });

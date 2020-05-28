@@ -42,7 +42,7 @@ export const IndexSetupDatasetFilter: React.FC<{
 
   const selectableOptions: EuiSelectableOption[] = useMemo(
     () =>
-      availableDatasets.map(datasetName => ({
+      availableDatasets.map((datasetName) => ({
         label: datasetName,
         checked:
           datasetFilter.type === 'includeSome' && datasetFilter.datasets.includes(datasetName)

@@ -42,7 +42,7 @@ describe('<JsonWatchEdit /> create route', () => {
         const { find } = testBed;
 
         expect(find('tab').length).toBe(2);
-        expect(find('tab').map(t => t.text())).toEqual(['Edit', 'Simulate']);
+        expect(find('tab').map((t) => t.text())).toEqual(['Edit', 'Simulate']);
       });
 
       test('should navigate to the "Simulate" tab', () => {
