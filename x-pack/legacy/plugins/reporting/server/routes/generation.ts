@@ -28,7 +28,7 @@ export function registerJobGenerationRoutes(
    * Generates enqueued job details to use in responses
    */
   const handler: HandlerFunction = async (username, exportTypeId, jobParams, context, req, res) => {
-    const licenseInfo = reporting.getLicenseInfo();
+    const licenseInfo = await reporting.getLicenseInfo();
     const licenseResults = licenseInfo[exportTypeId];
 
     if (!licenseResults.enableLinks) {

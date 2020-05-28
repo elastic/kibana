@@ -41,7 +41,7 @@ export async function registerJobInfoRoutes(
     userHandler(async (user, context, req, res) => {
       const {
         management: { jobTypes = [] },
-      } = reporting.getLicenseInfo();
+      } = await reporting.getLicenseInfo();
       const { username } = user;
       const {
         page: queryPage = '0',
@@ -72,7 +72,7 @@ export async function registerJobInfoRoutes(
       const { username } = user;
       const {
         management: { jobTypes = [] },
-      } = reporting.getLicenseInfo();
+      } = await reporting.getLicenseInfo();
 
       const count = await jobsQuery.count(jobTypes, username);
 
@@ -100,7 +100,7 @@ export async function registerJobInfoRoutes(
       const { docId } = req.params as { docId: string };
       const {
         management: { jobTypes = [] },
-      } = reporting.getLicenseInfo();
+      } = await reporting.getLicenseInfo();
 
       const result = await jobsQuery.get(username, docId, { includeContent: true });
 
@@ -140,7 +140,7 @@ export async function registerJobInfoRoutes(
       const { docId } = req.params as { docId: string };
       const {
         management: { jobTypes = [] },
-      } = reporting.getLicenseInfo();
+      } = await reporting.getLicenseInfo();
 
       const result = await jobsQuery.get(username, docId);
 
@@ -192,7 +192,7 @@ export async function registerJobInfoRoutes(
       const { docId } = req.params as { docId: string };
       const {
         management: { jobTypes = [] },
-      } = reporting.getLicenseInfo();
+      } = await reporting.getLicenseInfo();
 
       return downloadResponseHandler(res, jobTypes, username, { docId });
     })
@@ -214,7 +214,7 @@ export async function registerJobInfoRoutes(
       const { docId } = req.params as { docId: string };
       const {
         management: { jobTypes = [] },
-      } = reporting.getLicenseInfo();
+      } = await reporting.getLicenseInfo();
 
       return deleteResponseHandler(res, jobTypes, username, { docId });
     })

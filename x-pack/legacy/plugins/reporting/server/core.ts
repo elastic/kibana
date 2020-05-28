@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { first, mapTo } from 'rxjs/operators';
+import { first, mapTo, map } from 'rxjs/operators';
 import {
   ElasticsearchServiceSetup,
   KibanaRequest,
@@ -19,7 +19,7 @@ import { SecurityPluginSetup } from '../../../../plugins/security/server';
 import { ReportingPluginSpecOptions } from '../';
 // @ts-ignore no module definition
 import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
-import { ILicense } from '../../../../plugins/licensing/server';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import { screenshotsObservableFactory } from '../export_types/common/lib/screenshots';
 import { ServerFacade, ScreenshotsObservableFn } from '../server/types';
@@ -33,7 +33,7 @@ import { registerRoutes } from './routes';
 export interface ReportingInternalSetup {
   browserDriverFactory: HeadlessChromiumDriverFactory;
   elasticsearch: ElasticsearchServiceSetup;
-  license$: Rx.Observable<ILicense>;
+  licensing: LicensingPluginSetup;
   basePath: BasePath['get'];
   router: IRouter;
   security: SecurityPluginSetup;
@@ -49,7 +49,6 @@ interface ReportingInternalStart {
 
 export class ReportingCore {
   pluginSetupDeps?: ReportingInternalSetup;
-  private license?: ILicense;
   private pluginStartDeps?: ReportingInternalStart;
   private readonly pluginSetup$ = new Rx.ReplaySubject<ReportingInternalSetup>();
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>();
@@ -73,7 +72,6 @@ export class ReportingCore {
 
   public pluginSetup(reportingSetupDeps: ReportingInternalSetup) {
     this.pluginSetup$.next(reportingSetupDeps);
-    reportingSetupDeps.license$.subscribe((license) => (this.license = license));
   }
 
   public pluginStart(reportingStartDeps: ReportingInternalStart) {
@@ -99,8 +97,14 @@ export class ReportingCore {
     return (await this.getPluginStartDeps()).enqueueJob;
   }
 
-  public getLicenseInfo() {
-    return checkLicense(this.getExportTypesRegistry(), this.license);
+  public async getLicenseInfo() {
+    const { licensing } = await this.getPluginSetupDeps();
+    return await licensing.license$
+      .pipe(
+        map((license) => checkLicense(this.getExportTypesRegistry(), license)),
+        first()
+      )
+      .toPromise();
   }
 
   public getConfig(): ReportingConfig {
