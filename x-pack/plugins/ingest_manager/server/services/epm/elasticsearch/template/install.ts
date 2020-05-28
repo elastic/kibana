@@ -22,8 +22,8 @@ export const installTemplates = async (
   // install any pre-built index template assets,
   // atm, this is only the base package's global index templates
   // Install component templates first, as they are used by the index templates
-  await installPreBuiltComponentTemplates(pkgName, pkgVersion, paths, callCluster);
-  await installPreBuiltTemplates(pkgName, pkgVersion, callCluster);
+  await installPreBuiltComponentTemplates(paths, callCluster);
+  await installPreBuiltTemplates(paths, callCluster);
 
   // build templates per dataset from yml files
   const datasets = registryPackage.datasets;
@@ -45,16 +45,8 @@ export const installTemplates = async (
   return [];
 };
 
-const installPreBuiltTemplates = async (
-  pkgName: string,
-  pkgVersion: string,
-  callCluster: CallESAsCurrentUser
-) => {
-  const templatePaths = await Registry.getArchiveInfo(
-    pkgName,
-    pkgVersion,
-    (entry: Registry.ArchiveEntry) => isTemplate(entry)
-  );
+const installPreBuiltTemplates = async (paths: string[], callCluster: CallESAsCurrentUser) => {
+  const templatePaths = paths.filter((path) => isTemplate(path));
   const templateInstallPromises = templatePaths.map(async (path) => {
     const { file } = Registry.pathParts(path);
     const templateName = file.substr(0, file.lastIndexOf('.'));
@@ -96,8 +88,6 @@ const installPreBuiltTemplates = async (
 };
 
 const installPreBuiltComponentTemplates = async (
-  pkgName: string,
-  pkgVersion: string,
   paths: string[],
   callCluster: CallESAsCurrentUser
 ) => {
@@ -132,7 +122,7 @@ const installPreBuiltComponentTemplates = async (
   }
 };
 
-const isTemplate = ({ path }: Registry.ArchiveEntry) => {
+const isTemplate = (path: string) => {
   const pathParts = Registry.pathParts(path);
   return pathParts.type === ElasticsearchAssetType.indexTemplate;
 };
