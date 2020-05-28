@@ -95,18 +95,15 @@ export const Body = React.memo<BodyProps>(
     updateNote,
   }) => {
     const containerElementRef = useRef<HTMLDivElement>(null);
-    const [manageTimeline] = useManageTimeline();
-    const timelineTypeContext = useMemo(
-      () =>
-        manageTimeline[id] && manageTimeline[id].timelineTypeContext
-          ? manageTimeline[id].timelineTypeContext
-          : {},
-      [manageTimeline[id]]
-    );
+    const { getManageTimelineById } = useManageTimeline();
+    const timelineActions = useMemo(() => getManageTimelineById(id).timelineActions, [
+      getManageTimelineById,
+      id,
+    ]);
 
     const additionalActionWidth = useMemo(
-      () => timelineTypeContext.timelineActions?.reduce((acc, v) => acc + v.width, 0) ?? 0,
-      [timelineTypeContext.timelineActions]
+      () => timelineActions?.reduce((acc, v) => acc + v.width, 0) ?? 0,
+      [timelineActions]
     );
     const actionsColumnWidth = useMemo(
       () => getActionsColumnWidth(isEventViewer, showCheckboxes, additionalActionWidth),

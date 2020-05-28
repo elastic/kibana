@@ -36,7 +36,6 @@ import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
 import { useManageTimeline } from '../../manage_timeline';
-import * as i18n from '../../../../common/components/events_viewer/translations';
 
 interface OwnProps {
   browserFields: BrowserFields;
@@ -81,16 +80,11 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     updateNote,
     updateSort,
   }) => {
-    const [manageTimeline] = useManageTimeline();
-    const timelineTypeContext = useMemo(
-      () =>
-        manageTimeline[id] && manageTimeline[id].timelineTypeContext
-          ? manageTimeline[id].timelineTypeContext
-          : {
-              loadingText: i18n.LOADING_EVENTS,
-            },
-      [manageTimeline[id]]
-    );
+    const { getManageTimelineById } = useManageTimeline();
+    const { queryFields, selectAll } = useMemo(() => getManageTimelineById(id), [
+      getManageTimelineById,
+      id,
+    ]);
 
     const getNotesByIds = useCallback(
       (noteIds: string[]): Note[] => appSelectors.getNotes(notesById, noteIds),
@@ -107,13 +101,13 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
         setSelected!({
           id,
-          eventIds: getEventIdToDataMapping(data, eventIds, timelineTypeContext.queryFields ?? []),
+          eventIds: getEventIdToDataMapping(data, eventIds, queryFields),
           isSelected,
           isSelectAllChecked:
             isSelected && Object.keys(selectedEventIds).length + 1 === data.length,
         });
       },
-      [setSelected, id, data, selectedEventIds, timelineTypeContext.queryFields]
+      [setSelected, id, data, selectedEventIds, queryFields]
     );
 
     const onSelectAll: OnSelectAll = useCallback(
@@ -124,13 +118,13 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
               eventIds: getEventIdToDataMapping(
                 data,
                 data.map((event) => event._id),
-                timelineTypeContext.queryFields ?? []
+                queryFields
               ),
               isSelected,
               isSelectAllChecked: isSelected,
             })
           : clearSelected!({ id }),
-      [setSelected, clearSelected, id, data, timelineTypeContext.queryFields]
+      [setSelected, clearSelected, id, data, queryFields]
     );
 
     const onColumnSorted: OnColumnSorted = useCallback(
@@ -161,12 +155,12 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       [id]
     );
 
-    // Sync to timelineTypeContext.selectAll so parent components can select all events
+    // Sync to selectAll so parent components can select all events
     useEffect(() => {
-      if (timelineTypeContext.selectAll) {
+      if (selectAll) {
         onSelectAll({ isSelected: true });
       }
-    }, [timelineTypeContext.selectAll]); // onSelectAll dependency not necessary
+    }, [selectAll]); // onSelectAll dependency not necessary
 
     return (
       <Body

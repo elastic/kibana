@@ -101,20 +101,17 @@ const TitleRow = React.memo<{
   onOutsideClick: () => void;
   onUpdateColumns: OnUpdateColumns;
 }>(({ id, isEventViewer, onOutsideClick, onUpdateColumns }) => {
-  const [manageTimeline] = useManageTimeline();
-  const timelineTypeContext = useMemo(
-    () =>
-      manageTimeline[id] && manageTimeline[id].timelineTypeContext
-        ? manageTimeline[id].timelineTypeContext
-        : {},
-    [manageTimeline[id]]
-  );
+  const { getManageTimelineById } = useManageTimeline();
+  const documentType = useMemo(() => getManageTimelineById(id).documentType, [
+    getManageTimelineById,
+    id,
+  ]);
   const handleResetColumns = useCallback(() => {
     let resetDefaultHeaders = defaultHeaders;
     if (isEventViewer) {
-      if (timelineTypeContext.documentType?.toLocaleLowerCase() === 'alerts') {
+      if (documentType.toLocaleLowerCase() === 'alerts') {
         resetDefaultHeaders = alertsHeaders;
-      } else if (timelineTypeContext.documentType?.toLocaleLowerCase() === 'signals') {
+      } else if (documentType.toLocaleLowerCase() === 'signals') {
         resetDefaultHeaders = signalsHeaders;
       } else {
         resetDefaultHeaders = eventsDefaultHeaders;
@@ -122,7 +119,7 @@ const TitleRow = React.memo<{
     }
     onUpdateColumns(resetDefaultHeaders);
     onOutsideClick();
-  }, [isEventViewer, onOutsideClick, onUpdateColumns, timelineTypeContext]);
+  }, [isEventViewer, onOutsideClick, onUpdateColumns, documentType]);
 
   return (
     <EuiFlexGroup

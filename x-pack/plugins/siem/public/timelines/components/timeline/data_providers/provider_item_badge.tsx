@@ -53,19 +53,11 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     toggleExcludedProvider,
     val,
   }) => {
-    const [manageTimeline] = useManageTimeline();
-    const { isLoading } = useMemo(
-      () =>
-        timelineId &&
-        manageTimeline[timelineId] &&
-        manageTimeline[timelineId].timelineContextState &&
-        typeof manageTimeline[timelineId].timelineContextState !== 'undefined'
-          ? manageTimeline[timelineId].timelineContextState
-          : {
-              isLoading: false,
-            },
-      [timelineId, manageTimeline[timelineId ?? 0]]
-    );
+    const { getManageTimelineById } = useManageTimeline();
+    const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
+      getManageTimelineById,
+      timelineId,
+    ]);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const togglePopover = useCallback(() => {

@@ -95,19 +95,23 @@ const EventsViewerComponent: React.FC<Props> = ({
   const kibana = useKibana();
   const { filterManager } = useKibana().services.data.query;
   const [isQueryLoading, setIsQueryLoading] = useState(false);
-  // const [manageTimeline, dispatchTimeline] = useManageTimeline();
-  const { setTimelineFilterManager, getManageTimelineById } = useManageTimeline();
-  const timelineTypeContext = useMemo(() => getManageTimelineById(id), [getManageTimelineById, id]);
+
+  const {
+    getManageTimelineById,
+    setIsTimelineLoading,
+    setTimelineFilterManager,
+  } = useManageTimeline();
   useEffect(() => {
-    dispatchTimeline({
-      type: 'setTimelineContextState',
-      id,
-      timelineContextState: {
-        filterManager,
-        isLoading: isQueryLoading,
-      },
-    });
-  }, [filterManager, isQueryLoading]);
+    setIsTimelineLoading({ id, isLoading: isQueryLoading });
+  }, [isQueryLoading]);
+  useEffect(() => {
+    setTimelineFilterManager({ id, filterManager });
+  }, [filterManager]);
+
+  const { queryFields, title, unit } = useMemo(() => getManageTimelineById(id), [
+    getManageTimelineById,
+    id,
+  ]);
 
   const combinedQueries = combineQueries({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
@@ -121,13 +125,13 @@ const EventsViewerComponent: React.FC<Props> = ({
     end,
     isEventViewer: true,
   });
-  const queryFields = useMemo(
+  const fields = useMemo(
     () =>
       union(
-        columnsHeader.map(c => c.id),
-        timelineTypeContext.queryFields ?? []
+        columnsHeader.map((c) => c.id),
+        queryFields ?? []
       ),
-    [columnsHeader, timelineTypeContext.queryFields]
+    [columnsHeader, queryFields]
   );
   const sortField = useMemo(
     () => ({
@@ -142,7 +146,7 @@ const EventsViewerComponent: React.FC<Props> = ({
       {combinedQueries != null ? (
         <EventDetailsWidthProvider>
           <TimelineQuery
-            fields={queryFields}
+            fields={fields}
             filterQuery={combinedQueries.filterQuery}
             id={id}
             indexPattern={indexPattern}
@@ -164,19 +168,13 @@ const EventsViewerComponent: React.FC<Props> = ({
               const totalCountMinusDeleted =
                 totalCount > 0 ? totalCount - deletedEventIds.length : 0;
 
-              const subtitle = `${
-                i18n.SHOWING
-              }: ${totalCountMinusDeleted.toLocaleString()} ${timelineTypeContext.unit?.(
+              const subtitle = `${i18n.SHOWING}: ${totalCountMinusDeleted.toLocaleString()} ${unit(
                 totalCountMinusDeleted
-              ) ?? i18n.UNIT(totalCountMinusDeleted)}`;
+              )}`;
 
               return (
                 <>
-                  <HeaderSection
-                    id={id}
-                    subtitle={utilityBar ? undefined : subtitle}
-                    title={timelineTypeContext?.title ?? i18n.EVENTS}
-                  >
+                  <HeaderSection id={id} subtitle={utilityBar ? undefined : subtitle} title={title}>
                     {headerFilterGroup}
                   </HeaderSection>
 
@@ -193,7 +191,7 @@ const EventsViewerComponent: React.FC<Props> = ({
 
                     <StatefulBody
                       browserFields={browserFields}
-                      data={events.filter(e => !deletedEventIds.includes(e._id))}
+                      data={events.filter((e) => !deletedEventIds.includes(e._id))}
                       id={id}
                       isEventViewer={true}
                       height={height}

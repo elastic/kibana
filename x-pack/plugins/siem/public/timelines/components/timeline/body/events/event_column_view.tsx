@@ -79,23 +79,19 @@ export const EventColumnView = React.memo<Props>(
     toggleShowNotes,
     updateNote,
   }) => {
-    const [manageTimeline] = useManageTimeline();
-    const timelineTypeContext = useMemo(
-      () =>
-        manageTimeline[timelineId] && manageTimeline[timelineId].timelineTypeContext
-          ? manageTimeline[timelineId].timelineTypeContext
-          : {},
-      [manageTimeline[timelineId]]
-    );
-
+    const { getManageTimelineById } = useManageTimeline();
+    const timelineActions = useMemo(() => getManageTimelineById(timelineId).timelineActions, [
+      getManageTimelineById,
+      timelineId,
+    ]);
     const additionalActions = useMemo<JSX.Element[]>(
       () =>
-        timelineTypeContext.timelineActions?.map((action) => (
+        timelineActions.map((action) => (
           <EventsTdContent key={action.id} textAlign="center">
             {action.getAction({ eventId: id, ecsData })}
           </EventsTdContent>
         )) ?? [],
-      [ecsData, timelineTypeContext.timelineActions]
+      [ecsData, timelineActions]
     );
 
     return (

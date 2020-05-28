@@ -43,16 +43,13 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   const filterManagerBackup = useMemo(() => kibana.services.data.query.filterManager, [
     kibana.services.data.query.filterManager,
   ]);
-  const [manageTimeline] = useManageTimeline();
-  const { filterManager } = useMemo(
+  const { getTimelineFilterManager } = useManageTimeline();
+  const filterManager = useMemo(
     () =>
-      timelineId && manageTimeline[timelineId] && manageTimeline[timelineId].timelineContextState
-        ? { filterManager: filterManagerBackup, ...manageTimeline[timelineId].timelineContextState }
-        : {
-            filterManager: filterManagerBackup,
-            isLoading: false,
-          },
-    [timelineId, manageTimeline[timelineId ?? 0], filterManagerBackup]
+      timelineId
+        ? getTimelineFilterManager(timelineId) ?? filterManagerBackup
+        : filterManagerBackup,
+    [timelineId, getTimelineFilterManager, filterManagerBackup]
   );
   const filterForValue = useCallback(() => {
     const filter =

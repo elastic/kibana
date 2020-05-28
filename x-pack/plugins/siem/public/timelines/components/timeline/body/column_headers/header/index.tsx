@@ -42,26 +42,23 @@ export const HeaderComponent: React.FC<Props> = ({
       }),
     });
   }, [onColumnSorted, header, sort]);
-  const [manageTimeline] = useManageTimeline();
-  const timelineContextState = useMemo(
-    () =>
-      manageTimeline[timelineId] && manageTimeline[timelineId].timelineContextState
-        ? manageTimeline[timelineId].timelineContextState
-        : { isLoading: false },
-    [manageTimeline[timelineId]]
-  );
+  const { getManageTimelineById } = useManageTimeline();
+  const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
+    getManageTimelineById,
+    timelineId,
+  ]);
   return (
     <>
       <HeaderContent
         header={header}
-        isLoading={timelineContextState.isLoading}
+        isLoading={isLoading}
         isResizing={false}
         onClick={onClick}
         sort={sort}
       >
         <Actions
           header={header}
-          isLoading={timelineContextState.isLoading}
+          isLoading={isLoading}
           onColumnRemoved={onColumnRemoved}
           sort={sort}
         />

@@ -98,16 +98,11 @@ export const DataProviders = React.memo<Props>(
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
   }) => {
-    const [manageTimeline] = useManageTimeline();
-    const { isLoading } = useMemo(
-      () =>
-        manageTimeline[id] && manageTimeline[id].timelineContextState
-          ? manageTimeline[id].timelineContextState
-          : {
-              isLoading: false,
-            },
-      [manageTimeline[id]]
-    );
+    const { getManageTimelineById } = useManageTimeline();
+    const isLoading = useMemo(() => getManageTimelineById(id).isLoading, [
+      getManageTimelineById,
+      id,
+    ]);
     return (
       <DropTargetDataProvidersContainer className="drop-target-data-providers-container">
         <DropTargetDataProviders

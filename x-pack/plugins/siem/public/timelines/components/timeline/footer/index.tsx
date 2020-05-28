@@ -111,20 +111,22 @@ export const footerHeight = 40; // px
 /** Displays the server-side count of events */
 export const EventsCountComponent = ({
   closePopover,
+  documentType,
+  footerText,
   isOpen,
   items,
   itemsCount,
   onClick,
   serverSideEventCount,
-  timelineTypeContext,
 }: {
   closePopover: () => void;
+  documentType: string;
   isOpen: boolean;
   items: React.ReactElement[];
   itemsCount: number;
   onClick: () => void;
   serverSideEventCount: number;
-  timelineTypeContext: TimelineTypeContext;
+  footerText: string;
 }) => {
   return (
     <h5>
@@ -153,16 +155,12 @@ export const EventsCountComponent = ({
       >
         <EuiContextMenuPanel items={items} data-test-subj="timelinePickSizeRow" />
       </PopoverRowItems>
-      <EuiToolTip
-        content={`${serverSideEventCount} ${
-          timelineTypeContext.footerText ?? i18n.TOTAL_COUNT_OF_EVENTS
-        }`}
-      >
+      <EuiToolTip content={`${serverSideEventCount} ${footerText}`}>
         <ServerSideEventCount>
           <EuiBadge color="hollow" data-test-subj="server-side-event-count">
             {serverSideEventCount}
           </EuiBadge>{' '}
-          {timelineTypeContext.documentType ?? i18n.EVENTS}
+          {documentType}
         </ServerSideEventCount>
       </EuiToolTip>
     </h5>
@@ -241,14 +239,12 @@ export const FooterComponent = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
-  const [manageTimeline] = useManageTimeline();
-  const timelineTypeContext = useMemo(
-    () =>
-      manageTimeline[id] && manageTimeline[id].timelineTypeContext
-        ? manageTimeline[id].timelineTypeContext
-        : {},
-    [manageTimeline[id]]
-  );
+
+  const { getManageTimelineById } = useManageTimeline();
+  const { documentType, loadingText, footerText } = useMemo(() => getManageTimelineById(id), [
+    getManageTimelineById,
+    id,
+  ]);
 
   const loadMore = useCallback(() => {
     setPaginationLoading(true);
@@ -279,7 +275,7 @@ export const FooterComponent = ({
           data-test-subj="LoadingPanelTimeline"
           height="35px"
           showBorder={false}
-          text={`${timelineTypeContext.loadingText ?? i18n.LOADING_TIMELINE_DATA}...`}
+          text={`${loadingText}...`}
           width="100%"
         />
       </LoadingPanelContainer>
@@ -325,12 +321,13 @@ export const FooterComponent = ({
           >
             <EventsCount
               closePopover={closePopover}
+              documentType={documentType}
+              footerText={footerText}
               isOpen={isPopoverOpen}
               items={rowItems}
               itemsCount={itemsCount}
               onClick={onButtonClick}
               serverSideEventCount={serverSideEventCount}
-              timelineTypeContext={timelineTypeContext}
             />
           </EuiFlexGroup>
         </EuiFlexItem>
