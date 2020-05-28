@@ -12,11 +12,9 @@ import turfBooleanContains from '@turf/boolean-contains';
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
 import {
-  getLayerById,
   getDataFilters,
   getWaitingForMapReadyLayerListRaw,
   getQuery,
-  getFittableLayers,
 } from '../selectors/map_selectors';
 import {
   CLEAR_GOTO,
@@ -182,13 +180,6 @@ export function clearMouseCoordinates() {
 
 export function disableScrollZoom() {
   return { type: SET_SCROLL_ZOOM, scrollZoom: false };
-}
-
-export function setGotoWithBounds(bounds: MapExtent) {
-  return {
-    type: SET_GOTO,
-    bounds,
-  };
 }
 
 export function setGotoWithCenter({ lat, lon, zoom }: MapCenterAndZoom) {

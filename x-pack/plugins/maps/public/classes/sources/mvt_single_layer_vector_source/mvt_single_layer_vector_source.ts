@@ -16,7 +16,6 @@ import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters
 import {
   MapExtent,
   TiledSingleLayerVectorSourceDescriptor,
-  VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from './mvt_single_layer_vector_source_editor';

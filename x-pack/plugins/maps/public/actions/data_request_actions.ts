@@ -6,12 +6,15 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Dispatch } from 'redux';
+// @ts-ignore
+import turf from 'turf';
 import { FeatureCollection } from 'geojson';
 import { MapStoreState } from '../reducers/store';
 import { LAYER_TYPE, SOURCE_DATA_REQUEST_ID } from '../../common/constants';
 import {
   getDataFilters,
   getDataRequestDescriptor,
+  getFittableLayers,
   getLayerById,
   getLayerList,
 } from '../selectors/map_selectors';
@@ -27,13 +30,14 @@ import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
   LAYER_DATA_LOAD_STARTED,
+  SET_GOTO,
   SET_LAYER_ERROR_STATUS,
   SET_LAYER_STYLE_META,
   UPDATE_LAYER_PROP,
   UPDATE_SOURCE_DATA_REQUEST,
 } from './map_action_constants';
 import { ILayer } from '../classes/layers/layer';
-import { DataMeta, MapFilters } from '../../common/descriptor_types';
+import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
 
 export type DataRequestContext = {
@@ -314,8 +318,7 @@ export function fitToDataBounds() {
       return;
     }
 
-    const dataFilters = getDataFilters(getState());
-    const boundsPromises = layerList.map(async (layer) => {
+    const boundsPromises = layerList.map(async (layer: ILayer) => {
       return layer.getBounds(getDataRequestContext(dispatch, getState, layer.getId()));
     });
 
@@ -366,5 +369,12 @@ export function fitToDataBounds() {
     };
 
     dispatch(setGotoWithBounds(dataBounds));
+  };
+}
+
+function setGotoWithBounds(bounds: MapExtent) {
+  return {
+    type: SET_GOTO,
+    bounds,
   };
 }

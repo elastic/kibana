@@ -20,12 +20,7 @@ import {
   SOURCE_DATA_REQUEST_ID,
 } from '../../../common/constants';
 import { copyPersistentState } from '../../reducers/util';
-import {
-  LayerDescriptor,
-  MapExtent,
-  MapFilters,
-  StyleDescriptor,
-} from '../../../common/descriptor_types';
+import { LayerDescriptor, MapExtent, StyleDescriptor } from '../../../common/descriptor_types';
 import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
