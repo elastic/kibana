@@ -6,7 +6,7 @@
 ++++
 
 You do not need to configure any settings to use {kib} {ml-features}. They are
-enabled by default.
+enabled by default. 
 
 [[general-ml-settings-kb]]
 ==== General {ml} settings
@@ -23,13 +23,4 @@ enabled by default.
 
 |===
 
-[[data-visualizer-settings]]
-==== {data-viz} settings
-
-[cols="2*<"]
-|===
-| `xpack.ml.file_data_visualizer.max_file_size`
-  | Sets the file size limit when importing data in the {data-viz}. The default
-  value is `100MB`. The highest supported value for this setting is `1GB`.
-
-|===
+For advanced settings, refer to <<kibana-ml-settings>>.
