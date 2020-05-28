@@ -89,6 +89,7 @@ function DashboardSelect({
   useEffect(() => {
     (async () => {
       const dashboards = await getSavedDashboardLoader().findAll();
+      // TODO: this is not typed as dashboard saved objects
       const _options = dashboards.hits.map((d) => ({
         value: d.id as string,
         text: d.title as string,
