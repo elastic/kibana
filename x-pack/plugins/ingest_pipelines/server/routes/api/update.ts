@@ -29,7 +29,7 @@ export const registerUpdateRoute = ({
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       const { name } = req.params;
       const { description, processors, version, on_failure } = req.body;
 

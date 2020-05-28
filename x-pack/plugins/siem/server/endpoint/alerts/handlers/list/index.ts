@@ -23,7 +23,7 @@ export const alertListHandlerWrapper = function (
         .getEventIndexPattern(ctx);
       const reqData = await getRequestData(req, endpointAppContext);
       const response = await searchESForAlerts(
-        ctx.core.elasticsearch.dataClient,
+        ctx.core.elasticsearch.legacy.client,
         reqData,
         indexPattern
       );
