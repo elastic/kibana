@@ -1,9 +1,9 @@
 [[management]]
-= Management
+= Stack Management
 
 [partintro]
 --
-*Management* is home to UIs for managing all things Elastic Stack&mdash;
+*Stack Management* is home to UIs for managing all things Elastic Stack&mdash;
 indices, clusters, licenses, UI settings, index patterns, spaces, and more.
 
 [float]
@@ -83,14 +83,13 @@ connectors for triggering actions.
 | Monitor the generation of reports&mdash;PDF, PNG, and CSV&mdash;and download reports that you previously generated.
 A report can contain a dashboard, visualization, saved search, or Canvas workpad.
 
-| <<xpack-ml-anomalies, Machine Learning Jobs>>
-| Create jobs that model the normal behavior of your time series data &mdash;
-learning trends, periodicity, and more &mdash; so you can detect anomalies,
-streamline root cause analysis, and reduce false positives.
+| {ml-docs}/ml-jobs.html[Machine Learning Jobs]
+| View your {anomaly-jobs} and {dfanalytics-jobs}. Open the Single Metric
+Viewer or Anomaly Explorer to see your {ml} results.
 
 | <<watcher-ui, Watcher>>
 | Detect changes in your data by creating, managing, and monitoring alerts.
-For example, create an alert when the maximum total CPU usage on a machine goes
+For example, you might create an alert when the maximum total CPU usage on a machine goes
 above a certain percentage.
 
 |===
@@ -109,7 +108,7 @@ specific privileges.
 
 | <<xpack-kibana-role-management, Roles>>
 |View the roles that exist on your cluster. Customize
-the actions that a user with the role can perform, both on a cluster and an index level.
+the actions that a user with the role can perform, on a cluster, index, and space level.
 
 | <<api-keys, API Keys>>
 | Create secondary credentials so that you can send requests on behalf of the user.
