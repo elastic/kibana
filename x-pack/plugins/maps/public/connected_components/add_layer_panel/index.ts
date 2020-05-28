@@ -12,7 +12,7 @@ import { getFlyoutDisplay, getIndexingStage } from '../../selectors/ui_selectors
 import {
   addPreviewLayers,
   promotePreviewLayers,
-  setSelectedLayerToFirstPreviewLayer,
+  setFirstPreviewLayerToSelectedLayer,
   updateFlyout,
   updateIndexingStage,
 } from '../../actions';
@@ -35,7 +35,7 @@ function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
       dispatch<any>(addPreviewLayers(layerDescriptors));
     },
     promotePreviewLayers: () => {
-      dispatch<any>(setSelectedLayerToFirstPreviewLayer());
+      dispatch<any>(setFirstPreviewLayerToSelectedLayer());
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
       dispatch<any>(promotePreviewLayers());
     },

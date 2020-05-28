@@ -227,7 +227,7 @@ export function setSelectedLayer(layerId: string | null) {
   };
 }
 
-export function setSelectedLayerToFirstPreviewLayer() {
+export function setFirstPreviewLayerToSelectedLayer() {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const firstPreviewLayer = getLayerList(getState()).find((layer) => {
       return layer.isPreviewLayer();
