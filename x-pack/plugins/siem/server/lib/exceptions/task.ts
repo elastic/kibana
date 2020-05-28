@@ -32,10 +32,14 @@ interface PackagerTaskRunnerContext {
 
 export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
   const run = async () => {
-    context.logger.debug('HELLO WORLD');
     const [{ savedObjects }] = await context.core.getStartServices();
     const savedObjectsRepository = savedObjects.createInternalRepository();
-    context.logger.debug(savedObjectsRepository.get);
+    // TODO: add logic here to:
+    // 1. pull entire exception list
+    // 2. compile endpoint message for all supported schemaVersions
+    // 3. compare hashes to the latest hashes that appear in the artifact manifest
+    // 4. write new artifact record and update manifest, if necessary
+    // 5. clean up old artifacts, if necessary
   };
 
   const getTaskRunner = (runnerContext: PackagerTaskRunnerContext) => {
