@@ -213,13 +213,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
     }
 
-    if (plugins.taskManager) {
-      this.exceptionsPackagerTask = setupPackagerTask({
-        core,
-        logger: this.logger,
-        taskManager: plugins.taskManager,
-      });
-    }
+    this.exceptionsPackagerTask = setupPackagerTask({
+      core,
+      logger: this.logger,
+      taskManager: plugins.taskManager,
+    });
 
     const libs = compose(core, plugins, this.context.env.mode.prod);
     initServer(libs);
@@ -236,8 +234,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       agentService: plugins.ingestManager.agentService,
     });
 
-    if (plugins.taskManager && this.exceptionsPackagerTask) {
+    if (this.exceptionsPackagerTask) {
       this.exceptionsPackagerTask.getTaskRunner(plugins.taskManager).run();
+    } else {
+      this.logger.debug('Exceptions Packager not available.');
     }
 
     return {};
