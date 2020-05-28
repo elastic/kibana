@@ -23,7 +23,10 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
     async assertTotalDocumentCount(expectedTotalDocCount: number) {
       await retry.tryForTime(5000, async () => {
         const docCount = await testSubjects.getVisibleText('mlDataVisualizerTotalDocCount');
-        expect(docCount).to.eql(expectedTotalDocCount);
+        expect(docCount).to.eql(
+          expectedTotalDocCount,
+          `Expected total document count to be '${expectedTotalDocCount}' (got '${docCount}')`
+        );
       });
     },
 
@@ -34,7 +37,10 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
     async assertFieldsPanelsExist(expectedPanelCount: number) {
       const allPanels = await testSubjects.findAll('~mlDataVisualizerFieldsPanel');
-      expect(allPanels).to.have.length(expectedPanelCount);
+      expect(allPanels).to.have.length(
+        expectedPanelCount,
+        `Expectedfield panels count to be '${expectedPanelCount}' (got '${allPanels.length}')`
+      );
     },
 
     async assertFieldsPanelForTypesExist(fieldTypes: ML_JOB_FIELD_TYPES[]) {
@@ -50,7 +56,10 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
         const filteredCards = await testSubjects.findAll(
           `mlDataVisualizerFieldsPanel ${panelFieldTypes} > ~mlFieldDataCard`
         );
-        expect(filteredCards).to.have.length(expectedCardCount);
+        expect(filteredCards).to.have.length(
+          expectedCardCount,
+          `Expectedfield field card count for panels '${panelFieldTypes}' to be '${expectedCardCount}' (got '${filteredCards.length}')`
+        );
       });
     },
 
@@ -60,7 +69,10 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       );
       const searchBarInput = await searchBar.findByTagName('input');
       const actualSearchValue = await searchBarInput.getAttribute('value');
-      expect(actualSearchValue).to.eql(expectedSearchValue);
+      expect(actualSearchValue).to.eql(
+        expectedSearchValue,
+        `Expected search value for field types '${fieldTypes}' to be '${expectedSearchValue}' (got '${actualSearchValue}')`
+      );
     },
 
     async filterFieldsPanelWithSearchString(
@@ -91,7 +103,10 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
         'mlDataVisualizerFieldTypesSelect',
         'value'
       );
-      expect(actualTypeValue).to.eql(expectedTypeValue);
+      expect(actualTypeValue).to.eql(
+        expectedTypeValue,
+        `Expected fields panel type value to be '${expectedTypeValue}' (got '${actualTypeValue}')`
+      );
     },
 
     async setFieldsPanelTypeInputValue(

@@ -19,7 +19,10 @@ export function MachineLearningCustomUrlsProvider({ getService }: FtrProviderCon
         'mlJobCustomUrlLabelInput',
         'value'
       );
-      expect(actualCustomUrlLabel).to.eql(expectedValue);
+      expect(actualCustomUrlLabel).to.eql(
+        expectedValue,
+        `Expected custom url label to be '${expectedValue}' (got '${actualCustomUrlLabel}')`
+      );
     },
 
     async setCustomUrlLabel(customUrlsLabel: string) {
@@ -29,11 +32,16 @@ export function MachineLearningCustomUrlsProvider({ getService }: FtrProviderCon
       await this.assertCustomUrlLabelValue(customUrlsLabel);
     },
 
-    async assertCustomUrlItem(index: number, label: string) {
+    async assertCustomUrlItem(index: number, expectedLabel: string) {
       await testSubjects.existOrFail(`mlJobEditCustomUrlItem_${index}`);
-      expect(
-        await testSubjects.getAttribute(`mlJobEditCustomUrlLabelInput_${index}`, 'value')
-      ).to.eql(label);
+      const actualLabel = await testSubjects.getAttribute(
+        `mlJobEditCustomUrlLabelInput_${index}`,
+        'value'
+      );
+      expect(actualLabel).to.eql(
+        expectedLabel,
+        `Expected custom url item to be '${expectedLabel}' (got '${actualLabel}')`
+      );
     },
 
     /**

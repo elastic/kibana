@@ -35,7 +35,10 @@ export function MachineLearningJobWizardAdvancedProvider(
       const actualValue = await aceEditor.getValue(
         'mlAdvancedDatafeedQueryEditor > codeEditorContainer'
       );
-      expect(actualValue).to.eql(expectedValue);
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Expected datafeed query editor value to be '${expectedValue}' (got '${actualValue}')`
+      );
     },
 
     async assertQueryDelayInputExists() {
@@ -44,7 +47,10 @@ export function MachineLearningJobWizardAdvancedProvider(
 
     async assertQueryDelayValue(expectedValue: string) {
       const actualQueryDelay = await this.getValueOrPlaceholder('mlJobWizardInputQueryDelay');
-      expect(actualQueryDelay).to.eql(expectedValue);
+      expect(actualQueryDelay).to.eql(
+        expectedValue,
+        `Expected query delay value to be '${expectedValue}' (got '${actualQueryDelay}')`
+      );
     },
 
     async setQueryDelay(queryDelay: string) {
@@ -61,7 +67,10 @@ export function MachineLearningJobWizardAdvancedProvider(
 
     async assertFrequencyValue(expectedValue: string) {
       const actualFrequency = await this.getValueOrPlaceholder('mlJobWizardInputFrequency');
-      expect(actualFrequency).to.eql(expectedValue);
+      expect(actualFrequency).to.eql(
+        expectedValue,
+        `Expected frquency value to be '${expectedValue}' (got '${actualFrequency}')`
+      );
     },
 
     async setFrequency(frequency: string) {
@@ -78,7 +87,10 @@ export function MachineLearningJobWizardAdvancedProvider(
 
     async assertScrollSizeValue(expectedValue: string) {
       const actualScrollSize = await this.getValueOrPlaceholder('mlJobWizardInputScrollSize');
-      expect(actualScrollSize).to.eql(expectedValue);
+      expect(actualScrollSize).to.eql(
+        expectedValue,
+        `Expected scroll size value to be '${expectedValue}' (got '${actualScrollSize}')`
+      );
     },
 
     async setScrollSize(scrollSize: string) {
@@ -97,7 +109,10 @@ export function MachineLearningJobWizardAdvancedProvider(
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlTimeFieldNameSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected time field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
     },
 
     async selectTimeField(identifier: string) {
@@ -113,7 +128,10 @@ export function MachineLearningJobWizardAdvancedProvider(
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlCategorizationFieldNameSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected categorization field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
     },
 
     async selectCategorizationField(identifier: string) {
@@ -129,7 +147,10 @@ export function MachineLearningJobWizardAdvancedProvider(
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlSummaryCountFieldNameSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected summary count field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
     },
 
     async selectSummaryCountField(identifier: string) {
@@ -160,7 +181,10 @@ export function MachineLearningJobWizardAdvancedProvider(
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlAdvancedFunctionSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected detector function selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
     },
 
     async selectDetectorFunction(identifier: string) {
@@ -176,7 +200,10 @@ export function MachineLearningJobWizardAdvancedProvider(
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlAdvancedFieldSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected detector field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
     },
 
     async selectDetectorField(identifier: string) {
@@ -192,7 +219,10 @@ export function MachineLearningJobWizardAdvancedProvider(
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlAdvancedByFieldSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected detector by field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
     },
 
     async selectDetectorByField(identifier: string) {
@@ -208,7 +238,10 @@ export function MachineLearningJobWizardAdvancedProvider(
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlAdvancedOverFieldSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected detector over field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
     },
 
     async selectDetectorOverField(identifier: string) {
@@ -224,7 +257,10 @@ export function MachineLearningJobWizardAdvancedProvider(
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlAdvancedPartitionFieldSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected detector partition field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
     },
 
     async selectDetectorPartitionField(identifier: string) {
@@ -240,7 +276,10 @@ export function MachineLearningJobWizardAdvancedProvider(
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlAdvancedExcludeFrequentSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected detector exclude frequent selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
     },
 
     async selectDetectorExcludeFrequent(identifier: string) {
@@ -257,7 +296,10 @@ export function MachineLearningJobWizardAdvancedProvider(
         'mlAdvancedDetectorDescriptionInput',
         'value'
       );
-      expect(actualDetectorDescription).to.eql(expectedValue);
+      expect(actualDetectorDescription).to.eql(
+        expectedValue,
+        `Expected detector description value to be '${expectedValue}' (got '${actualDetectorDescription}')`
+      );
     },
 
     async setDetectorDescription(description: string) {
@@ -287,13 +329,19 @@ export function MachineLearningJobWizardAdvancedProvider(
       const actualDetectorIdentifier = await testSubjects.getVisibleText(
         `mlAdvancedDetector ${detectorIndex} > mlDetectorIdentifier`
       );
-      expect(actualDetectorIdentifier).to.eql(expectedDetectorName);
+      expect(actualDetectorIdentifier).to.eql(
+        expectedDetectorName,
+        `Expected detector name to be '${expectedDetectorName}' (got '${actualDetectorIdentifier}')`
+      );
 
       if (expectedDetectorDescription !== undefined) {
         const actualDetectorDescription = await testSubjects.getVisibleText(
           `mlAdvancedDetector ${detectorIndex} > mlDetectorDescription`
         );
-        expect(actualDetectorDescription).to.eql(expectedDetectorDescription);
+        expect(actualDetectorDescription).to.eql(
+          expectedDetectorDescription,
+          `Expected detector description to be '${expectedDetectorDescription}' (got '${actualDetectorDescription}')`
+        );
       }
     },
 
