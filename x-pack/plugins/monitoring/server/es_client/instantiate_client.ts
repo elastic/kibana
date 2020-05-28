@@ -24,6 +24,10 @@ export function instantiateClient(
   ) => ICustomClusterClient
 ) {
   const isMonitoringCluster = hasMonitoringCluster(elasticsearchConfig);
+  // elasticsearch_client_config seems to assume we need an array here
+  if (isMonitoringCluster && !Array.isArray(elasticsearchConfig.hosts)) {
+    elasticsearchConfig.hosts = [elasticsearchConfig.hosts];
+  }
   const cluster = createClient('monitoring', {
     ...(isMonitoringCluster ? elasticsearchConfig : {}),
     plugins: [monitoringBulk],
