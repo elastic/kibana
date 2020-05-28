@@ -281,7 +281,6 @@ export function getIndexPatternDatasource({
     ) => {
       render(
         <LayerPanel
-          state={props.state}
           onChangeIndexPattern={(indexPatternId) => {
             changeLayerIndexPattern({
               savedObjectsClient,
