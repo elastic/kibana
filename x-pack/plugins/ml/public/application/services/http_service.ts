@@ -8,12 +8,11 @@ import { Observable } from 'rxjs';
 import { HttpFetchOptionsWithPath, HttpFetchOptions, HttpStart } from 'kibana/public';
 import { getHttp } from '../util/dependency_cache';
 
-function getResultHeaders(headers: HeadersInit): HeadersInit {
+function getResultHeaders(headers: HeadersInit) {
   return {
-    asSystemRequest: true,
     'Content-Type': 'application/json',
     ...headers,
-  } as HeadersInit;
+  };
 }
 
 function getFetchOptions(
@@ -25,6 +24,7 @@ function getFetchOptions(
   return {
     path: options.path,
     fetchOptions: {
+      asSystemRequest: true,
       credentials: 'same-origin',
       method: options.method || 'GET',
       ...(options.body ? { body: options.body } : {}),
@@ -111,7 +111,6 @@ export class HttpService {
 
   private getResultHeaders(headers: HeadersInit): HeadersInit {
     return {
-      asSystemRequest: true,
       'Content-Type': 'application/json',
       ...headers,
     } as HeadersInit;
@@ -126,6 +125,7 @@ export class HttpService {
     return {
       path: options.path,
       fetchOptions: {
+        asSystemRequest: true,
         credentials: 'same-origin',
         method: options.method || 'GET',
         ...(options.body ? { body: options.body } : {}),

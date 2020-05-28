@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes } from 'src/core/public';
 import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../constants';
 
 export type AgentType =
@@ -26,7 +25,7 @@ export interface AgentAction extends NewAgentAction {
   created_at: string;
 }
 
-export interface AgentActionSOAttributes extends SavedObjectAttributes {
+export interface AgentActionSOAttributes {
   type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
   sent_at?: string;
   created_at: string;
@@ -62,7 +61,7 @@ export interface AgentEvent extends NewAgentEvent {
   id: string;
 }
 
-export interface AgentEventSOAttributes extends NewAgentEvent, SavedObjectAttributes {}
+export type AgentEventSOAttributes = NewAgentEvent;
 
 type MetadataValue = string | AgentMetadata;
 
@@ -92,6 +91,6 @@ export interface Agent extends AgentBase {
   status?: string;
 }
 
-export interface AgentSOAttributes extends AgentBase, SavedObjectAttributes {
+export interface AgentSOAttributes extends AgentBase {
   current_error_events?: string;
 }
