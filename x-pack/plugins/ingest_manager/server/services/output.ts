@@ -35,7 +35,6 @@ class OutputService {
     }
 
     return {
-      id: outputs.saved_objects[0].id,
       ...outputs.saved_objects[0].attributes,
     };
   }
@@ -88,7 +87,6 @@ class OutputService {
     const newSo = await soClient.create<Output>(SAVED_OBJECT_TYPE, output as Output, options);
 
     return {
-      id: newSo.id,
       ...newSo.attributes,
     };
   }
@@ -101,7 +99,6 @@ class OutputService {
     }
 
     return {
-      id: outputSO.id,
       ...outputSO.attributes,
     };
   }
@@ -124,7 +121,6 @@ class OutputService {
     return {
       items: outputs.saved_objects.map<Output>((outputSO) => {
         return {
-          id: outputSO.id,
           ...outputSO.attributes,
         };
       }),
