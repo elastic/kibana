@@ -44,7 +44,7 @@ async function getSpacesUsage(
   spacesAvailable: boolean
 ) {
   if (!spacesAvailable) {
-    return {} as UsageStats;
+    return null;
   }
 
   const knownFeatureIds = features.getFeatures().map((feature) => feature.id);
@@ -76,7 +76,7 @@ async function getSpacesUsage(
     });
   } catch (err) {
     if (err.status === 404) {
-      return {} as UsageStats;
+      return null;
     }
 
     throw err;
