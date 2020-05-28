@@ -28,6 +28,7 @@ export interface AgentAction extends NewAgentAction {
 export interface AgentActionSOAttributes {
   type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
   sent_at?: string;
+  timestamp?: string;
   created_at: string;
   agent_id: string;
   data?: string;
