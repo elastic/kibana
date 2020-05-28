@@ -20,6 +20,10 @@ import { ResolverEvent } from '../../../common/endpoint/types';
 import * as event from '../../../common/endpoint/models/event';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
+import { useHistory } from 'react-router-dom';
+// eslint-disable-next-line import/no-nodejs-modules
+import querystring from 'querystring';
+import { urlFromQueryParams } from '../../endpoint_alerts/view/url_from_query_params';
 
 const HorizontalRule = memo(function HorizontalRule() {
   return (
@@ -47,6 +51,32 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
     event: ResolverEvent;
   }
 
+  const history = useHistory();
+  const urlSearch = location.search;
+  const queryParams: {crumbId: string, crumbEvent: string} = useMemo(() => { 
+    return Object.assign({crumbId: '', crumbEvent: ''}, querystring.parse(urlSearch.slice(1))) },
+  [urlSearch]);
+
+  const {crumbId, crumbEvent} = queryParams;
+  
+  const whichTableViewAndBreadcrumbsToRender = useMemo(()=>{
+
+  },[crumbId, crumbEvent])
+
+  /**
+   * This updates both the breadcrumb nav and the table view to go along with it
+   */
+  const updateCrumbs = useCallback(
+    (newCrumbs) => {
+      const newQueryParms = Object.assign(queryParams, newCrumbs);
+      const relativeURL = urlFromQueryParams(newQueryParms);
+      return history.push(relativeURL);
+    },
+    [history, queryParams]
+  );
+
+  console.log(queryParams);
+  
   const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
   const { timestamp } = useContext(SideEffectContext);
 
