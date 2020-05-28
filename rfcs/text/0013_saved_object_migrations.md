@@ -117,6 +117,11 @@ migrations.](https://github.com/elastic/kibana/blob/75444a9f1879c5702f9f2b8ad4a7
    downtime window, and slightly improve the reliability is more important
    than (2.7) _maintain read-only functionality during the downtime
    window_. See (4.5.1).
+4. A saved object type (and it's associated migrations) will only ever be
+   owned by one plugin. If pluginA registers saved object type `plugin_a_type`
+   then pluginB must never register that same type, even if pluginA is
+   disabled. Although we cannot enforce it on third-party plugins, breaking
+   this assumption may lead to data loss.
 
 ## 4.1 Discover and remedy potential failures before any downtime
 
