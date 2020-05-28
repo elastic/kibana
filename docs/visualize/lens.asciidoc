@@ -68,7 +68,7 @@ If you'd like to use a visualization type that is not suggested, click the visua
 then select a new one. 
 
 [role="screenshot"]
-image::images/lens_viz-types.png[]
+image::images/lens_viz_types.png[]
 
 When there is an exclamation point (!)
 next to a visualization type, Lens is unable to transfer your data, but
