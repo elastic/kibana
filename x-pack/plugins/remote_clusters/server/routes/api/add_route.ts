@@ -36,7 +36,7 @@ export const register = (deps: RouteDependencies): void => {
     response
   ) => {
     try {
-      const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
+      const callAsCurrentUser = ctx.core.elasticsearch.legacy.client.callAsCurrentUser;
 
       const { name } = request.body;
 

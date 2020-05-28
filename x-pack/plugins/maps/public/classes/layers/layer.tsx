@@ -79,6 +79,8 @@ export interface ILayer {
   }): ReactElement<any> | null;
   getInFlightRequestTokens(): symbol[];
   getPrevRequestToken(dataId: string): symbol | undefined;
+  destroy: () => void;
+  isPreviewLayer: () => boolean;
 }
 export type Footnote = {
   icon: ReactElement<any>;
@@ -176,6 +178,10 @@ export class AbstractLayer implements ILayer {
 
   isJoinable(): boolean {
     return this.getSource().isJoinable();
+  }
+
+  isPreviewLayer(): boolean {
+    return !!this._descriptor.__isPreviewLayer;
   }
 
   supportsElasticsearchFilters(): boolean {

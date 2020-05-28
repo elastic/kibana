@@ -42,7 +42,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
       },
     },
     async (context, req, res) => {
-      const requestClient = context.core.elasticsearch.dataClient;
+      const requestClient = context.core.elasticsearch.legacy.client;
       const { fromDate, toDate, timeFieldName, field, dslQuery } = req.body;
 
       try {
