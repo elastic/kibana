@@ -119,6 +119,7 @@ export async function installPackage(options: {
       savedObjectsClient,
       pkgName,
       pkgVersion,
+      paths,
     }),
     installPipelines(registryPackageInfo, paths, callCluster),
     // index patterns and ilm policies are not currently associated with a particular package
@@ -187,13 +188,14 @@ export async function installKibanaAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion: string;
+  paths: string[];
 }) {
-  const { savedObjectsClient, pkgName, pkgVersion } = options;
+  const { savedObjectsClient, paths } = options;
 
   // Only install Kibana assets during package installation.
   const kibanaAssetTypes = Object.values(KibanaAssetType);
   const installationPromises = kibanaAssetTypes.map(async (assetType) =>
-    installKibanaSavedObjects({ savedObjectsClient, pkgName, pkgVersion, assetType })
+    installKibanaSavedObjects({ savedObjectsClient, assetType, paths })
   );
 
   // installKibanaSavedObjects returns AssetReference[], so .map creates AssetReference[][]
@@ -238,19 +240,16 @@ export async function saveInstallationReferences(options: {
 
 async function installKibanaSavedObjects({
   savedObjectsClient,
-  pkgName,
-  pkgVersion,
   assetType,
+  paths,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  pkgName: string;
-  pkgVersion: string;
   assetType: KibanaAssetType;
+  paths: string[];
 }) {
-  const isSameType = ({ path }: Registry.ArchiveEntry) =>
-    assetType === Registry.pathParts(path).type;
-  const paths = await Registry.getArchiveInfo(pkgName, pkgVersion, isSameType);
-  const toBeSavedObjects = await Promise.all(paths.map(getObject));
+  const isSameType = (path: string) => assetType === Registry.pathParts(path).type;
+  const pathsOfType = paths.filter((path) => isSameType(path));
+  const toBeSavedObjects = await Promise.all(pathsOfType.map(getObject));
 
   if (toBeSavedObjects.length === 0) {
     return [];
