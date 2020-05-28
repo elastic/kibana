@@ -654,7 +654,7 @@ export class AlertsClient {
     );
     if (invalidActionGroups.length) {
       throw Boom.badRequest(
-        i18n.translate('xpack.alerting.alertsClient.validateActions.invalidGroups', {
+        i18n.translate('xpack.alerts.alertsClient.validateActions.invalidGroups', {
           defaultMessage: 'Invalid action groups: {groups}',
           values: {
             groups: invalidActionGroups.join(', '),

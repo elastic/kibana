@@ -31,7 +31,7 @@ export async function loadAlertType({
   );
   if (isNone(maybeAlertType)) {
     throw new Error(
-      i18n.translate('xpack.alerting.loadAlertType.missingAlertTypeError', {
+      i18n.translate('xpack.alerts.loadAlertType.missingAlertTypeError', {
         defaultMessage: 'Alert type "{id}" is not registered.',
         values: {
           id,

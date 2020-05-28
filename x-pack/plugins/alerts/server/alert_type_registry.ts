@@ -32,7 +32,7 @@ export class AlertTypeRegistry {
   public register(alertType: AlertType) {
     if (this.has(alertType.id)) {
       throw new Error(
-        i18n.translate('xpack.alerting.alertTypeRegistry.register.duplicateAlertTypeError', {
+        i18n.translate('xpack.alerts.alertTypeRegistry.register.duplicateAlertTypeError', {
           defaultMessage: 'Alert type "{id}" is already registered.',
           values: {
             id: alertType.id,
@@ -55,7 +55,7 @@ export class AlertTypeRegistry {
   public get(id: string): AlertType {
     if (!this.has(id)) {
       throw Boom.badRequest(
-        i18n.translate('xpack.alerting.alertTypeRegistry.get.missingAlertTypeError', {
+        i18n.translate('xpack.alerts.alertTypeRegistry.get.missingAlertTypeError', {
           defaultMessage: 'Alert type "{id}" is not registered.',
           values: {
             id,

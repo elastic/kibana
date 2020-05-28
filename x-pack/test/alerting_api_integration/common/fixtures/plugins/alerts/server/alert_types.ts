@@ -12,7 +12,7 @@ import { AlertType, AlertExecutorOptions } from '../../../../../../../plugins/al
 
 export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
-  { alerting }: Pick<FixtureSetupDeps, 'alerting'>
+  { alerts }: Pick<FixtureSetupDeps, 'alerts'>
 ) {
   const clusterClient = core.elasticsearch.adminClient;
   const alwaysFiringAlertType: AlertType = {
@@ -286,13 +286,13 @@ export function defineAlertTypes(
     },
     async executor(opts: AlertExecutorOptions) {},
   };
-  alerting.registerType(alwaysFiringAlertType);
-  alerting.registerType(cumulativeFiringAlertType);
-  alerting.registerType(neverFiringAlertType);
-  alerting.registerType(failingAlertType);
-  alerting.registerType(validationAlertType);
-  alerting.registerType(authorizationAlertType);
-  alerting.registerType(noopAlertType);
-  alerting.registerType(onlyContextVariablesAlertType);
-  alerting.registerType(onlyStateVariablesAlertType);
+  alerts.registerType(alwaysFiringAlertType);
+  alerts.registerType(cumulativeFiringAlertType);
+  alerts.registerType(neverFiringAlertType);
+  alerts.registerType(failingAlertType);
+  alerts.registerType(validationAlertType);
+  alerts.registerType(authorizationAlertType);
+  alerts.registerType(noopAlertType);
+  alerts.registerType(onlyContextVariablesAlertType);
+  alerts.registerType(onlyStateVariablesAlertType);
 }

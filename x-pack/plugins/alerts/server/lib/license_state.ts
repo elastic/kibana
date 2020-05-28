@@ -43,10 +43,10 @@ export class LicenseState {
         showAppLink: true,
         enableAppLink: false,
         message: i18n.translate(
-          'xpack.alerting.serverSideErrors.unavailableLicenseInformationErrorMessage',
+          'xpack.alerts.serverSideErrors.unavailableLicenseInformationErrorMessage',
           {
             defaultMessage:
-              'Alerting is unavailable - license information is not available at this time.',
+              'Alerts is unavailable - license information is not available at this time.',
           }
         ),
       };
