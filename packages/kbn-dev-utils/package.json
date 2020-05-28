@@ -23,7 +23,7 @@
     "tslib": "^1.9.3"
   },
   "devDependencies": {
-    "typescript": "3.7.2",
+    "typescript": "3.9.3",
     "@kbn/expect": "1.0.0",
     "chance": "1.0.18"
   }

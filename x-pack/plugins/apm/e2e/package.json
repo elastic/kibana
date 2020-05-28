@@ -19,7 +19,7 @@
     "p-limit": "^2.3.0",
     "p-retry": "^4.2.0",
     "ts-loader": "^7.0.4",
-    "typescript": "3.9.2",
+    "typescript": "3.9.3",
     "wait-on": "^5.0.0",
     "webpack": "^4.43.0",
     "yargs": "^15.3.1"

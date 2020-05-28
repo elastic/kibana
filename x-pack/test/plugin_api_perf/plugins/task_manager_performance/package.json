@@ -17,7 +17,7 @@
     "pretty-ms": "5.0.0"
   },
   "devDependencies": {
-    "typescript": "3.7.2"
+    "typescript": "3.9.3"
   },
   "license": "Apache-2.0"
 }
