@@ -115,10 +115,11 @@ const ActionsColumnContent = euiStyled(LogEntryColumnContent)`
 const ButtonWrapper = euiStyled.div`
   background: ${(props) => props.theme.eui.euiColorPrimary};
   border-radius: 50%;
+  padding: 4px;
+  transform: translateY(-6px);
 `;
 
 // this prevents the button from influencing the line height
 const AbsoluteWrapper = euiStyled.div`
-  overflow: hidden;
   position: absolute;
 `;
