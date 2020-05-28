@@ -22,7 +22,6 @@ import { TimelineEpicDependencies } from './epic';
 import { isNotNull } from './helpers';
 import { addTimeline } from '../../../common/lib/local_storage';
 
-const timelinePageIds = ['alerts-table', 'signals-page'];
 const timelineActionTypes = [
   removeColumn.type,
   upsertColumn.type,
@@ -33,7 +32,8 @@ const timelineActionTypes = [
 ];
 
 const isPageTimeline = (timelineId: string | undefined): boolean =>
-  !!(timelineId && timelinePageIds.includes(timelineId));
+  // Is not a flyout timeline
+  !(timelineId && timelineId.toLowerCase().startsWith('timeline'));
 
 export const createTimelineLocalStorageEpic = <State>(): Epic<
   Action,
