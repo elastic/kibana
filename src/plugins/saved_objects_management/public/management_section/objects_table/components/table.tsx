@@ -54,7 +54,7 @@ export interface TableProps {
   filterOptions: any[];
   canDelete: boolean;
   onDelete: () => void;
-  onActionRefresh: () => void;
+  onActionRefresh: (object: SavedObjectWithMetadata) => void;
   onExport: (includeReferencesDeep: boolean) => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   pageIndex: number;
@@ -278,7 +278,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                   });
                   const { refreshOnFinish = () => false } = action;
                   if (refreshOnFinish()) {
-                    onActionRefresh();
+                    onActionRefresh(object);
                   }
                 });
 

@@ -41,3 +41,15 @@ export async function findObjects(
 
   return keysToCamelCaseShallow(response) as SavedObjectsFindResponse;
 }
+
+export async function findObject(
+  http: HttpStart,
+  type: string,
+  id: string
+): Promise<SavedObjectWithMetadata> {
+  const response = await http.get<Record<string, any>>(
+    `/api/kibana/management/saved_objects/${encodeURIComponent(type)}/${encodeURIComponent(id)}`
+  );
+
+  return response as SavedObjectWithMetadata;
+}

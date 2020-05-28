@@ -65,6 +65,7 @@ import {
   fetchExportObjects,
   fetchExportByTypeAndSearch,
   findObjects,
+  findObject,
   extractExportDetails,
   SavedObjectsExportResultDetails,
 } from '../../lib';
@@ -157,7 +158,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   componentWillUnmount() {
     this._isMounted = false;
-    this.debouncedFetch.cancel();
+    this.debouncedFetchObjects.cancel();
   }
 
   fetchCounts = async () => {
@@ -202,15 +203,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   fetchSavedObjects = () => {
-    this.setState(
-      {
-        isSearching: true,
-      },
-      this.debouncedFetch
-    );
+    this.setState({ isSearching: true }, this.debouncedFetchObjects);
   };
 
-  debouncedFetch = debounce(async () => {
+  fetchSavedObject = (type: string, id: string) => {
+    this.setState({ isSearching: true }, () => this.debouncedFetchObject(type, id));
+  };
+
+  debouncedFetchObjects = debounce(async () => {
     const { activeQuery: query, page, perPage } = this.state;
     const { notifications, http, allowedTypes } = this.props;
     const { queryText, visibleTypes } = parseQuery(query);
@@ -261,8 +261,46 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }
   }, 300);
 
-  refreshData = async () => {
+  debouncedFetchObject = debounce(async (type: string, id: string) => {
+    const { notifications, http } = this.props;
+    try {
+      const resp = await findObject(http, type, id);
+      if (!this._isMounted) {
+        return;
+      }
+
+      this.setState(({ savedObjects, filteredItemCount }) => {
+        const refreshedSavedObjects = savedObjects.map((object) =>
+          object.type === type && object.id === id ? resp : object
+        );
+        return {
+          savedObjects: refreshedSavedObjects,
+          filteredItemCount,
+          isSearching: false,
+        };
+      });
+    } catch (error) {
+      if (this._isMounted) {
+        this.setState({
+          isSearching: false,
+        });
+      }
+      notifications.toasts.addDanger({
+        title: i18n.translate(
+          'savedObjectsManagement.objectsTable.unableFindSavedObjectNotificationMessage',
+          { defaultMessage: 'Unable to find saved object' }
+        ),
+        text: `${error}`,
+      });
+    }
+  }, 300);
+
+  refreshObjects = async () => {
     await Promise.all([this.fetchSavedObjects(), this.fetchCounts()]);
+  };
+
+  refreshObject = async ({ type, id }: SavedObjectWithMetadata) => {
+    await this.fetchSavedObject(type, id);
   };
 
   onSelectionChanged = (selection: SavedObjectWithMetadata[]) => {
@@ -731,7 +769,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         <Header
           onExportAll={() => this.setState({ isShowingExportAllOptionsModal: true })}
           onImport={this.showImportFlyout}
-          onRefresh={this.refreshData}
+          onRefresh={this.refreshObjects}
           filteredCount={filteredItemCount}
         />
         <EuiSpacer size="xs" />
@@ -748,7 +786,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onExport={this.onExport}
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
-            onActionRefresh={this.refreshData}
+            onActionRefresh={this.refreshObject}
             goInspectObject={this.props.goInspectObject}
             pageIndex={page}
             pageSize={perPage}
