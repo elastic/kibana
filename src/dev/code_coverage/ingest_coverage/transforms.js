@@ -105,21 +105,18 @@ const truncateMsg = (msg) => (msg.length > size ? `${msg.slice(0, 50)}...` : msg
 export const itemizeVcs = (vcsInfo) => (obj) => {
   const [branch, sha, author, commitMsg] = vcsInfo;
 
-  // Extra logging
-  console.log(`\n### VCS INFO:`);
-  console.dir(vcsInfo);
-  console.log('');
-
   const vcs = {
     branch,
     sha,
     author,
     vcsUrl: `https://github.com/elastic/kibana/commit/${sha}`,
   };
-  return fromNullable(commitMsg).fold(always({ ...obj, vcs }), (msg) => {
-    const vcsInfo = { ...vcs, commitMsg: truncateMsg(msg) };
-    return { ...obj, vcsInfo };
-  });
+  const res = fromNullable(commitMsg).fold(always({ ...obj, vcs }), (msg) => ({
+    ...obj,
+    vcs: { ...vcs, commitMsg: truncateMsg(msg) },
+  }));
+
+  return res;
 };
 export const testRunner = (obj) => {
   const { jsonSummaryPath } = obj;
