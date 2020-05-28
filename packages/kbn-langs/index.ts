@@ -17,4 +17,6 @@
  * under the License.
  */
 
-export * from './xjson';
+import * as XJsonGrammar from './xjson';
+
+export { XJsonGrammar };

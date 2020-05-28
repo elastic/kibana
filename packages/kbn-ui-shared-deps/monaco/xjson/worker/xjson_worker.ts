@@ -17,7 +17,18 @@
  * under the License.
  */
 
-// This export also registers the language globally
-export { registerGrammarChecker } from './language';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import { XJsonGrammar } from '@kbn/langs';
 
-export { ID } from './constants';
+export class XJsonWorker {
+  constructor(private ctx: monaco.worker.IWorkerContext) {}
+  private parser: any;
+
+  async parse() {
+    if (!this.parser) {
+      this.parser = XJsonGrammar.createParser();
+    }
+    const [model] = this.ctx.getMirrorModels();
+    return this.parser(model.getValue());
+  }
+}

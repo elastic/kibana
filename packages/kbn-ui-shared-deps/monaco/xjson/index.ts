@@ -17,35 +17,8 @@
  * under the License.
  */
 
-const path = require('path');
-const webpack = require('webpack');
+// This import also registers the language globally
+import { registerGrammarChecker } from './language';
+import { ID } from './constants';
 
-const createConfig = (lang) => ({
-  mode: 'production',
-  entry: path.resolve(__dirname, `./worker/${lang}.worker.ts`),
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.amd.worker.js',
-  },
-  resolve: {
-    modules: ['node_modules'],
-    extensions: ['.js', '.ts', '.tsx'],
-  },
-  module: {
-    rules: [
-      {
-        test: /\.ts$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['@babel/typescript'],
-          },
-        },
-      },
-    ],
-  },
-  plugins: [new webpack.BannerPlugin('/* eslint-disable */')],
-});
-
-module.exports = createConfig('xjson');
+export const XJsonLang = { ID, registerGrammarChecker };

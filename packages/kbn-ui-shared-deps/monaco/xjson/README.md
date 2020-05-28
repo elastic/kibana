@@ -19,7 +19,7 @@ the "raw-loader".
 See the related ./webpack.xjson-worker.config.js file that is runnable with Kibana's webpack with:
 
 ```sh
-yarn webpack --config ./src/plugins/es_ui_shared/__packages_do_not_import__/monaco/xjson_lang/webpack.xjson-worker.config.js
+yarn webpack --config ./monaco/xjson/webpack.worker.config.js
 ```
 
 ### ./lexer_rules
@@ -38,7 +38,3 @@ the grammar parser.
 ### ./worker_proxy_service
 
 A stateful mechanism for holding a reference to the Monaco-provided proxy getter.
-
-### ../grammar
-
-The parser logic that lives inside of the worker. Takes in a string and returns annotations for XJSON.

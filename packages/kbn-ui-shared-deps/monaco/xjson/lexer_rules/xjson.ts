@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { monaco } from '@kbn/ui-shared-deps/monaco';
+import { monaco } from '../../';
 import { ID } from '../constants';
 import './painless';
 import './esql';

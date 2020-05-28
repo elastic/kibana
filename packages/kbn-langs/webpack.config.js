@@ -28,6 +28,7 @@ module.exports = {
     modules: ['node_modules'],
     extensions: ['.js', '.ts', '.tsx'],
   },
+  stats: 'errors-only',
   module: {
     rules: [
       {

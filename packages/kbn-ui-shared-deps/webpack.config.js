@@ -79,7 +79,18 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
-        include: [require.resolve('./monaco.ts')],
+        include: [require.resolve('./monaco/index.ts')],
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+            },
+          },
+        ],
+      },
+      {
+        test: /\.ts$/,
         use: [
           {
             loader: 'babel-loader',
@@ -96,6 +107,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     alias: {
       moment: MOMENT_SRC,
     },
+    extensions: ['.js', '.ts'],
   },
 
   optimization: {

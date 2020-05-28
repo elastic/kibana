@@ -24,12 +24,9 @@ const supportsColor = require('supports-color');
 const { ToolingLog, withProcRunner, pickLevelFromFlags } = require('@kbn/dev-utils');
 
 const TARGET_BUILD_DIR = path.resolve(__dirname, '../target');
-const WORKER_BUILD_DIRS = [path.resolve(__dirname, '../xjson/monaco')];
 const ROOT_DIR = path.resolve(__dirname, '../');
 
-const flags = getopts(process.argv, {
-  boolean: ['watch', 'dev', 'help', 'debug'],
-});
+const flags = getopts(process.argv);
 
 const log = new ToolingLog({
   level: pickLevelFromFlags(flags),
@@ -41,27 +38,11 @@ withProcRunner(log, async (proc) => {
 
   await del(TARGET_BUILD_DIR);
 
-  for (const workerBuildDir of WORKER_BUILD_DIRS) {
-    await del(`${workerBuildDir}/dist`);
-  }
-
   const cwd = ROOT_DIR;
   const env = { ...process.env };
   if (supportsColor.stdout) {
     env.FORCE_COLOR = 'true';
   }
-
-  await Promise.all([
-    WORKER_BUILD_DIRS.map((buildDir) =>
-      proc.run(`webpack  ${buildDir}`, {
-        cmd: 'webpack',
-        args: ['--config', `${buildDir}/webpack.worker.config.js`],
-        wait: true,
-        env,
-        cwd,
-      })
-    ),
-  ]);
 
   await proc.run('webpack  ', {
     cmd: 'webpack',

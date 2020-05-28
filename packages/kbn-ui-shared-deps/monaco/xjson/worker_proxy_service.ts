@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { monaco } from '@kbn/ui-shared-deps/monaco';
+import { XJsonGrammar } from '@kbn/langs';
+import { monaco } from '../';
 import { XJsonWorker } from './worker';
-import { AnnoTypes } from '../grammar';
 import { ID } from './constants';
 
 export interface Annotation {
   name?: string;
-  type: AnnoTypes;
+  type: XJsonGrammar.AnnoTypes;
   text: string;
   at: number;
 }
@@ -46,7 +46,7 @@ export class WorkerProxyService {
   }
 
   public setup() {
-    this.worker = monaco.editor.createWebWorker({ label: ID });
+    this.worker = monaco.editor.createWebWorker({ label: ID, moduleId: '' });
   }
 
   public stop() {

@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { monaco } from './monaco';
+export { createParser, AnnoTypes } from './grammar';

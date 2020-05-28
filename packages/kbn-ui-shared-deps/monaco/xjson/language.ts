@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import 'monaco-editor/esm/vs/editor/contrib/hover/hover';
-import 'monaco-editor/esm/vs/editor/contrib/wordOperations/wordOperations';
-import { monaco } from '@kbn/ui-shared-deps/monaco';
+import { monaco } from '../';
 import { WorkerProxyService } from './worker_proxy_service';
 import './lexer_rules';
 import { ID } from './constants';
 // @ts-ignore
-import workerSrc from '!!raw-loader!./dist/bundle.amd.worker.js';
+import workerSrc from '!!raw-loader!./dist/bundle.editor.worker.js';
 
 const wps = new WorkerProxyService();
 
