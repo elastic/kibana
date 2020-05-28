@@ -4,24 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ImmutableReducer } from '../common/store';
-import { AppAction } from '../common/store/actions';
 import { SiemPageName } from '../app/types';
-import { ManagementState } from './store/types';
 
 /**
  * The type for the management store global namespace. Used mostly internally to reference
  * the type while defining more complex interfaces/types
  */
 export type ManagementStoreGlobalNamespace = 'management';
-
-export interface ManagementPluginState {
-  management: ManagementState;
-}
-
-export interface ManagementPluginReducer {
-  management: ImmutableReducer<ManagementState, AppAction>;
-}
 
 /**
  * The management list of sub-tabs. Changes to these will impact the Router routes.

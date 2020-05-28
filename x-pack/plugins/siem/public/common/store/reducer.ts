@@ -19,7 +19,7 @@ import {
 } from '../../endpoint_alerts/store';
 import { EndpointHostsPluginState, EndpointHostsPluginReducer } from '../../endpoint_hosts/store';
 
-import { ManagementPluginReducer, ManagementPluginState } from '../../management/types';
+import { ManagementPluginReducer, ManagementPluginState } from '../../management/store/types';
 
 export interface State
   extends HostsPluginState,

@@ -6,6 +6,8 @@
 
 import { Immutable } from '../../../common/endpoint/types';
 import { PolicyDetailsState, PolicyListState } from '../pages/policy/types';
+import { ImmutableReducer } from '../../common/store';
+import { AppAction } from '../../common/store/actions';
 
 /**
  * Redux store state for the Management section
@@ -13,4 +15,12 @@ import { PolicyDetailsState, PolicyListState } from '../pages/policy/types';
 export interface ManagementState {
   policyDetails: Immutable<PolicyDetailsState>;
   policyList: Immutable<PolicyListState>;
+}
+
+export interface ManagementPluginState {
+  management: ManagementState;
+}
+
+export interface ManagementPluginReducer {
+  management: ImmutableReducer<ManagementState, AppAction>;
 }
