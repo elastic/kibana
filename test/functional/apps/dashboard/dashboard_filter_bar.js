@@ -194,15 +194,22 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.loadSavedDashboard('dashboard with bad filters');
       });
 
-      it('bad filters are loaded in error mode', async function () {
+      it('filter with non-existent index pattern renders in error mode', async function () {
+        const hasBadFieldFilter = await filterBar.hasFilter('name', 'error', false);
+        expect(hasBadFieldFilter).to.be(true);
+      });
+
+      it('filter with non-existent field renders in error mode', async function () {
         const hasBadFieldFilter = await filterBar.hasFilter('baad-field', 'error', false);
         expect(hasBadFieldFilter).to.be(true);
+      });
 
-        const hasBadIndexPatternFilter = await filterBar.hasFilter('name', 'error', false);
+      it('filter from unrelated index pattern is still applicable if field name is found', async function () {
+        const hasBadIndexPatternFilter = await filterBar.hasFilter('animal', 'exists', true);
         expect(hasBadIndexPatternFilter).to.be(true);
       });
 
-      it('unrelated filters are loaded in warning mode', async function () {
+      it('filter from unrelated index pattern is rendred as a warning if field name is not found', async function () {
         const hasWarningFieldFilter = await filterBar.hasFilter('extension', 'warn', true);
         expect(hasWarningFieldFilter).to.be(true);
       });
