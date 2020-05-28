@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import * as labels from './translations';
@@ -34,10 +34,6 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
   const { filters, setAlertParams } = props;
 
   const [newFilters, setNewFilters] = useState<string[]>([]);
-
-  useEffect(() => {
-    setAlertParams('filters', filters);
-  }, [filters, setAlertParams]);
 
   return (
     <>

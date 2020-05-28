@@ -13,6 +13,7 @@ import {
   UiPayload,
   setAlertFlyoutType,
   setAlertFlyoutVisible,
+  setSearchText,
 } from '../actions';
 
 export interface UiState {
@@ -20,6 +21,7 @@ export interface UiState {
   alertFlyoutType?: string;
   basePath: string;
   esKuery: string;
+  searchText: string;
   integrationsPopoverOpen: PopoverState | null;
 }
 
@@ -27,6 +29,7 @@ const initialState: UiState = {
   alertFlyoutVisible: false,
   basePath: '',
   esKuery: '',
+  searchText: '',
   integrationsPopoverOpen: null,
 };
 
@@ -55,6 +58,11 @@ export const uiReducer = handleActions<UiState, UiPayload>(
     [String(setAlertFlyoutType)]: (state, action: Action<string>) => ({
       ...state,
       alertFlyoutType: action.payload,
+    }),
+
+    [String(setSearchText)]: (state, action: Action<string>) => ({
+      ...state,
+      searchText: action.payload,
     }),
   },
   initialState
