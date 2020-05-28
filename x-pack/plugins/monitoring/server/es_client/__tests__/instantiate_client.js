@@ -38,6 +38,21 @@ const serverWithUrl = {
     },
   },
 };
+const serverWithUrlAndSingleHost = {
+  monitoring: {
+    ui: {
+      elasticsearch: {
+        hosts: 'http://monitoring-cluster.test:9200',
+        username: 'monitoring-user-internal-test',
+        password: 'monitoring-p@ssw0rd!-internal-test',
+        ssl: {},
+        customHeaders: {
+          'x-custom-headers-test': 'connection-monitoring',
+        },
+      },
+    },
+  },
+};
 
 const createClient = sinon.stub();
 const log = { info: sinon.stub() };
@@ -102,6 +117,18 @@ describe('Instantiate Client', () => {
   describe('Use a connection to monitoring cluster', () => {
     it('exposes an authenticated client using monitoring host settings', () => {
       instantiateClient(serverWithUrl.monitoring.ui.elasticsearch, log, createClient);
+      const createClusterCall = createClient.getCall(0);
+      const createClientOptions = createClusterCall.args[1];
+
+      sinon.assert.calledOnce(createClient);
+      expect(createClusterCall.args[0]).to.be('monitoring');
+      expect(createClientOptions.hosts[0]).to.eql('http://monitoring-cluster.test:9200');
+      expect(createClientOptions.username).to.eql('monitoring-user-internal-test');
+      expect(createClientOptions.password).to.eql('monitoring-p@ssw0rd!-internal-test');
+    });
+
+    it('should always use an array', () => {
+      instantiateClient(serverWithUrlAndSingleHost.monitoring.ui.elasticsearch, log, createClient);
       const createClusterCall = createClient.getCall(0);
       const createClientOptions = createClusterCall.args[1];
 
