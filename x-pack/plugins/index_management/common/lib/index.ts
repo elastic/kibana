@@ -10,3 +10,8 @@ export {
 } from './template_serialization';
 
 export { getTemplateParameter } from './utils';
+
+export {
+  deserializeComponentTemplate,
+  deserializeComponenTemplateList,
+} from './component_template_serialization';

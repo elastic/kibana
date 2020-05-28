@@ -32,6 +32,11 @@ export interface TemplateV2Serialized extends TemplateBaseSerialized {
   composed_of?: string[];
 }
 
+export interface TemplateV2Es {
+  name: string;
+  index_template: TemplateV2Serialized;
+}
+
 /**
  * Interface for the template list in our UI table
  * we don't include the mappings, settings and aliases

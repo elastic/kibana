@@ -5,19 +5,17 @@
  */
 import { schema } from '@kbn/config-schema';
 
+import {
+  deserializeComponentTemplate,
+  deserializeComponenTemplateList,
+} from '../../../../common/lib';
+import { ComponentTemplateEs } from '../../../../common';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
 const paramsSchema = schema.object({
   name: schema.string(),
 });
-
-const getComponentTemplatesInUse = (indexTemplates) => {
-  const componentTemplates = indexTemplates.map(({ index_template: indexTemplate }) => {
-    return indexTemplate.composed_of;
-  });
-  return [].concat.apply([], componentTemplates); // return flattened array
-};
 
 export function registerGetAllRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
   // Get all component templates
@@ -27,7 +25,9 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
       const { callAsCurrentUser } = ctx.dataManagement!.client;
 
       try {
-        const { component_templates: componentTemplates } = await callAsCurrentUser(
+        const {
+          component_templates: componentTemplates,
+        }: { component_templates: ComponentTemplateEs[] } = await callAsCurrentUser(
           'dataManagement.getComponentTemplates'
         );
 
@@ -35,14 +35,12 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
           'dataManagement.getComposableIndexTemplates'
         );
 
-        const activeComponentTemplates = getComponentTemplatesInUse(indexTemplates);
-
-        const body = componentTemplates.map((component) => {
-          const isActive = activeComponentTemplates.includes(component.name);
-          return {
-            ...component,
-            isActive,
-          };
+        const body = componentTemplates.map((componentTemplate) => {
+          const deserializedComponentTemplateListItem = deserializeComponenTemplateList(
+            componentTemplate,
+            indexTemplates
+          );
+          return deserializedComponentTemplateListItem;
         });
 
         return res.ok({ body });
@@ -79,11 +77,12 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
           }
         );
 
+        const { index_templates: indexTemplates } = await callAsCurrentUser(
+          'dataManagement.getComposableIndexTemplates'
+        );
+
         return res.ok({
-          body: {
-            ...componentTemplates[0],
-            name,
-          },
+          body: deserializeComponentTemplate(componentTemplates[0], indexTemplates),
         });
       } catch (error) {
         if (isEsError(error)) {
