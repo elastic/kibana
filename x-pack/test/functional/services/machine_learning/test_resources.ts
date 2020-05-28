@@ -5,7 +5,6 @@
  */
 
 import { ProvidedType } from '@kbn/test/types/ftr';
-
 import { savedSearches } from './test_resources_data';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -28,6 +27,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   return {
     async setKibanaTimeZoneToUTC() {
@@ -100,6 +100,17 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       } else {
         return await this.createIndexPattern(title, timeFieldName);
       }
+    },
+
+    async assertIndexPatternNotExist(title: string) {
+      await retry.waitForWithTimeout(`index pattern'${title}' to not exist`, 5 * 1000, async () => {
+        const indexPatternId = await this.getIndexPatternId(title);
+        if (!indexPatternId) {
+          return true;
+        } else {
+          throw new Error(`Index pattern '${title}' should not exist.`);
+        }
+      });
     },
 
     async createSavedSearch(title: string, body: object): Promise<string> {

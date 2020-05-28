@@ -14,13 +14,12 @@ const COMMON_HEADERS = {
 };
 
 export default ({ getService }: FtrProviderContext) => {
-  const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
 
   const jobId = `bm_${Date.now()}`;
-  const generateDestinationIndex = (analyticsId: string) => `user-${analyticsId}_1`;
+  const generateDestinationIndex = (analyticsId: string) => `user-${analyticsId}`;
   const commonJobConfig = {
     source: {
       index: ['ft_bank_marketing'],
@@ -65,13 +64,6 @@ export default ({ getService }: FtrProviderContext) => {
     }
   }
 
-  async function jobDeleted(analyticsId: string) {
-    return await supertest
-      .get(`/api/ml/data_frame/analytics/${analyticsId}`)
-      .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-      .set(COMMON_HEADERS)
-      .expect(404);
-  }
   describe('DELETE data_frame/analytics', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/bm_classification');
@@ -85,38 +77,47 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('DeleteDataFrameAnalytics', () => {
       it('should delete analytics jobs by id', async () => {
+        const analyticsId = `${jobId}_1`;
         const { body } = await supertest
-          .delete(`/api/ml/data_frame/analytics/${jobId}_1`)
+          .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_HEADERS)
           .expect(200);
+
         expect(body.analyticsJobDeleted.success).to.eql(true);
+        await ml.api.assertDataFrameAnalyticsJobNotExist(analyticsId);
       });
 
-      it('should not allow to retrieve analytics jobs for the user without required permissions', async () => {
+      it('should not allow to retrieve analytics jobs for unauthorized user', async () => {
+        const analyticsId = `${jobId}_2`;
         const { body } = await supertest
-          .delete(`/api/ml/data_frame/analytics/${jobId}_2`)
+          .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_HEADERS)
           .expect(404);
 
         expect(body.error).to.eql('Not Found');
         expect(body.message).to.eql('Not Found');
+        await ml.api.assertDataFrameAnalyticsJobExist(analyticsId);
+      });
 
-        const { body: body2 } = await supertest
-          .delete(`/api/ml/data_frame/analytics/${jobId}_2`)
+      it('should not allow to retrieve analytics jobs for the user with only view permission', async () => {
+        const analyticsId = `${jobId}_2`;
+        const { body } = await supertest
+          .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_HEADERS)
           .expect(404);
 
-        expect(body2.error).to.eql('Not Found');
-        expect(body2.message).to.eql('Not Found');
+        expect(body.error).to.eql('Not Found');
+        expect(body.message).to.eql('Not Found');
+        await ml.api.assertDataFrameAnalyticsJobExist(analyticsId);
       });
 
       it('should show 404 error if job does not exist or has already been deleted', async () => {
         const { body } = await supertest
           .delete(`/api/ml/data_frame/analytics/${jobId}_invalid`)
-          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+          .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_HEADERS)
           .expect(404);
 
@@ -124,40 +125,36 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.message).to.eql('Not Found');
       });
 
-      describe('with deleteTargetIndex setting', function () {
+      describe('with deleteDestIndex setting', function () {
         const analyticsId = `${jobId}_2`;
         const destinationIndex = generateDestinationIndex(analyticsId);
 
         before(async () => {
-          await es.indices.create({ index: destinationIndex });
-          await ml.api.assertIndicesExist(generateDestinationIndex(analyticsId));
+          await ml.api.createIndices(destinationIndex);
+          await ml.api.assertIndicesExist(destinationIndex);
         });
 
         after(async () => {
-          await es.indices.delete({ index: destinationIndex, ignore: [404] });
+          await ml.api.deleteIndices(destinationIndex);
         });
 
-        it('should delete job and target index by id', async () => {
+        it('should delete job and destination index by id', async () => {
           const { body } = await supertest
             .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
-            .query({ deleteTargetIndex: true })
+            .query({ deleteDestIndex: true })
             .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
             .set(COMMON_HEADERS)
             .expect(200);
 
           expect(body.analyticsJobDeleted.success).to.eql(true);
-          expect(body.targetIndexDeleted.success).to.eql(true);
-          expect(body.targetIndexPatternDeleted.success).to.eql(false);
-          expect(jobDeleted(analyticsId)).to.eql(true);
-
-          const targetIndexExists = await es.indices.exists({
-            index: destinationIndex,
-            allowNoIndices: false,
-          });
-          expect(targetIndexExists).to.eql(false);
+          expect(body.destIndexDeleted.success).to.eql(true);
+          expect(body.destIndexPatternDeleted.success).to.eql(false);
+          await ml.api.assertDataFrameAnalyticsJobNotExist(analyticsId);
+          await ml.api.assertIndicesNotToExist(destinationIndex);
         });
       });
-      describe('with deleteTargetIndex setting', function () {
+
+      describe('with deleteDestIndexPattern setting', function () {
         const analyticsId = `${jobId}_3`;
         const destinationIndex = generateDestinationIndex(analyticsId);
 
@@ -173,63 +170,49 @@ export default ({ getService }: FtrProviderContext) => {
         it('should delete job and index pattern by id', async () => {
           const { body } = await supertest
             .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
-            .query({ deleteIndexPattern: true })
+            .query({ deleteDestIndexPattern: true })
             .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
             .set(COMMON_HEADERS)
             .expect(200);
-          expect(body.analyticsJobDeleted.success).to.eql(true);
-          expect(body.targetIndexDeleted.success).to.eql(false);
-          expect(body.targetIndexPatternDeleted.success).to.eql(true);
-          expect(jobDeleted(analyticsId)).to.eql(true);
 
-          // Check if index pattern was deleted
-          const indexPatternId = await ml.testResources.getIndexPatternId(analyticsId);
-          expect(indexPatternId).to.eql(undefined);
+          expect(body.analyticsJobDeleted.success).to.eql(true);
+          expect(body.destIndexDeleted.success).to.eql(false);
+          expect(body.destIndexPatternDeleted.success).to.eql(true);
+          await ml.api.assertDataFrameAnalyticsJobNotExist(analyticsId);
+          await ml.testResources.assertIndexPatternNotExist(destinationIndex);
         });
       });
 
-      describe('with deleteTargetIndex & deleteTargetIndex setting', function () {
+      describe('with deleteDestIndex & deleteDestIndexPattern setting', function () {
         const analyticsId = `${jobId}_4`;
         const destinationIndex = generateDestinationIndex(analyticsId);
 
         before(async () => {
-          await es.indices.create({ index: destinationIndex });
-          await ml.api.assertIndicesExist(generateDestinationIndex(analyticsId));
-
-          // Mimic real job by creating index pattern after job is created
+          // Mimic real job by creating target index & index pattern after DFA job is created
+          await ml.api.createIndices(destinationIndex);
+          await ml.api.assertIndicesExist(destinationIndex);
           await ml.testResources.createIndexPatternIfNeeded(destinationIndex);
         });
 
         after(async () => {
-          await es.indices.delete({ index: destinationIndex, ignore: [404] });
+          await ml.api.deleteIndices(destinationIndex);
           await ml.testResources.deleteIndexPattern(destinationIndex);
         });
 
         it('deletes job, target index, and index pattern by id', async () => {
-          // Mimic real job by creating target index & index pattern after DFA job is created
           const { body } = await supertest
             .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
-            .query({ deleteTargetIndex: true, deleteIndexPattern: true })
+            .query({ deleteDestIndex: true, deleteDestIndexPattern: true })
             .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
             .set(COMMON_HEADERS)
             .expect(200);
+
           expect(body.analyticsJobDeleted.success).to.eql(true);
-          expect(body.targetIndexDeleted.success).to.eql(true);
-          expect(body.targetIndexPatternDeleted.success).to.eql(true);
-
-          // Check if index was deleted
-          expect(jobDeleted(analyticsId)).to.eql(true);
-
-          // Check if target index was deleted
-          const targetIndexExists = await es.indices.exists({
-            index: destinationIndex,
-            allowNoIndices: false,
-          });
-          expect(targetIndexExists).to.eql(false);
-
-          // Check if index pattern was deleted
-          const indexPatternId = await ml.testResources.getIndexPatternId(analyticsId);
-          expect(indexPatternId).to.eql(undefined);
+          expect(body.destIndexDeleted.success).to.eql(true);
+          expect(body.destIndexPatternDeleted.success).to.eql(true);
+          await ml.api.assertDataFrameAnalyticsJobNotExist(analyticsId);
+          await ml.api.assertIndicesNotToExist(destinationIndex);
+          await ml.testResources.assertIndexPatternNotExist(destinationIndex);
         });
       });
     });

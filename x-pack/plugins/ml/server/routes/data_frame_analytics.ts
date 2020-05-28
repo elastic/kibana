@@ -390,6 +390,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
           analyticsJobDeleted.success = true;
         } catch (deleteDFAError) {
           analyticsJobDeleted.error = wrapError(deleteDFAError);
+          if (analyticsJobDeleted.error.statusCode === 404) {
+            return response.notFound();
+          }
         }
         const results = {
           analyticsJobDeleted,
