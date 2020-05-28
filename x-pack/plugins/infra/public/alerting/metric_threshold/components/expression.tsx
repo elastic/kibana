@@ -483,8 +483,6 @@ export const Expressions: React.FC<Props> = (props) => {
                     timeOrTimes:
                       previewResult.resultTotals.fired === 1 ? firedTimeLabel : firedTimesLabel,
                     fired: <strong>{previewResult.resultTotals.fired}</strong>,
-                    numberOfGroups: <strong>{previewResult.numberOfGroups}</strong>,
-                    groupName: alertParams.groupBy,
                     lookback: previewOptions.find((e) => e.value === previewLookbackInterval)
                       ?.shortText,
                   }}
