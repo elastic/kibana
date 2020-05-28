@@ -69,7 +69,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
 
       try {
         const alertsClient = context.alerting?.getAlertsClient();
-        const clusterClient = context.core.elasticsearch.dataClient;
+        const clusterClient = context.core.elasticsearch.legacy.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.siem?.getSiemClient();
 
