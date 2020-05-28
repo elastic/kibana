@@ -165,7 +165,6 @@ export interface ReportingSetupDeps {
   licensing: LicensingPluginSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
-  licensing: LicensingPluginSetup;
   __LEGACY: LegacySetup;
 }
 

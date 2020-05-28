@@ -9,7 +9,6 @@ import { take } from 'rxjs/operators';
 import { PluginInitializerContext } from 'src/core/server';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 import { ReportingPluginSpecOptions } from '../';
-import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 import { PluginsSetup } from '../../../../plugins/reporting/server';
 import { SecurityPluginSetup } from '../../../../plugins/security/server';
 import { buildConfig } from './config';
@@ -49,7 +48,6 @@ export const legacyInit = async (
     licensing: server.newPlatform.setup.plugins.licensing as LicensingPluginSetup,
     security: server.newPlatform.setup.plugins.security as SecurityPluginSetup,
     usageCollection: server.newPlatform.setup.plugins.usageCollection,
-    licensing: server.newPlatform.setup.plugins.licensing as LicensingPluginSetup,
     __LEGACY,
   });
 

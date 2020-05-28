@@ -23,12 +23,11 @@ const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => {
   return {
     elasticsearch: setupMock.elasticsearch,
     security: setupMock.security,
-    licensing: {} as any,
-    usageCollection: {} as any,
-    __LEGACY: { plugins: { xpack_main: { status: new EventEmitter() } } } as any,
     licensing: {
       license$: of({ isAvailable: true, isActive: true, type: 'basic' }),
     } as any,
+    usageCollection: {} as any,
+    __LEGACY: { plugins: { xpack_main: { status: new EventEmitter() } } } as any,
   };
 };
 
