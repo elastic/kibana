@@ -37,6 +37,11 @@ interface State {
 export class EmbeddableFactoryRenderer extends React.Component<Props, State> {
   private embeddable?: IEmbeddable;
 
+  // TODO: dirty, this is not react way
+  public updateInput(input: Props['input']) {
+    this.embeddable?.updateInput(input);
+  }
+
   constructor(props: Props) {
     super(props);
     this.state = {
