@@ -56,7 +56,7 @@ export class InteractionBoundary extends PureComponent<void, State, void> {
       {
         top: '50%',
         left: '50%',
-        position: 'absolute',
+        position: 'absolute' as 'absolute',
       },
       this.state
     );
