@@ -270,13 +270,6 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
     }
   }, [defaultFilters, filterGroup]);
   const { initializeTimeline, setTimelineActions } = useManageTimeline();
-  useEffect(() => {
-    setTimelineActions({
-      id: SIGNALS_PAGE_TIMELINE_ID,
-      queryFields: requiredFieldsForActions,
-      timelineActions: additionalActions,
-    });
-  }, [additionalActions]);
 
   useEffect(() => {
     initializeTimeline({
@@ -287,7 +280,14 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
       title: i18n.SIGNALS_TABLE_TITLE,
       selectAll: canUserCRUD ? selectAll : false,
     });
-  }, [canUserCRUD, selectAll]);
+  }, []);
+  useEffect(() => {
+    setTimelineActions({
+      id: SIGNALS_PAGE_TIMELINE_ID,
+      queryFields: requiredFieldsForActions,
+      timelineActions: additionalActions,
+    });
+  }, [additionalActions]);
   const headerFilterGroup = useMemo(
     () => <SignalsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,
     [onFilterGroupChangedCallback]

@@ -28,7 +28,7 @@ import { OnChangeItemsPerPage, OnLoadMore } from '../events';
 import { LastUpdatedAt } from './last_updated';
 import * as i18n from './translations';
 import { useEventDetailsWidthContext } from '../../../../common/components/events_viewer/event_details_width_context';
-import { useManageTimeline, TimelineTypeContext } from '../../manage_timeline';
+import { useManageTimeline } from '../../manage_timeline';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
 
