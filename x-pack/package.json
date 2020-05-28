@@ -152,7 +152,7 @@
     "jest-styled-components": "^7.0.2",
     "jsdom": "^15.2.1",
     "loader-utils": "^1.2.3",
-    "madge": "3.4.4",
+    "madge": "3.9.0",
     "marge": "^1.0.1",
     "mocha": "^7.1.1",
     "mocha-junit-reporter": "^1.23.1",
