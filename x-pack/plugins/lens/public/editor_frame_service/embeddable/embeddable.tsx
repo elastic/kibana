@@ -45,6 +45,7 @@ export interface LensEmbeddableInput extends EmbeddableInput {
   timeRange?: TimeRange;
   query?: Query;
   filters?: Filter[];
+  darkMode?: boolean;
 }
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
@@ -152,6 +153,9 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
         expression={this.savedVis.expression}
         context={this.currentContext}
         handleEvent={this.handleEvent}
+        variables={{
+          darkMode: this.getInput().darkMode,
+        }}
       />,
       domNode
     );

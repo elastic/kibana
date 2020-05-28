@@ -17,6 +17,10 @@ export function toExpression(input: SavedLensInput): string {
     expressionParts.push(`title="${input.title}"`);
   }
 
+  if (input.darkMode) {
+    expressionParts.push(`darkMode=${input.darkMode}`);
+  }
+
   if (input.timeRange) {
     expressionParts.push(
       `timerange={timerange from="${input.timeRange.from}" to="${input.timeRange.to}"}`

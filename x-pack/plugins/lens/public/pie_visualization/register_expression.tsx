@@ -12,7 +12,7 @@ import { PartialTheme } from '@elastic/charts';
 import {
   IInterpreterRenderHandlers,
   ExpressionRenderDefinition,
-  ExpressionFunctionDefinition,
+  ExpressionFunctionDefinition, ExecutionContext,
 } from 'src/plugins/expressions/public';
 import { LensMultiTable, FormatFactory, LensFilterEvent } from '../types';
 import { PieExpressionProps, PieExpressionArgs } from './types';
@@ -79,13 +79,16 @@ export const pie: ExpressionFunctionDefinition<
     },
   },
   inputTypes: ['lens_multitable'],
-  fn(data: LensMultiTable, args: PieExpressionArgs) {
+  fn(data: LensMultiTable, args: PieExpressionArgs, context: ExecutionContext) {
     return {
       type: 'render',
       as: 'lens_pie_renderer',
       value: {
         data,
         args,
+        context: {
+          darkMode: context.variables.darkMode as (boolean | undefined),
+        },
       },
     };
   },
@@ -93,8 +96,7 @@ export const pie: ExpressionFunctionDefinition<
 
 export const getPieRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
-  chartTheme: PartialTheme;
-  isDarkMode: boolean;
+  getChartTheme: (darkModeOverwrite?: boolean) => { theme: PartialTheme; isDark: boolean };
 }): ExpressionRenderDefinition<PieExpressionProps> => ({
   name: 'lens_pie_renderer',
   displayName: i18n.translate('xpack.lens.pie.visualizationName', {
@@ -112,6 +114,9 @@ export const getPieRenderer = (dependencies: {
       handlers.event({ name: 'filter', data });
     };
     const formatFactory = await dependencies.formatFactory;
+    const { theme: chartTheme, isDark: isDarkMode } = dependencies.getChartTheme(
+      config.context.darkMode
+    );
     ReactDOM.render(
       <I18nProvider>
         <MemoizedChart
@@ -119,7 +124,8 @@ export const getPieRenderer = (dependencies: {
           {...dependencies}
           formatFactory={formatFactory}
           onClickValue={onClickValue}
-          isDarkMode={dependencies.isDarkMode}
+          isDarkMode={isDarkMode}
+          chartTheme={chartTheme}
         />
       </I18nProvider>,
       domNode,

@@ -20,12 +20,14 @@ interface Arguments {
   id: string;
   title: string | null;
   timerange: TimeRangeArg | null;
+  darkMode?: boolean;
 }
 
 export type SavedLensInput = EmbeddableInput & {
   id: string;
   timeRange?: TimeRange;
   filters: DataFilter[];
+  darkMode?: boolean;
 };
 
 const defaultTimeRange = {
@@ -56,6 +58,11 @@ export function savedLens(): ExpressionFunctionDefinition<
         help: argHelp.timerange,
         required: false,
       },
+      darkMode: {
+        types: ['boolean'],
+        help: '',
+        required: false,
+      },
       title: {
         types: ['string'],
         help: argHelp.title,
@@ -74,6 +81,7 @@ export function savedLens(): ExpressionFunctionDefinition<
           timeRange: args.timerange || defaultTimeRange,
           title: args.title ? args.title : undefined,
           disableTriggers: true,
+          darkMode: args.darkMode,
         },
         embeddableType: EmbeddableTypes.lens,
         generatedAt: Date.now(),

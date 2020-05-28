@@ -43,9 +43,10 @@ export class XyVisualization {
     expressions.registerRenderer(
       getXyChartRenderer({
         formatFactory,
-        chartTheme: core.uiSettings.get<boolean>('theme:darkMode')
-          ? EUI_CHARTS_THEME_DARK.theme
-          : EUI_CHARTS_THEME_LIGHT.theme,
+        getChartTheme: (darkModeOverwrite?: boolean) =>
+          darkModeOverwrite ?? core.uiSettings.get<boolean>('theme:darkMode')
+            ? EUI_CHARTS_THEME_DARK.theme
+            : EUI_CHARTS_THEME_LIGHT.theme,
         timeZone: getTimeZone(core.uiSettings),
         histogramBarTarget: core.uiSettings.get<number>('histogram:barTarget'),
       })

@@ -21,6 +21,7 @@ import {
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
+  ExecutionContext,
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
   ExpressionValueSearchContext,
@@ -48,6 +49,9 @@ type SeriesSpec = InferPropType<typeof LineSeries> &
 export interface XYChartProps {
   data: LensMultiTable;
   args: XYArgs;
+  context: {
+    darkMode?: boolean;
+  }
 }
 
 export interface XYRender {
@@ -99,13 +103,16 @@ export const xyChart: ExpressionFunctionDefinition<
       multi: true,
     },
   },
-  fn(data: LensMultiTable, args: XYArgs) {
+  fn(data: LensMultiTable, args: XYArgs, context: ExecutionContext) {
     return {
       type: 'render',
       as: 'lens_xy_chart_renderer',
       value: {
         data,
         args,
+        context: {
+          darkMode: context.variables.darkMode as (boolean | undefined),
+        },
       },
     };
   },
@@ -113,7 +120,7 @@ export const xyChart: ExpressionFunctionDefinition<
 
 export const getXyChartRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
-  chartTheme: PartialTheme;
+  getChartTheme: (darkModeOverwrite?: boolean) => PartialTheme;
   histogramBarTarget: number;
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
@@ -142,7 +149,7 @@ export const getXyChartRenderer = (dependencies: {
         <XYChartReportable
           {...config}
           formatFactory={formatFactory}
-          chartTheme={dependencies.chartTheme}
+          chartTheme={dependencies.getChartTheme(config.context.darkMode)}
           timeZone={dependencies.timeZone}
           histogramBarTarget={dependencies.histogramBarTarget}
           onClickValue={onClickValue}
@@ -182,6 +189,9 @@ export function XYChartReportable(props: XYChartRenderProps) {
 export function XYChart({
   data,
   args,
+  context: {
+    darkMode,
+  },
   formatFactory,
   timeZone,
   chartTheme,

@@ -34,10 +34,14 @@ export class PieVisualization {
     expressions.registerRenderer(
       getPieRenderer({
         formatFactory,
-        chartTheme: core.uiSettings.get<boolean>('theme:darkMode')
-          ? EUI_CHARTS_THEME_DARK.theme
-          : EUI_CHARTS_THEME_LIGHT.theme,
-        isDarkMode: core.uiSettings.get<boolean>('theme:darkMode'),
+        getChartTheme(darkModeOverwrite?: boolean) {
+          const isDark = darkModeOverwrite ?? core.uiSettings.get<boolean>('theme:darkMode');
+
+          return {
+            theme: isDark ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme,
+            isDark,
+          };
+        }
       })
     );
 

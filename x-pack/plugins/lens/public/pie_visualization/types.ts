@@ -34,6 +34,9 @@ export type PieExpressionArgs = SharedLayerState & {
 export interface PieExpressionProps {
   data: LensMultiTable;
   args: PieExpressionArgs;
+  context: {
+    darkMode?: boolean;
+  };
 }
 
 export type ColumnGroups = Array<{

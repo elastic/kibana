@@ -23,11 +23,13 @@ export interface ExpressionWrapperProps {
     filters?: Filter[];
     lastReloadRequestTime?: number;
   };
+  variables?: { darkMode?: boolean };
   handleEvent: (event: ExpressionRendererEvent) => void;
 }
 
 export function ExpressionWrapper({
   ExpressionRenderer: ExpressionRendererComponent,
+  variables,
   expression,
   context,
   handleEvent,
@@ -55,6 +57,7 @@ export function ExpressionWrapper({
             padding="m"
             expression={expression}
             searchContext={{ ...context }}
+            variables={variables}
             renderError={(error) => <div data-test-subj="expression-renderer-error">{error}</div>}
             onEvent={handleEvent}
           />

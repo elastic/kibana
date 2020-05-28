@@ -6,6 +6,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import classNames from 'classnames';
 import {
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
@@ -19,6 +20,9 @@ import { VisualizationContainer } from '../visualization_container';
 export interface MetricChartProps {
   data: LensMultiTable;
   args: MetricConfig;
+  context: {
+    darkMode?: boolean;
+  };
 }
 
 export interface MetricRender {
@@ -54,13 +58,16 @@ export const metricChart: ExpressionFunctionDefinition<
     },
   },
   inputTypes: ['lens_multitable'],
-  fn(data, args) {
+  fn(data, args, context) {
     return {
       type: 'render',
       as: 'lens_metric_chart_renderer',
       value: {
         data,
         args,
+        context: {
+          darkMode: context.variables.darkMode as boolean | undefined,
+        },
       },
     } as MetricRender;
   },
@@ -95,6 +102,7 @@ export function MetricChart({
   data,
   args,
   formatFactory,
+  context: { darkMode },
 }: MetricChartProps & { formatFactory: FormatFactory }) {
   const { title, accessor, mode } = args;
   let value = '-';
@@ -117,7 +125,12 @@ export function MetricChart({
   }
 
   return (
-    <VisualizationContainer reportTitle={title} className="lnsMetricExpression__container">
+    <VisualizationContainer
+      reportTitle={title}
+      className={classNames('lnsMetricExpression__container', {
+        'lnsMetricExpression__container--dark': darkMode,
+      })}
+    >
       <AutoScale>
         <div data-test-subj="lns_metric_value" style={{ fontSize: '60pt', fontWeight: 600 }}>
           {value}
