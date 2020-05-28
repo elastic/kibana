@@ -147,47 +147,49 @@ export const DiscoverGrid = function DiscoverGridInner({
   });
   const [flyoutRow, setFlyoutRow] = useState<number | undefined>(undefined);
 
-  const dataGridColumns = columns.map(
-    (columnName): EuiDataGridColumn => {
-      const column: EuiDataGridColumn = {
-        id: columnName,
-        schema: indexPattern.getFieldByName(columnName)?.type,
-      };
+  const dataGridColumns = useMemo(() => {
+    const mappedCols = columns.map(
+      (columnName): EuiDataGridColumn => {
+        const column: EuiDataGridColumn = {
+          id: columnName,
+          schema: indexPattern.getFieldByName(columnName)?.type,
+        };
 
-      // Default DataGrid schemas: boolean, numeric, datetime, json, currency
-      // Default indexPattern types: KBN_FIELD_TYPES in src/plugins/data/common/kbn_field_types/types.ts
-      switch (column.schema) {
-        case 'date':
-          column.schema = 'datetime';
-          break;
-        case 'number':
-          column.schema = 'numeric';
-          break;
-        case '_source':
-        case 'object':
-          column.schema = kibanaJSON;
-          break;
-        case 'geo_point':
-          column.schema = geoPoint;
-          break;
-        default:
-          column.schema = undefined;
-          break;
+        // Default DataGrid schemas: boolean, numeric, datetime, json, currency
+        // Default indexPattern types: KBN_FIELD_TYPES in src/plugins/data/common/kbn_field_types/types.ts
+        switch (column.schema) {
+          case 'date':
+            column.schema = 'datetime';
+            break;
+          case 'number':
+            column.schema = 'numeric';
+            break;
+          case '_source':
+          case 'object':
+            column.schema = kibanaJSON;
+            break;
+          case 'geo_point':
+            column.schema = geoPoint;
+            break;
+          default:
+            column.schema = undefined;
+            break;
+        }
+
+        if (useShortDots) {
+          column.display = <>{shortenDottedString(columnName)}</>;
+        }
+
+        return column;
       }
-
-      if (useShortDots) {
-        column.display = <>{shortenDottedString(columnName)}</>;
-      }
-
-      return column;
+    );
+    // Discover always injects a Time column as the first item (unless advance settings turned it off)
+    // Have to guard against this to allow users to request the same column again later
+    if (showTimeCol) {
+      mappedCols.unshift({ id: timeString, schema: 'datetime', initialWidth: 200 });
     }
-  );
-
-  // Discover always injects a Time column as the first item (unless advance settings turned it off)
-  // Have to guard against this to allow users to request the same column again later
-  if (showTimeCol) {
-    dataGridColumns.unshift({ id: timeString, schema: 'datetime', initialWidth: 172 });
-  }
+    return mappedCols;
+  }, [columns, useShortDots, showTimeCol, indexPattern, timeString]);
 
   /**
    * Pagination
@@ -233,46 +235,50 @@ export const DiscoverGrid = function DiscoverGridInner({
   /**
    * Cell rendering
    */
-  const showFilterActions = (isDetails: boolean, fieldName: string) => {
-    return isDetails && indexPattern.fields.getByName(fieldName)?.filterable;
-  };
-  const createFilter = (fieldName: string, row: any, type: '-' | '+') => {
-    return onFilter(
-      indexPattern.fields.getByName(fieldName),
-      indexPattern.flattenHit(row)[fieldName],
-      type
-    );
-  };
-  const formattedField = function (row: any, columnId: string) {
-    const formattedValue = indexPattern.formatField(row, columnId);
-    // TODO Field formatters need to be fixed
-    // eslint-disable-next-line react/no-danger
-    return <span dangerouslySetInnerHTML={{ __html: formattedValue }} />;
-  };
+  const renderCellValue = useCallback(
+    ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
+      if (
+        rowIndex < pagination.pageIndex * pagination.pageSize ||
+        rowIndex > pagination.pageIndex * pagination.pageSize + pagination.pageSize
+      ) {
+        return null;
+      }
 
-  const renderCellValue = ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
-    const row = rows[rowIndex];
-    let value: string | ReactNode;
-    value = '-';
+      const row = rows[rowIndex];
 
-    if (typeof row === 'undefined') {
-      return value;
-    }
+      if (typeof row === 'undefined') {
+        return '-';
+      }
 
-    const fieldName = columnId === timeString ? indexPattern.timeFieldName! : columnId;
-    value = formattedField(row, fieldName);
+      const createFilter = (fieldName: string, type: '-' | '+') => {
+        return onFilter(
+          indexPattern.fields.getByName(fieldName),
+          indexPattern.flattenHit(row)[fieldName],
+          type
+        );
+      };
 
-    if (showFilterActions(isDetails, fieldName)) {
-      return (
-        <CellPopover
-          value={value}
-          onPositiveFilterClick={() => createFilter(fieldName, rows[rowIndex], '+')}
-          onNegativeFilterClick={() => createFilter(fieldName, rows[rowIndex], '-')}
-        />
+      const fieldName = columnId === timeString ? indexPattern.timeFieldName! : columnId;
+
+      const value = (
+        // TODO Field formatters need to be fixed
+        // eslint-disable-next-line react/no-danger
+        <span dangerouslySetInnerHTML={{ __html: indexPattern.formatField(row, fieldName) }} />
       );
-    }
-    return value;
-  };
+
+      if (isDetails && indexPattern.fields.getByName(fieldName)?.filterable) {
+        return (
+          <CellPopover
+            value={value}
+            onPositiveFilterClick={() => createFilter(fieldName, '+')}
+            onNegativeFilterClick={() => createFilter(fieldName, '-')}
+          />
+        );
+      }
+      return value;
+    },
+    [rows, indexPattern, onFilter, pagination, timeString]
+  );
 
   /**
    * Render variables
@@ -280,7 +286,7 @@ export const DiscoverGrid = function DiscoverGridInner({
   const pageCount = Math.ceil(rows.length / pagination.pageSize);
   const isOnLastPage = pagination.pageIndex === pageCount - 1;
   const showDisclaimer = rows.length === sampleSize && isOnLastPage;
-  const randomId = useMemo(() => htmlIdGenerator(), []);
+  const randomId = useMemo(() => String(htmlIdGenerator()), []);
   let searchString: ReactNode = <></>;
   if (searchTitle) {
     if (searchDescription) {
@@ -296,7 +302,38 @@ export const DiscoverGrid = function DiscoverGridInner({
     }
   }
 
-  if (!rows || !rows.length) {
+  const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
+  const leadingControlControls = useMemo(
+    () => [
+      {
+        id: 'openDetails',
+        width: 31,
+        headerCellRender: () => (
+          <EuiScreenReaderOnly>
+            <span>
+              {i18n.translate('discover.controlColumnHeader', {
+                defaultMessage: 'Control column',
+              })}
+            </span>
+          </EuiScreenReaderOnly>
+        ),
+        rowCellRender: ({ rowIndex }: { rowIndex: number }) => (
+          <button
+            aria-label={i18n.translate('discover.grid.viewDoc', {
+              defaultMessage: 'Toggle dialog with details',
+            })}
+            onClick={() => setFlyoutRow(rowIndex)}
+            className="dscTable__buttonToggle"
+          >
+            <EuiIcon size="s" type={flyoutRow === rowIndex ? 'eyeClosed' : 'eye'} />
+          </button>
+        ),
+      },
+    ],
+    [flyoutRow]
+  );
+
+  if (!rowCount) {
     return null;
   }
 
@@ -304,38 +341,13 @@ export const DiscoverGrid = function DiscoverGridInner({
     <>
       <EuiDataGrid
         aria-labelledby={ariaLabelledBy}
-        aria-describedby={String(randomId)}
+        aria-describedby={randomId}
         inMemory={{ level: 'sorting' }}
         sorting={{ columns: sortingColumns, onSort: onTableSort }}
-        rowCount={rows.length}
+        rowCount={rowCount}
         columns={dataGridColumns}
         renderCellValue={renderCellValue}
-        leadingControlColumns={[
-          {
-            id: 'openDetails',
-            width: 31,
-            headerCellRender: () => (
-              <EuiScreenReaderOnly>
-                <span>
-                  {i18n.translate('discover.controlColumnHeader', {
-                    defaultMessage: 'Control column',
-                  })}
-                </span>
-              </EuiScreenReaderOnly>
-            ),
-            rowCellRender: ({ rowIndex }) => (
-              <button
-                aria-label={i18n.translate('discover.grid.viewDoc', {
-                  defaultMessage: 'Toggle dialog with details',
-                })}
-                onClick={() => setFlyoutRow(rowIndex)}
-                className="dscTable__buttonToggle"
-              >
-                <EuiIcon type={flyoutRow === rowIndex ? 'eyeClosed' : 'eye'} size="s" />
-              </button>
-            ),
-          },
-        ]}
+        leadingControlColumns={leadingControlControls}
         columnVisibility={{
           visibleColumns,
           setVisibleColumns,
