@@ -4,6 +4,7 @@
 
 ## Reducer type
 
+Redux like Reducer
 
 <b>Signature:</b>
 

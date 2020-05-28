@@ -25,9 +25,10 @@ import { Comparator, Connect, StateContainer, UnboxState } from './types';
 const { useContext, useLayoutEffect, useRef, createElement: h } = React;
 
 /**
- * Returns the latest state of a state container.
+ * Returns the latest state of a {@link StateContainer}.
  *
- * @param container State container which state to track.
+ * @param container - {@link StateContainer} which state to track.
+ * @returns - latest {@link StateContainer} state
  * @public
  */
 export const useContainerState = <Container extends StateContainer<any, any>>(
@@ -38,11 +39,12 @@ export const useContainerState = <Container extends StateContainer<any, any>>(
  * Apply selector to state container to extract only needed information. Will
  * re-render your component only when the section changes.
  *
- * @param container State container which state to track.
- * @param selector Function used to pick parts of state.
- * @param comparator Comparator function used to memoize previous result, to not
+ * @param container - {@link StateContainer} which state to track.
+ * @param selector - Function used to pick parts of state.
+ * @param comparator - {@link Comparator} function used to memoize previous result, to not
  *    re-render React component if state did not change. By default uses
  *    `fast-deep-equal` package.
+ * @returns - result of a selector(state)
  * @public
  */
 export const useContainerSelector = <Container extends StateContainer<any, any>, Result>(
@@ -72,7 +74,7 @@ export const useContainerSelector = <Container extends StateContainer<any, any>,
 
 /**
  * Creates helpers for using {@link StateContainer | State Containers} with react
- *
+ * Refer to [guide](https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_containers/react.md) for details
  * @public
  */
 export const createStateContainerReactHelpers = <Container extends StateContainer<any, any>>() => {

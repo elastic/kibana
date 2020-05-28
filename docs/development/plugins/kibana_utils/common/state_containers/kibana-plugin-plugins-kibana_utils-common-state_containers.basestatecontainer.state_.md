@@ -4,6 +4,8 @@
 
 ## BaseStateContainer.state$ property
 
+ of state
+
 <b>Signature:</b>
 
 ```typescript

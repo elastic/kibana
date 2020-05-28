@@ -4,6 +4,7 @@
 
 ## Dispatch type
 
+Redux like dispatch
 
 <b>Signature:</b>
 

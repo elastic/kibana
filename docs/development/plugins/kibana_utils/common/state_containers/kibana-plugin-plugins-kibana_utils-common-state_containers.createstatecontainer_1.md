@@ -17,7 +17,7 @@ export declare function createStateContainer<State extends BaseState, PureTransi
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  defaultState | <code>State</code> | initial state |
-|  pureTransitions | <code>PureTransitions</code> | state transitions configuration object |
+|  pureTransitions | <code>PureTransitions</code> | state transitions configuration object. Map of . |
 
 <b>Returns:</b>
 

@@ -4,6 +4,7 @@
 
 ## Middleware type
 
+Redux like Middleware
 
 <b>Signature:</b>
 

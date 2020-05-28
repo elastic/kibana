@@ -20,28 +20,29 @@ State containers are Redux-store-like objects meant to help you manage state in 
 |  --- | --- |
 |  [BaseStateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.basestatecontainer.md) | Base state container shape without transitions or selectors |
 |  [CreateStateContainerOptions](./kibana-plugin-plugins-kibana_utils-common-state_containers.createstatecontaineroptions.md) | State container options |
-|  [ReduxLikeStateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.reduxlikestatecontainer.md) | Fully featured state container which matches Redux store interface |
-|  [StateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md) | Fully featured state container with selectors and transitions |
-|  [TransitionDescription](./kibana-plugin-plugins-kibana_utils-common-state_containers.transitiondescription.md) |  |
+|  [ReduxLikeStateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.reduxlikestatecontainer.md) | Fully featured state container which matches Redux store interface. Extends [StateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md) Allows to use state container with redux libraries |
+|  [StateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md) | Fully featured state container with  and . Extends [BaseStateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.basestatecontainer.md) |
 
 ## Variables
 
 |  Variable | Description |
 |  --- | --- |
-|  [createStateContainerReactHelpers](./kibana-plugin-plugins-kibana_utils-common-state_containers.createstatecontainerreacthelpers.md) | Creates helpers for using [State Containers](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md) with react |
+|  [createStateContainerReactHelpers](./kibana-plugin-plugins-kibana_utils-common-state_containers.createstatecontainerreacthelpers.md) | Creates helpers for using [State Containers](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md) with react Refer to \[guide\](https://github.com/elastic/kibana/blob/master/src/plugins/kibana\_utils/docs/state\_containers/react.md) for details |
 |  [useContainerSelector](./kibana-plugin-plugins-kibana_utils-common-state_containers.usecontainerselector.md) | Apply selector to state container to extract only needed information. Will re-render your component only when the section changes. |
-|  [useContainerState](./kibana-plugin-plugins-kibana_utils-common-state_containers.usecontainerstate.md) | Returns the latest state of a state container. |
+|  [useContainerState](./kibana-plugin-plugins-kibana_utils-common-state_containers.usecontainerstate.md) | Returns the latest state of a [StateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md)<!-- -->. |
 
 ## Type Aliases
 
 |  Type Alias | Description |
 |  --- | --- |
-|  [BaseState](./kibana-plugin-plugins-kibana_utils-common-state_containers.basestate.md) | Base state shape valid for state container |
+|  [BaseState](./kibana-plugin-plugins-kibana_utils-common-state_containers.basestate.md) | Base [StateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md) state shape |
 |  [Comparator](./kibana-plugin-plugins-kibana_utils-common-state_containers.comparator.md) |  |
 |  [Connect](./kibana-plugin-plugins-kibana_utils-common-state_containers.connect.md) |  |
-|  [Dispatch](./kibana-plugin-plugins-kibana_utils-common-state_containers.dispatch.md) |  |
+|  [Dispatch](./kibana-plugin-plugins-kibana_utils-common-state_containers.dispatch.md) | Redux like dispatch |
+|  [EnsurePureTransition](./kibana-plugin-plugins-kibana_utils-common-state_containers.ensurepuretransition.md) |  |
 |  [MapStateToProps](./kibana-plugin-plugins-kibana_utils-common-state_containers.mapstatetoprops.md) |  |
-|  [Middleware](./kibana-plugin-plugins-kibana_utils-common-state_containers.middleware.md) |  |
+|  [Middleware](./kibana-plugin-plugins-kibana_utils-common-state_containers.middleware.md) | Redux like Middleware |
 |  [PureSelector](./kibana-plugin-plugins-kibana_utils-common-state_containers.pureselector.md) |  |
-|  [Reducer](./kibana-plugin-plugins-kibana_utils-common-state_containers.reducer.md) |  |
+|  [Reducer](./kibana-plugin-plugins-kibana_utils-common-state_containers.reducer.md) | Redux like Reducer |
+|  [UnboxState](./kibana-plugin-plugins-kibana_utils-common-state_containers.unboxstate.md) | Utility type for inferring state shape from [StateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md) |
 

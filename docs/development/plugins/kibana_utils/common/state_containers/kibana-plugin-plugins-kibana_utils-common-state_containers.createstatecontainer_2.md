@@ -17,9 +17,9 @@ export declare function createStateContainer<State extends BaseState, PureTransi
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  defaultState | <code>State</code> | initial state |
-|  pureTransitions | <code>PureTransitions</code> | state transitions configuration object |
-|  pureSelectors | <code>PureSelectors</code> | state selectors configuration object |
-|  options | <code>CreateStateContainerOptions</code> |  |
+|  pureTransitions | <code>PureTransitions</code> | state transitions configuration object. Map of . |
+|  pureSelectors | <code>PureSelectors</code> | state selectors configuration object. Map of . |
+|  options | <code>CreateStateContainerOptions</code> | state container options [CreateStateContainerOptions](./kibana-plugin-plugins-kibana_utils-common-state_containers.createstatecontaineroptions.md) |
 
 <b>Returns:</b>
 

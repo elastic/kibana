@@ -142,7 +142,7 @@ const runApiExtractor = (
     messageCallback: (message: ExtractorMessage) => {
       if (message.messageId === 'console-api-report-not-copied') {
         // ConsoleMessageId.ApiReportNotCopied
-        log.warning(`You have changed the signature of the ${folder} Core API`);
+        log.warning(`You have changed the signature of the ${folder} public API`);
         log.warning(
           'To accept these changes run `node scripts/check_published_api_changes.js --accept` and then:\n' +
             "\t 1. Commit the updated documentation and API review file '" +
@@ -153,7 +153,7 @@ const runApiExtractor = (
         message.handled = true;
       } else if (message.messageId === 'console-api-report-copied') {
         // ConsoleMessageId.ApiReportCopied
-        log.warning(`You have changed the signature of the ${folder} Core API`);
+        log.warning(`You have changed the signature of the ${folder} public API`);
         log.warning(
           "Please commit the updated API documentation and the API review file: '" +
             config.reportFilePath
@@ -161,7 +161,7 @@ const runApiExtractor = (
         message.handled = true;
       } else if (message.messageId === 'console-api-report-unchanged') {
         // ConsoleMessageId.ApiReportUnchanged
-        log.info(`Core ${folder} API: no changes detected ✔`);
+        log.info(`${folder} API: no changes detected ✔`);
         message.handled = true;
       }
     },
@@ -181,7 +181,7 @@ async function run(
   folder: string,
   { log, opts }: { log: ToolingLog; opts: Options }
 ): Promise<boolean> {
-  log.info(`Core ${folder} API: checking for changes in API signature...`);
+  log.info(`${folder} API: checking for changes in API signature...`);
 
   const { apiReportChanged, succeeded } = runApiExtractor(log, folder, opts.accept);
 
@@ -199,7 +199,7 @@ async function run(
       log.error(e);
       return false;
     }
-    log.info(`Core ${folder} API: updated documentation ✔`);
+    log.info(`${folder} API: updated documentation ✔`);
   }
 
   // If the api signature changed or any errors or warnings occured, exit with an error
@@ -248,17 +248,17 @@ async function run(
       dedent(chalk`
         {dim usage:} node scripts/check_published_api_changes [...options]
 
-        Checks for any changes to the Kibana Core API
+        Checks for any changes to the Kibana shared API
 
         Examples:
 
-          {dim # Checks for any changes to the Kibana Core API}
+          {dim # Checks for any changes to the Kibana shared API}
           {dim $} node scripts/check_published_api_changes
 
-          {dim # Checks for any changes to the Kibana Core API and updates the documentation}
+          {dim # Checks for any changes to the Kibana shared API and updates the documentation}
           {dim $} node scripts/check_published_api_changes --docs
 
-          {dim # Checks for and automatically accepts and updates documentation for any changes to the Kibana Core API}
+          {dim # Checks for and automatically accepts and updates documentation for any changes to the Kibana shared API}
           {dim $} node scripts/check_published_api_changes --accept
 
           {dim # Only checks the core/public directory}
@@ -266,7 +266,7 @@ async function run(
 
         Options:
           --accept    {dim Accepts all changes by updating the API Review files and documentation}
-          --docs      {dim Updates the Core API documentation}
+          --docs      {dim Updates the API documentation}
           --filter    {dim RegExp that folder names must match, folders: [${folders.join(', ')}]}
           --help      {dim Show this message}
       `)
@@ -276,7 +276,7 @@ async function run(
   }
 
   try {
-    log.info(`Core: Building types...`);
+    log.info(`Building types for api extractor...`);
     await runBuildTypes();
   } catch (e) {
     log.error(e);

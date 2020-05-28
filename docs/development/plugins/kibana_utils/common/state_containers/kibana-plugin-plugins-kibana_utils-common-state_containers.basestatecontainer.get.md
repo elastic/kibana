@@ -4,6 +4,8 @@
 
 ## BaseStateContainer.get property
 
+Retrieves current state from the container
+
 <b>Signature:</b>
 
 ```typescript

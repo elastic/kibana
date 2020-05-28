@@ -46,7 +46,6 @@ const defaultFreeze: <T>(value: T) => T = isProduction
 
 /**
  * State container options
- *
  * @public
  */
 export interface CreateStateContainerOptions {
@@ -77,7 +76,7 @@ export function createStateContainer<State extends BaseState>(
 /**
  * Creates a state container with transitions, but without selectors
  * @param defaultState - initial state
- * @param pureTransitions - state transitions configuration object
+ * @param pureTransitions - state transitions configuration object. Map of {@link PureTransition}.
  * @typeParam State - shape of state
  * @public
  */
@@ -89,8 +88,9 @@ export function createStateContainer<State extends BaseState, PureTransitions ex
 /**
  * Creates a state container with transitions and selectors
  * @param defaultState - initial state
- * @param pureTransitions - state transitions configuration object
- * @param pureSelectors - state selectors configuration object
+ * @param pureTransitions - state transitions configuration object. Map of {@link PureTransition}.
+ * @param pureSelectors - state selectors configuration object. Map of {@link PureSelectors}.
+ * @param options - state container options {@link CreateStateContainerOptions}
  * @typeParam State - shape of state
  * @public
  */
@@ -113,8 +113,8 @@ export function createStateContainer<
   PureSelectors extends object
 >(
   defaultState: State,
-  pureTransitions: PureTransitions = {} as PureTransitions,
-  pureSelectors: PureSelectors = {} as PureSelectors,
+  pureTransitions: PureTransitions = {} as PureTransitions, // TODO: https://github.com/elastic/kibana/issues/54439
+  pureSelectors: PureSelectors = {} as PureSelectors, // TODO: https://github.com/elastic/kibana/issues/54439
   options: CreateStateContainerOptions = {}
 ): ReduxLikeStateContainer<State, PureTransitions, PureSelectors> {
   const { freeze = defaultFreeze } = options;

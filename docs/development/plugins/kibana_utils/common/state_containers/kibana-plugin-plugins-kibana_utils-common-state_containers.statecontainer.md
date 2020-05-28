@@ -4,7 +4,7 @@
 
 ## StateContainer interface
 
-Fully featured state container with selectors and transitions
+Fully featured state container with  and . Extends [BaseStateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.basestatecontainer.md)
 
 <b>Signature:</b>
 

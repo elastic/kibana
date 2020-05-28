@@ -4,7 +4,7 @@
 
 ## createStateContainerReactHelpers variable
 
-Creates helpers for using [State Containers](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md) with react
+Creates helpers for using [State Containers](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md) with react Refer to \[guide\](https://github.com/elastic/kibana/blob/master/src/plugins/kibana\_utils/docs/state\_containers/react.md) for details
 
 <b>Signature:</b>
 

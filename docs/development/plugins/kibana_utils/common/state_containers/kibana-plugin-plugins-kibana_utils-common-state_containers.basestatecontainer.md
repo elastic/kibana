@@ -16,7 +16,7 @@ export interface BaseStateContainer<State extends BaseState>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [get](./kibana-plugin-plugins-kibana_utils-common-state_containers.basestatecontainer.get.md) | <code>() =&gt; State</code> |  |
-|  [set](./kibana-plugin-plugins-kibana_utils-common-state_containers.basestatecontainer.set.md) | <code>(state: State) =&gt; void</code> |  |
-|  [state$](./kibana-plugin-plugins-kibana_utils-common-state_containers.basestatecontainer.state_.md) | <code>Observable&lt;State&gt;</code> |  |
+|  [get](./kibana-plugin-plugins-kibana_utils-common-state_containers.basestatecontainer.get.md) | <code>() =&gt; State</code> | Retrieves current state from the container |
+|  [set](./kibana-plugin-plugins-kibana_utils-common-state_containers.basestatecontainer.set.md) | <code>(state: State) =&gt; void</code> | Sets state into container |
+|  [state$](./kibana-plugin-plugins-kibana_utils-common-state_containers.basestatecontainer.state_.md) | <code>Observable&lt;State&gt;</code> |  of state |
 

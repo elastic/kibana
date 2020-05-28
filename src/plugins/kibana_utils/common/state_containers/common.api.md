@@ -15,11 +15,9 @@ export type BaseState = object;
 
 // @public
 export interface BaseStateContainer<State extends BaseState> {
-    // (undocumented)
     get: () => State;
-    // (undocumented)
     set: (state: State) => void;
-    // (undocumented)
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "Observable"
     state$: Observable<State>;
 }
 
@@ -35,6 +33,8 @@ export function createStateContainer<State extends BaseState>(defaultState: Stat
 // @public
 export function createStateContainer<State extends BaseState, PureTransitions extends object>(defaultState: State, pureTransitions: PureTransitions): ReduxLikeStateContainer<State, PureTransitions>;
 
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "PureSelectors"
+//
 // @public
 export function createStateContainer<State extends BaseState, PureTransitions extends object, PureSelectors extends object>(defaultState: State, pureTransitions: PureTransitions, pureSelectors: PureSelectors, options?: CreateStateContainerOptions): ReduxLikeStateContainer<State, PureTransitions, PureSelectors>;
 
@@ -55,19 +55,23 @@ export const createStateContainerReactHelpers: <Container extends StateContainer
     connect: Connect<UnboxState<Container>>;
 };
 
-// @public (undocumented)
+// @public
 export type Dispatch<T> = (action: T) => void;
 
 // @internal (undocumented)
 export type EnsurePureSelector<T> = Ensure<T, PureSelector<any, any, any>>;
 
-// @internal (undocumented)
+// Warning: (ae-incompatible-release-tags) The symbol "EnsurePureTransition" is marked as @public, but its signature references "PureTransition" which is marked as @internal
+//
+// @public (undocumented)
 export type EnsurePureTransition<T> = Ensure<T, PureTransition<any, any>>;
 
 // @public (undocumented)
 export type MapStateToProps<State extends BaseState, StateProps extends object> = (state: State) => StateProps;
 
-// @public (undocumented)
+// Warning: (ae-incompatible-release-tags) The symbol "Middleware" is marked as @public, but its signature references "TransitionDescription" which is marked as @internal
+//
+// @public
 export type Middleware<State extends BaseState = BaseState> = (store: Pick<ReduxLikeStateContainer<State, any>, 'getState' | 'dispatch'>) => (next: (action: TransitionDescription) => TransitionDescription | any) => Dispatch<TransitionDescription>;
 
 // Warning: (ae-incompatible-release-tags) The symbol "PureSelector" is marked as @public, but its signature references "Selector" which is marked as @internal
@@ -94,13 +98,17 @@ export type PureTransitionsToTransitions<T extends object> = {
 // @internal (undocumented)
 export type PureTransitionToTransition<T extends PureTransition<any, any>> = ReturnType<T>;
 
-// @public (undocumented)
+// Warning: (ae-incompatible-release-tags) The symbol "Reducer" is marked as @public, but its signature references "TransitionDescription" which is marked as @internal
+//
+// @public
 export type Reducer<State extends BaseState> = (state: State, action: TransitionDescription) => State;
 
 // @public
 export interface ReduxLikeStateContainer<State extends BaseState, PureTransitions extends object = {}, PureSelectors extends object = {}> extends StateContainer<State, PureTransitions, PureSelectors> {
     // (undocumented)
     addMiddleware: (middleware: Middleware<State>) => void;
+    // Warning: (ae-incompatible-release-tags) The symbol "dispatch" is marked as @public, but its signature references "TransitionDescription" which is marked as @internal
+    //
     // (undocumented)
     dispatch: (action: TransitionDescription) => void;
     // (undocumented)
@@ -131,7 +139,7 @@ export interface StateContainer<State extends BaseState, PureTransitions extends
 // @internal (undocumented)
 export type Transition<State extends BaseState, Args extends any[]> = (...args: Args) => State;
 
-// @public (undocumented)
+// @internal (undocumented)
 export interface TransitionDescription<Type extends string = string, Args extends any[] = any[]> {
     // (undocumented)
     args: Args;
@@ -139,24 +147,14 @@ export interface TransitionDescription<Type extends string = string, Args extend
     type: Type;
 }
 
-// @internal
+// @public
 export type UnboxState<Container extends StateContainer<any, any>> = Container extends StateContainer<infer T, any> ? T : never;
 
-// Warning: (ae-incompatible-release-tags) The symbol "useContainerSelector" is marked as @public, but its signature references "UnboxState" which is marked as @internal
-//
 // @public
 export const useContainerSelector: <Container extends StateContainer<any, any, {}>, Result>(container: Container, selector: (state: UnboxState<Container>) => Result, comparator?: Comparator<Result>) => Result;
 
-// Warning: (ae-incompatible-release-tags) The symbol "useContainerState" is marked as @public, but its signature references "UnboxState" which is marked as @internal
-//
 // @public
 export const useContainerState: <Container extends StateContainer<any, any, {}>>(container: Container) => UnboxState<Container>;
 
-
-// Warnings were encountered during analysis:
-//
-// src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts:78:46 - (ae-incompatible-release-tags) The symbol "useState" is marked as @public, but its signature references "UnboxState" which is marked as @internal
-// src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts:78:46 - (ae-incompatible-release-tags) The symbol "useSelector" is marked as @public, but its signature references "UnboxState" which is marked as @internal
-// src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts:78:46 - (ae-incompatible-release-tags) The symbol "connect" is marked as @public, but its signature references "UnboxState" which is marked as @internal
 
 ```

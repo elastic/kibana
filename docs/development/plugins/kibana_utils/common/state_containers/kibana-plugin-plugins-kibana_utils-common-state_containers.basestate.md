@@ -4,7 +4,7 @@
 
 ## BaseState type
 
-Base state shape valid for state container
+Base [StateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md) state shape
 
 <b>Signature:</b>
 
