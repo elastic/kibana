@@ -216,12 +216,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
     }
 
-    this.exceptionsPackagerTask = setupPackagerTask({
-      core,
-      logger: this.logger,
-      taskManager: plugins.taskManager,
-      lists: plugins.lists,
-    });
+    if (plugins.taskManager && plugins.lists) {
+      this.exceptionsPackagerTask = setupPackagerTask({
+        core,
+        logger: this.logger,
+        taskManager: plugins.taskManager,
+        lists: plugins.lists,
+      });
+    }
 
     const libs = compose(core, plugins, this.context.env.mode.prod);
     initServer(libs);
