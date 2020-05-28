@@ -8,6 +8,7 @@ import ReactDOM from 'react-dom';
 import { ConfigSchema } from '../';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import { PluginSetupDeps } from '../plugin';
+import { Home } from '../pages/Home';
 
 export const renderApp = (
   core: CoreStart,
@@ -15,7 +16,7 @@ export const renderApp = (
   { element }: AppMountParameters,
   config: ConfigSchema
 ) => {
-  ReactDOM.render(<div>Hello observability overview</div>, element);
+  ReactDOM.render(<Home />, element);
   return () => {
     ReactDOM.unmountComponentAtNode(element);
   };
