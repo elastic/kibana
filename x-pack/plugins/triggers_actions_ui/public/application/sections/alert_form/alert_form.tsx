@@ -179,6 +179,7 @@ export const AlertForm = ({
           .filter(
             (alertTypeRegistryItem: AlertTypeModel) =>
               alertTypesIndex &&
+              alertTypesIndex[alertTypeRegistryItem.id] &&
               alertTypesIndex[alertTypeRegistryItem.id].producer === alert.consumer
           );
   const alertTypeNodes = alertTypeRegistryList.map(function (item, index) {
