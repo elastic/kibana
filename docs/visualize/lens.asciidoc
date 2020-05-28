@@ -76,7 +76,7 @@ still allows you to make the change.
 
 [float]
 [[customize-operation]]
-==== Change the data aggregation and labels
+==== Change the aggregation and labels
 
 Lens allows some customizations of the data for each visualization.
 
