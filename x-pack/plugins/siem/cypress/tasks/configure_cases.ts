@@ -5,13 +5,12 @@
  */
 
 import {
-  ADD_NEW_CONNECTOR_OPTION_LINK,
+  ADD_NEW_CONNECTOR_DROPDOWN_BUTTON,
   CONNECTOR,
   CONNECTOR_NAME,
   CONNECTORS_DROPDOWN,
   PASSWORD,
   SAVE_BTN,
-  SAVE_CHANGES_BTN,
   SERVICE_NOW_CONNECTOR_CARD,
   URL,
   USERNAME,
@@ -30,23 +29,20 @@ export const addServiceNowConnector = (connector: Connector) => {
 };
 
 export const openAddNewConnectorOption = () => {
-  cy.get(MAIN_PAGE).then($page => {
+  cy.get(MAIN_PAGE).then(($page) => {
     if ($page.find(SERVICE_NOW_CONNECTOR_CARD).length !== 1) {
       cy.wait(1000);
-      cy.get(ADD_NEW_CONNECTOR_OPTION_LINK).click({ force: true });
+      cy.get(CONNECTORS_DROPDOWN).click({ force: true });
+      cy.get(ADD_NEW_CONNECTOR_DROPDOWN_BUTTON).click();
     }
   });
-};
-
-export const saveChanges = () => {
-  cy.get(SAVE_CHANGES_BTN).click();
 };
 
 export const selectLastConnectorCreated = () => {
   cy.get(CONNECTORS_DROPDOWN).click({ force: true });
   cy.get('@createConnector')
     .its('response')
-    .then(response => {
+    .then((response) => {
       cy.get(CONNECTOR(response.body.id)).click();
     });
 };

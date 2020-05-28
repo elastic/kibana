@@ -7,7 +7,7 @@
 import {
   getTransactionAvgDurationByBrowser,
   Options,
-  AvgDurationByBrowserAPIResponse
+  AvgDurationByBrowserAPIResponse,
 } from '.';
 import * as transformerModule from './transformer';
 import * as fetcherModule from './fetcher';
@@ -20,7 +20,7 @@ describe('getAvgDurationByBrowser', () => {
       .mockReturnValueOnce(({} as unknown) as AvgDurationByBrowserAPIResponse);
     const search = () => {};
     const options = ({
-      setup: { client: { search }, indices: {}, uiFiltersES: [] }
+      setup: { client: { search }, indices: {}, uiFiltersES: [] },
     } as unknown) as Options;
     jest
       .spyOn<{ fetcher: any }, 'fetcher'>(fetcherModule, 'fetcher')

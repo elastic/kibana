@@ -15,19 +15,27 @@ import { useUpdateCase } from '../../../../containers/case/use_update_case';
 import { useGetCase } from '../../../../containers/case/use_get_case';
 import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
 import { wait } from '../../../../lib/helpers';
-import { usePushToService } from '../use_push_to_service';
+
+import { useConnectors } from '../../../../containers/case/configure/use_connectors';
+import { connectorsMock } from '../../../../containers/case/configure/mock';
+
+import { usePostPushToService } from '../../../../containers/case/use_post_push_to_service';
+
 jest.mock('../../../../containers/case/use_update_case');
 jest.mock('../../../../containers/case/use_get_case_user_actions');
 jest.mock('../../../../containers/case/use_get_case');
-jest.mock('../use_push_to_service');
+jest.mock('../../../../containers/case/configure/use_connectors');
+jest.mock('../../../../containers/case/use_post_push_to_service');
+
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
-const usePushToServiceMock = usePushToService as jest.Mock;
+const useConnectorsMock = useConnectors as jest.Mock;
+const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 
 export const caseProps: CaseProps = {
   caseId: basicCase.id,
   userCanCrud: true,
-  caseData: basicCase,
+  caseData: { ...basicCase, connectorId: 'servicenow-2' },
   fetchCase: jest.fn(),
   updateCase: jest.fn(),
 };
@@ -42,6 +50,8 @@ describe('CaseView ', () => {
   const fetchCaseUserActions = jest.fn();
   const fetchCase = jest.fn();
   const updateCase = jest.fn();
+  const postPushToService = jest.fn();
+
   const data = caseProps.caseData;
   const defaultGetCase = {
     isLoading: false,
@@ -85,18 +95,8 @@ describe('CaseView ', () => {
     useUpdateCaseMock.mockImplementation(() => defaultUpdateCaseState);
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     useGetCaseUserActionsMock.mockImplementation(() => defaultUseGetCaseUserActions);
-    usePushToServiceMock.mockImplementation(({ updateCase: updateCaseMockCall }) => ({
-      pushButton: (
-        <button
-          data-test-subj="mock-button"
-          onClick={() => updateCaseMockCall(caseProps.caseData)}
-          type="button"
-        >
-          {'Hello Button'}
-        </button>
-      ),
-      pushCallouts: null,
-    }));
+    usePostPushToServiceMock.mockImplementation(() => ({ isLoading: false, postPushToService }));
+    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, isLoading: false }));
   });
 
   it('should render CaseComponent', async () => {
@@ -108,37 +108,23 @@ describe('CaseView ', () => {
       </TestProviders>
     );
     await wait();
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-title"]`)
-        .first()
-        .prop('title')
-    ).toEqual(data.title);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-status"]`)
-        .first()
-        .text()
-    ).toEqual(data.status);
+    expect(wrapper.find(`[data-test-subj="case-view-title"]`).first().prop('title')).toEqual(
+      data.title
+    );
+    expect(wrapper.find(`[data-test-subj="case-view-status"]`).first().text()).toEqual(data.status);
     expect(
       wrapper
         .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="case-tag"]`)
         .first()
         .text()
     ).toEqual(data.tags[0]);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-username"]`)
-        .first()
-        .text()
-    ).toEqual(data.createdBy.username);
+    expect(wrapper.find(`[data-test-subj="case-view-username"]`).first().text()).toEqual(
+      data.createdBy.username
+    );
     expect(wrapper.contains(`[data-test-subj="case-view-closedAt"]`)).toBe(false);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-createdAt"]`)
-        .first()
-        .prop('value')
-    ).toEqual(data.createdAt);
+    expect(wrapper.find(`[data-test-subj="case-view-createdAt"]`).first().prop('value')).toEqual(
+      data.createdAt
+    );
     expect(
       wrapper
         .find(`[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]`)
@@ -161,18 +147,12 @@ describe('CaseView ', () => {
     );
     await wait();
     expect(wrapper.contains(`[data-test-subj="case-view-createdAt"]`)).toBe(false);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-closedAt"]`)
-        .first()
-        .prop('value')
-    ).toEqual(basicCaseClosed.closedAt);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-status"]`)
-        .first()
-        .text()
-    ).toEqual(basicCaseClosed.status);
+    expect(wrapper.find(`[data-test-subj="case-view-closedAt"]`).first().prop('value')).toEqual(
+      basicCaseClosed.closedAt
+    );
+    expect(wrapper.find(`[data-test-subj="case-view-status"]`).first().text()).toEqual(
+      basicCaseClosed.status
+    );
   });
 
   it('should dispatch update state when button is toggled', async () => {
@@ -203,17 +183,9 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
+    expect(wrapper.find('[data-test-subj="editable-title-loading"]').first().exists()).toBeTruthy();
     expect(
-      wrapper
-        .find('[data-test-subj="editable-title-loading"]')
-        .first()
-        .exists()
-    ).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="editable-title-edit-icon"]')
-        .first()
-        .exists()
+      wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()
     ).toBeFalsy();
   });
 
@@ -231,10 +203,7 @@ describe('CaseView ', () => {
       </TestProviders>
     );
     expect(
-      wrapper
-        .find('[data-test-subj="toggle-case-status"]')
-        .first()
-        .prop('isLoading')
+      wrapper.find('[data-test-subj="toggle-case-status"]').first().prop('isLoading')
     ).toBeTruthy();
   });
 
@@ -284,12 +253,7 @@ describe('CaseView ', () => {
         .first()
         .exists()
     ).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="tag-list-edit"]')
-        .first()
-        .exists()
-    ).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="tag-list-edit"]').first().exists()).toBeFalsy();
   });
 
   it('should update title', () => {
@@ -301,10 +265,7 @@ describe('CaseView ', () => {
       </TestProviders>
     );
     const newTitle = 'The new title';
-    wrapper
-      .find(`[data-test-subj="editable-title-edit-icon"]`)
-      .first()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="editable-title-edit-icon"]`).first().simulate('click');
     wrapper.update();
     wrapper
       .find(`[data-test-subj="editable-title-input-field"]`)
@@ -312,10 +273,7 @@ describe('CaseView ', () => {
       .simulate('change', { target: { value: newTitle } });
 
     wrapper.update();
-    wrapper
-      .find(`[data-test-subj="editable-title-submit-btn"]`)
-      .first()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="editable-title-submit-btn"]`).first().simulate('click');
 
     wrapper.update();
     const updateObject = updateCaseProperty.mock.calls[0][0];
@@ -328,6 +286,7 @@ describe('CaseView ', () => {
       ...defaultUseGetCaseUserActions,
       hasDataToPush: true,
     }));
+
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -335,20 +294,18 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
-    expect(
-      wrapper
-        .find('[data-test-subj="has-data-to-push-button"]')
-        .first()
-        .exists()
-    ).toBeTruthy();
-    wrapper
-      .find('[data-test-subj="mock-button"]')
-      .first()
-      .simulate('click');
-    wrapper.update();
+
     await wait();
-    expect(updateCase).toBeCalledWith(caseProps.caseData);
-    expect(fetchCaseUserActions).toBeCalledWith(caseProps.caseData.id);
+
+    expect(
+      wrapper.find('[data-test-subj="has-data-to-push-button"]').first().exists()
+    ).toBeTruthy();
+
+    wrapper.find('[data-test-subj="push-to-external-service"]').first().simulate('click');
+
+    wrapper.update();
+
+    expect(postPushToService).toHaveBeenCalled();
   });
 
   it('should return null if error', () => {
@@ -422,11 +379,33 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
-    wrapper
-      .find('[data-test-subj="case-refresh"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
     expect(fetchCaseUserActions).toBeCalledWith(caseProps.caseData.id);
     expect(fetchCase).toBeCalled();
+  });
+
+  it('should disable the push button when connector is invalid', () => {
+    useGetCaseUserActionsMock.mockImplementation(() => ({
+      ...defaultUseGetCaseUserActions,
+      hasDataToPush: true,
+    }));
+
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent
+            {...{
+              ...caseProps,
+              updateCase,
+              caseData: { ...caseProps.caseData, connectorId: 'not-exist' },
+            }}
+          />
+        </Router>
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.find('button[data-test-subj="push-to-external-service"]').first().prop('disabled')
+    ).toBeTruthy();
   });
 });

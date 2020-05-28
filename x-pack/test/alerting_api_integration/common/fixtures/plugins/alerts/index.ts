@@ -9,7 +9,7 @@ import { AlertExecutorOptions, AlertType } from '../../../../../../plugins/alert
 import { ActionTypeExecutorOptions, ActionType } from '../../../../../../plugins/actions/server';
 
 // eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
+export default function (kibana: any) {
   return new kibana.Plugin({
     require: ['xpack_main', 'elasticsearch'],
     name: 'alerts-fixture',
@@ -233,6 +233,7 @@ export default function(kibana: any) {
           { id: 'other', name: 'Other' },
         ],
         defaultActionGroupId: 'default',
+        producer: 'alerting',
         actionVariables: {
           state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
           context: [{ name: 'instanceContextValue', description: 'the instance context value' }],
@@ -291,6 +292,7 @@ export default function(kibana: any) {
           { id: 'default', name: 'Default' },
           { id: 'other', name: 'Other' },
         ],
+        producer: 'alerting',
         defaultActionGroupId: 'default',
         async executor(alertExecutorOptions: AlertExecutorOptions) {
           const { services, state } = alertExecutorOptions;
@@ -298,7 +300,7 @@ export default function(kibana: any) {
 
           const runCount = (state.runCount || 0) + 1;
 
-          times(runCount, index => {
+          times(runCount, (index) => {
             services
               .alertInstanceFactory(`instance-${index}`)
               .replaceState({ instanceStateValue: true })
@@ -319,6 +321,7 @@ export default function(kibana: any) {
             name: 'Default',
           },
         ],
+        producer: 'alerting',
         defaultActionGroupId: 'default',
         async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
@@ -345,6 +348,7 @@ export default function(kibana: any) {
             name: 'Default',
           },
         ],
+        producer: 'alerting',
         defaultActionGroupId: 'default',
         async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
@@ -369,6 +373,7 @@ export default function(kibana: any) {
             name: 'Default',
           },
         ],
+        producer: 'alerting',
         defaultActionGroupId: 'default',
         validate: {
           params: schema.object({
@@ -452,6 +457,7 @@ export default function(kibana: any) {
             name: 'Default',
           },
         ],
+        producer: 'alerting',
         defaultActionGroupId: 'default',
         validate: {
           params: schema.object({
@@ -464,6 +470,7 @@ export default function(kibana: any) {
         id: 'test.noop',
         name: 'Test: Noop',
         actionGroups: [{ id: 'default', name: 'Default' }],
+        producer: 'alerting',
         defaultActionGroupId: 'default',
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
@@ -471,6 +478,7 @@ export default function(kibana: any) {
         id: 'test.onlyContextVariables',
         name: 'Test: Only Context Variables',
         actionGroups: [{ id: 'default', name: 'Default' }],
+        producer: 'alerting',
         defaultActionGroupId: 'default',
         actionVariables: {
           context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
@@ -481,6 +489,7 @@ export default function(kibana: any) {
         id: 'test.onlyStateVariables',
         name: 'Test: Only State Variables',
         actionGroups: [{ id: 'default', name: 'Default' }],
+        producer: 'alerting',
         defaultActionGroupId: 'default',
         actionVariables: {
           state: [{ name: 'aStateVariable', description: 'this is a state variable' }],

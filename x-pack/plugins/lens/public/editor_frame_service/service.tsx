@@ -44,7 +44,7 @@ async function collectAsyncDefinitions<T extends { id: string }>(
 ) {
   const resolvedDefinitions = await Promise.all(definitions);
   const definitionMap: Record<string, T> = {};
-  resolvedDefinitions.forEach(definition => {
+  resolvedDefinitions.forEach((definition) => {
     definitionMap[definition.id] = definition;
   });
 
@@ -81,10 +81,10 @@ export class EditorFrameService {
     }
 
     return {
-      registerDatasource: datasource => {
+      registerDatasource: (datasource) => {
         this.datasources.push(datasource as Datasource<unknown, unknown>);
       },
-      registerVisualization: visualization => {
+      registerVisualization: (visualization) => {
         this.visualizations.push(visualization as Visualization<unknown, unknown>);
       },
     };

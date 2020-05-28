@@ -16,7 +16,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   TRANSACTION_DURATION,
-  SERVICE_ENVIRONMENT
+  SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { AlertingPlugin } from '../../../../alerting/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
@@ -36,16 +36,16 @@ const paramsSchema = schema.object({
   aggregationType: schema.oneOf([
     schema.literal('avg'),
     schema.literal('95th'),
-    schema.literal('99th')
+    schema.literal('99th'),
   ]),
-  environment: schema.string()
+  environment: schema.string(),
 });
 
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionDuration];
 
 export function registerTransactionDurationAlertType({
   alerting,
-  config$
+  config$,
 }: RegisterAlertParams) {
   alerting.registerType({
     id: AlertType.TransactionDuration,
@@ -53,7 +53,7 @@ export function registerTransactionDurationAlertType({
     actionGroups: alertTypeConfig.actionGroups,
     defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
     validate: {
-      params: paramsSchema
+      params: paramsSchema,
     },
     actionVariables: {
       context: [
@@ -61,22 +61,23 @@ export function registerTransactionDurationAlertType({
           description: i18n.translate(
             'xpack.apm.registerTransactionDurationAlertType.variables.serviceName',
             {
-              defaultMessage: 'Service name'
+              defaultMessage: 'Service name',
             }
           ),
-          name: 'serviceName'
+          name: 'serviceName',
         },
         {
           description: i18n.translate(
             'xpack.apm.registerTransactionDurationAlertType.variables.transactionType',
             {
-              defaultMessage: 'Transaction type'
+              defaultMessage: 'Transaction type',
             }
           ),
-          name: 'transactionType'
-        }
-      ]
+          name: 'transactionType',
+        },
+      ],
     },
+    producer: 'apm',
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();
 
@@ -84,7 +85,7 @@ export function registerTransactionDurationAlertType({
 
       const indices = await getApmIndices({
         config,
-        savedObjectsClient: services.savedObjectsClient
+        savedObjectsClient: services.savedObjectsClient,
       });
 
       const environmentTerm =
@@ -102,47 +103,47 @@ export function registerTransactionDurationAlertType({
                 {
                   range: {
                     '@timestamp': {
-                      gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`
-                    }
-                  }
+                      gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`,
+                    },
+                  },
                 },
                 {
                   term: {
-                    [PROCESSOR_EVENT]: 'transaction'
-                  }
+                    [PROCESSOR_EVENT]: 'transaction',
+                  },
                 },
                 {
                   term: {
-                    [SERVICE_NAME]: alertParams.serviceName
-                  }
+                    [SERVICE_NAME]: alertParams.serviceName,
+                  },
                 },
                 {
                   term: {
-                    [TRANSACTION_TYPE]: alertParams.transactionType
-                  }
+                    [TRANSACTION_TYPE]: alertParams.transactionType,
+                  },
                 },
-                ...environmentTerm
-              ]
-            }
+                ...environmentTerm,
+              ],
+            },
           },
           aggs: {
             agg:
               alertParams.aggregationType === 'avg'
                 ? {
                     avg: {
-                      field: TRANSACTION_DURATION
-                    }
+                      field: TRANSACTION_DURATION,
+                    },
                   }
                 : {
                     percentiles: {
                       field: TRANSACTION_DURATION,
                       percents: [
-                        alertParams.aggregationType === '95th' ? 95 : 99
-                      ]
-                    }
-                  }
-          }
-        }
+                        alertParams.aggregationType === '95th' ? 95 : 99,
+                      ],
+                    },
+                  },
+          },
+        },
       };
 
       const response: ESSearchResponse<
@@ -164,11 +165,11 @@ export function registerTransactionDurationAlertType({
         );
         alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
           transactionType: alertParams.transactionType,
-          serviceName: alertParams.serviceName
+          serviceName: alertParams.serviceName,
         });
       }
 
       return {};
-    }
+    },
   });
 }

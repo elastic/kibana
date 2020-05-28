@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiButton,
 } from '@elastic/eui';
 
 import styled from 'styled-components';
@@ -29,12 +28,6 @@ const EuiFormRowExtended = styled(EuiFormRow)`
   }
 `;
 
-const AddConnectorEuiFormRow = styled(EuiFormRow)`
-  width: 100%;
-  max-width: 100%;
-  text-align: right;
-`;
-
 export interface Props {
   connectors: Connector[];
   disabled: boolean;
@@ -42,7 +35,6 @@ export interface Props {
   updateConnectorDisabled: boolean;
   onChangeConnector: (id: string) => void;
   selectedConnector: string;
-  handleShowAddFlyout: () => void;
   handleShowEditFlyout: () => void;
 }
 const ConnectorsComponent: React.FC<Props> = ({
@@ -52,11 +44,10 @@ const ConnectorsComponent: React.FC<Props> = ({
   updateConnectorDisabled,
   onChangeConnector,
   selectedConnector,
-  handleShowAddFlyout,
   handleShowEditFlyout,
 }) => {
   const connectorsName = useMemo(
-    () => connectors.find(c => c.id === selectedConnector)?.name ?? 'none',
+    () => connectors.find((c) => c.id === selectedConnector)?.name ?? 'none',
     [connectors, selectedConnector]
   );
 
@@ -77,7 +68,7 @@ const ConnectorsComponent: React.FC<Props> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [connectorsName]
+    [connectorsName, updateConnectorDisabled]
   );
 
   return (
@@ -100,18 +91,9 @@ const ConnectorsComponent: React.FC<Props> = ({
             isLoading={isLoading}
             onChange={onChangeConnector}
             data-test-subj="case-connectors-dropdown"
+            appendAddConnectorButton={true}
           />
         </EuiFormRowExtended>
-        <AddConnectorEuiFormRow>
-          <EuiButton
-            fill
-            disabled={disabled}
-            onClick={handleShowAddFlyout}
-            data-test-subj="case-configure-add-connector-button"
-          >
-            {i18n.ADD_NEW_CONNECTOR}
-          </EuiButton>
-        </AddConnectorEuiFormRow>
       </EuiDescribedFormGroup>
     </>
   );

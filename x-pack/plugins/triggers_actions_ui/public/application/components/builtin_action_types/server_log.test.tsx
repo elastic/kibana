@@ -82,10 +82,7 @@ describe('ServerLogParamsFields renders', () => {
     );
     expect(wrapper.find('[data-test-subj="loggingLevelSelect"]').length > 0).toBeTruthy();
     expect(
-      wrapper
-        .find('[data-test-subj="loggingLevelSelect"]')
-        .first()
-        .prop('value')
+      wrapper.find('[data-test-subj="loggingLevelSelect"]').first().prop('value')
     ).toStrictEqual('trace');
     expect(wrapper.find('[data-test-subj="loggingMessageInput"]').length > 0).toBeTruthy();
   });
@@ -112,10 +109,7 @@ describe('ServerLogParamsFields renders', () => {
     );
     expect(wrapper.find('[data-test-subj="loggingLevelSelect"]').length > 0).toBeTruthy();
     expect(
-      wrapper
-        .find('[data-test-subj="loggingLevelSelect"]')
-        .first()
-        .prop('value')
+      wrapper.find('[data-test-subj="loggingLevelSelect"]').first().prop('value')
     ).toStrictEqual('info');
     expect(wrapper.find('[data-test-subj="loggingMessageInput"]').length > 0).toBeTruthy();
   });

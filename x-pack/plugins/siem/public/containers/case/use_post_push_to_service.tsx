@@ -174,9 +174,10 @@ export const formatServiceRequestData = (
     },
     comments: comments
       .filter(
-        c => actualExternalService == null || actualExternalService.commentsToUpdate.includes(c.id)
+        (c) =>
+          actualExternalService == null || actualExternalService.commentsToUpdate.includes(c.id)
       )
-      .map(c => ({
+      .map((c) => ({
         commentId: c.id,
         comment: c.comment,
         createdAt: c.createdAt,

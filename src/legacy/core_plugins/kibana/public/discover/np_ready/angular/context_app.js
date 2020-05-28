@@ -72,7 +72,7 @@ function ContextAppController($scope, Private) {
       ...queryParameterActions,
       ...queryActions,
     },
-    action => (...args) => action(this.state)(...args)
+    (action) => (...args) => action(this.state)(...args)
   );
 
   this.constants = {
@@ -86,7 +86,7 @@ function ContextAppController($scope, Private) {
       () => this.state.rows.anchor,
       () => this.state.rows.successors,
     ],
-    newValues => this.actions.setAllRows(...newValues)
+    (newValues) => this.actions.setAllRows(...newValues)
   );
 
   /**
@@ -97,7 +97,7 @@ function ContextAppController($scope, Private) {
       ..._.pick(this, QUERY_PARAMETER_KEYS),
       indexPatternId: this.indexPattern.id,
     }),
-    newQueryParameters => {
+    (newQueryParameters) => {
       const { queryParameters } = this.state;
       if (
         newQueryParameters.indexPatternId !== queryParameters.indexPatternId ||
@@ -123,7 +123,7 @@ function ContextAppController($scope, Private) {
       predecessorCount: this.state.queryParameters.predecessorCount,
       successorCount: this.state.queryParameters.successorCount,
     }),
-    newParameters => {
+    (newParameters) => {
       _.assign(this, newParameters);
     }
   );

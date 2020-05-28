@@ -343,7 +343,7 @@ export const useRefreshAnalyticsList = (
 
       subscriptions.push(
         distinct$
-          .pipe(filter(state => state === REFRESH_ANALYTICS_LIST_STATE.REFRESH))
+          .pipe(filter((state) => state === REFRESH_ANALYTICS_LIST_STATE.REFRESH))
           .subscribe(() => typeof callback.onRefresh === 'function' && callback.onRefresh())
       );
     }
@@ -351,7 +351,7 @@ export const useRefreshAnalyticsList = (
     if (typeof callback.isLoading === 'function') {
       subscriptions.push(
         distinct$.subscribe(
-          state =>
+          (state) =>
             typeof callback.isLoading === 'function' &&
             callback.isLoading(state === REFRESH_ANALYTICS_LIST_STATE.LOADING)
         )
@@ -359,7 +359,7 @@ export const useRefreshAnalyticsList = (
     }
 
     return () => {
-      subscriptions.map(sub => sub.unsubscribe());
+      subscriptions.map((sub) => sub.unsubscribe());
     };
   }, []);
 

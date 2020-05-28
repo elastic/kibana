@@ -25,7 +25,7 @@ import {
 } from 'src/legacy/plugin_discovery/types';
 
 // eslint-disable-next-line import/no-default-export
-export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
+export default function (kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
   const pluginSpec: Partial<LegacyPluginOptions> = {
     id: 'kbn_tp_run_pipeline',
     uiExports: {

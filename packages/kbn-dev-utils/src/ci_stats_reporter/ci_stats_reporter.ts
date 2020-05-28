@@ -145,7 +145,7 @@ export class CiStatsReporter {
           `failed to reach kibana-ci-stats service [reason=${reason}], retrying in ${attempt} seconds`
         );
 
-        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
       }
     }
   }

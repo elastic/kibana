@@ -47,7 +47,7 @@ export const getAnomaliesHostTableColumns = (
         idPrefix: `anomalies-host-table-hostName-${createCompoundHostKey(
           anomaliesByHost
         )}-hostName`,
-        render: item => <HostDetailsLink hostName={item} />,
+        render: (item) => <HostDetailsLink hostName={item} />,
       }),
   },
   {
@@ -96,7 +96,7 @@ export const getAnomaliesHostTableColumns = (
     render: (influencers, anomaliesByHost) => (
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
         {influencers &&
-          influencers.map(influencer => {
+          influencers.map((influencer) => {
             const [key, value] = getEntries(influencer);
             const entityName = key != null ? key : '';
             const entityValue = value != null ? value : '';
@@ -126,7 +126,7 @@ export const getAnomaliesHostTableColumns = (
     name: i18n.TIME_STAMP,
     field: 'anomaly.time',
     sortable: true,
-    render: time => <FormattedRelativePreferenceDate value={time} />,
+    render: (time) => <FormattedRelativePreferenceDate value={time} />,
   },
 ];
 
@@ -141,7 +141,7 @@ export const getAnomaliesHostTableColumnsCurated = (
 
   // Columns to exclude from host details pages
   if (pageType === HostsType.details) {
-    return columns.filter(column => column.name !== i18n.HOST_NAME);
+    return columns.filter((column) => column.name !== i18n.HOST_NAME);
   } else {
     return columns;
   }

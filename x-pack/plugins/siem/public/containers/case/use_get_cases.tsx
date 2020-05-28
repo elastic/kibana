@@ -45,25 +45,25 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
       return {
         ...state,
         isError: false,
-        loading: [...state.loading.filter(e => e !== action.payload), action.payload],
+        loading: [...state.loading.filter((e) => e !== action.payload), action.payload],
       };
     case 'FETCH_UPDATE_CASE_SUCCESS':
       return {
         ...state,
-        loading: state.loading.filter(e => e !== 'caseUpdate'),
+        loading: state.loading.filter((e) => e !== 'caseUpdate'),
       };
     case 'FETCH_CASES_SUCCESS':
       return {
         ...state,
         data: action.payload,
         isError: false,
-        loading: state.loading.filter(e => e !== 'cases'),
+        loading: state.loading.filter((e) => e !== 'cases'),
       };
     case 'FETCH_FAILURE':
       return {
         ...state,
         isError: true,
-        loading: state.loading.filter(e => e !== action.payload),
+        loading: state.loading.filter((e) => e !== action.payload),
       };
     case 'UPDATE_FILTER_OPTIONS':
       return {

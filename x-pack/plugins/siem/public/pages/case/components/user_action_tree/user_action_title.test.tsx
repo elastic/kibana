@@ -48,10 +48,7 @@ describe('UserActionTitle ', () => {
         </Router>
       </TestProviders>
     );
-    wrapper
-      .find(`[data-test-subj="copy-link"]`)
-      .first()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="copy-link"]`).first().simulate('click');
     expect(copy).toBeCalledTimes(1);
   });
 });

@@ -49,14 +49,18 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   };
 }
 
+const searchAriaLabel = i18n.translate('kbn.management.editIndexPattern.fields.searchAria', {
+  defaultMessage: 'Search fields',
+});
+
 const filterAriaLabel = i18n.translate('kbn.management.editIndexPattern.fields.filterAria', {
-  defaultMessage: 'Filter',
+  defaultMessage: 'Filter field types',
 });
 
 const filterPlaceholder = i18n.translate(
   'kbn.management.editIndexPattern.fields.filterPlaceholder',
   {
-    defaultMessage: 'Filter',
+    defaultMessage: 'Search',
   }
 );
 
@@ -73,7 +77,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
     const tempScriptedFieldLanguages: string[] = [];
-    indexPattern.fields.forEach(field => {
+    indexPattern.fields.forEach((field) => {
       if (field.scripted) {
         if (field.lang) {
           tempScriptedFieldLanguages.push(field.lang);
@@ -106,9 +110,9 @@ export function Tabs({ config, indexPattern, fields, services, history, location
             <EuiFieldSearch
               placeholder={filterPlaceholder}
               value={fieldFilter}
-              onChange={e => setFieldFilter(e.target.value)}
+              onChange={(e) => setFieldFilter(e.target.value)}
               data-test-subj="indexPatternFieldFilter"
-              aria-label={filterAriaLabel}
+              aria-label={searchAriaLabel}
             />
           </EuiFlexItem>
           {type === TAB_INDEXED_FIELDS && indexedFieldTypes.length > 0 && (
@@ -116,8 +120,9 @@ export function Tabs({ config, indexPattern, fields, services, history, location
               <EuiSelect
                 options={indexedFieldTypes}
                 value={indexedFieldTypeFilter}
-                onChange={e => setIndexedFieldTypeFilter(e.target.value)}
+                onChange={(e) => setIndexedFieldTypeFilter(e.target.value)}
                 data-test-subj="indexedFieldTypeFilterDropdown"
+                aria-label={filterAriaLabel}
               />
             </EuiFlexItem>
           )}
@@ -126,7 +131,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
               <EuiSelect
                 options={scriptedFieldLanguages}
                 value={scriptedFieldLanguageFilter}
-                onChange={e => setScriptedFieldLanguageFilter(e.target.value)}
+                onChange={(e) => setScriptedFieldLanguageFilter(e.target.value)}
                 data-test-subj="scriptedFieldLanguageFilterDropdown"
               />
             </EuiFlexItem>
@@ -257,8 +262,8 @@ export function Tabs({ config, indexPattern, fields, services, history, location
   return (
     <EuiTabbedContent
       tabs={euiTabs}
-      selectedTab={euiTabs.find(tab => tab.id === selectedTabId)}
-      onTabClick={tab => {
+      selectedTab={euiTabs.find((tab) => tab.id === selectedTabId)}
+      onTabClick={(tab) => {
         setSelectedTabId(tab.id);
         syncingStateFunc.setCurrentTab(tab.id);
       }}

@@ -95,21 +95,21 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
     >
       <FormDrilldownWizard
         name={wizardConfig.name}
-        onNameChange={newName => {
+        onNameChange={(newName) => {
           setWizardConfig({
             ...wizardConfig,
             name: newName,
           });
         }}
         actionConfig={wizardConfig.actionConfig}
-        onActionConfigChange={newActionConfig => {
+        onActionConfigChange={(newActionConfig) => {
           setWizardConfig({
             ...wizardConfig,
             actionConfig: newActionConfig,
           });
         }}
         currentActionFactory={wizardConfig.actionFactory}
-        onActionFactoryChange={actionFactory => {
+        onActionFactoryChange={(actionFactory) => {
           if (!actionFactory) {
             setWizardConfig({
               ...wizardConfig,

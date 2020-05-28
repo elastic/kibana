@@ -48,7 +48,7 @@ async function waitForMapDependencies(): Promise<boolean> {
     return whenModulesLoadedPromise;
   }
 
-  whenModulesLoadedPromise = new Promise(async resolve => {
+  whenModulesLoadedPromise = new Promise(async (resolve) => {
     ({
       // @ts-ignore
       getMapsSavedObjectLoader,
@@ -111,7 +111,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
       );
     }
 
-    const promises = queryableIndexPatternIds.map(async indexPatternId => {
+    const promises = queryableIndexPatternIds.map(async (indexPatternId) => {
       try {
         // @ts-ignore
         return await getIndexPatternService().get(indexPatternId);

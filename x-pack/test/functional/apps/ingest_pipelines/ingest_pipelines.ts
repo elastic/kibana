@@ -11,7 +11,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'ingestPipelines']);
   const log = getService('log');
 
-  describe('Ingest Pipelines', function() {
+  describe('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
       await pageObjects.common.navigateToApp('ingestPipelines');

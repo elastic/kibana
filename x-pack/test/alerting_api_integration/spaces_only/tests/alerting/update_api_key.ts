@@ -35,7 +35,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', undefined);
 
       await alertUtils.updateApiKey(createdAlert.id);
 
@@ -60,7 +60,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.other.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.other.id, createdAlert.id, 'alert', undefined);
 
       await alertUtils.getUpdateApiKeyRequest(createdAlert.id).expect(404, {
         statusCode: 404,

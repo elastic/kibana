@@ -34,7 +34,6 @@ interface Props {
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
-  show: boolean;
 }
 
 const DropTargetDataProvidersContainer = styled.div`
@@ -55,13 +54,17 @@ const DropTargetDataProvidersContainer = styled.div`
 `;
 
 const DropTargetDataProviders = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 2px;
   position: relative;
-  border: 0.2rem dashed ${props => props.theme.eui.euiColorMediumShade};
+  border: 0.2rem dashed ${(props) => props.theme.eui.euiColorMediumShade};
   border-radius: 5px;
-  margin: 5px 0 5px 0;
+  margin: 2px 0 2px 0;
   min-height: 100px;
   overflow-y: auto;
-  background-color: ${props => props.theme.eui.euiFormBackgroundColor};
+  background-color: ${(props) => props.theme.eui.euiFormBackgroundColor};
 `;
 
 DropTargetDataProviders.displayName = 'DropTargetDataProviders';
@@ -94,7 +97,6 @@ export const DataProviders = React.memo<Props>(
     onDataProviderRemoved,
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
-    show,
   }) => {
     return (
       <DropTargetDataProvidersContainer className="drop-target-data-providers-container">
@@ -116,10 +118,7 @@ export const DataProviders = React.memo<Props>(
                     onToggleDataProviderExcluded={onToggleDataProviderExcluded}
                   />
                 ) : (
-                  <DroppableWrapper
-                    isDropDisabled={!show || isLoading}
-                    droppableId={getDroppableId(id)}
-                  >
+                  <DroppableWrapper isDropDisabled={isLoading} droppableId={getDroppableId(id)}>
                     <Empty />
                   </DroppableWrapper>
                 )}

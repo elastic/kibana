@@ -21,17 +21,17 @@
  * @param {Function} by - it's a callback which determines how data will be mapped.
  * @return {Function} function - a predefined filter function
  */
-export const makeFilter = by =>
+export const makeFilter = (by) =>
   /**
    * @param {*} value
    * @return {Function} function - the predefined filter function with a filter value
    */
-  value =>
+  (value) =>
     /**
      * @param {Array|Object} data
      * @return {*} result - it depends on "by" outcome.
      */
-    data => by(data, value);
+    (data) => by(data, value);
 
 /**
  * @param {Array} annotations

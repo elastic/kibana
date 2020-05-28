@@ -29,7 +29,7 @@ import {
 } from './constants';
 
 // eslint-disable-next-line import/no-default-export
-export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
+export default function (kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
   const pluginSpec: Legacy.PluginSpecOptions = {
     id: PLUGIN_ID,
     config(Joi: any) {

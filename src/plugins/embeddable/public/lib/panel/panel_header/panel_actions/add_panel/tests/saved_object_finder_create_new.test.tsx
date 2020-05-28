@@ -41,11 +41,9 @@ describe('SavedObjectFinderCreateNew', () => {
     const onClick = jest.fn();
     for (let i = 0; i < 3; i++) {
       items.push(
-        <EuiContextMenuItem
-          key={i + 1}
-          data-test-subj={`item${i + 1}`}
-          onClick={onClick}
-        >{`item${i + 1}`}</EuiContextMenuItem>
+        <EuiContextMenuItem key={i + 1} data-test-subj={`item${i + 1}`} onClick={onClick}>{`item${
+          i + 1
+        }`}</EuiContextMenuItem>
       );
     }
 
@@ -69,11 +67,9 @@ describe('SavedObjectFinderCreateNew', () => {
     const onClick = jest.fn();
     for (let i = 0; i < 3; i++) {
       items.push(
-        <EuiContextMenuItem
-          key={i + 1}
-          data-test-subj={`item${i + 1}`}
-          onClick={onClick}
-        >{`item${i + 1}`}</EuiContextMenuItem>
+        <EuiContextMenuItem key={i + 1} data-test-subj={`item${i + 1}`} onClick={onClick}>{`item${
+          i + 1
+        }`}</EuiContextMenuItem>
       );
     }
 

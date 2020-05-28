@@ -117,7 +117,7 @@ export const withConnectorFlyout = <T extends ActionConnector>({
                 value={apiUrl || ''} // Needed to prevent uncontrolled input error when value is undefined
                 data-test-subj="apiUrlFromInput"
                 placeholder="https://<site-url>"
-                onChange={evt => handleOnChangeActionConfig('apiUrl', evt.target.value)}
+                onChange={(evt) => handleOnChangeActionConfig('apiUrl', evt.target.value)}
                 onBlur={handleOnBlurActionConfig.bind(null, 'apiUrl')}
               />
             </EuiFormRow>

@@ -61,13 +61,11 @@ describe('Events Viewer', () => {
     });
 
     it('displays the `default ECS` category (by default)', () => {
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE)
-        .invoke('text')
-        .should('eq', 'default ECS');
+      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE).invoke('text').should('eq', 'default ECS');
     });
 
     it('displays a checked checkbox for all of the default events viewer columns that are also in the default ECS category', () => {
-      defaultHeadersInDefaultEcsCategory.forEach(header =>
+      defaultHeadersInDefaultEcsCategory.forEach((header) =>
         cy.get(FIELDS_BROWSER_CHECKBOX(header.id)).should('be.checked')
       );
     });
@@ -137,25 +135,19 @@ describe('Events Viewer', () => {
       const filterInput = 'aa7ca589f1b8220002f2fc61c64cfbf1'; // this will never match real data
       cy.get(HEADER_SUBTITLE)
         .invoke('text')
-        .then(initialNumberOfEvents => {
+        .then((initialNumberOfEvents) => {
           kqlSearch(`${filterInput}{enter}`);
-          cy.get(HEADER_SUBTITLE)
-            .invoke('text')
-            .should('not.equal', initialNumberOfEvents);
+          cy.get(HEADER_SUBTITLE).invoke('text').should('not.equal', initialNumberOfEvents);
         });
     });
 
     it('loads more events when the load more button is clicked', () => {
       const defaultNumberOfLoadedEvents = '25';
-      cy.get(LOCAL_EVENTS_COUNT)
-        .invoke('text')
-        .should('equal', defaultNumberOfLoadedEvents);
+      cy.get(LOCAL_EVENTS_COUNT).invoke('text').should('equal', defaultNumberOfLoadedEvents);
 
       cy.get(LOAD_MORE).click({ force: true });
 
-      cy.get(LOCAL_EVENTS_COUNT)
-        .invoke('text')
-        .should('not.equal', defaultNumberOfLoadedEvents);
+      cy.get(LOCAL_EVENTS_COUNT).invoke('text').should('not.equal', defaultNumberOfLoadedEvents);
     });
   });
 });

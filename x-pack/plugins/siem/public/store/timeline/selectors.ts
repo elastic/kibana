@@ -22,27 +22,27 @@ const selectCallOutUnauthorizedMsg = (state: State): boolean =>
 export const selectTimeline = (state: State, timelineId: string): TimelineModel =>
   state.timeline.timelineById[timelineId];
 
-export const autoSaveMsgSelector = createSelector(selectAutoSaveMsg, autoSaveMsg => autoSaveMsg);
+export const autoSaveMsgSelector = createSelector(selectAutoSaveMsg, (autoSaveMsg) => autoSaveMsg);
 
 export const timelineByIdSelector = createSelector(
   selectTimelineById,
-  timelineById => timelineById
+  (timelineById) => timelineById
 );
 
 export const getShowCallOutUnauthorizedMsg = () =>
   createSelector(
     selectCallOutUnauthorizedMsg,
-    showCallOutUnauthorizedMsg => showCallOutUnauthorizedMsg
+    (showCallOutUnauthorizedMsg) => showCallOutUnauthorizedMsg
   );
 
 export const getTimelines = () => timelineByIdSelector;
 
-export const getTimelineByIdSelector = () => createSelector(selectTimeline, timeline => timeline);
+export const getTimelineByIdSelector = () => createSelector(selectTimeline, (timeline) => timeline);
 
-export const getEventsByIdSelector = () => createSelector(selectTimeline, timeline => timeline);
+export const getEventsByIdSelector = () => createSelector(selectTimeline, (timeline) => timeline);
 
 export const getKqlFilterQuerySelector = () =>
-  createSelector(selectTimeline, timeline =>
+  createSelector(selectTimeline, (timeline) =>
     timeline &&
     timeline.kqlQuery &&
     timeline.kqlQuery.filterQuery &&
@@ -52,12 +52,12 @@ export const getKqlFilterQuerySelector = () =>
   );
 
 export const getKqlFilterQueryDraftSelector = () =>
-  createSelector(selectTimeline, timeline =>
+  createSelector(selectTimeline, (timeline) =>
     timeline && timeline.kqlQuery ? timeline.kqlQuery.filterQueryDraft : null
   );
 
 export const getKqlFilterKuerySelector = () =>
-  createSelector(selectTimeline, timeline =>
+  createSelector(selectTimeline, (timeline) =>
     timeline &&
     timeline.kqlQuery &&
     timeline.kqlQuery.filterQuery &&
@@ -69,7 +69,7 @@ export const getKqlFilterKuerySelector = () =>
 export const isFilterQueryDraftValidSelector = () =>
   createSelector(
     selectTimeline,
-    timeline =>
+    (timeline) =>
       timeline &&
       timeline.kqlQuery &&
       isFromKueryExpressionValid(timeline.kqlQuery.filterQueryDraft)

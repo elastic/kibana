@@ -68,10 +68,7 @@ describe('StatefulOpenTimeline', () => {
       </TestProviders>
     );
 
-    const componentProps = wrapper
-      .find('[data-test-subj="open-timeline"]')
-      .last()
-      .props();
+    const componentProps = wrapper.find('[data-test-subj="open-timeline"]').last().props();
 
     expect(componentProps).toEqual({
       ...componentProps,
@@ -104,12 +101,7 @@ describe('StatefulOpenTimeline', () => {
       wrapper
         .find('[data-test-subj="search-bar"] input')
         .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
-      expect(
-        wrapper
-          .find('[data-test-subj="search-row"]')
-          .first()
-          .prop('query')
-      ).toEqual('abcd');
+      expect(wrapper.find('[data-test-subj="search-row"]').first().prop('query')).toEqual('abcd');
     });
 
     test('it appends the word "with" to the Showing in Timelines message when the user enters a query', async () => {
@@ -132,12 +124,9 @@ describe('StatefulOpenTimeline', () => {
         .find('[data-test-subj="search-bar"] input')
         .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
 
-      expect(
-        wrapper
-          .find('[data-test-subj="query-message"]')
-          .first()
-          .text()
-      ).toContain('Showing: 11 timelines with');
+      expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
+        'Showing: 11 timelines with'
+      );
     });
 
     test('echos (renders) the query when the user enters a query', async () => {
@@ -160,12 +149,9 @@ describe('StatefulOpenTimeline', () => {
         .find('[data-test-subj="search-bar"] input')
         .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
 
-      expect(
-        wrapper
-          .find('[data-test-subj="selectable-query-text"]')
-          .first()
-          .text()
-      ).toEqual('with "abcd"');
+      expect(wrapper.find('[data-test-subj="selectable-query-text"]').first().text()).toEqual(
+        'with "abcd"'
+      );
     });
   });
 
@@ -187,10 +173,8 @@ describe('StatefulOpenTimeline', () => {
       await wait();
 
       expect(
-        wrapper
-          .find(`.${OPEN_TIMELINE_CLASS_NAME} input`)
-          .first()
-          .getDOMNode().id === document.activeElement!.id
+        wrapper.find(`.${OPEN_TIMELINE_CLASS_NAME} input`).first().getDOMNode().id ===
+          document.activeElement!.id
       ).toBe(true);
     });
   });
@@ -220,10 +204,7 @@ describe('StatefulOpenTimeline', () => {
         .first()
         .simulate('change', { target: { checked: true } });
 
-      wrapper
-        .find('[data-test-subj="favorite-selected"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="favorite-selected"]').first().simulate('click');
 
       expect(addTimelinesToFavorites).toHaveBeenCalledWith([
         'saved-timeline-11',
@@ -264,10 +245,7 @@ describe('StatefulOpenTimeline', () => {
         .first()
         .simulate('change', { target: { checked: true } });
 
-      wrapper
-        .find('[data-test-subj="delete-selected"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="delete-selected"]').first().simulate('click');
 
       expect(deleteTimelines).toHaveBeenCalledWith([
         'saved-timeline-11',
@@ -331,24 +309,15 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="open-timeline"]')
-          .last()
-          .prop('sortDirection')
-      ).toEqual('desc');
+      expect(wrapper.find('[data-test-subj="open-timeline"]').last().prop('sortDirection')).toEqual(
+        'desc'
+      );
 
-      wrapper
-        .find('thead tr th button')
-        .at(0)
-        .simulate('click');
+      wrapper.find('thead tr th button').at(0).simulate('click');
 
-      expect(
-        wrapper
-          .find('[data-test-subj="open-timeline"]')
-          .last()
-          .prop('sortDirection')
-      ).toEqual('asc');
+      expect(wrapper.find('[data-test-subj="open-timeline"]').last().prop('sortDirection')).toEqual(
+        'asc'
+      );
     });
   });
 
@@ -368,24 +337,15 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="open-timeline"]')
-          .last()
-          .prop('onlyFavorites')
-      ).toEqual(false);
+      expect(wrapper.find('[data-test-subj="open-timeline"]').last().prop('onlyFavorites')).toEqual(
+        false
+      );
 
-      wrapper
-        .find('[data-test-subj="only-favorites-toggle"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="only-favorites-toggle"]').first().simulate('click');
 
-      expect(
-        wrapper
-          .find('[data-test-subj="open-timeline"]')
-          .last()
-          .prop('onlyFavorites')
-      ).toEqual(true);
+      expect(wrapper.find('[data-test-subj="open-timeline"]').last().prop('onlyFavorites')).toEqual(
+        true
+      );
     });
   });
 
@@ -409,29 +369,20 @@ describe('StatefulOpenTimeline', () => {
       wrapper.update();
 
       expect(
-        wrapper
-          .find('[data-test-subj="open-timeline"]')
-          .last()
-          .prop('itemIdToExpandedNotesRowMap')
+        wrapper.find('[data-test-subj="open-timeline"]').last().prop('itemIdToExpandedNotesRowMap')
       ).toEqual({});
 
-      wrapper
-        .find('[data-test-subj="expand-notes"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
 
       expect(
-        wrapper
-          .find('[data-test-subj="open-timeline"]')
-          .last()
-          .prop('itemIdToExpandedNotesRowMap')
+        wrapper.find('[data-test-subj="open-timeline"]').last().prop('itemIdToExpandedNotesRowMap')
       ).toEqual({
         '10849df0-7b44-11e9-a608-ab3d811609': (
           <NotePreviews
             notes={
               mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes != null
                 ? mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes.map(
-                    note => ({ ...note, savedObjectId: note.noteId })
+                    (note) => ({ ...note, savedObjectId: note.noteId })
                   )
                 : []
             }
@@ -459,10 +410,7 @@ describe('StatefulOpenTimeline', () => {
 
       wrapper.update();
 
-      wrapper
-        .find('[data-test-subj="expand-notes"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
       expect(wrapper.find('[data-test-subj="note-previews-container"]').exists()).toEqual(true);
       expect(wrapper.find('[data-test-subj="updated-by"]').exists()).toEqual(true);
 
@@ -475,7 +423,10 @@ describe('StatefulOpenTimeline', () => {
       ).toEqual('elastic');
     });
 
-    test('it renders the tabs', async () => {
+    /**
+     * enable this test when createtTemplateTimeline is ready
+     */
+    test.skip('it renders the tabs', async () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
@@ -514,10 +465,7 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
       const getSelectedItem = (): [] =>
-        wrapper
-          .find('[data-test-subj="open-timeline"]')
-          .last()
-          .prop('selectedItems');
+        wrapper.find('[data-test-subj="open-timeline"]').last().prop('selectedItems');
       await wait();
       expect(getSelectedItem().length).toEqual(0);
       wrapper
@@ -547,12 +495,9 @@ describe('StatefulOpenTimeline', () => {
 
     wrapper.update();
 
-    expect(
-      wrapper
-        .find('[data-test-subj="query-message"]')
-        .first()
-        .text()
-    ).toContain('Showing: 11 timelines ');
+    expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
+      'Showing: 11 timelines '
+    );
   });
 
   // TODO - Have been skip because we need to re-implement the test as the component changed
@@ -611,10 +556,7 @@ describe('StatefulOpenTimeline', () => {
 
     await wait();
 
-    wrapper
-      .find('[data-test-subj="open-duplicate"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="open-duplicate"]').first().simulate('click');
 
     expect(onOpenTimeline).toBeCalledWith({ duplicate: true, timelineId: 'saved-timeline-11' });
   });

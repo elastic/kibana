@@ -16,7 +16,9 @@ import { act } from 'react-dom/test-utils';
 jest.mock(
   '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
 );
+
 const onSubmit = jest.fn();
+
 const defaultProps = {
   connectors: connectorsMock,
   disabled: false,
@@ -41,62 +43,38 @@ describe('EditConnector ', () => {
     );
 
     expect(
-      wrapper
-        .find(`[data-test-subj="dropdown-connectors"]`)
-        .last()
-        .prop('disabled')
+      wrapper.find(`span[data-test-subj="dropdown-connector-no-connector"]`).last().exists()
     ).toBeTruthy();
 
-    expect(
-      wrapper
-        .find(`span[data-test-subj="dropdown-connector-no-connector"]`)
-        .last()
-        .exists()
-    ).toBeTruthy();
-    wrapper
-      .find(`[data-test-subj="connector-edit-button"]`)
-      .last()
-      .simulate('click');
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.update();
+    wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+    wrapper.update();
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="edit-connectors-submit"]`)
-        .last()
-        .exists()
-    ).toBeTruthy();
-
-    expect(
-      wrapper
-        .find(`[data-test-subj="dropdown-connectors"]`)
-        .last()
-        .prop('disabled')
-    ).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().exists()).toBeTruthy();
   });
+
   it('Edit external service on submit', async () => {
     const wrapper = mount(
       <TestProviders>
         <EditConnector {...defaultProps} />
       </TestProviders>
     );
-    wrapper
-      .find(`[data-test-subj="connector-edit-button"]`)
-      .last()
-      .simulate('click');
-    expect(
-      wrapper
-        .find(`[data-test-subj="edit-connectors-submit"]`)
-        .last()
-        .exists()
-    ).toBeTruthy();
+
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.update();
+    wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+    wrapper.update();
+
+    expect(wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().exists()).toBeTruthy();
+
     await act(async () => {
-      wrapper
-        .find(`[data-test-subj="edit-connectors-submit"]`)
-        .last()
-        .simulate('click');
+      wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
       await wait();
       expect(onSubmit).toBeCalledWith(sampleConnector);
     });
   });
+
   it('Resets selector on cancel', async () => {
     const props = {
       ...defaultProps,
@@ -106,15 +84,14 @@ describe('EditConnector ', () => {
         <EditConnector {...props} />
       </TestProviders>
     );
-    wrapper
-      .find(`[data-test-subj="connector-edit-button"]`)
-      .last()
-      .simulate('click');
+
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.update();
+    wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+    wrapper.update();
+
     await act(async () => {
-      wrapper
-        .find(`[data-test-subj="edit-connectors-cancel"]`)
-        .last()
-        .simulate('click');
+      wrapper.find(`[data-test-subj="edit-connectors-cancel"]`).last().simulate('click');
       await wait();
       wrapper.update();
       expect(formHookMock.setFieldValue).toBeCalledWith(
@@ -123,20 +100,7 @@ describe('EditConnector ', () => {
       );
     });
   });
-  it('Renders disabled button', () => {
-    const props = { ...defaultProps, disabled: true };
-    const wrapper = mount(
-      <TestProviders>
-        <EditConnector {...props} />
-      </TestProviders>
-    );
-    expect(
-      wrapper
-        .find(`[data-test-subj="connector-edit-button"]`)
-        .last()
-        .prop('disabled')
-    ).toBeTruthy();
-  });
+
   it('Renders loading spinner', () => {
     const props = { ...defaultProps, isLoading: true };
     const wrapper = mount(
@@ -144,11 +108,6 @@ describe('EditConnector ', () => {
         <EditConnector {...props} />
       </TestProviders>
     );
-    expect(
-      wrapper
-        .find(`[data-test-subj="connector-loading"]`)
-        .last()
-        .exists()
-    ).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="connector-loading"]`).last().exists()).toBeTruthy();
   });
 });

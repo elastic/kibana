@@ -42,7 +42,7 @@ describe('RemoteClusterForm', () => {
         'remoteClusterFormSeedNodesFormRow',
         'remoteClusterFormSkipUnavailableFormRow',
         'remoteClusterFormGlobalError',
-      ].map(testSubject => {
+      ].map((testSubject) => {
         const mountedField = findTestSubject(component, testSubject);
         return takeMountedSnapshot(mountedField);
       });

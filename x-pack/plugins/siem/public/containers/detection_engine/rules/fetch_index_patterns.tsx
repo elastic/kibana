@@ -68,7 +68,7 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
             },
           })
           .then(
-            result => {
+            (result) => {
               if (isSubscribed) {
                 setIsLoading(false);
                 setIndicesExists(get('data.source.status.indicesExist', result));
@@ -80,7 +80,7 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
                 );
               }
             },
-            error => {
+            (error) => {
               if (isSubscribed) {
                 setIsLoading(false);
                 errorToToaster({ title: i18n.RULE_ADD_FAILURE, error, dispatchToaster });

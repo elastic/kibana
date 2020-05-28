@@ -54,7 +54,7 @@ export class MapPlugin {
       },
     });
 
-    licensing.license$.subscribe(license => {
+    licensing.license$.subscribe((license) => {
       const { state } = license.check('maps', 'basic');
       if (state === 'valid' && !routesInitialized) {
         routesInitialized = true;

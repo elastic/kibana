@@ -72,7 +72,7 @@ export class IndexPatternsService {
     if (!this.savedObjectsCache) {
       return [];
     }
-    return this.savedObjectsCache.map(obj => obj?.id);
+    return this.savedObjectsCache.map((obj) => obj?.id);
   };
 
   getTitles = async (refresh: boolean = false): Promise<string[]> => {
@@ -82,7 +82,7 @@ export class IndexPatternsService {
     if (!this.savedObjectsCache) {
       return [];
     }
-    return this.savedObjectsCache.map(obj => obj?.attributes?.title);
+    return this.savedObjectsCache.map((obj) => obj?.attributes?.title);
   };
 
   getFields = async (fields: IndexPatternCachedFieldType[], refresh: boolean = false) => {

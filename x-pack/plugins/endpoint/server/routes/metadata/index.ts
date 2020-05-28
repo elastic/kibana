@@ -145,9 +145,9 @@ async function mapToHostResultList(
       request_page_index: queryParams.from,
       hosts: await Promise.all(
         searchResponse.hits.hits
-          .map(response => response.inner_hits.most_recent.hits.hits)
-          .flatMap(data => data as HitSource)
-          .map(async entry => enrichHostMetadata(entry._source, metadataRequestContext))
+          .map((response) => response.inner_hits.most_recent.hits.hits)
+          .flatMap((data) => data as HitSource)
+          .map(async (entry) => enrichHostMetadata(entry._source, metadataRequestContext))
       ),
       total: totalNumberOfHosts,
     };

@@ -32,11 +32,11 @@ describe('alert details tests', () => {
     const middleware = alertMiddlewareFactory(coreStart, depsStart);
     store = createStore(alertListReducer, applyMiddleware(middleware));
 
-    selectorIsTrue = async selector => {
+    selectorIsTrue = async (selector) => {
       // If the selector returns true, we're done
       while (selector(store.getState()) !== true) {
         // otherwise, wait til the next state change occurs
-        await new Promise(resolve => {
+        await new Promise((resolve) => {
           const unsubscribe = store.subscribe(() => {
             unsubscribe();
             resolve();
@@ -64,7 +64,7 @@ describe('alert details tests', () => {
 
     it('should return alert details data', async () => {
       // wait for alertDetails to be defined
-      await selectorIsTrue(state => state.alertDetails !== undefined);
+      await selectorIsTrue((state) => state.alertDetails !== undefined);
     });
   });
 });

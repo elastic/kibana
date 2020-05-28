@@ -67,7 +67,7 @@ export const createSearchSourceFromJSON = (
 
   // Inject index id if a reference is saved
   if (searchSourceValues.indexRefName) {
-    const reference = references.find(ref => ref.name === searchSourceValues.indexRefName);
+    const reference = references.find((ref) => ref.name === searchSourceValues.indexRefName);
     if (!reference) {
       throw new Error(`Could not find reference for ${searchSourceValues.indexRefName}`);
     }
@@ -96,7 +96,7 @@ export const createSearchSourceFromJSON = (
   const searchSourceFields = searchSource.getFields();
   const fnProps = transform(
     searchSourceFields,
-    function(dynamic, val, name) {
+    function (dynamic, val, name) {
       if (isFunction(val) && name) dynamic[name] = val;
     },
     {}

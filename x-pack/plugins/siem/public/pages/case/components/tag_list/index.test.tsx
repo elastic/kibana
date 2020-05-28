@@ -63,28 +63,10 @@ describe('TagList ', () => {
         <TagList {...defaultProps} />
       </TestProviders>
     );
-    expect(
-      wrapper
-        .find(`[data-test-subj="no-tags"]`)
-        .last()
-        .exists()
-    ).toBeTruthy();
-    wrapper
-      .find(`[data-test-subj="tag-list-edit-button"]`)
-      .last()
-      .simulate('click');
-    expect(
-      wrapper
-        .find(`[data-test-subj="no-tags"]`)
-        .last()
-        .exists()
-    ).toBeFalsy();
-    expect(
-      wrapper
-        .find(`[data-test-subj="edit-tags"]`)
-        .last()
-        .exists()
-    ).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="no-tags"]`).last().exists()).toBeTruthy();
+    wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
+    expect(wrapper.find(`[data-test-subj="no-tags"]`).last().exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="edit-tags"]`).last().exists()).toBeTruthy();
   });
   it('Edit tag on submit', async () => {
     const wrapper = mount(
@@ -92,15 +74,9 @@ describe('TagList ', () => {
         <TagList {...defaultProps} />
       </TestProviders>
     );
-    wrapper
-      .find(`[data-test-subj="tag-list-edit-button"]`)
-      .last()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
     await act(async () => {
-      wrapper
-        .find(`[data-test-subj="edit-tags-submit"]`)
-        .last()
-        .simulate('click');
+      wrapper.find(`[data-test-subj="edit-tags-submit"]`).last().simulate('click');
       await wait();
       expect(onSubmit).toBeCalledWith(sampleTags);
     });
@@ -111,15 +87,9 @@ describe('TagList ', () => {
         <TagList {...defaultProps} />
       </TestProviders>
     );
-    wrapper
-      .find(`[data-test-subj="tag-list-edit-button"]`)
-      .last()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
     expect(
-      wrapper
-        .find(`[data-test-subj="caseTags"] [data-test-subj="input"]`)
-        .first()
-        .prop('options')
+      wrapper.find(`[data-test-subj="caseTags"] [data-test-subj="input"]`).first().prop('options')
     ).toEqual([{ label: 'coke' }, { label: 'pepsi' }, { label: 'rad' }, { label: 'dude' }]);
   });
   it('Cancels on cancel', async () => {
@@ -132,35 +102,14 @@ describe('TagList ', () => {
         <TagList {...props} />
       </TestProviders>
     );
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-tag"]`)
-        .last()
-        .exists()
-    ).toBeTruthy();
-    wrapper
-      .find(`[data-test-subj="tag-list-edit-button"]`)
-      .last()
-      .simulate('click');
+    expect(wrapper.find(`[data-test-subj="case-tag"]`).last().exists()).toBeTruthy();
+    wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
     await act(async () => {
-      expect(
-        wrapper
-          .find(`[data-test-subj="case-tag"]`)
-          .last()
-          .exists()
-      ).toBeFalsy();
-      wrapper
-        .find(`[data-test-subj="edit-tags-cancel"]`)
-        .last()
-        .simulate('click');
+      expect(wrapper.find(`[data-test-subj="case-tag"]`).last().exists()).toBeFalsy();
+      wrapper.find(`[data-test-subj="edit-tags-cancel"]`).last().simulate('click');
       await wait();
       wrapper.update();
-      expect(
-        wrapper
-          .find(`[data-test-subj="case-tag"]`)
-          .last()
-          .exists()
-      ).toBeTruthy();
+      expect(wrapper.find(`[data-test-subj="case-tag"]`).last().exists()).toBeTruthy();
     });
   });
   it('Renders disabled button', () => {
@@ -171,10 +120,7 @@ describe('TagList ', () => {
       </TestProviders>
     );
     expect(
-      wrapper
-        .find(`[data-test-subj="tag-list-edit-button"]`)
-        .last()
-        .prop('disabled')
+      wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().prop('disabled')
     ).toBeTruthy();
   });
 });

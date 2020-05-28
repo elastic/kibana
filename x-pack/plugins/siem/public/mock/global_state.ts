@@ -23,7 +23,7 @@ import {
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
 } from '../../common/constants';
-import { TimelineType } from '../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../common/types/timeline';
 
 export const mockGlobalState: State = {
   app: {
@@ -221,6 +221,7 @@ export const mockGlobalState: State = {
         width: DEFAULT_TIMELINE_WIDTH,
         isSaving: false,
         version: null,
+        status: TimelineStatus.active,
       },
     },
   },

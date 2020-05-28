@@ -76,6 +76,7 @@ export function savedLens(): ExpressionFunctionDefinition<
           disableTriggers: true,
         },
         embeddableType: EmbeddableTypes.lens,
+        generatedAt: Date.now(),
       };
     },
   };

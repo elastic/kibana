@@ -24,16 +24,12 @@ describe('formatTimestampToDuration', () => {
         formatTimestampToDuration(fiftyNineSeconds, CALCULATE_DURATION_SINCE, getTestTime())
       ).to.be('59 seconds');
 
-      const fiveMins = getTestTime()
-        .subtract(5, 'minutes')
-        .subtract(30, 'seconds');
+      const fiveMins = getTestTime().subtract(5, 'minutes').subtract(30, 'seconds');
       expect(formatTimestampToDuration(fiveMins, CALCULATE_DURATION_SINCE, getTestTime())).to.be(
         '6 mins'
       );
 
-      const sixHours = getTestTime()
-        .subtract(6, 'hours')
-        .subtract(30, 'minutes');
+      const sixHours = getTestTime().subtract(6, 'hours').subtract(30, 'minutes');
       expect(formatTimestampToDuration(sixHours, CALCULATE_DURATION_SINCE, getTestTime())).to.be(
         '6 hrs 30 mins'
       );
@@ -85,17 +81,12 @@ describe('formatTimestampToDuration', () => {
         '10 mins'
       );
 
-      const sixHours = getTestTime()
-        .add(6, 'hours')
-        .add(30, 'minutes');
+      const sixHours = getTestTime().add(6, 'hours').add(30, 'minutes');
       expect(formatTimestampToDuration(sixHours, CALCULATE_DURATION_UNTIL, getTestTime())).to.be(
         '6 hrs 30 mins'
       );
 
-      const sevenDays = getTestTime()
-        .add(7, 'days')
-        .add(6, 'hours')
-        .add(18, 'minutes');
+      const sevenDays = getTestTime().add(7, 'days').add(6, 'hours').add(18, 'minutes');
       expect(formatTimestampToDuration(sevenDays, CALCULATE_DURATION_UNTIL, getTestTime())).to.be(
         '7 days 6 hrs 18 mins'
       );

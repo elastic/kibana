@@ -17,10 +17,7 @@ describe('ExternalServiceColumn ', () => {
       <ExternalServiceColumn {...{ theCase: useGetCasesMockState.data.cases[0] }} />
     );
     expect(
-      wrapper
-        .find(`[data-test-subj="case-table-column-external-notPushed"]`)
-        .last()
-        .exists()
+      wrapper.find(`[data-test-subj="case-table-column-external-notPushed"]`).last().exists()
     ).toBeTruthy();
   });
   it('Up to date', () => {
@@ -28,10 +25,7 @@ describe('ExternalServiceColumn ', () => {
       <ExternalServiceColumn {...{ theCase: useGetCasesMockState.data.cases[1] }} />
     );
     expect(
-      wrapper
-        .find(`[data-test-subj="case-table-column-external-upToDate"]`)
-        .last()
-        .exists()
+      wrapper.find(`[data-test-subj="case-table-column-external-upToDate"]`).last().exists()
     ).toBeTruthy();
   });
   it('Needs update', () => {
@@ -39,10 +33,7 @@ describe('ExternalServiceColumn ', () => {
       <ExternalServiceColumn {...{ theCase: useGetCasesMockState.data.cases[2] }} />
     );
     expect(
-      wrapper
-        .find(`[data-test-subj="case-table-column-external-requiresUpdate"]`)
-        .last()
-        .exists()
+      wrapper.find(`[data-test-subj="case-table-column-external-requiresUpdate"]`).last().exists()
     ).toBeTruthy();
   });
 });

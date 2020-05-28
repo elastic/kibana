@@ -33,10 +33,7 @@ describe('FieldName', () => {
     );
 
     expect(
-      wrapper
-        .find(`[data-test-subj="field-name-${timestampFieldId}"]`)
-        .first()
-        .text()
+      wrapper.find(`[data-test-subj="field-name-${timestampFieldId}"]`).first().text()
     ).toEqual(timestampFieldId);
   });
 
@@ -78,11 +75,6 @@ describe('FieldName', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('strong')
-        .first()
-        .text()
-    ).toEqual(highlight);
+    expect(wrapper.find('strong').first().text()).toEqual(highlight);
   });
 });

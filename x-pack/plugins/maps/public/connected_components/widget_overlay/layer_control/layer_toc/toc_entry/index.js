@@ -35,15 +35,15 @@ function mapStateToProps(state = {}, ownProps) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    openLayerPanel: async layerId => {
+    openLayerPanel: async (layerId) => {
       await dispatch(removeTransientLayer());
       await dispatch(setSelectedLayer(layerId));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
-    hideTOCDetails: layerId => {
+    hideTOCDetails: (layerId) => {
       dispatch(hideTOCDetails(layerId));
     },
-    showTOCDetails: layerId => {
+    showTOCDetails: (layerId) => {
       dispatch(showTOCDetails(layerId));
     },
   };

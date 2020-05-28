@@ -30,7 +30,7 @@ export class TransformUiPlugin {
           defaultMessage: 'Transforms',
         }),
         order: 4,
-        mount: async params => {
+        mount: async (params) => {
           const { mountManagementSection } = await import('./app/mount_management_section');
           return mountManagementSection(coreSetup, params);
         },

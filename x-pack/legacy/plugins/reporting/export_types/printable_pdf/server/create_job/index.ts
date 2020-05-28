@@ -48,7 +48,7 @@ export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
       forceNow: new Date().toISOString(),
       headers: serializedEncryptedHeaders,
       layout,
-      objects: relativeUrls.map(u => ({ relativeUrl: u })),
+      objects: relativeUrls.map((u) => ({ relativeUrl: u })),
       title,
       type: objectType, // Note: this changes the shape of the job params object
     };
