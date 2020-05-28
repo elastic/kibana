@@ -218,23 +218,46 @@ id's deterministically with e.g. UUIDv5.
 1. On startup, find the index to which the `.kibana` alias points,
    `.kibana_n`, and check if any documents have an outdated `migrationVersion`
    indicating that a migration needs to be performed. 
-2. Create `.kibana_n+1`, if it already exists, ignore the error and continue.
+2. Create `.kibana_n+1` with mappings set to the combination of the previous
+   index's mappings and the expected mappings. Included in the mappings should
+   be [`migrationMappingPropertyHashes` metadata](https://github.com/elastic/kibana/blob/97d1685c3dea682f80fd1a907bbc1d6f3702ea85/src/core/server/saved_objects/migrations/core/build_active_mappings.ts#L49)
+   1. If the index already exists, compare the `migrationMappingPropertyHashes`
+      metadata to verify that the mappings are compatible using the [existing `diffMappings` method](https://github.com/elastic/kibana/blob/97d1685c3dea682f80fd1a907bbc1d6f3702ea85/src/core/server/saved_objects/migrations/core/build_active_mappings.ts#L54-L60).
+      If these mappings aren't compatible, fail the migration. This could
+      happen if a newer kibana node has already attempted the migration, or a
+      kibana node on the same version which didn't have all the plugins that
+      the current node has.
 3. Migrate documents by reading from `.kibana_n` and creating documents in
    `.kibana_n+1`. If a document already exists, ignore.
-4. Move the `.kibana` index to point to `.kibana_n+1` (ignore if it has
-   already been moved). 
+4. Move the `.kibana` alias to point to `.kibana_n+1` (ignore if it has
+   already been moved).
+5. To prevent lost deletes in step (3) all saved object deletes will be
+   converted into "soft" deletes by setting the document's `status:'deleted'`.
+   1. We will introduce an `updated_at` root property for all saved objects
+      which will also be updated when a document is deleted.
+   2. A background task will periodically perform a hard delete on documents
+      with `status: 'deleted'` and `current_time - updated_at > retention_period`.  
+      By setting `retention_period` to a large period like 72 hours we
+      mitigate clock synchronization problems like clock skew and daylight
+      savings time updates.
 
-Together with the limitations this algorithm ensures that migrations are
+Together with the limitations, this algorithm ensures that migrations are
 idempotent. If two nodes are started simultaneously, both of them will start
 writing into `.kibana_n+1` but because migrations are idempotent, it doesn’t
 matter which node’s writes win.
 
 > Note: This algorithm doesn't support mixed Kibana versions attempting to
 > perform a migration at the same time. E.g. if a v7.8.0 and a v7.9.0 node
-> attempts to simultaneously migrate a 7.6.0 index the result will be an
-> inconsistent state. This is an unlikely scenario in practise and therefore
-> an acceptable limitation. In 8.x we can ensure that only the latest node
-> completes the migration. 
+> attempts to simultaneously migrate a 7.6.0 index the result could be an
+> inconsistent state that leads to data loss.
+> 
+> Similarly, if two nodes on the same version and with different plugins
+> attempt a migration at the same time, it could cause two back-to-back
+> migrations which might lead to data loss.
+>
+> Because these scenarios are unlikely in practise they are acceptable
+> limitations. We will document that these are unsupported configurations that
+> could lead to data loss.
 
 ## 4.5 Changes in 8.0
 1. Migrations will be in-place and re-use the same index for minor and patch
