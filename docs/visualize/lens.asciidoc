@@ -4,9 +4,9 @@
 
 beta[]
 
-*Lens* provides you with a simple and fast way to create visualizations of your {es} data. With *Lens*, 
+*Lens* is a simple and fast way to create visualizations of your {es} data. With *Lens*, 
 you drag and drop your data fields onto the visualization builder pane, and *Lens* automatically generates 
-a visualization that best dsiplays your data.
+a visualization that best displays your data.
 
 With Lens, you can:
 
@@ -40,7 +40,7 @@ To filter the fields in the data panel:
 
 * Enter the name in *Search field names*.
 
-* Click *Filter by type*, then select the filter. To show all of the fields in the index pattern, select *Only show fields with data*.
+* Click *Filter by type*, then select the filter. To show all of the fields in the index pattern, deselect *Only show fields with data*.
 
 [float]
 [[view-data-summaries]]
@@ -57,9 +57,9 @@ image::images/lens_data_info.png[]
 [[change-the-visualization-type]]
 ==== Change the visualization type
 
-*Lens* enables you to switch between any supported visualization type at any time with *Suggestions*.
+*Lens* enables you to switch between any supported visualization type at any time.
 
-*Suggestions* are shortcuts to alternate visualizations that *Lens* generates for you based on your index data.
+*Suggestions* are shortcuts to alternate visualizations that *Lens* generates for you.
 
 [role="screenshot"]
 image::images/lens_suggestions.gif[]
@@ -76,7 +76,7 @@ still allows you to make the change.
 
 [float]
 [[customize-operation]]
-==== Change the data aggregation and labels
+==== Change the aggregation and labels
 
 Lens allows some customizations of the data for each visualization.
 
