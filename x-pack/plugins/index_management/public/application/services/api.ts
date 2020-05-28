@@ -288,7 +288,7 @@ export function useLoadComponentTemplates() {
 export function deleteComponentTemplates(names: string[]) {
   const result = sendRequest({
     path: `${API_BASE_PATH}/component_templates/${names
-      .map(name => encodeURIComponent(name))
+      .map((name) => encodeURIComponent(name))
       .join(',')}`,
     method: 'delete',
   });

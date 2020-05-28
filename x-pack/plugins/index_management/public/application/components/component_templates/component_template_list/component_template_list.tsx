@@ -4,39 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { RouteComponentProps } from 'react-router-dom';
-import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../../../../../common/constants/ui_metric';
-import { SectionLoading } from '../../../../shared_imports';
-import { useLoadComponentTemplates } from '../../../services/api';
-import { useServices } from '../../../app_context';
+
+import { SectionLoading } from '../shared_imports';
+import { useComponentTemplatesContext } from '../component_templates_context';
+import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
+
 import { EmptyPrompt } from './empty_prompt';
 import { ComponentTable } from './table';
 import { LoadError } from './error';
 import { ComponentTemplatesDeleteModal } from './delete_modal';
 
-interface MatchParams {
-  templateName?: string;
-}
+export const ComponentTemplateList: React.FunctionComponent = () => {
+  const { api, trackMetric } = useComponentTemplatesContext();
 
-export const ComponentTemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { templateName },
-  },
-  location,
-  history,
-}) => {
-  const { uiMetricService } = useServices();
-
-  const { data, isLoading, error, sendRequest } = useLoadComponentTemplates();
+  const { data, isLoading, error, sendRequest } = api.useLoadComponentTemplates();
 
   const [componentTemplatesToDelete, setComponentTemplatesToDelete] = useState<string[]>([]);
 
   // Track component loaded
   useEffect(() => {
-    uiMetricService.trackMetric('loaded', UIM_COMPONENT_TEMPLATE_LIST_LOAD);
-  }, [uiMetricService]);
+    trackMetric('loaded', UIM_COMPONENT_TEMPLATE_LIST_LOAD);
+  }, [trackMetric]);
 
   if (data?.length === 0) {
     return <EmptyPrompt />;
@@ -61,7 +51,7 @@ export const ComponentTemplateList: React.FunctionComponent<RouteComponentProps<
         onDeleteClick={setComponentTemplatesToDelete}
       />
     );
-  } else {
+  } else if (error) {
     content = <LoadError onReloadClick={sendRequest} />;
   }
 
@@ -70,7 +60,7 @@ export const ComponentTemplateList: React.FunctionComponent<RouteComponentProps<
       {content}
       {componentTemplatesToDelete?.length > 0 ? (
         <ComponentTemplatesDeleteModal
-          callback={deleteResponse => {
+          callback={(deleteResponse) => {
             if (deleteResponse?.hasDeletedComponentTemplates) {
               // refetch the component templates
               sendRequest();

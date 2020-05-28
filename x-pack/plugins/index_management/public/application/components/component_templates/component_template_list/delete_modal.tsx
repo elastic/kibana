@@ -9,9 +9,7 @@ import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useServices } from '../../../app_context';
-
-import { deleteComponentTemplates } from '../../../services/api';
+import { useComponentTemplatesContext } from '../component_templates_context';
 
 export const ComponentTemplatesDeleteModal = ({
   componentTemplatesToDelete,
@@ -20,12 +18,13 @@ export const ComponentTemplatesDeleteModal = ({
   componentTemplatesToDelete: string[];
   callback: (data?: { hasDeletedComponentTemplates: boolean }) => void;
 }) => {
-  const { notificationService } = useServices();
+  const { toasts, api } = useComponentTemplatesContext();
   const numComponentTemplatesToDelete = componentTemplatesToDelete.length;
 
   const handleDeleteComponentTemplates = () => {
-    deleteComponentTemplates(componentTemplatesToDelete).then(
-      ({ data: { itemsDeleted, errors }, error }) => {
+    api
+      .deleteComponentTemplates(componentTemplatesToDelete)
+      .then(({ data: { itemsDeleted, errors }, error }) => {
         const hasDeletedComponentTemplates = itemsDeleted && itemsDeleted.length;
 
         if (hasDeletedComponentTemplates) {
@@ -48,7 +47,7 @@ export const ComponentTemplatesDeleteModal = ({
                 );
 
           callback({ hasDeletedComponentTemplates });
-          notificationService.showSuccessToast(successMessage);
+          toasts.addSuccess(successMessage);
         }
 
         if (error || errors?.length) {
@@ -71,10 +70,9 @@ export const ComponentTemplatesDeleteModal = ({
                   values: { name: (errors && errors[0].name) || componentTemplatesToDelete[0] },
                 }
               );
-          notificationService.showDangerToast(errorMessage);
+          toasts.addDanger(errorMessage);
         }
-      }
-    );
+      });
   };
 
   const handleOnCancel = () => {
@@ -119,7 +117,7 @@ export const ComponentTemplatesDeleteModal = ({
           </p>
 
           <ul>
-            {componentTemplatesToDelete.map(name => (
+            {componentTemplatesToDelete.map((name) => (
               <li key={name}>{name}</li>
             ))}
           </ul>

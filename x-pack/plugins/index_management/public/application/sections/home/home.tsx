@@ -22,7 +22,7 @@ import { BASE_PATH } from '../../../../common/constants';
 import { documentationService } from '../../services/documentation';
 import { IndexList } from './index_list';
 import { TemplateList } from './template_list';
-import { ComponentTemplateList } from './component_template_list';
+import { ComponentTemplateList } from '../../components/component_templates';
 import { breadcrumbService } from '../../services/breadcrumbs';
 
 export enum Section {
