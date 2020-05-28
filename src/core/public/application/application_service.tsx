@@ -306,6 +306,7 @@ export class ApplicationService {
         const relUrl = http.basePath.prepend(getAppUrl(availableMounters, appId, path));
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },
+      parseAppUrl: (url) => parseAppUrl(url, http.basePath, this.apps),
       navigateToApp,
       navigateToUrl: async (url) => {
         const appInfo = parseAppUrl(url, http.basePath, this.apps);

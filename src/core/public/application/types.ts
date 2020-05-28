@@ -555,6 +555,14 @@ export type Mounter<T = App | LegacyApp> = SelectivePartial<
   T extends LegacyApp ? never : 'unmountBeforeMounting'
 >;
 
+/**
+ * @public
+ */
+export interface ParsedAppUrl {
+  app: string;
+  path?: string;
+}
+
 /** @public */
 export interface ApplicationSetup {
   /**
@@ -689,6 +697,12 @@ export interface ApplicationStart {
   navigateToUrl(url: string): Promise<void>;
 
   /**
+   * TODO
+   * @param url
+   */
+  parseAppUrl(url: string): ParsedAppUrl | undefined;
+
+  /**
    * Returns an URL to a given app, including the global base path.
    * By default, the URL is relative (/basePath/app/my-app).
    * Use the `absolute` option to generate an absolute url (http://host:port/basePath/app/my-app)
@@ -721,11 +735,7 @@ export interface ApplicationStart {
 }
 
 /** @internal */
-export interface InternalApplicationStart
-  extends Pick<
-    ApplicationStart,
-    'capabilities' | 'navigateToApp' | 'navigateToUrl' | 'getUrlForApp' | 'currentAppId$'
-  > {
+export interface InternalApplicationStart extends Omit<ApplicationStart, 'registerMountContext'> {
   /**
    * Apps available based on the current capabilities.
    * Should be used to show navigation links and make routing decisions.

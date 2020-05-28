@@ -119,6 +119,7 @@ export {
   AppNavLinkStatus,
   AppUpdatableFields,
   AppUpdater,
+  ParsedAppUrl,
   ScopedHistory,
 } from './application';
 
