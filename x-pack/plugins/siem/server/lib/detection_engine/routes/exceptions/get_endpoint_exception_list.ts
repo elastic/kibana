@@ -4,11 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter, RequestHandlerContext, APICaller, SavedObjectsClient } from 'kibana/server';
+import { IRouter, SavedObjectsClient } from 'kibana/server';
+import { FoundExceptionListItemSchema } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { findExceptionListItem } from '../../../../../../lists/server/services/exception_lists/find_exception_list_item';
 
 const allowlistBaseRoute: string = '/api/endpoint/allowlist';
+
+export interface EndpointExceptionList {
+  exceptions_list: ExceptionsList[];
+}
+
+export interface ExceptionsList {
+  type: string;
+  entries: EntryElement[];
+}
+
+export interface EntryElement {
+  field: string;
+  operator: string;
+  entry: EntryEntry;
+}
+
+export interface EntryEntry {
+  exact_caseless?: string;
+  exact_caseless_any?: string[];
+}
 
 /**
  * Registers the exception list route to enable sensors to download a compressed exception list
@@ -24,13 +45,14 @@ export function getEndpointExceptionList(router: IRouter) {
   );
 }
 
-async function getFullEndpointExceptionList(soClient: SavedObjectsClient) {
-  let exceptions = []; // TODO: type me
+async function getFullEndpointExceptionList(
+  soClient: SavedObjectsClient
+): Promise<EndpointExceptionList> {
+  const exceptions: EndpointExceptionList = { exceptions_list: [] };
   let numResponses = 0;
   let page = 1;
 
   do {
-    console.log(`Fetching page ${page}`);
     const response = await findExceptionListItem({
       listId: 'endpoint_list', // TODO
       namespaceType: 'single', // ?
@@ -43,9 +65,12 @@ async function getFullEndpointExceptionList(soClient: SavedObjectsClient) {
     });
 
     if (response?.data !== undefined) {
-      console.log(`Found ${response.data.length} exceptions`);
       numResponses = response.data.length;
-      exceptions = exceptions.concat(response.data);
+
+      exceptions.exceptions_list = exceptions.exceptions_list.concat(
+        translateToEndpointExceptions(response)
+      );
+
       page++;
     } else {
       break;
@@ -53,6 +78,40 @@ async function getFullEndpointExceptionList(soClient: SavedObjectsClient) {
   } while (numResponses > 0);
 
   return exceptions;
+}
+
+/**
+ * Translates Exception list items to Exceptions the endpoint can understand
+ * @param exc
+ */
+function translateToEndpointExceptions(exc: FoundExceptionListItemSchema): ExceptionsList[] {
+  const translated: ExceptionsList[] = [];
+  // Transform to endpoint format
+  exc.data.forEach((item) => {
+    const endpointItem: ExceptionsList = {
+      type: item.type,
+      entries: [],
+    };
+    item.entries.forEach((entry) => {
+      // TODO case sensitive?
+      const e: EntryEntry = {};
+      if (entry.match) {
+        e.exact_caseless = entry.match;
+      }
+
+      if (entry.match_any) {
+        e.exact_caseless_any = entry.match_any;
+      }
+
+      endpointItem.entries.push({
+        field: entry.field,
+        operator: entry.operator,
+        entry: e,
+      });
+    });
+    translated.push(endpointItem);
+  });
+  return translated;
 }
 
 /**

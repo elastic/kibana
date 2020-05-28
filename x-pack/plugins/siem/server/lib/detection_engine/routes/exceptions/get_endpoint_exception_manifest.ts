@@ -39,6 +39,7 @@ async function handleWhitelistManifest(context, req, res) {
  * Creates the manifest for the whitelist
  */
 async function getWhitelistManifest(ctx) {
+  const whitelistArtifactCache = []; // TODO
   const hash = createHash('sha256')
     .update(whitelistArtifactCache.toString('utf8'), 'utf8')
     .digest('hex');
