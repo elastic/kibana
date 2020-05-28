@@ -90,7 +90,7 @@ export async function installPackage(options: {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   // TODO: change epm API to /packageName/version so we don't need to do this
   const [pkgName, pkgVersion] = pkgkey.split('-');
-
+  const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);
   // see if some version of this package is already installed
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
   // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
@@ -135,7 +135,8 @@ export async function installPackage(options: {
     registryPackageInfo,
     callCluster,
     pkgName,
-    pkgVersion
+    pkgVersion,
+    paths
   );
   const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.datasets);
 
