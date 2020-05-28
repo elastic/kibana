@@ -44,11 +44,11 @@ To filter the fields in the data panel:
 
 [float]
 [[view-data-summaries]]
-==== View the top values
+==== Data summaries
 
-To help you decide exactly the data you want to display, view the top values for each field for the specified time range.
+To help you decide exactly the data you want to display, get a quick summary of each field. The summary shows the distribution of values in the time range.
 
-To view the top values, navigate to the field, then click *i*.
+To view the field summary information, navigate to the field, then click *i*.
 
 [role="screenshot"]
 image::images/lens_data_info.png[]
