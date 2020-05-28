@@ -8,7 +8,7 @@ import ReactDOM from 'react-dom';
 import { ConfigSchema } from '../';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import { PluginSetupDeps } from '../plugin';
-import { Home } from '../pages/Home';
+import { Home } from '../pages/home';
 
 export const renderApp = (
   core: CoreStart,
@@ -16,7 +16,7 @@ export const renderApp = (
   { element }: AppMountParameters,
   config: ConfigSchema
 ) => {
-  ReactDOM.render(<Home />, element);
+  ReactDOM.render(<Home core={core} />, element);
   return () => {
     ReactDOM.unmountComponentAtNode(element);
   };

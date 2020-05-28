@@ -18,9 +18,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { ISection, Section } from './Section';
+import { CoreStart } from '../../../../../../src/core/public';
 
 const appsSection: ISection[] = [
   {
@@ -97,7 +98,25 @@ const BodyContainer = styled.div`
   border: 1px solid #d3dae6;
 `;
 
-export const Home = () => {
+interface Props {
+  core: CoreStart;
+}
+
+export const Home = ({ core }: Props) => {
+  useEffect(() => {
+    core.chrome.setBreadcrumbs([
+      {
+        text: i18n.translate('observability.home.breadcrumb.observability', {
+          defaultMessage: 'Observability',
+        }),
+      },
+      {
+        text: i18n.translate('observability.home.breadcrumb.gettingStarted', {
+          defaultMessage: 'Getting started',
+        }),
+      },
+    ]);
+  }, [core.chrome]);
   return (
     <FixedContainer>
       <TitleContainer>
