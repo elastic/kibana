@@ -9,10 +9,11 @@ import { AuthenticatedUser } from '../../../../../../plugins/security/server';
 import { getUserFactory } from '../../lib/get_user';
 import { ReportingInternalSetup, ReportingCore } from '../../core';
 
+type ReportingUser = AuthenticatedUser | null;
 const superuserRole = 'superuser';
 
 export type RequestHandlerUser = RequestHandler extends (...a: infer U) => infer R
-  ? (user: AuthenticatedUser | null, ...a: U) => R
+  ? (user: ReportingUser, ...a: U) => R
   : never;
 
 export const authorizedUserPreRoutingFactory = function authorizedUserPreRoutingFn(
@@ -24,26 +25,24 @@ export const authorizedUserPreRoutingFactory = function authorizedUserPreRouting
 
   return <P, Q, B>(handler: RequestHandlerUser): RequestHandler<P, Q, B, RouteMethod> => {
     return (context, req, res) => {
-      // TODO: license checking
-      let user: AuthenticatedUser | null = null;
-
+      let user: ReportingUser = null;
       if (setupDeps.security) {
+        // find the authenticated user, or null if security is not enabled
         user = getUser(req);
         if (!user) {
-          return res.unauthorized({
-            body: `Sorry, you aren't authenticated`,
-          });
+          // security is enabled but the user is null
+          return res.unauthorized({ body: `Sorry, you aren't authenticated` });
         }
       }
 
       if (user) {
+        // check allowance with the configured set of roleas + "superuser"
         const allowedRoles = config.get('roles', 'allow') || [];
         const authorizedRoles = [superuserRole, ...allowedRoles];
 
-        if (user && !user.roles.find((role) => authorizedRoles.includes(role))) {
-          return res.forbidden({
-            body: `Sorry, you don't have access to Reporting`,
-          });
+        if (!user.roles.find((role) => authorizedRoles.includes(role))) {
+          // user's roles do not allow
+          return res.forbidden({ body: `Sorry, you don't have access to Reporting` });
         }
       }
 
