@@ -1,0 +1,9 @@
+{
+  "cluster.post_voting_config_exclusions": {
+    "data_autocomplete_rules": {
+      "node_ids": "",
+      "node_names": "",
+      "timeout": ""
+    }
+  }
+}
