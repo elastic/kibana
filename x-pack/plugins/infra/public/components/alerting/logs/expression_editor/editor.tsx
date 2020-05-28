@@ -17,11 +17,7 @@ import {
 import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertsContextValue } from '../../../../../../triggers_actions_ui/public/application/context/alerts_context';
-import {
-  LogDocumentCountAlertParams,
-  Comparator,
-  TimeUnit,
-} from '../../../../../common/alerting/logs/types';
+import { LogDocumentCountAlertParams, Comparator } from '../../../../../common/alerting/logs/types';
 import { DocumentCount } from './document_count';
 import { Criteria } from './criteria';
 import { useSourceId } from '../../../../containers/source_id';
