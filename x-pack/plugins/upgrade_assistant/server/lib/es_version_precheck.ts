@@ -62,11 +62,11 @@ export const esVersionCheck = async (
   ctx: RequestHandlerContext,
   response: KibanaResponseFactory
 ) => {
-  const { adminClient } = ctx.core.elasticsearch;
+  const { client } = ctx.core.elasticsearch.legacy;
   let allNodeVersions: SemVer[];
 
   try {
-    allNodeVersions = await getAllNodeVersions(adminClient);
+    allNodeVersions = await getAllNodeVersions(client);
   } catch (e) {
     if (e.status === 403) {
       return response.forbidden({ body: e.message });
