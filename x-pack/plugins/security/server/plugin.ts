@@ -13,7 +13,7 @@ import {
   Logger,
   PluginInitializerContext,
 } from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
+import { deepFreeze } from '../../../../src/core/server';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -115,7 +115,7 @@ export class Plugin {
   public async setup(core: CoreSetup, { features, licensing }: PluginSetupDependencies) {
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
-        map(rawConfig =>
+        map((rawConfig) =>
           createConfig(rawConfig, this.initializerContext.logger.get('config'), {
             isTLSEnabled: core.http.isTlsEnabled,
           })
@@ -196,7 +196,7 @@ export class Plugin {
 
       license,
 
-      registerSpacesService: service => {
+      registerSpacesService: (service) => {
         if (this.wasSpacesServiceAccessed()) {
           throw new Error('Spaces service has been accessed before registration.');
         }

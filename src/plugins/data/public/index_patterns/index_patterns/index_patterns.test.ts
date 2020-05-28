@@ -19,12 +19,13 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { IndexPatternsService } from './index_patterns';
-import {
-  SavedObjectsClientContract,
-  HttpSetup,
-  SavedObjectsFindResponsePublic,
-  CoreStart,
-} from 'kibana/public';
+import { SavedObjectsClientContract, SavedObjectsFindResponsePublic } from 'kibana/public';
+import { coreMock, httpServiceMock } from '../../../../../core/public/mocks';
+import { fieldFormatsServiceMock } from '../../field_formats/mocks';
+
+const core = coreMock.createStart();
+const http = httpServiceMock.createStartContract();
+const fieldFormats = fieldFormatsServiceMock.createStartContract();
 
 jest.mock('./index_pattern', () => {
   class IndexPattern {
@@ -61,10 +62,7 @@ describe('IndexPatterns', () => {
         }) as Promise<SavedObjectsFindResponsePublic<any>>
     );
 
-    const core = {} as CoreStart;
-    const http = {} as HttpSetup;
-
-    indexPatterns = new IndexPatternsService(core, savedObjectsClient, http);
+    indexPatterns = new IndexPatternsService(core, savedObjectsClient, http, fieldFormats);
   });
 
   test('does cache gets for the same id', async () => {

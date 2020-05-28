@@ -21,7 +21,7 @@ import _, { defaults } from 'lodash';
 
 import { Optional } from '@kbn/utility-types';
 
-import { AggGroupNames, AggParam, IAggGroupNames } from '../../data/public';
+import { AggGroupNames, AggParam, AggGroupName } from '../../data/public';
 
 export interface ISchemas {
   [AggGroupNames.Buckets]: Schema[];
@@ -32,7 +32,7 @@ export interface ISchemas {
 export interface Schema {
   aggFilter: string[];
   editor: boolean | string;
-  group: IAggGroupNames;
+  group: AggGroupName;
   max: number;
   min: number;
   name: string;
@@ -58,7 +58,7 @@ export class Schemas implements ISchemas {
     >
   ) {
     _(schemas || [])
-      .map(schema => {
+      .map((schema) => {
         if (!schema.name) throw new Error('all schema must have a unique name');
 
         if (schema.name === 'split') {
@@ -95,5 +95,5 @@ export class Schemas implements ISchemas {
 }
 
 export const getSchemaByName = (schemas: Schema[], schemaName?: string) => {
-  return schemas.find(s => s.name === schemaName) || ({} as Schema);
+  return schemas.find((s) => s.name === schemaName) || ({} as Schema);
 };

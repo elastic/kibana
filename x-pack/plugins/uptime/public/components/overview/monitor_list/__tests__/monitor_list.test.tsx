@@ -12,12 +12,19 @@ import {
 } from '../../../../../common/runtime_types';
 import { MonitorListComponent } from '../monitor_list';
 import { renderWithRouter, shallowWithRouter } from '../../../../lib';
+import * as redux from 'react-redux';
 
 describe('MonitorList component', () => {
   let result: MonitorSummaryResult;
   let localStorageMock: any;
 
   beforeEach(() => {
+    const useDispatchSpy = jest.spyOn(redux, 'useDispatch');
+    useDispatchSpy.mockReturnValue(jest.fn());
+
+    const useSelectorSpy = jest.spyOn(redux, 'useSelector');
+    useSelectorSpy.mockReturnValue(true);
+
     localStorageMock = {
       getItem: jest.fn().mockImplementation(() => '25'),
       setItem: jest.fn(),
@@ -99,8 +106,8 @@ describe('MonitorList component', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
         monitorList={{ list: result, loading: false }}
-        lastRefresh={123}
-        getMonitorList={jest.fn()}
+        pageSize={10}
+        setPageSize={jest.fn()}
       />
     );
 
@@ -119,8 +126,8 @@ describe('MonitorList component', () => {
           },
           loading: true,
         }}
-        lastRefresh={123}
-        getMonitorList={jest.fn()}
+        pageSize={10}
+        setPageSize={jest.fn()}
       />
     );
     expect(component).toMatchSnapshot();
@@ -130,8 +137,8 @@ describe('MonitorList component', () => {
     const component = renderWithRouter(
       <MonitorListComponent
         monitorList={{ list: result, loading: false }}
-        lastRefresh={123}
-        getMonitorList={jest.fn()}
+        pageSize={10}
+        setPageSize={jest.fn()}
       />
     );
 
@@ -142,8 +149,8 @@ describe('MonitorList component', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
         monitorList={{ list: result, error: new Error('foo message'), loading: false }}
-        lastRefresh={123}
-        getMonitorList={jest.fn()}
+        pageSize={10}
+        setPageSize={jest.fn()}
       />
     );
 
@@ -154,8 +161,8 @@ describe('MonitorList component', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
         monitorList={{ list: result, loading: true }}
-        lastRefresh={123}
-        getMonitorList={jest.fn()}
+        pageSize={10}
+        setPageSize={jest.fn()}
       />
     );
 
@@ -253,8 +260,8 @@ describe('MonitorList component', () => {
             },
             loading: false,
           }}
-          lastRefresh={123}
-          getMonitorList={jest.fn()}
+          pageSize={10}
+          setPageSize={jest.fn()}
         />
       );
 
@@ -273,8 +280,8 @@ describe('MonitorList component', () => {
             },
             loading: false,
           }}
-          lastRefresh={123}
-          getMonitorList={jest.fn()}
+          pageSize={10}
+          setPageSize={jest.fn()}
         />
       );
 

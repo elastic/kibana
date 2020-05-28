@@ -7,6 +7,7 @@
 import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
 import {
   Agent,
+  NewAgentEvent,
   AgentEvent,
   AgentAction,
   AgentSOAttributes,
@@ -23,7 +24,7 @@ import { appContextService } from '../app_context';
 export async function agentCheckin(
   soClient: SavedObjectsClientContract,
   agent: Agent,
-  events: AgentEvent[],
+  events: NewAgentEvent[],
   localMetadata?: any
 ) {
   const updateData: {
@@ -85,10 +86,10 @@ export async function agentCheckin(
 async function processEventsForCheckin(
   soClient: SavedObjectsClientContract,
   agent: Agent,
-  events: AgentEvent[]
+  events: NewAgentEvent[]
 ) {
   const acknowledgedActionIds: string[] = [];
-  const updatedErrorEvents = [...agent.current_error_events];
+  const updatedErrorEvents: Array<AgentEvent | NewAgentEvent> = [...agent.current_error_events];
   for (const event of events) {
     // @ts-ignore
     event.config_id = agent.config_id;
@@ -99,7 +100,9 @@ async function processEventsForCheckin(
 
     if (isErrorOrState(event)) {
       // Remove any global or specific to a stream event
-      const existingEventIndex = updatedErrorEvents.findIndex(e => e.stream_id === event.stream_id);
+      const existingEventIndex = updatedErrorEvents.findIndex(
+        (e) => e.stream_id === event.stream_id
+      );
       if (existingEventIndex >= 0) {
         updatedErrorEvents.splice(existingEventIndex, 1);
       }
@@ -122,10 +125,10 @@ async function processEventsForCheckin(
 async function createEventsForAgent(
   soClient: SavedObjectsClientContract,
   agentId: string,
-  events: AgentEvent[]
+  events: NewAgentEvent[]
 ) {
   const objects: Array<SavedObjectsBulkCreateObject<AgentEventSOAttributes>> = events.map(
-    eventData => {
+    (eventData) => {
       return {
         attributes: {
           ...eventData,
@@ -139,11 +142,11 @@ async function createEventsForAgent(
   return soClient.bulkCreate(objects);
 }
 
-function isErrorOrState(event: AgentEvent) {
+function isErrorOrState(event: AgentEvent | NewAgentEvent) {
   return event.type === 'STATE' || event.type === 'ERROR';
 }
 
-function isActionEvent(event: AgentEvent) {
+function isActionEvent(event: AgentEvent | NewAgentEvent) {
   return (
     event.type === 'ACTION' && (event.subtype === 'ACKNOWLEDGED' || event.subtype === 'UNKNOWN')
   );
@@ -171,7 +174,7 @@ export function shouldCreateConfigAction(agent: Agent, actions: AgentAction[]): 
     return false;
   }
 
-  const isActionAlreadyGenerated = !!actions.find(action => {
+  const isActionAlreadyGenerated = !!actions.find((action) => {
     if (!action.data || action.type !== 'CONFIG_CHANGE') {
       return false;
     }

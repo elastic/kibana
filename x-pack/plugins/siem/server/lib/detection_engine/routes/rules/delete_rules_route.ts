@@ -34,16 +34,14 @@ export const deleteRulesRoute = (router: IRouter) => {
         const { id, rule_id: ruleId } = request.query;
 
         const alertsClient = context.alerting?.getAlertsClient();
-        const actionsClient = context.actions?.getActionsClient();
         const savedObjectsClient = context.core.savedObjects.client;
 
-        if (!actionsClient || !alertsClient) {
+        if (!alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
         const rule = await deleteRules({
-          actionsClient,
           alertsClient,
           id,
           ruleId,
@@ -59,7 +57,7 @@ export const deleteRulesRoute = (router: IRouter) => {
             search: rule.id,
             searchFields: ['alertId'],
           });
-          ruleStatuses.saved_objects.forEach(async obj => ruleStatusClient.delete(obj.id));
+          ruleStatuses.saved_objects.forEach(async (obj) => ruleStatusClient.delete(obj.id));
           const [validated, errors] = transformValidate(
             rule,
             undefined,

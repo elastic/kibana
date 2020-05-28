@@ -9,11 +9,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../plugins/ml/common/constants/states';
-import { USER } from '../../../../functional/services/machine_learning/security_common';
-
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-};
+import { Job } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
+import { USER } from '../../../../functional/services/ml/security_common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -23,7 +21,8 @@ export default ({ getService }: FtrProviderContext) => {
 
   const testDataListPositive = [
     {
-      testTitleSuffix: 'for sample logs dataset with prefix and startDatafeed false',
+      testTitleSuffix:
+        'for sample logs dataset with prefix, startDatafeed false and estimateModelMemory false',
       sourceDataArchive: 'ml/sample_logs',
       indexPattern: { name: 'kibana_sample_data_logs', timeField: '@timestamp' },
       module: 'sample_data_weblogs',
@@ -32,6 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf1_',
         indexPatternName: 'kibana_sample_data_logs',
         startDatafeed: false,
+        estimateModelMemory: false,
       },
       expected: {
         responseCode: 200,
@@ -40,16 +40,55 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf1_low_request_rate',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf1_response_code_rates',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf1_url_scanning',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+        ],
+      },
+    },
+    {
+      testTitleSuffix:
+        'for sample logs dataset with prefix, startDatafeed false and estimateModelMemory true',
+      sourceDataArchive: 'ml/sample_logs',
+      indexPattern: { name: 'kibana_sample_data_logs', timeField: '@timestamp' },
+      module: 'sample_data_weblogs',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf2_',
+        indexPatternName: 'kibana_sample_data_logs',
+        startDatafeed: false,
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf2_low_request_rate',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf2_response_code_rates',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf2_url_scanning',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '16mb',
           },
         ],
       },
@@ -100,7 +139,7 @@ export default ({ getService }: FtrProviderContext) => {
     const { body } = await supertest
       .post(`/api/ml/modules/setup/${module}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_HEADERS)
+      .set(COMMON_REQUEST_HEADERS)
       .send(rqBody)
       .expect(rspCode);
 
@@ -117,13 +156,13 @@ export default ({ getService }: FtrProviderContext) => {
     return 0;
   }
 
-  describe('module setup', function() {
+  describe('module setup', function () {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
     for (const testData of testDataListPositive) {
-      describe('sets up module data', function() {
+      describe('sets up module data', function () {
         before(async () => {
           await esArchiver.loadIfNeeded(testData.sourceDataArchive);
           await ml.testResources.createIndexPatternIfNeeded(
@@ -150,7 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(rspBody).to.have.property('jobs');
 
             const expectedRspJobs = testData.expected.jobs
-              .map(job => {
+              .map((job) => {
                 return { id: job.jobId, success: true };
               })
               .sort(compareById);
@@ -168,7 +207,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(rspBody).to.have.property('datafeeds');
 
             const expectedRspDatafeeds = testData.expected.jobs
-              .map(job => {
+              .map((job) => {
                 return {
                   id: `datafeed-${job.jobId}`,
                   success: true,
@@ -194,9 +233,44 @@ export default ({ getService }: FtrProviderContext) => {
             const datafeedId = `datafeed-${job.jobId}`;
             await ml.api.waitForAnomalyDetectionJobToExist(job.jobId);
             await ml.api.waitForDatafeedToExist(datafeedId);
+            if (testData.requestBody.startDatafeed === true) {
+              await ml.api.waitForADJobRecordCountToBePositive(job.jobId);
+            }
             await ml.api.waitForJobState(job.jobId, job.jobState);
             await ml.api.waitForDatafeedState(datafeedId, job.datafeedState);
           }
+
+          // compare model memory limits for created jobs
+          const expectedModelMemoryLimits = testData.expected.jobs
+            .map((j) => ({
+              id: j.jobId,
+              modelMemoryLimit: j.modelMemoryLimit,
+            }))
+            .sort(compareById);
+
+          const {
+            body: { jobs },
+          }: {
+            body: {
+              jobs: Job[];
+            };
+          } = await ml.api.getAnomalyDetectionJob(
+            testData.expected.jobs.map((j) => j.jobId).join()
+          );
+
+          const actualModelMemoryLimits = jobs
+            .map((j) => ({
+              id: j.job_id,
+              modelMemoryLimit: j.analysis_limits!.model_memory_limit,
+            }))
+            .sort(compareById);
+
+          expect(actualModelMemoryLimits).to.eql(
+            expectedModelMemoryLimits,
+            `Expected job model memory limits '${JSON.stringify(
+              expectedModelMemoryLimits
+            )}' (got '${JSON.stringify(actualModelMemoryLimits)}')`
+          );
         });
 
         // TODO in future updates: add creation validations for created saved objects
@@ -204,7 +278,7 @@ export default ({ getService }: FtrProviderContext) => {
     }
 
     for (const testData of testDataListNegative) {
-      describe('rejects request', function() {
+      describe('rejects request', function () {
         before(async () => {
           if (testData.hasOwnProperty('sourceDataArchive')) {
             await esArchiver.loadIfNeeded(testData.sourceDataArchive!);
@@ -229,13 +303,9 @@ export default ({ getService }: FtrProviderContext) => {
             testData.expected.responseCode
           );
 
-          expect(rspBody)
-            .to.have.property('error')
-            .eql(testData.expected.error);
+          expect(rspBody).to.have.property('error').eql(testData.expected.error);
 
-          expect(rspBody)
-            .to.have.property('message')
-            .eql(testData.expected.message);
+          expect(rspBody).to.have.property('message').eql(testData.expected.message);
         });
       });
     }

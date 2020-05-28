@@ -26,15 +26,11 @@ export const umDynamicSettings: SavedObjectsType = {
       heartbeatIndices: {
         type: 'keyword',
       },
-      certThresholds: {
-        properties: {
-          expiration: {
-            type: 'long',
-          },
-          age: {
-            type: 'long',
-          },
-        },
+      certAgeThreshold: {
+        type: 'long',
+      },
+      certExpirationThreshold: {
+        type: 'long',
       },
     },
   },

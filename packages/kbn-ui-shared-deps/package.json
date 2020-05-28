@@ -6,18 +6,19 @@
   "scripts": {
     "build": "node scripts/build",
     "kbn:bootstrap": "node scripts/build --dev",
-    "kbn:watch": "node scripts/build --watch"
+    "kbn:watch": "node scripts/build --dev --watch"
   },
   "dependencies": {
-    "@elastic/charts": "18.4.2",
-    "@elastic/eui": "22.3.0",
+    "@elastic/charts": "19.2.0",
+    "@elastic/eui": "23.3.1",
     "@kbn/i18n": "1.0.0",
     "abortcontroller-polyfill": "^1.4.0",
     "angular": "^1.7.9",
+    "compression-webpack-plugin": "^3.1.0",
     "core-js": "^3.6.4",
     "custom-event-polyfill": "^0.3.0",
     "elasticsearch-browser": "^16.7.0",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
     "monaco-editor": "~0.17.0",

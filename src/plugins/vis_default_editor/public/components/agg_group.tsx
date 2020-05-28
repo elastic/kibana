@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggGroupNames, search, IAggConfig, TimeRange } from '../../../data/public';
+import { AggGroupNames, AggGroupLabels, IAggConfig, TimeRange } from '../../../data/public';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
 import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from './agg_common_props';
@@ -70,9 +70,9 @@ function DefaultEditorAggGroup({
   setValidity,
   timeRange,
 }: DefaultEditorAggGroupProps) {
-  const groupNameLabel = (search.aggs.aggGroupNamesMap() as any)[groupName];
+  const groupNameLabel = AggGroupLabels[groupName];
   // e.g. buckets can have no aggs
-  const schemaNames = schemas.map(s => s.name);
+  const schemaNames = schemas.map((s) => s.name);
   const group: IAggConfig[] = useMemo(
     () =>
       state.data.aggs!.aggs.filter(
@@ -100,7 +100,7 @@ function DefaultEditorAggGroup({
         })
       : undefined;
 
-  const isGroupValid = !bucketsError && Object.values(aggsState).every(item => item.valid);
+  const isGroupValid = !bucketsError && Object.values(aggsState).every((item) => item.valid);
   const isAllAggsTouched = isInvalidAggsTouched(aggsState);
   const isMetricAggregationDisabled = useMemo(
     () => groupName === AggGroupNames.Metrics && getEnabledMetricAggsCount(group) === 1,
@@ -165,7 +165,7 @@ function DefaultEditorAggGroup({
                 draggableId={`agg_group_dnd_${groupName}_${agg.id}`}
                 customDragHandle={true}
               >
-                {provided => (
+                {(provided) => (
                   <DefaultEditorAgg
                     agg={agg}
                     aggIndex={index}

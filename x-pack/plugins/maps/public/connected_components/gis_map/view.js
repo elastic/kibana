@@ -11,7 +11,7 @@ import { MBMapContainer } from '../map/mb';
 import { WidgetOverlay } from '../widget_overlay';
 import { ToolbarOverlay } from '../toolbar_overlay';
 import { LayerPanel } from '../layer_panel';
-import { AddLayerPanel } from '../layer_addpanel';
+import { AddLayerPanel } from '../add_layer_panel';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettingsPanel } from '../map_settings_panel';
+import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -36,6 +37,7 @@ export class GisMap extends Component {
     this._isMounted = true;
     this._isInitalLoadRenderTimerStarted = false;
     this._setRefreshTimer();
+    registerLayerWizards();
   }
 
   componentDidUpdate() {
@@ -71,7 +73,7 @@ export class GisMap extends Component {
     }
   };
 
-  _loadGeoFields = async nextIndexPatternIds => {
+  _loadGeoFields = async (nextIndexPatternIds) => {
     if (_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
       // all ready loaded index pattern ids
       return;
@@ -82,8 +84,8 @@ export class GisMap extends Component {
     const geoFields = [];
     try {
       const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
-      indexPatterns.forEach(indexPattern => {
-        indexPattern.fields.forEach(field => {
+      indexPatterns.forEach((indexPattern) => {
+        indexPattern.fields.forEach((field) => {
           if (
             !indexPatternsUtils.isNestedField(field) &&
             (field.type === ES_GEO_FIELD_TYPE.GEO_POINT ||

@@ -7,16 +7,16 @@
 import { Page } from 'puppeteer';
 import * as Rx from 'rxjs';
 import * as contexts from '../export_types/common/lib/screenshots/constants';
-import { ElementsPositionAndAttribute } from '../export_types/common/lib/screenshots/types';
 import { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../server/browsers';
 import { createDriverFactory } from '../server/browsers/chromium';
-import { CaptureConfig } from '../server/types';
-import { Logger } from '../types';
+import { LevelLogger } from '../server/lib';
+import { CaptureConfig, ElementsPositionAndAttribute } from '../server/types';
 
 interface CreateMockBrowserDriverFactoryOpts {
   evaluate: jest.Mock<Promise<any>, any[]>;
   waitForSelector: jest.Mock<Promise<any>, any[]>;
   screenshot: jest.Mock<Promise<any>, any[]>;
+  open: jest.Mock<Promise<any>, any[]>;
   getCreatePage: (driver: HeadlessChromiumDriver) => jest.Mock<any, any>;
 }
 
@@ -87,11 +87,12 @@ const defaultOpts: CreateMockBrowserDriverFactoryOpts = {
   evaluate: mockBrowserEvaluate,
   waitForSelector: mockWaitForSelector,
   screenshot: mockScreenshot,
+  open: jest.fn(),
   getCreatePage,
 };
 
 export const createMockBrowserDriverFactory = async (
-  logger: Logger,
+  logger: LevelLogger,
   opts: Partial<CreateMockBrowserDriverFactoryOpts> = {}
 ): Promise<HeadlessChromiumDriverFactory> => {
   const captureConfig: CaptureConfig = {
@@ -124,6 +125,7 @@ export const createMockBrowserDriverFactory = async (
   mockBrowserDriver.waitForSelector = opts.waitForSelector ? opts.waitForSelector : defaultOpts.waitForSelector; // prettier-ignore
   mockBrowserDriver.evaluate = opts.evaluate ? opts.evaluate : defaultOpts.evaluate;
   mockBrowserDriver.screenshot = opts.screenshot ? opts.screenshot : defaultOpts.screenshot;
+  mockBrowserDriver.open = opts.open ? opts.open : defaultOpts.open;
 
   mockBrowserDriverFactory.createPage = opts.getCreatePage
     ? opts.getCreatePage(mockBrowserDriver)

@@ -22,9 +22,10 @@ interface Props {
   query?: MlRisonData;
   path?: string;
   children?: React.ReactNode;
+  external?: boolean;
 }
 
-export function MLLink({ children, path = '', query = {} }: Props) {
+export function MLLink({ children, path = '', query = {}, external }: Props) {
   const { core } = useApmPluginContext();
   const location = useLocation();
 
@@ -38,8 +39,15 @@ export function MLLink({ children, path = '', query = {} }: Props) {
 
   const href = url.format({
     pathname: core.http.basePath.prepend('/app/ml'),
-    hash: `${path}?_g=${rison.encode(risonQuery as RisonValue)}`
+    hash: `${path}?_g=${rison.encode(risonQuery as RisonValue)}`,
   });
 
-  return <EuiLink children={children} href={href} />;
+  return (
+    <EuiLink
+      children={children}
+      href={href}
+      external={external}
+      target={external ? '_blank' : undefined}
+    />
+  );
 }

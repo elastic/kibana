@@ -52,9 +52,10 @@ export const ConnectorAddFlyout = ({
     capabilities,
     actionTypeRegistry,
     reloadConnectors,
+    docLinks,
   } = useActionsConnectorsContext();
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
-  const [hasActionsDisabledByLicense, setHasActionsDisabledByLicense] = useState<boolean>(false);
+  const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
 
   // hooks
   const initialConnector = {
@@ -96,7 +97,7 @@ export const ConnectorAddFlyout = ({
       <ActionTypeMenu
         onActionTypeChange={onActionTypeChange}
         actionTypes={actionTypes}
-        setHasActionsDisabledByLicense={setHasActionsDisabledByLicense}
+        setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
       />
     );
   } else {
@@ -106,7 +107,7 @@ export const ConnectorAddFlyout = ({
       ...actionTypeModel?.validateConnector(connector).errors,
       ...validateBaseProperties(connector).errors,
     } as IErrorObject;
-    hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+    hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
     currentForm = (
       <ActionConnectorForm
@@ -116,13 +117,14 @@ export const ConnectorAddFlyout = ({
         errors={errors}
         actionTypeRegistry={actionTypeRegistry}
         http={http}
+        docLinks={docLinks}
       />
     );
   }
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
-      .then(savedConnector => {
+      .then((savedConnector) => {
         if (toastNotifications) {
           toastNotifications.addSuccess(
             i18n.translate(
@@ -138,7 +140,7 @@ export const ConnectorAddFlyout = ({
         }
         return savedConnector;
       })
-      .catch(errorRes => {
+      .catch((errorRes) => {
         toastNotifications.addDanger(
           errorRes.body?.message ??
             i18n.translate(
@@ -219,7 +221,7 @@ export const ConnectorAddFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         banner={
-          !actionType && hasActionsDisabledByLicense ? (
+          !actionType && hasActionsUpgradeableByTrial ? (
             <UpgradeYourLicenseCallOut http={http} />
           ) : (
             <Fragment />
@@ -317,3 +319,6 @@ const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
     </EuiFlexGroup>
   </EuiCallOut>
 );
+
+// eslint-disable-next-line import/no-default-export
+export { ConnectorAddFlyout as default };

@@ -5,6 +5,7 @@
  */
 
 import { isEqual } from 'lodash';
+// @ts-ignore
 import numeral from '@elastic/numeral';
 import { ml } from '../../../../services/ml_api_service';
 import { AnalysisResult, InputOverrides } from '../../../../../../common/types/file_datavisualizer';
@@ -90,7 +91,7 @@ export function createUrlOverrides(overrides: InputOverrides, originalSettings: 
         value = '';
       }
 
-      const snakeCaseO = o.replace(/([A-Z])/g, $1 => `_${$1.toLowerCase()}`);
+      const snakeCaseO = o.replace(/([A-Z])/g, ($1) => `_${$1.toLowerCase()}`);
       formattedOverrides[snakeCaseO] = value;
     }
   }

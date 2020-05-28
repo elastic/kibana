@@ -128,7 +128,11 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
       const { name, phases } = body;
 
       try {
-        await createPolicy(context.core.elasticsearch.dataClient.callAsCurrentUser, name, phases);
+        await createPolicy(
+          context.core.elasticsearch.legacy.client.callAsCurrentUser,
+          name,
+          phases
+        );
         return response.ok();
       } catch (e) {
         if (lib.isEsError(e)) {

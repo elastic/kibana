@@ -12,11 +12,11 @@ export interface PopoverState {
 
 export type UiPayload = PopoverState & string & number & Map<string, string[]>;
 
-export const setAlertFlyoutVisible = createAction<boolean>('TOGGLE ALERT FLYOUT');
+export const setAlertFlyoutVisible = createAction<boolean | undefined>('TOGGLE ALERT FLYOUT');
+
+export const setAlertFlyoutType = createAction<string>('SET ALERT FLYOUT TYPE');
 
 export const setBasePath = createAction<string>('SET BASE PATH');
-
-export const triggerAppRefresh = createAction<number>('REFRESH APP');
 
 export const setEsKueryString = createAction<string>('SET ES KUERY STRING');
 

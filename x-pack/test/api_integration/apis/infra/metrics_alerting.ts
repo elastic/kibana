@@ -10,7 +10,7 @@ import { MetricExpressionParams } from '../../../../plugins/infra/server/lib/ale
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const client = getService('legacyEs');
   const index = 'test-index';
   const getSearchParams = (aggType: string) =>
@@ -48,21 +48,6 @@ export default function({ getService }: FtrProviderContext) {
           '@timestamp',
           undefined,
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
-        );
-        const result = await client.search({
-          index,
-          body: searchBody,
-        });
-        expect(result.error).to.not.be.ok();
-        expect(result.hits).to.be.ok();
-        expect(result.aggregations).to.be.ok();
-      });
-      it('should work with a filterQuery in KQL format', async () => {
-        const searchBody = getElasticsearchMetricQuery(
-          getSearchParams('avg'),
-          '@timestamp',
-          undefined,
-          '"agent.hostname":"foo"'
         );
         const result = await client.search({
           index,

@@ -59,7 +59,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('connectors-row')
         .toArray()
-        .map(row => {
+        .map((row) => {
           return {
             name: $(row)
               .findTestSubject('connectorsTableCell-name')
@@ -67,10 +67,6 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
               .text(),
             actionType: $(row)
               .findTestSubject('connectorsTableCell-actionType')
-              .find('.euiTableCellContent')
-              .text(),
-            referencedByCount: $(row)
-              .findTestSubject('connectorsTableCell-referencedByCount')
               .find('.euiTableCellContent')
               .text(),
           };
@@ -81,7 +77,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('alert-row')
         .toArray()
-        .map(row => {
+        .map((row) => {
           return {
             name: $(row)
               .findTestSubject('alertsTableCell-name')
@@ -124,7 +120,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await find.clickDisplayedByCssSelector(`[data-test-subj="alertsList"] [title="${name}"]`);
     },
     async changeTabs(tab: 'alertsTab' | 'connectorsTab') {
-      return await testSubjects.click(tab);
+      await testSubjects.click(tab);
     },
     async toggleSwitch(testSubject: string) {
       const switchBtn = await testSubjects.find(testSubject);

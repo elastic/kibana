@@ -48,7 +48,7 @@ export class DllCompiler {
     uiBundles = {},
     babelLoaderCacheDir = '',
     threadLoaderPoolConfig = {},
-    chunks = Array.from(Array(4).keys()).map(chunkN => `_${chunkN}`)
+    chunks = Array.from(Array(4).keys()).map((chunkN) => `_${chunkN}`)
   ) {
     return {
       uiBundles,
@@ -130,25 +130,25 @@ export class DllCompiler {
   }
 
   getDllPaths() {
-    return this.rawDllConfig.chunks.map(chunk =>
+    return this.rawDllConfig.chunks.map((chunk) =>
       this.resolvePath(`${this.rawDllConfig.entryName}${chunk}${this.rawDllConfig.dllExt}`)
     );
   }
 
   getEntryPaths() {
-    return this.rawDllConfig.chunks.map(chunk =>
+    return this.rawDllConfig.chunks.map((chunk) =>
       this.resolvePath(`${this.rawDllConfig.entryName}${chunk}${this.rawDllConfig.entryExt}`)
     );
   }
 
   getManifestPaths() {
-    return this.rawDllConfig.chunks.map(chunk =>
+    return this.rawDllConfig.chunks.map((chunk) =>
       this.resolvePath(`${this.rawDllConfig.entryName}${chunk}${this.rawDllConfig.manifestExt}`)
     );
   }
 
   getStylePaths() {
-    return this.rawDllConfig.chunks.map(chunk =>
+    return this.rawDllConfig.chunks.map((chunk) =>
       this.resolvePath(`${this.rawDllConfig.entryName}${chunk}${this.rawDllConfig.styleExt}`)
     );
   }
@@ -156,7 +156,7 @@ export class DllCompiler {
   async ensureEntryFilesExists() {
     const entryPaths = this.getEntryPaths();
 
-    await Promise.all(entryPaths.map(async entryPath => await this.ensureFileExists(entryPath)));
+    await Promise.all(entryPaths.map(async (entryPath) => await this.ensureFileExists(entryPath)));
   }
 
   async ensureManifestFilesExists() {
@@ -179,7 +179,7 @@ export class DllCompiler {
   async ensureStyleFileExists() {
     const stylePaths = this.getStylePaths();
 
-    await Promise.all(stylePaths.map(async stylePath => await this.ensureFileExists(stylePath)));
+    await Promise.all(stylePaths.map(async (stylePath) => await this.ensureFileExists(stylePath)));
   }
 
   async ensureFileExists(filePath, content) {
@@ -208,7 +208,7 @@ export class DllCompiler {
   dllsExistsSync() {
     const dllPaths = this.getDllPaths();
 
-    return dllPaths.every(dllPath => this.existsSync(dllPath));
+    return dllPaths.every((dllPath) => this.existsSync(dllPath));
   }
 
   existsSync(filePath) {
@@ -223,7 +223,7 @@ export class DllCompiler {
     const entryPaths = this.getEntryPaths();
 
     const entryFilesContent = await Promise.all(
-      entryPaths.map(async entryPath => await this.readFile(entryPath))
+      entryPaths.map(async (entryPath) => await this.readFile(entryPath))
     );
 
     // merge all the module contents from entry files again into
@@ -304,7 +304,7 @@ export class DllCompiler {
         // bundled inside the dll bundle
         const notAllowedModules = [];
 
-        stats.compilation.modules.forEach(module => {
+        stats.compilation.modules.forEach((module) => {
           // ignore if no module or userRequest are defined
           if (!module || !module.resource) {
             return;
@@ -327,7 +327,7 @@ export class DllCompiler {
           if (notInNodeModulesOrWebpackShims(module.resource)) {
             const reasons = module.reasons || [];
 
-            reasons.forEach(reason => {
+            reasons.forEach((reason) => {
               // Skip if we can't read the reason info
               if (!reason || !reason.module || !reason.module.resource) {
                 return;

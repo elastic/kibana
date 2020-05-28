@@ -131,6 +131,27 @@ const SavedSortRuntimeType = runtimeTypes.partial({
 });
 
 /*
+ *  Timeline Statuses
+ */
+
+export enum TimelineStatus {
+  active = 'active',
+  draft = 'draft',
+}
+
+export const TimelineStatusLiteralRt = runtimeTypes.union([
+  runtimeTypes.literal(TimelineStatus.active),
+  runtimeTypes.literal(TimelineStatus.draft),
+]);
+
+const TimelineStatusLiteralWithNullRt = unionWithNullType(TimelineStatusLiteralRt);
+
+export type TimelineStatusLiteral = runtimeTypes.TypeOf<typeof TimelineStatusLiteralRt>;
+export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
+  typeof TimelineStatusLiteralWithNullRt
+>;
+
+/*
  *  Timeline Types
  */
 
@@ -143,6 +164,11 @@ export const TimelineTypeLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineType.template),
   runtimeTypes.literal(TimelineType.default),
 ]);
+
+export const TimelineTypeLiteralWithNullRt = unionWithNullType(TimelineTypeLiteralRt);
+
+export type TimelineTypeLiteral = runtimeTypes.TypeOf<typeof TimelineTypeLiteralRt>;
+export type TimelineTypeLiteralWithNull = runtimeTypes.TypeOf<typeof TimelineTypeLiteralWithNullRt>;
 
 export const SavedTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
@@ -160,6 +186,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   dateRange: unionWithNullType(SavedDateRangePickerRuntimeType),
   savedQueryId: unionWithNullType(runtimeTypes.string),
   sort: unionWithNullType(SavedSortRuntimeType),
+  status: unionWithNullType(TimelineStatusLiteralRt),
   created: unionWithNullType(runtimeTypes.number),
   createdBy: unionWithNullType(runtimeTypes.string),
   updated: unionWithNullType(runtimeTypes.number),

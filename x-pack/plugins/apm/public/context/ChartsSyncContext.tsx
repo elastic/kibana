@@ -25,20 +25,20 @@ const ChartsSyncContextProvider: React.FC = ({ children }) => {
   const { environment } = uiFilters;
 
   const { data = { annotations: [] } } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (start && end && serviceName) {
         return callApmApi({
-          pathname: '/api/apm/services/{serviceName}/annotations',
+          pathname: '/api/apm/services/{serviceName}/annotation/search',
           params: {
             path: {
-              serviceName
+              serviceName,
             },
             query: {
               start,
               end,
-              environment
-            }
-          }
+              environment,
+            },
+          },
         });
       }
     },
@@ -59,19 +59,19 @@ const ChartsSyncContextProvider: React.FC = ({ children }) => {
         const currentSearch = toQuery(history.location.search);
         const nextSearch = {
           rangeFrom: new Date(range.start).toISOString(),
-          rangeTo: new Date(range.end).toISOString()
+          rangeTo: new Date(range.end).toISOString(),
         };
 
         history.push({
           ...history.location,
           search: fromQuery({
             ...currentSearch,
-            ...nextSearch
-          })
+            ...nextSearch,
+          }),
         });
       },
       hoverX: time,
-      annotations: data.annotations
+      annotations: data.annotations,
     };
 
     return { ...hoverXHandlers };

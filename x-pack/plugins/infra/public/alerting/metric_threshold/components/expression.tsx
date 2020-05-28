@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { debounce } from 'lodash';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
   EuiSpacer,
@@ -40,6 +41,8 @@ import { ExpressionRow } from './expression_row';
 import { AlertContextMeta, TimeUnit, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
 
+const FILTER_TYPING_DEBOUNCE_MS = 500;
+
 interface Props {
   errors: IErrorObject[];
   alertParams: {
@@ -63,7 +66,7 @@ const defaultExpression = {
   timeUnit: 'm',
 } as MetricExpression;
 
-export const Expressions: React.FC<Props> = props => {
+export const Expressions: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors, alertsContext } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
@@ -71,6 +74,7 @@ export const Expressions: React.FC<Props> = props => {
     fetch: alertsContext.http.fetch,
     toastWarning: alertsContext.toastNotifications.addWarning,
   });
+
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('m');
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
@@ -99,9 +103,13 @@ export const Expressions: React.FC<Props> = props => {
 
   const addExpression = useCallback(() => {
     const exp = alertParams.criteria?.slice() || [];
-    exp.push(defaultExpression);
+    exp.push({
+      ...defaultExpression,
+      timeSize: timeSize ?? defaultExpression.timeSize,
+      timeUnit: timeUnit ?? defaultExpression.timeUnit,
+    });
     setAlertParams('criteria', exp);
-  }, [setAlertParams, alertParams.criteria]);
+  }, [setAlertParams, alertParams.criteria, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
     (id: number) => {
@@ -125,8 +133,12 @@ export const Expressions: React.FC<Props> = props => {
     [setAlertParams, derivedIndexPattern]
   );
 
+  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
+    onFilterChange,
+  ]);
+
   const onGroupByChange = useCallback(
-    (group: string | null) => {
+    (group: string | null | string[]) => {
       setAlertParams('groupBy', group || '');
     },
     [setAlertParams]
@@ -143,7 +155,7 @@ export const Expressions: React.FC<Props> = props => {
   const updateTimeSize = useCallback(
     (ts: number | undefined) => {
       const criteria =
-        alertParams.criteria?.map(c => ({
+        alertParams.criteria?.map((c) => ({
           ...c,
           timeSize: ts,
         })) || [];
@@ -156,7 +168,7 @@ export const Expressions: React.FC<Props> = props => {
   const updateTimeUnit = useCallback(
     (tu: string) => {
       const criteria =
-        alertParams.criteria?.map(c => ({
+        alertParams.criteria?.map((c) => ({
           ...c,
           timeUnit: tu,
         })) || [];
@@ -166,52 +178,60 @@ export const Expressions: React.FC<Props> = props => {
     [alertParams.criteria, setAlertParams]
   );
 
-  useEffect(() => {
+  const preFillAlertCriteria = useCallback(() => {
     const md = alertsContext.metadata;
-    if (md) {
-      if (md.currentOptions?.metrics) {
-        setAlertParams(
-          'criteria',
-          md.currentOptions.metrics.map(metric => ({
-            metric: metric.field,
-            comparator: Comparator.GT,
-            threshold: [],
-            timeSize,
-            timeUnit,
-            aggType: metric.aggregation,
-          }))
-        );
-      } else {
-        setAlertParams('criteria', [defaultExpression]);
-      }
-
-      if (md.currentOptions) {
-        if (md.currentOptions.filterQuery) {
-          setAlertParams('filterQueryText', md.currentOptions.filterQuery);
-          setAlertParams(
-            'filterQuery',
-            convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedIndexPattern) ||
-              ''
-          );
-        } else if (md.currentOptions.groupBy && md.series) {
-          const filter = `${md.currentOptions.groupBy}: "${md.series.id}"`;
-          setAlertParams('filterQueryText', filter);
-          setAlertParams(
-            'filterQuery',
-            convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-          );
-        }
-
-        setAlertParams('groupBy', md.currentOptions.groupBy);
-      }
-      setAlertParams('sourceId', source?.id);
+    if (md && md.currentOptions?.metrics) {
+      setAlertParams(
+        'criteria',
+        md.currentOptions.metrics.map((metric) => ({
+          metric: metric.field,
+          comparator: Comparator.GT,
+          threshold: [],
+          timeSize,
+          timeUnit,
+          aggType: metric.aggregation,
+        }))
+      );
     } else {
-      if (!alertParams.criteria) {
-        setAlertParams('criteria', [defaultExpression]);
-      }
-      if (!alertParams.sourceId) {
-        setAlertParams('sourceId', source?.id || 'default');
-      }
+      setAlertParams('criteria', [defaultExpression]);
+    }
+  }, [alertsContext.metadata, setAlertParams, timeSize, timeUnit]);
+
+  const preFillAlertFilter = useCallback(() => {
+    const md = alertsContext.metadata;
+    if (md && md.currentOptions?.filterQuery) {
+      setAlertParams('filterQueryText', md.currentOptions.filterQuery);
+      setAlertParams(
+        'filterQuery',
+        convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedIndexPattern) || ''
+      );
+    } else if (md && md.currentOptions?.groupBy && md.series) {
+      const { groupBy } = md.currentOptions;
+      const filter = Array.isArray(groupBy)
+        ? groupBy.map((field, index) => `${field}: "${md.series?.keys?.[index]}"`).join(' and ')
+        : `${groupBy}: "${md.series.id}"`;
+      setAlertParams('filterQueryText', filter);
+      setAlertParams(
+        'filterQuery',
+        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
+      );
+    }
+  }, [alertsContext.metadata, derivedIndexPattern, setAlertParams]);
+
+  useEffect(() => {
+    if (alertParams.criteria && alertParams.criteria.length) {
+      setTimeSize(alertParams.criteria[0].timeSize);
+      setTimeUnit(alertParams.criteria[0].timeUnit);
+    } else {
+      preFillAlertCriteria();
+    }
+
+    if (!alertParams.filterQuery) {
+      preFillAlertFilter();
+    }
+
+    if (!alertParams.sourceId) {
+      setAlertParams('sourceId', source?.id || 'default');
     }
   }, [alertsContext.metadata, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -251,7 +271,7 @@ export const Expressions: React.FC<Props> = props => {
                 context={alertsContext}
                 derivedIndexPattern={derivedIndexPattern}
                 source={source}
-                filterQuery={alertParams.filterQuery}
+                filterQuery={alertParams.filterQueryText}
                 groupBy={alertParams.groupBy}
               />
             </ExpressionRow>
@@ -302,7 +322,7 @@ export const Expressions: React.FC<Props> = props => {
           </>
         }
         checked={alertParams.alertOnNoData}
-        onChange={e => setAlertParams('alertOnNoData', e.target.checked)}
+        onChange={(e) => setAlertParams('alertOnNoData', e.target.checked)}
       />
 
       <EuiSpacer size={'m'} />
@@ -320,7 +340,7 @@ export const Expressions: React.FC<Props> = props => {
         {(alertsContext.metadata && (
           <MetricsExplorerKueryBar
             derivedIndexPattern={derivedIndexPattern}
-            onChange={onFilterChange}
+            onChange={debouncedOnFilterChange}
             onSubmit={onFilterChange}
             value={alertParams.filterQueryText}
           />

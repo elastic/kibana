@@ -32,7 +32,14 @@ describe('getLatestMonitor', () => {
           },
         },
         size: 1,
-        _source: ['url', 'monitor', 'observer', 'tls', '@timestamp'],
+        _source: [
+          'url',
+          'monitor',
+          'observer',
+          '@timestamp',
+          'tls.server.x509.not_after',
+          'tls.server.x509.not_before',
+        ],
         sort: {
           '@timestamp': { order: 'desc' },
         },
@@ -83,6 +90,10 @@ describe('getLatestMonitor', () => {
           "type": "http",
         },
         "timestamp": "123456",
+        "tls": Object {
+          "not_after": undefined,
+          "not_before": undefined,
+        },
       }
     `);
     expect(result.timestamp).toBe('123456');

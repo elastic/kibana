@@ -16,20 +16,17 @@ import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import { mlJobService } from '../../../services/job_service';
 import { loadNewJobCapabilities } from '../../../services/new_job_capabilities_service';
 import { checkCreateJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
-import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
+import {
+  ANOMALY_DETECTION_BREADCRUMB,
+  CREATE_JOB_BREADCRUMB,
+  ML_BREADCRUMB,
+} from '../../breadcrumbs';
 
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;
 }
 
-const createJobBreadcrumbs = {
-  text: i18n.translate('xpack.ml.jobsBreadcrumbs.createJobLabel', {
-    defaultMessage: 'Create job',
-  }),
-  href: '#/jobs/new_job',
-};
-
-const baseBreadcrumbs = [ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB, createJobBreadcrumbs];
+const baseBreadcrumbs = [ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB, CREATE_JOB_BREADCRUMB];
 
 const singleMetricBreadcrumbs = [
   ...baseBreadcrumbs,
@@ -45,7 +42,7 @@ const multiMetricBreadcrumbs = [
   ...baseBreadcrumbs,
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.multiMetricLabel', {
-      defaultMessage: 'Multi metric',
+      defaultMessage: 'Multi-metric',
     }),
     href: '',
   },

@@ -7,19 +7,20 @@
 import {
   staticIndexPatternRoute,
   dynamicIndexPatternRoute,
-  apmIndexPatternTitleRoute
+  apmIndexPatternTitleRoute,
 } from './index_pattern';
 import {
   errorDistributionRoute,
   errorGroupsRoute,
-  errorsRoute
+  errorsRoute,
 } from './errors';
 import {
   serviceAgentNameRoute,
   serviceTransactionTypesRoute,
   servicesRoute,
   serviceNodeMetadataRoute,
-  serviceAnnotationsRoute
+  serviceAnnotationsRoute,
+  serviceAnnotationsCreateRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -29,12 +30,12 @@ import {
   listAgentConfigurationEnvironmentsRoute,
   listAgentConfigurationServicesRoute,
   createOrUpdateAgentConfigurationRoute,
-  agentConfigurationAgentNameRoute
+  agentConfigurationAgentNameRoute,
 } from './settings/agent_configuration';
 import {
   apmIndexSettingsRoute,
   apmIndicesRoute,
-  saveApmIndicesRoute
+  saveApmIndicesRoute,
 } from './settings/apm_indices';
 import { metricsChartsRoute } from './metrics';
 import { serviceNodesRoute } from './service_nodes';
@@ -46,7 +47,7 @@ import {
   transactionGroupsDistributionRoute,
   transactionGroupsRoute,
   transactionGroupsAvgDurationByCountry,
-  transactionGroupsAvgDurationByBrowser
+  transactionGroupsAvgDurationByBrowser,
 } from './transaction_groups';
 import {
   errorGroupsLocalFiltersRoute,
@@ -56,7 +57,7 @@ import {
   transactionGroupsLocalFiltersRoute,
   transactionsLocalFiltersRoute,
   serviceNodesLocalFiltersRoute,
-  uiFiltersEnvironmentsRoute
+  uiFiltersEnvironmentsRoute,
 } from './ui_filters';
 import { createApi } from './create_api';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
@@ -66,7 +67,7 @@ import {
   updateCustomLinkRoute,
   deleteCustomLinkRoute,
   listCustomLinksRoute,
-  customLinkTransactionRoute
+  customLinkTransactionRoute,
 } from './settings/custom_link';
 
 const createApmApi = () => {
@@ -87,6 +88,7 @@ const createApmApi = () => {
     .add(servicesRoute)
     .add(serviceNodeMetadataRoute)
     .add(serviceAnnotationsRoute)
+    .add(serviceAnnotationsCreateRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)

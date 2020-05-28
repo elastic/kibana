@@ -19,6 +19,7 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import classNames from 'classnames';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -81,7 +82,7 @@ export class Form extends PureComponent<FormProps> {
   getSettingByKey = (key: string): FieldSetting | undefined => {
     return Object.values(this.props.settings)
       .flat()
-      .find(el => el.name === key);
+      .find((el) => el.name === key);
   };
 
   getCountOfUnsavedChanges = (): number => {
@@ -91,8 +92,8 @@ export class Form extends PureComponent<FormProps> {
   getCountOfHiddenUnsavedChanges = (): number => {
     const shownSettings = Object.values(this.props.visibleSettings)
       .flat()
-      .map(setting => setting.name);
-    return Object.keys(this.state.unsavedChanges).filter(key => !shownSettings.includes(key))
+      .map((setting) => setting.name);
+    return Object.keys(this.state.unsavedChanges).filter((key) => !shownSettings.includes(key))
       .length;
   };
 
@@ -255,7 +256,7 @@ export class Form extends PureComponent<FormProps> {
               </EuiFlexGroup>
             </EuiText>
             <EuiSpacer size="m" />
-            {settings.map(setting => {
+            {settings.map((setting) => {
               return (
                 <Field
                   key={setting.name}
@@ -325,10 +326,20 @@ export class Form extends PureComponent<FormProps> {
 
   renderBottomBar = () => {
     const areChangesInvalid = this.areChangesInvalid();
-    const bottomBarClasses = classNames('mgtAdvancedSettingsForm__bottomBar', {
-      'mgtAdvancedSettingsForm__bottomBar--pushForNav':
-        localStorage.getItem(NAV_IS_LOCKED_KEY) === 'true',
-    });
+
+    // TODO #64541
+    // Delete these classes
+    let bottomBarClasses = '';
+    const pageNav = this.props.settings.general.find(
+      (setting) => setting.name === 'pageNavigation'
+    );
+
+    if (pageNav?.value === 'legacy') {
+      bottomBarClasses = classNames('mgtAdvancedSettingsForm__bottomBar', {
+        'mgtAdvancedSettingsForm__bottomBar--pushForNav':
+          localStorage.getItem(NAV_IS_LOCKED_KEY) === 'true',
+      });
+    }
     return (
       <EuiBottomBar className={bottomBarClasses} data-test-subj="advancedSetting-bottomBar">
         <EuiFlexGroup
@@ -392,7 +403,7 @@ export class Form extends PureComponent<FormProps> {
     const { visibleSettings, categories, categoryCounts, clearQuery } = this.props;
     const currentCategories: Category[] = [];
 
-    categories.forEach(category => {
+    categories.forEach((category) => {
       if (visibleSettings[category] && visibleSettings[category].length) {
         currentCategories.push(category);
       }
@@ -402,7 +413,7 @@ export class Form extends PureComponent<FormProps> {
       <Fragment>
         <div>
           {currentCategories.length
-            ? currentCategories.map(category => {
+            ? currentCategories.map((category) => {
                 return this.renderCategory(
                   category,
                   visibleSettings[category],

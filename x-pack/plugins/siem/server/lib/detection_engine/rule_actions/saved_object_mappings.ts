@@ -8,7 +8,7 @@ import { SavedObjectsType } from '../../../../../../../src/core/server';
 
 export const ruleActionsSavedObjectType = 'siem-detection-engine-rule-actions';
 
-export const ruleActionsSavedObjectMappings = {
+export const ruleActionsSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
     alertThrottle: {
       type: 'keyword',

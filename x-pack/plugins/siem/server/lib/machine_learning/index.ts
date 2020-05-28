@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import { SearchResponse, SearchParams } from 'elasticsearch';
 
-import { AlertServices } from '../../../../alerting/server';
-import { AnomalyRecordDoc as Anomaly } from '../../../../ml/common/types/anomalies';
+import { AnomalyRecordDoc as Anomaly } from '../../../../ml/server';
 
 export { Anomaly };
 export type AnomalyResults = SearchResponse<Anomaly>;
+type MlSearch = <T>(searchParams: SearchParams) => Promise<SearchResponse<T>>;
 
 export interface AnomaliesSearchParams {
   jobIds: string[];
@@ -22,12 +22,11 @@ export interface AnomaliesSearchParams {
 
 export const getAnomalies = async (
   params: AnomaliesSearchParams,
-  callCluster: AlertServices['callCluster']
+  mlSearch: MlSearch
 ): Promise<AnomalyResults> => {
   const boolCriteria = buildCriteria(params);
 
-  return callCluster('search', {
-    index: '.ml-anomalies-*',
+  return mlSearch({
     size: params.maxRecords || 100,
     body: {
       query: {
@@ -76,7 +75,7 @@ const buildCriteria = (params: AnomaliesSearchParams): object[] => {
   ];
 
   if (jobIdsFilterable) {
-    const jobIdFilter = jobIds.map(jobId => `job_id:${jobId}`).join(' OR ');
+    const jobIdFilter = jobIds.map((jobId) => `job_id:${jobId}`).join(' OR ');
 
     boolCriteria.push({
       query_string: {

@@ -2413,6 +2413,12 @@
         },
         "siem-ui-timeline": {
           "properties": {
+            "timelineType": {
+              "type": "keyword"
+            },
+            "status": {
+              "type": "keyword"
+            },
             "columns": {
               "properties": {
                 "aggregatable": {

@@ -49,9 +49,9 @@ const generateAnnotationData = (values, formatter) =>
     }),
   }));
 
-const decorateFormatter = formatter => ({ value }) => formatter(value);
+const decorateFormatter = (formatter) => ({ value }) => formatter(value);
 
-const handleCursorUpdate = cursor => {
+const handleCursorUpdate = (cursor) => {
   eventBus.trigger(ACTIVE_CURSOR, cursor);
 };
 
@@ -87,7 +87,7 @@ export const TimeSeries = ({
   const tooltipFormatter = decorateFormatter(xAxisFormatter);
   const uiSettings = getUISettings();
   const timeZone = getTimezone(uiSettings);
-  const hasBarChart = series.some(({ bars }) => bars.show);
+  const hasBarChart = series.some(({ bars }) => bars?.show);
 
   // compute the theme based on the bg color
   const theme = getTheme(darkMode, backgroundColor);
@@ -100,13 +100,21 @@ export const TimeSeries = ({
   const { colors } = getChartsSetup();
   colors.mappedColors.mapKeys(series.filter(({ color }) => !color).map(({ label }) => label));
 
+  const onBrushEndListener = ({ x }) => {
+    if (!x) {
+      return;
+    }
+    const [min, max] = x;
+    onBrush(min, max);
+  };
+
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
         showLegend={legend}
         showLegendExtra={true}
         legendPosition={legendPosition}
-        onBrushEnd={onBrush}
+        onBrushEnd={onBrushEndListener}
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
         theme={
@@ -172,7 +180,7 @@ export const TimeSeries = ({
           // Only use color mapping if there is no color from the server
           const finalColor = color ?? colors.mappedColors.mapping[label];
 
-          if (bars.show) {
+          if (bars?.show) {
             return (
               <BarSeriesDecorator
                 key={key}
@@ -197,7 +205,7 @@ export const TimeSeries = ({
             );
           }
 
-          if (lines.show) {
+          if (lines?.show) {
             return (
               <AreaSeriesDecorator
                 key={key}

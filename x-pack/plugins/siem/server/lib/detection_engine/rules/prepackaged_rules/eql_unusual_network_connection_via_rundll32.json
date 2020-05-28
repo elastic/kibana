@@ -5,7 +5,7 @@
   ],
   "language": "kuery",
   "name": "Unusual Network Connection via RunDLL32",
-  "query": "process.name:rundll32.exe and event.action:\"Network connection detected (rule: NetworkConnect)\" and not destination.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)",
+  "query": "process.name:rundll32.exe and event.action:\"Network connection detected (rule: NetworkConnect)\" and not destination.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 or 127.0.0.0/8)",
   "risk_score": 21,
   "rule_id": "52aaab7b-b51c-441a-89ce-4387b3aea886",
   "severity": "low",
@@ -31,5 +31,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { render, wait } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { ApmIndices } from '.';
 import * as hooks from '../../../../hooks/useFetcher';
 import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 
 describe('ApmIndices', () => {
-  it('should not get stuck in infinite loop', async () => {
-    spyOn(hooks, 'useFetcher').and.returnValue({
+  it('should not get stuck in infinite loop', () => {
+    const spy = spyOn(hooks, 'useFetcher').and.returnValue({
       data: undefined,
-      status: 'loading'
+      status: 'loading',
     });
     const { getByText } = render(
       <MockApmPluginContextWrapper>
@@ -30,6 +30,6 @@ describe('ApmIndices', () => {
       </h2>
     `);
 
-    await wait();
+    expect(spy).toHaveBeenCalledTimes(2);
   });
 });

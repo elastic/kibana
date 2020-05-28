@@ -88,5 +88,5 @@ export interface SavedObjectMigrationContext {
  * @public
  */
 export interface SavedObjectMigrationMap {
-  [version: string]: SavedObjectMigrationFn;
+  [version: string]: SavedObjectMigrationFn<any, any>;
 }

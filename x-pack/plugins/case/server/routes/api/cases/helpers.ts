@@ -6,7 +6,8 @@
 
 import { get } from 'lodash';
 
-import { CaseAttributes, CasePatchRequest } from '../../../../common/api';
+import { SavedObjectsFindResponse } from 'kibana/server';
+import { CaseAttributes, CasePatchRequest, CasesConfigureAttributes } from '../../../../common/api';
 
 interface CompareArrays {
   addedItems: string[];
@@ -23,12 +24,12 @@ export const compareArrays = ({
     addedItems: [],
     deletedItems: [],
   };
-  originalValue.forEach(origVal => {
+  originalValue.forEach((origVal) => {
     if (!updatedValue.includes(origVal)) {
       result.deletedItems = [...result.deletedItems, origVal];
     }
   });
-  updatedValue.forEach(updatedVal => {
+  updatedValue.forEach((updatedVal) => {
     if (!originalValue.includes(updatedVal)) {
       result.addedItems = [...result.addedItems, updatedVal];
     }
@@ -75,8 +76,20 @@ export const getCaseToUpdate = (
           ...acc,
           [key]: value,
         };
+      } else if (currentValue == null && key === 'connector_id' && value !== currentValue) {
+        return {
+          ...acc,
+          [key]: value,
+        };
       }
       return acc;
     },
     { id: queryCase.id, version: queryCase.version }
   );
+
+export const getConnectorId = (
+  caseConfigure: SavedObjectsFindResponse<CasesConfigureAttributes>
+): string =>
+  caseConfigure.saved_objects.length > 0
+    ? caseConfigure.saved_objects[0].attributes.connector_id
+    : 'none';

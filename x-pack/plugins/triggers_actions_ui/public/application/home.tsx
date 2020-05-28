@@ -125,7 +125,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
         </EuiPageContentHeader>
 
         <EuiTabs>
-          {tabs.map(tab => (
+          {tabs.map((tab) => (
             <EuiTab
               onClick={() => onSectionChange(tab.id)}
               isSelected={tab.id === section}
@@ -167,3 +167,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     </EuiPageBody>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { TriggersActionsUIHome as default };

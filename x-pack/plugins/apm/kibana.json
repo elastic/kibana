@@ -4,7 +4,7 @@
   "kibanaVersion": "kibana",
   "requiredPlugins": [
     "features",
-    "apm_oss",
+    "apmOss",
     "data",
     "home",
     "licensing",
@@ -15,9 +15,14 @@
     "usageCollection",
     "taskManager",
     "actions",
-    "alerting"
+    "alerting",
+    "observability",
+    "security"
   ],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "apm"]
+  "configPath": [
+    "xpack",
+    "apm"
+  ]
 }

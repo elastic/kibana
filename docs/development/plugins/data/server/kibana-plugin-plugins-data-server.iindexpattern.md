@@ -21,3 +21,9 @@ export interface IIndexPattern
 |  [title](./kibana-plugin-plugins-data-server.iindexpattern.title.md) | <code>string</code> |  |
 |  [type](./kibana-plugin-plugins-data-server.iindexpattern.type.md) | <code>string</code> |  |
 
+## Methods
+
+|  Method | Description |
+|  --- | --- |
+|  [getTimeField()](./kibana-plugin-plugins-data-server.iindexpattern.gettimefield.md) |  |
+

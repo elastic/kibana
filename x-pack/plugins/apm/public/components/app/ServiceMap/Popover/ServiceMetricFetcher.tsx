@@ -11,39 +11,31 @@ import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ServiceMetricList } from './ServiceMetricList';
 
 interface ServiceMetricFetcherProps {
-  frameworkName?: string;
   serviceName: string;
 }
 
 export function ServiceMetricFetcher({
-  frameworkName,
-  serviceName
+  serviceName,
 }: ServiceMetricFetcherProps) {
   const {
-    urlParams: { start, end, environment }
+    urlParams: { start, end, environment },
   } = useUrlParams();
 
   const { data = {} as ServiceNodeMetrics, status } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
           pathname: '/api/apm/service-map/service/{serviceName}',
-          params: { path: { serviceName }, query: { start, end, environment } }
+          params: { path: { serviceName }, query: { start, end, environment } },
         });
       }
     },
     [serviceName, start, end, environment],
     {
-      preservePreviousData: false
+      preservePreviousData: false,
     }
   );
   const isLoading = status === 'loading';
 
-  return (
-    <ServiceMetricList
-      {...data}
-      frameworkName={frameworkName}
-      isLoading={isLoading}
-    />
-  );
+  return <ServiceMetricList {...data} isLoading={isLoading} />;
 }

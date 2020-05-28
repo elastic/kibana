@@ -11,12 +11,7 @@ import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metric
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
 import { InfraBackendLibs } from '../../infra_types';
-
-const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
-  schema.string({
-    validate: value =>
-      arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
-  });
+import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 
 export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
   const baseCriterion = {
@@ -67,8 +62,12 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
       params: schema.object(
         {
           criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion])),
-          groupBy: schema.maybe(schema.string()),
-          filterQuery: schema.maybe(schema.string()),
+          groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+          filterQuery: schema.maybe(
+            schema.string({
+              validate: validateIsStringElasticsearchJSONFilter,
+            })
+          ),
           sourceId: schema.string(),
           alertOnNoData: schema.maybe(schema.boolean()),
         },
@@ -85,5 +84,6 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
         { name: 'reason', description: reasonActionVariableDescription },
       ],
     },
+    producer: 'metrics',
   };
 }

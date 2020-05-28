@@ -205,7 +205,6 @@ export interface RegistryVarsEntry {
 interface PackageAdditions {
   title: string;
   latestVersion: string;
-  installedVersion?: string;
   assets: AssetsGroupedByServiceByType;
 }
 
@@ -276,6 +275,9 @@ export interface IndexTemplate {
     settings: any;
     mappings: object;
     aliases: object;
+  };
+  data_stream: {
+    timestamp_field: string;
   };
 }
 

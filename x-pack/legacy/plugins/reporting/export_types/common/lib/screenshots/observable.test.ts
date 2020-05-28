@@ -18,13 +18,16 @@ jest.mock('../../../../server/browsers/chromium/puppeteer', () => ({
 import * as Rx from 'rxjs';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { loggingServiceMock } from '../../../../../../../../src/core/server/mocks';
+import { HeadlessChromiumDriver } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
+import {
+  CaptureConfig,
+  ConditionalHeaders,
+  ElementsPositionAndAttribute,
+} from '../../../../server/types';
 import { createMockBrowserDriverFactory, createMockLayoutInstance } from '../../../../test_helpers';
-import { ConditionalHeaders, HeadlessChromiumDriver } from '../../../../types';
-import { CaptureConfig } from '../../../../server/types';
 import * as contexts from './constants';
 import { screenshotsObservableFactory } from './observable';
-import { ElementsPositionAndAttribute } from './types';
 
 /*
  * Mocks
@@ -98,9 +101,12 @@ describe('Screenshot Observable Pipeline', () => {
       return Promise.resolve(`allyourBase64 screenshots`);
     });
 
+    const mockOpen = jest.fn();
+
     // mocks
     mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger, {
       screenshot: mockScreenshot,
+      open: mockOpen,
     });
 
     // test
@@ -179,6 +185,15 @@ describe('Screenshot Observable Pipeline', () => {
         },
       ]
     `);
+
+    // ensures the correct selectors are waited on for multi URL jobs
+    expect(mockOpen.mock.calls.length).toBe(2);
+
+    const firstSelector = mockOpen.mock.calls[0][1].waitForSelector;
+    expect(firstSelector).toBe('.application');
+
+    const secondSelector = mockOpen.mock.calls[1][1].waitForSelector;
+    expect(secondSelector).toBe('[data-shared-page="2"]');
   });
 
   describe('error handling', () => {

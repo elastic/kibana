@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { Installation, InstallationStatus, PackageInfo } from '../../../types';
+import { Installation, InstallationStatus, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
 
@@ -26,19 +26,20 @@ export async function getPackages(
   } & Registry.SearchParams
 ) {
   const { savedObjectsClient } = options;
-  const registryItems = await Registry.fetchList({ category: options.category }).then(items => {
-    return items.map(item =>
+  const registryItems = await Registry.fetchList({ category: options.category }).then((items) => {
+    return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
     );
   });
   // get the installed packages
-  const results = await savedObjectsClient.find<Installation>({
-    type: PACKAGES_SAVED_OBJECT_TYPE,
-  });
+  const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
+
   // filter out any internal packages
-  const savedObjectsVisible = results.saved_objects.filter(o => !o.attributes.internal);
+  const savedObjectsVisible = packageSavedObjects.saved_objects.filter(
+    (o) => !o.attributes.internal
+  );
   const packageList = registryItems
-    .map(item =>
+    .map((item) =>
       createInstallableFrom(
         item,
         savedObjectsVisible.find(({ id }) => id === item.name)
@@ -46,6 +47,12 @@ export async function getPackages(
     )
     .sort(sortByName);
   return packageList;
+}
+
+export async function getPackageSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
+  return savedObjectsClient.find<Installation>({
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+  });
 }
 
 export async function getPackageKeysByStatus(
@@ -94,7 +101,7 @@ export async function getInstallationObject(options: {
   const { savedObjectsClient, pkgName } = options;
   return savedObjectsClient
     .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
-    .catch(e => undefined);
+    .catch((e) => undefined);
 }
 
 export async function getInstallation(options: {
@@ -113,4 +120,12 @@ function sortByName(a: { name: string }, b: { name: string }) {
   } else {
     return 0;
   }
+}
+
+export async function getKibanaSavedObject(
+  savedObjectsClient: SavedObjectsClientContract,
+  type: KibanaAssetType,
+  id: string
+) {
+  return savedObjectsClient.get(type, id);
 }

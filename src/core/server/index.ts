@@ -288,7 +288,17 @@ export {
   MetricsServiceSetup,
 } from './metrics';
 
-export { RecursiveReadonly } from '../utils';
+export {
+  RecursiveReadonly,
+  DEFAULT_APP_CATEGORIES,
+  getFlattenedObject,
+  URLMeaningfulParts,
+  modifyUrl,
+  isRelativeUrl,
+  Freezable,
+  deepFreeze,
+  assertNever,
+} from '../utils';
 
 export {
   SavedObject,
@@ -344,8 +354,9 @@ export interface RequestHandlerContext {
       typeRegistry: ISavedObjectTypeRegistry;
     };
     elasticsearch: {
-      dataClient: IScopedClusterClient;
-      adminClient: IScopedClusterClient;
+      legacy: {
+        client: IScopedClusterClient;
+      };
     };
     uiSettings: {
       client: IUiSettingsClient;

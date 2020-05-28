@@ -51,7 +51,7 @@ type NavProps = RouteComponentProps & {
 };
 
 const Nav = withRouter(({ history, navigateToApp, pages }: NavProps) => {
-  const navItems = pages.map(page => ({
+  const navItems = pages.map((page) => ({
     id: page.id,
     name: page.title,
     onClick: () => history.push(`/${page.id}`),
@@ -103,7 +103,7 @@ const SearchApp = ({ basename, data, application }: SearchBarComponentParams) =>
   ];
 
   const routes = pages.map((page, i) => (
-    <Route key={i} path={`/${page.id}`} render={props => buildPage(page)} />
+    <Route key={i} path={`/${page.id}`} render={(props) => buildPage(page)} />
   ));
 
   return (

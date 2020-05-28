@@ -8,14 +8,17 @@
 
 import * as t from 'io-ts';
 
-import { idOrUndefined, list_idOrUndefined, valueOrUndefined } from '../common/schemas';
+import { id, list_id, valueOrUndefined } from '../common/schemas';
+import { Identity, RequiredKeepUndefined } from '../../types';
 
-export const deleteListItemSchema = t.exact(
-  t.type({
-    id: idOrUndefined,
-    list_id: list_idOrUndefined,
-    value: valueOrUndefined,
-  })
-);
+export const deleteListItemSchema = t.intersection([
+  t.exact(
+    t.type({
+      value: valueOrUndefined,
+    })
+  ),
+  t.exact(t.partial({ id, list_id })),
+]);
 
-export type DeleteListItemSchema = t.TypeOf<typeof deleteListItemSchema>;
+export type DeleteListItemSchemaPartial = Identity<t.TypeOf<typeof deleteListItemSchema>>;
+export type DeleteListItemSchema = RequiredKeepUndefined<t.TypeOf<typeof deleteListItemSchema>>;

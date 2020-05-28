@@ -101,11 +101,11 @@ class TutorialUi extends React.Component {
     getServices().chrome.setBreadcrumbs([
       {
         text: homeTitle,
-        href: '#/home',
+        href: '#/',
       },
       {
         text: addDataTitle,
-        href: '#/home/tutorial_directory',
+        href: '#/tutorial_directory',
       },
       {
         text: tutorial ? tutorial.name : this.props.tutorialId,
@@ -147,7 +147,7 @@ class TutorialUi extends React.Component {
 
     const paramValues = {};
     if (instructions.params) {
-      instructions.params.forEach(param => {
+      instructions.params.forEach((param) => {
         paramValues[param.id] = param.defaultValue;
       });
     }
@@ -162,7 +162,7 @@ class TutorialUi extends React.Component {
     });
   };
 
-  setVisibleInstructions = instructionsType => {
+  setVisibleInstructions = (instructionsType) => {
     this.setState(
       {
         visibleInstructions: instructionsType,
@@ -172,21 +172,21 @@ class TutorialUi extends React.Component {
   };
 
   setParameter = (paramId, newValue) => {
-    this.setState(previousState => {
+    this.setState((previousState) => {
       const paramValues = _.cloneDeep(previousState.paramValues);
       paramValues[paramId] = newValue;
       return { paramValues: paramValues };
     });
   };
 
-  checkInstructionSetStatus = async instructionSetIndex => {
+  checkInstructionSetStatus = async (instructionSetIndex) => {
     const instructionSet = this.getInstructionSets()[instructionSetIndex];
     const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`);
 
     if (esHitsCheckConfig) {
       const statusCheckState = await this.fetchEsHitsStatus(esHitsCheckConfig);
 
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         statusCheckStates: {
           ...prevState.statusCheckStates,
           [instructionSetIndex]: statusCheckState,
@@ -200,7 +200,7 @@ class TutorialUi extends React.Component {
    * @param esHitsCheckConfig
    * @return {Promise<string>}
    */
-  fetchEsHitsStatus = async esHitsCheckConfig => {
+  fetchEsHitsStatus = async (esHitsCheckConfig) => {
     const searchHeader = JSON.stringify({ index: esHitsCheckConfig.index });
     const searchBody = JSON.stringify({ query: esHitsCheckConfig.query, size: 1 });
     const response = await fetch(this.props.addBasePath('/elasticsearch/_msearch'), {
@@ -260,9 +260,9 @@ class TutorialUi extends React.Component {
     }
   };
 
-  onStatusCheck = instructionSetIndex => {
+  onStatusCheck = (instructionSetIndex) => {
     this.setState(
-      prevState => ({
+      (prevState) => ({
         statusCheckStates: {
           ...prevState.statusCheckStates,
           [instructionSetIndex]: StatusCheckStates.FETCHING,
@@ -272,7 +272,7 @@ class TutorialUi extends React.Component {
     );
   };
 
-  renderInstructionSets = instructions => {
+  renderInstructionSets = (instructions) => {
     let offset = 1;
     return instructions.instructionSets.map((instructionSet, index) => {
       const currentOffset = offset;
@@ -320,12 +320,12 @@ class TutorialUi extends React.Component {
       label = this.state.tutorial.artifacts.application.label;
       url = this.props.addBasePath(this.state.tutorial.artifacts.application.path);
     } else if (_.has(this.state, 'tutorial.artifacts.dashboards')) {
-      const overviewDashboard = this.state.tutorial.artifacts.dashboards.find(dashboard => {
+      const overviewDashboard = this.state.tutorial.artifacts.dashboards.find((dashboard) => {
         return dashboard.isOverview;
       });
       if (overviewDashboard) {
         label = overviewDashboard.linkLabel;
-        url = this.props.addBasePath(`/app/kibana#/dashboard/${overviewDashboard.id}`);
+        url = this.props.addBasePath(`/app/dashboards#/view/${overviewDashboard.id}`);
       }
     }
 

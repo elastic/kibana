@@ -12,6 +12,7 @@ import {
   Settings,
   Position,
   timeFormatter,
+  BrushEndListener,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
@@ -42,7 +43,11 @@ export const MonitorBarSeries = ({ histogramSeries }: MonitorBarSeriesProps) => 
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
 
-  const onBrushEnd = (min: number, max: number) => {
+  const onBrushEnd: BrushEndListener = ({ x }) => {
+    if (!x) {
+      return;
+    }
+    const [min, max] = x;
     updateUrlParams({
       dateRangeStart: moment(min).toISOString(),
       dateRangeEnd: moment(max).toISOString(),

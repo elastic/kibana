@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const LayoutTypes = {
-  PRESERVE_LAYOUT: 'preserve_layout',
-  PRINT: 'print',
-};
-
-export const PAGELOAD_SELECTOR = '.application';
+export const DEFAULT_PAGELOAD_SELECTOR = '.application';

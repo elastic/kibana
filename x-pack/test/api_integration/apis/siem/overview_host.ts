@@ -7,11 +7,11 @@
 import expect from '@kbn/expect';
 
 import { DEFAULT_INDEX_PATTERN } from '../../../../plugins/siem/common/constants';
-import { overviewHostQuery } from '../../../../plugins/siem/public/containers/overview/overview_host/index.gql_query';
+import { overviewHostQuery } from '../../../../plugins/siem/public/overview/containers//overview_host/index.gql_query';
 import { GetOverviewHostQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('Overview Host', () => {
@@ -56,7 +56,7 @@ export default function({ getService }: FtrProviderContext) {
               inspect: false,
             },
           })
-          .then(resp => {
+          .then((resp) => {
             const overviewHost = resp.data.source.OverviewHost;
             expect(overviewHost).to.eql(expectedResult);
           });

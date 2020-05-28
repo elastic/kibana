@@ -7,8 +7,9 @@
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { pageObjects } from './page_objects';
+import { services } from './services';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
   return {
@@ -18,6 +19,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'X-Pack Endpoint Functional Tests',
     },
+    services,
     apps: {
       ...xpackFunctionalConfig.get('apps'),
       endpoint: {
@@ -28,7 +30,6 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.endpoint.enabled=true',
         '--xpack.ingestManager.enabled=true',
       ],
     },

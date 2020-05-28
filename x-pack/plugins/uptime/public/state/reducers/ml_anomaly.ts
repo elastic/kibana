@@ -15,11 +15,9 @@ import {
   getMLCapabilitiesAction,
 } from '../actions';
 import { getAsyncInitialState, handleAsyncAction } from './utils';
-import { IHttpFetchError } from '../../../../../../target/types/core/public/http';
 import { AsyncInitialState } from './types';
-import { MlCapabilitiesResponse } from '../../../../../plugins/ml/common/types/capabilities';
+import { MlCapabilitiesResponse, JobExistResult } from '../../../../../plugins/ml/public';
 import { CreateMLJobSuccess, DeleteJobResults } from '../actions/types';
-import { JobExistResult } from '../../../../../plugins/ml/common/types/data_recognizer';
 
 export interface MLJobState {
   mlJob: AsyncInitialState<JobExistResult>;
@@ -37,17 +35,15 @@ const initialState: MLJobState = {
   mlCapabilities: getAsyncInitialState(),
 };
 
-type Payload = IHttpFetchError;
-
 export const mlJobsReducer = handleActions<MLJobState>(
   {
-    ...handleAsyncAction<MLJobState, Payload>('mlJob', getExistingMLJobAction),
-    ...handleAsyncAction<MLJobState, Payload>('mlCapabilities', getMLCapabilitiesAction),
-    ...handleAsyncAction<MLJobState, Payload>('createJob', createMLJobAction),
-    ...handleAsyncAction<MLJobState, Payload>('deleteJob', deleteMLJobAction),
-    ...handleAsyncAction<MLJobState, Payload>('anomalies', getAnomalyRecordsAction),
+    ...handleAsyncAction<MLJobState>('mlJob', getExistingMLJobAction),
+    ...handleAsyncAction<MLJobState>('mlCapabilities', getMLCapabilitiesAction),
+    ...handleAsyncAction<MLJobState>('createJob', createMLJobAction),
+    ...handleAsyncAction<MLJobState>('deleteJob', deleteMLJobAction),
+    ...handleAsyncAction<MLJobState>('anomalies', getAnomalyRecordsAction),
     ...{
-      [String(resetMLState)]: state => ({
+      [String(resetMLState)]: (state) => ({
         ...state,
         mlJob: {
           loading: false,

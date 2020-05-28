@@ -16,55 +16,40 @@ import {
 } from '@elastic/eui';
 import { txtChangeButton } from './i18n';
 import './action_wizard.scss';
-
-// TODO: this interface is temporary for just moving forward with the component
-// and it will be imported from the ../ui_actions when implemented properly
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type ActionBaseConfig = {};
-export interface ActionFactory<Config extends ActionBaseConfig = ActionBaseConfig> {
-  type: string; // TODO: type should be tied to Action and ActionByType
-  displayName: string;
-  iconType?: string;
-  wizard: React.FC<ActionFactoryWizardProps<Config>>;
-  createConfig: () => Config;
-  isValid: (config: Config) => boolean;
-}
-
-export interface ActionFactoryWizardProps<Config extends ActionBaseConfig> {
-  config?: Config;
-
-  /**
-   * Callback called when user updates the config in UI.
-   */
-  onConfig: (config: Config) => void;
-}
+import { ActionFactory } from '../../dynamic_actions';
 
 export interface ActionWizardProps {
   /**
    * List of available action factories
    */
-  actionFactories: Array<ActionFactory<any>>; // any here to be able to pass array of ActionFactory<Config> with different configs
+  actionFactories: ActionFactory[];
 
   /**
    * Currently selected action factory
-   * undefined - is allowed and means that non is selected
+   * undefined - is allowed and means that none is selected
    */
   currentActionFactory?: ActionFactory;
+
   /**
    * Action factory selected changed
-   * null - means user click "change" and removed action factory selection
+   * empty - means user click "change" and removed action factory selection
    */
-  onActionFactoryChange: (actionFactory: ActionFactory | null) => void;
+  onActionFactoryChange: (actionFactory?: ActionFactory) => void;
 
   /**
    * current config for currently selected action factory
    */
-  config?: ActionBaseConfig;
+  config?: object;
 
   /**
    * config changed
    */
-  onConfigChange: (config: ActionBaseConfig) => void;
+  onConfigChange: (config: object) => void;
+
+  /**
+   * Context will be passed into ActionFactory's methods
+   */
+  context: object;
 }
 
 export const ActionWizard: React.FC<ActionWizardProps> = ({
@@ -73,6 +58,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   onActionFactoryChange,
   onConfigChange,
   config,
+  context,
 }) => {
   // auto pick action factory if there is only 1 available
   if (!currentActionFactory && actionFactories.length === 1) {
@@ -85,10 +71,11 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
         actionFactory={currentActionFactory}
         showDeselect={actionFactories.length > 1}
         onDeselect={() => {
-          onActionFactoryChange(null);
+          onActionFactoryChange(undefined);
         }}
+        context={context}
         config={config}
-        onConfigChange={newConfig => {
+        onConfigChange={(newConfig) => {
           onConfigChange(newConfig);
         }}
       />
@@ -97,23 +84,25 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
 
   return (
     <ActionFactorySelector
+      context={context}
       actionFactories={actionFactories}
-      onActionFactorySelected={actionFactory => {
+      onActionFactorySelected={(actionFactory) => {
         onActionFactoryChange(actionFactory);
       }}
     />
   );
 };
 
-interface SelectedActionFactoryProps<Config extends ActionBaseConfig = ActionBaseConfig> {
-  actionFactory: ActionFactory<Config>;
-  config: Config;
-  onConfigChange: (config: Config) => void;
+interface SelectedActionFactoryProps {
+  actionFactory: ActionFactory;
+  config: object;
+  context: object;
+  onConfigChange: (config: object) => void;
   showDeselect: boolean;
   onDeselect: () => void;
 }
 
-export const TEST_SUBJ_SELECTED_ACTION_FACTORY = 'selected-action-factory';
+export const TEST_SUBJ_SELECTED_ACTION_FACTORY = 'selectedActionFactory';
 
 const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
   actionFactory,
@@ -121,28 +110,28 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
   showDeselect,
   onConfigChange,
   config,
+  context,
 }) => {
   return (
     <div
       className="auaActionWizard__selectedActionFactoryContainer"
-      data-test-subj={TEST_SUBJ_SELECTED_ACTION_FACTORY}
-      data-testid={TEST_SUBJ_SELECTED_ACTION_FACTORY}
+      data-test-subj={`${TEST_SUBJ_SELECTED_ACTION_FACTORY}-${actionFactory.id}`}
     >
       <header>
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          {actionFactory.iconType && (
+          {actionFactory.getIconType(context) && (
             <EuiFlexItem grow={false}>
-              <EuiIcon type={actionFactory.iconType} size="m" />
+              <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={true}>
             <EuiText>
-              <h4>{actionFactory.displayName}</h4>
+              <h4>{actionFactory.getDisplayName(context)}</h4>
             </EuiText>
           </EuiFlexItem>
           {showDeselect && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" onClick={() => onDeselect()}>
+              <EuiButtonEmpty size="xs" onClick={() => onDeselect()}>
                 {txtChangeButton}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -151,10 +140,11 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
       </header>
       <EuiSpacer size="m" />
       <div>
-        {actionFactory.wizard({
-          config,
-          onConfig: onConfigChange,
-        })}
+        <actionFactory.ReactCollectConfig
+          config={config}
+          onConfig={onConfigChange}
+          context={context}
+        />
       </div>
     </div>
   );
@@ -162,14 +152,16 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
 
 interface ActionFactorySelectorProps {
   actionFactories: ActionFactory[];
+  context: object;
   onActionFactorySelected: (actionFactory: ActionFactory) => void;
 }
 
-export const TEST_SUBJ_ACTION_FACTORY_ITEM = 'action-factory-item';
+export const TEST_SUBJ_ACTION_FACTORY_ITEM = 'actionFactoryItem';
 
 const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
   actionFactories,
   onActionFactorySelected,
+  context,
 }) => {
   if (actionFactories.length === 0) {
     // this is not user facing, as it would be impossible to get into this state
@@ -177,20 +169,30 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
     return <div>No action factories to pick from</div>;
   }
 
+  // The below style is applied to fix Firefox rendering bug.
+  // See: https://github.com/elastic/kibana/pull/61219/#pullrequestreview-402903330
+  const firefoxBugFix = {
+    willChange: 'opacity',
+  };
+
   return (
-    <EuiFlexGroup wrap>
-      {actionFactories.map(actionFactory => (
-        <EuiKeyPadMenuItem
-          className="auaActionWizard__actionFactoryItem"
-          key={actionFactory.type}
-          label={actionFactory.displayName}
-          data-testid={TEST_SUBJ_ACTION_FACTORY_ITEM}
-          data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
-          onClick={() => onActionFactorySelected(actionFactory)}
-        >
-          {actionFactory.iconType && <EuiIcon type={actionFactory.iconType} size="m" />}
-        </EuiKeyPadMenuItem>
-      ))}
+    <EuiFlexGroup gutterSize="m" wrap={true} style={firefoxBugFix}>
+      {[...actionFactories]
+        .sort((f1, f2) => f2.order - f1.order)
+        .map((actionFactory) => (
+          <EuiFlexItem grow={false} key={actionFactory.id}>
+            <EuiKeyPadMenuItem
+              className="auaActionWizard__actionFactoryItem"
+              label={actionFactory.getDisplayName(context)}
+              data-test-subj={`${TEST_SUBJ_ACTION_FACTORY_ITEM}-${actionFactory.id}`}
+              onClick={() => onActionFactorySelected(actionFactory)}
+            >
+              {actionFactory.getIconType(context) && (
+                <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
+              )}
+            </EuiKeyPadMenuItem>
+          </EuiFlexItem>
+        ))}
     </EuiFlexGroup>
   );
 };

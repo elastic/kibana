@@ -7,7 +7,7 @@ import React from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { MonitorPageLink } from '../monitor_page_link';
+import { MonitorPageLink } from '../../../common/monitor_page_link';
 import { useGetUrlParams } from '../../../../hooks';
 import { stringifyUrlParams } from '../../../../lib/helper/stringify_url_params';
 import { MonitorError } from '../../../../../common/runtime_types';

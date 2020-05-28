@@ -11,12 +11,10 @@ import {
   savedObjectsClientMock,
 } from '../../../../../../../../src/core/server/mocks';
 import { alertsClientMock } from '../../../../../../alerting/server/mocks';
-import { actionsClientMock } from '../../../../../../actions/server/mocks';
 import { licensingMock } from '../../../../../../licensing/server/mocks';
 import { siemMock } from '../../../../mocks';
 
 const createMockClients = () => ({
-  actionsClient: actionsClientMock.create(),
   alertsClient: alertsClientMock.create(),
   clusterClient: elasticsearchServiceMock.createScopedClusterClient(),
   licensing: { license: licensingMock.createLicenseMock() },
@@ -29,11 +27,12 @@ const createRequestContextMock = (
 ) => {
   const coreContext = coreMock.createRequestHandlerContext();
   return ({
-    actions: { getActionsClient: jest.fn(() => clients.actionsClient) },
     alerting: { getAlertsClient: jest.fn(() => clients.alertsClient) },
     core: {
       ...coreContext,
-      elasticsearch: { ...coreContext.elasticsearch, dataClient: clients.clusterClient },
+      elasticsearch: {
+        legacy: { ...coreContext.elasticsearch, client: clients.clusterClient },
+      },
       savedObjects: { client: clients.savedObjectsClient },
     },
     licensing: clients.licensing,

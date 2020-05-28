@@ -6,6 +6,7 @@
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/public';
 
+import { ManagementSectionId } from '../../../../src/plugins/management/public';
 import { PLUGIN } from '../common/constants';
 import { init as initHttp } from './application/services/http';
 import { init as initDocumentation } from './application/services/documentation';
@@ -37,7 +38,7 @@ export class IndexLifecycleManagementPlugin {
       initUiMetric(usageCollection);
       initNotification(toasts, fatalErrors);
 
-      management.sections.getSection('elasticsearch')!.registerApp({
+      management.sections.getSection(ManagementSectionId.Data).registerApp({
         id: PLUGIN.ID,
         title: PLUGIN.TITLE,
         order: 2,

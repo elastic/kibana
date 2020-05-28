@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as Rx from 'rxjs';
 import sinon from 'sinon';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { ReportingConfig } from '../';
 import { createMockReportingCore } from '../../test_helpers';
 import { getExportTypesRegistry } from '../lib/export_types_registry';
+import { ReportingSetupDeps } from '../types';
+import { FeaturesAvailability } from './';
 import {
-  registerReportingUsageCollector,
   getReportingUsageCollector,
+  registerReportingUsageCollector,
 } from './reporting_usage_collector';
-import { ReportingConfig } from '../types';
-import { SearchResponse } from './types';
+import { ReportingUsageType, SearchResponse } from './types';
 
 const exportTypesRegistry = getExportTypesRegistry();
 
@@ -32,30 +36,22 @@ function getMockUsageCollection() {
   };
 }
 
+const getLicenseMock = (licenseType = 'platinum') => () => {
+  return Promise.resolve({
+    isAvailable: () => true,
+    license: { getType: () => licenseType },
+  } as FeaturesAvailability);
+};
+
 function getPluginsMock(
   { license, usageCollection = getMockUsageCollection() } = { license: 'platinum' }
 ) {
-  const mockXpackMain = {
-    info: {
-      isAvailable: sinon.stub().returns(true),
-      feature: () => ({
-        getLicenseCheckResults: sinon.stub(),
-      }),
-      license: {
-        isOneOf: sinon.stub().returns(false),
-        getType: sinon.stub().returns(license),
-      },
-      toJSON: () => ({ b: 1 }),
-    },
-  };
-  return {
+  return ({
+    licensing: { license$: Rx.of(getLicenseMock(license)) },
     usageCollection,
-    __LEGACY: {
-      plugins: {
-        xpack_main: mockXpackMain,
-      },
-    },
-  } as any;
+    elasticsearch: {},
+    security: {},
+  } as unknown) as ReportingSetupDeps & { usageCollection: UsageCollectionSetup };
 }
 
 const getMockReportingConfig = () => ({
@@ -78,7 +74,7 @@ describe('license checks', () => {
       const { fetch } = getReportingUsageCollector(
         mockConfig,
         plugins.usageCollection,
-        plugins.__LEGACY.plugins.xpack_main.info,
+        getLicenseMock('basic'),
         exportTypesRegistry,
         function isReady() {
           return Promise.resolve(true);
@@ -108,7 +104,7 @@ describe('license checks', () => {
       const { fetch } = getReportingUsageCollector(
         mockConfig,
         plugins.usageCollection,
-        plugins.__LEGACY.plugins.xpack_main.info,
+        getLicenseMock('none'),
         exportTypesRegistry,
         function isReady() {
           return Promise.resolve(true);
@@ -138,7 +134,7 @@ describe('license checks', () => {
       const { fetch } = getReportingUsageCollector(
         mockConfig,
         plugins.usageCollection,
-        plugins.__LEGACY.plugins.xpack_main.info,
+        getLicenseMock('platinum'),
         exportTypesRegistry,
         function isReady() {
           return Promise.resolve(true);
@@ -168,7 +164,7 @@ describe('license checks', () => {
       const { fetch } = getReportingUsageCollector(
         mockConfig,
         plugins.usageCollection,
-        plugins.__LEGACY.plugins.xpack_main.info,
+        getLicenseMock('basic'),
         exportTypesRegistry,
         function isReady() {
           return Promise.resolve(true);
@@ -194,7 +190,7 @@ describe('data modeling', () => {
     const { fetch } = getReportingUsageCollector(
       mockConfig,
       plugins.usageCollection,
-      plugins.__LEGACY.plugins.xpack_main.info,
+      getLicenseMock(),
       exportTypesRegistry,
       function isReady() {
         return Promise.resolve(true);
@@ -247,7 +243,7 @@ describe('data modeling', () => {
     const { fetch } = getReportingUsageCollector(
       mockConfig,
       plugins.usageCollection,
-      plugins.__LEGACY.plugins.xpack_main.info,
+      getLicenseMock(),
       exportTypesRegistry,
       function isReady() {
         return Promise.resolve(true);
@@ -300,7 +296,7 @@ describe('data modeling', () => {
     const { fetch } = getReportingUsageCollector(
       mockConfig,
       plugins.usageCollection,
-      plugins.__LEGACY.plugins.xpack_main.info,
+      getLicenseMock(),
       exportTypesRegistry,
       function isReady() {
         return Promise.resolve(true);
@@ -345,6 +341,111 @@ describe('data modeling', () => {
     const usageStats = await fetch(callClusterMock as any);
     expect(usageStats).toMatchSnapshot();
   });
+
+  test('Cast various example data to the TypeScript definition', () => {
+    const check = (obj: ReportingUsageType) => {
+      return typeof obj;
+    };
+
+    // just check that the example objects can be cast to ReportingUsageType
+    check({
+      PNG: { available: true, total: 7 },
+      _all: 21,
+      available: true,
+      browser_type: 'chromium',
+      csv: { available: true, total: 4 },
+      enabled: true,
+      last7Days: {
+        PNG: { available: true, total: 0 },
+        _all: 0,
+        csv: { available: true, total: 0 },
+        printable_pdf: {
+          app: { dashboard: 0, visualization: 0 },
+          available: true,
+          layout: { preserve_layout: 0, print: 0 },
+          total: 0,
+        },
+        status: { completed: 0, failed: 0 },
+        statuses: {},
+      },
+      printable_pdf: {
+        app: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
+        available: true,
+        layout: { preserve_layout: 7, print: 3 },
+        total: 10,
+      },
+      status: { completed: 21, failed: 0 },
+      statuses: {
+        completed: {
+          PNG: { dashboard: 3, visualization: 4 },
+          csv: {},
+          printable_pdf: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
+        },
+      },
+    });
+    check({
+      PNG: { available: true, total: 3 },
+      _all: 4,
+      available: true,
+      browser_type: 'chromium',
+      csv: { available: true, total: 0 },
+      enabled: true,
+      last7Days: {
+        PNG: { available: true, total: 3 },
+        _all: 4,
+        csv: { available: true, total: 0 },
+        printable_pdf: {
+          app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
+          available: true,
+          layout: { preserve_layout: 1, print: 0 },
+          total: 1,
+        },
+        status: { completed: 4, failed: 0 },
+        statuses: {
+          completed: { PNG: { visualization: 3 }, printable_pdf: { 'canvas workpad': 1 } },
+        },
+      },
+      printable_pdf: {
+        app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
+        available: true,
+        layout: { preserve_layout: 1, print: 0 },
+        total: 1,
+      },
+      status: { completed: 4, failed: 0 },
+      statuses: {
+        completed: { PNG: { visualization: 3 }, printable_pdf: { 'canvas workpad': 1 } },
+      },
+    });
+    check({
+      available: true,
+      browser_type: 'chromium',
+      enabled: true,
+      last7Days: {
+        _all: 0,
+        status: { completed: 0, failed: 0 },
+        statuses: {},
+        printable_pdf: {
+          available: true,
+          total: 0,
+          app: { dashboard: 0, visualization: 0 },
+          layout: { preserve_layout: 0, print: 0 },
+        },
+        csv: { available: true, total: 0 },
+        PNG: { available: true, total: 0 },
+      },
+      _all: 0,
+      status: { completed: 0, failed: 0 },
+      statuses: {},
+      printable_pdf: {
+        available: true,
+        total: 0,
+        app: { dashboard: 0, visualization: 0 },
+        layout: { preserve_layout: 0, print: 0 },
+      },
+      csv: { available: true, total: 0 },
+      PNG: { available: true, total: 0 },
+    });
+  });
 });
 
 describe('Ready for collection observable', () => {
@@ -356,7 +457,7 @@ describe('Ready for collection observable', () => {
     const makeCollectorSpy = sinon.spy();
     usageCollection.makeUsageCollector = makeCollectorSpy;
 
-    const plugins = getPluginsMock({ usageCollection } as any);
+    const plugins = getPluginsMock({ usageCollection, license: 'platinum' });
     registerReportingUsageCollector(mockReporting, plugins);
 
     const [args] = makeCollectorSpy.firstCall.args;

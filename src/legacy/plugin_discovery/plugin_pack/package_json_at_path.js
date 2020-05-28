@@ -52,11 +52,11 @@ async function createPackageJsonAtPath(path) {
   };
 }
 
-export const createPackageJsonAtPath$ = path =>
+export const createPackageJsonAtPath$ = (path) =>
   // If plugin directory contains manifest file, we should skip it since it
   // should have been handled by the core plugin system already.
   Rx.defer(() => isNewPlatformPlugin(path)).pipe(
-    mergeMap(isNewPlatformPlugin => (isNewPlatformPlugin ? [] : createPackageJsonAtPath(path))),
-    map(packageJson => ({ packageJson })),
-    catchError(error => [{ error }])
+    mergeMap((isNewPlatformPlugin) => (isNewPlatformPlugin ? [] : createPackageJsonAtPath(path))),
+    map((packageJson) => ({ packageJson })),
+    catchError((error) => [{ error }])
   );

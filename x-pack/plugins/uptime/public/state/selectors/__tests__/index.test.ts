@@ -44,7 +44,6 @@ describe('state selectors', () => {
       basePath: 'yyz',
       esKuery: '',
       integrationsPopoverOpen: null,
-      lastRefresh: 125,
     },
     monitorStatus: {
       status: null,
@@ -97,6 +96,12 @@ describe('state selectors', () => {
     },
     indexStatus: {
       indexStatus: {
+        data: null,
+        loading: false,
+      },
+    },
+    certificates: {
+      certs: {
         data: null,
         loading: false,
       },

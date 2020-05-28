@@ -34,22 +34,20 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
     const siemResponse = buildSiemResponse(response);
 
     const alertsClient = context.alerting?.getAlertsClient();
-    const actionsClient = context.actions?.getActionsClient();
     const savedObjectsClient = context.core.savedObjects.client;
 
-    if (!actionsClient || !alertsClient) {
+    if (!alertsClient) {
       return siemResponse.error({ statusCode: 404 });
     }
 
     const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
 
     const rules = await Promise.all(
-      request.body.map(async payloadRule => {
+      request.body.map(async (payloadRule) => {
         const { id, rule_id: ruleId } = payloadRule;
         const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
         try {
           const rule = await deleteRules({
-            actionsClient,
             alertsClient,
             id,
             ruleId,
@@ -65,7 +63,7 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
               search: rule.id,
               searchFields: ['alertId'],
             });
-            ruleStatuses.saved_objects.forEach(async obj => ruleStatusClient.delete(obj.id));
+            ruleStatuses.saved_objects.forEach(async (obj) => ruleStatusClient.delete(obj.id));
             return transformValidateBulkError(idOrRuleIdOrUnknown, rule, undefined, ruleStatuses);
           } else {
             return getIdBulkError({ id, ruleId });

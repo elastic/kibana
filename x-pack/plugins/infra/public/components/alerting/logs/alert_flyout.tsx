@@ -24,10 +24,13 @@ export const AlertFlyout = (props: Props) => {
       {triggersActionsUI && (
         <AlertsContextProvider
           value={{
-            metadata: {},
+            metadata: {
+              isInternal: true,
+            },
             toastNotifications: services.notifications?.toasts,
             http: services.http,
             docLinks: services.docLinks,
+            capabilities: services.application.capabilities,
             actionTypeRegistry: triggersActionsUI.actionTypeRegistry,
             alertTypeRegistry: triggersActionsUI.alertTypeRegistry,
           }}

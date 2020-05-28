@@ -6,7 +6,13 @@
 import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiLink, EuiButton, EuiInMemoryTableProps } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiLink,
+  EuiButton,
+  EuiInMemoryTableProps,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
 
 import { BASE_PATH } from '../../../../common/constants';
 import { Pipeline } from '../../../../common/types';
@@ -31,16 +37,27 @@ export const PipelineTable: FunctionComponent<Props> = ({
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     itemId: 'name',
     isSelectable: true,
+    'data-test-subj': 'pipelinesTable',
     sorting: { sort: { field: 'name', direction: 'asc' } },
     selection: {
       onSelectionChange: setSelection,
+    },
+    rowProps: () => ({
+      'data-test-subj': 'pipelineTableRow',
+    }),
+    cellProps: (pipeline, column) => {
+      const { field } = column as EuiTableFieldDataColumnType<Pipeline>;
+
+      return {
+        'data-test-subj': `pipelineTableRow-${field}`,
+      };
     },
     search: {
       toolsLeft:
         selection.length > 0 ? (
           <EuiButton
             data-test-subj="deletePipelinesButton"
-            onClick={() => onDeletePipelineClick(selection.map(pipeline => pipeline.name))}
+            onClick={() => onDeletePipelineClick(selection.map((pipeline) => pipeline.name))}
             color="danger"
           >
             <FormattedMessage
@@ -49,9 +66,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
               values={{ count: selection.length }}
             />
           </EuiButton>
-        ) : (
-          undefined
-        ),
+        ) : undefined,
       toolsRight: [
         <EuiButton
           key="reloadButton"
@@ -91,7 +106,11 @@ export const PipelineTable: FunctionComponent<Props> = ({
           defaultMessage: 'Name',
         }),
         sortable: true,
-        render: (name: string) => <EuiLink href={`#${BASE_PATH}?pipeline=${name}`}>{name}</EuiLink>,
+        render: (name: string) => (
+          <EuiLink href={`#${BASE_PATH}?pipeline=${name}`} data-test-subj="pipelineDetailsLink">
+            {name}
+          </EuiLink>
+        ),
       },
       {
         name: (

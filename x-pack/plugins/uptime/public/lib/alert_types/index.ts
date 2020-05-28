@@ -6,7 +6,11 @@
 
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { initMonitorStatusAlertType } from './monitor_status';
+import { initTlsAlertType } from './tls';
 
 export type AlertTypeInitializer = (dependenies: { autocomplete: any }) => AlertTypeModel;
 
-export const alertTypeInitializers: AlertTypeInitializer[] = [initMonitorStatusAlertType];
+export const alertTypeInitializers: AlertTypeInitializer[] = [
+  initMonitorStatusAlertType,
+  initTlsAlertType,
+];

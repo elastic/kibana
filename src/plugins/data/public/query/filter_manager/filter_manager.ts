@@ -53,8 +53,8 @@ export class FilterManager {
     // existing globalFilters should be mutated by appFilters
     // ignore original appFilters which are already inside globalFilters
     const cleanedAppFilters: Filter[] = [];
-    _.each(appFilters, function(filter, i) {
-      const match = _.find(globalFilters, function(globalFilter) {
+    _.each(appFilters, function (filter, i) {
+      const match = _.find(globalFilters, function (globalFilter) {
         return compareFilters(globalFilter, filter);
       });
 
@@ -203,7 +203,7 @@ export class FilterManager {
   }
 
   public removeFilter(filter: Filter) {
-    const filterIndex = _.findIndex(this.filters, item => {
+    const filterIndex = _.findIndex(this.filters, (item) => {
       return _.isEqual(item.meta, filter.meta) && _.isEqual(item.query, filter.query);
     });
 

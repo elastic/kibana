@@ -11,7 +11,6 @@ export interface GetSnapshotPayload {
   dateRangeStart: string;
   dateRangeEnd: string;
   filters?: string;
-  statusFilter?: string;
 }
 
 export const getSnapshotCountAction = createAction<GetSnapshotPayload>('GET_SNAPSHOT_COUNT');

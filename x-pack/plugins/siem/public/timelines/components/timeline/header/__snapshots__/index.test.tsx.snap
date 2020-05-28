@@ -1,0 +1,279 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header rendering renders correctly against snapshot 1`] = `
+<Fragment>
+  <DataProviders
+    browserFields={Object {}}
+    dataProviders={
+      Array [
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 1",
+          "kqlQuery": "",
+          "name": "Provider 1",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 1",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 2",
+          "kqlQuery": "",
+          "name": "Provider 2",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 2",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 3",
+          "kqlQuery": "",
+          "name": "Provider 3",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 3",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 4",
+          "kqlQuery": "",
+          "name": "Provider 4",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 4",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 5",
+          "kqlQuery": "",
+          "name": "Provider 5",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 5",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 6",
+          "kqlQuery": "",
+          "name": "Provider 6",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 6",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 7",
+          "kqlQuery": "",
+          "name": "Provider 7",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 7",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 8",
+          "kqlQuery": "",
+          "name": "Provider 8",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 8",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 9",
+          "kqlQuery": "",
+          "name": "Provider 9",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 9",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 10",
+          "kqlQuery": "",
+          "name": "Provider 10",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 10",
+          },
+        },
+      ]
+    }
+    id="foo"
+    onDataProviderEdited={[MockFunction]}
+    onDataProviderRemoved={[MockFunction]}
+    onToggleDataProviderEnabled={[MockFunction]}
+    onToggleDataProviderExcluded={[MockFunction]}
+  />
+  <Connect(StatefulSearchOrFilterComponent)
+    browserFields={Object {}}
+    filterManager={
+      FilterManager {
+        "fetch$": Subject {
+          "_isScalar": false,
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "filters": Array [],
+        "uiSettings": Object {
+          "get": [MockFunction],
+          "get$": [MockFunction],
+          "getAll": [MockFunction],
+          "getSaved$": [MockFunction],
+          "getUpdate$": [MockFunction],
+          "getUpdateErrors$": [MockFunction],
+          "isCustom": [MockFunction],
+          "isDeclared": [MockFunction],
+          "isDefault": [MockFunction],
+          "isOverridden": [MockFunction],
+          "overrideLocalDefault": [MockFunction],
+          "remove": [MockFunction],
+          "set": [MockFunction],
+        },
+        "updated$": Subject {
+          "_isScalar": false,
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+      }
+    }
+    indexPattern={
+      Object {
+        "fields": Array [
+          Object {
+            "aggregatable": true,
+            "name": "@timestamp",
+            "searchable": true,
+            "type": "date",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "@version",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.ephemeral_id",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.hostname",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.id",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.test1",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.test2",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.test3",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.test4",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.test5",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.test6",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.test7",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.test8",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "host.name",
+            "searchable": true,
+            "type": "string",
+          },
+        ],
+        "title": "filebeat-*,auditbeat-*,packetbeat-*",
+      }
+    }
+    timelineId="foo"
+  />
+</Fragment>
+`;

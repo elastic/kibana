@@ -28,6 +28,7 @@ import TerserPlugin from 'terser-webpack-plugin';
 import webpackMerge from 'webpack-merge';
 // @ts-ignore
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
 import { Bundle, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
@@ -63,7 +64,7 @@ function dynamicExternals(bundle: Bundle, context: string, request: string) {
   // ignore requests that don't include a /{dirname}/public for one of our
   // "static" bundles as a cheap way to avoid doing path resolution
   // for paths that couldn't possibly resolve to what we're looking for
-  const reqToStaticBundle = STATIC_BUNDLE_PLUGINS.some(p =>
+  const reqToStaticBundle = STATIC_BUNDLE_PLUGINS.some((p) =>
     request.includes(`/${p.dirname}/public`)
   );
   if (!reqToStaticBundle) {
@@ -99,7 +100,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
     output: {
       path: bundle.outputDir,
       filename: `[name].${bundle.type}.js`,
-      devtoolModuleFilenameTemplate: info =>
+      devtoolModuleFilenameTemplate: (info) =>
         `/${bundle.type}:${bundle.id}/${Path.relative(
           bundle.sourceRoot,
           info.absoluteResourcePath
@@ -120,7 +121,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
 
     externals: [
       UiSharedDeps.externals,
-      function(context, request, cb) {
+      function (context, request, cb) {
         try {
           cb(undefined, dynamicExternals(bundle, context, request));
         } catch (error) {
@@ -136,9 +137,9 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
       // or which have require() statements that should be ignored because the file is
       // already bundled with all its necessary depedencies
       noParse: [
-        /[\///]node_modules[\///]elasticsearch-browser[\///]/,
-        /[\///]node_modules[\///]lodash[\///]index\.js$/,
-        /[\///]node_modules[\///]vega-lib[\///]build[\///]vega\.js$/,
+        /[\/\\]node_modules[\/\\]elasticsearch-browser[\/\\]/,
+        /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
+        /[\/\\]node_modules[\/\\]vega-lib[\/\\]build[\/\\]vega\.js$/,
       ],
 
       rules: [
@@ -318,6 +319,16 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
         'process.env': {
           IS_KIBANA_DISTRIBUTABLE: `"true"`,
         },
+      }),
+      new CompressionPlugin({
+        algorithm: 'brotliCompress',
+        filename: '[path].br',
+        test: /\.(js|css)$/,
+      }),
+      new CompressionPlugin({
+        algorithm: 'gzip',
+        filename: '[path].gz',
+        test: /\.(js|css)$/,
       }),
     ],
 

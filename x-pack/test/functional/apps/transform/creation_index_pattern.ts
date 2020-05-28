@@ -13,11 +13,11 @@ interface GroupByEntry {
   intervalLabel?: string;
 }
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('creation_index_pattern', function() {
+  describe('creation_index_pattern', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
@@ -58,6 +58,7 @@ export default function({ getService }: FtrProviderContext) {
           return `user-${this.transformId}`;
         },
         expected: {
+          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category.keyword": {'],
           pivotAdvancedEditorValue: {
             group_by: {
               'category.keyword': {
@@ -117,6 +118,7 @@ export default function({ getService }: FtrProviderContext) {
           return `user-${this.transformId}`;
         },
         expected: {
+          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "geoip.country_iso_code": {'],
           pivotAdvancedEditorValue: {
             group_by: {
               'geoip.country_iso_code': {
@@ -152,7 +154,7 @@ export default function({ getService }: FtrProviderContext) {
     ];
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function() {
+      describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
           await transform.testResources.deleteIndexPattern(testData.destinationIndex);
@@ -233,7 +235,7 @@ export default function({ getService }: FtrProviderContext) {
         it('displays the advanced configuration', async () => {
           await transform.wizard.enabledAdvancedPivotEditor();
           await transform.wizard.assertAdvancedPivotEditorContent(
-            testData.expected.pivotAdvancedEditorValue
+            testData.expected.pivotAdvancedEditorValueArr
           );
         });
 
@@ -320,7 +322,7 @@ export default function({ getService }: FtrProviderContext) {
           await transform.table.refreshTransformList();
           await transform.table.filterWithSearchString(testData.transformId);
           const rows = await transform.table.parseTransformTable();
-          expect(rows.filter(row => row.id === testData.transformId)).to.have.length(1);
+          expect(rows.filter((row) => row.id === testData.transformId)).to.have.length(1);
         });
 
         it('job creation displays details for the created job in the job list', async () => {

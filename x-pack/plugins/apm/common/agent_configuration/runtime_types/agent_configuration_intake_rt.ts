@@ -6,11 +6,11 @@
 
 import * as t from 'io-ts';
 import { settingDefinitions } from '../setting_definitions';
+import { SettingValidation } from '../setting_definitions/types';
 
 // retrieve validation from config definitions settings and validate on the server
 const knownSettings = settingDefinitions.reduce<
-  // TODO: is it possible to get rid of any?
-  Record<string, t.Type<any, string, unknown>>
+  Record<string, SettingValidation>
 >((acc, { key, validation }) => {
   acc[key] = validation;
   return acc;
@@ -18,18 +18,18 @@ const knownSettings = settingDefinitions.reduce<
 
 export const serviceRt = t.partial({
   name: t.string,
-  environment: t.string
+  environment: t.string,
 });
 
 export const settingsRt = t.intersection([
   t.record(t.string, t.string),
-  t.partial(knownSettings)
+  t.partial(knownSettings),
 ]);
 
 export const agentConfigurationIntakeRt = t.intersection([
   t.partial({ agent_name: t.string }),
   t.type({
     service: serviceRt,
-    settings: settingsRt
-  })
+    settings: settingsRt,
+  }),
 ]);

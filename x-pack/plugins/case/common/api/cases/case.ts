@@ -11,11 +11,13 @@ import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt } from './status';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { ActionTypeExecutorResult } from '../../../../actions/server/types';
 
 const StatusRt = rt.union([rt.literal('open'), rt.literal('closed')]);
 
 const CaseBasicRt = rt.type({
+  connector_id: rt.string,
   description: rt.string,
   status: StatusRt,
   tags: rt.array(rt.string),

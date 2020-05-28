@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -23,6 +23,7 @@ import {
   EuiIconTip,
   EuiButtonIcon,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -36,7 +37,7 @@ import { AlertReducerAction } from './alert_reducer';
 import { AlertTypeModel, Alert, IErrorObject, AlertAction, AlertTypeIndex } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { useAlertsContext } from '../../context/alerts_context';
-import { ActionForm } from '../action_connector_form/action_form';
+import { ActionForm } from '../action_connector_form';
 
 export function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
@@ -87,7 +88,14 @@ export const AlertForm = ({
   setHasActionsDisabled,
 }: AlertFormProps) => {
   const alertsContext = useAlertsContext();
-  const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = alertsContext;
+  const {
+    http,
+    toastNotifications,
+    alertTypeRegistry,
+    actionTypeRegistry,
+    docLinks,
+    capabilities,
+  } = alertsContext;
 
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
     alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null
@@ -159,7 +167,21 @@ export const AlertForm = ({
     ? alertTypeModel.alertParamsExpression
     : null;
 
-  const alertTypeNodes = alertTypeRegistry.list().map(function(item, index) {
+  const alertTypeRegistryList =
+    alert.consumer === 'alerting'
+      ? alertTypeRegistry
+          .list()
+          .filter(
+            (alertTypeRegistryItem: AlertTypeModel) => !alertTypeRegistryItem.requiresAppContext
+          )
+      : alertTypeRegistry
+          .list()
+          .filter(
+            (alertTypeRegistryItem: AlertTypeModel) =>
+              alertTypesIndex &&
+              alertTypesIndex[alertTypeRegistryItem.id].producer === alert.consumer
+          );
+  const alertTypeNodes = alertTypeRegistryList.map(function (item, index) {
     return (
       <EuiKeyPadMenuItem
         key={index}
@@ -215,14 +237,24 @@ export const AlertForm = ({
         ) : null}
       </EuiFlexGroup>
       {AlertParamsExpressionComponent ? (
-        <AlertParamsExpressionComponent
-          alertParams={alert.params}
-          alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
-          errors={errors}
-          setAlertParams={setAlertParams}
-          setAlertProperty={setAlertProperty}
-          alertsContext={alertsContext}
-        />
+        <Suspense
+          fallback={
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          <AlertParamsExpressionComponent
+            alertParams={alert.params}
+            alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
+            errors={errors}
+            setAlertParams={setAlertParams}
+            setAlertProperty={setAlertProperty}
+            alertsContext={alertsContext}
+          />
+        </Suspense>
       ) : null}
       {defaultActionGroupId ? (
         <ActionForm
@@ -230,7 +262,9 @@ export const AlertForm = ({
           setHasActionsDisabled={setHasActionsDisabled}
           messageVariables={
             alertTypesIndex && alertTypesIndex[alert.alertTypeId]
-              ? actionVariablesFromAlertType(alertTypesIndex[alert.alertTypeId]).map(av => av.name)
+              ? actionVariablesFromAlertType(alertTypesIndex[alert.alertTypeId]).map(
+                  (av) => av.name
+                )
               : undefined
           }
           defaultActionGroupId={defaultActionGroupId}
@@ -245,6 +279,8 @@ export const AlertForm = ({
           actionTypeRegistry={actionTypeRegistry}
           defaultActionMessage={alertTypeModel?.defaultActionMessage}
           toastNotifications={toastNotifications}
+          docLinks={docLinks}
+          capabilities={capabilities}
         />
       ) : null}
     </Fragment>
@@ -306,7 +342,7 @@ export const AlertForm = ({
               name="name"
               data-test-subj="alertNameInput"
               value={alert.name || ''}
-              onChange={e => {
+              onChange={(e) => {
                 setAlertProperty('name', e.target.value);
               }}
               onBlur={() => {
@@ -337,13 +373,13 @@ export const AlertForm = ({
                 const newOptions = [...tagsOptions, { label: searchValue }];
                 setAlertProperty(
                   'tags',
-                  newOptions.map(newOption => newOption.label)
+                  newOptions.map((newOption) => newOption.label)
                 );
               }}
               onChange={(selectedOptions: Array<{ label: string }>) => {
                 setAlertProperty(
                   'tags',
-                  selectedOptions.map(selectedOption => selectedOption.label)
+                  selectedOptions.map((selectedOption) => selectedOption.label)
                 );
               }}
               onBlur={() => {
@@ -375,7 +411,7 @@ export const AlertForm = ({
                   value={alertInterval || ''}
                   name="interval"
                   data-test-subj="intervalInput"
-                  onChange={e => {
+                  onChange={(e) => {
                     const interval =
                       e.target.value !== '' ? parseInt(e.target.value, 10) : undefined;
                     setAlertInterval(interval);
@@ -389,7 +425,7 @@ export const AlertForm = ({
                   compressed
                   value={alertIntervalUnit}
                   options={getTimeOptions(alertInterval ?? 1)}
-                  onChange={e => {
+                  onChange={(e) => {
                     setAlertIntervalUnit(e.target.value);
                     setScheduleProperty('interval', `${alertInterval}${e.target.value}`);
                   }}
@@ -409,19 +445,19 @@ export const AlertForm = ({
                   value={alertThrottle || ''}
                   name="throttle"
                   data-test-subj="throttleInput"
-                  onChange={e => {
+                  onChange={(e) => {
                     pipe(
                       some(e.target.value.trim()),
-                      filter(value => value !== ''),
-                      map(value => parseInt(value, 10)),
-                      filter(value => !isNaN(value)),
+                      filter((value) => value !== ''),
+                      map((value) => parseInt(value, 10)),
+                      filter((value) => !isNaN(value)),
                       fold(
                         () => {
                           // unset throttle
                           setAlertThrottle(null);
                           setAlertProperty('throttle', null);
                         },
-                        throttle => {
+                        (throttle) => {
                           setAlertThrottle(throttle);
                           setAlertProperty('throttle', `${throttle}${alertThrottleUnit}`);
                         }
@@ -435,7 +471,7 @@ export const AlertForm = ({
                   compressed
                   value={alertThrottleUnit}
                   options={getTimeOptions(alertThrottle ?? 1)}
-                  onChange={e => {
+                  onChange={(e) => {
                     setAlertThrottleUnit(e.target.value);
                     if (alertThrottle) {
                       setAlertProperty('throttle', `${alertThrottle}${e.target.value}`);

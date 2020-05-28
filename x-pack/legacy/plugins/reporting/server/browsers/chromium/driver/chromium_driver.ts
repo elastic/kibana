@@ -7,18 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import { map, trunc } from 'lodash';
 import open from 'opn';
-import { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
+import { ElementHandle, EvaluateFn, Page, Response, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
 import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
-import { LevelLogger } from '../../../../server/lib';
-import {
-  ConditionalHeaders,
-  ConditionalHeadersConditions,
-  ElementPosition,
-  InterceptedRequest,
-  NetworkPolicy,
-} from '../../../../types';
-import { allowRequest } from '../../network_policy';
+import { LevelLogger } from '../../../lib';
+import { ConditionalHeaders, ElementPosition } from '../../../types';
+import { allowRequest, NetworkPolicy } from '../../network_policy';
 
 export interface ChromiumDriverOptions {
   inspect: boolean;
@@ -38,12 +32,32 @@ interface EvaluateMetaOpts {
   context: string;
 }
 
+type ConditionalHeadersConditions = ConditionalHeaders['conditions'];
+
+interface InterceptedRequest {
+  requestId: string;
+  request: {
+    url: string;
+    method: string;
+    headers: {
+      [key: string]: string;
+    };
+    initialPriority: string;
+    referrerPolicy: string;
+  };
+  frameId: string;
+  resourceType: string;
+}
+
 const WAIT_FOR_DELAY_MS: number = 100;
 
 export class HeadlessChromiumDriver {
   private readonly page: Page;
   private readonly inspect: boolean;
   private readonly networkPolicy: NetworkPolicy;
+
+  private listenersAttached = false;
+  private interceptedCount = 0;
 
   constructor(page: Page, { inspect, networkPolicy }: ChromiumDriverOptions) {
     this.page = page;
@@ -76,103 +90,13 @@ export class HeadlessChromiumDriver {
     logger: LevelLogger
   ): Promise<void> {
     logger.info(`opening url ${url}`);
-    // @ts-ignore
-    const client = this.page._client;
-    let interceptedCount = 0;
+
+    // Reset intercepted request count
+    this.interceptedCount = 0;
 
     await this.page.setRequestInterception(true);
 
-    // We have to reach into the Chrome Devtools Protocol to apply headers as using
-    // puppeteer's API will cause map tile requests to hang indefinitely:
-    //    https://github.com/puppeteer/puppeteer/issues/5003
-    // Docs on this client/protocol can be found here:
-    //    https://chromedevtools.github.io/devtools-protocol/tot/Fetch
-    client.on('Fetch.requestPaused', async (interceptedRequest: InterceptedRequest) => {
-      const {
-        requestId,
-        request: { url: interceptedUrl },
-      } = interceptedRequest;
-      const allowed = !interceptedUrl.startsWith('file://');
-      const isData = interceptedUrl.startsWith('data:');
-
-      // We should never ever let file protocol requests go through
-      if (!allowed || !this.allowRequest(interceptedUrl)) {
-        logger.error(`Got bad URL: "${interceptedUrl}", closing browser.`);
-        await client.send('Fetch.failRequest', {
-          errorReason: 'Aborted',
-          requestId,
-        });
-        this.page.browser().close();
-        throw new Error(
-          i18n.translate('xpack.reporting.chromiumDriver.disallowedOutgoingUrl', {
-            defaultMessage: `Received disallowed outgoing URL: "{interceptedUrl}", exiting`,
-            values: { interceptedUrl },
-          })
-        );
-      }
-
-      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
-        logger.debug(`Using custom headers for ${interceptedUrl}`);
-        const headers = map(
-          {
-            ...interceptedRequest.request.headers,
-            ...conditionalHeaders.headers,
-          },
-          (value, name) => ({
-            name,
-            value,
-          })
-        );
-
-        try {
-          await client.send('Fetch.continueRequest', {
-            requestId,
-            headers,
-          });
-        } catch (err) {
-          logger.error(
-            i18n.translate('xpack.reporting.chromiumDriver.failedToCompleteRequestUsingHeaders', {
-              defaultMessage: 'Failed to complete a request using headers: {error}',
-              values: { error: err },
-            })
-          );
-        }
-      } else {
-        const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
-        logger.debug(`No custom headers for ${loggedUrl}`);
-        try {
-          await client.send('Fetch.continueRequest', { requestId });
-        } catch (err) {
-          logger.error(
-            i18n.translate('xpack.reporting.chromiumDriver.failedToCompleteRequest', {
-              defaultMessage: 'Failed to complete a request: {error}',
-              values: { error: err },
-            })
-          );
-        }
-      }
-      interceptedCount = interceptedCount + (isData ? 0 : 1);
-    });
-
-    // Even though 3xx redirects go through our request
-    // handler, we should probably inspect responses just to
-    // avoid being bamboozled by some malicious request
-    this.page.on('response', interceptedResponse => {
-      const interceptedUrl = interceptedResponse.url();
-      const allowed = !interceptedUrl.startsWith('file://');
-
-      if (!interceptedResponse.ok()) {
-        logger.warn(
-          `Chromium received a non-OK response (${interceptedResponse.status()}) for request ${interceptedUrl}`
-        );
-      }
-
-      if (!allowed || !this.allowRequest(interceptedUrl)) {
-        logger.error(`Got disallowed URL "${interceptedUrl}", closing browser.`);
-        this.page.browser().close();
-        throw new Error(`Received disallowed URL in response: ${interceptedUrl}`);
-      }
-    });
+    this.registerListeners(conditionalHeaders, logger);
 
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
 
@@ -186,7 +110,7 @@ export class HeadlessChromiumDriver {
       { context: 'waiting for page load selector' },
       logger
     );
-    logger.info(`handled ${interceptedCount} page requests`);
+    logger.info(`handled ${this.interceptedCount} page requests`);
   }
 
   public async screenshot(elementPosition: ElementPosition): Promise<string> {
@@ -254,7 +178,7 @@ export class HeadlessChromiumDriver {
           `Timed out waiting for the items selected to equal ${toEqual}. Found: ${result}. Context: ${context.context}`
         );
       }
-      await new Promise(r => setTimeout(r, WAIT_FOR_DELAY_MS));
+      await new Promise((r) => setTimeout(r, WAIT_FOR_DELAY_MS));
     }
   }
 
@@ -270,6 +194,111 @@ export class HeadlessChromiumDriver {
       deviceScaleFactor: zoom,
       isMobile: false,
     });
+  }
+
+  private registerListeners(conditionalHeaders: ConditionalHeaders, logger: LevelLogger) {
+    if (this.listenersAttached) {
+      return;
+    }
+
+    // @ts-ignore
+    const client = this.page._client;
+
+    // We have to reach into the Chrome Devtools Protocol to apply headers as using
+    // puppeteer's API will cause map tile requests to hang indefinitely:
+    //    https://github.com/puppeteer/puppeteer/issues/5003
+    // Docs on this client/protocol can be found here:
+    //    https://chromedevtools.github.io/devtools-protocol/tot/Fetch
+    client.on('Fetch.requestPaused', async (interceptedRequest: InterceptedRequest) => {
+      const {
+        requestId,
+        request: { url: interceptedUrl },
+      } = interceptedRequest;
+
+      const allowed = !interceptedUrl.startsWith('file://');
+      const isData = interceptedUrl.startsWith('data:');
+
+      // We should never ever let file protocol requests go through
+      if (!allowed || !this.allowRequest(interceptedUrl)) {
+        logger.error(`Got bad URL: "${interceptedUrl}", closing browser.`);
+        await client.send('Fetch.failRequest', {
+          errorReason: 'Aborted',
+          requestId,
+        });
+        this.page.browser().close();
+        throw new Error(
+          i18n.translate('xpack.reporting.chromiumDriver.disallowedOutgoingUrl', {
+            defaultMessage: `Received disallowed outgoing URL: "{interceptedUrl}", exiting`,
+            values: { interceptedUrl },
+          })
+        );
+      }
+
+      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
+        logger.debug(`Using custom headers for ${interceptedUrl}`);
+        const headers = map(
+          {
+            ...interceptedRequest.request.headers,
+            ...conditionalHeaders.headers,
+          },
+          (value, name) => ({
+            name,
+            value,
+          })
+        );
+
+        try {
+          await client.send('Fetch.continueRequest', {
+            requestId,
+            headers,
+          });
+        } catch (err) {
+          logger.error(
+            i18n.translate('xpack.reporting.chromiumDriver.failedToCompleteRequestUsingHeaders', {
+              defaultMessage: 'Failed to complete a request using headers: {error}',
+              values: { error: err },
+            })
+          );
+        }
+      } else {
+        const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
+        logger.debug(`No custom headers for ${loggedUrl}`);
+        try {
+          await client.send('Fetch.continueRequest', { requestId });
+        } catch (err) {
+          logger.error(
+            i18n.translate('xpack.reporting.chromiumDriver.failedToCompleteRequest', {
+              defaultMessage: 'Failed to complete a request: {error}',
+              values: { error: err },
+            })
+          );
+        }
+      }
+
+      this.interceptedCount = this.interceptedCount + (isData ? 0 : 1);
+    });
+
+    // Even though 3xx redirects go through our request
+    // handler, we should probably inspect responses just to
+    // avoid being bamboozled by some malicious request
+    this.page.on('response', (interceptedResponse: Response) => {
+      const interceptedUrl = interceptedResponse.url();
+      const allowed = !interceptedUrl.startsWith('file://');
+
+      if (!interceptedResponse.ok()) {
+        logger.warn(
+          `Chromium received a non-OK response (${interceptedResponse.status()}) for request ${interceptedUrl}`
+        );
+      }
+
+      if (!allowed || !this.allowRequest(interceptedUrl)) {
+        logger.error(`Got disallowed URL "${interceptedUrl}", closing browser.`);
+        this.page.browser().close();
+        throw new Error(`Received disallowed URL in response: ${interceptedUrl}`);
+      }
+    });
+
+    this.listenersAttached = true;
   }
 
   private async launchDebugger() {

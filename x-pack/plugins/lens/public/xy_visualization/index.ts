@@ -5,24 +5,18 @@
  */
 
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import { CoreSetup, IUiSettingsClient, CoreStart } from 'kibana/public';
+import { CoreSetup, IUiSettingsClient } from 'kibana/public';
 import moment from 'moment-timezone';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import { xyVisualization } from './xy_visualization';
 import { xyChart, getXyChartRenderer } from './xy_expression';
 import { legendConfig, xConfig, layerConfig } from './types';
 import { EditorFrameSetup, FormatFactory } from '../types';
-import { setExecuteTriggerActions } from '../services';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
   formatFactory: Promise<FormatFactory>;
   editorFrame: EditorFrameSetup;
-}
-
-interface XyVisualizationPluginStartPlugins {
-  uiActions: UiActionsStart;
 }
 
 function getTimeZone(uiSettings: IUiSettingsClient) {
@@ -58,8 +52,5 @@ export class XyVisualization {
     );
 
     editorFrame.registerVisualization(xyVisualization);
-  }
-  start(core: CoreStart, { uiActions }: XyVisualizationPluginStartPlugins) {
-    setExecuteTriggerActions(uiActions.executeTriggerActions);
   }
 }

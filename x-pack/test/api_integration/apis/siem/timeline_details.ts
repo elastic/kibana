@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 
-import { timelineDetailsQuery } from '../../../../plugins/siem/public/containers/timeline/details/index.gql_query';
+import { timelineDetailsQuery } from '../../../../plugins/siem/public/timelines/containers/details/index.gql_query';
 import { DetailItem, GetTimelineDetailsQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -294,7 +294,7 @@ const EXPECTED_DATA: DetailItem[] = [
   { field: '_score', values: ['1'], originalValue: 1 },
 ];
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -313,11 +313,11 @@ export default function({ getService }: FtrProviderContext) {
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           },
         })
-        .then(resp => {
+        .then((resp) => {
           const detailsData: DetailsData = (resp.data.source.TimelineDetails.data ||
             []) as DetailsData;
           expect(
-            sortBy(detailsData, 'name').map(item => {
+            sortBy(detailsData, 'name').map((item) => {
               const { __typename, ...rest } = item;
               return rest;
             })

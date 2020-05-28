@@ -9,16 +9,12 @@ export {
   XJsonMode,
   collapseLiteralStrings,
   expandLiteralStrings,
+  UseRequestConfig,
+  useRequest,
 } from '../../../../src/plugins/es_ui_shared/public';
 
 export {
-  UseRequestConfig,
-  useRequest,
-} from '../../../../src/plugins/es_ui_shared/public/request/np_ready_request';
-
-export { getErrorMessage } from '../../ml/common/util/errors';
-
-export {
+  getErrorMessage,
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   multiColumnSortFactory,
@@ -30,5 +26,5 @@ export {
   SearchResponse7,
   UseDataGridReturnType,
   UseIndexDataReturnType,
-} from '../../ml/public/application/components/data_grid';
-export { INDEX_STATUS } from '../../ml/public/application/data_frame_analytics/common';
+  INDEX_STATUS,
+} from '../../ml/public';

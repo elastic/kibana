@@ -12,12 +12,12 @@ import {
   EuiLink,
   EuiPanel,
   EuiText,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { fontSize, pct, px, units } from '../../../style/variables';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
@@ -26,12 +26,12 @@ import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink'
 export const APMIndicesPermission: React.FC = ({ children }) => {
   const [
     isPermissionWarningDismissed,
-    setIsPermissionWarningDismissed
+    setIsPermissionWarningDismissed,
   ] = useState(false);
 
-  const { data: indicesPrivileges = {}, status } = useFetcher(callApmApi => {
+  const { data: indicesPrivileges, status } = useFetcher((callApmApi) => {
     return callApmApi({
-      pathname: '/api/apm/security/indices_privileges'
+      pathname: '/api/apm/security/indices_privileges',
     });
   }, []);
 
@@ -40,13 +40,17 @@ export const APMIndicesPermission: React.FC = ({ children }) => {
     return null;
   }
 
-  const indicesWithoutPermission = Object.keys(indicesPrivileges).filter(
-    index => !indicesPrivileges[index].read
-  );
-
   // Show permission warning when a user has at least one index without Read privilege,
-  // and he has not manually dismissed the warning
-  if (!isEmpty(indicesWithoutPermission) && !isPermissionWarningDismissed) {
+  // and they have not manually dismissed the warning
+  if (
+    indicesPrivileges &&
+    !indicesPrivileges.has_all_requested &&
+    !isEmpty(indicesPrivileges.index) &&
+    !isPermissionWarningDismissed
+  ) {
+    const indicesWithoutPermission = Object.keys(
+      indicesPrivileges.index
+    ).filter((index) => !indicesPrivileges.index[index].read);
     return (
       <PermissionWarning
         indicesWithoutPermission={indicesWithoutPermission}
@@ -79,7 +83,7 @@ interface Props {
 
 const PermissionWarning = ({
   indicesWithoutPermission,
-  onEscapeHatchClick
+  onEscapeHatchClick,
 }: Props) => {
   return (
     <div style={{ height: pct(95) }}>
@@ -88,7 +92,7 @@ const PermissionWarning = ({
           <EuiTitle size="l">
             <h1>
               {i18n.translate('xpack.apm.permission.apm', {
-                defaultMessage: 'APM'
+                defaultMessage: 'APM',
               })}
             </h1>
           </EuiTitle>
@@ -106,7 +110,7 @@ const PermissionWarning = ({
               title={
                 <h2>
                   {i18n.translate('xpack.apm.permission.title', {
-                    defaultMessage: 'Missing permissions to access APM'
+                    defaultMessage: 'Missing permissions to access APM',
                   })}
                 </h2>
               }
@@ -115,11 +119,11 @@ const PermissionWarning = ({
                   <p>
                     {i18n.translate('xpack.apm.permission.description', {
                       defaultMessage:
-                        "Your user doesn't have access to all APM indices. You can still use the APM app but some data may be missing. You must be granted access to the following indices:"
+                        "Your user doesn't have access to all APM indices. You can still use the APM app but some data may be missing. You must be granted access to the following indices:",
                     })}
                   </p>
                   <ul style={{ listStyleType: 'none' }}>
-                    {indicesWithoutPermission.map(index => (
+                    {indicesWithoutPermission.map((index) => (
                       <li key={index} style={{ marginTop: units.half }}>
                         <EuiText size="s">{index}</EuiText>
                       </li>
@@ -136,7 +140,7 @@ const PermissionWarning = ({
                     {(href: string) => (
                       <EuiButton color="primary" fill href={href}>
                         {i18n.translate('xpack.apm.permission.learnMore', {
-                          defaultMessage: 'Learn more about APM permissions'
+                          defaultMessage: 'Learn more about APM permissions',
                         })}
                       </EuiButton>
                     )}
@@ -148,7 +152,7 @@ const PermissionWarning = ({
                       style={{ fontSize }}
                     >
                       {i18n.translate('xpack.apm.permission.dismissWarning', {
-                        defaultMessage: 'Dismiss'
+                        defaultMessage: 'Dismiss',
                       })}
                     </EuiLink>
                   </EscapeHatch>

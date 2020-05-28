@@ -4,7 +4,6 @@
   "kibanaVersion": "kibana",
   "requiredPlugins": [
     "features",
-    "apm",
     "usageCollection",
     "spaces",
     "home",

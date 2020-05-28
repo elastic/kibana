@@ -36,7 +36,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
   class DiscoverPage {
     public async getChartTimespan() {
-      const el = await find.byCssSelector('.small > label[for="dscResultsIntervalSelector"]');
+      const el = await find.byCssSelector('[data-test-subj="discoverIntervalDateRange"]');
       return await el.getVisibleText();
     }
 
@@ -129,6 +129,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await testSubjects.click('discoverOpenButton');
     }
 
+    public async clickResetSavedSearchButton() {
+      await testSubjects.moveMouseTo('resetSavedSearch');
+      await testSubjects.click('resetSavedSearch');
+      await header.waitUntilLoadingHasFinished();
+    }
+
     public async closeLoadSavedSearchPanel() {
       await testSubjects.click('euiFlyoutCloseButton');
     }
@@ -136,11 +142,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async clickHistogramBar() {
       const el = await elasticChart.getCanvas();
 
-      await browser
-        .getActions()
-        .move({ x: 0, y: 20, origin: el._webElement })
-        .click()
-        .perform();
+      await browser.getActions().move({ x: 0, y: 20, origin: el._webElement }).click().perform();
     }
 
     public async brushHistogram() {
@@ -162,9 +164,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return selectedOption.getVisibleText();
     }
 
-    public async getChartIntervalScaledToDesc() {
+    public async getChartIntervalWarningIcon() {
       await header.waitUntilLoadingHasFinished();
-      return await testSubjects.getVisibleText('discoverIntervalSelectScaledToDesc');
+      return await find.existsByCssSelector('.euiToolTipAnchor');
     }
 
     public async setChartInterval(interval: string) {
@@ -208,7 +210,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       const $ = await table.parseDomContent();
       return $('mark')
         .toArray()
-        .map(mark => $(mark).text());
+        .map((mark) => $(mark).text());
     }
 
     public async toggleSidebarCollapse() {
@@ -220,11 +222,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       const $ = await sidebar.parseDomContent();
       return $('.dscSidebar__item[attr-field]')
         .toArray()
-        .map(field =>
-          $(field)
-            .find('span.eui-textTruncate')
-            .text()
-        );
+        .map((field) => $(field).find('span.eui-textTruncate').text());
     }
 
     public async getSidebarWidth() {

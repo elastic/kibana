@@ -3,26 +3,28 @@
 # For more info, see https://help.github.com/articles/about-codeowners/
 
 # App
+/x-pack/plugins/dashboard_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
 /x-pack/plugins/graph/ @elastic/kibana-app
 /src/legacy/server/url_shortening/ @elastic/kibana-app
 /src/legacy/server/sample_data/ @elastic/kibana-app
-/src/legacy/core_plugins/kibana/public/dashboard/ @elastic/kibana-app
-/src/legacy/core_plugins/kibana/public/discover/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
-/src/plugins/vis_type_vislib/ @elastic/kibana-app
-/src/plugins/vis_type_xy/ @elastic/kibana-app
-/src/plugins/vis_type_table/ @elastic/kibana-app
-/src/plugins/kibana_legacy/ @elastic/kibana-app
-/src/plugins/vis_type_timelion/ @elastic/kibana-app
 /src/plugins/dashboard/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
 /src/plugins/input_control_vis/ @elastic/kibana-app
-/src/plugins/visualize/ @elastic/kibana-app
-/src/plugins/vis_type_timeseries/ @elastic/kibana-app
-/src/plugins/vis_type_metric/ @elastic/kibana-app
+/src/plugins/kibana_legacy/ @elastic/kibana-app
+/src/plugins/vis_default_editor/ @elastic/kibana-app
 /src/plugins/vis_type_markdown/ @elastic/kibana-app
+/src/plugins/vis_type_metric/ @elastic/kibana-app
+/src/plugins/vis_type_table/ @elastic/kibana-app
+/src/plugins/vis_type_tagcloud/ @elastic/kibana-app
+/src/plugins/vis_type_timelion/ @elastic/kibana-app
+/src/plugins/vis_type_timeseries/ @elastic/kibana-app
+/src/plugins/vis_type_vega/ @elastic/kibana-app
+/src/plugins/vis_type_vislib/ @elastic/kibana-app
+/src/plugins/vis_type_xy/ @elastic/kibana-app
+/src/plugins/visualize/ @elastic/kibana-app
 
 # Core UI
 # Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
@@ -64,7 +66,7 @@
 /x-pack/plugins/drilldowns/ @elastic/kibana-app-arch
 
 # APM
-/x-pack/legacy/plugins/apm/  @elastic/apm-ui
+/x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
 /src/legacy/core_plugins/apm_oss/  @elastic/apm-ui
@@ -75,7 +77,8 @@
 /x-pack/legacy/plugins/beats_management/  @elastic/beats
 
 # Canvas
-/x-pack/legacy/plugins/canvas/  @elastic/kibana-canvas
+/x-pack/plugins/canvas/  @elastic/kibana-canvas
+/x-pack/test/functional/apps/canvas/  @elastic/kibana-canvas
 
 # Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
@@ -125,12 +128,21 @@
 /src/legacy/server/sass/ @elastic/kibana-operations
 /src/legacy/server/utils/ @elastic/kibana-operations
 /src/legacy/server/warnings/ @elastic/kibana-operations
+/.ci/es-snapshots/ @elastic/kibana-operations
+/vars/ @elastic/kibana-operations
+
+# Quality Assurance
+/src/dev/code_coverage @elastic/kibana-qa
+/test/functional/services/common @elastic/kibana-qa
+/test/functional/services/lib @elastic/kibana-qa
+/test/functional/services/remote @elastic/kibana-qa
 
 # Platform
 /src/core/  @elastic/kibana-platform
 /config/kibana.yml @elastic/kibana-platform
 /x-pack/plugins/features/  @elastic/kibana-platform
 /x-pack/plugins/licensing/  @elastic/kibana-platform
+/x-pack/plugins/cloud/ @elastic/kibana-platform
 /packages/kbn-config-schema/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
 /src/legacy/server/http/ @elastic/kibana-platform
@@ -159,7 +171,8 @@
 
 # Pulse
 /packages/kbn-analytics/ @elastic/pulse
-/src/legacy/core_plugins/ui_metric/ @elastic/pulse
+/src/plugins/kibana_usage_collection/ @elastic/pulse
+/src/plugins/newsfeed/ @elastic/pulse
 /src/plugins/telemetry/ @elastic/pulse
 /src/plugins/telemetry_collection_manager/ @elastic/pulse
 /src/plugins/telemetry_management_section/ @elastic/pulse

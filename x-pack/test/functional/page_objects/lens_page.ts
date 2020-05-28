@@ -63,7 +63,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       let actualText: string | undefined;
 
       await retry.waitForWithTimeout('assertExpectedText', 1000, async () => {
-        actualText = await find.byCssSelector(selector).then(el => el.getVisibleText());
+        actualText = await find.byCssSelector(selector).then((el) => el.getVisibleText());
         return test(actualText);
       });
 
@@ -79,7 +79,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param expectedText - the expected text
      */
     assertExactText(selector: string, expectedText: string) {
-      return this.assertExpectedText(selector, value => value === expectedText);
+      return this.assertExpectedText(selector, (value) => value === expectedText);
     },
 
     /**
@@ -133,16 +133,34 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Save the current Lens visualization.
      */
-    async save(title: string) {
+    async save(title: string, saveAsNew?: boolean, redirectToOrigin?: boolean) {
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
       await testSubjects.setValue('savedObjectTitle', title);
+
+      const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
+      if (saveAsNewCheckboxExists) {
+        const state = saveAsNew ? 'check' : 'uncheck';
+        await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
+      }
+
+      const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
+      if (redirectToOriginCheckboxExists) {
+        const state = redirectToOrigin ? 'check' : 'uncheck';
+        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
+      }
+
       await testSubjects.click('confirmSaveSavedObjectButton');
-      retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
         testSubjects
           .missingOrFail('confirmSaveSavedObjectButton')
           .then(() => true)
           .catch(() => false)
       );
+    },
+
+    async saveAndReturn() {
+      await testSubjects.click('lnsApp_saveAndReturnButton');
     },
 
     getTitle() {

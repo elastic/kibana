@@ -29,6 +29,7 @@ import { Storage } from '../../../../../../plugins/kibana_utils/public';
 import { getEsQueryConfig, buildEsQuery, Query } from '../../../../common';
 import { getQueryLog } from '../../../query';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
   defaultMessage: 'Filters',
@@ -45,6 +46,13 @@ interface FilterValue {
 export interface FiltersBucketAggDependencies {
   uiSettings: IUiSettingsClient;
   getInternalStartServices: GetInternalStartServicesFn;
+}
+
+export interface AggParamsFilters extends Omit<BaseAggParams, 'customLabel'> {
+  filters?: Array<{
+    input: Query;
+    label: string;
+  }>;
 }
 
 export const getFiltersBucketAgg = ({
@@ -67,7 +75,7 @@ export const getFiltersBucketAgg = ({
             const inFilters: FilterValue[] = aggConfig.params.filters;
             if (!size(inFilters)) return;
 
-            inFilters.forEach(filter => {
+            inFilters.forEach((filter) => {
               const persistedLog = getQueryLog(
                 uiSettings,
                 new Storage(window.localStorage),
@@ -79,7 +87,7 @@ export const getFiltersBucketAgg = ({
 
             const outFilters = transform(
               inFilters,
-              function(filters, filter) {
+              function (filters, filter) {
                 const input = cloneDeep(filter.input);
 
                 if (!input) {

@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
@@ -51,7 +51,7 @@ export default function({ getService }) {
           .post(`/api/saved_objects/_bulk_create`)
           .send(BULK_REQUESTS)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               saved_objects: [
                 {
@@ -72,10 +72,25 @@ export default function({ getService }) {
                   attributes: {
                     title: 'A great new dashboard',
                   },
+                  migrationVersion: {
+                    dashboard: resp.body.saved_objects[1].migrationVersion.dashboard,
+                  },
                   references: [],
                 },
               ],
             });
+          }));
+
+      it('should not return raw id when object id is unspecified', async () =>
+        await supertest
+          .post(`/api/saved_objects/_bulk_create`)
+          // eslint-disable-next-line no-unused-vars
+          .send(BULK_REQUESTS.map(({ id, ...rest }) => rest))
+          .expect(200)
+          .then((resp) => {
+            resp.body.saved_objects.map(({ id }) =>
+              expect(id).not.match(/visualization|dashboard/)
+            );
           }));
     });
 
@@ -94,7 +109,7 @@ export default function({ getService }) {
           .post('/api/saved_objects/_bulk_create')
           .send(BULK_REQUESTS)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               saved_objects: [
                 {
@@ -106,6 +121,9 @@ export default function({ getService }) {
                     title: 'An existing visualization',
                   },
                   references: [],
+                  migrationVersion: {
+                    visualization: resp.body.saved_objects[0].migrationVersion.visualization,
+                  },
                 },
                 {
                   type: 'dashboard',
@@ -116,6 +134,9 @@ export default function({ getService }) {
                     title: 'A great new dashboard',
                   },
                   references: [],
+                  migrationVersion: {
+                    dashboard: resp.body.saved_objects[1].migrationVersion.dashboard,
+                  },
                 },
               ],
             });

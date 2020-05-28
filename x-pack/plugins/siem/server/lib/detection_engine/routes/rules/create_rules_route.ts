@@ -8,22 +8,20 @@ import uuid from 'uuid';
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { SetupPlugins } from '../../../../plugin';
+import { buildMlAuthz } from '../../../machine_learning/authz';
+import { throwHttpError } from '../../../machine_learning/validation';
 import { createRules } from '../../rules/create_rules';
 import { readRules } from '../../rules/read_rules';
 import { RuleAlertParamsRest } from '../../types';
 import { transformValidate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
 import { createRulesSchema } from '../schemas/create_rules_schema';
-import {
-  buildRouteValidation,
-  transformError,
-  buildSiemResponse,
-  validateLicenseForRuleType,
-} from '../utils';
+import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
-export const createRulesRoute = (router: IRouter): void => {
+export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void => {
   router.post(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -70,16 +68,17 @@ export const createRulesRoute = (router: IRouter): void => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
         const alertsClient = context.alerting?.getAlertsClient();
-        const actionsClient = context.actions?.getActionsClient();
-        const clusterClient = context.core.elasticsearch.dataClient;
+        const clusterClient = context.core.elasticsearch.legacy.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.siem?.getSiemClient();
 
-        if (!siemClient || !actionsClient || !alertsClient) {
+        if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
+
+        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+        throwHttpError(await mlAuthz.validateRuleType(type));
 
         const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
         const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
@@ -100,7 +99,6 @@ export const createRulesRoute = (router: IRouter): void => {
         }
         const createdRule = await createRules({
           alertsClient,
-          actionsClient,
           anomalyThreshold,
           description,
           enabled,

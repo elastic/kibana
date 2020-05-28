@@ -44,12 +44,12 @@ describe('timeline data providers', () => {
     cy.get(TIMELINE_DROPPED_DATA_PROVIDERS)
       .first()
       .invoke('text')
-      .then(dataProviderText => {
+      .then((dataProviderText) => {
         cy.get(HOSTS_NAMES_DRAGGABLE)
           .first()
           .invoke('text')
-          .should(hostname => {
-            expect(dataProviderText).to.eq(`host.name: "${hostname}"`);
+          .should((hostname) => {
+            expect(dataProviderText).to.eq(`host.name: "${hostname}"AND`);
           });
       });
   });

@@ -5,56 +5,42 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import { connect } from 'react-redux';
-import { useUrlParams } from '../../../hooks';
+import { useDispatch, useSelector } from 'react-redux';
+import { useGetUrlParams } from '../../../hooks';
 import { parseFiltersMap } from './parse_filter_map';
-import { AppState } from '../../../state';
-import { fetchOverviewFilters, GetOverviewFiltersPayload } from '../../../state/actions';
+import { fetchOverviewFilters } from '../../../state/actions';
 import { FilterGroupComponent } from './index';
-import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
 import { UptimeRefreshContext } from '../../../contexts';
+import { esKuerySelector, overviewFiltersSelector } from '../../../state/selectors';
 
-interface OwnProps {
+interface Props {
   esFilters?: string;
 }
 
-interface StoreProps {
-  esKuery: string;
-  lastRefresh: number;
-  loading: boolean;
-  overviewFilters: OverviewFilters;
-}
-
-interface DispatchProps {
-  loadFilterGroup: typeof fetchOverviewFilters;
-}
-
-type Props = OwnProps & StoreProps & DispatchProps;
-
-export const Container: React.FC<Props> = ({
-  esKuery,
-  esFilters,
-  loading,
-  loadFilterGroup,
-  overviewFilters,
-}: Props) => {
+export const FilterGroup: React.FC<Props> = ({ esFilters }: Props) => {
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
-  const [getUrlParams, updateUrl] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd, statusFilter, filters: urlFilters } = getUrlParams();
+  const { filters: overviewFilters, loading } = useSelector(overviewFiltersSelector);
+  const esKuery = useSelector(esKuerySelector);
+
+  const { dateRangeStart, dateRangeEnd, statusFilter, filters: urlFilters } = useGetUrlParams();
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const filterSelections = parseFiltersMap(urlFilters);
-    loadFilterGroup({
-      dateRangeStart,
-      dateRangeEnd,
-      locations: filterSelections.locations ?? [],
-      ports: filterSelections.ports ?? [],
-      schemes: filterSelections.schemes ?? [],
-      search: esKuery,
-      statusFilter,
-      tags: filterSelections.tags ?? [],
-    });
+    dispatch(
+      fetchOverviewFilters({
+        dateRangeStart,
+        dateRangeEnd,
+        locations: filterSelections.locations ?? [],
+        ports: filterSelections.ports ?? [],
+        schemes: filterSelections.schemes ?? [],
+        search: esKuery,
+        statusFilter,
+        tags: filterSelections.tags ?? [],
+      })
+    );
   }, [
     lastRefresh,
     dateRangeStart,
@@ -63,42 +49,8 @@ export const Container: React.FC<Props> = ({
     esFilters,
     statusFilter,
     urlFilters,
-    loadFilterGroup,
+    dispatch,
   ]);
 
-  // update filters in the URL from filter group
-  const onFilterUpdate = (filtersKuery: string) => {
-    if (urlFilters !== filtersKuery) {
-      updateUrl({ filters: filtersKuery, pagination: '' });
-    }
-  };
-
-  return (
-    <FilterGroupComponent
-      currentFilter={urlFilters}
-      overviewFilters={overviewFilters}
-      loading={loading}
-      onFilterUpdate={onFilterUpdate}
-    />
-  );
+  return <FilterGroupComponent overviewFilters={overviewFilters} loading={loading} />;
 };
-
-const mapStateToProps = ({
-  overviewFilters: { loading, filters },
-  ui: { esKuery, lastRefresh },
-}: AppState): StoreProps => ({
-  esKuery,
-  overviewFilters: filters,
-  lastRefresh,
-  loading,
-});
-
-const mapDispatchToProps = (dispatch: any): DispatchProps => ({
-  loadFilterGroup: (payload: GetOverviewFiltersPayload) => dispatch(fetchOverviewFilters(payload)),
-});
-
-export const FilterGroup = connect<StoreProps, DispatchProps, OwnProps>(
-  // @ts-ignore connect is expecting null | undefined for some reason
-  mapStateToProps,
-  mapDispatchToProps
-)(Container);

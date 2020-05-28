@@ -990,6 +990,9 @@ ls -lh plugins/my_plugin/target/public/
 you might see at least one js bundle - `my_plugin.plugin.js`. This is the only artifact loaded by the platform during bootstrap in the browser. The rule of thumb is to keep its size as small as possible.
 Other lazily loaded parts of your plugin present in the same folder as separate chunks under `{number}.plugin.js` names.
 If you want to investigate what your plugin bundle consists of you need to run `@kbn/optimizer` with `--profile` flag to get generated [webpack stats file](https://webpack.js.org/api/stats/).
+```bash
+node scripts/build_kibana_platform_plugins.js --dist --no-examples --profile
+```
 Many OSS tools are allowing you to analyze generated stats file
 - [an official tool](http://webpack.github.io/analyse/#modules) from webpack authors
 - [webpack-visualizer](https://chrisbateman.github.io/webpack-visualizer/)
@@ -1237,6 +1240,7 @@ import { npStart: { plugins } } from 'ui/new_platform';
 | `ui/filter_manager`                               | `plugins.data.filter`                                                | --                                                                                                                                   |
 | `ui/index_patterns`                               | `plugins.data.indexPatterns`                                         |
 | `import 'ui/management'`                          | `plugins.management.sections`                                        |                                                                                                                                      |
+| `import 'ui/registry/field_format_editors'`       | `plugins.indexPatternManagement.fieldFormatEditors`                                        |                                                                                                                                      |
 | `ui/registry/field_formats`                       | `plugins.data.fieldFormats`                                          |                                                                                                                                      |
 | `ui/registry/feature_catalogue`                   | `plugins.home.featureCatalogue.register`                             | Must add `home` as a dependency in your kibana.json.                                                                                 |
 | `ui/registry/vis_types`                           | `plugins.visualizations`                                       | --                                                                                                                                   |

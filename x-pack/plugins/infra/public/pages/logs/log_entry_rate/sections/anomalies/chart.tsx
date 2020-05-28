@@ -15,6 +15,7 @@ import {
   LIGHT_THEME,
   DARK_THEME,
   RectAnnotation,
+  BrushEndListener,
 } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -53,8 +54,12 @@ export const AnomaliesChart: React.FunctionComponent<{
     [dateFormat]
   );
 
-  const handleBrushEnd = useCallback(
-    (startTime: number, endTime: number) => {
+  const handleBrushEnd = useCallback<BrushEndListener>(
+    ({ x }) => {
+      if (!x) {
+        return;
+      }
+      const [startTime, endTime] = x;
       setTimeRange({
         endTime,
         startTime,
@@ -75,7 +80,7 @@ export const AnomaliesChart: React.FunctionComponent<{
         <Axis
           id="values"
           position="left"
-          tickFormat={value => numeral(value.toPrecision(3)).format('0[.][00]a')} // https://github.com/adamwdraper/Numeral-js/issues/194
+          tickFormat={(value) => numeral(value.toPrecision(3)).format('0[.][00]a')} // https://github.com/adamwdraper/Numeral-js/issues/194
         />
         <BarSeries
           id={logEntryRateSpecId}

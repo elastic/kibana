@@ -12,7 +12,7 @@ import { map, fold } from 'fp-ts/lib/Either';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { defaultSourceConfiguration } from './defaults';
 import { NotFoundError } from './errors';
-import { infraSourceConfigurationSavedObjectType } from './saved_object_mappings';
+import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
 import {
   InfraSavedSourceConfiguration,
   InfraSourceConfiguration,
@@ -42,7 +42,7 @@ export class InfraSources {
   ): Promise<InfraSource> {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
     const savedSourceConfiguration = await this.getInternalSourceConfiguration(sourceId)
-      .then(internalSourceConfiguration => ({
+      .then((internalSourceConfiguration) => ({
         id: sourceId,
         version: undefined,
         updatedAt: undefined,
@@ -52,9 +52,9 @@ export class InfraSources {
           internalSourceConfiguration
         ),
       }))
-      .catch(err =>
+      .catch((err) =>
         err instanceof NotFoundError
-          ? this.getSavedSourceConfiguration(savedObjectsClient, sourceId).then(result => ({
+          ? this.getSavedSourceConfiguration(savedObjectsClient, sourceId).then((result) => ({
               ...result,
               configuration: mergeSourceConfiguration(
                 staticDefaultSourceConfiguration,
@@ -63,7 +63,7 @@ export class InfraSources {
             }))
           : Promise.reject(err)
       )
-      .catch(err =>
+      .catch((err) =>
         savedObjectsClient.errors.isNotFoundError(err)
           ? Promise.resolve({
               id: sourceId,
@@ -85,7 +85,7 @@ export class InfraSources {
       savedObjectsClient
     );
 
-    return savedSourceConfigurations.map(savedSourceConfiguration => ({
+    return savedSourceConfigurations.map((savedSourceConfiguration) => ({
       ...savedSourceConfiguration,
       configuration: mergeSourceConfiguration(
         staticDefaultSourceConfiguration,
@@ -108,7 +108,7 @@ export class InfraSources {
 
     const createdSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
       await savedObjectsClient.create(
-        infraSourceConfigurationSavedObjectType,
+        infraSourceConfigurationSavedObjectName,
         pickSavedSourceConfiguration(newSourceConfiguration) as any,
         { id: sourceId }
       )
@@ -127,7 +127,7 @@ export class InfraSources {
     savedObjectsClient: SavedObjectsClientContract,
     sourceId: string
   ) {
-    await savedObjectsClient.delete(infraSourceConfigurationSavedObjectType, sourceId);
+    await savedObjectsClient.delete(infraSourceConfigurationSavedObjectName, sourceId);
   }
 
   public async updateSourceConfiguration(
@@ -149,7 +149,7 @@ export class InfraSources {
 
     const updatedSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
       await savedObjectsClient.update(
-        infraSourceConfigurationSavedObjectType,
+        infraSourceConfigurationSavedObjectName,
         sourceId,
         pickSavedSourceConfiguration(updatedSourceConfigurationAttributes) as any,
         {
@@ -207,7 +207,7 @@ export class InfraSources {
     sourceId: string
   ) {
     const savedObject = await savedObjectsClient.get(
-      infraSourceConfigurationSavedObjectType,
+      infraSourceConfigurationSavedObjectName,
       sourceId
     );
 
@@ -216,7 +216,7 @@ export class InfraSources {
 
   private async getAllSavedSourceConfigurations(savedObjectsClient: SavedObjectsClientContract) {
     const savedObjects = await savedObjectsClient.find({
-      type: infraSourceConfigurationSavedObjectType,
+      type: infraSourceConfigurationSavedObjectName,
     });
 
     return savedObjects.saved_objects.map(convertSavedObjectToSavedSourceConfiguration);
@@ -242,14 +242,14 @@ const mergeSourceConfiguration = (
 export const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknown) =>
   pipe(
     SourceConfigurationSavedObjectRuntimeType.decode(savedObject),
-    map(savedSourceConfiguration => ({
+    map((savedSourceConfiguration) => ({
       id: savedSourceConfiguration.id,
       version: savedSourceConfiguration.version,
       updatedAt: savedSourceConfiguration.updated_at,
       origin: 'stored' as 'stored',
       configuration: savedSourceConfiguration.attributes,
     })),
-    fold(errors => {
+    fold((errors) => {
       throw new Error(failure(errors).join('\n'));
     }, identity)
   );

@@ -7,7 +7,7 @@
 import { Action } from 'redux-actions';
 import { AsyncAction } from '../actions/types';
 
-export function handleAsyncAction<ReducerState, Payload>(
+export function handleAsyncAction<ReducerState>(
   storeKey: string,
   asyncAction: AsyncAction<any, any>
 ) {
@@ -24,7 +24,7 @@ export function handleAsyncAction<ReducerState, Payload>(
       ...state,
       [storeKey]: {
         ...(state as any)[storeKey],
-        data: action.payload === null ? action.payload : { ...action.payload },
+        data: action.payload,
         loading: false,
       },
     }),

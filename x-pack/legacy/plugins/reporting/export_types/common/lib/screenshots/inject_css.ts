@@ -7,18 +7,19 @@
 import { i18n } from '@kbn/i18n';
 import fs from 'fs';
 import { promisify } from 'util';
-import { LevelLogger } from '../../../../server/lib';
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
+import { LevelLogger, startTrace } from '../../../../server/lib';
+import { HeadlessChromiumDriver } from '../../../../server/browsers';
 import { Layout } from '../../layouts/layout';
 import { CONTEXT_INJECTCSS } from './constants';
 
 const fsp = { readFile: promisify(fs.readFile) };
 
 export const injectCustomCss = async (
-  browser: HeadlessBrowser,
+  browser: HeadlessChromiumDriver,
   layout: Layout,
   logger: LevelLogger
 ): Promise<void> => {
+  const endTrace = startTrace('inject_css', 'correction');
   logger.debug(
     i18n.translate('xpack.reporting.screencapture.injectingCss', {
       defaultMessage: 'injecting custom css',
@@ -30,7 +31,7 @@ export const injectCustomCss = async (
   try {
     await browser.evaluate(
       {
-        fn: css => {
+        fn: (css) => {
           const node = document.createElement('style');
           node.type = 'text/css';
           node.innerHTML = css; // eslint-disable-line no-unsanitized/property
@@ -49,4 +50,6 @@ export const injectCustomCss = async (
       })
     );
   }
+
+  endTrace();
 };

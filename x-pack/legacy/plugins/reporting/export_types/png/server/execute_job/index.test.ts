@@ -5,10 +5,9 @@
  */
 
 import * as Rx from 'rxjs';
-import { CancellationToken } from '../../../../common/cancellation_token';
+import { CancellationToken } from '../../../../../../../plugins/reporting/common';
 import { ReportingCore } from '../../../../server';
-import { LevelLogger } from '../../../../server/lib';
-import { cryptoFactory } from '../../../../server/lib/crypto';
+import { cryptoFactory, LevelLogger } from '../../../../server/lib';
 import { createMockReportingCore } from '../../../../test_helpers';
 import { JobDocPayloadPNG } from '../../types';
 import { generatePngObservableFactory } from '../lib/generate_png';
@@ -125,8 +124,8 @@ test(`returns content_type of application/png`, async () => {
   const executeJob = await executeJobFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
 
-  const generatePngObservable = (await generatePngObservableFactory(mockReporting)) as jest.Mock;
-  generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
+  const generatePngObservable = await generatePngObservableFactory(mockReporting);
+  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of('foo'));
 
   const { content_type: contentType } = await executeJob(
     'pngJobId',
@@ -137,10 +136,9 @@ test(`returns content_type of application/png`, async () => {
 });
 
 test(`returns content of generatePng getBuffer base64 encoded`, async () => {
-  const testContent = 'test content';
-
-  const generatePngObservable = (await generatePngObservableFactory(mockReporting)) as jest.Mock;
-  generatePngObservable.mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
+  const testContent = 'raw string from get_screenhots';
+  const generatePngObservable = await generatePngObservableFactory(mockReporting);
+  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ base64: testContent }));
 
   const executeJob = await executeJobFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
@@ -150,5 +148,5 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
     cancellationToken
   );
 
-  expect(content).toEqual(Buffer.from(testContent).toString('base64'));
+  expect(content).toEqual(testContent);
 });

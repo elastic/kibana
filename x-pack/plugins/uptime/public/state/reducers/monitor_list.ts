@@ -9,9 +9,9 @@ import { getMonitorList, getMonitorListSuccess, getMonitorListFailure } from '..
 import { MonitorSummaryResult } from '../../../common/runtime_types';
 
 export interface MonitorList {
-  list: MonitorSummaryResult;
   error?: Error;
   loading: boolean;
+  list: MonitorSummaryResult;
 }
 
 export const initialState: MonitorList = {

@@ -17,7 +17,7 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MonitoringPluginDependencies, MonitoringConfig } from './types';
 import {
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
@@ -81,7 +81,7 @@ export class MonitoringPlugin
         this.overrideAlertingEmailDefaults(deps);
 
         const monitoringApp = new AngularApp(deps);
-        const removeHistoryListener = params.history.listen(location => {
+        const removeHistoryListener = params.history.listen((location) => {
           if (location.pathname === '' && location.hash === '') {
             monitoringApp.applyScope();
           }

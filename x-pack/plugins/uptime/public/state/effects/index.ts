@@ -16,6 +16,7 @@ import { fetchPingsEffect, fetchPingHistogramEffect } from './ping';
 import { fetchMonitorDurationEffect } from './monitor_duration';
 import { fetchMLJobEffect } from './ml_anomaly';
 import { fetchIndexStatusEffect } from './index_status';
+import { fetchCertificatesEffect } from '../certificates/certificates';
 
 export function* rootEffect() {
   yield fork(fetchMonitorDetailsEffect);
@@ -31,4 +32,5 @@ export function* rootEffect() {
   yield fork(fetchMLJobEffect);
   yield fork(fetchMonitorDurationEffect);
   yield fork(fetchIndexStatusEffect);
+  yield fork(fetchCertificatesEffect);
 }

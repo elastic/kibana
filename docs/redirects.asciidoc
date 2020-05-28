@@ -70,3 +70,13 @@ This page has moved. Please see <<maps>>.
 == Maps
 
 This page has moved. Please see <<maps>>.
+
+[role="exclude",id="development-embedding-visualizations"]
+== Embedding Visualizations
+
+This page was deleted. See <<development-visualize-index>>.
+
+[role="exclude",id="development-create-visualization"]
+== Developing Visualizations
+
+This page was deleted. See <<development-visualize-index>>.

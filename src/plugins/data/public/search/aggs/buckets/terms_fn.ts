@@ -20,27 +20,25 @@
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from '../../../../../expressions/public';
-import { AggExpressionType, AggExpressionFunctionArgs } from '../';
+import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
+import { getParsedValue } from '../utils/get_parsed_value';
 
-const aggName = 'terms';
 const fnName = 'aggTerms';
 
 type Input = any;
-type AggArgs = AggExpressionFunctionArgs<typeof aggName>;
+type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.TERMS>;
+
 // Since the orderAgg param is an agg nested in a subexpression, we need to
 // overwrite the param type to expect a value of type AggExpressionType.
-type Arguments = AggArgs &
-  Assign<
-    AggArgs,
-    { orderAgg?: AggArgs['orderAgg'] extends undefined ? undefined : AggExpressionType }
-  >;
+type Arguments = Assign<AggArgs, { orderAgg?: AggExpressionType }>;
+
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
 
 export const aggTerms = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.buckets.terms.help', {
-    defaultMessage: 'Generates a serialized agg config for a terms agg',
+    defaultMessage: 'Generates a serialized agg config for a Terms agg',
   }),
   type: 'agg_type',
   args: {
@@ -72,7 +70,7 @@ export const aggTerms = (): FunctionDefinition => ({
     },
     order: {
       types: ['string'],
-      required: true,
+      options: ['asc', 'desc'],
       help: i18n.translate('data.search.aggs.buckets.terms.order.help', {
         defaultMessage: 'Order in which to return the results: asc or desc',
       }),
@@ -91,41 +89,30 @@ export const aggTerms = (): FunctionDefinition => ({
     },
     size: {
       types: ['number'],
-      default: 5,
       help: i18n.translate('data.search.aggs.buckets.terms.size.help', {
         defaultMessage: 'Max number of buckets to retrieve',
       }),
     },
     missingBucket: {
       types: ['boolean'],
-      default: false,
       help: i18n.translate('data.search.aggs.buckets.terms.missingBucket.help', {
         defaultMessage: 'When set to true, groups together any buckets with missing fields',
       }),
     },
     missingBucketLabel: {
       types: ['string'],
-      default: i18n.translate('data.search.aggs.buckets.terms.missingBucketLabel', {
-        defaultMessage: 'Missing',
-        description: `Default label used in charts when documents are missing a field.
-      Visible when you create a chart with a terms aggregation and enable "Show missing values"`,
-      }),
       help: i18n.translate('data.search.aggs.buckets.terms.missingBucketLabel.help', {
         defaultMessage: 'Default label used in charts when documents are missing a field.',
       }),
     },
     otherBucket: {
       types: ['boolean'],
-      default: false,
       help: i18n.translate('data.search.aggs.buckets.terms.otherBucket.help', {
         defaultMessage: 'When set to true, groups together any buckets beyond the allowed size',
       }),
     },
     otherBucketLabel: {
       types: ['string'],
-      default: i18n.translate('data.search.aggs.buckets.terms.otherBucketLabel', {
-        defaultMessage: 'Other',
-      }),
       help: i18n.translate('data.search.aggs.buckets.terms.otherBucketLabel.help', {
         defaultMessage: 'Default label used in charts for documents in the Other bucket',
       }),
@@ -148,20 +135,15 @@ export const aggTerms = (): FunctionDefinition => ({
         defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
       }),
     },
+    customLabel: {
+      types: ['string'],
+      help: i18n.translate('data.search.aggs.buckets.terms.customLabel.help', {
+        defaultMessage: 'Represents a custom label for this aggregation',
+      }),
+    },
   },
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
-
-    let json;
-    try {
-      json = args.json ? JSON.parse(args.json) : undefined;
-    } catch (e) {
-      throw new Error('Unable to parse json argument string');
-    }
-
-    // Need to spread this object to work around TS bug:
-    // https://github.com/microsoft/TypeScript/issues/15300#issuecomment-436793742
-    const orderAgg = args.orderAgg?.value ? { ...args.orderAgg.value } : undefined;
 
     return {
       type: 'agg_type',
@@ -169,11 +151,11 @@ export const aggTerms = (): FunctionDefinition => ({
         id,
         enabled,
         schema,
-        type: aggName,
+        type: BUCKET_TYPES.TERMS,
         params: {
           ...rest,
-          orderAgg,
-          json,
+          orderAgg: args.orderAgg?.value,
+          json: getParsedValue(args, 'json'),
         },
       },
     };

@@ -50,7 +50,7 @@ import {
   ROLLBACK_MAP_SETTINGS,
   TRACK_MAP_SETTINGS,
   UPDATE_MAP_SETTING,
-} from '../actions/map_actions';
+} from '../actions';
 
 import { getDefaultMapSettings } from './default_map_settings';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
@@ -102,7 +102,7 @@ const updateLayerSourceDescriptorProp = (state, layerId, propName, value) => {
   return { ...state, layerList: updatedList };
 };
 
-const INITIAL_STATE = {
+export const DEFAULT_MAP_STATE = {
   ready: false,
   mapInitError: null,
   goto: null,
@@ -133,7 +133,7 @@ const INITIAL_STATE = {
   __rollbackSettings: null,
 };
 
-export function map(state = INITIAL_STATE, action) {
+export function map(state = DEFAULT_MAP_STATE, action) {
   switch (action.type) {
     case UPDATE_DRAW_STATE:
       return {
@@ -283,15 +283,15 @@ export function map(state = INITIAL_STATE, action) {
         },
       };
     case SET_SELECTED_LAYER:
-      const selectedMatch = state.layerList.find(layer => layer.id === action.selectedLayerId);
+      const selectedMatch = state.layerList.find((layer) => layer.id === action.selectedLayerId);
       return { ...state, selectedLayerId: selectedMatch ? action.selectedLayerId : null };
     case SET_TRANSIENT_LAYER:
-      const transientMatch = state.layerList.find(layer => layer.id === action.transientLayerId);
+      const transientMatch = state.layerList.find((layer) => layer.id === action.transientLayerId);
       return { ...state, __transientLayerId: transientMatch ? action.transientLayerId : null };
     case UPDATE_LAYER_ORDER:
       return {
         ...state,
-        layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]),
+        layerList: action.newLayerOrder.map((layerNumber) => state.layerList[layerNumber]),
       };
     case UPDATE_LAYER_PROP:
       return updateLayerInList(state, action.id, action.propName, action.newValue);
@@ -299,12 +299,12 @@ export function map(state = INITIAL_STATE, action) {
       return updateLayerSourceDescriptorProp(state, action.layerId, action.propName, action.value);
     case SET_JOINS:
       const layerDescriptor = state.layerList.find(
-        descriptor => descriptor.id === action.layer.getId()
+        (descriptor) => descriptor.id === action.layer.getId()
       );
       if (layerDescriptor) {
         const newLayerDescriptor = { ...layerDescriptor, joins: action.joins.slice() };
         const index = state.layerList.findIndex(
-          descriptor => descriptor.id === action.layer.getId()
+          (descriptor) => descriptor.id === action.layer.getId()
         );
         const newLayerList = state.layerList.slice();
         newLayerList[index] = newLayerDescriptor;
@@ -403,7 +403,7 @@ export function map(state = INITIAL_STATE, action) {
     case SET_WAITING_FOR_READY_HIDDEN_LAYERS:
       return {
         ...state,
-        waitingForMapReadyLayerList: state.waitingForMapReadyLayerList.map(layer => ({
+        waitingForMapReadyLayerList: state.waitingForMapReadyLayerList.map((layer) => ({
           ...layer,
           visible: !action.hiddenLayerIds.includes(layer.id),
         })),
@@ -418,7 +418,7 @@ function findDataRequest(layerDescriptor, dataRequestAction) {
     return;
   }
 
-  return layerDescriptor.__dataRequests.find(dataRequest => {
+  return layerDescriptor.__dataRequests.find((dataRequest) => {
     return dataRequest.dataId === dataRequestAction.dataId;
   });
 }
@@ -447,7 +447,7 @@ function updateSourceDataRequest(state, action) {
   if (!layerDescriptor) {
     return state;
   }
-  const dataRequest = layerDescriptor.__dataRequests.find(dataRequest => {
+  const dataRequest = layerDescriptor.__dataRequests.find((dataRequest) => {
     return dataRequest.dataId === SOURCE_DATA_ID_ORIGIN;
   });
   if (!dataRequest) {
@@ -517,7 +517,7 @@ function getValidDataRequest(state, action, checkRequestToken = true) {
 }
 
 function findLayerById(state, id) {
-  return state.layerList.find(layer => layer.id === id);
+  return state.layerList.find((layer) => layer.id === id);
 }
 
 function trackCurrentLayerState(state, layerId) {
