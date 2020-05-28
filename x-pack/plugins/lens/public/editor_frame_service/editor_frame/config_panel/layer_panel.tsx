@@ -193,7 +193,7 @@ export function LayerPanel(
                         defaultMessage: 'Format & style',
                       }),
                       content: (
-                        <div className="lnsVisualizationDimensionEditor">
+                        <div className="lnsLayerPanel__styleEditor">
                           <EuiSpacer size="s" />
                           <NativeRenderer
                             render={activeVisualization.renderDimensionEditor}
