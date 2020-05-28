@@ -33,7 +33,7 @@ import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule
 import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
 import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
 import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine/feature_flags';
-import { ExceptionsPackagerTask, ExceptionsPackagerTaskRunner } from './lib/exceptions';
+import { PackagerTask, setupPackagerTask } from './lib/exceptions';
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
@@ -75,8 +75,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
   private readonly endpointAppContextService = new EndpointAppContextService();
-  private exceptionsPackagerTask?: ExceptionsPackagerTask;
-  private exceptionsPackagerTaskRunner?: ExceptionsPackagerTaskRunner;
+  private exceptionsPackagerTask: PackagerTask;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
@@ -217,12 +216,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
     }
 
-    this.logger.debug('task manager');
-    this.logger.debug(plugins.taskManager);
-
     if (plugins.taskManager) {
-      this.exceptionsPackagerTask = new ExceptionsPackagerTask(this.logger, plugins.taskManager);
-      this.exceptionsPackagerTask!.register();
+      this.exceptionsPackagerTask = setupPackagerTask({
+        core,
+        logger: this.logger,
+        taskManager: plugins.taskManager,
+      });
     }
 
     const libs = compose(core, plugins, this.context.env.mode.prod);
@@ -240,12 +239,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       agentService: plugins.ingestManager.agentService,
     });
 
-    if (plugins.taskManager) {
-      this.exceptionsPackagerTaskRunner = new ExceptionsPackagerTaskRunner(
-        this.context.logger,
-        plugins.taskManager
-      );
-      this.exceptionsPackagerTaskRunner!.schedule();
+    if (plugins.taskManager && this.exceptionsPackagerTask) {
+      this.exceptionsPackagerTask.getTaskRunner(plugins.taskManager).run();
     }
 
     return {};

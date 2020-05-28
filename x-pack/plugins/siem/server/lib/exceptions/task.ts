@@ -4,37 +4,69 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, LoggerFactory } from '../../../../../../src/core/server';
-import { TaskManagerSetupContract } from '../../../../../plugins/task_manager/server';
+import { CoreSetup, Logger } from '../../../../../../src/core/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../../../plugins/task_manager/server';
 
-export class ExceptionsPackagerTask {
-  private readonly logger?: Logger;
-  private readonly taskManager?: TaskManagerSetupContract;
+export interface PackagerTask {
+  getTaskRunner: (taskManager: TaskManagerStartContract) => PackagerTaskRunner;
+}
 
-  constructor(logger: LoggerFactory, taskManager: TaskManagerSetupContract) {
-    this.logger! = logger.get('exceptions_packager_task');
-    this.taskManager! = taskManager;
-  }
+interface PackagerTaskRunner {
+  run: () => void;
+}
 
-  public register() {
-    this.taskManager!.registerTaskDefinitions({
-      'endpoint:exceptions-packager': {
-        title: 'SIEM Endpoint Exceptions Handler',
-        type: 'endpoint:exceptions-packager',
-        timeout: '1m',
-        createTaskRunner: () => {
-          return {
-            run: async () => {
-              await this.run();
+interface PackagerTaskContext {
+  core: CoreSetup;
+  logger: Logger;
+  taskManager: TaskManagerSetupContract;
+}
+
+export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
+  const run = async () => {
+    context.logger.debug('HELLO WORLD');
+  };
+
+  const getTaskRunner = (taskManager: TaskManagerStartContract) => {
+    return {
+      run: async () => {
+        try {
+          await taskManager.ensureScheduled({
+            id: 'siem:endpoint:exceptions-packager',
+            taskType: 'siem:endpoint:exceptions-packager',
+            scope: ['siem'],
+            schedule: {
+              interval: '5s',
             },
-            cancel: async () => {},
-          };
-        },
+            state: {},
+            params: {},
+          });
+        } catch (e) {
+          context.logger.debug(`Error scheduling task, received ${e.message}`);
+        }
       },
-    });
-  }
+    };
+  };
 
-  private async run() {
-    this.logger!.debug('HELLO WORLD');
-  }
+  context.taskManager.registerTaskDefinitions({
+    'siem:endpoint:exceptions-packager': {
+      title: 'SIEM Endpoint Exceptions Handler',
+      type: 'siem:endpoint:exceptions-packager',
+      timeout: '1m',
+      createTaskRunner: () => {
+        return {
+          run: async () => {
+            await run();
+          },
+          cancel: async () => {},
+        };
+      },
+    },
+  });
+
+  return {
+    getTaskRunner,
+  };
 }
