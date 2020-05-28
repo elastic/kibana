@@ -5,7 +5,6 @@
  */
 
 import { combineReducers as reduxCombineReducers } from 'redux';
-import { ManagementState } from '../types';
 import {
   initialPolicyDetailsState,
   policyDetailsReducer,
@@ -20,6 +19,7 @@ import {
 } from '../common/constants';
 import { ImmutableCombineReducers } from '../../common/store';
 import { AppAction } from '../../common/store/actions';
+import { ManagementState } from './types';
 
 // Change the type of `combinerReducers` locally
 const combineReducers: ImmutableCombineReducers = reduxCombineReducers;

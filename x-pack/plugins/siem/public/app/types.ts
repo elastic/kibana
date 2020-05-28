@@ -14,7 +14,7 @@ import { Immutable } from '../../common/endpoint/types';
 import { AlertListState } from '../../common/endpoint_alerts/types';
 import { AppAction } from '../common/store/actions';
 import { HostState } from '../endpoint_hosts/types';
-import { ManagementState } from '../management/types';
+import { ManagementState } from '../management/store/types';
 
 export enum SiemPageName {
   overview = 'overview',

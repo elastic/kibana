@@ -11,7 +11,8 @@ import { StartPlugins } from '../types';
 import { MANAGEMENT_STORE_GLOBAL_NAMESPACE } from './common/constants';
 import { SecuritySubPluginWithStore } from '../app/types';
 import { Immutable } from '../../common/endpoint/types';
-import { ManagementState, ManagementStoreGlobalNamespace } from './types';
+import { ManagementStoreGlobalNamespace } from './types';
+import { ManagementState } from './store/types';
 
 export { getManagementUrl } from './common/routing';
 

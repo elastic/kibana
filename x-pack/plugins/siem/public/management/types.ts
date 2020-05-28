@@ -4,25 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Immutable } from '../../common/endpoint/types';
-import { PolicyDetailsState, PolicyListState } from './pages/policy/types';
 import { ImmutableReducer } from '../common/store';
 import { AppAction } from '../common/store/actions';
 import { SiemPageName } from '../app/types';
+import { ManagementState } from './store/types';
 
 /**
  * The type for the management store global namespace. Used mostly internally to reference
  * the type while defining more complex interfaces/types
  */
 export type ManagementStoreGlobalNamespace = 'management';
-
-/**
- * Redux store state for the Management section
- */
-export interface ManagementState {
-  policyDetails: Immutable<PolicyDetailsState>;
-  policyList: Immutable<PolicyListState>;
-}
 
 export interface ManagementPluginState {
   management: ManagementState;
