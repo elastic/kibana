@@ -4,22 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import { SiemStorage } from './types';
+
 const LOCAL_STORAGE_TIMELINE_KEY = 'timelines';
 
-const getItem = (id: string) => JSON.parse(localStorage.getItem(id) ?? `{}`);
+export const createSiemLocalStorage = (): SiemStorage => {
+  const storage = new Storage(localStorage);
 
-const setItem = (id: string, item: unknown) => localStorage.setItem(id, JSON.stringify(item));
+  const getAllTimelines: SiemStorage['getAllTimelines'] = () => {
+    return storage.get(LOCAL_STORAGE_TIMELINE_KEY);
+  };
 
-const getAllTimelines = () => {
-  return getItem(LOCAL_STORAGE_TIMELINE_KEY);
+  const addTimeline: SiemStorage['addTimeline'] = (id, timeline) => {
+    const timelines = getAllTimelines() ?? {};
+    storage.set(LOCAL_STORAGE_TIMELINE_KEY, {
+      ...timelines,
+      [id]: timeline,
+    });
+  };
+
+  return { getAllTimelines, addTimeline };
 };
 
-const addTimeline = (id: string, timeline: unknown) => {
-  const timelines = getAllTimelines();
-  setItem(LOCAL_STORAGE_TIMELINE_KEY, {
-    ...timelines,
-    [id]: timeline,
-  });
-};
-
-export { getItem, setItem, getAllTimelines, addTimeline };
+export { SiemStorage };

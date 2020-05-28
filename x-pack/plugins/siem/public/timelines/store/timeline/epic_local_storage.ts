@@ -20,7 +20,6 @@ import {
 } from './actions';
 import { TimelineEpicDependencies } from './types';
 import { isNotNull } from './helpers';
-import { addTimeline } from '../../../common/lib/local_storage';
 
 const timelineActionTypes = [
   removeColumn.type,
@@ -40,7 +39,7 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
   Action,
   State,
   TimelineEpicDependencies<State>
-> => (action$, state$, { timelineByIdSelector }) => {
+> => (action$, state$, { timelineByIdSelector, storage }) => {
   const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
 
   return merge(
@@ -51,7 +50,7 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
       tap(([action, timelineById]) => {
         if (timelineActionTypes.includes(action.type)) {
           const timelineId: string = get('payload.id', action);
-          addTimeline(timelineId, timelineById[timelineId]);
+          storage.addTimeline(timelineId, timelineById[timelineId]);
         }
       }),
       ignoreElements()
