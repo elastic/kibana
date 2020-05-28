@@ -50,14 +50,14 @@ export class BulkUploader {
     this._usageInterval = TELEMETRY_COLLECTION_INTERVAL;
     this._log = log;
 
-    this._cluster = elasticsearch.createClient('admin', {
+    this._cluster = elasticsearch.legacy.createClient('admin', {
       plugins: [monitoringBulk],
     });
 
     if (hasMonitoringCluster(config.elasticsearch)) {
       this._log.info(`Detected direct connection to monitoring cluster`);
       this._hasDirectConnectionToMonitoringCluster = true;
-      this._cluster = elasticsearch.createClient('monitoring-direct', config.elasticsearch);
+      this._cluster = elasticsearch.legacy.createClient('monitoring-direct', config.elasticsearch);
       elasticsearch.legacy.client.callAsInternalUser('info').then((data) => {
         this._productionClusterUuid = get(data, 'cluster_uuid');
       });

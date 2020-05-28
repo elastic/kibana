@@ -72,7 +72,7 @@ export default function (kibana) {
         }
 
         const cluster = new Cluster(
-          server.newPlatform.setup.core.elasticsearch.createClient(name, clientConfig)
+          server.newPlatform.setup.core.elasticsearch.legacy.createClient(name, clientConfig)
         );
 
         clusters.set(name, cluster);
