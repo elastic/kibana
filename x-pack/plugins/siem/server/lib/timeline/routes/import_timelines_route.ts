@@ -132,7 +132,6 @@ export const importTimelinesRoute = (
                       timelineType,
                       version,
                     } = parsedTimeline;
-
                     const parsedTimelineObject = omit(
                       timelineSavedObjectOmittedFields,
                       parsedTimeline

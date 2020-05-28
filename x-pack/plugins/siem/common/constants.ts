@@ -141,3 +141,10 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
+
+/**
+ * CreateTemplateTimelineBtn
+ * https://github.com/elastic/kibana/pull/66613
+ * Remove the comment here to enable template timeline
+ */
+export const disableTemplate = false;
