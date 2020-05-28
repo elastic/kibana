@@ -26,7 +26,7 @@ import { getSourceByType } from '../classes/sources/source_registry';
 import { GeojsonFileSource } from '../classes/sources/client_file_source';
 import {
   LAYER_TYPE,
-  SOURCE_DATA_ID_ORIGIN,
+  SOURCE_DATA_REQUEST_ID,
   STYLE_TYPE,
   VECTOR_STYLES,
   SPATIAL_FILTERS_LAYER_ID,
@@ -266,7 +266,7 @@ export const getSpatialFiltersLayer = createSelector(
         alpha: settings.spatialFiltersAlpa,
         __dataRequests: [
           {
-            dataId: SOURCE_DATA_ID_ORIGIN,
+            dataId: SOURCE_DATA_REQUEST_ID,
             data: featureCollection,
           },
         ],

@@ -8,7 +8,7 @@
 import { Dispatch } from 'redux';
 import { FeatureCollection } from 'geojson';
 import { MapStoreState } from '../reducers/store';
-import { LAYER_TYPE, SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import { LAYER_TYPE, SOURCE_DATA_REQUEST_ID } from '../../common/constants';
 import {
   getDataFilters,
   getDataRequestDescriptor,
@@ -269,7 +269,7 @@ export function updateSourceDataRequest(layerId: string, newData: unknown) {
   return (dispatch: Dispatch) => {
     dispatch({
       type: UPDATE_SOURCE_DATA_REQUEST,
-      dataId: SOURCE_DATA_ID_ORIGIN,
+      dataId: SOURCE_DATA_REQUEST_ID,
       layerId,
       newData,
     });
