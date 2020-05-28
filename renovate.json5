@@ -788,14 +788,6 @@
         ],
       },
       {
-        groupSlug: 'prettier',
-        groupName: 'prettier related packages',
-        packageNames: [
-          'prettier',
-          '@types/prettier',
-        ],
-      },
-      {
         groupSlug: 'pretty-ms',
         groupName: 'pretty-ms related packages',
         packageNames: [

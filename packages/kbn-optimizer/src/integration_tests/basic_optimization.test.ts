@@ -21,19 +21,21 @@ import Path from 'path';
 import Fs from 'fs';
 import Zlib from 'zlib';
 import { inspect } from 'util';
-import prettier from 'prettier';
 
 import cpy from 'cpy';
 import del from 'del';
 import { toArray, tap } from 'rxjs/operators';
-import { createAbsolutePathSerializer, ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { runOptimizer, OptimizerConfig, OptimizerUpdate, logOptimizerState } from '@kbn/optimizer';
 
 const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');
 const MOCK_REPO_SRC = Path.resolve(__dirname, '../__fixtures__/mock_repo');
 const MOCK_REPO_DIR = Path.resolve(TMP_DIR, 'mock_repo');
 
-expect.addSnapshotSerializer(createAbsolutePathSerializer(REPO_ROOT));
+expect.addSnapshotSerializer({
+  print: (value: string) => value.split(REPO_ROOT).join('<absolute path>').replace(/\\/g, '/'),
+  test: (value: any) => typeof value === 'string' && value.includes(REPO_ROOT),
+});
 
 const log = new ToolingLog({
   level: 'error',
@@ -48,7 +50,7 @@ const log = new ToolingLog({
   },
 });
 
-beforeAll(async () => {
+beforeEach(async () => {
   await del(TMP_DIR);
   await cpy('**/*', MOCK_REPO_DIR, {
     cwd: MOCK_REPO_SRC,
@@ -57,7 +59,7 @@ beforeAll(async () => {
   });
 });
 
-afterAll(async () => {
+afterEach(async () => {
   await del(TMP_DIR);
 });
 
@@ -164,6 +166,10 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       <absolute path>/packages/kbn-ui-shared-deps/public_path_module_creator.js,
     ]
   `);
+
+  expectFileMatchesSnapshot('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
+  expectFileMatchesSnapshot('plugins/foo/target/public/0.plugin.js', 'foo async bundle');
+  expectFileMatchesSnapshot('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
 });
 
 it('uses cache on second run and exist cleanly', async () => {
@@ -192,6 +198,10 @@ it('uses cache on second run and exist cleanly', async () => {
       "initializing",
       "initializing",
       "initialized",
+      "initialized",
+      "running",
+      "running",
+      "running",
       "success",
     ]
   `);
@@ -210,21 +220,24 @@ it('prepares assets for distribution', async () => {
   expectFileMatchesSnapshotWithCompression('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
   expectFileMatchesSnapshotWithCompression(
     'plugins/foo/target/public/1.plugin.js',
-    '1 async bundle'
+    'foo async bundle'
   );
   expectFileMatchesSnapshotWithCompression('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
 });
+
+const expectFileMatchesSnapshot = (filePath: string, snapshotLabel: string) => {
+  const raw = Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, filePath), 'utf8');
+
+  expect(raw).toMatchSnapshot(snapshotLabel);
+
+  return raw;
+};
 
 /**
  * Verifies that the file matches the expected output and has matching compressed variants.
  */
 const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabel: string) => {
-  const raw = Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, filePath), 'utf8');
-  const pretty = prettier.format(raw, {
-    filepath: filePath,
-  });
-
-  expect(pretty).toMatchSnapshot(snapshotLabel);
+  const raw = expectFileMatchesSnapshot(filePath, snapshotLabel);
 
   // Verify the brotli variant matches
   expect(
