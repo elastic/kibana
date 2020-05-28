@@ -84,7 +84,9 @@ export const PolicyDetails = React.memo(() => {
     }
   }, [notifications.toasts, policyName, policyUpdateStatus]);
 
-  const handleBackToListOnClick = useNavigateByRouterEventHandler(getManagementUrl('policyList'));
+  const handleBackToListOnClick = useNavigateByRouterEventHandler(
+    getManagementUrl({ name: 'policyList', excludePrefix: true })
+  );
 
   const handleSaveOnClick = useCallback(() => {
     setShowConfirm(true);
@@ -126,7 +128,7 @@ export const PolicyDetails = React.memo(() => {
         iconType="arrowLeft"
         contentProps={{ style: { paddingLeft: '0' } }}
         onClick={handleBackToListOnClick}
-        href={`#${getManagementUrl('policyList')}`}
+        href={getManagementUrl({ name: 'policyList' })}
       >
         <FormattedMessage
           id="xpack.siem.endpoint.policy.details.backToListTitle"

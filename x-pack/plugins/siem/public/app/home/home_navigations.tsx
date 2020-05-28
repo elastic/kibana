@@ -14,6 +14,7 @@ import {
 } from '../../common/components/link_to';
 import * as i18n from './translations';
 import { SiemPageName, SiemNavTab } from '../types';
+import { getManagementUrl } from '../../management';
 
 export const navTabs: SiemNavTab = {
   [SiemPageName.overview]: {
@@ -61,8 +62,8 @@ export const navTabs: SiemNavTab = {
   [SiemPageName.management]: {
     id: SiemPageName.management,
     name: i18n.MANAGEMENT,
-    href: '#/management', // FIXME: provider getter function for this
+    href: getManagementUrl({ name: 'default' }),
     disabled: false,
-    urlKey: 'management',
+    urlKey: SiemPageName.management,
   },
 };

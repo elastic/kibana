@@ -24,7 +24,7 @@ import {
 import { getManagementUrl } from '../../../../common/routing';
 
 describe('policy list store concerns', () => {
-  const policyListPathUrl = getManagementUrl('policyList');
+  const policyListPathUrl = getManagementUrl({ name: 'policyList', excludePrefix: true });
   let fakeCoreStart: ReturnType<typeof coreMock.createStart>;
   let depsStart: DepsStartMock;
   let store: Store;

@@ -95,8 +95,13 @@ export const PolicyList = React.memo(() => {
         }),
         // eslint-disable-next-line react/display-name
         render: (value: string, item: Immutable<PolicyData>) => {
-          const routeUri = getManagementUrl('policyDetails', { policyId: item.id });
-          return <PolicyLink name={value} route={routeUri} href={`#${routeUri}`} />;
+          const routePath = getManagementUrl({
+            name: 'policyDetails',
+            policyId: item.id,
+            excludePrefix: true,
+          });
+          const routeUrl = getManagementUrl({ name: 'policyDetails', policyId: item.id });
+          return <PolicyLink name={value} route={routePath} href={routeUrl} />;
         },
         truncateText: true,
       },

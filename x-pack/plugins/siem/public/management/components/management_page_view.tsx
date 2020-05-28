@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { PageView, PageViewProps } from '../../common/components/endpoint/page_view';
 import { ManagementSubTab } from '../types';
-import { getManagementUrl } from '../common/routing';
+import { getManagementUrl } from '..';
 
 export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>(options => {
   const { tabName } = useParams<{ tabName: ManagementSubTab }>();
@@ -21,13 +21,13 @@ export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>(options => {
         }),
         id: ManagementSubTab.endpoints,
         isSelected: tabName === ManagementSubTab.endpoints,
-        href: `#${getManagementUrl('endpointList')}`,
+        href: getManagementUrl({ name: 'endpointList' }),
       },
       {
         name: i18n.translate('xpack.siem.managementTabs.policies', { defaultMessage: 'Policies' }),
         id: ManagementSubTab.policies,
         isSelected: tabName === ManagementSubTab.policies,
-        href: `#${getManagementUrl('policyList')}`,
+        href: getManagementUrl({ name: 'policyList' }),
       },
     ];
   }, [tabName]);

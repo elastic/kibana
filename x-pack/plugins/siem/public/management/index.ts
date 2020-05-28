@@ -13,6 +13,8 @@ import { SecuritySubPluginWithStore } from '../app/types';
 import { Immutable } from '../../common/endpoint/types';
 import { ManagementState, ManagementStoreGlobalNamespace } from './types';
 
+export { getManagementUrl } from './common/routing';
+
 export class Management {
   public setup() {}
 
