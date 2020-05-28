@@ -57,8 +57,6 @@ export function getSampleDashboardPanel<TEmbeddableInput extends EmbeddableInput
       y: 0,
       i: overrides.explicitInput.id,
     },
-    type: overrides.type,
-    explicitInput: overrides.explicitInput,
     ...overrides,
   };
 }
