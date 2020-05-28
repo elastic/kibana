@@ -38,6 +38,8 @@ export const getManagementInitialState = (): ManagementState => {
  * Redux store reducer for the SIEM Management section
  */
 export const managementReducer = combineReducers<ManagementState, AppAction>({
+  // @ts-ignore
   [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: policyListReducer,
+  // @ts-ignore
   [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: policyDetailsReducer,
 });

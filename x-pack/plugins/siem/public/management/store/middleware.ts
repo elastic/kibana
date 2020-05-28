@@ -13,6 +13,7 @@ import {
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
 } from '../common/constants';
 
+// @ts-ignore
 export const managementMiddlewareFactory: ImmutableMultipleMiddlewareFactory = (
   coreStart,
   depsStart
