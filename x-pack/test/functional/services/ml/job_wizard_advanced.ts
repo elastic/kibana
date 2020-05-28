@@ -69,7 +69,7 @@ export function MachineLearningJobWizardAdvancedProvider(
       const actualFrequency = await this.getValueOrPlaceholder('mlJobWizardInputFrequency');
       expect(actualFrequency).to.eql(
         expectedValue,
-        `Expected frquency value to be '${expectedValue}' (got '${actualFrequency}')`
+        `Expected frequency value to be '${expectedValue}' (got '${actualFrequency}')`
       );
     },
 

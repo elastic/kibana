@@ -39,7 +39,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       const allPanels = await testSubjects.findAll('~mlDataVisualizerFieldsPanel');
       expect(allPanels).to.have.length(
         expectedPanelCount,
-        `Expectedfield panels count to be '${expectedPanelCount}' (got '${allPanels.length}')`
+        `Expected field panels count to be '${expectedPanelCount}' (got '${allPanels.length}')`
       );
     },
 
@@ -58,7 +58,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
         );
         expect(filteredCards).to.have.length(
           expectedCardCount,
-          `Expectedfield field card count for panels '${panelFieldTypes}' to be '${expectedCardCount}' (got '${filteredCards.length}')`
+          `Expected field card count for panels '${panelFieldTypes}' to be '${expectedCardCount}' (got '${filteredCards.length}')`
         );
       });
     },
