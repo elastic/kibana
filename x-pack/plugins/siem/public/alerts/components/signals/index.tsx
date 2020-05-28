@@ -269,23 +269,25 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
       ];
     }
   }, [defaultFilters, filterGroup]);
-  const [, dispatchTimeline] = useManageTimeline();
+  const { initializeTimeline, setTimelineActions } = useManageTimeline();
   useEffect(() => {
-    dispatchTimeline({
+    setTimelineActions({
       id: SIGNALS_PAGE_TIMELINE_ID,
-      type: 'setTimelineTypeContext',
-      timelineTypeContext: {
-        documentType: i18n.SIGNALS_DOCUMENT_TYPE,
-        footerText: i18n.TOTAL_COUNT_OF_SIGNALS,
-        loadingText: i18n.LOADING_SIGNALS,
-        queryFields: requiredFieldsForActions,
-        timelineActions: additionalActions,
-        title: i18n.SIGNALS_TABLE_TITLE,
-        selectAll: canUserCRUD ? selectAll : false,
-      },
+      queryFields: requiredFieldsForActions,
+      timelineActions: additionalActions,
     });
-  }, [additionalActions, canUserCRUD, selectAll]);
+  }, [additionalActions]);
 
+  useEffect(() => {
+    initializeTimeline({
+      id: SIGNALS_PAGE_TIMELINE_ID,
+      documentType: i18n.SIGNALS_DOCUMENT_TYPE,
+      footerText: i18n.TOTAL_COUNT_OF_SIGNALS,
+      loadingText: i18n.LOADING_SIGNALS,
+      title: i18n.SIGNALS_TABLE_TITLE,
+      selectAll: canUserCRUD ? selectAll : false,
+    });
+  }, [canUserCRUD, selectAll]);
   const headerFilterGroup = useMemo(
     () => <SignalsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,
     [onFilterGroupChangedCallback]

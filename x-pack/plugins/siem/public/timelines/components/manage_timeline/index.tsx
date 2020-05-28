@@ -4,32 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { createContext, useCallback, useContext, useReducer } from 'react';
 import { noop } from 'lodash/fp';
-import React, { createContext, Dispatch, useContext, useReducer } from 'react';
-
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FilterManager } from '../../../../../../../src/plugins/data/public/query/filter_manager';
 import { TimelineAction } from '../timeline/body/actions';
+import * as i18n from '../../../common/components/events_viewer/translations';
+import * as i18nF from '../timeline/footer/translations';
 
-interface TimelineContextState {
-  filterManager: FilterManager | undefined;
-  isLoading: boolean;
-}
-export interface TimelineTypeContext {
-  documentType?: string;
-  footerText?: string;
-  id?: string;
+interface ManageTimelineInit {
+  id: string;
   indexToAdd?: string[] | null;
   loadingText?: string;
-  queryFields?: string[];
+  footerText?: string;
+  documentType?: string;
   selectAll?: boolean;
-  timelineActions?: TimelineAction[];
   title?: string;
   unit?: (totalCount: number) => string;
 }
+
 interface ManageTimeline {
-  timelineContextState?: TimelineContextState;
-  timelineTypeContext?: TimelineTypeContext;
+  id: string;
+  indexToAdd: string[] | null;
+  loadingText: string;
+  footerText: string;
+  documentType: string;
+  selectAll: boolean;
+  title?: string;
+  unit: (totalCount: number) => string;
+  filterManager?: FilterManager;
+  isLoading: boolean;
+  queryFields?: string[];
+  timelineActions?: TimelineAction[];
 }
 
 interface ManageTimelineById {
@@ -38,20 +44,157 @@ interface ManageTimelineById {
 const initManageTimeline: ManageTimelineById = {};
 type ActionManageTimeline =
   | {
-      type: 'setTimelineContextState';
+      type: 'INITIALIZE_TIMELINE';
       id: string;
-      timelineContextState: TimelineContextState;
+      payload: ManageTimelineInit;
     }
   | {
-      type: 'setTimelineTypeContext';
+      type: 'SET_IS_LOADING';
       id: string;
-      timelineTypeContext: TimelineTypeContext;
+      payload: boolean;
+    }
+  | {
+      type: 'SET_TIMELINE_ACTIONS';
+      id: string;
+      payload: { queryFields?: string[]; timelineActions?: TimelineAction[] };
+    }
+  | {
+      type: 'SET_TIMELINE_FILTER_MANAGER';
+      id: string;
+      payload: FilterManager;
     };
 
-const ManageTimelineContext = createContext<[ManageTimelineById, Dispatch<ActionManageTimeline>]>([
-  initManageTimeline,
-  () => noop,
-]);
+const reducerManageTimeline = (state: ManageTimelineById, action: ActionManageTimeline) => {
+  switch (action.type) {
+    case 'INITIALIZE_TIMELINE':
+      return {
+        ...state,
+        [action.id]: {
+          indexToAdd: null,
+          loadingText: i18n.LOADING_EVENTS,
+          footerText: i18nF.TOTAL_COUNT_OF_EVENTS,
+          documentType: i18nF.TOTAL_COUNT_OF_EVENTS,
+          selectAll: false,
+          isLoading: false,
+          unit: (n: number) => i18n.UNIT(n),
+          ...state[action.id],
+          ...action.payload,
+        },
+      };
+    case 'SET_TIMELINE_ACTIONS':
+    case 'SET_TIMELINE_FILTER_MANAGER':
+      return {
+        ...state,
+        [action.id]: {
+          ...state[action.id],
+          ...action.payload,
+        },
+      };
+    case 'SET_IS_LOADING':
+      return {
+        ...state,
+        [action.id]: {
+          ...state[action.id],
+          isLoading: action.payload,
+        },
+      };
+    default:
+      return state;
+  }
+};
+
+interface ManageGlobalTimeline {
+  getManageTimelineById: (id: string) => ManageTimeline | undefined;
+  getTimelineFilterManager: (id: string) => FilterManager | undefined;
+  initializeTimeline: (newTimeline: ManageTimelineInit) => void;
+  setIsTimelineLoading: (isLoadingArgs: { id: string; isLoading: boolean }) => void;
+  setTimelineActions: (actionsArgs: {
+    id: string;
+    queryFields: string[];
+    timelineActions: TimelineAction[];
+  }) => void;
+  setTimelineFilterManager: (filterArgs: { id: string; filterManager: FilterManager }) => void;
+}
+
+const useTimelineManager = (
+  manageTimelineForTesting?: ManageTimelineById
+): ManageGlobalTimeline => {
+  const [state, dispatch] = useReducer(
+    reducerManageTimeline,
+    manageTimelineForTesting ?? initManageTimeline
+  );
+
+  const initializeTimeline = useCallback((newTimeline: ManageTimelineInit) => {
+    dispatch({
+      type: 'INITIALIZE_TIMELINE',
+      id: newTimeline.id,
+      payload: newTimeline,
+    });
+  }, []);
+
+  const setTimelineActions = useCallback(
+    ({
+      id,
+      queryFields,
+      timelineActions,
+    }: {
+      id: string;
+      queryFields?: string[];
+      timelineActions?: TimelineAction[];
+    }) => {
+      dispatch({
+        type: 'SET_TIMELINE_ACTIONS',
+        id,
+        payload: { queryFields, timelineActions },
+      });
+    },
+    []
+  );
+
+  const setTimelineFilterManager = useCallback(
+    ({ id, filterManager }: { id: string; filterManager: FilterManager }) => {
+      dispatch({
+        type: 'SET_TIMELINE_FILTER_MANAGER',
+        id,
+        payload: filterManager,
+      });
+    },
+    []
+  );
+
+  const setIsTimelineLoading = useCallback(
+    ({ id, isLoading }: { id: string; isLoading: boolean }) => {
+      dispatch({
+        type: 'SET_IS_LOADING',
+        id,
+        payload: isLoading,
+      });
+    },
+    []
+  );
+
+  const getTimelineFilterManager = useCallback((id: string): FilterManager | undefined => state[id].filterManager, [state]);
+  const getManageTimelineById = useCallback((id: string): ManageTimeline => state[id], [state]);
+
+  return {
+    getManageTimelineById,
+    getTimelineFilterManager,
+    initializeTimeline,
+    setIsTimelineLoading,
+    setTimelineActions,
+    setTimelineFilterManager,
+  };
+};
+
+const init = {
+  getManageTimelineById: () => undefined,
+  getTimelineFilterManager: () => undefined,
+  initializeTimeline: () => noop,
+  setIsTimelineLoading: () => noop,
+  setTimelineActions: () => noop,
+  setTimelineFilterManager: () => noop,
+};
+const ManageTimelineContext = createContext<ManageGlobalTimeline>(init);
 
 export const useManageTimeline = () => useContext(ManageTimelineContext);
 
@@ -64,39 +207,10 @@ export const ManageGlobalTimeline = ({
   children,
   manageTimelineForTesting,
 }: ManageGlobalTimelineProps) => {
-  const reducerManageTimeline = (state: ManageTimelineById, action: ActionManageTimeline) => {
-    switch (action.type) {
-      case 'setTimelineContextState':
-        return {
-          ...state,
-          [action.id]: {
-            ...state[action.id],
-            timelineContextState:
-              state[action.id] && state[action.id].timelineContextState
-                ? { ...state[action.id].timelineContextState, ...action.timelineContextState }
-                : action.timelineContextState,
-          },
-        };
-      case 'setTimelineTypeContext':
-        return {
-          ...state,
-          [action.id]: {
-            ...state[action.id],
-            timelineTypeContext:
-              state[action.id] && state[action.id].timelineTypeContext
-                ? { ...state[action.id].timelineTypeContext, ...action.timelineTypeContext }
-                : action.timelineTypeContext,
-          },
-        };
-      default:
-        return state;
-    }
-  };
+  const timelineManager = useTimelineManager(manageTimelineForTesting);
 
   return (
-    <ManageTimelineContext.Provider
-      value={useReducer(reducerManageTimeline, manageTimelineForTesting ?? initManageTimeline)}
-    >
+    <ManageTimelineContext.Provider value={timelineManager}>
       {children}
     </ManageTimelineContext.Provider>
   );

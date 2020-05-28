@@ -95,16 +95,9 @@ const EventsViewerComponent: React.FC<Props> = ({
   const kibana = useKibana();
   const { filterManager } = useKibana().services.data.query;
   const [isQueryLoading, setIsQueryLoading] = useState(false);
-  const [manageTimeline, dispatchTimeline] = useManageTimeline();
-  const timelineTypeContext = useMemo(
-    () =>
-      manageTimeline[id] && manageTimeline[id].timelineTypeContext
-        ? manageTimeline[id].timelineTypeContext
-        : {
-            loadingText: i18n.LOADING_EVENTS,
-          },
-    [manageTimeline[id]]
-  );
+  // const [manageTimeline, dispatchTimeline] = useManageTimeline();
+  const { setTimelineFilterManager, getManageTimelineById } = useManageTimeline();
+  const timelineTypeContext = useMemo(() => getManageTimelineById(id), [getManageTimelineById, id]);
   useEffect(() => {
     dispatchTimeline({
       type: 'setTimelineContextState',
@@ -131,7 +124,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   const queryFields = useMemo(
     () =>
       union(
-        columnsHeader.map((c) => c.id),
+        columnsHeader.map(c => c.id),
         timelineTypeContext.queryFields ?? []
       ),
     [columnsHeader, timelineTypeContext.queryFields]
@@ -171,10 +164,11 @@ const EventsViewerComponent: React.FC<Props> = ({
               const totalCountMinusDeleted =
                 totalCount > 0 ? totalCount - deletedEventIds.length : 0;
 
-              const subtitle = `${i18n.SHOWING}: ${totalCountMinusDeleted.toLocaleString()} ${
-                timelineTypeContext.unit?.(totalCountMinusDeleted) ??
-                i18n.UNIT(totalCountMinusDeleted)
-              }`;
+              const subtitle = `${
+                i18n.SHOWING
+              }: ${totalCountMinusDeleted.toLocaleString()} ${timelineTypeContext.unit?.(
+                totalCountMinusDeleted
+              ) ?? i18n.UNIT(totalCountMinusDeleted)}`;
 
               return (
                 <>
@@ -199,7 +193,7 @@ const EventsViewerComponent: React.FC<Props> = ({
 
                     <StatefulBody
                       browserFields={browserFields}
-                      data={events.filter((e) => !deletedEventIds.includes(e._id))}
+                      data={events.filter(e => !deletedEventIds.includes(e._id))}
                       id={id}
                       isEventViewer={true}
                       height={height}

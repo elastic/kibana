@@ -155,7 +155,7 @@ export const TimelineComponent: React.FC<Props> = ({
     end,
   });
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-  const timelineQueryFields = useMemo(() => columnsHeader.map((c) => c.id), [columnsHeader]);
+  const timelineQueryFields = useMemo(() => columnsHeader.map(c => c.id), [columnsHeader]);
   const timelineQuerySortField = useMemo(
     () => ({
       sortFieldId: sort.columnId,
@@ -164,25 +164,20 @@ export const TimelineComponent: React.FC<Props> = ({
     [sort.columnId, sort.sortDirection]
   );
   const [isQueryLoading, setIsQueryLoading] = useState(false);
-  const [, dispatchTimeline] = useManageTimeline();
+  const {
+    initializeTimeline,
+    setIsTimelineLoading,
+    setTimelineFilterManager,
+  } = useManageTimeline();
   useEffect(() => {
-    dispatchTimeline({
-      type: 'setTimelineContextState',
-      id,
-      timelineContextState: {
-        filterManager,
-        isLoading: isQueryLoading || loadingIndexName,
-      },
-    });
-    dispatchTimeline({
-      type: 'setTimelineTypeContext',
-      id,
-      timelineTypeContext: {
-        indexToAdd,
-        id,
-      },
-    });
-  }, [filterManager, isQueryLoading]);
+    initializeTimeline({ id, indexToAdd });
+  }, []);
+  useEffect(() => {
+    setIsTimelineLoading({ id, isLoading: isQueryLoading || loadingIndexName });
+  }, [loadingIndexName, isQueryLoading]);
+  useEffect(() => {
+    setTimelineFilterManager({ id, filterManager });
+  }, [filterManager]);
 
   return (
     <TimelineContainer data-test-subj="timeline">

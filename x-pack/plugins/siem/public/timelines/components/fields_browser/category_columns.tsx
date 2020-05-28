@@ -49,19 +49,10 @@ interface ToolTipProps {
 
 const ToolTip = React.memo<ToolTipProps>(
   ({ categoryId, browserFields, onUpdateColumns, timelineId }) => {
-    const [manageTimeline] = useManageTimeline();
-    const { isLoading } = useMemo(
-      () =>
-        manageTimeline[timelineId] && manageTimeline[timelineId].timelineContextState
-          ? {
-              isLoading: false,
-              ...manageTimeline[timelineId].timelineContextState,
-            }
-          : {
-              isLoading: false,
-            },
-      [manageTimeline[timelineId]]
-    );
+    const { getManageTimelineById } = useManageTimeline();
+    const { isLoading } = useMemo(() => getManageTimelineById(timelineId) ?? { isLoading: false }, [
+      timelineId,
+    ]);
     return (
       <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
         {!isLoading ? (
