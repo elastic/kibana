@@ -113,7 +113,6 @@ export interface KibanaCore {
     legacy: ILegacyInternals;
     rendering: LegacyServiceSetupDeps['core']['rendering'];
     uiPlugins: UiPlugins;
-    uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
     savedObjectsClientProvider: LegacyServiceStartDeps['core']['savedObjects']['clientProvider'];
   };
   env: {
