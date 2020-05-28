@@ -160,7 +160,7 @@ When you're finished adding and arranging the panels, save the dashboard.
 . Enter the dashboard *Title* and optional *Description*, then *Save* the dashboard.
 
 [[sharing-dashboards]]
-=== Share the dashboard
+== Share the dashboard
 
 [[embedding-dashboards]]
 Share your dashboard outside of {kib}.
