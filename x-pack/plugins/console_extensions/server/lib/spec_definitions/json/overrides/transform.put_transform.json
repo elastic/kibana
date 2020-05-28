@@ -25,8 +25,10 @@
         }
       },
       "settings": {
-        "docs_per_second": null,
-        "max_page_search_size": 500
+        "__template": {
+          "docs_per_second": null,
+          "max_page_search_size": 500
+        }
       },
       "source": {
         "__template": {
