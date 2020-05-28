@@ -99,6 +99,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OverlayRef](./kibana-plugin-core-public.overlayref.md) | Returned by [OverlayStart](./kibana-plugin-core-public.overlaystart.md) methods for closing a mounted overlay. |
 |  [OverlayStart](./kibana-plugin-core-public.overlaystart.md) |  |
 |  [PackageInfo](./kibana-plugin-core-public.packageinfo.md) |  |
+|  [ParsedAppUrl](./kibana-plugin-core-public.parsedappurl.md) | Application info returned by [ApplicationStart.parseAppUrl()](./kibana-plugin-core-public.applicationstart.parseappurl.md) |
 |  [Plugin](./kibana-plugin-core-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-core-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
 |  [SavedObject](./kibana-plugin-core-public.savedobject.md) |  |

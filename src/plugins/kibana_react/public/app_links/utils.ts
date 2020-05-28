@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { MouseEvent } from 'react';
+import React from 'react';
 
 /**
  * Returns true if any modifier key is active on the event, false otherwise.
  */
-export const hasActiveModifierKey = (event: MouseEvent): boolean => {
+export const hasActiveModifierKey = (event: React.MouseEvent): boolean => {
   return event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
 };
 

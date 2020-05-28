@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { MouseEventHandler } from 'react';
+import React from 'react';
 import { ApplicationStart } from 'src/core/public';
 import { getClosestLink, hasActiveModifierKey } from './utils';
 
@@ -33,7 +33,7 @@ export const createCrossAppClickHandler = ({
   currentAppId,
   navigateToApp,
   parseAppUrl,
-}: CreateCrossAppClickHandlerOptions): MouseEventHandler<HTMLElement> => {
+}: CreateCrossAppClickHandlerOptions): React.MouseEventHandler<HTMLElement> => {
   return (e) => {
     if (container == null) {
       return;

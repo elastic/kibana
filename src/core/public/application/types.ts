@@ -556,6 +556,8 @@ export type Mounter<T = App | LegacyApp> = SelectivePartial<
 >;
 
 /**
+ * Application info returned by {@link ApplicationStart.parseAppUrl}
+ *
  * @public
  */
 export interface ParsedAppUrl {
@@ -697,8 +699,22 @@ export interface ApplicationStart {
   navigateToUrl(url: string): Promise<void>;
 
   /**
-   * TODO
-   * @param url
+   * Parse given url, which can either be an absolute url or a relative path including the basePath, and
+   * return the corresponding app info if available.
+   *
+   * @example
+   * ```ts
+   * // current url: `https://kibana:8080/base-path/s/my-space/app/dashboard`
+   *
+   * // will return `{ app: 'discover', path: '/some-path?foo=bar'}`
+   * application.parseAppUrl('https://kibana:8080/base-path/s/my-space/app/discover/some-path?foo=bar')
+   * application.parseAppUrl('/base-path/s/my-space/app/discover/some-path?foo=bar')
+   *
+   * // will return `undefined`
+   * application.parseAppUrl('https://elsewhere:8080/base-path/s/my-space/app/discover/some-path') // origin does not match
+   * application.parseAppUrl('/app/discover/some-path') // does not include the current basePath
+   * application.parseAppUrl('/base-path/s/my-space/app/unknown-app/some-path') // unknown application
+   * ```
    */
   parseAppUrl(url: string): ParsedAppUrl | undefined;
 
