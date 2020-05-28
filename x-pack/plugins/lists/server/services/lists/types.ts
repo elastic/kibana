@@ -3,4 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export type NamespaceType = 'agnostic' | 'single';
+
+interface Scroll {
+  searchAfter: string[] | undefined;
+  validSearchAfterFound: boolean;
+}
