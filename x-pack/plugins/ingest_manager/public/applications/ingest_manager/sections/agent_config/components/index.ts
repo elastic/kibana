@@ -6,5 +6,7 @@
 
 export { AgentConfigForm, agentConfigFormValidation } from './config_form';
 export { AgentConfigDeleteProvider } from './config_delete_provider';
+export { DatasourceDeleteProvider } from './datasource_delete_provider';
 export { LinkedAgentCount } from './linked_agent_count';
 export { ConfirmDeployConfigModal } from './confirm_deploy_modal';
+export { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';

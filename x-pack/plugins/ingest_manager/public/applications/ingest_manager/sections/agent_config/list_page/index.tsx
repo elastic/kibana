@@ -33,10 +33,9 @@ import {
   useUrlParams,
   useBreadcrumbs,
 } from '../../../hooks';
-import { CreateAgentConfigFlyout } from './components';
-import { SearchBar } from '../../../components/search_bar';
+import { SearchBar, ContextMenuActions } from '../../../components';
 import { LinkedAgentCount } from '../components';
-import { TableRowActions } from '../components/table_row_actions';
+import { CreateAgentConfigFlyout } from './components';
 
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
@@ -81,7 +80,7 @@ const ConfigRowActions = memo<{ config: AgentConfig; onDelete: () => void }>(
     const hasWriteCapabilities = useCapabilities().write;
 
     return (
-      <TableRowActions
+      <ContextMenuActions
         items={[
           <EuiContextMenuItem
             icon="inspect"
