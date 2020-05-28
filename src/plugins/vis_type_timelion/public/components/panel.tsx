@@ -71,7 +71,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
   const kibana = useKibana<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
   const [canvasElem, setCanvasElem] = useState<JQuery<HTMLElement>>();
-  const [chartElem, setChartElem] = useState<HTMLElement>();
+  const [chartElem, setChartElem] = useState<JQuery<HTMLElement>>();
 
   const [originalColorMap, setOriginalColorMap] = useState(() => new Map<Series, string>());
 
@@ -248,12 +248,12 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     (pos: Position) => {
       unhighlightSeries();
 
-      const axes = plot.getAxes();
-      if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max) {
+      const axes = plot!.getAxes();
+      if (pos.x < axes.xaxis.min! || pos.x > axes.xaxis.max!) {
         return;
       }
 
-      const dataset = plot.getData();
+      const dataset = plot!.getData();
       if (legendCaption) {
         legendCaption.text(
           moment(pos.x).format(get(dataset, '[0]._global.legend.timeFormat', DEFAULT_TIME_FORMAT))
@@ -261,7 +261,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
       }
       for (let i = 0; i < dataset.length; ++i) {
         const series = dataset[i];
-        const useNearestPoint = series.lines.show && !series.lines.steps;
+        const useNearestPoint = series.lines!.show && !series.lines!.steps;
         const precision = get(series, '_meta.precision', 2);
 
         if (series._hide) {
@@ -281,14 +281,16 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
 
         const y = currentPoint[1];
 
-        if (y != null && legendValueNumbers) {
-          let label = y.toFixed(precision);
-          if (series.yaxis.tickFormatter) {
-            label = series.yaxis.tickFormatter(Number(label), series.yaxis);
+        if (legendValueNumbers) {
+          if (y == null) {
+            legendValueNumbers.eq(i).empty();
+          } else {
+            let label = y.toFixed(precision);
+            if (series.yaxis.tickFormatter) {
+              label = series.yaxis.tickFormatter(Number(label), series.yaxis);
+            }
+            legendValueNumbers.eq(i).text(`(${label})`);
           }
-          legendValueNumbers.eq(i).text(`(${label})`);
-        } else {
-          legendValueNumbers.eq(i).empty();
         }
       }
     },
@@ -308,7 +310,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     if (legendCaption) {
       legendCaption.html(emptyCaption);
     }
-    each(legendValueNumbers, (num: Node) => {
+    each(legendValueNumbers!, (num: Node) => {
       $(num).empty();
     });
   }, [legendCaption, legendValueNumbers]);
