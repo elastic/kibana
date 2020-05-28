@@ -7,9 +7,12 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
-import { documentationService } from '../../../services/documentation';
+
+import { useComponentTemplatesContext } from '../component_templates_context';
 
 export const EmptyPrompt: FunctionComponent = () => {
+  const { documentation } = useComponentTemplatesContext();
+
   return (
     <EuiEmptyPrompt
       iconType="managementApp"
@@ -28,7 +31,7 @@ export const EmptyPrompt: FunctionComponent = () => {
             defaultMessage="For example, you might create a component template that defines index settings that can be reused across index templates."
           />
           <br />
-          <EuiLink href={documentationService.getComponentTemplatesLink()} target="_blank" external>
+          <EuiLink href={documentation.getComponentTemplatesLink()} target="_blank" external>
             {i18n.translate('xpack.idxMgmt.home.componentTemplates.emptyPromptDocumentionLink', {
               defaultMessage: 'Learn more',
             })}

@@ -17,6 +17,7 @@ import {
 
 interface ComponentTemplate {
   name: string;
+  isActive: boolean;
 }
 
 export interface Props {
@@ -45,7 +46,9 @@ export const ComponentTable: FunctionComponent<Props> = ({
           ? i18n.translate('xpack.idxMgmt.componentTemplatesList.table.disabledSelectionLabel', {
               defaultMessage: 'Component template is in use',
             })
-          : undefined,
+          : i18n.translate('xpack.idxMgmt.componentTemplatesList.table.selectionLabel', {
+              defaultMessage: 'Select this component template',
+            }),
     },
     rowProps: () => ({
       'data-test-subj': 'componentTemplateTableRow',

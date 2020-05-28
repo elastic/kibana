@@ -48,8 +48,3 @@ export const UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB = 'template_details_aliases_t
 export const UIM_TEMPLATE_CREATE = 'template_create';
 export const UIM_TEMPLATE_UPDATE = 'template_update';
 export const UIM_TEMPLATE_CLONE = 'template_clone';
-
-// component template metrics
-export const UIM_COMPONENT_TEMPLATE_LIST_LOAD = 'component_template_list_load';
-export const UIM_COMPONENT_TEMPLATE_DELETE = 'component_template_delete';
-export const UIM_COMPONENT_TEMPLATE_DELETE_MANY = 'component_template_delete_many';
