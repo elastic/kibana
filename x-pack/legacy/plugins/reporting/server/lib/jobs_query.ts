@@ -45,7 +45,7 @@ export function jobsQueryFactory(
   elasticsearch: ElasticsearchServiceSetup
 ) {
   const index = config.get('index');
-  const { callAsInternalUser } = elasticsearch.adminClient;
+  const { callAsInternalUser } = elasticsearch.legacy.client;
 
   function getUsername(user: any) {
     return get(user, 'username', false);

@@ -52,7 +52,9 @@ beforeEach(async () => {
 
 const mockPlugins = ({
   elasticsearch: {
-    adminClient: { callAsInternalUser: jest.fn() },
+    legacy: {
+      client: { callAsInternalUser: jest.fn() },
+    },
   },
   security: null,
 } as unknown) as ReportingSetupDeps;
@@ -70,7 +72,7 @@ const getErrorsFromRequest = (request: any) =>
 
 test(`returns 404 if job not found`, async () => {
   // @ts-ignore
-  mockPlugins.elasticsearch.adminClient = {
+  mockPlugins.elasticsearch.legacy.client = {
     callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(getHits())),
   };
 
@@ -88,7 +90,7 @@ test(`returns 404 if job not found`, async () => {
 
 test(`returns 401 if not valid job type`, async () => {
   // @ts-ignore
-  mockPlugins.elasticsearch.adminClient = {
+  mockPlugins.elasticsearch.legacy.client = {
     callAsInternalUser: jest
       .fn()
       .mockReturnValue(Promise.resolve(getHits({ jobtype: 'invalidJobType' }))),
@@ -108,7 +110,7 @@ test(`returns 401 if not valid job type`, async () => {
 describe(`when job is incomplete`, () => {
   const getIncompleteResponse = async () => {
     // @ts-ignore
-    mockPlugins.elasticsearch.adminClient = {
+    mockPlugins.elasticsearch.legacy.client = {
       callAsInternalUser: jest
         .fn()
         .mockReturnValue(
@@ -155,7 +157,7 @@ describe(`when job is failed`, () => {
       output: { content: 'job failure message' },
     });
     // @ts-ignore
-    mockPlugins.elasticsearch.adminClient = {
+    mockPlugins.elasticsearch.legacy.client = {
       callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
     };
 
@@ -201,7 +203,7 @@ describe(`when job is completed`, () => {
       },
     });
     // @ts-ignore
-    mockPlugins.elasticsearch.adminClient = {
+    mockPlugins.elasticsearch.legacy.client = {
       callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
     };
 

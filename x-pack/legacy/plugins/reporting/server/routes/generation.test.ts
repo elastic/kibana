@@ -44,7 +44,7 @@ beforeEach(async () => {
 
 const mockPlugins = {
   elasticsearch: {
-    adminClient: { callAsInternalUser: jest.fn() },
+    legacy: { client: { callAsInternalUser: jest.fn() } },
   },
   security: null,
 };

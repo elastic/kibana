@@ -153,7 +153,7 @@ export async function generateCsvSearch(
 
   const config = reporting.getConfig();
   const elasticsearch = await reporting.getElasticsearchService();
-  const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(
+  const { callAsCurrentUser } = elasticsearch.legacy.client.asScoped(
     KibanaRequest.from(req.getRawRequest())
   );
   const callCluster = (...params: [string, object]) => callAsCurrentUser(...params);

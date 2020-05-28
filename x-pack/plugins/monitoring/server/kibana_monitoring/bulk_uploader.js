@@ -58,7 +58,7 @@ export class BulkUploader {
       this._log.info(`Detected direct connection to monitoring cluster`);
       this._hasDirectConnectionToMonitoringCluster = true;
       this._cluster = elasticsearch.createClient('monitoring-direct', config.elasticsearch);
-      elasticsearch.adminClient.callAsInternalUser('info').then((data) => {
+      elasticsearch.legacy.client.callAsInternalUser('info').then((data) => {
         this._productionClusterUuid = get(data, 'cluster_uuid');
       });
     }
