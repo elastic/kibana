@@ -57,7 +57,7 @@ image::images/lens_data_info.png[]
 [[change-the-visualization-type]]
 ==== Change the visualization type
 
-*Lens* enables you to switch between any supported visualization type at any time with *Suggestions*.
+*Lens* enables you to switch between any supported visualization type at any time.
 
 *Suggestions* are shortcuts to alternate visualizations that *Lens* generates for you based on your index data.
 
