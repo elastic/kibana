@@ -34,63 +34,63 @@ export const filterEventsAgainstList = async ({
     const isStringableType = (val: SearchTypes) =>
       ['string', 'number', 'boolean'].includes(typeof val);
     // grab the signals with values found in the given exception lists.
-    const filteredHitsPromises = exceptionsList.map(async (exceptionItem: List) => {
-      if (
-        exceptionItem.values == null ||
-        exceptionItem.values.length === 0 ||
-        exceptionItem.values_type !== 'list'
-      ) {
-        throw new Error('Malformed exception list provided');
-      }
-      if (!type.is(exceptionItem.values[0].name)) {
-        throw new Error(
-          `Unsupported list type used, please use one of ${Object.keys(type.keys).join()}`
+    const filteredHitsPromises = exceptionsList
+      .filter((exceptionItem: List) => exceptionItem.values_type === 'list')
+      .map(async (exceptionItem: List) => {
+        if (exceptionItem.values == null || exceptionItem.values.length === 0) {
+          throw new Error('Malformed exception list provided');
+        }
+        if (!type.is(exceptionItem.values[0].name)) {
+          throw new Error(
+            `Unsupported list type used, please use one of ${Object.keys(type.keys).join()}`
+          );
+        }
+        if (!exceptionItem.values[0].id) {
+          throw new Error(`Missing list id for exception on field ${exceptionItem.field}`);
+        }
+        // acquire the list values we are checking for.
+        const valuesOfGivenType = eventSearchResult.hits.hits.reduce((acc, searchResultItem) => {
+          const valueField = get(exceptionItem.field, searchResultItem._source);
+          if (valueField != null && isStringableType(valueField)) {
+            acc.add(valueField.toString());
+          }
+          return acc;
+        }, new Set<string>());
+
+        // matched will contain any list items that matched with the
+        // values passed in from the Set.
+        const matchedListItems = await listClient.getListItemByValues({
+          listId: exceptionItem.values[0].id,
+          type: exceptionItem.values[0].name,
+          value: [...valuesOfGivenType],
+        });
+
+        // create a set of list values that were a hit - easier to work with
+        const matchedListItemsSet = new Set<SearchTypes>(
+          matchedListItems.map((item) => item.value)
         );
-      }
-      if (!exceptionItem.values[0].id) {
-        throw new Error(`Missing list id for exception on field ${exceptionItem.field}`);
-      }
-      // acquire the list values we are checking for.
-      const valuesOfGivenType = eventSearchResult.hits.hits.reduce((acc, searchResultItem) => {
-        const valueField = get(exceptionItem.field, searchResultItem._source);
-        if (valueField != null && isStringableType(valueField)) {
-          acc.add(valueField.toString());
-        }
-        return acc;
-      }, new Set<string>());
 
-      // matched will contain any list items that matched with the
-      // values passed in from the Set.
-      const matchedListItems = await listClient.getListItemByValues({
-        listId: exceptionItem.values[0].id,
-        type: exceptionItem.values[0].name,
-        value: [...valuesOfGivenType],
-      });
-
-      // create a set of list values that were a hit - easier to work with
-      const matchedListItemsSet = new Set<SearchTypes>(matchedListItems.map((item) => item.value));
-
-      // do a single search after with these values.
-      // painless script to do nested query in elasticsearch
-      // filter out the search results that match with the values found in the list.
-      const operator = exceptionItem.values_operator;
-      const filteredEvents = eventSearchResult.hits.hits.filter((item) => {
-        const eventItem = get(exceptionItem.field, item._source);
-        if (operator === 'included') {
-          if (eventItem != null) {
-            return !matchedListItemsSet.has(eventItem);
+        // do a single search after with these values.
+        // painless script to do nested query in elasticsearch
+        // filter out the search results that match with the values found in the list.
+        const operator = exceptionItem.values_operator;
+        const filteredEvents = eventSearchResult.hits.hits.filter((item) => {
+          const eventItem = get(exceptionItem.field, item._source);
+          if (operator === 'included') {
+            if (eventItem != null) {
+              return !matchedListItemsSet.has(eventItem);
+            }
+          } else if (operator === 'excluded') {
+            if (eventItem != null) {
+              return matchedListItemsSet.has(eventItem);
+            }
           }
-        } else if (operator === 'excluded') {
-          if (eventItem != null) {
-            return matchedListItemsSet.has(eventItem);
-          }
-        }
-        return false;
+          return false;
+        });
+        const diff = eventSearchResult.hits.hits.length - filteredEvents.length;
+        logger.debug(`Lists filtered out ${diff} events`);
+        return filteredEvents;
       });
-      const diff = eventSearchResult.hits.hits.length - filteredEvents.length;
-      logger.debug(`Lists filtered out ${diff} events`);
-      return filteredEvents;
-    });
 
     const filteredHits = await Promise.all(filteredHitsPromises);
     const toReturn: SignalSearchResponse = {
