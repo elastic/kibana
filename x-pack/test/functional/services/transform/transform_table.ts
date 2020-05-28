@@ -98,7 +98,10 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
         uniqueColumnValues.sort();
 
         // check if the returned unique value matches the supplied filter value
-        expect(uniqueColumnValues).to.eql(expectedColumnValues);
+        expect(uniqueColumnValues).to.eql(
+          expectedColumnValues,
+          `Expected '${tableSubj}' column values to be '${expectedColumnValues}' (got '${uniqueColumnValues}')`
+        );
       });
     }
 
@@ -123,7 +126,12 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
     public async assertTransformRowFields(transformId: string, expectedRow: object) {
       const rows = await this.parseTransformTable();
       const transformRow = rows.filter((row) => row.id === transformId)[0];
-      expect(transformRow).to.eql(expectedRow);
+      expect(transformRow).to.eql(
+        expectedRow,
+        `Expected transform row to be '${JSON.stringify(expectedRow)}' (got '${JSON.stringify(
+          transformRow
+        )}')`
+      );
     }
 
     public async assertTransformExpandedRow() {
