@@ -32,7 +32,9 @@ export function registerExploreRoute({
         {
           core: {
             elasticsearch: {
-              dataClient: { callAsCurrentUser: callCluster },
+              legacy: {
+                client: { callAsCurrentUser: callCluster },
+              },
             },
           },
         },

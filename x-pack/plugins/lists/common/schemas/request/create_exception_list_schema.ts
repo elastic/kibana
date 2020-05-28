@@ -10,6 +10,7 @@ import * as t from 'io-ts';
 
 import {
   ListId,
+  NamespaceType,
   Tags,
   _Tags,
   _tags,
@@ -17,6 +18,7 @@ import {
   exceptionListType,
   meta,
   name,
+  namespace_type,
   tags,
 } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
@@ -35,6 +37,7 @@ export const createExceptionListSchema = t.intersection([
       _tags, // defaults to empty array if not set during decode
       list_id: DefaultUuid, // defaults to a GUID (UUID v4) string if not set during decode
       meta, // defaults to undefined if not set during decode
+      namespace_type, // defaults to 'single' if not set during decode
       tags, // defaults to empty array if not set during decode
     })
   ),
@@ -45,11 +48,12 @@ export type CreateExceptionListSchema = RequiredKeepUndefined<
   t.TypeOf<typeof createExceptionListSchema>
 >;
 
-// This type is used after a decode since the arrays turn into defaults of empty arrays.
+// This type is used after a decode since some things are defaults after a decode.
 export type CreateExceptionListSchemaDecoded = Identity<
-  CreateExceptionListSchema & {
+  Omit<CreateExceptionListSchema, '_tags' | 'tags' | 'list_id' | 'namespace_type'> & {
     _tags: _Tags;
     tags: Tags;
     list_id: ListId;
+    namespace_type: NamespaceType;
   }
 >;

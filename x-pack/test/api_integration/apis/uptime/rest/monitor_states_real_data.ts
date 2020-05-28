@@ -49,7 +49,7 @@ const checkMonitorStatesResponse = ({
     ).to.eql(statuses);
     (summaries ?? []).forEach((s) => {
       expect(s.state.url.full).to.be.ok();
-      expect(s.histogram?.count).to.be(20);
+      expect(Array.isArray(s.histogram?.points)).to.be(true);
       (s.histogram?.points ?? []).forEach((point) => {
         expect(point.timestamp).to.be.greaterThan(absFrom);
         expect(point.timestamp).to.be.lessThan(absTo);
