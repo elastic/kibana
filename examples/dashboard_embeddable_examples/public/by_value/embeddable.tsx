@@ -35,7 +35,7 @@ const initialInput: DashboardContainerInput = {
   // TODO: do we need all of this props? Looks like we can make those optional
   viewMode: ViewMode.VIEW,
   filters: [],
-  timeRange: { to: 'now', from: 'now-15m' },
+  timeRange: { to: 'now', from: 'now-1d' },
   useMargins: false,
   title: 'test',
   query: { query: '', language: 'lucene' },

@@ -135,7 +135,7 @@ function useSavedDashboardInput(
           // TODO: do we need all of this or can we mark those optional?
           viewMode: ViewMode.VIEW,
           filters: [],
-          timeRange: { to: 'now', from: 'now-15m' },
+          timeRange: { to: 'now', from: 'now-1d' },
           useMargins: false,
           title: 'test',
           query: { query: '', language: 'lucene' },
