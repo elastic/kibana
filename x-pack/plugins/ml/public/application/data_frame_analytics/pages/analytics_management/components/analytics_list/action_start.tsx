@@ -54,7 +54,7 @@ export const StartAction: FC<StartActionProps> = ({ item }) => {
       iconType="play"
       onClick={openModal}
       aria-label={buttonStartText}
-      data-test-sub="mlAnalyticsJobStartButton"
+      data-test-subj="mlAnalyticsJobStartButton"
     >
       {buttonStartText}
     </EuiButtonEmpty>
