@@ -18,8 +18,8 @@ import {
 import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
-import { ListPluginSetup as ListsSetup } from '../../lists/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
+import { ListPluginSetup } from '../../lists/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -56,7 +56,7 @@ export interface SetupPlugins {
   spaces?: SpacesSetup;
   taskManager: TaskManagerSetupContract;
   ml?: MlSetup;
-  lists: ListsSetup;
+  lists?: ListPluginSetup;
 }
 
 export interface StartPlugins {
@@ -201,6 +201,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         logger: this.logger,
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
+        lists: plugins.lists,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,

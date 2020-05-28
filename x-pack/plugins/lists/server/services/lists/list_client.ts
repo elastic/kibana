@@ -6,11 +6,18 @@
 
 import { APICaller } from 'kibana/server';
 
-import { ListItemArraySchema, ListItemSchema, ListSchema } from '../../../common/schemas';
+import {
+  FoundListItemSchema,
+  FoundListSchema,
+  ListItemArraySchema,
+  ListItemSchema,
+  ListSchema,
+} from '../../../common/schemas';
 import { ConfigType } from '../../config';
 import {
   createList,
   deleteList,
+  findList,
   getList,
   getListIndex,
   getListTemplate,
@@ -21,6 +28,7 @@ import {
   deleteListItem,
   deleteListItemByValue,
   exportListItemsToStream,
+  findListItem,
   getListItem,
   getListItemByValue,
   getListItemByValues,
@@ -52,6 +60,8 @@ import {
   DeleteListItemOptions,
   DeleteListOptions,
   ExportListItemsToStreamOptions,
+  FindListItemOptions,
+  FindListOptions,
   GetListItemByValueOptions,
   GetListItemOptions,
   GetListItemsByValueOptions,
@@ -408,6 +418,58 @@ export class ListClient {
       listItemIndex,
       type,
       value,
+    });
+  };
+
+  public findList = async ({
+    filter,
+    currentIndexPosition,
+    perPage,
+    page,
+    sortField,
+    sortOrder,
+    searchAfter,
+  }: FindListOptions): Promise<FoundListSchema> => {
+    const { callCluster } = this;
+    const listIndex = this.getListIndex();
+    return findList({
+      callCluster,
+      currentIndexPosition,
+      filter,
+      listIndex,
+      page,
+      perPage,
+      searchAfter,
+      sortField,
+      sortOrder,
+    });
+  };
+
+  public findListItem = async ({
+    listId,
+    filter,
+    currentIndexPosition,
+    perPage,
+    page,
+    sortField,
+    sortOrder,
+    searchAfter,
+  }: FindListItemOptions): Promise<FoundListItemSchema | null> => {
+    const { callCluster } = this;
+    const listIndex = this.getListIndex();
+    const listItemIndex = this.getListItemIndex();
+    return findListItem({
+      callCluster,
+      currentIndexPosition,
+      filter,
+      listId,
+      listIndex,
+      listItemIndex,
+      page,
+      perPage,
+      searchAfter,
+      sortField,
+      sortOrder,
     });
   };
 }
