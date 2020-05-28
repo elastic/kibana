@@ -58,7 +58,7 @@ describe('Build KQL Query', () => {
   test('Build KQL query with two data provider', () => {
     const dataProviders = mockDataProviders.slice(0, 2);
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
-    expect(cleanUpKqlQuery(kqlQuery)).toEqual('(name : "Provider 1") or (name : "Provider 2" )');
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('(name : "Provider 1" ) or (name : "Provider 2" )');
   });
 
   test('Build KQL query with one data provider and one and', () => {
@@ -111,6 +111,23 @@ describe('Build KQL Query', () => {
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
     expect(cleanUpKqlQuery(kqlQuery)).toEqual(
       '(name : "Provider 1" and name : "Provider 3" and name : "Provider 4") or (name : "Provider 2" and name : "Provider 5")'
+    );
+  });
+
+  test('Build KQL query with all data provider', () => {
+    const kqlQuery = buildGlobalQuery(mockDataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual(
+      '(name : "Provider 1" ) or (name : "Provider 2" ) or (name : "Provider 3" ) or (name : "Provider 4" ) or (name : "Provider 5" ) or (name : "Provider 6" ) or (name : "Provider 7" ) or (name : "Provider 8" ) or (name : "Provider 9" ) or (name : "Provider 10" )'
+    );
+  });
+
+  test('Build complex KQL query with and and or', () => {
+    const dataProviders = cloneDeep(mockDataProviders);
+    dataProviders[0].and = mockDataProviders.slice(2, 4);
+    dataProviders[1].and = mockDataProviders.slice(4, 5);
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual(
+      '(name : "Provider 1" and name : "Provider 3" and name : "Provider 4") or (name : "Provider 2" and name : "Provider 5") or (name : "Provider 3" ) or (name : "Provider 4" ) or (name : "Provider 5" ) or (name : "Provider 6" ) or (name : "Provider 7" ) or (name : "Provider 8" ) or (name : "Provider 9" ) or (name : "Provider 10" )'
     );
   });
 });
