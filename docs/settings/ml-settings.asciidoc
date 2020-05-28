@@ -23,4 +23,7 @@ enabled by default.
 
 |===
 
-For advanced settings, refer to <<kibana-ml-settings>>.
+[[advanced-ml-settings-kb]]
+==== Advanced {ml} settings
+
+Refer to <<kibana-ml-settings,Advanced {ml} settings in {kib}>>.
