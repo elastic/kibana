@@ -40,7 +40,7 @@ export const help: FunctionHelp<FunctionFactory<typeof pie>> = {
       defaultMessage:
         'The legend position. For example, {legend}, or {BOOLEAN_FALSE}. When {BOOLEAN_FALSE}, the legend is hidden.',
       values: {
-        positions: Object.values(Position)
+        legend: Object.values(Legend)
           .map((position) => `\`"${position}"\``)
           .join(', '),
         BOOLEAN_FALSE,
