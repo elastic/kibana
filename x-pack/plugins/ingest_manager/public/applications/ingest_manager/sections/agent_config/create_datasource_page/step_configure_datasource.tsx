@@ -5,23 +5,17 @@
  */
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiEmptyPrompt,
-  EuiText,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PackageInfo, NewDatasource, DatasourceInput } from '../../../types';
 import { Loading } from '../../../components';
 import { DatasourceValidationResults, validationHasErrors } from './services';
-import { DatasourceInputPanel } from './components';
 import { EndpointConfiguration } from './components/endpoint_configuration';
+import { DatasourceInputPanel, CustomConfigureDatasource } from './components';
+import { CreateDatasourceFrom } from './types';
 
 export const StepConfigureDatasource: React.FunctionComponent<{
+  from: CreateDatasourceFrom;
   packageInfo: PackageInfo;
   datasource: NewDatasource;
   updateDatasource: (fields: Partial<NewDatasource>) => void;
@@ -29,6 +23,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
   submitAttempted: boolean;
   editMode?: boolean;
 }> = ({
+  from,
   packageInfo,
   datasource,
   updateDatasource,
@@ -77,23 +72,10 @@ export const StepConfigureDatasource: React.FunctionComponent<{
       </EuiFlexGroup>
     ) : (
       <EuiPanel>
-        <EuiEmptyPrompt
-          iconType="checkInCircleFilled"
-          iconColor="secondary"
-          body={
-            <EuiText>
-              <p>
-                {datasource.package?.name === 'endpoint' ? (
-                  <EndpointConfiguration editMode={editMode} />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.ingestManager.createDatasource.stepConfigure.noConfigOptionsMessage"
-                    defaultMessage="Nothing to configure"
-                  />
-                )}
-              </p>
-            </EuiText>
-          }
+        <CustomConfigureDatasource
+          packageName={packageInfo.name}
+          datasource={datasource}
+          from={from}
         />
       </EuiPanel>
     );

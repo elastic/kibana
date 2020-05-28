@@ -6,3 +6,4 @@
 export { CreateDatasourcePageLayout } from './layout';
 export { DatasourceInputPanel } from './datasource_input_panel';
 export { DatasourceInputVarField } from './datasource_input_var_field';
+export { CustomConfigureDatasource } from './custom_configure_datasource';

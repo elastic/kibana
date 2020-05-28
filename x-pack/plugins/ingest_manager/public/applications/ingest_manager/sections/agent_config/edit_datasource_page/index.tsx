@@ -299,6 +299,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
                 ),
                 children: (
                   <StepConfigureDatasource
+                    from={'edit'}
                     packageInfo={packageInfo}
                     datasource={datasource}
                     updateDatasource={updateDatasource}
