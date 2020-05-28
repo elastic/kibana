@@ -66,10 +66,7 @@ class DatasourceService {
       throw new Error(datasourceSO.error.message);
     }
 
-    return {
-      id: datasourceSO.id,
-      ...datasourceSO.attributes,
-    };
+    return datasourceSO.attributes;
   }
 
   public async getByIDs(
@@ -86,10 +83,7 @@ class DatasourceService {
       return null;
     }
 
-    return datasourceSO.saved_objects.map((so) => ({
-      id: so.id,
-      ...so.attributes,
-    }));
+    return datasourceSO.saved_objects.map((so) => so.attributes);
   }
 
   public async list(
@@ -112,12 +106,7 @@ class DatasourceService {
     });
 
     return {
-      items: datasources.saved_objects.map<Datasource>((datasourceSO) => {
-        return {
-          id: datasourceSO.id,
-          ...datasourceSO.attributes,
-        };
-      }),
+      items: datasources.saved_objects.map<Datasource>((datasourceSO) => datasourceSO.attributes),
       total: datasources.total,
       page,
       perPage,
