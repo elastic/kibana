@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { SuggestionRequest, Visualization, VisualizationSuggestion, Operation } from '../types';
 import chartTableSVG from '../assets/chart_datatable.svg';
@@ -132,10 +130,6 @@ export const datatableVisualization: Visualization<
         hide: true,
       },
     ];
-  },
-
-  renderDimensionEditor(domElement, props) {
-    render(<>Custom editor for dimension</>, domElement);
   },
 
   getConfiguration({ state, frame, layerId }) {
