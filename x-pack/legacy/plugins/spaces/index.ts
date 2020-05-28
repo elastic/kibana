@@ -8,19 +8,8 @@ import { resolve } from 'path';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { Legacy } from 'kibana';
 import { KibanaRequest } from '../../../../src/core/server';
-import { SpacesServiceSetup } from '../../../plugins/spaces/server';
 import { SpacesPluginSetup } from '../../../plugins/spaces/server';
-// @ts-ignore
-import { AuditLogger } from '../../server/lib/audit_logger';
 import { wrapError } from './server/lib/errors';
-
-export interface LegacySpacesPlugin {
-  getSpaceId: (request: Legacy.Request) => ReturnType<SpacesServiceSetup['getSpaceId']>;
-  getActiveSpace: (request: Legacy.Request) => ReturnType<SpacesServiceSetup['getActiveSpace']>;
-  spaceIdToNamespace: SpacesServiceSetup['spaceIdToNamespace'];
-  namespaceToSpaceId: SpacesServiceSetup['namespaceToSpaceId'];
-  getBasePath: SpacesServiceSetup['getBasePath'];
-}
 
 export const spaces = (kibana: Record<string, any>) =>
   new kibana.Plugin({
@@ -78,15 +67,6 @@ export const spaces = (kibana: Record<string, any>) =>
       if (!spacesPlugin) {
         throw new Error('New Platform XPack Spaces plugin is not available.');
       }
-
-      const { registerLegacyAPI } = spacesPlugin.__legacyCompat;
-
-      registerLegacyAPI({
-        auditLogger: {
-          create: (pluginId: string) =>
-            new AuditLogger(server, pluginId, server.config(), server.plugins.xpack_main.info),
-        },
-      });
 
       server.expose('getSpaceId', (request: Legacy.Request) =>
         spacesPlugin.spacesService.getSpaceId(request)

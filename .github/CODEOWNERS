@@ -158,7 +158,6 @@
 /x-pack/legacy/plugins/security/  @elastic/kibana-security
 /x-pack/legacy/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
-/x-pack/legacy/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /x-pack/plugins/security/  @elastic/kibana-security
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security

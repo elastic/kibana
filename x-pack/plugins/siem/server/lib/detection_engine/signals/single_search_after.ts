@@ -36,9 +36,6 @@ export const singleSearchAfter = async ({
   searchResult: SignalSearchResponse;
   searchDuration: string;
 }> => {
-  if (searchAfterSortId == null) {
-    throw Error('Attempted to search after with empty sort id');
-  }
   try {
     const searchAfterQuery = buildEventsSearchQuery({
       index,

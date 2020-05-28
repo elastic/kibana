@@ -140,7 +140,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async getJobState(jobId: string): Promise<JOB_STATE> {
       const jobStats = await this.getADJobStats(jobId);
 
-      expect(jobStats.jobs).to.have.length(1);
+      expect(jobStats.jobs).to.have.length(
+        1,
+        `Expected job stats to have exactly one job (got '${jobStats.length}')`
+      );
       const state: JOB_STATE = jobStats.jobs[0].state;
 
       return state;
@@ -178,7 +181,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .expect(200)
         .then((res: any) => res.body);
 
-      expect(datafeedStats.datafeeds).to.have.length(1);
+      expect(datafeedStats.datafeeds).to.have.length(
+        1,
+        `Expected datafeed stats to have exactly one datafeed (got '${datafeedStats.datafeeds.length}')`
+      );
       const state: DATAFEED_STATE = datafeedStats.datafeeds[0].state;
 
       return state;
@@ -206,7 +212,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .expect(200)
         .then((res: any) => res.body);
 
-      expect(analyticsStats.data_frame_analytics).to.have.length(1);
+      expect(analyticsStats.data_frame_analytics).to.have.length(
+        1,
+        `Expected dataframe analytics stats to have exactly one object (got '${analyticsStats.data_frame_analytics.length}')`
+      );
       const state: DATA_FRAME_TASK_STATE = analyticsStats.data_frame_analytics[0].state;
 
       return state;
@@ -414,7 +423,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async getADJobRecordCount(jobId: string): Promise<number> {
       const jobStats = await this.getADJobStats(jobId);
 
-      expect(jobStats.jobs).to.have.length(1);
+      expect(jobStats.jobs).to.have.length(
+        1,
+        `Expected job stats to have exactly one job (got '${jobStats.jobs.length}')`
+      );
       const processedRecordCount: number = jobStats.jobs[0].data_counts.processed_record_count;
 
       return processedRecordCount;

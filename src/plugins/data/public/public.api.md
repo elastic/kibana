@@ -991,6 +991,8 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     name: string;
     // (undocumented)
+    readFromDocValues?: boolean;
+    // (undocumented)
     script?: string;
     // (undocumented)
     scripted?: boolean;
