@@ -65,7 +65,10 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
     developerExamples.register({
       appId: 'embeddableExplorer',
       title: 'Embeddables',
-      description: `See how to build a "hello world" embeddable, an embeddable container, and how embeddable input and output is used.`,
+      description: `Multiple embeddable examples showcase how to build custom dashboard widgets, how to build your own custom "container"
+      (like a dashboard but imagine you want to render the panels differently), and how to embed anything that can show up in a dashboard
+      in your own UI and app, that comes pre-connected with actions built by other developers.
+      `,
       links: [
         {
           label: 'README',
