@@ -194,63 +194,52 @@ export const MapsCreateEditView = withRouter(
       return await savedObjectLoader.get(savedObjectId);
     }
 
-    getSavedMapFilters(savedMap) {
+    initFilters(savedMap) {
       const { globalState, mapsAppState } = this.props;
-      return {
-        query: getInitialQuery({
-          mapStateJSON: savedMap.mapStateJSON,
-          appState: mapsAppState,
-          userQueryLanguage: getUiSettings().get('search:queryLanguage'),
-        }),
-        time: getInitialTimeFilters({
-          mapStateJSON: savedMap.mapStateJSON,
-          globalState: globalState,
-        }),
-        refreshConfig: getInitialRefreshConfig({
-          mapStateJSON: savedMap.mapStateJSON,
-          globalState: globalState,
-        }),
-      };
+      const mapStateJSON = savedMap
+        ? savedMap.mapStateJSON
+        : undefined;
+      const query = getInitialQuery({
+        mapStateJSON,
+        appState: mapsAppState,
+        userQueryLanguage: getUiSettings().get('search:queryLanguage'),
+      });
+      const time = getInitialTimeFilters({
+        mapStateJSON,
+        globalState: globalState,
+      });
+      const refreshConfig = getInitialRefreshConfig({
+        mapStateJSON,
+        globalState: globalState,
+      });
+      this.setState({ query, time, refreshConfig });
+      this.state.store.dispatch(setRefreshConfig(refreshConfig));
     }
 
-    async getSavedMap(savedMapId) {
-      let savedMap = {};
-      let savedMapFilters = {};
-      if (savedMapId) {
-        savedMap = await this._fetchSavedMap(savedMapId);
-        savedMapFilters = this.getSavedMapFilters(savedMap);
-      }
-      const layerList = getInitialLayers(
-        savedMap.layerListJSON,
-        this.getInitialLayersFromUrlParam()
-      );
-      return {
-        ...savedMapFilters,
-        initialLayerListConfig: copyPersistentState(layerList),
-        layerList,
-        savedMap,
-      };
-    }
-
-    async initMap(savedMapId) {
-      let unsubscribe;
-      const savedMapAndLayerSettings = await this.getSavedMap(savedMapId);
-      const { globalState } = this.props;
+    async initMapAndLayerSettings(savedMapId) {
       const { store } = this.state;
-      const { savedMap, refreshConfig, layerList } = savedMapAndLayerSettings;
+      let unsubscribe;
 
-      // clear old UI state
-      store.dispatch(setSelectedLayer(null));
-      store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      store.dispatch(setReadOnly(!getMapsCapabilities().save));
+      // Get saved map & layer settings
+      let savedMap;
+      let layerList;
+      savedMap = await this._fetchSavedMap(savedMapId);
+      this.initFilters(savedMap);
+      if (savedMap.layerListJSON) {
+        layerList = JSON.parse(savedMap.layerListJSON);
+      } else {
+        layerList = getInitialLayers(this.getInitialLayersFromUrlParam());
+      }
+      store.dispatch(replaceLayerList(layerList));
+      this.setState({
+        initialLayerListConfig: copyPersistentState(layerList),
+        savedMap,
+      });
+      return savedMap;
+    }
 
-      // TODO: Handle store changes
-      // await this.handleStoreChanges();
-      // unsubscribe = store.subscribe(async () => {
-      //   await this.handleStoreChanges(store);
-      // });
-
-      // sync store with savedMap mapState
+    syncStoreAndGetFilters(savedMap) {
+      const { store } = this.state;
       let savedObjectFilters = [];
       if (savedMap.mapStateJSON) {
         const mapState = JSON.parse(savedMap.mapStateJSON);
@@ -276,25 +265,40 @@ export const MapsCreateEditView = withRouter(
         );
         store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
       }
+      return savedObjectFilters;
+    }
 
-      store.dispatch(replaceLayerList(layerList));
-      store.dispatch(setRefreshConfig(refreshConfig));
+    clearUi() {
+      const { store } = this.state;
+      // clear old UI state
+      store.dispatch(setSelectedLayer(null));
+      store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      store.dispatch(setReadOnly(!getMapsCapabilities().save));
+    }
 
-      const initialFilters = [
-        ..._.get(globalState, 'filters', []),
-        ...this.getAppStateFilters(),
-        ...savedObjectFilters,
-      ];
-      await this.onQueryChange({ filters: initialFilters });
-      this.setState({
-        ...savedMapAndLayerSettings,
-        initialized: true,
+    async initMap(savedMapId) {
+      const { globalState } = this.props;
+      const savedMap = await this.initMapAndLayerSettings(savedMapId);
+      this.clearUi();
+
+      // TODO: Handle store changes
+      // await this.handleStoreChanges();
+      // unsubscribe = store.subscribe(async () => {
+      //   await this.handleStoreChanges(store);
+      // });
+
+      const savedObjectFilters = this.syncStoreAndGetFilters(savedMap);
+      await this.onQueryChange({
+        filters: [
+          ..._.get(globalState, 'filters', []),
+          ...this.getAppStateFilters(),
+          ...savedObjectFilters,
+        ]
       });
     }
 
     render() {
       const {
-        initialized,
         store,
         query,
         time,
@@ -303,6 +307,7 @@ export const MapsCreateEditView = withRouter(
         initialLayerListConfig,
         isVisible,
       } = this.state;
+      const initialized = !!query && !!time && !!refreshConfig;
       return (
         <div id="maps-plugin" ng-class="{mapFullScreen: isFullScreen}">
           {initialized ? (

@@ -310,7 +310,7 @@ export class MapListing extends React.Component {
         sortable: true,
         render: (field, record) => (
           <EuiLink
-            href={createMapPath(record.id)}
+            href={getHttp().basePath.prepend(createMapPath(record.id))}
             data-test-subj={`mapListingTitleLink-${record.title.split(' ').join('-')}`}
           >
             {field}
