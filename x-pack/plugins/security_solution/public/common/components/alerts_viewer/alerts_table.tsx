@@ -17,7 +17,6 @@ export interface OwnProps {
   start: number;
 }
 
-const ALERTS_TABLE_ID = 'alerts-table';
 const defaultAlertsFilters: Filter[] = [
   {
     meta: {
@@ -52,12 +51,13 @@ const defaultAlertsFilters: Filter[] = [
 ];
 
 interface Props {
+  id: string;
   endDate: number;
   startDate: number;
   pageFilters?: Filter[];
 }
 
-const AlertsTableComponent: React.FC<Props> = ({ endDate, startDate, pageFilters = [] }) => {
+const AlertsTableComponent: React.FC<Props> = ({ id, endDate, startDate, pageFilters = [] }) => {
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
   const { initializeTimeline } = useManageTimeline();
 
@@ -75,7 +75,7 @@ const AlertsTableComponent: React.FC<Props> = ({ endDate, startDate, pageFilters
       pageFilters={alertsFilter}
       defaultModel={alertsDefaultModel}
       end={endDate}
-      id={ALERTS_TABLE_ID}
+      id={id}
       start={startDate}
     />
   );

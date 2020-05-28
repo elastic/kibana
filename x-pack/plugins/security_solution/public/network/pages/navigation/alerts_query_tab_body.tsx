@@ -10,6 +10,8 @@ import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import { AlertsView } from '../../../common/components/alerts_viewer';
 import { NetworkComponentQueryProps } from './types';
 
+const ALERTS_TABLE_ID = 'network-page-external-alerts';
+
 export const filterNetworkData: Filter[] = [
   {
     query: {
@@ -62,7 +64,7 @@ export const filterNetworkData: Filter[] = [
 ];
 
 export const NetworkAlertsQueryTabBody = React.memo((alertsProps: NetworkComponentQueryProps) => (
-  <AlertsView {...alertsProps} pageFilters={filterNetworkData} />
+  <AlertsView tableId={ALERTS_TABLE_ID} {...alertsProps} pageFilters={filterNetworkData} />
 ));
 
 NetworkAlertsQueryTabBody.displayName = 'NetworkAlertsQueryTabBody';

@@ -37,6 +37,8 @@ import { DetectionEngineHeaderPage } from '../../components/detection_engine_hea
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
 
+const ALERTS_TABLE_ID = 'alerts-page-alerts';
+
 export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   filters,
   query,
@@ -138,6 +140,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
                         />
                         <EuiSpacer size="l" />
                         <AlertsTable
+                          id={ALERTS_TABLE_ID}
                           loading={loading}
                           hasIndexWrite={hasIndexWrite ?? false}
                           canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}

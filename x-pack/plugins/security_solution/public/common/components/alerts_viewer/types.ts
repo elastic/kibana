@@ -10,11 +10,13 @@ import { NetworkComponentQueryProps } from '../../../network/pages/navigation/ty
 import { MatrixHistogramOption } from '../matrix_histogram/types';
 
 type CommonQueryProps = HostsComponentsQueryProps | NetworkComponentQueryProps;
-export interface AlertsComponentsQueryProps
+
+export interface AlertsComponentsProps
   extends Pick<
     CommonQueryProps,
     'deleteQuery' | 'endDate' | 'filterQuery' | 'skip' | 'setQuery' | 'startDate' | 'type'
   > {
+  tableId: string;
   pageFilters: Filter[];
   stackByOptions?: MatrixHistogramOption[];
   defaultFilters?: Filter[];

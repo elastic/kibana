@@ -17,7 +17,7 @@ import { MatrixHistogramContainer } from '../../../common/components/matrix_hist
 import * as i18n from '../translations';
 import { HistogramType } from '../../../graphql/types';
 
-const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
+const HOSTS_PAGE_TIMELINE_ID = 'hosts-page-events';
 const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
 
 export const eventsStackByOptions: MatrixHistogramOption[] = [

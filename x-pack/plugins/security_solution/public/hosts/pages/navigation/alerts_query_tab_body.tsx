@@ -10,6 +10,8 @@ import { Filter } from '../../../../../../../src/plugins/data/public';
 import { AlertsView } from '../../../common/components/alerts_viewer';
 import { AlertsComponentQueryProps } from './types';
 
+const ALERTS_TABLE_ID = 'hosts-page-external-alerts';
+
 export const filterHostData: Filter[] = [
   {
     query: {
@@ -48,7 +50,7 @@ export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentQu
     [pageFilters]
   );
 
-  return <AlertsView {...rest} pageFilters={hostPageFilters} />;
+  return <AlertsView tableId={ALERTS_TABLE_ID} {...rest} pageFilters={hostPageFilters} />;
 });
 
 HostAlertsQueryTabBody.displayName = 'HostAlertsQueryTabBody';
