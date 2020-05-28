@@ -320,7 +320,7 @@ export const useField = <T>(
       validationTypeToValidate: validationType,
     });
 
-    if ((validationErrors as Promise<ValidationError[]>).then) {
+    if (Reflect.has(validationErrors, 'then')) {
       return (validationErrors as Promise<ValidationError[]>).then(onValidationErrors);
     }
     return onValidationErrors(validationErrors as ValidationError[]);
