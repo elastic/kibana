@@ -40,7 +40,7 @@ To filter the fields in the data panel:
 
 * Enter the name in *Search field names*.
 
-* Click *Filter by type*, then select the filter. To show all of the fields in the index pattern, select *Only show fields with data*.
+* Click *Filter by type*, then select the filter. To show all of the fields in the index pattern, deselect *Only show fields with data*.
 
 [float]
 [[view-data-summaries]]
