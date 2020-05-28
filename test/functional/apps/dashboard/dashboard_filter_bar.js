@@ -205,8 +205,15 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('filter from unrelated index pattern is still applicable if field name is found', async function () {
-        const hasBadIndexPatternFilter = await filterBar.hasFilter('animal', 'exists', true);
-        expect(hasBadIndexPatternFilter).to.be(true);
+        const hasUnrelatedIndexPatternFilter = await filterBar.hasFilter('animal', 'exists', true);
+        expect(hasUnrelatedIndexPatternFilter).to.be(true);
+
+        const hasUnrelatedIndexPatternFilterPhrase = await filterBar.hasFilter(
+          'animal',
+          'Cat',
+          true
+        );
+        expect(hasUnrelatedIndexPatternFilterPhrase).to.be(true);
       });
 
       it('filter from unrelated index pattern is rendred as a warning if field name is not found', async function () {
