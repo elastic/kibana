@@ -76,6 +76,7 @@ export function* extractCodeMessages(buffer, reporter) {
         'dynamicImport',
         'nullishCoalescingOperator',
         'optionalChaining',
+        'exportNamespaceFrom',
       ],
     });
   } catch (error) {
