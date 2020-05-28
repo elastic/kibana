@@ -42,7 +42,7 @@
 
 .globalFilterItem-isError {
   .globalFilterLabel__value {
-    color: $euiColorDanger;
+    color: makeHighContrastColor($euiColorDangerText, $euiColorLightShade);
   }
 }
 
