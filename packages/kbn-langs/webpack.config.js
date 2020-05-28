@@ -16,17 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+const path = require('path');
 
-// Lib is intentionally not included in this barrel export file to separate worker logic
-// from being imported with pure functions
-
-export {
-  ElasticsearchSqlHighlightRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  addXJsonToRules,
-  XJsonMode,
-  installXJsonMode,
-} from './ace/modes';
-
-export { expandLiteralStrings, collapseLiteralStrings } from './lib';
+module.exports = {
+  mode: 'production',
+  entry: './index.ts',
+  output: {
+    path: path.resolve(__dirname, 'target'),
+  },
+  resolve: {
+    modules: ['node_modules'],
+    extensions: ['.js', '.ts', '.tsx'],
+  },
+  module: {
+    rules: [
+      {
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/typescript'],
+          },
+        },
+      },
+    ],
+  },
+};

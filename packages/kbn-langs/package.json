@@ -1,0 +1,22 @@
+{
+  "name": "@kbn/langs",
+  "version": "1.0.0",
+  "main": "./target/index.js",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "monaco-editor": "~0.17.0"
+  },
+  "devDependencies": {
+    "getopts": "^2.2.4",
+    "babel-loader": "^8.0.6",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10",
+    "supports-color": "^7.0.0",
+    "del": "^5.1.0"
+  },
+  "scripts": {
+    "//": "At this point in time we only have one language in here",
+    "build": "node ./scripts/build.js"
+  }
+}

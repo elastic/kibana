@@ -45,7 +45,6 @@ export {
   XJsonHighlightRules,
   collapseLiteralStrings,
   expandLiteralStrings,
-  monaco,
 } from './console_lang';
 
 export {

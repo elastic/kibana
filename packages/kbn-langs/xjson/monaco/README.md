@@ -39,6 +39,6 @@ the grammar parser.
 
 A stateful mechanism for holding a reference to the Monaco-provided proxy getter.
 
-### ./grammar
+### ../grammar
 
 The parser logic that lives inside of the worker. Takes in a string and returns annotations for XJSON.

@@ -19,7 +19,7 @@
 
 import { monaco } from '@kbn/ui-shared-deps/monaco';
 import { XJsonWorker } from './worker';
-import { AnnoTypes } from './grammar';
+import { AnnoTypes } from '../grammar';
 import { ID } from './constants';
 
 export interface Annotation {
