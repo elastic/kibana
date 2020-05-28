@@ -43,7 +43,7 @@ const StyledEuiPage = styled(EuiPage)`
     }
   }
   .endpoint-navTabs {
-    margin-left: ${props => props.theme.eui.euiSizeL};
+    margin-left: ${(props) => props.theme.eui.euiSizeL};
   }
 `;
 

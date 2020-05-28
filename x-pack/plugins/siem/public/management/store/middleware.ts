@@ -20,12 +20,12 @@ export const managementMiddlewareFactory: ImmutableMultipleMiddlewareFactory = (
 ) => {
   return [
     substateMiddlewareFactory(
-      globalState =>
+      (globalState) =>
         globalState[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_POLICY_LIST_NAMESPACE],
       policyListMiddlewareFactory(coreStart, depsStart)
     ),
     substateMiddlewareFactory(
-      globalState =>
+      (globalState) =>
         globalState[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE],
       policyDetailsMiddlewareFactory(coreStart, depsStart)
     ),

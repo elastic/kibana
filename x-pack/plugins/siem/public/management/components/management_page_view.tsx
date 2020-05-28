@@ -11,7 +11,7 @@ import { PageView, PageViewProps } from '../../common/components/endpoint/page_v
 import { ManagementSubTab } from '../types';
 import { getManagementUrl } from '..';
 
-export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>(options => {
+export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) => {
   const { tabName } = useParams<{ tabName: ManagementSubTab }>();
   const tabs = useMemo((): PageViewProps['tabs'] => {
     return [
