@@ -14,6 +14,7 @@ import {
   SavedTimeline,
   TimelineSavedObject,
   TimelineTypeLiteralWithNull,
+  ExportTimelineNotFoundError,
 } from '../../../common/types/timeline';
 import {
   ResponseTimeline,
@@ -438,3 +439,35 @@ export const timelineWithReduxProperties = (
   pinnedEventIds: pinnedEvents.map((e) => e.eventId),
   pinnedEventsSaveObject: pinnedEvents,
 });
+
+export const getTimelines = async (request: FrameworkRequest, timelineIds: string[]) => {
+  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjects = await Promise.resolve(
+    savedObjectsClient.bulkGet(
+      timelineIds.reduce(
+        (acc, timelineId) => [...acc, { id: timelineId, type: timelineSavedObjectType }],
+        [] as Array<{ id: string; type: string }>
+      )
+    )
+  );
+
+  const timelineObjects: {
+    timelines: TimelineSavedObject[];
+    errors: ExportTimelineNotFoundError[];
+  } = savedObjects.saved_objects.reduce(
+    (acc, savedObject) => {
+      return savedObject.error == null
+        ? {
+            errors: acc.errors,
+            timelines: [...acc.timelines, convertSavedObjectToSavedTimeline(savedObject)],
+          }
+        : { errors: [...acc.errors, savedObject.error], timelines: acc.timelines };
+    },
+    {
+      timelines: [] as TimelineSavedObject[],
+      errors: [] as ExportTimelineNotFoundError[],
+    }
+  );
+
+  return timelineObjects;
+};

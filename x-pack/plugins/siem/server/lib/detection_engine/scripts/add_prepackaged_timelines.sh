@@ -9,23 +9,17 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./add_prepackaged_timelines.sh ${file}
-file=${1:-../rules/prepackaged_timelines/index.ndjson}
-url=${KIBANA_URL}${SPACE_URL}/api/timeline/_import
-
-delim="-----MultipartDelimeter$$$RANDOM$RANDOM$RANDOM"
-nl=$'\r\n'
-mime=application/octet-stream
+# Uses a defaults if no argument is specified
+TIMELINES=${1:-../rules/prepackaged_timelines/index.ndjson}
 
 # Generate ndjson for prepackage timelines.
 sh ./regen_prepackage_timelines_index.sh
 
-# Body of the request.
-data() {
-    # Also make sure to set the fields you need.
-    printf %s "--$delim${nl}Content-Disposition: form-data; name=\"file\"; filename=\"index.ndjson\"${nl}Content-Type: $mime$nl$nl"
-    cat "$file"
-    printf %s "$nl--$delim--$nl"
-}
-
-echo response="$(data | curl -X POST "$url" -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} -H 'kbn-xsrf: 123' -H "content-type: multipart/form-data; boundary=$delim" --data-binary @-)"
+# Example to import and overwrite everything from ./rules/prepackaged_timelines/index.ndjson
+# ./import_rules.sh
+curl -s -k \
+  -H 'kbn-xsrf: 123' \
+  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
+  -X POST "${KIBANA_URL}${SPACE_URL}/api/timeline/_import" \
+  --form file=@${TIMELINES} \
+  | jq .;

@@ -265,19 +265,6 @@ export interface AllTimelineSavedObject
  * Import/export timelines
  */
 
-export type ExportTimelineSavedObjectsClient = Pick<
-  SavedObjectsClient,
-  | 'get'
-  | 'errors'
-  | 'create'
-  | 'bulkCreate'
-  | 'delete'
-  | 'find'
-  | 'bulkGet'
-  | 'update'
-  | 'bulkUpdate'
->;
-
 export type ExportedGlobalNotes = Array<Exclude<NoteSavedObject, 'eventId'>>;
 export type ExportedEventNotes = NoteSavedObject[];
 
