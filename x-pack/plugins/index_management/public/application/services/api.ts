@@ -30,8 +30,6 @@ import {
   UIM_TEMPLATE_CREATE,
   UIM_TEMPLATE_UPDATE,
   UIM_TEMPLATE_CLONE,
-  UIM_COMPONENT_TEMPLATE_DELETE,
-  UIM_COMPONENT_TEMPLATE_DELETE_MANY,
 } from '../../../common/constants';
 
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
@@ -274,29 +272,6 @@ export async function updateTemplate(template: TemplateDeserialized) {
   });
 
   uiMetricService.trackMetric('count', UIM_TEMPLATE_UPDATE);
-
-  return result;
-}
-
-export function useLoadComponentTemplates() {
-  return useRequest<any>({
-    path: `${API_BASE_PATH}/component_templates`,
-    method: 'get',
-  });
-}
-
-export function deleteComponentTemplates(names: string[]) {
-  const result = sendRequest({
-    path: `${API_BASE_PATH}/component_templates/${names
-      .map((name) => encodeURIComponent(name))
-      .join(',')}`,
-    method: 'delete',
-  });
-
-  uiMetricService.trackMetric(
-    'count',
-    names.length > 1 ? UIM_COMPONENT_TEMPLATE_DELETE_MANY : UIM_COMPONENT_TEMPLATE_DELETE
-  );
 
   return result;
 }

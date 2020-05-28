@@ -11,3 +11,5 @@ export * from './indices';
 export * from './mappings';
 
 export * from './templates';
+
+export * from './component_templates';

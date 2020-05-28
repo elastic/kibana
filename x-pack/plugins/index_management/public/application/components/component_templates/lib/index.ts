@@ -6,6 +6,6 @@
 
 export * from './api';
 
-export * from './use_request';
+export * from './request';
 
 export * from './documentation';

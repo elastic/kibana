@@ -27,7 +27,7 @@ import { breadcrumbService } from '../../services/breadcrumbs';
 
 export enum Section {
   Indices = 'indices',
-  IndexTemplates = 'index_templates',
+  IndexTemplates = 'templates',
   ComponentTemplates = 'component_templates',
 }
 

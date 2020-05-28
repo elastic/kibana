@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexSettings, Aliases, Mappings } from '../../../../common';
+import { IndexSettings } from './indices';
+import { Aliases } from './aliases';
+import { Mappings } from './mappings';
 
-export interface ComponentTemplateSerialized {
+interface ComponentTemplateBase {
   template: {
     settings?: IndexSettings;
     aliases?: Aliases;
@@ -16,11 +18,16 @@ export interface ComponentTemplateSerialized {
   _meta?: { [key: string]: any };
 }
 
-export interface ComponentTemplateDeserialized extends ComponentTemplateSerialized {
+export interface ComponentTemplateDeserialized extends ComponentTemplateBase {
   name: string;
   _kbnMeta: {
     usedBy: string[];
   };
+}
+
+export interface ComponentTemplateEs {
+  name: string;
+  component_template: ComponentTemplateBase;
 }
 
 export interface ComponentTemplateListItem {

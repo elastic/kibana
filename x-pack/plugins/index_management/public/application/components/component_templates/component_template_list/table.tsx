@@ -12,16 +12,14 @@ import {
   EuiButton,
   EuiInMemoryTableProps,
   EuiTableFieldDataColumnType,
+  EuiHealth,
   EuiIcon,
 } from '@elastic/eui';
 
-interface ComponentTemplate {
-  name: string;
-  isActive: boolean;
-}
+import { ComponentTemplateListItem } from '../types';
 
 export interface Props {
-  componentTemplates: ComponentTemplate[];
+  componentTemplates: ComponentTemplateListItem[];
   onReloadClick: () => void;
   onDeleteClick: (componentTemplateName: string[]) => void;
 }
@@ -31,20 +29,20 @@ export const ComponentTable: FunctionComponent<Props> = ({
   onReloadClick,
   onDeleteClick,
 }) => {
-  const [selection, setSelection] = useState<ComponentTemplate[]>([]);
+  const [selection, setSelection] = useState<ComponentTemplateListItem[]>([]);
 
-  const tableProps: EuiInMemoryTableProps<ComponentTemplate> = {
+  const tableProps: EuiInMemoryTableProps<ComponentTemplateListItem> = {
     itemId: 'name',
     isSelectable: true,
     'data-test-subj': 'componentTemplatesTable',
     sorting: { sort: { field: 'name', direction: 'asc' } },
     selection: {
       onSelectionChange: setSelection,
-      selectable: ({ isActive }) => !isActive,
+      selectable: ({ isInUse }) => !isInUse,
       selectableMessage: (selectable) =>
         !selectable
           ? i18n.translate('xpack.idxMgmt.componentTemplatesList.table.disabledSelectionLabel', {
-              defaultMessage: 'Component template is in use',
+              defaultMessage: 'Component template is in use and cannot be deleted',
             })
           : i18n.translate('xpack.idxMgmt.componentTemplatesList.table.selectionLabel', {
               defaultMessage: 'Select this component template',
@@ -54,7 +52,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
       'data-test-subj': 'componentTemplateTableRow',
     }),
     cellProps: (componentTemplate, column) => {
-      const { field } = column as EuiTableFieldDataColumnType<ComponentTemplate>;
+      const { field } = column as EuiTableFieldDataColumnType<ComponentTemplateListItem>;
 
       return {
         'data-test-subj': `componentTemplateTableRow-${field}`,
@@ -105,6 +103,36 @@ export const ComponentTable: FunctionComponent<Props> = ({
       box: {
         incremental: true,
       },
+      filters: [
+        {
+          type: 'field_value_selection' as const,
+          field: 'isInUse',
+          name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isInUseFilterLabel', {
+            defaultMessage: 'Status',
+          }),
+          multiSelect: false,
+          options: [
+            {
+              value: true,
+              view: i18n.translate(
+                'xpack.idxMgmt.componentTemplatesList.table.inUseFilterOptionLabel',
+                {
+                  defaultMessage: 'In use',
+                }
+              ),
+            },
+            {
+              value: false,
+              view: i18n.translate(
+                'xpack.idxMgmt.componentTemplatesList.table.notInUseFilterOptionLabel',
+                {
+                  defaultMessage: 'Not in use',
+                }
+              ),
+            },
+          ],
+        },
+      ],
     },
     pagination: {
       initialPageSize: 10,
@@ -125,12 +153,49 @@ export const ComponentTable: FunctionComponent<Props> = ({
         ),
       },
       {
-        field: 'isActive',
-        name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isActiveColumnTitle', {
-          defaultMessage: 'Active',
+        field: 'isInUse',
+        name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isInUseColumnTitle', {
+          defaultMessage: 'Status',
         }),
         sortable: true,
-        render: (isActive: boolean) => (isActive ? <EuiIcon type="check" /> : null),
+        render: (isInUse: boolean) => {
+          const label = isInUse
+            ? i18n.translate('xpack.idxMgmt.componentTemplatesList.table.inUseCellDescription', {
+                defaultMessage: 'In use',
+              })
+            : i18n.translate('xpack.idxMgmt.componentTemplatesList.table.notInUseCellDescription', {
+                defaultMessage: 'Not in use',
+              });
+          const color = isInUse ? 'success' : 'danger';
+          return <EuiHealth color={color}>{label}</EuiHealth>;
+        },
+      },
+      {
+        field: 'hasMappings',
+        name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.mappingsColumnTitle', {
+          defaultMessage: 'Mappings',
+        }),
+        truncateText: true,
+        sortable: true,
+        render: (hasMappings: boolean) => (hasMappings ? <EuiIcon type="check" /> : null),
+      },
+      {
+        field: 'hasSettings',
+        name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.settingsColumnTitle', {
+          defaultMessage: 'Settings',
+        }),
+        truncateText: true,
+        sortable: true,
+        render: (hasSettings: boolean) => (hasSettings ? <EuiIcon type="check" /> : null),
+      },
+      {
+        field: 'hasAliases',
+        name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.aliasesColumnTitle', {
+          defaultMessage: 'Aliases',
+        }),
+        truncateText: true,
+        sortable: true,
+        render: (hasAliases: boolean) => (hasAliases ? <EuiIcon type="check" /> : null),
       },
       {
         name: (
@@ -184,7 +249,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
             icon: 'trash',
             color: 'danger',
             onClick: ({ name }) => onDeleteClick([name]),
-            enabled: ({ isActive }) => !isActive,
+            enabled: ({ isInUse }) => !isInUse,
           },
         ],
       },

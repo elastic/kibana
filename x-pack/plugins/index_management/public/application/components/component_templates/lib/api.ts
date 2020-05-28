@@ -5,7 +5,7 @@
  */
 
 import { ComponentTemplateDeserialized } from '../types';
-import { UseRequestHook, SendRequestHook } from './use_request';
+import { UseRequestHook, SendRequestHook } from './request';
 import { UIM_COMPONENT_TEMPLATE_DELETE_MANY, UIM_COMPONENT_TEMPLATE_DELETE } from '../constants';
 
 export const getApi = (
