@@ -750,6 +750,13 @@ function discoverController(
             // Update defaults so that "reload saved query" functions correctly
             setAppState(getStateDefaults());
             chrome.docTitle.change(savedSearch.lastSavedTitle);
+            chrome.setBreadcrumbs([
+              {
+                text: discoverBreadcrumbsTitle,
+                href: '#/',
+              },
+              { text: savedSearch.title },
+            ]);
           }
         }
       });

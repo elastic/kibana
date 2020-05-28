@@ -69,6 +69,16 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
+      it('renaming a saved query should modify name in breadcrumb', async function () {
+        const queryName2 = 'Modified Query # 1';
+        await PageObjects.discover.loadSavedSearch(queryName1);
+        await PageObjects.discover.saveSearch(queryName2);
+
+        await retry.try(async function () {
+          expect(await PageObjects.discover.getCurrentQueryName()).to.be(queryName2);
+        });
+      });
+
       it('should show the correct hit count', async function () {
         const expectedHitCount = '14,004';
         await retry.try(async function () {
