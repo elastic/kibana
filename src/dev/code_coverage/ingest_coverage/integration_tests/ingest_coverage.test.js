@@ -40,22 +40,20 @@ const verboseArgs = [
   '--path',
 ];
 
-// FLAKY: https://github.com/elastic/kibana/issues/67554
-// FLAKY: https://github.com/elastic/kibana/issues/67555
-// FLAKY: https://github.com/elastic/kibana/issues/67556
-describe.skip('Ingesting coverage', () => {
+describe('Ingesting coverage', () => {
   const summaryPath = 'jest-combined/coverage-summary-manual-mix.json';
   const resolved = resolve(MOCKS_DIR, summaryPath);
-  const siteUrlRegex = /"staticSiteUrl": (".+",)/;
-  let actualUrl = '';
-
-  beforeAll(async () => {
-    const opts = [...verboseArgs, resolved];
-    const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
-    actualUrl = siteUrlRegex.exec(stdout)[1];
-  });
 
   describe(`staticSiteUrl`, () => {
+    let actualUrl = '';
+    const siteUrlRegex = /"staticSiteUrl": (".+",)/;
+
+    beforeAll(async () => {
+      const opts = [...verboseArgs, resolved];
+      const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
+      actualUrl = siteUrlRegex.exec(stdout)[1];
+    });
+
     it('should contain the static host', () => {
       const staticHost = /https:\/\/kibana-coverage\.elastic\.dev/;
       expect(staticHost.test(actualUrl)).ok();
@@ -67,6 +65,30 @@ describe.skip('Ingesting coverage', () => {
     it('should contain the folder structure', () => {
       const folderStructure = /(?:.*|.*-combined)\//;
       expect(folderStructure.test(actualUrl)).ok();
+    });
+  });
+
+  describe(`vcsInfo`, () => {
+    let vcsInfo;
+    describe(`without a commit msg in the vcs info file`, () => {
+      const args = [
+        'scripts/ingest_coverage.js',
+        '--verbose',
+        '--vcsInfoPath',
+        'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO_missing_commit_msg.txt',
+        '--path',
+      ];
+
+      beforeAll(async () => {
+        const opts = [...args, resolved];
+        const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
+        vcsInfo = stdout;
+      });
+
+      it(`should be an obj w/o a commit msg`, () => {
+        const commitMsgRE = /"commitMsg"/;
+        expect(commitMsgRE.test(vcsInfo)).to.not.be.ok();
+      });
     });
   });
 });
