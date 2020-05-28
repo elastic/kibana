@@ -31,18 +31,12 @@ export async function navigateToApp(
   const devToolsResponses = new Map<string, any>();
   const apps = [
     'kibana',
-    'graph',
-    'logs',
-    'canvas',
-    'maps',
-    'timelion',
-    'metrics',
-    'apm',
-    'uptime',
-    'siem',
-    'dev_tools',
-    'monitoring',
-  ].map(app => `/app/${app}`);
+    'canvas', // +1
+    'maps', // +16
+    'timelion', // +1
+    'apm', // +1
+    'uptime', // +1
+  ].map((app) => `/app/${app}`);
 
   for (const url of ['/login', ...apps]) {
     const page = await browser.newPage();

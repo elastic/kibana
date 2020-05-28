@@ -52,41 +52,31 @@ export function ingestPerformanceMetrics(
   const metrics = Array<{
     url: string;
     encodedBodyLength: number;
-    plugin?: string;
-    type?: string;
   }>();
 
   for (const [url, array] of uniqueRequests) {
-    const isPlugin = url.endsWith('.plugin.js');
-    if (isPlugin) {
-      const type = url.match(/.*\/\d+.plugin.js$/) ? 'lazy' : 'entry';
-      const results = url.match(/(?<=plugin\/)(.*)(?=\/)/);
-      const plugin = results ? results[0] : url;
+    // ignore lazy loaded plugins
+    if (url.match(/.*\/\d+.plugin.js$/)) {
+      continue;
+    }
+
+    // get all entry plugins and repeatable assets
+    if (url.endsWith('.plugin.js') || array.length > 1) {
       const encodedBodyLength = Math.round(
         array.map((i: any) => i.encodedBodyLength).reduce((acc, value) => acc + value) /
           array.length
       );
-
-      metrics.push({ url, plugin, type, encodedBodyLength });
-    } else {
-      if (array.length > 1) {
-        const encodedBodyLength = Math.round(
-          array.map((i: any) => i.encodedBodyLength).reduce((acc, value) => acc + value) /
-            array.length
-        );
-        metrics.push({ url, encodedBodyLength });
-      }
+      metrics.push({ url, encodedBodyLength });
     }
   }
 
   const reporter = CiStatsReporter.fromEnv(log);
-  metrics.map(asset => {
-    reporter.metrics([
-      {
-        group: 'Asset size',
-        id: asset.url,
-        value: asset.encodedBodyLength,
-      },
-    ]);
-  });
+
+  reporter.metrics(
+    metrics.map((asset) => ({
+      group: 'Asset size',
+      id: asset.url,
+      value: asset.encodedBodyLength,
+    }))
+  );
 }

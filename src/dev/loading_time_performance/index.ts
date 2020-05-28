@@ -25,7 +25,7 @@ import { ingestPerformanceMetrics } from './ingest_metrics';
 // @ts-ignore not TS yet
 import getUrl from '../../test_utils/get_url';
 
-const configPath = resolve(REPO_ROOT, 'x-pack/test/functional/config.js');
+const configPath = resolve(REPO_ROOT, 'x-pack/test/page_load_metrics/config.ts');
 
 export function runTestsCli() {
   run(

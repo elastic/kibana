@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/performance').runTestsCli();
+require('../src/dev/loading_time_performance').runTestsCli();
