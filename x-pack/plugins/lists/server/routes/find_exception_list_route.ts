@@ -13,7 +13,11 @@ import {
   transformError,
   validate,
 } from '../siem_server_deps';
-import { findExceptionListSchema, foundExceptionListSchema } from '../../common/schemas';
+import {
+  FindExceptionListSchemaDecoded,
+  findExceptionListSchema,
+  foundExceptionListSchema,
+} from '../../common/schemas';
 
 import { getExceptionListClient } from './utils';
 
@@ -25,7 +29,9 @@ export const findExceptionListRoute = (router: IRouter): void => {
       },
       path: `${EXCEPTION_LIST_URL}/_find`,
       validate: {
-        query: buildRouteValidation(findExceptionListSchema),
+        query: buildRouteValidation<typeof findExceptionListSchema, FindExceptionListSchemaDecoded>(
+          findExceptionListSchema
+        ),
       },
     },
     async (context, request, response) => {
@@ -35,13 +41,14 @@ export const findExceptionListRoute = (router: IRouter): void => {
         const {
           filter,
           page,
+          namespace_type: namespaceType,
           per_page: perPage,
           sort_field: sortField,
           sort_order: sortOrder,
         } = request.query;
         const exceptionListItems = await exceptionLists.findExceptionList({
           filter,
-          namespaceType: 'single', // TODO: Bubble this up
+          namespaceType,
           page,
           perPage,
           sortField,
