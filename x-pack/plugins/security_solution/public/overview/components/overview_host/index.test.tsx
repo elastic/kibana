@@ -14,6 +14,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  createSiemLocalStorageMock,
 } from '../../../common/mock';
 
 import { OverviewHost } from '.';
@@ -92,11 +93,12 @@ const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
 describe('OverviewHost', () => {
   const state: State = mockGlobalState;
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  const siemLocalStorageMock = createSiemLocalStorageMock();
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock);
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock);
   });
 
   test('it renders the expected widget title', () => {

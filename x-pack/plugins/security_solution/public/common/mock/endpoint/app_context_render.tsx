@@ -19,7 +19,7 @@ import { alertMiddlewareFactory } from '../../../endpoint_alerts/store/middlewar
 import { AppRootProvider } from './app_root_provider';
 import { managementMiddlewareFactory } from '../../../management/store/middleware';
 import { createKibanaContextProviderMock } from '../kibana_react';
-import { SUB_PLUGINS_REDUCER, mockGlobalState } from '..';
+import { SUB_PLUGINS_REDUCER, mockGlobalState, createSiemLocalStorageMock } from '..';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -56,14 +56,23 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const coreStart = coreMock.createStart({ basePath: '/mock' });
   const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
-  const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, apolloClientObservable, [
-    substateMiddlewareFactory(
-      (globalState) => globalState.alertList,
-      alertMiddlewareFactory(coreStart, depsStart)
-    ),
-    ...managementMiddlewareFactory(coreStart, depsStart),
-    middlewareSpy.actionSpyMiddleware,
-  ]);
+  const siemLocalStorageMock = createSiemLocalStorageMock();
+
+  const store = createStore(
+    mockGlobalState,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    siemLocalStorageMock,
+    [
+      substateMiddlewareFactory(
+        (globalState) => globalState.alertList,
+        alertMiddlewareFactory(coreStart, depsStart)
+      ),
+      ...managementMiddlewareFactory(coreStart, depsStart),
+      middlewareSpy.actionSpyMiddleware,
+    ]
+  );
+
   const MockKibanaContextProvider = createKibanaContextProviderMock();
 
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (

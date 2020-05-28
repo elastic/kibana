@@ -13,6 +13,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  createSiemLocalStorageMock,
 } from '../../mock';
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
@@ -141,7 +142,9 @@ const state: State = {
     },
   },
 };
-const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+
+const siemLocalStorageMock = createSiemLocalStorageMock();
+const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock);
 
 describe('StatefulTopN', () => {
   // Suppress warnings about "react-beautiful-dnd"

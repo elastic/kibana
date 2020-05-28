@@ -18,6 +18,7 @@ import {
   mockGlobalState,
   apolloClientObservable,
   SUB_PLUGINS_REDUCER,
+  createSiemLocalStorageMock,
 } from '../../common/mock';
 import { State, createStore } from '../../common/store';
 import { inputsActions } from '../../common/store/inputs';
@@ -155,7 +156,13 @@ describe('rendering - rendering', () => {
     ];
     localSource[0].result.data.source.status.indicesExist = true;
     const myState: State = mockGlobalState;
-    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    const siemLocalStorageMock = createSiemLocalStorageMock();
+    const myStore = createStore(
+      myState,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      siemLocalStorageMock
+    );
     const wrapper = mount(
       <TestProviders store={myStore}>
         <MockedProvider mocks={localSource} addTypename={false}>

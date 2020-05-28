@@ -10,7 +10,12 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
-import { apolloClientObservable, mockGlobalState, SUB_PLUGINS_REDUCER } from '../../mock';
+import {
+  apolloClientObservable,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+  createSiemLocalStorageMock,
+} from '../../mock';
 import { createUseUiSetting$Mock } from '../../mock/kibana_react';
 import { createStore, State } from '../../store';
 
@@ -75,11 +80,17 @@ const timepickerRanges = [
 describe('SIEM Super Date Picker', () => {
   describe('#SuperDatePicker', () => {
     const state: State = mockGlobalState;
-    let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    const siemLocalStorageMock = createSiemLocalStorageMock();
+    let store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      siemLocalStorageMock
+    );
 
     beforeEach(() => {
       jest.clearAllMocks();
-      store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+      store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock);
       mockUseUiSetting$.mockImplementation((key, defaultValue) => {
         const useUiSetting$Mock = createUseUiSetting$Mock();
 

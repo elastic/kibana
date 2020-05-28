@@ -13,6 +13,7 @@ import {
   mockGlobalState,
   apolloClientObservable,
   SUB_PLUGINS_REDUCER,
+  createSiemLocalStorageMock,
 } from '../../../../common/mock';
 import { createStore, State } from '../../../../common/store';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
@@ -48,11 +49,12 @@ describe('Properties', () => {
   const usersViewing = ['elastic'];
 
   const state: State = mockGlobalState;
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  const siemLocalStorageMock = createSiemLocalStorageMock();
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock);
     mockedWidth = 1000;
   });
 

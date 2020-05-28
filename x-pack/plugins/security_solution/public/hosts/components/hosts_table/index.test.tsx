@@ -15,6 +15,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  createSiemLocalStorageMock,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
@@ -35,12 +36,13 @@ jest.mock('../../../common/components/query_bar', () => ({
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
+  const siemLocalStorageMock = createSiemLocalStorageMock();
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock);
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, siemLocalStorageMock);
   });
 
   describe('rendering', () => {
