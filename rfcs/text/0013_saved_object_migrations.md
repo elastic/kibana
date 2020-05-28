@@ -313,11 +313,11 @@ will automatically remove the guard.
 1. Disable `action.auto_create_index` for the Kibana system indices.
 2. If a node detects that the `.kibana` index requires a migration it does the
    following:
-   1. Create a version-specific read and write alias for sending commands
-       (.e.g `.kibana_8.0.1_read` & `.kibana_8.0.1_write`.
-   2. Remove the write alias(es) for all previous versions.
-3. All saved object reads and writes use the version-specific read and write
-   alias.
+   1. Create a version-specific alias for reading and writing to the
+      underlying index .e.g `.kibana_8.0.1`. All saved object reads and writes
+      use this alias instead of reading or writing directly to the index.
+   2. Remove the version-specific alias(es) for all previous versions thereby
+      minimizing the chance that an outdated node can cause data loss.
 
 # 5. Alternatives
 # 5.1 Rolling upgrades
