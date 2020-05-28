@@ -34,6 +34,7 @@ import {
 } from './map_action_constants';
 import { ILayer } from '../classes/layers/layer';
 import { DataMeta, MapFilters } from '../../common/descriptor_types';
+import { DataRequestAbortError } from '../classes/util/data_request';
 
 export type DataRequestContext = {
   startLoading(dataId: string, requestToken: symbol, meta: DataMeta): void;
@@ -275,5 +276,95 @@ export function updateSourceDataRequest(layerId: string, newData: unknown) {
     });
 
     dispatch<any>(updateStyleMeta(layerId));
+  };
+}
+
+export function fitToLayerExtent(layerId: string) {
+  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+    const targetLayer = getLayerById(layerId, getState());
+
+    if (targetLayer) {
+      try {
+        const bounds = await targetLayer.getBounds(
+          getDataRequestContext(dispatch, getState, layerId)
+        );
+        if (bounds) {
+          await dispatch(setGotoWithBounds(bounds));
+        }
+      } catch (error) {
+        if (!(error instanceof DataRequestAbortError)) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            'Unhandled getBounds error for layer. Only DataRequestAbortError should be surfaced',
+            error
+          );
+        }
+        // new fitToLayerExtent request has superseded this thread of execution. Results no longer needed.
+        return;
+      }
+    }
+  };
+}
+
+export function fitToDataBounds() {
+  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+    const layerList = getFittableLayers(getState());
+
+    if (!layerList.length) {
+      return;
+    }
+
+    const dataFilters = getDataFilters(getState());
+    const boundsPromises = layerList.map(async (layer) => {
+      return layer.getBounds(getDataRequestContext(dispatch, getState, layer.getId()));
+    });
+
+    let bounds;
+    try {
+      bounds = await Promise.all(boundsPromises);
+    } catch (error) {
+      if (!(error instanceof DataRequestAbortError)) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          'Unhandled getBounds error for layer. Only DataRequestAbortError should be surfaced',
+          error
+        );
+      }
+      // new fitToDataBounds request has superseded this thread of execution. Results no longer needed.
+      return;
+    }
+
+    const corners = [];
+    for (let i = 0; i < bounds.length; i++) {
+      const b = bounds[i];
+
+      // filter out undefined bounds (uses Infinity due to turf responses)
+      if (
+        b === null ||
+        b.minLon === Infinity ||
+        b.maxLon === Infinity ||
+        b.minLat === -Infinity ||
+        b.maxLat === -Infinity
+      ) {
+        continue;
+      }
+
+      corners.push([b.minLon, b.minLat]);
+      corners.push([b.maxLon, b.maxLat]);
+    }
+
+    if (!corners.length) {
+      return;
+    }
+
+    const turfUnionBbox = turf.bbox(turf.multiPoint(corners));
+    const dataBounds = {
+      minLon: turfUnionBbox[0],
+      minLat: turfUnionBbox[1],
+      maxLon: turfUnionBbox[2],
+      maxLat: turfUnionBbox[3],
+    };
+
+    dispatch(setGotoWithBounds(dataBounds));
   };
 }
