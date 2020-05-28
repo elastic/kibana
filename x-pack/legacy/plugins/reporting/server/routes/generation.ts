@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { kibanaResponseFactory } from 'src/core/server';
 import { ReportingCore } from '../';
@@ -52,7 +53,14 @@ export function registerJobGenerationRoutes(
     });
   };
 
-  function handleError(exportTypeId: string, err: Error, res: typeof kibanaResponseFactory) {
+  function handleError(res: typeof kibanaResponseFactory, err: Error | Boom) {
+    if (err instanceof Boom) {
+      return res.customError({
+        statusCode: err.output.statusCode,
+        body: err.output.payload.message,
+      });
+    }
+
     if (err instanceof esErrors['401']) {
       return res.unauthorized({
         body: `Sorry, you aren't authenticated`,
@@ -61,7 +69,7 @@ export function registerJobGenerationRoutes(
 
     if (err instanceof esErrors['403']) {
       return res.forbidden({
-        body: `Sorry, you are not authorized to create ${exportTypeId} reports`,
+        body: `Sorry, you are not authorized`,
       });
     }
 
@@ -81,6 +89,6 @@ export function registerJobGenerationRoutes(
   // Register beta panel-action download-related API's
   if (config.get('csv', 'enablePanelActionDownload')) {
     registerGenerateCsvFromSavedObject(reporting, setupDeps, handler, handleError);
-    registerGenerateCsvFromSavedObjectImmediate(reporting, setupDeps);
+    registerGenerateCsvFromSavedObjectImmediate(reporting, setupDeps, handleError);
   }
 }

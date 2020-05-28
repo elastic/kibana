@@ -30,16 +30,18 @@ export function registerGenerateFromJobParams(
         params: schema.object({
           exportType: schema.string({ minLength: 2 }),
         }),
-        body: schema.maybe(
+        body: schema.nullable(
           schema.object({
             jobParams: schema.maybe(schema.string()),
           })
         ),
-        query: schema.object({
-          jobParams: schema.string({
-            defaultValue: '',
-          }),
-        }),
+        query: schema.nullable(
+          schema.object({
+            jobParams: schema.string({
+              defaultValue: '',
+            }),
+          })
+        ),
       },
     },
     userHandler(async (user, context, req, res) => {
@@ -85,7 +87,7 @@ export function registerGenerateFromJobParams(
       try {
         return await handler(user, exportType, jobParams, context, req, res);
       } catch (err) {
-        return handleError(exportType, err, res);
+        return handleError(res, err);
       }
     })
   );

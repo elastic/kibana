@@ -6,11 +6,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { ReportingCore } from '../';
+import { HandlerErrorFunction } from './types';
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
-import { isoStringValidate } from '../lib/iso_string_validate';
 import { JobDocOutput } from '../types';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 import { ReportingInternalSetup } from '../core';
@@ -26,7 +26,8 @@ import { ReportingInternalSetup } from '../core';
  */
 export function registerGenerateCsvFromSavedObjectImmediate(
   reporting: ReportingCore,
-  setupDeps: ReportingInternalSetup
+  setupDeps: ReportingInternalSetup,
+  handleError: HandlerErrorFunction
 ) {
   const userHandler = authorizedUserPreRoutingFactory(reporting, setupDeps);
   const { router } = setupDeps;
@@ -48,12 +49,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           state: schema.object({}, { unknowns: 'allow' }),
           timerange: schema.object({
             timezone: schema.string({ defaultValue: 'UTC' }),
-            min: schema.string({
-              validate: isoStringValidate,
-            }),
-            max: schema.string({
-              validate: isoStringValidate,
-            }),
+            min: schema.nullable(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
+            max: schema.nullable(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
           }),
         }),
       },
@@ -63,37 +60,42 @@ export function registerGenerateCsvFromSavedObjectImmediate(
       const jobParams = getJobParamsFromRequest(req, { isImmediate: true });
       const createJobFn = createJobFactory(reporting, setupDeps);
       const executeJobFn = await executeJobFactory(reporting, setupDeps); // FIXME: does not "need" to be async
-      const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
-        jobParams,
-        req.headers,
-        context,
-        req
-      );
-      const {
-        content_type: jobOutputContentType,
-        content: jobOutputContent,
-        size: jobOutputSize,
-      }: JobDocOutput = await executeJobFn(null, jobDocPayload, context, req);
 
-      logger.info(`Job output size: ${jobOutputSize} bytes`);
+      try {
+        const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
+          jobParams,
+          req.headers,
+          context,
+          req
+        );
+        const {
+          content_type: jobOutputContentType,
+          content: jobOutputContent,
+          size: jobOutputSize,
+        }: JobDocOutput = await executeJobFn(null, jobDocPayload, context, req);
 
-      /*
-       * ESQueue worker function defaults `content` to null, even if the
-       * executeJob returned undefined.
-       *
-       * This converts null to undefined so the value can be sent to h.response()
-       */
-      if (jobOutputContent === null) {
-        logger.warn('CSV Job Execution created empty content result');
+        logger.info(`Job output size: ${jobOutputSize} bytes`);
+
+        /*
+         * ESQueue worker function defaults `content` to null, even if the
+         * executeJob returned undefined.
+         *
+         * This converts null to undefined so the value can be sent to h.response()
+         */
+        if (jobOutputContent === null) {
+          logger.warn('CSV Job Execution created empty content result');
+        }
+
+        return res.ok({
+          body: jobOutputContent || '',
+          headers: {
+            'content-type': jobOutputContentType,
+            'accept-ranges': 'none',
+          },
+        });
+      } catch (err) {
+        return handleError(res, err);
       }
-
-      return res.ok({
-        body: jobOutputContent || '',
-        headers: {
-          'content-type': jobOutputContentType,
-          'accept-ranges': 'none',
-        },
-      });
     })
   );
 }

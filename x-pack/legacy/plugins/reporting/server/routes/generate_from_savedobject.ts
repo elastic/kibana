@@ -6,7 +6,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { isoStringValidate } from '../lib/iso_string_validate';
 import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
 import { ReportingCore } from '../';
 import { API_BASE_GENERATE_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
@@ -43,12 +42,8 @@ export function registerGenerateCsvFromSavedObject(
           state: schema.object({}),
           timerange: schema.object({
             timezone: schema.string({ defaultValue: 'UTC' }),
-            min: schema.string({
-              validate: isoStringValidate,
-            }),
-            max: schema.string({
-              validate: isoStringValidate,
-            }),
+            min: schema.nullable(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
+            max: schema.nullable(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
           }),
         }),
       },
