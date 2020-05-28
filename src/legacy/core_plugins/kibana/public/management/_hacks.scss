@@ -22,8 +22,3 @@ kbn-management-objects-view {
 kbn-management-objects-view {
   .ace_editor { height: 300px; }
 }
-
-// Hack because the management wrapper is flat HTML and needs a class
-.mgtPage__body {
-  max-width: map-get($euiBreakpoints, 'xl');
-}

@@ -23,7 +23,7 @@ import React, { useState } from 'react';
 import { AppMountParameters } from 'kibana/public';
 import { ManagementApp, ManagementSection } from '../../utils';
 
-import './_index.scss';
+import './_sidebar_nav.scss';
 
 import { ManagementItem } from '../../utils/management_item';
 import { reactRouterNavigate } from '../../../../kibana_react/public';
