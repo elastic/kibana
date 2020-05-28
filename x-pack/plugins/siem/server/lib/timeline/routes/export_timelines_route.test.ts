@@ -22,6 +22,9 @@ import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 import { convertSavedObjectToSavedNote } from '../../note/saved_object';
 import { convertSavedObjectToSavedPinnedEvent } from '../../pinned_event/saved_object';
 import { convertSavedObjectToSavedTimeline } from '../convert_saved_object_to_savedtimeline';
+import { mockGetCurrentUser } from './__mocks__/import_timelines';
+import { SecurityPluginSetup } from '../../../../../../plugins/security/server';
+
 jest.mock('../convert_saved_object_to_savedtimeline', () => {
   return {
     convertSavedObjectToSavedTimeline: jest.fn(),
@@ -42,11 +45,17 @@ jest.mock('../../pinned_event/saved_object', () => {
 describe('export timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  let securitySetup: SecurityPluginSetup;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-
+    securitySetup = ({
+      authc: {
+        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
+      },
+      authz: {},
+    } as unknown) as SecurityPluginSetup;
     clients.savedObjectsClient.bulkGet.mockResolvedValue(mockTimelinesSavedObjects());
 
     ((convertSavedObjectToSavedTimeline as unknown) as jest.Mock).mockReturnValue(mockTimelines());
@@ -54,7 +63,7 @@ describe('export timelines', () => {
     ((convertSavedObjectToSavedPinnedEvent as unknown) as jest.Mock).mockReturnValue(
       mockPinnedEvents()
     );
-    exportTimelinesRoute(server.router, createMockConfig());
+    exportTimelinesRoute(server.router, createMockConfig(), securitySetup);
   });
 
   describe('status codes', () => {
