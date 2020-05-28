@@ -166,7 +166,7 @@ function isLoginAttemptWithProviderType(
  * @param sessionValue The session value to check.
  */
 function isLegacyProviderSession(sessionValue: any) {
-  return typeof sessionValue?.provider === 'string';
+  return typeof sessionValue?.provider?.name !== 'string';
 }
 
 /**
@@ -544,7 +544,7 @@ export class Authenticator {
     // If there is no session to predict which provider to use first, let's use the order
     // providers are configured in. Otherwise return provider that owns session first, and only then the rest
     // of providers.
-    if (!sessionValue) {
+    if (!sessionValue?.provider?.name) {
       yield* this.providers;
     } else {
       yield [sessionValue.provider.name, this.providers.get(sessionValue.provider.name)!];

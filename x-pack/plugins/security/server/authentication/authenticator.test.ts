@@ -540,6 +540,29 @@ describe('Authenticator', () => {
       expect(mockSessionStorage.set).not.toHaveBeenCalled();
       expect(mockSessionStorage.clear).toHaveBeenCalled();
     });
+
+    it('clears legacy 6.8 session.', async () => {
+      const user = mockAuthenticatedUser();
+      const request = httpServerMock.createKibanaRequest();
+
+      // Use string format for the `provider` session value field and wrap state/provider in value object to emulate legacy 6.8 session.
+      mockSessionStorage.get.mockResolvedValue({
+        value: { state: mockSessVal.state, provider: 'basic' },
+        expires: null,
+      } as any);
+
+      mockBasicAuthenticationProvider.login.mockResolvedValue(AuthenticationResult.succeeded(user));
+
+      await expect(
+        authenticator.login(request, { provider: { type: 'basic' }, value: {} })
+      ).resolves.toEqual(AuthenticationResult.succeeded(user));
+
+      expect(mockBasicAuthenticationProvider.login).toHaveBeenCalledTimes(1);
+      expect(mockBasicAuthenticationProvider.login).toHaveBeenCalledWith(request, {}, null);
+
+      expect(mockSessionStorage.set).not.toHaveBeenCalled();
+      expect(mockSessionStorage.clear).toHaveBeenCalled();
+    });
   });
 
   describe('`authenticate` method', () => {
@@ -970,6 +993,31 @@ describe('Authenticator', () => {
 
       // Use string format for the `provider` session value field to emulate legacy session.
       mockSessionStorage.get.mockResolvedValue({ ...mockSessVal, provider: 'basic' });
+
+      mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+        AuthenticationResult.succeeded(user)
+      );
+
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(user)
+      );
+
+      expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalledTimes(1);
+      expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalledWith(request, null);
+
+      expect(mockSessionStorage.set).not.toHaveBeenCalled();
+      expect(mockSessionStorage.clear).toHaveBeenCalled();
+    });
+
+    it('clears legacy 6.8 session.', async () => {
+      const user = mockAuthenticatedUser();
+      const request = httpServerMock.createKibanaRequest();
+
+      // Use string format for the `provider` session value field and wrap state/provider in value object to emulate legacy 6.8 session.
+      mockSessionStorage.get.mockResolvedValue({
+        value: { state: mockSessVal.state, provider: 'basic' },
+        expires: null,
+      } as any);
 
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user)
