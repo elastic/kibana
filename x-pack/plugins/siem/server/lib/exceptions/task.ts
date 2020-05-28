@@ -9,7 +9,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../../plugins/task_manager/server';
-import { ListsPluginSetup as ListsSetup } from '../../../../lists/server';
+import { ListPluginSetup } from '../../../../lists/server';
 
 export interface PackagerTask {
   getTaskRunner: (context: PackagerTaskRunnerContext) => PackagerTaskRunner;
@@ -23,7 +23,7 @@ interface PackagerTaskContext {
   core: CoreSetup;
   logger: Logger;
   taskManager: TaskManagerSetupContract;
-  lists: ListsSetup;
+  lists: ListPluginSetup;
 }
 
 interface PackagerTaskRunnerContext {
@@ -32,6 +32,8 @@ interface PackagerTaskRunnerContext {
 
 export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
   const run = async () => {
+    context.logger.debug('Running exception list packager task');
+
     const [{ savedObjects }] = await context.core.getStartServices();
     const savedObjectsRepository = savedObjects.createInternalRepository();
     // TODO: add logic here to:
@@ -51,7 +53,7 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
             taskType: 'siem:endpoint:exceptions-packager',
             scope: ['siem'],
             schedule: {
-              interval: '5s',
+              interval: '5s', // TODO: update this with real interval
             },
             state: {},
             params: {},
