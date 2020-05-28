@@ -18,7 +18,7 @@ import {
   updateItemsPerPage,
   updateSort,
 } from './actions';
-import { TimelineEpicDependencies } from './epic';
+import { TimelineEpicDependencies } from './types';
 import { isNotNull } from './helpers';
 import { addTimeline } from '../../../common/lib/local_storage';
 
