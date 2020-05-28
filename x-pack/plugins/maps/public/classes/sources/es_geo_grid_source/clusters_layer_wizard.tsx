@@ -27,7 +27,6 @@ import {
   VECTOR_STYLES,
   STYLE_TYPE,
 } from '../../../../common/constants';
-// @ts-ignore
 import { COLOR_GRADIENTS } from '../../styles/color_utils';
 
 export const clustersLayerWizardConfig: LayerWizard = {
