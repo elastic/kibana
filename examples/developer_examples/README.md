@@ -2,13 +2,35 @@
 
 Owner: Kibana application architecture team
 
-Register your API services, a description, and add links to examples and READMEs.  These
-will appear in the Developer portal app when Kibana in dev mode, is run via :
+The developer examples app is a landing page where developers go to search for working, tested examples of various developer 
+services. Add your a link to your example using the developerExamples `register` function offered on the `setup` contract:
+
+```ts
+  setup(core, { developerExamples }) {
+    developerExamples.register({
+      appId: 'myFooExampleApp',
+      title: 'Foo services',
+      description: `Foo services let you do bar and zed.`,
+      links: [
+        {
+          label: 'README',
+          href: 'https://github.com/elastic/kibana/tree/master/src/plugins/foo/README.md',
+          iconType: 'logoGithub',
+          target: '_blank',
+          size: 's',
+        },
+      ],
+      image: img,
+    });
+  }
+```
+
+Run Kibana with developer examples via:
 
 ```
 yarn start --run-examples
 ```
 
-<img src="./navigation.png" height="400px" />
+Then navigate to "Developer examples":
 
-<img src="./developer_examples.png" height="300px" />
+<img src="./navigation.png" height="400px" />
