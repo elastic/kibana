@@ -66,7 +66,7 @@ export function registerGenerateCsvFromSavedObject(
           res
         );
       } catch (err) {
-        return handleRouteError(CSV_FROM_SAVEDOBJECT_JOB_TYPE, err, res);
+        return handleRouteError(res, err);
       }
 
       if (get(result, 'source.job') == null) {
