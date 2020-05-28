@@ -21,7 +21,7 @@ const log = new ToolingLog({
 
 export default async ({ readConfigFile }) => {
   const defaultConfigs = await readConfigFile(require.resolve('../../functional/config'));
- // const { apps } = defaultConfigs.getAll();
+  // const { apps } = defaultConfigs.getAll();
   const { tests, ...provisionedConfigs } = buildState(resolve(__dirname, stateFilePath));
 
   const servers = {
@@ -77,8 +77,12 @@ export default async ({ readConfigFile }) => {
         hash: '/console',
       },
       home: {
-        pathname: '/app/home',
-        hash: '/',
+        pathname: '/app/kibana',
+        hash: '/home',
+      },
+      sampledata: {
+        pathname: '/app/kibana',
+        hash: '/home/tutorial_directory/sampleData',
       },
       monitoring: {
         pathname: '/app/monitoring',

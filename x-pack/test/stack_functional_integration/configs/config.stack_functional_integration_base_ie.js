@@ -21,7 +21,7 @@ const log = new ToolingLog({
 
 export default async ({ readConfigFile }) => {
   const defaultConfigs = await readConfigFile(require.resolve('../../functional/config'));
-  const { servers, apps } = defaultConfigs.getAll();
+  const { servers } = defaultConfigs.getAll();
   const { tests, ...provisionedConfigs } = buildState(resolve(__dirname, stateFilePath));
 
   return {
@@ -33,7 +33,57 @@ export default async ({ readConfigFile }) => {
       type: 'ie',
     },
     servers,
-    apps,
+    apps: {
+      kibana: {
+        pathname: '/app/kibana',
+      },
+      status_page: {
+        pathname: '/status',
+      },
+      discover: {
+        pathname: '/app/kibana',
+        hash: '/discover',
+      },
+      context: {
+        pathname: '/app/discover',
+        hash: '/context',
+      },
+      visualize: {
+        pathname: '/app/visualize',
+        hash: '/',
+      },
+      dashboard: {
+        pathname: '/app/dashboards',
+        hash: '/list',
+      },
+      // deprecated settings, use management
+      settings: {
+        pathname: '/app/kibana',
+        hash: '/management',
+      },
+      management: {
+        pathname: '/app/kibana',
+        hash: '/management',
+      },
+      timelion: {
+        pathname: '/app/timelion',
+      },
+      console: {
+        pathname: '/app/dev_tools',
+        hash: '/console',
+      },
+      home: {
+        pathname: '/app/kibana',
+        hash: '/home',
+      },
+      sampledata: {
+        pathname: '/app/kibana',
+        hash: '/home/tutorial_directory/sampleData',
+      },
+      monitoring: {
+        pathname: '/app/monitoring',
+      },
+    },
     stackFunctionalIntegrationTests: {
       envObj: provisionedConfigs,
     },
