@@ -23,6 +23,7 @@ import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { IngestManagerStartContract } from '../../ingest_manager/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import { initRoutes } from './routes';
@@ -31,6 +32,7 @@ import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule
 import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
 import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
 import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine/feature_flags';
+import { ExceptionsPackagerTask, ExceptionsPackagerTaskRunner } from './lib/exceptions';
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { SiemClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
@@ -51,11 +53,13 @@ export interface SetupPlugins {
   licensing: LicensingPluginSetup;
   security?: SecuritySetup;
   spaces?: SpacesSetup;
+  taskManager: TaskManagerSetupContract;
   ml?: MlSetup;
 }
 
 export interface StartPlugins {
   ingestManager: IngestManagerStartContract;
+  taskManager: TaskManagerStartContract;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -69,6 +73,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private context: PluginInitializerContext;
   private siemClientFactory: SiemClientFactory;
   private readonly endpointAppContextService = new EndpointAppContextService();
+  private exceptionsPackagerTask?: ExceptionsPackagerTask;
+  private exceptionsPackagerTaskRunner?: ExceptionsPackagerTaskRunner;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
@@ -208,6 +214,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
     }
 
+    this.logger.debug('task manager');
+    this.logger.debug(plugins.taskManager);
+
+    if (plugins.taskManager) {
+      this.exceptionsPackagerTask = new ExceptionsPackagerTask(this.logger, plugins.taskManager);
+      this.exceptionsPackagerTask!.register();
+    }
+
     const libs = compose(core, plugins, this.context.env.mode.prod);
     initServer(libs);
 
@@ -222,6 +236,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ),
       agentService: plugins.ingestManager.agentService,
     });
+
+    if (plugins.taskManager) {
+      this.exceptionsPackagerTaskRunner = new ExceptionsPackagerTaskRunner(
+        this.context.logger,
+        plugins.taskManager
+      );
+      this.exceptionsPackagerTaskRunner!.schedule();
+    }
+
     return {};
   }
 
