@@ -9,7 +9,6 @@ import { RedirectWrapper } from './redirect_wrapper';
 import { SiemPageName } from '../../../app/types';
 
 export const RedirectToManagementPage = memo(() => {
-  // FIXME: define all paths/urls in `/management` then use here
   return <RedirectWrapper to={`/${SiemPageName.management}`} />;
 });
 

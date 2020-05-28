@@ -5,7 +5,6 @@
  */
 
 import { Reducer, AnyAction, Middleware, Dispatch } from 'redux';
-
 import { NavTab } from '../common/components/navigation/types';
 import { HostsState } from '../hosts/store';
 import { NetworkState } from '../network/store';
@@ -15,9 +14,6 @@ import { Immutable } from '../../common/endpoint/types';
 import { AlertListState } from '../../common/endpoint_alerts/types';
 import { AppAction } from '../common/store/actions';
 import { HostState } from '../endpoint_hosts/types';
-
-// FIXME: cleanup
-// import { PolicyDetailsState, PolicyListState } from '../management/pages/policy/types';
 import { ManagementState } from '../management/types';
 
 export enum SiemPageName {

@@ -19,15 +19,6 @@ import {
 } from '../../endpoint_alerts/store';
 import { EndpointHostsPluginState, EndpointHostsPluginReducer } from '../../endpoint_hosts/store';
 
-// FIXME: cleanup
-// import {
-//   EndpointPolicyDetailsStatePluginState,
-//   EndpointPolicyDetailsStatePluginReducer,
-// } from '../../management/pages/policy/store/policy_details';
-// import {
-//   EndpointPolicyListStatePluginState,
-//   EndpointPolicyListStatePluginReducer,
-// } from '../../management/pages/policy/store/policy_list';
 import { ManagementPluginReducer, ManagementPluginState } from '../../management/types';
 
 export interface State
@@ -37,7 +28,6 @@ export interface State
     EndpointAlertsPluginState,
     EndpointHostsPluginState,
     ManagementPluginState {
-  // EndpointPolicyListStatePluginState // EndpointPolicyDetailsStatePluginState, // FIXME: cleanup
   app: AppState;
   dragAndDrop: DragAndDropState;
   inputs: InputsState;
@@ -55,10 +45,6 @@ type SubPluginsInitState = HostsPluginState &
   EndpointAlertsPluginState &
   EndpointHostsPluginState &
   ManagementPluginState;
-
-// FIXME: cleanup
-// EndpointPolicyDetailsStatePluginState &
-// EndpointPolicyListStatePluginState;
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   NetworkPluginReducer &
