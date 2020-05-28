@@ -10,7 +10,7 @@ import { applyMiddleware, Store, createStore } from 'redux';
 
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
-import { HostResultList } from '../../../common/endpoint/types';
+import { HostResultList, AppLocation } from '../../../common/endpoint/types';
 import { DepsStartMock, depsStartMock } from '../../common/mock/endpoint';
 
 import { hostMiddlewareFactory } from './middleware';
@@ -27,7 +27,7 @@ describe('host list pagination: ', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
-  let history: History<never>;
+  let history: History<AppLocation['state']>;
   let store: Store;
   let queryParams: () => HostIndexUIQueryParams;
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
