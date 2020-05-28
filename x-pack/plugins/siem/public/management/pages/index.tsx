@@ -14,6 +14,7 @@ import {
   MANAGEMENT_ROUTING_ROOT_PATH,
 } from '../common/constants';
 import { ManagementPageView } from '../components/management_page_view';
+import { NotFoundPage } from '../../app/404';
 
 const TmpEndpoints = () => {
   return (
@@ -34,7 +35,7 @@ export const ManagementContainer = memo(() => {
         exact
         render={() => <Redirect to="/management/endpoints" />}
       />
-      {/* TODO: add page not found route here */}
+      <Route path="*" component={NotFoundPage} />
     </Switch>
   );
 });
