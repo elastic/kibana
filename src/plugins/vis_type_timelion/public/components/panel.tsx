@@ -70,18 +70,18 @@ const emptyCaption = '<br>';
 function Panel({ interval, seriesList, renderComplete }: PanelProps) {
   const kibana = useKibana<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
-  const [canvasElem, setCanvasElem] = useState();
-  const [chartElem, setChartElem] = useState();
+  const [canvasElem, setCanvasElem] = useState<JQuery<HTMLElement>>();
+  const [chartElem, setChartElem] = useState<HTMLElement>();
 
   const [originalColorMap, setOriginalColorMap] = useState(() => new Map<Series, string>());
 
   const [highlightedSeries, setHighlightedSeries] = useState<number | null>(null);
-  const [focusedSeries, setFocusedSeries] = useState();
-  const [plot, setPlot] = useState();
+  const [focusedSeries, setFocusedSeries] = useState<number | null>();
+  const [plot, setPlot] = useState<jquery.flot.plot>();
 
   // Used to toggle the series, and for displaying values on hover
-  const [legendValueNumbers, setLegendValueNumbers] = useState();
-  const [legendCaption, setLegendCaption] = useState();
+  const [legendValueNumbers, setLegendValueNumbers] = useState<JQuery<HTMLElement>>();
+  const [legendCaption, setLegendCaption] = useState<JQuery<HTMLElement>>();
 
   const canvasRef = useCallback((node) => {
     if (node !== null) {
