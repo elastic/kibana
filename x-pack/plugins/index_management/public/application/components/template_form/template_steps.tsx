@@ -19,7 +19,7 @@ const stepNamesMap: { [key: number]: string } = {
     defaultMessage: 'Logistics',
   }),
   2: i18n.translate('xpack.idxMgmt.templateForm.steps.settingsStepName', {
-    defaultMessage: 'Settings / Mappings / Aliases',
+    defaultMessage: 'Configure',
   }),
   // 3: i18n.translate('xpack.idxMgmt.templateForm.steps.mappingsStepName', {
   //   defaultMessage: 'Mappings',

@@ -154,7 +154,7 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
             <h2 data-test-subj="stepTitle">
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepSettings.stepTitle"
-                defaultMessage="Index settings / Mappings / Aliases"
+                defaultMessage="Configure"
               />
             </h2>
           </EuiTitle>
