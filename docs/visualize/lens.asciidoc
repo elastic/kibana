@@ -59,7 +59,7 @@ image::images/lens_data_info.png[]
 
 *Lens* enables you to switch between any supported visualization type at any time.
 
-*Suggestions* are shortcuts to alternate visualizations that *Lens* generates for you based on your index data.
+*Suggestions* are shortcuts to alternate visualizations that *Lens* generates for you.
 
 [role="screenshot"]
 image::images/lens_suggestions.gif[]
