@@ -17,11 +17,7 @@ export function getJobParamsFromRequest(
   };
   const { timerange, state } = request.body as JobParamsPostPayloadPanelCsv;
 
-  const post = Object.assign(
-    {},
-    state ? { state } : {},
-    timerange && timerange.min && timerange.max ? { timerange } : { timerange: {} }
-  );
+  const post = timerange || state ? { timerange, state } : undefined;
 
   return {
     isImmediate: opts.isImmediate,
