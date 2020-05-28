@@ -127,7 +127,7 @@ export async function installPackage(options: {
     // currenly only the base package has an ILM policy
     // at some point ILM policies can be installed/modified
     // per dataset and we should then save them
-    installILMPolicy(pkgName, pkgVersion, callCluster),
+    installILMPolicy(pkgName, pkgVersion, paths, callCluster),
   ]);
 
   // install or update the templates
