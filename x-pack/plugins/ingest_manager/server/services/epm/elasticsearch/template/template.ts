@@ -310,6 +310,10 @@ export const updateCurrentWriteIndices = async (
   return updateAllIndices(allIndices, callCluster);
 };
 
+function isCurrentIndex(item: CurrentIndex[] | undefined): item is CurrentIndex[] {
+  return item !== undefined;
+}
+
 const queryIndicesFromTemplates = async (
   callCluster: CallESAsCurrentUser,
   templates: TemplateRef[]
@@ -318,7 +322,7 @@ const queryIndicesFromTemplates = async (
     return getIndices(callCluster, template);
   });
   const indexObjects = await Promise.all(indexPromises);
-  return indexObjects.filter((item) => item !== undefined).flat();
+  return indexObjects.filter(isCurrentIndex).flat();
 };
 
 const getIndices = async (
