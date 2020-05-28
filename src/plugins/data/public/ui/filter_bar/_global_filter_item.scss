@@ -48,7 +48,7 @@
 
 .globalFilterItem-isWarning {
   .globalFilterLabel__value {
-    color: $euiColorWarning;
+    color: makeHighContrastColor($euiColorWarningText, $euiColorLightShade);
   }
 }
 
