@@ -49,7 +49,7 @@ export function healthRoute(
             enabled: isSecurityEnabled = false,
             ssl: { http: { enabled: isTLSEnabled = false } = {} } = {},
           } = {},
-        }: XPackUsageSecurity = await context.core.elasticsearch.adminClient
+        }: XPackUsageSecurity = await context.core.elasticsearch.legacy.client
           // `transport.request` is potentially unsafe when combined with untrusted user input.
           // Do not augment with such input.
           .callAsInternalUser('transport.request', {

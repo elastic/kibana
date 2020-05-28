@@ -20,13 +20,11 @@ export function mockHandlerArguments(
   {
     alertsClient = alertsClientMock.create(),
     listTypes: listTypesRes = [],
-    elasticsearch = elasticsearchServiceMock.createSetup(),
+    esClient = elasticsearchServiceMock.createClusterClient(),
   }: {
     alertsClient?: AlertsClientMock;
     listTypes?: AlertType[];
-    elasticsearch?: jest.Mocked<{
-      adminClient: jest.Mocked<IClusterClient>;
-    }>;
+    esClient?: jest.Mocked<IClusterClient>;
   },
   req: unknown,
   res?: Array<MethodKeysOf<KibanaResponseFactory>>
@@ -34,7 +32,7 @@ export function mockHandlerArguments(
   const listTypes = jest.fn(() => listTypesRes);
   return [
     ({
-      core: { elasticsearch },
+      core: { elasticsearch: { legacy: { client: esClient } } },
       alerting: {
         listTypes,
         getAlertsClient() {
