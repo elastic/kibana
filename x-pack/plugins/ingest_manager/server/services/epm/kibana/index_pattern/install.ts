@@ -14,6 +14,7 @@ import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
 import { getPackageKeysByStatus } from '../../packages/get';
 import { InstallationStatus, RegistryPackage, CallESAsCurrentUser } from '../../../../types';
 import { appContextService } from '../../../../services';
+import { cacheHas, getCacheKey } from '../../registry/cache';
 
 interface FieldFormatMap {
   [key: string]: FieldFormatMapItem;
@@ -86,6 +87,17 @@ export async function installIndexPatterns(
     savedObjectsClient,
     InstallationStatus.installed
   );
+
+  // TODO: move to install package
+  // cache all installed packages if they don't exist
+  const packagesPromise = installedPackages.map((pkg) => {
+    const pkgkey = getCacheKey(pkg.pkgName + '-' + pkg.pkgVersion);
+    if (!cacheHas(pkgkey)) {
+      return Registry.getArchiveInfo(pkg.pkgName, pkg.pkgVersion);
+    }
+  });
+  await Promise.all(packagesPromise);
+
   if (pkgName && pkgVersion) {
     // add this package to the array if it doesn't already exist
     const foundPkg = installedPackages.find((pkg) => pkg.pkgName === pkgName);
