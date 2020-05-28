@@ -64,7 +64,7 @@ describe('Field', function () {
     conflictDescriptions: { a: ['b', 'c'], d: ['e'] },
   } as Field;
 
-  it('the correct properties are writable', function () {
+  it('the correct properties are writable', () => {
     const field = getField();
 
     expect(field.count).toEqual(1);
@@ -84,7 +84,7 @@ describe('Field', function () {
     expect(field.conflictDescriptions).toEqual({});
   });
 
-  it('the correct properties are not writable', function () {
+  it('the correct properties are not writable', () => {
     const field = getField();
 
     expect(field.name).toEqual(fieldValues.name);
@@ -213,7 +213,7 @@ describe('Field', function () {
     expect(fieldD.filterable).toEqual(false);
   });
 
-  it('exports the property to JSON', function () {
+  it('exports the property to JSON', () => {
     const field = new Field({ fieldFormatMap: { name: {} } } as IndexPattern, fieldValues, false, {
       fieldFormats: {} as FieldFormatsStart,
       toastNotifications: notificationServiceMock.createStartContract().toasts,
