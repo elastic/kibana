@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
 import { BrowserFields } from '../../../common/containers/source';
-import { TimelineQuery } from '../../containers/index';
+import { useTimelineQuery } from '../../containers/index';
 import { Direction } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ColumnHeaderOptions, KqlMode, EventType } from '../../../timelines/store/timeline/model';
@@ -143,17 +143,31 @@ export const TimelineComponent: React.FC<Props> = ({
 }) => {
   const kibana = useKibana();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
-  const combinedQueries = combineQueries({
-    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-    dataProviders,
-    indexPattern,
-    browserFields,
-    filters,
-    kqlQuery: { query: kqlQueryExpression, language: 'kuery' },
-    kqlMode,
-    start,
-    end,
-  });
+  const combinedQueries = useMemo(
+    () =>
+      combineQueries({
+        config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+        dataProviders,
+        indexPattern,
+        browserFields,
+        filters,
+        kqlQuery: { query: kqlQueryExpression, language: 'kuery' },
+        kqlMode,
+        start,
+        end,
+      }),
+    [
+      kibana.services.uiSettings,
+      dataProviders,
+      indexPattern,
+      browserFields,
+      filters,
+      kqlQueryExpression,
+      kqlMode,
+      start,
+      end,
+    ]
+  );
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const timelineQueryFields = useMemo(() => columnsHeader.map((c) => c.id), [columnsHeader]);
   const timelineQuerySortField = useMemo(
@@ -163,6 +177,26 @@ export const TimelineComponent: React.FC<Props> = ({
     }),
     [sort.columnId, sort.sortDirection]
   );
+  const {
+    events,
+    inspect,
+    loading,
+    totalCount,
+    pageInfo,
+    loadMore,
+    getUpdatedAt,
+    refetch,
+  } = useTimelineQuery({
+    eventType,
+    fields: timelineQueryFields,
+    id,
+    indexToAdd,
+    kibana,
+    sourceId: 'default',
+    limit: itemsPerPage,
+    filterQuery: combinedQueries?.filterQuery,
+    sortField: timelineQuerySortField,
+  });
 
   return (
     <TimelineContainer data-test-subj="timeline">
@@ -190,74 +224,49 @@ export const TimelineComponent: React.FC<Props> = ({
       </StyledEuiFlyoutHeader>
       <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
       {combinedQueries != null ? (
-        <TimelineQuery
-          eventType={eventType}
-          id={id}
+        <ManageTimelineContext
+          filterManager={filterManager}
           indexToAdd={indexToAdd}
-          fields={timelineQueryFields}
-          sourceId="default"
-          limit={itemsPerPage}
-          filterQuery={combinedQueries.filterQuery}
-          sortField={timelineQuerySortField}
+          loading={loading || loadingIndexName}
+          type={{ id }}
         >
-          {({
-            events,
-            inspect,
-            loading,
-            totalCount,
-            pageInfo,
-            loadMore,
-            getUpdatedAt,
-            refetch,
-          }) => (
-            <ManageTimelineContext
-              filterManager={filterManager}
-              indexToAdd={indexToAdd}
-              loading={loading || loadingIndexName}
-              type={{ id }}
-            >
-              <TimelineRefetch
-                id={id}
-                inputId="timeline"
-                inspect={inspect}
-                loading={loading}
-                refetch={refetch}
-              />
-              <StyledEuiFlyoutBody
-                data-test-subj="eui-flyout-body"
-                className="timeline-flyout-body"
-              >
-                <StatefulBody
-                  browserFields={browserFields}
-                  data={events}
-                  id={id}
-                  sort={sort}
-                  toggleColumn={toggleColumn}
-                />
-              </StyledEuiFlyoutBody>
-              <StyledEuiFlyoutFooter
-                data-test-subj="eui-flyout-footer"
-                className="timeline-flyout-footer"
-              >
-                <Footer
-                  serverSideEventCount={totalCount}
-                  hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                  height={footerHeight}
-                  isLive={isLive}
-                  isLoading={loading || loadingIndexName}
-                  itemsCount={events.length}
-                  itemsPerPage={itemsPerPage}
-                  itemsPerPageOptions={itemsPerPageOptions}
-                  onChangeItemsPerPage={onChangeItemsPerPage}
-                  onLoadMore={loadMore}
-                  nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                  tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                  getUpdatedAt={getUpdatedAt}
-                />
-              </StyledEuiFlyoutFooter>
-            </ManageTimelineContext>
-          )}
-        </TimelineQuery>
+          <TimelineRefetch
+            id={id}
+            inputId="timeline"
+            inspect={inspect}
+            loading={loading}
+            refetch={refetch}
+          />
+          <StyledEuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
+            <StatefulBody
+              browserFields={browserFields}
+              data={events}
+              id={id}
+              sort={sort}
+              toggleColumn={toggleColumn}
+            />
+          </StyledEuiFlyoutBody>
+          <StyledEuiFlyoutFooter
+            data-test-subj="eui-flyout-footer"
+            className="timeline-flyout-footer"
+          >
+            <Footer
+              serverSideEventCount={totalCount}
+              hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+              height={footerHeight}
+              isLive={isLive}
+              isLoading={loading || loadingIndexName}
+              itemsCount={events.length}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
+              onChangeItemsPerPage={onChangeItemsPerPage}
+              onLoadMore={loadMore}
+              nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+              tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+              getUpdatedAt={getUpdatedAt}
+            />
+          </StyledEuiFlyoutFooter>
+        </ManageTimelineContext>
       ) : null}
     </TimelineContainer>
   );

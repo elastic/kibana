@@ -110,7 +110,6 @@ export const Body = React.memo<BodyProps>(
         columnHeaders.reduce((totalWidth, header) => totalWidth + header.width, actionsColumnWidth),
       [actionsColumnWidth, columnHeaders]
     );
-
     return (
       <>
         <TimelineBody data-test-subj="timeline-body" bodyHeight={height} ref={containerElementRef}>

@@ -4,30 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, uniqBy } from 'lodash/fp';
-import memoizeOne from 'memoize-one';
-import React from 'react';
-import { Query } from 'react-apollo';
-import { compose, Dispatch } from 'redux';
-import { connect, ConnectedProps } from 'react-redux';
+import { isEmpty } from 'lodash/fp';
+import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
+import { ApolloQueryResult } from 'apollo-client';
+import memoizeOne from 'memoize-one';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
-import {
-  GetTimelineQuery,
-  PageInfo,
-  SortField,
-  TimelineEdges,
-  TimelineItem,
-} from '../../graphql/types';
+import { GetTimelineQuery, PageInfo, SortField, TimelineItem } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../common/store';
-import { withKibana, WithKibanaProps } from '../../common/lib/kibana';
+import { WithKibanaProps } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
-import { QueryTemplate, QueryTemplateProps } from '../../common/containers/query_template';
+import { QueryTemplateProps } from '../../common/containers/query_template';
 import { EventType } from '../../timelines/store/timeline/model';
 import { timelineQuery } from './index.gql_query';
 import { timelineActions } from '../../timelines/store/timeline';
 import { SIGNALS_PAGE_TIMELINE_ID } from '../../alerts/components/signals';
+import { useApolloClient } from '../../common/utils/apollo_context';
+import { useStateToaster, errorToToaster } from '../../common/components/toasters';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -41,12 +36,7 @@ export interface TimelineArgs {
   getUpdatedAt: () => number;
 }
 
-export interface CustomReduxProps {
-  clearSignalsState: ({ id }: { id?: string }) => void;
-}
-
 export interface OwnProps extends QueryTemplateProps {
-  children?: (args: TimelineArgs) => React.ReactNode;
   eventType?: EventType;
   id: string;
   indexPattern?: IIndexPattern;
@@ -56,144 +46,216 @@ export interface OwnProps extends QueryTemplateProps {
   fields: string[];
 }
 
-type TimelineQueryProps = OwnProps & PropsFromRedux & WithKibanaProps & CustomReduxProps;
+type TimelineQueryProps = OwnProps & WithKibanaProps;
 
-class TimelineQueryComponent extends QueryTemplate<
-  TimelineQueryProps,
-  GetTimelineQuery.Query,
-  GetTimelineQuery.Variables
-> {
-  private updatedDate: number = Date.now();
-  private memoizedTimelineEvents: (variables: string, events: TimelineEdges[]) => TimelineItem[];
+const defaultInspectObj = { dsl: [], response: [] };
 
-  constructor(props: TimelineQueryProps) {
-    super(props);
-    this.memoizedTimelineEvents = memoizeOne(this.getTimelineEvents);
+const getTimelineEvents = memoizeOne(
+  (
+    variables: string,
+    timelineEdges: GetTimelineQuery.Edges[],
+    paginatedAction: boolean = false,
+    events: TimelineItem[]
+  ): TimelineItem[] => {
+    const eventsFromEdges = timelineEdges.map(
+      (e: GetTimelineQuery.Edges) => e.node as TimelineItem
+    );
+    if (paginatedAction) {
+      return [...events, ...eventsFromEdges];
+    }
+    return eventsFromEdges;
   }
+);
 
-  public render() {
-    const {
-      children,
-      clearSignalsState,
-      eventType = 'raw',
-      id,
-      indexPattern,
-      indexToAdd = [],
-      isInspected,
-      kibana,
-      limit,
-      fields,
-      filterQuery,
-      sourceId,
-      sortField,
-    } = this.props;
-    const defaultKibanaIndex = kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
-    const defaultIndex =
+export const useTimelineQuery = ({
+  eventType = 'raw',
+  id,
+  indexPattern,
+  indexToAdd = [],
+  kibana,
+  limit,
+  fields,
+  filterQuery,
+  sourceId,
+  sortField,
+}: TimelineQueryProps): TimelineArgs => {
+  const getQuery = inputsSelectors.timelineQueryByIdSelector();
+  const { isInspected } = useSelector((state: State) => getQuery(state, id));
+  const dispatch = useDispatch();
+  const apolloClient = useApolloClient();
+  const [, dispatchToaster] = useStateToaster();
+  const updatedAt = useRef(Date.now());
+
+  const getUpdatedAt = useCallback(() => updatedAt.current, [updatedAt.current]);
+
+  const [response, setResponse] = useState<
+    Pick<
+      TimelineArgs,
+      'events' | 'id' | 'inspect' | 'loading' | 'pageInfo' | 'totalCount' | 'getUpdatedAt'
+    >
+  >({
+    events: [],
+    id,
+    inspect: defaultInspectObj,
+    loading: false,
+    pageInfo: {},
+    totalCount: 0,
+    getUpdatedAt,
+  });
+
+  const defaultKibanaIndex = kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
+  const defaultIndex = useMemo(
+    () =>
       indexPattern == null || (indexPattern != null && indexPattern.title === '')
         ? [
             ...(['all', 'raw'].includes(eventType) ? defaultKibanaIndex : []),
             ...(['all', 'signal'].includes(eventType) ? indexToAdd : []),
           ]
-        : indexPattern?.title.split(',') ?? [];
-    const variables: GetTimelineQuery.Variables = {
+        : indexPattern?.title.split(',') ?? [],
+    [indexPattern, defaultKibanaIndex, eventType, indexToAdd]
+  );
+  const variablesMemo = useMemo<
+    Pick<
+      GetTimelineQuery.Variables,
+      'fieldRequested' | 'filterQuery' | 'sourceId' | 'sortField' | 'defaultIndex' | 'inspect'
+    >
+  >(
+    () => ({
       fieldRequested: fields,
       filterQuery: createFilter(filterQuery),
       sourceId,
-      pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
       defaultIndex,
       inspect: isInspected,
-    };
+    }),
+    [defaultIndex, fields, filterQuery, sourceId, sortField, isInspected]
+  );
 
-    return (
-      <Query<GetTimelineQuery.Query, GetTimelineQuery.Variables>
-        query={timelineQuery}
-        fetchPolicy="network-only"
-        notifyOnNetworkStatusChange
-        variables={variables}
-      >
-        {({ data, loading, fetchMore, refetch }) => {
-          this.setRefetch(refetch);
-          this.setExecuteBeforeRefetch(clearSignalsState);
-          this.setExecuteBeforeFetchMore(clearSignalsState);
+  const updateResponseEvents = useCallback(
+    ({
+      resp,
+      didCancel,
+      paginatedAction = false,
+      variables,
+    }: {
+      resp: ApolloQueryResult<GetTimelineQuery.Query> | undefined;
+      didCancel: boolean;
+      variables: GetTimelineQuery.Variables;
+      paginatedAction?: boolean;
+    }) => {
+      const timelineEdges = resp?.data?.source.Timeline.edges ?? [];
+      if (!didCancel) {
+        updatedAt.current = Date.now();
+        setResponse({
+          id,
+          inspect: resp?.data?.source.Timeline.inspect ?? defaultInspectObj,
+          loading: false,
+          totalCount: resp?.data?.source.Timeline.totalCount ?? 0,
+          pageInfo: resp?.data?.source.Timeline.pageInfo ?? {},
+          events: getTimelineEvents(
+            JSON.stringify(variables),
+            timelineEdges,
+            paginatedAction,
+            response.events
+          ),
+          getUpdatedAt,
+        });
+      }
+    },
+    [response, limit]
+  );
 
-          const timelineEdges = getOr([], 'source.Timeline.edges', data);
-          this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string, tiebreaker?: string) => ({
-            variables: {
-              pagination: {
-                cursor: newCursor,
-                tiebreaker,
-                limit,
-              },
+  const requestEvents = useCallback(
+    async (
+      cursor: string | null = null,
+      tiebreaker: string | null = null,
+      variables: GetTimelineQuery.Variables,
+      abortCtrl: AbortController
+    ) => {
+      const fetch = async () =>
+        apolloClient?.query<GetTimelineQuery.Query, GetTimelineQuery.Variables>({
+          query: timelineQuery,
+          fetchPolicy: 'network-only',
+          variables,
+          context: {
+            fetchOptions: {
+              abortSignal: abortCtrl.signal,
             },
-            updateQuery: (prev, { fetchMoreResult }) => {
-              if (!fetchMoreResult) {
-                return prev;
-              }
-              return {
-                ...fetchMoreResult,
-                source: {
-                  ...fetchMoreResult.source,
-                  Timeline: {
-                    ...fetchMoreResult.source.Timeline,
-                    edges: uniqBy('node._id', [
-                      ...prev.source.Timeline.edges,
-                      ...fetchMoreResult.source.Timeline.edges,
-                    ]),
-                  },
-                },
-              };
-            },
-          }));
-          this.updatedDate = Date.now();
-          return children!({
-            id,
-            inspect: getOr(null, 'source.Timeline.inspect', data),
-            refetch: this.wrappedRefetch,
-            loading,
-            totalCount: getOr(0, 'source.Timeline.totalCount', data),
-            pageInfo: getOr({}, 'source.Timeline.pageInfo', data),
-            events: this.memoizedTimelineEvents(JSON.stringify(variables), timelineEdges),
-            loadMore: this.wrappedLoadMore,
-            getUpdatedAt: this.getUpdatedAt,
+          },
+        });
+      return fetch();
+    },
+    [apolloClient, limit]
+  );
+
+  const getEvents = useCallback(
+    async (cursor?: string, tiebreaker?: string) => {
+      let didCancel = false;
+      const abortCtrl = new AbortController();
+
+      try {
+        setResponse({
+          ...response,
+          loading: true,
+        });
+        const variables = {
+          ...variablesMemo,
+          pagination: { limit, cursor, tiebreaker },
+        };
+        const resp = await requestEvents(cursor, tiebreaker, variables, abortCtrl);
+        updateResponseEvents({ resp, didCancel, paginatedAction: !isEmpty(cursor), variables });
+      } catch (error) {
+        if (!didCancel) {
+          errorToToaster({
+            title: 'ERROR',
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
           });
-        }}
-      </Query>
-    );
-  }
+          setResponse({
+            ...response,
+            loading: false,
+            totalCount: 0,
+            events: [],
+          });
+        }
+      }
 
-  private getUpdatedAt = () => this.updatedDate;
+      return () => {
+        didCancel = true;
+        abortCtrl.abort();
+      };
+    },
+    [requestEvents, updateResponseEvents, response, variablesMemo, limit]
+  );
 
-  private getTimelineEvents = (variables: string, timelineEdges: TimelineEdges[]): TimelineItem[] =>
-    timelineEdges.map((e: TimelineEdges) => e.node);
-}
-
-const makeMapStateToProps = () => {
-  const getQuery = inputsSelectors.timelineQueryByIdSelector();
-  const mapStateToProps = (state: State, { id }: OwnProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      isInspected,
-    };
-  };
-  return mapStateToProps;
-};
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  clearSignalsState: ({ id }: { id?: string }) => {
+  const clearSignalsState = useCallback(() => {
     if (id != null && id === SIGNALS_PAGE_TIMELINE_ID) {
       dispatch(timelineActions.clearEventsLoading({ id }));
       dispatch(timelineActions.clearEventsDeleted({ id }));
     }
-  },
-});
+  }, [id]);
 
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
+  const refetch = useCallback(() => {
+    clearSignalsState();
+    getEvents();
+  }, [getEvents, clearSignalsState]);
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
+  const loadMore = useCallback(
+    async (cursor: string, tiebreaker?: string) => {
+      clearSignalsState();
+      getEvents(cursor, tiebreaker);
+    },
+    [getEvents, clearSignalsState]
+  );
 
-export const TimelineQuery = compose<React.ComponentClass<OwnProps>>(
-  connector,
-  withKibana
-)(TimelineQueryComponent);
+  useEffect(() => {
+    // T
+    getEvents();
+  }, [variablesMemo, limit]);
+
+  return {
+    ...response,
+    refetch,
+    loadMore,
+  };
+};
