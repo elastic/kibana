@@ -4489,33 +4489,33 @@ const log = new Log();
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = __webpack_require__(36);
 var proc_runner_1 = __webpack_require__(37);
-exports.withProcRunner = proc_runner_1.withProcRunner;
-exports.ProcRunner = proc_runner_1.ProcRunner;
+Object.defineProperty(exports, "withProcRunner", { enumerable: true, get: function () { return proc_runner_1.withProcRunner; } });
+Object.defineProperty(exports, "ProcRunner", { enumerable: true, get: function () { return proc_runner_1.ProcRunner; } });
 tslib_1.__exportStar(__webpack_require__(414), exports);
 var serializers_1 = __webpack_require__(419);
-exports.createAbsolutePathSerializer = serializers_1.createAbsolutePathSerializer;
+Object.defineProperty(exports, "createAbsolutePathSerializer", { enumerable: true, get: function () { return serializers_1.createAbsolutePathSerializer; } });
 var certs_1 = __webpack_require__(443);
-exports.CA_CERT_PATH = certs_1.CA_CERT_PATH;
-exports.ES_KEY_PATH = certs_1.ES_KEY_PATH;
-exports.ES_CERT_PATH = certs_1.ES_CERT_PATH;
-exports.ES_P12_PATH = certs_1.ES_P12_PATH;
-exports.ES_P12_PASSWORD = certs_1.ES_P12_PASSWORD;
-exports.ES_EMPTYPASSWORD_P12_PATH = certs_1.ES_EMPTYPASSWORD_P12_PATH;
-exports.ES_NOPASSWORD_P12_PATH = certs_1.ES_NOPASSWORD_P12_PATH;
-exports.KBN_KEY_PATH = certs_1.KBN_KEY_PATH;
-exports.KBN_CERT_PATH = certs_1.KBN_CERT_PATH;
-exports.KBN_P12_PATH = certs_1.KBN_P12_PATH;
-exports.KBN_P12_PASSWORD = certs_1.KBN_P12_PASSWORD;
+Object.defineProperty(exports, "CA_CERT_PATH", { enumerable: true, get: function () { return certs_1.CA_CERT_PATH; } });
+Object.defineProperty(exports, "ES_KEY_PATH", { enumerable: true, get: function () { return certs_1.ES_KEY_PATH; } });
+Object.defineProperty(exports, "ES_CERT_PATH", { enumerable: true, get: function () { return certs_1.ES_CERT_PATH; } });
+Object.defineProperty(exports, "ES_P12_PATH", { enumerable: true, get: function () { return certs_1.ES_P12_PATH; } });
+Object.defineProperty(exports, "ES_P12_PASSWORD", { enumerable: true, get: function () { return certs_1.ES_P12_PASSWORD; } });
+Object.defineProperty(exports, "ES_EMPTYPASSWORD_P12_PATH", { enumerable: true, get: function () { return certs_1.ES_EMPTYPASSWORD_P12_PATH; } });
+Object.defineProperty(exports, "ES_NOPASSWORD_P12_PATH", { enumerable: true, get: function () { return certs_1.ES_NOPASSWORD_P12_PATH; } });
+Object.defineProperty(exports, "KBN_KEY_PATH", { enumerable: true, get: function () { return certs_1.KBN_KEY_PATH; } });
+Object.defineProperty(exports, "KBN_CERT_PATH", { enumerable: true, get: function () { return certs_1.KBN_CERT_PATH; } });
+Object.defineProperty(exports, "KBN_P12_PATH", { enumerable: true, get: function () { return certs_1.KBN_P12_PATH; } });
+Object.defineProperty(exports, "KBN_P12_PASSWORD", { enumerable: true, get: function () { return certs_1.KBN_P12_PASSWORD; } });
 var run_1 = __webpack_require__(444);
-exports.run = run_1.run;
-exports.createFailError = run_1.createFailError;
-exports.createFlagError = run_1.createFlagError;
-exports.combineErrors = run_1.combineErrors;
-exports.isFailError = run_1.isFailError;
+Object.defineProperty(exports, "run", { enumerable: true, get: function () { return run_1.run; } });
+Object.defineProperty(exports, "createFailError", { enumerable: true, get: function () { return run_1.createFailError; } });
+Object.defineProperty(exports, "createFlagError", { enumerable: true, get: function () { return run_1.createFlagError; } });
+Object.defineProperty(exports, "combineErrors", { enumerable: true, get: function () { return run_1.combineErrors; } });
+Object.defineProperty(exports, "isFailError", { enumerable: true, get: function () { return run_1.isFailError; } });
 var repo_root_1 = __webpack_require__(421);
-exports.REPO_ROOT = repo_root_1.REPO_ROOT;
+Object.defineProperty(exports, "REPO_ROOT", { enumerable: true, get: function () { return repo_root_1.REPO_ROOT; } });
 var kbn_client_1 = __webpack_require__(449);
-exports.KbnClient = kbn_client_1.KbnClient;
+Object.defineProperty(exports, "KbnClient", { enumerable: true, get: function () { return kbn_client_1.KbnClient; } });
 tslib_1.__exportStar(__webpack_require__(492), exports);
 tslib_1.__exportStar(__webpack_require__(499), exports);
 
@@ -4759,9 +4759,9 @@ function __importDefault(mod) {
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 var with_proc_runner_1 = __webpack_require__(38);
-exports.withProcRunner = with_proc_runner_1.withProcRunner;
+Object.defineProperty(exports, "withProcRunner", { enumerable: true, get: function () { return with_proc_runner_1.withProcRunner; } });
 var proc_runner_1 = __webpack_require__(39);
-exports.ProcRunner = proc_runner_1.ProcRunner;
+Object.defineProperty(exports, "ProcRunner", { enumerable: true, get: function () { return proc_runner_1.ProcRunner; } });
 
 
 /***/ }),
@@ -4789,6 +4789,7 @@ exports.ProcRunner = proc_runner_1.ProcRunner;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.withProcRunner = void 0;
 const proc_runner_1 = __webpack_require__(39);
 /**
  *  Create a ProcRunner and pass it to an async function. When
@@ -4836,6 +4837,7 @@ exports.withProcRunner = withProcRunner;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProcRunner = void 0;
 const tslib_1 = __webpack_require__(36);
 const moment_1 = tslib_1.__importDefault(__webpack_require__(40));
 const Rx = tslib_1.__importStar(__webpack_require__(169));
@@ -33489,6 +33491,7 @@ module.exports = callback => {
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.isCliError = exports.createCliError = void 0;
 const $isCliError = Symbol('isCliError');
 function createCliError(message) {
     const error = new Error(message);
@@ -33527,6 +33530,7 @@ exports.isCliError = isCliError;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.startProc = void 0;
 const tslib_1 = __webpack_require__(36);
 const execa_1 = tslib_1.__importDefault(__webpack_require__(371));
 const fs_1 = __webpack_require__(23);
@@ -36506,6 +36510,7 @@ function buildProcessTree (parentPid, tree, pidsToProcess, spawnChildProcessesLi
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.observeLines = void 0;
 const tslib_1 = __webpack_require__(36);
 const Rx = tslib_1.__importStar(__webpack_require__(169));
 const operators_1 = __webpack_require__(270);
@@ -36575,6 +36580,7 @@ exports.observeLines = observeLines;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.observeReadable = void 0;
 const tslib_1 = __webpack_require__(36);
 const Rx = tslib_1.__importStar(__webpack_require__(169));
 const operators_1 = __webpack_require__(270);
@@ -36615,14 +36621,14 @@ exports.observeReadable = observeReadable;
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 var tooling_log_1 = __webpack_require__(415);
-exports.ToolingLog = tooling_log_1.ToolingLog;
+Object.defineProperty(exports, "ToolingLog", { enumerable: true, get: function () { return tooling_log_1.ToolingLog; } });
 var tooling_log_text_writer_1 = __webpack_require__(416);
-exports.ToolingLogTextWriter = tooling_log_text_writer_1.ToolingLogTextWriter;
+Object.defineProperty(exports, "ToolingLogTextWriter", { enumerable: true, get: function () { return tooling_log_text_writer_1.ToolingLogTextWriter; } });
 var log_levels_1 = __webpack_require__(417);
-exports.pickLevelFromFlags = log_levels_1.pickLevelFromFlags;
-exports.parseLogLevel = log_levels_1.parseLogLevel;
+Object.defineProperty(exports, "pickLevelFromFlags", { enumerable: true, get: function () { return log_levels_1.pickLevelFromFlags; } });
+Object.defineProperty(exports, "parseLogLevel", { enumerable: true, get: function () { return log_levels_1.parseLogLevel; } });
 var tooling_log_collecting_writer_1 = __webpack_require__(418);
-exports.ToolingLogCollectingWriter = tooling_log_collecting_writer_1.ToolingLogCollectingWriter;
+Object.defineProperty(exports, "ToolingLogCollectingWriter", { enumerable: true, get: function () { return tooling_log_collecting_writer_1.ToolingLogCollectingWriter; } });
 
 
 /***/ }),
@@ -36650,6 +36656,7 @@ exports.ToolingLogCollectingWriter = tooling_log_collecting_writer_1.ToolingLogC
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ToolingLog = void 0;
 const tslib_1 = __webpack_require__(36);
 const Rx = tslib_1.__importStar(__webpack_require__(169));
 const tooling_log_text_writer_1 = __webpack_require__(416);
@@ -36738,6 +36745,7 @@ exports.ToolingLog = ToolingLog;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ToolingLogTextWriter = void 0;
 const tslib_1 = __webpack_require__(36);
 const util_1 = __webpack_require__(29);
 const chalk_1 = tslib_1.__importDefault(__webpack_require__(2));
@@ -36832,6 +36840,7 @@ exports.ToolingLogTextWriter = ToolingLogTextWriter;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseLogLevel = exports.pickLevelFromFlags = void 0;
 const LEVELS = ['silent', 'error', 'warning', 'info', 'debug', 'verbose'];
 function pickLevelFromFlags(flags, options = {}) {
     if (flags.verbose)
@@ -36888,6 +36897,7 @@ exports.parseLogLevel = parseLogLevel;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ToolingLogCollectingWriter = void 0;
 const tooling_log_text_writer_1 = __webpack_require__(416);
 class ToolingLogCollectingWriter extends tooling_log_text_writer_1.ToolingLogTextWriter {
     constructor() {
@@ -36932,7 +36942,7 @@ exports.ToolingLogCollectingWriter = ToolingLogCollectingWriter;
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 var absolute_path_serializer_1 = __webpack_require__(420);
-exports.createAbsolutePathSerializer = absolute_path_serializer_1.createAbsolutePathSerializer;
+Object.defineProperty(exports, "createAbsolutePathSerializer", { enumerable: true, get: function () { return absolute_path_serializer_1.createAbsolutePathSerializer; } });
 
 
 /***/ }),
@@ -36960,6 +36970,7 @@ exports.createAbsolutePathSerializer = absolute_path_serializer_1.createAbsolute
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createAbsolutePathSerializer = void 0;
 const repo_root_1 = __webpack_require__(421);
 function createAbsolutePathSerializer(rootPath = repo_root_1.REPO_ROOT) {
     return {
@@ -36995,6 +37006,7 @@ exports.createAbsolutePathSerializer = createAbsolutePathSerializer;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.REPO_ROOT = void 0;
 const tslib_1 = __webpack_require__(36);
 const path_1 = tslib_1.__importDefault(__webpack_require__(16));
 const fs_1 = tslib_1.__importDefault(__webpack_require__(23));
@@ -39383,6 +39395,7 @@ module.exports = (chalk, tmp) => {
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.KBN_P12_PASSWORD = exports.KBN_P12_PATH = exports.KBN_CERT_PATH = exports.KBN_KEY_PATH = exports.ES_NOPASSWORD_P12_PATH = exports.ES_EMPTYPASSWORD_P12_PATH = exports.ES_P12_PASSWORD = exports.ES_P12_PATH = exports.ES_CERT_PATH = exports.ES_KEY_PATH = exports.CA_CERT_PATH = void 0;
 const path_1 = __webpack_require__(16);
 exports.CA_CERT_PATH = path_1.resolve(__dirname, '../certs/ca.crt');
 exports.ES_KEY_PATH = path_1.resolve(__dirname, '../certs/elasticsearch.key');
@@ -39423,12 +39436,12 @@ exports.KBN_P12_PASSWORD = 'storepass';
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 var run_1 = __webpack_require__(445);
-exports.run = run_1.run;
+Object.defineProperty(exports, "run", { enumerable: true, get: function () { return run_1.run; } });
 var fail_1 = __webpack_require__(446);
-exports.createFailError = fail_1.createFailError;
-exports.createFlagError = fail_1.createFlagError;
-exports.combineErrors = fail_1.combineErrors;
-exports.isFailError = fail_1.isFailError;
+Object.defineProperty(exports, "createFailError", { enumerable: true, get: function () { return fail_1.createFailError; } });
+Object.defineProperty(exports, "createFlagError", { enumerable: true, get: function () { return fail_1.createFlagError; } });
+Object.defineProperty(exports, "combineErrors", { enumerable: true, get: function () { return fail_1.combineErrors; } });
+Object.defineProperty(exports, "isFailError", { enumerable: true, get: function () { return fail_1.isFailError; } });
 
 
 /***/ }),
@@ -39456,6 +39469,7 @@ exports.isFailError = fail_1.isFailError;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.run = void 0;
 const tslib_1 = __webpack_require__(36);
 const util_1 = __webpack_require__(29);
 // @ts-ignore @types are outdated and module is super simple
@@ -39561,6 +39575,7 @@ exports.run = run;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.combineErrors = exports.isFailError = exports.createFlagError = exports.createFailError = void 0;
 const util_1 = __webpack_require__(29);
 const FAIL_TAG = Symbol('fail error');
 function createFailError(reason, options = {}) {
@@ -39629,6 +39644,7 @@ exports.combineErrors = combineErrors;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getHelp = exports.getFlags = void 0;
 const tslib_1 = __webpack_require__(36);
 const path_1 = __webpack_require__(16);
 const dedent_1 = tslib_1.__importDefault(__webpack_require__(14));
@@ -39707,9 +39723,9 @@ function getFlags(argv, options) {
 }
 exports.getFlags = getFlags;
 function getHelp(options) {
-    var _a, _b;
+    var _a;
     const usage = options.usage || `node ${path_1.relative(process.cwd(), process.argv[1])}`;
-    const optionHelp = (dedent_1.default(((_b = (_a = options) === null || _a === void 0 ? void 0 : _a.flags) === null || _b === void 0 ? void 0 : _b.help) || '') +
+    const optionHelp = (dedent_1.default(((_a = options === null || options === void 0 ? void 0 : options.flags) === null || _a === void 0 ? void 0 : _a.help) || '') +
         '\n' +
         dedent_1.default `
       --verbose, -v      Log verbosely
@@ -39972,9 +39988,9 @@ module.exports = getopts
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 var kbn_client_1 = __webpack_require__(450);
-exports.KbnClient = kbn_client_1.KbnClient;
+Object.defineProperty(exports, "KbnClient", { enumerable: true, get: function () { return kbn_client_1.KbnClient; } });
 var kbn_client_requester_1 = __webpack_require__(451);
-exports.uriencode = kbn_client_requester_1.uriencode;
+Object.defineProperty(exports, "uriencode", { enumerable: true, get: function () { return kbn_client_requester_1.uriencode; } });
 
 
 /***/ }),
@@ -40002,6 +40018,7 @@ exports.uriencode = kbn_client_requester_1.uriencode;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.KbnClient = void 0;
 const kbn_client_requester_1 = __webpack_require__(451);
 const kbn_client_status_1 = __webpack_require__(494);
 const kbn_client_plugins_1 = __webpack_require__(495);
@@ -40069,6 +40086,7 @@ exports.KbnClient = KbnClient;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.KbnClientRequester = exports.uriencode = void 0;
 const tslib_1 = __webpack_require__(36);
 const url_1 = tslib_1.__importDefault(__webpack_require__(452));
 const axios_1 = tslib_1.__importDefault(__webpack_require__(453));
@@ -40112,7 +40130,7 @@ class KbnClientRequester {
         const url = url_1.default.resolve(this.pickUrl(), options.path);
         const description = options.description || `${options.method} ${url}`;
         let attempt = 0;
-        const maxAttempts = (_a = options.retries, (_a !== null && _a !== void 0 ? _a : DEFAULT_MAX_ATTEMPTS));
+        const maxAttempts = (_a = options.retries) !== null && _a !== void 0 ? _a : DEFAULT_MAX_ATTEMPTS;
         while (true) {
             attempt += 1;
             try {
@@ -43477,6 +43495,7 @@ tslib_1.__exportStar(__webpack_require__(493), exports);
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.isAxiosResponseError = exports.isAxiosRequestError = void 0;
 exports.isAxiosRequestError = (error) => {
     return error && error.config && error.response === undefined;
 };
@@ -43510,6 +43529,7 @@ exports.isAxiosResponseError = (error) => {
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.KbnClientStatus = void 0;
 class KbnClientStatus {
     constructor(requester) {
         this.requester = requester;
@@ -43559,6 +43579,7 @@ exports.KbnClientStatus = KbnClientStatus;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.KbnClientPlugins = void 0;
 const PLUGIN_STATUS_ID = /^plugin:(.+?)@/;
 class KbnClientPlugins {
     constructor(status) {
@@ -43609,6 +43630,7 @@ exports.KbnClientPlugins = KbnClientPlugins;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.KbnClientVersion = void 0;
 class KbnClientVersion {
     constructor(status) {
         this.status = status;
@@ -43650,6 +43672,7 @@ exports.KbnClientVersion = KbnClientVersion;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.KbnClientSavedObjects = void 0;
 const kbn_client_requester_1 = __webpack_require__(451);
 class KbnClientSavedObjects {
     constructor(log, requester) {
@@ -43759,6 +43782,7 @@ exports.KbnClientSavedObjects = KbnClientSavedObjects;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.KbnClientUiSettings = void 0;
 const kbn_client_requester_1 = __webpack_require__(451);
 class KbnClientUiSettings {
     constructor(log, requester, defaults) {
@@ -43888,6 +43912,7 @@ tslib_1.__exportStar(__webpack_require__(500), exports);
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.CiStatsReporter = void 0;
 const tslib_1 = __webpack_require__(36);
 const util_1 = __webpack_require__(29);
 const axios_1 = tslib_1.__importDefault(__webpack_require__(453));
@@ -43940,7 +43965,7 @@ class CiStatsReporter {
         return !!this.config;
     }
     async metrics(metrics) {
-        var _a, _b, _c, _d;
+        var _a;
         if (!this.config) {
             return;
         }
@@ -43967,11 +43992,11 @@ class CiStatsReporter {
                 return;
             }
             catch (error) {
-                if (!((_a = error) === null || _a === void 0 ? void 0 : _a.request)) {
+                if (!(error === null || error === void 0 ? void 0 : error.request)) {
                     // not an axios error, must be a usage error that we should notify user about
                     throw error;
                 }
-                if (((_b = error) === null || _b === void 0 ? void 0 : _b.response) && error.response.status !== 502) {
+                if ((error === null || error === void 0 ? void 0 : error.response) && error.response.status !== 502) {
                     // error response from service was received so warn the user and move on
                     this.log.warning(`error recording metric [status=${error.response.status}] [resp=${util_1.inspect(error.response.data)}] ${bodySummary}`);
                     return;
@@ -43981,7 +44006,7 @@ class CiStatsReporter {
                     return;
                 }
                 // we failed to reach the backend and we have remaining attempts, lets retry after a short delay
-                const reason = ((_d = (_c = error) === null || _c === void 0 ? void 0 : _c.response) === null || _d === void 0 ? void 0 : _d.status) ? `${error.response.status} response`
+                const reason = ((_a = error === null || error === void 0 ? void 0 : error.response) === null || _a === void 0 ? void 0 : _a.status) ? `${error.response.status} response`
                     : 'no response';
                 this.log.warning(`failed to reach kibana-ci-stats service [reason=${reason}], retrying in ${attempt} seconds`);
                 await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
