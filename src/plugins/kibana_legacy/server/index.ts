@@ -40,7 +40,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
         get(completeConfig, 'kibana.defaultAppId') === undefined &&
         get(completeConfig, 'kibana_legacy.defaultAppId') === undefined
       ) {
-        return config;
+        return completeConfig;
       }
       log(
         `kibana.defaultAppId is deprecated and will be removed in 8.0. Please use the \`defaultRoute\` advanced setting instead`
