@@ -11,6 +11,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { Location } from 'history';
 import { first } from 'lodash';
@@ -153,6 +155,18 @@ export function TransactionOverview() {
             <EuiTitle size="xs">
               <h3>Transactions</h3>
             </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiCallOut
+              title="Too many unique transaction names"
+              color="primary"
+              iconType="help"
+            >
+              <p>
+                It looks like there&apos;s a lot of unique transaction names.
+                This could be a sign of incorrect setup in your agent.{' '}
+                <EuiLink href="#">Learn more in the documentation</EuiLink>.
+              </p>
+            </EuiCallOut>
             <EuiSpacer size="s" />
             <TransactionList
               isLoading={transactionListStatus === 'loading'}
