@@ -258,7 +258,7 @@ export class Server {
           },
           elasticsearch: {
             legacy: {
-              client: coreSetup.elasticsearch.dataClient.asScoped(req),
+              client: coreSetup.elasticsearch.legacy.client.asScoped(req),
             },
           },
           uiSettings: {
