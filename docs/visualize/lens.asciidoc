@@ -4,7 +4,7 @@
 
 beta[]
 
-*Lens* provides you with a simple and fast way to create visualizations of your {es} data. With *Lens*, 
+*Lens* is a simple and fast way to create visualizations of your {es} data. With *Lens*, 
 you drag and drop your data fields onto the visualization builder pane, and *Lens* automatically generates 
 a visualization that best displays your data.
 
