@@ -11,7 +11,7 @@ import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { ColorGradient } from './components/color_gradient';
 import { vislibColorMaps } from '../../../../../../src/plugins/charts/public';
 
-const GRADIENT_INTERVALS = 8;
+export const GRADIENT_INTERVALS = 8;
 
 export const DEFAULT_FILL_COLORS = euiPaletteColorBlind();
 export const DEFAULT_LINE_COLORS = [
@@ -73,7 +73,7 @@ export function getColorRampCenterColor(colorRampName) {
 
 // Returns an array of color stops
 // [ stop_input_1: number, stop_output_1: color, stop_input_n: number, stop_output_n: color ]
-export function getOrdinalColorRampStops(colorRampName, min, max) {
+export function getOrdinalMbColorRampStops(colorRampName, min, max, numberColors) {
   if (!colorRampName) {
     return null;
   }
@@ -82,7 +82,7 @@ export function getOrdinalColorRampStops(colorRampName, min, max) {
     return null;
   }
 
-  const hexColors = getHexColorRangeStrings(colorRampName, GRADIENT_INTERVALS);
+  const hexColors = getHexColorRangeStrings(colorRampName, numberColors);
   if (max === min) {
     //just return single stop value
     return [max, hexColors[hexColors.length - 1]];
