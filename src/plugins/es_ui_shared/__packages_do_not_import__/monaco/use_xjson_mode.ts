@@ -16,18 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { XJsonMode } from '../../../public';
-import { useXJsonMode as useBaseXJsonMode } from '../../../__packages_do_not_import__/xjson';
 
-const xJsonMode = new XJsonMode();
+import { XJsonLang } from '@kbn/ui-shared-deps/monaco';
+import { useXJsonMode as useBaseXJsonMode } from '../xjson';
 
 interface ReturnValue extends ReturnType<typeof useBaseXJsonMode> {
-  xJsonMode: typeof xJsonMode;
+  XJsonLang: typeof XJsonLang;
 }
 
 export const useXJsonMode = (json: Parameters<typeof useBaseXJsonMode>[0]): ReturnValue => {
   return {
     ...useBaseXJsonMode(json),
-    xJsonMode,
+    XJsonLang,
   };
 };
