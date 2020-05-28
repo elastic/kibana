@@ -23,17 +23,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testRunner: PuppeteerTestRunner,
 
     esArchiver: {
-      directory: resolve('../../../test/functional/es_archives'),
+      directory: resolve(__dirname, 'es_archives'),
     },
 
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),
-      serverArgs: [
-        ...xpackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
-        // define custom es server here
-        // API Keys is enabled at the top level
-        // 'xpack.security.enabled=true',
-      ],
+      serverArgs: [...xpackFunctionalTestsConfig.get('esTestCluster.serverArgs')],
     },
 
     kbnTestServer: {

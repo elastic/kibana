@@ -17,18 +17,5 @@
  * under the License.
  */
 
-export interface ResponseReceivedEvent {
-  frameId: string;
-  loaderId: string;
-  requestId: string;
-  response: Record<string, any>;
-  timestamp: number;
-  type: string;
-}
-
-export interface LoadingFinishedEvent {
-  encodedDataLength: number;
-  requestId: string;
-  shouldReportCorbBlocking: boolean;
-  timestamp: number;
-}
+require('../src/setup_node_env');
+require('@kbn/test').runPageLoadMetricsCli();

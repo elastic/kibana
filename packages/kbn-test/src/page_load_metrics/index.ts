@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('../src/dev/loading_time_performance').runTestsCli();
+export * from './cli';
+export { capturePageLoadMetrics } from './capture_page_load_metrics';

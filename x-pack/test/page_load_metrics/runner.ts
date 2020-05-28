@@ -4,28 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Url from 'url';
+import { CiStatsReporter } from '@kbn/dev-utils';
 
-import { withProcRunner } from '@kbn/dev-utils';
+// @ts-ignore not TS yet
+import getUrl from '../../../src/test_utils/get_url';
+
 import { FtrProviderContext } from './../functional/ftr_provider_context';
-import { navigateToApp } from './../../../src/dev/loading_time_performance/navigation';
-import { ingestPerformanceMetrics } from './../../../src/dev/loading_time_performance/ingest_metrics';
+import { capturePageLoadMetrics } from './../../../src/dev/page_load_metrics';
 
 export async function PuppeteerTestRunner({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
+  const esArchiver = getService('esArchiver');
 
-  const options = {
-    headless: false,
+  await esArchiver.load('default');
+  const metrics = await capturePageLoadMetrics(log, {
+    headless: true,
     appConfig: {
-      url: Url.format(config.get('servers.kibana')),
-      login: config.get('servers.kibana.username'),
+      url: getUrl.baseUrl(config.get('servers.kibana')),
+      username: config.get('servers.kibana.username'),
       password: config.get('servers.kibana.password'),
     },
-  };
-
-  await withProcRunner(log, async () => {
-    const responses = await navigateToApp(log, options);
-    ingestPerformanceMetrics(log, responses);
   });
+  const reporter = CiStatsReporter.fromEnv(log);
+
+  await reporter.metrics(metrics);
 }
