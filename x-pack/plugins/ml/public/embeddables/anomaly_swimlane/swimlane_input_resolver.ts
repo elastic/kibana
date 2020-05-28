@@ -56,7 +56,7 @@ export function useSwimlaneInputResolver(
 
   const [swimlaneData, setSwimlaneData] = useState<OverallSwimlaneData>();
   const [swimlaneType, setSwimlaneType] = useState<string>();
-  const [error, setError] = useState();
+  const [error, setError] = useState<Error | null>();
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
 
