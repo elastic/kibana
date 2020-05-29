@@ -14,7 +14,13 @@ const testBedConfig = {
   memoryRouter: {
     onRouter: (router) =>
       (routing.reactRouter = {
-        ...router,
+        history: {
+          ...router.history,
+          parentHistory: {
+            createHref: () => '',
+            push: () => {},
+          },
+        },
         getUrlForApp: () => '',
       }),
   },
