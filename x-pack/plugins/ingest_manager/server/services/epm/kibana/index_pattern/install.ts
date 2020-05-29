@@ -90,13 +90,10 @@ export async function installIndexPatterns(
 
   // TODO: move to install package
   // cache all installed packages if they don't exist
-  const packagesPromise = installedPackages.map((pkg) => {
-    const pkgkey = getCacheKey(pkg.pkgName + '-' + pkg.pkgVersion);
-    if (!cacheHas(pkgkey)) {
-      return Registry.getArchiveInfo(pkg.pkgName, pkg.pkgVersion);
-    }
-  });
-  await Promise.all(packagesPromise);
+  const packagePromises = installedPackages.map((pkg) =>
+    Registry.ensureCachedArchiveInfo(pkg.pkgName, pkg.pkgVersion)
+  );
+  await Promise.all(packagePromises);
 
   if (pkgName && pkgVersion) {
     // add this package to the array if it doesn't already exist
