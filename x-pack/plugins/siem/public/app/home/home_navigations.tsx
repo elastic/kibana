@@ -14,6 +14,7 @@ import {
 } from '../../common/components/link_to';
 import * as i18n from './translations';
 import { SiemPageName, SiemNavTab } from '../types';
+import { getManagementUrl } from '../../management';
 
 export const navTabs: SiemNavTab = {
   [SiemPageName.overview]: {
@@ -57,5 +58,12 @@ export const navTabs: SiemNavTab = {
     href: getCaseUrl(null),
     disabled: false,
     urlKey: 'case',
+  },
+  [SiemPageName.management]: {
+    id: SiemPageName.management,
+    name: i18n.MANAGEMENT,
+    href: getManagementUrl({ name: 'default' }),
+    disabled: false,
+    urlKey: SiemPageName.management,
   },
 };
