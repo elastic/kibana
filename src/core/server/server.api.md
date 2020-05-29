@@ -822,7 +822,7 @@ export class ElasticsearchErrorHelpers {
 
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
-    // (undocumented)
+    // @deprecated (undocumented)
     legacy: {
         readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
         readonly client: IClusterClient;
@@ -831,7 +831,7 @@ export interface ElasticsearchServiceSetup {
 
 // @public (undocumented)
 export interface ElasticsearchServiceStart {
-    // (undocumented)
+    // @deprecated (undocumented)
     legacy: {
         readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
         readonly client: IClusterClient;

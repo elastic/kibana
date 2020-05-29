@@ -94,7 +94,7 @@ export class ElasticsearchService
       switchMap(
         (config) =>
           new Observable<CoreClusterClients>((subscriber) => {
-            this.log.debug('Creating elasticsearch clients');
+            this.log.debug('Creating elasticsearch client');
 
             const coreClients = {
               config,

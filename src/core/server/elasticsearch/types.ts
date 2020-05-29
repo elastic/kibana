@@ -28,6 +28,11 @@ import { ServiceStatus } from '../status';
  * @public
  */
 export interface ElasticsearchServiceSetup {
+  /**
+   * @deprecated
+   * Use {@link ElasticsearchServiceStart.legacy} instead.
+   *
+   * */
   legacy: {
     /**
      * @deprecated
@@ -74,6 +79,11 @@ export interface ElasticsearchServiceSetup {
  * @public
  */
 export interface ElasticsearchServiceStart {
+  /**
+   * @deprecated
+   * Provided for the backward compatibility.
+   * Switch to the new elasticsearch client as soon as https://github.com/elastic/kibana/issues/35508 done.
+   * */
   legacy: {
     /**
      * Create application specific Elasticsearch cluster API client with customized config. See {@link IClusterClient}.
