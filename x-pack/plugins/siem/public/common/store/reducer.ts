@@ -17,7 +17,10 @@ import {
   EndpointAlertsPluginState,
   EndpointAlertsPluginReducer,
 } from '../../endpoint_alerts/store';
-import { EndpointHostsPluginState, EndpointHostsPluginReducer } from '../../endpoint_hosts/store';
+import {
+  EndpointHostsPluginState,
+  EndpointHostsPluginReducer,
+} from '../../management/pages/endpoint_hosts/store';
 
 import { ManagementPluginReducer, ManagementPluginState } from '../../management/store/types';
 

@@ -7,7 +7,7 @@
 import { hostsReducer } from '../../hosts/store';
 import { networkReducer } from '../../network/store';
 import { timelineReducer } from '../../timelines/store/timeline/reducer';
-import { hostListReducer } from '../../endpoint_hosts/store';
+import { hostListReducer } from '../../management/pages/endpoint_hosts/store';
 import { alertListReducer } from '../../endpoint_alerts/store';
 import { managementReducer } from '../../management/store';
 

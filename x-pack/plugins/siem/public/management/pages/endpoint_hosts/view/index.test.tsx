@@ -9,14 +9,14 @@ import * as reactTestingLibrary from '@testing-library/react';
 
 import { HostList } from './index';
 import { mockHostDetailsApiResult, mockHostResultList } from '../store/mock_host_result_list';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../common/mock/endpoint';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
   HostInfo,
   HostStatus,
   HostPolicyResponseActionStatus,
-} from '../../../common/endpoint/types';
-import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
-import { AppAction } from '../../common/store/actions';
+} from '../../../../../common/endpoint/types';
+import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
+import { AppAction } from '../../../../common/store/actions';
 
 describe('when on the hosts page', () => {
   const docGenerator = new EndpointDocGenerator();

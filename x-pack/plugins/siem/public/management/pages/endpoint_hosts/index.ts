@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SecuritySubPluginWithStore } from '../app/types';
+import { CoreStart } from 'kibana/public';
+import { SecuritySubPluginWithStore } from '../../../app/types';
 import { getEndpointHostsRoutes } from './routes';
 import { initialHostListState, hostListReducer } from './store/reducer';
-import { Immutable } from '../../common/endpoint/types';
+import { Immutable } from '../../../../common/endpoint/types';
 import { HostState } from './types';
 import { hostMiddlewareFactory } from './store/middleware';
-import { CoreStart } from '../../../../../src/core/public';
-import { StartPlugins } from '../types';
-import { substateMiddlewareFactory } from '../common/store';
+import { StartPlugins } from '../../../types';
+import { substateMiddlewareFactory } from '../../../common/store';
 
 export class EndpointHosts {
   public setup() {}

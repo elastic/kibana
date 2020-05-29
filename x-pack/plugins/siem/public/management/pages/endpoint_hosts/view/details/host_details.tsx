@@ -16,14 +16,14 @@ import {
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { HostMetadata } from '../../../../common/endpoint/types';
+import { HostMetadata } from '../../../../../../common/endpoint/types';
 import { useHostSelector, useHostLogsUrl } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
 import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
-import { FormattedDateAndTime } from '../../../common/components/endpoint/formatted_date_time';
-import { useNavigateByRouterEventHandler } from '../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { LinkToApp } from '../../../common/components/endpoint/link_to_app';
+import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
+import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
+import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;

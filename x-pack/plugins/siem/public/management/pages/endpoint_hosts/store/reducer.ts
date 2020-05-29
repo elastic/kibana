@@ -6,9 +6,9 @@
 
 import { isOnHostPage, hasSelectedHost } from './selectors';
 import { HostState } from '../types';
-import { AppAction } from '../../common/store/actions';
-import { ImmutableReducer } from '../../common/store';
-import { Immutable } from '../../../common/endpoint/types';
+import { AppAction } from '../../../../common/store/actions';
+import { ImmutableReducer } from '../../../../common/store';
+import { Immutable } from '../../../../../common/endpoint/types';
 
 export const initialHostListState = (): HostState => {
   return {

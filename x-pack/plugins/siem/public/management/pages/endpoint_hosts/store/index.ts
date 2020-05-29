@@ -5,9 +5,9 @@
  */
 
 import { HostState } from '../types';
-import { ImmutableReducer } from '../../common/store';
-import { AppAction } from '../../common/store/actions';
-import { Immutable } from '../../../common/endpoint/types';
+import { ImmutableReducer } from '../../../../common/store';
+import { AppAction } from '../../../../common/store/actions';
+import { Immutable } from '../../../../../common/endpoint/types';
 
 export { hostListReducer } from './reducer';
 export { HostAction } from './action';

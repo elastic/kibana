@@ -64,7 +64,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const overviewSubPlugin = new (await import('./overview')).Overview();
       const timelinesSubPlugin = new (await import('./timelines')).Timelines();
       const endpointAlertsSubPlugin = new (await import('./endpoint_alerts')).EndpointAlerts();
-      const endpointHostsSubPlugin = new (await import('./endpoint_hosts')).EndpointHosts();
+      const endpointHostsSubPlugin = new (
+        await import('./management/pages/endpoint_hosts')
+      ).EndpointHosts();
       const managementSubPlugin = new (await import('./management')).Management();
 
       const alertsStart = alertsSubPlugin.start();

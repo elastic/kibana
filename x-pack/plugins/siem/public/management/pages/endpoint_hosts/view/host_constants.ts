@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostStatus, HostPolicyResponseActionStatus } from '../../../common/endpoint/types';
+import { HostStatus, HostPolicyResponseActionStatus } from '../../../../../common/endpoint/types';
 
 export const HOST_STATUS_TO_HEALTH_COLOR = Object.freeze<
   {

@@ -10,8 +10,8 @@ import {
   HostMetadata,
   HostPolicyResponse,
   AppLocation,
-} from '../../common/endpoint/types';
-import { ServerApiError } from '../common/types';
+} from '../../../../common/endpoint/types';
+import { ServerApiError } from '../../../common/types';
 
 export interface HostState {
   /** list of host **/

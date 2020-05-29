@@ -26,7 +26,7 @@ import {
 import { networkModel } from '../../network/store';
 import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 import { initialAlertListState } from '../../endpoint_alerts/store/reducer';
-import { initialHostListState } from '../../endpoint_hosts/store/reducer';
+import { initialHostListState } from '../../management/pages/endpoint_hosts/store/reducer';
 import { getManagementInitialState } from '../../management/store';
 
 const alertList = initialAlertListState();

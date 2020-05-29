@@ -5,15 +5,18 @@
  */
 import { CoreStart, HttpSetup } from 'kibana/public';
 import { applyMiddleware, createStore, Store } from 'redux';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { History, createBrowserHistory } from 'history';
 import { hostListReducer, hostMiddlewareFactory } from './index';
 
-import { DepsStartMock, depsStartMock } from '../../common/mock/endpoint';
+import { DepsStartMock, depsStartMock } from '../../../../common/mock/endpoint';
 
-import { createSpyMiddleware, MiddlewareActionSpyHelper } from '../../common/store/test_utils';
-import { Immutable, HostResultList } from '../../../common/endpoint/types';
-import { AppAction } from '../../common/store/actions';
+import {
+  createSpyMiddleware,
+  MiddlewareActionSpyHelper,
+} from '../../../../common/store/test_utils';
+import { Immutable, HostResultList } from '../../../../../common/endpoint/types';
+import { AppAction } from '../../../../common/store/actions';
 import { mockHostResultList } from './mock_host_result_list';
 import { listData } from './selectors';
 import { HostState } from '../types';

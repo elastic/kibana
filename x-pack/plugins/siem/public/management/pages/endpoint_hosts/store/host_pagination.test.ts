@@ -8,10 +8,10 @@ import { CoreStart, HttpSetup } from 'kibana/public';
 import { History, createBrowserHistory } from 'history';
 import { applyMiddleware, Store, createStore } from 'redux';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
-import { HostResultList, AppLocation } from '../../../common/endpoint/types';
-import { DepsStartMock, depsStartMock } from '../../common/mock/endpoint';
+import { HostResultList, AppLocation } from '../../../../../common/endpoint/types';
+import { DepsStartMock, depsStartMock } from '../../../../common/mock/endpoint';
 
 import { hostMiddlewareFactory } from './middleware';
 
@@ -20,7 +20,10 @@ import { hostListReducer } from './reducer';
 import { uiQueryParams } from './selectors';
 import { mockHostResultList } from './mock_host_result_list';
 import { HostState, HostIndexUIQueryParams } from '../types';
-import { MiddlewareActionSpyHelper, createSpyMiddleware } from '../../common/store/test_utils';
+import {
+  MiddlewareActionSpyHelper,
+  createSpyMiddleware,
+} from '../../../../common/store/test_utils';
 import { urlFromQueryParams } from '../view/url_from_query_params';
 
 describe('host list pagination: ', () => {

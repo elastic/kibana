@@ -24,10 +24,10 @@ import * as selectors from '../store/selectors';
 import { useHostSelector } from './hooks';
 import { urlFromQueryParams } from './url_from_query_params';
 import { HOST_STATUS_TO_HEALTH_COLOR } from './host_constants';
-import { useNavigateByRouterEventHandler } from '../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { CreateStructuredSelector } from '../../common/store';
-import { Immutable, HostInfo } from '../../../common/endpoint/types';
-import { PageView } from '../../common/components/endpoint/page_view';
+import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
+import { CreateStructuredSelector } from '../../../../common/store';
+import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
+import { PageView } from '../../../../common/components/endpoint/page_view';
 
 const HostLink = memo<{
   name: string;

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostInfo, HostResultList, HostStatus } from '../../../common/endpoint/types';
-import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
+import { HostInfo, HostResultList, HostStatus } from '../../../../../common/endpoint/types';
+import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 
 export const mockHostResultList: (options?: {
   total?: number;

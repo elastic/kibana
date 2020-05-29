@@ -12,7 +12,7 @@ import {
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   HostPolicyResponseActionStatus,
-} from '../../../common/endpoint/types';
+} from '../../../../../common/endpoint/types';
 import { HostState, HostIndexUIQueryParams } from '../types';
 
 const PAGE_SIZES = Object.freeze([10, 20, 50]);

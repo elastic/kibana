@@ -8,7 +8,7 @@
 import querystring from 'querystring';
 
 import { HostIndexUIQueryParams } from '../types';
-import { AppLocation } from '../../../common/endpoint/types';
+import { AppLocation } from '../../../../../common/endpoint/types';
 
 export function urlFromQueryParams(queryParams: HostIndexUIQueryParams): Partial<AppLocation> {
   const search = querystring.stringify(queryParams);
