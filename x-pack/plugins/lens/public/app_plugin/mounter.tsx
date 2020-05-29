@@ -19,23 +19,24 @@ import { App } from './app';
 import { EditorFrameStart } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { SavedObjectIndexStore } from '../persistence';
-import { LensPluginStartDependencies, LensIncomingState } from '../plugin';
+import { LensPluginStartDependencies } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE } from '../../common';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
   params: AppMountParameters,
-  incomingState: LensIncomingState,
   createEditorFrame: EditorFrameStart['createInstance']
 ) {
   const [coreStart, startDependencies] = await core.getStartServices();
-  const { data: dataStart, navigation } = startDependencies;
+  const { data: dataStart, navigation, embeddable } = startDependencies;
   const savedObjectsClient = coreStart.savedObjects.client;
   addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
 
   coreStart.chrome.docTitle.change(
     i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
   );
+
+  const { originatingApp } = embeddable?.stateTransfer.incomingOriginatingApp(params.history) || {};
 
   const instance = await createEditorFrame();
 
@@ -49,7 +50,6 @@ export async function mountApp(
     routeProps: RouteComponentProps<{ id?: string }>,
     id?: string,
     returnToOrigin?: boolean,
-    originatingApp?: string,
     newlyCreated?: boolean
   ) => {
     if (!id) {
@@ -58,16 +58,19 @@ export async function mountApp(
       routeProps.history.push(`/edit/${id}`);
     } else if (!!originatingApp && id && returnToOrigin) {
       routeProps.history.push(`/edit/${id}`);
-      const state = { id: newlyCreated ? id : '', type: LENS_EMBEDDABLE_TYPE };
-      coreStart.application.navigateToApp(originatingApp, {
-        state,
-      });
+
+      if (newlyCreated && embeddable) {
+        embeddable.stateTransfer.outgoingEmbeddablePackage(originatingApp, {
+          state: { id, type: LENS_EMBEDDABLE_TYPE },
+        });
+      } else {
+        coreStart.application.navigateToApp(originatingApp);
+      }
     }
   };
 
   const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
     trackUiEvent('loaded');
-    const originatingApp = incomingState.embeddableOriginatingApp;
 
     return (
       <App
@@ -79,7 +82,7 @@ export async function mountApp(
         docId={routeProps.match.params.id}
         docStorage={new SavedObjectIndexStore(savedObjectsClient)}
         redirectTo={(id, returnToOrigin, newlyCreated) =>
-          redirectTo(routeProps, id, returnToOrigin, originatingApp, newlyCreated)
+          redirectTo(routeProps, id, returnToOrigin, newlyCreated)
         }
         originatingApp={originatingApp}
       />

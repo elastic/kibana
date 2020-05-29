@@ -95,13 +95,8 @@ export class LensPlugin {
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
-        const { embeddableOriginatingApp } = (params.history.location.state ||
-          {}) as LensIncomingState;
-        if (embeddableOriginatingApp) {
-          delete (params.history.location.state as LensIncomingState).embeddableOriginatingApp;
-        }
         const { mountApp } = await import('./app_plugin/mounter');
-        return mountApp(core, params, { embeddableOriginatingApp }, this.createEditorFrame!);
+        return mountApp(core, params, this.createEditorFrame!);
       },
     });
 

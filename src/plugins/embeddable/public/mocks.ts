@@ -21,6 +21,7 @@ import {
   EmbeddableSetup,
   EmbeddableSetupDependencies,
   EmbeddableStartDependencies,
+  EmbeddableStateTransfer,
 } from '.';
 import { EmbeddablePublicPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
@@ -32,6 +33,17 @@ import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
 
 export type Setup = jest.Mocked<EmbeddableSetup>;
 export type Start = jest.Mocked<EmbeddableStart>;
+
+export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTransfer> => {
+  return {
+    incomingOriginatingApp: jest.fn(),
+    incomingEmbeddablePackage: jest.fn(),
+    incoming: jest.fn(),
+    outgoingOriginatingApp: jest.fn(),
+    outgoingEmbeddablePackage: jest.fn(),
+    outgoing: jest.fn(),
+  };
+};
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
@@ -46,6 +58,7 @@ const createStartContract = (): Start => {
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
     EmbeddablePanel: jest.fn(),
+    stateTransfer: createEmbeddableStateTransferMock() as EmbeddableStateTransfer,
   };
   return startContract;
 };

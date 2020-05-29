@@ -150,10 +150,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     if ('aliasPath' in visType) {
       params = visType.aliasPath;
       this.props.onClose();
-      this.props.stateTransfer.outgoingOriginatingApp(visType.aliasApp, {
-        path: params,
-        state: { originatingApp: this.props.originatingApp || '' },
-      });
+      this.navigate(visType.aliasApp, visType.aliasPath);
       return;
     }
 
@@ -166,12 +163,22 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
     this.props.onClose();
     if (this.props.outsideVisualizeApp) {
-      this.props.stateTransfer.outgoingOriginatingApp('visualize', {
-        path: `#${basePath}${params.join('&')}`,
-        state: { originatingApp: this.props.originatingApp || '' },
-      });
+      this.navigate('visualize', `#${basePath}${params.join('&')}`);
     } else {
       location.assign(this.props.addBasePath(`${baseUrl}${params.join('&')}`));
+    }
+  }
+
+  private navigate(appId: string, params: string) {
+    if (this.props.stateTransfer && this.props.originatingApp) {
+      this.props.stateTransfer.outgoingOriginatingApp(appId, {
+        path: params,
+        state: { originatingApp: this.props.originatingApp },
+      });
+    } else {
+      this.props.application.navigateToApp(appId, {
+        path: params,
+      });
     }
   }
 }

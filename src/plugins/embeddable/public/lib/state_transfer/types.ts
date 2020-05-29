@@ -17,5 +17,32 @@
  * under the License.
  */
 
-export { EmbeddableStateTransfer } from './embeddable_state_transfer';
-export { EmbeddableOriginatingAppState, EmbeddablePackageState } from './types';
+export interface EmbeddableOriginatingAppState {
+  originatingApp: string;
+}
+
+export function isEmbeddableOriginatingAppState(
+  state: unknown
+): state is EmbeddableOriginatingAppState {
+  return ensureFieldOfTypeExists('originatingApp', state, 'string');
+}
+
+export interface EmbeddablePackageState {
+  type: string;
+  id: string;
+}
+
+export function isEmbeddablePackageState(state: unknown): state is EmbeddablePackageState {
+  return (
+    ensureFieldOfTypeExists('type', state, 'string') &&
+    ensureFieldOfTypeExists('id', state, 'string')
+  );
+}
+
+function ensureFieldOfTypeExists(key: string, obj: unknown, type?: string): boolean {
+  return (
+    obj &&
+    key in (obj as { [key: string]: unknown }) &&
+    (!type || typeof (obj as { [key: string]: unknown })[key] === type)
+  );
+}

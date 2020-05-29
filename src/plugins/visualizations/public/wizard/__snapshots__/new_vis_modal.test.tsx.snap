@@ -110,6 +110,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
   isOpen={true}
   onClose={[Function]}
   savedObjects={Object {}}
+  stateTransfer={Object {}}
   uiSettings={
     Object {
       "get": [MockFunction] {
@@ -1653,6 +1654,7 @@ exports[`NewVisModal should render as expected 1`] = `
   isOpen={true}
   onClose={[Function]}
   savedObjects={Object {}}
+  stateTransfer={Object {}}
   uiSettings={
     Object {
       "get": [MockFunction] {

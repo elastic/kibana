@@ -639,7 +639,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
    */
   function doSave(saveOptions) {
     // vis.title was not bound and it's needed to reflect title into visState
-    const firstSave = !Boolean(savedVis.id);
+    const newlyCreated = !Boolean(savedVis.id) || savedVis.copyOnSave;
     stateContainer.transitions.setVis({
       title: savedVis.title,
       type: savedVis.type || stateContainer.getState().vis.type,
@@ -672,10 +672,13 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
               // Manually insert a new url so the back button will open the saved visualization.
               history.replace(appPath);
               setActiveUrl(appPath);
-              const savedVisId = firstSave || savedVis.copyOnSave ? savedVis.id : '';
-              application.navigateToApp($scope.getOriginatingApp(), {
-                state: { id: savedVisId, type: VISUALIZE_EMBEDDABLE_TYPE },
-              });
+              if (newlyCreated && embeddable) {
+                embeddable.stateTransfer.outgoingEmbeddablePackage($scope.getOriginatingApp(), {
+                  state: { id: savedVis.id, type: VISUALIZE_EMBEDDABLE_TYPE },
+                });
+              } else {
+                application.navigateToApp($scope.getOriginatingApp());
+              }
             } else if (savedVis.id === $route.current.params.id) {
               chrome.docTitle.change(savedVis.lastSavedTitle);
               chrome.setBreadcrumbs($injector.invoke(getEditBreadcrumbs));

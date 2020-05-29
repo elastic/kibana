@@ -18,24 +18,12 @@
  */
 
 import { CoreStart, ScopedHistory } from '../../../../../core/public';
-
-export interface EmbeddableOriginatingAppState {
-  originatingApp: string;
-}
-
-export function isEmbeddableOriginatingAppState(
-  state: unknown
-): state is EmbeddableOriginatingAppState {
-  return (
-    'originatingApp' in (state as { [key: string]: unknown }) &&
-    typeof (state as { [key: string]: unknown }).originatingApp === 'string'
-  );
-}
-
-export interface EmbeddablePackageState {
-  type: string;
-  id: string;
-}
+import {
+  EmbeddableOriginatingAppState,
+  isEmbeddableOriginatingAppState,
+  EmbeddablePackageState,
+  isEmbeddablePackageState,
+} from './types';
 
 export class EmbeddableStateTransfer {
   constructor(private coreStart: CoreStart) {}
@@ -45,6 +33,13 @@ export class EmbeddableStateTransfer {
     removeAfterFetch: boolean = true
   ): EmbeddableOriginatingAppState | undefined {
     return this.incoming(history, isEmbeddableOriginatingAppState, removeAfterFetch);
+  }
+
+  public incomingEmbeddablePackage(
+    history: ScopedHistory,
+    removeAfterFetch: boolean = true
+  ): EmbeddablePackageState | undefined {
+    return this.incoming(history, isEmbeddablePackageState, removeAfterFetch);
   }
 
   public incoming<IncomingStateType>(
@@ -67,14 +62,21 @@ export class EmbeddableStateTransfer {
 
   public async outgoingOriginatingApp(
     appId: string,
-    options: { path: string; state: EmbeddableOriginatingAppState }
+    options: { path?: string; state: EmbeddableOriginatingAppState }
   ): Promise<void> {
     await this.outgoing<EmbeddableOriginatingAppState>(appId, options);
   }
 
+  public async outgoingEmbeddablePackage(
+    appId: string,
+    options: { path?: string; state: EmbeddablePackageState }
+  ): Promise<void> {
+    await this.outgoing<EmbeddablePackageState>(appId, options);
+  }
+
   public async outgoing<OutgoingStateType = unknown>(
     appId: string,
-    options: { path: string; state: OutgoingStateType }
+    options: { path?: string; state?: OutgoingStateType }
   ): Promise<void> {
     await this.coreStart.application.navigateToApp(appId, options);
   }

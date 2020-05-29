@@ -31,6 +31,7 @@ interface Props {
   getActions: UiActionsService['getTriggerCompatibleActions'];
   getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
   getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
+  panelComponent: EmbeddableStart['EmbeddablePanel'];
   overlays: CoreStart['overlays'];
   application: CoreStart['application'];
   notifications: CoreStart['notifications'];
@@ -108,14 +109,7 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
           <EmbeddableChildPanel
             container={this.props.container}
             embeddableId={panelState.explicitInput.id}
-            getActions={this.props.getActions}
-            getEmbeddableFactory={this.props.getEmbeddableFactory}
-            getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
-            overlays={this.props.overlays}
-            notifications={this.props.notifications}
-            application={this.props.application}
-            inspector={this.props.inspector}
-            SavedObjectFinder={this.props.SavedObjectFinder}
+            PanelComponent={this.props.panelComponent}
           />
         </EuiFlexItem>
       );

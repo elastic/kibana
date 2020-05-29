@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _, { uniq, cloneDeep } from 'lodash';
+import _, { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 import React from 'react';
@@ -404,18 +404,13 @@ export class DashboardAppController {
               refreshDashboardContainer();
             });
 
-            const incomingState = cloneDeep(
-              scopedHistory().location.state
-            ) as DashboardIncomingState;
+            const incomingState = embeddable.stateTransfer.incomingEmbeddablePackage(
+              scopedHistory()
+            );
             if (incomingState) {
-              Object.keys(incomingState).forEach((key: string) => {
-                delete (scopedHistory().location.state as { [key: string]: unknown })[key];
+              container.addNewEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
+                savedObjectId: incomingState.id,
               });
-              if (incomingState.id) {
-                container.addNewEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
-                  savedObjectId: incomingState.id,
-                });
-              }
             }
           }
 

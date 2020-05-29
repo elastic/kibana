@@ -48,6 +48,7 @@ interface HelloWorldContainerOptions {
   getActions: UiActionsService['getTriggerCompatibleActions'];
   getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
   getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
+  panelComponent: EmbeddableStart['EmbeddablePanel'];
   overlays: CoreStart['overlays'];
   application: CoreStart['application'];
   notifications: CoreStart['notifications'];
@@ -86,6 +87,7 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
           notifications={this.options.notifications}
           inspector={this.options.inspector}
           SavedObjectFinder={this.options.SavedObjectFinder}
+          panelComponent={this.options.panelComponent}
         />
       </I18nProvider>,
       node

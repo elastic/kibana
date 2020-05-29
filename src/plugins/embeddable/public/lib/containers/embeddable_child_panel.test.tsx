@@ -32,6 +32,7 @@ import {
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { mount } from 'enzyme';
 import { embeddablePluginMock } from '../../mocks';
+import { EmbeddablePanel, IEmbeddable } from '..';
 
 test('EmbeddableChildPanel renders an embeddable when it is done loading', async () => {
   const inspector = inspectorPluginMock.createStartContract();
@@ -58,10 +59,9 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
 
   expect(newEmbeddable.id).toBeDefined();
 
-  const component = mount(
-    <EmbeddableChildPanel
-      container={container}
-      embeddableId={newEmbeddable.id}
+  const testPanel = ({ embeddable }: { embeddable: IEmbeddable }) => (
+    <EmbeddablePanel
+      embeddable={embeddable}
       getActions={() => Promise.resolve([])}
       getAllEmbeddableFactories={start.getEmbeddableFactories}
       getEmbeddableFactory={getEmbeddableFactory}
@@ -70,6 +70,14 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
       overlays={{} as any}
       inspector={inspector}
       SavedObjectFinder={() => null}
+    />
+  );
+
+  const component = mount(
+    <EmbeddableChildPanel
+      container={container}
+      embeddableId={newEmbeddable.id}
+      PanelComponent={testPanel}
     />
   );
 
@@ -97,10 +105,9 @@ test(`EmbeddableChildPanel renders an error message if the factory doesn't exist
     { getEmbeddableFactory } as any
   );
 
-  const component = mount(
-    <EmbeddableChildPanel
-      container={container}
-      embeddableId={'1'}
+  const testPanel = ({ embeddable }: { embeddable: IEmbeddable }) => (
+    <EmbeddablePanel
+      embeddable={embeddable}
       getActions={() => Promise.resolve([])}
       getAllEmbeddableFactories={(() => []) as any}
       getEmbeddableFactory={(() => undefined) as any}
@@ -110,6 +117,9 @@ test(`EmbeddableChildPanel renders an error message if the factory doesn't exist
       inspector={inspector}
       SavedObjectFinder={() => null}
     />
+  );
+  const component = mount(
+    <EmbeddableChildPanel container={container} embeddableId={'1'} PanelComponent={testPanel} />
   );
 
   await nextTick();
