@@ -10,27 +10,17 @@ import { i18n } from '@kbn/i18n';
 import { PackageInfo, NewDatasource, DatasourceInput } from '../../../types';
 import { Loading } from '../../../components';
 import { DatasourceValidationResults, validationHasErrors } from './services';
-import { EndpointConfiguration } from './components/endpoint_configuration';
 import { DatasourceInputPanel, CustomConfigureDatasource } from './components';
 import { CreateDatasourceFrom } from './types';
 
 export const StepConfigureDatasource: React.FunctionComponent<{
-  from: CreateDatasourceFrom;
+  from?: CreateDatasourceFrom;
   packageInfo: PackageInfo;
   datasource: NewDatasource;
   updateDatasource: (fields: Partial<NewDatasource>) => void;
   validationResults: DatasourceValidationResults;
   submitAttempted: boolean;
-  editMode?: boolean;
-}> = ({
-  from,
-  packageInfo,
-  datasource,
-  updateDatasource,
-  validationResults,
-  submitAttempted,
-  editMode = false,
-}) => {
+}> = ({ from, packageInfo, datasource, updateDatasource, validationResults, submitAttempted }) => {
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   // Configure inputs (and their streams)

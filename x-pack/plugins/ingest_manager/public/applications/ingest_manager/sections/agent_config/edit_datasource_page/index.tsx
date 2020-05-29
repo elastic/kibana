@@ -305,7 +305,6 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
                     updateDatasource={updateDatasource}
                     validationResults={validationResults!}
                     submitAttempted={formState === 'INVALID'}
-                    editMode={true}
                   />
                 ),
               },
