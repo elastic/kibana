@@ -64,7 +64,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
-    maxWorkerCount: 1,
+    maxActiveWorkers: 1,
     dist: false,
   });
 
@@ -96,24 +96,34 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   assert('produce two bundle cache events while initializing', bundleCacheStates.length === 2);
 
   const initializedStates = msgs.filter((msg) => msg.state.phase === 'initialized');
-  assert('produce at least one initialized event', initializedStates.length >= 1);
+  assert(
+    'produce at least one initialized event',
+    initializedStates.length >= 1,
+    initializedStates
+  );
 
   const workerStarted = msgs.filter((msg) => msg.event?.type === 'worker started');
-  assert('produce one worker started event', workerStarted.length === 1);
+  assert('produce two worker started events', workerStarted.length === 2, workerStarted);
 
   const runningStates = msgs.filter((msg) => msg.state.phase === 'running');
   assert(
-    'produce two or three "running" states',
-    runningStates.length === 2 || runningStates.length === 3
+    'produce three or four "running" states',
+    runningStates.length === 3 || runningStates.length === 4,
+    runningStates
   );
 
   const bundleNotCachedEvents = msgs.filter((msg) => msg.event?.type === 'bundle not cached');
-  assert('produce two "bundle not cached" events', bundleNotCachedEvents.length === 2);
+  assert(
+    'produce two "bundle not cached" events',
+    bundleNotCachedEvents.length === 2,
+    bundleNotCachedEvents
+  );
 
   const successStates = msgs.filter((msg) => msg.state.phase === 'success');
   assert(
     'produce one or two "compiler success" states',
-    successStates.length === 1 || successStates.length === 2
+    successStates.length === 1 || successStates.length === 2,
+    successStates
   );
 
   const otherStates = msgs.filter(
@@ -167,7 +177,7 @@ it('uses cache on second run and exist cleanly', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
-    maxWorkerCount: 1,
+    maxActiveWorkers: 1,
     dist: false,
   });
 
@@ -198,7 +208,7 @@ it('prepares assets for distribution', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
-    maxWorkerCount: 1,
+    maxActiveWorkers: 1,
     dist: true,
   });
 

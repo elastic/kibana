@@ -20,9 +20,11 @@ The `@kbn/optimizer` is automatically executed from the dev cli, the Kibana buil
 
 ### Worker count
 
-You can limit the number of workers the optimizer uses by setting the `KBN_OPTIMIZER_MAX_WORKERS` environment variable. You might want to do this if your system struggles to keep up while the optimizer is getting started and building all plugins as fast as possible. Setting `KBN_OPTIMIZER_MAX_WORKERS=1` will cause the optimizer to take the longest amount of time but will have the smallest impact on other components of your system.
+You can limit the number of workers the optimizer uses by setting the `KBN_OPTIMIZER_MAX_ACTIVE_WORKERS` environment variable. You might want to do this if your system struggles to keep up while the optimizer is getting started and building all plugins as fast as possible. Setting `KBN_OPTIMIZER_MAX_ACTIVE_WORKERS=1` will cause the optimizer to take the longest amount of time but will have the smallest impact on other components of your system.
 
 We only limit the number of workers we will start at any given time. If we start more workers later we will limit the number of workers we start at that time by the maximum, but we don't take into account the number of workers already started because it is assumed that those workers are doing very little work. This greatly simplifies the logic as we don't ever have to reallocate workers and provides the best performance in most cases.
+
+You can also influce the number of works using the `KBN_OPTIMIZER_SOFT_MAX_MODULES_PER_WORKER` environment variable. This value defaults to 3000 and will cause the creation of enough workers so that each worker will be building approximately this many bundles. If the number of workers created by this value is greater than the maximum allowed by `KBN_OPTIMIZER_MAX_ACTIVE_WORKERS` then we will only start the maximum allowed active workers initially and start subsequent workers once the first ones are done (or idle when in `watch` mode).
 
 ### Caching
 

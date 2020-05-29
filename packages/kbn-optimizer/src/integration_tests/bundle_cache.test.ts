@@ -57,7 +57,7 @@ it('emits "bundle cached" event when everything is updated', async () => {
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [],
     pluginPaths: [Path.resolve(MOCK_REPO_DIR, 'plugins/foo')],
-    maxWorkerCount: 1,
+    maxActiveWorkers: 1,
   });
   const [bundle] = config.bundles;
 
@@ -96,7 +96,7 @@ it('emits "bundle not cached" event when cacheKey is up to date but caching is d
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [],
     pluginPaths: [Path.resolve(MOCK_REPO_DIR, 'plugins/foo')],
-    maxWorkerCount: 1,
+    maxActiveWorkers: 1,
     cache: false,
   });
   const [bundle] = config.bundles;
@@ -137,7 +137,7 @@ it('emits "bundle not cached" event when optimizerCacheKey is missing', async ()
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [],
     pluginPaths: [Path.resolve(MOCK_REPO_DIR, 'plugins/foo')],
-    maxWorkerCount: 1,
+    maxActiveWorkers: 1,
   });
   const [bundle] = config.bundles;
 
@@ -177,7 +177,7 @@ it('emits "bundle not cached" event when optimizerCacheKey is outdated, includes
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [],
     pluginPaths: [Path.resolve(MOCK_REPO_DIR, 'plugins/foo')],
-    maxWorkerCount: 1,
+    maxActiveWorkers: 1,
   });
   const [bundle] = config.bundles;
 
@@ -222,7 +222,7 @@ it('emits "bundle not cached" event when cacheKey is missing', async () => {
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [],
     pluginPaths: [Path.resolve(MOCK_REPO_DIR, 'plugins/foo')],
-    maxWorkerCount: 1,
+    maxActiveWorkers: 1,
   });
   const [bundle] = config.bundles;
 
@@ -260,7 +260,7 @@ it('emits "bundle not cached" event when cacheKey is outdated', async () => {
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [],
     pluginPaths: [Path.resolve(MOCK_REPO_DIR, 'plugins/foo')],
-    maxWorkerCount: 1,
+    maxActiveWorkers: 1,
   });
   const [bundle] = config.bundles;
 

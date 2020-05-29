@@ -19,26 +19,27 @@
 
 import { Bundle, descending, ascending } from '../common';
 
-// helper types used inside getWorkerConfigs so we don't have
-// to calculate moduleCounts over and over
-
-export interface Assignments {
-  moduleCount: number;
-  newBundles: number;
-  bundles: Bundle[];
-}
-
-/** assign a wrapped bundle to a worker */
-const assignBundle = (worker: Assignments, bundle: Bundle) => {
-  const moduleCount = bundle.cache.getModuleCount();
-  if (moduleCount !== undefined) {
-    worker.moduleCount += moduleCount;
-  } else {
-    worker.newBundles += 1;
-  }
-
-  worker.bundles.push(bundle);
+const times = (n: number, fn: () => void) => {
+  for (let i = 0; i < n; i++) fn();
 };
+
+export class Assignment {
+  public moduleCount = 0;
+  public newBundles = 0;
+  public readonly bundles: Bundle[] = [];
+
+  public addBundle(bundle: Bundle) {
+    const moduleCount = bundle.cache.getModuleCount();
+
+    if (moduleCount !== undefined) {
+      this.moduleCount += moduleCount;
+    } else {
+      this.newBundles += 1;
+    }
+
+    this.bundles.push(bundle);
+  }
+}
 
 /**
  * Create WorkerConfig objects for each worker we will use to build the bundles.
@@ -54,22 +55,42 @@ const assignBundle = (worker: Assignments, bundle: Bundle) => {
  * assign them to workers round-robin, starting with the workers which have
  * the smallest number of modules to build.
  */
-export function assignBundlesToWorkers(bundles: Bundle[], maxWorkerCount: number) {
-  const workerCount = Math.min(bundles.length, maxWorkerCount);
-  const workers: Assignments[] = [];
-  for (let i = 0; i < workerCount; i++) {
-    workers.push({
-      moduleCount: 0,
-      newBundles: 0,
-      bundles: [],
-    });
+export function assignBundlesToWorkers(
+  bundles: Bundle[],
+  maxActiveWorkers: number,
+  softMaxModulesPerWorker: number
+) {
+  /**
+   * start with assignments equal to the max active worker limit
+   */
+  const assignments: Assignment[] = [];
+  times(maxActiveWorkers, () => {
+    assignments.push(new Assignment());
+  });
+
+  /**
+   * add bundles without counts to assignments that don't already have new bundles, or create new assignments
+   */
+  const bundlesWithoutCounts = bundles
+    .filter((b) => b.cache.getModuleCount() === undefined)
+    .sort(descending((b) => b.id));
+
+  for (const bundle of bundlesWithoutCounts) {
+    let assignment = assignments.find((a) => !a.newBundles);
+    if (!assignment) {
+      assignment = new Assignment();
+      assignments.push(assignment);
+    }
+    assignment.addBundle(bundle);
   }
 
   /**
-   * separate the bundles which do and don't have module
-   * counts and sort them by [moduleCount, id]
+   * add bundles with the largest number of modules to the smallest worker
+   * until it is no longer the smallest worker and repeat until all bundles
+   * with module counts are assigned. If all assignments are over the soft
+   * limit add another batch equal to the max active worker count
    */
-  const bundlesWithCountsDesc = bundles
+  const bundlesWithCounts = bundles
     .filter((b) => b.cache.getModuleCount() !== undefined)
     .sort(
       descending(
@@ -77,45 +98,51 @@ export function assignBundlesToWorkers(bundles: Bundle[], maxWorkerCount: number
         (b) => b.id
       )
     );
-  const bundlesWithoutModuleCounts = bundles
-    .filter((b) => b.cache.getModuleCount() === undefined)
-    .sort(descending((b) => b.id));
 
-  /**
-   * assign largest bundles to the smallest worker until it is
-   * no longer the smallest worker and repeat until all bundles
-   * with module counts are assigned
-   */
-  while (bundlesWithCountsDesc.length) {
-    const [smallestWorker, nextSmallestWorker] = workers.sort(ascending((w) => w.moduleCount));
+  while (bundlesWithCounts.length) {
+    const incompleteAssignments = assignments.filter(
+      (a) => a.moduleCount < softMaxModulesPerWorker && !a.newBundles
+    );
 
-    while (!nextSmallestWorker || smallestWorker.moduleCount <= nextSmallestWorker.moduleCount) {
-      const bundle = bundlesWithCountsDesc.shift();
+    if (!incompleteAssignments.length) {
+      const remainingModuleCount = bundlesWithCounts.reduce(
+        (acc, b) => b.cache.getModuleCount()! + acc,
+        0
+      );
+      // add maxActiveWorkers incomplete assignments
+      times(Math.ceil(remainingModuleCount / softMaxModulesPerWorker), () => {
+        const assignment = new Assignment();
+        assignments.push(assignment);
+        incompleteAssignments.push(assignment);
+      });
+    }
+
+    const [smallest, nextSmallest] = incompleteAssignments.sort(ascending((w) => w.moduleCount));
+
+    while (!nextSmallest || smallest.moduleCount <= nextSmallest.moduleCount) {
+      const bundle = bundlesWithCounts.shift();
 
       if (!bundle) {
         break;
       }
 
-      assignBundle(smallestWorker, bundle);
-    }
-  }
+      smallest.addBundle(bundle);
 
-  /**
-   * assign bundles without module counts to workers round-robin
-   * starting with the smallest workers
-   */
-  workers.sort(ascending((w) => w.moduleCount));
-  while (bundlesWithoutModuleCounts.length) {
-    for (const worker of workers) {
-      const bundle = bundlesWithoutModuleCounts.shift();
-
-      if (!bundle) {
+      // if adding a bundle to an assignment makes it exceed the max then
+      // break so that we recalc incompleteAssignments and potentially create
+      // new empty assignments
+      if (smallest.moduleCount >= softMaxModulesPerWorker) {
         break;
       }
-
-      assignBundle(worker, bundle);
     }
   }
 
-  return workers;
+  return assignments
+    .filter((a) => a.bundles.length)
+    .sort(
+      ascending(
+        (bundle) => bundle.moduleCount,
+        (bundle) => bundle.newBundles
+      )
+    );
 }

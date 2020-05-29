@@ -25,13 +25,9 @@ import { Bundle, WorkerConfig } from '../common';
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
 
-function pickMaxWorkerCount(dist: boolean) {
-  // don't break if cpus() returns nothing, or an empty array
-  const cpuCount = Math.max(Os.cpus()?.length, 1);
-  // if we're buiding the dist then we can use more of the system's resources to get things done a little quicker
-  const maxWorkers = dist ? cpuCount - 1 : Math.ceil(cpuCount / 3);
-  // ensure we always have at least two workers
-  return Math.max(maxWorkers, 2);
+function pickMaxWorkerCount() {
+  const cpuCount = Os.cpus()?.length || 1;
+  return Math.max(cpuCount - 1, 2);
 }
 
 interface Options {
@@ -40,7 +36,15 @@ interface Options {
   /** enable to run the optimizer in watch mode */
   watch?: boolean;
   /** the maximum number of workers that will be created */
-  maxWorkerCount?: number;
+  maxActiveWorkers?: number;
+  /**
+   * the number of bundles we aim to assign to each worker,
+   * this may cause more workers than maxActiveWorkers to be
+   * created but we will still only run up to maxActiveWorkers
+   * workers at any time (additional worker configs won't be
+   * run until active worker count drops below maxActiveWorkers)
+   */
+  softMaxModulesPerWorker?: number;
   /** set to false to disabling writing/reading of caches */
   cache?: boolean;
   /** build assets suitable for use in the distributable */
@@ -68,7 +72,8 @@ interface Options {
 interface ParsedOptions {
   repoRoot: string;
   watch: boolean;
-  maxWorkerCount: number;
+  maxActiveWorkers: number;
+  softMaxModulesPerWorker: number;
   profileWebpack: boolean;
   cache: boolean;
   dist: boolean;
@@ -122,18 +127,26 @@ export class OptimizerConfig {
       throw new TypeError('pluginPaths must all be absolute paths');
     }
 
-    const maxWorkerCount = process.env.KBN_OPTIMIZER_MAX_WORKERS
-      ? parseInt(process.env.KBN_OPTIMIZER_MAX_WORKERS, 10)
-      : options.maxWorkerCount ?? pickMaxWorkerCount(dist);
-    if (typeof maxWorkerCount !== 'number' || !Number.isFinite(maxWorkerCount)) {
-      throw new TypeError('worker count must be a number');
+    const maxActiveWorkers = process.env.KBN_OPTIMIZER_MAX_ACTIVE_WORKERS
+      ? parseInt(process.env.KBN_OPTIMIZER_MAX_ACTIVE_WORKERS, 10)
+      : options.maxActiveWorkers ?? pickMaxWorkerCount();
+    if (typeof maxActiveWorkers !== 'number' || !Number.isFinite(maxActiveWorkers)) {
+      throw new TypeError('max worker count must be a number');
+    }
+
+    const softMaxModulesPerWorker = process.env.KBN_OPTIMIZER_SOFT_MAX_MODULES_PER_WORKER
+      ? parseInt(process.env.KBN_OPTIMIZER_SOFT_MAX_MODULES_PER_WORKER, 10)
+      : options.softMaxModulesPerWorker ?? 3000;
+    if (typeof softMaxModulesPerWorker !== 'number' || !Number.isFinite(softMaxModulesPerWorker)) {
+      throw new TypeError('max modules per worker must be a number');
     }
 
     return {
       watch,
       dist,
       repoRoot,
-      maxWorkerCount,
+      maxActiveWorkers,
+      softMaxModulesPerWorker,
       profileWebpack,
       cache,
       pluginScanDirs,
@@ -169,7 +182,8 @@ export class OptimizerConfig {
       options.inspectWorkers,
       plugins,
       options.repoRoot,
-      options.maxWorkerCount,
+      options.maxActiveWorkers,
+      options.softMaxModulesPerWorker,
       options.dist,
       options.profileWebpack
     );
@@ -182,7 +196,8 @@ export class OptimizerConfig {
     public readonly inspectWorkers: boolean,
     public readonly plugins: KibanaPlatformPlugin[],
     public readonly repoRoot: string,
-    public readonly maxWorkerCount: number,
+    public readonly maxActiveWorkers: number,
+    public readonly softMaxModulesPerWorker: number,
     public readonly dist: boolean,
     public readonly profileWebpack: boolean
   ) {}

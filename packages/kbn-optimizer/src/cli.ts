@@ -70,8 +70,21 @@ run(
       throw createFlagError('expected --no-inspect-workers to have no value');
     }
 
-    const maxWorkerCount = flags.workers ? Number.parseInt(String(flags.workers), 10) : undefined;
-    if (maxWorkerCount !== undefined && (!Number.isFinite(maxWorkerCount) || maxWorkerCount < 1)) {
+    const softMaxModulesPerWorker = flags['worker-size']
+      ? Number.parseInt(String(flags['worker-size']), 10)
+      : undefined;
+    if (
+      softMaxModulesPerWorker !== undefined &&
+      (!Number.isFinite(softMaxModulesPerWorker) || softMaxModulesPerWorker < 1)
+    ) {
+      throw createFlagError('expected --worker-size to be a number greater than 0');
+    }
+
+    const maxActiveWorkers = flags.workers ? Number.parseInt(String(flags.workers), 10) : undefined;
+    if (
+      maxActiveWorkers !== undefined &&
+      (!Number.isFinite(maxActiveWorkers) || maxActiveWorkers < 1)
+    ) {
       throw createFlagError('expected --workers to be a number greater than 0');
     }
 
@@ -90,7 +103,8 @@ run(
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
       watch,
-      maxWorkerCount,
+      maxActiveWorkers,
+      softMaxModulesPerWorker,
       oss,
       dist,
       cache,
@@ -128,7 +142,7 @@ run(
         'inspect-workers',
         'report-stats',
       ],
-      string: ['workers', 'scan-dir'],
+      string: ['workers', 'scan-dir', 'worker-size'],
       default: {
         core: true,
         examples: true,
@@ -138,6 +152,7 @@ run(
       help: `
         --watch            run the optimizer in watch mode
         --workers          max number of workers to use
+        --worker-size      soft max number of modules to build per worker
         --oss              only build oss plugins
         --profile          profile the webpack builds and write stats.json files to build outputs
         --no-core          disable generating the core bundle

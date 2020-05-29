@@ -82,7 +82,6 @@ function usingWorkerProc<T>(
           ...(inspectFlag && config.inspectWorkers
             ? [`${inspectFlag}=${inspectPortCounter++}`]
             : []),
-          ...(config.maxWorkerCount <= 3 ? ['--max-old-space-size=2048'] : []),
         ],
       });
 

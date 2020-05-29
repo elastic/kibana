@@ -20,13 +20,13 @@
 import * as Rx from 'rxjs';
 import { mergeMap, toArray } from 'rxjs/operators';
 
-import { maybeMap } from '../common';
+import { maybeMap, WorkerMsg } from '../common';
 
 import { OptimizerConfig } from './optimizer_config';
 import { BundleCacheEvent } from './bundle_cache';
 import { ChangeEvent } from './watcher';
 import { assignBundlesToWorkers } from './assign_bundles_to_workers';
-import { observeWorker } from './observe_worker';
+import { observeWorker, WorkerStatus } from './observe_worker';
 
 /**
  * Create a stream of all worker events, these include messages
@@ -56,12 +56,75 @@ export function runWorkers(
     // subsequent batches are defined by changeEvent$
     changeEvent$.pipe(maybeMap((c) => (c.type === 'changes' ? c.bundles : undefined)))
   ).pipe(
-    mergeMap((bundles) =>
-      Rx.from(assignBundlesToWorkers(bundles, config.maxWorkerCount)).pipe(
-        mergeMap((assignment) =>
-          observeWorker(config, config.getWorkerConfig(optimizerCacheKey), assignment.bundles)
-        )
-      )
+    mergeMap(
+      (bundles) =>
+        new Rx.Observable<WorkerMsg | WorkerStatus>((subscriber) => {
+          const assignments = assignBundlesToWorkers(
+            bundles,
+            config.maxActiveWorkers,
+            config.softMaxModulesPerWorker
+          );
+
+          if (assignments.length === 0) {
+            subscriber.complete();
+            return;
+          }
+
+          let activeWorkers = 0;
+
+          startWorkers();
+
+          function startWorkers() {
+            while (activeWorkers < config.maxActiveWorkers && !subscriber.closed) {
+              const assignment = assignments.shift();
+              if (!assignment) {
+                break;
+              }
+
+              activeWorkers += 1;
+              let pendingBundleCount = assignment.bundles.length;
+
+              subscriber.add(
+                observeWorker(
+                  config,
+                  config.getWorkerConfig(optimizerCacheKey),
+                  assignment.bundles
+                ).subscribe({
+                  next(msg) {
+                    if (config.watch) {
+                      if (msg.type === 'compiler success' || msg.type === 'compiler issue') {
+                        pendingBundleCount = pendingBundleCount - 1;
+                      }
+
+                      if (pendingBundleCount === 0) {
+                        activeWorkers = activeWorkers - 1;
+                        process.nextTick(startWorkers);
+                      }
+                    }
+
+                    subscriber.next(msg);
+                  },
+
+                  error(error) {
+                    subscriber.error(error);
+                  },
+
+                  complete() {
+                    if (!config.watch) {
+                      activeWorkers = activeWorkers - 1;
+
+                      if (activeWorkers === 0 && assignments.length === 0) {
+                        subscriber.complete();
+                      } else {
+                        process.nextTick(startWorkers);
+                      }
+                    }
+                  },
+                })
+              );
+            }
+          }
+        })
     )
   );
 }

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import Os from 'os';
+
 import Chalk from 'chalk';
 import moment from 'moment';
 import {
@@ -30,6 +32,15 @@ import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer
 
 import { LegacyConfig } from '../../core/server/legacy';
 
+function pickMaxWorkerCount() {
+  // don't break if cpus() returns nothing, or an empty array
+  const cpuCount = Os.cpus()?.length || 1;
+  // if we're buiding the dist then we can use more of the system's resources to get things done a little quicker
+  const maxWorkers = Math.ceil(cpuCount / 3);
+  // ensure we always have at least two workers
+  return Math.max(maxWorkers, 2);
+}
+
 export function runKbnOptimizer(opts: Record<string, any>, config: LegacyConfig) {
   const optimizerConfig = OptimizerConfig.create({
     repoRoot: REPO_ROOT,
@@ -39,6 +50,7 @@ export function runKbnOptimizer(opts: Record<string, any>, config: LegacyConfig)
     dist: !!opts.dist,
     oss: !!opts.oss,
     examples: !!opts.runExamples,
+    maxActiveWorkers: pickMaxWorkerCount(),
     pluginPaths: config.get('plugins.paths'),
   });
 

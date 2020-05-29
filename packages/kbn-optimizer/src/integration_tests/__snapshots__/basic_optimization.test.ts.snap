@@ -31,7 +31,7 @@ OptimizerConfig {
   "cache": true,
   "dist": false,
   "inspectWorkers": false,
-  "maxWorkerCount": 1,
+  "maxWorkerCount": 7,
   "plugins": Array [
     Object {
       "directory": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar,

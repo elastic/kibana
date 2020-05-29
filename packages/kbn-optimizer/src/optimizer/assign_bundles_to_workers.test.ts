@@ -21,11 +21,11 @@ jest.mock('fs');
 
 import { Bundle } from '../common';
 
-import { assignBundlesToWorkers, Assignments } from './assign_bundles_to_workers';
+import { assignBundlesToWorkers, Assignment } from './assign_bundles_to_workers';
 
 const hasModuleCount = (b: Bundle) => b.cache.getModuleCount() !== undefined;
 const noModuleCount = (b: Bundle) => b.cache.getModuleCount() === undefined;
-const summarizeBundles = (w: Assignments) =>
+const summarizeBundles = (w: Assignment) =>
   [
     w.moduleCount ? `${w.moduleCount} known modules` : '',
     w.newBundles ? `${w.newBundles} new bundles` : '',
@@ -33,12 +33,12 @@ const summarizeBundles = (w: Assignments) =>
     .filter(Boolean)
     .join(', ');
 
-const readConfigs = (workers: Assignments[]) =>
+const readConfigs = (workers: Assignment[]) =>
   workers.map(
     (w, i) => `worker ${i} (${summarizeBundles(w)}) => ${w.bundles.map((b) => b.id).join(',')}`
   );
 
-const assertReturnVal = (workers: Assignments[]) => {
+const assertReturnVal = (workers: Assignment[]) => {
   expect(workers).toBeInstanceOf(Array);
   for (const worker of workers) {
     expect(worker).toEqual({
@@ -89,138 +89,181 @@ const getBundles = ({
 };
 
 it('creates less workers if maxWorkersCount is larger than bundle count', () => {
-  const workers = assignBundlesToWorkers(getBundles({ withCounts: 2 }), 10);
+  const workers = assignBundlesToWorkers(getBundles({ withCounts: 2 }), 10, 3000);
 
   assertReturnVal(workers);
   expect(workers.length).toBe(2);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (1 known modules) => foo1",
-      "worker 1 (2 known modules) => foo2",
+      "worker 0 (2 known modules) => foo2",
+      "worker 1 (1 known modules) => foo1",
     ]
   `);
 });
 
-it('assigns unknown plugin counts as evenly as possible', () => {
-  const workers = assignBundlesToWorkers(getBundles({ withoutCounts: 10 }), 3);
+it('assigns unknown plugin counts to their own workers', () => {
+  const workers = assignBundlesToWorkers(getBundles({ withoutCounts: 10 }), 3, 3000);
 
   assertReturnVal(workers);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (4 new bundles) => bar9,bar6,bar3,bar0",
-      "worker 1 (3 new bundles) => bar8,bar5,bar2",
-      "worker 2 (3 new bundles) => bar7,bar4,bar1",
+      "worker 0 (1 new bundles) => bar9",
+      "worker 1 (1 new bundles) => bar8",
+      "worker 2 (1 new bundles) => bar7",
+      "worker 3 (1 new bundles) => bar6",
+      "worker 4 (1 new bundles) => bar5",
+      "worker 5 (1 new bundles) => bar4",
+      "worker 6 (1 new bundles) => bar3",
+      "worker 7 (1 new bundles) => bar2",
+      "worker 8 (1 new bundles) => bar1",
+      "worker 9 (1 new bundles) => bar0",
     ]
   `);
 });
 
-it('distributes bundles without module counts evenly after assigning modules with known counts evenly', () => {
+it('assigns bundles without module counts to their own workers, assigns modules with known counts evenly', () => {
   const bundles = getBundles({ withCounts: 16, withoutCounts: 10 });
-  const workers = assignBundlesToWorkers(bundles, 4);
+  const workers = assignBundlesToWorkers(bundles, 4, 100);
 
   assertReturnVal(workers);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (78 known modules, 3 new bundles) => foo5,foo11,foo8,foo6,foo2,foo1,bar9,bar5,bar1",
-      "worker 1 (78 known modules, 3 new bundles) => foo16,foo14,foo13,foo12,foo9,foo7,foo4,foo3,bar8,bar4,bar0",
-      "worker 2 (100 known modules, 2 new bundles) => foo10,bar7,bar3",
-      "worker 3 (150 known modules, 2 new bundles) => foo15,bar6,bar2",
+      "worker 0 (1 new bundles) => bar2",
+      "worker 1 (1 new bundles) => bar9",
+      "worker 2 (1 new bundles) => bar7",
+      "worker 3 (1 new bundles) => bar6",
+      "worker 4 (1 new bundles) => bar5",
+      "worker 5 (1 new bundles) => bar4",
+      "worker 6 (1 new bundles) => bar3",
+      "worker 7 (1 new bundles) => bar8",
+      "worker 8 (1 new bundles) => bar1",
+      "worker 9 (1 new bundles) => bar0",
+      "worker 10 (150 known modules) => foo15",
+      "worker 11 (100 known modules) => foo10",
+      "worker 12 (52 known modules) => foo5,foo2",
+      "worker 13 (52 known modules) => foo16,foo12,foo9,foo8,foo4,foo3",
+      "worker 14 (52 known modules) => foo14,foo13,foo11,foo7,foo6,foo1",
     ]
   `);
 });
 
 it('distributes 2 bundles to workers evenly', () => {
-  const workers = assignBundlesToWorkers(getBundles({ withCounts: 2 }), 4);
+  const workers = assignBundlesToWorkers(getBundles({ withCounts: 2 }), 4, 3000);
 
   assertReturnVal(workers);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (1 known modules) => foo1",
-      "worker 1 (2 known modules) => foo2",
+      "worker 0 (2 known modules) => foo2",
+      "worker 1 (1 known modules) => foo1",
     ]
   `);
 });
 
 it('distributes 5 bundles to workers evenly', () => {
-  const workers = assignBundlesToWorkers(getBundles({ withCounts: 5 }), 4);
+  const workers = assignBundlesToWorkers(getBundles({ withCounts: 5 }), 4, 3000);
 
   assertReturnVal(workers);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (3 known modules) => foo2,foo1",
-      "worker 1 (3 known modules) => foo3",
-      "worker 2 (4 known modules) => foo4",
-      "worker 3 (50 known modules) => foo5",
+      "worker 0 (50 known modules) => foo5",
+      "worker 1 (4 known modules) => foo4",
+      "worker 2 (3 known modules) => foo3",
+      "worker 3 (3 known modules) => foo2,foo1",
     ]
   `);
 });
 
 it('distributes 10 bundles to workers evenly', () => {
-  const workers = assignBundlesToWorkers(getBundles({ withCounts: 10 }), 4);
+  const workers = assignBundlesToWorkers(getBundles({ withCounts: 10 }), 4, 3000);
 
   assertReturnVal(workers);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (20 known modules) => foo9,foo6,foo4,foo1",
-      "worker 1 (20 known modules) => foo8,foo7,foo3,foo2",
-      "worker 2 (50 known modules) => foo5",
-      "worker 3 (100 known modules) => foo10",
+      "worker 0 (100 known modules) => foo10",
+      "worker 1 (50 known modules) => foo5",
+      "worker 2 (20 known modules) => foo9,foo6,foo4,foo1",
+      "worker 3 (20 known modules) => foo8,foo7,foo3,foo2",
     ]
   `);
 });
 
 it('distributes 15 bundles to workers evenly', () => {
-  const workers = assignBundlesToWorkers(getBundles({ withCounts: 15 }), 4);
+  const workers = assignBundlesToWorkers(getBundles({ withCounts: 15 }), 4, 3000);
 
   assertReturnVal(workers);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (70 known modules) => foo14,foo13,foo12,foo11,foo9,foo6,foo4,foo1",
-      "worker 1 (70 known modules) => foo5,foo8,foo7,foo3,foo2",
-      "worker 2 (100 known modules) => foo10",
-      "worker 3 (150 known modules) => foo15",
+      "worker 0 (150 known modules) => foo15",
+      "worker 1 (100 known modules) => foo10",
+      "worker 2 (70 known modules) => foo5,foo8,foo7,foo3,foo2",
+      "worker 3 (70 known modules) => foo14,foo13,foo12,foo11,foo9,foo6,foo4,foo1",
     ]
   `);
 });
 
 it('distributes 20 bundles to workers evenly', () => {
-  const workers = assignBundlesToWorkers(getBundles({ withCounts: 20 }), 4);
+  const workers = assignBundlesToWorkers(getBundles({ withCounts: 20 }), 4, 3000);
 
   assertReturnVal(workers);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (153 known modules) => foo15,foo3",
-      "worker 1 (153 known modules) => foo10,foo16,foo13,foo11,foo7,foo6",
-      "worker 2 (154 known modules) => foo5,foo19,foo18,foo17,foo14,foo12,foo9,foo8,foo4,foo2,foo1",
-      "worker 3 (200 known modules) => foo20",
+      "worker 0 (200 known modules) => foo20",
+      "worker 1 (154 known modules) => foo5,foo19,foo18,foo17,foo14,foo12,foo9,foo8,foo4,foo2,foo1",
+      "worker 2 (153 known modules) => foo15,foo3",
+      "worker 3 (153 known modules) => foo10,foo16,foo13,foo11,foo7,foo6",
     ]
   `);
 });
 
 it('distributes 25 bundles to workers evenly', () => {
-  const workers = assignBundlesToWorkers(getBundles({ withCounts: 25 }), 4);
+  const workers = assignBundlesToWorkers(getBundles({ withCounts: 25 }), 4, 3000);
 
   assertReturnVal(workers);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (250 known modules) => foo20,foo17,foo13,foo9,foo8,foo2,foo1",
-      "worker 1 (250 known modules) => foo15,foo23,foo22,foo18,foo16,foo11,foo7,foo3",
-      "worker 2 (250 known modules) => foo10,foo5,foo24,foo21,foo19,foo14,foo12,foo6,foo4",
-      "worker 3 (250 known modules) => foo25",
+      "worker 0 (250 known modules) => foo25",
+      "worker 1 (250 known modules) => foo20,foo17,foo13,foo9,foo8,foo3",
+      "worker 2 (250 known modules) => foo15,foo23,foo22,foo18,foo16,foo11,foo7,foo2,foo1",
+      "worker 3 (250 known modules) => foo10,foo5,foo24,foo21,foo19,foo14,foo12,foo6,foo4",
     ]
   `);
 });
 
 it('distributes 30 bundles to workers evenly', () => {
-  const workers = assignBundlesToWorkers(getBundles({ withCounts: 30 }), 4);
+  const workers = assignBundlesToWorkers(getBundles({ withCounts: 30 }), 4, 3000);
 
   assertReturnVal(workers);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (352 known modules) => foo30,foo22,foo14,foo11,foo4,foo1",
-      "worker 1 (352 known modules) => foo15,foo10,foo28,foo24,foo19,foo16,foo9,foo6",
-      "worker 2 (353 known modules) => foo20,foo5,foo29,foo23,foo21,foo13,foo12,foo3,foo2",
-      "worker 3 (353 known modules) => foo25,foo27,foo26,foo18,foo17,foo8,foo7",
+      "worker 0 (353 known modules) => foo25,foo28,foo24,foo21,foo13,foo12,foo3,foo2",
+      "worker 1 (353 known modules) => foo15,foo10,foo27,foo26,foo18,foo17,foo8,foo7",
+      "worker 2 (352 known modules) => foo30,foo22,foo14,foo11,foo4,foo1",
+      "worker 3 (352 known modules) => foo20,foo5,foo29,foo23,foo19,foo16,foo9,foo6",
+    ]
+  `);
+});
+
+it('creates more workers when the maxBundlesPerWorker count is low', () => {
+  const workers = assignBundlesToWorkers(getBundles({ withCounts: 30 }), 4, 50);
+
+  assertReturnVal(workers);
+  expect(readConfigs(workers)).toMatchInlineSnapshot(`
+    Array [
+      "worker 0 (300 known modules) => foo30",
+      "worker 1 (250 known modules) => foo25",
+      "worker 2 (200 known modules) => foo20",
+      "worker 3 (150 known modules) => foo15",
+      "worker 4 (100 known modules) => foo10",
+      "worker 5 (50 known modules) => foo5",
+      "worker 6 (44 known modules) => foo29,foo8,foo7",
+      "worker 7 (43 known modules) => foo28,foo9,foo6",
+      "worker 8 (41 known modules) => foo24,foo13,foo4",
+      "worker 9 (40 known modules) => foo23,foo14,foo3",
+      "worker 10 (39 known modules) => foo19,foo18,foo2",
+      "worker 11 (39 known modules) => foo27,foo11,foo1",
+      "worker 12 (38 known modules) => foo26,foo12",
+      "worker 13 (38 known modules) => foo22,foo16",
+      "worker 14 (38 known modules) => foo21,foo17",
     ]
   `);
 });
