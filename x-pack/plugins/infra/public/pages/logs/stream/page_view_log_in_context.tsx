@@ -54,7 +54,9 @@ export const PageViewLogInContext: React.FC = () => {
   return (
     <EuiOverlayMask>
       <EuiModal onClose={closeModal} maxWidth={false}>
-        <EuiModalBody style={{ width: vw - MODAL_MARGIN * 2, height: vh - MODAL_MARGIN * 2 }}>
+        <EuiModalBody
+          style={{ width: vw - MODAL_MARGIN * 2, height: vh - MODAL_MARGIN * 2, padding: '16px 0' }}
+        >
           <EuiFlexGroup
             direction="column"
             responsive={false}
