@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable @kbn/eslint/module_migration */
+
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 import 'monaco-editor/esm/vs/base/common/worker/simpleWorker';
@@ -30,7 +32,5 @@ import 'monaco-editor/esm/vs/editor/contrib/wordOperations/wordOperations.js'; /
 import 'monaco-editor/esm/vs/editor/contrib/suggest/suggestController.js'; // Needed for suggestions
 import 'monaco-editor/esm/vs/editor/contrib/hover/hover.js'; // Needed for hover
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/parameterHints.js'; // Needed for signature
-
-export { XJsonLang } from './xjson';
 
 export { monaco };

@@ -52,6 +52,15 @@ module.exports = {
           from: 'react-router',
           to: 'react-router-dom',
         },
+        {
+          from: '@kbn/ui-shared-deps/monaco',
+          to: '@kbn/monaco',
+        },
+        {
+          from: 'monaco-editor',
+          to: false,
+          disallowedMessage: `Don't import monaco directly, use or add exports to @kbn/monaco`
+        },
       ],
     ],
   },

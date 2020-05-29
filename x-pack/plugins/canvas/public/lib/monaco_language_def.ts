@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { monaco } from '@kbn/ui-shared-deps/monaco';
+import { monaco } from '@kbn/monaco';
 import { ExpressionFunction } from '../../types';
 
 export const LANGUAGE_ID = 'canvas-expression';

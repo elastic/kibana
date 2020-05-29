@@ -19,8 +19,10 @@
 
 // Please note: this module is intended to be run inside of a webworker.
 
+/* eslint-disable @kbn/eslint/module_migration */
 // @ts-ignore
 import * as worker from 'monaco-editor/esm/vs/editor/editor.worker';
+/* eslint-enable @kbn/eslint/module_migration */
 import { XJsonWorker } from './xjson_worker';
 
 self.onmessage = () => {

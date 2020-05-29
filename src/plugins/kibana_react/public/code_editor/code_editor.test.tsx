@@ -19,9 +19,11 @@
 
 import React from 'react';
 import { CodeEditor } from './code_editor';
-import { monaco } from '@kbn/ui-shared-deps/monaco';
+import { monaco } from '@kbn/monaco';
 import { shallow } from 'enzyme';
 
+// disabled because this is a test, but also it seems we shouldn't need this?
+/* eslint-disable-next-line @kbn/eslint/module_migration */
 import 'monaco-editor/esm/vs/basic-languages/html/html.contribution.js';
 
 // A sample language definition with a few example tokens

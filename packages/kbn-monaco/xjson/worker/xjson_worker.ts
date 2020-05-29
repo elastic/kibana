@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { createParser } from '../grammar';
 

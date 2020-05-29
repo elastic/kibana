@@ -17,4 +17,9 @@
  * under the License.
  */
 
-export * from './monaco';
+export { monaco } from './monaco';
+export { XJsonLang } from './xjson';
+
+/* eslint-disable-next-line @kbn/eslint/module_migration */
+import BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
+export { BarePluginApi };

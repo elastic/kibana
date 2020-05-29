@@ -7,7 +7,7 @@
 // It is important that we use this specific monaco instance so that
 // editor settings are registered against the instance our React component
 // uses.
-import { monaco } from '@kbn/ui-shared-deps/monaco';
+import { monaco } from '@kbn/monaco';
 
 // @ts-ignore
 import workerSrc from 'raw-loader!monaco-editor/min/vs/base/worker/workerMain.js';

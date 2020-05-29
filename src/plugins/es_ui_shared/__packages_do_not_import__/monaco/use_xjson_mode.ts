@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { XJsonLang } from '@kbn/ui-shared-deps/monaco';
+import { XJsonLang } from '@kbn/monaco';
 import { useXJsonMode as useBaseXJsonMode } from '../xjson';
 
 interface ReturnValue extends ReturnType<typeof useBaseXJsonMode> {

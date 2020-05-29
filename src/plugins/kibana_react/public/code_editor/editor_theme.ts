@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { monaco } from '@kbn/ui-shared-deps/monaco';
+import { monaco } from '@kbn/monaco';
 
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
