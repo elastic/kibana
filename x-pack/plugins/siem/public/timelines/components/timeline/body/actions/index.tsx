@@ -16,14 +16,9 @@ import * as i18n from '../translations';
 import { OnRowSelected } from '../../events';
 import { Ecs } from '../../../../../graphql/types';
 
-export interface TimelineActionProps {
+export interface TimelineRowActionOnClick {
   eventId: string;
   ecsData: Ecs;
-}
-
-interface TimelineRowTooltip {
-  dataTestSubj?: string;
-  content: string;
 }
 
 export interface TimelineRowAction {
@@ -33,8 +28,8 @@ export interface TimelineRowAction {
   iconType: string;
   id: string;
   isActionDisabled?: boolean;
-  onClick: ({ eventId, ecsData }: TimelineActionProps) => void;
-  tooltip: TimelineRowTooltip;
+  onClick: ({ eventId, ecsData }: TimelineRowActionOnClick) => void;
+  content: string;
   width?: number;
 }
 
@@ -88,6 +83,21 @@ export const Actions = React.memo<Props>(
       actionsColumnWidth={actionsColumnWidth}
       data-test-subj="event-actions-container"
     >
+      <EventsTd>
+        <EventsTdContent textAlign="center">
+          {loading && <EventsLoading />}
+
+          {!loading && (
+            <EuiButtonIcon
+              aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
+              data-test-subj="expand-event"
+              iconType={expanded ? 'arrowDown' : 'arrowRight'}
+              id={eventId}
+              onClick={onEventToggled}
+            />
+          )}
+        </EventsTdContent>
+      </EventsTd>
       {showCheckboxes && (
         <EventsTd data-test-subj="select-event-container">
           <EventsTdContent textAlign="center">
@@ -111,22 +121,6 @@ export const Actions = React.memo<Props>(
       )}
 
       <>{additionalActions}</>
-
-      <EventsTd>
-        <EventsTdContent textAlign="center">
-          {loading && <EventsLoading />}
-
-          {!loading && (
-            <EuiButtonIcon
-              aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
-              data-test-subj="expand-event"
-              iconType={expanded ? 'arrowDown' : 'arrowRight'}
-              id={eventId}
-              onClick={onEventToggled}
-            />
-          )}
-        </EventsTdContent>
-      </EventsTd>
 
       {!isEventViewer && (
         <>

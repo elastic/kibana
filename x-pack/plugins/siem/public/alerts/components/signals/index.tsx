@@ -257,30 +257,6 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
       updateTimelineIsLoading,
     ]
   );
-  const contextActions = useMemo(
-    () =>
-      getSignalsActions({
-        apolloClient,
-        canUserCRUD,
-        hasIndexWrite,
-        createTimeline: createTimelineCallback,
-        setEventsLoading: setEventsLoadingCallback,
-        setEventsDeleted: setEventsDeletedCallback,
-        status: filterGroup === FILTER_OPEN ? FILTER_CLOSED : FILTER_OPEN,
-        updateTimelineIsLoading,
-      }),
-    [
-      apolloClient,
-      canUserCRUD,
-      createTimelineCallback,
-      hasIndexWrite,
-      filterGroup,
-      setEventsLoadingCallback,
-      setEventsDeletedCallback,
-      updateTimelineIsLoading,
-    ]
-  );
-
   const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
   const defaultFiltersMemo = useMemo(() => {
     if (isEmpty(defaultFilters)) {
@@ -308,7 +284,7 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
     setTimelineRowActions({
       id: SIGNALS_PAGE_TIMELINE_ID,
       queryFields: requiredFieldsForActions,
-      timelineRowActions: { primary: additionalActions, secondary: contextActions },
+      timelineRowActions: additionalActions,
     });
   }, [additionalActions]);
   const headerFilterGroup = useMemo(

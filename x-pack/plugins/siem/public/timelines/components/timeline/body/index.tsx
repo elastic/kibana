@@ -101,14 +101,19 @@ export const Body = React.memo<BodyProps>(
       id,
     ]);
 
-    const additionalActionWidth = useMemo(
-      () =>
-        timelineActions.reduce(
-          (acc, v) => (v.displayType === 'icon' ? acc + (v.width ?? 0) : acc),
-          0
-        ) ?? 0,
-      [timelineActions]
-    );
+    const additionalActionWidth = useMemo(() => {
+      let hasContextMenu = false;
+      return (
+        timelineActions.reduce((acc, v) => {
+          if (v.displayType === 'icon') {
+            return acc + (v.width ?? 0);
+          }
+          const addWidth = hasContextMenu ? 0 : 26;
+          hasContextMenu = true;
+          return acc + addWidth;
+        }, 0) ?? 0
+      );
+    }, [timelineActions]);
     const actionsColumnWidth = useMemo(
       () => getActionsColumnWidth(isEventViewer, showCheckboxes, additionalActionWidth),
       [isEventViewer, showCheckboxes, additionalActionWidth]

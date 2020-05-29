@@ -6,14 +6,12 @@
 
 /* eslint-disable react/display-name */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import ApolloClient from 'apollo-client';
-import React from 'react';
 
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import {
   TimelineRowAction,
-  TimelineActionProps,
+  TimelineRowActionOnClick,
 } from '../../../timelines/components/timeline/body/actions';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import {
@@ -209,7 +207,7 @@ export const getSignalsActions = ({
   updateTimelineIsLoading: UpdateTimelineLoading;
 }): TimelineRowAction[] => [
   {
-    onClick: ({ ecsData }: TimelineActionProps) =>
+    onClick: ({ ecsData }: TimelineRowActionOnClick) =>
       sendSignalToTimelineAction({
         apolloClient,
         createTimeline,
@@ -217,18 +215,15 @@ export const getSignalsActions = ({
         updateTimelineIsLoading,
       }),
     iconType: 'timeline',
-    dataTestSubj: 'send-signal-to-timeline-tool-tip',
+    dataTestSubj: 'send-signal-to-timeline',
     ariaLabel: 'Send signal to timeline',
     id: 'sendSignalToTimeline',
     width: 26,
-    tooltip: {
-      dataTestSubj: 'send-signal-to-timeline-button',
-      content: i18n.ACTION_INVESTIGATE_IN_TIMELINE,
-    },
+    content: i18n.ACTION_INVESTIGATE_IN_TIMELINE,
     displayType: 'icon',
   },
   {
-    onClick: ({ eventId }: TimelineActionProps) =>
+    onClick: ({ eventId }: TimelineRowActionOnClick) =>
       updateSignalStatusAction({
         signalIds: [eventId],
         status,
@@ -239,16 +234,13 @@ export const getSignalsActions = ({
     width: 26,
     iconType: status === FILTER_OPEN ? 'securitySignalDetected' : 'securitySignalResolved',
     isActionDisabled: !canUserCRUD || !hasIndexWrite,
-    dataTestSubj: 'update-signal-status-tool-tip',
+    dataTestSubj: 'update-signal-status',
     ariaLabel: 'Update signal status',
-    tooltip: {
-      dataTestSubj: 'update-signal-status-button',
-      content: status === FILTER_OPEN ? i18n.ACTION_OPEN_SIGNAL : i18n.ACTION_CLOSE_SIGNAL,
-    },
+    content: status === FILTER_OPEN ? i18n.ACTION_OPEN_SIGNAL : i18n.ACTION_CLOSE_SIGNAL,
     displayType: 'icon',
   },
   {
-    onClick: ({ eventId }: TimelineActionProps) =>
+    onClick: ({ eventId }: TimelineRowActionOnClick) =>
       updateSignalStatusAction({
         signalIds: [eventId],
         status,
@@ -258,12 +250,9 @@ export const getSignalsActions = ({
     id: 'updateSignalStatus',
     iconType: status === FILTER_OPEN ? 'securitySignalDetected' : 'securitySignalResolved',
     isActionDisabled: !canUserCRUD || !hasIndexWrite,
-    dataTestSubj: 'update-signal-status-tool-tip',
+    dataTestSubj: 'update-signal-status',
     ariaLabel: 'Update signal status',
-    tooltip: {
-      dataTestSubj: 'update-signal-status-button',
-      content: status === FILTER_OPEN ? i18n.ACTION_OPEN_SIGNAL : i18n.ACTION_CLOSE_SIGNAL,
-    },
+    content: status === FILTER_OPEN ? i18n.ACTION_OPEN_SIGNAL : i18n.ACTION_CLOSE_SIGNAL,
     displayType: 'contextMenu',
   },
 ];
