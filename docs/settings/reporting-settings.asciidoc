@@ -216,7 +216,7 @@ When `xpack.reporting.capture.browser.type` is set to `chromium` (default) you c
   Defaults to `500`.
 
 | `xpack.reporting.csv.scroll.duration`
-  | Amonunt of time allowed before the scroll context is cleaned when a CSV export is executed.
+  | Amount of time allowed before {kib} cleans the scroll context during a CSV export.
   Defaults to `30s`.
   
 | `xpack.reporting.csv.checkForFormulas`
