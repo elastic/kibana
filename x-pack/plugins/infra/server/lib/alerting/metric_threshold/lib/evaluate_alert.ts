@@ -29,28 +29,46 @@ interface CompositeAggregationsResponse {
   };
 }
 
-const getValuesFromAggregations = (
-  aggregations: Aggregation,
-  aggType: MetricExpressionParams['aggType']
+export const evaluateAlert = (
+  callCluster: AlertServices['callCluster'],
+  params: AlertExecutorOptions['params'],
+  config: InfraSource['configuration'],
+  timeframe?: { start: number; end: number }
 ) => {
-  try {
-    const { buckets } = aggregations.aggregatedIntervals;
-    if (!buckets.length) return null; // No Data state
-    if (aggType === Aggregators.COUNT) {
-      return buckets.map((bucket) => bucket.doc_count);
-    }
-    if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
-      return buckets.map((bucket) => {
-        const values = bucket.aggregatedValue?.values || [];
-        const firstValue = first(values);
-        if (!firstValue) return null;
-        return firstValue.value;
-      });
-    }
-    return buckets.map((bucket) => bucket.aggregatedValue.value);
-  } catch (e) {
-    return undefined; // Error state
-  }
+  const { criteria, groupBy, filterQuery } = params as {
+    criteria: MetricExpressionParams[];
+    groupBy: string | undefined | string[];
+    filterQuery: string | undefined;
+  };
+  return Promise.all(
+    criteria.map((criterion) => {
+      return (async () => {
+        const currentValues = await getMetric(
+          callCluster,
+          criterion,
+          config.metricAlias,
+          config.fields.timestamp,
+          groupBy,
+          filterQuery,
+          timeframe
+        );
+        const { threshold, comparator } = criterion;
+        const comparisonFunction = comparatorMap[comparator];
+        return mapValues(currentValues, (values: number[] | null | undefined) => {
+          return {
+            ...criterion,
+            metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
+            currentValue: Array.isArray(values) ? last(values) : NaN,
+            shouldFire: Array.isArray(values)
+              ? values.map((value) => comparisonFunction(value, threshold))
+              : [false],
+            isNoData: values === null,
+            isError: values === undefined,
+          };
+        });
+      })();
+    })
+  );
 };
 
 const getMetric: (
@@ -115,6 +133,30 @@ const getMetric: (
   }
 };
 
+const getValuesFromAggregations = (
+  aggregations: Aggregation,
+  aggType: MetricExpressionParams['aggType']
+) => {
+  try {
+    const { buckets } = aggregations.aggregatedIntervals;
+    if (!buckets.length) return null; // No Data state
+    if (aggType === Aggregators.COUNT) {
+      return buckets.map((bucket) => bucket.doc_count);
+    }
+    if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
+      return buckets.map((bucket) => {
+        const values = bucket.aggregatedValue?.values || [];
+        const firstValue = first(values);
+        if (!firstValue) return null;
+        return firstValue.value;
+      });
+    }
+    return buckets.map((bucket) => bucket.aggregatedValue.value);
+  } catch (e) {
+    return undefined; // Error state
+  }
+};
+
 const comparatorMap = {
   [Comparator.BETWEEN]: (value: number, [a, b]: number[]) =>
     value >= Math.min(a, b) && value <= Math.max(a, b),
@@ -125,46 +167,4 @@ const comparatorMap = {
   [Comparator.LT]: (a: number, [b]: number[]) => a < b,
   [Comparator.GT_OR_EQ]: (a: number, [b]: number[]) => a >= b,
   [Comparator.LT_OR_EQ]: (a: number, [b]: number[]) => a <= b,
-};
-
-export const evaluateAlert = (
-  callCluster: AlertServices['callCluster'],
-  params: AlertExecutorOptions['params'],
-  config: InfraSource['configuration'],
-  timeframe?: { start: number; end: number }
-) => {
-  const { criteria, groupBy, filterQuery } = params as {
-    criteria: MetricExpressionParams[];
-    groupBy: string | undefined | string[];
-    filterQuery: string | undefined;
-  };
-  return Promise.all(
-    criteria.map((criterion) => {
-      return (async () => {
-        const currentValues = await getMetric(
-          callCluster,
-          criterion,
-          config.metricAlias,
-          config.fields.timestamp,
-          groupBy,
-          filterQuery,
-          timeframe
-        );
-        const { threshold, comparator } = criterion;
-        const comparisonFunction = comparatorMap[comparator];
-        return mapValues(currentValues, (values: number[] | null | undefined) => {
-          return {
-            ...criterion,
-            metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
-            currentValue: Array.isArray(values) ? last(values) : NaN,
-            shouldFire: Array.isArray(values)
-              ? values.map((value) => comparisonFunction(value, threshold))
-              : [false],
-            isNoData: values === null,
-            isError: values === undefined,
-          };
-        });
-      })();
-    })
-  );
 };
