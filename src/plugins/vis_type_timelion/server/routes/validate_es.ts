@@ -29,7 +29,7 @@ export function validateEsRoute(router: IRouter) {
     async function (context, request, response) {
       const uiSettings = await context.core.uiSettings.client.getAll();
 
-      const { callAsCurrentUser } = context.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
 
       const timefield = uiSettings['timelion:es.timefield'];
 

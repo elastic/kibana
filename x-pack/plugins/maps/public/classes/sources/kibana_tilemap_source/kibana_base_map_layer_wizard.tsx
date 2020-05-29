@@ -24,12 +24,12 @@ export const kibanaBasemapLayerWizardConfig: LayerWizard = {
     defaultMessage: 'Tile map service configured in kibana.yml',
   }),
   icon: 'logoKibana',
-  renderWizard: ({ previewLayer }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = () => {
       const layerDescriptor = TileLayer.createDescriptor({
         sourceDescriptor: KibanaTilemapSource.createDescriptor(),
       });
-      previewLayer(layerDescriptor);
+      previewLayers([layerDescriptor]);
     };
     return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
