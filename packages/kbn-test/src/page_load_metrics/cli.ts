@@ -25,7 +25,6 @@ import { capturePageLoadMetrics } from './capture_page_load_metrics';
 export function runPageLoadMetricsCli() {
   run(
     async ({ flags, log }) => {
-      log.info('!!! Do not forget to load data with index pattern !!!');
       const kibanaUrl = flags['kibana-url'];
       if (!kibanaUrl || typeof kibanaUrl !== 'string') {
         throw createFlagError('Expect --kibana-url to be a string');

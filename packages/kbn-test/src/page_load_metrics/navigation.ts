@@ -72,25 +72,23 @@ async function loginToKibana(
 export async function navigateToApps(log: ToolingLog, options: NavigationOptions) {
   const browser = await puppeteer.launch({ headless: options.headless, args: ['--no-sandbox'] });
   const devToolsResponses: NavigationResults = new Map();
-  const paths = [
-    '/app/discover',
-    '/app/home',
-    '/app/canvas', // +1
-    '/app/maps', // +16
-    '/app/timelion', // +1
-    '/app/apm', // +1
-    '/app/uptime', // +1
+  const apps = [
+    { path: '/app/discover', locator: '[data-test-subj="discover-sidebar"]' },
+    { path: '/app/home', locator: '[data-test-subj="homeApp"]' },
+    { path: '/app/canvas', locator: '[data-test-subj="create-workpad-button"]' },
+    { path: '/app/maps', locator: '[data-test-subj="mapsFullScreenMode"]' },
+    { path: '/app/apm', locator: '[data-test-subj="apmMainContainer"]' },
   ];
 
   await loginToKibana(log, browser, options);
 
   await Promise.all(
-    paths.map(async (path) => {
+    apps.map(async (app) => {
       const page = await browser.newPage();
       page.setCacheEnabled(false);
       page.setDefaultNavigationTimeout(0);
       const frameResponses = new Map<string, FrameResponse>();
-      devToolsResponses.set(path, frameResponses);
+      devToolsResponses.set(app.path, frameResponses);
 
       const client = await page.target().createCDPSession();
       await client.send('Network.enable');
@@ -111,10 +109,15 @@ export async function navigateToApps(log: ToolingLog, options: NavigationOptions
         getRequestData(event.requestId).dataLength += event.dataLength;
       });
 
-      const url = createUrl(path, options);
+      const url = createUrl(app.path, options);
       log.debug(`goto ${url}`);
       await page.goto(url, {
         waitUntil: 'networkidle0',
+      });
+
+      await page.waitForSelector(app.locator, { timeout: 30000 }).catch((err) => {
+        log.error(`Page '${app.path}' was not loaded properly, current ulr: ${page.url()}`);
+        throw err;
       });
 
       await page.close();
