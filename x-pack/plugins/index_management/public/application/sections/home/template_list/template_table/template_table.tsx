@@ -69,7 +69,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({ templates, reloa
       }),
       truncateText: true,
       sortable: true,
-      render: (composedOf = []) => <span>{composedOf.join(', ')}</span>,
+      render: (composedOf: string[] = []) => <span>{composedOf.join(', ')}</span>,
     },
     {
       field: 'priority',
