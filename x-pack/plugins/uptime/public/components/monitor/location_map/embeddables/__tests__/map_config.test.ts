@@ -22,14 +22,14 @@ describe('map_config', () => {
 
   beforeEach(() => {
     upPoints = [
-      { lat: '52.487239', lon: '13.399262' },
-      { lat: '55.487239', lon: '13.399262' },
-      { lat: '54.487239', lon: '14.399262' },
+      { name: 'US-EAST', location: { lat: '52.487239', lon: '13.399262' } },
+      { location: { lat: '55.487239', lon: '13.399262' }, name: 'US-WEST' },
+      { location: { lat: '54.487239', lon: '14.399262' }, name: 'Europe' },
     ];
     downPoints = [
-      { lat: '52.487239', lon: '13.399262' },
-      { lat: '55.487239', lon: '13.399262' },
-      { lat: '54.487239', lon: '14.399262' },
+      { location: { lat: '52.487239', lon: '13.399262' }, name: 'Asia' },
+      { location: { lat: '55.487239', lon: '13.399262' }, name: 'APJ' },
+      { location: { lat: '54.487239', lon: '14.399262' }, name: 'Canada' },
     ];
     colors = {
       danger: '#BC261E',

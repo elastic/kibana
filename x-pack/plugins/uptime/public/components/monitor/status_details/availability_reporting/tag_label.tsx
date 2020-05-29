@@ -11,6 +11,7 @@ import { StatusTag } from '../../location_map';
 
 const BadgeItem = styled.div`
   white-space: nowrap;
+  display: inline-block;
   @media (max-width: 1042px) {
     display: inline-block;
     margin-right: 16px;

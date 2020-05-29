@@ -13,18 +13,12 @@ import { UptimeThemeContext } from '../../../../contexts';
 import { MonitorLocation } from '../../../../../common/runtime_types';
 import { SHORT_TIMESPAN_LOCALE, SHORT_TS_LOCALE } from '../../../../../common/constants';
 import { AvailabilityReporting } from '../index';
-import { TagLabel } from './tag_label';
-import { LocationAvailability } from './location_status';
 
 // Set height so that it remains within panel, enough height to display 7 locations tags
 const TagContainer = styled.div`
-  max-height: 229px;
+  max-height: 246px;
   overflow: hidden;
   margin-top: auto;
-`;
-
-const OtherLocationsDiv = styled.div`
-  padding-left: 18px;
 `;
 
 interface Props {
@@ -35,7 +29,7 @@ interface Props {
 
 export interface StatusTag {
   label: string;
-  timestamp: number;
+  timestamp: string;
   color: string;
   availability: number;
 }
@@ -47,8 +41,6 @@ export const LocationStatusTags = ({ locations, ups, downs }: Props) => {
 
   const allLocations: StatusTag[] = [];
   const prevLocal: string = moment.locale() ?? 'en';
-  const totalUps = 0;
-  const totalDowns = 0;
 
   const shortLocale = moment.locale(SHORT_TS_LOCALE) === SHORT_TS_LOCALE;
   if (!shortLocale) {
@@ -57,7 +49,7 @@ export const LocationStatusTags = ({ locations, ups, downs }: Props) => {
 
   locations.forEach((item: MonitorLocation) => {
     allLocations.push({
-      label: item.geo.name,
+      label: item.geo.name!,
       timestamp: moment(new Date(item.timestamp).valueOf()).fromNow(),
       color: item.summary.down === 0 ? gray : danger,
       availability: (item.ups / (item.ups + item.downs)) * 100,
@@ -72,30 +64,15 @@ export const LocationStatusTags = ({ locations, ups, downs }: Props) => {
     return a.label > b.label ? 1 : b.label > a.label ? -1 : 0;
   });
 
+  if (!locations?.length > 0) {
+    return null;
+  }
+
   return (
     <>
       <TagContainer>
-        <AvailabilityReporting ups={ups} downs={downs} />
-        <EuiSpacer size="s" />
-        {allLocations.map((item, ind) => (
-          <LocationAvailability locationStatus={item} key={ind} />
-        ))}
+        <AvailabilityReporting ups={ups} downs={downs} allLocations={allLocations} />
       </TagContainer>
-      {locations.length > 7 && (
-        <OtherLocationsDiv>
-          <EuiText color="subdued">
-            <h4>
-              <FormattedMessage
-                id="xpack.uptime.locationMap.locations.tags.others"
-                defaultMessage="{otherLoc} Others ..."
-                values={{
-                  otherLoc: locations.length - 7,
-                }}
-              />
-            </h4>
-          </EuiText>
-        </OtherLocationsDiv>
-      )}
     </>
   );
 };

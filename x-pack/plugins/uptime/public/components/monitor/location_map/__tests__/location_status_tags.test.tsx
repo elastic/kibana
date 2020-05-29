@@ -19,19 +19,27 @@ describe('LocationStatusTags component', () => {
         summary: { up: 4, down: 0 },
         geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment().subtract('5', 'w').toISOString(),
+        ups: 4,
+        downs: 0,
       },
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment().subtract('5', 'w').toISOString(),
+        ups: 4,
+        downs: 0,
       },
       {
         summary: { up: 0, down: 2 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment().subtract('5', 'w').toISOString(),
+        ups: 4,
+        downs: 0,
       },
     ];
-    const component = shallowWithIntl(<LocationStatusTags locations={monitorLocations} />);
+    const component = shallowWithIntl(
+      <LocationStatusTags locations={monitorLocations} ups={8} downs={1} />
+    );
     expect(component).toMatchSnapshot();
   });
 
@@ -41,44 +49,62 @@ describe('LocationStatusTags component', () => {
         summary: { up: 0, down: 1 },
         geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment().subtract('5', 's').toISOString(),
+        ups: 4,
+        downs: 0,
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment().subtract('5', 'm').toISOString(),
+        ups: 4,
+        downs: 0,
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment().subtract('5', 'h').toISOString(),
+        ups: 4,
+        downs: 0,
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Tokyo', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment().subtract('5', 'd').toISOString(),
+        ups: 4,
+        downs: 0,
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'New York', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment().subtract('5', 'w').toISOString(),
+        ups: 4,
+        downs: 0,
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Toronto', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment().subtract('5', 'M').toISOString(),
+        ups: 4,
+        downs: 0,
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Sydney', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment().subtract('5', 'y').toISOString(),
+        ups: 4,
+        downs: 0,
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Paris', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment().subtract('5', 'y').toISOString(),
+        ups: 4,
+        downs: 0,
       },
     ];
-    const component = renderWithIntl(<LocationStatusTags locations={monitorLocations} />);
+    const component = renderWithIntl(
+      <LocationStatusTags locations={monitorLocations} ups={10} downs={2} />
+    );
     expect(component).toMatchSnapshot();
   });
 
@@ -95,7 +121,9 @@ describe('LocationStatusTags component', () => {
         timestamp: moment().subtract('5', 'd').toISOString(),
       },
     ];
-    const component = renderWithIntl(<LocationStatusTags locations={monitorLocations} />);
+    const component = renderWithIntl(
+      <LocationStatusTags locations={monitorLocations} ups={10} downs={2} />
+    );
     expect(component).toMatchSnapshot();
   });
 
@@ -112,7 +140,9 @@ describe('LocationStatusTags component', () => {
         timestamp: moment().subtract('5', 'm').toISOString(),
       },
     ];
-    const component = renderWithIntl(<LocationStatusTags locations={monitorLocations} />);
+    const component = renderWithIntl(
+      <LocationStatusTags locations={monitorLocations} ups={10} downs={2} />
+    );
     expect(component).toMatchSnapshot();
   });
 });

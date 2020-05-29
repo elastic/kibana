@@ -120,8 +120,8 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
     totalUps += ups.value;
     totalDowns += downs.value;
     const location: MonitorLocation = {
-      ups: ups.value,
-      downs: downs.value,
+      ups: ups.value ?? 0,
+      downs: downs.value ?? 0,
       summary: mostRecentLocation?.summary,
       geo: getGeo(mostRecentLocation?.observer?.geo),
       timestamp: mostRecentLocation['@timestamp'],

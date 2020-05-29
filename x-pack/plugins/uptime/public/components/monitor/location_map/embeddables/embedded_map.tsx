@@ -7,9 +7,10 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
+import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../../legacy/plugins/maps/public';
 import * as i18n from './translations';
-import { Location } from '../../../../../common/runtime_types';
+import { GeoPoint } from '../../../../../common/runtime_types';
 import { getLayerList } from './map_config';
 import { UptimeThemeContext, UptimeStartupPluginsContext } from '../../../../contexts';
 import {
@@ -18,13 +19,15 @@ import {
   ErrorEmbeddable,
 } from '../../../../../../../../src/plugins/embeddable/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/public';
+import { RenderTooltipContentParams } from '../../../../../../maps/public';
+import { MapToolTipComponent } from './map_tool_tip';
 
 export interface EmbeddedMapProps {
   upPoints: LocationPoint[];
   downPoints: LocationPoint[];
 }
 
-export type LocationPoint = Required<Location>;
+export type LocationPoint = Required<GeoPoint>;
 
 const EmbeddedPanel = styled.div`
   z-index: auto;
@@ -54,6 +57,8 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
   }
   const factory: any = embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
+  const portalNode = React.useMemo(() => createPortalNode(), []);
+
   const input: MapEmbeddableInput = {
     id: uuid.v4(),
     filters: [],
@@ -73,10 +78,37 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
       zoom: 0,
     },
     disableInteractive: true,
-    disableTooltipControl: true,
+    // disableTooltipControl: true,
     hideToolbarOverlay: true,
     hideLayerControl: true,
     hideViewControl: true,
+  };
+
+  const renderTooltipContent = ({
+    addFilters,
+    closeTooltip,
+    features,
+    isLocked,
+    getLayerName,
+    loadFeatureProperties,
+    loadFeatureGeometry,
+  }: RenderTooltipContentParams) => {
+    const props = {
+      addFilters,
+      closeTooltip,
+      isLocked,
+      getLayerName,
+      loadFeatureProperties,
+      loadFeatureGeometry,
+    };
+    const relevantFeatures = features.filter(
+      (item) => item.layerId === 'up_points' || item.layerId === 'down_points'
+    );
+    if (relevantFeatures.length > 0) {
+      return <OutPortal {...props} node={portalNode} features={relevantFeatures} />;
+    }
+    closeTooltip();
+    return null;
   };
 
   useEffect(() => {
@@ -90,6 +122,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
       });
 
       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
+        embeddableObject.setRenderTooltipContent(renderTooltipContent);
         await embeddableObject.setLayerList(getLayerList(upPoints, downPoints, colors));
       }
 
@@ -123,6 +156,9 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
         className="embPanel__content"
         ref={embeddableRoot}
       />
+      <InPortal node={portalNode}>
+        <MapToolTipComponent />
+      </InPortal>
     </EmbeddedPanel>
   );
 });

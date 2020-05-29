@@ -5,14 +5,14 @@
  */
 
 import React from 'react';
+import styled from 'styled-components';
 import {
   EuiLink,
-  EuiTitle,
-  EuiTextColor,
   EuiSpacer,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiIcon,
 } from '@elastic/eui';
 import { MonitorSSLCertificate } from './ssl_certificate';
 import * as labels from './translations';
@@ -26,6 +26,18 @@ interface MonitorStatusBarProps {
   monitorLocations: MonitorLocations;
 }
 
+export const MonListTitle = styled(EuiDescriptionListTitle)`
+  &&& {
+    width: 30%;
+  }
+`;
+
+export const MonListDescription = styled(EuiDescriptionListDescription)`
+  &&& {
+    width: 70%;
+  }
+`;
+
 export const MonitorStatusBarComponent: React.FC<MonitorStatusBarProps> = ({
   monitorId,
   monitorStatus,
@@ -34,28 +46,30 @@ export const MonitorStatusBarComponent: React.FC<MonitorStatusBarProps> = ({
   const full = monitorStatus?.url?.full ?? '';
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-      <EuiFlexItem grow={false}>
+    <>
+      <div>
         <StatusByLocations locations={monitorLocations?.locations ?? []} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText>
+      </div>
+      <EuiSpacer />
+      <EuiDescriptionList
+        type="responsiveColumn"
+        compressed={true}
+        textStyle="reverse"
+        style={{ maxWidth: '450px' }}
+      >
+        <MonListTitle>URL</MonListTitle>
+        <MonListDescription>
           <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank">
             {full}
+            <EuiIcon type={'popout'} size="s" />
           </EuiLink>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <EuiTextColor color="subdued">
-            <h1 data-test-subj="monitor-page-title">{monitorId}</h1>
-          </EuiTextColor>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiSpacer />
-      <EuiFlexItem grow={false}>
+        </MonListDescription>
+        <MonListTitle>Monitor ID</MonListTitle>
+        <MonListDescription>
+          <h4 data-test-subj="monitor-page-title">{monitorId}</h4>
+        </MonListDescription>
         <MonitorSSLCertificate tls={monitorStatus?.tls} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiDescriptionList>
+    </>
   );
 };

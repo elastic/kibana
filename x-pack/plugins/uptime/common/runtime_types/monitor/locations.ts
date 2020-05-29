@@ -7,12 +7,12 @@ import * as t from 'io-ts';
 import { CheckGeoType, SummaryType } from '../common';
 
 // IO type for validation
-export const MonitorLocationType = t.partial({
-  summary: SummaryType,
-  geo: CheckGeoType,
-  timestamp: t.string,
+export const MonitorLocationType = t.type({
   ups: t.number,
   downs: t.number,
+  timestamp: t.string,
+  summary: SummaryType,
+  geo: CheckGeoType,
 });
 
 // Typescript type for type checking

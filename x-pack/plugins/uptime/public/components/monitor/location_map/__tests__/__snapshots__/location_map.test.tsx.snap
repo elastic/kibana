@@ -2,51 +2,104 @@
 
 exports[`LocationMap component doesnt shows warning if geo is provided 1`] = `
 <EuiErrorBoundary>
+  <EuiHideFor
+    sizes={
+      Array [
+        "xl",
+      ]
+    }
+  >
+    <styled.span>
+      <EuiButtonGroup
+        idToSelectedMap={
+          Object {
+            "listBtn": true,
+          }
+        }
+        isIconOnly={true}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "iconType": "list",
+              "id": "listBtn",
+              "label": "Bold",
+              "name": "bold",
+            },
+            Object {
+              "iconType": "mapMarker",
+              "id": "mapBtn",
+              "label": "Italic",
+              "name": "italic",
+            },
+          ]
+        }
+        style={
+          Object {
+            "marginLeft": "auto",
+          }
+        }
+        type="multi"
+      />
+    </styled.span>
+  </EuiHideFor>
   <Styled(EuiFlexGroup)
     gutterSize="none"
     justifyContent="flexEnd"
     wrap={true}
   >
-    <Styled(EuiFlexItem)>
-      <LocationStatusTags
-        locations={
-          Array [
-            Object {
-              "geo": Object {
-                "location": Object {
-                  "lat": "40.730610",
-                  "lon": " -73.935242",
+    <EuiShowFor
+      sizes={Array []}
+    >
+      <Styled(EuiFlexItem)
+        grow={true}
+      >
+        <LocationStatusTags
+          downs={0}
+          locations={
+            Array [
+              Object {
+                "downs": 0,
+                "geo": Object {
+                  "location": Object {
+                    "lat": "40.730610",
+                    "lon": " -73.935242",
+                  },
+                  "name": "New York",
                 },
-                "name": "New York",
-              },
-              "summary": Object {
-                "down": 0,
-                "up": 4,
-              },
-              "timestamp": "2020-01-13T22:50:06.536Z",
-            },
-            Object {
-              "geo": Object {
-                "location": Object {
-                  "lat": "52.487448",
-                  "lon": " 13.394798",
+                "summary": Object {
+                  "down": 0,
+                  "up": 4,
                 },
-                "name": "Tokyo",
+                "timestamp": "2020-01-13T22:50:06.536Z",
+                "ups": 4,
               },
-              "summary": Object {
-                "down": 0,
-                "up": 4,
+              Object {
+                "downs": 0,
+                "geo": Object {
+                  "location": Object {
+                    "lat": "52.487448",
+                    "lon": " 13.394798",
+                  },
+                  "name": "Tokyo",
+                },
+                "summary": Object {
+                  "down": 0,
+                  "up": 4,
+                },
+                "timestamp": "2020-01-13T22:50:04.354Z",
+                "ups": 4,
               },
-              "timestamp": "2020-01-13T22:50:04.354Z",
-            },
-          ]
-        }
-      />
-    </Styled(EuiFlexItem)>
-    <EuiHideFor
+            ]
+          }
+          ups={0}
+        />
+      </Styled(EuiFlexItem)>
+    </EuiShowFor>
+    <EuiShowFor
       sizes={
         Array [
-          "xs",
+          "xl",
         ]
       }
     >
@@ -56,83 +109,181 @@ exports[`LocationMap component doesnt shows warning if geo is provided 1`] = `
         <styled.div>
           <EmbeddedMap
             downPoints={Array []}
+            monitorLocations={
+              Object {
+                "locations": Array [
+                  Object {
+                    "downs": 0,
+                    "geo": Object {
+                      "location": Object {
+                        "lat": "40.730610",
+                        "lon": " -73.935242",
+                      },
+                      "name": "New York",
+                    },
+                    "summary": Object {
+                      "down": 0,
+                      "up": 4,
+                    },
+                    "timestamp": "2020-01-13T22:50:06.536Z",
+                    "ups": 4,
+                  },
+                  Object {
+                    "downs": 0,
+                    "geo": Object {
+                      "location": Object {
+                        "lat": "52.487448",
+                        "lon": " 13.394798",
+                      },
+                      "name": "Tokyo",
+                    },
+                    "summary": Object {
+                      "down": 0,
+                      "up": 4,
+                    },
+                    "timestamp": "2020-01-13T22:50:04.354Z",
+                    "ups": 4,
+                  },
+                ],
+                "monitorId": "wapo",
+              }
+            }
             upPoints={
               Array [
                 Object {
-                  "lat": "40.730610",
-                  "lon": " -73.935242",
+                  "location": Object {
+                    "lat": "40.730610",
+                    "lon": " -73.935242",
+                  },
+                  "name": "New York",
                 },
                 Object {
-                  "lat": "52.487448",
-                  "lon": " 13.394798",
+                  "location": Object {
+                    "lat": "52.487448",
+                    "lon": " 13.394798",
+                  },
+                  "name": "Tokyo",
                 },
               ]
             }
           />
         </styled.div>
       </EuiFlexItem>
-    </EuiHideFor>
+    </EuiShowFor>
   </Styled(EuiFlexGroup)>
 </EuiErrorBoundary>
 `;
 
 exports[`LocationMap component renders correctly against snapshot 1`] = `
 <EuiErrorBoundary>
+  <EuiHideFor
+    sizes={
+      Array [
+        "xl",
+      ]
+    }
+  >
+    <styled.span>
+      <EuiButtonGroup
+        idToSelectedMap={
+          Object {
+            "listBtn": true,
+          }
+        }
+        isIconOnly={true}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "iconType": "list",
+              "id": "listBtn",
+              "label": "Bold",
+              "name": "bold",
+            },
+            Object {
+              "iconType": "mapMarker",
+              "id": "mapBtn",
+              "label": "Italic",
+              "name": "italic",
+            },
+          ]
+        }
+        style={
+          Object {
+            "marginLeft": "auto",
+          }
+        }
+        type="multi"
+      />
+    </styled.span>
+  </EuiHideFor>
   <Styled(EuiFlexGroup)
     gutterSize="none"
     justifyContent="flexEnd"
     wrap={true}
   >
-    <Styled(EuiFlexItem)>
-      <LocationStatusTags
-        locations={
-          Array [
-            Object {
-              "geo": Object {
-                "location": Object {
-                  "lat": "40.730610",
-                  "lon": " -73.935242",
+    <EuiShowFor
+      sizes={Array []}
+    >
+      <Styled(EuiFlexItem)
+        grow={true}
+      >
+        <LocationStatusTags
+          downs={0}
+          locations={
+            Array [
+              Object {
+                "downs": 0,
+                "geo": Object {
+                  "location": Object {
+                    "lat": "40.730610",
+                    "lon": " -73.935242",
+                  },
+                  "name": "New York",
                 },
-                "name": "New York",
-              },
-              "summary": Object {
-                "down": 0,
-                "up": 4,
-              },
-              "timestamp": "2020-01-13T22:50:06.536Z",
-            },
-            Object {
-              "geo": Object {
-                "location": Object {
-                  "lat": "52.487448",
-                  "lon": " 13.394798",
+                "summary": Object {
+                  "down": 0,
+                  "up": 4,
                 },
-                "name": "Tokyo",
+                "timestamp": "2020-01-13T22:50:06.536Z",
+                "ups": 4,
               },
-              "summary": Object {
-                "down": 0,
-                "up": 4,
+              Object {
+                "geo": Object {
+                  "location": Object {
+                    "lat": "52.487448",
+                    "lon": " 13.394798",
+                  },
+                  "name": "Tokyo",
+                },
+                "summary": Object {
+                  "down": 0,
+                  "up": 4,
+                },
+                "timestamp": "2020-01-13T22:50:04.354Z",
               },
-              "timestamp": "2020-01-13T22:50:04.354Z",
-            },
-            Object {
-              "geo": Object {
-                "name": "Unnamed-location",
+              Object {
+                "downs": 0,
+                "geo": Object {
+                  "name": "Unnamed-location",
+                },
+                "summary": Object {
+                  "down": 0,
+                  "up": 4,
+                },
+                "timestamp": "2020-01-13T22:50:02.753Z",
+                "ups": 4,
               },
-              "summary": Object {
-                "down": 0,
-                "up": 4,
-              },
-              "timestamp": "2020-01-13T22:50:02.753Z",
-            },
-          ]
-        }
-      />
-    </Styled(EuiFlexItem)>
-    <EuiHideFor
+            ]
+          }
+          ups={0}
+        />
+      </Styled(EuiFlexItem)>
+    </EuiShowFor>
+    <EuiShowFor
       sizes={
         Array [
-          "xs",
+          "xl",
         ]
       }
     >
@@ -143,56 +294,162 @@ exports[`LocationMap component renders correctly against snapshot 1`] = `
         <styled.div>
           <EmbeddedMap
             downPoints={Array []}
+            monitorLocations={
+              Object {
+                "locations": Array [
+                  Object {
+                    "downs": 0,
+                    "geo": Object {
+                      "location": Object {
+                        "lat": "40.730610",
+                        "lon": " -73.935242",
+                      },
+                      "name": "New York",
+                    },
+                    "summary": Object {
+                      "down": 0,
+                      "up": 4,
+                    },
+                    "timestamp": "2020-01-13T22:50:06.536Z",
+                    "ups": 4,
+                  },
+                  Object {
+                    "geo": Object {
+                      "location": Object {
+                        "lat": "52.487448",
+                        "lon": " 13.394798",
+                      },
+                      "name": "Tokyo",
+                    },
+                    "summary": Object {
+                      "down": 0,
+                      "up": 4,
+                    },
+                    "timestamp": "2020-01-13T22:50:04.354Z",
+                  },
+                  Object {
+                    "downs": 0,
+                    "geo": Object {
+                      "name": "Unnamed-location",
+                    },
+                    "summary": Object {
+                      "down": 0,
+                      "up": 4,
+                    },
+                    "timestamp": "2020-01-13T22:50:02.753Z",
+                    "ups": 4,
+                  },
+                ],
+                "monitorId": "wapo",
+              }
+            }
             upPoints={
               Array [
                 Object {
-                  "lat": "40.730610",
-                  "lon": " -73.935242",
+                  "location": Object {
+                    "lat": "40.730610",
+                    "lon": " -73.935242",
+                  },
+                  "name": "New York",
                 },
                 Object {
-                  "lat": "52.487448",
-                  "lon": " 13.394798",
+                  "location": Object {
+                    "lat": "52.487448",
+                    "lon": " 13.394798",
+                  },
+                  "name": "Tokyo",
                 },
               ]
             }
           />
         </styled.div>
       </EuiFlexItem>
-    </EuiHideFor>
+    </EuiShowFor>
   </Styled(EuiFlexGroup)>
 </EuiErrorBoundary>
 `;
 
 exports[`LocationMap component renders named locations that have missing geo data 1`] = `
 <EuiErrorBoundary>
+  <EuiHideFor
+    sizes={
+      Array [
+        "xl",
+      ]
+    }
+  >
+    <styled.span>
+      <EuiButtonGroup
+        idToSelectedMap={
+          Object {
+            "listBtn": true,
+          }
+        }
+        isIconOnly={true}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "iconType": "list",
+              "id": "listBtn",
+              "label": "Bold",
+              "name": "bold",
+            },
+            Object {
+              "iconType": "mapMarker",
+              "id": "mapBtn",
+              "label": "Italic",
+              "name": "italic",
+            },
+          ]
+        }
+        style={
+          Object {
+            "marginLeft": "auto",
+          }
+        }
+        type="multi"
+      />
+    </styled.span>
+  </EuiHideFor>
   <Styled(EuiFlexGroup)
     gutterSize="none"
     justifyContent="flexEnd"
     wrap={true}
   >
-    <Styled(EuiFlexItem)>
-      <LocationStatusTags
-        locations={
-          Array [
-            Object {
-              "geo": Object {
-                "location": undefined,
-                "name": "New York",
+    <EuiShowFor
+      sizes={Array []}
+    >
+      <Styled(EuiFlexItem)
+        grow={true}
+      >
+        <LocationStatusTags
+          downs={0}
+          locations={
+            Array [
+              Object {
+                "downs": 0,
+                "geo": Object {
+                  "location": undefined,
+                  "name": "New York",
+                },
+                "summary": Object {
+                  "down": 0,
+                  "up": 4,
+                },
+                "timestamp": "2020-01-13T22:50:06.536Z",
+                "ups": 4,
               },
-              "summary": Object {
-                "down": 0,
-                "up": 4,
-              },
-              "timestamp": "2020-01-13T22:50:06.536Z",
-            },
-          ]
-        }
-      />
-    </Styled(EuiFlexItem)>
-    <EuiHideFor
+            ]
+          }
+          ups={0}
+        />
+      </Styled(EuiFlexItem)>
+    </EuiShowFor>
+    <EuiShowFor
       sizes={
         Array [
-          "xs",
+          "xl",
         ]
       }
     >
@@ -203,58 +460,131 @@ exports[`LocationMap component renders named locations that have missing geo dat
         <styled.div>
           <EmbeddedMap
             downPoints={Array []}
+            monitorLocations={
+              Object {
+                "locations": Array [
+                  Object {
+                    "downs": 0,
+                    "geo": Object {
+                      "location": undefined,
+                      "name": "New York",
+                    },
+                    "summary": Object {
+                      "down": 0,
+                      "up": 4,
+                    },
+                    "timestamp": "2020-01-13T22:50:06.536Z",
+                    "ups": 4,
+                  },
+                ],
+                "monitorId": "wapo",
+              }
+            }
             upPoints={Array []}
           />
         </styled.div>
       </EuiFlexItem>
-    </EuiHideFor>
+    </EuiShowFor>
   </Styled(EuiFlexGroup)>
 </EuiErrorBoundary>
 `;
 
 exports[`LocationMap component shows warning if geo information is missing 1`] = `
 <EuiErrorBoundary>
+  <EuiHideFor
+    sizes={
+      Array [
+        "xl",
+      ]
+    }
+  >
+    <styled.span>
+      <EuiButtonGroup
+        idToSelectedMap={
+          Object {
+            "listBtn": true,
+          }
+        }
+        isIconOnly={true}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "iconType": "list",
+              "id": "listBtn",
+              "label": "Bold",
+              "name": "bold",
+            },
+            Object {
+              "iconType": "mapMarker",
+              "id": "mapBtn",
+              "label": "Italic",
+              "name": "italic",
+            },
+          ]
+        }
+        style={
+          Object {
+            "marginLeft": "auto",
+          }
+        }
+        type="multi"
+      />
+    </styled.span>
+  </EuiHideFor>
   <Styled(EuiFlexGroup)
     gutterSize="none"
     justifyContent="flexEnd"
     wrap={true}
   >
-    <Styled(EuiFlexItem)>
-      <LocationStatusTags
-        locations={
-          Array [
-            Object {
-              "geo": Object {
-                "location": Object {
-                  "lat": "52.487448",
-                  "lon": " 13.394798",
+    <EuiShowFor
+      sizes={Array []}
+    >
+      <Styled(EuiFlexItem)
+        grow={true}
+      >
+        <LocationStatusTags
+          downs={0}
+          locations={
+            Array [
+              Object {
+                "downs": 0,
+                "geo": Object {
+                  "location": Object {
+                    "lat": "52.487448",
+                    "lon": " 13.394798",
+                  },
+                  "name": "Tokyo",
                 },
-                "name": "Tokyo",
+                "summary": Object {
+                  "down": 0,
+                  "up": 4,
+                },
+                "timestamp": "2020-01-13T22:50:04.354Z",
+                "ups": 4,
               },
-              "summary": Object {
-                "down": 0,
-                "up": 4,
+              Object {
+                "downs": 0,
+                "geo": Object {
+                  "name": "Unnamed-location",
+                },
+                "summary": Object {
+                  "down": 0,
+                  "up": 4,
+                },
+                "timestamp": "2020-01-13T22:50:02.753Z",
+                "ups": 4,
               },
-              "timestamp": "2020-01-13T22:50:04.354Z",
-            },
-            Object {
-              "geo": Object {
-                "name": "Unnamed-location",
-              },
-              "summary": Object {
-                "down": 0,
-                "up": 4,
-              },
-              "timestamp": "2020-01-13T22:50:02.753Z",
-            },
-          ]
-        }
-      />
-    </Styled(EuiFlexItem)>
-    <EuiHideFor
+            ]
+          }
+          ups={0}
+        />
+      </Styled(EuiFlexItem)>
+    </EuiShowFor>
+    <EuiShowFor
       sizes={
         Array [
-          "xs",
+          "xl",
         ]
       }
     >
@@ -265,18 +595,56 @@ exports[`LocationMap component shows warning if geo information is missing 1`] =
         <styled.div>
           <EmbeddedMap
             downPoints={Array []}
+            monitorLocations={
+              Object {
+                "locations": Array [
+                  Object {
+                    "downs": 0,
+                    "geo": Object {
+                      "location": Object {
+                        "lat": "52.487448",
+                        "lon": " 13.394798",
+                      },
+                      "name": "Tokyo",
+                    },
+                    "summary": Object {
+                      "down": 0,
+                      "up": 4,
+                    },
+                    "timestamp": "2020-01-13T22:50:04.354Z",
+                    "ups": 4,
+                  },
+                  Object {
+                    "downs": 0,
+                    "geo": Object {
+                      "name": "Unnamed-location",
+                    },
+                    "summary": Object {
+                      "down": 0,
+                      "up": 4,
+                    },
+                    "timestamp": "2020-01-13T22:50:02.753Z",
+                    "ups": 4,
+                  },
+                ],
+                "monitorId": "wapo",
+              }
+            }
             upPoints={
               Array [
                 Object {
-                  "lat": "52.487448",
-                  "lon": " 13.394798",
+                  "location": Object {
+                    "lat": "52.487448",
+                    "lon": " 13.394798",
+                  },
+                  "name": "Tokyo",
                 },
               ]
             }
           />
         </styled.div>
       </EuiFlexItem>
-    </EuiHideFor>
+    </EuiShowFor>
   </Styled(EuiFlexGroup)>
 </EuiErrorBoundary>
 `;

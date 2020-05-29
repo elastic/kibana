@@ -23,7 +23,7 @@ const WrapFlexItem = styled(EuiFlexItem)`
       width: 100%;
     }
     @media (max-width: 1042px) {
-      flex-basis: 520px;
+      // flex-basis: 520px;
     }
   }
 `;
@@ -56,11 +56,11 @@ export const MonitorStatusDetailsComponent = ({
 
   return (
     <EuiPanel>
-      <EuiFlexGroup gutterSize="l" wrap responsive={true}>
-        <EuiFlexItem grow={true}>
+      <EuiFlexGroup gutterSize="l" wrap={true} responsive={false}>
+        <EuiFlexItem grow={1}>
           <MonitorStatusBar monitorId={monitorId} />
         </EuiFlexItem>
-        <WrapFlexItem grow={false}>
+        <WrapFlexItem grow={2}>
           <LocationMap monitorLocations={monitorLocations} />
         </WrapFlexItem>
       </EuiFlexGroup>

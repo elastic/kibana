@@ -2,57 +2,69 @@
 
 exports[`SSL Certificate component renders 1`] = `
 Array [
-  <div
-    class="euiText euiText--medium"
+  .c0.c0.c0 {
+  width: 30%;
+}
+
+<dt
+    class="euiDescriptionList__title c0"
   >
     Certificate:
-  </div>,
+  </dt>,
   <div
     class="euiSpacer euiSpacer--s"
   />,
-  <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  .c0.c0.c0 {
+  width: 70%;
+}
+
+<dd
+    class="euiDescriptionList__description c0"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
     >
       <div
-        aria-label="Expires in 2 months"
-        class="euiText euiText--small eui-displayInline euiText--constrainedWidth"
-      >
-        Expires 
-        <span
-          class="euiBadge euiBadge--iconLeft"
-          style="background-color:#d3dae6;color:#000"
-        >
-          <span
-            class="euiBadge__content"
-          >
-            <span
-              class="euiBadge__text"
-            >
-              in 2 months
-            </span>
-          </span>
-        </span>
-      </div>
-    </div>
-    <div
-      class="euiFlexItem"
-    >
-      <a
-        class="eui-displayInline"
-        href="/certificates"
+        class="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <div
-          class="euiText euiText--medium"
-          style="white-space:nowrap"
+          aria-label="Expires in 2 months"
+          class="euiText euiText--small eui-displayInline euiText--constrainedWidth"
         >
-          Certificate overview
+          Expires 
+          <span
+            class="euiBadge euiBadge--iconLeft"
+            style="background-color:#d3dae6;color:#000"
+          >
+            <span
+              class="euiBadge__content"
+            >
+              <span
+                class="euiBadge__text"
+              >
+                in 2 months
+              </span>
+            </span>
+          </span>
         </div>
-      </a>
+      </div>
+      <div
+        class="euiFlexItem"
+      >
+        <a
+          class="eui-displayInline"
+          href="/certificates"
+        >
+          <div
+            class="euiText euiText--medium"
+            style="white-space:nowrap"
+          >
+            Certificate overview
+          </div>
+        </a>
+      </div>
     </div>
-  </div>,
+  </dd>,
 ]
 `;
 

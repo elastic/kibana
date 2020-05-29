@@ -14,6 +14,7 @@ export const mockDownPointsLayer = {
     __featureCollection: {
       features: [
         {
+          id: 'Asia',
           type: 'feature',
           geometry: {
             type: 'Point',
@@ -21,6 +22,7 @@ export const mockDownPointsLayer = {
           },
         },
         {
+          id: 'APJ',
           type: 'feature',
           geometry: {
             type: 'Point',
@@ -28,6 +30,7 @@ export const mockDownPointsLayer = {
           },
         },
         {
+          id: 'Canada',
           type: 'feature',
           geometry: {
             type: 'Point',
@@ -79,6 +82,7 @@ export const mockUpPointsLayer = {
     __featureCollection: {
       features: [
         {
+          id: 'US-EAST',
           type: 'feature',
           geometry: {
             type: 'Point',
@@ -86,6 +90,7 @@ export const mockUpPointsLayer = {
           },
         },
         {
+          id: 'US-WEST',
           type: 'feature',
           geometry: {
             type: 'Point',
@@ -93,6 +98,7 @@ export const mockUpPointsLayer = {
           },
         },
         {
+          id: 'Europe',
           type: 'feature',
           geometry: {
             type: 'Point',

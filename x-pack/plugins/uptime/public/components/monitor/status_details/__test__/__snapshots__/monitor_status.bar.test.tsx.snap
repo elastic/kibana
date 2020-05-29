@@ -1,12 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
-<div
-  class="euiFlexGroup euiFlexGroup--directionColumn"
->
-  <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
-  >
+Array [
+  <div>
     <div
       class="euiText euiText--medium"
     >
@@ -14,12 +10,29 @@ exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
         Up in 2 Locations
       </h2>
     </div>
-  </div>
+  </div>,
   <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
+    class="euiSpacer euiSpacer--l"
+  />,
+  .c0.c0.c0 {
+  width: 30%;
+}
+
+.c1.c1.c1 {
+  width: 70%;
+}
+
+<dl
+    class="euiDescriptionList euiDescriptionList--responsiveColumn euiDescriptionList--reverse euiDescriptionList--compressed"
+    style="max-width:450px"
   >
-    <div
-      class="euiText euiText--medium"
+    <dt
+      class="euiDescriptionList__title c0"
+    >
+      URL
+    </dt>
+    <dd
+      class="euiDescriptionList__description c1"
     >
       <a
         aria-label="Monitor URL link"
@@ -29,27 +42,25 @@ exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
         target="_blank"
       >
         https://www.example.com/
+        <div
+          data-euiicon-type="popout"
+        />
       </a>
-    </div>
-  </div>
-  <div
-    class="euiFlexItem"
-  >
-    <span
-      class="euiTextColor euiTextColor--subdued euiTitle euiTitle--xsmall"
+    </dd>
+    <dt
+      class="euiDescriptionList__title c0"
     >
-      <h1
+      Monitor ID
+    </dt>
+    <dd
+      class="euiDescriptionList__description c1"
+    >
+      <h4
         data-test-subj="monitor-page-title"
       >
         id1
-      </h1>
-    </span>
-  </div>
-  <div
-    class="euiSpacer euiSpacer--l"
-  />
-  <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
-  />
-</div>
+      </h4>
+    </dd>
+  </dl>,
+]
 `;

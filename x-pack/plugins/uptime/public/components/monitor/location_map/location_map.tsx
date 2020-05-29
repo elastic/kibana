@@ -4,10 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiErrorBoundary, EuiHideFor } from '@elastic/eui';
-import { LocationStatusTags } from '../status_details/availability_reporting/location_status_tags';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiErrorBoundary,
+  EuiHideFor,
+  EuiButtonGroup,
+  EuiShowFor,
+} from '@elastic/eui';
+import { LocationStatusTags } from '../status_details/availability_reporting';
 import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
 import { MonitorLocations, MonitorLocation } from '../../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../../common/constants';
@@ -30,17 +37,20 @@ const MapPanel = styled.div`
 
 const EuiFlexItemTags = styled(EuiFlexItem)`
   padding-top: 5px;
+  width: 350px;
+  margin-top: auto;
   @media (max-width: 1042px) {
-    flex-basis: 80% !important;
-    flex-grow: 0 !important;
-    order: 1;
+    width: 100%;
   }
 `;
 
 const FlexGroup = styled(EuiFlexGroup)`
   @media (max-width: 850px) {
-    justify-content: center;
   }
+`;
+
+const ToggleViewButtons = styled.span`
+  margin-left: auto;
 `;
 
 interface LocationMapProps {
@@ -54,45 +64,79 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
   let isGeoInfoMissing = false;
 
   if (monitorLocations?.locations) {
-    monitorLocations.locations.forEach((item: MonitorLocation) => {
-      if (item.geo?.name === UNNAMED_LOCATION || !item.geo?.location) {
+    monitorLocations.locations.forEach(({ geo, summary }: MonitorLocation) => {
+      if (geo?.name === UNNAMED_LOCATION || !geo?.location) {
         isGeoInfoMissing = true;
-      } else if (
-        item.geo?.name !== UNNAMED_LOCATION &&
-        !!item.geo.location.lat &&
-        !!item.geo.location.lon
-      ) {
-        // TypeScript doesn't infer that the above checks in this block's condition
-        // ensure that lat and lon are defined when we try to pass the location object directly,
-        // but if we destructure the values it does. Improvement to this block is welcome.
-        const { lat, lon } = item.geo.location;
-        if (item?.summary?.down === 0) {
-          upPoints.push({ lat, lon });
+      } else if (!!geo.location.lat && !!geo.location.lon) {
+        if (summary?.down === 0) {
+          upPoints.push(geo);
         } else {
-          downPoints.push({ lat, lon });
+          downPoints.push(geo);
         }
       }
     });
   }
 
+  const toggleButtons = [
+    {
+      id: `listBtn`,
+      label: 'Bold',
+      name: 'bold',
+      iconType: 'list',
+    },
+    {
+      id: `mapBtn`,
+      label: 'Italic',
+      name: 'italic',
+      iconType: 'mapMarker',
+    },
+  ];
+
+  const [selectedView, setSelectedView] = useState({ listBtn: true });
+
+  const onChangeView = (optionId) => {
+    setSelectedView({
+      [optionId]: !selectedView[optionId],
+    });
+  };
+
   return (
     <EuiErrorBoundary>
-      <FlexGroup wrap={true} gutterSize="none" justifyContent="flexEnd">
-        <EuiFlexItemTags>
-          <LocationStatusTags
-            locations={monitorLocations?.locations || []}
-            ups={monitorLocations?.ups ?? 0}
-            downs={monitorLocations?.downs ?? 0}
+      <EuiHideFor sizes={['xl']}>
+        <ToggleViewButtons>
+          <EuiButtonGroup
+            options={toggleButtons}
+            idToSelectedMap={selectedView}
+            onChange={(id) => onChangeView(id)}
+            type="multi"
+            isIconOnly
+            style={{ marginLeft: 'auto' }}
           />
-        </EuiFlexItemTags>
-        <EuiHideFor sizes={['xs']}>
+        </ToggleViewButtons>
+      </EuiHideFor>
+
+      <FlexGroup wrap={true} gutterSize="none" justifyContent="flexEnd">
+        <EuiShowFor sizes={!selectedView.listBtn ? ['xl'] : []}>
+          <EuiFlexItemTags grow={true}>
+            <LocationStatusTags
+              locations={monitorLocations?.locations || []}
+              ups={monitorLocations?.ups ?? 0}
+              downs={monitorLocations?.downs ?? 0}
+            />
+          </EuiFlexItemTags>
+        </EuiShowFor>
+        <EuiShowFor sizes={!selectedView.mapBtn ? ['xl'] : []}>
           <EuiFlexItem grow={false}>
             {isGeoInfoMissing && <LocationMissingWarning />}
             <MapPanel>
-              <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
+              <EmbeddedMap
+                upPoints={upPoints}
+                downPoints={downPoints}
+                monitorLocations={monitorLocations}
+              />
             </MapPanel>
           </EuiFlexItem>
-        </EuiHideFor>
+        </EuiShowFor>
       </FlexGroup>
     </EuiErrorBoundary>
   );
