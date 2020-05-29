@@ -8,6 +8,7 @@
       "expand_wildcards": [
         "open",
         "closed",
+        "hidden",
         "none",
         "all"
       ],
@@ -19,6 +20,6 @@
     "patterns": [
       "{indices}/_freeze"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/frozen.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/freeze-index-api.html"
   }
 }
