@@ -62,7 +62,7 @@ export function registerGenerateFromJobParams(
       if (!jobParamsRison) {
         return res.customError({
           statusCode: 400,
-          body: 'A jobParams RISON string is required',
+          body: 'A jobParams RISON string is required in the querystring or POST body',
         });
       }
 

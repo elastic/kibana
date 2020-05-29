@@ -32,6 +32,10 @@ export function registerJobGenerationRoutes(
     const licenseInfo = await reporting.getLicenseInfo();
     const licenseResults = licenseInfo[exportTypeId];
 
+    if (!licenseResults) {
+      return res.badRequest({ body: `Invalid export-type of ${exportTypeId}` });
+    }
+
     if (!licenseResults.enableLinks) {
       return res.forbidden({ body: licenseResults.message });
     }

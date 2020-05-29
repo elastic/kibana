@@ -99,12 +99,23 @@ describe('POST /api/reporting/generate', () => {
       .expect(400)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(
-          '"[request body]: expected a plain object value, but found [null] instead."'
+          '"A jobParams RISON string is required in the querystring or POST body"'
         )
       );
   });
 
-  it('returns 400 if job params is invalid', async () => {
+  it('returns 400 if job params query is invalid', async () => {
+    registerJobGenerationRoutes(core, mockDeps);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener)
+      .post('/api/reporting/generate/printablePdf?jobParams=foo:')
+      .expect(400)
+      .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
+  });
+
+  it('returns 400 if job params body is invalid', async () => {
     registerJobGenerationRoutes(core, mockDeps);
 
     await server.start();
@@ -114,6 +125,20 @@ describe('POST /api/reporting/generate', () => {
       .send({ jobParams: `foo:` })
       .expect(400)
       .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
+  });
+
+  it('returns 400 export type is invalid', async () => {
+    registerJobGenerationRoutes(core, mockDeps);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener)
+      .post('/api/reporting/generate/TonyHawksProSkater2')
+      .send({ jobParams: `abc` })
+      .expect(400)
+      .then(({ body }) =>
+        expect(body.message).toMatchInlineSnapshot('"Invalid export-type of TonyHawksProSkater2"')
+      );
   });
 
   it('returns 400 if job handler throws an error', async () => {
