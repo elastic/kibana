@@ -13,7 +13,7 @@ enabled by default.
 
 [cols="2*<"]
 |===
-| `xpack.ml.enabled`
+| `xpack.ml.enabled` {ess-icon}
   | Set to `true` (default) to enable {kib} {ml-features}. +
   +
   If set to `false` in `kibana.yml`, the {ml} icon is hidden in this {kib}
