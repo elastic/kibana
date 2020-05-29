@@ -57,7 +57,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     if (!privilege) {
       return false;
     }
-    return privilege.securityDisabled === true || privilege.has_all_requested === true;
+    return privilege.has_all_requested === true;
   }
 
   /**
