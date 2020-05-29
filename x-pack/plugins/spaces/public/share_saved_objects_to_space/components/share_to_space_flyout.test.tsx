@@ -13,18 +13,21 @@ import { Space } from '../../../common/model/space';
 import { findTestSubject } from 'test_utils/find_test_subject';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { act } from '@testing-library/react';
-import { ProcessingShareToSpace } from './processing_share_to_space';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
 import { ToastsApi } from 'src/core/public';
+import { EuiCallOut } from '@elastic/eui';
+import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
 
 interface SetupOpts {
   mockSpaces?: Space[];
+  namespaces?: string[];
   returnBeforeSpacesLoad?: boolean;
 }
 
 const setup = async (opts: SetupOpts = {}) => {
   const onClose = jest.fn();
+  const onObjectUpdated = jest.fn();
 
   const mockSpacesManager = spacesManagerMock.create();
 
@@ -74,6 +77,7 @@ const setup = async (opts: SetupOpts = {}) => {
       },
     ],
     meta: { icon: 'dashboard', title: 'foo' },
+    namespaces: opts.namespaces || ['my-active-space', 'space-1'],
   };
 
   const wrapper = mountWithIntl(
@@ -82,6 +86,7 @@ const setup = async (opts: SetupOpts = {}) => {
       spacesManager={(mockSpacesManager as unknown) as SpacesManager}
       toastNotifications={(mockToastNotifications as unknown) as ToastsApi}
       onClose={onClose}
+      onObjectUpdated={onObjectUpdated}
     />
   );
 
@@ -138,10 +143,56 @@ describe('ShareToSpaceFlyout', () => {
     expect(onClose).toHaveBeenCalledTimes(0);
   });
 
-  it('handles errors thrown from shareSavedObjects API call', async () => {
+  it('does not show a warning callout when the saved object has multiple namespaces', async () => {
+    const { wrapper, onClose } = await setup();
+
+    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+    expect(wrapper.find(EuiCallOut)).toHaveLength(0);
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(onClose).toHaveBeenCalledTimes(0);
+  });
+
+  it('shows a warning callout when the saved object only has one namespace', async () => {
+    const { wrapper, onClose } = await setup({ namespaces: ['my-active-space'] });
+
+    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+    expect(wrapper.find(EuiCallOut)).toHaveLength(1);
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(onClose).toHaveBeenCalledTimes(0);
+  });
+
+  it('does not show the Copy flyout by default', async () => {
+    const { wrapper, onClose } = await setup({ namespaces: ['my-active-space'] });
+
+    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+    expect(wrapper.find(CopySavedObjectsToSpaceFlyout)).toHaveLength(0);
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(onClose).toHaveBeenCalledTimes(0);
+  });
+
+  it('shows the Copy flyout if the the "Make a copy" button is clicked', async () => {
+    const { wrapper, onClose } = await setup({ namespaces: ['my-active-space'] });
+
+    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
+
+    const copyButton = findTestSubject(wrapper, 'sts-copy-button'); // this button is only present in the warning callout
+
+    await act(async () => {
+      copyButton.simulate('click');
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find(CopySavedObjectsToSpaceFlyout)).toHaveLength(1);
+    expect(onClose).toHaveBeenCalledTimes(0);
+  });
+
+  it('handles errors thrown from shareSavedObjectsAdd API call', async () => {
     const { wrapper, mockSpacesManager, mockToastNotifications } = await setup();
 
-    mockSpacesManager.copySavedObjects.mockImplementation(() => {
+    mockSpacesManager.shareSavedObjectAdd.mockImplementation(() => {
       return Promise.reject(Boom.serverUnavailable('Something bad happened'));
     });
 
@@ -153,10 +204,10 @@ describe('ShareToSpaceFlyout', () => {
     // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
     const spaceSelector = wrapper.find(SelectableSpacesControl);
     act(() => {
-      spaceSelector.props().onChange(['space-1']);
+      spaceSelector.props().onChange(['space-2', 'space-3']);
     });
 
-    const startButton = findTestSubject(wrapper, 'cts-initiate-button');
+    const startButton = findTestSubject(wrapper, 'sts-initiate-button');
 
     await act(async () => {
       startButton.simulate('click');
@@ -164,37 +215,15 @@ describe('ShareToSpaceFlyout', () => {
       wrapper.update();
     });
 
-    expect(mockSpacesManager.copySavedObjects).toHaveBeenCalled();
+    expect(mockSpacesManager.shareSavedObjectAdd).toHaveBeenCalled();
+    expect(mockSpacesManager.shareSavedObjectRemove).not.toHaveBeenCalled();
     expect(mockToastNotifications.addError).toHaveBeenCalled();
   });
 
-  it('handles errors thrown from resolveShareSavedObjectsErrors API call', async () => {
+  it('handles errors thrown from shareSavedObjectsRemove API call', async () => {
     const { wrapper, mockSpacesManager, mockToastNotifications } = await setup();
 
-    mockSpacesManager.copySavedObjects.mockResolvedValue({
-      'space-1': {
-        success: true,
-        successCount: 3,
-      },
-      'space-2': {
-        success: false,
-        successCount: 1,
-        errors: [
-          {
-            type: 'index-pattern',
-            id: 'conflicting-ip',
-            error: { type: 'conflict' },
-          },
-          {
-            type: 'visualization',
-            id: 'my-viz',
-            error: { type: 'conflict' },
-          },
-        ],
-      },
-    });
-
-    mockSpacesManager.resolveCopySavedObjectsErrors.mockImplementation(() => {
+    mockSpacesManager.shareSavedObjectRemove.mockImplementation(() => {
       return Promise.reject(Boom.serverUnavailable('Something bad happened'));
     });
 
@@ -206,10 +235,10 @@ describe('ShareToSpaceFlyout', () => {
     // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
     const spaceSelector = wrapper.find(SelectableSpacesControl);
     act(() => {
-      spaceSelector.props().onChange(['space-2']);
+      spaceSelector.props().onChange(['space-2', 'space-3']);
     });
 
-    const startButton = findTestSubject(wrapper, 'cts-initiate-button');
+    const startButton = findTestSubject(wrapper, 'sts-initiate-button');
 
     await act(async () => {
       startButton.simulate('click');
@@ -217,28 +246,12 @@ describe('ShareToSpaceFlyout', () => {
       wrapper.update();
     });
 
-    expect(mockSpacesManager.copySavedObjects).toHaveBeenCalled();
-    expect(mockToastNotifications.addError).not.toHaveBeenCalled();
-
-    const spaceResult = findTestSubject(wrapper, `cts-space-result-space-2`);
-    spaceResult.simulate('click');
-
-    const overwriteButton = findTestSubject(wrapper, `cts-overwrite-conflict-conflicting-ip`);
-    overwriteButton.simulate('click');
-
-    const finishButton = findTestSubject(wrapper, 'cts-finish-button');
-
-    await act(async () => {
-      finishButton.simulate('click');
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(mockSpacesManager.resolveCopySavedObjectsErrors).toHaveBeenCalled();
+    expect(mockSpacesManager.shareSavedObjectAdd).toHaveBeenCalled();
+    expect(mockSpacesManager.shareSavedObjectRemove).toHaveBeenCalled();
     expect(mockToastNotifications.addError).toHaveBeenCalled();
   });
 
-  it('allows the form to be filled out', async () => {
+  it('allows the form to be filled out to add a space', async () => {
     const {
       wrapper,
       onClose,
@@ -246,17 +259,6 @@ describe('ShareToSpaceFlyout', () => {
       mockToastNotifications,
       savedObjectToShare,
     } = await setup();
-
-    mockSpacesManager.copySavedObjects.mockResolvedValue({
-      'space-1': {
-        success: true,
-        successCount: 3,
-      },
-      'space-2': {
-        success: true,
-        successCount: 3,
-      },
-    });
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
@@ -267,10 +269,10 @@ describe('ShareToSpaceFlyout', () => {
     const spaceSelector = wrapper.find(SelectableSpacesControl);
 
     act(() => {
-      spaceSelector.props().onChange(['space-1', 'space-2']);
+      spaceSelector.props().onChange(['space-1', 'space-2', 'space-3']);
     });
 
-    const startButton = findTestSubject(wrapper, 'cts-initiate-button');
+    const startButton = findTestSubject(wrapper, 'sts-initiate-button');
 
     await act(async () => {
       startButton.simulate('click');
@@ -278,26 +280,17 @@ describe('ShareToSpaceFlyout', () => {
       wrapper.update();
     });
 
-    expect(mockSpacesManager.copySavedObjects).toHaveBeenCalledWith(
-      [{ type: savedObjectToShare.type, id: savedObjectToShare.id }],
-      ['space-1', 'space-2'],
-      true,
-      true
-    );
+    const { type, id } = savedObjectToShare;
+    const { shareSavedObjectAdd, shareSavedObjectRemove } = mockSpacesManager;
+    expect(shareSavedObjectAdd).toHaveBeenCalledWith({ type, id }, ['space-2', 'space-3']);
+    expect(shareSavedObjectRemove).not.toHaveBeenCalled();
 
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(0);
-    expect(wrapper.find(ProcessingShareToSpace)).toHaveLength(1);
-
-    const finishButton = findTestSubject(wrapper, 'cts-finish-button');
-    act(() => {
-      finishButton.simulate('click');
-    });
-
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(mockToastNotifications.addSuccess).toHaveBeenCalledTimes(1);
     expect(mockToastNotifications.addError).not.toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('allows conflicts to be resolved', async () => {
+  it('allows the form to be filled out to remove a space', async () => {
     const {
       wrapper,
       onClose,
@@ -306,45 +299,19 @@ describe('ShareToSpaceFlyout', () => {
       savedObjectToShare,
     } = await setup();
 
-    mockSpacesManager.copySavedObjects.mockResolvedValue({
-      'space-1': {
-        success: true,
-        successCount: 3,
-      },
-      'space-2': {
-        success: false,
-        successCount: 1,
-        errors: [
-          {
-            type: 'index-pattern',
-            id: 'conflicting-ip',
-            error: { type: 'conflict' },
-          },
-          {
-            type: 'visualization',
-            id: 'my-viz',
-            error: { type: 'conflict' },
-          },
-        ],
-      },
-    });
-
-    mockSpacesManager.resolveCopySavedObjectsErrors.mockResolvedValue({
-      'space-2': {
-        success: true,
-        successCount: 2,
-      },
-    });
+    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
 
     // Using props callback instead of simulating clicks,
     // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
     const spaceSelector = wrapper.find(SelectableSpacesControl);
 
     act(() => {
-      spaceSelector.props().onChange(['space-1', 'space-2']);
+      spaceSelector.props().onChange([]);
     });
 
-    const startButton = findTestSubject(wrapper, 'cts-initiate-button');
+    const startButton = findTestSubject(wrapper, 'sts-initiate-button');
 
     await act(async () => {
       startButton.simulate('click');
@@ -352,69 +319,38 @@ describe('ShareToSpaceFlyout', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(0);
-    expect(wrapper.find(ProcessingShareToSpace)).toHaveLength(1);
+    const { type, id } = savedObjectToShare;
+    const { shareSavedObjectAdd, shareSavedObjectRemove } = mockSpacesManager;
+    expect(shareSavedObjectAdd).not.toHaveBeenCalled();
+    expect(shareSavedObjectRemove).toHaveBeenCalledWith({ type, id }, ['space-1']);
 
-    const spaceResult = findTestSubject(wrapper, `cts-space-result-space-2`);
-    spaceResult.simulate('click');
-
-    const overwriteButton = findTestSubject(wrapper, `cts-overwrite-conflict-conflicting-ip`);
-    overwriteButton.simulate('click');
-
-    const finishButton = findTestSubject(wrapper, 'cts-finish-button');
-
-    await act(async () => {
-      finishButton.simulate('click');
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(mockSpacesManager.resolveCopySavedObjectsErrors).toHaveBeenCalledWith(
-      [{ type: savedObjectToShare.type, id: savedObjectToShare.id }],
-      {
-        'space-2': [{ type: 'index-pattern', id: 'conflicting-ip', overwrite: true }],
-      },
-      true
-    );
-
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(mockToastNotifications.addSuccess).toHaveBeenCalledTimes(1);
     expect(mockToastNotifications.addError).not.toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('displays an error when missing references are encountered', async () => {
-    const { wrapper, onClose, mockSpacesManager, mockToastNotifications } = await setup();
+  it('allows the form to be filled out to add and remove a space', async () => {
+    const {
+      wrapper,
+      onClose,
+      mockSpacesManager,
+      mockToastNotifications,
+      savedObjectToShare,
+    } = await setup();
 
-    mockSpacesManager.copySavedObjects.mockResolvedValue({
-      'space-1': {
-        success: true,
-        successCount: 3,
-      },
-      'space-2': {
-        success: false,
-        successCount: 1,
-        errors: [
-          {
-            type: 'visualization',
-            id: 'my-viz',
-            error: {
-              type: 'missing_references',
-              blocking: [],
-              references: [{ type: 'index-pattern', id: 'missing-index-pattern' }],
-            },
-          },
-        ],
-      },
-    });
+    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
 
     // Using props callback instead of simulating clicks,
     // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
     const spaceSelector = wrapper.find(SelectableSpacesControl);
 
     act(() => {
-      spaceSelector.props().onChange(['space-1', 'space-2']);
+      spaceSelector.props().onChange(['space-2', 'space-3']);
     });
 
-    const startButton = findTestSubject(wrapper, 'cts-initiate-button');
+    const startButton = findTestSubject(wrapper, 'sts-initiate-button');
 
     await act(async () => {
       startButton.simulate('click');
@@ -422,37 +358,13 @@ describe('ShareToSpaceFlyout', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(0);
-    expect(wrapper.find(ProcessingShareToSpace)).toHaveLength(1);
+    const { type, id } = savedObjectToShare;
+    const { shareSavedObjectAdd, shareSavedObjectRemove } = mockSpacesManager;
+    expect(shareSavedObjectAdd).toHaveBeenCalledWith({ type, id }, ['space-2', 'space-3']);
+    expect(shareSavedObjectRemove).toHaveBeenCalledWith({ type, id }, ['space-1']);
 
-    const spaceResult = findTestSubject(wrapper, `cts-space-result-space-2`);
-    spaceResult.simulate('click');
-
-    const errorIconTip = spaceResult.find(
-      'EuiIconTip[data-test-subj="cts-object-result-error-my-viz"]'
-    );
-
-    expect(errorIconTip.props()).toMatchInlineSnapshot(`
-      Object {
-        "color": "danger",
-        "content": <FormattedMessage
-          defaultMessage="There was an error sharing this saved object."
-          id="xpack.spaces.management.shareToSpace.shareStatus.unresolvableErrorMessage"
-          values={Object {}}
-        />,
-        "data-test-subj": "cts-object-result-error-my-viz",
-        "type": "cross",
-      }
-    `);
-
-    const finishButton = findTestSubject(wrapper, 'cts-finish-button');
-    act(() => {
-      finishButton.simulate('click');
-    });
-
-    expect(mockSpacesManager.resolveCopySavedObjectsErrors).not.toHaveBeenCalled();
-
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(mockToastNotifications.addSuccess).toHaveBeenCalledTimes(2);
     expect(mockToastNotifications.addError).not.toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

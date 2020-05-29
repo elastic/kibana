@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './summarize_share_result';
 export { ShareSavedObjectsToSpaceService } from './share_saved_objects_to_space_service';

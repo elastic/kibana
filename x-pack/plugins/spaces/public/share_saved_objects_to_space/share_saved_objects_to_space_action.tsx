@@ -25,10 +25,18 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
     }),
     icon: 'share',
     type: 'icon',
+    enabled: (object: SavedObjectsManagementRecord) => {
+      // this is only enabled for multi-namespace saved object types
+      return Array.isArray(object.namespaces);
+    },
     onClick: (object: SavedObjectsManagementRecord) => {
+      this.isDataChanged = false;
       this.start(object);
     },
   };
+  public refreshOnFinish = () => this.isDataChanged;
+
+  private isDataChanged: boolean = false;
 
   constructor(
     private readonly spacesManager: SpacesManager,
@@ -41,9 +49,11 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
     if (!this.record) {
       throw new Error('No record available! `render()` was likely called before `start()`.');
     }
+
     return (
       <ShareSavedObjectsToSpaceFlyout
         onClose={this.onClose}
+        onObjectUpdated={() => (this.isDataChanged = true)}
         savedObject={this.record}
         spacesManager={this.spacesManager}
         toastNotifications={this.notifications.toasts}

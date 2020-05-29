@@ -17,52 +17,55 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiEmptyPrompt,
+  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ToastsStart } from 'src/core/public';
-import {
-  ProcessedImportResponse,
-  processImportResponse,
-} from '../../../../../../src/legacy/core_plugins/kibana/public';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../../spaces_manager';
-import { ProcessingShareToSpace } from './processing_share_to_space';
-import { ShareToSpaceFlyoutFooter } from './share_to_space_flyout_footer';
 import { ShareToSpaceForm } from './share_to_space_form';
-import { ShareOptions, ImportRetry } from '../types';
+import { ShareOptions, SpaceTarget } from '../types';
+import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
 
 interface Props {
   onClose: () => void;
+  onObjectUpdated: () => void;
   savedObject: SavedObjectsManagementRecord;
   spacesManager: SpacesManager;
   toastNotifications: ToastsStart;
 }
 
-export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
-  const { onClose, savedObject, spacesManager, toastNotifications } = props;
-  const [shareOptions, setShareOptions] = useState<ShareOptions>({
-    includeRelated: true,
-    overwrite: true,
-    selectedSpaceIds: [],
-  });
+const arraysAreEqual = (a: unknown[], b: unknown[]) =>
+  a.every((x) => b.includes(x)) && b.every((x) => a.includes(x));
 
-  const [{ isLoading, spaces }, setSpacesState] = useState<{ isLoading: boolean; spaces: Space[] }>(
-    {
-      isLoading: true,
-      spaces: [],
-    }
-  );
+export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
+  const { onClose, onObjectUpdated, savedObject, spacesManager, toastNotifications } = props;
+  const { namespaces: currentNamespaces = [] } = savedObject;
+  const [shareOptions, setShareOptions] = useState<ShareOptions>({ selectedSpaceIds: [] });
+  const [showMakeCopy, setShowMakeCopy] = useState<boolean>(false);
+
+  const [{ isLoading, spaces }, setSpacesState] = useState<{
+    isLoading: boolean;
+    spaces: SpaceTarget[];
+  }>({ isLoading: true, spaces: [] });
   useEffect(() => {
     const getSpaces = spacesManager.getSpaces('shareSavedObjectsIntoSpace');
     const getActiveSpace = spacesManager.getActiveSpace();
     Promise.all([getSpaces, getActiveSpace])
       .then(([allSpaces, activeSpace]) => {
+        const createSpaceTarget = (space: Space): SpaceTarget => ({
+          ...space,
+          isActiveSpace: space.id === activeSpace.id,
+        });
         setSpacesState({
           isLoading: false,
-          spaces: allSpaces.filter((space) => space.id !== activeSpace.id),
+          spaces: allSpaces.map((space) => createSpaceTarget(space)),
+        });
+        setShareOptions({
+          selectedSpaceIds: currentNamespaces.filter((spaceId) => spaceId !== activeSpace.id),
         });
       })
       .catch((e) => {
@@ -72,82 +75,71 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
           }),
         });
       });
-  }, [spacesManager, toastNotifications]);
+  }, [currentNamespaces, spacesManager, toastNotifications]);
+
+  const getSelectionChanges = () => {
+    const activeSpace = spaces.find((space) => space.isActiveSpace);
+    if (!activeSpace) {
+      return { changed: false, spacesToAdd: [], spacesToRemove: [] };
+    }
+    const initialSelection = currentNamespaces.filter(
+      (spaceId) => spaceId !== activeSpace.id && spaceId !== '?'
+    );
+    const { selectedSpaceIds } = shareOptions;
+    const changed = !arraysAreEqual(initialSelection, selectedSpaceIds);
+    const spacesToAdd = selectedSpaceIds.filter((spaceId) => !initialSelection.includes(spaceId));
+    const spacesToRemove = initialSelection.filter(
+      (spaceId) => !selectedSpaceIds.includes(spaceId)
+    );
+    return { changed, spacesToAdd, spacesToRemove };
+  };
+  const { changed: isSelectionChanged, spacesToAdd, spacesToRemove } = getSelectionChanges();
 
   const [shareInProgress, setShareInProgress] = useState(false);
-  const [conflictResolutionInProgress, setConflictResolutionInProgress] = useState(false);
-  const [shareResult, setShareResult] = useState<Record<string, ProcessedImportResponse>>({});
-  const [retries, setRetries] = useState<Record<string, ImportRetry[]>>({});
-
-  const initialShareFinished = Object.values(shareResult).length > 0;
-
-  const onRetriesChange = (updatedRetries: Record<string, ImportRetry[]>) => {
-    setRetries(updatedRetries);
-  };
 
   async function startShare() {
     setShareInProgress(true);
-    setShareResult({});
     try {
-      const shareSavedObjectsResult = await spacesManager.copySavedObjects(
-        [
-          {
-            type: savedObject.type,
-            id: savedObject.id,
-          },
-        ],
-        shareOptions.selectedSpaceIds,
-        shareOptions.includeRelated,
-        shareOptions.overwrite
-      );
-      const processedResult = mapValues(shareSavedObjectsResult, processImportResponse);
-      setShareResult(processedResult);
+      const { type, id, meta } = savedObject;
+      const title =
+        currentNamespaces.length === 1
+          ? i18n.translate('xpack.spaces.management.shareToSpace.shareNewSuccessTitle', {
+              defaultMessage: 'Saved Object is now shared!',
+            })
+          : i18n.translate('xpack.spaces.management.shareToSpace.shareEditSuccessTitle', {
+              defaultMessage: 'Saved Object updated',
+            });
+      if (spacesToAdd.length > 0) {
+        await spacesManager.shareSavedObjectAdd({ type, id }, spacesToAdd);
+        const spaceNames = spacesToAdd.map(
+          (spaceId) => spaces.find((space) => space.id === spaceId)!.name
+        );
+        const text = i18n.translate('xpack.spaces.management.shareToSpace.shareAddSuccessText', {
+          defaultMessage: `'{object}' was added to the following spaces:\n{spaces}`,
+          values: { object: meta.title, spaces: spaceNames.join(', ') },
+        });
+        toastNotifications.addSuccess({ title, text });
+      }
+      if (spacesToRemove.length > 0) {
+        await spacesManager.shareSavedObjectRemove({ type, id }, spacesToRemove);
+        const spaceNames = spacesToRemove.map(
+          (spaceId) => spaces.find((space) => space.id === spaceId)!.name
+        );
+        const text = i18n.translate('xpack.spaces.management.shareToSpace.shareRemoveSuccessText', {
+          defaultMessage: `'{object}' was removed from the following spaces:\n{spaces}`,
+          values: { object: meta.title, spaces: spaceNames.join(', ') },
+        });
+        toastNotifications.addSuccess({ title, text });
+      }
+      onObjectUpdated();
+      onClose();
     } catch (e) {
       setShareInProgress(false);
       toastNotifications.addError(e, {
         title: i18n.translate('xpack.spaces.management.shareToSpace.shareErrorTitle', {
-          defaultMessage: 'Error sharing saved object',
+          defaultMessage: 'Error updating saved object',
         }),
       });
-    }
-  }
-
-  async function finishShare() {
-    const needsConflictResolution = Object.values(retries).some((spaceRetry) =>
-      spaceRetry.some((retry) => retry.overwrite)
-    );
-
-    if (needsConflictResolution) {
-      setConflictResolutionInProgress(true);
-      try {
-        await spacesManager.resolveCopySavedObjectsErrors(
-          [
-            {
-              type: savedObject.type,
-              id: savedObject.id,
-            },
-          ],
-          retries,
-          shareOptions.includeRelated
-        );
-
-        toastNotifications.addSuccess(
-          i18n.translate('xpack.spaces.management.shareToSpace.resolveShareSuccessTitle', {
-            defaultMessage: 'Overwrite successful',
-          })
-        );
-
-        onClose();
-      } catch (e) {
-        setShareInProgress(false);
-        toastNotifications.addError(e, {
-          title: i18n.translate('xpack.spaces.management.shareToSpace.resolveShareErrorTitle', {
-            defaultMessage: 'Error resolving saved object conflicts',
-          }),
-        });
-      }
-    } else {
-      onClose();
     }
   }
 
@@ -158,7 +150,8 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
     }
 
     // Step 1a: assets loaded, but no spaces are available for share.
-    if (spaces.length === 0) {
+    // The `spaces` array includes the current space, so at minimum it will have a length of 1.
+    if (spaces.length < 2) {
       return (
         <EuiEmptyPrompt
           body={
@@ -181,30 +174,32 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
       );
     }
 
+    const showShareWarning = currentNamespaces.length === 1;
     // Step 2: Share has not been initiated yet; User must fill out form to continue.
-    if (!shareInProgress) {
-      return (
-        <ShareToSpaceForm spaces={spaces} shareOptions={shareOptions} onUpdate={setShareOptions} />
-      );
-    }
-
-    // Step3: Share operation is in progress
     return (
-      <ProcessingShareToSpace
-        savedObject={savedObject}
-        shareInProgress={shareInProgress}
-        conflictResolutionInProgress={conflictResolutionInProgress}
-        shareResult={shareResult}
+      <ShareToSpaceForm
         spaces={spaces}
         shareOptions={shareOptions}
-        retries={retries}
-        onRetriesChange={onRetriesChange}
+        onUpdate={setShareOptions}
+        showShareWarning={showShareWarning}
+        makeCopy={() => setShowMakeCopy(true)}
       />
     );
   };
 
+  if (showMakeCopy) {
+    return (
+      <CopySavedObjectsToSpaceFlyout
+        onClose={onClose}
+        savedObject={savedObject}
+        spacesManager={spacesManager}
+        toastNotifications={toastNotifications}
+      />
+    );
+  }
+
   return (
-    <EuiFlyout onClose={onClose} maxWidth={600} data-test-subj="share-to-space-flyout">
+    <EuiFlyout onClose={onClose} maxWidth={460} data-test-subj="share-to-space-flyout">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>
@@ -240,16 +235,33 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <ShareToSpaceFlyoutFooter
-          shareInProgress={shareInProgress}
-          conflictResolutionInProgress={conflictResolutionInProgress}
-          initialShareFinished={initialShareFinished}
-          shareResult={shareResult}
-          numberOfSelectedSpaces={shareOptions.selectedSpaceIds.length}
-          retries={retries}
-          onShareStart={startShare}
-          onShareFinish={finishShare}
-        />
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={() => onClose()}
+              data-test-subj="sts-cancel-button"
+              disabled={shareInProgress}
+            >
+              <FormattedMessage
+                id="xpack.spaces.management.shareToSpace.cancelButton"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={() => startShare()}
+              data-test-subj="sts-initiate-button"
+              disabled={!isSelectionChanged || shareInProgress}
+            >
+              <FormattedMessage
+                id="xpack.spaces.management.shareToSpace.shareToSpacesButton"
+                defaultMessage="Share"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

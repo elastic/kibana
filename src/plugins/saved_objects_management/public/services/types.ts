@@ -28,6 +28,7 @@ export interface SavedObjectsManagementRecord {
     title: string;
   };
   references: SavedObjectReference[];
+  namespaces?: string[];
 }
 
 export abstract class SavedObjectsManagementAction {

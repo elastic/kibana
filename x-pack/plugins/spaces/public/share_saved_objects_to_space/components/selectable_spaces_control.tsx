@@ -6,12 +6,12 @@
 
 import './selectable_spaces_control.scss';
 import React, { Fragment } from 'react';
-import { EuiSelectable, EuiSelectableOption, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBadge, EuiSelectable, EuiSelectableOption, EuiLoadingSpinner } from '@elastic/eui';
 import { SpaceAvatar } from '../../space_avatar';
-import { Space } from '../../../common/model/space';
+import { SpaceTarget } from '../types';
 
 interface Props {
-  spaces: Space[];
+  spaces: SpaceTarget[];
   selectedSpaceIds: string[];
   onChange: (selectedSpaceIds: string[]) => void;
   disabled?: boolean;
@@ -19,24 +19,33 @@ interface Props {
 
 type SpaceOption = EuiSelectableOption & { ['data-space-id']: string };
 
+const activeSpaceProps = {
+  append: <EuiBadge color="hollow">Current</EuiBadge>,
+  disabled: true,
+  checked: 'on' as 'on',
+};
+
 export const SelectableSpacesControl = (props: Props) => {
   if (props.spaces.length === 0) {
     return <EuiLoadingSpinner />;
   }
 
-  const options = props.spaces.map<SpaceOption>((space) => ({
-    label: space.name,
-    prepend: <SpaceAvatar space={space} size={'s'} />,
-    checked: props.selectedSpaceIds.includes(space.id) ? 'on' : undefined,
-    ['data-space-id']: space.id,
-    ['data-test-subj']: `cts-space-selector-row-${space.id}`,
-  }));
+  const options = props.spaces
+    .sort((a, b) => (a.isActiveSpace ? -1 : b.isActiveSpace ? 1 : 0))
+    .map<SpaceOption>((space) => ({
+      label: space.name,
+      prepend: <SpaceAvatar space={space} size={'s'} />,
+      checked: props.selectedSpaceIds.includes(space.id) ? 'on' : undefined,
+      ['data-space-id']: space.id,
+      ['data-test-subj']: `sts-space-selector-row-${space.id}`,
+      ...(space.isActiveSpace ? activeSpaceProps : {}),
+    }));
 
   function updateSelectedSpaces(selectedOptions: SpaceOption[]) {
     if (props.disabled) return;
 
     const selectedSpaceIds = selectedOptions
-      .filter((opt) => opt.checked)
+      .filter((opt) => opt.checked && !opt.disabled)
       .map((opt) => opt['data-space-id']);
 
     props.onChange(selectedSpaceIds);
@@ -50,7 +59,7 @@ export const SelectableSpacesControl = (props: Props) => {
         bordered: true,
         rowHeight: 40,
         className: 'spcShareToSpace__spacesList',
-        'data-test-subj': 'cts-form-space-selector',
+        'data-test-subj': 'sts-form-space-selector',
       }}
       searchable
     >

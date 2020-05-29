@@ -5,10 +5,9 @@
  */
 
 import { SavedObjectsImportRetry, SavedObjectsImportResponse } from 'src/core/public';
+import { Space } from '..';
 
 export interface ShareOptions {
-  includeRelated: boolean;
-  overwrite: boolean;
   selectedSpaceIds: string[];
 }
 
@@ -16,4 +15,8 @@ export type ImportRetry = Omit<SavedObjectsImportRetry, 'replaceReferences'>;
 
 export interface ShareSavedObjectsToSpaceResponse {
   [spaceId: string]: SavedObjectsImportResponse;
+}
+
+export interface SpaceTarget extends Space {
+  isActiveSpace: boolean;
 }

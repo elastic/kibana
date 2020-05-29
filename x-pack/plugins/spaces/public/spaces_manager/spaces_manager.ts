@@ -101,6 +101,24 @@ export class SpacesManager {
     });
   }
 
+  public async shareSavedObjectAdd(
+    object: Pick<SavedObjectsManagementRecord, 'type' | 'id'>,
+    spaces: string[]
+  ): Promise<void> {
+    return this.http.post(`/api/spaces/_share_saved_object_add`, {
+      body: JSON.stringify({ object, spaces }),
+    });
+  }
+
+  public async shareSavedObjectRemove(
+    object: Pick<SavedObjectsManagementRecord, 'type' | 'id'>,
+    spaces: string[]
+  ): Promise<void> {
+    return this.http.post(`/api/spaces/_share_saved_object_remove`, {
+      body: JSON.stringify({ object, spaces }),
+    });
+  }
+
   public redirectToSpaceSelector() {
     window.location.href = `${this.serverBasePath}/spaces/space_selector`;
   }

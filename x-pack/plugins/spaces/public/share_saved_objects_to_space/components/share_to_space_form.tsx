@@ -5,70 +5,79 @@
  */
 
 import './share_to_space_form.scss';
-import React from 'react';
-import {
-  EuiSwitch,
-  EuiSpacer,
-  EuiHorizontalRule,
-  EuiFormRow,
-  EuiListGroup,
-  EuiListGroupItem,
-} from '@elastic/eui';
+import React, { Fragment } from 'react';
+import { EuiHorizontalRule, EuiFormRow, EuiCallOut, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ShareOptions } from '../types';
-import { Space } from '../../../common/model/space';
+import { ShareOptions, SpaceTarget } from '../types';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 
 interface Props {
-  spaces: Space[];
+  spaces: SpaceTarget[];
   onUpdate: (shareOptions: ShareOptions) => void;
   shareOptions: ShareOptions;
+  showShareWarning: boolean;
+  makeCopy: () => void;
 }
 
 export const ShareToSpaceForm = (props: Props) => {
-  const setOverwrite = (overwrite: boolean) => props.onUpdate({ ...props.shareOptions, overwrite });
-
   const setSelectedSpaceIds = (selectedSpaceIds: string[]) =>
     props.onUpdate({ ...props.shareOptions, selectedSpaceIds });
 
+  const getShareWarning = () => {
+    if (!props.showShareWarning) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.spaces.management.shareToSpace.shareWarningTitle"
+              defaultMessage="Any changes made to one space will be reflected in all spaces."
+            />
+          }
+          color="warning"
+        >
+          {/* <p> */}
+          <FormattedMessage
+            id="xpack.spaces.management.shareToSpace.shareWarningBody"
+            defaultMessage="To avoid changes across spaces, make a copy instead."
+          />
+          {/* </p> */}
+          <EuiButton
+            onClick={() => props.makeCopy()}
+            color="warning"
+            data-test-subj="sts-copy-button"
+          >
+            <FormattedMessage
+              id="xpack.spaces.management.shareToSpace.shareWarningButton"
+              defaultMessage="Make a copy"
+            />
+          </EuiButton>
+        </EuiCallOut>
+
+        <EuiHorizontalRule margin="m" />
+      </Fragment>
+    );
+  };
+
   return (
     <div data-test-subj="share-to-space-form">
-      <EuiListGroup className="spcShareToSpaceOptionsView" flush>
-        <EuiListGroupItem
-          className="spcShareToSpaceIncludeRelated"
-          iconType={'check'}
-          label={
-            <span className="spcShareToSpaceIncludeRelated__label">
-              <FormattedMessage
-                id="xpack.spaces.management.shareToSpace.includeRelatedFormLabel"
-                defaultMessage="Including related saved objects"
-              />
-            </span>
-          }
-        />
-      </EuiListGroup>
-
-      <EuiSpacer />
-
-      <EuiSwitch
-        data-test-subj="cts-form-overwrite"
-        label={
-          <FormattedMessage
-            id="xpack.spaces.management.shareToSpace.automaticallyOverwrite"
-            defaultMessage="Automatically overwrite all saved objects"
-          />
-        }
-        checked={props.shareOptions.overwrite}
-        onChange={(e) => setOverwrite(e.target.checked)}
-      />
-
-      <EuiHorizontalRule margin="m" />
+      {getShareWarning()}
 
       <EuiFormRow
         label={
           <FormattedMessage
             id="xpack.spaces.management.shareToSpace.selectSpacesLabel"
             defaultMessage="Select spaces to share into"
+          />
+        }
+        labelAppend={
+          <FormattedMessage
+            id="xpack.spaces.management.shareToSpace.selectSpacesLabelAppend"
+            defaultMessage="{selectedCount} selected"
+            values={{ selectedCount: props.shareOptions.selectedSpaceIds.length }}
           />
         }
         fullWidth
