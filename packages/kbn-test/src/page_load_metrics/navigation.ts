@@ -70,7 +70,7 @@ async function loginToKibana(
 }
 
 export async function navigateToApps(log: ToolingLog, options: NavigationOptions) {
-  const browser = await puppeteer.launch({ headless: options.headless });
+  const browser = await puppeteer.launch({ headless: options.headless, args: ['--no-sandbox'] });
   const devToolsResponses: NavigationResults = new Map();
   const paths = [
     '/app/discover',
