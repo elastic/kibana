@@ -5,17 +5,10 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ConfigSchema } from '../';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
-import { PluginSetupDeps } from '../plugin';
 import { Home } from '../pages/home';
 
-export const renderApp = (
-  core: CoreStart,
-  deps: PluginSetupDeps,
-  { element }: AppMountParameters,
-  config: ConfigSchema
-) => {
+export const renderApp = (core: CoreStart, { element }: AppMountParameters) => {
   ReactDOM.render(<Home core={core} />, element);
   return () => {
     ReactDOM.unmountComponentAtNode(element);

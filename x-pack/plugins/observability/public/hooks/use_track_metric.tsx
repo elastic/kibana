@@ -38,9 +38,14 @@ export { METRIC_TYPE };
 export function useUiTracker<Services extends ServiceDeps>({
   app: defaultApp,
 }: { app?: ObservabilityApp } = {}) {
-  const reportUiStats = useKibana<Services>().services?.usageCollection?.reportUiStats;
+  const reportUiStats = useKibana<Services>().services?.usageCollection
+    ?.reportUiStats;
   const trackEvent = useMemo(() => {
-    return ({ app = defaultApp, metric, metricType = METRIC_TYPE.COUNT }: TrackMetricOptions) => {
+    return ({
+      app = defaultApp,
+      metric,
+      metricType = METRIC_TYPE.COUNT,
+    }: TrackMetricOptions) => {
       if (reportUiStats) {
         reportUiStats(app as string, metricType, metric);
       }
@@ -50,10 +55,16 @@ export function useUiTracker<Services extends ServiceDeps>({
 }
 
 export function useTrackMetric<Services extends ServiceDeps>(
-  { app, metric, metricType = METRIC_TYPE.COUNT, delay = 0 }: TrackMetricOptions,
+  {
+    app,
+    metric,
+    metricType = METRIC_TYPE.COUNT,
+    delay = 0,
+  }: TrackMetricOptions,
   effectDependencies: EffectDeps = []
 ) {
-  const reportUiStats = useKibana<Services>().services?.usageCollection?.reportUiStats;
+  const reportUiStats = useKibana<Services>().services?.usageCollection
+    ?.reportUiStats;
 
   useEffect(() => {
     if (!reportUiStats) {
@@ -88,5 +99,8 @@ export function useTrackPageview<Services extends ServiceDeps>(
   { path, ...rest }: TrackPageviewProps,
   effectDependencies: EffectDeps = []
 ) {
-  useTrackMetric<Services>({ ...rest, metric: `pageview__${path}` }, effectDependencies);
+  useTrackMetric<Services>(
+    { ...rest, metric: `pageview__${path}` },
+    effectDependencies
+  );
 }

@@ -7,7 +7,10 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { ObservabilityPlugin, ObservabilityPluginSetup } from './plugin';
-import { createOrUpdateIndex, MappingsDefinition } from './utils/create_or_update_index';
+import {
+  createOrUpdateIndex,
+  MappingsDefinition,
+} from './utils/create_or_update_index';
 import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
 
 export const config = {

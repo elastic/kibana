@@ -57,7 +57,9 @@ export function createAnnotationsClient(params: {
   function ensureGoldLicense<T extends (...args: any[]) => any>(fn: T): T {
     return ((...args) => {
       if (!license?.hasAtLeast('gold')) {
-        throw Boom.forbidden('Annotations require at least a gold license or a trial license.');
+        throw Boom.forbidden(
+          'Annotations require at least a gold license or a trial license.'
+        );
       }
       return fn(...args);
     }) as T;
