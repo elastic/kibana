@@ -24,6 +24,7 @@ import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { IngestManagerStartContract } from '../../ingest_manager/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import { initRoutes } from './routes';
@@ -32,6 +33,7 @@ import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule
 import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
 import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
 import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine/feature_flags';
+import { PackagerTask, setupPackagerTask } from './lib/exceptions';
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { SiemClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
@@ -52,12 +54,14 @@ export interface SetupPlugins {
   licensing: LicensingPluginSetup;
   security?: SecuritySetup;
   spaces?: SpacesSetup;
+  taskManager: TaskManagerSetupContract;
   ml?: MlSetup;
   lists?: ListPluginSetup;
 }
 
 export interface StartPlugins {
   ingestManager: IngestManagerStartContract;
+  taskManager: TaskManagerStartContract;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -71,6 +75,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private context: PluginInitializerContext;
   private siemClientFactory: SiemClientFactory;
   private readonly endpointAppContextService = new EndpointAppContextService();
+  private exceptionsPackagerTask: PackagerTask;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
@@ -211,6 +216,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
     }
 
+    if (plugins.taskManager && plugins.lists) {
+      this.exceptionsPackagerTask = setupPackagerTask({
+        core,
+        logger: this.logger,
+        taskManager: plugins.taskManager,
+        lists: plugins.lists,
+      });
+    }
+
     const libs = compose(core, plugins, this.context.env.mode.prod);
     initServer(libs);
 
@@ -225,6 +239,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ),
       agentService: plugins.ingestManager.agentService,
     });
+
+    if (this.exceptionsPackagerTask) {
+      this.exceptionsPackagerTask
+        .getTaskRunner({
+          taskManager: plugins.taskManager,
+        })
+        .run();
+    } else {
+      this.logger.debug('Exceptions Packager not available.');
+    }
+
     return {};
   }
 

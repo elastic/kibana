@@ -12,6 +12,7 @@
     "features",
     "home",
     "ingestManager",
+    "taskManager",
     "inspector",
     "licensing",
     "maps",
