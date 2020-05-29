@@ -12,6 +12,7 @@ import { ListPlugin } from './plugin';
 // exporting these since its required at top level in siem plugin
 export { ListClient } from './services/lists/list_client';
 export { ListPluginSetup } from './types';
+export { listMock } from './mocks';
 
 export const config = { schema: ConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext): ListPlugin =>

@@ -15,15 +15,18 @@ import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import uuid from 'uuid';
-import { ListClient } from '../../../../../lists/server';
-import { ListItemArraySchema } from '../../../../../lists/common/schemas';
+import { listMock } from '../../../../../lists/server';
+import { getListItemResponseMock } from '../../../../../lists/common/schemas/response/list_item_schema.mock';
 
 describe('searchAfterAndBulkCreate', () => {
   let mockService: AlertServicesMock;
   let inputIndexPattern: string[] = [];
+  let listClient = listMock.getListClient();
   const someGuids = Array.from({ length: 13 }).map(() => uuid.v4());
   beforeEach(() => {
     jest.clearAllMocks();
+    listClient = listMock.getListClient();
+    listClient.getListItemByValues = jest.fn().mockResolvedValue([]);
     inputIndexPattern = ['auditbeat-*'];
     mockService = alertsMock.createAlertServices();
   });
@@ -93,9 +96,7 @@ describe('searchAfterAndBulkCreate', () => {
       });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
-      listClient: ({
-        getListItemByValues: async () => [],
-      } as unknown) as ListClient,
+      listClient,
       exceptionsList: [
         {
           field: 'source.ip',
@@ -169,9 +170,7 @@ describe('searchAfterAndBulkCreate', () => {
       });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
-      listClient: ({
-        getListItemByValues: async () => [],
-      } as unknown) as ListClient,
+      listClient,
       exceptionsList: [
         {
           field: 'source.ip',
@@ -243,19 +242,18 @@ describe('searchAfterAndBulkCreate', () => {
           },
         ],
       });
+
+    listClient.getListItemByValues = jest.fn(({ value }) =>
+      Promise.resolve(
+        value.slice(0, 2).map((item) => ({
+          ...getListItemResponseMock(),
+          value: item,
+        }))
+      )
+    );
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
-      listClient: ({
-        getListItemByValues: async ({
-          value,
-        }: {
-          type: string;
-          listId: string;
-          value: string[];
-        }) => {
-          return value.map((item) => ({ value: item }));
-        },
-      } as unknown) as ListClient,
+      listClient,
       exceptionsList: undefined,
       services: mockService,
       logger: mockLogger,
@@ -288,11 +286,7 @@ describe('searchAfterAndBulkCreate', () => {
       .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3)))
       .mockRejectedValue(new Error('bulk failed')); // Added this recently
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      listClient: ({
-        getListItemByValues: async () => {
-          return ([] as unknown) as ListItemArraySchema;
-        },
-      } as unknown) as ListClient,
+      listClient,
       exceptionsList: [
         {
           field: 'source.ip',
@@ -335,18 +329,16 @@ describe('searchAfterAndBulkCreate', () => {
   test('should return success with 0 total hits', async () => {
     const sampleParams = sampleRuleAlertParams();
     mockService.callCluster.mockResolvedValueOnce(sampleEmptyDocSearchResults());
+    listClient.getListItemByValues = jest.fn(({ value }) =>
+      Promise.resolve(
+        value.slice(0, 2).map((item) => ({
+          ...getListItemResponseMock(),
+          value: item,
+        }))
+      )
+    );
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      listClient: ({
-        getListItemByValues: async ({
-          value,
-        }: {
-          type: string;
-          listId: string;
-          value: string[];
-        }) => {
-          return value.map((item) => ({ value: item }));
-        },
-      } as unknown) as ListClient,
+      listClient,
       exceptionsList: [
         {
           field: 'source.ip',
@@ -405,18 +397,16 @@ describe('searchAfterAndBulkCreate', () => {
       .mockImplementation(() => {
         throw Error('Fake Error');
       });
+    listClient.getListItemByValues = jest.fn(({ value }) =>
+      Promise.resolve(
+        value.slice(0, 2).map((item) => ({
+          ...getListItemResponseMock(),
+          value: item,
+        }))
+      )
+    );
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      listClient: ({
-        getListItemByValues: async ({
-          value,
-        }: {
-          type: string;
-          listId: string;
-          value: string[];
-        }) => {
-          return value.map((item) => ({ value: item }));
-        },
-      } as unknown) as ListClient,
+      listClient,
       exceptionsList: [
         {
           field: 'source.ip',
