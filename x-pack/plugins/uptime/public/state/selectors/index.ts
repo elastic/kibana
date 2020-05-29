@@ -84,3 +84,5 @@ export const monitorListSelector = ({ monitorList }: AppState) => monitorList;
 export const overviewFiltersSelector = ({ overviewFilters }: AppState) => overviewFilters;
 
 export const esKuerySelector = ({ ui: { esKuery } }: AppState) => esKuery;
+
+export const selectSearchText = ({ ui: { searchText } }: AppState) => searchText;

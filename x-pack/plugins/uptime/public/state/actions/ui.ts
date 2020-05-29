@@ -20,6 +20,8 @@ export const setBasePath = createAction<string>('SET BASE PATH');
 
 export const setEsKueryString = createAction<string>('SET ES KUERY STRING');
 
+export const setSearchText = createAction<string>('SET SEARCH');
+
 export const toggleIntegrationsPopover = createAction<PopoverState>(
   'TOGGLE INTEGRATION POPOVER STATE'
 );

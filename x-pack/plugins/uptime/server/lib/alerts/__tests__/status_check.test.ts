@@ -310,9 +310,12 @@ describe('status check alert', () => {
       expect(Object.keys(alert.validate?.params?.props ?? {})).toMatchInlineSnapshot(`
         Array [
           "filters",
-          "numTimes",
-          "timerange",
           "locations",
+          "numTimes",
+          "search",
+          "timerangeCount",
+          "timerangeUnit",
+          "timerange",
         ]
       `);
     });

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
-import { selectMonitorStatusAlert } from '../../../../state/selectors';
+import { selectMonitorStatusAlert, selectSearchText } from '../../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../index';
 
 interface Props {
@@ -29,6 +29,12 @@ export const AlertMonitorStatus: React.FC<Props> = ({
   timerange,
 }) => {
   const { filters, locations } = useSelector(selectMonitorStatusAlert);
+  const searchText = useSelector(selectSearchText);
+
+  useEffect(() => {
+    setAlertParams('search', searchText);
+  }, [setAlertParams, searchText]);
+
   return (
     <AlertMonitorStatusComponent
       autocomplete={autocomplete}
