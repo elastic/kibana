@@ -85,7 +85,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
 
   if (actions && actions.length >= 1) {
     return actions.map((action: any) => {
-      const FieldsComponent = actionFieldsComponentMap[action.type];
+      const FieldsComponent = actionFieldsComponentMap[action.type] as any;
       const errors = actionErrors[action.id];
       const hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
