@@ -50,7 +50,7 @@ const log = new ToolingLog({
   },
 });
 
-beforeEach(async () => {
+beforeAll(async () => {
   await del(TMP_DIR);
   await cpy('**/*', MOCK_REPO_DIR, {
     cwd: MOCK_REPO_SRC,
@@ -59,7 +59,7 @@ beforeEach(async () => {
   });
 });
 
-afterEach(async () => {
+afterAll(async () => {
   await del(TMP_DIR);
 });
 
@@ -195,10 +195,6 @@ it('uses cache on second run and exist cleanly', async () => {
       "initializing",
       "initializing",
       "initialized",
-      "initialized",
-      "running",
-      "running",
-      "running",
       "success",
     ]
   `);
