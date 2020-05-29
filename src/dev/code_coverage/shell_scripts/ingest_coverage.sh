@@ -3,6 +3,16 @@
 echo "### Ingesting Code Coverage"
 echo ""
 
+set -e
+function final() {
+  set +e
+  for x in jest functional mocha; do
+    echo "### First 50 lines of the summary file for: ${x}"
+    COVERAGE_SUMMARY_FILE=target/kibana-coverage/${x}-combined/coverage-summary.json
+    head -50 ${COVERAGE_SUMMARY_FILE}
+  done
+}
+trap 'final' EXIT
 
 BUILD_ID=$1
 export BUILD_ID
