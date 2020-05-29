@@ -107,7 +107,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
 
       // set to time
       await testSubjects.click('superDatePickerendDatePopoverButton');
-      const panel = await this.getTimePickerPanel();
+      let panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
       await testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
@@ -116,14 +116,10 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
       // set from time
       await testSubjects.click('superDatePickerstartDatePopoverButton');
       await this.waitPanelIsGone(panel);
+      panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
       await testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', fromTime);
-      await this.submitQuery();
-    }
-
-    private async submitQuery() {
-      const panel = await this.getTimePickerPanel();
 
       const superDatePickerApplyButtonExists = await testSubjects.exists(
         'superDatePickerApplyTimeButton'
@@ -140,13 +136,6 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
 
       await this.waitPanelIsGone(panel);
       await header.awaitGlobalLoadingIndicatorHidden();
-    }
-
-    public async setEndDateTimeToNow() {
-      await testSubjects.click('superDatePickerendDatePopoverButton');
-      await testSubjects.click('superDatePickerNowTab');
-      await testSubjects.click('superDatePickerNowButton');
-      await this.submitQuery();
     }
 
     public async isOff() {

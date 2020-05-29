@@ -236,8 +236,11 @@ export default function ({ getService, getPageObjects }) {
 
     describe('empty query', function () {
       it('should update the histogram timerange when the query is resubmitted', async function () {
-        await PageObjects.timePicker.setEndDateTimeToNow();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await kibanaServer.uiSettings.update({
+          'timepicker:timeDefaults': '{  "from": "Sep 18, 2015 @ 19:37:13.000",  "to": "now"}',
+        });
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.header.awaitKibanaChrome();
         const initialTimeString = await PageObjects.discover.getChartTimespan();
         await queryBar.submitQuery();
         const refreshedTimeString = await PageObjects.discover.getChartTimespan();
