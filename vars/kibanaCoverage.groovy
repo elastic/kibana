@@ -104,11 +104,17 @@ def bootMergeAndIngest(buildNum, buildUrl, title) {
     yarn kbn bootstrap --prefer-offline
     # Return to project root
     cd ..
+
+set -x
+
     . src/dev/code_coverage/shell_scripts/extract_archives.sh
     . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
     . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
     . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
     . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${buildNum} ${buildUrl}
+
+set +x
+
   """, title)
 }
 
