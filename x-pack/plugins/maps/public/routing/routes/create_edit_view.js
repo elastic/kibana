@@ -46,6 +46,7 @@ import { MapsTopNavMenu } from '../page_elements/top_nav_menu';
 export const MapsCreateEditView = withRouter(
   class extends React.Component {
     visibleSubscription = null;
+    unsubscribe = null;
 
     constructor(props) {
       super(props);
@@ -59,6 +60,8 @@ export const MapsCreateEditView = withRouter(
         layerList: [],
         initialized: false,
         isVisible: true,
+        isSaveDisabled: false,
+        isOpenSettingsDisabled: false,
       };
     }
 
@@ -70,6 +73,12 @@ export const MapsCreateEditView = withRouter(
 
       const { savedMapId } = this.props.match.params;
       this.initMap(savedMapId);
+    }
+
+    componentWillUnmount() {
+      if (this.unsubscribe) {
+        this.unsubscribe();
+      }
     }
 
     getInitialLayersFromUrlParam() {
@@ -121,36 +130,37 @@ export const MapsCreateEditView = withRouter(
     }
 
     async handleStoreChanges() {
-      const { store, prevIndexPatternIds } = this.state;
+      const {
+        store,
+        prevIndexPatternIds,
+        isSaveDisabled,
+        isOpenSettingsDisabled
+      } = this.state;
+      const storeUpdates = {};
+
       const nextIsFullScreen = getIsFullScreen(store.getState());
-      if (nextIsFullScreen !== $scope.isFullScreen) {
-        // Must trigger digest cycle for angular top nav to redraw itself when isFullScreen changes
-        $scope.$evalAsync(() => {
-          $scope.isFullScreen = nextIsFullScreen;
-        });
+      if (nextIsFullScreen !== isFullScreen) {
+        storeUpdates.isFullScreen = nextIsFullScreen;
       }
 
       const nextIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
       if (nextIndexPatternIds !== prevIndexPatternIds) {
-        this.setState({
-          prevIndexPatternIds: nextIndexPatternIds,
-        });
+        storeUpdates.prevIndexPatternIds = nextIndexPatternIds;
         await this.updateIndexPatterns(nextIndexPatternIds);
       }
 
       const nextIsSaveDisabled = hasDirtyState(store.getState());
-      if (nextIsSaveDisabled !== $scope.isSaveDisabled) {
-        $scope.$evalAsync(() => {
-          $scope.isSaveDisabled = nextIsSaveDisabled;
-        });
+      if (nextIsSaveDisabled !== isSaveDisabled) {
+        storeUpdates.isSaveDisabled = nextIsSaveDisabled;
       }
 
       const flyoutDisplay = getFlyoutDisplay(store.getState());
       const nextIsOpenSettingsDisabled = flyoutDisplay !== FLYOUT_STATE.NONE;
-      if (nextIsOpenSettingsDisabled !== $scope.isOpenSettingsDisabled) {
-        $scope.$evalAsync(() => {
-          $scope.isOpenSettingsDisabled = nextIsOpenSettingsDisabled;
-        });
+      if (nextIsOpenSettingsDisabled !== isOpenSettingsDisabled) {
+        storeUpdates.isOpenSettingsDisabled = nextIsOpenSettingsDisabled;
+      }
+      if (!_.isEmpty(storeUpdates)) {
+        this.setState(storeUpdates);
       }
     }
 
@@ -216,7 +226,6 @@ export const MapsCreateEditView = withRouter(
 
     async initMapAndLayerSettings(savedMapId) {
       const { store } = this.state;
-      let unsubscribe;
 
       // Get saved map & layer settings
       let savedMap;
@@ -276,14 +285,14 @@ export const MapsCreateEditView = withRouter(
 
     async initMap(savedMapId) {
       const { globalState } = this.props;
+      const { store } = this.state;
       const savedMap = await this.initMapAndLayerSettings(savedMapId);
       this.clearUi();
 
-      // TODO: Handle store changes
-      // await this.handleStoreChanges();
-      // unsubscribe = store.subscribe(async () => {
-      //   await this.handleStoreChanges(store);
-      // });
+      await this.handleStoreChanges();
+      this.unsubscribe = store.subscribe(async () => {
+        await this.handleStoreChanges(store);
+      });
 
       const savedObjectFilters = this.syncStoreAndGetFilters(savedMap);
       await this.onQueryChange({
