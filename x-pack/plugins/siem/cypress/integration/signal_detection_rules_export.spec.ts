@@ -5,13 +5,13 @@
  */
 
 import {
-  goToManageSignalDetectionRules,
-  waitForSignalsIndexToBeCreated,
-  waitForSignalsPanelToBeLoaded,
+  goToManageAlertDetectionRules,
+  waitForAlertsIndexToBeCreated,
+  waitForAlertsPanelToBeLoaded,
 } from '../tasks/detections';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { exportFirstRule } from '../tasks/signal_detection_rules';
+import { exportFirstRule } from '../tasks/alert_detection_rules';
 
 import { DETECTIONS } from '../urls/navigation';
 
@@ -33,9 +33,9 @@ describe('Export rules', () => {
 
   it('Exports a custom rule', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
-    waitForSignalsPanelToBeLoaded();
-    waitForSignalsIndexToBeCreated();
-    goToManageSignalDetectionRules();
+    waitForAlertsPanelToBeLoaded();
+    waitForAlertsIndexToBeCreated();
+    goToManageAlertDetectionRules();
     exportFirstRule();
     cy.wait('@export').then((xhr) => {
       cy.readFile(EXPECTED_EXPORTED_RULE_FILE_PATH).then(($expectedExportedJson) => {

@@ -11,7 +11,6 @@ import { Position } from '@elastic/charts';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/alerts_viewer/translations';
-import { getDetectionEngineAlertUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
 import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
@@ -22,7 +21,7 @@ import {
   Query,
 } from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../../common/store';
-import { HostsType } from '../../../hosts/store/model';
+import { HostsTableType, HostsType } from '../../../hosts/store/model';
 
 import * as i18n from '../../pages/translations';
 import {
@@ -32,6 +31,7 @@ import {
 import { MatrixHisrogramConfigs } from '../../../common/components/matrix_histogram/types';
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 import { navTabs } from '../../../app/home/home_navigations';
+import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 
 const ID = 'alertsByCategoryOverview';
 
@@ -75,11 +75,14 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
 
   const kibana = useKibana();
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const urlSearch = useGetUrlSearch(navTabs.detections);
+  const urlSearch = useGetUrlSearch(navTabs.hosts);
 
   const alertsCountViewAlertsButton = useMemo(
     () => (
-      <EuiButton data-test-subj="view-alerts" href={getDetectionEngineAlertUrl(urlSearch)}>
+      <EuiButton
+        data-test-subj="view-alerts"
+        href={getTabsOnHostsUrl(HostsTableType.alerts, urlSearch)}
+      >
         {i18n.VIEW_ALERTS}
       </EuiButton>
     ),

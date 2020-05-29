@@ -310,13 +310,13 @@ describe('StatefulTopN', () => {
     });
   });
 
-  test(`defaults to the 'Signals events' option when rendering in a NON-active timeline context (e.g. the Signals table on the Detections page) when 'documentType' from 'useTimelineTypeContext()' is 'signals'`, () => {
+  test(`defaults to the 'Alert events' option when rendering in a NON-active timeline context (e.g. the Alerts table on the Detections page) when 'documentType' from 'useTimelineTypeContext()' is 'alerts'`, () => {
     const filterManager = new FilterManager(mockUiSettingsForFilterManager);
     const wrapper = mount(
       <TestProviders store={store}>
         <TimelineContext.Provider value={{ filterManager, isLoading: false }}>
           <TimelineTypeContext.Provider
-            value={{ documentType: 'signals', id: ACTIVE_TIMELINE_REDUX_ID }}
+            value={{ documentType: 'alerts', id: ACTIVE_TIMELINE_REDUX_ID }}
           >
             <StatefulTopN
               browserFields={mockBrowserFields}
@@ -332,6 +332,6 @@ describe('StatefulTopN', () => {
 
     const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
-    expect(props.defaultView).toEqual('signal');
+    expect(props.defaultView).toEqual('alert');
   });
 });

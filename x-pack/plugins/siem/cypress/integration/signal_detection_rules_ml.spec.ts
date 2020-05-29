@@ -34,7 +34,7 @@ import {
   RULES_ROW,
   RULES_TABLE,
   SEVERITY,
-} from '../screens/signal_detection_rules';
+} from '../screens/alert_detection_rules';
 
 import {
   createAndActivateRule,
@@ -43,9 +43,9 @@ import {
   selectMachineLearningRuleType,
 } from '../tasks/create_new_rule';
 import {
-  goToManageSignalDetectionRules,
-  waitForSignalsIndexToBeCreated,
-  waitForSignalsPanelToBeLoaded,
+  goToManageAlertDetectionRules,
+  waitForAlertsIndexToBeCreated,
+  waitForAlertsPanelToBeLoaded,
 } from '../tasks/detections';
 import {
   changeToThreeHundredRowsPerPage,
@@ -54,13 +54,13 @@ import {
   goToRuleDetails,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
-} from '../tasks/signal_detection_rules';
+} from '../tasks/alert_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
 
-describe('Signal detection rules, machine learning', () => {
+describe('Alert detection rules, machine learning', () => {
   before(() => {
     esArchiverLoad('prebuilt_rules_loaded');
   });
@@ -71,9 +71,9 @@ describe('Signal detection rules, machine learning', () => {
 
   it('Creates and activates a new ml rule', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
-    waitForSignalsPanelToBeLoaded();
-    waitForSignalsIndexToBeCreated();
-    goToManageSignalDetectionRules();
+    waitForAlertsPanelToBeLoaded();
+    waitForAlertsIndexToBeCreated();
+    goToManageAlertDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     goToCreateNewRule();
     selectMachineLearningRuleType();

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { allEvents, defaultOptions, getOptions, rawEvents, signalEvents } from './helpers';
+import { allEvents, defaultOptions, getOptions, rawEvents, alertEvents } from './helpers';
 
 describe('getOptions', () => {
   test(`it returns the default options when 'activeTimelineEventType' is undefined`, () => {
@@ -19,7 +19,7 @@ describe('getOptions', () => {
     expect(getOptions('raw')).toEqual(rawEvents);
   });
 
-  test(`it returns 'signalEvents' when 'activeTimelineEventType' is 'signal'`, () => {
-    expect(getOptions('signal')).toEqual(signalEvents);
+  test(`it returns 'alertEvents' when 'activeTimelineEventType' is 'alert'`, () => {
+    expect(getOptions('alert')).toEqual(alertEvents);
   });
 });

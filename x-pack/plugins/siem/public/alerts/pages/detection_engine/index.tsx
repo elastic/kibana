@@ -13,7 +13,6 @@ import { DetectionEnginePage } from './detection_engine';
 import { EditRulePage } from './rules/edit';
 import { RuleDetailsPage } from './rules/details';
 import { RulesPage } from './rules';
-import { DetectionEngineTab } from './types';
 
 const detectionEnginePath = `/:pageName(detections)`;
 
@@ -22,11 +21,7 @@ type Props = Partial<RouteComponentProps<{}>> & { url: string };
 const DetectionEngineContainerComponent: React.FC<Props> = () => (
   <ManageUserInfo>
     <Switch>
-      <Route
-        exact
-        path={`${detectionEnginePath}/:tabName(${DetectionEngineTab.signals}|${DetectionEngineTab.alerts})`}
-        strict
-      >
+      <Route exact path={`${detectionEnginePath}`} strict>
         <DetectionEnginePage />
       </Route>
       <Route exact path={`${detectionEnginePath}/rules`}>
@@ -44,7 +39,7 @@ const DetectionEngineContainerComponent: React.FC<Props> = () => (
       <Route
         path="/detections/"
         render={({ location: { search = '' } }) => (
-          <Redirect from="/detections/" to={`/detections/${DetectionEngineTab.signals}${search}`} />
+          <Redirect from="/detections/" to={`/detections/${search}`} />
         )}
       />
     </Switch>

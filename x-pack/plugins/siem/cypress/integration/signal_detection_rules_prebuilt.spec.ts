@@ -10,7 +10,7 @@ import {
   RELOAD_PREBUILT_RULES_BTN,
   RULES_ROW,
   RULES_TABLE,
-} from '../screens/signal_detection_rules';
+} from '../screens/alert_detection_rules';
 
 import {
   changeToThreeHundredRowsPerPage,
@@ -22,11 +22,11 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForPrebuiltDetectionRulesToBeLoaded,
   waitForRulesToBeLoaded,
-} from '../tasks/signal_detection_rules';
+} from '../tasks/alert_detection_rules';
 import {
-  goToManageSignalDetectionRules,
-  waitForSignalsIndexToBeCreated,
-  waitForSignalsPanelToBeLoaded,
+  goToManageAlertDetectionRules,
+  waitForAlertsIndexToBeCreated,
+  waitForAlertsPanelToBeLoaded,
 } from '../tasks/detections';
 import { esArchiverLoadEmptyKibana, esArchiverUnloadEmptyKibana } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
@@ -35,7 +35,7 @@ import { DETECTIONS } from '../urls/navigation';
 
 import { totalNumberOfPrebuiltRules } from '../objects/rule';
 
-describe('Signal detection rules, prebuilt rules', () => {
+describe('Alert detection rules, prebuilt rules', () => {
   before(() => {
     esArchiverLoadEmptyKibana();
   });
@@ -49,9 +49,9 @@ describe('Signal detection rules, prebuilt rules', () => {
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
-    waitForSignalsPanelToBeLoaded();
-    waitForSignalsIndexToBeCreated();
-    goToManageSignalDetectionRules();
+    waitForAlertsPanelToBeLoaded();
+    waitForAlertsIndexToBeCreated();
+    goToManageAlertDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
@@ -74,9 +74,9 @@ describe('Deleting prebuilt rules', () => {
 
     esArchiverLoadEmptyKibana();
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
-    waitForSignalsPanelToBeLoaded();
-    waitForSignalsIndexToBeCreated();
-    goToManageSignalDetectionRules();
+    waitForAlertsPanelToBeLoaded();
+    waitForAlertsIndexToBeCreated();
+    goToManageAlertDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();

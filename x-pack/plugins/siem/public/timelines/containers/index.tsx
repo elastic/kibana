@@ -27,7 +27,7 @@ import { QueryTemplate, QueryTemplateProps } from '../../common/containers/query
 import { EventType } from '../../timelines/store/timeline/model';
 import { timelineQuery } from './index.gql_query';
 import { timelineActions } from '../../timelines/store/timeline';
-import { SIGNALS_PAGE_TIMELINE_ID } from '../../alerts/components/signals';
+import { ALERTS_TABLE_TIMELINE_ID } from '../../alerts/components/alerts_table';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -182,7 +182,7 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   clearSignalsState: ({ id }: { id?: string }) => {
-    if (id != null && id === SIGNALS_PAGE_TIMELINE_ID) {
+    if (id != null && id === ALERTS_TABLE_TIMELINE_ID) {
       dispatch(timelineActions.clearEventsLoading({ id }));
       dispatch(timelineActions.clearEventsDeleted({ id }));
     }

@@ -42,15 +42,15 @@ import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
-import { SignalsHistogramPanel } from '../../../../components/signals_histogram_panel';
-import { SignalsTable } from '../../../../components/signals';
+import { AlertsHistogramPanel } from '../../../../components/alerts_histogram_panel';
+import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserInfo } from '../../../../components/user_info';
 import { DetectionEngineEmptyPage } from '../../detection_engine_empty_page';
-import { useSignalInfo } from '../../../../components/signals_info';
+import { useAlertInfo } from '../../../../components/alerts_info';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
-import { buildSignalsRuleIdFilter } from '../../../../components/signals/default_config';
-import { NoWriteSignalsCallOut } from '../../../../components/no_write_signals_callout';
+import { buildAlertsRuleIdFilter } from '../../../../components/alerts_table/default_config';
+import { NoWriteAlertsCallOut } from '../../../../components/no_write_alerts_callout';
 import * as detectionI18n from '../../translations';
 import { ReadOnlyCallOut } from '../../../../components/rules/read_only_callout';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
@@ -59,7 +59,7 @@ import { getStepsData, redirectToDetections, userHasNoPermissions } from '../hel
 import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { GlobalTime } from '../../../../../common/containers/global_time';
-import { signalsHistogramOptions } from '../../../../components/signals_histogram_panel/config';
+import { alertsHistogramOptions } from '../../../../components/alerts_histogram_panel/config';
 import { inputsSelectors } from '../../../../../common/store/inputs';
 import { State } from '../../../../../common/store';
 import { InputsRange } from '../../../../../common/store/inputs/model';
@@ -72,14 +72,14 @@ import { useMlCapabilities } from '../../../../../common/components/ml_popover/h
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
 
 enum RuleDetailTabs {
-  signals = 'signals',
+  alerts = 'alerts',
   failures = 'failures',
 }
 
 const ruleDetailTabs = [
   {
-    id: RuleDetailTabs.signals,
-    name: detectionI18n.SIGNAL,
+    id: RuleDetailTabs.alerts,
+    name: detectionI18n.ALERT,
     disabled: false,
   },
   {
@@ -107,7 +107,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const [isLoading, rule] = useRule(ruleId);
   // This is used to re-trigger api rule status when user de/activate rule
   const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
-  const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.signals);
+  const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.alerts);
   const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
     rule != null
       ? getStepsData({ rule, detailsView: true })
@@ -117,7 +117,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
           defineRuleData: null,
           scheduleRuleData: null,
         };
-  const [lastSignals] = useSignalInfo({ ruleId });
+  const [lastAlerts] = useAlertInfo({ ruleId });
   const mlCapabilities = useMlCapabilities();
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
@@ -166,13 +166,13 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     [isLoading, rule]
   );
 
-  const signalDefaultFilters = useMemo(
-    () => (ruleId != null ? buildSignalsRuleIdFilter(ruleId) : []),
+  const alertDefaultFilters = useMemo(
+    () => (ruleId != null ? buildAlertsRuleIdFilter(ruleId) : []),
     [ruleId]
   );
 
-  const signalMergedFilters = useMemo(() => [...signalDefaultFilters, ...filters], [
-    signalDefaultFilters,
+  const alertMergedFilters = useMemo(() => [...alertDefaultFilters, ...filters], [
+    alertDefaultFilters,
     filters,
   ]);
 
@@ -196,7 +196,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const ruleError = useMemo(
     () =>
       rule?.status === 'failed' &&
-      ruleDetailTab === RuleDetailTabs.signals &&
+      ruleDetailTab === RuleDetailTabs.alerts &&
       rule?.last_failure_at != null ? (
         <RuleStatusFailedCallOut
           message={rule?.last_failure_message ?? ''}
@@ -236,7 +236,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
 
   return (
     <>
-      {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
+      {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
       {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
       <WithSource sourceId="default" indexToAdd={indexToAdd}>
         {({ indicesExist, indexPattern }) => {
@@ -257,12 +257,12 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                       border
                       subtitle={subTitle}
                       subtitle2={[
-                        ...(lastSignals != null
+                        ...(lastAlerts != null
                           ? [
                               <>
-                                {detectionI18n.LAST_SIGNAL}
+                                {detectionI18n.LAST_ALERT}
                                 {': '}
-                                {lastSignals}
+                                {lastAlerts}
                               </>,
                             ]
                           : []),
@@ -358,24 +358,24 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     <EuiSpacer />
                     {tabs}
                     <EuiSpacer />
-                    {ruleDetailTab === RuleDetailTabs.signals && (
+                    {ruleDetailTab === RuleDetailTabs.alerts && (
                       <>
-                        <SignalsHistogramPanel
+                        <AlertsHistogramPanel
                           deleteQuery={deleteQuery}
-                          filters={signalMergedFilters}
+                          filters={alertMergedFilters}
                           query={query}
                           from={from}
                           signalIndexName={signalIndexName}
                           setQuery={setQuery}
-                          stackByOptions={signalsHistogramOptions}
+                          stackByOptions={alertsHistogramOptions}
                           to={to}
                           updateDateRange={updateDateRangeCallback}
                         />
                         <EuiSpacer />
                         {ruleId != null && (
-                          <SignalsTable
+                          <AlertsTable
                             canUserCRUD={canUserCRUD ?? false}
-                            defaultFilters={signalDefaultFilters}
+                            defaultFilters={alertDefaultFilters}
                             hasIndexWrite={hasIndexWrite ?? false}
                             from={from}
                             loading={loading}

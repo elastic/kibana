@@ -7,11 +7,11 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useUserInfo } from './index';
 
-import { usePrivilegeUser } from '../../containers/detection_engine/signals/use_privilege_user';
-import { useSignalIndex } from '../../containers/detection_engine/signals/use_signal_index';
+import { usePrivilegeUser } from '../../containers/detection_engine/alerts/use_privilege_user';
+import { useSignalIndex } from '../../containers/detection_engine/alerts/use_signal_index';
 import { useKibana } from '../../../common/lib/kibana';
-jest.mock('../../containers/detection_engine/signals/use_privilege_user');
-jest.mock('../../containers/detection_engine/signals/use_signal_index');
+jest.mock('../../containers/detection_engine/alerts/use_privilege_user');
+jest.mock('../../containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../common/lib/kibana');
 
 describe('useUserInfo', () => {

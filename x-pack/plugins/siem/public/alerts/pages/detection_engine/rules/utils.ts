@@ -30,13 +30,6 @@ const getTabBreadcrumb = (pathname: string, search: string[]) => {
     };
   }
 
-  if (tabPath === 'signals') {
-    return {
-      text: i18nDetections.SIGNAL,
-      href: `${getDetectionEngineTabUrl(tabPath)}${!isEmpty(search[0]) ? search[0] : ''}`,
-    };
-  }
-
   if (tabPath === 'rules') {
     return {
       text: i18nRules.PAGE_TITLE,

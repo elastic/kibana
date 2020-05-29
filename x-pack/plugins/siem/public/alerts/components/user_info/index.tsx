@@ -7,8 +7,8 @@
 import { noop } from 'lodash/fp';
 import React, { useEffect, useReducer, Dispatch, createContext, useContext } from 'react';
 
-import { usePrivilegeUser } from '../../containers/detection_engine/signals/use_privilege_user';
-import { useSignalIndex } from '../../containers/detection_engine/signals/use_signal_index';
+import { usePrivilegeUser } from '../../containers/detection_engine/alerts/use_privilege_user';
+import { useSignalIndex } from '../../containers/detection_engine/alerts/use_signal_index';
 import { useKibana } from '../../../common/lib/kibana';
 
 export interface State {

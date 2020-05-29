@@ -22,8 +22,7 @@ export const schema: FormSchema = {
     helpText: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepScheduleRule.fieldIntervalHelpText',
       {
-        defaultMessage:
-          'Rules run periodically and detect signals within the specified time frame.',
+        defaultMessage: 'Rules run periodically and detect alerts within the specified time frame.',
       }
     ),
   },
@@ -38,7 +37,7 @@ export const schema: FormSchema = {
     helpText: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepScheduleRule.fieldAdditionalLookBackHelpText',
       {
-        defaultMessage: 'Adds time to the look-back period to prevent missed signals.',
+        defaultMessage: 'Adds time to the look-back period to prevent missed alerts.',
       }
     ),
   },

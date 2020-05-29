@@ -32,17 +32,17 @@ export const rawEvents: TopNOption[] = [
   },
 ];
 
-/** A (stable) array containing only the 'Signal events' option */
-export const signalEvents: TopNOption[] = [
+/** A (stable) array containing only the 'Alert events' option */
+export const alertEvents: TopNOption[] = [
   {
-    value: 'signal',
-    inputDisplay: i18n.SIGNAL_EVENTS,
-    'data-test-subj': 'option-signal',
+    value: 'alert',
+    inputDisplay: i18n.ALERT_EVENTS,
+    'data-test-subj': 'option-alert',
   },
 ];
 
 /** A (stable) array containing the default Top N options */
-export const defaultOptions = [...rawEvents, ...signalEvents];
+export const defaultOptions = [...rawEvents, ...alertEvents];
 
 /**
  * Returns the options to be displayed in a Top N view select. When
@@ -58,8 +58,8 @@ export const getOptions = (activeTimelineEventType?: EventType): TopNOption[] =>
       return allEvents;
     case 'raw':
       return rawEvents;
-    case 'signal':
-      return signalEvents;
+    case 'alert':
+      return alertEvents;
     default:
       return defaultOptions;
   }

@@ -641,7 +641,7 @@ export const getEmptySignalsResponse = (): SignalSearchResponse => ({
   _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
   hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
   aggregations: {
-    signalsByGrouping: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+    alertsByGrouping: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
   },
 });
 

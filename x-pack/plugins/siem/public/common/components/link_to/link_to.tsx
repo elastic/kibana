@@ -25,7 +25,6 @@ import {
   RedirectToCreatePage,
   RedirectToConfigureCasesPage,
 } from './redirect_to_case';
-import { DetectionEngineTab } from '../../../alerts/pages/detection_engine/types';
 import { TimelineType } from '../../../../common/types/timeline';
 
 interface LinkToPageProps {
@@ -87,11 +86,6 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
       component={RedirectToDetectionEnginePage}
       exact
       path={`${match.url}/:pageName(${SiemPageName.detections})`}
-    />
-    <Route
-      component={RedirectToDetectionEnginePage}
-      exact
-      path={`${match.url}/:pageName(${SiemPageName.detections})/:tabName(${DetectionEngineTab.alerts}|${DetectionEngineTab.signals})`}
     />
     <Route
       component={RedirectToRulesPage}

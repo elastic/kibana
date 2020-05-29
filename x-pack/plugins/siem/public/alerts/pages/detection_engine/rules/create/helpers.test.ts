@@ -611,7 +611,7 @@ describe('helpers', () => {
       const mockAction = {
         group: 'default',
         id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-        params: { message: 'ML Rule generated {{state.signals_count}} signals' },
+        params: { message: 'ML Rule generated {{state.signals_count}} alerts' },
         actionTypeId: '.slack',
       };
 
