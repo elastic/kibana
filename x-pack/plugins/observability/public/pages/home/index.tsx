@@ -76,7 +76,17 @@ const tryItOutItemsSection: ISection[] = [
 const FixedContainer = styled.div`
   position: fixed;
   width: 100%;
+  top: 49px;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+`;
+
+const OverflowContainer = styled.div`
   height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #fff;
 `;
 
 const CentralizedContainer = styled.div`
@@ -84,18 +94,15 @@ const CentralizedContainer = styled.div`
   margin: 0 auto;
 `;
 
-const TitleContainer = styled(CentralizedContainer)`
+const TitleContainer = styled.div`
   height: 124px;
   display: flex;
   align-items: center;
+  background-color: #fafbfd;
 `;
 
 const BodyContainer = styled.div`
-  background-color: #fff;
-  height: 100%;
-  box-shadow: 0 2px 2px -1px rgba(152, 162, 179, 0.3),
-    0 1px 5px -2px rgba(152, 162, 179, 0.3);
-  border: 1px solid #d3dae6;
+  border-top: 1px solid #d3dae6;
 `;
 
 interface Props {
@@ -119,120 +126,126 @@ export const Home = ({ core }: Props) => {
   }, [core.chrome]);
   return (
     <FixedContainer>
-      <TitleContainer>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="logoObservability" size="xxl" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="m">
-              <h1>
-                {i18n.translate('observability.home.title', {
-                  defaultMessage: 'Observability',
-                })}
-              </h1>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </TitleContainer>
-      <BodyContainer>
-        <CentralizedContainer>
-          <EuiSpacer size="xl" />
-          <EuiFlexGroup direction="column">
-            {/* title and description */}
-            <EuiFlexItem style={{ maxWidth: 567 }}>
-              <EuiTitle size="s">
-                <h2>
-                  {i18n.translate('observability.home.sectionTitle', {
-                    defaultMessage: 'Observability built on the Elastic Stack',
-                  })}
-                </h2>
-              </EuiTitle>
-              <EuiSpacer size="m" />
-              <EuiText size="s" color="subdued">
-                {i18n.translate('observability.home.sectionsubtitle', {
-                  defaultMessage:
-                    'Bring your logs, metrics, and APM traces together at scale in a single stack so you can monitor and react to events happening anywhere in your environment.',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-
-            {/* Apps sections */}
-            <EuiFlexItem>
-              <EuiSpacer size="s" />
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiFlexGrid columns={2}>
-                    {appsSection.map((app) => (
-                      <Section section={app} key={app.id} />
-                    ))}
-                  </EuiFlexGrid>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiImage
-                    size="xl"
-                    alt="observability overview image"
-                    url="/plugins/observability/assets/observability-overview.png"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-
-            {/* Get started button */}
-            <EuiFlexItem>
-              <EuiFlexGroup justifyContent="center" gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    iconType="sortRight"
-                    iconSide="right"
-                    style={{ width: 175 }}
-                    href="/app/home#/tutorial_directory/logging"
-                  >
-                    {i18n.translate('observability.home.getStatedButton', {
-                      defaultMessage: 'Get started',
+      <OverflowContainer>
+        <TitleContainer>
+          <CentralizedContainer>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="logoObservability" size="xxl" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="m">
+                  <h1>
+                    {i18n.translate('observability.home.title', {
+                      defaultMessage: 'Observability',
                     })}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </CentralizedContainer>
+        </TitleContainer>
+        <BodyContainer>
+          <CentralizedContainer>
+            <EuiSpacer size="xl" />
+            <EuiFlexGroup direction="column">
+              {/* title and description */}
+              <EuiFlexItem style={{ maxWidth: 567 }}>
+                <EuiTitle size="s">
+                  <h2>
+                    {i18n.translate('observability.home.sectionTitle', {
+                      defaultMessage:
+                        'Observability built on the Elastic Stack',
+                    })}
+                  </h2>
+                </EuiTitle>
+                <EuiSpacer size="m" />
+                <EuiText size="s" color="subdued">
+                  {i18n.translate('observability.home.sectionsubtitle', {
+                    defaultMessage:
+                      'Bring your logs, metrics, and APM traces together at scale in a single stack so you can monitor and react to events happening anywhere in your environment.',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
 
-            <EuiHorizontalRule margin="xl" />
-
-            {/* Try it out */}
-            <EuiFlexItem>
-              <EuiFlexGroup justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="s">
-                    <h3>
-                      {i18n.translate('observability.home.tryItOut', {
-                        defaultMessage: 'Try it out',
-                      })}
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-
-            {/* Try it out sections */}
-            <EuiFlexItem>
-              <EuiFlexGroup justifyContent="center">
-                {tryItOutItemsSection.map((item) => (
-                  <EuiFlexItem
-                    grow={false}
-                    key={item.id}
-                    style={{ width: 260 }}
-                  >
-                    <EuiPanel hasShadow paddingSize="s">
-                      <Section section={item} />
-                    </EuiPanel>
+              {/* Apps sections */}
+              <EuiFlexItem>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiFlexGrid columns={2}>
+                      {appsSection.map((app) => (
+                        <Section section={app} key={app.id} />
+                      ))}
+                    </EuiFlexGrid>
                   </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </CentralizedContainer>
-      </BodyContainer>
+                  <EuiFlexItem>
+                    <EuiImage
+                      size="xl"
+                      alt="observability overview image"
+                      url="/plugins/observability/assets/observability-overview.png"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              {/* Get started button */}
+              <EuiFlexItem>
+                <EuiFlexGroup justifyContent="center" gutterSize="none">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      fill
+                      iconType="sortRight"
+                      iconSide="right"
+                      style={{ width: 175 }}
+                      href="/app/home#/tutorial_directory/logging"
+                    >
+                      {i18n.translate('observability.home.getStatedButton', {
+                        defaultMessage: 'Get started',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              <EuiHorizontalRule margin="xl" />
+
+              {/* Try it out */}
+              <EuiFlexItem>
+                <EuiFlexGroup justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="s">
+                      <h3>
+                        {i18n.translate('observability.home.tryItOut', {
+                          defaultMessage: 'Try it out',
+                        })}
+                      </h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              {/* Try it out sections */}
+              <EuiFlexItem>
+                <EuiFlexGroup justifyContent="center">
+                  {tryItOutItemsSection.map((item) => (
+                    <EuiFlexItem
+                      grow={false}
+                      key={item.id}
+                      style={{ width: 260 }}
+                    >
+                      <EuiPanel hasShadow paddingSize="s">
+                        <Section section={item} />
+                      </EuiPanel>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+                <EuiSpacer />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </CentralizedContainer>
+        </BodyContainer>
+      </OverflowContainer>
     </FixedContainer>
   );
 };
