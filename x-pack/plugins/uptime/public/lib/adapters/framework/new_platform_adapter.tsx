@@ -73,7 +73,7 @@ export const getKibanaFrameworkAdapter = (
         links: [
           {
             linkType: 'documentation',
-            href: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/xpack-uptime.html`,
+            href: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/uptime-app-overview.html`,
           },
           {
             linkType: 'discuss',
