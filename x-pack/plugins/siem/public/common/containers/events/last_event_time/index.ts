@@ -33,7 +33,7 @@ export interface OwnProps extends QueryTemplateProps {
   indexKey: LastEventIndexKey;
 }
 
-export function useLastEventTimeQuery<TCache = object>(
+export function useLastEventTimeQuery(
   indexKey: LastEventIndexKey,
   details: LastTimeDetails,
   sourceId: string
@@ -44,7 +44,10 @@ export function useLastEventTimeQuery<TCache = object>(
   const [currentIndexKey, updateCurrentIndexKey] = useState<LastEventIndexKey | null>(null);
   const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const apolloClient = useApolloClient();
-  async function fetchLastEventTime(signal: AbortSignal) {
+
+  useEffect(() => {
+    const abortCtrl = new AbortController();
+    const signal = abortCtrl.signal;
     updateLoading(true);
     if (apolloClient) {
       apolloClient
@@ -77,14 +80,8 @@ export function useLastEventTimeQuery<TCache = object>(
           }
         );
     }
-  }
-
-  useEffect(() => {
-    const abortCtrl = new AbortController();
-    const signal = abortCtrl.signal;
-    fetchLastEventTime(signal);
     return () => abortCtrl.abort();
-  }, [apolloClient, indexKey, details.hostName, details.ip, fetchLastEventTime]);
+  }, [apolloClient, currentIndexKey, defaultIndex, details, indexKey, sourceId]);
 
   return { lastSeen, loading, errorMessage };
 }

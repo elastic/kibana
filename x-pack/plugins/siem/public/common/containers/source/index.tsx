@@ -75,7 +75,7 @@ export const getIndexFields = memoizeOne(
 );
 
 export const getBrowserFields = memoizeOne(
-  (title: string, fields: IndexField[]): BrowserFields =>
+  (_title: string, fields: IndexField[]): BrowserFields =>
     fields && fields.length > 0
       ? fields.reduce<BrowserFields>(
           (accumulator: BrowserFields, field: IndexField) =>
@@ -131,7 +131,10 @@ export const useWithSource = (sourceId: string, indices: string[]) => {
   const [errorMessage, updateErrorMessage] = useState<string | null>(null);
 
   const apolloClient = useApolloClient();
-  async function fetchSource(signal: AbortSignal) {
+
+  useEffect(() => {
+    const abortCtrl = new AbortController();
+    const signal = abortCtrl.signal;
     updateLoading(true);
     if (apolloClient) {
       apolloClient
@@ -166,14 +169,8 @@ export const useWithSource = (sourceId: string, indices: string[]) => {
           }
         );
     }
-  }
-
-  useEffect(() => {
-    const abortCtrl = new AbortController();
-    const signal = abortCtrl.signal;
-    fetchSource(signal);
     return () => abortCtrl.abort();
-  }, [apolloClient, sourceId, indices, fetchSource]);
+  }, [apolloClient, sourceId, indices]);
 
   return { indicesExist, browserFields, indexPattern, loading, errorMessage };
 };

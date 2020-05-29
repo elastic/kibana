@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useCallback } from 'react';
 
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { getTags } from './api';
@@ -86,7 +86,7 @@ export const useGetTags = (): UseGetTags => {
       abortCtrl.abort();
       didCancel = true;
     };
-  });
+  }, [dispatchToaster]);
   useEffect(() => {
     callFetch();
   }, [callFetch]);

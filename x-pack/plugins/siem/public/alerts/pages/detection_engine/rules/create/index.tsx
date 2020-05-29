@@ -111,11 +111,10 @@ const CreateRulePageComponent: React.FC = () => {
     [RuleStep.ruleActions]: false,
   });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
-  const actionMessageParams = useMemo(
-    () =>
-      getActionMessageParams((stepsData.current['define-rule'].data as DefineStepRule).ruleType),
-    [stepsData.current['define-rule'].data]
-  );
+  const defineRuleData: DefineStepRule = stepsData.current['define-rule'].data;
+  const actionMessageParams = useMemo(() => getActionMessageParams(defineRuleData.ruleType), [
+    defineRuleData.ruleType,
+  ]);
 
   const setStepData = useCallback(
     (step: RuleStep, data: unknown, isValid: boolean) => {

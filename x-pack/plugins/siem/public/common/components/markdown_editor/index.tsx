@@ -95,15 +95,18 @@ export const MarkdownEditor = React.memo<{
       [onChange]
     );
 
-    const setCursorPosition = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      if (onCursorPositionUpdate) {
-        onCursorPositionUpdate({
-          start: e!.target!.selectionStart ?? 0,
-          end: e!.target!.selectionEnd ?? 0,
-        });
-      }
-      return false;
-    };
+    const setCursorPosition = useCallback(
+      (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        if (onCursorPositionUpdate) {
+          onCursorPositionUpdate({
+            start: e!.target!.selectionStart ?? 0,
+            end: e!.target!.selectionEnd ?? 0,
+          });
+        }
+        return false;
+      },
+      [onCursorPositionUpdate]
+    );
 
     const tabs = useMemo(
       () => [

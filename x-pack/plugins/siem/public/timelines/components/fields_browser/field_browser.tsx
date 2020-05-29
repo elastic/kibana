@@ -120,17 +120,6 @@ const FieldsBrowserComponent: React.FC<Props> = ({
   toggleColumn,
   width,
 }) => {
-  /** Focuses the input that filters the field browser */
-  const focusInput = () => {
-    const elements = document.getElementsByClassName(
-      getFieldBrowserSearchInputClassName(timelineId)
-    );
-
-    if (elements.length > 0) {
-      (elements[0] as HTMLElement).focus(); // this cast is required because focus() does not exist on every `Element` returned by `getElementsByClassName`
-    }
-  };
-
   /** Invoked when the user types in the input to filter the field browser */
   const onInputChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,7 +139,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
     [onFieldSelected, onHideFieldBrowser]
   );
 
-  const scrollViews = () => {
+  useEffect(() => {
     if (selectedCategoryId !== '') {
       const categoryPaneTitles = document.getElementsByClassName(
         getCategoryPaneCategoryClassName({
@@ -175,12 +164,15 @@ const FieldsBrowserComponent: React.FC<Props> = ({
       }
     }
 
-    focusInput(); // always re-focus the input to enable additional filtering
-  };
+    // always re-focus the input to enable additional filtering
+    const elements = document.getElementsByClassName(
+      getFieldBrowserSearchInputClassName(timelineId)
+    );
 
-  useEffect(() => {
-    scrollViews();
-  }, [scrollViews, selectedCategoryId, timelineId]);
+    if (elements.length > 0 && elements[0] instanceof HTMLElement) {
+      elements[0].focus();
+    }
+  }, [selectedCategoryId, timelineId]);
 
   return (
     <EuiOutsideClickDetector

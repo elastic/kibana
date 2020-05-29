@@ -41,9 +41,11 @@ export function useFirstLastSeenHostQuery<TCache = object>(
   const [errorMessage, updateErrorMessage] = useState<string | null>(null);
   const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
 
-  async function fetchFirstLastSeenHost(signal: AbortSignal) {
+  useEffect(() => {
+    const abortCtrl = new AbortController();
+    const signal = abortCtrl.signal;
     updateLoading(true);
-    return apolloClient
+    apolloClient
       .query<GetHostFirstLastSeenQuery.Query, GetHostFirstLastSeenQuery.Variables>({
         query: HostFirstLastSeenGqlQuery,
         fetchPolicy: 'cache-first',
@@ -72,14 +74,8 @@ export function useFirstLastSeenHostQuery<TCache = object>(
           updateErrorMessage(error.message);
         }
       );
-  }
-
-  useEffect(() => {
-    const abortCtrl = new AbortController();
-    const signal = abortCtrl.signal;
-    fetchFirstLastSeenHost(signal);
     return () => abortCtrl.abort();
-  }, [fetchFirstLastSeenHost]);
+  }, [apolloClient, defaultIndex, hostName, sourceId]);
 
   return { firstSeen, lastSeen, loading, errorMessage };
 }

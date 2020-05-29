@@ -46,7 +46,8 @@ export const useTimelineTypes = (): {
         href: getTimelineTabsUrl(TimelineType.template, urlSearch),
         disabled: false,
       },
-    ]
+    ],
+    [urlSearch]
   );
 
   const onFilterClicked = useCallback(
