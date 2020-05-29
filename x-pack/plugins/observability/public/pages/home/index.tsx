@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { ISection, Section } from './section';
-import { CoreStart } from '../../../../../../src/core/public';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 
 const appsSection: ISection[] = [
   {
@@ -105,25 +105,28 @@ const BodyContainer = styled.div`
   border-top: 1px solid #d3dae6;
 `;
 
-interface Props {
-  core: CoreStart;
-}
+export const Home = () => {
+  const { core } = usePluginContext();
 
-export const Home = ({ core }: Props) => {
-  useEffect(() => {
-    core.chrome.setBreadcrumbs([
-      {
-        text: i18n.translate('observability.home.breadcrumb.observability', {
-          defaultMessage: 'Observability',
-        }),
-      },
-      {
-        text: i18n.translate('observability.home.breadcrumb.gettingStarted', {
-          defaultMessage: 'Getting started',
-        }),
-      },
-    ]);
-  }, [core.chrome]);
+  useEffect(
+    () => {
+      core.chrome.setBreadcrumbs([
+        {
+          text: i18n.translate('observability.home.breadcrumb.observability', {
+            defaultMessage: 'Observability',
+          }),
+        },
+        {
+          text: i18n.translate('observability.home.breadcrumb.gettingStarted', {
+            defaultMessage: 'Getting started',
+          }),
+        },
+      ]);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   return (
     <FixedContainer>
       <OverflowContainer>
@@ -183,7 +186,9 @@ export const Home = ({ core }: Props) => {
                     <EuiImage
                       size="xl"
                       alt="observability overview image"
-                      url="/plugins/observability/assets/observability-overview.png"
+                      url={core.http.basePath.prepend(
+                        '/plugins/observability/assets/observability-overview.png'
+                      )}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -198,7 +203,9 @@ export const Home = ({ core }: Props) => {
                       iconType="sortRight"
                       iconSide="right"
                       style={{ width: 175 }}
-                      href="/app/home#/tutorial_directory/logging"
+                      href={core.http.basePath.prepend(
+                        '/app/home#/tutorial_directory/logging'
+                      )}
                     >
                       {i18n.translate('observability.home.getStatedButton', {
                         defaultMessage: 'Get started',
