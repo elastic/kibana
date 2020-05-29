@@ -9,13 +9,12 @@ import {
   CreateExceptionListSchemaPartial,
   ExceptionListItemSchema,
   ExceptionListSchema,
+  NamespaceType,
 } from '../../common/schemas';
 import { HttpStart } from '../../../../../src/core/public';
 
 export interface FilterExceptionsOptions {
   filter: string;
-  sortField: string;
-  sortOrder: string;
   tags: string[];
 }
 
@@ -47,6 +46,7 @@ export interface UseExceptionListProps {
   filterOptions?: FilterExceptionsOptions;
   http: HttpStart;
   id: string | undefined;
+  namespaceType: NamespaceType;
   onError: (arg: Error) => void;
   pagination?: Pagination;
 }
@@ -54,7 +54,7 @@ export interface UseExceptionListProps {
 export interface ApiCallByListIdProps {
   http: HttpStart;
   listId: string;
-  listType?: string;
+  namespaceType: NamespaceType;
   filterOptions?: FilterExceptionsOptions;
   pagination?: Pagination;
   signal: AbortSignal;
@@ -63,6 +63,7 @@ export interface ApiCallByListIdProps {
 export interface ApiCallByIdProps {
   http: HttpStart;
   id: string;
+  namespaceType: NamespaceType;
   signal: AbortSignal;
 }
 

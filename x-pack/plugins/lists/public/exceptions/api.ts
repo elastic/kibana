@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../../common/constants';
+import {
+  EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_NAMESPACE,
+  EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
+  EXCEPTION_LIST_URL,
+} from '../../common/constants';
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -73,11 +78,12 @@ export const addExceptionListItem = async ({
 export const fetchExceptionListById = async ({
   http,
   id,
+  namespaceType,
   signal,
 }: ApiCallByIdProps): Promise<ExceptionListSchema> =>
   http.fetch<ExceptionListSchema>(`${EXCEPTION_LIST_URL}`, {
     method: 'GET',
-    query: { id },
+    query: { id, namespace_type: namespaceType },
     signal,
   });
 
@@ -92,11 +98,9 @@ export const fetchExceptionListById = async ({
 export const fetchExceptionListItemsByListId = async ({
   http,
   listId,
-  listType,
+  namespaceType,
   filterOptions = {
     filter: '',
-    sortField: 'enabled',
-    sortOrder: 'desc',
     tags: [],
   },
   pagination = {
@@ -106,22 +110,20 @@ export const fetchExceptionListItemsByListId = async ({
   },
   signal,
 }: ApiCallByListIdProps): Promise<FoundExceptionListItemSchema> => {
-  // TODO - figure out if SO space should be determined here or server side
-  const namespaceType = listType === 'endpoint' ? 'agnostic' : 'single';
+  const namespace =
+    namespaceType === 'agnostic' ? EXCEPTION_LIST_NAMESPACE_AGNOSTIC : EXCEPTION_LIST_NAMESPACE;
   const filters = [
     ...(filterOptions.filter.length
-      ? [`exception-list.attributes.entries.field: ${filterOptions.filter}`]
+      ? [`${namespace}.attributes.entries.field:${filterOptions.filter}*`]
       : []),
-    ...(filterOptions.tags?.map((t) => `exception-list.attributes.tags: ${t}`) ?? []),
+    ...(filterOptions.tags?.map((t) => `${namespace}.attributes.tags:${t}`) ?? []),
   ];
 
   const query = {
-    listId,
-    namespaceType,
+    list_id: listId,
+    namespace_type: namespaceType,
     page: pagination.page,
     per_page: pagination.perPage,
-    sort_field: filterOptions.sortField,
-    sort_order: filterOptions.sortOrder,
     ...(filters.length ? { filter: filters.join(' AND ') } : {}),
   };
 
@@ -143,11 +145,12 @@ export const fetchExceptionListItemsByListId = async ({
 export const fetchExceptionListItemById = async ({
   http,
   id,
+  namespaceType,
   signal,
 }: ApiCallByIdProps): Promise<ExceptionListItemSchema> =>
   http.fetch<ExceptionListItemSchema>(`${EXCEPTION_LIST_ITEM_URL}`, {
     method: 'GET',
-    query: { id },
+    query: { id, namespace_type: namespaceType },
     signal,
   });
 
@@ -162,11 +165,12 @@ export const fetchExceptionListItemById = async ({
 export const deleteExceptionListById = async ({
   http,
   id,
+  namespaceType,
   signal,
 }: ApiCallByIdProps): Promise<ExceptionListSchema> =>
   http.fetch<ExceptionListSchema>(`${EXCEPTION_LIST_URL}`, {
     method: 'DELETE',
-    query: { id },
+    query: { id, namespace_type: namespaceType },
     signal,
   });
 
@@ -181,10 +185,11 @@ export const deleteExceptionListById = async ({
 export const deleteExceptionListItemById = async ({
   http,
   id,
+  namespaceType,
   signal,
 }: ApiCallByIdProps): Promise<ExceptionListItemSchema> =>
   http.fetch<ExceptionListItemSchema>(`${EXCEPTION_LIST_ITEM_URL}`, {
     method: 'DELETE',
-    query: { id },
+    query: { id, namespace_type: namespaceType },
     signal,
   });

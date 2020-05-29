@@ -20,6 +20,7 @@ export type ReturnExceptionListAndItems = [boolean, ExceptionListAndItems | null
 export const useExceptionList = ({
   http,
   id,
+  namespaceType,
   pagination = {
     page: 1,
     perPage: 20,
@@ -27,8 +28,6 @@ export const useExceptionList = ({
   },
   filterOptions = {
     filter: '',
-    sortField: 'enabled',
-    sortOrder: 'desc',
     tags: [],
   },
   onError,
@@ -48,22 +47,33 @@ export const useExceptionList = ({
         if (shouldRefresh) {
           try {
             setLoading(true);
-            const exceptionList = await fetchExceptionListById({
+
+            const {
+              list_id,
+              namespace_type,
+              ...restOfExceptionList
+            } = await fetchExceptionListById({
               http,
               id: idToFetch,
+              namespaceType,
               signal: abortCtrl.signal,
             });
             const fetchListItemsResult = await fetchExceptionListItemsByListId({
               filterOptions,
               http,
-              listId: exceptionList.list_id,
+              listId: list_id,
+              namespaceType: namespace_type,
               pagination,
               signal: abortCtrl.signal,
             });
+
             setRefresh(false);
+
             if (isSubscribed) {
               setExceptionList({
-                ...exceptionList,
+                list_id,
+                namespace_type,
+                ...restOfExceptionList,
                 exceptionItems: {
                   items: [...fetchListItemsResult.data],
                   pagination: {

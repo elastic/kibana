@@ -5,12 +5,7 @@
  */
 import { createKibanaCoreStartMock } from '../common/mocks/kibana_core';
 
-import {
-  mockExceptionItem,
-  mockExceptionList,
-  mockNewExceptionItem,
-  mockNewExceptionList,
-} from './mock';
+import { mockExceptionItem, mockExceptionList } from './mock';
 import {
   addExceptionList,
   addExceptionListItem,
@@ -40,161 +35,231 @@ const mockKibanaHttpService = ((createKibanaCoreStartMock() as unknown) as jest.
 );
 
 describe('Exceptions Lists API', () => {
-  describe('addExceptionList', () => {
+  describe('#addExceptionList', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(mockExceptionList);
     });
 
-    test('check parameter url, body', async () => {
-      await addExceptionList({
+    test('it uses POST when "list.id" does not exist', async () => {
+      const payload = { ...mockExceptionList };
+      delete payload.id;
+      const exceptionResponse = await addExceptionList({
         http: mockKibanaHttpService(),
-        list: mockNewExceptionList,
+        list: payload,
         signal: abortCtrl.signal,
       });
+
       expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
-        body:
-          '{"_tags":["endpoint","process","malware","os:linux"],"description":"This is a sample endpoint type exception","list_id":"endpoint_list","name":"Sample Endpoint Exception List","tags":["user added string for a tag","malware"],"type":"endpoint"}',
+        body: JSON.stringify(payload),
         method: 'POST',
         signal: abortCtrl.signal,
       });
+      expect(exceptionResponse).toEqual({ id: '1', ...mockExceptionList });
     });
 
-    test('check parameter url, body when "list.id" exists', async () => {
-      await addExceptionList({
-        http: mockKibanaHttpService(),
-        list: mockExceptionList,
-        signal: abortCtrl.signal,
-      });
-      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
-        body:
-          '{"_tags":["endpoint","process","malware","os:linux"],"created_at":"2020-04-23T00:19:13.289Z","created_by":"user_name","description":"This is a sample endpoint type exception","id":"1","list_id":"endpoint_list","meta":{},"name":"Sample Endpoint Exception List","namespace_type":"single","tags":["user added string for a tag","malware"],"tie_breaker_id":"77fd1909-6786-428a-a671-30229a719c1f","type":"endpoint","updated_at":"2020-04-23T00:19:13.289Z","updated_by":"user_name"}',
-        method: 'PUT',
-        signal: abortCtrl.signal,
-      });
-    });
-
-    test('happy path', async () => {
+    test('it uses PUT when "list.id" exists', async () => {
+      const payload = { ...mockExceptionList };
       const exceptionResponse = await addExceptionList({
         http: mockKibanaHttpService(),
-        list: mockNewExceptionList,
+        list: payload,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
+        body: JSON.stringify(payload),
+        method: 'PUT',
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual(mockExceptionList);
     });
   });
 
-  describe('addExceptionListItem', () => {
+  describe('#addExceptionListItem', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(mockExceptionItem);
     });
 
-    test('check parameter url, body', async () => {
-      await addExceptionListItem({
+    test('it uses POST when "listItem.id" does not exist', async () => {
+      const payload = { ...mockExceptionItem };
+      delete payload.id;
+      const exceptionResponse = await addExceptionListItem({
         http: mockKibanaHttpService(),
-        listItem: mockNewExceptionItem,
+        listItem: payload,
         signal: abortCtrl.signal,
       });
+
       expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items', {
-        body:
-          '{"_tags":["endpoint","process","malware","os:linux"],"description":"This is a sample endpoint type exception","entries":[{"field":"actingProcess.file.signer","match":"Elastic, N.V.","operator":"included"},{"field":"event.category","match_any":["process","malware"],"operator":"included"}],"item_id":"endpoint_list_item","list_id":"endpoint_list","name":"Sample Endpoint Exception List","tags":["user added string for a tag","malware"],"type":"simple"}',
+        body: JSON.stringify(payload),
         method: 'POST',
         signal: abortCtrl.signal,
       });
+      expect(exceptionResponse).toEqual(mockExceptionItem);
     });
 
     test('check parameter url, body when "listItem.id" exists', async () => {
-      await addExceptionListItem({
-        http: mockKibanaHttpService(),
-        listItem: mockExceptionItem,
-        signal: abortCtrl.signal,
-      });
-      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items', {
-        body:
-          '{"_tags":["endpoint","process","malware","os:linux"],"comment":[],"created_at":"2020-04-23T00:19:13.289Z","created_by":"user_name","description":"This is a sample endpoint type exception","entries":[{"field":"actingProcess.file.signer","match":"Elastic, N.V.","operator":"included"},{"field":"event.category","match_any":["process","malware"],"operator":"included"}],"id":"1","item_id":"endpoint_list_item","list_id":"endpoint_list","meta":{},"name":"Sample Endpoint Exception List","namespace_type":"single","tags":["user added string for a tag","malware"],"tie_breaker_id":"77fd1909-6786-428a-a671-30229a719c1f","type":"simple","updated_at":"2020-04-23T00:19:13.289Z","updated_by":"user_name"}',
-        method: 'PUT',
-        signal: abortCtrl.signal,
-      });
-    });
-
-    test('happy path', async () => {
+      const payload = { ...mockExceptionItem };
       const exceptionResponse = await addExceptionListItem({
         http: mockKibanaHttpService(),
-        listItem: mockNewExceptionItem,
+        listItem: payload,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items', {
+        body: JSON.stringify(payload),
+        method: 'PUT',
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual(mockExceptionItem);
     });
   });
 
-  describe('fetchExceptionListById', () => {
+  describe('#fetchExceptionListById', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(mockExceptionList);
     });
 
-    test('check parameter url, body', async () => {
+    test('it invokes "fetchExceptionListById" with expected url and body values', async () => {
       await fetchExceptionListById({
         http: mockKibanaHttpService(),
         id: '1',
+        namespaceType: 'single',
         signal: abortCtrl.signal,
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
         method: 'GET',
         query: {
           id: '1',
+          namespace_type: 'single',
         },
         signal: abortCtrl.signal,
       });
     });
 
-    test('happy path', async () => {
+    test('it returns expected exception list on success', async () => {
       const exceptionResponse = await fetchExceptionListById({
         http: mockKibanaHttpService(),
         id: '1',
+        namespaceType: 'single',
         signal: abortCtrl.signal,
       });
+
       expect(exceptionResponse).toEqual(mockExceptionList);
     });
   });
 
-  describe('fetchExceptionListItemsByListId', () => {
+  describe('#fetchExceptionListItemsByListId', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue([mockNewExceptionItem]);
+      fetchMock.mockResolvedValue([mockExceptionItem]);
     });
 
-    test('check parameter url, query without any filter or perPage options', async () => {
+    test('it invokes "fetchExceptionListItemsByListId" with expected url and body values', async () => {
       await fetchExceptionListItemsByListId({
         http: mockKibanaHttpService(),
         listId: 'myList',
+        namespaceType: 'single',
         signal: abortCtrl.signal,
       });
+
       expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
         method: 'GET',
         query: {
-          listId: 'myList',
-          namespaceType: 'single',
+          list_id: 'myList',
+          namespace_type: 'single',
           page: 1,
           per_page: 20,
-          sort_field: 'enabled',
-          sort_order: 'desc',
         },
         signal: abortCtrl.signal,
       });
     });
 
-    test('check parameter url, query with a filter', async () => {
+    test('it invokes with expected url and body values when a filter exists and "namespaceType" of "single"', async () => {
       await fetchExceptionListItemsByListId({
         filterOptions: {
           filter: 'hello world',
-          sortField: 'enabled',
-          sortOrder: 'desc',
+          tags: [],
+        },
+        http: mockKibanaHttpService(),
+        listId: 'myList',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
+        method: 'GET',
+        query: {
+          filter: 'exception-list.attributes.entries.field:hello world*',
+          list_id: 'myList',
+          namespace_type: 'single',
+          page: 1,
+          per_page: 20,
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('it invokes with expected url and body values when a filter exists and "namespaceType" of "agnostic"', async () => {
+      await fetchExceptionListItemsByListId({
+        filterOptions: {
+          filter: 'hello world',
+          tags: [],
+        },
+        http: mockKibanaHttpService(),
+        listId: 'myList',
+        namespaceType: 'agnostic',
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
+        method: 'GET',
+        query: {
+          filter: 'exception-list-agnostic.attributes.entries.field:hello world*',
+          list_id: 'myList',
+          namespace_type: 'agnostic',
+          page: 1,
+          per_page: 20,
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('it invokes with expected url and body values when tags exists', async () => {
+      await fetchExceptionListItemsByListId({
+        filterOptions: {
+          filter: '',
           tags: ['malware'],
         },
         http: mockKibanaHttpService(),
         listId: 'myList',
+        namespaceType: 'agnostic',
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
+        method: 'GET',
+        query: {
+          filter: 'exception-list-agnostic.attributes.tags:malware',
+          list_id: 'myList',
+          namespace_type: 'agnostic',
+          page: 1,
+          per_page: 20,
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('it invokes with expected url and body values when filter and tags exists', async () => {
+      await fetchExceptionListItemsByListId({
+        filterOptions: {
+          filter: 'host.name',
+          tags: ['malware'],
+        },
+        http: mockKibanaHttpService(),
+        listId: 'myList',
+        namespaceType: 'agnostic',
         signal: abortCtrl.signal,
       });
 
@@ -202,72 +267,62 @@ describe('Exceptions Lists API', () => {
         method: 'GET',
         query: {
           filter:
-            'exception-list.attributes.entries.field: hello world AND exception-list.attributes.tags: malware',
-          listId: 'myList',
-          namespaceType: 'single',
+            'exception-list-agnostic.attributes.entries.field:host.name* AND exception-list-agnostic.attributes.tags:malware',
+          list_id: 'myList',
+          namespace_type: 'agnostic',
           page: 1,
           per_page: 20,
-          sort_field: 'enabled',
-          sort_order: 'desc',
         },
         signal: abortCtrl.signal,
       });
     });
 
-    test('happy path', async () => {
+    test('it returns expected format when call succeeds', async () => {
       const exceptionResponse = await fetchExceptionListItemsByListId({
-        filterOptions: {
-          filter: '',
-          sortField: 'enabled',
-          sortOrder: 'desc',
-          tags: [],
-        },
         http: mockKibanaHttpService(),
         listId: 'endpoint_list',
-        listType: 'siem',
-        pagination: {
-          page: 1,
-          perPage: 20,
-          total: 0,
-        },
+        namespaceType: 'single',
         signal: abortCtrl.signal,
       });
-      expect(exceptionResponse).toEqual([mockNewExceptionItem]);
+      expect(exceptionResponse).toEqual([{ ...mockExceptionItem }]);
     });
   });
 
-  describe('fetchExceptionListItemById', () => {
+  describe('#fetchExceptionListItemById', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue([mockNewExceptionItem]);
+      fetchMock.mockResolvedValue([mockExceptionItem]);
     });
 
-    test('check parameter url, body', async () => {
+    test('it invokes "fetchExceptionListItemById" with expected url and body values', async () => {
       await fetchExceptionListItemById({
         http: mockKibanaHttpService(),
         id: '1',
+        namespaceType: 'single',
         signal: abortCtrl.signal,
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items', {
         method: 'GET',
         query: {
           id: '1',
+          namespace_type: 'single',
         },
         signal: abortCtrl.signal,
       });
     });
 
-    test('happy path', async () => {
+    test('it returns expected format when call succeeds', async () => {
       const exceptionResponse = await fetchExceptionListItemById({
         http: mockKibanaHttpService(),
         id: '1',
+        namespaceType: 'single',
         signal: abortCtrl.signal,
       });
-      expect(exceptionResponse).toEqual([mockNewExceptionItem]);
+      expect(exceptionResponse).toEqual([mockExceptionItem]);
     });
   });
 
-  describe('deleteExceptionListById', () => {
+  describe('#deleteExceptionListById', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(mockExceptionList);
@@ -277,28 +332,31 @@ describe('Exceptions Lists API', () => {
       await deleteExceptionListById({
         http: mockKibanaHttpService(),
         id: '1',
+        namespaceType: 'single',
         signal: abortCtrl.signal,
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
         method: 'DELETE',
         query: {
           id: '1',
+          namespace_type: 'single',
         },
         signal: abortCtrl.signal,
       });
     });
 
-    test('happy path', async () => {
+    test('it returns expected format when call succeeds', async () => {
       const exceptionResponse = await deleteExceptionListById({
         http: mockKibanaHttpService(),
         id: '1',
+        namespaceType: 'single',
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual(mockExceptionList);
     });
   });
 
-  describe('deleteExceptionListItemById', () => {
+  describe('#deleteExceptionListItemById', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(mockExceptionItem);
@@ -308,21 +366,24 @@ describe('Exceptions Lists API', () => {
       await deleteExceptionListItemById({
         http: mockKibanaHttpService(),
         id: '1',
+        namespaceType: 'single',
         signal: abortCtrl.signal,
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items', {
         method: 'DELETE',
         query: {
           id: '1',
+          namespace_type: 'single',
         },
         signal: abortCtrl.signal,
       });
     });
 
-    test('happy path', async () => {
+    test('it returns expected format when call succeeds', async () => {
       const exceptionResponse = await deleteExceptionListItemById({
         http: mockKibanaHttpService(),
         id: '1',
+        namespaceType: 'single',
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual(mockExceptionItem);
