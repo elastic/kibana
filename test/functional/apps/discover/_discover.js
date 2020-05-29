@@ -233,5 +233,16 @@ export default function ({ getService, getPageObjects }) {
         expect(await PageObjects.discover.getNrOfFetches()).to.be(1);
       });
     });
+
+    describe('empty query', function () {
+      it('should update the histogram timerange when the query is resubmitted', async function () {
+        await PageObjects.timePicker.setEndDateTimeToNow();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        const initialTimeString = await PageObjects.discover.getChartTimespan();
+        await queryBar.submitQuery();
+        const refreshedTimeString = await PageObjects.discover.getChartTimespan();
+        expect(refreshedTimeString).not.to.be(initialTimeString);
+      });
+    });
   });
 }
