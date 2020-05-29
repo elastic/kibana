@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  PLUGIN,
-  API_BASE_PATH,
-  DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT,
-  BASE_PATH,
-} from './constants';
-
-export { getTemplateParameter } from './lib';
-
-export * from './types';
+export { TabSummary } from './tab_summary';
+export { TabAliases } from './tab_aliases';
+export { TabMappings } from './tab_mappings';
+export { TabSettings } from './tab_settings';

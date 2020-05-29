@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { ComponentTemplateListItem } from '../types';
+import { useComponentTemplatesContext } from '../component_templates_context';
 
 export interface Props {
   componentTemplates: ComponentTemplateListItem[];
@@ -30,6 +31,8 @@ export const ComponentTable: FunctionComponent<Props> = ({
   onDeleteClick,
 }) => {
   const [selection, setSelection] = useState<ComponentTemplateListItem[]>([]);
+
+  const { appBasePath } = useComponentTemplatesContext();
 
   const tableProps: EuiInMemoryTableProps<ComponentTemplateListItem> = {
     itemId: 'name',
@@ -146,8 +149,10 @@ export const ComponentTable: FunctionComponent<Props> = ({
         }),
         sortable: true,
         render: (name: string) => (
-          // TODO placeholder for now
-          <EuiLink href={'#'} data-test-subj="componentTemplateDetailsLink">
+          <EuiLink
+            href={`#${appBasePath}component_templates/${name}`}
+            data-test-subj="componentTemplateDetailsLink"
+          >
             {name}
           </EuiLink>
         ),

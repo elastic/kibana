@@ -5,19 +5,29 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SectionLoading } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
-
 import { EmptyPrompt } from './empty_prompt';
 import { ComponentTable } from './table';
 import { LoadError } from './error';
 import { ComponentTemplatesDeleteModal } from './delete_modal';
+import { ComponentTemplateDetailsFlyout } from './details_flyout';
 
-export const ComponentTemplateList: React.FunctionComponent = () => {
-  const { api, trackMetric } = useComponentTemplatesContext();
+interface MatchParams {
+  componentTemplateName?: string;
+}
+
+export const ComponentTemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+  match: {
+    params: { componentTemplateName },
+  },
+  history,
+}) => {
+  const { api, trackMetric, appBasePath } = useComponentTemplatesContext();
 
   const { data, isLoading, error, sendRequest } = api.useLoadComponentTemplates();
 
@@ -27,6 +37,10 @@ export const ComponentTemplateList: React.FunctionComponent = () => {
   useEffect(() => {
     trackMetric('loaded', UIM_COMPONENT_TEMPLATE_LIST_LOAD);
   }, [trackMetric]);
+
+  const goToList = () => {
+    return history.push(`${appBasePath}component_templates`);
+  };
 
   if (data?.length === 0) {
     return <EmptyPrompt />;
@@ -58,18 +72,31 @@ export const ComponentTemplateList: React.FunctionComponent = () => {
   return (
     <div data-test-subj="componentTemplateList">
       {content}
+
+      {/* delete modal */}
       {componentTemplatesToDelete?.length > 0 ? (
         <ComponentTemplatesDeleteModal
           callback={(deleteResponse) => {
             if (deleteResponse?.hasDeletedComponentTemplates) {
               // refetch the component templates
               sendRequest();
+              // go back to list view (if deleted from details flyout)
+              goToList();
             }
             setComponentTemplatesToDelete([]);
           }}
           componentTemplatesToDelete={componentTemplatesToDelete}
         />
       ) : null}
+
+      {/* details flyout */}
+      {componentTemplateName && (
+        <ComponentTemplateDetailsFlyout
+          onClose={goToList}
+          onDeleteClick={setComponentTemplatesToDelete}
+          componentTemplateName={componentTemplateName}
+        />
+      )}
     </div>
   );
 };

@@ -4,13 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  PLUGIN,
-  API_BASE_PATH,
-  DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT,
-  BASE_PATH,
-} from './constants';
-
-export { getTemplateParameter } from './lib';
-
-export * from './types';
+export { ComponentTemplateDetailsFlyout } from './details_flyout';

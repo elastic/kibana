@@ -136,7 +136,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           />
           <Route
             exact
-            path={`${BASE_PATH}${Section.ComponentTemplates}`}
+            path={`${BASE_PATH}${Section.ComponentTemplates}/:componentTemplateName*`}
             component={ComponentTemplateList}
           />
         </Switch>
