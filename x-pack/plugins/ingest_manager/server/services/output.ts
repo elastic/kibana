@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsClientContract } from 'src/core/server';
-import { NewOutput, Output } from '../types';
+import { NewOutput, Output, OutputSOAttributes } from '../types';
 import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import { appContextService } from './app_context';
 import { decodeCloudId } from '../../common';
@@ -13,7 +13,7 @@ const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
 class OutputService {
   public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
-    const outputs = await soClient.find<Output>({
+    const outputs = await soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       filter: `${OUTPUT_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
     });
@@ -44,7 +44,7 @@ class OutputService {
     id: string,
     data: Partial<NewOutput>
   ) {
-    await soClient.update<NewOutput>(SAVED_OBJECT_TYPE, id, data);
+    await soClient.update<OutputSOAttributes>(SAVED_OBJECT_TYPE, id, data);
   }
 
   public async getDefaultOutputId(soClient: SavedObjectsClientContract) {
@@ -67,7 +67,7 @@ class OutputService {
     }
     const so = await appContextService
       .getEncryptedSavedObjects()
-      ?.getDecryptedAsInternalUser<Output>(OUTPUT_SAVED_OBJECT_TYPE, defaultOutputId);
+      ?.getDecryptedAsInternalUser<OutputSOAttributes>(OUTPUT_SAVED_OBJECT_TYPE, defaultOutputId);
 
     if (!so || !so.attributes.fleet_enroll_username || !so.attributes.fleet_enroll_password) {
       return null;
@@ -84,27 +84,33 @@ class OutputService {
     output: NewOutput,
     options?: { id?: string }
   ): Promise<Output> {
-    const newSo = await soClient.create<Output>(SAVED_OBJECT_TYPE, output as Output, options);
+    const newSo = await soClient.create<OutputSOAttributes>(
+      SAVED_OBJECT_TYPE,
+      output as Output,
+      options
+    );
 
     return {
+      id: newSo.id,
       ...newSo.attributes,
     };
   }
 
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
-    const outputSO = await soClient.get<Output>(SAVED_OBJECT_TYPE, id);
+    const outputSO = await soClient.get<OutputSOAttributes>(SAVED_OBJECT_TYPE, id);
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
     }
 
     return {
+      id: outputSO.id,
       ...outputSO.attributes,
     };
   }
 
   public async update(soClient: SavedObjectsClientContract, id: string, data: Partial<Output>) {
-    const outputSO = await soClient.update<Output>(SAVED_OBJECT_TYPE, id, data);
+    const outputSO = await soClient.update<OutputSOAttributes>(SAVED_OBJECT_TYPE, id, data);
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
@@ -112,7 +118,7 @@ class OutputService {
   }
 
   public async list(soClient: SavedObjectsClientContract) {
-    const outputs = await soClient.find<Output>({
+    const outputs = await soClient.find<OutputSOAttributes>({
       type: SAVED_OBJECT_TYPE,
       page: 1,
       perPage: 1000,
@@ -121,6 +127,7 @@ class OutputService {
     return {
       items: outputs.saved_objects.map<Output>((outputSO) => {
         return {
+          id: outputSO.id,
           ...outputSO.attributes,
         };
       }),
