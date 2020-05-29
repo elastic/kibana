@@ -11,11 +11,17 @@ import { APICaller } from 'kibana/server';
 import {
   Description,
   DescriptionOrUndefined,
+  Filter,
   Id,
   IdOrUndefined,
+  ListId,
   MetaOrUndefined,
   Name,
   NameOrUndefined,
+  Page,
+  PerPage,
+  SortFieldOrUndefined,
+  SortOrderOrUndefined,
   Type,
 } from '../../../common/schemas';
 import { ConfigType } from '../../config';
@@ -109,4 +115,25 @@ export interface GetListItemsByValueOptions {
   type: Type;
   listId: string;
   value: string[];
+}
+
+export interface FindListOptions {
+  currentIndexPosition: number;
+  filter: Filter;
+  perPage: PerPage;
+  page: Page;
+  searchAfter: string[] | undefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+}
+
+export interface FindListItemOptions {
+  currentIndexPosition: number;
+  filter: Filter;
+  listId: ListId;
+  perPage: PerPage;
+  page: Page;
+  searchAfter: string[] | undefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
 }

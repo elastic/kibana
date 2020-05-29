@@ -49,7 +49,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
         ? await uiSettings.client.get(UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS)
         : 0;
 
-    return elasticsearch.dataClient.callAsCurrentUser(endpoint, {
+    return elasticsearch.legacy.client.callAsCurrentUser(endpoint, {
       ...params,
       ignore_throttled: !includeFrozen,
       ...(maxConcurrentShardRequests > 0

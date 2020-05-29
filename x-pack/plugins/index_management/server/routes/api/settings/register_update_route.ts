@@ -31,7 +31,7 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
       };
 
       try {
-        const response = await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
+        const response = await ctx.core.elasticsearch.legacy.client.callAsCurrentUser(
           'indices.putSettings',
           params
         );

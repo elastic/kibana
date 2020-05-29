@@ -139,7 +139,7 @@ export function getESClient(
   const {
     callAsCurrentUser,
     callAsInternalUser,
-  } = context.core.elasticsearch.dataClient;
+  } = context.core.elasticsearch.legacy.client;
 
   async function callEs(operationName: string, params: Record<string, any>) {
     const startTime = process.hrtime();
