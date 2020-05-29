@@ -51,7 +51,6 @@ interface OwnProps<TCache = object> {
   hideActions?: ActionTimelineToShow[];
   onOpenTimeline?: (timeline: TimelineModel) => void;
 }
-export const disableTemplate = true;
 
 /**
  * CreateTemplateTimelineBtn
