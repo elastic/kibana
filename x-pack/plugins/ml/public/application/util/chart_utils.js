@@ -65,7 +65,7 @@ export function chartLimits(data = []) {
   return limits;
 }
 
-export function chartExtendedLimits(data = []) {
+export function chartExtendedLimits(data = [], functionDescription) {
   let _min = Infinity;
   let _max = -Infinity;
   data.forEach((d) => {
@@ -94,6 +94,12 @@ export function chartExtendedLimits(data = []) {
     const padding = limits.max * 0.05;
     limits.max += padding;
     limits.min -= padding;
+  }
+
+  // makes sure the domain starts at 0 if the aggregation is by count
+  // since the number should always be positive
+  if (functionDescription === 'count' && limits.min < 0) {
+    limits.min = 0;
   }
   return limits;
 }

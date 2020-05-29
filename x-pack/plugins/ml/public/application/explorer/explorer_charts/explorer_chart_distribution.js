@@ -142,7 +142,11 @@ export class ExplorerChartDistribution extends React.Component {
           return d.entity === highlight;
         });
         // calculate the max y domain based on value, typical, and actual
-        const { min: yScaleDomainMin, max: yScaleDomainMax } = chartExtendedLimits(focusData);
+        // also sets the min to be at least 0 if the series function type is `count`
+        const { min: yScaleDomainMin, max: yScaleDomainMax } = chartExtendedLimits(
+          focusData,
+          functionDescription
+        );
         // now again filter chartData to include only the data points within the domain
         chartData = chartData.filter((d) => {
           return d.value <= yScaleDomainMax;
@@ -151,10 +155,7 @@ export class ExplorerChartDistribution extends React.Component {
         lineChartYScale = d3.scale
           .linear()
           .range([chartHeight, 0])
-          .domain([
-            yScaleDomainMin < 0 && functionDescription === 'count' ? 0 : yScaleDomainMin,
-            yScaleDomainMax,
-          ])
+          .domain([yScaleDomainMin < 0 ? yScaleDomainMin : 0, yScaleDomainMax])
           .nice();
       } else if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
         // avoid overflowing the border of the highlighted area
