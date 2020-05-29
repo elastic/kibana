@@ -37,7 +37,13 @@ export const JobMessages: FC<JobMessagesProps> = ({ messages, loading, error, re
             defaultMessage: 'Refresh',
           })}
         >
-          <EuiButtonIcon onClick={refreshMessage} iconType="refresh" aria-label="Refresh" />
+          <EuiButtonIcon
+            onClick={refreshMessage}
+            iconType="refresh"
+            aria-label={i18n.translate('xpack.ml.jobMessages.refreshAriaLabel', {
+              defaultMessage: 'Refresh',
+            })}
+          />
         </EuiToolTip>
       ) : (
         ''
