@@ -20,23 +20,12 @@ import React, { Component, RefObject } from 'react';
 import { Subscription } from 'rxjs';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { CoreStart } from 'src/core/public';
-import { UiActionsService } from 'src/plugins/ui_actions/public';
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { IContainer, PanelState, EmbeddableChildPanel } from '../..';
 import { EmbeddableStart } from '../../../plugin';
 
 interface Props {
   container: IContainer;
-  getActions: UiActionsService['getTriggerCompatibleActions'];
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
-  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   panelComponent: EmbeddableStart['EmbeddablePanel'];
-  overlays: CoreStart['overlays'];
-  application: CoreStart['application'];
-  notifications: CoreStart['notifications'];
-  inspector: InspectorStartContract;
-  SavedObjectFinder: React.ComponentType<any>;
 }
 
 interface State {

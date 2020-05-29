@@ -35,7 +35,7 @@ interface ActionContext {
 interface NavigationContext {
   app: string;
   path: string;
-  state?: EmbeddableOriginatingAppState;
+  state: EmbeddableOriginatingAppState;
 }
 
 export class EditPanelAction implements Action<ActionContext> {
@@ -47,7 +47,7 @@ export class EditPanelAction implements Action<ActionContext> {
   constructor(
     private readonly getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'],
     private readonly application: ApplicationStart,
-    private readonly stateTransfer?: EmbeddableStart['stateTransfer']
+    private readonly stateTransfer: EmbeddableStart['stateTransfer']
   ) {
     if (this.application?.currentAppId$) {
       this.application.currentAppId$
@@ -87,17 +87,10 @@ export class EditPanelAction implements Action<ActionContext> {
   public async execute(context: ActionContext) {
     const appTarget = this.getAppTarget(context);
     if (appTarget) {
-      if (this.stateTransfer && appTarget.state) {
-        await this.stateTransfer.outgoingOriginatingApp(appTarget.app, {
-          path: appTarget.path,
-          state: appTarget.state,
-        });
-      } else {
-        await this.application.navigateToApp(appTarget.app, {
-          path: appTarget.path,
-          state: appTarget.state,
-        });
-      }
+      await this.stateTransfer.outgoingOriginatingApp(appTarget.app, {
+        path: appTarget.path,
+        state: appTarget.state,
+      });
       return;
     }
 
@@ -112,11 +105,8 @@ export class EditPanelAction implements Action<ActionContext> {
     const app = embeddable ? embeddable.getOutput().editApp : undefined;
     const path = embeddable ? embeddable.getOutput().editPath : undefined;
     if (app && path) {
-      if (this.currentAppId) {
-        const state = { originatingApp: this.currentAppId };
-        return { app, path, state };
-      }
-      return { app, path };
+      const state = { originatingApp: this.currentAppId! };
+      return { app, path, state };
     }
   }
 

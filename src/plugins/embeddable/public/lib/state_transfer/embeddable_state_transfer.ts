@@ -30,22 +30,22 @@ export class EmbeddableStateTransfer {
 
   public incomingOriginatingApp(
     history: ScopedHistory,
-    removeAfterFetch: boolean = true
+    removeAfterFetch: boolean = false
   ): EmbeddableOriginatingAppState | undefined {
     return this.incoming(history, isEmbeddableOriginatingAppState, removeAfterFetch);
   }
 
   public incomingEmbeddablePackage(
     history: ScopedHistory,
-    removeAfterFetch: boolean = true
+    removeAfterFetch: boolean = false
   ): EmbeddablePackageState | undefined {
     return this.incoming(history, isEmbeddablePackageState, removeAfterFetch);
   }
 
   public incoming<IncomingStateType>(
     history: ScopedHistory,
-    guard?: (state: unknown) => state is IncomingStateType,
-    removeAfterFetch: boolean = true
+    guard: (state: unknown) => state is IncomingStateType,
+    removeAfterFetch: boolean = false
   ): IncomingStateType | undefined {
     const incomingState = history?.location?.state;
     const castState =

@@ -93,11 +93,6 @@ export interface DashboardAppControllerDependencies extends RenderDeps {
   navigation: NavigationStart;
 }
 
-export interface DashboardIncomingState {
-  type: string;
-  id: string;
-}
-
 export class DashboardAppController {
   // Part of the exposed plugin API - do not remove without careful consideration.
   appStatus: {

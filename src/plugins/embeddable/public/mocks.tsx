@@ -16,15 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
 import {
   EmbeddableStart,
   EmbeddableSetup,
   EmbeddableSetupDependencies,
   EmbeddableStartDependencies,
   EmbeddableStateTransfer,
+  IEmbeddable,
+  EmbeddablePanel,
 } from '.';
 import { EmbeddablePublicPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
+import { UiActionsService } from './lib/ui_actions';
+import { CoreStart } from '../../../core/public';
+import { Start as InspectorStart } from '../../inspector/public';
 
 // eslint-disable-next-line
 import { inspectorPluginMock } from '../../inspector/public/mocks';
@@ -33,6 +39,45 @@ import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
 
 export type Setup = jest.Mocked<EmbeddableSetup>;
 export type Start = jest.Mocked<EmbeddableStart>;
+
+interface CreateEmbeddablePanelMockArgs {
+  getActions: UiActionsService['getTriggerCompatibleActions'];
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
+  overlays: CoreStart['overlays'];
+  notifications: CoreStart['notifications'];
+  application: CoreStart['application'];
+  inspector: InspectorStart;
+  SavedObjectFinder: React.ComponentType<any>;
+  stateTransfer: EmbeddableStart['stateTransfer'];
+}
+
+export const createEmbeddablePanelMock = ({
+  getActions,
+  getEmbeddableFactory,
+  getAllEmbeddableFactories,
+  overlays,
+  notifications,
+  application,
+  inspector,
+  SavedObjectFinder,
+  stateTransfer,
+}: Partial<CreateEmbeddablePanelMockArgs>) => {
+  return ({ embeddable }: { embeddable: IEmbeddable }) => (
+    <EmbeddablePanel
+      embeddable={embeddable}
+      getActions={getActions || (() => Promise.resolve([]))}
+      getAllEmbeddableFactories={getAllEmbeddableFactories || ((() => []) as any)}
+      getEmbeddableFactory={getEmbeddableFactory || ((() => undefined) as any)}
+      notifications={notifications || ({} as any)}
+      application={application || ({} as any)}
+      overlays={overlays || ({} as any)}
+      inspector={inspector || ({} as any)}
+      SavedObjectFinder={SavedObjectFinder || (() => null)}
+      stateTransfer={stateTransfer || ({} as any)}
+    />
+  );
+};
 
 export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTransfer> => {
   return {

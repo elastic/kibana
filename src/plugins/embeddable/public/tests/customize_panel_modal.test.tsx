@@ -37,6 +37,7 @@ import { testPlugin } from './test_plugin';
 import { CustomizePanelModal } from '../lib/panel/panel_header/panel_actions/customize_title/customize_panel_modal';
 import { mount } from 'enzyme';
 import { EmbeddableStart } from '../plugin';
+import { createEmbeddablePanelMock } from '../mocks';
 
 let api: EmbeddableStart;
 let container: Container;
@@ -55,17 +56,20 @@ beforeEach(async () => {
   setup.registerEmbeddableFactory(contactCardFactory.type, contactCardFactory);
 
   api = doStart();
+
+  const testPanel = createEmbeddablePanelMock({
+    getActions: uiActions.getTriggerCompatibleActions,
+    getEmbeddableFactory: api.getEmbeddableFactory,
+    getAllEmbeddableFactories: api.getEmbeddableFactories,
+    overlays: coreStart.overlays,
+    notifications: coreStart.notifications,
+    application: coreStart.application,
+  });
   container = new HelloWorldContainer(
     { id: '123', panels: {} },
     {
-      getActions: uiActions.getTriggerCompatibleActions,
       getEmbeddableFactory: api.getEmbeddableFactory,
-      getAllEmbeddableFactories: api.getEmbeddableFactories,
-      overlays: coreStart.overlays,
-      notifications: coreStart.notifications,
-      application: coreStart.application,
-      inspector: {} as any,
-      SavedObjectFinder: () => null,
+      panelComponent: testPanel,
     }
   );
   const contactCardEmbeddable = await container.addNewEmbeddable<

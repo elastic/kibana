@@ -61,7 +61,7 @@ interface Props {
   application: CoreStart['application'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
-  stateTransfer?: EmbeddableStart['stateTransfer'];
+  stateTransfer: EmbeddableStart['stateTransfer'];
   hideHeader?: boolean;
 }
 

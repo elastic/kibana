@@ -163,6 +163,7 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
         notifications={{} as any}
         application={applicationMock}
         overlays={{} as any}
+        stateTransfer={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
       />
@@ -202,6 +203,7 @@ const renderInEditModeAndOpenContextMenu = async (
         notifications={{} as any}
         overlays={{} as any}
         application={applicationMock}
+        stateTransfer={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
       />
@@ -309,6 +311,7 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
         notifications={{} as any}
         overlays={{} as any}
         application={applicationMock}
+        stateTransfer={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
       />
@@ -372,6 +375,7 @@ test('Updates when hidePanelTitles is toggled', async () => {
         notifications={{} as any}
         overlays={{} as any}
         application={applicationMock}
+        stateTransfer={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
       />
@@ -425,6 +429,7 @@ test('Check when hide header option is false', async () => {
         notifications={{} as any}
         overlays={{} as any}
         application={applicationMock}
+        stateTransfer={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
         hideHeader={false}
@@ -463,6 +468,7 @@ test('Check when hide header option is true', async () => {
         notifications={{} as any}
         overlays={{} as any}
         application={{} as any}
+        stateTransfer={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
         hideHeader={true}
