@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { ISection, Section } from './Section';
+import { ISection, Section } from './section';
 import { CoreStart } from '../../../../../../src/core/public';
 
 const appsSection: ISection[] = [
