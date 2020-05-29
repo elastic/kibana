@@ -210,6 +210,25 @@ When `xpack.reporting.capture.browser.type` is set to `chromium` (default) you c
   large exports from causing performance and storage issues.
   Defaults to `10485760` (10mB).
 
+| `xpack.reporting.csv.scroll.size`
+  | Number of documents being retrieved from Elasticsearch for each scroll iteration when a CSV 
+  export is executed.
+  Defaults to `500`.
+
+| `xpack.reporting.csv.scroll.duration`
+  | Amonunt of time allowed before the scroll context is cleaned when a CSV export is executed.
+  Defaults to `30s`.
+  
+| `xpack.reporting.csv.checkForFormulas`
+  | Enables a check which Warns when there's a potential formula involved in the output (=, -, +, and @ chars).
+  See OWASP: https://www.owasp.org/index.php/CSV_Injection
+  Defaults to `true`.
+  
+| `xpack.reporting.csv.enablePanelActionDownload`
+  | Enables CSV export from a saved search on a dashboard. This action is available in the dashboard 
+  panel menu for the saved search.
+  Defaults to `true`.
+
 |===
 
 [float]
