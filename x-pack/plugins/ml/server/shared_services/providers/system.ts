@@ -23,7 +23,7 @@ export interface MlSystemProvider {
   ): {
     mlCapabilities(): Promise<MlCapabilitiesResponse>;
     mlInfo(): Promise<MlInfoResponse>;
-    mlSearch<T>(searchParams: SearchParams): Promise<SearchResponse<T>>;
+    mlAnomalySearch<T>(searchParams: SearchParams): Promise<SearchResponse<T>>;
   };
 }
 
@@ -68,7 +68,7 @@ export function getMlSystemProvider(
             cloudId,
           };
         },
-        async mlSearch<T>(searchParams: SearchParams): Promise<SearchResponse<T>> {
+        async mlAnomalySearch<T>(searchParams: SearchParams): Promise<SearchResponse<T>> {
           isFullLicense();
           return callAsCurrentUser('search', {
             ...searchParams,

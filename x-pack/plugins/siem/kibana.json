@@ -24,7 +24,8 @@
     "newsfeed",
     "security",
     "spaces",
-    "usageCollection"
+    "usageCollection",
+    "lists"
   ],
   "server": true,
   "ui": true
