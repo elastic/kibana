@@ -33,11 +33,7 @@ const MOCK_REPO_SRC = Path.resolve(__dirname, '../__fixtures__/mock_repo');
 const MOCK_REPO_DIR = Path.resolve(TMP_DIR, 'mock_repo');
 
 expect.addSnapshotSerializer({
-  print: (value: string) =>
-    value
-      .split(REPO_ROOT)
-      .join('<absolute path>')
-      .replace(/\\/g, '/'),
+  print: (value: string) => value.split(REPO_ROOT).join('<absolute path>').replace(/\\/g, '/'),
   test: (value: any) => typeof value === 'string' && value.includes(REPO_ROOT),
 });
 
@@ -91,39 +87,39 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     }
   };
 
-  const initializingStates = msgs.filter(msg => msg.state.phase === 'initializing');
+  const initializingStates = msgs.filter((msg) => msg.state.phase === 'initializing');
   assert('produce at least one initializing event', initializingStates.length >= 1);
 
   const bundleCacheStates = msgs.filter(
-    msg =>
+    (msg) =>
       (msg.event?.type === 'bundle cached' || msg.event?.type === 'bundle not cached') &&
       msg.state.phase === 'initializing'
   );
   assert('produce two bundle cache events while initializing', bundleCacheStates.length === 2);
 
-  const initializedStates = msgs.filter(msg => msg.state.phase === 'initialized');
+  const initializedStates = msgs.filter((msg) => msg.state.phase === 'initialized');
   assert('produce at least one initialized event', initializedStates.length >= 1);
 
-  const workerStarted = msgs.filter(msg => msg.event?.type === 'worker started');
+  const workerStarted = msgs.filter((msg) => msg.event?.type === 'worker started');
   assert('produce one worker started event', workerStarted.length === 1);
 
-  const runningStates = msgs.filter(msg => msg.state.phase === 'running');
+  const runningStates = msgs.filter((msg) => msg.state.phase === 'running');
   assert(
     'produce two or three "running" states',
     runningStates.length === 2 || runningStates.length === 3
   );
 
-  const bundleNotCachedEvents = msgs.filter(msg => msg.event?.type === 'bundle not cached');
+  const bundleNotCachedEvents = msgs.filter((msg) => msg.event?.type === 'bundle not cached');
   assert('produce two "bundle not cached" events', bundleNotCachedEvents.length === 2);
 
-  const successStates = msgs.filter(msg => msg.state.phase === 'success');
+  const successStates = msgs.filter((msg) => msg.state.phase === 'success');
   assert(
     'produce one or two "compiler success" states',
     successStates.length === 1 || successStates.length === 2
   );
 
   const otherStates = msgs.filter(
-    msg =>
+    (msg) =>
       msg.state.phase !== 'initializing' &&
       msg.state.phase !== 'success' &&
       msg.state.phase !== 'running' &&
@@ -139,7 +135,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   );
   expectFileMatchesSnapshotWithCompression('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
 
-  const foo = config.bundles.find(b => b.id === 'foo')!;
+  const foo = config.bundles.find((b) => b.id === 'foo')!;
   expect(foo).toBeTruthy();
   foo.cache.refresh();
   expect(foo.cache.getModuleCount()).toBe(5);
@@ -153,7 +149,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     ]
   `);
 
-  const bar = config.bundles.find(b => b.id === 'bar')!;
+  const bar = config.bundles.find((b) => b.id === 'bar')!;
   expect(bar).toBeTruthy();
   bar.cache.refresh();
   expect(bar.cache.getModuleCount()).toBe(
@@ -189,7 +185,7 @@ it('uses cache on second run and exist cleanly', async () => {
 
   const msgs = await runOptimizer(config)
     .pipe(
-      tap(state => {
+      tap((state) => {
         if (state.event?.type === 'worker stdio') {
           // eslint-disable-next-line no-console
           console.log('worker', state.event.stream, state.event.chunk.toString('utf8'));
@@ -199,7 +195,7 @@ it('uses cache on second run and exist cleanly', async () => {
     )
     .toPromise();
 
-  expect(msgs.map(m => m.state.phase)).toMatchInlineSnapshot(`
+  expect(msgs.map((m) => m.state.phase)).toMatchInlineSnapshot(`
     Array [
       "initializing",
       "initializing",
