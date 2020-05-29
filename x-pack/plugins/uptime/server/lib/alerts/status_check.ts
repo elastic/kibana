@@ -179,17 +179,27 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
   validate: {
     params: schema.object({
       filters: schema.maybe(
-        schema.object({
-          'monitor.type': schema.arrayOf(schema.string()),
-          'observer.geo.name': schema.arrayOf(schema.string()),
-          tags: schema.arrayOf(schema.string()),
-          'url.port': schema.arrayOf(schema.string()),
-        })
+        schema.oneOf([
+          schema.object({
+            'monitor.type': schema.maybe(schema.arrayOf(schema.string())),
+            'observer.geo.name': schema.maybe(schema.arrayOf(schema.string())),
+            tags: schema.maybe(schema.arrayOf(schema.string())),
+            'url.port': schema.maybe(schema.arrayOf(schema.string())),
+          }),
+          schema.string(),
+        ])
       ),
+      locations: schema.maybe(schema.arrayOf(schema.string())),
       numTimes: schema.number(),
       search: schema.maybe(schema.string()),
-      timerangeCount: schema.number(),
-      timerangeUnit: schema.string(),
+      timerangeCount: schema.maybe(schema.number()),
+      timerangeUnit: schema.maybe(schema.string()),
+      timerange: schema.maybe(
+        schema.object({
+          from: schema.string(),
+          to: schema.string(),
+        })
+      ),
     }),
   },
   defaultActionGroupId: MONITOR_STATUS.id,
