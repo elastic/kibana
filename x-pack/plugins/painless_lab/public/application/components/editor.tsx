@@ -25,7 +25,6 @@ export function Editor({ code, onChange }: Props) {
       }}
       value={xJson}
       onChange={(value) => {
-        console.log(convertToJson(value));
         setXJson(value);
         onChange(value);
       }}
