@@ -507,7 +507,7 @@ export interface StateUrl {
 /** Monitor status data over time. */
 export interface SummaryHistogram {
   /** The number of documents used to assemble the histogram. */
-  count?: number | null;
+  count?: number;
   /** The individual histogram data points. */
   points: SummaryHistogramPoint[];
 }
