@@ -17,6 +17,4 @@
  * under the License.
  */
 
-import * as XJsonGrammar from './xjson';
-
-export { XJsonGrammar };
+export * from './monaco';

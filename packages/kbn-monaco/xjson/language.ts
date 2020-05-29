@@ -17,14 +17,19 @@
  * under the License.
  */
 
-import { monaco } from '../';
+// This file contains a lot of single setup logic for registering a language globally
+
+import { monaco } from '../monaco';
 import { WorkerProxyService } from './worker_proxy_service';
-import './lexer_rules';
+import { registerLexerRules } from './lexer_rules';
 import { ID } from './constants';
 // @ts-ignore
 import workerSrc from '!!raw-loader!./dist/bundle.editor.worker.js';
 
 const wps = new WorkerProxyService();
+
+// Register rules against shared monaco instance.
+registerLexerRules(monaco);
 
 // In future we will need to make this map languages to workers using "id" and/or "label" values
 // that get passed in.

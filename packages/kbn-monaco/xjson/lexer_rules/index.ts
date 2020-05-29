@@ -18,17 +18,15 @@
  */
 
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import { XJsonGrammar } from '@kbn/langs';
+import * as xJson from './xjson';
+import * as esql from './esql';
+import * as painless from './painless';
 
-export class XJsonWorker {
-  constructor(private ctx: monaco.worker.IWorkerContext) {}
-  private parser: any;
-
-  async parse() {
-    if (!this.parser) {
-      this.parser = XJsonGrammar.createParser();
-    }
-    const [model] = this.ctx.getMirrorModels();
-    return this.parser(model.getValue());
-  }
-}
+export const registerLexerRules = (m: typeof monaco) => {
+  m.languages.register({ id: xJson.ID });
+  m.languages.setMonarchTokensProvider(xJson.ID, xJson.lexerRules);
+  m.languages.register({ id: painless.ID });
+  m.languages.setMonarchTokensProvider(painless.ID, painless.lexerRules);
+  m.languages.register({ id: esql.ID });
+  m.languages.setMonarchTokensProvider(esql.ID, esql.lexerRules);
+};

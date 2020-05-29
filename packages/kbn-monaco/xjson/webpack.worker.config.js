@@ -16,19 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 const path = require('path');
 
-module.exports = {
+const createConfig = (lang) => ({
   mode: 'production',
-  entry: './index.ts',
+  entry: path.resolve(__dirname, `./worker/${lang}.worker.ts`),
   output: {
-    path: path.resolve(__dirname, 'target'),
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'bundle.editor.worker.js',
   },
   resolve: {
     modules: ['node_modules'],
     extensions: ['.js', '.ts', '.tsx'],
   },
-  stats: 'errors-only',
   module: {
     rules: [
       {
@@ -43,4 +44,6 @@ module.exports = {
       },
     ],
   },
-};
+});
+
+module.exports = createConfig('xjson');

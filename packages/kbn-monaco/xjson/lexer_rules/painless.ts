@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { monaco } from '../../';
+import { monaco } from '../../monaco';
 
-const ID = 'painless';
+export const ID = 'painless';
 
 /**
  * Extends the default type for a Monarch language so we can use

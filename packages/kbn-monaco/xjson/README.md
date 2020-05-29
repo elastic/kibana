@@ -19,12 +19,12 @@ the "raw-loader".
 See the related ./webpack.xjson-worker.config.js file that is runnable with Kibana's webpack with:
 
 ```sh
-yarn webpack --config ./monaco/xjson/webpack.worker.config.js
+yarn webpack --config ./xjson/webpack.worker.config.js
 ```
 
 ### ./lexer_rules
 
-Contains the Monarch-specific language tokenization rules for XJSON
+Contains the Monarch-specific language tokenization rules for XJSON. Each set of rules registers itself against monaco.
 
 ### ./constants.ts
 

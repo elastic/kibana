@@ -26,7 +26,9 @@ const { ToolingLog, withProcRunner, pickLevelFromFlags } = require('@kbn/dev-uti
 const TARGET_BUILD_DIR = path.resolve(__dirname, '../target');
 const ROOT_DIR = path.resolve(__dirname, '../');
 
-const flags = getopts(process.argv);
+const flags = getopts(process.argv, {
+  boolean: ['dev'],
+});
 
 const log = new ToolingLog({
   level: pickLevelFromFlags(flags),
@@ -46,7 +48,15 @@ withProcRunner(log, async (proc) => {
 
   await proc.run('webpack  ', {
     cmd: 'webpack',
-    args: ['--config', `${ROOT_DIR}/webpack.config.js`],
+    args: ['--config', `${ROOT_DIR}/webpack.config.js`, flags.dev ? '--env.dev' : '--env.prod'],
+    wait: true,
+    env,
+    cwd,
+  });
+
+  await proc.run('tsc  ', {
+    cmd: 'tsc',
+    args: ['--emitDeclarationOnly'],
     wait: true,
     env,
     cwd,

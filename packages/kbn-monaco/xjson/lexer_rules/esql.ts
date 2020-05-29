@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { monaco } from '../../';
+import { monaco } from '../../monaco';
 
-const ID = 'esql';
+export const ID = 'esql';
 
 const brackets = [
   { open: '[', close: ']', token: 'delimiter.square' },
@@ -268,6 +268,3 @@ export const lexerRules = {
     ],
   },
 } as monaco.languages.IMonarchLanguage;
-
-monaco.languages.register({ id: ID });
-monaco.languages.setMonarchTokensProvider(ID, lexerRules);

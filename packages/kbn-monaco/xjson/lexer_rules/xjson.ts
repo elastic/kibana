@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import { monaco } from '../../';
+import { monaco } from '../../monaco';
 import { ID } from '../constants';
 import './painless';
 import './esql';
 
 import { globals } from './shared';
+
+export { ID };
 
 export const lexerRules: monaco.languages.IMonarchLanguage = {
   ...(globals as any),

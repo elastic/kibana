@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { XJsonGrammar } from '@kbn/langs';
-import { monaco } from '../';
+import { AnnoTypes } from './grammar';
+import { monaco } from '../monaco';
 import { XJsonWorker } from './worker';
 import { ID } from './constants';
 
 export interface Annotation {
   name?: string;
-  type: XJsonGrammar.AnnoTypes;
+  type: AnnoTypes;
   text: string;
   at: number;
 }

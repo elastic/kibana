@@ -17,4 +17,8 @@
  * under the License.
  */
 
-export { createParser, AnnoTypes } from './grammar';
+import { registerGrammarChecker } from './language';
+
+import { ID } from './constants';
+
+export const XJsonLang = { registerGrammarChecker, ID };
