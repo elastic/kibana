@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { EuiIcon, EuiSideNav, EuiScreenReaderOnly, EuiSideNavItemType } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { sortBy } from 'lodash';
+
+import { EuiIcon, EuiSideNav, EuiScreenReaderOnly, EuiSideNavItemType } from '@elastic/eui';
 import { AppMountParameters } from 'kibana/public';
 import { ManagementApp, ManagementSection } from '../../utils';
 
@@ -53,24 +55,29 @@ export const ManagementSidebarNav = ({
   const toggleOpenOnMobile = () => setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
 
   const sectionsToNavItems = (managementSections: ManagementSection[]) => {
-    return managementSections
-      .filter((section) => section.getAppsEnabled())
-      .map((section) => ({
-        ...createNavItem(section, {
-          items: appsToNavItems(section.apps),
-        }),
-      }));
+    const sortedManagementSections = sortBy(managementSections, 'order');
+
+    return sortedManagementSections.reduce<Array<EuiSideNavItemType<any>>>((acc, section) => {
+      const apps = sortBy(section.getAppsEnabled(), 'order');
+
+      if (apps.length) {
+        acc.push({
+          ...createNavItem(section, {
+            items: appsToNavItems(apps),
+          }),
+        });
+      }
+
+      return acc;
+    }, []);
   };
 
-  const appsToNavItems = (managementApps: ManagementApp[]) => {
-    return managementApps
-      .filter((app) => app.enabled)
-      .map((app) => ({
-        ...createNavItem(app, {
-          ...reactRouterNavigate(history, app.basePath),
-        }),
-      }));
-  };
+  const appsToNavItems = (managementApps: ManagementApp[]) =>
+    managementApps.map((app) => ({
+      ...createNavItem(app, {
+        ...reactRouterNavigate(history, app.basePath),
+      }),
+    }));
 
   const createNavItem = <T extends ManagementItem>(
     item: T,

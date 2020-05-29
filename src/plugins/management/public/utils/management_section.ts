@@ -53,6 +53,6 @@ export class ManagementSection extends ManagementItem {
   }
 
   getAppsEnabled() {
-    return this.apps.filter((app) => app.enabled).sort((a, b) => a.order - b.order);
+    return this.apps.filter((app) => app.enabled);
   }
 }

@@ -59,10 +59,7 @@ export class ManagementSectionsService {
     return {
       getSection: this.getSection,
       getAllSections: this.getAllSections,
-      getSectionsEnabled: () =>
-        this.getAllSections()
-          .filter((section) => section.enabled && section.getAppsEnabled().length)
-          .sort((a, b) => a.order - b.order),
+      getSectionsEnabled: () => this.getAllSections().filter((section) => section.enabled),
     };
   }
 }

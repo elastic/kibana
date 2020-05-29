@@ -58,10 +58,10 @@ describe('ManagementService', () => {
     // Start phase:
     const start = managementService.start();
 
-    expect(start.getSectionsEnabled().length).toEqual(1);
+    expect(start.getSectionsEnabled().length).toEqual(7);
 
-    testApp.disable();
+    testSection.disable();
 
-    expect(start.getSectionsEnabled().length).toEqual(0);
+    expect(start.getSectionsEnabled().length).toEqual(6);
   });
 });
