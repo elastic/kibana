@@ -1688,7 +1688,7 @@ describe('find()', () => {
         },
       ],
     });
-    const result = await alertsClient.find();
+    const result = await alertsClient.find({ options: {} });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Array [
