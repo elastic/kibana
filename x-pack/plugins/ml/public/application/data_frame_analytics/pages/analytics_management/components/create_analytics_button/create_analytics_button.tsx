@@ -10,9 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 
-interface Props {
-  actions: CreateAnalyticsFormProps['actions'];
-  state: CreateAnalyticsFormProps['state'];
+interface Props extends CreateAnalyticsFormProps {
   setIsSourceIndexModalVisible: React.Dispatch<React.SetStateAction<any>>;
 }
 

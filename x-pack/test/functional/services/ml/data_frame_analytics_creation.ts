@@ -182,9 +182,11 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertDependentVariableInputExists() {
-      await testSubjects.existOrFail(
-        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
-      );
+      await retry.tryForTime(8000, async () => {
+        await testSubjects.existOrFail(
+          'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
+        );
+      });
     },
 
     async assertDependentVariableInputMissing() {
@@ -212,16 +214,16 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertTrainingPercentInputExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutTrainingPercentSlider');
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardTrainingPercentSlider');
     },
 
     async assertTrainingPercentInputMissing() {
-      await testSubjects.missingOrFail('mlAnalyticsCreateJobFlyoutTrainingPercentSlider');
+      await testSubjects.missingOrFail('mlAnalyticsCreateJobWizardTrainingPercentSlider');
     },
 
     async assertTrainingPercentValue(expectedValue: string) {
       const actualTrainingPercent = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobFlyoutTrainingPercentSlider',
+        'mlAnalyticsCreateJobWizardTrainingPercentSlider',
         'value'
       );
       expect(actualTrainingPercent).to.eql(
@@ -231,7 +233,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async setTrainingPercent(trainingPercent: string) {
-      const slider = await testSubjects.find('mlAnalyticsCreateJobFlyoutTrainingPercentSlider');
+      const slider = await testSubjects.find('mlAnalyticsCreateJobWizardTrainingPercentSlider');
 
       let currentValue = await slider.getAttribute('value');
       let currentDiff = +currentValue - +trainingPercent;
@@ -400,6 +402,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         await this.assertCreationCalloutMessagesExist();
       });
       await testSubjects.click('analyticsWizardCardManagement');
+      await testSubjects.existOrFail('mlPageDataFrameAnalytics');
     },
   };
 }

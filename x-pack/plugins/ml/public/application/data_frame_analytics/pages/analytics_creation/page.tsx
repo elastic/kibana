@@ -111,9 +111,7 @@ export const Page: FC = () => {
       title: i18n.translate('xpack.dataframe.analytics.creation.createStepTitle', {
         defaultMessage: 'Create',
       }),
-      children: (
-        <CreateStep {...createAnalyticsForm} setCurrentStep={setCurrentStep} step={currentStep} />
-      ),
+      children: <CreateStep {...createAnalyticsForm} step={currentStep} />,
       status: currentStep >= ANALYTICS_STEPS.CREATE ? undefined : ('incomplete' as EuiStepStatus),
       'data-test-subj': 'mlAnalyticsCreateJobWizardCreateStep',
     },

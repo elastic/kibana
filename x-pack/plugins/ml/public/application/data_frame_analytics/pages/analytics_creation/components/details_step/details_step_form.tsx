@@ -106,7 +106,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           aria-label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdInputAriaLabel', {
             defaultMessage: 'Choose a unique analytics job ID.',
           })}
-          isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
+          isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists || jobIdEmpty}
           data-test-subj="mlAnalyticsCreateJobFlyoutJobIdInput"
         />
       </EuiFormRow>

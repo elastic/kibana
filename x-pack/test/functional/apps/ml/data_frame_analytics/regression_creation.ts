@@ -122,6 +122,12 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
+        it('continues to the create step', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToNextStep(
+            'mlAnalyticsCreateJobWizardCreateStep'
+          );
+        });
+
         it('creates and starts the analytics job', async () => {
           await ml.dataFrameAnalyticsCreation.assertCreateButtonExists();
           await ml.dataFrameAnalyticsCreation.assertStartJobCheckboxCheckState(true);

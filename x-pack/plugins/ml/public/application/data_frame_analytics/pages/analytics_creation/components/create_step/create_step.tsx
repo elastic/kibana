@@ -8,12 +8,16 @@ import React, { FC, Fragment, useState } from 'react';
 import { EuiButton, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { Messages } from '../../../analytics_management/components/create_analytics_form/messages';
 import { ANALYTICS_STEPS } from '../../page';
 import { BackToListPanel } from '../back_to_list_panel';
 
-export const CreateStep: FC<CreateAnalyticsStepProps> = ({ actions, state, step }) => {
+interface Props extends CreateAnalyticsFormProps {
+  step: ANALYTICS_STEPS;
+}
+
+export const CreateStep: FC<Props> = ({ actions, state, step }) => {
   const { createAnalyticsJob, startAnalyticsJob } = actions;
   const {
     isAdvancedEditorValidJson,
