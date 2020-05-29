@@ -8,11 +8,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
-  EuiModalBody,
   EuiOverlayMask,
   EuiText,
   EuiTextColor,
   EuiToolTip,
+  EuiSpacer,
 } from '@elastic/eui';
 import { noop } from 'lodash';
 import React, { useCallback, useContext, useMemo } from 'react';
@@ -22,6 +22,7 @@ import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { useViewportDimensions } from '../../../utils/use_viewport_dimensions';
+import { euiStyled } from '../../../../../observability/public';
 
 const MODAL_MARGIN = 25;
 
@@ -54,9 +55,7 @@ export const PageViewLogInContext: React.FC = () => {
   return (
     <EuiOverlayMask>
       <EuiModal onClose={closeModal} maxWidth={false}>
-        <EuiModalBody
-          style={{ width: vw - MODAL_MARGIN * 2, height: vh - MODAL_MARGIN * 2, padding: '16px 0' }}
-        >
+        <LogInContextWrapper width={vw - MODAL_MARGIN * 2} height={vh - MODAL_MARGIN * 2}>
           <EuiFlexGroup
             direction="column"
             responsive={false}
@@ -65,6 +64,7 @@ export const PageViewLogInContext: React.FC = () => {
           >
             <EuiFlexItem grow={1}>
               <LogEntryContext context={contextEntry.context} />
+              <EuiSpacer size="m" />
               <ScrollableLogTextStreamView
                 target={contextEntry.cursor}
                 columnConfigurations={columnConfigurations}
@@ -90,11 +90,17 @@ export const PageViewLogInContext: React.FC = () => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiModalBody>
+        </LogInContextWrapper>
       </EuiModal>
     </EuiOverlayMask>
   );
 };
+
+const LogInContextWrapper = euiStyled.div<{ width: number | string; height: number | string }>`
+  padding: 16px;
+  width: ${(props) => (typeof props.width === 'number' ? `${props.width}px` : props.width)};
+  height: ${(props) => (typeof props.height === 'number' ? `${props.height}px` : props.height)};
+`;
 
 const LogEntryContext: React.FC<{ context: LogEntry['context'] }> = ({ context }) => {
   if ('container.id' in context) {
