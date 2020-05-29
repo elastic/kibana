@@ -9,10 +9,10 @@ import { API_BASE_PATH, INDEX_PATTERNS } from './constants';
 export const registerHelpers = ({ supertest }) => {
   const getAllTemplates = () => supertest.get(`${API_BASE_PATH}/templates`);
 
-  const getOneTemplate = (name, formatVersion = 1) =>
-    supertest.get(`${API_BASE_PATH}/templates/${name}?v=${formatVersion}`);
+  const getOneTemplate = (name, isLegacy = true) =>
+    supertest.get(`${API_BASE_PATH}/templates/${name}?legacy=${isLegacy}`);
 
-  const getTemplatePayload = (name, formatVersion = 1) => ({
+  const getTemplatePayload = (name, isLegacy = true) => ({
     name,
     order: 1,
     indexPatterns: INDEX_PATTERNS,
@@ -45,12 +45,12 @@ export const registerHelpers = ({ supertest }) => {
       },
     },
     _kbnMeta: {
-      formatVersion,
+      isLegacy,
     },
   });
 
   const createTemplate = (payload) =>
-    supertest.put(`${API_BASE_PATH}/templates`).set('kbn-xsrf', 'xxx').send(payload);
+    supertest.post(`${API_BASE_PATH}/templates`).set('kbn-xsrf', 'xxx').send(payload);
 
   const deleteTemplates = (templates) =>
     supertest.post(`${API_BASE_PATH}/delete-templates`).set('kbn-xsrf', 'xxx').send({ templates });
