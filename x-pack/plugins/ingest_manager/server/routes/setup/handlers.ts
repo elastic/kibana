@@ -9,6 +9,7 @@ import { outputService, appContextService } from '../../services';
 import { GetFleetStatusResponse } from '../../../common';
 import { setupIngestManager, setupFleet } from '../../services/setup';
 import { PostFleetSetupRequestSchema } from '../../types';
+import { IngestManagerError, getHTTPResponseCode } from '../../errors';
 
 export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
@@ -54,7 +55,7 @@ export const createFleetSetupHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const soClient = context.core.savedObjects.client;
-    const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
+    const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
     await setupIngestManager(soClient, callCluster);
     await setupFleet(soClient, callCluster, {
       forceRecreate: request.body?.forceRecreate ?? false,
@@ -73,7 +74,7 @@ export const createFleetSetupHandler: RequestHandler<
 
 export const ingestManagerSetupHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const logger = appContextService.getLogger();
   try {
     await setupIngestManager(soClient, callCluster);
@@ -81,6 +82,13 @@ export const ingestManagerSetupHandler: RequestHandler = async (context, request
       body: { isInitialized: true },
     });
   } catch (e) {
+    if (e instanceof IngestManagerError) {
+      logger.error(e.message);
+      return response.customError({
+        statusCode: getHTTPResponseCode(e),
+        body: { message: e.message },
+      });
+    }
     if (e.isBoom) {
       logger.error(e.output.payload.message);
       return response.customError({
