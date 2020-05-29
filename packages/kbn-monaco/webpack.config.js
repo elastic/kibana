@@ -37,16 +37,15 @@ module.exports = (env) => {
     module: {
       rules: [
         {
-          test: /\.ts$/,
+          test: /\.(js|ts)$/,
           exclude: /node_modules/,
-          use: [
-            {
-              loader: 'babel-loader',
-              options: {
-                presets: ['@babel/typescript'],
-              },
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
             },
-          ],
+          },
         },
         {
           test: /\.css$/,
