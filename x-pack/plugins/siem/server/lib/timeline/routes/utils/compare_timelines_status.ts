@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimelineTypeLiteralWithNull, TimelineType } from '../../../../../common/types/timeline';
+import {
+  TimelineTypeLiteralWithNull,
+  TimelineType,
+  TimelineStatus,
+  TimelineTypeLiteral,
+} from '../../../../../common/types/timeline';
 import { FrameworkRequest } from '../../../framework';
 
 import { TimelineStatusActions, TimelineStatusAction } from './common';
@@ -23,6 +28,7 @@ interface GivenTimelineInput {
 }
 
 interface TimelinesStatusProps {
+  status: TimelineStatus | null | undefined;
   title: string | null | undefined;
   timelineType: TimelineTypeLiteralWithNull | undefined;
   timelineInput: GivenTimelineInput;
@@ -33,10 +39,11 @@ interface TimelinesStatusProps {
 export class CompareTimelinesStatus {
   public readonly timelineObject: TimelineObject;
   public readonly templateTimelineObject: TimelineObject;
-  private readonly timelineType: TimelineTypeLiteralWithNull;
+  private readonly timelineType: TimelineTypeLiteral;
   private readonly title: string | null;
-
+  private readonly status: TimelineStatus;
   constructor({
+    status = TimelineStatus.active,
     title,
     timelineType = TimelineType.default,
     timelineInput,
@@ -45,7 +52,6 @@ export class CompareTimelinesStatus {
   }: TimelinesStatusProps) {
     this.timelineObject = new TimelineObject({
       id: timelineInput.id,
-      title,
       type: timelineInput.type ?? TimelineType.default,
       version: timelineInput.version,
       frameworkRequest,
@@ -53,7 +59,6 @@ export class CompareTimelinesStatus {
 
     this.templateTimelineObject = new TimelineObject({
       id: templateTimelineInput.id,
-      title,
       type: templateTimelineInput.type ?? TimelineType.template,
       version: templateTimelineInput.version,
       frameworkRequest,
@@ -61,14 +66,16 @@ export class CompareTimelinesStatus {
 
     this.timelineType = timelineType ?? TimelineType.default;
     this.title = title ?? null;
+    this.status = status ?? TimelineStatus.active;
   }
 
   public get isCreatable() {
     return (
-      (this.timelineObject.isCreatable && !this.isHandlingTemplateTimeline) ||
-      (this.templateTimelineObject.isCreatable &&
-        this.timelineObject.isCreatable &&
-        this.isHandlingTemplateTimeline)
+      this.isTitleExists &&
+      ((this.timelineObject.isCreatable && !this.isHandlingTemplateTimeline) ||
+        (this.templateTimelineObject.isCreatable &&
+          this.timelineObject.isCreatable &&
+          this.isHandlingTemplateTimeline))
     );
   }
 
@@ -78,16 +85,22 @@ export class CompareTimelinesStatus {
 
   public get isUpdatable() {
     return (
-      (this.timelineObject.isUpdatable && !this.isHandlingTemplateTimeline) ||
-      (this.templateTimelineObject.isUpdatable && this.isHandlingTemplateTimeline)
+      !this.isUpdatingImmutiableTimeline &&
+      ((this.timelineObject.isUpdatable && !this.isHandlingTemplateTimeline) ||
+        (this.templateTimelineObject.isUpdatable && this.isHandlingTemplateTimeline))
     );
   }
 
   public get isUpdatableViaImport() {
     return (
-      (this.timelineObject.isUpdatableViaImport && !this.isHandlingTemplateTimeline) ||
-      (this.templateTimelineObject.isUpdatableViaImport && this.isHandlingTemplateTimeline)
+      !this.isUpdatingImmutiableTimeline &&
+      ((this.timelineObject.isUpdatableViaImport && !this.isHandlingTemplateTimeline) ||
+        (this.templateTimelineObject.isUpdatableViaImport && this.isHandlingTemplateTimeline))
     );
+  }
+
+  public get isTitleExists() {
+    return this.title != null;
   }
 
   public getFailureChecker(action?: TimelineStatusAction) {
@@ -101,19 +114,21 @@ export class CompareTimelinesStatus {
   }
 
   public checkIsFailureCases(action?: TimelineStatusAction) {
-    const commonError = commonFailureChecker(this.title);
-    if (commonError) {
-      return commonError;
-    }
     const failureChecker = this.getFailureChecker(action);
     const version = this.templateTimelineObject.getVersion;
-    return failureChecker(
+    const commonError = commonFailureChecker(this.title);
+    if (commonError != null) {
+      return commonError;
+    }
+    const msg = failureChecker(
       this.isHandlingTemplateTimeline,
+      this.status,
       this.timelineObject.getVersion?.toString() ?? null,
       version != null && typeof version === 'string' ? parseInt(version, 10) : version,
-      this.timelineObject.data,
-      this.templateTimelineObject.data
+      this.timelineObject.getData,
+      this.templateTimelineObject.getData
     );
+    return msg;
   }
 
   public get templateTimelineInput() {
@@ -133,6 +148,22 @@ export class CompareTimelinesStatus {
 
   public get isHandlingTemplateTimeline() {
     return this.timelineType === TimelineType.template;
+  }
+
+  private get isUpdatingImmutiableTimeline() {
+    const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
+    /*
+     * Do not allow
+     * 1. Existing timeline is immutiable
+     * 2. Converting existing timeline's status
+     */
+    return (
+      (obj.isExists && obj.getData?.status != null && this.status !== obj.getData?.status) ||
+      (obj.isExists &&
+        obj.getData?.status == null &&
+        this.status !== TimelineStatus.active &&
+        this.status != null)
+    );
   }
 
   public async init() {

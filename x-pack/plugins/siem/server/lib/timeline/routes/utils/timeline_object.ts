@@ -5,24 +5,23 @@
  */
 import {
   TimelineType,
-  TimelineTypeLiteralWithNull,
+  TimelineTypeLiteral,
   TimelineSavedObject,
+  TimelineStatus,
 } from '../../../../../common/types/timeline';
 import { getTimeline, getTemplateTimeline } from './create_timelines';
 import { FrameworkRequest } from '../../../framework';
 
 interface TimelineObjectProps {
   id: string | null | undefined;
-  type: TimelineTypeLiteralWithNull | undefined;
-  title: string | null | undefined;
+  type: TimelineTypeLiteral;
   version: string | number | null | undefined;
   frameworkRequest: FrameworkRequest;
 }
 
 export class TimelineObject {
   private id: string | null;
-  private type: TimelineTypeLiteralWithNull;
-  private title: string | null;
+  private type: TimelineTypeLiteral;
   private version: string | number | null;
   private frameworkRequest: FrameworkRequest;
 
@@ -31,13 +30,11 @@ export class TimelineObject {
   constructor({
     id = null,
     type = TimelineType.default,
-    title = null,
     version = null,
     frameworkRequest,
   }: TimelineObjectProps) {
     this.id = id;
     this.type = type;
-    this.title = title;
 
     this.version = version;
     this.frameworkRequest = frameworkRequest;
@@ -55,8 +52,12 @@ export class TimelineObject {
     return this.data;
   }
 
-  public get isTitleExists() {
-    return this.title != null;
+  public get getData() {
+    return this.data;
+  }
+
+  public get isImmutiable() {
+    return this.data?.status === TimelineStatus.immutiable;
   }
 
   public get isExists() {
@@ -64,11 +65,11 @@ export class TimelineObject {
   }
 
   public get isUpdatable() {
-    return this.isExists && !this.isVersionConflict() && this.isTitleExists;
+    return this.isExists && !this.isVersionConflict() && !this.isImmutiable;
   }
 
   public get isCreatable() {
-    return !this.isExists && this.isTitleExists;
+    return !this.isExists;
   }
 
   public get isUpdatableViaImport() {

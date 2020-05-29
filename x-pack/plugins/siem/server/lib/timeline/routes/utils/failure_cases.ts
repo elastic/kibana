@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { TimelineSavedObject } from '../../../../../common/types/timeline';
+import { isEmpty } from 'lodash/fp';
+import { TimelineSavedObject, TimelineStatus } from '../../../../../common/types/timeline';
 
 export const UPDATE_TIMELINE_ERROR_MESSAGE =
   'CREATE timeline with PATCH is not allowed, please use POST instead';
@@ -20,24 +20,60 @@ export const CREATE_TIMELINE_ERROR_MESSAGE =
 export const CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
   'UPDATE template timeline with POST is not allowed, please use PATCH instead';
 export const EMPTY_TITLE_ERROR_MESSAGE = 'Title cannot be empty';
+export const UPDATE_STATUS_ERROR_MESSAGE = 'Update timeline status is is not allowed';
+
+const isUpdatingStatus = (
+  isHandlingTemplateTimeline: boolean,
+  status: TimelineStatus | null | undefined,
+  existTimeline: TimelineSavedObject | null,
+  existTemplateTimeline: TimelineSavedObject | null
+) => {
+  const obj = isHandlingTemplateTimeline ? existTemplateTimeline : existTimeline;
+
+  return (obj?.status != null && status !== obj?.status) ||
+    (obj?.status == null && status !== TimelineStatus.active && status != null)
+    ? UPDATE_STATUS_ERROR_MESSAGE
+    : null;
+};
+
+const isGivenTitleExists = (title: string | null | undefined) => {
+  return title == null ? EMPTY_TITLE_ERROR_MESSAGE : null;
+};
+
+const getImportExistingTimelineError = (id: string, timelineType: string) =>
+  `${timelineType}_id: "${id}" already exists`;
 
 export const commonFailureChecker = (title: string | null | undefined) => {
-  if (title == null) {
-    return {
-      body: EMPTY_TITLE_ERROR_MESSAGE,
-      statusCode: 405,
-    };
-  }
-  return null;
+  const error = [isGivenTitleExists(title)].filter((msg) => msg != null).join(',');
+  return !isEmpty(error)
+    ? {
+        body: error,
+        statusCode: 405,
+      }
+    : null;
 };
 
 export const checkIsUpdateFailureCases = (
   isHandlingTemplateTimeline: boolean,
+  status: TimelineStatus | null | undefined,
   version: string | null,
   templateTimelineVersion: number | null,
   existTimeline: TimelineSavedObject | null,
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
+  const error = isUpdatingStatus(
+    isHandlingTemplateTimeline,
+    status,
+    existTimeline,
+    existTemplateTimeline
+  );
+  if (error) {
+    return {
+      body: error,
+      statusCode: 409,
+    };
+  }
+
   if (isHandlingTemplateTimeline) {
     if (existTemplateTimeline == null) {
       // template timeline !exists
@@ -109,6 +145,7 @@ export const checkIsUpdateFailureCases = (
 
 export const checkIsCreateFailureCases = (
   isHandlingTemplateTimeline: boolean,
+  status: TimelineStatus | null | undefined,
   version: string | null,
   templateTimelineVersion: number | null,
   existTimeline: TimelineSavedObject | null,
@@ -130,11 +167,9 @@ export const checkIsCreateFailureCases = (
   }
 };
 
-const getImportExistingTimelineError = (id: string, timelineType: string) =>
-  `${timelineType}_id: "${id}" already exists`;
-
 export const checkIsCreateViaImportFailureCases = (
   isHandlingTemplateTimeline: boolean,
+  status: TimelineStatus | null | undefined,
   version: string | null,
   templateTimelineVersion: number | null,
   existTimeline: TimelineSavedObject | null,

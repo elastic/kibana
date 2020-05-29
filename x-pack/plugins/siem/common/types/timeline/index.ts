@@ -137,11 +137,13 @@ const SavedSortRuntimeType = runtimeTypes.partial({
 export enum TimelineStatus {
   active = 'active',
   draft = 'draft',
+  immutiable = 'immutiable',
 }
 
 export const TimelineStatusLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineStatus.active),
   runtimeTypes.literal(TimelineStatus.draft),
+  runtimeTypes.literal(TimelineStatus.immutiable),
 ]);
 
 const TimelineStatusLiteralWithNullRt = unionWithNullType(TimelineStatusLiteralRt);

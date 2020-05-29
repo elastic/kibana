@@ -126,6 +126,7 @@ export const importTimelinesRoute = (
                       pinnedEventIds,
                       globalNotes,
                       eventNotes,
+                      status,
                       templateTimelineId,
                       templateTimelineVersion,
                       title,
@@ -140,6 +141,7 @@ export const importTimelinesRoute = (
                     let newTimeline = null;
                     try {
                       const compareTimelinesStatus = new CompareTimelinesStatus({
+                        status,
                         timelineType,
                         title,
                         timelineInput: {

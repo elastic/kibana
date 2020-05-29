@@ -17,25 +17,7 @@ export interface ExportTimeline {
   isEnableDownloader: boolean;
 }
 
-export const useExportTimeline = (): ExportTimeline => {
-  const [isEnableDownloader, setIsEnableDownloader] = useState(false);
-
-  const enableExportTimelineDownloader = useCallback(() => {
-    setIsEnableDownloader(true);
-  }, []);
-
-  const disableExportTimelineDownloader = useCallback(() => {
-    setIsEnableDownloader(false);
-  }, []);
-
-  return {
-    disableExportTimelineDownloader,
-    enableExportTimelineDownloader,
-    isEnableDownloader,
-  };
-};
-
-const EditTimelineActionsComponent: React.FC<{
+export const EditTimelineActionsComponent: React.FC<{
   deleteTimelines: DeleteTimelines | undefined;
   ids: string[];
   isEnableDownloader: boolean;
@@ -52,6 +34,7 @@ const EditTimelineActionsComponent: React.FC<{
 }) => (
   <>
     <TimelineDownloader
+      data-test-subj="TimelineDownloader"
       exportedIds={ids}
       getExportedData={exportSelectedTimeline}
       isEnableDownloader={isEnableDownloader}
@@ -59,6 +42,7 @@ const EditTimelineActionsComponent: React.FC<{
     />
     {deleteTimelines != null && (
       <DeleteTimelineModalOverlay
+        data-test-subj="DeleteTimelineModalOverlay"
         deleteTimelines={deleteTimelines}
         isModalOpen={isDeleteTimelineModalOpen}
         onComplete={onComplete}

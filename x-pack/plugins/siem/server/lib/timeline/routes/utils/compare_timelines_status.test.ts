@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
 import { FrameworkRequest } from '../../../framework';
 
 import {
@@ -14,7 +14,7 @@ import {
 } from '../__mocks__/import_timelines';
 
 import { CompareTimelinesStatus as TimelinesStatusType } from './compare_timelines_status';
-import { EMPTY_TITLE_ERROR_MESSAGE } from './failure_cases';
+import { EMPTY_TITLE_ERROR_MESSAGE, UPDATE_STATUS_ERROR_MESSAGE } from './failure_cases';
 import { TimelineStatusActions } from './common';
 
 describe('CompareTimelinesStatus', () => {
@@ -453,6 +453,145 @@ describe('CompareTimelinesStatus', () => {
       test(`update via import`, () => {
         const error = timelineObj.checkIsFailureCases(TimelineStatusActions.updateViaImport);
         expect(error?.body).toEqual(EMPTY_TITLE_ERROR_MESSAGE);
+      });
+    });
+  });
+
+  describe(`Throw error if given status is updated`, () => {
+    describe('timeline', () => {
+      const mockGetTimeline: jest.Mock = jest.fn();
+      const mockGetTemplateTimeline: jest.Mock = jest.fn();
+      let timelineObj: TimelinesStatusType;
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      afterAll(() => {
+        jest.resetModules();
+      });
+
+      beforeAll(() => {
+        jest.resetModules();
+      });
+
+      beforeEach(async () => {
+        jest.doMock('../../saved_object', () => {
+          return {
+            getTimeline: mockGetTimeline.mockReturnValue(null),
+            getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
+              timeline: [],
+            }),
+          };
+        });
+
+        const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
+          .CompareTimelinesStatus;
+
+        timelineObj = new CompareTimelinesStatus({
+          timelineInput: {
+            id: mockUniqueParsedObjects[0].savedObjectId,
+            type: TimelineType.default,
+            version: mockUniqueParsedObjects[0].version,
+          },
+          timelineType: TimelineType.default,
+          title: 'mock title',
+          status: TimelineStatus.immutiable,
+          templateTimelineInput: {
+            id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
+            type: TimelineType.template,
+            version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
+          },
+          frameworkRequest: {} as FrameworkRequest,
+        });
+
+        await timelineObj.init();
+      });
+
+      test(`create`, () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.create);
+        expect(error).toBeNull();
+      });
+
+      test(`create via import`, () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.createViaImport);
+        expect(error).toBeNull();
+      });
+
+      test(`update`, () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.update);
+        expect(error?.body).toEqual(UPDATE_STATUS_ERROR_MESSAGE);
+      });
+    });
+
+    describe('template timeline', () => {
+      const mockGetTimeline: jest.Mock = jest.fn();
+      const mockGetTemplateTimeline: jest.Mock = jest.fn();
+      let timelineObj: TimelinesStatusType;
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      afterAll(() => {
+        jest.resetModules();
+      });
+
+      beforeAll(() => {
+        jest.resetModules();
+      });
+
+      beforeEach(async () => {
+        jest.doMock('../../saved_object', () => {
+          return {
+            getTimeline: mockGetTimeline.mockReturnValue(null),
+            getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
+              timeline: [],
+            }),
+          };
+        });
+
+        const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
+          .CompareTimelinesStatus;
+
+        timelineObj = new CompareTimelinesStatus({
+          timelineInput: {
+            id: mockUniqueParsedObjects[0].savedObjectId,
+            type: TimelineType.default,
+            version: mockUniqueParsedObjects[0].version,
+          },
+          status: TimelineStatus.immutiable,
+          timelineType: TimelineType.default,
+          title: 'mock title',
+          templateTimelineInput: {
+            id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
+            type: TimelineType.template,
+            version: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineVersion,
+          },
+          frameworkRequest: {} as FrameworkRequest,
+        });
+
+        await timelineObj.init();
+      });
+
+      test(`create`, () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.create);
+        expect(error?.body).toBeUndefined();
+      });
+
+      test(`create via import`, () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.createViaImport);
+        expect(error?.body).toBeUndefined();
+      });
+
+      test(`update`, () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.update);
+        expect(error?.body).toEqual(UPDATE_STATUS_ERROR_MESSAGE);
+      });
+
+      test(`update via import`, () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.updateViaImport);
+        expect(error?.body).toEqual(UPDATE_STATUS_ERROR_MESSAGE);
       });
     });
   });
