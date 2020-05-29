@@ -7,6 +7,7 @@
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 import { createSelector } from 'reselect';
+import { matchPath } from 'react-router-dom';
 import {
   Immutable,
   HostPolicyResponseAppliedAction,
@@ -14,6 +15,7 @@ import {
   HostPolicyResponseActionStatus,
 } from '../../../../../common/endpoint/types';
 import { HostState, HostIndexUIQueryParams } from '../types';
+import { MANAGEMENT_ROUTING_ENDPOINTS_PATH } from '../../../common/constants';
 
 const PAGE_SIZES = Object.freeze([10, 20, 50]);
 
@@ -96,8 +98,14 @@ export const policyResponseLoading = (state: Immutable<HostState>): boolean =>
 
 export const policyResponseError = (state: Immutable<HostState>) => state.policyResponseError;
 
-export const isOnHostPage = (state: Immutable<HostState>) =>
-  state.location ? state.location.pathname === '/endpoint-hosts' : false;
+export const isOnHostPage = (state: Immutable<HostState>) => {
+  return (
+    matchPath(state.location?.pathname ?? '', {
+      path: MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+      exact: true,
+    }) !== null
+  );
+};
 
 export const uiQueryParams: (
   state: Immutable<HostState>

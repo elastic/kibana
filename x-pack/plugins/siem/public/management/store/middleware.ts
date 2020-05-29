@@ -8,10 +8,12 @@ import { ImmutableMultipleMiddlewareFactory, substateMiddlewareFactory } from '.
 import { policyListMiddlewareFactory } from '../pages/policy/store/policy_list';
 import { policyDetailsMiddlewareFactory } from '../pages/policy/store/policy_details';
 import {
+  MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
 } from '../common/constants';
+import { hostMiddlewareFactory } from '../pages/endpoint_hosts/store';
 
 // @ts-ignore
 export const managementMiddlewareFactory: ImmutableMultipleMiddlewareFactory = (
@@ -28,6 +30,11 @@ export const managementMiddlewareFactory: ImmutableMultipleMiddlewareFactory = (
       (globalState) =>
         globalState[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE],
       policyDetailsMiddlewareFactory(coreStart, depsStart)
+    ),
+    substateMiddlewareFactory(
+      (globalState) =>
+        globalState[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_ENDPOINTS_NAMESPACE],
+      hostMiddlewareFactory(coreStart, depsStart)
     ),
   ];
 };

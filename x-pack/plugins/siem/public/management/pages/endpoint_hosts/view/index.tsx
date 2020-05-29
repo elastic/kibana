@@ -28,6 +28,7 @@ import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoi
 import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
 import { PageView } from '../../../../common/components/endpoint/page_view';
+import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 
 const HostLink = memo<{
   name: string;
@@ -230,6 +231,7 @@ export const HostList = () => {
         pagination={paginationSetup}
         onChange={onTableChange}
       />
+      <SpyRoute />
     </PageView>
   );
 };

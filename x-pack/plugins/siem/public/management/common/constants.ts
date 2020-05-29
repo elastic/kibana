@@ -19,3 +19,5 @@ export const MANAGEMENT_STORE_GLOBAL_NAMESPACE: ManagementStoreGlobalNamespace =
 export const MANAGEMENT_STORE_POLICY_LIST_NAMESPACE = 'policyList';
 /** Namespace within the Management state where policy details state is maintained */
 export const MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE = 'policyDetails';
+/** Namespace within the Management state where endpoints state is maintained */
+export const MANAGEMENT_STORE_ENDPOINTS_NAMESPACE = 'endpoints';

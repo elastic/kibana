@@ -8,6 +8,7 @@ import { Immutable } from '../../../common/endpoint/types';
 import { PolicyDetailsState, PolicyListState } from '../pages/policy/types';
 import { ImmutableReducer } from '../../common/store';
 import { AppAction } from '../../common/store/actions';
+import { HostState } from '../pages/endpoint_hosts/types';
 
 /**
  * Redux store state for the Management section
@@ -15,6 +16,7 @@ import { AppAction } from '../../common/store/actions';
 export interface ManagementState {
   policyDetails: Immutable<PolicyDetailsState>;
   policyList: Immutable<PolicyListState>;
+  endpoints: Immutable<HostState>;
 }
 
 export interface ManagementPluginState {

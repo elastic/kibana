@@ -14,12 +14,14 @@ import {
   policyListReducer,
 } from '../pages/policy/store/policy_list/reducer';
 import {
+  MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
 } from '../common/constants';
 import { ImmutableCombineReducers } from '../../common/store';
 import { AppAction } from '../../common/store/actions';
 import { ManagementState } from './types';
+import { hostListReducer, initialHostListState } from '../pages/endpoint_hosts/store/reducer';
 
 // Change the type of `combinerReducers` locally
 const combineReducers: ImmutableCombineReducers = reduxCombineReducers;
@@ -31,6 +33,7 @@ export const getManagementInitialState = (): ManagementState => {
   return {
     [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: initialPolicyListState(),
     [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: initialPolicyDetailsState(),
+    [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: initialHostListState(),
   };
 };
 
@@ -42,4 +45,6 @@ export const managementReducer = combineReducers<ManagementState, AppAction>({
   [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: policyListReducer,
   // @ts-ignore
   [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: policyDetailsReducer,
+  // @ts-ignore
+  [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: hostListReducer,
 });

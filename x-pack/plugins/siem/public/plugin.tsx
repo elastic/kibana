@@ -64,9 +64,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const overviewSubPlugin = new (await import('./overview')).Overview();
       const timelinesSubPlugin = new (await import('./timelines')).Timelines();
       const endpointAlertsSubPlugin = new (await import('./endpoint_alerts')).EndpointAlerts();
-      const endpointHostsSubPlugin = new (
-        await import('./management/pages/endpoint_hosts')
-      ).EndpointHosts();
       const managementSubPlugin = new (await import('./management')).Management();
 
       const alertsStart = alertsSubPlugin.start();
@@ -76,7 +73,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const overviewStart = overviewSubPlugin.start();
       const timelinesStart = timelinesSubPlugin.start();
       const endpointAlertsStart = endpointAlertsSubPlugin.start(coreStart, startPlugins);
-      const endpointHostsStart = endpointHostsSubPlugin.start(coreStart, startPlugins);
       const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
 
       return renderApp(services, params, {
@@ -88,7 +84,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...overviewStart.routes,
           ...timelinesStart.routes,
           ...endpointAlertsStart.routes,
-          ...endpointHostsStart.routes,
           ...managementSubPluginStart.routes,
         ],
         store: {
@@ -97,7 +92,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...networkStart.store.initialState,
             ...timelinesStart.store.initialState,
             ...endpointAlertsStart.store.initialState,
-            ...endpointHostsStart.store.initialState,
             ...managementSubPluginStart.store.initialState,
           },
           reducer: {
@@ -105,12 +99,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...networkStart.store.reducer,
             ...timelinesStart.store.reducer,
             ...endpointAlertsStart.store.reducer,
-            ...endpointHostsStart.store.reducer,
             ...managementSubPluginStart.store.reducer,
           },
           middlewares: [
             ...(endpointAlertsStart.store.middleware ?? []),
-            ...(endpointHostsStart.store.middleware ?? []),
             ...(managementSubPluginStart.store.middleware ?? []),
           ],
         },
