@@ -220,7 +220,7 @@ When `xpack.reporting.capture.browser.type` is set to `chromium` (default) you c
   Defaults to `30s`.
   
 | `xpack.reporting.csv.checkForFormulas`
-  | Enables a check which Warns when there's a potential formula involved in the output (=, -, +, and @ chars).
+  | Enables a check that warns you when there's a potential formula involved in the output (=, -, +, and @ chars).
   See OWASP: https://www.owasp.org/index.php/CSV_Injection
   Defaults to `true`.
   
