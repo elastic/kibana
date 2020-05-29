@@ -19,17 +19,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import {
-  BindEmbeddableFactoryDefinitionOutputType,
-  EmbeddableStart,
-} from 'src/plugins/embeddable/public';
 import { CoreStart } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { EmbeddableStart } from '../../../../embeddable/public';
 import {
   ContainerOutput,
   EmbeddableFactoryDefinition,
   ErrorEmbeddable,
   Container,
+  BindEmbeddableFactoryDefinitionOutputType,
 } from '../../embeddable_plugin';
 import { DashboardContainer, DashboardContainerInput } from './dashboard_container';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';

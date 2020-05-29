@@ -51,6 +51,8 @@ export type EmbeddableFactoryDefinition<
     BindEmbeddableFactoryDefinitionOutputType<O>;
 
 // TODO: hack to bind output to definition. is there a better way?
-export class BindEmbeddableFactoryDefinitionOutputType<O extends EmbeddableOutput = EmbeddableOutput> {
+export class BindEmbeddableFactoryDefinitionOutputType<
+  O extends EmbeddableOutput = EmbeddableOutput
+> {
   __bindOutputTypeHack? = (undefined as unknown) as O;
 }

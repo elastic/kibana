@@ -63,7 +63,6 @@ export class EmbeddableRoot extends React.Component<Props> {
       this.props.input &&
       prevProps?.input !== this.props.input
     ) {
-      debugger;
       this.props.embeddable.updateInput(this.props.input);
     }
   }
