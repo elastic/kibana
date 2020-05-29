@@ -19,11 +19,11 @@ export const mvtVectorSourceWizardConfig: LayerWizard = {
     defaultMessage: 'Vector source wizard',
   }),
   icon: 'grid',
-  renderWizard: ({ previewLayer, mapColors }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: MVTSingleLayerVectorSourceConfig) => {
       const sourceDescriptor = MVTSingleLayerVectorSource.createDescriptor(sourceConfig);
       const layerDescriptor = TiledVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
-      previewLayer(layerDescriptor);
+      previewLayers([layerDescriptor]);
     };
 
     return <MVTSingleLayerVectorSourceEditor onSourceConfigChange={onSourceConfigChange} />;

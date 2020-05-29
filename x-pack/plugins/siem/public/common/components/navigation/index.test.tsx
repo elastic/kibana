@@ -72,6 +72,13 @@ describe('SIEM Navigation', () => {
             name: 'Cases',
             urlKey: 'case',
           },
+          management: {
+            disabled: false,
+            href: '#/management',
+            id: 'management',
+            name: 'Management',
+            urlKey: 'management',
+          },
           detections: {
             disabled: false,
             href: '#/link-to/detections',
@@ -111,6 +118,7 @@ describe('SIEM Navigation', () => {
         pageName: 'hosts',
         pathName: '/hosts',
         search: '',
+        state: undefined,
         tabName: 'authentications',
         query: { query: '', language: 'kuery' },
         filters: [],
@@ -178,6 +186,13 @@ describe('SIEM Navigation', () => {
             id: 'hosts',
             name: 'Hosts',
             urlKey: 'host',
+          },
+          management: {
+            disabled: false,
+            href: '#/management',
+            id: 'management',
+            name: 'Management',
+            urlKey: 'management',
           },
           network: {
             disabled: false,
