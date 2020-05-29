@@ -132,6 +132,7 @@ export type SourceDescriptor =
 export type LayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
   __isInErrorState?: boolean;
+  __isPreviewLayer?: boolean;
   __errorMessage?: string;
   __trackedLayerDescriptor?: LayerDescriptor;
   alpha?: number;
