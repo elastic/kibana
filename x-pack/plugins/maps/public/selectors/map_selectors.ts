@@ -137,9 +137,6 @@ export const getSelectedLayerId = ({ map }: MapStoreState): string | null => {
   return !map.selectedLayerId || !map.layerList ? null : map.selectedLayerId;
 };
 
-export const getTransientLayerId = ({ map }: MapStoreState): string | null =>
-  map.__transientLayerId;
-
 export const getLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
   map.layerList ? map.layerList : [];
 
@@ -331,15 +328,28 @@ export const getSelectedLayer = createSelector(
   }
 );
 
-export const getMapColors = createSelector(
-  getTransientLayerId,
-  getLayerListRaw,
-  (transientLayerId, layerList) =>
-    layerList.reduce((accu: string[], layer: LayerDescriptor) => {
-      if (layer.id === transientLayerId) {
-        return accu;
-      }
-      const color: string | undefined = _.get(layer, 'style.properties.fillColor.options.color');
+export const hasPreviewLayers = createSelector(getLayerList, (layerList) => {
+  return layerList.some((layer) => {
+    return layer.isPreviewLayer();
+  });
+});
+
+export const isLoadingPreviewLayers = createSelector(getLayerList, (layerList) => {
+  return layerList.some((layer) => {
+    return layer.isPreviewLayer() && layer.isLayerLoading();
+  });
+});
+
+export const getMapColors = createSelector(getLayerListRaw, (layerList) =>
+  layerList
+    .filter((layerDescriptor) => {
+      return !layerDescriptor.__isPreviewLayer;
+    })
+    .reduce((accu: string[], layerDescriptor: LayerDescriptor) => {
+      const color: string | undefined = _.get(
+        layerDescriptor,
+        'style.properties.fillColor.options.color'
+      );
       if (color) accu.push(color);
       return accu;
     }, [])
@@ -373,24 +383,20 @@ export const getQueryableUniqueIndexPatternIds = createSelector(getLayerList, (l
   return _.uniq(indexPatternIds);
 });
 
-export const hasDirtyState = createSelector(
-  getLayerListRaw,
-  getTransientLayerId,
-  (layerListRaw, transientLayerId) => {
-    if (transientLayerId) {
+export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
+  return layerListRaw.some((layerDescriptor) => {
+    if (layerDescriptor.__isPreviewLayer) {
       return true;
     }
 
-    return layerListRaw.some((layerDescriptor) => {
-      const trackedState = layerDescriptor[TRACKED_LAYER_DESCRIPTOR];
-      if (!trackedState) {
-        return false;
-      }
-      const currentState = copyPersistentState(layerDescriptor);
-      return !_.isEqual(currentState, trackedState);
-    });
-  }
-);
+    const trackedState = layerDescriptor[TRACKED_LAYER_DESCRIPTOR];
+    if (!trackedState) {
+      return false;
+    }
+    const currentState = copyPersistentState(layerDescriptor);
+    return !_.isEqual(currentState, trackedState);
+  });
+});
 
 export const areLayersLoaded = createSelector(
   getLayerList,
