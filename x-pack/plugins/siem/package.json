@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "lodash": "^4.17.15",
+    "lzma-native": "6.0.0",
     "querystring": "^0.2.0",
     "redux-devtools-extension": "^2.13.8",
     "@types/seedrandom": ">=2.0.0 <4.0.0"

@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, Logger, SavedObjectsRepository } from '../../../../../../src/core/server';
+import { CoreSetup, Logger, SavedObjectsClient } from '../../../../../../src/core/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../../plugins/task_manager/server';
 import { ListPluginSetup } from '../../../../lists/server';
+import { GetFullEndpointExceptionList } from './fetch_endpoint_exceptions';
 
 export interface PackagerTask {
   getTaskRunner: (context: PackagerTaskRunnerContext) => PackagerTaskRunner;
@@ -36,6 +37,11 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
 
     const [{ savedObjects }] = await context.core.getStartServices();
     const savedObjectsRepository = savedObjects.createInternalRepository();
+    const soClient = new SavedObjectsClient(savedObjectsRepository);
+    const exceptionListClient = context.lists.getExceptionListClient(soClient, 'kibana');
+    const exceptions = await GetFullEndpointExceptionList(exceptionListClient);
+
+    await soClient.create('config', exceptions); // TODO is config the right type?
     // TODO: add logic here to:
     // 1. pull entire exception list
     // 2. compile endpoint message for all supported schemaVersions
@@ -75,7 +81,7 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
           run: async () => {
             await run();
           },
-          cancel: async () => {},
+          cancel: async () => { },
         };
       },
     },
