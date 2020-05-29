@@ -11,7 +11,6 @@ import { security } from './legacy/plugins/security';
 import { dashboardMode } from './legacy/plugins/dashboard_mode';
 import { beats } from './legacy/plugins/beats_management';
 import { spaces } from './legacy/plugins/spaces';
-import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
 import { ingestManager } from './legacy/plugins/ingest_manager';
 
 module.exports = function (kibana) {
@@ -23,7 +22,6 @@ module.exports = function (kibana) {
     security(kibana),
     dashboardMode(kibana),
     beats(kibana),
-    encryptedSavedObjects(kibana),
     ingestManager(kibana),
   ];
 };
