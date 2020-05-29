@@ -334,7 +334,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
             savedObjectsClient: savedObjects.getScopedClient(request, { includedHiddenTypes }),
             actionTypeRegistry: actionTypeRegistry!,
             defaultKibanaIndex,
-            scopedClusterClient: context.core.elasticsearch.adminClient,
+            scopedClusterClient: context.core.elasticsearch.legacy.client,
             preconfiguredActions,
           });
         },
