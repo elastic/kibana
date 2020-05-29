@@ -58,7 +58,7 @@ export const createListItem = async ({
     ...transformListItemToElasticQuery({ type, value }),
   };
 
-  const response: CreateDocumentResponse = await callCluster('index', {
+  const response = await callCluster<CreateDocumentResponse>('index', {
     body,
     id,
     index: listItemIndex,

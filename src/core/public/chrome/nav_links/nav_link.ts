@@ -62,7 +62,7 @@ export interface ChromeNavLink {
 
   /**
    * A EUI iconType that will be used for the app's icon. This icon
-   * takes precendence over the `icon` property.
+   * takes precedence over the `icon` property.
    */
   readonly euiIconType?: string;
 
@@ -71,6 +71,14 @@ export interface ChromeNavLink {
    * if `euiIconType` is not provided.
    */
   readonly icon?: string;
+
+  /**
+   * Settled state between `url`, `baseUrl`, and `active`
+   *
+   * @internalRemarks
+   * This should be required once legacy apps are gone.
+   */
+  readonly href?: string;
 
   /** LEGACY FIELDS */
 
@@ -144,7 +152,7 @@ export interface ChromeNavLink {
 
 /** @public */
 export type ChromeNavLinkUpdateableFields = Partial<
-  Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase'>
+  Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase' | 'href'>
 >;
 
 export class NavLinkWrapper {
@@ -162,7 +170,7 @@ export class NavLinkWrapper {
 
   public update(newProps: ChromeNavLinkUpdateableFields) {
     // Enforce limited properties at runtime for JS code
-    newProps = pick(newProps, ['active', 'disabled', 'hidden', 'url', 'subUrlBase']);
+    newProps = pick(newProps, ['active', 'disabled', 'hidden', 'url', 'subUrlBase', 'href']);
     return new NavLinkWrapper({ ...this.properties, ...newProps });
   }
 }
