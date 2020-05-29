@@ -50,7 +50,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     const status = error ? error.body.status || 400 : 200;
     const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
 
-    server.respondWith('PUT', `${API_BASE_PATH}/templates`, [
+    server.respondWith('POST', `${API_BASE_PATH}/templates`, [
       status,
       { 'Content-Type': 'application/json' },
       body,

@@ -6,7 +6,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../common';
+import { CREATE_LEGACY_TEMPLATE_BY_DEFAULT } from '../../common';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { TemplateFormTestBed } from './helpers/template_form.helpers';
 import {
@@ -344,7 +344,6 @@ describe('<TemplateCreate />', () => {
       const latestRequest = server.requests[server.requests.length - 1];
 
       const expected = {
-        isManaged: false,
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
         template: {
@@ -366,7 +365,8 @@ describe('<TemplateCreate />', () => {
           aliases: ALIASES,
         },
         _kbnMeta: {
-          formatVersion: DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT,
+          isLegacy: CREATE_LEGACY_TEMPLATE_BY_DEFAULT,
+          isManaged: false,
         },
       };
 

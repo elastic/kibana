@@ -46,6 +46,7 @@ export interface IdxMgmtHomeTestBed extends TestBed<IdxMgmtTestSubjects> {
     clickActionMenu: (name: TemplateDeserialized['name']) => void;
     getIncludeHiddenIndicesToggleStatus: () => boolean;
     clickIncludeHiddenIndicesToggle: () => void;
+    toggleViewItem: (view: 'composable' | 'system') => void;
   };
 }
 
@@ -103,7 +104,7 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
 
   const clickTemplateAt = async (index: number) => {
     const { component, table, router } = testBed;
-    const { rows } = table.getMetaData('templateTable');
+    const { rows } = table.getMetaData('legacyTemplateTable');
     const templateLink = findTestSubject(rows[index].reactWrapper, 'templateDetailsLink');
 
     await act(async () => {
@@ -142,6 +143,23 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
     component.update();
   };
 
+  const toggleViewItem = (view: 'composable' | 'system') => {
+    const { find, component } = testBed;
+    const views = ['composable', 'system'];
+
+    // First open the pop over
+    act(() => {
+      find('viewButton').simulate('click');
+    });
+    component.update();
+
+    // Then click on a filter item
+    act(() => {
+      find('filterList.filterItem').at(views.indexOf(view)).simulate('click');
+    });
+    component.update();
+  };
+
   return {
     ...testBed,
     findAction,
@@ -156,6 +174,7 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
       clickActionMenu,
       getIncludeHiddenIndicesToggleStatus,
       clickIncludeHiddenIndicesToggle,
+      toggleViewItem,
     },
   };
 };
@@ -168,6 +187,7 @@ export type TestSubjects =
   | 'cell'
   | 'closeDetailsButton'
   | 'createTemplateButton'
+  | 'createLegacyTemplateButton'
   | 'deleteSystemTemplateCallOut'
   | 'deleteTemplateButton'
   | 'deleteTemplatesConfirmation'
@@ -198,4 +218,7 @@ export type TestSubjects =
   | 'templateDetails.title'
   | 'templateList'
   | 'templateTable'
-  | 'templatesTab';
+  | 'legacyTemplateTable'
+  | 'templatesTab'
+  | 'viewButton'
+  | 'filterList.filterItem';

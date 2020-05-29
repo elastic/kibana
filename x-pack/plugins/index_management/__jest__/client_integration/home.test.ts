@@ -10,6 +10,15 @@ import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './help
 import { IdxMgmtHomeTestBed } from './helpers/home.helpers';
 import { API_BASE_PATH } from '../../common/constants';
 
+/**
+ * The below import is required to avoid a console error warn from the "brace" package
+ * console.warn ../node_modules/brace/index.js:3999
+      Could not load worker ReferenceError: Worker is not defined
+          at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
+ */
+import { stubWebWorker } from '../../../../test_utils/stub_web_worker';
+stubWebWorker();
+
 const { setup } = pageHelpers.home;
 
 const removeWhiteSpaceOnArrayValues = (array: any[]) =>
@@ -21,6 +30,42 @@ const removeWhiteSpaceOnArrayValues = (array: any[]) =>
   });
 
 jest.mock('ui/new_platform');
+
+// jest.mock('@elastic/eui', () => ({
+//   ...jest.requireActual('@elastic/eui'),
+//   // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
+//   // which does not produce a valid component wrapper
+//   EuiComboBox: (props: any) => (
+//     <input
+//       data-test-subj={props['data-test-subj'] || 'mockComboBox'}
+//       data-currentvalue={props.selectedOptions}
+//       onChange={async (syntheticEvent: any) => {
+//         props.onChange([syntheticEvent['0']]);
+//       }}
+//     />
+//   ),
+//   // Mocking EuiCodeEditor, which uses React Ace under the hood
+//   EuiCodeEditor: (props: any) => (
+//     <input
+//       data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+//       data-currentvalue={props.value}
+//       onChange={(e: any) => {
+//         props.onChange(e.jsonContent);
+//       }}
+//     />
+//   ),
+//   // Mocking EuiSuperSelect to be able to easily change its value
+//   // with a `myWrapper.simulate('change', { target: { value: 'someValue' } })`
+//   EuiSuperSelect: (props: any) => (
+//     <input
+//       data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
+//       value={props.valueOfSelected}
+//       onChange={(e) => {
+//         props.onChange(e.target.value);
+//       }}
+//     />
+//   ),
+// }));
 
 describe('<IndexManagementHome />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -86,7 +131,7 @@ describe('<IndexManagementHome />', () => {
         expect(exists('indicesList')).toBe(true);
         expect(exists('templateList')).toBe(false);
 
-        httpRequestsMockHelpers.setLoadTemplatesResponse([]);
+        httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
         actions.selectHomeTab('templatesTab');
 
@@ -105,7 +150,7 @@ describe('<IndexManagementHome />', () => {
         beforeEach(async () => {
           const { actions, component } = testBed;
 
-          httpRequestsMockHelpers.setLoadTemplatesResponse([]);
+          httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
           actions.selectHomeTab('templatesTab');
 
@@ -124,6 +169,9 @@ describe('<IndexManagementHome />', () => {
       });
 
       describe('when there are index templates', () => {
+        // Add a default loadIndexTemplate response
+        httpRequestsMockHelpers.setLoadTemplateResponse(fixtures.getTemplate());
+
         const template1 = fixtures.getTemplate({
           name: `a${getRandomString()}`,
           indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
@@ -138,21 +186,52 @@ describe('<IndexManagementHome />', () => {
             },
           },
         });
+
         const template2 = fixtures.getTemplate({
           name: `b${getRandomString()}`,
           indexPatterns: ['template2Pattern1*'],
         });
+
         const template3 = fixtures.getTemplate({
           name: `.c${getRandomString()}`, // mock system template
           indexPatterns: ['template3Pattern1*', 'template3Pattern2', 'template3Pattern3'],
         });
 
+        const template4 = fixtures.getTemplate({
+          name: `a${getRandomString()}`,
+          indexPatterns: ['template4Pattern1*', 'template4Pattern2'],
+          template: {
+            settings: {
+              index: {
+                number_of_shards: '1',
+                lifecycle: {
+                  name: 'my_ilm_policy',
+                },
+              },
+            },
+          },
+          isLegacy: true,
+        });
+
+        const template5 = fixtures.getTemplate({
+          name: `b${getRandomString()}`,
+          indexPatterns: ['template5Pattern1*'],
+          isLegacy: true,
+        });
+
+        const template6 = fixtures.getTemplate({
+          name: `.c${getRandomString()}`, // mock system template
+          indexPatterns: ['template6Pattern1*', 'template6Pattern2', 'template6Pattern3'],
+          isLegacy: true,
+        });
+
         const templates = [template1, template2, template3];
+        const legacyTemplates = [template4, template5, template6];
 
         beforeEach(async () => {
           const { actions, component } = testBed;
 
-          httpRequestsMockHelpers.setLoadTemplatesResponse(templates);
+          httpRequestsMockHelpers.setLoadTemplatesResponse({ templates, legacyTemplates });
 
           actions.selectHomeTab('templatesTab');
 
@@ -166,9 +245,32 @@ describe('<IndexManagementHome />', () => {
           const { table } = testBed;
 
           const { tableCellsValues } = table.getMetaData('templateTable');
+          const { tableCellsValues: legacyTableCellsValues } = table.getMetaData(
+            'legacyTemplateTable'
+          );
 
+          // Test composable table content
           tableCellsValues.forEach((row, i) => {
             const template = templates[i];
+            const { name, indexPatterns, priority, ilmPolicy, composedOf } = template;
+
+            const ilmPolicyName = ilmPolicy && ilmPolicy.name ? ilmPolicy.name : '';
+            const composedOfString = composedOf ? composedOf.join(',') : '';
+            const priorityFormatted = priority ? priority.toString() : '';
+
+            expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
+              name,
+              indexPatterns.join(', '),
+              ilmPolicyName,
+              composedOfString,
+              priorityFormatted,
+              'MSA', // Mappings Settings Aliases badges
+            ]);
+          });
+
+          // Test legacy table content
+          legacyTableCellsValues.forEach((row, i) => {
+            const template = legacyTemplates[i];
             const { name, indexPatterns, order, ilmPolicy } = template;
 
             const ilmPolicyName = ilmPolicy && ilmPolicy.name ? ilmPolicy.name : '';
@@ -208,27 +310,23 @@ describe('<IndexManagementHome />', () => {
 
         test('should have a button to create a new template', () => {
           const { exists } = testBed;
-          expect(exists('createTemplateButton')).toBe(true);
+          expect(exists('createLegacyTemplateButton')).toBe(true);
         });
 
         test('should have a switch to view system templates', async () => {
-          const { table, exists, component, form } = testBed;
-          const { rows } = table.getMetaData('templateTable');
+          const { table, exists, actions } = testBed;
+          const { rows } = table.getMetaData('legacyTemplateTable');
 
           expect(rows.length).toEqual(
-            templates.filter((template) => !template.name.startsWith('.')).length
+            legacyTemplates.filter((template) => !template.name.startsWith('.')).length
           );
 
-          expect(exists('systemTemplatesSwitch')).toBe(true);
+          expect(exists('viewButton')).toBe(true);
 
-          await act(async () => {
-            form.toggleEuiSwitch('systemTemplatesSwitch');
-            await nextTick();
-            component.update();
-          });
+          actions.toggleViewItem('system');
 
-          const { rows: updatedRows } = table.getMetaData('templateTable');
-          expect(updatedRows.length).toEqual(templates.length);
+          const { rows: updatedRows } = table.getMetaData('legacyTemplateTable');
+          expect(updatedRows.length).toEqual(legacyTemplates.length);
         });
 
         test('each row should have a link to the template details panel', async () => {
@@ -238,12 +336,12 @@ describe('<IndexManagementHome />', () => {
 
           expect(exists('templateList')).toBe(true);
           expect(exists('templateDetails')).toBe(true);
-          expect(find('templateDetails.title').text()).toBe(template1.name);
+          expect(find('templateDetails.title').text()).toBe(legacyTemplates[0].name);
         });
 
         test('template actions column should have an option to delete', () => {
           const { actions, findAction } = testBed;
-          const { name: templateName } = template1;
+          const [{ name: templateName }] = legacyTemplates;
 
           actions.clickActionMenu(templateName);
 
@@ -254,7 +352,7 @@ describe('<IndexManagementHome />', () => {
 
         test('template actions column should have an option to clone', () => {
           const { actions, findAction } = testBed;
-          const { name: templateName } = template1;
+          const [{ name: templateName }] = legacyTemplates;
 
           actions.clickActionMenu(templateName);
 
@@ -265,7 +363,7 @@ describe('<IndexManagementHome />', () => {
 
         test('template actions column should have an option to edit', () => {
           const { actions, findAction } = testBed;
-          const { name: templateName } = template1;
+          const [{ name: templateName }] = legacyTemplates;
 
           actions.clickActionMenu(templateName);
 
@@ -277,7 +375,7 @@ describe('<IndexManagementHome />', () => {
         describe('delete index template', () => {
           test('should show a confirmation when clicking the delete template button', async () => {
             const { actions } = testBed;
-            const { name: templateName } = template1;
+            const [{ name: templateName }] = legacyTemplates;
 
             await actions.clickTemplateAction(templateName, 'delete');
 
@@ -294,32 +392,28 @@ describe('<IndexManagementHome />', () => {
           });
 
           test('should show a warning message when attempting to delete a system template', async () => {
-            const { component, form, actions } = testBed;
+            const { exists, actions } = testBed;
 
-            await act(async () => {
-              form.toggleEuiSwitch('systemTemplatesSwitch');
-              await nextTick();
-              component.update();
-            });
+            actions.toggleViewItem('system');
 
-            const { name: systemTemplateName } = template3;
+            const { name: systemTemplateName } = legacyTemplates[2];
             await actions.clickTemplateAction(systemTemplateName, 'delete');
 
-            expect(
-              document.body.querySelector('[data-test-subj="deleteSystemTemplateCallOut"]')
-            ).not.toBe(null);
+            expect(exists('deleteSystemTemplateCallOut')).toBe(true);
           });
 
           test('should send the correct HTTP request to delete an index template', async () => {
             const { component, actions, table } = testBed;
-            const { rows } = table.getMetaData('templateTable');
+            const { rows } = table.getMetaData('legacyTemplateTable');
 
             const templateId = rows[0].columns[2].value;
 
-            const {
-              name: templateName,
-              _kbnMeta: { formatVersion },
-            } = template1;
+            const [
+              {
+                name: templateName,
+                _kbnMeta: { isLegacy },
+              },
+            ] = legacyTemplates;
             await actions.clickTemplateAction(templateName, 'delete');
 
             const modal = document.body.querySelector(
@@ -347,7 +441,7 @@ describe('<IndexManagementHome />', () => {
             expect(latestRequest.method).toBe('POST');
             expect(latestRequest.url).toBe(`${API_BASE_PATH}/delete-templates`);
             expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
-              templates: [{ name: template1.name, formatVersion }],
+              templates: [{ name: legacyTemplates[0].name, isLegacy }],
             });
           });
         });
@@ -357,6 +451,7 @@ describe('<IndexManagementHome />', () => {
             const template = fixtures.getTemplate({
               name: `a${getRandomString()}`,
               indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
+              isLegacy: true,
             });
 
             httpRequestsMockHelpers.setLoadTemplateResponse(template);
@@ -381,7 +476,7 @@ describe('<IndexManagementHome />', () => {
 
             test('should set the correct title', async () => {
               const { find } = testBed;
-              const { name } = template1;
+              const [{ name }] = legacyTemplates;
 
               expect(find('templateDetails.title').text()).toEqual(name);
             });
@@ -437,6 +532,7 @@ describe('<IndexManagementHome />', () => {
                     alias1: {},
                   },
                 },
+                isLegacy: true,
               });
 
               const { find, actions, exists } = testBed;
@@ -477,6 +573,7 @@ describe('<IndexManagementHome />', () => {
               const templateWithNoOptionalFields = fixtures.getTemplate({
                 name: `a${getRandomString()}`,
                 indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
+                isLegacy: true,
               });
 
               const { actions, find, exists, component } = testBed;
