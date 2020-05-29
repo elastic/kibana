@@ -131,8 +131,8 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
   setDataGetter,
   onStepValidityChange,
 }) => {
-  const [isFromComponentsVisible, setIsFromComponentsVisible] = useState(false);
-  const [isAddManualVisible, setIsAddManualVisible] = useState(true);
+  const [isFromComponentsVisible] = useState(true);
+  const [isAddManualVisible] = useState(true);
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
   const [isMappingsVisible, setIsMappingsVisible] = useState(false);
   const [isAliasesVisible, setIsAliasesVisible] = useState(false);
@@ -165,7 +165,7 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
             <p>
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepSettings.settingsDescription"
-                defaultMessage="Configure your index template."
+                defaultMessage="Configure the mappings, settings and aliases of your index template."
               />
             </p>
           </EuiText>
@@ -186,10 +186,13 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
+
       <EuiSpacer />
+
+      {/* Inherit from components */}
       <div>
         <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
+          {/* <EuiFlexItem grow={false}>
             <EuiSwitch
               data-test-subj="enablePhaseSwitch-warm"
               label=""
@@ -200,13 +203,13 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
               }}
               aria-controls="warmPhaseContent"
             />
-          </EuiFlexItem>
+          </EuiFlexItem> */}
           <EuiFlexItem>
             <EuiTitle size="s">
               <h2 className="eui-displayInlineBlock eui-alignMiddle">
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseLabel"
-                  defaultMessage="Use data from your components"
+                  defaultMessage="Inherit from components"
                 />
               </h2>
             </EuiTitle>
@@ -215,28 +218,41 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
                 <p>
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescriptionMessage"
-                    defaultMessage="Reuse the saved index settings, mappings and aliases from your components."
+                    defaultMessage="Inherit index settings, mappings and aliases from your components."
                   />
                 </p>
               </EuiText>
             </EuiTextColor>
-
-            <EuiSpacer />
-
-            {isFromComponentsVisible ? (
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <ComponentTemplatesContainer />
-                </EuiFlexItem>
-                <EuiFlexItem />
-              </EuiFlexGroup>
-            ) : null}
           </EuiFlexItem>
         </EuiFlexGroup>
+        {isFromComponentsVisible ? (
+          <>
+            <EuiSpacer />
+            <EuiFlexGroup style={{ minHeight: '160px', maxHeight: '320px' }}>
+              <EuiFlexItem
+                style={{
+                  padding: '16px',
+                  backgroundColor: '#fafbfc',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#69707D',
+                }}
+              >
+                <div>Select a component template</div>
+              </EuiFlexItem>
+              <EuiFlexItem style={{ overflowY: 'auto' }}>
+                <ComponentTemplatesContainer />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        ) : null}
       </div>
+
+      <EuiSpacer size="l" />
+
       <div>
         <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
+          {/* <EuiFlexItem grow={false}>
             <EuiSwitch
               data-test-subj="enablePhaseSwitch-warm"
               label=""
@@ -246,13 +262,13 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
                 setIsAddManualVisible(e.target.checked);
               }}
             />
-          </EuiFlexItem>
+          </EuiFlexItem> */}
           <EuiFlexItem>
             <EuiTitle size="s">
               <h2 className="eui-displayInlineBlock eui-alignMiddle">
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseLabel"
-                  defaultMessage="Add additional settings / mappings / aliases"
+                  defaultMessage="Additional configuration"
                 />
               </h2>
             </EuiTitle>
@@ -261,7 +277,7 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
                 <p>
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescriptionMessage"
-                    defaultMessage="Add any additional index settings, mappings or aliases unique to this template."
+                    defaultMessage="Add additional index settings, mappings or aliases. This additional configuration will have priority over the component templates"
                   />
                 </p>
               </EuiText>

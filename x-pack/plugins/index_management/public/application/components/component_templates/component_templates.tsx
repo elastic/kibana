@@ -3,9 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import {
+  EuiText,
+  EuiEmptyPrompt,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldSearch,
+} from '@elastic/eui';
 
 import { ComponentTemplateDeserialized } from '../../../../common';
 import { CreateButtonPopOver } from './components';
@@ -16,7 +23,28 @@ interface Props {
   components: ComponentTemplateDeserialized[];
 }
 
+function fuzzyMatch(pattern: string, text: string) {
+  pattern = '.*' + pattern.split('').join('.*') + '.*';
+  const re = new RegExp(pattern);
+  return re.test(text);
+}
+
 export const ComponentTemplates = ({ isLoading, components }: Props) => {
+  const [searchValue, setSearchValue] = useState('');
+
+  const filteredComponents = useMemo<ComponentTemplateDeserialized[]>(() => {
+    if (isLoading) {
+      return [];
+    }
+    if (searchValue === '') {
+      return components;
+    }
+    return components.filter((component) => {
+      const match = fuzzyMatch(searchValue, component.name);
+      return match;
+    });
+  }, [isLoading, components, searchValue]);
+
   const renderEmptyPrompt = () => {
     const emptyPromptBody = (
       <EuiText color="subdued">
@@ -54,12 +82,33 @@ export const ComponentTemplates = ({ isLoading, components }: Props) => {
   };
 
   if (isLoading) {
-    return <p>Loading....</p>;
+    return null;
   }
 
   if (components.length === 0) {
     return renderEmptyPrompt();
   }
 
-  return <ComponentTemplatesList components={components} />;
+  return (
+    <>
+      <div>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFieldSearch
+              style={{ minWidth: '350px' }}
+              placeholder="Search components"
+              value={searchValue}
+              onChange={(e) => {
+                setSearchValue(e.target.value);
+              }}
+              aria-label="Search components"
+              compressed
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>View</EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+      <ComponentTemplatesList components={filteredComponents} />
+    </>
+  );
 };

@@ -91,3 +91,17 @@ export interface TemplateDeserialized {
 }
 
 export type IndexTemplateFormatVersion = 1 | 2;
+
+export interface ComponentTemplateSerialized {
+  template: {
+    settings?: IndexSettings;
+    aliases?: Aliases;
+    mappings?: Mappings;
+  };
+  version?: number;
+  _meta?: { [key: string]: any };
+}
+
+export interface ComponentTemplateDeserialized extends ComponentTemplateSerialized {
+  name: string;
+}

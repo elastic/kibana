@@ -18,10 +18,10 @@ import { serializers } from '../../../shared_imports';
 import { TemplateDeserialized, DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../../../common';
 import { TemplateSteps } from './template_steps';
 import {
-  StepAliases,
+  // StepAliases,
   StepLogistics,
-  StepMappings,
-  StepSettings,
+  // StepMappings,
+  // StepSettings,
   StepSettingsMappingsAliases,
   StepReview,
 } from './steps';
@@ -70,7 +70,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
   clearSaveError,
   isEditing,
 }) => {
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [currentStep, setCurrentStep] = useState<number>(2);
   const [validation, setValidation] = useState<ValidationState>({
     1: defaultValidation,
     2: defaultValidation,
