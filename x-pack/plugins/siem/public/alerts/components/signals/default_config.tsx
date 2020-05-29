@@ -12,7 +12,7 @@ import React from 'react';
 
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import {
-  TimelineAction,
+  TimelineRowAction,
   TimelineActionProps,
 } from '../../../timelines/components/timeline/body/actions';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
@@ -207,54 +207,63 @@ export const getSignalsActions = ({
   createTimeline: CreateTimeline;
   status: 'open' | 'closed';
   updateTimelineIsLoading: UpdateTimelineLoading;
-}): TimelineAction[] => [
+}): TimelineRowAction[] => [
   {
-    getAction: ({ ecsData }: TimelineActionProps): JSX.Element => (
-      <EuiToolTip
-        data-test-subj="send-signal-to-timeline-tool-tip"
-        content={i18n.ACTION_INVESTIGATE_IN_TIMELINE}
-      >
-        <EuiButtonIcon
-          data-test-subj="send-signal-to-timeline-button"
-          onClick={() =>
-            sendSignalToTimelineAction({
-              apolloClient,
-              createTimeline,
-              ecsData,
-              updateTimelineIsLoading,
-            })
-          }
-          iconType="timeline"
-          aria-label="Next"
-        />
-      </EuiToolTip>
-    ),
+    onClick: ({ ecsData }: TimelineActionProps) =>
+      sendSignalToTimelineAction({
+        apolloClient,
+        createTimeline,
+        ecsData,
+        updateTimelineIsLoading,
+      }),
+    iconType: 'timeline',
+    dataTestSubj: 'send-signal-to-timeline-tool-tip',
+    ariaLabel: 'Send signal to timeline',
     id: 'sendSignalToTimeline',
     width: 26,
+    tooltip: {
+      dataTestSubj: 'send-signal-to-timeline-button',
+      content: i18n.ACTION_INVESTIGATE_IN_TIMELINE,
+    },
+    displayType: 'icon',
   },
   {
-    getAction: ({ eventId }: TimelineActionProps): JSX.Element => (
-      <EuiToolTip
-        data-test-subj="update-signal-status-tool-tip"
-        content={status === FILTER_OPEN ? i18n.ACTION_OPEN_SIGNAL : i18n.ACTION_CLOSE_SIGNAL}
-      >
-        <EuiButtonIcon
-          data-test-subj={'update-signal-status-button'}
-          onClick={() =>
-            updateSignalStatusAction({
-              signalIds: [eventId],
-              status,
-              setEventsLoading,
-              setEventsDeleted,
-            })
-          }
-          isDisabled={!canUserCRUD || !hasIndexWrite}
-          iconType={status === FILTER_OPEN ? 'securitySignalDetected' : 'securitySignalResolved'}
-          aria-label="Next"
-        />
-      </EuiToolTip>
-    ),
+    onClick: ({ eventId }: TimelineActionProps) =>
+      updateSignalStatusAction({
+        signalIds: [eventId],
+        status,
+        setEventsLoading,
+        setEventsDeleted,
+      }),
     id: 'updateSignalStatus',
     width: 26,
+    iconType: status === FILTER_OPEN ? 'securitySignalDetected' : 'securitySignalResolved',
+    isActionDisabled: !canUserCRUD || !hasIndexWrite,
+    dataTestSubj: 'update-signal-status-tool-tip',
+    ariaLabel: 'Update signal status',
+    tooltip: {
+      dataTestSubj: 'update-signal-status-button',
+      content: status === FILTER_OPEN ? i18n.ACTION_OPEN_SIGNAL : i18n.ACTION_CLOSE_SIGNAL,
+    },
+    displayType: 'icon',
+  },
+  {
+    onClick: ({ eventId }: TimelineActionProps) =>
+      updateSignalStatusAction({
+        signalIds: [eventId],
+        status,
+        setEventsLoading,
+        setEventsDeleted,
+      }),
+    id: 'updateSignalStatus',
+    iconType: status === FILTER_OPEN ? 'securitySignalDetected' : 'securitySignalResolved',
+    isActionDisabled: !canUserCRUD || !hasIndexWrite,
+    dataTestSubj: 'update-signal-status-tool-tip',
+    ariaLabel: 'Update signal status',
+    tooltip: {
+      dataTestSubj: 'update-signal-status-button',
+      content: status === FILTER_OPEN ? i18n.ACTION_OPEN_SIGNAL : i18n.ACTION_CLOSE_SIGNAL,
+    },
+    displayType: 'contextMenu',
   },
 ];

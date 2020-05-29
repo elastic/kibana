@@ -21,10 +21,21 @@ export interface TimelineActionProps {
   ecsData: Ecs;
 }
 
-export interface TimelineAction {
-  getAction: ({ eventId, ecsData }: TimelineActionProps) => JSX.Element;
-  width: number;
+interface TimelineRowTooltip {
+  dataTestSubj?: string;
+  content: string;
+}
+
+export interface TimelineRowAction {
+  ariaLabel?: string;
+  dataTestSubj?: string;
+  displayType: 'icon' | 'contextMenu';
+  iconType: string;
   id: string;
+  isActionDisabled?: boolean;
+  onClick: ({ eventId, ecsData }: TimelineActionProps) => void;
+  tooltip: TimelineRowTooltip;
+  width?: number;
 }
 
 interface Props {

@@ -8,7 +8,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
-import { TimelineAction } from '../../../timelines/components/timeline/body/actions';
+import { TimelineRowAction } from '../../../timelines/components/timeline/body/actions';
 import { buildSignalsRuleIdFilter, getSignalsActions } from './default_config';
 import {
   CreateTimeline,
@@ -84,7 +84,7 @@ describe('signals default_config', () => {
     });
 
     describe('signal open action', () => {
-      let signalsActions: TimelineAction[];
+      let signalsActions: TimelineRowAction[];
       let signalOpenAction: JSX.Element;
       let wrapper: ReactWrapper<React.ReactElement, unknown>;
 
@@ -138,7 +138,7 @@ describe('signals default_config', () => {
     });
 
     describe('signal close action', () => {
-      let signalsActions: TimelineAction[];
+      let signalsActions: TimelineRowAction[];
       let signalCloseAction: JSX.Element;
       let wrapper: ReactWrapper<React.ReactElement, unknown>;
 

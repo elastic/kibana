@@ -96,13 +96,17 @@ export const Body = React.memo<BodyProps>(
   }) => {
     const containerElementRef = useRef<HTMLDivElement>(null);
     const { getManageTimelineById } = useManageTimeline();
-    const timelineActions = useMemo(() => getManageTimelineById(id).timelineActions, [
+    const timelineActions = useMemo(() => getManageTimelineById(id).timelineRowActions, [
       getManageTimelineById,
       id,
     ]);
 
     const additionalActionWidth = useMemo(
-      () => timelineActions?.reduce((acc, v) => acc + v.width, 0) ?? 0,
+      () =>
+        timelineActions.reduce(
+          (acc, v) => (v.displayType === 'icon' ? acc + (v.width ?? 0) : acc),
+          0
+        ) ?? 0,
       [timelineActions]
     );
     const actionsColumnWidth = useMemo(

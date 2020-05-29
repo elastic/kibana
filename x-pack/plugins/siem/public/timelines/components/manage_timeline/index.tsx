@@ -8,7 +8,7 @@ import React, { createContext, useCallback, useContext, useReducer } from 'react
 import { noop } from 'lodash/fp';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FilterManager } from '../../../../../../../src/plugins/data/public/query/filter_manager';
-import { TimelineAction } from '../timeline/body/actions';
+import { TimelineRowAction } from '../timeline/body/actions';
 import * as i18n from '../../../common/components/events_viewer/translations';
 import * as i18nF from '../timeline/footer/translations';
 
@@ -33,7 +33,7 @@ interface ManageTimeline {
   loadingText: string;
   queryFields: string[];
   selectAll: boolean;
-  timelineActions: TimelineAction[];
+  timelineRowActions: TimelineRowAction[];
   title: string;
   unit: (totalCount: number) => string;
 }
@@ -56,7 +56,7 @@ type ActionManageTimeline =
   | {
       type: 'SET_TIMELINE_ACTIONS';
       id: string;
-      payload: { queryFields?: string[]; timelineActions?: TimelineAction[] };
+      payload: { queryFields?: string[]; timelineRowActions: TimelineRowAction[] };
     }
   | {
       type: 'SET_TIMELINE_FILTER_MANAGER';
@@ -72,7 +72,7 @@ const timelineDefaults = {
   selectAll: false,
   isLoading: false,
   queryFields: [],
-  timelineActions: [],
+  timelineRowActions: [],
   title: i18n.EVENTS,
   unit: (n: number) => i18n.UNIT(n),
 };
@@ -114,10 +114,10 @@ interface ManageGlobalTimeline {
   getTimelineFilterManager: (id: string) => FilterManager | undefined;
   initializeTimeline: (newTimeline: ManageTimelineInit) => void;
   setIsTimelineLoading: (isLoadingArgs: { id: string; isLoading: boolean }) => void;
-  setTimelineActions: (actionsArgs: {
+  setTimelineRowActions: (actionsArgs: {
     id: string;
-    queryFields: string[];
-    timelineActions: TimelineAction[];
+    queryFields?: string[];
+    timelineRowActions: TimelineRowAction[];
   }) => void;
   setTimelineFilterManager: (filterArgs: { id: string; filterManager: FilterManager }) => void;
 }
@@ -138,20 +138,20 @@ const useTimelineManager = (
     });
   }, []);
 
-  const setTimelineActions = useCallback(
+  const setTimelineRowActions = useCallback(
     ({
       id,
       queryFields,
-      timelineActions,
+      timelineRowActions,
     }: {
       id: string;
       queryFields?: string[];
-      timelineActions?: TimelineAction[];
+      timelineRowActions: TimelineRowAction[];
     }) => {
       dispatch({
         type: 'SET_TIMELINE_ACTIONS',
         id,
-        payload: { queryFields, timelineActions },
+        payload: { queryFields, timelineRowActions },
       });
     },
     []
@@ -199,7 +199,7 @@ const useTimelineManager = (
     getTimelineFilterManager,
     initializeTimeline,
     setIsTimelineLoading,
-    setTimelineActions,
+    setTimelineRowActions,
     setTimelineFilterManager,
   };
 };
@@ -209,7 +209,7 @@ const init = {
   getTimelineFilterManager: () => undefined,
   initializeTimeline: () => noop,
   setIsTimelineLoading: () => noop,
-  setTimelineActions: () => noop,
+  setTimelineRowActions: () => noop,
   setTimelineFilterManager: () => noop,
 };
 const ManageTimelineContext = createContext<ManageGlobalTimeline>(init);
