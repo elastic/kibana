@@ -22,11 +22,11 @@ export const emsBoundariesLayerWizardConfig: LayerWizard = {
     defaultMessage: 'Administrative boundaries from Elastic Maps Service',
   }),
   icon: 'emsApp',
-  renderWizard: ({ previewLayer, mapColors }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: Partial<EMSFileSourceDescriptor>) => {
       const sourceDescriptor = EMSFileSource.createDescriptor(sourceConfig);
       const layerDescriptor = VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
-      previewLayer(layerDescriptor);
+      previewLayers([layerDescriptor]);
     };
     return <EMSFileCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
