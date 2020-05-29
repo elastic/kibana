@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { SavedObjectsClientContract } from 'kibana/server';
 
 import { getFoundExceptionListSchemaMock } from '../../../common/schemas/response/found_exception_list_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
@@ -28,7 +28,7 @@ export class ExceptionListClientMock extends ExceptionListClient {
 
 export const getExceptionListClientMock = (): ExceptionListClient => {
   const mock = new ExceptionListClientMock({
-    savedObjectsClient: savedObjectsClientMock.create(),
+    savedObjectsClient: (jest.fn() as unknown) as SavedObjectsClientContract,
     user: 'elastic',
   });
   return mock;
