@@ -21,7 +21,7 @@ export const getHostPolicyResponseHandler = function (
       const doc = await getPolicyResponseByHostId(
         index,
         request.query.hostId,
-        context.core.elasticsearch.dataClient
+        context.core.elasticsearch.legacy.client
       );
 
       if (doc) {
