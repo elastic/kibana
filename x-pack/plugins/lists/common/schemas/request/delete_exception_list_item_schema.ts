@@ -8,13 +8,22 @@
 
 import * as t from 'io-ts';
 
-import { id, item_id } from '../common/schemas';
+import { NamespaceType, id, item_id, namespace_type } from '../common/schemas';
 
 export const deleteExceptionListItemSchema = t.exact(
   t.partial({
     id,
     item_id,
+    namespace_type, // defaults to 'single' if not set during decode
   })
 );
 
 export type DeleteExceptionListItemSchema = t.TypeOf<typeof deleteExceptionListItemSchema>;
+
+// This type is used after a decode since some things are defaults after a decode.
+export type DeleteExceptionListItemSchemaDecoded = Omit<
+  DeleteExceptionListItemSchema,
+  'namespace_type'
+> & {
+  namespace_type: NamespaceType;
+};

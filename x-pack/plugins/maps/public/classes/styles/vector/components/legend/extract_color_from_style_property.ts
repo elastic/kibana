@@ -43,7 +43,7 @@ export function extractColorFromStyleProperty(
     }
 
     const palette = getColorPalette(dynamicOptions.colorCategory);
-    return palette[0];
+    return palette ? palette[0] : defaultColor;
   } else {
     // return middle of gradient for dynamic style property
     if (dynamicOptions.useCustomColorRamp) {
@@ -58,6 +58,7 @@ export function extractColorFromStyleProperty(
     if (!dynamicOptions.color) {
       return defaultColor;
     }
-    return getColorRampCenterColor(dynamicOptions.color);
+    const centerColor = getColorRampCenterColor(dynamicOptions.color);
+    return centerColor ? centerColor : defaultColor;
   }
 }
