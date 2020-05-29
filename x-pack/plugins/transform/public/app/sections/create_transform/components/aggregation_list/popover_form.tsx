@@ -18,6 +18,7 @@ import {
   EuiSelectOption,
 } from '@elastic/eui';
 
+import { cloneDeep } from 'lodash';
 import { dictionaryToArray } from '../../../../../../common/types/common';
 
 import {
@@ -69,7 +70,7 @@ function parsePercentsInput(inputValue: string | undefined) {
 }
 
 export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onChange, options }) => {
-  const [aggConfigDef, setAggConfigDef] = useState(defaultData);
+  const [aggConfigDef, setAggConfigDef] = useState(cloneDeep(defaultData));
 
   const [aggName, setAggName] = useState(defaultData.aggName);
   const [agg, setAgg] = useState(defaultData.agg);
@@ -83,10 +84,11 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
 
   // Update configuration based on the aggregation type
   useEffect(() => {
+    if (agg === aggConfigDef.agg) return;
     const config = getAggFormConfig(agg);
     if (config === undefined) return;
     setAggConfigDef(config);
-  }, [agg]);
+  }, [agg, aggConfigDef.agg]);
 
   const availableFields: EuiSelectOption[] = [];
   const availableAggs: EuiSelectOption[] = [];

@@ -123,7 +123,6 @@ export function getFilterAggConfig(
     aggConfig: {},
     forceEdit: true,
     uiAggConfigToEs() {
-      console.log(this, '___this___');
       // ensure the configuration has been completed
       if (!isPivotAggsConfigFilter(this)) {
         // eslint-disable-next-line no-console
@@ -174,7 +173,9 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
   const { indexPattern } = useContext(CreateTransformWizardContext);
   const filterAggsOptions = getSupportedFilterAggs(selectedField, indexPattern!);
 
-  const filterAggTypeConfig = getFilterAggTypeConfig(aggConfig.filterAgg);
+  const filterAggTypeConfig = isPivotAggsConfigFilter(aggConfig)
+    ? aggConfig.aggTypeConfig
+    : getFilterAggTypeConfig(aggConfig.filterAgg);
 
   return (
     <>
@@ -202,13 +203,13 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
       {aggConfig.filterAgg && (
         <filterAggTypeConfig.FilterAggFormComponent
           config={aggConfig.aggTypeConfig?.filterAggConfig}
-          onChange={(e) => {
+          onChange={(update) => {
             onChange({
               ...aggConfig,
-              validationResult: e.validationResult,
+              validationResult: update.validationResult,
               aggTypeConfig: {
                 ...filterAggTypeConfig,
-                filterAggConfig: e.config,
+                filterAggConfig: update.config,
               },
             });
           }}
@@ -263,8 +264,6 @@ export const FilterTermForm: PivotAggConfigFilterTerm['aggConfig']['aggTypeConfi
   onChange,
   selectedField,
 }) => {
-  console.log(config, '!!___config___');
-
   const api = useApi();
   const { indexPattern } = useContext(CreateTransformWizardContext);
 
