@@ -43,7 +43,6 @@ export const PAGE_ROUTING_PATHS = {
   configurations: '/configs',
   configurations_list: '/configs',
   configuration_details: '/configs/:configId/:tabId?',
-  configuration_details_yaml: '/configs/:configId/yaml',
   configuration_details_settings: '/configs/:configId/settings',
   add_datasource_from_configuration: '/configs/:configId/add-datasource',
   add_datasource_from_integration: '/integrations/:pkgkey/add-datasource',
