@@ -22,6 +22,7 @@ export interface ISection {
   icon: string;
   description: string;
   href?: string;
+  target?: '_blank';
 }
 
 export const Section = ({ section }: { section: ISection }) => {
@@ -55,6 +56,7 @@ export const Section = ({ section }: { section: ISection }) => {
     return (
       <EuiFlexItem>
         <EuiButtonEmpty
+          target={section.target}
           href={core.http.basePath.prepend(href)}
           style={{ height: 'auto' }}
         >
