@@ -61,6 +61,7 @@ class TimeseriesPanelConfigUi extends Component {
       axis_min: '',
       legend_position: 'right',
       show_grid: 1,
+      tooltip_mode: 'show_all',
     };
     const model = { ...defaults, ...this.props.model };
     const { selectedTab } = this.state;
@@ -83,6 +84,22 @@ class TimeseriesPanelConfigUi extends Component {
           defaultMessage: 'Left',
         }),
         value: 'left',
+      },
+    ];
+    const tooltipModeOptions = [
+      {
+        label: intl.formatMessage({
+          id: 'visTypeTimeseries.timeseries.tooltipOptions.showAll',
+          defaultMessage: 'Show all values',
+        }),
+        value: 'show_all',
+      },
+      {
+        label: intl.formatMessage({
+          id: 'visTypeTimeseries.timeseries.tooltipOptions.showFocused',
+          defaultMessage: 'Show single value',
+        }),
+        value: 'show_focused',
       },
     ];
     const selectedPositionOption = positionOptions.find((option) => {
@@ -132,6 +149,10 @@ class TimeseriesPanelConfigUi extends Component {
     ];
     const selectedLegendPosOption = legendPositionOptions.find((option) => {
       return model.legend_position === option.value;
+    });
+
+    const selectedTooltipMode = tooltipModeOptions.find((option) => {
+      return model.tooltip_mode === option.value;
     });
 
     let view;
@@ -355,6 +376,24 @@ class TimeseriesPanelConfigUi extends Component {
               </EuiFlexItem>
               <EuiFlexItem>
                 <YesNo value={model.show_grid} name="show_grid" onChange={this.props.onChange} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="visTypeTimeseries.timeseries.optionsTab.tooltipMode"
+                    defaultMessage="Tooltip"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiComboBox
+                  isClearable={false}
+                  id={htmlId('tooltipMode')}
+                  options={tooltipModeOptions}
+                  selectedOptions={selectedTooltipMode ? [selectedTooltipMode] : []}
+                  onChange={handleSelectChange('tooltip_mode')}
+                  singleSelection={{ asPlainText: true }}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
