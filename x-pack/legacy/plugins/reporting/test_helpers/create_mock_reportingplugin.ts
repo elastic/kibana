@@ -62,6 +62,7 @@ export const createMockReportingCore = async (
   const core = plugin.getReportingCore();
 
   if (setupDepsMock) {
+    // @ts-ignore overwriting private properties
     core.pluginSetupDeps = setupDepsMock;
   }
 

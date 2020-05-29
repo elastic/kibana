@@ -107,7 +107,9 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it('fails on unauthenticated users', async () => {
+    // @ts-ignore
     core.pluginSetupDeps = ({
+      // @ts-ignore
       ...core.pluginSetupDeps,
       security: {
         authc: {
@@ -128,7 +130,9 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it('fails on users without the appropriate role', async () => {
+    // @ts-ignore
     core.pluginSetupDeps = ({
+      // @ts-ignore
       ...core.pluginSetupDeps,
       security: {
         authc: {

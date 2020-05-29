@@ -14,7 +14,6 @@ import { ReportingCore } from '..';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { ExportTypeDefinition } from '../types';
 import { LevelLogger } from '../lib';
-import { ReportingInternalSetup } from '../core';
 import { of } from 'rxjs';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
@@ -71,7 +70,7 @@ describe('POST /api/reporting/generate', () => {
           type: 'gold',
         }),
       },
-    } as unknown) as ReportingInternalSetup;
+    } as unknown) as any;
     core = await createMockReportingCore(config, mockDeps);
     exportTypesRegistry = new ExportTypesRegistry();
     exportTypesRegistry.register({

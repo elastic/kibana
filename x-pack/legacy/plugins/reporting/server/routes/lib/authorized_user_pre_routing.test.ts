@@ -48,6 +48,7 @@ describe('authorized_user_pre_routing', function () {
   it('should return from handler with null user when security is disabled', async function () {
     mockCore.getPluginSetupDeps = () =>
       (({
+        // @ts-ignore
         ...mockCore.pluginSetupDeps,
         security: undefined, // disable security
       } as unknown) as ReportingInternalSetup);
@@ -67,6 +68,7 @@ describe('authorized_user_pre_routing', function () {
   it('should return with 401 when security is enabled but no authenticated user', async function () {
     mockCore.getPluginSetupDeps = () =>
       (({
+        // @ts-ignore
         ...mockCore.pluginSetupDeps,
         security: {
           authc: { getCurrentUser: () => null },
@@ -87,6 +89,7 @@ describe('authorized_user_pre_routing', function () {
   it(`should return with 403 when security is enabled but user doesn't have allowed role`, async function () {
     mockCore.getPluginSetupDeps = () =>
       (({
+        // @ts-ignore
         ...mockCore.pluginSetupDeps,
         security: {
           authc: { getCurrentUser: () => ({ username: 'friendlyuser', roles: ['cowboy'] }) },
@@ -106,6 +109,7 @@ describe('authorized_user_pre_routing', function () {
   it('should return from handler when security is enabled and user has explicitly allowed role', async function () {
     mockCore.getPluginSetupDeps = () =>
       (({
+        // @ts-ignore
         ...mockCore.pluginSetupDeps,
         security: {
           authc: {
