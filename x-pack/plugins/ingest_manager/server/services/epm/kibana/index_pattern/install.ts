@@ -14,7 +14,6 @@ import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
 import { getPackageKeysByStatus } from '../../packages/get';
 import { InstallationStatus, RegistryPackage, CallESAsCurrentUser } from '../../../../types';
 import { appContextService } from '../../../../services';
-import { cacheHas, getCacheKey } from '../../registry/cache';
 
 interface FieldFormatMap {
   [key: string]: FieldFormatMapItem;
