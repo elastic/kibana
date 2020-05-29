@@ -14,6 +14,7 @@ import {
   EuiToolTip,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { noop } from 'lodash';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { LogEntry } from '../../../../common/http_api';
@@ -103,8 +104,15 @@ const LogInContextWrapper = euiStyled.div<{ width: number | string; height: numb
 `;
 
 const LogEntryContext: React.FC<{ context: LogEntry['context'] }> = ({ context }) => {
+  let text;
   if ('container.id' in context) {
-    return <p>Displayed logs are from container {context['container.id']}</p>;
+    text = (
+      <FormattedMessage
+        id="xpack.infra.logs.viewInContext.logsFromContainerTitle"
+        defaultMessage="Displayed logs are from container {container}"
+        values={{ container: context['container.id'] }}
+      />
+    );
   }
 
   if ('host.name' in context) {
@@ -112,21 +120,27 @@ const LogEntryContext: React.FC<{ context: LogEntry['context'] }> = ({ context }
       context['log.file.path'].length > 45
         ? context['log.file.path'].slice(0, 20) + '...' + context['log.file.path'].slice(-25)
         : context['log.file.path'];
-
-    return (
-      <EuiText size="s">
-        <p>
-          <EuiTextColor color="subdued">
-            Displayed logs are from file{' '}
+    text = (
+      <FormattedMessage
+        id="xpack.infra.logs.viewInContext.logsFromFileTitle"
+        defaultMessage="Displayed logs are from file {file} and host {host}"
+        values={{
+          file: (
             <EuiToolTip content={context['log.file.path']}>
               <span>{shortenedFilePath}</span>
-            </EuiToolTip>{' '}
-            and host {context['host.name']}
-          </EuiTextColor>
-        </p>
-      </EuiText>
+            </EuiToolTip>
+          ),
+          host: context['host.name'],
+        }}
+      />
     );
   }
 
-  return null;
+  return (
+    <EuiText size="s">
+      <p>
+        <EuiTextColor color="subdued">{text}</EuiTextColor>
+      </p>
+    </EuiText>
+  );
 };
