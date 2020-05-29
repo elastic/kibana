@@ -239,20 +239,4 @@ export const getSignalsActions = ({
     content: status === FILTER_OPEN ? i18n.ACTION_OPEN_SIGNAL : i18n.ACTION_CLOSE_SIGNAL,
     displayType: 'icon',
   },
-  {
-    onClick: ({ eventId }: TimelineRowActionOnClick) =>
-      updateSignalStatusAction({
-        signalIds: [eventId],
-        status,
-        setEventsLoading,
-        setEventsDeleted,
-      }),
-    id: 'updateSignalStatus',
-    iconType: status === FILTER_OPEN ? 'securitySignalDetected' : 'securitySignalResolved',
-    isActionDisabled: !canUserCRUD || !hasIndexWrite,
-    dataTestSubj: 'update-signal-status',
-    ariaLabel: 'Update signal status',
-    content: status === FILTER_OPEN ? i18n.ACTION_OPEN_SIGNAL : i18n.ACTION_CLOSE_SIGNAL,
-    displayType: 'contextMenu',
-  },
 ];
