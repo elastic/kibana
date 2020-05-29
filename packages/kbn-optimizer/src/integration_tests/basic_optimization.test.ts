@@ -167,10 +167,6 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       <absolute path>/packages/kbn-ui-shared-deps/public_path_module_creator.js,
     ]
   `);
-
-  expectFileMatchesSnapshot('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
-  expectFileMatchesSnapshot('plugins/foo/target/public/0.plugin.js', 'foo async bundle');
-  expectFileMatchesSnapshot('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
 });
 
 it('uses cache on second run and exist cleanly', async () => {
@@ -226,19 +222,13 @@ it('prepares assets for distribution', async () => {
   expectFileMatchesSnapshotWithCompression('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
 });
 
-const expectFileMatchesSnapshot = (filePath: string, snapshotLabel: string) => {
-  const raw = Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, filePath), 'utf8');
-
-  expect(raw).toMatchSnapshot(snapshotLabel);
-
-  return raw;
-};
-
 /**
  * Verifies that the file matches the expected output and has matching compressed variants.
  */
 const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabel: string) => {
-  const raw = expectFileMatchesSnapshot(filePath, snapshotLabel);
+  const raw = Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, filePath), 'utf8');
+
+  expect(raw).toMatchSnapshot(snapshotLabel);
 
   // Verify the brotli variant matches
   expect(
