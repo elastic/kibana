@@ -51,7 +51,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
   public async setup(
     core: CoreSetup,
     plugins: {
-      apmOss: APMOSSPluginSetup;
+      apm_oss: APMOSSPluginSetup;
       home: HomeServerPluginSetup;
       licensing: LicensingPluginSetup;
       cloud?: CloudSetup;
@@ -66,7 +66,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
   ) {
     this.logger = this.initContext.logger.get();
     const config$ = this.initContext.config.create<APMXPackConfig>();
-    const mergedConfig$ = combineLatest(plugins.apmOss.config$, config$).pipe(
+    const mergedConfig$ = combineLatest(plugins.apm_oss.config$, config$).pipe(
       map(([apmOssConfig, apmConfig]) => mergeConfigs(apmOssConfig, apmConfig))
     );
 
@@ -97,7 +97,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       });
     }
 
-    const ossTutorialProvider = plugins.apmOss.getRegisteredTutorialProvider();
+    const ossTutorialProvider = plugins.apm_oss.getRegisteredTutorialProvider();
     plugins.home.tutorials.unregisterTutorial(ossTutorialProvider);
     plugins.home.tutorials.registerTutorial(() => {
       const ossPart = ossTutorialProvider({});
@@ -107,15 +107,15 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
           label: i18n.translate(
             'xpack.apm.tutorial.specProvider.artifacts.application.label',
             {
-              defaultMessage: 'Launch APM'
+              defaultMessage: 'Launch APM',
             }
-          )
+          ),
         };
       }
 
       return {
         ...ossPart,
-        elasticCloud: createElasticCloudInstructions(plugins.cloud)
+        elasticCloud: createElasticCloudInstructions(plugins.cloud),
       };
     });
     plugins.features.registerFeature(APM_FEATURE);
