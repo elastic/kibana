@@ -8,10 +8,13 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core
 import { createBrowserDriverFactory } from './browsers';
 import { ReportingConfig } from './config';
 import { ReportingCore } from './core';
+import { registerRoutes } from './routes';
 import { createQueueFactory, enqueueJobFactory, LevelLogger, runValidations } from './lib';
 import { setFieldFormats } from './services';
 import { ReportingSetup, ReportingSetupDeps, ReportingStart, ReportingStartDeps } from './types';
 import { registerReportingUsageCollector } from './usage';
+// @ts-ignore no module definition
+import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
 
 export class ReportingPlugin
   implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
@@ -33,7 +36,8 @@ export class ReportingPlugin
     const { xpack_main: xpackMainLegacy, reporting: reportingLegacy } = __LEGACY.plugins;
     const { logger } = this;
 
-    this.reportingCore.legacySetup(xpackMainLegacy, reportingLegacy, __LEGACY);
+    // legacy plugin status
+    mirrorPluginStatus(xpackMainLegacy, reportingLegacy);
 
     const browserDriverFactory = await createBrowserDriverFactory(config, this.logger); // required for validations :(
     runValidations(config, elasticsearch, browserDriverFactory, this.logger);
@@ -42,7 +46,7 @@ export class ReportingPlugin
     registerReportingUsageCollector(this.reportingCore, plugins);
 
     // regsister setup internals
-    this.reportingCore.pluginSetup({
+    const deps = {
       browserDriverFactory,
       elasticsearch,
       licensing,
@@ -50,10 +54,11 @@ export class ReportingPlugin
       router,
       security,
       logger,
-    });
+    };
+    this.reportingCore.pluginSetup(deps);
 
     // Setup routing
-    this.reportingCore.setupRoutes();
+    registerRoutes(this.reportingCore);
 
     return {};
   }

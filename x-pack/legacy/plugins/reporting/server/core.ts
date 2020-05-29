@@ -16,19 +16,14 @@ import {
   BasePath,
 } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../../plugins/security/server';
-import { ReportingPluginSpecOptions } from '../';
-// @ts-ignore no module definition
-import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
-import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import { screenshotsObservableFactory } from '../export_types/common/lib/screenshots';
-import { ServerFacade, ScreenshotsObservableFn } from '../server/types';
+import { ScreenshotsObservableFn } from '../server/types';
 import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
 import { ESQueueInstance } from './lib/create_queue';
 import { EnqueueJobFn } from './lib/enqueue_job';
-import { registerRoutes } from './routes';
 
 export interface ReportingInternalSetup {
   browserDriverFactory: HeadlessChromiumDriverFactory;
@@ -55,19 +50,6 @@ export class ReportingCore {
   private exportTypesRegistry = getExportTypesRegistry();
 
   constructor(private config: ReportingConfig) {}
-
-  legacySetup(
-    xpackMainPlugin: XPackMainPlugin,
-    reporting: ReportingPluginSpecOptions,
-    __LEGACY: ServerFacade
-  ) {
-    // legacy plugin status
-    mirrorPluginStatus(xpackMainPlugin, reporting);
-  }
-
-  public async setupRoutes() {
-    registerRoutes(this);
-  }
 
   public pluginSetup(reportingSetupDeps: ReportingInternalSetup) {
     this.pluginSetupDeps = reportingSetupDeps;
