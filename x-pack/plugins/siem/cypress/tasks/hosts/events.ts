@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { drag, drop } from '../common';
 import {
   CLOSE_MODAL,
+  DRAGGABLE_HEADER,
   EVENTS_VIEWER_FIELDS_BUTTON,
   FIELDS_BROWSER_CONTAINER,
   HOST_GEO_CITY_NAME_CHECKBOX,
@@ -57,4 +59,25 @@ export const resetFields = () => {
 
 export const waitsForEventsToBeLoaded = () => {
   cy.get(SERVER_SIDE_EVENT_COUNT).should('exist').invoke('text').should('not.equal', '0');
+};
+
+export const dragAndDropColumn = ({
+  column,
+  newPosition,
+}: {
+  column: number;
+  newPosition: number;
+}) => {
+  cy.get(DRAGGABLE_HEADER).first().should('exist');
+  cy.get(DRAGGABLE_HEADER)
+    .eq(column)
+    .then((header) => drag(header));
+
+  cy.wait(3000); // wait for DOM updates before moving
+
+  cy.get(DRAGGABLE_HEADER)
+    .eq(newPosition)
+    .then((targetPosition) => {
+      drop(targetPosition);
+    });
 };

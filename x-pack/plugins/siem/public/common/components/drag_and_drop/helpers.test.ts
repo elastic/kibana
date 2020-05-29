@@ -32,6 +32,7 @@ import {
   getDroppableId,
   getFieldIdFromDraggable,
   getProviderIdFromDraggable,
+  getTimelineIdFromColumnDroppableId,
   getTimelineProviderDraggableId,
   getTimelineProviderDroppableId,
   providerWasDroppedOnTimeline,
@@ -982,6 +983,18 @@ describe('helpers', () => {
         },
         type: 'x-pack/siem/local/drag_and_drop/NO_PROVIDER_FOUND',
       });
+    });
+  });
+
+  describe('getTimelineIdFromColumnDroppableId', () => {
+    test('it returns the expected timelineId from a column droppableId', () => {
+      expect(getTimelineIdFromColumnDroppableId(DROPPABLE_ID_TIMELINE_COLUMNS)).toEqual(
+        'timeline-1'
+      );
+    });
+
+    test('it returns an empty string when the droppableId is an empty string', () => {
+      expect(getTimelineIdFromColumnDroppableId('')).toEqual('');
     });
   });
 });
