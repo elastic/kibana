@@ -17,21 +17,16 @@ import {
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
-  SOURCE_DATA_ID_ORIGIN,
+  SOURCE_DATA_REQUEST_ID,
 } from '../../../common/constants';
 import { copyPersistentState } from '../../reducers/util';
-import {
-  LayerDescriptor,
-  MapExtent,
-  MapFilters,
-  StyleDescriptor,
-} from '../../../common/descriptor_types';
+import { LayerDescriptor, MapExtent, StyleDescriptor } from '../../../common/descriptor_types';
 import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 
 export interface ILayer {
-  getBounds(mapFilters: MapFilters): Promise<MapExtent>;
+  getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null>;
   getDataRequest(id: string): DataRequest | undefined;
   getDisplayName(source?: ISource): Promise<string>;
   getId(): string;
@@ -396,7 +391,7 @@ export class AbstractLayer implements ILayer {
   }
 
   getSourceDataRequest(): DataRequest | undefined {
-    return this.getDataRequest(SOURCE_DATA_ID_ORIGIN);
+    return this.getDataRequest(SOURCE_DATA_REQUEST_ID);
   }
 
   getDataRequest(id: string): DataRequest | undefined {
@@ -450,13 +445,8 @@ export class AbstractLayer implements ILayer {
     return sourceDataRequest ? sourceDataRequest.hasData() : false;
   }
 
-  async getBounds(mapFilters: MapFilters): Promise<MapExtent> {
-    return {
-      minLon: -180,
-      maxLon: 180,
-      minLat: -89,
-      maxLat: 89,
-    };
+  async getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null> {
+    return null;
   }
 
   renderStyleEditor({
