@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PivotSupportedAggs } from '../../../../../common/pivot_aggs';
+import { PIVOT_SUPPORTED_AGGS, PivotSupportedAggs } from '../../../../../common/pivot_aggs';
 import { getFilterAggConfig } from './filter_agg_config';
 
 /**
  * Gets form configuration for provided aggregation type.
  */
-export function getAggFormConfig(agg: PivotSupportedAggs) {
+export function getAggFormConfig(agg: PivotSupportedAggs | string) {
   switch (agg) {
-    case 'filter':
+    case PIVOT_SUPPORTED_AGGS.FILTER:
       return getFilterAggConfig();
     default:
       return;

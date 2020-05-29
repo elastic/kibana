@@ -11,6 +11,7 @@ import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 import { AggName } from './aggregations';
 import { EsFieldName } from './fields';
 import { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg_config';
+import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
 
 export type PivotSupportedAggs = typeof PIVOT_SUPPORTED_AGGS[keyof typeof PIVOT_SUPPORTED_AGGS];
 
@@ -81,26 +82,58 @@ export interface PivotAggsConfigBase {
   dropDownName: string;
 }
 
-export interface AggFormConfig<T> {
+/**
+ * Resolves agg UI config from provided ES agg definition
+ */
+export function getAggConfigFromEsAgg(esAggDefinition: Record<string, any>) {
+  const aggKeys = Object.keys(esAggDefinition);
+
+  // Find the main aggregation key
+  const agg = aggKeys.find((aggKey) => aggKey !== 'aggs');
+
+  if (!agg) {
+    throw new Error('Invalid aggregation definition');
+  }
+
+  const config = getAggFormConfig(agg);
+
+  if (aggKeys.includes('agg')) {
+    // process sub-aggregation
+  }
+
+  if (!config) {
+    return;
+  }
+
+  return config.mappers.esToUiAggConfig(esAggDefinition);
+}
+
+export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
+  field: EsFieldName;
+}
+
+export interface PivotAggsConfigWithUiCustom extends PivotAggsConfigBase {
+  aggConfig: any;
+}
+
+export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
+  /** Form component */
   AggFormComponent: FC<{
     aggConfig: Partial<T>;
     onChange: (arg: Partial<T>) => void;
     selectedField: string;
   }>;
-  defaultAggConfig?: Partial<T>;
-}
-
-export interface PivotAggsConfigWithUiBase<T = {}> extends PivotAggsConfigBase {
-  field: EsFieldName;
-  /**
-   * Configuration of agg form
-   */
-  formConfig: T extends {} ? AggFormConfig<T> : undefined;
+  /** Aggregation specific configuration */
+  aggConfig: T;
   /**
    * Indicates if the user's input is required after quick adding of the aggregation
    * from the suggestions.
    */
   forceEdit?: boolean;
+  /** Set UI configuration from ES aggregation definition */
+  esToUiAggConfig: (arg: { [key: string]: any }) => void;
+  /** Converts UI agg config form to ES agg request object */
+  uiAggConfigToEs: () => { [key: string]: any };
 }
 
 interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {
@@ -108,7 +141,10 @@ interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {
   percents: number[];
 }
 
-export type PivotAggsConfigWithUiSupport = PivotAggsConfigWithUiBase | PivotAggsConfigPercentiles;
+export type PivotAggsConfigWithUiSupport =
+  | PivotAggsConfigWithUiBase
+  | PivotAggsConfigPercentiles
+  | PivotAggsConfigWithExtendedForm;
 
 export function isPivotAggsConfigWithUiSupport(arg: any): arg is PivotAggsConfigWithUiSupport {
   return (
@@ -126,7 +162,7 @@ export function isPivotAggsConfigWithUiSupport(arg: any): arg is PivotAggsConfig
 type PivotAggsConfigWithExtendedForm = PivotAggsConfigFilter;
 
 export function isPivotAggsWithExtendedForm(arg: any): arg is PivotAggsConfigWithExtendedForm {
-  return arg.hasOwnProperty('formConfig');
+  return arg.hasOwnProperty('AggFormComponent');
 }
 
 export function isPivotAggsConfigPercentiles(arg: any): arg is PivotAggsConfigPercentiles {
@@ -143,14 +179,26 @@ export type PivotAggsConfig = PivotAggsConfigBase | PivotAggsConfigWithUiSupport
 export type PivotAggsConfigWithUiSupportDict = Dictionary<PivotAggsConfigWithUiSupport>;
 export type PivotAggsConfigDict = Dictionary<PivotAggsConfig>;
 
-export function getEsAggFromAggConfig(groupByConfig: PivotAggsConfigBase): PivotAgg {
-  const esAgg = { ...groupByConfig };
+/**
+ * Extracts Elasticsearch-ready aggregation configuration
+ * from the UI config
+ */
+export function getEsAggFromAggConfig(
+  pivotAggsConfig: PivotAggsConfigBase | PivotAggsConfigWithExtendedForm
+): PivotAgg {
+  console.log(pivotAggsConfig, '___pivotAggsConfig___');
+
+  let esAgg: { [key: string]: any } = { ...pivotAggsConfig };
 
   delete esAgg.agg;
   delete esAgg.aggName;
   delete esAgg.dropDownName;
 
+  if (isPivotAggsWithExtendedForm(pivotAggsConfig)) {
+    esAgg = pivotAggsConfig.uiAggConfigToEs();
+  }
+
   return {
-    [groupByConfig.agg]: esAgg,
+    [pivotAggsConfig.agg]: esAgg,
   };
 }

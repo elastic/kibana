@@ -93,6 +93,9 @@ export const usePivotConfig = (
     setAggList({ ...aggList });
   };
 
+  /**
+   * Adds updated aggregation to the list
+   */
   const updateAggregation = (previousAggName: AggName, item: PivotAggsConfig) => {
     const aggListWithoutPrevious = { ...aggList };
     delete aggListWithoutPrevious[previousAggName];
@@ -111,6 +114,9 @@ export const usePivotConfig = (
     setAggList(aggListWithoutPrevious);
   };
 
+  /**
+   * Deletes aggregation from the list
+   */
   const deleteAggregation = (aggName: AggName) => {
     delete aggList[aggName];
     setAggList({ ...aggList });

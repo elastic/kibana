@@ -37,11 +37,7 @@ export function getDefaultAggregationConfig(
         percents: PERCENTILES_AGG_DEFAULT_PERCENTS,
       };
     case PIVOT_SUPPORTED_AGGS.FILTER:
-      return {
-        ...commonConfig,
-        forceEdit: true,
-        formConfig: getFilterAggConfig(),
-      };
+      return getFilterAggConfig(commonConfig);
     default:
       return commonConfig;
   }

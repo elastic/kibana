@@ -69,6 +69,8 @@ function parsePercentsInput(inputValue: string | undefined) {
 }
 
 export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onChange, options }) => {
+  const [aggConfigDef, setAggConfigDef] = useState(defaultData);
+
   const [aggName, setAggName] = useState(defaultData.aggName);
   const [agg, setAgg] = useState(defaultData.agg);
   const [field, setField] = useState(
@@ -77,20 +79,14 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
 
   const [percents, setPercents] = useState(getDefaultPercents(defaultData));
 
-  const [aggFormConfig, setAggFormConfig] = useState(
-    isPivotAggsWithExtendedForm(defaultData) ? defaultData.formConfig : undefined
-  );
-
-  const [aggForm, setAggForm] = useState(aggFormConfig?.defaultAggConfig);
-
   const isUnsupportedAgg = !isPivotAggsConfigWithUiSupport(defaultData);
 
   // Update configuration based on the aggregation type
   useEffect(() => {
     const config = getAggFormConfig(agg);
-    setAggFormConfig(config);
-    setAggForm(config?.defaultAggConfig);
-  }, [agg, field]);
+    if (config === undefined) return;
+    setAggConfigDef(config);
+  }, [agg]);
 
   const availableFields: EuiSelectOption[] = [];
   const availableAggs: EuiSelectOption[] = [];
@@ -111,6 +107,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
 
     if (agg !== PIVOT_SUPPORTED_AGGS.PERCENTILES) {
       updatedItem = {
+        ...aggConfigDef,
         agg,
         aggName,
         field,
@@ -222,14 +219,19 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           />
         </EuiFormRow>
       )}
-      {aggFormConfig && (
-        <aggFormConfig.AggFormComponent
-          aggConfig={aggForm!}
+      {isPivotAggsWithExtendedForm(aggConfigDef) && (
+        <aggConfigDef.AggFormComponent
+          aggConfig={aggConfigDef.aggConfig!}
           selectedField={field}
           onChange={(update) => {
-            setAggForm({
-              ...aggForm,
-              ...update,
+            console.log(update, '___update___');
+
+            setAggConfigDef({
+              ...aggConfigDef,
+              aggConfig: {
+                ...aggConfigDef.aggConfig,
+                ...update,
+              },
             });
           }}
         />

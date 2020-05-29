@@ -5,16 +5,23 @@
  */
 
 import { EuiCodeEditor, EuiComboBox, EuiFormRow, EuiSelect } from '@elastic/eui';
-import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
-import { PivotAggsConfigWithUiBase } from '../../../../../common/pivot_aggs';
+import {
+  PivotAggsConfigWithExtra,
+  PivotAggsConfigWithUiBase,
+} from '../../../../../common/pivot_aggs';
 import { CreateTransformWizardContext } from '../../wizard/wizard';
 import { useApi } from '../../../../../hooks';
 import {
   IndexPattern,
   KBN_FIELD_TYPES,
 } from '../../../../../../../../../../src/plugins/data/public';
+import {
+  requiredValidator,
+  ValidationResult,
+} from '../../../../../../../../ml/common/util/validators';
 
 export const FILTERS = {
   CUSTOM: 'custom',
@@ -50,20 +57,93 @@ export const filterAggsFieldSupport: { [key: string]: FilterAggType[] } = {
   [KBN_FIELD_TYPES.CONFLICT]: [],
 };
 
-interface FilterAggProps<U> {
-  filterAgg: FilterAggType;
-  aggTypeConfig: U | undefined;
+interface FilterAggTypeConfig<U> {
+  /** Form component */
+  FilterAggFormComponent: FilterAggForm<U>;
+  /** Filter agg type configuration*/
+  filterAggConfig: U;
+  /**
+   * Mappers for aggregation objects
+   */
+  esToUiAggConfig: (arg: { [key: string]: any }) => any;
+  /** Converts UI agg config form to ES agg request object */
+  uiAggConfigToEs: (field?: string) => { [key: string]: any };
 }
 
-export type PivotAggsConfigFilter<U = undefined> = PivotAggsConfigWithUiBase<FilterAggProps<U>>;
+/** Filter agg type definition */
+interface FilterAggProps<T extends FilterAggType, U> {
+  /** Filter aggregation type */
+  filterAgg: T;
+  /** Definition of the filter agg config */
+  aggTypeConfig: FilterAggTypeConfig<U>;
+  /** Validation result of the entire filter aggregation form */
+  validationResult?: ValidationResult;
+}
+
+/** Filter term agg */
+export type PivotAggConfigFilterTerm = PivotAggsConfigWithExtra<
+  FilterAggProps<'term', { value: string }>
+>;
+
+/** Filter range agg */
+export type PivotAggConfigFilterRange = PivotAggsConfigWithExtra<
+  FilterAggProps<'range', { gt?: string; lt?: string; lte?: string; gte?: string }>
+>;
+
+/** Union type for filter aggregations */
+export type PivotAggsConfigFilter = PivotAggConfigFilterTerm | PivotAggConfigFilterRange;
+
+export function isPivotAggsConfigFilter(arg: any): arg is PivotAggsConfigFilter {
+  return arg?.aggConfig?.filterAgg !== undefined;
+}
+
+export type PivotAggsConfigFilterInit = Omit<PivotAggsConfigFilter, 'aggConfig'> & {
+  aggConfig: {};
+};
+
+type FilterAggForm<T> = FC<{
+  /** Filter aggregation related configuration */
+  config: Partial<T> | undefined;
+  /** Callback for configuration updates */
+  onChange: (arg: Partial<{ config: Partial<T>; validationResult: ValidationResult }>) => void;
+  /** Selected field for the aggregation */
+  selectedField?: string;
+  validationResult?: ValidationResult;
+}>;
 
 /**
- * Gets configuration of the filter aggregation.
+ * Gets initial basic configuration of the filter aggregation.
  */
-export function getFilterAggConfig(): PivotAggsConfigFilter['formConfig'] {
+export function getFilterAggConfig(
+  commonConfig: PivotAggsConfigWithUiBase
+): PivotAggsConfigFilterInit {
   return {
+    ...commonConfig,
     AggFormComponent: FilterAggForm,
-    defaultAggConfig: {},
+    aggConfig: {},
+    forceEdit: true,
+    uiAggConfigToEs() {
+      console.log(this, '___this___');
+      // ensure the configuration has been completed
+      if (!isPivotAggsConfigFilter(this)) {
+        // eslint-disable-next-line no-console
+        console.warn('Config is not ready yet');
+        return {};
+      }
+      const esAgg = this.aggConfig.aggTypeConfig.uiAggConfigToEs(this.field);
+      return {
+        [this.aggConfig.filterAgg]: esAgg,
+      };
+    },
+    esToUiAggConfig(esAggDefinition: { [key in FilterAggType]: any }) {
+      const filterAgg = Object.keys(esAggDefinition)[0] as FilterAggType;
+      const config = getFilterAggTypeConfig(filterAgg);
+
+      this.aggConfig = {
+        filterAgg,
+        aggTypeConfig: config,
+      };
+    },
   };
 }
 
@@ -86,7 +166,7 @@ export function getSupportedFilterAggs(
 /**
  * Component for filter aggregation related controls.
  */
-export const FilterAggForm: PivotAggsConfigFilter['formConfig']['AggFormComponent'] = ({
+export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
   aggConfig,
   onChange,
   selectedField,
@@ -94,7 +174,7 @@ export const FilterAggForm: PivotAggsConfigFilter['formConfig']['AggFormComponen
   const { indexPattern } = useContext(CreateTransformWizardContext);
   const filterAggsOptions = getSupportedFilterAggs(selectedField, indexPattern!);
 
-  const FilterAggTypeForm = getFilterAggTypeForm(aggConfig.filterAgg);
+  const filterAggTypeConfig = getFilterAggTypeConfig(aggConfig.filterAgg);
 
   return (
     <>
@@ -120,12 +200,16 @@ export const FilterAggForm: PivotAggsConfigFilter['formConfig']['AggFormComponen
         />
       </EuiFormRow>
       {aggConfig.filterAgg && (
-        <FilterAggTypeForm
-          config={aggConfig.aggTypeConfig}
+        <filterAggTypeConfig.FilterAggFormComponent
+          config={aggConfig.aggTypeConfig?.filterAggConfig}
           onChange={(e) => {
             onChange({
               ...aggConfig,
-              aggTypeConfig: e,
+              validationResult: e.validationResult,
+              aggTypeConfig: {
+                ...filterAggTypeConfig,
+                filterAggConfig: e.config,
+              },
             });
           }}
           selectedField={selectedField}
@@ -135,39 +219,59 @@ export const FilterAggForm: PivotAggsConfigFilter['formConfig']['AggFormComponen
   );
 };
 
-type FilterAggForm<T> = FC<{
-  config: T | undefined;
-  onChange: (arg: T) => void;
-  selectedField?: string;
-}>;
-
 /**
  * Returns a form component for provided filter aggregation type.
  */
-export function getFilterAggTypeForm(filterAggType?: FilterAggType): FilterAggForm<any> {
+export function getFilterAggTypeConfig(
+  filterAggType?: FilterAggType
+): PivotAggsConfigFilter['aggConfig']['aggTypeConfig'] {
   switch (filterAggType) {
-    case 'term':
-      return FilterTermForm;
-    case 'range':
-      return FilterRangeForm;
+    case FILTERS.TERM:
+      return {
+        FilterAggFormComponent: FilterTermForm,
+        filterAggConfig: {
+          value: '',
+        },
+        esToUiAggConfig() {},
+        uiAggConfigToEs(fieldName: string) {
+          return {
+            [fieldName]: this.filterAggConfig.value,
+          };
+        },
+      };
+    case FILTERS.RANGE:
+      return {
+        FilterAggFormComponent: FilterRangeForm,
+        esToUiAggConfig() {},
+        uiAggConfigToEs() {},
+      };
     default:
-      return FilterEditorForm;
+      return {
+        FilterAggFormComponent: FilterEditorForm,
+        esToUiAggConfig() {},
+        uiAggConfigToEs() {},
+      };
   }
 }
 
 /**
  * Form component for the term filter aggregation.
  */
-export const FilterTermForm: FilterAggForm<{ value: string | undefined }> = ({
+export const FilterTermForm: PivotAggConfigFilterTerm['aggConfig']['aggTypeConfig']['FilterAggFormComponent'] = ({
   config,
+  validationResult,
   onChange,
   selectedField,
 }) => {
+  console.log(config, '!!___config___');
+
   const api = useApi();
   const { indexPattern } = useContext(CreateTransformWizardContext);
 
   const [options, setOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const validators = useMemo(() => requiredValidator(), []);
 
   const onSearchChange = useCallback(
     (searchValue) => {
@@ -233,7 +337,12 @@ export const FilterTermForm: FilterAggForm<{ value: string | undefined }> = ({
         selectedOptions={selectedOptions}
         isClearable={false}
         onChange={(selected) => {
-          onChange({ value: selected[0].label });
+          onChange({
+            config: {
+              value: selected[0].label,
+            },
+            validationResult: validators(selected[0].label),
+          });
         }}
         onSearchChange={debounce(onSearchChange, 600)}
         data-test-subj="filterTermValueSelection"
@@ -245,7 +354,7 @@ export const FilterTermForm: FilterAggForm<{ value: string | undefined }> = ({
 /**
  * Form component for the range filter aggregation.
  */
-export const FilterRangeForm: FilterAggForm<{ from: string; to: string }> = ({
+export const FilterRangeForm: PivotAggConfigFilterRange['aggConfig']['aggTypeConfig']['FilterAggFormComponent'] = ({
   config,
   onChange,
 }) => {
