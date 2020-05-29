@@ -7,14 +7,14 @@
 import { CancellationToken } from '../../../../../plugins/reporting/common';
 import { PLUGIN_ID } from '../../common/constants';
 import { ReportingCore } from '../../server';
+import { LevelLogger } from '../../server/lib';
 import { ESQueueWorkerExecuteFn, ExportTypeDefinition, JobSource } from '../../server/types';
 import { ESQueueInstance } from './create_queue';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
 
-export function createWorkerFactory<JobParamsType>(reporting: ReportingCore) {
+export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, logger: LevelLogger) {
   const config = reporting.getConfig();
-  const setupDeps = reporting.getPluginSetupDeps();
   const queueConfig = config.get('queue');
   const kibanaName = config.kbnConfig.get('server', 'name');
   const kibanaId = config.kbnConfig.get('server', 'uuid');
@@ -27,7 +27,7 @@ export function createWorkerFactory<JobParamsType>(reporting: ReportingCore) {
     for (const exportType of reporting.getExportTypesRegistry().getAll() as Array<
       ExportTypeDefinition<JobParamsType, unknown, unknown, ESQueueWorkerExecuteFn<unknown>>
     >) {
-      const jobExecutor = await exportType.executeJobFactory(reporting); // FIXME: does not "need" to be async
+      const jobExecutor = await exportType.executeJobFactory(reporting, logger); // FIXME: does not "need" to be async
       jobExecutors.set(exportType.jobType, jobExecutor);
     }
 
@@ -63,13 +63,13 @@ export function createWorkerFactory<JobParamsType>(reporting: ReportingCore) {
     const worker = queue.registerWorker(PLUGIN_ID, workerFn, workerOptions);
 
     worker.on(esqueueEvents.EVENT_WORKER_COMPLETE, (res: any) => {
-      setupDeps.logger.debug(`Worker completed: (${res.job.id})`);
+      logger.debug(`Worker completed: (${res.job.id})`);
     });
     worker.on(esqueueEvents.EVENT_WORKER_JOB_EXECUTION_ERROR, (res: any) => {
-      setupDeps.logger.debug(`Worker error: (${res.job.id})`);
+      logger.debug(`Worker error: (${res.job.id})`);
     });
     worker.on(esqueueEvents.EVENT_WORKER_JOB_TIMEOUT, (res: any) => {
-      setupDeps.logger.debug(`Job timeout exceeded: (${res.job.id})`);
+      logger.debug(`Job timeout exceeded: (${res.job.id})`);
     });
   };
 }

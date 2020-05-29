@@ -11,6 +11,7 @@ import { createWorkerFactory } from './create_worker';
 import { Job } from './enqueue_job';
 // @ts-ignore
 import { Esqueue } from './esqueue';
+import { LevelLogger } from './level_logger';
 
 interface ESQueueWorker {
   on: (event: string, handler: any) => void;
@@ -37,11 +38,10 @@ type GenericWorkerFn<JobParamsType> = (
 ) => void | Promise<JobDocOutput>;
 
 export async function createQueueFactory<JobParamsType, JobPayloadType>(
-  reporting: ReportingCore
+  reporting: ReportingCore,
+  logger: LevelLogger
 ): Promise<ESQueueInstance> {
   const config = reporting.getConfig();
-  const setupDeps = reporting.getPluginSetupDeps();
-  const { logger } = setupDeps;
   const queueIndexInterval = config.get('queue', 'indexInterval');
   const queueTimeout = config.get('queue', 'timeout');
   const queueIndex = config.get('index');
@@ -60,7 +60,7 @@ export async function createQueueFactory<JobParamsType, JobPayloadType>(
 
   if (isPollingEnabled) {
     // create workers to poll the index for idle jobs waiting to be claimed and executed
-    const createWorker = createWorkerFactory(reporting);
+    const createWorker = createWorkerFactory(reporting, logger);
     await createWorker(queue);
   } else {
     logger.info(

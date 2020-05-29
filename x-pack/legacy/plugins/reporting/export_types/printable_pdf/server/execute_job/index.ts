@@ -9,6 +9,7 @@ import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PDF_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
+import { LevelLogger } from '../../../../server/lib';
 import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput } from '../../../../server/types';
 import {
   decryptJobHeaders,
@@ -23,13 +24,13 @@ import { generatePdfObservableFactory } from '../lib/generate_pdf';
 type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPDF>>;
 
 export const executeJobFactory: QueuedPdfExecutorFactory = async function executeJobFactoryFn(
-  reporting: ReportingCore
+  reporting: ReportingCore,
+  parentLogger: LevelLogger
 ) {
   const config = reporting.getConfig();
-  const setupDeps = reporting.getPluginSetupDeps();
   const encryptionKey = config.get('encryptionKey');
 
-  const logger = setupDeps.logger.clone([PDF_JOB_TYPE, 'execute']);
+  const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
 
   return async function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
     const apmTrans = apm.startTransaction('reporting execute_job pdf', 'reporting');

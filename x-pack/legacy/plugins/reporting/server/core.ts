@@ -21,7 +21,7 @@ import { screenshotsObservableFactory } from '../export_types/common/lib/screens
 import { ScreenshotsObservableFn } from '../server/types';
 import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
-import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
+import { checkLicense, getExportTypesRegistry } from './lib';
 import { ESQueueInstance } from './lib/create_queue';
 import { EnqueueJobFn } from './lib/enqueue_job';
 
@@ -32,7 +32,6 @@ export interface ReportingInternalSetup {
   basePath: BasePath['get'];
   router: IRouter;
   security: SecurityPluginSetup;
-  logger: LevelLogger;
 }
 
 interface ReportingInternalStart {

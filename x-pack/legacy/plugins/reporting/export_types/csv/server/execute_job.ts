@@ -9,7 +9,7 @@ import Hapi from 'hapi';
 import { IUiSettingsClient, KibanaRequest } from '../../../../../../../src/core/server';
 import { CSV_BOM_CHARS, CSV_JOB_TYPE } from '../../../common/constants';
 import { ReportingCore } from '../../../server';
-import { cryptoFactory } from '../../../server/lib';
+import { cryptoFactory, LevelLogger } from '../../../server/lib';
 import { getFieldFormats } from '../../../server/services';
 import { ESQueueWorkerExecuteFn, ExecuteJobFactory } from '../../../server/types';
 import { JobDocPayloadDiscoverCsv } from '../types';
@@ -18,11 +18,10 @@ import { createGenerateCsv } from './lib/generate_csv';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadDiscoverCsv
->> = async function executeJobFactoryFn(reporting: ReportingCore) {
+>> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: LevelLogger) {
   const config = reporting.getConfig();
-  const setupDeps = reporting.getPluginSetupDeps();
   const crypto = cryptoFactory(config.get('encryptionKey'));
-  const logger = setupDeps.logger.clone([CSV_JOB_TYPE, 'execute-job']);
+  const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job']);
   const serverBasePath = config.kbnConfig.get('server', 'basePath');
 
   return async function executeJob(

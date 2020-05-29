@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
-import { cryptoFactory } from '../../../../server/lib';
+import { cryptoFactory, LevelLogger } from '../../../../server/lib';
 import { CreateJobFactory, TimeRangeParams } from '../../../../server/types';
 import {
   JobDocPayloadPanelCsv,
@@ -41,11 +41,10 @@ interface VisData {
 
 export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
   JobParamsPanelCsv
->> = function createJobFactoryFn(reporting: ReportingCore) {
+>> = function createJobFactoryFn(reporting: ReportingCore, parentLogger: LevelLogger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
-  const setupDeps = reporting.getPluginSetupDeps();
-  const logger = setupDeps.logger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
+  const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
   return async function createJob(
     jobParams: JobParamsPanelCsv,

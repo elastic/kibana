@@ -23,6 +23,7 @@ configGetStub.withArgs('server', 'name').returns('test-server-123');
 configGetStub.withArgs('server', 'uuid').returns('g9ymiujthvy6v8yrh7567g6fwzgzftzfr');
 
 const executeJobFactoryStub = sinon.stub();
+const getMockLogger = sinon.stub();
 
 const getMockExportTypesRegistry = (
   exportTypes: any[] = [{ executeJobFactory: executeJobFactoryStub }]
@@ -47,7 +48,7 @@ describe('Create Worker', () => {
   });
 
   test('Creates a single Esqueue worker for Reporting', async () => {
-    const createWorker = createWorkerFactory(mockReporting);
+    const createWorker = createWorkerFactory(mockReporting, getMockLogger());
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 
     await createWorker(queue);
@@ -79,7 +80,7 @@ Object {
       { executeJobFactory: executeJobFactoryStub },
     ]);
     mockReporting.getExportTypesRegistry = () => exportTypesRegistry;
-    const createWorker = createWorkerFactory(mockReporting);
+    const createWorker = createWorkerFactory(mockReporting, getMockLogger());
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 
     await createWorker(queue);

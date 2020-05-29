@@ -9,6 +9,7 @@ import { errors as elasticsearchErrors } from 'elasticsearch';
 import { kibanaResponseFactory } from 'src/core/server';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
+import { LevelLogger as Logger } from '../lib';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
@@ -16,7 +17,7 @@ import { HandlerFunction } from './types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 
-export function registerJobGenerationRoutes(reporting: ReportingCore) {
+export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Logger) {
   const config = reporting.getConfig();
   const downloadBaseUrl =
     config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
@@ -89,6 +90,6 @@ export function registerJobGenerationRoutes(reporting: ReportingCore) {
   // Register beta panel-action download-related API's
   if (config.get('csv', 'enablePanelActionDownload')) {
     registerGenerateCsvFromSavedObject(reporting, handler, handleError);
-    registerGenerateCsvFromSavedObjectImmediate(reporting, handleError);
+    registerGenerateCsvFromSavedObjectImmediate(reporting, handleError, logger);
   }
 }

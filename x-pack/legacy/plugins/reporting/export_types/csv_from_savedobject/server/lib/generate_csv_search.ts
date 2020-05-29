@@ -17,6 +17,7 @@ import {
   Query,
 } from '../../../../../../../../src/plugins/data/server';
 import { CancellationToken } from '../../../../../../../plugins/reporting/common';
+import { LevelLogger } from '../../../../server/lib';
 import { ReportingCore } from '../../../../server';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import {
@@ -54,9 +55,9 @@ export async function generateCsvSearch(
   context: RequestHandlerContext,
   req: KibanaRequest,
   searchPanel: SearchPanel,
-  jobParams: JobParamsDiscoverCsv
+  jobParams: JobParamsDiscoverCsv,
+  logger: LevelLogger
 ): Promise<CsvResultFromSearch> {
-  const setupDeps = reporting.getPluginSetupDeps();
   const savedObjectsClient = context.core.savedObjects.client;
   const { indexPatternSavedObjectId, timerange } = searchPanel;
   const savedSearchObjectAttr = searchPanel.attributes;
@@ -169,7 +170,7 @@ export async function generateCsvSearch(
     },
   };
 
-  const generateCsv = createGenerateCsv(setupDeps.logger);
+  const generateCsv = createGenerateCsv(logger);
 
   return {
     type: 'CSV from Saved Search',

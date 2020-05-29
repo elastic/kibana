@@ -11,6 +11,7 @@ import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
+import { LevelLogger as Logger } from '../lib';
 import { JobDocOutput } from '../types';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 
@@ -25,7 +26,8 @@ import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routi
  */
 export function registerGenerateCsvFromSavedObjectImmediate(
   reporting: ReportingCore,
-  handleError: HandlerErrorFunction
+  handleError: HandlerErrorFunction,
+  parentLogger: Logger
 ) {
   const setupDeps = reporting.getPluginSetupDeps();
   const userHandler = authorizedUserPreRoutingFactory(reporting);
@@ -55,10 +57,10 @@ export function registerGenerateCsvFromSavedObjectImmediate(
       },
     },
     userHandler(async (user, context, req, res) => {
-      const logger = setupDeps.logger.clone(['savedobject-csv']);
+      const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(req, { isImmediate: true });
-      const createJobFn = createJobFactory(reporting);
-      const executeJobFn = await executeJobFactory(reporting); // FIXME: does not "need" to be async
+      const createJobFn = createJobFactory(reporting, logger);
+      const executeJobFn = await executeJobFactory(reporting, logger); // FIXME: does not "need" to be async
 
       try {
         const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
