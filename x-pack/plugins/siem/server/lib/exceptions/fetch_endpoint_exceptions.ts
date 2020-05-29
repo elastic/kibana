@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import lzma from 'lzma-native';
 import { FoundExceptionListItemSchema } from '../../../../lists/common/schemas/response/found_exception_list_item_schema';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -22,7 +28,6 @@ export interface EntryEntry {
   exact_caseless?: string;
   exact_caseless_any?: string[];
 }
-
 
 export async function GetFullEndpointExceptionList(
   eClient: ExceptionListClient
@@ -95,7 +100,7 @@ function translateToEndpointExceptions(exc: FoundExceptionListItemSchema): Excep
 /**
  * Compresses the exception list
  */
-function compressExceptionList(exceptionList: EndpointExceptionList): Promise<Buffer> {
+export function CompressExceptionList(exceptionList: EndpointExceptionList): Promise<Buffer> {
   return lzma.compress(JSON.stringify(exceptionList), (res: Buffer) => {
     return res;
   });

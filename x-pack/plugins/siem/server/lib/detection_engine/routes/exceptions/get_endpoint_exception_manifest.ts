@@ -6,6 +6,7 @@
 
 import { IRouter, RequestHandlerContext, APICaller } from 'kibana/server';
 import { createHash } from 'crypto';
+import { SavedObjectsClient } from 'kibana/public';
 
 const allowlistBaseRoute: string = '/api/endpoint/allowlist';
 
@@ -39,22 +40,12 @@ async function handleWhitelistManifest(context, req, res) {
  * Creates the manifest for the whitelist
  */
 async function getWhitelistManifest(ctx) {
-  const whitelistArtifactCache = []; // TODO
-  const hash = createHash('sha256')
-    .update(whitelistArtifactCache.toString('utf8'), 'utf8')
-    .digest('hex');
+  const soClient: SavedObjectsClient = ctx.core.savedObjects.client;
 
-  const manifest = {
-    schemaVersion: '1.0.0',
-    manifestVersion: '1.0.0',
-    artifacts: {
-      'global-whitelist': {
-        url: `${allowlistBaseRoute}/download/${hash}`,
-        sha256: hash,
-        size: whitelistArtifactCache.byteLength,
-        encoding: 'xz',
-      },
-    },
-  };
-  return manifest;
+  const manifestResp = soClient.find({
+    type: 'siem-exceptions-artifact',
+    fields: ['name', 'schemaVersion', 'sha256', 'encoding', 'created'],
+  });
+
+  return manifestResp;
 }
