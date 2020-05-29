@@ -4,32 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter, RequestHandlerContext, APICaller } from 'kibana/server';
-import { createHash } from 'crypto';
-import { SavedObjectsClient } from 'kibana/public';
+import { IRouter } from '../../../../../../../../src/core/server';
 
 const allowlistBaseRoute: string = '/api/endpoint/allowlist';
 
 /**
  * Registers the exception list route to enable sensors to retrieve a manifest of available lists
  */
-export function getEndpointExceptionManifest(router: IRouter) {
+export function getEndpointExceptionListManifest(router: IRouter) {
   router.get(
     {
-      path: '/api/endpoint/manifest',
+      path: `${allowlistBaseRoute}/manifest`,
       validate: {},
       options: { authRequired: true },
     },
-    handleWhitelistManifest
+    handleAllowlistManifest
   );
 }
 
 /**
  * Handles the GET request for whitelist manifest
  */
-async function handleWhitelistManifest(context, req, res) {
+async function handleAllowlistManifest(context, req, res) {
   try {
-    const manifest = await getWhitelistManifest(context);
+    const manifest = await getAllowlistManifest(context);
+    // TODO: transform and validate response
     return res.ok({ body: manifest });
   } catch (err) {
     return res.internalError({ body: err });
@@ -39,8 +38,8 @@ async function handleWhitelistManifest(context, req, res) {
 /**
  * Creates the manifest for the whitelist
  */
-async function getWhitelistManifest(ctx) {
-  const soClient: SavedObjectsClient = ctx.core.savedObjects.client;
+async function getAllowlistManifest(ctx) {
+  const soClient = ctx.core.savedObjects.client;
 
   const manifestResp = soClient.find({
     type: 'siem-exceptions-artifact',

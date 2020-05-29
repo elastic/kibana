@@ -4,18 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter, SavedObjectsClient } from 'kibana/server';
+import { IRouter } from '../../../../../../../../src/core/server';
+import { buildRouteValidation } from '../utils';
+import { downloadExceptionListSchema } from '../schemas/download_exception_list_schema';
+import { DownloadExceptionListRequestParams } from '../../exceptions/types';
 
 const allowlistBaseRoute: string = '/api/endpoint/allowlist';
 
 /**
  * Registers the exception list route to enable sensors to download a compressed  allowlist
  */
-export function getEndpointExceptionList(router: IRouter) {
+export function downloadEndpointExceptionList(router: IRouter) {
   router.get(
     {
-      path: `${allowlistBaseRoute}`,
-      validate: {}, // TODO: add param for hash
+      path: `${allowlistBaseRoute}/download/{sha256}`,
+      validate: {
+        params: buildRouteValidation<DownloadExceptionListRequestParams>(
+          downloadExceptionListSchema
+        ),
+      },
       options: { authRequired: true },
     },
     handleEndpointExceptionDownload
@@ -27,17 +34,18 @@ export function getEndpointExceptionList(router: IRouter) {
  */
 async function handleEndpointExceptionDownload(context, req, res) {
   try {
-    const soClient: SavedObjectsClient = context.core.savedObjects.client;
-    const sha256Hash = '1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975'; // TODO get from req
+    const soClient = context.core.savedObjects.client;
     const resp = await soClient.find({
       type: 'siem-exceptions-artifact',
-      search: sha256Hash,
+      search: req.params.sha256,
       searchFields: ['sha256'],
     });
     if (resp.total > 0) {
       return res.ok({ body: resp.saved_objects[0] });
+    } else if (resp.total > 1) {
+      context.logger.warn(`Duplicate allowlist entries found: ${req.params.sha256}`);
     } else {
-      return res.notFound({});
+      return res.notFound();
     }
   } catch (err) {
     return res.internalError({ body: err });
