@@ -47,14 +47,6 @@ describe('ManagementService', () => {
 
     expect(setup.getSection('test-section')).not.toBeUndefined();
 
-    const testApp = testSection.registerApp({
-      id: 'test-app',
-      title: 'Test App',
-      mount: () => () => {},
-    });
-
-    expect(testSection.getApp('test-app')).not.toBeUndefined();
-
     // Start phase:
     const start = managementService.start();
 

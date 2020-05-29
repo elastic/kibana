@@ -172,11 +172,11 @@ export default async function ({ readConfigFile }) {
       snapshotRestore: {
         pathname: '/app/management/data/snapshot_restore',
       },
-      crossClusterReplication: {
-        pathname: '/app/management/data/cross_cluster_replication',
-      },
       remoteClusters: {
         pathname: '/app/management/data/remote_clusters',
+      },
+      crossClusterReplication: {
+        pathname: '/app/management/data/cross_cluster_replication',
       },
       apm: {
         pathname: '/app/apm',
