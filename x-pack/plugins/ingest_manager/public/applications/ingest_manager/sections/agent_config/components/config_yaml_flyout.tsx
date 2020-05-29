@@ -6,7 +6,6 @@
 
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { dump } from 'js-yaml';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCodeBlock,
@@ -20,8 +19,9 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import { useGetOneAgentConfigFull, useGetOneAgentConfig } from '../../../hooks';
+import { useGetOneAgentConfigFull, useGetOneAgentConfig, useCore } from '../../../hooks';
 import { Loading } from '../../../components';
+import { configToYaml, agentConfigRouteService } from '../../../services';
 
 const FlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {
@@ -29,21 +29,9 @@ const FlyoutBody = styled(EuiFlyoutBody)`
   }
 `;
 
-const CONFIG_KEYS_ORDER = [
-  'id',
-  'name',
-  'revision',
-  'type',
-  'outputs',
-  'settings',
-  'datasources',
-  'enabled',
-  'package',
-  'input',
-];
-
 export const ConfigYamlFlyout = memo<{ configId: string; onClose: () => void }>(
   ({ configId, onClose }) => {
+    const core = useCore();
     const { isLoading: isLoadingYaml, data: yamlData } = useGetOneAgentConfigFull(configId);
     const { data: configData } = useGetOneAgentConfig(configId);
 
@@ -52,23 +40,13 @@ export const ConfigYamlFlyout = memo<{ configId: string; onClose: () => void }>(
         <Loading />
       ) : (
         <EuiCodeBlock language="yaml" isCopyable fontSize="m">
-          {dump(yamlData.item, {
-            sortKeys: (keyA: string, keyB: string) => {
-              const indexA = CONFIG_KEYS_ORDER.indexOf(keyA);
-              const indexB = CONFIG_KEYS_ORDER.indexOf(keyB);
-              if (indexA >= 0 && indexB < 0) {
-                return -1;
-              }
-
-              if (indexA < 0 && indexB >= 0) {
-                return 1;
-              }
-
-              return indexA - indexB;
-            },
-          })}
+          {configToYaml(yamlData!.item)}
         </EuiCodeBlock>
       );
+
+    const downloadLink = core.http.basePath.prepend(
+      agentConfigRouteService.getInfoFullDownloadPath(configId)
+    );
 
     return (
       <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
@@ -102,7 +80,11 @@ export const ConfigYamlFlyout = memo<{ configId: string; onClose: () => void }>(
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => {}} iconType="download">
+              <EuiButton
+                href={downloadLink}
+                iconType="download"
+                isDisabled={Boolean(isLoadingYaml && !yamlData)}
+              >
                 <FormattedMessage
                   id="xpack.ingestManager.configDetails.yamlDownloadButtonLabel"
                   defaultMessage="Download configuration"

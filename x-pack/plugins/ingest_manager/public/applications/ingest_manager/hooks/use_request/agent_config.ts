@@ -14,6 +14,7 @@ import { agentConfigRouteService } from '../../services';
 import {
   GetAgentConfigsResponse,
   GetOneAgentConfigResponse,
+  GetFullAgentConfigResponse,
   CreateAgentConfigRequest,
   CreateAgentConfigResponse,
   UpdateAgentConfigRequest,
@@ -39,7 +40,7 @@ export const useGetOneAgentConfig = (agentConfigId: string | undefined) => {
 };
 
 export const useGetOneAgentConfigFull = (agentConfigId: string) => {
-  return useRequest({
+  return useRequest<GetFullAgentConfigResponse>({
     path: agentConfigRouteService.getInfoFullPath(agentConfigId),
     method: 'get',
   });

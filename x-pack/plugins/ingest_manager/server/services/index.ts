@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { AgentStatus } from '../../common/types/models';
+import { AgentStatus } from '../types';
 import * as settingsService from './settings';
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 

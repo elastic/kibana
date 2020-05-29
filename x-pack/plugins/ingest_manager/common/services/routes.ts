@@ -90,6 +90,13 @@ export const agentConfigRouteService = {
   getInfoFullPath: (agentConfigId: string) => {
     return AGENT_CONFIG_API_ROUTES.FULL_INFO_PATTERN.replace('{agentConfigId}', agentConfigId);
   },
+
+  getInfoFullDownloadPath: (agentConfigId: string) => {
+    return AGENT_CONFIG_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN.replace(
+      '{agentConfigId}',
+      agentConfigId
+    );
+  },
 };
 
 export const dataStreamRouteService = {
