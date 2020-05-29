@@ -5,7 +5,7 @@
  */
 
 import { FrameworkRequest } from '../framework';
-import { ExceptionsArtifactSavedObject } from '.types';
+import { ExceptionsArtifactSavedObject } from './types';
 
 export interface ExceptionsArtifact {
   getArtifact: (
