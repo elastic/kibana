@@ -34,12 +34,14 @@ jest.mock('../convert_saved_object_to_savedtimeline', () => {
 jest.mock('../../note/saved_object', () => {
   return {
     convertSavedObjectToSavedNote: jest.fn(),
+    getNotesByTimelineId: jest.fn().mockReturnValue([]),
   };
 });
 
 jest.mock('../../pinned_event/saved_object', () => {
   return {
     convertSavedObjectToSavedPinnedEvent: jest.fn(),
+    getAllPinnedEventsByTimelineId: jest.fn().mockReturnValue([]),
   };
 });
 describe('export timelines', () => {
