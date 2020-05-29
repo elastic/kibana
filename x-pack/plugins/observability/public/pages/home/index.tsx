@@ -62,6 +62,7 @@ const tryItOutItemsSection: ISection[] = [
     description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet magna at neque dictum.',
     href: 'https://demo.elastic.co/',
+    target: '_blank',
   },
   {
     id: 'sampleData',
