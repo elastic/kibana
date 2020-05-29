@@ -6,49 +6,34 @@
 
 import { validateUrls } from '../../../../common/validate_urls';
 import { cryptoFactory } from '../../../../server/lib';
-import {
-  ConditionalHeaders,
-  CreateJobFactory,
-  ESQueueCreateJobFn,
-  RequestFacade,
-} from '../../../../server/types';
+import { CreateJobFactory, ESQueueCreateJobFn } from '../../../../server/types';
 import { JobParamsPDF } from '../../types';
-// @ts-ignore untyped module
-import { compatibilityShimFactory } from './compatibility_shim';
-
-interface CreateJobFnOpts {
-  objectType: any;
-  title: string;
-  relativeUrls: string[];
-  browserTimezone: string;
-  layout: any;
-}
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPDF
->> = function createJobFactoryFn(reporting, logger) {
+>> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();
+  const setupDeps = reporting.getPluginSetupDeps();
   const crypto = cryptoFactory(config.get('encryptionKey'));
-  const compatibilityShim = compatibilityShimFactory(reporting, logger);
 
-  return compatibilityShim(async function createJobFn(
-    { objectType, title, relativeUrls, browserTimezone, layout }: CreateJobFnOpts,
-    headers: ConditionalHeaders['headers'],
-    request: RequestFacade
+  return async function createJobFn(
+    { title, relativeUrls, browserTimezone, layout, objectType }: JobParamsPDF,
+    context,
+    req
   ) {
-    const serializedEncryptedHeaders = await crypto.encrypt(headers);
+    const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
 
     validateUrls(relativeUrls);
 
     return {
-      basePath: request.getBasePath(),
+      basePath: setupDeps.basePath(req),
       browserTimezone,
       forceNow: new Date().toISOString(),
       headers: serializedEncryptedHeaders,
       layout,
-      objects: relativeUrls.map((u) => ({ relativeUrl: u })),
+      relativeUrls,
       title,
-      type: objectType, // Note: this changes the shape of the job params object
+      objectType,
     };
-  });
+  };
 };
