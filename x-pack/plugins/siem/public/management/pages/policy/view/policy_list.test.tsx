@@ -9,8 +9,8 @@ import * as reactTestingLibrary from '@testing-library/react';
 
 import { PolicyList } from './index';
 import { mockPolicyResultList } from '../store/policy_list/mock_policy_result_list';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../common/mock/endpoint';
-import { AppAction } from '../../common/store/actions';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import { AppAction } from '../../../../common/store/actions';
 
 describe('when on the policies page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -33,7 +33,7 @@ describe('when on the policies page', () => {
     let firstPolicyID: string;
     beforeEach(() => {
       reactTestingLibrary.act(() => {
-        history.push('/policy');
+        history.push('/management/policy');
         reactTestingLibrary.act(() => {
           const policyListData = mockPolicyResultList({ total: 3 });
           firstPolicyID = policyListData.items[0].id;

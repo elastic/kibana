@@ -22,7 +22,7 @@ import { useDispatch } from 'react-redux';
 import { useLocation, useHistory } from 'react-router-dom';
 import { createStructuredSelector } from 'reselect';
 import { EuiContextMenuPanelProps } from '@elastic/eui/src/components/context_menu/context_menu_panel';
-import { CreateStructuredSelector } from '../../common/store';
+import { CreateStructuredSelector } from '../../../../common/store';
 import * as selectors from '../store/policy_list/selectors';
 import { usePolicyListSelector } from './policy_hooks';
 import { PolicyListAction } from '../store/policy_list';
@@ -33,9 +33,7 @@ import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { ManagementPageView } from '../../../components/management_page_view';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { getManagementUrl } from '../../../common/routing';
-import { FormattedDateAndTime } from '../../common/components/endpoint/formatted_date_time';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { Immutable, PolicyData } from '../../../common/endpoint/types';
+import { FormattedDateAndTime } from '../../../../common/components/endpoint/formatted_date_time';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -143,7 +141,7 @@ export const PolicyList = React.memo(() => {
           return (
             <>
               <EuiFlexItem grow={false}>
-                <PolicyLink name={item.name} route={routePath} href={routeUrl} />;
+                <PolicyLink name={item.name} route={routePath} href={routeUrl} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText
@@ -159,7 +157,7 @@ export const PolicyList = React.memo(() => {
                 </EuiText>
               </EuiFlexItem>
             </>
-          )
+          );
         },
         truncateText: true,
       },

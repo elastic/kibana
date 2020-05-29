@@ -5,7 +5,7 @@
  */
 
 import { GetPolicyListResponse } from '../../types';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 
 export const mockPolicyResultList: (options?: {
   total?: number;
