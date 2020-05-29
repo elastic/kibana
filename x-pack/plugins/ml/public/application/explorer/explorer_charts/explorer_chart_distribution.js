@@ -99,7 +99,7 @@ export class ExplorerChartDistribution extends React.Component {
     const filteredChartData = init(config);
     drawRareChart(filteredChartData);
 
-    function init({ chartData }) {
+    function init({ chartData, functionDescription }) {
       const $el = $('.ml-explorer-chart');
 
       // Clear any existing elements from the visualization,
@@ -151,7 +151,10 @@ export class ExplorerChartDistribution extends React.Component {
         lineChartYScale = d3.scale
           .linear()
           .range([chartHeight, 0])
-          .domain([yScaleDomainMin < 0 ? yScaleDomainMin : 0, yScaleDomainMax])
+          .domain([
+            yScaleDomainMin < 0 && functionDescription === 'count' ? 0 : yScaleDomainMin,
+            yScaleDomainMax,
+          ])
           .nice();
       } else if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
         // avoid overflowing the border of the highlighted area
