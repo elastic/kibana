@@ -68,21 +68,23 @@ describe('DeleteAction', () => {
     expect(getByTestId('mlAnalyticsJobDeleteButton')).toHaveAttribute('disabled');
   });
 
-  test('When delete modal is open, modal lets user delete target index by default.', () => {
-    const mock = jest.spyOn(CheckPrivilige, 'checkPermission');
-    mock.mockImplementation((p) => p === 'canDeleteDataFrameAnalytics');
-    const { getByTestId, queryByTestId } = render(
-      <I18nProvider>
-        <DeleteAction item={mockAnalyticsListItem} />
-      </I18nProvider>
-    );
-    const deleteButton = getByTestId('mlAnalyticsJobDeleteButton');
-    fireEvent.click(deleteButton);
-    expect(getByTestId('mlAnalyticsJobDeleteModal')).toBeInTheDocument();
-    expect(getByTestId('mlAnalyticsJobDeleteIndexSwitch')).toBeInTheDocument();
-    const mlAnalyticsJobDeleteIndexSwitch = getByTestId('mlAnalyticsJobDeleteIndexSwitch');
-    expect(mlAnalyticsJobDeleteIndexSwitch).toHaveAttribute('aria-checked', 'true');
-    expect(queryByTestId('mlAnalyticsJobDeleteIndexPatternSwitch')).toBeNull();
-    mock.mockRestore();
+  describe('When delete model is open', () => {
+    test('should allow to delete target index by default.', () => {
+      const mock = jest.spyOn(CheckPrivilige, 'checkPermission');
+      mock.mockImplementation((p) => p === 'canDeleteDataFrameAnalytics');
+      const { getByTestId, queryByTestId } = render(
+        <I18nProvider>
+          <DeleteAction item={mockAnalyticsListItem} />
+        </I18nProvider>
+      );
+      const deleteButton = getByTestId('mlAnalyticsJobDeleteButton');
+      fireEvent.click(deleteButton);
+      expect(getByTestId('mlAnalyticsJobDeleteModal')).toBeInTheDocument();
+      expect(getByTestId('mlAnalyticsJobDeleteIndexSwitch')).toBeInTheDocument();
+      const mlAnalyticsJobDeleteIndexSwitch = getByTestId('mlAnalyticsJobDeleteIndexSwitch');
+      expect(mlAnalyticsJobDeleteIndexSwitch).toHaveAttribute('aria-checked', 'true');
+      expect(queryByTestId('mlAnalyticsJobDeleteIndexPatternSwitch')).toBeNull();
+      mock.mockRestore();
+    });
   });
 });

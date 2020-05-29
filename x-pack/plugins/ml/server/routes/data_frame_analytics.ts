@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CustomHttpResponseOptions, RequestHandlerContext, ResponseError } from 'kibana/server';
+import { RequestHandlerContext } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { RouteInitialization } from '../types';
@@ -17,11 +17,7 @@ import {
   deleteDataFrameAnalyticsJobSchema,
 } from './schemas/data_analytics_schema';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
-
-export interface DeleteDataFrameAnalyticsWithIndexStatus {
-  success: boolean;
-  error?: CustomHttpResponseOptions<ResponseError>;
-}
+import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
 
 function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
   const iph = new IndexPatternHandler(context.core.savedObjects.client);

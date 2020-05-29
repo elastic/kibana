@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
 import { http } from '../http_service';
 
 import { basePath } from './index';
 import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common';
 import { DeepPartial } from '../../../../common/types/common';
+import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../../../common/types/data_frame_analytics';
 
 export interface GetDataFrameAnalyticsStatsResponseOk {
   node_failures?: object;
@@ -33,10 +33,6 @@ interface GetDataFrameAnalyticsResponse {
   data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
-export interface DeleteDataFrameAnalyticsWithIndexStatus {
-  success: boolean;
-  error?: CustomHttpResponseOptions<ResponseError>;
-}
 interface DeleteDataFrameAnalyticsWithIndexResponse {
   acknowledged: boolean;
   analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
