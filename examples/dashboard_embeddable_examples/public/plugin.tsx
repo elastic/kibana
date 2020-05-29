@@ -18,13 +18,9 @@
  */
 
 import { AppMountParameters, CoreSetup, Plugin } from 'kibana/public';
-import { UiActionsService } from '../../../src/plugins/ui_actions/public';
-import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { DashboardStart } from '../../../src/plugins/dashboard/public';
 
 interface StartDeps {
-  uiActions: UiActionsService;
-  embeddable: EmbeddableStart;
   dashboard: DashboardStart;
 }
 
@@ -38,9 +34,9 @@ export class DashboardEmbeddableExamples implements Plugin<void, void, {}, Start
         const { renderApp } = await import('./app');
         return renderApp(
           {
-            embeddableApi: depsStart.embeddable,
             basename: params.appBasePath,
-            getSavedDashboardLoader: depsStart.dashboard.getSavedDashboardLoader,
+            DashboardEmbeddableByValueRenderer:
+              depsStart.dashboard.DashboardEmbeddableByValueRenderer,
           },
           params.element
         );

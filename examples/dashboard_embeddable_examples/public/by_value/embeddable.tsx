@@ -17,16 +17,9 @@
  * under the License.
  */
 
-import React from 'react';
-import {
-  EmbeddableFactoryRenderer,
-  EmbeddableStart,
-  ViewMode,
-} from '../../../../src/plugins/embeddable/public';
-import {
-  DASHBOARD_CONTAINER_TYPE,
-  DashboardContainerInput,
-} from '../../../../src/plugins/dashboard/public';
+import React, { useState } from 'react';
+import { ViewMode } from '../../../../src/plugins/embeddable/public';
+import { DashboardContainerInput, DashboardStart } from '../../../../src/plugins/dashboard/public';
 import { HELLO_WORLD_EMBEDDABLE } from '../../../embeddable_examples/public/hello_world';
 import { InputEditor } from './input_editor';
 
@@ -59,28 +52,16 @@ const initialInput: DashboardContainerInput = {
 };
 
 export const DashboardEmbeddableByValue = ({
-  embeddableApi,
+  DashboardEmbeddableByValueRenderer,
 }: {
-  embeddableApi: EmbeddableStart;
+  DashboardEmbeddableByValueRenderer: DashboardStart['DashboardEmbeddableByValueRenderer'];
 }) => {
-  const embeddableRendererRef = React.useRef<EmbeddableFactoryRenderer>(null);
+  const [input, setInput] = useState(initialInput);
 
   return (
-    <div>
-      <InputEditor
-        initialValue={initialInput}
-        onSubmit={(newInput) => {
-          // TODO: not sure why linter doesn't allow this
-          // eslint-disable-next-line no-unused-expressions
-          embeddableRendererRef.current?.updateInput(newInput);
-        }}
-      />
-      <EmbeddableFactoryRenderer
-        getEmbeddableFactory={embeddableApi.getEmbeddableFactory}
-        type={DASHBOARD_CONTAINER_TYPE}
-        input={initialInput}
-        ref={embeddableRendererRef}
-      />
-    </div>
+    <>
+      <InputEditor initialValue={initialInput} onSubmit={setInput} />
+      <DashboardEmbeddableByValueRenderer input={input} />
+    </>
   );
 };

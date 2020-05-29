@@ -31,9 +31,8 @@ import {
 import 'brace/mode/json';
 import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { AppMountParameters } from '../../../src/core/public';
-import { DashboardStart } from '../../../src/plugins/dashboard/public/';
 import { DashboardEmbeddableByValue } from './by_value/embeddable';
-import { DashboardEmbeddableByReference } from './by_ref/embeddable';
+import { DashboardStart } from '../../../src/plugins/dashboard/public';
 
 interface PageDef {
   title: string;
@@ -68,30 +67,28 @@ const Nav = withRouter(({ history, pages }: NavProps) => {
 
 interface Props {
   basename: string;
+  DashboardEmbeddableByValueRenderer: DashboardStart['DashboardEmbeddableByValueRenderer'];
   embeddableApi: EmbeddableStart;
-  getSavedDashboardLoader: DashboardStart['getSavedDashboardLoader'];
 }
 
 const DashboardEmbeddableExplorerApp = ({
   basename,
-  embeddableApi,
-  getSavedDashboardLoader,
+  DashboardEmbeddableByValueRenderer,
 }: Props) => {
   const pages: PageDef[] = [
     {
       title: 'By value dashboard embeddable',
       id: 'dashboardEmbeddableByValue',
-      component: <DashboardEmbeddableByValue embeddableApi={embeddableApi} />,
+      component: (
+        <DashboardEmbeddableByValue
+          DashboardEmbeddableByValueRenderer={DashboardEmbeddableByValueRenderer}
+        />
+      ),
     },
     {
       title: 'By ref dashboard embeddable',
       id: 'dashboardEmbeddableByRef',
-      component: (
-        <DashboardEmbeddableByReference
-          embeddableApi={embeddableApi}
-          getSavedDashboardLoader={getSavedDashboardLoader}
-        />
-      ),
+      component: <div>TODO: Not implemented, but coming soon...</div>,
     },
   ];
 

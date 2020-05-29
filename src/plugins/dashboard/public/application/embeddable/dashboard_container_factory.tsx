@@ -19,7 +19,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import { EmbeddableStart } from 'src/plugins/embeddable/public';
+import {
+  BindEmbeddableFactoryDefinitionOutputType,
+  EmbeddableStart,
+} from 'src/plugins/embeddable/public';
 import { CoreStart } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import {
@@ -44,12 +47,15 @@ interface StartServices {
 }
 
 export class DashboardContainerFactory
+  extends BindEmbeddableFactoryDefinitionOutputType<ContainerOutput>
   implements
     EmbeddableFactoryDefinition<DashboardContainerInput, ContainerOutput, DashboardContainer> {
   public readonly isContainerType = true;
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
-  constructor(private readonly getStartServices: () => Promise<StartServices>) {}
+  constructor(private readonly getStartServices: () => Promise<StartServices>) {
+    super();
+  }
 
   public isEditable = async () => {
     const { capabilities } = await this.getStartServices();

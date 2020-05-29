@@ -19,27 +19,24 @@
 
 import React from 'react';
 import {
-  EuiPanel,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiTitle,
+  EuiPanel,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import {
-  EmbeddableStart,
-  EmbeddableFactoryRenderer,
-  EmbeddableRoot,
-} from '../../../src/plugins/embeddable/public';
-import { HelloWorldEmbeddable, HELLO_WORLD_EMBEDDABLE } from '../../embeddable_examples/public';
+import { EmbeddableRenderer } from '../../../src/plugins/embeddable/public';
+import { HelloWorldEmbeddable } from '../../embeddable_examples/public';
+import { EmbeddableExamplesStart } from '../../embeddable_examples/public/plugin';
 
 interface Props {
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  helloWorldEmbeddableFactory: EmbeddableExamplesStart['helloWorldEmbeddableFactory'];
 }
 
-export function HelloWorldEmbeddableExample({ getEmbeddableFactory }: Props) {
+export function HelloWorldEmbeddableExample({ helloWorldEmbeddableFactory }: Props) {
   return (
     <EuiPageBody>
       <EuiPageHeader>
@@ -54,27 +51,27 @@ export function HelloWorldEmbeddableExample({ getEmbeddableFactory }: Props) {
           <EuiText>
             Here the embeddable is rendered without the factory. A developer may use this method if
             they want to statically embed a single embeddable into their application or page.
+            `input` may be used to declaratively update current embeddable input
           </EuiText>
           <EuiPanel data-test-subj="helloWorldEmbeddablePanel" paddingSize="none" role="figure">
-            <EmbeddableRoot embeddable={new HelloWorldEmbeddable({ id: 'hello' })} />
+            <EmbeddableRenderer
+              embeddable={new HelloWorldEmbeddable({ id: 'hello' })}
+              input={{ id: 'hello' }}
+            />
           </EuiPanel>
 
           <EuiText>
-            Here the embeddable is rendered using the factory.create method. This method is used
-            programatically when a container embeddable attempts to initialize it&#39;s children
-            embeddables. This method can be used when you only have a string representing the type
-            of embeddable, and input data.
+            Here the embeddable is rendered using the factory. Internally it creates embeddable
+            using factory.create(). This method is used programatically when a container embeddable
+            attempts to initialize it&#39;s children embeddables. This method can be used when you
+            only have a access to a factory.
           </EuiText>
           <EuiPanel
             data-test-subj="helloWorldEmbeddableFromFactory"
             paddingSize="none"
             role="figure"
           >
-            <EmbeddableFactoryRenderer
-              getEmbeddableFactory={getEmbeddableFactory}
-              type={HELLO_WORLD_EMBEDDABLE}
-              input={{ id: '1234' }}
-            />
+            <EmbeddableRenderer factory={helloWorldEmbeddableFactory} input={{ id: '1234' }} />
           </EuiPanel>
         </EuiPageContentBody>
       </EuiPageContent>

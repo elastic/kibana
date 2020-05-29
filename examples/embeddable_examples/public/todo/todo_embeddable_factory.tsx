@@ -23,7 +23,11 @@ import { OverlayStart } from 'kibana/public';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
-import { IContainer, EmbeddableFactoryDefinition } from '../../../../src/plugins/embeddable/public';
+import {
+  IContainer,
+  EmbeddableFactoryDefinition,
+  BindEmbeddableFactoryDefinitionOutputType,
+} from '../../../../src/plugins/embeddable/public';
 import { TodoEmbeddable, TODO_EMBEDDABLE, TodoInput, TodoOutput } from './todo_embeddable';
 
 function TaskInput({ onSave }: { onSave: (task: string) => void }) {
@@ -47,11 +51,13 @@ interface StartServices {
   openModal: OverlayStart['openModal'];
 }
 
-export class TodoEmbeddableFactory
+export class TodoEmbeddableFactory extends BindEmbeddableFactoryDefinitionOutputType<TodoOutput>
   implements EmbeddableFactoryDefinition<TodoInput, TodoOutput, TodoEmbeddable> {
   public readonly type = TODO_EMBEDDABLE;
 
-  constructor(private getStartServices: () => Promise<StartServices>) {}
+  constructor(private getStartServices: () => Promise<StartServices>) {
+    super();
+  }
 
   public async isEditable() {
     return true;

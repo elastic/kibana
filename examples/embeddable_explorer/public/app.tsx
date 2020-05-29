@@ -38,6 +38,7 @@ import { HelloWorldEmbeddableExample } from './hello_world_embeddable_example';
 import { TodoEmbeddableExample } from './todo_embeddable_example';
 import { ListContainerExample } from './list_container_example';
 import { EmbeddablePanelExample } from './embeddable_panel_example';
+import { EmbeddableExamplesStart } from '../../embeddable_examples/public/plugin';
 
 interface PageDef {
   title: string;
@@ -81,6 +82,7 @@ interface Props {
   inspector: InspectorStartContract;
   savedObject: SavedObjectsStart;
   uiSettingsClient: IUiSettingsClient;
+  embeddableExamples: EmbeddableExamplesStart;
 }
 
 const EmbeddableExplorerApp = ({
@@ -93,26 +95,36 @@ const EmbeddableExplorerApp = ({
   overlays,
   uiActionsApi,
   notifications,
+  embeddableExamples,
 }: Props) => {
   const pages: PageDef[] = [
     {
       title: 'Hello world embeddable',
       id: 'helloWorldEmbeddableSection',
       component: (
-        <HelloWorldEmbeddableExample getEmbeddableFactory={embeddableApi.getEmbeddableFactory} />
+        <HelloWorldEmbeddableExample
+          helloWorldEmbeddableFactory={embeddableExamples.helloWorldEmbeddableFactory}
+        />
       ),
     },
     {
       title: 'Todo embeddable',
       id: 'todoEmbeddableSection',
       component: (
-        <TodoEmbeddableExample getEmbeddableFactory={embeddableApi.getEmbeddableFactory} />
+        <TodoEmbeddableExample todoEmbeddableFactory={embeddableExamples.todoEmbeddableFactory} />
       ),
     },
     {
       title: 'List container embeddable',
       id: 'listContainerSection',
-      component: <ListContainerExample getEmbeddableFactory={embeddableApi.getEmbeddableFactory} />,
+      component: (
+        <ListContainerExample
+          listContainerEmbeddableFactory={embeddableExamples.listContainerEmbeddableFactory}
+          searchableListContainerEmbeddableFactory={
+            embeddableExamples.searchableListContainerEmbeddableFactory
+          }
+        />
+      ),
     },
     {
       title: 'Dynamically adding children to a container',

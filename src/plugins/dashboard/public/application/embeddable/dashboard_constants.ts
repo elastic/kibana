@@ -22,4 +22,3 @@ export const DASHBOARD_GRID_HEIGHT = 20;
 export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 export const DEFAULT_PANEL_HEIGHT = 15;
 export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
-export const DASHBOARD_CONTAINER_TYPE_BY_REF = 'dashboard_by_ref';
