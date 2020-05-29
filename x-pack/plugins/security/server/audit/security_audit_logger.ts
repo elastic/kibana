@@ -5,10 +5,10 @@
  */
 
 import { AuthenticationProvider } from '../../common/types';
-import { LegacyAPI } from '../plugin';
+import { AuditLogger } from './audit_service';
 
 export class SecurityAuditLogger {
-  constructor(private readonly getAuditLogger: () => LegacyAPI['auditLogger']) {}
+  constructor(private readonly logger: AuditLogger) {}
 
   savedObjectsAuthorizationFailure(
     username: string,
@@ -23,7 +23,7 @@ export class SecurityAuditLogger {
     const missingString = missing
       .map(({ spaceId, privilege }) => `${spaceId ? `(${spaceId})` : ''}${privilege}`)
       .join(',');
-    this.getAuditLogger().log(
+    this.logger.log(
       'saved_objects_authorization_failure',
       `${username} unauthorized to [${action}] [${typesString}]${spacesString}: missing [${missingString}]`,
       {
@@ -46,7 +46,7 @@ export class SecurityAuditLogger {
   ) {
     const typesString = types.join(',');
     const spacesString = spaceIds.length ? ` in [${spaceIds.join(',')}]` : '';
-    this.getAuditLogger().log(
+    this.logger.log(
       'saved_objects_authorization_success',
       `${username} authorized to [${action}] [${typesString}]${spacesString}`,
       {
@@ -60,7 +60,7 @@ export class SecurityAuditLogger {
   }
 
   accessAgreementAcknowledged(username: string, provider: AuthenticationProvider) {
-    this.getAuditLogger().log(
+    this.logger.log(
       'access_agreement_acknowledged',
       `${username} acknowledged access agreement (${provider.type}/${provider.name}).`,
       { username, provider }
