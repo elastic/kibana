@@ -62,6 +62,7 @@ export const MapsCreateEditView = withRouter(
         isVisible: true,
         isSaveDisabled: false,
         isOpenSettingsDisabled: false,
+        isFullScreen: false,
       };
     }
 
@@ -134,7 +135,8 @@ export const MapsCreateEditView = withRouter(
         store,
         prevIndexPatternIds,
         isSaveDisabled,
-        isOpenSettingsDisabled
+        isOpenSettingsDisabled,
+        isFullScreen,
       } = this.state;
       const storeUpdates = {};
 
@@ -228,9 +230,8 @@ export const MapsCreateEditView = withRouter(
       const { store } = this.state;
 
       // Get saved map & layer settings
-      let savedMap;
       let layerList;
-      savedMap = await this._fetchSavedMap(savedMapId);
+      const savedMap = await this._fetchSavedMap(savedMapId);
       this.initFilters(savedMap);
       if (savedMap.layerListJSON) {
         layerList = JSON.parse(savedMap.layerListJSON);

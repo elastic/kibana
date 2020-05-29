@@ -10,13 +10,22 @@ import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { getCoreI18n } from '../kibana_services';
 import { MapsListView } from './routes/list_view';
 import { MapsCreateEditView } from './routes/create_edit_view';
-import { createKbnUrlStateStorage } from '../../../../../src/plugins/kibana_utils/public/state_sync/state_sync_state_storage';
+import { createKbnUrlStateStorage } from '../../../../../src/plugins/kibana_utils/public';
+import { useGlobalStateSyncing } from './state_syncing/global_sync';
 
 export function renderApp(context, { appBasePath, element, history }) {
-  const I18nContext = getCoreI18n().Context;
+  render(<App history={history} appBasePath={appBasePath} />, element);
+  return () => unmountComponentAtNode(element);
+}
+
+const App = ({ history, appBasePath }) => {
   const kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
 
-  render(
+  // Init sync utils
+  useGlobalStateSyncing(kbnUrlStateStorage);
+
+  const I18nContext = getCoreI18n().Context;
+  return (
     <I18nContext>
       <Router basename={appBasePath} history={history}>
         <Switch>
@@ -41,9 +50,6 @@ export function renderApp(context, { appBasePath, element, history }) {
           <Route component={MapsListView} />
         </Switch>
       </Router>
-    </I18nContext>,
-    element
+    </I18nContext>
   );
-
-  return () => unmountComponentAtNode(element);
-}
+};
