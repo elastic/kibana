@@ -43,7 +43,6 @@ exports[`Header renders 1`] = `
       "getComponent": [MockFunction],
       "getUrlForApp": [MockFunction],
       "navigateToApp": [MockFunction],
-      "navigateToUrl": [MockFunction],
       "registerMountContext": [MockFunction],
     }
   }
@@ -658,7 +657,6 @@ exports[`Header renders 2`] = `
       "getComponent": [MockFunction],
       "getUrlForApp": [MockFunction],
       "navigateToApp": [MockFunction],
-      "navigateToUrl": [MockFunction],
       "registerMountContext": [MockFunction],
     }
   }
@@ -2193,7 +2191,7 @@ exports[`Header renders 2`] = `
               <div
                 className="euiHeaderSectionItem euiHeaderSectionItem--borderRight header__toggleNavButtonSection"
               >
-                <EuiHeaderSectionItemButton
+                <ForwardRef
                   aria-controls="mockId"
                   aria-expanded={false}
                   aria-label="Toggle primary navigation"
@@ -2221,7 +2219,7 @@ exports[`Header renders 2`] = `
                       />
                     </EuiIcon>
                   </button>
-                </EuiHeaderSectionItemButton>
+                </ForwardRef>
               </div>
             </EuiHeaderSectionItem>
             <EuiHeaderSectionItem
@@ -2380,7 +2378,7 @@ exports[`Header renders 2`] = `
                     aria-label="Go to home page"
                     data-test-subj="logo"
                     href="/"
-                    iconType="logoElastic"
+                    iconType="logoKibana"
                     onClick={[Function]}
                   >
                     <a
@@ -2389,18 +2387,17 @@ exports[`Header renders 2`] = `
                       data-test-subj="logo"
                       href="/"
                       onClick={[Function]}
-                      rel="noreferrer"
                     >
                       <EuiIcon
                         aria-label="Elastic"
                         className="euiHeaderLogo__icon"
                         size="l"
-                        type="logoElastic"
+                        type="logoKibana"
                       >
                         <div
                           aria-label="Elastic"
                           className="euiHeaderLogo__icon"
-                          data-euiicon-type="logoElastic"
+                          data-euiicon-type="logoKibana"
                           size="l"
                         />
                       </EuiIcon>
@@ -4303,7 +4300,7 @@ exports[`Header renders 2`] = `
                           <div
                             className="euiPopover__anchor"
                           >
-                            <EuiHeaderSectionItemButton
+                            <ForwardRef
                               aria-expanded={false}
                               aria-haspopup="true"
                               aria-label="Help menu"
@@ -4327,7 +4324,7 @@ exports[`Header renders 2`] = `
                                   />
                                 </EuiIcon>
                               </button>
-                            </EuiHeaderSectionItemButton>
+                            </ForwardRef>
                           </div>
                         </div>
                       </EuiOutsideClickDetector>
@@ -4742,7 +4739,6 @@ exports[`Header renders 3`] = `
       "getComponent": [MockFunction],
       "getUrlForApp": [MockFunction],
       "navigateToApp": [MockFunction],
-      "navigateToUrl": [MockFunction],
       "registerMountContext": [MockFunction],
     }
   }
@@ -6277,7 +6273,7 @@ exports[`Header renders 3`] = `
               <div
                 className="euiHeaderSectionItem euiHeaderSectionItem--borderRight header__toggleNavButtonSection"
               >
-                <EuiHeaderSectionItemButton
+                <ForwardRef
                   aria-controls="mockId"
                   aria-expanded={false}
                   aria-label="Toggle primary navigation"
@@ -6305,7 +6301,7 @@ exports[`Header renders 3`] = `
                       />
                     </EuiIcon>
                   </button>
-                </EuiHeaderSectionItemButton>
+                </ForwardRef>
               </div>
             </EuiHeaderSectionItem>
             <EuiHeaderSectionItem
@@ -6464,7 +6460,7 @@ exports[`Header renders 3`] = `
                     aria-label="Go to home page"
                     data-test-subj="logo"
                     href="/"
-                    iconType="logoElastic"
+                    iconType="logoKibana"
                     onClick={[Function]}
                   >
                     <a
@@ -6473,18 +6469,17 @@ exports[`Header renders 3`] = `
                       data-test-subj="logo"
                       href="/"
                       onClick={[Function]}
-                      rel="noreferrer"
                     >
                       <EuiIcon
                         aria-label="Elastic"
                         className="euiHeaderLogo__icon"
                         size="l"
-                        type="logoElastic"
+                        type="logoKibana"
                       >
                         <div
                           aria-label="Elastic"
                           className="euiHeaderLogo__icon"
-                          data-euiicon-type="logoElastic"
+                          data-euiicon-type="logoKibana"
                           size="l"
                         />
                       </EuiIcon>
@@ -8387,7 +8382,7 @@ exports[`Header renders 3`] = `
                           <div
                             className="euiPopover__anchor"
                           >
-                            <EuiHeaderSectionItemButton
+                            <ForwardRef
                               aria-expanded={false}
                               aria-haspopup="true"
                               aria-label="Help menu"
@@ -8411,7 +8406,7 @@ exports[`Header renders 3`] = `
                                   />
                                 </EuiIcon>
                               </button>
-                            </EuiHeaderSectionItemButton>
+                            </ForwardRef>
                           </div>
                         </div>
                       </EuiOutsideClickDetector>
@@ -8812,7 +8807,6 @@ exports[`Header renders 3`] = `
                                       <a
                                         class="euiListGroupItem__button"
                                         href="/"
-                                        rel="noreferrer"
                                       >
                                         <div
                                           class="euiListGroupItem__icon"
@@ -8895,7 +8889,6 @@ exports[`Header renders 3`] = `
                                             class="euiListGroupItem__button"
                                             data-test-subj="collapsibleNavAppLink--recent"
                                             href="http://localhost/"
-                                            rel="noreferrer"
                                             title="dashboard, type: kibana"
                                           >
                                             <span
@@ -9048,7 +9041,6 @@ exports[`Header renders 3`] = `
                                         <a
                                           class="euiListGroupItem__button"
                                           href="/"
-                                          rel="noreferrer"
                                         >
                                           <div
                                             class="euiListGroupItem__icon"
@@ -9131,7 +9123,6 @@ exports[`Header renders 3`] = `
                                               class="euiListGroupItem__button"
                                               data-test-subj="collapsibleNavAppLink--recent"
                                               href="http://localhost/"
-                                              rel="noreferrer"
                                               title="dashboard, type: kibana"
                                             >
                                               <span
@@ -9337,7 +9328,6 @@ exports[`Header renders 3`] = `
                                           className="euiListGroupItem__button"
                                           href="/"
                                           onClick={[Function]}
-                                          rel="noreferrer"
                                         >
                                           <EuiIcon
                                             className="euiListGroupItem__icon"
@@ -9530,7 +9520,6 @@ exports[`Header renders 3`] = `
                                                 data-test-subj="collapsibleNavAppLink--recent"
                                                 href="http://localhost/"
                                                 onClick={[Function]}
-                                                rel="noreferrer"
                                                 title="dashboard, type: kibana"
                                               >
                                                 <span
@@ -9898,7 +9887,6 @@ exports[`Header renders 4`] = `
       "getComponent": [MockFunction],
       "getUrlForApp": [MockFunction],
       "navigateToApp": [MockFunction],
-      "navigateToUrl": [MockFunction],
       "registerMountContext": [MockFunction],
     }
   }
@@ -11442,7 +11430,7 @@ exports[`Header renders 4`] = `
                 <div
                   className="euiHeaderSectionItem euiHeaderSectionItem--borderRight eui-showFor--xs eui-showFor--s"
                 >
-                  <EuiHeaderSectionItemButton
+                  <ForwardRef
                     aria-label="Toggle side navigation"
                     onClick={[Function]}
                   >
@@ -11462,7 +11450,7 @@ exports[`Header renders 4`] = `
                         />
                       </EuiIcon>
                     </button>
-                  </EuiHeaderSectionItemButton>
+                  </ForwardRef>
                 </div>
               </EuiHeaderSectionItem>
             </EuiShowFor>
@@ -11622,7 +11610,7 @@ exports[`Header renders 4`] = `
                     aria-label="Go to home page"
                     data-test-subj="logo"
                     href="/"
-                    iconType="logoElastic"
+                    iconType="logoKibana"
                     onClick={[Function]}
                   >
                     <a
@@ -11631,18 +11619,17 @@ exports[`Header renders 4`] = `
                       data-test-subj="logo"
                       href="/"
                       onClick={[Function]}
-                      rel="noreferrer"
                     >
                       <EuiIcon
                         aria-label="Elastic"
                         className="euiHeaderLogo__icon"
                         size="l"
-                        type="logoElastic"
+                        type="logoKibana"
                       >
                         <div
                           aria-label="Elastic"
                           className="euiHeaderLogo__icon"
-                          data-euiicon-type="logoElastic"
+                          data-euiicon-type="logoKibana"
                           size="l"
                         />
                       </EuiIcon>
@@ -13545,7 +13532,7 @@ exports[`Header renders 4`] = `
                           <div
                             className="euiPopover__anchor"
                           >
-                            <EuiHeaderSectionItemButton
+                            <ForwardRef
                               aria-expanded={false}
                               aria-haspopup="true"
                               aria-label="Help menu"
@@ -13569,7 +13556,7 @@ exports[`Header renders 4`] = `
                                   />
                                 </EuiIcon>
                               </button>
-                            </EuiHeaderSectionItemButton>
+                            </ForwardRef>
                           </div>
                         </div>
                       </EuiOutsideClickDetector>
@@ -13915,26 +13902,7 @@ exports[`Header renders 4`] = `
                             }
                           >
                             <EuiListGroupItem
-                              buttonRef={
-                                Object {
-                                  "current": <button
-                                    class="euiListGroupItem__button"
-                                    data-test-subj="navDrawerExpandButton-isExpanded"
-                                    type="button"
-                                  >
-                                    <div
-                                      class="euiListGroupItem__icon"
-                                      data-euiicon-type="menuLeft"
-                                    />
-                                    <span
-                                      class="euiListGroupItem__label"
-                                      title="Collapse"
-                                    >
-                                      Collapse
-                                    </span>
-                                  </button>,
-                                }
-                              }
+                              buttonRef={[Function]}
                               className="navDrawerExpandButton-isExpanded"
                               data-test-subj="navDrawerExpandButton-isExpanded"
                               extraAction={
@@ -14264,7 +14232,6 @@ exports[`Header renders 4`] = `
                 <EuiNavDrawerFlyout
                   id="navDrawerFlyout"
                   isCollapsed={true}
-                  listItems={null}
                   onClose={[Function]}
                   wrapText={true}
                 >
@@ -14277,11 +14244,12 @@ exports[`Header renders 4`] = `
                     <EuiTitle
                       className="euiNavDrawerFlyout__title"
                       size="xxs"
+                      tabIndex="-1"
                     >
                       <div
                         className="euiTitle euiTitle--xxsmall euiNavDrawerFlyout__title"
                         id="navDrawerFlyoutTitle"
-                        tabIndex={-1}
+                        tabIndex="-1"
                       />
                     </EuiTitle>
                   </div>
