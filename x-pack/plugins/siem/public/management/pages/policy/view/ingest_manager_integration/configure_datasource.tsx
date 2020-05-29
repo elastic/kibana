@@ -8,14 +8,17 @@ import React, { memo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
-import { CustomConfigureDatasourceContent } from '../../../../../ingest_manager/public';
-import { LinkToApp } from '../../../common/components/endpoint/link_to_app';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
+import { CustomConfigureDatasourceContent } from '../../../../../../../ingest_manager/public';
+import { getManagementUrl } from '../../../..';
 
 export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent>(
   ({ from }: { from: string }) => {
+    const { services } = useKibana();
     const pathname = useLocation().pathname.split('/');
     const policyId = pathname[pathname.length - 1];
+    const policyUrl = getManagementUrl({ name: 'policyDetails', policyId });
 
     return (
       <EuiEmptyPrompt
@@ -25,8 +28,8 @@ export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent
               {from === 'edit' ? (
                 <LinkToApp
                   appId="siem"
-                  appPath={`#/policy/${policyId}`}
-                  href={`siem#/policy/${policyId}`}
+                  appPath={policyUrl}
+                  href={`${services.application.getUrlForApp('siem')}${policyUrl}`}
                 >
                   <FormattedMessage
                     id="xpack.endpoint.ingestManager.editDatasource.stepConfigure"

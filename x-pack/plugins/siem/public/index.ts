@@ -12,4 +12,4 @@ export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(
 
 export { Plugin, PluginSetup, PluginStart };
 
-export { ConfigureEndpointDatasource } from './endpoint_policy/view/ingest_manager_integration';
+export { ConfigureEndpointDatasource } from './management/pages/policy/view/ingest_manager_integration';

@@ -20,7 +20,14 @@ export const StepConfigureDatasource: React.FunctionComponent<{
   updateDatasource: (fields: Partial<NewDatasource>) => void;
   validationResults: DatasourceValidationResults;
   submitAttempted: boolean;
-}> = ({ from, packageInfo, datasource, updateDatasource, validationResults, submitAttempted }) => {
+}> = ({
+  from = 'config',
+  packageInfo,
+  datasource,
+  updateDatasource,
+  validationResults,
+  submitAttempted,
+}) => {
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   // Configure inputs (and their streams)
