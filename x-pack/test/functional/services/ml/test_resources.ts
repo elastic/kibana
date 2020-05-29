@@ -99,14 +99,18 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
     },
 
     async assertIndexPatternNotExist(title: string) {
-      await retry.waitForWithTimeout(`index pattern'${title}' to not exist`, 5 * 1000, async () => {
-        const indexPatternId = await this.getIndexPatternId(title);
-        if (!indexPatternId) {
-          return true;
-        } else {
-          throw new Error(`Index pattern '${title}' should not exist.`);
+      await retry.waitForWithTimeout(
+        `index pattern '${title}' to not exist`,
+        5 * 1000,
+        async () => {
+          const indexPatternId = await this.getIndexPatternId(title);
+          if (!indexPatternId) {
+            return true;
+          } else {
+            throw new Error(`Index pattern '${title}' should not exist.`);
+          }
         }
-      });
+      );
     },
 
     async createSavedSearch(title: string, body: object): Promise<string> {

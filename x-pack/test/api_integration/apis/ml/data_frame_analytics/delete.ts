@@ -83,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body.analyticsJobDeleted.success).to.eql(true);
-        await ml.api.assertDataFrameAnalyticsJobNotExist(analyticsId);
+        await ml.api.waitForDataFrameAnalyticsJobNotToExist(analyticsId);
       });
 
       it('should not allow to retrieve analytics jobs for unauthorized user', async () => {
@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body.error).to.eql('Not Found');
         expect(body.message).to.eql('Not Found');
-        await ml.api.assertDataFrameAnalyticsJobExist(analyticsId);
+        await ml.api.waitForDataFrameAnalyticsJobToExist(analyticsId);
       });
 
       it('should not allow to retrieve analytics jobs for the user with only view permission', async () => {
@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body.error).to.eql('Not Found');
         expect(body.message).to.eql('Not Found');
-        await ml.api.assertDataFrameAnalyticsJobExist(analyticsId);
+        await ml.api.waitForDataFrameAnalyticsJobToExist(analyticsId);
       });
 
       it('should show 404 error if job does not exist or has already been deleted', async () => {
@@ -147,7 +147,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.analyticsJobDeleted.success).to.eql(true);
           expect(body.destIndexDeleted.success).to.eql(true);
           expect(body.destIndexPatternDeleted.success).to.eql(false);
-          await ml.api.assertDataFrameAnalyticsJobNotExist(analyticsId);
+          await ml.api.waitForDataFrameAnalyticsJobNotToExist(analyticsId);
           await ml.api.assertIndicesNotToExist(destinationIndex);
         });
       });
@@ -176,7 +176,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.analyticsJobDeleted.success).to.eql(true);
           expect(body.destIndexDeleted.success).to.eql(false);
           expect(body.destIndexPatternDeleted.success).to.eql(true);
-          await ml.api.assertDataFrameAnalyticsJobNotExist(analyticsId);
+          await ml.api.waitForDataFrameAnalyticsJobNotToExist(analyticsId);
           await ml.testResources.assertIndexPatternNotExist(destinationIndex);
         });
       });
@@ -208,7 +208,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.analyticsJobDeleted.success).to.eql(true);
           expect(body.destIndexDeleted.success).to.eql(true);
           expect(body.destIndexPatternDeleted.success).to.eql(true);
-          await ml.api.assertDataFrameAnalyticsJobNotExist(analyticsId);
+          await ml.api.waitForDataFrameAnalyticsJobNotToExist(analyticsId);
           await ml.api.assertIndicesNotToExist(destinationIndex);
           await ml.testResources.assertIndexPatternNotExist(destinationIndex);
         });
