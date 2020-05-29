@@ -25,6 +25,7 @@ describe('Security Plugin', () => {
           idleTimeout: 1500,
           lifespan: null,
         },
+        audit: { enabled: false },
         authc: {
           selector: { enabled: false },
           providers: ['saml', 'token'],
@@ -48,8 +49,10 @@ describe('Security Plugin', () => {
       await expect(plugin.setup(mockCoreSetup, mockDependencies)).resolves.toMatchInlineSnapshot(`
               Object {
                 "__legacyCompat": Object {
-                  "registerLegacyAPI": [Function],
                   "registerPrivilegesWithCluster": [Function],
+                },
+                "audit": Object {
+                  "getLogger": [Function],
                 },
                 "authc": Object {
                   "areAPIKeysEnabled": [Function],
