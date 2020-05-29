@@ -18,7 +18,6 @@ import {
   EuiSelectOption,
 } from '@elastic/eui';
 
-import { cloneDeep } from 'lodash';
 import { dictionaryToArray } from '../../../../../../common/types/common';
 
 import {
@@ -70,7 +69,7 @@ function parsePercentsInput(inputValue: string | undefined) {
 }
 
 export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onChange, options }) => {
-  const [aggConfigDef, setAggConfigDef] = useState(cloneDeep(defaultData));
+  const [aggConfigDef, setAggConfigDef] = useState(defaultData);
 
   const [aggName, setAggName] = useState(defaultData.aggName);
   const [agg, setAgg] = useState(defaultData.agg);
@@ -223,11 +222,9 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
       )}
       {isPivotAggsWithExtendedForm(aggConfigDef) && (
         <aggConfigDef.AggFormComponent
-          aggConfig={aggConfigDef.aggConfig!}
+          aggConfig={aggConfigDef.aggConfig}
           selectedField={field}
           onChange={(update) => {
-            console.log(update, '___update___');
-
             setAggConfigDef({
               ...aggConfigDef,
               aggConfig: {

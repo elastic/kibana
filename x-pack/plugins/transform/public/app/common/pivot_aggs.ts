@@ -10,8 +10,8 @@ import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
 import { AggName } from './aggregations';
 import { EsFieldName } from './fields';
-import { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg_config';
 import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
+import { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
 
 export type PivotSupportedAggs = typeof PIVOT_SUPPORTED_AGGS[keyof typeof PIVOT_SUPPORTED_AGGS];
 
@@ -105,35 +105,33 @@ export function getAggConfigFromEsAgg(esAggDefinition: Record<string, any>) {
     return;
   }
 
-  return config.mappers.esToUiAggConfig(esAggDefinition);
+  return config.mappers.setUiConfigFromEs(esAggDefinition);
 }
 
 export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
   field: EsFieldName;
 }
 
-export interface PivotAggsConfigWithUiCustom extends PivotAggsConfigBase {
-  aggConfig: any;
-}
-
 export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
   /** Form component */
   AggFormComponent: FC<{
-    aggConfig: Partial<T>;
-    onChange: (arg: Partial<T>) => void;
+    // aggConfig: Partial<T>;
+    // onChange: (arg: Partial<T>) => void;
+    aggConfig: any;
+    onChange: (arg: any) => void;
     selectedField: string;
   }>;
   /** Aggregation specific configuration */
-  aggConfig: T;
+  aggConfig: Partial<T>;
   /**
    * Indicates if the user's input is required after quick adding of the aggregation
    * from the suggestions.
    */
   forceEdit?: boolean;
   /** Set UI configuration from ES aggregation definition */
-  esToUiAggConfig: (arg: { [key: string]: any }) => void;
+  setUiConfigFromEs: (arg: { [key: string]: any }) => void;
   /** Converts UI agg config form to ES agg request object */
-  uiAggConfigToEs: () => { [key: string]: any };
+  getEsAggConfig: () => { [key: string]: any };
 }
 
 interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {
@@ -186,8 +184,6 @@ export type PivotAggsConfigDict = Dictionary<PivotAggsConfig>;
 export function getEsAggFromAggConfig(
   pivotAggsConfig: PivotAggsConfigBase | PivotAggsConfigWithExtendedForm
 ): PivotAgg {
-  console.log(pivotAggsConfig, '___pivotAggsConfig___');
-
   let esAgg: { [key: string]: any } = { ...pivotAggsConfig };
 
   delete esAgg.agg;
@@ -195,7 +191,7 @@ export function getEsAggFromAggConfig(
   delete esAgg.dropDownName;
 
   if (isPivotAggsWithExtendedForm(pivotAggsConfig)) {
-    esAgg = pivotAggsConfig.uiAggConfigToEs();
+    esAgg = pivotAggsConfig.getEsAggConfig();
   }
 
   return {

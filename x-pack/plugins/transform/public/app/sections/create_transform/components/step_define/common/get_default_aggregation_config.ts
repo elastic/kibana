@@ -10,8 +10,8 @@ import {
   PIVOT_SUPPORTED_AGGS,
   PivotAggsConfigWithUiSupport,
 } from '../../../../../common';
-import { getFilterAggConfig } from './filter_agg_config';
 import { PivotSupportedAggs } from '../../../../../common/pivot_aggs';
+import { getFilterAggConfig } from './filter_agg/config';
 
 /**
  * Provides a configuration based on the aggregation type.

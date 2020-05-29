@@ -5,7 +5,7 @@
  */
 
 import { PIVOT_SUPPORTED_AGGS, PivotSupportedAggs } from '../../../../../common/pivot_aggs';
-import { getFilterAggConfig } from './filter_agg_config';
+import { getFilterAggConfig } from './filter_agg/config';
 
 /**
  * Gets form configuration for provided aggregation type.
