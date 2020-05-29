@@ -5,25 +5,13 @@
  */
 
 import React, { FC, Fragment, useState } from 'react';
-import {
-  EuiButton,
-  EuiCard,
-  EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiButton, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { Messages } from '../../../analytics_management/components/create_analytics_form/messages';
 import { ANALYTICS_STEPS } from '../../page';
-
-function redirectToAnalyticsManagementPage() {
-  window.location.href = '#/data_frame_analytics?';
-}
+import { BackToListPanel } from '../back_to_list_panel';
 
 export const CreateStep: FC<CreateAnalyticsStepProps> = ({ actions, state, step }) => {
   const { createAnalyticsJob, startAnalyticsJob } = actions;
@@ -64,6 +52,7 @@ export const CreateStep: FC<CreateAnalyticsStepProps> = ({ actions, state, step 
               )}
             >
               <EuiCheckbox
+                data-test-subj="mlAnalyticsCreateJobWizardStartJobCheckbox"
                 id={'dataframe-create-start-checkbox'}
                 label={i18n.translate('xpack.ml.dataframe.analytics.create.wizardStartCheckbox', {
                   defaultMessage: 'Start immediately',
@@ -88,27 +77,7 @@ export const CreateStep: FC<CreateAnalyticsStepProps> = ({ actions, state, step 
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      {isJobCreated === true && (
-        <Fragment>
-          <EuiHorizontalRule />
-          <EuiCard
-            // @ts-ignore
-            style={{ width: '300px' }}
-            icon={<EuiIcon size="xxl" type="list" />}
-            title={i18n.translate('xpack.ml.dataframe.analytics.create.analyticsListCardTitle', {
-              defaultMessage: 'Data Frame Analytics',
-            })}
-            description={i18n.translate(
-              'xpack.ml.dataframe.analytics.create.analyticsListCardDescription',
-              {
-                defaultMessage: 'Return to the analytics management page.',
-              }
-            )}
-            onClick={redirectToAnalyticsManagementPage}
-            data-test-subj="analyticsWizardCardManagement"
-          />
-        </Fragment>
-      )}
+      {isJobCreated === true && <BackToListPanel />}
     </Fragment>
   );
 };

@@ -42,12 +42,12 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
   return {
     async assertJobTypeSelectExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutJobTypeSelect');
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardJobTypeSelect');
     },
 
     async assertJobTypeSelection(expectedSelection: string) {
       const actualSelection = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobFlyoutJobTypeSelect',
+        'mlAnalyticsCreateJobWizardJobTypeSelect',
         'value'
       );
       expect(actualSelection).to.eql(
@@ -57,12 +57,12 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async selectJobType(jobType: string) {
-      await testSubjects.selectValue('mlAnalyticsCreateJobFlyoutJobTypeSelect', jobType);
+      await testSubjects.selectValue('mlAnalyticsCreateJobWizardJobTypeSelect', jobType);
       await this.assertJobTypeSelection(jobType);
     },
 
     async assertAdvancedEditorSwitchExists() {
-      await testSubjects.existOrFail(`mlAnalyticsCreateJobFlyoutAdvancedEditorSwitch`, {
+      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardAdvancedEditorSwitch`, {
         allowHidden: true,
       });
     },
@@ -70,7 +70,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     async assertAdvancedEditorSwitchCheckState(expectedCheckState: boolean) {
       const actualCheckState =
         (await testSubjects.getAttribute(
-          'mlAnalyticsCreateJobFlyoutAdvancedEditorSwitch',
+          'mlAnalyticsCreateJobWizardAdvancedEditorSwitch',
           'aria-checked'
         )) === 'true';
       expect(actualCheckState).to.eql(
@@ -183,19 +183,19 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async assertDependentVariableInputExists() {
       await testSubjects.existOrFail(
-        'mlAnalyticsCreateJobFlyoutDependentVariableSelect > comboBoxInput'
+        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
       );
     },
 
     async assertDependentVariableInputMissing() {
       await testSubjects.missingOrFail(
-        'mlAnalyticsCreateJobFlyoutDependentVariableSelect > comboBoxInput'
+        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
       );
     },
 
     async assertDependentVariableSelection(expectedSelection: string[]) {
       const actualSelection = await comboBox.getComboBoxSelectedOptions(
-        'mlAnalyticsCreateJobFlyoutDependentVariableSelect > comboBoxInput'
+        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
       );
       expect(actualSelection).to.eql(
         expectedSelection,
@@ -205,7 +205,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async selectDependentVariable(dependentVariable: string) {
       await comboBox.set(
-        'mlAnalyticsCreateJobFlyoutDependentVariableSelect > comboBoxInput',
+        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput',
         dependentVariable
       );
       await this.assertDependentVariableSelection([dependentVariable]);
@@ -271,13 +271,18 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertTrainingPercentValue(trainingPercent);
     },
 
+    async continueToNextStep(nextStep: string) {
+      await testSubjects.click('mlAnalyticsCreateJobWizardContinueButton');
+      await testSubjects.existOrFail(nextStep);
+    },
+
     async assertModelMemoryInputExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutModelMemoryInput');
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardModelMemoryInput');
     },
 
     async assertModelMemoryValue(expectedValue: string) {
       const actualModelMemory = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobFlyoutModelMemoryInput',
+        'mlAnalyticsCreateJobWizardModelMemoryInput',
         'value'
       );
       expect(actualModelMemory).to.eql(
@@ -289,7 +294,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     async setModelMemory(modelMemory: string) {
       await retry.tryForTime(15 * 1000, async () => {
         await mlCommon.setValueWithChecks(
-          'mlAnalyticsCreateJobFlyoutModelMemoryInput',
+          'mlAnalyticsCreateJobWizardModelMemoryInput',
           modelMemory,
           {
             clearWithKeyboard: true,
@@ -300,14 +305,14 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertCreateIndexPatternSwitchExists() {
-      await testSubjects.existOrFail(`mlAnalyticsCreateJobFlyoutCreateIndexPatternSwitch`, {
+      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardCreateIndexPatternSwitch`, {
         allowHidden: true,
       });
     },
 
     async getCreateIndexPatternSwitchCheckState(): Promise<boolean> {
       const state = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobFlyoutCreateIndexPatternSwitch',
+        'mlAnalyticsCreateJobWizardCreateIndexPatternSwitch',
         'aria-checked'
       );
       return state === 'true';
@@ -323,58 +328,46 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async setCreateIndexPatternSwitchState(checkState: boolean) {
       if ((await this.getCreateIndexPatternSwitchCheckState()) !== checkState) {
-        await testSubjects.click('mlAnalyticsCreateJobFlyoutCreateIndexPatternSwitch');
+        await testSubjects.click('mlAnalyticsCreateJobWizardCreateIndexPatternSwitch');
       }
       await this.assertCreateIndexPatternSwitchCheckState(checkState);
     },
 
-    async assertCreateButtonExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutCreateButton');
+    async assertStartJobCheckboxExists() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardStartJobCheckbox');
     },
 
-    async assertCreateButtonMissing() {
-      await testSubjects.missingOrFail('mlAnalyticsCreateJobFlyoutCreateButton');
+    async assertStartJobCheckboxCheckState(expectedCheckState: boolean) {
+      const actualCheckState =
+        (await testSubjects.getAttribute(
+          'mlAnalyticsCreateJobWizardStartJobCheckbox',
+          'checked'
+        )) === 'true';
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Start job check state should be ${expectedCheckState} (got ${actualCheckState})`
+      );
+    },
+
+    async assertCreateButtonExists() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardCreateButton');
     },
 
     async isCreateButtonDisabled() {
-      const isEnabled = await testSubjects.isEnabled('mlAnalyticsCreateJobFlyoutCreateButton');
+      const isEnabled = await testSubjects.isEnabled('mlAnalyticsCreateJobWizardCreateButton');
       return !isEnabled;
     },
 
     async createAnalyticsJob(analyticsId: string) {
-      await testSubjects.click('mlAnalyticsCreateJobFlyoutCreateButton');
+      await testSubjects.click('mlAnalyticsCreateJobWizardCreateButton');
       await retry.tryForTime(5000, async () => {
-        await this.assertCreateButtonMissing();
-        await this.assertStartButtonExists();
+        await this.assertBackToManagementCardExists();
       });
       await mlApi.waitForDataFrameAnalyticsJobToExist(analyticsId);
     },
 
-    async assertStartButtonExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutStartButton');
-    },
-
-    async assertStartButtonMissing() {
-      await testSubjects.missingOrFail('mlAnalyticsCreateJobFlyoutStartButton');
-    },
-
-    async startAnalyticsJob() {
-      await testSubjects.click('mlAnalyticsCreateJobFlyoutStartButton');
-      await retry.tryForTime(5000, async () => {
-        await this.assertStartButtonMissing();
-        await this.assertCloseButtonExists();
-      });
-    },
-
-    async assertCloseButtonExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutCloseButton');
-    },
-
-    async closeCreateAnalyticsJobFlyout() {
-      await retry.tryForTime(10 * 1000, async () => {
-        await testSubjects.click('mlAnalyticsCreateJobFlyoutCloseButton');
-        await testSubjects.missingOrFail('mlAnalyticsCreateJobFlyout');
-      });
+    async assertBackToManagementCardExists() {
+      await testSubjects.existOrFail('analyticsWizardCardManagement');
     },
 
     async getHeaderText() {
@@ -394,6 +387,19 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       }
       await this.assertExcludedFieldsSelection(job.analyzed_fields.excludes);
       await this.assertModelMemoryValue(job.model_memory_limit);
+    },
+
+    async assertCreationCalloutMessagesExist() {
+      await testSubjects.existOrFail('analyticsWizardCreationCallout_0');
+      await testSubjects.existOrFail('analyticsWizardCreationCallout_1');
+      await testSubjects.existOrFail('analyticsWizardCreationCallout_2');
+    },
+
+    async navigateToJobManagementPage() {
+      await retry.tryForTime(5000, async () => {
+        await this.assertCreationCalloutMessagesExist();
+      });
+      await testSubjects.click('analyticsWizardCardManagement');
     },
   };
 }

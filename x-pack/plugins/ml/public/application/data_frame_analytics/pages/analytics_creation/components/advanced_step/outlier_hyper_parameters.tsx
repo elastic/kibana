@@ -28,13 +28,13 @@ export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, 
           })}
         >
           <EuiSelect
-            options={Object.values(OUTLIER_ANALYSYS_METHOD).map(outlierMethod => ({
+            options={Object.values(OUTLIER_ANALYSYS_METHOD).map((outlierMethod) => ({
               value: outlierMethod,
               text: outlierMethod,
             }))}
             value={method}
             hasNoInitialSelection={true}
-            onChange={e => {
+            onChange={(e) => {
               setFormState({ method: e.target.value });
             }}
             data-test-subj="mlAnalyticsCreateJobWizardMethodInput"
@@ -60,7 +60,7 @@ export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, 
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardnNeighborsInput"
-            onChange={e => setFormState({ nNeighbors: +e.target.value })}
+            onChange={(e) => setFormState({ nNeighbors: +e.target.value })}
             step={1}
             min={1}
           />
@@ -85,7 +85,7 @@ export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, 
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardoutlierFractionInput"
-            onChange={e => setFormState({ outlierFraction: +e.target.value })}
+            onChange={(e) => setFormState({ outlierFraction: +e.target.value })}
             step={0.001}
             min={0}
             max={1}
@@ -135,7 +135,7 @@ export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, 
             ]}
             value={standardizationEnabled}
             hasNoInitialSelection={true}
-            onChange={e => {
+            onChange={(e) => {
               setFormState({ standardizationEnabled: e.target.value });
             }}
           />

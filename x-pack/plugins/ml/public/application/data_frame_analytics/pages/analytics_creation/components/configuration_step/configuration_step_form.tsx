@@ -384,7 +384,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
               }
               isClearable={false}
               isInvalid={dependentVariable === ''}
-              data-test-subj="mlAnalyticsCreateJobFlyoutDependentVariableSelect"
+              data-test-subj="mlAnalyticsCreateJobWizardDependentVariableSelect"
             />
           </EuiFormRow>
         </Fragment>
@@ -431,7 +431,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
             value={trainingPercent}
             // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
             onChange={(e) => setFormState({ trainingPercent: +e.target.value })}
-            data-test-subj="mlAnalyticsCreateJobFlyoutTrainingPercentSlider"
+            data-test-subj="mlAnalyticsCreateJobWizardTrainingPercentSlider"
           />
         </EuiFormRow>
       )}

@@ -138,7 +138,9 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
         label={i18n.translate('xpack.ml.dataframe.analytics.create.destinationIndexLabel', {
           defaultMessage: 'Destination index',
         })}
-        isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
+        isInvalid={
+          destinationIndexNameEmpty || (!destinationIndexNameEmpty && !destinationIndexNameValid)
+        }
         helpText={
           destinationIndexNameExists &&
           i18n.translate('xpack.ml.dataframe.analytics.create.destinationIndexHelpText', {
@@ -204,7 +206,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           })}
           checked={createIndexPattern === true}
           onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
-          data-test-subj="mlAnalyticsCreateJobFlyoutCreateIndexPatternSwitch"
+          data-test-subj="mlAnalyticsCreateJobWizardCreateIndexPatternSwitch"
         />
       </EuiFormRow>
       <EuiSpacer />

@@ -34,7 +34,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
                 'Regularization parameter to prevent overfitting on the training data set.',
             })}
             data-test-subj="mlAnalyticsCreateJobFlyoutLambdaInput"
-            onChange={e => setFormState({ lambda: +e.target.value })}
+            onChange={(e) => setFormState({ lambda: +e.target.value })}
             step={0.001}
             min={0}
           />
@@ -58,7 +58,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
               }
             )}
             data-test-subj="mlAnalyticsCreateJobFlyoutMaxTreesInput"
-            onChange={e => setFormState({ maxTrees: +e.target.value })}
+            onChange={(e) => setFormState({ maxTrees: +e.target.value })}
             isInvalid={maxTrees !== undefined && !Number.isInteger(maxTrees)}
             step={1}
             min={1}
@@ -82,7 +82,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
                 'Multiplies a linear penalty associated with the size of individual trees in the forest',
             })}
             data-test-subj="mlAnalyticsCreateJobWizardGammaInput"
-            onChange={e => setFormState({ gamma: +e.target.value })}
+            onChange={(e) => setFormState({ gamma: +e.target.value })}
             step={0.001}
             min={0}
           />
@@ -102,7 +102,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
               defaultMessage: 'The shrinkage applied to the weights',
             })}
             data-test-subj="mlAnalyticsCreateJobWizardEtaInput"
-            onChange={e => setFormState({ eta: +e.target.value })}
+            onChange={(e) => setFormState({ eta: +e.target.value })}
             step={0.001}
             min={0.001}
             max={1}
@@ -128,7 +128,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardFeatureBagFractionInput"
-            onChange={e => setFormState({ featureBagFraction: +e.target.value })}
+            onChange={(e) => setFormState({ featureBagFraction: +e.target.value })}
             isInvalid={
               featureBagFraction !== undefined &&
               (featureBagFraction > 1 || featureBagFraction <= 0)
@@ -157,7 +157,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardRandomizeSeedInput"
-            onChange={e => setFormState({ randomizeSeed: +e.target.value })}
+            onChange={(e) => setFormState({ randomizeSeed: +e.target.value })}
             isInvalid={randomizeSeed !== undefined && typeof randomizeSeed !== 'number'}
             step={1}
           />

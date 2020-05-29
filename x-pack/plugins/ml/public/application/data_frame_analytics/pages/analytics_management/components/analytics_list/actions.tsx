@@ -106,10 +106,10 @@ export const getActions = (createAnalyticsForm: CreateAnalyticsFormProps) => {
         return <DeleteAction item={item} />;
       },
     },
-    {
-      render: (item: DeepReadonly<DataFrameAnalyticsListRow>) => {
-        return <CloneAction item={item} createAnalyticsForm={createAnalyticsForm} />;
-      },
-    },
+    // {
+    //   render: (item: DeepReadonly<DataFrameAnalyticsListRow>) => {
+    //     return <CloneAction item={item} createAnalyticsForm={createAnalyticsForm} />;
+    //   },
+    // },
   ];
 };

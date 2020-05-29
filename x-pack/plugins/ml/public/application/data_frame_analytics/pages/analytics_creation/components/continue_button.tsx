@@ -18,7 +18,12 @@ export const ContinueButton: FC<{ isDisabled: boolean; onClick: any }> = ({
 }) => (
   <EuiFlexGroup>
     <EuiFlexItem grow={false}>
-      <EuiButton isDisabled={isDisabled} size="s" onClick={onClick}>
+      <EuiButton
+        data-test-subj="mlAnalyticsCreateJobWizardContinueButton"
+        isDisabled={isDisabled}
+        size="s"
+        onClick={onClick}
+      >
         {continueButtonText}
       </EuiButton>
     </EuiFlexItem>

@@ -20,7 +20,10 @@ export const ConfigurationStep: FC<CreateAnalyticsStepProps> = ({
   stepActivated,
 }) => {
   return (
-    <EuiForm className="mlDataFrameAnalyticsCreateForm">
+    <EuiForm
+      className="mlDataFrameAnalyticsCreateForm"
+      data-test-subj="mlAnalyticsCreateJobWizardConfigurationStep"
+    >
       {step === ANALYTICS_STEPS.CONFIGURATION && (
         <ConfigurationStepForm actions={actions} state={state} setCurrentStep={setCurrentStep} />
       )}
