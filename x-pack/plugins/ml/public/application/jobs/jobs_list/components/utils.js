@@ -19,7 +19,7 @@ import { mlCalendarService } from '../../../services/calendar_service';
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
     ml.jobs
-      .jobs(jobId)
+      .jobs([jobId])
       .then((jobs) => {
         if (jobs.length) {
           resolve(jobs[0]);

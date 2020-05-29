@@ -13,7 +13,11 @@ import {
   transformError,
   validate,
 } from '../siem_server_deps';
-import { exceptionListItemSchema, readExceptionListItemSchema } from '../../common/schemas';
+import {
+  ReadExceptionListItemSchemaDecoded,
+  exceptionListItemSchema,
+  readExceptionListItemSchema,
+} from '../../common/schemas';
 
 import { getErrorMessageExceptionListItem, getExceptionListClient } from './utils';
 
@@ -25,20 +29,22 @@ export const readExceptionListItemRoute = (router: IRouter): void => {
       },
       path: EXCEPTION_LIST_ITEM_URL,
       validate: {
-        query: buildRouteValidation(readExceptionListItemSchema),
+        query: buildRouteValidation<
+          typeof readExceptionListItemSchema,
+          ReadExceptionListItemSchemaDecoded
+        >(readExceptionListItemSchema),
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { id, item_id: itemId } = request.query;
+        const { id, item_id: itemId, namespace_type: namespaceType } = request.query;
         const exceptionLists = getExceptionListClient(context);
         if (id != null || itemId != null) {
           const exceptionListItem = await exceptionLists.getExceptionListItem({
             id,
             itemId,
-            // TODO: Bubble this up
-            namespaceType: 'single',
+            namespaceType,
           });
           if (exceptionListItem == null) {
             return siemResponse.error({

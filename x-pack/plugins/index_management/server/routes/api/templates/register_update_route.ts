@@ -23,7 +23,7 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
       validate: { body: bodySchema, params: paramsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       const { name } = req.params as typeof paramsSchema.type;
       const template = req.body as TemplateDeserialized;
       const {
