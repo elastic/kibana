@@ -12,7 +12,7 @@ export default ({ getService, loadTestFile }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
 
   describe('Uptime app', function () {
-    this.tags('ciGroup6');
+    this.tags('ciGroup15');
 
     describe('with real-world data', () => {
       before(async () => {
