@@ -158,8 +158,8 @@ export function TransactionOverview() {
             <EuiSpacer size="s" />
             <EuiCallOut
               title="Too many unique transaction names."
-              color="primary"
-              iconType="help"
+              color="danger"
+              iconType="alert"
             >
               <p>
                 We have detected a lot of unique transaction names among your
