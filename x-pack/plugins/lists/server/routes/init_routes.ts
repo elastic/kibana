@@ -20,6 +20,8 @@ import {
   exportListItemRoute,
   findExceptionListItemRoute,
   findExceptionListRoute,
+  findListItemRoute,
+  findListRoute,
   importListItemRoute,
   patchListItemRoute,
   patchListRoute,
@@ -41,6 +43,7 @@ export const initRoutes = (router: IRouter): void => {
   updateListRoute(router);
   deleteListRoute(router);
   patchListRoute(router);
+  findListRoute(router);
 
   // list items
   createListItemRoute(router);
@@ -50,6 +53,7 @@ export const initRoutes = (router: IRouter): void => {
   patchListItemRoute(router);
   exportListItemRoute(router);
   importListItemRoute(router);
+  findListItemRoute(router);
 
   // indexes of lists
   createListIndexRoute(router);
