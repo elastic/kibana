@@ -14,12 +14,10 @@ import { getLogstashForClusters } from '../logstash';
 import { getLogstashPipelineIds } from '../logstash/get_pipeline_ids';
 import { getBeatsForClusters } from '../beats';
 import { alertsClustersAggregation } from '../../cluster_alerts/alerts_clusters_aggregation';
-import { alertsClusterSearch } from '../../cluster_alerts/alerts_cluster_search';
 import { checkLicense as checkLicenseForAlerts } from '../../cluster_alerts/check_license';
 import { fetchStatus } from '../alerts/fetch_status';
 import { getClustersSummary } from './get_clusters_summary';
 import {
-  CLUSTER_ALERTS_SEARCH_SIZE,
   STANDALONE_CLUSTER_CLUSTER_UUID,
   CODE_PATH_ML,
   CODE_PATH_ALERTS,
@@ -109,18 +107,6 @@ export async function getClustersFromRequest(
         start,
         end,
         req.logger
-      );
-
-      cluster.legacyAlerts = await alertsClusterSearch(
-        req,
-        alertsIndex,
-        cluster,
-        checkLicenseForAlerts,
-        {
-          start,
-          end,
-          size: CLUSTER_ALERTS_SEARCH_SIZE,
-        }
       );
     }
 

@@ -114,3 +114,12 @@ export interface AlertData {
   severity: AlertSeverity;
   meta: any;
 }
+
+export interface LegacyAlert {
+  prefix: string;
+  message: string;
+  metadata: {
+    severity: number;
+    cluster_uuid: string;
+  };
+}

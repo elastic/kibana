@@ -101,26 +101,30 @@ export const AlertPopoverStatus: React.FC<AlertPopoverStatusProps> = (
         >
           {nextStepsUi}
         </EuiCallOut>
-        <EuiSpacer size="m" />
-        <AlertPopoverTriggeredActions isEditMode={isEditMode} />
-        <EuiSpacer size="s" />
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h3>Alert settings</h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <AlertPopoverSettings isEditMode={isEditMode} />
-        <EuiSpacer size="s" />
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiLink onClick={() => setIsEditMode(!isEditMode)}>
-              <EuiText size="s">{isEditMode ? 'Stop configuring' : 'Configure'}</EuiText>
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {alert.isLegacy ? null : (
+          <Fragment>
+            <EuiSpacer size="m" />
+            <AlertPopoverTriggeredActions isEditMode={isEditMode} />
+            <EuiSpacer size="s" />
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h3>Alert settings</h3>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <AlertPopoverSettings isEditMode={isEditMode} />
+            <EuiSpacer size="s" />
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiLink onClick={() => setIsEditMode(!isEditMode)}>
+                  <EuiText size="s">{isEditMode ? 'Stop configuring' : 'Configure'}</EuiText>
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </Fragment>
+        )}
       </Fragment>
     </AlertPopoverContext.Provider>
   );

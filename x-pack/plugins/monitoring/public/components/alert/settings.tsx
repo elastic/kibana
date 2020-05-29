@@ -30,7 +30,7 @@ export const AlertPopoverSettings: React.FC<AlertPopoverSettingsProps> = (
   const context = React.useContext(AlertPopoverContext);
   const [activeConfigureSetting, setActiveConfigureSetting] = React.useState<string | null>(null);
 
-  if (!context.alert.rawAlert?.params || Object.keys(context.alert.rawAlert?.params).length === 0) {
+  if (!context.alert.rawAlert.params || Object.keys(context.alert.rawAlert.params).length === 0) {
     return null;
   }
 
@@ -64,14 +64,11 @@ export const AlertPopoverSettings: React.FC<AlertPopoverSettingsProps> = (
   }
 
   function getDynamicSettings() {
-    if (
-      !context.alert.rawAlert?.params ||
-      Object.keys(context.alert.rawAlert?.params).length === 0
-    ) {
+    if (!context.alert.rawAlert.params || Object.keys(context.alert.rawAlert.params).length === 0) {
       return null;
     }
 
-    return Object.keys(context.alert.rawAlert?.params).map((name) => {
+    return Object.keys(context.alert.rawAlert.params).map((name) => {
       const detail = context.alert.paramDetails[name];
       if (!detail) {
         return null;
@@ -109,7 +106,7 @@ export const AlertPopoverSettings: React.FC<AlertPopoverSettingsProps> = (
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
-                  <p>Notify me every {context.alert.rawAlert?.throttle}</p>
+                  <p>Notify me every {context.alert.rawAlert.throttle}</p>
                 </EuiText>
               </EuiFlexItem>
               {isEditMode ? (

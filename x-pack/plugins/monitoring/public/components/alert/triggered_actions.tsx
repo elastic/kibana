@@ -24,7 +24,6 @@ import { AlertAction } from '../../../../alerting/common';
 import { AlertPopoverAddAction } from './add_action';
 import { AlertPopoverConfigureAction } from './configure_action';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface AlertPopoverTriggeredActionsProps {
   isEditMode: boolean;
 }
@@ -40,7 +39,7 @@ export const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActions
   const [showAddAction, setShowAddAction] = React.useState(false);
 
   function editAction(action: AlertAction, field: string, value: string) {
-    const idx = actions.findIndex(act => act.id === action.id);
+    const idx = actions.findIndex((act) => act.id === action.id);
     setActions([
       ...actions.slice(0, idx),
       {
@@ -55,7 +54,7 @@ export const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActions
   }
 
   async function disableAction(action: AlertAction) {
-    const index = actions.findIndex(_action => _action.id === action.id);
+    const index = actions.findIndex((_action) => _action.id === action.id);
     const updatedActions = [...actions.slice(0, index), ...actions.slice(index + 1)];
     try {
       await Legacy.shims.kfetch({
@@ -74,7 +73,7 @@ export const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActions
     }
   }
 
-  const actionList = actions.map(action => {
+  const actionList = actions.map((action) => {
     let icon = 'dot';
     let message;
 
@@ -147,7 +146,7 @@ export const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActions
                 <EuiSpacer size="s" />
                 <AlertPopoverAddAction
                   cancel={() => setShowAddAction(false)}
-                  done={alert => {
+                  done={(alert) => {
                     setActions(alert.rawAlert.actions);
                     setShowAddAction(false);
                   }}
@@ -163,14 +162,14 @@ export const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActions
 
   let configureUi = null;
   if (currentConfigureActionTypeId) {
-    const action = actions.find(_action => _action.actionTypeId === currentConfigureActionTypeId);
+    const action = actions.find((_action) => _action.actionTypeId === currentConfigureActionTypeId);
     if (action) {
       configureUi = (
         <AlertPopoverConfigureAction
           action={action}
           editAction={(field: string, value: string) => editAction(action, field, value)}
           cancel={() => setCurrentConfigureActionTypeId(null)}
-          done={alert => {
+          done={(alert) => {
             setCurrentConfigureActionTypeId(null);
             setActions(alert.rawAlert.actions);
           }}

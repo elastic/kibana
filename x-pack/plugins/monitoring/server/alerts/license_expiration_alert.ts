@@ -19,6 +19,7 @@ import {
 } from './types';
 import { AlertInstance, AlertExecutorOptions } from '../../../alerting/server';
 import {
+  INDEX_ALERTS,
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_LICENSE_EXPIRATION,
   ALERT_ACTION_TYPE_EMAIL,
@@ -29,6 +30,7 @@ import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import { fetchDefaultEmailAddress } from '../lib/alerts/fetch_default_email_address';
 import { CommonAlertParams } from '../../common/types';
+import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
 
 const RESOLVED = i18n.translate('xpack.monitoring.alerts.licenseExpiration.resolved', {
   defaultMessage: 'resolved',
@@ -39,9 +41,12 @@ const FIRING = i18n.translate('xpack.monitoring.alerts.licenseExpiration.firing'
 
 const EXPIRES_DAYS = [60, 30, 14, 7];
 
+const WATCH_NAME = 'xpack_license_expiration';
+
 export class LicenseExpirationAlert extends BaseAlert {
   public type = ALERT_LICENSE_EXPIRATION;
   public label = 'License expiration';
+  public isLegacy = true;
 
   protected dateFormat: string = '';
   protected emailAddress: string = '';
@@ -63,12 +68,37 @@ export class LicenseExpirationAlert extends BaseAlert {
     uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
+    const logger = this.getLogger(this.type);
+    let alertIndexPattern = INDEX_ALERTS;
+    if (availableCcs) {
+      alertIndexPattern = getCcsIndexPattern(alertIndexPattern, availableCcs);
+    }
     let esIndexPattern = INDEX_PATTERN_ELASTICSEARCH;
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-    const licenses = await fetchLicenses(callCluster, clusters, esIndexPattern);
-    return licenses.map((license) => {
+    const [licenses, legacyAlerts] = await Promise.all([
+      await fetchLicenses(callCluster, clusters, esIndexPattern),
+      await fetchLegacyAlerts(
+        callCluster,
+        clusters,
+        alertIndexPattern,
+        WATCH_NAME,
+        this.config.ui.max_bucket_size
+      ),
+    ]);
+    return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
+      const license = licenses.find(
+        (_license) => _license.clusterUuid === legacyAlert.metadata.cluster_uuid
+      );
+      if (!license) {
+        // This is potentially bad
+        logger.warn(
+          `Unable to map legacy alert status to license for ${legacyAlert.metadata.cluster_uuid}. No alert will show in the UI but it is assumed the alert has been resolved.`
+        );
+        return accum;
+      }
+
       const $expiry = moment.utc(license.expiryDateMS);
       let isExpired = false;
       let severity = AlertSeverity.Success;
@@ -91,14 +121,15 @@ export class LicenseExpirationAlert extends BaseAlert {
         }
       }
 
-      return {
+      accum.push({
         instanceKey: `${license.clusterUuid}`,
         clusterUuid: license.clusterUuid,
         shouldFire: isExpired,
         severity,
         meta: license,
-      };
-    });
+      });
+      return accum;
+    }, []);
   }
 
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertLicenseState {

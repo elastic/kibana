@@ -31,7 +31,7 @@ export const AlertPopoverConfigureThrottle: React.FC<AlertPopoverConfigureThrott
   const { done, cancel } = props;
   const context = React.useContext(AlertPopoverContext);
   const [isSaving, setIsSaving] = React.useState(false);
-  const [throttle, setThrottle] = React.useState(context.alert.rawAlert?.throttle);
+  const [throttle, setThrottle] = React.useState(context.alert.rawAlert.throttle);
 
   async function save() {
     setIsSaving(true);
@@ -65,7 +65,7 @@ export const AlertPopoverConfigureThrottle: React.FC<AlertPopoverConfigureThrott
           <EuiFormRow label="Notify me every">
             <AlertPopoverConfigureDurationParam
               name={'throttle'}
-              duration={context.alert.rawAlert?.throttle as string}
+              duration={context.alert.rawAlert.throttle as string}
               setBody={(body: { throttle: string }) => setThrottle(body.throttle)}
             />
           </EuiFormRow>

@@ -21,11 +21,16 @@ export async function fetchStatus(
   await Promise.all(
     alertTypes.map(async (type) => {
       const alert = await AlertsFactory.getByType(type, alertsClient);
+      const serialized = alert.serialize();
+      if (!serialized) {
+        return;
+      }
+
       const result: CommonAlertStatus = {
         exists: false,
         enabled: false,
         states: [],
-        alert: alert.serialize(),
+        alert: serialized,
       };
 
       byType[type] = result;
@@ -60,8 +65,6 @@ export async function fetchStatus(
         accum.push({ firing, state, meta });
         return accum;
       }, []);
-
-      return result;
     })
   );
 

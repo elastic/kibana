@@ -38,22 +38,23 @@ const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
 const ALERTS_UPDATE_FIELDS = ['name', 'tags', 'schedule', 'params', 'throttle', 'actions'];
 
 export class BaseAlert {
+  public type!: string;
+  public label!: string;
+  public defaultThrottle: string = '1m';
+  public defaultInterval: string = '1m';
+  public rawAlert: Alert | undefined;
+  public isLegacy: boolean = false;
+
   protected getUiSettingsService!: () => Promise<UiSettingsServiceStart>;
   protected monitoringCluster!: ICustomClusterClient;
   protected getLogger!: (...scopes: string[]) => Logger;
   protected config!: MonitoringConfig;
   protected kibanaUrl!: string;
-  public type!: string;
-  public label!: string;
   protected defaultParams: CommonAlertParams | {} = {};
   public get paramDetails() {
     return {};
   }
-
-  public defaultThrottle: string = '1m';
-  public defaultInterval: string = '1m';
   protected alertType!: AlertType;
-  public rawAlert: Alert | undefined;
 
   constructor(rawAlert: Alert | undefined = undefined) {
     if (rawAlert) {
@@ -61,12 +62,17 @@ export class BaseAlert {
     }
   }
 
-  public serialize(): CommonBaseAlert {
+  public serialize(): CommonBaseAlert | null {
+    if (!this.rawAlert) {
+      return null;
+    }
+
     return {
       type: this.type,
       label: this.label,
       rawAlert: this.rawAlert,
       paramDetails: this.paramDetails,
+      isLegacy: this.isLegacy,
     };
   }
 
@@ -289,7 +295,7 @@ export class BaseAlert {
   protected async execute({ services, params, state }: AlertExecutorOptions): Promise<any> {
     const logger = this.getLogger(this.type);
     logger.debug(
-      `Firing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
+      `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
 
     const callCluster = this.monitoringCluster

@@ -10,7 +10,8 @@ export interface CommonBaseAlert {
   type: string;
   label: string;
   paramDetails: CommonAlertParamDetails;
-  rawAlert: Alert | undefined;
+  rawAlert: Alert;
+  isLegacy: boolean;
 }
 
 export interface CommonActionDefaultParameters {

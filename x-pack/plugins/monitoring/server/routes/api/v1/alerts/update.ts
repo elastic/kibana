@@ -60,7 +60,11 @@ export function updateAlertsRoute(server: any, npRoute: RouteDependencies) {
         } else if (params) {
           await alert.updateParams(alertsClient, params);
         }
-        return response.ok({ body: alert.serialize() });
+        const serialized = alert.serialize();
+        if (!serialized) {
+          return response.internalError({ body: 'Error serializing alert' });
+        }
+        return response.ok({ body: serialized });
       } catch (err) {
         throw handleError(err);
       }
