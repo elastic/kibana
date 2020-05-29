@@ -33,31 +33,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  ChromeDocTitle,
-  NotificationsStart,
-  OverlayStart,
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-} from 'src/core/public';
 import { IndexPattern, IndexPatternField } from '../../../../../plugins/data/public';
-import { IndexPatternManagementStart } from '../..';
+import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
 import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 
-interface EditIndexPatternProps extends RouteComponentProps {
+export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: IndexPattern;
-  config: IUiSettingsClient;
-  services: {
-    notifications: NotificationsStart;
-    docTitle: ChromeDocTitle;
-    overlays: OverlayStart;
-    savedObjectsClient: SavedObjectsClientContract;
-    indexPatternManagement: IndexPatternManagementStart;
-    painlessDocLink: string;
-  };
 }
 
 const mappingAPILink = i18n.translate(
@@ -97,68 +82,69 @@ const confirmModalOptionsDelete = {
 };
 
 export const EditIndexPattern = withRouter(
-  ({ indexPattern, config, services, history, location }: EditIndexPatternProps) => {
+  ({ indexPattern, history, location }: EditIndexPatternProps) => {
+    const { uiSettings, indexPatternManagementStart, overlays, savedObjects, chrome } = useKibana<
+      IndexPatternManagmentContext
+    >().services;
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
-      indexPattern.fields.filter(field => field.type === 'conflict')
+      indexPattern.fields.filter((field) => field.type === 'conflict')
     );
-    const [defaultIndex, setDefaultIndex] = useState<string>(config.get('defaultIndex'));
+    const [defaultIndex, setDefaultIndex] = useState<string>(uiSettings.get('defaultIndex'));
     const [tags, setTags] = useState<any[]>([]);
 
     useEffect(() => {
       setFields(indexPattern.getNonScriptedFields());
-      setConflictedFields(indexPattern.fields.filter(field => field.type === 'conflict'));
+      setConflictedFields(indexPattern.fields.filter((field) => field.type === 'conflict'));
     }, [indexPattern]);
 
     useEffect(() => {
       const indexPatternTags =
-        services.indexPatternManagement.list.getIndexPatternTags(
+        indexPatternManagementStart.list.getIndexPatternTags(
           indexPattern,
           indexPattern.id === defaultIndex
         ) || [];
       setTags(indexPatternTags);
-    }, [defaultIndex, indexPattern, services.indexPatternManagement.list]);
+    }, [defaultIndex, indexPattern, indexPatternManagementStart.list]);
 
     const setDefaultPattern = useCallback(() => {
-      config.set('defaultIndex', indexPattern.id);
+      uiSettings.set('defaultIndex', indexPattern.id);
       setDefaultIndex(indexPattern.id || '');
-    }, [config, indexPattern.id]);
+    }, [uiSettings, indexPattern.id]);
 
     const refreshFields = () => {
-      services.overlays
-        .openConfirm(confirmMessage, confirmModalOptionsRefresh)
-        .then(async isConfirmed => {
-          if (isConfirmed) {
-            await indexPattern.init(true);
-            setFields(indexPattern.getNonScriptedFields());
-          }
-        });
+      overlays.openConfirm(confirmMessage, confirmModalOptionsRefresh).then(async (isConfirmed) => {
+        if (isConfirmed) {
+          await indexPattern.init(true);
+          setFields(indexPattern.getNonScriptedFields());
+        }
+      });
     };
 
-    const removePatternClick = () => {
+    const removePattern = () => {
       async function doRemove() {
         if (indexPattern.id === defaultIndex) {
           const indexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
-            services.savedObjectsClient,
-            config.get('defaultIndex'),
-            services.indexPatternManagement
+            savedObjects.client,
+            uiSettings.get('defaultIndex'),
+            indexPatternManagementStart
           );
-          config.remove('defaultIndex');
-          const otherPatterns = filter(indexPatterns, pattern => {
+          uiSettings.remove('defaultIndex');
+          const otherPatterns = filter(indexPatterns, (pattern) => {
             return pattern.id !== indexPattern.id;
           });
 
           if (otherPatterns.length) {
-            config.set('defaultIndex', otherPatterns[0].id);
+            uiSettings.set('defaultIndex', otherPatterns[0].id);
           }
         }
 
-        Promise.resolve(indexPattern.destroy()).then(function() {
+        Promise.resolve(indexPattern.destroy()).then(function () {
           history.push('');
         });
       }
 
-      services.overlays.openConfirm('', confirmModalOptionsDelete).then(isConfirmed => {
+      overlays.openConfirm('', confirmModalOptionsDelete).then((isConfirmed) => {
         if (isConfirmed) {
           doRemove();
         }
@@ -186,7 +172,7 @@ export const EditIndexPattern = withRouter(
       defaultMessage: 'Index pattern details',
     });
 
-    services.docTitle.change(indexPattern.title);
+    chrome.docTitle.change(indexPattern.title);
 
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
 
@@ -199,7 +185,7 @@ export const EditIndexPattern = withRouter(
                 indexPattern={indexPattern}
                 setDefault={setDefaultPattern}
                 refreshFields={refreshFields}
-                deleteIndexPatternClick={removePatternClick}
+                deleteIndexPatternClick={removePattern}
                 defaultIndex={defaultIndex}
               />
               <EuiSpacer size="s" />
@@ -244,11 +230,6 @@ export const EditIndexPattern = withRouter(
               <Tabs
                 indexPattern={indexPattern}
                 fields={fields}
-                config={config}
-                services={{
-                  indexPatternManagement: services.indexPatternManagement,
-                  painlessDocLink: services.painlessDocLink,
-                }}
                 history={history}
                 location={location}
               />

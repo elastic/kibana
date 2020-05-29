@@ -12,7 +12,7 @@ const defaultUrlParams = {
   serviceName: 'opbeans-python',
   transactionType: 'request',
   start: '2018-01-10T09:51:41.050Z',
-  end: '2018-01-10T10:06:41.050Z'
+  end: '2018-01-10T10:06:41.050Z',
 };
 
 interface Props {
@@ -24,7 +24,7 @@ interface Props {
 export const MockUrlParamsContextProvider = ({
   params,
   children,
-  refreshTimeRange = () => undefined
+  refreshTimeRange = () => undefined,
 }: Props) => {
   const urlParams = { ...defaultUrlParams, ...params };
   return (
@@ -32,7 +32,7 @@ export const MockUrlParamsContextProvider = ({
       value={{
         urlParams,
         refreshTimeRange,
-        uiFilters: useUiFilters(urlParams)
+        uiFilters: useUiFilters(urlParams),
       }}
       children={children}
     />

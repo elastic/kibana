@@ -58,7 +58,7 @@ export const proxyRequest = ({
   });
 
   const finalUserHeaders = { ...headers };
-  const hasHostHeader = Object.keys(finalUserHeaders).some(key => key.toLowerCase() === 'host');
+  const hasHostHeader = Object.keys(finalUserHeaders).some((key) => key.toLowerCase() === 'host');
   if (!hasHostHeader) {
     finalUserHeaders.host = hostname;
   }
@@ -79,7 +79,7 @@ export const proxyRequest = ({
     agent,
   });
 
-  req.once('response', res => {
+  req.once('response', (res) => {
     resolved = true;
     resolve(res);
   });

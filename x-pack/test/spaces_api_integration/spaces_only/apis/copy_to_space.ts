@@ -24,7 +24,7 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
   } = copyToSpaceTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
   describe('copy to spaces', () => {
-    originSpaces.forEach(spaceId => {
+    originSpaces.forEach((spaceId) => {
       copyToSpaceTest(`from the ${spaceId} space`, {
         spaceId,
         tests: {

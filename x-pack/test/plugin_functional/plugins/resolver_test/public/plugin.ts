@@ -34,7 +34,7 @@ export class ResolverTestPlugin
           value: IEmbeddable | undefined | PromiseLike<IEmbeddable | undefined> | undefined
         ) => void;
 
-        const promise = new Promise<IEmbeddable | undefined>(resolve => {
+        const promise = new Promise<IEmbeddable | undefined>((resolve) => {
           resolveEmbeddable = resolve;
         });
 

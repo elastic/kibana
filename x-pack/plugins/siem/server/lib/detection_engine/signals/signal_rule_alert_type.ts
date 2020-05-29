@@ -143,7 +143,7 @@ export const signalRulesAlertType = ({
           const summaryJobs = await ml
             .jobServiceProvider(scopedMlCallCluster)
             .jobsSummary([machineLearningJobId]);
-          const jobSummary = summaryJobs.find(job => job.id === machineLearningJobId);
+          const jobSummary = summaryJobs.find((job) => job.id === machineLearningJobId);
 
           if (jobSummary == null || !isJobStarted(jobSummary.jobState, jobSummary.datafeedState)) {
             const errorMessage = buildRuleMessage(
@@ -161,7 +161,7 @@ export const signalRulesAlertType = ({
             ml,
             callCluster: scopedMlCallCluster,
             // This is needed to satisfy the ML Services API, but can be empty as it is
-            // currently unused by the mlSearch function.
+            // currently unused by the mlAnomalySearch function.
             request: ({} as unknown) as KibanaRequest,
             jobId: machineLearningJobId,
             anomalyThreshold,

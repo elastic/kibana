@@ -316,11 +316,7 @@ describe('<RemoteClusterList />', () => {
 
       test('should have a "Status" section', () => {
         actions.clickRemoteClusterAt(0);
-        expect(
-          find('remoteClusterDetailPanelStatusSection')
-            .find('h3')
-            .text()
-        ).toEqual('Status');
+        expect(find('remoteClusterDetailPanelStatusSection').find('h3').text()).toEqual('Status');
         expect(exists('remoteClusterDetailPanelStatusValues')).toBe(true);
       });
 

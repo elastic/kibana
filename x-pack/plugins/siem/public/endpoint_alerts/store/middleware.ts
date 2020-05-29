@@ -13,7 +13,13 @@ import {
 import { AlertConstants } from '../../../common/endpoint_alerts/alert_constants';
 import { ImmutableMiddlewareFactory } from '../../common/store';
 import { cloneHttpFetchQuery } from '../../common/utils/clone_http_fetch_query';
-import { isOnAlertPage, apiQueryParams, hasSelectedAlert, uiQueryParams } from './selectors';
+import {
+  isOnAlertPage,
+  apiQueryParams,
+  hasSelectedAlert,
+  uiQueryParams,
+  isAlertPageTabChange,
+} from './selectors';
 import { Immutable } from '../../../common/endpoint/types';
 
 export const alertMiddlewareFactory: ImmutableMiddlewareFactory<Immutable<AlertListState>> = (
@@ -36,25 +42,25 @@ export const alertMiddlewareFactory: ImmutableMiddlewareFactory<Immutable<AlertL
     return [indexPattern];
   }
 
-  return api => next => async action => {
+  return (api) => (next) => async (action) => {
     next(action);
     const state = api.getState();
-    if (action.type === 'userChangedUrl' && isOnAlertPage(state)) {
+    if (action.type === 'userChangedUrl' && isOnAlertPage(state) && !isAlertPageTabChange(state)) {
       const patterns = await fetchIndexPatterns();
       api.dispatch({ type: 'serverReturnedSearchBarIndexPatterns', payload: patterns });
 
-      const response: AlertResultList = await coreStart.http.get(`/api/endpoint/alerts`, {
+      const listResponse: AlertResultList = await coreStart.http.get(`/api/endpoint/alerts`, {
         query: cloneHttpFetchQuery(apiQueryParams(state)),
       });
-      api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
-    }
+      api.dispatch({ type: 'serverReturnedAlertsData', payload: listResponse });
 
-    if (action.type === 'userChangedUrl' && isOnAlertPage(state) && hasSelectedAlert(state)) {
-      const uiParams = uiQueryParams(state);
-      const response: AlertDetails = await coreStart.http.get(
-        `/api/endpoint/alerts/${uiParams.selected_alert}`
-      );
-      api.dispatch({ type: 'serverReturnedAlertDetailsData', payload: response });
+      if (hasSelectedAlert(state)) {
+        const uiParams = uiQueryParams(state);
+        const detailsResponse: AlertDetails = await coreStart.http.get(
+          `/api/endpoint/alerts/${uiParams.selected_alert}`
+        );
+        api.dispatch({ type: 'serverReturnedAlertDetailsData', payload: detailsResponse });
+      }
     }
   };
 };

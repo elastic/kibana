@@ -26,14 +26,14 @@ const dashify = (str: string) => {
   return str
     .trim()
     .replace(/([a-z])([A-Z])/g, '$1-$2')
-    .replace(/\W/g, m => (/[À-ž]/.test(m) ? m : '-'))
+    .replace(/\W/g, (m) => (/[À-ž]/.test(m) ? m : '-'))
     .replace(/^-+|-+$/g, '')
     .toLowerCase();
 };
 
 const inlineStyle = (obj: Record<string, string | number>) => {
   if (!obj) return '';
-  const styles = Object.keys(obj).map(key => {
+  const styles = Object.keys(obj).map((key) => {
     const prop = dashify(key);
     const line = prop.concat(':').concat(String(obj[key]));
     return line;
@@ -123,7 +123,7 @@ export const font: ExpressionFunctionDefinition<'font', null, Arguments, Style> 
         values: {
           list: Object.values(FontWeight)
             .slice(0, -1)
-            .map(weight => `\`"${weight}"\``)
+            .map((weight) => `\`"${weight}"\``)
             .join(', '),
           end: `\`"${Object.values(FontWeight).slice(-1)[0]}"\``,
         },

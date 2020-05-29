@@ -39,9 +39,9 @@ export const executeJobFactory: QueuedPngExecutorFactory = async function execut
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
-      map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
-      map(filteredHeaders => getConditionalHeaders({ config, job, filteredHeaders })),
-      mergeMap(conditionalHeaders => {
+      map((decryptedHeaders) => omitBlacklistedHeaders({ job, decryptedHeaders })),
+      map((filteredHeaders) => getConditionalHeaders({ config, job, filteredHeaders })),
+      mergeMap((conditionalHeaders) => {
         const urls = getFullUrls({ config, job });
         const hashUrl = urls[0];
         if (apmGetAssets) apmGetAssets.end();
@@ -66,7 +66,7 @@ export const executeJobFactory: QueuedPngExecutorFactory = async function execut
           warnings,
         };
       }),
-      catchError(err => {
+      catchError((err) => {
         jobLogger.error(err);
         return Rx.throwError(err);
       })

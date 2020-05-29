@@ -32,8 +32,8 @@ class AzureCloudService extends CloudService {
     return (
       promisify(request)(req)
         // Note: there is no fallback option for Azure
-        .then(response => {
-          return this._parseResponse(response.body, body => this._parseBody(body));
+        .then((response) => {
+          return this._parseResponse(response.body, (body) => this._parseBody(body));
         })
     );
   }

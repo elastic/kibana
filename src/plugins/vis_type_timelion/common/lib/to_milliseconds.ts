@@ -38,7 +38,7 @@ const unitMappings = [
 ] as Units[][];
 
 const vals = {} as Values;
-unitMappings.forEach(units => {
+unitMappings.forEach((units) => {
   const normal = moment.normalizeUnits(units[0]) as Units;
   const val = moment.duration(1, normal).asMilliseconds();
   ([] as Units[]).concat(normal, units).forEach((unit: Units) => {

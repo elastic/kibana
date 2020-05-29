@@ -33,7 +33,7 @@ export const SpaceResult = (props: Props) => {
     savedObject,
     conflictResolutionInProgress,
   } = props;
-  const spaceHasPendingOverwrites = retries.some(r => r.overwrite);
+  const spaceHasPendingOverwrites = retries.some((r) => r.overwrite);
 
   return (
     <EuiAccordion

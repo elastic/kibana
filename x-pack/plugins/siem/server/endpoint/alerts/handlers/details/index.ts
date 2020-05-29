@@ -12,7 +12,7 @@ import { AlertDetailsPagination } from './lib/pagination';
 import { getHostData } from '../../../routes/metadata';
 import { AlertId, AlertIdError } from '../lib';
 
-export const alertDetailsHandlerWrapper = function(
+export const alertDetailsHandlerWrapper = function (
   endpointAppContext: EndpointAppContext
 ): RequestHandler<AlertDetailsRequestParams, unknown, unknown> {
   const alertDetailsHandler: RequestHandler<AlertDetailsRequestParams, unknown, unknown> = async (
@@ -22,7 +22,7 @@ export const alertDetailsHandlerWrapper = function(
   ) => {
     try {
       const alertId = AlertId.fromEncoded(req.params.id);
-      const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('get', {
+      const response = (await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('get', {
         index: alertId.index,
         id: alertId.id,
       })) as GetResponse<AlertEvent>;

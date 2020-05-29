@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const defaultConfig = await readConfigFile(require.resolve('./config'));
 
   return {
@@ -25,7 +25,7 @@ export default async function({ readConfigFile }) {
     //   require.resolve(__dirname, './apps/logstash'),
     //   require.resolve(__dirname, './apps/grok_debugger'),
     //   require.resolve(__dirname, './apps/infra'),
-    //   require.resolve(__dirname, './apps/machine_learning'),
+    //   require.resolve(__dirname, './apps/ml'),
     //   require.resolve(__dirname, './apps/rollup_job'),
     //   require.resolve(__dirname, './apps/maps'),
     //   require.resolve(__dirname, './apps/status_page'),

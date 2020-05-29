@@ -31,7 +31,9 @@ export function registerSearchRoute({
           core: {
             uiSettings: { client: uiSettings },
             elasticsearch: {
-              dataClient: { callAsCurrentUser: callCluster },
+              legacy: {
+                client: { callAsCurrentUser: callCluster },
+              },
             },
           },
         },

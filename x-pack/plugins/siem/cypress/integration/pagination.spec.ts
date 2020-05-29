@@ -32,13 +32,13 @@ describe('Pagination', () => {
     cy.get(PROCESS_NAME_FIELD)
       .first()
       .invoke('text')
-      .then(processNameFirstPage => {
+      .then((processNameFirstPage) => {
         goToThirdPage();
         waitForUncommonProcessesToBeLoaded();
         cy.get(PROCESS_NAME_FIELD)
           .first()
           .invoke('text')
-          .should(processNameSecondPage => {
+          .should((processNameSecondPage) => {
             expect(processNameFirstPage).not.to.eq(processNameSecondPage);
           });
       });
@@ -54,7 +54,7 @@ describe('Pagination', () => {
     cy.get(PROCESS_NAME_FIELD)
       .first()
       .invoke('text')
-      .then(expectedThirdPageResult => {
+      .then((expectedThirdPageResult) => {
         openAuthentications();
         waitForAuthenticationsToBeLoaded();
         cy.get(FIRST_PAGE_SELECTOR).should('have.class', 'euiPaginationButton-isActive');
@@ -64,7 +64,7 @@ describe('Pagination', () => {
         cy.get(PROCESS_NAME_FIELD)
           .first()
           .invoke('text')
-          .should(actualThirdPageResult => {
+          .should((actualThirdPageResult) => {
             expect(expectedThirdPageResult).to.eq(actualThirdPageResult);
           });
       });
