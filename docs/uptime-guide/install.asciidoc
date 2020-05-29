@@ -67,7 +67,7 @@ Secure your installation by following the {heartbeat-ref}/securing-heartbeat.htm
 * Make sure you're using the same major versions of Heartbeat and Kibana.
 
 * Index patterns tell Kibana which Elasticsearch indices you want to explore.
-The Uptime app requires a +heartbeat-{short-version}*+ index pattern.
+The Uptime app requires a +heartbeat-{major-version-only}*+ index pattern.
 If you have configured a different index pattern, you can use {ref}/indices-aliases.html[index aliases] to ensure data is recognized by the Uptime app.
 
 After you install and configure Heartbeat,
