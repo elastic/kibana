@@ -76,6 +76,6 @@ export async function capturePageLoadMetrics(log: ToolingLog, options: Navigatio
       return true;
     })
     .map(([url, measurements]) => {
-      return { group: 'Asset size', id: url, value: measurements[0] };
+      return { group: 'page load asset size', id: url, value: measurements[0] };
     });
 }

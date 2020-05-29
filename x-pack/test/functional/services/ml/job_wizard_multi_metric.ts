@@ -20,7 +20,10 @@ export function MachineLearningJobWizardMultiMetricProvider({ getService }: FtrP
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlMultiMetricSplitFieldSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected split field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
     },
 
     async selectSplitField(identifier: string) {
@@ -33,15 +36,21 @@ export function MachineLearningJobWizardMultiMetricProvider({ getService }: FtrP
       await testSubjects.existOrFail(`mlDataSplit > mlSplitCard front`);
     },
 
-    async assertDetectorSplitFrontCardTitle(frontCardTitle: string) {
-      expect(
-        await testSubjects.getVisibleText(`mlDataSplit > mlSplitCard front > mlSplitCardTitle`)
-      ).to.eql(frontCardTitle);
+    async assertDetectorSplitFrontCardTitle(expectedFrontCardTitle: string) {
+      const actualFrontCardTitle = await testSubjects.getVisibleText(
+        `mlDataSplit > mlSplitCard front > mlSplitCardTitle`
+      );
+      expect(actualFrontCardTitle).to.eql(
+        expectedFrontCardTitle,
+        `Expected front card title to be '${expectedFrontCardTitle}' (got '${actualFrontCardTitle}')`
+      );
     },
 
-    async assertDetectorSplitNumberOfBackCards(numberOfBackCards: number) {
-      expect(await testSubjects.findAll(`mlDataSplit > mlSplitCard back`)).to.have.length(
-        numberOfBackCards
+    async assertDetectorSplitNumberOfBackCards(expectedNumberOfBackCards: number) {
+      const allBackCards = await testSubjects.findAll(`mlDataSplit > mlSplitCard back`);
+      expect(allBackCards).to.have.length(
+        expectedNumberOfBackCards,
+        `Expected number of back cards to be '${expectedNumberOfBackCards}' (got '${allBackCards.length}')`
       );
     },
   };
