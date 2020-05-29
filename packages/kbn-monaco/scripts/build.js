@@ -55,7 +55,7 @@ withProcRunner(log, async (proc) => {
     cwd,
   });
 
-  await proc.run('tsc  ', {
+  await proc.run('tsc      ', {
     cmd: 'tsc',
     args: ['--emitDeclarationOnly'],
     wait: true,
