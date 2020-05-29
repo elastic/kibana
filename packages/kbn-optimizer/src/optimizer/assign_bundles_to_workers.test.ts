@@ -95,8 +95,8 @@ it('creates less workers if maxWorkersCount is larger than bundle count', () => 
   expect(workers.length).toBe(2);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (2 known modules) => foo2",
-      "worker 1 (1 known modules) => foo1",
+      "worker 0 (1 known modules) => foo1",
+      "worker 1 (2 known modules) => foo2",
     ]
   `);
 });
@@ -138,11 +138,11 @@ it('assigns bundles without module counts to their own workers, assigns modules 
       "worker 7 (1 new bundles) => bar8",
       "worker 8 (1 new bundles) => bar1",
       "worker 9 (1 new bundles) => bar0",
-      "worker 10 (150 known modules) => foo15",
-      "worker 11 (100 known modules) => foo10",
-      "worker 12 (52 known modules) => foo5,foo2",
-      "worker 13 (52 known modules) => foo16,foo12,foo9,foo8,foo4,foo3",
-      "worker 14 (52 known modules) => foo14,foo13,foo11,foo7,foo6,foo1",
+      "worker 10 (52 known modules) => foo5,foo2",
+      "worker 11 (52 known modules) => foo16,foo12,foo9,foo8,foo4,foo3",
+      "worker 12 (52 known modules) => foo14,foo13,foo11,foo7,foo6,foo1",
+      "worker 13 (100 known modules) => foo10",
+      "worker 14 (150 known modules) => foo15",
     ]
   `);
 });
@@ -153,8 +153,8 @@ it('distributes 2 bundles to workers evenly', () => {
   assertReturnVal(workers);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (2 known modules) => foo2",
-      "worker 1 (1 known modules) => foo1",
+      "worker 0 (1 known modules) => foo1",
+      "worker 1 (2 known modules) => foo2",
     ]
   `);
 });
@@ -165,10 +165,10 @@ it('distributes 5 bundles to workers evenly', () => {
   assertReturnVal(workers);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (50 known modules) => foo5",
-      "worker 1 (4 known modules) => foo4",
-      "worker 2 (3 known modules) => foo3",
-      "worker 3 (3 known modules) => foo2,foo1",
+      "worker 0 (3 known modules) => foo3",
+      "worker 1 (3 known modules) => foo2,foo1",
+      "worker 2 (4 known modules) => foo4",
+      "worker 3 (50 known modules) => foo5",
     ]
   `);
 });
@@ -179,10 +179,10 @@ it('distributes 10 bundles to workers evenly', () => {
   assertReturnVal(workers);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (100 known modules) => foo10",
-      "worker 1 (50 known modules) => foo5",
-      "worker 2 (20 known modules) => foo9,foo6,foo4,foo1",
-      "worker 3 (20 known modules) => foo8,foo7,foo3,foo2",
+      "worker 0 (20 known modules) => foo9,foo6,foo4,foo1",
+      "worker 1 (20 known modules) => foo8,foo7,foo3,foo2",
+      "worker 2 (50 known modules) => foo5",
+      "worker 3 (100 known modules) => foo10",
     ]
   `);
 });
@@ -193,10 +193,10 @@ it('distributes 15 bundles to workers evenly', () => {
   assertReturnVal(workers);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (150 known modules) => foo15",
-      "worker 1 (100 known modules) => foo10",
-      "worker 2 (70 known modules) => foo5,foo8,foo7,foo3,foo2",
-      "worker 3 (70 known modules) => foo14,foo13,foo12,foo11,foo9,foo6,foo4,foo1",
+      "worker 0 (70 known modules) => foo5,foo8,foo7,foo3,foo2",
+      "worker 1 (70 known modules) => foo14,foo13,foo12,foo11,foo9,foo6,foo4,foo1",
+      "worker 2 (100 known modules) => foo10",
+      "worker 3 (150 known modules) => foo15",
     ]
   `);
 });
@@ -207,10 +207,10 @@ it('distributes 20 bundles to workers evenly', () => {
   assertReturnVal(workers);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (200 known modules) => foo20",
-      "worker 1 (154 known modules) => foo5,foo19,foo18,foo17,foo14,foo12,foo9,foo8,foo4,foo2,foo1",
-      "worker 2 (153 known modules) => foo15,foo3",
-      "worker 3 (153 known modules) => foo10,foo16,foo13,foo11,foo7,foo6",
+      "worker 0 (153 known modules) => foo15,foo3",
+      "worker 1 (153 known modules) => foo10,foo16,foo13,foo11,foo7,foo6",
+      "worker 2 (154 known modules) => foo5,foo19,foo18,foo17,foo14,foo12,foo9,foo8,foo4,foo2,foo1",
+      "worker 3 (200 known modules) => foo20",
     ]
   `);
 });
@@ -235,10 +235,10 @@ it('distributes 30 bundles to workers evenly', () => {
   assertReturnVal(workers);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (353 known modules) => foo25,foo28,foo24,foo21,foo13,foo12,foo3,foo2",
-      "worker 1 (353 known modules) => foo15,foo10,foo27,foo26,foo18,foo17,foo8,foo7",
-      "worker 2 (352 known modules) => foo30,foo22,foo14,foo11,foo4,foo1",
-      "worker 3 (352 known modules) => foo20,foo5,foo29,foo23,foo19,foo16,foo9,foo6",
+      "worker 0 (352 known modules) => foo30,foo22,foo14,foo11,foo4,foo1",
+      "worker 1 (352 known modules) => foo20,foo5,foo29,foo23,foo19,foo16,foo9,foo6",
+      "worker 2 (353 known modules) => foo25,foo28,foo24,foo21,foo13,foo12,foo3,foo2",
+      "worker 3 (353 known modules) => foo15,foo10,foo27,foo26,foo18,foo17,foo8,foo7",
     ]
   `);
 });
@@ -249,21 +249,21 @@ it('creates more workers when the maxBundlesPerWorker count is low', () => {
   assertReturnVal(workers);
   expect(readConfigs(workers)).toMatchInlineSnapshot(`
     Array [
-      "worker 0 (300 known modules) => foo30",
-      "worker 1 (250 known modules) => foo25",
-      "worker 2 (200 known modules) => foo20",
-      "worker 3 (150 known modules) => foo15",
-      "worker 4 (100 known modules) => foo10",
-      "worker 5 (50 known modules) => foo5",
-      "worker 6 (44 known modules) => foo29,foo8,foo7",
+      "worker 0 (38 known modules) => foo21,foo17",
+      "worker 1 (38 known modules) => foo22,foo16",
+      "worker 2 (38 known modules) => foo26,foo12",
+      "worker 3 (39 known modules) => foo27,foo11,foo1",
+      "worker 4 (39 known modules) => foo19,foo18,foo2",
+      "worker 5 (40 known modules) => foo23,foo14,foo3",
+      "worker 6 (41 known modules) => foo24,foo13,foo4",
       "worker 7 (43 known modules) => foo28,foo9,foo6",
-      "worker 8 (41 known modules) => foo24,foo13,foo4",
-      "worker 9 (40 known modules) => foo23,foo14,foo3",
-      "worker 10 (39 known modules) => foo19,foo18,foo2",
-      "worker 11 (39 known modules) => foo27,foo11,foo1",
-      "worker 12 (38 known modules) => foo26,foo12",
-      "worker 13 (38 known modules) => foo22,foo16",
-      "worker 14 (38 known modules) => foo21,foo17",
+      "worker 8 (44 known modules) => foo29,foo8,foo7",
+      "worker 9 (50 known modules) => foo5",
+      "worker 10 (100 known modules) => foo10",
+      "worker 11 (150 known modules) => foo15",
+      "worker 12 (200 known modules) => foo20",
+      "worker 13 (250 known modules) => foo25",
+      "worker 14 (300 known modules) => foo30",
     ]
   `);
 });
