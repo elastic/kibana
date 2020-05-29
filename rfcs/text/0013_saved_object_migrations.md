@@ -16,7 +16,7 @@
     - [4.3.1.2 Algorithm](#4312-algorithm)
   - [4.5 Changes in 8.0](#45-changes-in-80)
     - [4.5.1 Migration algorithm (8.0):](#451-migration-algorithm-80)
-    - [4.5.2 Minimizing data loss with mixed Kibana versions (8.0)](#452-minimizing-data-loss-with-mixed-kibana-versions-80)
+    - [4.5.2 Upgrade procedure](#452-upgrade-procedure)
 - [5. Alternatives](#5-alternatives)
 - [5.1 Rolling upgrades](#51-rolling-upgrades)
   - [5.2 Single node migrations coordinated through a lease/lock](#52-single-node-migrations-coordinated-through-a-leaselock)
@@ -24,6 +24,7 @@
     - [5.2.2 Document lock algorithm](#522-document-lock-algorithm)
     - [5.2.3 Checking for "weak lease" expiry](#523-checking-for-weak-lease-expiry)
   - [5.3 Minimize data loss with mixed Kibana versions during 7.x](#53-minimize-data-loss-with-mixed-kibana-versions-during-7x)
+  - [5.4 Minimizing data loss with unsupported upgrade configurations (8.0)](#54-minimizing-data-loss-with-unsupported-upgrade-configurations-80)
 - [6. How we teach this](#6-how-we-teach-this)
 - [Unresolved questions](#unresolved-questions)
 
@@ -268,19 +269,23 @@ matter which node’s writes win.
 
 ### 4.5.1 Migration algorithm (8.0):
 
-1. On startup, find the index to which the `.kibana` alias points,
-   `.kibana_n`, and check if any documents have an outdated `migrationVersion`
-   indicating that a migration needs to be performed.
-2. If there are documents with newer `migrationVersion` numbers, exit Kibana
-   with a fatal error.
+1. Exit Kibana with a fatal error if a newer node has started a migration by
+   checking for:
+   1. Documents with a newer `migrationVersion` numbers.
+2. If the mappings are out of date, update the mappings to the combination of
+   the index's current mappings and the expected mappings.
 3. If there are outdated documents, migrate these in batches:
-   1. Read a batch of outdated documents from `.kibana_n`.
-   2. Transform documents by applying the migration functions.
+   1. Read a batch of outdated documents from the index.
+   2. Transform documents by applying the migration transformation functions.
    3. Update the document batch in the same index using optimistic concurrency
-      control. 
-   4. If a batch fails due to an update version mismatch, repeat the entire
-      process.
-4. Once all documents are up to date, the migration is complete and Kibana can
+      control. If a batch fails due to an update version mismatch continue
+      migrating the other batches.
+   4. If a batch fails due other reasons repeat the entire migration process.
+4. If any of the batches in step (3.3) failed, repeat the entire migration
+   process. This ensures that in-progress bulk update operations from an
+   outdated node won't lead to unmigrated documents still being present after
+   the migration.
+5. Once all documents are up to date, the migration is complete and Kibana can
    start serving traffic.
 
 Advantages:
@@ -296,8 +301,8 @@ Advantages:
   `.kibana_n`.
 - Simplifies Kibana system index Elasticsearch plugin since it needs to work
   on one index per "tenant".
-- Can prevent data loss when mixed versions of Kibana are both attempting a
-  migration using optimistic concurrency control.
+- By leveraging optimistic concurrency control we can further minimize data
+  loss for unsupported upgrade configurations in the future.
 
 Drawbacks:
 - Cannot make breaking mapping changes (even though it was possible, we have not
@@ -313,39 +318,17 @@ Drawbacks:
 - It’s impossible to provide read-only functionality for outdated nodes which
   means we can't achieve goal (2.7).
 
-### 4.5.2 Minimizing data loss with mixed Kibana versions (8.0)
-When multiple versions of Kibana are running at the same time, writes from the
-outdated node can result in outdated documents being written to the Kibana
-index. Since these outdated documents might have different fields, queries
-might only return a subset of the results which leads to incorrect results and
-even data loss.
+### 4.5.2 Upgrade procedure
+Kibana upgrades are only guaranteed to be safe if the following upgrade
+procedure is followed:
 
-To prevent data loss we need to implement an index-wide “guard” which will
-prevent any writes from outdated nodes. The index-wide building blocks which
-Elasticsearch provides such as aliases or read-only indices are located inside
-Elasticsearch's ClusterState. But, there are certain failure scenarios under
-which ClusterState could remain inconsistent between nodes for an unbounded
-amount of time. In addition, any in-progress writes such as a bulk operation
-will continue to run even after an index was set to read-only or an alias had
-been removed.
-
-Since Elasticsearch doesn't expose the required building blocks, Kibana cannot
-guarantee that there would be no data loss. Instead, we aim to minimize it as
-much as possible.
-
-To perform a rollback for a failed migration, any "guards" put in place by
-newer Kibana nodes will have to be removed. By locating this state in the
-backup snapshot taken before an upgrade, rolling back to the previous snapshot
-will automatically remove the guard.
-
-1. Disable `action.auto_create_index` for the Kibana system indices.
-2. If a node detects that the `.kibana` index requires a migration it does the
-   following:
-   1. Create a version-specific alias for reading and writing to the
-      underlying index .e.g `.kibana_8.0.1`. All saved object reads and writes
-      use this alias instead of reading or writing directly to the index.
-   2. Remove the version-specific alias(es) for all previous versions thereby
-      minimizing the chance that an outdated node can cause data loss.
+1. Wait for all traffic to outdated nodes to drain. This ensures that any bulk
+   operations have either completed or returned a timeout error.
+2. Start up the upgraded Kibana nodes. All running Kibana nodes should use be
+   on the same version, have the same plugins installed and use the same
+   configuration. We recommend only bringing up a single node, let it finish
+   the migration and only when it's status is green, bring up additional nodes
+   if required.
 
 # 5. Alternatives
 # 5.1 Rolling upgrades
@@ -542,6 +525,96 @@ problems than what it solves.
   2. Set the outdated index to read-only. Since `.kibana` is never advanced,
     it will be pointing to a read-only index which prevent writes from
     6.8+ releases which are already online.
+
+## 5.4 Minimizing data loss with unsupported upgrade configurations (8.0)
+> This alternative can reduce some data loss when our upgrade procedure isn't
+> followed. We see value in adopting these protections but because of the
+> significant complexity they add, these won't be included in the initial
+> implementation for 8.x. Instead, we will re-evaluate adding these at a
+> future date.
+
+Even if (4.5.2) is the only supported upgrade procedure, we should try to
+prevent data loss when these instructions aren't followed.
+
+To prevent data loss we need to prevent any writes from older nodes. We use
+a version-specific alias for this purpose. Each time a migration is started,
+all other aliases are removed. However, aliases are stored inside
+Elasticsearch's ClusterState and this state could remain inconsistent between
+nodes for an unbounded amount of time. In addition, bulk operations that were
+accepted before the alias was removed will continue to run even after removing
+the alias.
+
+As a result, Kibana cannot guarantee that there would be no data loss but
+instead, aims to minimize it as much as possible by adding the bold sections
+to the migration algorithm from (4.5.1)
+
+1. **Disable `action.auto_create_index` for the Kibana system indices.**
+2. Exit Kibana with a fatal error if a newer node has started a migration by
+   checking for:
+   1. **Version-specific aliases on the `.kibana` index with a newer version.**
+   2. Documents with newer `migrationVersion` numbers.
+3. **Remove all other aliases and create a new version-specific alias for
+   reading and writing to the `.kibana` index .e.g `.kibana_8.0.1`. During and
+   after the migration, all saved object reads and writes use this alias
+   instead of reading or writing directly to the index. By using the atomic
+   `POST /_aliases` API we minimize the chance that an outdated node creating
+   new outdated documents can cause data loss.**
+4. **Wait for the default bulk operation timeout of 30s. This ensures that any
+   bulk operations accepted before the removal of the alias have either
+   completed or returned a timeout error to it's initiator.**
+5. If the mappings are out of date, update the mappings **through the alias**
+   to the combination of the index's current mappings and the expected
+   mappings. **If this operation fails due to an index missing exception (most
+   likely because another node removed our version-specific alias) repeat the
+   entire migration process.**
+6. If there are outdated documents, migrate these in batches:
+   1. Read a batch of outdated documents from `.kibana_n`.
+   2. Transform documents by applying the migration functions.
+   3. Update the document batch in the same index using optimistic concurrency
+      control. If a batch fails due to an update version mismatch continue
+      migrating the other batches.
+   4. If a batch fails due other reasons repeat the entire migration process.
+7. If any of the batches in step (6.3) failed, repeat the entire migration
+   process. This ensures that in-progress bulk update operations from an
+   outdated node won't lead to unmigrated documents still being present after
+   the migration.
+8. Once all documents are up to date, the migration is complete and Kibana can
+   start serving traffic.
+
+Steps (2) and (3) from the migration algorithm in minimize the chances of the
+following scenarios occuring but cannot guarantee it. It is therefore useful
+to enumarate some scenarios and their worst case impact:
+1. An outdated node issued a bulk create to it's version-specific alias.
+   Because a user doesn't wait for all traffic to drain a newer node starts
+   it's migration before the bulk create was complete. Since this bulk create
+   was accepted before the newer node deleted the previous version-specific
+   aliases, it is possible that the index now contains some outdated documents
+   that the new node is unaware of and doesn't migrate. Although these outdated
+   documents can lead to inconsistent query results and data loss, step (4)
+   ensures that an error will be returned to the node that created these
+   objects.
+2. A 8.1.0 node and a 8.2.0 node starts migrating a 8.0.0 index in parallel.
+   Even though the 8.2.0 node will remove the 8.1.0 version-specific aliases,
+   the 8.1.0 node could have sent an bulk update operation that got accepted
+   before its alias was removed. When the 8.2.0 node tries to migrate these
+   8.1.0 documents it gets a version conflict but cannot be sure if this was
+   because another node of the same version migrated this document (which can
+   safely be ignored) or interference from a different Kibana version. The
+   8.1.0 node will hit the error in step (6.3) and restart the migration but
+   then ultimately fail at step (2). The 8.2.0 node will repeat the entire
+   migration process from step (7) thus ensuring that all documents are up to
+   date.
+3. A race condition with another Kibana node on the same version, but with
+   different enabled plugins caused this node's required mappings to be
+   overwritten. If this causes a mapper parsing exception in step (6.3) we can
+   restart the migration. Because updating the mappings is additive and saved
+   object types are unique to a plugin, restarting the migration will allow
+   the node to update the mappings to be compatible with node's plugins. Both
+   nodes will be able to successfully complete the migration of their plugins'
+   registered saved object types. However, if the migration doesn't trigger a
+   mapper parsing exception the incompatible mappings would go undetected
+   which can cause future problems like write failures or inconsistent query
+   results.
 
 # 6. How we teach this
 1. Update documentation and server logs to start educating users to depend on
