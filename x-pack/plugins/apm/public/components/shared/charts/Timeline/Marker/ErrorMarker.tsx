@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import {
   TRACE_ID,
-  TRANSACTION_ID,
+  TRANSACTION_ID
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { useUrlParams } from '../../../../../hooks/useUrlParams';
 import { px, unit, units } from '../../../../../style/variables';
@@ -34,6 +34,7 @@ const TimeLegend = styled(Legend)`
 const ErrorLink = styled(ErrorDetailLink)`
   display: block;
   margin: ${px(units.half)} 0 ${px(units.half)} 0;
+  overflow-wrap: break-word;
 `;
 
 const Button = styled(Legend)`
@@ -67,10 +68,10 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
       ...(error.trace?.id ? [`${TRACE_ID} : "${error.trace?.id}"`] : []),
       ...(error.transaction?.id
         ? [`${TRANSACTION_ID} : "${error.transaction?.id}"`]
-        : []),
+        : [])
     ].join(' and '),
     rangeFrom,
-    rangeTo,
+    rangeTo
   };
 
   return (
