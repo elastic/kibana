@@ -207,13 +207,10 @@ describe('LayerPanel', () => {
       const group = component.find('DimensionPopover');
       const panel = mount(group.prop('panel'));
 
-      expect(panel.find('NativeRenderer')).toHaveLength(2);
-      expect(mockDatasource.renderDimensionEditor).toHaveBeenCalledWith(
-        expect.any(Element),
-        expect.objectContaining({
-          columnId: 'newid',
-        })
-      );
+      expect(panel.find('EuiTabbedContent').prop('tabs')).toHaveLength(2);
+      act(() => {
+        panel.find('EuiTab#visualization').simulate('click');
+      });
       expect(mockVisualization.renderDimensionEditor).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
