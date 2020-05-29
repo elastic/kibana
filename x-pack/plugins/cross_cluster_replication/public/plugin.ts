@@ -65,14 +65,17 @@ export class CrossClusterReplicationPlugin implements Plugin {
 
     ccrApp.disable();
 
+    const config = this.initializerContext.config.get<ClientConfigType>();
+
+    toasts.addSuccess(`Enabled: ${config.ui.enable}. RC UI enabled: ${remoteClusters.isUiEnabled}`);
+
     licensing.license$
       .pipe(first())
       .toPromise()
       .then((license) => {
         const licenseStatus = license.check(PLUGIN.ID, PLUGIN.minimumLicenseType);
         const isLicenseOk = licenseStatus.state === 'valid';
-        const config = this.initializerContext.config.get<ClientConfigType>();
-
+        toasts.addSuccess(`License OK: ${isLicenseOk}`);
         // remoteClusters.isUiEnabled is driven by the xpack.remote_clusters.ui.enabled setting.
         // The CCR UI depends upon the Remote Clusters UI (e.g. by cross-linking to it), so if
         // the Remote Clusters UI is disabled we can't show the CCR UI.
