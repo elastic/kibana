@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../../services/ml_api_service';
 import { useRefreshAnalyticsList } from '../../../../common';
@@ -55,5 +55,14 @@ export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId }) => {
 
   useRefreshAnalyticsList({ onRefresh: getMessagesFactory() });
 
-  return <JobMessages messages={messages} loading={isLoading} error={errorMessage} />;
+  const refreshMessage = useCallback(() => getMessagesFactory(), [analyticsId]);
+
+  return (
+    <JobMessages
+      messages={messages}
+      loading={isLoading}
+      error={errorMessage}
+      refreshMessage={refreshMessage}
+    />
+  );
 };
