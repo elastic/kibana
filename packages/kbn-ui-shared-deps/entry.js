@@ -19,6 +19,9 @@
 
 require('./polyfills');
 
+// styles
+require('@kbn/monaco/target/index.css');
+
 // must load before angular
 export const Jquery = require('jquery');
 window.$ = window.jQuery = Jquery;
