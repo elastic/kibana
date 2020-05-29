@@ -155,6 +155,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     Array [
       <absolute path>/node_modules/css-loader/package.json,
       <absolute path>/node_modules/style-loader/package.json,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/styles.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/lib.ts,
