@@ -11,13 +11,10 @@ import { ESQueueWorkerExecuteFn, ExportTypeDefinition, JobSource } from '../../s
 import { ESQueueInstance } from './create_queue';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
-import { ReportingInternalSetup } from '../core';
 
-export function createWorkerFactory<JobParamsType>(
-  reporting: ReportingCore,
-  setupDeps: ReportingInternalSetup
-) {
+export function createWorkerFactory<JobParamsType>(reporting: ReportingCore) {
   const config = reporting.getConfig();
+  const setupDeps = reporting.getPluginSetupDeps();
   const queueConfig = config.get('queue');
   const kibanaName = config.kbnConfig.get('server', 'name');
   const kibanaId = config.kbnConfig.get('server', 'uuid');
@@ -30,7 +27,7 @@ export function createWorkerFactory<JobParamsType>(
     for (const exportType of reporting.getExportTypesRegistry().getAll() as Array<
       ExportTypeDefinition<JobParamsType, unknown, unknown, ESQueueWorkerExecuteFn<unknown>>
     >) {
-      const jobExecutor = await exportType.executeJobFactory(reporting, setupDeps); // FIXME: does not "need" to be async
+      const jobExecutor = await exportType.executeJobFactory(reporting); // FIXME: does not "need" to be async
       jobExecutors.set(exportType.jobType, jobExecutor);
     }
 

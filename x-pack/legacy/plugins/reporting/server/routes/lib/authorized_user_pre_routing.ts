@@ -7,7 +7,7 @@
 import { RequestHandler, RouteMethod } from 'src/core/server';
 import { AuthenticatedUser } from '../../../../../../plugins/security/server';
 import { getUserFactory } from '../../lib/get_user';
-import { ReportingInternalSetup, ReportingCore } from '../../core';
+import { ReportingCore } from '../../core';
 
 type ReportingUser = AuthenticatedUser | null;
 const superuserRole = 'superuser';
@@ -17,12 +17,11 @@ export type RequestHandlerUser = RequestHandler extends (...a: infer U) => infer
   : never;
 
 export const authorizedUserPreRoutingFactory = function authorizedUserPreRoutingFn(
-  core: ReportingCore,
-  setupDeps: ReportingInternalSetup
+  reporting: ReportingCore
 ) {
-  const config = core.getConfig();
+  const config = reporting.getConfig();
+  const setupDeps = reporting.getPluginSetupDeps();
   const getUser = getUserFactory(setupDeps.security);
-
   return <P, Q, B>(handler: RequestHandlerUser): RequestHandler<P, Q, B, RouteMethod> => {
     return (context, req, res) => {
       let user: ReportingUser = null;

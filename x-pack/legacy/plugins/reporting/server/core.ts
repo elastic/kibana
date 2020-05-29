@@ -66,11 +66,11 @@ export class ReportingCore {
   }
 
   public async setupRoutes() {
-    const dep = await this.getPluginSetupDeps();
-    registerRoutes(this, dep);
+    registerRoutes(this);
   }
 
   public pluginSetup(reportingSetupDeps: ReportingInternalSetup) {
+    this.pluginSetupDeps = reportingSetupDeps;
     this.pluginSetup$.next(reportingSetupDeps);
   }
 
@@ -98,7 +98,7 @@ export class ReportingCore {
   }
 
   public async getLicenseInfo() {
-    const { licensing } = await this.getPluginSetupDeps();
+    const { licensing } = this.getPluginSetupDeps();
     return await licensing.license$
       .pipe(
         map((license) => checkLicense(this.getExportTypesRegistry(), license)),
@@ -111,16 +111,16 @@ export class ReportingCore {
     return this.config;
   }
 
-  public async getScreenshotsObservable(): Promise<ScreenshotsObservableFn> {
-    const { browserDriverFactory } = await this.getPluginSetupDeps();
+  public getScreenshotsObservable(): ScreenshotsObservableFn {
+    const { browserDriverFactory } = this.getPluginSetupDeps();
     return screenshotsObservableFactory(this.config.get('capture'), browserDriverFactory);
   }
 
-  public async getPluginSetupDeps() {
-    if (this.pluginSetupDeps) {
-      return this.pluginSetupDeps;
+  public getPluginSetupDeps() {
+    if (!this.pluginSetupDeps) {
+      throw new Error(`"pluginSetupDeps" dependencies haven't initialized yet`);
     }
-    return await this.pluginSetup$.pipe(first()).toPromise();
+    return this.pluginSetupDeps;
   }
 
   /*
@@ -135,7 +135,7 @@ export class ReportingCore {
   }
 
   public async getElasticsearchService() {
-    return (await this.getPluginSetupDeps()).elasticsearch;
+    return this.getPluginSetupDeps().elasticsearch;
   }
 
   public async getSavedObjectsClient(fakeRequest: KibanaRequest) {

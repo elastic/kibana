@@ -10,17 +10,16 @@ import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routi
 import { HandlerErrorFunction, HandlerFunction } from './types';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { ReportingInternalSetup } from '../core';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerGenerateFromJobParams(
   reporting: ReportingCore,
-  setupDeps: ReportingInternalSetup,
   handler: HandlerFunction,
   handleError: HandlerErrorFunction
 ) {
-  const userHandler = authorizedUserPreRoutingFactory(reporting, setupDeps);
+  const setupDeps = reporting.getPluginSetupDeps();
+  const userHandler = authorizedUserPreRoutingFactory(reporting);
   const { router } = setupDeps;
 
   router.post(

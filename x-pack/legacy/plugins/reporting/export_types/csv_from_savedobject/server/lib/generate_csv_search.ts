@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReportingInternalSetup } from '../../../../server/core';
 import {
   IUiSettingsClient,
   KibanaRequest,
@@ -52,12 +51,12 @@ const getUiSettings = async (config: IUiSettingsClient) => {
 
 export async function generateCsvSearch(
   reporting: ReportingCore,
-  setupDeps: ReportingInternalSetup,
   context: RequestHandlerContext,
   req: KibanaRequest,
   searchPanel: SearchPanel,
   jobParams: JobParamsDiscoverCsv
 ): Promise<CsvResultFromSearch> {
+  const setupDeps = reporting.getPluginSetupDeps();
   const savedObjectsClient = context.core.savedObjects.client;
   const { indexPatternSavedObjectId, timerange } = searchPanel;
   const savedSearchObjectAttr = searchPanel.attributes;

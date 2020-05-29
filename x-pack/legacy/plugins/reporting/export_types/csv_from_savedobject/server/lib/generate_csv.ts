@@ -6,12 +6,11 @@
 
 import { badRequest } from 'boom';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-import { ReportingInternalSetup } from '../../../../server/core';
 import { ReportingCore } from '../../../../server';
 import { FakeRequest, JobParamsPanelCsv, SearchPanel, VisPanel } from '../../types';
 import { generateCsvSearch } from './generate_csv_search';
 
-export function createGenerateCsv(reporting: ReportingCore, setupDeps: ReportingInternalSetup) {
+export function createGenerateCsv(reporting: ReportingCore) {
   return async function generateCsv(
     context: RequestHandlerContext,
     request: KibanaRequest | FakeRequest,
@@ -28,7 +27,6 @@ export function createGenerateCsv(reporting: ReportingCore, setupDeps: Reporting
       case 'search':
         return await generateCsvSearch(
           reporting,
-          setupDeps,
           context,
           request as KibanaRequest,
           panel as SearchPanel,

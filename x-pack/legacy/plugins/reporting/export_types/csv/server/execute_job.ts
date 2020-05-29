@@ -15,15 +15,12 @@ import { ESQueueWorkerExecuteFn, ExecuteJobFactory } from '../../../server/types
 import { JobDocPayloadDiscoverCsv } from '../types';
 import { fieldFormatMapFactory } from './lib/field_format_map';
 import { createGenerateCsv } from './lib/generate_csv';
-import { ReportingInternalSetup } from '../../../server/core';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadDiscoverCsv
->> = async function executeJobFactoryFn(
-  reporting: ReportingCore,
-  setupDeps: ReportingInternalSetup
-) {
+>> = async function executeJobFactoryFn(reporting: ReportingCore) {
   const config = reporting.getConfig();
+  const setupDeps = reporting.getPluginSetupDeps();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = setupDeps.logger.clone([CSV_JOB_TYPE, 'execute-job']);
   const serverBasePath = config.kbnConfig.get('server', 'basePath');

@@ -11,8 +11,9 @@ import { JobParamsPDF } from '../../types';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPDF
->> = function createJobFactoryFn(reporting, deps) {
+>> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();
+  const setupDeps = reporting.getPluginSetupDeps();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
   return async function createJobFn(
@@ -25,7 +26,7 @@ export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
     validateUrls(relativeUrls);
 
     return {
-      basePath: deps.basePath(req),
+      basePath: setupDeps.basePath(req),
       browserTimezone,
       forceNow: new Date().toISOString(),
       headers: serializedEncryptedHeaders,

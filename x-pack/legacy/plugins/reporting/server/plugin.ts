@@ -61,10 +61,8 @@ export class ReportingPlugin
   public async start(core: CoreStart, plugins: ReportingStartDeps) {
     const { reportingCore } = this;
 
-    const deps = await reportingCore.getPluginSetupDeps();
-    const esqueue = await createQueueFactory(reportingCore, deps);
-
-    const enqueueJob = enqueueJobFactory(reportingCore, deps);
+    const esqueue = await createQueueFactory(reportingCore);
+    const enqueueJob = enqueueJobFactory(reportingCore);
 
     this.reportingCore.pluginStart({
       savedObjects: core.savedObjects,

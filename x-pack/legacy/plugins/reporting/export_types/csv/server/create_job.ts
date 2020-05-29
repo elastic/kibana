@@ -9,13 +9,13 @@ import { ReportingCore } from '../../../server';
 import { cryptoFactory } from '../../../server/lib';
 import { CreateJobFactory, ESQueueCreateJobFn } from '../../../server/types';
 import { JobParamsDiscoverCsv } from '../types';
-import { ReportingInternalSetup } from '../../../server/core';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsDiscoverCsv
->> = function createJobFactoryFn(reporting: ReportingCore, setupDeps: ReportingInternalSetup) {
+>> = function createJobFactoryFn(reporting: ReportingCore) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
+  const setupDeps = reporting.getPluginSetupDeps();
 
   return async function createJob(
     jobParams: JobParamsDiscoverCsv,

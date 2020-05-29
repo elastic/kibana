@@ -13,14 +13,10 @@ import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { HandlerFunction } from './types';
-import { ReportingInternalSetup } from '../core';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 
-export function registerJobGenerationRoutes(
-  reporting: ReportingCore,
-  setupDeps: ReportingInternalSetup
-) {
+export function registerJobGenerationRoutes(reporting: ReportingCore) {
   const config = reporting.getConfig();
   const downloadBaseUrl =
     config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
@@ -88,11 +84,11 @@ export function registerJobGenerationRoutes(
     });
   }
 
-  registerGenerateFromJobParams(reporting, setupDeps, handler, handleError);
+  registerGenerateFromJobParams(reporting, handler, handleError);
 
   // Register beta panel-action download-related API's
   if (config.get('csv', 'enablePanelActionDownload')) {
-    registerGenerateCsvFromSavedObject(reporting, setupDeps, handler, handleError);
-    registerGenerateCsvFromSavedObjectImmediate(reporting, setupDeps, handleError);
+    registerGenerateCsvFromSavedObject(reporting, handler, handleError);
+    registerGenerateCsvFromSavedObjectImmediate(reporting, handleError);
   }
 }

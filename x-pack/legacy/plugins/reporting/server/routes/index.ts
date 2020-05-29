@@ -6,9 +6,9 @@
 
 import { registerJobGenerationRoutes } from './generation';
 import { registerJobInfoRoutes } from './jobs';
-import { ReportingCore, ReportingInternalSetup } from '../core';
+import { ReportingCore } from '../core';
 
-export function registerRoutes(reporting: ReportingCore, setupDeps: ReportingInternalSetup) {
-  registerJobGenerationRoutes(reporting, setupDeps);
-  registerJobInfoRoutes(reporting, setupDeps);
+export function registerRoutes(reporting: ReportingCore) {
+  registerJobGenerationRoutes(reporting);
+  registerJobInfoRoutes(reporting);
 }

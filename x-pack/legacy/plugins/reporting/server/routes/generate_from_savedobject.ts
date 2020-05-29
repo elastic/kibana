@@ -11,7 +11,6 @@ import { ReportingCore } from '../';
 import { API_BASE_GENERATE_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
-import { ReportingInternalSetup } from '../core';
 
 /*
  * This function registers API Endpoints for queuing Reporting jobs. The API inputs are:
@@ -24,11 +23,11 @@ import { ReportingInternalSetup } from '../core';
  */
 export function registerGenerateCsvFromSavedObject(
   reporting: ReportingCore,
-  setupDeps: ReportingInternalSetup,
   handleRoute: HandlerFunction,
   handleRouteError: HandlerErrorFunction
 ) {
-  const userHandler = authorizedUserPreRoutingFactory(reporting, setupDeps);
+  const setupDeps = reporting.getPluginSetupDeps();
+  const userHandler = authorizedUserPreRoutingFactory(reporting);
   const { router } = setupDeps;
   router.post(
     {

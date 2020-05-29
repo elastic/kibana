@@ -11,8 +11,9 @@ import { JobParamsPNG } from '../../types';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPNG
->> = function createJobFactoryFn(reporting, deps) {
+>> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();
+  const setupDeps = reporting.getPluginSetupDeps();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
   return async function createJob(
@@ -31,7 +32,7 @@ export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
       headers: serializedEncryptedHeaders,
       browserTimezone,
       layout,
-      basePath: deps.basePath(req),
+      basePath: setupDeps.basePath(req),
       forceNow: new Date().toISOString(),
     };
   };

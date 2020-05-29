@@ -8,7 +8,7 @@ import { EventEmitter } from 'events';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { AuthenticatedUser } from '../../../../../plugins/security/server';
 import { ESQueueCreateJobFn } from '../../server/types';
-import { ReportingCore, ReportingInternalSetup } from '../core';
+import { ReportingCore } from '../core';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
 
@@ -34,11 +34,9 @@ export type EnqueueJobFn = <JobParamsType>(
   request: KibanaRequest
 ) => Promise<Job>;
 
-export function enqueueJobFactory(
-  reporting: ReportingCore,
-  setupDeps: ReportingInternalSetup
-): EnqueueJobFn {
+export function enqueueJobFactory(reporting: ReportingCore): EnqueueJobFn {
   const config = reporting.getConfig();
+  const setupDeps = reporting.getPluginSetupDeps();
   const queueTimeout = config.get('queue', 'timeout');
   const browserType = config.get('capture', 'browser', 'type');
   const maxAttempts = config.get('capture', 'maxAttempts');
@@ -60,7 +58,7 @@ export function enqueueJobFactory(
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    const createJob = exportType.createJobFactory(reporting, setupDeps) as CreateJobFn;
+    const createJob = exportType.createJobFactory(reporting) as CreateJobFn;
     const payload = await createJob(jobParams, context, request);
 
     const options = {

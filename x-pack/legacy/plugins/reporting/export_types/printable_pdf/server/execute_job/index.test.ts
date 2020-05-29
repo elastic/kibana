@@ -9,30 +9,17 @@ jest.mock('../lib/generate_pdf', () => ({ generatePdfObservableFactory: jest.fn(
 import * as Rx from 'rxjs';
 import { CancellationToken } from '../../../../../../../plugins/reporting/common';
 import { ReportingCore } from '../../../../server';
-import { cryptoFactory, LevelLogger } from '../../../../server/lib';
+import { cryptoFactory } from '../../../../server/lib';
 import { createMockReportingCore } from '../../../../test_helpers';
 import { JobDocPayloadPDF } from '../../types';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { executeJobFactory } from './index';
-import { ReportingInternalSetup } from '../../../../server/core';
 
 let mockReporting: ReportingCore;
 
 const cancellationToken = ({
   on: jest.fn(),
 } as unknown) as CancellationToken;
-
-const mockLoggerFactory = {
-  get: jest.fn().mockImplementation(() => ({
-    error: jest.fn(),
-    debug: jest.fn(),
-    warn: jest.fn(),
-  })),
-};
-const getMockDeps = () =>
-  ({
-    logger: new LevelLogger(mockLoggerFactory),
-  } as ReportingInternalSetup);
 
 const mockEncryptionKey = 'testencryptionkey';
 const encryptHeaders = async (headers: Record<string, string>) => {
@@ -79,7 +66,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
   const generatePdfObservable = (await generatePdfObservableFactory(mockReporting)) as jest.Mock;
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-  const executeJob = await executeJobFactory(mockReporting, getMockDeps());
+  const executeJob = await executeJobFactory(mockReporting);
   const browserTimezone = 'UTC';
   await executeJob(
     'pdfJobId',
@@ -91,43 +78,33 @@ test(`passes browserTimezone to generatePdf`, async () => {
     cancellationToken
   );
 
-  expect(generatePdfObservable.mock.calls).toMatchInlineSnapshot(`
+  // Don't snapshot logger
+  const [, ...rest] = generatePdfObservable.mock.calls[0];
+
+  expect(rest).toMatchInlineSnapshot(`
     Array [
+      undefined,
       Array [
-        LevelLogger {
-          "_logger": Object {
-            "get": [MockFunction],
-          },
-          "_tags": Array [
-            "printable_pdf",
-            "execute",
-            "pdfJobId",
-          ],
-          "warning": [Function],
-        },
-        undefined,
-        Array [
-          "http://localhost:5601/sbp/app/kibana#/something",
-        ],
-        "UTC",
-        Object {
-          "conditions": Object {
-            "basePath": "/sbp",
-            "hostname": "localhost",
-            "port": 5601,
-            "protocol": "http",
-          },
-          "headers": Object {},
-        },
-        undefined,
-        false,
+        "http://localhost:5601/sbp/app/kibana#/something",
       ],
+      "UTC",
+      Object {
+        "conditions": Object {
+          "basePath": "/sbp",
+          "hostname": "localhost",
+          "port": 5601,
+          "protocol": "http",
+        },
+        "headers": Object {},
+      },
+      undefined,
+      false,
     ]
   `);
 });
 
 test(`returns content_type of application/pdf`, async () => {
-  const executeJob = await executeJobFactory(mockReporting, getMockDeps());
+  const executeJob = await executeJobFactory(mockReporting);
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = await generatePdfObservableFactory(mockReporting);
@@ -146,7 +123,7 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const generatePdfObservable = await generatePdfObservableFactory(mockReporting);
   (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
-  const executeJob = await executeJobFactory(mockReporting, getMockDeps());
+  const executeJob = await executeJobFactory(mockReporting);
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await executeJob(
     'pdfJobId',

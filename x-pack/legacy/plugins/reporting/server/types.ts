@@ -19,7 +19,7 @@ import { SecurityPluginSetup } from '../../../../plugins/security/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import { LayoutInstance } from '../export_types/common/layouts';
 import { ReportingConfigType } from './config';
-import { ReportingCore, ReportingInternalSetup } from './core';
+import { ReportingCore } from './core';
 import { LevelLogger } from './lib';
 
 /*
@@ -207,14 +207,10 @@ export type ServerFacade = LegacySetup;
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export type CreateJobFactory<CreateJobFnType> = (
-  reporting: ReportingCore,
-  setupDeps: ReportingInternalSetup
-) => CreateJobFnType;
+export type CreateJobFactory<CreateJobFnType> = (reporting: ReportingCore) => CreateJobFnType;
 
 export type ExecuteJobFactory<ExecuteJobFnType> = (
-  reporting: ReportingCore,
-  setupDeps: ReportingInternalSetup
+  reporting: ReportingCore
 ) => Promise<ExecuteJobFnType>; // FIXME: does not "need" to be async
 
 export interface ExportTypeDefinition<

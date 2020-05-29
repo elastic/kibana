@@ -15,11 +15,11 @@ import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { ExportTypeDefinition } from '../types';
 import { LevelLogger } from '../lib';
 import { ReportingInternalSetup } from '../core';
+import { of } from 'rxjs';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('GET /api/reporting/jobs/download', () => {
-  let mockDeps: ReportingInternalSetup;
   let server: setupServerReturn['server'];
   let httpSetup: setupServerReturn['httpSetup'];
   let exportTypesRegistry: ExportTypesRegistry;
@@ -40,13 +40,30 @@ describe('GET /api/reporting/jobs/download', () => {
   };
 
   beforeEach(async () => {
-    core = await createMockReportingCore(config);
+    ({ server, httpSetup } = await setupServer());
+    core = await createMockReportingCore(config, ({
+      elasticsearch: {
+        adminClient: { callAsInternalUser: jest.fn() },
+      },
+      security: {
+        authc: {
+          getCurrentUser: () => ({
+            id: '123',
+            roles: ['superuser'],
+            username: 'Tom Riddle',
+          }),
+        },
+      },
+      router: httpSetup.createRouter(''),
+      licensing: {
+        license$: of({
+          isActive: true,
+          isAvailable: true,
+          type: 'gold',
+        }),
+      },
+    } as unknown) as ReportingInternalSetup);
     // @ts-ignore
-    core.license = {
-      isActive: true,
-      isAvailable: true,
-      type: 'gold',
-    };
     exportTypesRegistry = new ExportTypesRegistry();
     exportTypesRegistry.register({
       id: 'unencoded',
@@ -62,22 +79,6 @@ describe('GET /api/reporting/jobs/download', () => {
       validLicenses: ['basic', 'gold'],
     } as ExportTypeDefinition<unknown, unknown, unknown, unknown>);
     core.getExportTypesRegistry = () => exportTypesRegistry;
-    ({ server, httpSetup } = await setupServer());
-    mockDeps = ({
-      elasticsearch: {
-        adminClient: { callAsInternalUser: jest.fn() },
-      },
-      security: {
-        authc: {
-          getCurrentUser: () => ({
-            id: '123',
-            roles: ['superuser'],
-            username: 'Tom Riddle',
-          }),
-        },
-      },
-      router: httpSetup.createRouter(''),
-    } as unknown) as ReportingInternalSetup;
   });
 
   afterEach(async () => {
@@ -88,10 +89,10 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('fails on malformed download IDs', async () => {
     // @ts-ignore
-    mockDeps.elasticsearch.adminClient = {
+    core.pluginSetupDeps.elasticsearch.adminClient = {
       callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(getHits())),
     };
-    registerJobInfoRoutes(core, mockDeps);
+    registerJobInfoRoutes(core);
 
     await server.start();
 
@@ -106,16 +107,15 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it('fails on unauthenticated users', async () => {
-    // @ts-ignore
-    const unauthenticatedPlugin = ({
-      ...mockDeps,
+    core.pluginSetupDeps = ({
+      ...core.pluginSetupDeps,
       security: {
         authc: {
           getCurrentUser: () => undefined,
         },
       },
     } as unknown) as ReportingInternalSetup;
-    registerJobInfoRoutes(core, unauthenticatedPlugin);
+    registerJobInfoRoutes(core);
 
     await server.start();
 
@@ -128,9 +128,8 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it('fails on users without the appropriate role', async () => {
-    // @ts-ignore
-    const peasantUser = ({
-      ...mockDeps,
+    core.pluginSetupDeps = ({
+      ...core.pluginSetupDeps,
       security: {
         authc: {
           getCurrentUser: () => ({
@@ -141,7 +140,7 @@ describe('GET /api/reporting/jobs/download', () => {
         },
       },
     } as unknown) as ReportingInternalSetup;
-    registerJobInfoRoutes(core, peasantUser);
+    registerJobInfoRoutes(core);
 
     await server.start();
 
@@ -155,10 +154,11 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('returns 404 if job not found', async () => {
     // @ts-ignore
-    mockDeps.elasticsearch.adminClient = {
+    core.pluginSetupDeps.elasticsearch.adminClient = {
       callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(getHits())),
     };
-    registerJobInfoRoutes(core, mockDeps);
+
+    registerJobInfoRoutes(core);
 
     await server.start();
 
@@ -167,12 +167,12 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('returns a 401 if not a valid job type', async () => {
     // @ts-ignore
-    mockDeps.elasticsearch.adminClient = {
+    core.pluginSetupDeps.elasticsearch.adminClient = {
       callAsInternalUser: jest
         .fn()
         .mockReturnValue(Promise.resolve(getHits({ jobtype: 'invalidJobType' }))),
     };
-    registerJobInfoRoutes(core, mockDeps);
+    registerJobInfoRoutes(core);
 
     await server.start();
 
@@ -181,14 +181,14 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('when a job is incomplete', async () => {
     // @ts-ignore
-    mockDeps.elasticsearch.adminClient = {
+    core.pluginSetupDeps.elasticsearch.adminClient = {
       callAsInternalUser: jest
         .fn()
         .mockReturnValue(
           Promise.resolve(getHits({ jobtype: 'unencodedJobType', status: 'pending' }))
         ),
     };
-    registerJobInfoRoutes(core, mockDeps);
+    registerJobInfoRoutes(core);
 
     await server.start();
     await supertest(httpSetup.server.listener)
@@ -201,7 +201,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('when a job fails', async () => {
     // @ts-ignore
-    mockDeps.elasticsearch.adminClient = {
+    core.pluginSetupDeps.elasticsearch.adminClient = {
       callAsInternalUser: jest.fn().mockReturnValue(
         Promise.resolve(
           getHits({
@@ -212,7 +212,7 @@ describe('GET /api/reporting/jobs/download', () => {
         )
       ),
     };
-    registerJobInfoRoutes(core, mockDeps);
+    registerJobInfoRoutes(core);
 
     await server.start();
     await supertest(httpSetup.server.listener)
@@ -244,10 +244,10 @@ describe('GET /api/reporting/jobs/download', () => {
     it('when a known job-type is complete', async () => {
       const hits = getCompleteHits();
       // @ts-ignore
-      mockDeps.elasticsearch.adminClient = {
+      core.pluginSetupDeps.elasticsearch.adminClient = {
         callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
       };
-      registerJobInfoRoutes(core, mockDeps);
+      registerJobInfoRoutes(core);
 
       await server.start();
       await supertest(httpSetup.server.listener)
@@ -260,16 +260,14 @@ describe('GET /api/reporting/jobs/download', () => {
     it('succeeds when security is not there or disabled', async () => {
       const hits = getCompleteHits();
       // @ts-ignore
-      mockDeps.elasticsearch.adminClient = {
+      core.pluginSetupDeps.elasticsearch.adminClient = {
         callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
       };
 
       // @ts-ignore
-      const noSecurityPlugins = ({
-        ...mockDeps,
-        security: null,
-      } as unknown) as ReportingInternalSetup;
-      registerJobInfoRoutes(core, noSecurityPlugins);
+      core.pluginSetupDeps.security = null;
+
+      registerJobInfoRoutes(core);
 
       await server.start();
 
@@ -286,10 +284,10 @@ describe('GET /api/reporting/jobs/download', () => {
         outputContent: 'test',
       });
       // @ts-ignore
-      mockDeps.elasticsearch.adminClient = {
+      core.pluginSetupDeps.elasticsearch.adminClient = {
         callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
       };
-      registerJobInfoRoutes(core, mockDeps);
+      registerJobInfoRoutes(core);
 
       await server.start();
       await supertest(httpSetup.server.listener)
@@ -306,10 +304,10 @@ describe('GET /api/reporting/jobs/download', () => {
         outputContentType: 'application/pdf',
       });
       // @ts-ignore
-      mockDeps.elasticsearch.adminClient = {
+      core.pluginSetupDeps.elasticsearch.adminClient = {
         callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
       };
-      registerJobInfoRoutes(core, mockDeps);
+      registerJobInfoRoutes(core);
 
       await server.start();
       await supertest(httpSetup.server.listener)
@@ -327,10 +325,10 @@ describe('GET /api/reporting/jobs/download', () => {
         outputContentType: 'application/html',
       });
       // @ts-ignore
-      mockDeps.elasticsearch.adminClient = {
+      core.pluginSetupDeps.elasticsearch.adminClient = {
         callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
       };
-      registerJobInfoRoutes(core, mockDeps);
+      registerJobInfoRoutes(core);
 
       await server.start();
       await supertest(httpSetup.server.listener)

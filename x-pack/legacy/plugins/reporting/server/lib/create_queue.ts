@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReportingCore, ReportingInternalSetup } from '../core';
+import { ReportingCore } from '../core';
 import { JobDocOutput, JobSource } from '../types';
 import { createTaggedLogger } from './create_tagged_logger'; // TODO remove createTaggedLogger once esqueue is removed
 import { createWorkerFactory } from './create_worker';
@@ -37,10 +37,10 @@ type GenericWorkerFn<JobParamsType> = (
 ) => void | Promise<JobDocOutput>;
 
 export async function createQueueFactory<JobParamsType, JobPayloadType>(
-  reporting: ReportingCore,
-  setupDeps: ReportingInternalSetup
+  reporting: ReportingCore
 ): Promise<ESQueueInstance> {
   const config = reporting.getConfig();
+  const setupDeps = reporting.getPluginSetupDeps();
   const { logger } = setupDeps;
   const queueIndexInterval = config.get('queue', 'indexInterval');
   const queueTimeout = config.get('queue', 'timeout');
@@ -60,7 +60,7 @@ export async function createQueueFactory<JobParamsType, JobPayloadType>(
 
   if (isPollingEnabled) {
     // create workers to poll the index for idle jobs waiting to be claimed and executed
-    const createWorker = createWorkerFactory(reporting, setupDeps);
+    const createWorker = createWorkerFactory(reporting);
     await createWorker(queue);
   } else {
     logger.info(

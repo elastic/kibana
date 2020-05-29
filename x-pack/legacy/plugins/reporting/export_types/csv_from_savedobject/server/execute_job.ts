@@ -13,7 +13,6 @@ import { ExecuteJobFactory, JobDocOutput, JobDocPayload } from '../../../server/
 import { CsvResultFromSearch } from '../../csv/types';
 import { FakeRequest, JobDocPayloadPanelCsv, JobParamsPanelCsv, SearchPanel } from '../types';
 import { createGenerateCsv } from './lib';
-import { ReportingInternalSetup } from '../../../server/core';
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was
@@ -28,14 +27,12 @@ export type ImmediateExecuteFn<JobParamsType> = (
 
 export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
   JobParamsPanelCsv
->> = async function executeJobFactoryFn(
-  reporting: ReportingCore,
-  setupDeps: ReportingInternalSetup
-) {
+>> = async function executeJobFactoryFn(reporting: ReportingCore) {
   const config = reporting.getConfig();
+  const setupDeps = reporting.getPluginSetupDeps();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = setupDeps.logger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
-  const generateCsv = createGenerateCsv(reporting, setupDeps);
+  const generateCsv = createGenerateCsv(reporting);
 
   return async function executeJob(
     jobId: string | null,

@@ -15,11 +15,11 @@ import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { ExportTypeDefinition } from '../types';
 import { LevelLogger } from '../lib';
 import { ReportingInternalSetup } from '../core';
+import { of } from 'rxjs';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('POST /api/reporting/generate', () => {
-  let mockDeps: ReportingInternalSetup;
   let server: setupServerReturn['server'];
   let httpSetup: setupServerReturn['httpSetup'];
   let exportTypesRegistry: ExportTypesRegistry;
@@ -49,24 +49,8 @@ describe('POST /api/reporting/generate', () => {
   } as unknown) as jest.Mocked<LevelLogger>;
 
   beforeEach(async () => {
-    core = await createMockReportingCore(config);
-    // @ts-ignore
-    core.license = {
-      isActive: true,
-      isAvailable: true,
-      type: 'gold',
-    };
-    exportTypesRegistry = new ExportTypesRegistry();
-    exportTypesRegistry.register({
-      id: 'printablePdf',
-      jobType: 'printable_pdf',
-      jobContentEncoding: 'base64',
-      jobContentExtension: 'pdf',
-      validLicenses: ['basic', 'gold'],
-    } as ExportTypeDefinition<unknown, unknown, unknown, unknown>);
-    core.getExportTypesRegistry = () => exportTypesRegistry;
     ({ server, httpSetup } = await setupServer());
-    mockDeps = ({
+    const mockDeps = ({
       elasticsearch: {
         adminClient: { callAsInternalUser: jest.fn() },
       },
@@ -80,7 +64,24 @@ describe('POST /api/reporting/generate', () => {
         },
       },
       router: httpSetup.createRouter(''),
+      licensing: {
+        license$: of({
+          isActive: true,
+          isAvailable: true,
+          type: 'gold',
+        }),
+      },
     } as unknown) as ReportingInternalSetup;
+    core = await createMockReportingCore(config, mockDeps);
+    exportTypesRegistry = new ExportTypesRegistry();
+    exportTypesRegistry.register({
+      id: 'printablePdf',
+      jobType: 'printable_pdf',
+      jobContentEncoding: 'base64',
+      jobContentExtension: 'pdf',
+      validLicenses: ['basic', 'gold'],
+    } as ExportTypeDefinition<unknown, unknown, unknown, unknown>);
+    core.getExportTypesRegistry = () => exportTypesRegistry;
   });
 
   afterEach(async () => {
@@ -90,7 +91,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if there are no job params', async () => {
-    registerJobGenerationRoutes(core, mockDeps);
+    registerJobGenerationRoutes(core);
 
     await server.start();
 
@@ -105,7 +106,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if job params query is invalid', async () => {
-    registerJobGenerationRoutes(core, mockDeps);
+    registerJobGenerationRoutes(core);
 
     await server.start();
 
@@ -116,7 +117,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if job params body is invalid', async () => {
-    registerJobGenerationRoutes(core, mockDeps);
+    registerJobGenerationRoutes(core);
 
     await server.start();
 
@@ -128,7 +129,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 export type is invalid', async () => {
-    registerJobGenerationRoutes(core, mockDeps);
+    registerJobGenerationRoutes(core);
 
     await server.start();
 
@@ -150,7 +151,7 @@ describe('POST /api/reporting/generate', () => {
         },
       }));
 
-    registerJobGenerationRoutes(core, mockDeps);
+    registerJobGenerationRoutes(core);
 
     await server.start();
 

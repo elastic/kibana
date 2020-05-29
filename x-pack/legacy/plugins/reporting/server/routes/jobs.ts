@@ -14,7 +14,6 @@ import {
   downloadJobResponseHandlerFactory,
 } from './lib/job_response_handler';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
-import { ReportingInternalSetup } from '../core';
 
 interface ListQuery {
   page: string;
@@ -23,12 +22,10 @@ interface ListQuery {
 }
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
-export async function registerJobInfoRoutes(
-  reporting: ReportingCore,
-  setupDeps: ReportingInternalSetup
-) {
+export async function registerJobInfoRoutes(reporting: ReportingCore) {
   const config = reporting.getConfig();
-  const userHandler = authorizedUserPreRoutingFactory(reporting, setupDeps);
+  const setupDeps = reporting.getPluginSetupDeps();
+  const userHandler = authorizedUserPreRoutingFactory(reporting);
   const { elasticsearch, router } = setupDeps;
   const jobsQuery = jobsQueryFactory(config, elasticsearch);
 

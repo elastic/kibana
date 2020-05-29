@@ -7,7 +7,6 @@
 import { notFound, notImplemented } from 'boom';
 import { get } from 'lodash';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-import { ReportingInternalSetup } from '../../../../server/core';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
 import { cryptoFactory } from '../../../../server/lib';
@@ -42,9 +41,10 @@ interface VisData {
 
 export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
   JobParamsPanelCsv
->> = function createJobFactoryFn(reporting: ReportingCore, setupDeps: ReportingInternalSetup) {
+>> = function createJobFactoryFn(reporting: ReportingCore) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
+  const setupDeps = reporting.getPluginSetupDeps();
   const logger = setupDeps.logger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
   return async function createJob(

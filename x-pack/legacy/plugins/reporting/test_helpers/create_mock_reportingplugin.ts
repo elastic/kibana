@@ -18,6 +18,7 @@ import { EventEmitter } from 'events';
 import { coreMock } from 'src/core/server/mocks';
 import { ReportingConfig, ReportingCore, ReportingPlugin } from '../server';
 import { ReportingSetupDeps, ReportingStartDeps } from '../server/types';
+import { ReportingInternalSetup } from '../server/core';
 
 const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => {
   return {
@@ -52,8 +53,17 @@ const createMockReportingPlugin = async (config: ReportingConfig): Promise<Repor
   return plugin;
 };
 
-export const createMockReportingCore = async (config: ReportingConfig): Promise<ReportingCore> => {
+export const createMockReportingCore = async (
+  config: ReportingConfig,
+  setupDepsMock?: ReportingInternalSetup
+): Promise<ReportingCore> => {
   config = config || {};
   const plugin = await createMockReportingPlugin(config);
-  return plugin.getReportingCore();
+  const core = plugin.getReportingCore();
+
+  if (setupDepsMock) {
+    core.pluginSetupDeps = setupDepsMock;
+  }
+
+  return core;
 };

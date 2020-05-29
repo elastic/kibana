@@ -7,7 +7,6 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { ReportingInternalSetup } from '../../../../server/core';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
 import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput } from '../../../../server/types';
@@ -23,10 +22,10 @@ import { generatePngObservableFactory } from '../lib/generate_png';
 type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPNG>>;
 
 export const executeJobFactory: QueuedPngExecutorFactory = async function executeJobFactoryFn(
-  reporting: ReportingCore,
-  setupDeps: ReportingInternalSetup
+  reporting: ReportingCore
 ) {
   const config = reporting.getConfig();
+  const setupDeps = reporting.getPluginSetupDeps();
   const encryptionKey = config.get('encryptionKey');
   const logger = setupDeps.logger.clone([PNG_JOB_TYPE, 'execute']);
 
