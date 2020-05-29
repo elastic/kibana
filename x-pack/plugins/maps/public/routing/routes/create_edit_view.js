@@ -7,8 +7,8 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { GisMap } from '../connected_components/gis_map';
-import { createMapStore } from '../reducers/store';
+import { GisMap } from '../../connected_components/gis_map';
+import { createMapStore } from '../../reducers/store';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import _ from 'lodash';
 import {
@@ -22,10 +22,10 @@ import {
   setReadOnly,
   setIsLayerTOCOpen,
   setOpenTOCDetails,
-} from '../actions';
-import { DEFAULT_IS_LAYER_TOC_OPEN, FLYOUT_STATE } from '../reducers/ui';
-import { getFlyoutDisplay, getIsFullScreen } from '../selectors/ui_selectors';
-import { getQueryableUniqueIndexPatternIds, hasDirtyState } from '../selectors/map_selectors';
+} from '../../actions';
+import { DEFAULT_IS_LAYER_TOC_OPEN, FLYOUT_STATE } from '../../reducers/ui';
+import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
+import { getQueryableUniqueIndexPatternIds, hasDirtyState } from '../../selectors/map_selectors';
 import {
   getIndexPatternService,
   getMapsCapabilities,
@@ -33,15 +33,15 @@ import {
   getData,
   getUiSettings,
   getCoreChrome,
-} from '../kibana_services';
-import { copyPersistentState } from '../reducers/util';
-import { getInitialLayers } from '../angular/get_initial_layers';
+} from '../../kibana_services';
+import { copyPersistentState } from '../../reducers/util';
+import { getInitialLayers } from '../../angular/get_initial_layers';
 import rison from 'rison-node';
-import { getInitialTimeFilters } from '../angular/get_initial_time_filters';
-import { getInitialRefreshConfig } from '../angular/get_initial_refresh_config';
-import { getInitialQuery } from '../angular/get_initial_query';
-import { getMapsSavedObjectLoader } from '../angular/services/gis_map_saved_object_loader';
-import { MapsTopNavMenu } from './top_nav_menu';
+import { getInitialTimeFilters } from '../../angular/get_initial_time_filters';
+import { getInitialRefreshConfig } from '../../angular/get_initial_refresh_config';
+import { getInitialQuery } from '../../angular/get_initial_query';
+import { getMapsSavedObjectLoader } from '../../angular/services/gis_map_saved_object_loader';
+import { MapsTopNavMenu } from '../page_elements/top_nav_menu';
 
 export const MapsCreateEditView = withRouter(
   class extends React.Component {
@@ -196,9 +196,7 @@ export const MapsCreateEditView = withRouter(
 
     initFilters(savedMap) {
       const { globalState, mapsAppState } = this.props;
-      const mapStateJSON = savedMap
-        ? savedMap.mapStateJSON
-        : undefined;
+      const mapStateJSON = savedMap ? savedMap.mapStateJSON : undefined;
       const query = getInitialQuery({
         mapStateJSON,
         appState: mapsAppState,
@@ -293,7 +291,7 @@ export const MapsCreateEditView = withRouter(
           ..._.get(globalState, 'filters', []),
           ...this.getAppStateFilters(),
           ...savedObjectFilters,
-        ]
+        ],
       });
     }
 

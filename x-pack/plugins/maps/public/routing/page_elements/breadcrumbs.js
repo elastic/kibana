@@ -5,11 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getCoreChrome } from '../kibana_services';
-import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { getCoreChrome } from '../../kibana_services';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import _ from 'lodash';
-import { getLayerListRaw } from '../selectors/map_selectors';
-import { copyPersistentState } from '../reducers/util';
+import { getLayerListRaw } from '../../selectors/map_selectors';
+import { copyPersistentState } from '../../reducers/util';
 
 function isOnMapNow() {
   return window.location.hash.startsWith(`#/${MAP_SAVED_OBJECT_TYPE}`);

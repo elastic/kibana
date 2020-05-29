@@ -6,19 +6,28 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
+import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { getCoreI18n } from '../kibana_services';
-import { MapsListView } from './list_view';
-import { MapsCreateEditView } from './create_edit_view';
+import { MapsListView } from './routes/list_view';
+import { MapsCreateEditView } from './routes/create_edit_view';
+import { createKbnUrlStateStorage } from '../../../../../src/plugins/kibana_utils/public/state_sync/state_sync_state_storage';
 
-export function renderApp(context, { appBasePath, element }) {
+export function renderApp(context, { appBasePath, element, history }) {
   const I18nContext = getCoreI18n().Context;
+  const kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
+
   render(
     <I18nContext>
-      <Router basename={appBasePath}>
+      <Router basename={appBasePath} history={history}>
         <Switch>
-          <Route path={`/map/:savedMapId`} component={MapsCreateEditView} />
-          <Route path={`/map`} component={MapsCreateEditView} />
+          <Route
+            path={`/map/:savedMapId`}
+            render={() => <MapsCreateEditView kbnUrlStateStorage={kbnUrlStateStorage} />}
+          />
+          <Route
+            path={`/map`}
+            render={() => <MapsCreateEditView kbnUrlStateStorage={kbnUrlStateStorage} />}
+          />
           <Route
             path={``}
             render={({ location }) => {
