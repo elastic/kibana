@@ -10,6 +10,15 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
   Client.prototype.dataManagement = components.clientAction.namespaceFactory();
   const dataManagement = Client.prototype.dataManagement.prototype;
 
+  dataManagement.getDataStreams = ca({
+    urls: [
+      {
+        fmt: '/_data_stream',
+      },
+    ],
+    method: 'GET',
+  });
+
   dataManagement.getComponentTemplates = ca({
     urls: [
       {

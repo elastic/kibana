@@ -19,11 +19,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { documentationService } from '../../services/documentation';
+import { DataStreamList } from './data_stream_list';
 import { IndexList } from './index_list';
 import { TemplateList } from './template_list';
 import { breadcrumbService } from '../../services/breadcrumbs';
 
-type Section = 'indices' | 'templates';
+type Section = 'data_streams' | 'indices' | 'templates';
 
 interface MatchParams {
   section: Section;
@@ -36,6 +37,15 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   history,
 }) => {
   const tabs = [
+    {
+      id: 'data_streams' as Section,
+      name: (
+        <FormattedMessage
+          id="xpack.idxMgmt.home.dataStreamsTabTitle"
+          defaultMessage="Data Streams"
+        />
+      ),
+    },
     {
       id: 'indices' as Section,
       name: <FormattedMessage id="xpack.idxMgmt.home.indicesTabTitle" defaultMessage="Indices" />,
@@ -106,6 +116,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <EuiSpacer size="m" />
 
         <Switch>
+          <Route exact path="/data_streams" component={DataStreamList} />
           <Route exact path="/indices" component={IndexList} />
           <Route exact path="/indices/filter/:filter?" component={IndexList} />
           <Route

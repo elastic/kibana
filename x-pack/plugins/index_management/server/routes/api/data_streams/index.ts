@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './aliases';
+import { RouteDependencies } from '../../../types';
 
-export * from './indices';
+import { registerGetAllRoute } from './register_get_route';
 
-export * from './mappings';
-
-export * from './templates';
-
-export { DataStreamFromEs, DataStream, DataStreamIndex } from './data_streams';
+export function registerDataStreamRoutes(dependencies: RouteDependencies) {
+  registerGetAllRoute(dependencies);
+}
