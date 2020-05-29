@@ -149,7 +149,6 @@ export class Plugin {
     this.featureUsageService = new SecurityFeatureUsageService();
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
 
-    const auditLogger = new SecurityAuditLogger(() => this.getLegacyAPI().auditLogger);
     const audit = this.auditService.setup({ license, config: config.audit });
     const auditLogger = new SecurityAuditLogger(audit.getLogger());
 
