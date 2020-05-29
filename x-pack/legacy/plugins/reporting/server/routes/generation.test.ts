@@ -90,7 +90,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if there are no job params', async () => {
-    registerJobGenerationRoutes(core);
+    registerJobGenerationRoutes(core, mockLogger);
 
     await server.start();
 
@@ -105,7 +105,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if job params query is invalid', async () => {
-    registerJobGenerationRoutes(core);
+    registerJobGenerationRoutes(core, mockLogger);
 
     await server.start();
 
@@ -116,7 +116,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if job params body is invalid', async () => {
-    registerJobGenerationRoutes(core);
+    registerJobGenerationRoutes(core, mockLogger);
 
     await server.start();
 
@@ -128,7 +128,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 export type is invalid', async () => {
-    registerJobGenerationRoutes(core);
+    registerJobGenerationRoutes(core, mockLogger);
 
     await server.start();
 
@@ -150,7 +150,7 @@ describe('POST /api/reporting/generate', () => {
         },
       }));
 
-    registerJobGenerationRoutes(core);
+    registerJobGenerationRoutes(core, mockLogger);
 
     await server.start();
 

@@ -7,7 +7,7 @@
 import * as Rx from 'rxjs';
 import { CancellationToken } from '../../../../../../../plugins/reporting/common';
 import { ReportingCore } from '../../../../server';
-import { cryptoFactory } from '../../../../server/lib';
+import { cryptoFactory, LevelLogger } from '../../../../server/lib';
 import { createMockReportingCore } from '../../../../test_helpers';
 import { JobDocPayloadPNG } from '../../types';
 import { generatePngObservableFactory } from '../lib/generate_png';
@@ -20,6 +20,15 @@ let mockReporting: ReportingCore;
 const cancellationToken = ({
   on: jest.fn(),
 } as unknown) as CancellationToken;
+
+const mockLoggerFactory = {
+  get: jest.fn().mockImplementation(() => ({
+    error: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn(),
+  })),
+};
+const getMockLogger = () => new LevelLogger(mockLoggerFactory);
 
 const mockEncryptionKey = 'abcabcsecuresecret';
 const encryptHeaders = async (headers: Record<string, string>) => {
@@ -68,7 +77,7 @@ test(`passes browserTimezone to generatePng`, async () => {
   const generatePngObservable = (await generatePngObservableFactory(mockReporting)) as jest.Mock;
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-  const executeJob = await executeJobFactory(mockReporting);
+  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
   const browserTimezone = 'UTC';
   await executeJob(
     'pngJobId',
@@ -80,29 +89,39 @@ test(`passes browserTimezone to generatePng`, async () => {
     cancellationToken
   );
 
-  // Don't snapshot logger
-  const [, ...rest] = generatePngObservable.mock.calls[0];
-
-  expect(rest).toMatchInlineSnapshot(`
+  expect(generatePngObservable.mock.calls).toMatchInlineSnapshot(`
     Array [
-      "http://localhost:5601/sbp/app/kibana#/something",
-      "UTC",
-      Object {
-        "conditions": Object {
-          "basePath": "/sbp",
-          "hostname": "localhost",
-          "port": 5601,
-          "protocol": "http",
+      Array [
+        LevelLogger {
+          "_logger": Object {
+            "get": [MockFunction],
+          },
+          "_tags": Array [
+            "PNG",
+            "execute",
+            "pngJobId",
+          ],
+          "warning": [Function],
         },
-        "headers": Object {},
-      },
-      undefined,
+        "http://localhost:5601/sbp/app/kibana#/something",
+        "UTC",
+        Object {
+          "conditions": Object {
+            "basePath": "/sbp",
+            "hostname": "localhost",
+            "port": 5601,
+            "protocol": "http",
+          },
+          "headers": Object {},
+        },
+        undefined,
+      ],
     ]
   `);
 });
 
 test(`returns content_type of application/png`, async () => {
-  const executeJob = await executeJobFactory(mockReporting);
+  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePngObservable = await generatePngObservableFactory(mockReporting);
@@ -121,7 +140,7 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   const generatePngObservable = await generatePngObservableFactory(mockReporting);
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ base64: testContent }));
 
-  const executeJob = await executeJobFactory(mockReporting);
+  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await executeJob(
     'pngJobId',

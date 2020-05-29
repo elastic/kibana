@@ -34,7 +34,6 @@ export class ReportingPlugin
     const router = core.http.createRouter();
     const basePath = core.http.basePath.get;
     const { xpack_main: xpackMainLegacy, reporting: reportingLegacy } = __LEGACY.plugins;
-    const { logger } = this;
 
     // legacy plugin status
     mirrorPluginStatus(xpackMainLegacy, reportingLegacy);
@@ -47,23 +46,22 @@ export class ReportingPlugin
       basePath,
       router,
       security,
-      logger,
     };
 
     runValidations(config, elasticsearch, browserDriverFactory, this.logger);
 
     this.reportingCore.pluginSetup(deps);
     registerReportingUsageCollector(this.reportingCore, plugins);
-    registerRoutes(this.reportingCore);
+    registerRoutes(this.reportingCore, this.logger);
 
     return {};
   }
 
   public async start(core: CoreStart, plugins: ReportingStartDeps) {
-    const { reportingCore } = this;
+    const { reportingCore, logger } = this;
 
-    const esqueue = await createQueueFactory(reportingCore);
-    const enqueueJob = enqueueJobFactory(reportingCore);
+    const esqueue = await createQueueFactory(reportingCore, logger);
+    const enqueueJob = enqueueJobFactory(reportingCore, logger);
 
     this.reportingCore.pluginStart({
       savedObjects: core.savedObjects,

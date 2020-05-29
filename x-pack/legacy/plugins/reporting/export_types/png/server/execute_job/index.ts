@@ -9,6 +9,7 @@ import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
+import { LevelLogger } from '../../../../server/lib';
 import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput } from '../../../../server/types';
 import {
   decryptJobHeaders,
@@ -22,12 +23,12 @@ import { generatePngObservableFactory } from '../lib/generate_png';
 type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPNG>>;
 
 export const executeJobFactory: QueuedPngExecutorFactory = async function executeJobFactoryFn(
-  reporting: ReportingCore
+  reporting: ReportingCore,
+  parentLogger: LevelLogger
 ) {
   const config = reporting.getConfig();
-  const setupDeps = reporting.getPluginSetupDeps();
   const encryptionKey = config.get('encryptionKey');
-  const logger = setupDeps.logger.clone([PNG_JOB_TYPE, 'execute']);
+  const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);
 
   return async function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
     const apmTrans = apm.startTransaction('reporting execute_job png', 'reporting');

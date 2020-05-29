@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { ReportingCore } from '../../../server';
-import { cryptoFactory } from '../../../server/lib';
+import { cryptoFactory, LevelLogger } from '../../../server/lib';
 import { ExecuteJobFactory, JobDocOutput, JobDocPayload } from '../../../server/types';
 import { CsvResultFromSearch } from '../../csv/types';
 import { FakeRequest, JobDocPayloadPanelCsv, JobParamsPanelCsv, SearchPanel } from '../types';
@@ -27,12 +27,11 @@ export type ImmediateExecuteFn<JobParamsType> = (
 
 export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
   JobParamsPanelCsv
->> = async function executeJobFactoryFn(reporting: ReportingCore) {
+>> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: LevelLogger) {
   const config = reporting.getConfig();
-  const setupDeps = reporting.getPluginSetupDeps();
   const crypto = cryptoFactory(config.get('encryptionKey'));
-  const logger = setupDeps.logger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
-  const generateCsv = createGenerateCsv(reporting);
+  const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
+  const generateCsv = createGenerateCsv(reporting, parentLogger);
 
   return async function executeJob(
     jobId: string | null,

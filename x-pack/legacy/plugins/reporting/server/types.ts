@@ -207,10 +207,14 @@ export type ServerFacade = LegacySetup;
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export type CreateJobFactory<CreateJobFnType> = (reporting: ReportingCore) => CreateJobFnType;
+export type CreateJobFactory<CreateJobFnType> = (
+  reporting: ReportingCore,
+  logger: LevelLogger
+) => CreateJobFnType;
 
 export type ExecuteJobFactory<ExecuteJobFnType> = (
-  reporting: ReportingCore
+  reporting: ReportingCore,
+  logger: LevelLogger
 ) => Promise<ExecuteJobFnType>; // FIXME: does not "need" to be async
 
 export interface ExportTypeDefinition<

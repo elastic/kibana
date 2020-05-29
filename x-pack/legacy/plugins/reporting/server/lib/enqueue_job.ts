@@ -11,6 +11,7 @@ import { ESQueueCreateJobFn } from '../../server/types';
 import { ReportingCore } from '../core';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
+import { LevelLogger } from './level_logger';
 
 interface ConfirmedJob {
   id: string;
@@ -34,13 +35,15 @@ export type EnqueueJobFn = <JobParamsType>(
   request: KibanaRequest
 ) => Promise<Job>;
 
-export function enqueueJobFactory(reporting: ReportingCore): EnqueueJobFn {
+export function enqueueJobFactory(
+  reporting: ReportingCore,
+  parentLogger: LevelLogger
+): EnqueueJobFn {
   const config = reporting.getConfig();
-  const setupDeps = reporting.getPluginSetupDeps();
   const queueTimeout = config.get('queue', 'timeout');
   const browserType = config.get('capture', 'browser', 'type');
   const maxAttempts = config.get('capture', 'maxAttempts');
-  const logger = setupDeps.logger.clone(['queue-job']);
+  const logger = parentLogger.clone(['queue-job']);
 
   return async function enqueueJob<JobParamsType>(
     exportTypeId: string,
@@ -58,7 +61,7 @@ export function enqueueJobFactory(reporting: ReportingCore): EnqueueJobFn {
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    const createJob = exportType.createJobFactory(reporting) as CreateJobFn;
+    const createJob = exportType.createJobFactory(reporting, logger) as CreateJobFn;
     const payload = await createJob(jobParams, context, request);
 
     const options = {
