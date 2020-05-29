@@ -25,8 +25,6 @@ export function getIndexPatternFieldList(
   fieldCounts: Record<string, number>,
   { data }: DiscoverServices
 ) {
-  if (!indexPattern || !fieldCounts) return data.indexPatterns.createFieldList(indexPattern);
-
   const fieldSpecs = indexPattern.fields.slice(0);
   const fieldNamesInDocs = Object.keys(fieldCounts);
   const fieldNamesInIndexPattern = map(indexPattern.fields, 'name');
