@@ -27,5 +27,6 @@ export async function PuppeteerTestRunner({ getService }: FtrProviderContext) {
   });
   const reporter = CiStatsReporter.fromEnv(log);
 
+  log.debug('Report page load asset size');
   await reporter.metrics(metrics);
 }
