@@ -31,7 +31,7 @@ OptimizerConfig {
   "cache": true,
   "dist": false,
   "inspectWorkers": false,
-  "maxWorkerCount": 7,
+  "maxActiveWorkers": 1,
   "plugins": Array [
     Object {
       "directory": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar,
@@ -51,6 +51,7 @@ OptimizerConfig {
   ],
   "profileWebpack": false,
   "repoRoot": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo,
+  "softMaxModulesPerWorker": 3000,
   "watch": false,
 }
 `;
