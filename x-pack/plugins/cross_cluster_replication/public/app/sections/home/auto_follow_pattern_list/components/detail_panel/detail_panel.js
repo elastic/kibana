@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 
-import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { getIndexListUri } from '../../../../../../../../../plugins/index_management/public';
 
 import {
@@ -299,10 +298,9 @@ export class DetailPanel extends Component {
         <EuiSpacer size="l" />
 
         <EuiLink
-          {...reactRouterNavigate(
-            routing._reactRouter.history.parentHistory,
-            `/data/index_management${indexManagementUri}`
-          )}
+          href={routing._reactRouter.getUrlForApp('management', {
+            path: `data/index_management${indexManagementUri}`,
+          })}
           data-test-subj="viewIndexManagementLink"
         >
           <FormattedMessage
