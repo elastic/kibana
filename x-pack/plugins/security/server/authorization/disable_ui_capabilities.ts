@@ -6,17 +6,25 @@
 
 import { flatten, isObject, mapValues } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
+import { RecursiveReadonlyArray } from '@kbn/utility-types';
 import { KibanaRequest, Logger } from '../../../../../src/core/server';
-import { Feature } from '../../../features/server';
+import {
+  Feature,
+  ElasticsearchFeature,
+  FeatureElasticsearchPrivileges,
+} from '../../../features/server';
 
 import { CheckPrivilegesResponse } from './check_privileges';
 import { AuthorizationServiceSetup } from '.';
+import { AuthenticatedUser } from '..';
 
 export function disableUICapabilitiesFactory(
   request: KibanaRequest,
   features: Feature[],
+  elasticsearchFeatures: ElasticsearchFeature[],
   logger: Logger,
-  authz: AuthorizationServiceSetup
+  authz: AuthorizationServiceSetup,
+  user: AuthenticatedUser | null
 ) {
   // nav links are sourced from the apps property.
   // The Kibana Platform associates nav links to the app which registers it, in a 1:1 relationship.
@@ -24,6 +32,37 @@ export function disableUICapabilitiesFactory(
   const featureNavLinkIds = features
     .flatMap((feature) => feature.app)
     .filter((navLinkId) => navLinkId != null);
+
+  const elasticsearchFeatureMap = elasticsearchFeatures.reduce((acc, esFeature) => {
+    return {
+      ...acc,
+      [esFeature.id]: esFeature.privileges,
+    };
+  }, {} as Record<string, RecursiveReadonlyArray<FeatureElasticsearchPrivileges>>);
+
+  const allRequiredClusterPrivileges = Array.from(
+    new Set(
+      Object.values(elasticsearchFeatureMap)
+        .flat()
+        .map((p) => p.requiredClusterPrivileges)
+        .flat()
+    )
+  );
+
+  const allRequiredIndexPrivileges = Object.values(elasticsearchFeatureMap)
+    .flat()
+    .filter((p) => !!p.requiredIndexPrivileges)
+    .reduce((acc, p) => {
+      return {
+        ...acc,
+        ...Object.entries(p.requiredIndexPrivileges!).reduce((acc2, [indexName, privileges]) => {
+          return {
+            ...acc2,
+            [indexName]: [...(acc[indexName] ?? []), ...privileges],
+          };
+        }, {} as Record<string, string[]>),
+      };
+    }, {} as Record<string, string[]>);
 
   const shouldDisableFeatureUICapability = (
     featureId: keyof UICapabilities,
@@ -85,7 +124,13 @@ export function disableUICapabilitiesFactory(
     let checkPrivilegesResponse: CheckPrivilegesResponse;
     try {
       const checkPrivilegesDynamically = authz.checkPrivilegesDynamicallyWithRequest(request);
-      checkPrivilegesResponse = await checkPrivilegesDynamically(uiActions);
+      checkPrivilegesResponse = await checkPrivilegesDynamically({
+        kibana: uiActions,
+        elasticsearch: {
+          cluster: allRequiredClusterPrivileges,
+          index: allRequiredIndexPrivileges,
+        },
+      });
     } catch (err) {
       // if we get a 401/403, then we want to disable all uiCapabilities, as this
       // is generally when the user hasn't authenticated yet and we're displaying the
@@ -110,9 +155,42 @@ export function disableUICapabilitiesFactory(
       }
 
       const action = authz.actions.ui.get(featureId, ...uiCapabilityParts);
-      return checkPrivilegesResponse.privileges.some(
+
+      const hasRequiredKibanaPrivileges = checkPrivilegesResponse.privileges.kibana.some(
         (x) => x.privilege === action && x.authorized === true
       );
+
+      if (hasRequiredKibanaPrivileges) {
+        return true;
+      }
+
+      const isCatalogueFeature = featureId === 'catalogue';
+      const isManagementFeature = featureId === 'management';
+
+      if (isCatalogueFeature) {
+        const [catalogueEntry] = uiCapabilityParts;
+        return elasticsearchFeatures.some((esFeature) => {
+          const featureGrantsCatalogueEntry = (esFeature.catalogue ?? []).includes(catalogueEntry);
+          return (
+            featureGrantsCatalogueEntry &&
+            hasRequiredElasticsearchPrivilegesForFeature(esFeature, checkPrivilegesResponse, user)
+          );
+        });
+      } else if (isManagementFeature) {
+        const [managementSectionId, managementEntryId] = uiCapabilityParts;
+        return elasticsearchFeatures.some((esFeature) => {
+          const featureGrantsManagementEntry =
+            (esFeature.management ?? {}).hasOwnProperty(managementSectionId) &&
+            esFeature.management![managementSectionId].includes(managementEntryId);
+
+          return (
+            featureGrantsManagementEntry &&
+            hasRequiredElasticsearchPrivilegesForFeature(esFeature, checkPrivilegesResponse, user)
+          );
+        });
+      }
+
+      return hasRequiredKibanaPrivileges;
     };
 
     return mapValues(uiCapabilities, (featureUICapabilities, featureId) => {
@@ -150,4 +228,33 @@ export function disableUICapabilitiesFactory(
     all: disableAll,
     usingPrivileges,
   };
+}
+
+function hasRequiredElasticsearchPrivilegesForFeature(
+  esFeature: ElasticsearchFeature,
+  checkPrivilegesResponse: CheckPrivilegesResponse,
+  user: AuthenticatedUser | null
+) {
+  return esFeature.privileges.some((privilege) => {
+    const hasRequiredClusterPrivileges = privilege.requiredClusterPrivileges.every(
+      (expectedClusterPriv) =>
+        checkPrivilegesResponse.privileges.elasticsearch.cluster.some(
+          (x) => x.privilege === expectedClusterPriv && x.authorized === true
+        )
+    );
+
+    const hasRequiredIndexPrivileges = Object.entries(
+      privilege.requiredIndexPrivileges ?? {}
+    ).every(([indexName, requiredIndexPrivileges]) => {
+      return checkPrivilegesResponse.privileges.elasticsearch.index[indexName]
+        .filter((indexResponse) => requiredIndexPrivileges.includes(indexResponse.privilege))
+        .every((indexResponse) => indexResponse.authorized);
+    });
+
+    const hasRequiredRoles = (privilege.requiredRoles ?? []).every(
+      (requiredRole) => user?.roles.includes(requiredRole) ?? false
+    );
+
+    return hasRequiredClusterPrivileges && hasRequiredIndexPrivileges && hasRequiredRoles;
+  });
 }

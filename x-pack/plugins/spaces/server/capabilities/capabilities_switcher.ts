@@ -28,7 +28,7 @@ export function setupCapabilitiesSwitcher(
         core.getStartServices(),
       ]);
 
-      const registeredFeatures = features.getFeatures();
+      const registeredFeatures = features.getKibanaFeatures();
 
       // try to retrieve capabilities for authenticated or "maybe authenticated" users
       return toggleCapabilities(registeredFeatures, capabilities, activeSpace);

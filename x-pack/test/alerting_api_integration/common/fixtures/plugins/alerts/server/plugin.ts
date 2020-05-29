@@ -25,7 +25,7 @@ export interface FixtureStartDeps {
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   public setup(core: CoreSetup<FixtureStartDeps>, { features, actions, alerts }: FixtureSetupDeps) {
-    features.registerFeature({
+    features.registerKibanaFeature({
       id: 'alertsFixture',
       name: 'Alerts',
       app: ['alerts', 'kibana'],

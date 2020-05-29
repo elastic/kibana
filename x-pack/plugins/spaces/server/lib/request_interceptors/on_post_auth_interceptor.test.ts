@@ -124,7 +124,7 @@ describe.skip('onPostAuthInterceptor', () => {
     const loggingMock = loggingSystemMock.create().asLoggerFactory().get('xpack', 'spaces');
 
     const featuresPlugin = featuresPluginMock.createSetup();
-    featuresPlugin.getFeatures.mockReturnValue(([
+    featuresPlugin.getKibanaFeatures.mockReturnValue(([
       {
         id: 'feature-1',
         name: 'feature 1',

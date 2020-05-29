@@ -16,4 +16,20 @@ export interface HasPrivilegesResponse {
   application: {
     [applicationName: string]: HasPrivilegesResponseApplication;
   };
+  cluster?: {
+    [privilegeName: string]: boolean;
+  };
+  index?: {
+    [indexName: string]: {
+      [privilegeName: string]: boolean;
+    };
+  };
+}
+
+export interface CheckPrivilegesPayload {
+  kibana?: string | string[];
+  elasticsearch?: {
+    cluster: string[];
+    index: Record<string, string[]>;
+  };
 }

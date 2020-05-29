@@ -12,6 +12,7 @@ jest.mock('../lib/enqueue_job');
 jest.mock('../lib/validate');
 
 import * as Rx from 'rxjs';
+import { featuresPluginMock } from '../../../features/server/mocks';
 import { ReportingConfig, ReportingCore } from '../';
 import {
   chromium,
@@ -32,6 +33,7 @@ import { Report } from '../lib/store';
 
 const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup => {
   return {
+    features: featuresPluginMock.createSetup(),
     elasticsearch: setupMock.elasticsearch || { legacy: { client: {} } },
     basePath: setupMock.basePath,
     router: setupMock.router,

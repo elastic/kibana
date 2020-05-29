@@ -27,7 +27,7 @@ export class AlertingBuiltinsPlugin implements Plugin<IService, IService> {
     core: CoreSetup,
     { alerts, features }: AlertingBuiltinsDeps
   ): Promise<IService> {
-    features.registerFeature(BUILT_IN_ALERTS_FEATURE);
+    features.registerKibanaFeature(BUILT_IN_ALERTS_FEATURE);
 
     registerBuiltInAlertTypes({
       service: this.service,

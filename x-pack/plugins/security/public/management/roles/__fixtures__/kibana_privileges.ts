@@ -19,7 +19,7 @@ export const createRawKibanaPrivileges = (
   { allowSubFeaturePrivileges = true } = {}
 ) => {
   const featuresService = featuresPluginMock.createSetup();
-  featuresService.getFeatures.mockReturnValue(features);
+  featuresService.getKibanaFeatures.mockReturnValue(features);
 
   const licensingService = {
     getFeatures: () => ({ allowSubFeaturePrivileges } as SecurityLicenseFeatures),

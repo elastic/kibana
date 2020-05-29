@@ -23,7 +23,7 @@ coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
 describe('Features Plugin', () => {
   it('returns OSS + registered features', async () => {
     const plugin = new Plugin(initContext);
-    const { registerFeature } = await plugin.setup(coreSetup, {});
+    const { registerKibanaFeature: registerFeature } = await plugin.setup(coreSetup, {});
     registerFeature({
       id: 'baz',
       name: 'baz',
@@ -31,7 +31,7 @@ describe('Features Plugin', () => {
       privileges: null,
     });
 
-    const { getFeatures } = await plugin.start(coreStart);
+    const { getKibanaFeatures: getFeatures } = await plugin.start(coreStart);
 
     expect(getFeatures().map((f) => f.id)).toMatchInlineSnapshot(`
       Array [
@@ -49,7 +49,7 @@ describe('Features Plugin', () => {
 
   it('returns OSS + registered features with timelion when available', async () => {
     const plugin = new Plugin(initContext);
-    const { registerFeature } = await plugin.setup(coreSetup, {
+    const { registerKibanaFeature: registerFeature } = await plugin.setup(coreSetup, {
       visTypeTimelion: { uiEnabled: true },
     });
     registerFeature({
@@ -59,7 +59,7 @@ describe('Features Plugin', () => {
       privileges: null,
     });
 
-    const { getFeatures } = await plugin.start(coreStart);
+    const { getKibanaFeatures: getFeatures } = await plugin.start(coreStart);
 
     expect(getFeatures().map((f) => f.id)).toMatchInlineSnapshot(`
       Array [
@@ -79,7 +79,7 @@ describe('Features Plugin', () => {
   it('registers not hidden saved objects types', async () => {
     const plugin = new Plugin(initContext);
     await plugin.setup(coreSetup, {});
-    const { getFeatures } = await plugin.start(coreStart);
+    const { getKibanaFeatures: getFeatures } = await plugin.start(coreStart);
 
     const soTypes =
       getFeatures().find((f) => f.id === 'savedObjectsManagement')?.privileges?.all.savedObject

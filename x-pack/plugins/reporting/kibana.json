@@ -14,7 +14,8 @@
     "licensing",
     "uiActions",
     "embeddable",
-    "share"
+    "share",
+    "features"
   ],
   "server": true,
   "ui": true,

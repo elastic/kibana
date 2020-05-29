@@ -58,7 +58,7 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
     this.license = new License();
   }
 
-  setup({ http, getStartServices }: CoreSetup, { licensing }: Dependencies): {} {
+  setup({ http, getStartServices }: CoreSetup, { licensing, features }: Dependencies): {} {
     const router = http.createRouter();
 
     this.license.setup(
@@ -74,6 +74,20 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
         logger: this.logger,
       }
     );
+
+    features.registerElasticsearchFeature({
+      id: PLUGIN.id,
+      management: {
+        data: [PLUGIN.id],
+      },
+      catalogue: [PLUGIN.id],
+      privileges: [
+        {
+          requiredClusterPrivileges: ['monitor_transform'],
+          ui: [],
+        },
+      ],
+    });
 
     this.apiRoutes.setup({
       router,

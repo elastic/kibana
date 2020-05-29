@@ -121,7 +121,7 @@ const setup = (space: Space) => {
   const coreSetup = coreMock.createSetup();
 
   const featuresStart = featuresPluginMock.createStart();
-  featuresStart.getFeatures.mockReturnValue(features);
+  featuresStart.getKibanaFeatures.mockReturnValue(features);
 
   coreSetup.getStartServices.mockResolvedValue([
     coreMock.createStart(),

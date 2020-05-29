@@ -8,8 +8,8 @@ import Joi from 'joi';
 
 import { difference } from 'lodash';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
-import { FeatureConfig } from '../common/feature';
-import { FeatureKibanaPrivileges } from '.';
+import { KibanaFeatureConfig } from '../common/feature';
+import { FeatureKibanaPrivileges, ElasticsearchFeatureConfig } from '.';
 
 // Each feature gets its own property on the UICapabilities object,
 // but that object has a few built-in properties which should not be overwritten.
@@ -74,7 +74,7 @@ const subFeatureSchema = Joi.object({
   ),
 });
 
-const schema = Joi.object({
+const kibanaFeatureSchema = Joi.object({
   id: Joi.string()
     .regex(featurePrivilegePartRegex)
     .invalid(...prohibitedFeatureIds)
@@ -117,8 +117,30 @@ const schema = Joi.object({
   }),
 });
 
-export function validateFeature(feature: FeatureConfig) {
-  const validateResult = Joi.validate(feature, schema);
+const elasticsearchFeatureSchema = Joi.object({
+  id: Joi.string()
+    .regex(featurePrivilegePartRegex)
+    .invalid(...prohibitedFeatureIds)
+    .required(),
+  management: managementSchema,
+  catalogue: catalogueSchema,
+  privileges: Joi.array()
+    .items(
+      Joi.object({
+        ui: Joi.array().items(Joi.string()).required(),
+        requiredClusterPrivileges: Joi.array().items(Joi.string()).required(),
+        requiredIndexPrivileges: Joi.object().pattern(
+          Joi.string(),
+          Joi.array().items(Joi.string())
+        ),
+        requiredRoles: Joi.array().items(Joi.string()),
+      })
+    )
+    .required(),
+});
+
+export function validateKibanaFeature(feature: KibanaFeatureConfig) {
+  const validateResult = Joi.validate(feature, kibanaFeatureSchema);
   if (validateResult.error) {
     throw validateResult.error;
   }
@@ -301,5 +323,12 @@ export function validateFeature(feature: FeatureConfig) {
         unseenAlertTypes.values()
       ).join(',')}`
     );
+  }
+}
+
+export function validateElasticsearchFeature(feature: ElasticsearchFeatureConfig) {
+  const validateResult = Joi.validate(feature, elasticsearchFeatureSchema);
+  if (validateResult.error) {
+    throw validateResult.error;
   }
 }

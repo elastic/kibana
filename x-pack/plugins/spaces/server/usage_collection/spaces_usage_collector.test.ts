@@ -37,7 +37,7 @@ function setup({
   } as LicensingPluginSetup;
 
   const featuresSetup = ({
-    getFeatures: jest.fn().mockReturnValue(features),
+    getKibanaFeatures: jest.fn().mockReturnValue(features),
   } as unknown) as PluginsSetup['features'];
 
   return {

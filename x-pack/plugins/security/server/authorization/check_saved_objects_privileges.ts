@@ -31,18 +31,18 @@ export const checkSavedObjectsPrivilegesWithRequestFactory = (
       const spacesService = getSpacesService();
       if (!spacesService) {
         // Spaces disabled, authorizing globally
-        return await checkPrivilegesWithRequest(request).globally(actions);
+        return await checkPrivilegesWithRequest(request).globally({ kibana: actions });
       } else if (Array.isArray(namespaceOrNamespaces)) {
         // Spaces enabled, authorizing against multiple spaces
         if (!namespaceOrNamespaces.length) {
           throw new Error(`Can't check saved object privileges for 0 namespaces`);
         }
         const spaceIds = namespaceOrNamespaces.map((x) => spacesService.namespaceToSpaceId(x));
-        return await checkPrivilegesWithRequest(request).atSpaces(spaceIds, actions);
+        return await checkPrivilegesWithRequest(request).atSpaces(spaceIds, { kibana: actions });
       } else {
         // Spaces enabled, authorizing against a single space
         const spaceId = spacesService.namespaceToSpaceId(namespaceOrNamespaces);
-        return await checkPrivilegesWithRequest(request).atSpace(spaceId, actions);
+        return await checkPrivilegesWithRequest(request).atSpace(spaceId, { kibana: actions });
       }
     };
   };

@@ -27,7 +27,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
   const { features } = plugins;
   const libs = compose(server);
 
-  features.registerFeature({
+  features.registerKibanaFeature({
     id: PLUGIN.ID,
     name: PLUGIN.NAME,
     order: 1000,

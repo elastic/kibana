@@ -159,7 +159,7 @@ describe('Alerting Plugin', () => {
 
 function mockFeatures() {
   const features = featuresPluginMock.createSetup();
-  features.getFeatures.mockReturnValue([
+  features.getKibanaFeatures.mockReturnValue([
     new Feature({
       id: 'appName',
       name: 'appName',

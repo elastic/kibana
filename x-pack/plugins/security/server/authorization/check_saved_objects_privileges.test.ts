@@ -68,7 +68,7 @@ describe('#checkSavedObjectsPrivileges', () => {
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivileges.atSpaces).toHaveBeenCalledTimes(1);
       const spaceIds = mockSpacesService!.namespaceToSpaceId.mock.results.map((x) => x.value);
-      expect(mockCheckPrivileges.atSpaces).toHaveBeenCalledWith(spaceIds, actions);
+      expect(mockCheckPrivileges.atSpaces).toHaveBeenCalledWith(spaceIds, { kibana: actions });
     });
   });
 
@@ -87,7 +87,7 @@ describe('#checkSavedObjectsPrivileges', () => {
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivileges.atSpace).toHaveBeenCalledTimes(1);
       const spaceId = mockSpacesService!.namespaceToSpaceId.mock.results[0].value;
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, actions);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, { kibana: actions });
     });
 
     test(`uses checkPrivileges.globally when Spaces is disabled`, async () => {
@@ -102,7 +102,7 @@ describe('#checkSavedObjectsPrivileges', () => {
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledTimes(1);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivileges.globally).toHaveBeenCalledTimes(1);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith(actions);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({ kibana: actions });
     });
   });
 });

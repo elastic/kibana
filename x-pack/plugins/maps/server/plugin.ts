@@ -162,7 +162,7 @@ export class MapsPlugin implements Plugin {
 
     this._initHomeData(home, core.http.basePath.prepend, currentConfig);
 
-    features.registerFeature({
+    features.registerKibanaFeature({
       id: APP_ID,
       name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
         defaultMessage: 'Maps',

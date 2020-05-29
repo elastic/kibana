@@ -35,7 +35,7 @@ export class CanvasPlugin implements Plugin {
     coreSetup.savedObjects.registerType(workpadType);
     coreSetup.savedObjects.registerType(workpadTemplateType);
 
-    plugins.features.registerFeature({
+    plugins.features.registerKibanaFeature({
       id: 'canvas',
       name: 'Canvas',
       order: 400,

@@ -5,34 +5,66 @@
  */
 
 import { cloneDeep, uniq } from 'lodash';
-import { FeatureConfig, Feature, FeatureKibanaPrivileges } from '../common';
-import { validateFeature } from './feature_schema';
+import {
+  FeatureConfig,
+  Feature,
+  FeatureKibanaPrivileges,
+  ElasticsearchFeatureConfig,
+  ElasticsearchFeature,
+} from '../common';
+import { validateKibanaFeature, validateElasticsearchFeature } from './feature_schema';
 
 export class FeatureRegistry {
   private locked = false;
-  private features: Record<string, FeatureConfig> = {};
+  private kibanaFeatures: Record<string, FeatureConfig> = {};
+  private esFeatures: Record<string, ElasticsearchFeatureConfig> = {};
 
-  public register(feature: FeatureConfig) {
+  public registerKibanaFeature(feature: FeatureConfig) {
     if (this.locked) {
       throw new Error(
         `Features are locked, can't register new features. Attempt to register ${feature.id} failed.`
       );
     }
 
-    validateFeature(feature);
+    validateKibanaFeature(feature);
 
-    if (feature.id in this.features) {
+    if (feature.id in this.kibanaFeatures || feature.id in this.esFeatures) {
       throw new Error(`Feature with id ${feature.id} is already registered.`);
     }
 
     const featureCopy = cloneDeep(feature);
 
-    this.features[feature.id] = applyAutomaticPrivilegeGrants(featureCopy);
+    this.kibanaFeatures[feature.id] = applyAutomaticPrivilegeGrants(featureCopy);
   }
 
-  public getAll(): Feature[] {
+  public registerElasticsearchFeature(feature: ElasticsearchFeatureConfig) {
+    if (this.locked) {
+      throw new Error(
+        `Features are locked, can't register new features. Attempt to register ${feature.id} failed.`
+      );
+    }
+
+    if (feature.id in this.kibanaFeatures || feature.id in this.esFeatures) {
+      throw new Error(`Feature with id ${feature.id} is already registered.`);
+    }
+
+    validateElasticsearchFeature(feature);
+
+    const featureCopy = cloneDeep(feature);
+
+    this.esFeatures[feature.id] = featureCopy;
+  }
+
+  public getAllKibanaFeatures(): Feature[] {
     this.locked = true;
-    return Object.values(this.features).map((featureConfig) => new Feature(featureConfig));
+    return Object.values(this.kibanaFeatures).map((featureConfig) => new Feature(featureConfig));
+  }
+
+  public getAllElasticsearchFeatures(): ElasticsearchFeature[] {
+    this.locked = true;
+    return Object.values(this.esFeatures).map(
+      (featureConfig) => new ElasticsearchFeature(featureConfig)
+    );
   }
 }
 

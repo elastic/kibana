@@ -76,6 +76,7 @@ it(`#setup returns exposed services`, () => {
     packageVersion: 'some-version',
     features: mockFeaturesSetup,
     getSpacesService: mockGetSpacesService,
+    getCurrentUser: jest.fn(),
   });
 
   expect(authz.actions.version).toBe('version:some-version');
@@ -147,10 +148,11 @@ describe('#start', () => {
       getSpacesService: jest
         .fn()
         .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() }),
+      getCurrentUser: jest.fn(),
     });
 
     const featuresStart = featuresPluginMock.createStart();
-    featuresStart.getFeatures.mockReturnValue([]);
+    featuresStart.getKibanaFeatures.mockReturnValue([]);
 
     authorizationService.start({ clusterClient: mockClusterClient, features: featuresStart });
 
@@ -248,10 +250,11 @@ it('#stop unsubscribes from license and ES updates.', () => {
     getSpacesService: jest
       .fn()
       .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() }),
+    getCurrentUser: jest.fn(),
   });
 
   const featuresStart = featuresPluginMock.createStart();
-  featuresStart.getFeatures.mockReturnValue([]);
+  featuresStart.getKibanaFeatures.mockReturnValue([]);
   authorizationService.start({ clusterClient: mockClusterClient, features: featuresStart });
 
   authorizationService.stop();

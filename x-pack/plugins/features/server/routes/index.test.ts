@@ -24,14 +24,14 @@ describe('GET /api/features', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeEach(() => {
     const featureRegistry = new FeatureRegistry();
-    featureRegistry.register({
+    featureRegistry.registerKibanaFeature({
       id: 'feature_1',
       name: 'Feature 1',
       app: [],
       privileges: null,
     });
 
-    featureRegistry.register({
+    featureRegistry.registerKibanaFeature({
       id: 'feature_2',
       name: 'Feature 2',
       order: 2,
@@ -39,7 +39,7 @@ describe('GET /api/features', () => {
       privileges: null,
     });
 
-    featureRegistry.register({
+    featureRegistry.registerKibanaFeature({
       id: 'feature_3',
       name: 'Feature 2',
       order: 1,
@@ -47,7 +47,7 @@ describe('GET /api/features', () => {
       privileges: null,
     });
 
-    featureRegistry.register({
+    featureRegistry.registerKibanaFeature({
       id: 'licensed_feature',
       name: 'Licensed Feature',
       app: ['bar-app'],

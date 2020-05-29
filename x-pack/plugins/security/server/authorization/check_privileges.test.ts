@@ -50,7 +50,9 @@ describe('#atSpace', () => {
     let actualResult;
     let errorThrown = null;
     try {
-      actualResult = await checkPrivileges.atSpace(options.spaceId, options.privilegeOrPrivileges);
+      actualResult = await checkPrivileges.atSpace(options.spaceId, {
+        kibana: options.privilegeOrPrivileges,
+      });
     } catch (err) {
       errorThrown = err;
     }
@@ -58,6 +60,7 @@ describe('#atSpace', () => {
     expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
     expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.hasPrivileges', {
       body: {
+        index: [],
         applications: [
           {
             application,
@@ -100,13 +103,19 @@ describe('#atSpace', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": true,
-        "privileges": Array [
-          Object {
-            "authorized": true,
-            "privilege": "mock-action:login",
-            "resource": "space_1",
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
           },
-        ],
+          "kibana": Array [
+            Object {
+              "authorized": true,
+              "privilege": "mock-action:login",
+              "resource": "space_1",
+            },
+          ],
+        },
         "username": "foo-username",
       }
     `);
@@ -132,13 +141,19 @@ describe('#atSpace', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": false,
-        "privileges": Array [
-          Object {
-            "authorized": false,
-            "privilege": "mock-action:login",
-            "resource": "space_1",
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
           },
-        ],
+          "kibana": Array [
+            Object {
+              "authorized": false,
+              "privilege": "mock-action:login",
+              "resource": "space_1",
+            },
+          ],
+        },
         "username": "foo-username",
       }
     `);
@@ -191,18 +206,24 @@ describe('#atSpace', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": true,
-        "privileges": Array [
-          Object {
-            "authorized": true,
-            "privilege": "saved_object:foo-type/get",
-            "resource": "space_1",
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
           },
-          Object {
-            "authorized": true,
-            "privilege": "saved_object:bar-type/get",
-            "resource": "space_1",
-          },
-        ],
+          "kibana": Array [
+            Object {
+              "authorized": true,
+              "privilege": "saved_object:foo-type/get",
+              "resource": "space_1",
+            },
+            Object {
+              "authorized": true,
+              "privilege": "saved_object:bar-type/get",
+              "resource": "space_1",
+            },
+          ],
+        },
         "username": "foo-username",
       }
     `);
@@ -233,18 +254,24 @@ describe('#atSpace', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": false,
-        "privileges": Array [
-          Object {
-            "authorized": false,
-            "privilege": "saved_object:foo-type/get",
-            "resource": "space_1",
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
           },
-          Object {
-            "authorized": true,
-            "privilege": "saved_object:bar-type/get",
-            "resource": "space_1",
-          },
-        ],
+          "kibana": Array [
+            Object {
+              "authorized": false,
+              "privilege": "saved_object:foo-type/get",
+              "resource": "space_1",
+            },
+            Object {
+              "authorized": true,
+              "privilege": "saved_object:bar-type/get",
+              "resource": "space_1",
+            },
+          ],
+        },
         "username": "foo-username",
       }
     `);
@@ -319,10 +346,9 @@ describe('#atSpaces', () => {
     let actualResult;
     let errorThrown = null;
     try {
-      actualResult = await checkPrivileges.atSpaces(
-        options.spaceIds,
-        options.privilegeOrPrivileges
-      );
+      actualResult = await checkPrivileges.atSpaces(options.spaceIds, {
+        kibana: options.privilegeOrPrivileges,
+      });
     } catch (err) {
       errorThrown = err;
     }
@@ -330,6 +356,7 @@ describe('#atSpaces', () => {
     expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
     expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.hasPrivileges', {
       body: {
+        index: [],
         applications: [
           {
             application,
@@ -376,18 +403,24 @@ describe('#atSpaces', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": true,
-        "privileges": Array [
-          Object {
-            "authorized": true,
-            "privilege": "mock-action:login",
-            "resource": "space_1",
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
           },
-          Object {
-            "authorized": true,
-            "privilege": "mock-action:login",
-            "resource": "space_2",
-          },
-        ],
+          "kibana": Array [
+            Object {
+              "authorized": true,
+              "privilege": "mock-action:login",
+              "resource": "space_1",
+            },
+            Object {
+              "authorized": true,
+              "privilege": "mock-action:login",
+              "resource": "space_2",
+            },
+          ],
+        },
         "username": "foo-username",
       }
     `);
@@ -417,18 +450,24 @@ describe('#atSpaces', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": false,
-        "privileges": Array [
-          Object {
-            "authorized": true,
-            "privilege": "mock-action:login",
-            "resource": "space_1",
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
           },
-          Object {
-            "authorized": false,
-            "privilege": "mock-action:login",
-            "resource": "space_2",
-          },
-        ],
+          "kibana": Array [
+            Object {
+              "authorized": true,
+              "privilege": "mock-action:login",
+              "resource": "space_1",
+            },
+            Object {
+              "authorized": false,
+              "privilege": "mock-action:login",
+              "resource": "space_2",
+            },
+          ],
+        },
         "username": "foo-username",
       }
     `);
@@ -520,28 +559,34 @@ describe('#atSpaces', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": true,
-        "privileges": Array [
-          Object {
-            "authorized": true,
-            "privilege": "saved_object:foo-type/get",
-            "resource": "space_1",
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
           },
-          Object {
-            "authorized": true,
-            "privilege": "saved_object:bar-type/get",
-            "resource": "space_1",
-          },
-          Object {
-            "authorized": true,
-            "privilege": "saved_object:foo-type/get",
-            "resource": "space_2",
-          },
-          Object {
-            "authorized": true,
-            "privilege": "saved_object:bar-type/get",
-            "resource": "space_2",
-          },
-        ],
+          "kibana": Array [
+            Object {
+              "authorized": true,
+              "privilege": "saved_object:foo-type/get",
+              "resource": "space_1",
+            },
+            Object {
+              "authorized": true,
+              "privilege": "saved_object:bar-type/get",
+              "resource": "space_1",
+            },
+            Object {
+              "authorized": true,
+              "privilege": "saved_object:foo-type/get",
+              "resource": "space_2",
+            },
+            Object {
+              "authorized": true,
+              "privilege": "saved_object:bar-type/get",
+              "resource": "space_2",
+            },
+          ],
+        },
         "username": "foo-username",
       }
     `);
@@ -578,28 +623,34 @@ describe('#atSpaces', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": false,
-        "privileges": Array [
-          Object {
-            "authorized": true,
-            "privilege": "saved_object:foo-type/get",
-            "resource": "space_1",
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
           },
-          Object {
-            "authorized": false,
-            "privilege": "saved_object:bar-type/get",
-            "resource": "space_1",
-          },
-          Object {
-            "authorized": false,
-            "privilege": "saved_object:foo-type/get",
-            "resource": "space_2",
-          },
-          Object {
-            "authorized": false,
-            "privilege": "saved_object:bar-type/get",
-            "resource": "space_2",
-          },
-        ],
+          "kibana": Array [
+            Object {
+              "authorized": true,
+              "privilege": "saved_object:foo-type/get",
+              "resource": "space_1",
+            },
+            Object {
+              "authorized": false,
+              "privilege": "saved_object:bar-type/get",
+              "resource": "space_1",
+            },
+            Object {
+              "authorized": false,
+              "privilege": "saved_object:foo-type/get",
+              "resource": "space_2",
+            },
+            Object {
+              "authorized": false,
+              "privilege": "saved_object:bar-type/get",
+              "resource": "space_2",
+            },
+          ],
+        },
         "username": "foo-username",
       }
     `);
@@ -636,28 +687,34 @@ describe('#atSpaces', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": false,
-        "privileges": Array [
-          Object {
-            "authorized": true,
-            "privilege": "saved_object:foo-type/get",
-            "resource": "space_1",
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
           },
-          Object {
-            "authorized": true,
-            "privilege": "saved_object:bar-type/get",
-            "resource": "space_1",
-          },
-          Object {
-            "authorized": false,
-            "privilege": "saved_object:foo-type/get",
-            "resource": "space_2",
-          },
-          Object {
-            "authorized": false,
-            "privilege": "saved_object:bar-type/get",
-            "resource": "space_2",
-          },
-        ],
+          "kibana": Array [
+            Object {
+              "authorized": true,
+              "privilege": "saved_object:foo-type/get",
+              "resource": "space_1",
+            },
+            Object {
+              "authorized": true,
+              "privilege": "saved_object:bar-type/get",
+              "resource": "space_1",
+            },
+            Object {
+              "authorized": false,
+              "privilege": "saved_object:foo-type/get",
+              "resource": "space_2",
+            },
+            Object {
+              "authorized": false,
+              "privilege": "saved_object:bar-type/get",
+              "resource": "space_2",
+            },
+          ],
+        },
         "username": "foo-username",
       }
     `);
@@ -694,28 +751,34 @@ describe('#atSpaces', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": false,
-        "privileges": Array [
-          Object {
-            "authorized": true,
-            "privilege": "saved_object:foo-type/get",
-            "resource": "space_1",
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
           },
-          Object {
-            "authorized": true,
-            "privilege": "saved_object:bar-type/get",
-            "resource": "space_1",
-          },
-          Object {
-            "authorized": true,
-            "privilege": "saved_object:foo-type/get",
-            "resource": "space_2",
-          },
-          Object {
-            "authorized": false,
-            "privilege": "saved_object:bar-type/get",
-            "resource": "space_2",
-          },
-        ],
+          "kibana": Array [
+            Object {
+              "authorized": true,
+              "privilege": "saved_object:foo-type/get",
+              "resource": "space_1",
+            },
+            Object {
+              "authorized": true,
+              "privilege": "saved_object:bar-type/get",
+              "resource": "space_1",
+            },
+            Object {
+              "authorized": true,
+              "privilege": "saved_object:foo-type/get",
+              "resource": "space_2",
+            },
+            Object {
+              "authorized": false,
+              "privilege": "saved_object:bar-type/get",
+              "resource": "space_2",
+            },
+          ],
+        },
         "username": "foo-username",
       }
     `);
@@ -857,7 +920,7 @@ describe('#globally', () => {
     let actualResult;
     let errorThrown = null;
     try {
-      actualResult = await checkPrivileges.globally(options.privilegeOrPrivileges);
+      actualResult = await checkPrivileges.globally({ kibana: options.privilegeOrPrivileges });
     } catch (err) {
       errorThrown = err;
     }
@@ -865,6 +928,7 @@ describe('#globally', () => {
     expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
     expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.hasPrivileges', {
       body: {
+        index: [],
         applications: [
           {
             application,
@@ -906,13 +970,19 @@ describe('#globally', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": true,
-        "privileges": Array [
-          Object {
-            "authorized": true,
-            "privilege": "mock-action:login",
-            "resource": undefined,
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
           },
-        ],
+          "kibana": Array [
+            Object {
+              "authorized": true,
+              "privilege": "mock-action:login",
+              "resource": undefined,
+            },
+          ],
+        },
         "username": "foo-username",
       }
     `);
@@ -937,13 +1007,19 @@ describe('#globally', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": false,
-        "privileges": Array [
-          Object {
-            "authorized": false,
-            "privilege": "mock-action:login",
-            "resource": undefined,
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
           },
-        ],
+          "kibana": Array [
+            Object {
+              "authorized": false,
+              "privilege": "mock-action:login",
+              "resource": undefined,
+            },
+          ],
+        },
         "username": "foo-username",
       }
     `);
@@ -1018,18 +1094,24 @@ describe('#globally', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": true,
-        "privileges": Array [
-          Object {
-            "authorized": true,
-            "privilege": "saved_object:foo-type/get",
-            "resource": undefined,
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
           },
-          Object {
-            "authorized": true,
-            "privilege": "saved_object:bar-type/get",
-            "resource": undefined,
-          },
-        ],
+          "kibana": Array [
+            Object {
+              "authorized": true,
+              "privilege": "saved_object:foo-type/get",
+              "resource": undefined,
+            },
+            Object {
+              "authorized": true,
+              "privilege": "saved_object:bar-type/get",
+              "resource": undefined,
+            },
+          ],
+        },
         "username": "foo-username",
       }
     `);
@@ -1059,18 +1141,24 @@ describe('#globally', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": false,
-        "privileges": Array [
-          Object {
-            "authorized": false,
-            "privilege": "saved_object:foo-type/get",
-            "resource": undefined,
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
           },
-          Object {
-            "authorized": true,
-            "privilege": "saved_object:bar-type/get",
-            "resource": undefined,
-          },
-        ],
+          "kibana": Array [
+            Object {
+              "authorized": false,
+              "privilege": "saved_object:foo-type/get",
+              "resource": undefined,
+            },
+            Object {
+              "authorized": true,
+              "privilege": "saved_object:bar-type/get",
+              "resource": undefined,
+            },
+          ],
+        },
         "username": "foo-username",
       }
     `);

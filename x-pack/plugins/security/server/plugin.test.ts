@@ -11,6 +11,7 @@ import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
 import { Plugin, PluginSetupDependencies } from './plugin';
 
 import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
+import { featuresPluginMock } from '../../features/server/mocks';
 
 describe('Security Plugin', () => {
   let plugin: Plugin;
@@ -48,6 +49,7 @@ describe('Security Plugin', () => {
 
     mockDependencies = ({
       licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
+      features: featuresPluginMock.createSetup(),
     } as unknown) as PluginSetupDependencies;
   });
 

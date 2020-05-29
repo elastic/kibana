@@ -41,7 +41,7 @@ export class GraphPlugin implements Plugin {
     }
 
     if (features) {
-      features.registerFeature({
+      features.registerKibanaFeature({
         id: 'graph',
         name: i18n.translate('xpack.graph.featureRegistry.graphFeatureName', {
           defaultMessage: 'Graph',

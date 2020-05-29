@@ -6,6 +6,7 @@
 
 import { IRouter } from 'src/core/server';
 
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { IndexManagementPluginSetup } from '../../index_management/server';
 import { License } from './services';
@@ -14,6 +15,7 @@ import { isEsError } from './shared_imports';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
+  features: FeaturesPluginSetup;
   indexManagement?: IndexManagementPluginSetup;
 }
 

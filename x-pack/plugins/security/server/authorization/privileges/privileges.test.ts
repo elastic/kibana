@@ -45,7 +45,7 @@ describe('features', () => {
     ];
 
     const mockFeaturesService = featuresPluginMock.createSetup();
-    mockFeaturesService.getFeatures.mockReturnValue(features);
+    mockFeaturesService.getKibanaFeatures.mockReturnValue(features);
 
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
@@ -85,13 +85,13 @@ describe('features', () => {
       }),
     ];
 
-    const mockXPackMainPlugin = {
-      getFeatures: jest.fn().mockReturnValue(features),
+    const mockFeaturesPlugin = {
+      getKibanaFeatures: jest.fn().mockReturnValue(features),
     };
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
     };
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
     const expectedAllPrivileges = [
       actions.login,
@@ -169,13 +169,13 @@ describe('features', () => {
       }),
     ];
 
-    const mockXPackMainPlugin = {
-      getFeatures: jest.fn().mockReturnValue(features),
+    const mockFeaturesPlugin = {
+      getKibanaFeatures: jest.fn().mockReturnValue(features),
     };
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
     };
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
     const actual = privileges.get();
     expect(actual).not.toHaveProperty('features.foo');
@@ -238,13 +238,13 @@ describe('features', () => {
         }),
       ];
 
-      const mockXPackMainPlugin = {
-        getFeatures: jest.fn().mockReturnValue(features),
+      const mockFeaturesPlugin = {
+        getKibanaFeatures: jest.fn().mockReturnValue(features),
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
       };
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(`${group}.all`, [
@@ -256,6 +256,7 @@ describe('features', () => {
               actions.space.manage,
               actions.ui.get('spaces', 'manage'),
               actions.ui.get('management', 'kibana', 'spaces'),
+              actions.ui.get('catalogue', 'spaces'),
             ]
           : []),
         ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
@@ -357,13 +358,13 @@ describe('features', () => {
         }),
       ];
 
-      const mockXPackMainPlugin = {
-        getFeatures: jest.fn().mockReturnValue(features),
+      const mockFeaturesPlugin = {
+        getKibanaFeatures: jest.fn().mockReturnValue(features),
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
       };
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(`${group}.read`, [
@@ -431,13 +432,13 @@ describe('features', () => {
         }),
       ];
 
-      const mockXPackMainPlugin = {
-        getFeatures: jest.fn().mockReturnValue(features),
+      const mockFeaturesPlugin = {
+        getKibanaFeatures: jest.fn().mockReturnValue(features),
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
       };
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(`${group}.all`, [
@@ -449,6 +450,7 @@ describe('features', () => {
               actions.space.manage,
               actions.ui.get('spaces', 'manage'),
               actions.ui.get('management', 'kibana', 'spaces'),
+              actions.ui.get('catalogue', 'spaces'),
             ]
           : []),
         ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
@@ -496,13 +498,13 @@ describe('features', () => {
         }),
       ];
 
-      const mockXPackMainPlugin = {
-        getFeatures: jest.fn().mockReturnValue(features),
+      const mockFeaturesPlugin = {
+        getKibanaFeatures: jest.fn().mockReturnValue(features),
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
       };
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(`${group}.all`, [
@@ -514,6 +516,7 @@ describe('features', () => {
               actions.space.manage,
               actions.ui.get('spaces', 'manage'),
               actions.ui.get('management', 'kibana', 'spaces'),
+              actions.ui.get('catalogue', 'spaces'),
             ]
           : []),
         ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
@@ -562,13 +565,13 @@ describe('features', () => {
         }),
       ];
 
-      const mockXPackMainPlugin = {
-        getFeatures: jest.fn().mockReturnValue(features),
+      const mockFeaturesPlugin = {
+        getKibanaFeatures: jest.fn().mockReturnValue(features),
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
       };
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(`${group}.all`, [
@@ -580,6 +583,7 @@ describe('features', () => {
               actions.space.manage,
               actions.ui.get('spaces', 'manage'),
               actions.ui.get('management', 'kibana', 'spaces'),
+              actions.ui.get('catalogue', 'spaces'),
             ]
           : []),
         ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
@@ -621,13 +625,13 @@ describe('reserved', () => {
       }),
     ];
 
-    const mockXPackMainPlugin = {
-      getFeatures: jest.fn().mockReturnValue(features),
+    const mockFeaturesPlugin = {
+      getKibanaFeatures: jest.fn().mockReturnValue(features),
     };
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
     };
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('reserved.foo', [actions.version]);
@@ -659,13 +663,13 @@ describe('reserved', () => {
       }),
     ];
 
-    const mockXPackMainPlugin = {
-      getFeatures: jest.fn().mockReturnValue(features),
+    const mockFeaturesPlugin = {
+      getKibanaFeatures: jest.fn().mockReturnValue(features),
     };
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
     };
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('reserved.foo', [
@@ -723,13 +727,13 @@ describe('reserved', () => {
       }),
     ];
 
-    const mockXPackMainPlugin = {
-      getFeatures: jest.fn().mockReturnValue(features),
+    const mockFeaturesPlugin = {
+      getKibanaFeatures: jest.fn().mockReturnValue(features),
     };
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
     };
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
     const actual = privileges.get();
     expect(actual).not.toHaveProperty('reserved.foo');
@@ -786,13 +790,13 @@ describe('subFeatures', () => {
         }),
       ];
 
-      const mockXPackMainPlugin = {
-        getFeatures: jest.fn().mockReturnValue(features),
+      const mockFeaturesPlugin = {
+        getKibanaFeatures: jest.fn().mockReturnValue(features),
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
       };
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
@@ -841,6 +845,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.ui.get('foo', 'foo'),
       ]);
@@ -912,13 +917,13 @@ describe('subFeatures', () => {
         }),
       ];
 
-      const mockXPackMainPlugin = {
-        getFeatures: jest.fn().mockReturnValue(features),
+      const mockFeaturesPlugin = {
+        getKibanaFeatures: jest.fn().mockReturnValue(features),
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
       };
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
@@ -993,6 +998,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
@@ -1111,13 +1117,13 @@ describe('subFeatures', () => {
         }),
       ];
 
-      const mockXPackMainPlugin = {
-        getFeatures: jest.fn().mockReturnValue(features),
+      const mockFeaturesPlugin = {
+        getKibanaFeatures: jest.fn().mockReturnValue(features),
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
       };
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
@@ -1192,6 +1198,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
       ]);
       expect(actual).toHaveProperty('global.read', [actions.login, actions.version]);
@@ -1250,13 +1257,13 @@ describe('subFeatures', () => {
         }),
       ];
 
-      const mockXPackMainPlugin = {
-        getFeatures: jest.fn().mockReturnValue(features),
+      const mockFeaturesPlugin = {
+        getKibanaFeatures: jest.fn().mockReturnValue(features),
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
       };
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
@@ -1319,6 +1326,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
@@ -1413,13 +1421,13 @@ describe('subFeatures', () => {
         }),
       ];
 
-      const mockXPackMainPlugin = {
-        getFeatures: jest.fn().mockReturnValue(features),
+      const mockFeaturesPlugin = {
+        getKibanaFeatures: jest.fn().mockReturnValue(features),
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
       };
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
@@ -1482,6 +1490,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
       ]);
       expect(actual).toHaveProperty('global.read', [actions.login, actions.version]);
@@ -1540,13 +1549,13 @@ describe('subFeatures', () => {
         }),
       ];
 
-      const mockXPackMainPlugin = {
-        getFeatures: jest.fn().mockReturnValue(features),
+      const mockFeaturesPlugin = {
+        getKibanaFeatures: jest.fn().mockReturnValue(features),
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: false }),
       };
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
       const actual = privileges.get();
       expect(actual.features).not.toHaveProperty(`foo.subFeaturePriv1`);
@@ -1598,6 +1607,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),

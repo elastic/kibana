@@ -14,7 +14,7 @@ interface SetupDeps {
 
 class FooPlugin implements Plugin {
   setup(core: CoreSetup, plugins: SetupDeps) {
-    plugins.features.registerFeature({
+    plugins.features.registerKibanaFeature({
       id: 'foo',
       name: 'Foo',
       icon: 'upArrow',

@@ -65,9 +65,9 @@ export async function createTestUserService(
   }
 
   return new (class TestUser {
-    async restoreDefaults() {
+    async restoreDefaults(shouldRefreshBrowser: boolean = true) {
       if (isEnabled()) {
-        await this.setRoles(config.get('security.defaultRoles'));
+        await this.setRoles(config.get('security.defaultRoles'), shouldRefreshBrowser);
       }
     }
 

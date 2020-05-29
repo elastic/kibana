@@ -63,7 +63,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Register space/feature control
      */
-    features.registerFeature({
+    features.registerKibanaFeature({
       id: 'enterpriseSearch',
       name: 'Enterprise Search',
       order: 0,

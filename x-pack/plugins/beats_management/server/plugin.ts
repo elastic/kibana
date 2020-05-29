@@ -10,12 +10,14 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '../../../../src/core/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginStart } from '../../licensing/server';
 import { BeatsManagementConfigType } from '../common';
 
 interface SetupDeps {
   security?: SecurityPluginSetup;
+  features: FeaturesPluginSetup;
 }
 
 interface StartDeps {
@@ -29,6 +31,20 @@ export class BeatsManagementPlugin implements Plugin<{}, {}, SetupDeps, StartDep
 
   public async setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     this.initializerContext.config.create();
+
+    plugins.features.registerElasticsearchFeature({
+      id: 'beats_management',
+      management: {
+        ingest: ['beats_management'],
+      },
+      privileges: [
+        {
+          ui: [],
+          requiredClusterPrivileges: [],
+          requiredRoles: ['beats_admin'],
+        },
+      ],
+    });
 
     return {};
   }

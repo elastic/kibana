@@ -94,7 +94,9 @@ describe('initAPIAuthorization', () => {
 
     expect(mockResponse.notFound).not.toHaveBeenCalled();
     expect(mockPostAuthToolkit.next).toHaveBeenCalledTimes(1);
-    expect(mockCheckPrivileges).toHaveBeenCalledWith([mockAuthz.actions.api.get('foo')]);
+    expect(mockCheckPrivileges).toHaveBeenCalledWith({
+      kibana: [mockAuthz.actions.api.get('foo')],
+    });
     expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
   });
 
@@ -129,7 +131,9 @@ describe('initAPIAuthorization', () => {
 
     expect(mockResponse.notFound).toHaveBeenCalledTimes(1);
     expect(mockPostAuthToolkit.next).not.toHaveBeenCalled();
-    expect(mockCheckPrivileges).toHaveBeenCalledWith([mockAuthz.actions.api.get('foo')]);
+    expect(mockCheckPrivileges).toHaveBeenCalledWith({
+      kibana: [mockAuthz.actions.api.get('foo')],
+    });
     expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
   });
 });

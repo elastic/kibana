@@ -165,6 +165,7 @@
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /x-pack/plugins/security/  @elastic/kibana-security
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
+/x-pack/test/ui_capabilities/ @elastic/kibana-security
 
 # Kibana Localization
 /src/dev/i18n/  @elastic/kibana-localization

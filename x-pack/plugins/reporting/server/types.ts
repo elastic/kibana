@@ -10,6 +10,7 @@ import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { CancellationToken } from '../../../plugins/reporting/common';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { JobStatus } from '../common/types';
@@ -159,6 +160,7 @@ export type ScreenshotsObservableFn = ({
 
 export interface ReportingSetupDeps {
   licensing: LicensingPluginSetup;
+  features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }

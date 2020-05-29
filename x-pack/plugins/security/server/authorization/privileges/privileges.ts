@@ -28,7 +28,7 @@ export function privilegesFactory(
 
   return {
     get() {
-      const features = featuresService.getFeatures();
+      const features = featuresService.getKibanaFeatures();
       const { allowSubFeaturePrivileges } = licenseService.getFeatures();
       const basePrivilegeFeatures = features.filter(
         (feature) => !feature.excludeFromBasePrivileges
@@ -100,6 +100,7 @@ export function privilegesFactory(
             actions.space.manage,
             actions.ui.get('spaces', 'manage'),
             actions.ui.get('management', 'kibana', 'spaces'),
+            actions.ui.get('catalogue', 'spaces'),
             actions.ui.get('enterpriseSearch', 'all'),
             ...allActions,
           ],

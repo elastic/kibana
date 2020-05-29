@@ -16,6 +16,7 @@ import {
   PluginInitializerContext,
 } from '../../../../src/core/server';
 import { SpacesPluginSetup } from '../../spaces/server';
+import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
 import {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
@@ -31,10 +32,16 @@ import { setupSavedObjects } from './saved_objects';
 import { AuditService, SecurityAuditLogger, AuditServiceSetup } from './audit';
 import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
 import { SecurityFeatureUsageService, SecurityFeatureUsageServiceStart } from './feature_usage';
+import { securityFeatures } from './features';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
   'getSpaceId' | 'namespaceToSpaceId'
+>;
+
+export type FeaturesService = Pick<
+  FeaturesSetupContract,
+  'getKibanaFeatures' | 'getElasticsearchFeatures'
 >;
 
 /**
@@ -139,6 +146,10 @@ export class Plugin {
       license$: licensing.license$,
     });
 
+    securityFeatures.forEach((securityFeature) =>
+      features.registerElasticsearchFeature(securityFeature)
+    );
+
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
 
     const audit = this.auditService.setup({ license, config: config.audit });
@@ -165,6 +176,7 @@ export class Plugin {
       packageVersion: this.initializerContext.env.packageInfo.version,
       getSpacesService: this.getSpacesService,
       features,
+      getCurrentUser: authc.getCurrentUser,
     });
 
     setupSavedObjects({
@@ -187,7 +199,7 @@ export class Plugin {
       getFeatures: () =>
         core
           .getStartServices()
-          .then(([, { features: featuresStart }]) => featuresStart.getFeatures()),
+          .then(([, { features: featuresStart }]) => featuresStart.getKibanaFeatures()),
       getFeatureUsageService: this.getFeatureUsageService,
     });
 
