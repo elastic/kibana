@@ -67,7 +67,9 @@ export class CrossClusterReplicationPlugin implements Plugin {
 
     const config = this.initializerContext.config.get<ClientConfigType>();
 
-    toasts.addSuccess(`Enabled: ${config.ui.enable}. RC UI enabled: ${remoteClusters.isUiEnabled}`);
+    toasts.addSuccess(
+      `Enabled: ${config.ui.enabled}. RC UI enabled: ${remoteClusters.isUiEnabled}`
+    );
 
     licensing.license$
       .pipe(first())
