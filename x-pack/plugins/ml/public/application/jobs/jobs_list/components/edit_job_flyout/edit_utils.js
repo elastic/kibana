@@ -32,7 +32,7 @@ export function saveJob(job, newJobData, finish) {
         .then(() => {
           resolve();
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
         });
     };
@@ -41,14 +41,14 @@ export function saveJob(job, newJobData, finish) {
     if (Object.keys(jobData).length) {
       mlJobService
         .updateJob(job.job_id, jobData)
-        .then(resp => {
+        .then((resp) => {
           if (resp.success) {
             saveDatafeedWrapper();
           } else {
             reject(resp);
           }
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
         });
     } else {
@@ -61,7 +61,7 @@ function saveDatafeed(datafeedData, job) {
   return new Promise((resolve, reject) => {
     if (Object.keys(datafeedData).length) {
       const datafeedId = job.datafeed_config.datafeed_id;
-      mlJobService.updateDatafeed(datafeedId, datafeedData).then(resp => {
+      mlJobService.updateDatafeed(datafeedId, datafeedData).then((resp) => {
         if (resp.success) {
           resolve();
         } else {
@@ -84,10 +84,10 @@ export function loadSavedDashboards(maxNumber) {
         fields: ['title'],
         perPage: maxNumber,
       })
-      .then(resp => {
+      .then((resp) => {
         const savedObjects = resp.savedObjects;
         if (savedObjects !== undefined) {
-          const dashboards = savedObjects.map(savedObj => {
+          const dashboards = savedObjects.map((savedObj) => {
             return { id: savedObj.id, title: savedObj.attributes.title };
           });
 
@@ -98,7 +98,7 @@ export function loadSavedDashboards(maxNumber) {
           resolve(dashboards);
         }
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -116,10 +116,10 @@ export function loadIndexPatterns(maxNumber) {
         fields: ['title'],
         perPage: maxNumber,
       })
-      .then(resp => {
+      .then((resp) => {
         const savedObjects = resp.savedObjects;
         if (savedObjects !== undefined) {
-          const indexPatterns = savedObjects.map(savedObj => {
+          const indexPatterns = savedObjects.map((savedObj) => {
             return { id: savedObj.id, title: savedObj.attributes.title };
           });
 
@@ -130,7 +130,7 @@ export function loadIndexPatterns(maxNumber) {
           resolve(indexPatterns);
         }
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -183,7 +183,7 @@ function extractDetectorDescriptions(job, newJobData) {
   }));
 
   const originalDetectors = job.analysis_config.detectors;
-  originalDetectors.forEach(d => {
+  originalDetectors.forEach((d) => {
     if (descriptions[d.detector_index].description !== d.detector_description) {
       detectors.push(descriptions[d.detector_index]);
     }

@@ -16,7 +16,7 @@ const mkdirAsync = promisify(fs.mkdir);
 
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
@@ -51,7 +51,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Print Layout', () => {
-      it('downloads a PDF file', async function() {
+      it('downloads a PDF file', async function () {
         // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
         // function is taking about 15 seconds per comparison in jenkins.
         this.timeout(300000);
@@ -85,7 +85,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Preserve Layout', () => {
-      it('matches baseline report', async function() {
+      it('matches baseline report', async function () {
         const writeSessionReport = async (name: string, rawPdf: Buffer, reportExt: string) => {
           const sessionDirectory = path.resolve(REPORTS_FOLDER, 'session');
           await mkdirAsync(sessionDirectory, { recursive: true });

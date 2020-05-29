@@ -8,16 +8,17 @@ import boom from 'boom';
 import Joi from 'joi';
 import { Legacy } from 'kibana';
 import rison from 'rison-node';
+import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
-import { ReportingCore, ReportingSetupDeps } from '../types';
+import { LevelLogger as Logger } from '../lib';
+import { ReportingSetupDeps, ServerFacade } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
 import {
   GetRouteConfigFactoryFn,
   getRouteConfigFactoryReportingPre,
   RouteConfigFactory,
 } from './lib/route_config_factories';
-import { HandlerErrorFunction, HandlerFunction } from './types';
+import { HandlerErrorFunction, HandlerFunction, ReportingResponseToolkit } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
@@ -47,9 +48,7 @@ export function registerGenerateFromJobParams(
           exportType: Joi.string().required(),
         }).required(),
         payload: Joi.object({
-          jobParams: Joi.string()
-            .optional()
-            .default(null),
+          jobParams: Joi.string().optional().default(null),
         }).allow(null), // allow optional payload
         query: Joi.object({
           jobParams: Joi.string().default(null),

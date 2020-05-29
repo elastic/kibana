@@ -59,7 +59,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionPa
           name="message"
           value={message || ''}
           data-test-subj="slackMessageTextArea"
-          onChange={e => {
+          onChange={(e) => {
             editAction('message', e.target.value, index);
           }}
           onBlur={() => {

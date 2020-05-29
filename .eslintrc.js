@@ -50,7 +50,7 @@ const ELASTIC_LICENSE_HEADER = `
 `;
 
 const allMochaRulesOff = {};
-Object.keys(require('eslint-plugin-mocha').rules).forEach(k => {
+Object.keys(require('eslint-plugin-mocha').rules).forEach((k) => {
   allMochaRulesOff['mocha/' + k] = 'off';
 });
 
@@ -198,6 +198,11 @@ module.exports = {
                 errorMessage: `Plugins may only import from src/core/server and src/core/public.`,
               },
               {
+                target: ['(src|x-pack)/plugins/*/public/**/*'],
+                from: ['(src|x-pack)/plugins/*/server/**/*'],
+                errorMessage: `Public code can not import from server, use a common directory.`,
+              },
+              {
                 target: [
                   '(src|x-pack)/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
@@ -219,6 +224,8 @@ module.exports = {
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/*.test.mocks{,.ts}',
+
+                  'target/types/**',
                 ],
                 allowSameFolder: true,
                 errorMessage:
@@ -491,7 +498,6 @@ module.exports = {
         '.eslintrc.js',
         '**/webpackShims/**/*.js',
         'packages/kbn-plugin-generator/**/*.js',
-        'packages/kbn-plugin-helpers/**/*.js',
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',

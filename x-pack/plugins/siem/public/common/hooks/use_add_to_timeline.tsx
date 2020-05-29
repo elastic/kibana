@@ -144,7 +144,7 @@ export const useAddToTimeline = ({
 
       if (draggableCoordinate != null && dropTargetCoordinate != null && preDrag != null) {
         const steps = 10;
-        const points = d3.range(steps + 1).map(i => ({
+        const points = d3.range(steps + 1).map((i) => ({
           x: d3.interpolate(draggableCoordinate.x, dropTargetCoordinate.x)(i * 0.1),
           y: d3.interpolate(draggableCoordinate.y, dropTargetCoordinate.y)(i * 0.1),
         }));

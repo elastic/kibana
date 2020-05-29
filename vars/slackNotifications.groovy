@@ -62,24 +62,46 @@ def getTestFailures() {
   def messages = []
   messages << "*Test Failures*"
 
-  def list = failures.collect { "• <${it.url}|${it.fullDisplayName}>" }.join("\n")
+  def list = failures.collect { "• <${it.url}|${it.fullDisplayName.split(/\./, 2)[-1]}>" }.join("\n")
   return "*Test Failures*\n${list}"
 }
 
-def sendFailedBuild(Map params = [:]) {
-  def displayName = "${env.JOB_NAME} ${env.BUILD_DISPLAY_NAME}"
+def getDefaultDisplayName() {
+  return "${env.JOB_NAME} ${env.BUILD_DISPLAY_NAME}"
+}
 
+def getDefaultContext() {
+  def duration = currentBuild.durationString.replace(' and counting', '')
+
+  return contextBlock([
+    "${buildUtils.getBuildStatus().toLowerCase().capitalize()} after ${duration}",
+    "<https://ci.kibana.dev/${env.JOB_BASE_NAME}/${env.BUILD_NUMBER}|ci.kibana.dev>",
+  ].join(' · '))
+}
+
+def getStatusIcon() {
+  def status = buildUtils.getBuildStatus()
+  if (status == 'UNSTABLE') {
+    return ':yellow_heart:'
+  }
+
+  return ':broken_heart:'
+}
+
+def sendFailedBuild(Map params = [:]) {
   def config = [
-    channel: '#kibana-operations',
-    title: ":broken_heart: *<${env.BUILD_URL}|${displayName}>*",
-    message: ":broken_heart: ${displayName}",
+    channel: '#kibana-operations-alerts',
+    title: "*<${env.BUILD_URL}|${getDefaultDisplayName()}>*",
+    message: getDefaultDisplayName(),
     color: 'danger',
     icon: ':jenkins:',
     username: 'Kibana Operations',
-    context: contextBlock("${displayName} · <https://ci.kibana.dev/${env.JOB_BASE_NAME}/${env.BUILD_NUMBER}|ci.kibana.dev>"),
+    context: getDefaultContext(),
   ] + params
 
-  def blocks = [markdownBlock(config.title)]
+  def title = "${getStatusIcon()} ${config.title}"
+
+  def blocks = [markdownBlock(title)]
   getFailedBuildBlocks().each { blocks << it }
   blocks << dividerBlock()
   blocks << config.context
@@ -94,18 +116,24 @@ def sendFailedBuild(Map params = [:]) {
   )
 }
 
+def onFailure(Map options = [:]) {
+  catchError {
+    def status = buildUtils.getBuildStatus()
+    if (status != "SUCCESS") {
+      catchErrors {
+        sendFailedBuild(options)
+      }
+    }
+  }
+}
+
 def onFailure(Map options = [:], Closure closure) {
   // try/finally will NOT work here, because the build status will not have been changed to ERROR when the finally{} block executes
   catchError {
     closure()
   }
 
-  def status = buildUtils.getBuildStatus()
-  if (status != "SUCCESS" && status != "UNSTABLE") {
-    catchErrors {
-      sendFailedBuild(options)
-    }
-  }
+  onFailure(options)
 }
 
 return this

@@ -84,7 +84,7 @@ export const getColumnsWithTimestamp = ({
           browserField: timestamp,
           width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
         }),
-        ...categoryFields.map(f => getColumnHeaderFromBrowserField({ browserField: f })),
+        ...categoryFields.map((f) => getColumnHeaderFromBrowserField({ browserField: f })),
       ])
     : [];
 };

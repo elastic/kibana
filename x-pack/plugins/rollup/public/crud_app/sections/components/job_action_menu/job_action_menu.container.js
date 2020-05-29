@@ -12,14 +12,14 @@ import { startJobs, stopJobs, deleteJobs, cloneJob } from '../../../store/action
 
 import { JobActionMenu as JobActionMenuComponent } from './job_action_menu';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     isUpdating: isUpdating(state),
   };
 };
 
 const mapDispatchToProps = (dispatch, { jobs }) => {
-  const jobIds = jobs.map(job => job.id);
+  const jobIds = jobs.map((job) => job.id);
   return {
     startJobs: () => {
       dispatch(startJobs(jobIds));
@@ -30,7 +30,7 @@ const mapDispatchToProps = (dispatch, { jobs }) => {
     deleteJobs: () => {
       dispatch(deleteJobs(jobIds));
     },
-    cloneJob: jobConfig => {
+    cloneJob: (jobConfig) => {
       dispatch(cloneJob(jobConfig));
     },
   };

@@ -19,9 +19,11 @@ import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
+import { ListPluginSetup } from '../../lists/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { LicensingPluginSetup } from '../../licensing/server';
+import { IngestManagerStartContract } from '../../ingest_manager/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import { initRoutes } from './routes';
@@ -35,6 +37,13 @@ import { SiemClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
 import { APP_ID, APP_ICON } from '../common/constants';
+import { registerEndpointRoutes } from './endpoint/routes/metadata';
+import { registerResolverRoutes } from './endpoint/routes/resolver';
+import { registerAlertRoutes } from './endpoint/alerts/routes';
+import { registerPolicyRoutes } from './endpoint/routes/policy';
+import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
+import { EndpointAppContext } from './endpoint/types';
+import { IngestIndexPatternRetriever } from './endpoint/alerts/index_pattern';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -44,10 +53,12 @@ export interface SetupPlugins {
   security?: SecuritySetup;
   spaces?: SpacesSetup;
   ml?: MlSetup;
+  lists?: ListPluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartPlugins {}
+export interface StartPlugins {
+  ingestManager: IngestManagerStartContract;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginSetup {}
@@ -59,6 +70,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private readonly config$: Observable<ConfigType>;
   private context: PluginInitializerContext;
   private siemClientFactory: SiemClientFactory;
+  private readonly endpointAppContextService = new EndpointAppContextService();
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
@@ -79,21 +91,27 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     }
 
+    const config = await this.config$.pipe(first()).toPromise();
+
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings);
+    const endpointContext: EndpointAppContext = {
+      logFactory: this.context.logger,
+      service: this.endpointAppContextService,
+      config: (): Promise<ConfigType> => Promise.resolve(config),
+    };
 
     const router = core.http.createRouter();
     core.http.registerRouteHandlerContext(APP_ID, (context, request, response) => ({
       getSiemClient: () => this.siemClientFactory.create(request),
     }));
 
-    const config = await this.config$.pipe(first()).toPromise();
-
     this.siemClientFactory.setup({
       getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
       config,
     });
 
+    // TO DO We need to get the endpoint routes inside of initRoutes
     initRoutes(
       router,
       config,
@@ -101,6 +119,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.security,
       plugins.ml
     );
+    registerEndpointRoutes(router, endpointContext);
+    registerResolverRoutes(router, endpointContext);
+    registerAlertRoutes(router, endpointContext);
+    registerPolicyRoutes(router, endpointContext);
 
     plugins.features.registerFeature({
       id: APP_ID,
@@ -174,6 +196,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         logger: this.logger,
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
+        lists: plugins.lists,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,
@@ -195,6 +218,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
+    this.endpointAppContextService.start({
+      indexPatternRetriever: new IngestIndexPatternRetriever(
+        plugins.ingestManager.esIndexPatternService,
+        this.context.logger
+      ),
+      agentService: plugins.ingestManager.agentService,
+    });
     return {};
+  }
+
+  public stop() {
+    this.logger.debug('Stopping plugin');
+    this.endpointAppContextService.stop();
   }
 }

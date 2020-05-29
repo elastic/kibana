@@ -62,7 +62,7 @@ export class Ccr extends Component {
                   defaultMessage: 'Shard',
                 }
               ),
-              render: shardId => {
+              render: (shardId) => {
                 return (
                   <EuiLink
                     href={getSafeForExternalLink(`#/elasticsearch/ccr/${index}/shard/${shardId}`)}
@@ -126,7 +126,7 @@ export class Ccr extends Component {
                   defaultMessage: 'Last fetch time',
                 }
               ),
-              render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>,
+              render: (syncLagTime) => <span>{toSeconds(syncLagTime)}</span>,
             },
             {
               field: 'opsSynced',
@@ -145,7 +145,7 @@ export class Ccr extends Component {
                   defaultMessage: 'Error',
                 }
               ),
-              render: error => <EuiTextColor color="danger">{error}</EuiTextColor>,
+              render: (error) => <EuiTextColor color="danger">{error}</EuiTextColor>,
             },
           ]}
           executeQueryOptions={{
@@ -232,7 +232,7 @@ export class Ccr extends Component {
                 defaultMessage: 'Last fetch time',
               }
             ),
-            render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>,
+            render: (syncLagTime) => <span>{toSeconds(syncLagTime)}</span>,
           },
           {
             field: 'opsSynced',
@@ -253,7 +253,7 @@ export class Ccr extends Component {
                 defaultMessage: 'Error',
               }
             ),
-            render: error => <EuiTextColor color="danger">{error}</EuiTextColor>,
+            render: (error) => <EuiTextColor color="danger">{error}</EuiTextColor>,
           },
         ]}
         items={items}

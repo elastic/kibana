@@ -1,0 +1,20 @@
+{
+  "list_id": "endpoint_list",
+  "_tags": ["endpoint", "process", "malware", "os:linux"],
+  "tags": ["user added string for a tag", "malware"],
+  "type": "simple",
+  "description": "This is a sample endpoint type exception that has no item_id so it creates a new id each time",
+  "name": "Sample Endpoint Exception List",
+  "entries": [
+    {
+      "field": "actingProcess.file.signer",
+      "operator": "included",
+      "match": "Elastic, N.V."
+    },
+    {
+      "field": "event.category",
+      "operator": "included",
+      "match_any": ["process", "malware"]
+    }
+  ]
+}

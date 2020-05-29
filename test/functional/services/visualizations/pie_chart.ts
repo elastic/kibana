@@ -68,13 +68,13 @@ export function PieChartProvider({ getService }: FtrProviderContext) {
       log.debug(`VisualizePage.getAllPieSliceStyles(${name})`);
       const pieSlices = await this.getAllPieSlices(name);
       return await Promise.all(
-        pieSlices.map(async pieSlice => await pieSlice.getAttribute('style'))
+        pieSlices.map(async (pieSlice) => await pieSlice.getAttribute('style'))
       );
     }
 
     async getPieChartData() {
       const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
-      return await Promise.all(chartTypes.map(async chart => await chart.getAttribute('d')));
+      return await Promise.all(chartTypes.map(async (chart) => await chart.getAttribute('d')));
     }
 
     async expectPieChartTableData(expectedTableData: Array<[]>) {
@@ -86,7 +86,7 @@ export function PieChartProvider({ getService }: FtrProviderContext) {
     async getPieChartLabels() {
       const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
       return await Promise.all(
-        chartTypes.map(async chart => await chart.getAttribute('data-label'))
+        chartTypes.map(async (chart) => await chart.getAttribute('data-label'))
       );
     }
 

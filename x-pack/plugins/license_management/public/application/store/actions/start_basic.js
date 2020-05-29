@@ -38,7 +38,7 @@ export const startBasicLicense = (currentLicenseType, ack) => async (
     //messages coming back in arrays
     const messages = Object.values(acknowledge)
       .slice(1)
-      .map(item => {
+      .map((item) => {
         return item[0];
       });
     const first = i18n.translate(

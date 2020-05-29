@@ -78,6 +78,7 @@
 
 # Canvas
 /x-pack/plugins/canvas/  @elastic/kibana-canvas
+/x-pack/test/functional/apps/canvas/  @elastic/kibana-canvas
 
 # Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
@@ -127,15 +128,21 @@
 /src/legacy/server/sass/ @elastic/kibana-operations
 /src/legacy/server/utils/ @elastic/kibana-operations
 /src/legacy/server/warnings/ @elastic/kibana-operations
+/.ci/es-snapshots/ @elastic/kibana-operations
+/vars/ @elastic/kibana-operations
 
 # Quality Assurance
 /src/dev/code_coverage @elastic/kibana-qa
+/test/functional/services/common @elastic/kibana-qa
+/test/functional/services/lib @elastic/kibana-qa
+/test/functional/services/remote @elastic/kibana-qa
 
 # Platform
 /src/core/  @elastic/kibana-platform
 /config/kibana.yml @elastic/kibana-platform
 /x-pack/plugins/features/  @elastic/kibana-platform
 /x-pack/plugins/licensing/  @elastic/kibana-platform
+/x-pack/plugins/cloud/ @elastic/kibana-platform
 /packages/kbn-config-schema/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
 /src/legacy/server/http/ @elastic/kibana-platform
@@ -151,7 +158,6 @@
 /x-pack/legacy/plugins/security/  @elastic/kibana-security
 /x-pack/legacy/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
-/x-pack/legacy/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /x-pack/plugins/security/  @elastic/kibana-security
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security

@@ -7,22 +7,24 @@
 import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
-import { getSelectedLayer } from '../../../selectors/map_selectors';
-import { clearTransientLayerStateAndCloseFlyout } from '../../../actions/map_actions';
+import { hasPreviewLayers, isLoadingPreviewLayers } from '../../../selectors/map_selectors';
+import { removePreviewLayers, updateFlyout } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
+import { FLYOUT_STATE } from '../../../reducers/ui';
 
 function mapStateToProps(state: MapStoreState) {
-  const selectedLayer = getSelectedLayer(state);
-  const hasLayerSelected = !!selectedLayer;
   return {
-    hasLayerSelected,
-    isLoading: hasLayerSelected && selectedLayer!.isLayerLoading(),
+    hasPreviewLayers: hasPreviewLayers(state),
+    isLoading: isLoadingPreviewLayers(state),
   };
 }
 
 function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
-    closeFlyout: () => dispatch(clearTransientLayerStateAndCloseFlyout()),
+    closeFlyout: () => {
+      dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      dispatch<any>(removePreviewLayers());
+    },
   };
 }
 

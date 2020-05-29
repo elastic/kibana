@@ -51,9 +51,9 @@ export function mutateSearchTimesTree(shard: Shard) {
 }
 
 const initShards = (data: ShardSerialized[]) =>
-  data.map(s => {
+  data.map((s) => {
     const idMatch = s.id.match(/\[([^\]\[]*?)\]/g) || [];
-    const ids = idMatch.map(id => {
+    const ids = idMatch.map((id) => {
       return id.replace('[', '').replace(']', '');
     });
     return {

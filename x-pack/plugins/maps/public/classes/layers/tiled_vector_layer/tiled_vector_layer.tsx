@@ -7,11 +7,11 @@
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../../../common/constants';
+import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE } from '../../../../common/constants';
 import { VectorLayer, VectorLayerArguments } from '../vector_layer/vector_layer';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { ITiledSingleLayerVectorSource } from '../../sources/vector_source';
-import { SyncContext } from '../../../actions/map_actions';
+import { DataRequestContext } from '../../../actions';
 import { ISource } from '../../sources/source';
 import {
   VectorLayerDescriptor,
@@ -50,8 +50,13 @@ export class TiledVectorLayer extends VectorLayer {
     };
   }
 
-  async _syncMVTUrlTemplate({ startLoading, stopLoading, onLoadError, dataFilters }: SyncContext) {
-    const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
+  async _syncMVTUrlTemplate({
+    startLoading,
+    stopLoading,
+    onLoadError,
+    dataFilters,
+  }: DataRequestContext) {
+    const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_REQUEST_ID}`);
     const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
       dataFilters,
       this.getSource(),
@@ -68,20 +73,16 @@ export class TiledVectorLayer extends VectorLayer {
       return null;
     }
 
-    startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
+    startLoading(SOURCE_DATA_REQUEST_ID, requestToken, searchFilters);
     try {
       const templateWithMeta = await this._source.getUrlTemplateWithMeta();
-      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, templateWithMeta, {});
+      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, templateWithMeta, {});
     } catch (error) {
-      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
+      onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
     }
   }
 
-  async syncData(syncContext: SyncContext) {
-    if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
-      return;
-    }
-
+  async syncData(syncContext: DataRequestContext) {
     await this._syncSourceStyleMeta(syncContext, this._source, this._style);
     await this._syncSourceFormatters(syncContext, this._source, this._style);
     await this._syncMVTUrlTemplate(syncContext);
