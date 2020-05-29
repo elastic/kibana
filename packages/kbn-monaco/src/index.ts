@@ -17,35 +17,9 @@
  * under the License.
  */
 
-const path = require('path');
+export { monaco } from './monaco';
+export { XJsonLang } from './xjson';
 
-const createLangWorkerConfig = (lang) => ({
-  mode: 'production',
-  entry: path.resolve(__dirname, lang, 'worker', `${lang}.worker.ts`),
-  output: {
-    path: path.resolve(__dirname, 'target'),
-    filename: `${lang}.worker.js`,
-  },
-  resolve: {
-    modules: ['node_modules'],
-    extensions: ['.js', '.ts', '.tsx'],
-  },
-  stats: 'errors-only',
-  module: {
-    rules: [
-      {
-        test: /\.(js|ts)$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            babelrc: false,
-            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-          },
-        },
-      },
-    ],
-  },
-});
-
-module.exports = [createLangWorkerConfig('xjson')];
+/* eslint-disable-next-line @kbn/eslint/module_migration */
+import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
+export { BarePluginApi };

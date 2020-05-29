@@ -1,9 +1,15 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["xjson/**/*.ts", "index.ts", "monaco.ts"],
   "compilerOptions": {
+    "outDir": "./target",
     "declaration": true,
-    "declarationDir": "./target/types",
-    "types": ["jest", "node"]
-  }
+    "sourceMap": true,
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "src/**/*"
+  ]
 }

@@ -16,47 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-module.exports = (env) => {
-  return {
-    mode: env.prod ? 'production' : 'development',
-    devtool: env.prod ? false : '#cheap-source-map',
-    entry: './index.ts',
-    output: {
-      filename: 'index.js',
-      path: path.resolve(__dirname, 'target'),
-      libraryTarget: 'commonjs',
-    },
-    resolve: {
-      modules: ['node_modules'],
-      extensions: ['.js', '.ts'],
-    },
-    stats: 'errors-only',
-    module: {
-      rules: [
-        {
-          test: /\.(js|ts)$/,
-          exclude: /node_modules/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-            },
+const path = require('path');
+
+const createLangWorkerConfig = (lang) => ({
+  mode: 'production',
+  entry: path.resolve(__dirname, 'src', lang, 'worker', `${lang}.worker.ts`),
+  output: {
+    path: path.resolve(__dirname, 'target/public'),
+    filename: `${lang}.worker.js`,
+  },
+  resolve: {
+    modules: ['node_modules'],
+    extensions: ['.js', '.ts', '.tsx'],
+  },
+  stats: 'errors-only',
+  module: {
+    rules: [
+      {
+        test: /\.(js|ts)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
           },
         },
-        {
-          test: /\.css$/,
-          use: [MiniCssExtractPlugin.loader, 'css-loader'],
-        },
-      ],
-    },
-    plugins: [
-      new MiniCssExtractPlugin({
-        filename: 'index.css',
-      }),
+      },
     ],
-  };
-};
+  },
+});
+
+module.exports = [createLangWorkerConfig('xjson')];

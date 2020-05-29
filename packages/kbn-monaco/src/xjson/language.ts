@@ -24,7 +24,7 @@ import { WorkerProxyService } from './worker_proxy_service';
 import { registerLexerRules } from './lexer_rules';
 import { ID } from './constants';
 // @ts-ignore
-import workerSrc from '!!raw-loader!../target/xjson.worker.js';
+import workerSrc from '!!raw-loader!../../target/public/xjson.worker.js';
 
 const wps = new WorkerProxyService();
 

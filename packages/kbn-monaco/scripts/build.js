@@ -19,61 +19,46 @@
 
 const path = require('path');
 const del = require('del');
-const getopts = require('getopts');
 const supportsColor = require('supports-color');
-const { ToolingLog, withProcRunner, pickLevelFromFlags } = require('@kbn/dev-utils');
+const { run } = require('@kbn/dev-utils');
 
 const TARGET_BUILD_DIR = path.resolve(__dirname, '../target');
 const ROOT_DIR = path.resolve(__dirname, '../');
 const WEBPACK_CONFIG_PATH = path.resolve(ROOT_DIR, 'webpack.config.js');
-const WORKER_WEBPACK_CONFIG_PATH = path.resolve(ROOT_DIR, 'webpack.worker.config.js');
 
-const flags = getopts(process.argv, {
-  boolean: ['dev'],
-});
+run(
+  async ({ procRunner, log, flags }) => {
+    log.info('Deleting old output');
 
-const log = new ToolingLog({
-  level: pickLevelFromFlags(flags),
-  writeTo: process.stdout,
-});
+    await del(TARGET_BUILD_DIR);
 
-withProcRunner(log, async (proc) => {
-  log.info('Deleting old output');
+    const cwd = ROOT_DIR;
+    const env = { ...process.env };
+    if (supportsColor.stdout) {
+      env.FORCE_COLOR = 'true';
+    }
 
-  await del(TARGET_BUILD_DIR);
+    await procRunner.run('worker', {
+      cmd: 'webpack',
+      args: ['--config', WEBPACK_CONFIG_PATH, flags.dev ? '--env.dev' : '--env.prod'],
+      wait: true,
+      env,
+      cwd,
+    });
 
-  const cwd = ROOT_DIR;
-  const env = { ...process.env };
-  if (supportsColor.stdout) {
-    env.FORCE_COLOR = 'true';
+    await procRunner.run('tsc   ', {
+      cmd: 'tsc',
+      args: [],
+      wait: true,
+      env,
+      cwd,
+    });
+
+    log.success('Complete');
+  },
+  {
+    flags: {
+      boolean: ['dev'],
+    },
   }
-
-  await proc.run('worker wp', {
-    cmd: 'webpack',
-    args: ['--config', WORKER_WEBPACK_CONFIG_PATH, flags.dev ? '--env.dev' : '--env.prod'],
-    wait: true,
-    env,
-    cwd,
-  });
-
-  await proc.run('base wp  ', {
-    cmd: 'webpack',
-    args: ['--config', WEBPACK_CONFIG_PATH, flags.dev ? '--env.dev' : '--env.prod'],
-    wait: true,
-    env,
-    cwd,
-  });
-
-  await proc.run('tsc      ', {
-    cmd: 'tsc',
-    args: ['--emitDeclarationOnly'],
-    wait: true,
-    env,
-    cwd,
-  });
-
-  log.success('Complete');
-}).catch((error) => {
-  log.error(error);
-  process.exit(1);
-});
+);

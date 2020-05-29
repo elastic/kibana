@@ -2,9 +2,7 @@
   "name": "@kbn/monaco",
   "version": "1.0.0",
   "private": true,
-  "license": "MIT",
   "main": "./target/index.js",
-  "types": "./target/types/index.d.ts",
   "scripts": {
     "build": "node ./scripts/build.js",
     "kbn:bootstrap": "yarn build --dev"
@@ -18,8 +16,6 @@
     "babel-loader": "^8.0.6",
     "css-loader": "^3.4.2",
     "del": "^5.1.0",
-    "getopts": "^2.2.4",
-    "mini-css-extract-plugin": "0.8.0",
     "raw-loader": "3.1.0",
     "supports-color": "^7.0.0",
     "typescript": "3.7.2",
