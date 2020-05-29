@@ -23,9 +23,9 @@ export function getDiscoverUrl(indexPatternId: string, baseUrl: string): string 
     index: indexPatternId,
   });
 
-  const hash = `#/discover?_g=${_g}&_a=${_a}`;
+  const hash = `/discover#?_g=${_g}&_a=${_a}`;
 
-  return `${baseUrl}${hash}`;
+  return `${baseUrl}/app${hash}`;
 }
 
 export const RedirectToTransformManagement: FC = () => <Redirect to={`/${SECTION_SLUG.HOME}`} />;

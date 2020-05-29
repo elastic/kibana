@@ -31,6 +31,7 @@ import {
 } from '@elastic/eui';
 import 'brace/theme/textmate';
 
+import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { getIndexListUri } from '../../../../../../../../../plugins/index_management/public';
 import { routing } from '../../../../../services/routing';
 import { API_STATUS } from '../../../../../constants';
@@ -454,9 +455,10 @@ export class DetailPanel extends Component {
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  href={routing._reactRouter.getUrlForApp('management', {
-                    path: `data/index_management${indexManagementUri}`,
-                  })}
+                  {...reactRouterNavigate(
+                    routing._reactRouter.history.parentHistory,
+                    `/data/index_management${indexManagementUri}`
+                  )}
                   data-test-subj="viewIndexManagementButton"
                 >
                   <FormattedMessage

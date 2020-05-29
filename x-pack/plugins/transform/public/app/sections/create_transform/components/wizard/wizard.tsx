@@ -120,14 +120,23 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
     // as it was when transforms were part of the ML plugin. This will be revisited
     // to come up with an approach that's more in line with the overall layout
     // of the Kibana management section.
-    const managementBody = document.getElementsByClassName(
+    let managementBody = document.getElementsByClassName(
       KBN_MANAGEMENT_PAGE_CLASSNAME.DEFAULT_BODY
     );
 
     if (managementBody.length > 0) {
-      managementBody[0].classList.add(KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER);
+      managementBody[0].classList.replace(
+        KBN_MANAGEMENT_PAGE_CLASSNAME.DEFAULT_BODY,
+        KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER
+      );
       return () => {
-        managementBody[0].classList.remove(KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER);
+        managementBody = document.getElementsByClassName(
+          KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER
+        );
+        managementBody[0].classList.replace(
+          KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER,
+          KBN_MANAGEMENT_PAGE_CLASSNAME.DEFAULT_BODY
+        );
       };
     }
   }, []);

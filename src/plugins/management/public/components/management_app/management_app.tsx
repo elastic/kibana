@@ -32,7 +32,7 @@ import { ManagementRouter } from './management_router';
 import { ManagementSidebarNav } from '../management_sidebar_nav';
 import { reactRouterNavigate } from '../../../../kibana_react/public';
 
-import './_management_app.scss';
+import './management_app.scss';
 
 interface ManagementAppProps {
   appBasePath: string;
