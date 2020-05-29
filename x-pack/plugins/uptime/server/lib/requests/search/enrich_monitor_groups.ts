@@ -6,16 +6,11 @@
 
 import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
-import { getHistogramIntervalFormatted } from '../../helper';
-import { STATES } from '../../../../../../legacy/plugins/uptime/common/constants';
-import {
 import {
   Check,
-  Histogram,
-  HistogramPoint,
   MonitorSummary,
   SummaryHistogram,
-  Check,
+  SummaryHistogramPoint,
   CursorDirection,
   SortOrder,
 } from '../../../../../../legacy/plugins/uptime/common/graphql/types';
@@ -363,9 +358,9 @@ const getHistogramForMonitors = async (
     };
   });
 
-  const histosById: { [key: string]: Histogram } = {};
+  const histosById: { [key: string]: SummaryHistogram } = {};
   monitorIds.forEach((id: string) => {
-    const points: HistogramPoint[] = [];
+    const points: SummaryHistogramPoint[] = [];
     simplified.forEach((simpleHisto) => {
       points.push({
         timestamp: simpleHisto.timestamp,
@@ -373,7 +368,7 @@ const getHistogramForMonitors = async (
         down: simpleHisto.byId[id],
       });
     });
-    histosById[id] = { points };
+    histosById[id] = { points, count: undefined };
   });
 
   return histosById;
