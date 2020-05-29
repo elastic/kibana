@@ -16,7 +16,7 @@ import { mockDataProviders } from './mock/mock_data_providers';
 import { Providers } from './providers';
 import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { ManageGlobalTimeline } from '../../manage_timeline';
+import { ManageGlobalTimeline, timelineDefaults } from '../../manage_timeline';
 
 const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
 
@@ -25,6 +25,14 @@ describe('Providers', () => {
   const mount = useMountAppended();
   const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 
+  const manageTimelineForTesting = {
+    foo: {
+      ...timelineDefaults,
+      id: 'foo',
+      filterManager,
+      isLoading,
+    },
+  };
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
@@ -93,14 +101,6 @@ describe('Providers', () => {
 
     test('while loading data, it does NOT invoke the onDataProviderRemoved callback when the close button is clicked', () => {
       const mockOnDataProviderRemoved = jest.fn();
-      const manageTimelineForTesting = {
-        foo: {
-          timelineContextState: {
-            filterManager,
-            isLoading,
-          },
-        },
-      };
       const wrapper = mount(
         <TestProviders>
           <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
@@ -157,14 +157,6 @@ describe('Providers', () => {
 
     test('while loading data, it does NOT invoke the onDataProviderRemoved callback when you click on the option "Delete" in the provider menu', () => {
       const mockOnDataProviderRemoved = jest.fn();
-      const manageTimelineForTesting = {
-        foo: {
-          timelineContextState: {
-            filterManager,
-            isLoading,
-          },
-        },
-      };
       const wrapper = mount(
         <TestProviders>
           <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
@@ -229,14 +221,6 @@ describe('Providers', () => {
 
     test('while loading data, it does NOT invoke the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
       const mockOnToggleDataProviderEnabled = jest.fn();
-      const manageTimelineForTesting = {
-        foo: {
-          timelineContextState: {
-            filterManager,
-            isLoading,
-          },
-        },
-      };
       const wrapper = mount(
         <TestProviders>
           <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
@@ -304,14 +288,6 @@ describe('Providers', () => {
 
     test('while loading data, it does NOT invoke the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', () => {
       const onToggleDataProviderExcluded = jest.fn();
-      const manageTimelineForTesting = {
-        foo: {
-          timelineContextState: {
-            filterManager,
-            isLoading,
-          },
-        },
-      };
 
       const wrapper = mount(
         <TestProviders>
@@ -412,14 +388,6 @@ describe('Providers', () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
       const mockOnDataProviderRemoved = jest.fn();
-      const manageTimelineForTesting = {
-        foo: {
-          timelineContextState: {
-            filterManager,
-            isLoading,
-          },
-        },
-      };
 
       const wrapper = mount(
         <TestProviders>
@@ -497,14 +465,6 @@ describe('Providers', () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
       const mockOnToggleDataProviderEnabled = jest.fn();
-      const manageTimelineForTesting = {
-        foo: {
-          timelineContextState: {
-            filterManager,
-            isLoading,
-          },
-        },
-      };
 
       const wrapper = mount(
         <TestProviders>
@@ -587,14 +547,6 @@ describe('Providers', () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
       const mockOnToggleDataProviderExcluded = jest.fn();
-      const manageTimelineForTesting = {
-        foo: {
-          timelineContextState: {
-            filterManager,
-            isLoading,
-          },
-        },
-      };
 
       const wrapper = mount(
         <TestProviders>

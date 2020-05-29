@@ -17,7 +17,10 @@ import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 
 import { DraggableWrapperHoverContent } from './draggable_wrapper_hover_content';
-import { ManageGlobalTimeline } from '../../../timelines/components/manage_timeline';
+import {
+  ManageGlobalTimeline,
+  timelineDefaults,
+} from '../../../timelines/components/manage_timeline';
 
 jest.mock('../../lib/kibana');
 
@@ -108,10 +111,9 @@ describe('DraggableWrapperHoverContent', () => {
           onFilterAdded = jest.fn();
           const manageTimelineForTesting = {
             [timelineId]: {
-              timelineContextState: {
-                filterManager,
-                isLoading: false,
-              },
+              ...timelineDefaults,
+              id: timelineId,
+              filterManager,
             },
           };
 
@@ -203,10 +205,9 @@ describe('DraggableWrapperHoverContent', () => {
 
           const manageTimelineForTesting = {
             [timelineId]: {
-              timelineContextState: {
-                filterManager,
-                isLoading: false,
-              },
+              ...timelineDefaults,
+              id: timelineId,
+              filterManager,
             },
           };
 

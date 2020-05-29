@@ -20,7 +20,10 @@ import { createStore, State } from '../../store';
 
 import { Props } from './top_n';
 import { ACTIVE_TIMELINE_REDUX_ID, StatefulTopN } from '.';
-import { ManageGlobalTimeline } from '../../../timelines/components/manage_timeline';
+import {
+  ManageGlobalTimeline,
+  timelineDefaults,
+} from '../../../timelines/components/manage_timeline';
 
 jest.mock('../../lib/kibana');
 jest.mock('../../../timelines/store/timeline/actions');
@@ -160,13 +163,15 @@ describe('StatefulTopN', () => {
     beforeEach(() => {
       wrapper = mount(
         <TestProviders store={store}>
-          <StatefulTopN
-            browserFields={mockBrowserFields}
-            field={field}
-            toggleTopN={jest.fn()}
-            onFilterAdded={jest.fn()}
-            value={value}
-          />
+          <ManageGlobalTimeline>
+            <StatefulTopN
+              browserFields={mockBrowserFields}
+              field={field}
+              toggleTopN={jest.fn()}
+              onFilterAdded={jest.fn()}
+              value={value}
+            />
+          </ManageGlobalTimeline>
         </TestProviders>
       );
     });
@@ -240,11 +245,9 @@ describe('StatefulTopN', () => {
       filterManager = new FilterManager(mockUiSettingsForFilterManager);
       const manageTimelineForTesting = {
         [ACTIVE_TIMELINE_REDUX_ID]: {
-          timelineContextState: {
-            filterManager,
-            isLoading: false,
-          },
-          timelineTypeContext: { id: ACTIVE_TIMELINE_REDUX_ID },
+          ...timelineDefaults,
+          id: ACTIVE_TIMELINE_REDUX_ID,
+          filterManager,
         },
       };
       wrapper = mount(
@@ -315,13 +318,13 @@ describe('StatefulTopN', () => {
 
   test(`defaults to the 'Signals events' option when rendering in a NON-active timeline context (e.g. the Signals table on the Detections page) when 'documentType' from 'useTimelineTypeContext()' is 'signals'`, () => {
     const filterManager = new FilterManager(mockUiSettingsForFilterManager);
+
     const manageTimelineForTesting = {
       [ACTIVE_TIMELINE_REDUX_ID]: {
-        timelineContextState: {
-          filterManager,
-          isLoading: false,
-        },
-        timelineTypeContext: { documentType: 'signals', id: ACTIVE_TIMELINE_REDUX_ID },
+        ...timelineDefaults,
+        id: ACTIVE_TIMELINE_REDUX_ID,
+        filterManager,
+        documentType: 'signals',
       },
     };
 

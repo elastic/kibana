@@ -128,7 +128,7 @@ export const Providers = React.memo<Props>(
       [dataProviders]
     );
     return (
-      <div data-test-subj="providers">
+      <div>
         {dataProviderGroups.map((group, groupIndex) => (
           <EuiFlexGroup alignItems="center" gutterSize="none" key={`droppable-${groupIndex}`}>
             <OrFlexItem grow={false}>

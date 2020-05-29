@@ -54,7 +54,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     val,
   }) => {
     const { getManageTimelineById } = useManageTimeline();
-    const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
+    const isLoading = useMemo(() => getManageTimelineById(timelineId ?? '').isLoading, [
       getManageTimelineById,
       timelineId,
     ]);

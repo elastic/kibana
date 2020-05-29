@@ -64,7 +64,7 @@ type ActionManageTimeline =
       payload: FilterManager;
     };
 
-const timelineDefaults = {
+export const timelineDefaults = {
   indexToAdd: null,
   loadingText: i18n.LOADING_EVENTS,
   footerText: i18nF.TOTAL_COUNT_OF_EVENTS,
@@ -109,10 +109,11 @@ const reducerManageTimeline = (state: ManageTimelineById, action: ActionManageTi
   }
 };
 
-interface ManageGlobalTimeline {
+interface UseTimelineManager {
   getManageTimelineById: (id: string) => ManageTimeline;
   getTimelineFilterManager: (id: string) => FilterManager | undefined;
   initializeTimeline: (newTimeline: ManageTimelineInit) => void;
+  isManagedTimeline: (id: string) => boolean;
   setIsTimelineLoading: (isLoadingArgs: { id: string; isLoading: boolean }) => void;
   setTimelineRowActions: (actionsArgs: {
     id: string;
@@ -122,9 +123,7 @@ interface ManageGlobalTimeline {
   setTimelineFilterManager: (filterArgs: { id: string; filterManager: FilterManager }) => void;
 }
 
-const useTimelineManager = (
-  manageTimelineForTesting?: ManageTimelineById
-): ManageGlobalTimeline => {
+const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseTimelineManager => {
   const [state, dispatch] = useReducer(
     reducerManageTimeline,
     manageTimelineForTesting ?? initManageTimeline
@@ -193,11 +192,13 @@ const useTimelineManager = (
     },
     [state]
   );
+  const isManagedTimeline = useCallback((id: string): boolean => state[id] != null, [state]);
 
   return {
     getManageTimelineById,
     getTimelineFilterManager,
     initializeTimeline,
+    isManagedTimeline,
     setIsTimelineLoading,
     setTimelineRowActions,
     setTimelineFilterManager,
@@ -207,12 +208,13 @@ const useTimelineManager = (
 const init = {
   getManageTimelineById: (id: string) => ({ ...timelineDefaults, id }),
   getTimelineFilterManager: () => undefined,
+  isManagedTimeline: () => false,
   initializeTimeline: () => noop,
   setIsTimelineLoading: () => noop,
   setTimelineRowActions: () => noop,
   setTimelineFilterManager: () => noop,
 };
-const ManageTimelineContext = createContext<ManageGlobalTimeline>(init);
+const ManageTimelineContext = createContext<UseTimelineManager>(init);
 
 export const useManageTimeline = () => useContext(ManageTimelineContext);
 

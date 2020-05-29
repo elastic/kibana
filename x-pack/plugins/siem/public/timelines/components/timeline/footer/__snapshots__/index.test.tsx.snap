@@ -27,6 +27,8 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
       >
         <EventsCount
           closePopover={[Function]}
+          documentType="events match the search criteria"
+          footerText="events match the search criteria"
           isOpen={false}
           items={
             Array [
@@ -59,7 +61,6 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
           itemsCount={2}
           onClick={[Function]}
           serverSideEventCount={15546}
-          timelineTypeContext={Object {}}
         />
       </EuiFlexGroup>
     </EuiFlexItem>

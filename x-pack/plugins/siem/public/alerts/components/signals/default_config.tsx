@@ -95,7 +95,7 @@ export const signalsHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
-    width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+    width: DEFAULT_DATE_COLUMN_MIN_WIDTH + 5,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -108,7 +108,7 @@ export const signalsHeaders: ColumnHeaderOptions[] = [
     columnHeaderType: defaultColumnHeaderType,
     id: 'signal.rule.version',
     label: i18n.SIGNALS_HEADERS_VERSION,
-    width: 100,
+    width: 95,
   },
   {
     columnHeaderType: defaultColumnHeaderType,

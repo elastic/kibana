@@ -103,9 +103,12 @@ const StatefulTopNComponent: React.FC<Props> = ({
   //    this component is rendered in the context of the active timeline. This
   //    behavior enables the 'All events' view by appending the signals index
   //    to the index pattern.
-  const { getManageTimelineById } = useManageTimeline();
+  const { isManagedTimeline, getManageTimelineById } = useManageTimeline();
   const { documentType, id: timelineId, indexToAdd } = useMemo(
-    () => getManageTimelineById(ACTIVE_TIMELINE_REDUX_ID),
+    () =>
+      isManagedTimeline(ACTIVE_TIMELINE_REDUX_ID)
+        ? getManageTimelineById(ACTIVE_TIMELINE_REDUX_ID)
+        : { documentType: null, id: null, indexToAdd: null },
     [getManageTimelineById]
   );
 
