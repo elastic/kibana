@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { TemplateDeserialized } from '../../../../common';
-import { serializeV1Template } from '../../../../common/lib';
+import { serializeLegacyTemplate } from '../../../../common/lib';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { templateSchema } from './validate_schemas';
@@ -15,35 +15,26 @@ import { templateSchema } from './validate_schemas';
 const bodySchema = templateSchema;
 
 export function registerCreateRoute({ router, license, lib }: RouteDependencies) {
-  router.put(
+  router.post(
     { path: addBasePath('/templates'), validate: { body: bodySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       const template = req.body as TemplateDeserialized;
       const {
-        _kbnMeta: { formatVersion },
+        _kbnMeta: { isLegacy },
       } = template;
 
-      if (formatVersion !== 1) {
+      if (!isLegacy) {
         return res.badRequest({ body: 'Only index template version 1 can be created.' });
       }
 
-      // For now we format to V1 index templates.
-      // When the V2 API is ready we will only create V2 template format.
-      const serializedTemplate = serializeV1Template(template);
-
-      const {
-        name,
-        order,
-        index_patterns,
-        version,
-        settings,
-        mappings,
-        aliases,
-      } = serializedTemplate;
+      const serializedTemplate = serializeLegacyTemplate(template);
+      const { order, index_patterns, version, settings, mappings, aliases } = serializedTemplate;
 
       // Check that template with the same name doesn't already exist
-      const templateExists = await callAsCurrentUser('indices.existsTemplate', { name });
+      const templateExists = await callAsCurrentUser('indices.existsTemplate', {
+        name: template.name,
+      });
 
       if (templateExists) {
         return res.conflict({
@@ -51,7 +42,7 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
             i18n.translate('xpack.idxMgmt.createRoute.duplicateTemplateIdErrorMessage', {
               defaultMessage: "There is already a template with name '{name}'.",
               values: {
-                name,
+                name: template.name,
               },
             })
           ),
@@ -61,7 +52,7 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
       try {
         // Otherwise create new index template
         const response = await callAsCurrentUser('indices.putTemplate', {
-          name,
+          name: template.name,
           order,
           body: {
             index_patterns,

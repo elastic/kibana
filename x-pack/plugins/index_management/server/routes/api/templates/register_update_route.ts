@@ -6,7 +6,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { TemplateDeserialized } from '../../../../common';
-import { serializeV1Template } from '../../../../common/lib';
+import { serializeLegacyTemplate } from '../../../../common/lib';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { templateSchema } from './validate_schemas';
@@ -27,14 +27,14 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
       const { name } = req.params as typeof paramsSchema.type;
       const template = req.body as TemplateDeserialized;
       const {
-        _kbnMeta: { formatVersion },
+        _kbnMeta: { isLegacy },
       } = template;
 
-      if (formatVersion !== 1) {
-        return res.badRequest({ body: 'Only index template version 1 can be edited.' });
+      if (!isLegacy) {
+        return res.badRequest({ body: 'Only legacy index template can be edited.' });
       }
 
-      const serializedTemplate = serializeV1Template(template);
+      const serializedTemplate = serializeLegacyTemplate(template);
 
       const { order, index_patterns, version, settings, mappings, aliases } = serializedTemplate;
 

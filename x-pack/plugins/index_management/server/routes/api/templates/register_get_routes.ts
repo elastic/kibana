@@ -5,7 +5,11 @@
  */
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { deserializeV1Template, deserializeTemplateList } from '../../../../common/lib';
+import {
+  deserializeLegacyTemplate,
+  deserializeLegacyTemplateList,
+  deserializeTemplateList,
+} from '../../../../common/lib';
 import { getManagedTemplatePrefix } from '../../../lib/get_managed_templates';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
@@ -17,8 +21,22 @@ export function registerGetAllRoute({ router, license }: RouteDependencies) {
       const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
 
-      const indexTemplatesByName = await callAsCurrentUser('indices.getTemplate');
-      const body = deserializeTemplateList(indexTemplatesByName, managedTemplatePrefix);
+      const _legacyTemplates = await callAsCurrentUser('indices.getTemplate');
+      const { index_templates: _templates } = await callAsCurrentUser('transport.request', {
+        path: '_index_template',
+        method: 'GET',
+      });
+
+      const legacyTemplates = deserializeLegacyTemplateList(
+        _legacyTemplates,
+        managedTemplatePrefix
+      );
+      const templates = deserializeTemplateList(_templates, managedTemplatePrefix);
+
+      const body = {
+        templates,
+        legacyTemplates,
+      };
 
       return res.ok({ body });
     })
@@ -31,7 +49,7 @@ const paramsSchema = schema.object({
 
 // Require the template format version (V1 or V2) to be provided as Query param
 const querySchema = schema.object({
-  v: schema.oneOf([schema.literal('1'), schema.literal('2')]),
+  legacy: schema.maybe(schema.boolean()),
 });
 
 export function registerGetOneRoute({ router, license, lib }: RouteDependencies) {
@@ -41,12 +59,12 @@ export function registerGetOneRoute({ router, license, lib }: RouteDependencies)
       validate: { params: paramsSchema, query: querySchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { name } = req.params as typeof paramsSchema.type;
+      const { name } = req.params as TypeOf<typeof paramsSchema>;
       const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
 
-      const { v: version } = req.query as TypeOf<typeof querySchema>;
+      const { legacy } = req.query as TypeOf<typeof querySchema>;
 
-      if (version !== '1') {
+      if (!legacy) {
         return res.badRequest({ body: 'Only index template version 1 can be fetched.' });
       }
 
@@ -56,7 +74,7 @@ export function registerGetOneRoute({ router, license, lib }: RouteDependencies)
 
         if (indexTemplateByName[name]) {
           return res.ok({
-            body: deserializeV1Template(
+            body: deserializeLegacyTemplate(
               { ...indexTemplateByName[name], name },
               managedTemplatePrefix
             ),

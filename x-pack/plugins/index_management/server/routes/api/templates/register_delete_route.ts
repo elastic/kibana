@@ -16,7 +16,7 @@ const bodySchema = schema.object({
   templates: schema.arrayOf(
     schema.object({
       name: schema.string(),
-      formatVersion: schema.oneOf([schema.literal(1), schema.literal(2)]),
+      isLegacy: schema.maybe(schema.boolean()),
     })
   ),
 });
@@ -35,10 +35,10 @@ export function registerDeleteRoute({ router, license }: RouteDependencies) {
       };
 
       await Promise.all(
-        templates.map(async ({ name, formatVersion }) => {
+        templates.map(async ({ name, isLegacy }) => {
           try {
-            if (formatVersion !== 1) {
-              return res.badRequest({ body: 'Only index template version 1 can be deleted.' });
+            if (!isLegacy) {
+              return res.badRequest({ body: 'Only legacy index template can be deleted.' });
             }
 
             await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('indices.deleteTemplate', {

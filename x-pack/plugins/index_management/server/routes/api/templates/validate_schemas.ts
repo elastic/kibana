@@ -24,8 +24,8 @@ export const templateSchema = schema.object({
       rollover_alias: schema.maybe(schema.string()),
     })
   ),
-  isManaged: schema.maybe(schema.boolean()),
   _kbnMeta: schema.object({
-    formatVersion: schema.oneOf([schema.literal(1), schema.literal(2)]),
+    isManaged: schema.maybe(schema.boolean()),
+    isLegacy: schema.maybe(schema.boolean()),
   }),
 });
