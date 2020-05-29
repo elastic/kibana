@@ -7,12 +7,6 @@
 import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
 import { Plugin, ClientSetup, ClientStart } from './plugin';
 
-export interface ConfigSchema {
-  ui: {
-    enabled: boolean;
-  };
-}
-
 export const plugin: PluginInitializer<ClientSetup, ClientStart> = (
   context: PluginInitializerContext
 ) => {

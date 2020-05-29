@@ -6,7 +6,11 @@
 
 import React from 'react';
 import * as styledComponents from 'styled-components';
-import { ThemedStyledComponentsModule, ThemeProvider, ThemeProviderProps } from 'styled-components';
+import {
+  ThemedStyledComponentsModule,
+  ThemeProvider,
+  ThemeProviderProps,
+} from 'styled-components';
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
@@ -42,4 +46,11 @@ const {
   withTheme,
 } = (styledComponents as unknown) as ThemedStyledComponentsModule<EuiTheme>;
 
-export { css, euiStyled, EuiThemeProvider, createGlobalStyle, keyframes, withTheme };
+export {
+  css,
+  euiStyled,
+  EuiThemeProvider,
+  createGlobalStyle,
+  keyframes,
+  withTheme,
+};

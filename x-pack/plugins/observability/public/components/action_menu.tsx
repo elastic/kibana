@@ -58,6 +58,10 @@ export const SectionLink: React.FC<EuiListGroupItemProps> = (props) => (
   <EuiListGroupItem style={{ padding: 0 }} size={'s'} {...props} />
 );
 
-export const ActionMenuDivider: React.FC<{}> = (props) => <EuiHorizontalRule margin={'s'} />;
+export const ActionMenuDivider: React.FC<{}> = (props) => (
+  <EuiHorizontalRule margin={'s'} />
+);
 
-export const ActionMenu: React.FC<Props> = (props) => <EuiPopover {...props} ownFocus={true} />;
+export const ActionMenu: React.FC<Props> = (props) => (
+  <EuiPopover {...props} ownFocus={true} />
+);
