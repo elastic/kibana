@@ -17,15 +17,35 @@
  * under the License.
  */
 
-// Please note: this module is intended to be run inside of a webworker.
-/* eslint-disable @kbn/eslint/module_migration */
+const path = require('path');
 
-// @ts-ignore
-import * as worker from 'monaco-editor/esm/vs/editor/editor.worker';
-import { XJsonWorker } from './xjson_worker';
+const createLangWorkerConfig = (lang) => ({
+  mode: 'production',
+  entry: path.resolve(__dirname, lang, 'worker', `${lang}.worker.ts`),
+  output: {
+    path: path.resolve(__dirname, 'target'),
+    filename: `${lang}.worker.js`,
+  },
+  resolve: {
+    modules: ['node_modules'],
+    extensions: ['.js', '.ts', '.tsx'],
+  },
+  stats: 'errors-only',
+  module: {
+    rules: [
+      {
+        test: /\.(js|ts)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+          },
+        },
+      },
+    ],
+  },
+});
 
-self.onmessage = () => {
-  worker.initialize((ctx: any, createData: any) => {
-    return new XJsonWorker(ctx);
-  });
-};
+module.exports = [createLangWorkerConfig('xjson')];

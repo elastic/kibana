@@ -48,5 +48,4 @@ target
 /packages/kbn-ui-framework/dist
 /packages/kbn-ui-framework/doc_site/build
 /packages/kbn-ui-framework/generator-kui/*/templates/
-/packages/kbn-monaco/xjson/dist
 
