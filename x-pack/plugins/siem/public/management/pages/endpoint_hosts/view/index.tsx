@@ -27,13 +27,14 @@ import { HOST_STATUS_TO_HEALTH_COLOR } from './host_constants';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
-import { PageView } from '../../../../common/components/endpoint/page_view';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
+import { ManagementPageView } from '../../../components/management_page_view';
+import { getManagementUrl } from '../../..';
 
 const HostLink = memo<{
   name: string;
   href: string;
-  route: ReturnType<typeof urlFromQueryParams>;
+  route: string;
 }>(({ name, href, route }) => {
   const clickHandler = useNavigateByRouterEventHandler(route);
 
@@ -97,10 +98,18 @@ export const HostList = () => {
           defaultMessage: 'Hostname',
         }),
         render: ({ hostname, id }: HostInfo['metadata']['host']) => {
-          const newQueryParams = urlFromQueryParams({ ...queryParams, selected_host: id });
-          return (
-            <HostLink name={hostname} href={`?${newQueryParams.search}`} route={newQueryParams} />
-          );
+          const toRoutePath = getManagementUrl({
+            ...queryParams,
+            name: 'endpointDetails',
+            selected_host: id,
+            excludePrefix: true,
+          });
+          const toRouteUrl = getManagementUrl({
+            ...queryParams,
+            name: 'endpointDetails',
+            selected_host: id,
+          });
+          return <HostLink name={hostname} href={toRouteUrl} route={toRoutePath} />;
         },
       },
       {
@@ -208,7 +217,7 @@ export const HostList = () => {
   }, [queryParams]);
 
   return (
-    <PageView
+    <ManagementPageView
       viewType="list"
       data-test-subj="hostPage"
       headerLeft={i18n.translate('xpack.siem.endpoint.host.hosts', { defaultMessage: 'Hosts' })}
@@ -232,6 +241,6 @@ export const HostList = () => {
         onChange={onTableChange}
       />
       <SpyRoute />
-    </PageView>
+    </ManagementPageView>
   );
 };

@@ -5,6 +5,8 @@
  */
 
 import { generatePath } from 'react-router-dom';
+// eslint-disable-next-line import/no-nodejs-modules
+import querystring from 'querystring';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
@@ -13,6 +15,20 @@ import {
 } from './constants';
 import { ManagementSubTab } from '../types';
 import { SiemPageName } from '../../app/types';
+import { HostIndexUIQueryParams } from '../pages/endpoint_hosts/types';
+
+// Takend from: https://github.com/microsoft/TypeScript/issues/12936#issuecomment-559034150
+type ExactKeys<T1, T2> = Exclude<keyof T1, keyof T2> extends never ? T1 : never;
+type Exact<T, Shape> = T extends Shape ? ExactKeys<T, Shape> : never;
+
+/**
+ * Returns a string to be used in the URL as search query params.
+ * Ensures that when creating a URL query param string, that the given input strictly
+ * matches the expected interface (guards against possibly leaking internal state)
+ */
+const querystringStringify: <ExpectedType extends object, ArgType>(
+  params: Exact<ExpectedType, ArgType>
+) => string = querystring.stringify;
 
 export type GetManagementUrlProps = {
   /**
@@ -22,10 +38,9 @@ export type GetManagementUrlProps = {
    */
   excludePrefix?: boolean;
 } & (
-  | { name: 'default' }
-  | { name: 'endpointList' }
-  | { name: 'policyList' }
+  | { name: 'default' | 'endpointList' | 'policyList' }
   | { name: 'policyDetails'; policyId: string }
+  | ({ name: 'endpointDetails' } & HostIndexUIQueryParams)
 );
 
 // Prefix is (almost) everything to the left of where the Router was mounted. In SIEM, since
@@ -50,6 +65,13 @@ export const getManagementUrl = (props: GetManagementUrlProps): string => {
         pageName: SiemPageName.management,
         tabName: ManagementSubTab.endpoints,
       });
+      break;
+    case 'endpointDetails':
+      const { name, excludePrefix, ...queryParams } = props;
+      url += `${generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
+        pageName: SiemPageName.management,
+        tabName: ManagementSubTab.endpoints,
+      })}?${querystringStringify<HostIndexUIQueryParams, typeof queryParams>(queryParams)}`;
       break;
     case 'policyList':
       url += generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
