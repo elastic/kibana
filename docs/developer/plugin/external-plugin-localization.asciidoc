@@ -1,12 +1,12 @@
-[[development-plugin-localization]]
-=== Localization for plugins
+[[external-plugin-localization]]
+=== Localization for plugins outside the {kib} repo
 
-To introduce localization for your plugin, use our i18n tool to create IDs and default messages. You can then extract these IDs with respective default messages into localization JSON files for Kibana to use when running your plugin.
+To introduce localization for your plugin, use our i18n tool to create IDs and default messages. You can then extract these IDs with respective default messages into localization JSON files for {kib} to use when running your plugin.
 
 [float]
 ==== Adding localization to your plugin
 
-You must add a `translations` directory at the root of your plugin. This directory will contain the translation files that Kibana uses.
+You must add a `translations` directory at the root of your plugin. This directory will contain the translation files that {kib} uses.
 
 ["source","shell"]
 -----------
@@ -20,13 +20,13 @@ You must add a `translations` directory at the root of your plugin. This directo
 
 
 [float]
-==== Using Kibana i18n tooling
-To simplify the localization process, Kibana provides tools for the following functions:
+==== Using {kib} i18n tooling
+To simplify the localization process, {kib} provides tools for the following functions:
 
 * Verify all translations have translatable strings and extract default messages from templates
-* Verify translation files and integrate them into Kibana
+* Verify translation files and integrate them into {kib}
 
-To use Kibana i18n tooling, create a `.i18nrc.json` file with the following configs:
+To use {kib} i18n tooling, create a `.i18nrc.json` file with the following configs:
 
 * `paths`.  The directory from which the i18n translation IDs are extracted.
 * `exclude`. The list of files to exclude while parsing paths.
@@ -47,7 +47,7 @@ To use Kibana i18n tooling, create a `.i18nrc.json` file with the following conf
 }
 -----------
 
-An example Kibana `.i18nrc.json` is {blob}.i18nrc.json[here].
+An example {kib} `.i18nrc.json` is {blob}.i18nrc.json[here].
 
 Full documentation about i18n tooling is {blob}src/dev/i18n/README.md[here].
 
@@ -83,10 +83,10 @@ node scripts/i18n_check --fix --include-config ../kibana-extra/myPlugin/.i18nrc.
 [float]
 ==== Implementing i18n in the UI
 
-Kibana relies on several UI frameworks (ReactJS and AngularJS) and
+{kib} relies on several UI frameworks (ReactJS and AngularJS) and
 requires localization in different environments (browser and NodeJS).
 The internationalization engine is framework agnostic and consumable in
-all parts of Kibana (ReactJS, AngularJS and NodeJS).
+all parts of {kib} (ReactJS, AngularJS and NodeJS).
 
 To simplify
 internationalization in UI frameworks, additional abstractions are
