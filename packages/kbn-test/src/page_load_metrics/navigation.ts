@@ -76,7 +76,7 @@ export async function navigateToApps(log: ToolingLog, options: NavigationOptions
     { path: '/app/discover', locator: '[data-test-subj="discover-sidebar"]' },
     { path: '/app/home', locator: '[data-test-subj="homeApp"]' },
     { path: '/app/canvas', locator: '[data-test-subj="create-workpad-button"]' },
-    { path: '/app/maps', locator: '[data-test-subj="mapsFullScreenMode"]' },
+    { path: '/app/maps', locator: '[data-test-subj="newMapLink"]' },
     { path: '/app/apm', locator: '[data-test-subj="apmMainContainer"]' },
   ];
 
@@ -116,7 +116,7 @@ export async function navigateToApps(log: ToolingLog, options: NavigationOptions
       });
 
       await page.waitForSelector(app.locator, { timeout: 30000 }).catch((err) => {
-        log.error(`Page '${app.path}' was not loaded properly, current ulr: ${page.url()}`);
+        log.error(`Page '${app.path}' was not loaded properly, current url: ${page.url()}`);
         throw err;
       });
 
