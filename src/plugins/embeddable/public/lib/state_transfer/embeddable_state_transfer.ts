@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { cloneDeep, forOwn } from 'lodash';
 import { CoreStart, ScopedHistory } from '../../../../../core/public';
 import {
   EmbeddableOriginatingAppState,
@@ -32,14 +33,22 @@ export class EmbeddableStateTransfer {
     history: ScopedHistory,
     removeAfterFetch: boolean = false
   ): EmbeddableOriginatingAppState | undefined {
-    return this.incoming(history, isEmbeddableOriginatingAppState, removeAfterFetch);
+    return this.incoming<EmbeddableOriginatingAppState>(
+      history,
+      isEmbeddableOriginatingAppState,
+      removeAfterFetch
+    );
   }
 
   public incomingEmbeddablePackage(
     history: ScopedHistory,
     removeAfterFetch: boolean = false
   ): EmbeddablePackageState | undefined {
-    return this.incoming(history, isEmbeddablePackageState, removeAfterFetch);
+    return this.incoming<EmbeddablePackageState>(
+      history,
+      isEmbeddablePackageState,
+      removeAfterFetch
+    );
   }
 
   public incoming<IncomingStateType>(
@@ -49,11 +58,9 @@ export class EmbeddableStateTransfer {
   ): IncomingStateType | undefined {
     const incomingState = history?.location?.state;
     const castState =
-      !guard || guard(incomingState)
-        ? (_.cloneDeep(incomingState) as IncomingStateType)
-        : undefined;
+      !guard || guard(incomingState) ? (cloneDeep(incomingState) as IncomingStateType) : undefined;
     if (castState && removeAfterFetch) {
-      _.forOwn(castState, (key: string) => {
+      Object.keys(castState).forEach((key: string) => {
         delete (history.location.state as { [key: string]: unknown })[key];
       });
     }
