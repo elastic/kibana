@@ -12,20 +12,25 @@ import {
   EuiInMemoryTableProps,
   EuiTextColor,
   EuiIcon,
+  EuiLink,
 } from '@elastic/eui';
+import { ScopedHistory } from 'kibana/public';
 
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ComponentTemplateListItem } from '../types';
 
 export interface Props {
   componentTemplates: ComponentTemplateListItem[];
   onReloadClick: () => void;
   onDeleteClick: (componentTemplateName: string[]) => void;
+  history: ScopedHistory;
 }
 
 export const ComponentTable: FunctionComponent<Props> = ({
   componentTemplates,
   onReloadClick,
   onDeleteClick,
+  history,
 }) => {
   const [selection, setSelection] = useState<ComponentTemplateListItem[]>([]);
 
@@ -120,6 +125,21 @@ export const ComponentTable: FunctionComponent<Props> = ({
           defaultMessage: 'Name',
         }),
         sortable: true,
+        render: (name: string) => (
+          /* eslint-disable-next-line @elastic/eui/href-or-on-click */
+          <EuiLink
+            {...reactRouterNavigate(
+              history,
+              {
+                pathname: `/component_templates/${name}`,
+              }
+              // () => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)
+            )}
+            data-test-subj="templateDetailsLink"
+          >
+            {name}
+          </EuiLink>
+        ),
       },
       {
         field: 'usedBy',
