@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 
 export interface ISection {
   id: string;
@@ -24,6 +25,7 @@ export interface ISection {
 }
 
 export const Section = ({ section }: { section: ISection }) => {
+  const { core } = usePluginContext();
   const { id, icon, title, description, href } = section;
 
   const sectionContent = (
@@ -52,7 +54,10 @@ export const Section = ({ section }: { section: ISection }) => {
   if (href) {
     return (
       <EuiFlexItem>
-        <EuiButtonEmpty href={href} style={{ height: 'auto' }}>
+        <EuiButtonEmpty
+          href={core.http.basePath.prepend(href)}
+          style={{ height: 'auto' }}
+        >
           {sectionContent}
         </EuiButtonEmpty>
       </EuiFlexItem>
