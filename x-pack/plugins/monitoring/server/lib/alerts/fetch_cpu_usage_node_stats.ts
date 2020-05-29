@@ -5,39 +5,42 @@
  */
 import { get } from 'lodash';
 import { AlertCluster, AlertCpuUsageNodeStats } from '../../alerts/types';
+import { MonitoringConfig } from '../../config';
+
+// interface
+
+interface NodeBucketESResponse {
+  key: string;
+  average_cpu: { value: number };
+}
+
+interface ClusterBucketESResponse {
+  key: string;
+  nodes: {
+    buckets: NodeBucketESResponse[];
+  };
+}
 
 export async function fetchCpuUsageNodeStats(
   callCluster: any,
   clusters: AlertCluster[],
   index: string,
+  startMs: number,
+  endMs: number,
+  config: MonitoringConfig
 ): Promise<AlertCpuUsageNodeStats[]> {
-  const filterPath = [
-    'hits.hits._source.node_stats.node_id',
-    'hits.hits._source.source_node.name',
-    'hits.hits._source.cluster_uuid',
-    'hits.hits._source.node_stats.os.cgroup.cpuacct.usage_nanos',
-    'hits.hits._source.node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods',
-    'hits.hits._source.node_stats.os.cgroup.cpu.cfs_quota_micros',
-    'hits.hits._source.node_stats.process.cpu.percent',
-  ];
+  const filterPath = ['aggregations'];
   const params = {
     index,
     filterPath,
     body: {
-      size: 1000, // TODO: figure this out
-      sort: [
-        {
-          timestamp: {
-            order: 'desc',
-          },
-        },
-      ],
+      size: 0,
       query: {
         bool: {
           filter: [
             {
               terms: {
-                cluster_uuid: clusters.map(cluster => cluster.clusterUuid),
+                cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
             {
@@ -45,29 +48,85 @@ export async function fetchCpuUsageNodeStats(
                 type: 'node_stats',
               },
             },
+            {
+              range: {
+                timestamp: {
+                  format: 'epoch_millis',
+                  gte: startMs,
+                  lte: endMs,
+                },
+              },
+            },
           ],
         },
       },
-      collapse: {
-        field: 'node_stats.node_id',
+      aggs: {
+        clusters: {
+          terms: {
+            field: 'cluster_uuid',
+            size: config.ui.max_bucket_size,
+            include: clusters.map((cluster) => cluster.clusterUuid),
+          },
+          aggs: {
+            nodes: {
+              terms: {
+                field: 'node_stats.node_id',
+                size: config.ui.max_bucket_size,
+              },
+              aggs: {
+                average_cpu: {
+                  avg: {
+                    field: 'node_stats.process.cpu.percent',
+                  },
+                },
+                average_usage: {
+                  avg: {
+                    field: 'node_stats.os.cgroup.cpuacct.usage_nanos',
+                  },
+                },
+                average_periods: {
+                  avg: {
+                    field: 'node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods',
+                  },
+                },
+                average_quota: {
+                  avg: {
+                    field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
+                  },
+                },
+                name: {
+                  terms: {
+                    field: 'source_node.name',
+                    size: 1,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
   };
 
   const response = await callCluster('search', params);
-  return get(response, 'hits.hits', []).map(hit => {
-    return {
-      clusterUuid: get(hit, '_source.cluster_uuid'),
-      nodeId: get(hit, '_source.node_stats.node_id'),
-      nodeName: get(hit, '_source.source_node.name'),
-      cpuUsage: get(hit, '_source.node_stats.process.cpu.percent', 0),
-      containerUsage: get(hit, '_source.node_stats.os.cgroup.cpuacct.usage_nanos', 0),
-      containerPeriods: get(
-        hit,
-        '_source.node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods',
-        0
-      ),
-      containerQuota: get(hit, '_source.node_stats.os.cgroup.cpu.cfs_quota_micros', 0),
-    } as AlertCpuUsageNodeStats;
-  });
+  const stats: AlertCpuUsageNodeStats[] = [];
+  const clusterBuckets = get(
+    response,
+    'aggregations.clusters.buckets',
+    []
+  ) as ClusterBucketESResponse[];
+  for (const clusterBucket of clusterBuckets) {
+    for (const node of clusterBucket.nodes.buckets) {
+      stats.push({
+        clusterUuid: clusterBucket.key,
+        nodeId: node.key,
+        nodeName: get(node, 'name.buckets[0].key'),
+        cpuUsage: get(node, 'average_cpu.value'),
+        containerUsage: get(node, 'average_usage.value'),
+        containerPeriods: get(node, 'average_periods.value'),
+        containerQuota: get(node, 'average_quota.value'),
+      });
+    }
+  }
+  return stats;
 }

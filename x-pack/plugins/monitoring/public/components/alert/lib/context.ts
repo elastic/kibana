@@ -13,6 +13,6 @@ interface AlertPopoverContextProps {
   validConnectorTypes: ActionType[];
   defaultParametersByAlertType: CommonActionDefaultParameters;
   addAction: (action: ActionResult) => void;
-  updateThrottle: (throttle: string | null) => void;
+  updateAlert: (alert: CommonBaseAlert) => void;
 }
 export const AlertPopoverContext = React.createContext<AlertPopoverContextProps>({} as any);

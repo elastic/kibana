@@ -15,8 +15,10 @@ import {
   EuiListGroupItem,
 } from '@elastic/eui';
 
-import { AlertPopoverConfigureThrottle } from './configure_throttle';
+import { AlertPopoverConfigureParam } from './configure_param';
 import { AlertPopoverContext } from './lib';
+import { CommonBaseAlert } from '../../../common/types';
+import { AlertPopoverConfigureThrottle } from './configure_throttle';
 
 interface AlertPopoverSettingsProps {
   isEditMode: boolean;
@@ -28,19 +30,72 @@ export const AlertPopoverSettings: React.FC<AlertPopoverSettingsProps> = (
   const context = React.useContext(AlertPopoverContext);
   const [activeConfigureSetting, setActiveConfigureSetting] = React.useState<string | null>(null);
 
+  if (!context.alert.rawAlert?.params || Object.keys(context.alert.rawAlert?.params).length === 0) {
+    return null;
+  }
+
+  function doneConfiguringSetting(alert: CommonBaseAlert) {
+    setActiveConfigureSetting(null);
+    context.updateAlert(alert);
+  }
+
   let configureSettingUi = null;
-  switch (activeConfigureSetting) {
-    case 'throttle':
-      configureSettingUi = (
-        <AlertPopoverConfigureThrottle
-          cancel={() => setActiveConfigureSetting(null)}
-          done={alert => {
-            setActiveConfigureSetting(null);
-            context.updateThrottle(alert.rawAlert.throttle);
-          }}
-        />
+  if (activeConfigureSetting) {
+    switch (activeConfigureSetting) {
+      case 'throttle':
+        configureSettingUi = (
+          <AlertPopoverConfigureThrottle
+            cancel={() => setActiveConfigureSetting(null)}
+            done={doneConfiguringSetting}
+          />
+        );
+        break;
+      default:
+        configureSettingUi = (
+          <AlertPopoverConfigureParam
+            name={activeConfigureSetting}
+            details={context.alert.paramDetails[activeConfigureSetting]}
+            value={context.alert.rawAlert.params[activeConfigureSetting]}
+            cancel={() => setActiveConfigureSetting(null)}
+            done={doneConfiguringSetting}
+          />
+        );
+    }
+  }
+
+  function getDynamicSettings() {
+    if (
+      !context.alert.rawAlert?.params ||
+      Object.keys(context.alert.rawAlert?.params).length === 0
+    ) {
+      return null;
+    }
+
+    return Object.keys(context.alert.rawAlert?.params).map((name) => {
+      const detail = context.alert.paramDetails[name];
+      if (!detail) {
+        return null;
+      }
+      return (
+        <EuiFlexGroup alignItems="center" gutterSize="s" key={name}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="clock" size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <p>{detail.withValueLabel}</p>
+            </EuiText>
+          </EuiFlexItem>
+          {isEditMode ? (
+            <EuiFlexItem>
+              <EuiLink onClick={() => setActiveConfigureSetting(name)}>
+                <EuiText size="s">Configure</EuiText>
+              </EuiLink>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       );
-      break;
+    });
   }
 
   const settingsList = (
@@ -54,7 +109,7 @@ export const AlertPopoverSettings: React.FC<AlertPopoverSettingsProps> = (
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
-                  <p>Notify me every {context.alert.rawAlert.throttle}</p>
+                  <p>Notify me every {context.alert.rawAlert?.throttle}</p>
                 </EuiText>
               </EuiFlexItem>
               {isEditMode ? (
@@ -65,6 +120,7 @@ export const AlertPopoverSettings: React.FC<AlertPopoverSettingsProps> = (
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
+            {getDynamicSettings()}
             {activeConfigureSetting ? (
               <Fragment>
                 <EuiSpacer size="s" />

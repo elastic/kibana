@@ -43,6 +43,6 @@ export class AlertsFactory {
   }
 
   public static getAll() {
-    return Object.values(BY_TYPE).map(alert => new alert());
+    return Object.values(BY_TYPE).map((alert) => new alert());
   }
 }

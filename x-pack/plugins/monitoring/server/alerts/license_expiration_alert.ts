@@ -28,6 +28,7 @@ import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import { fetchDefaultEmailAddress } from '../lib/alerts/fetch_default_email_address';
+import { CommonAlertParams } from '../../common/types';
 
 const RESOLVED = i18n.translate('xpack.monitoring.alerts.licenseExpiration.resolved', {
   defaultMessage: 'resolved',
@@ -56,6 +57,7 @@ export class LicenseExpirationAlert extends BaseAlert {
   }
 
   protected async fetchData(
+    params: CommonAlertParams,
     callCluster: any,
     clusters: AlertCluster[],
     uiSettings: IUiSettingsClient,
@@ -66,7 +68,7 @@ export class LicenseExpirationAlert extends BaseAlert {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
     const licenses = await fetchLicenses(callCluster, clusters, esIndexPattern);
-    return licenses.map(license => {
+    return licenses.map((license) => {
       const $expiry = moment.utc(license.expiryDateMS);
       let isExpired = false;
       let severity = AlertSeverity.Success;

@@ -14,7 +14,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { CommonAlertStatus, CommonActionDefaultParameters } from '../../../common/types';
+import {
+  CommonAlertStatus,
+  CommonActionDefaultParameters,
+  CommonBaseAlert,
+} from '../../../common/types';
 import { replaceTokens, AlertPopoverContext } from './lib';
 import { AlertMessage } from '../../../server/alerts/types';
 import { Legacy } from '../../legacy_shims';
@@ -60,19 +64,11 @@ export const AlertPopoverStatus: React.FC<AlertPopoverStatusProps> = (
   function addAction(action: ActionResult) {
     setConfiguredActions([...configuredActions, action]);
   }
-  function updateThrottle(throttle: string | null) {
-    if (throttle) {
-      setAlert({
-        ...alert,
-        rawAlert: {
-          ...alert.rawAlert,
-          throttle,
-        },
-      });
-    }
+  function updateAlert(_alert: CommonBaseAlert) {
+    setAlert(_alert);
   }
 
-  const firingStates = states.filter(state => state.firing);
+  const firingStates = states.filter((state) => state.firing);
   if (!firingStates.length) {
     return null;
   }
@@ -95,7 +91,7 @@ export const AlertPopoverStatus: React.FC<AlertPopoverStatusProps> = (
         configuredActions,
         defaultParametersByAlertType,
         addAction,
-        updateThrottle,
+        updateAlert,
       }}
     >
       <Fragment>

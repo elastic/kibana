@@ -7,12 +7,7 @@ import moment from 'moment';
 import { AlertState } from '../../alerts/types';
 import { AlertsClient } from '../../../../alerting/server';
 import { AlertsFactory } from '../../alerts';
-import {
-  CommonAlertStatus,
-  CommonAlertState,
-  CommonBaseAlert,
-  CommonAlertFilter,
-} from '../../../common/types';
+import { CommonAlertStatus, CommonAlertState, CommonAlertFilter } from '../../../common/types';
 
 export async function fetchStatus(
   alertsClient: AlertsClient,
@@ -30,7 +25,7 @@ export async function fetchStatus(
         exists: false,
         enabled: false,
         states: [],
-        alert: alert as CommonBaseAlert,
+        alert: alert.serialize(),
       };
 
       byType[type] = result;

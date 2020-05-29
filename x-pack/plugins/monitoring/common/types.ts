@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Alert } from '../../alerting/common';
-import { AlertSeverity } from './enums';
+import { AlertSeverity, AlertParamType } from './enums';
 
 export interface CommonBaseAlert {
   type: string;
   label: string;
-  defaultThrottle: string;
-  rawAlert: Alert;
+  paramDetails: CommonAlertParamDetails;
+  rawAlert: Alert | undefined;
 }
 
 export interface CommonActionDefaultParameters {
@@ -44,3 +44,17 @@ export const CommonAlertSeverityColorMap = {
   [AlertSeverity.Warning]: '#F5A700',
   [AlertSeverity.Success]: '#017D73',
 };
+
+export interface CommonAlertParamDetail {
+  rawLabel: string;
+  withValueLabel: string;
+  type: AlertParamType;
+}
+
+export interface CommonAlertParamDetails {
+  [name: string]: CommonAlertParamDetail;
+}
+
+export interface CommonAlertParams {
+  [name: string]: string | number;
+}

@@ -213,7 +213,7 @@ export function ElasticsearchPanel(props) {
 
   const nodesAlertStyle = {};
   let nodesAlertStatus = null;
-  if (alerts[ALERT_CPU_USAGE]) {
+  if (alerts[ALERT_CPU_USAGE] && alerts[ALERT_CPU_USAGE].states.length) {
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>
         <AlertMenu alerts={[alerts[ALERT_CPU_USAGE]]} />

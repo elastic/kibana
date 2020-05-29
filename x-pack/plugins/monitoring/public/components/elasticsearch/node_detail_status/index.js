@@ -43,9 +43,9 @@ export function NodeDetailStatus({ stats, alerts }) {
     {
       label: 'Alerts',
       value: (
-        <div style={{ color: `${CommonAlertSeverityColorMap[severity]}` }}>
+        <span style={{ color: `${CommonAlertSeverityColorMap[severity]}` }}>
           {Object.values(alerts).length}
-        </div>
+        </span>
       ),
     },
     {

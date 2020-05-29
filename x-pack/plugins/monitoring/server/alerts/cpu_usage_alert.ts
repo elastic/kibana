@@ -19,16 +19,21 @@ import {
 import { AlertInstance } from '../../../alerting/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
-  ALERT_CPU_USAGE_THRESHOLD_CONFIG,
   ALERT_CPU_USAGE,
   ALERT_ACTION_TYPE_EMAIL,
   ALERT_ACTION_TYPE_LOG,
 } from '../../common/constants';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
+import { AlertMessageTokenType, AlertSeverity, AlertParamType } from '../../common/enums';
 import { RawAlertInstance } from '../../../alerting/common';
-import { CommonAlertFilter, CommonAlertCpuUsageFilter } from '../../common/types';
+import { parseDuration } from '../../../alerting/common/parse_duration';
+import {
+  CommonAlertFilter,
+  CommonAlertCpuUsageFilter,
+  CommonAlertParams,
+  CommonAlertParamDetail,
+} from '../../common/types';
 import { AlertsClient } from '../../../alerting/server';
 
 const RESOLVED = i18n.translate('xpack.monitoring.alerts.cpuUsage.resolved', {
@@ -39,12 +44,42 @@ const FIRING = i18n.translate('xpack.monitoring.alerts.cpuUsage.firing', {
 });
 
 const DEFAULT_THRESHOLD = -1;
+const DEFAULT_DURATION = '5m';
+
+interface CpuUsageParams {
+  threshold: number;
+  duration: string;
+}
 
 export class CpuUsageAlert extends BaseAlert {
   public type = ALERT_CPU_USAGE;
   public label = 'CPU Usage';
+  protected defaultParams: CpuUsageParams = {
+    threshold: DEFAULT_THRESHOLD,
+    duration: DEFAULT_DURATION,
+  };
+  public get paramDetails() {
+    if (!this.rawAlert) {
+      return {};
+    }
+
+    const params = this.rawAlert.params as CpuUsageParams;
+    return {
+      threshold: {
+        withValueLabel: `Notify when CPU is over ${params.threshold}`,
+        rawLabel: `Notify when CPU is over`,
+        type: AlertParamType.Number,
+      } as CommonAlertParamDetail,
+      duration: {
+        withValueLabel: `Look at the average over ${params.duration}`,
+        rawLabel: `Look at the average over`,
+        type: AlertParamType.Duration,
+      } as CommonAlertParamDetail,
+    };
+  }
 
   protected async fetchData(
+    params: CommonAlertParams,
     callCluster: any,
     clusters: AlertCluster[],
     uiSettings: IUiSettingsClient,
@@ -54,12 +89,19 @@ export class CpuUsageAlert extends BaseAlert {
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-    const stats = await fetchCpuUsageNodeStats(callCluster, clusters, esIndexPattern);
-    const threshold =
-      parseInt(await uiSettings.get<string>(ALERT_CPU_USAGE_THRESHOLD_CONFIG), 10) ||
-      DEFAULT_THRESHOLD;
+    const duration = parseDuration(((params as unknown) as CpuUsageParams).duration);
+    const endMs = +new Date();
+    const startMs = endMs - duration;
+    const stats = await fetchCpuUsageNodeStats(
+      callCluster,
+      clusters,
+      esIndexPattern,
+      startMs,
+      endMs,
+      this.config
+    );
     // TODO: ignore single spikes? look for consistency?
-    return stats.map(stat => {
+    return stats.map((stat) => {
       let cpuUsage = 0;
       if (this.config.ui.container.elasticsearch.enabled) {
         cpuUsage =
@@ -71,7 +113,7 @@ export class CpuUsageAlert extends BaseAlert {
       return {
         instanceKey: `${stat.clusterUuid}:${stat.nodeId}`,
         clusterUuid: stat.clusterUuid,
-        shouldFire: cpuUsage > threshold,
+        shouldFire: cpuUsage > params.threshold,
         severity: AlertSeverity.Danger,
         meta: stat,
       };

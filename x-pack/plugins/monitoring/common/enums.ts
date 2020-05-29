@@ -20,3 +20,8 @@ export enum AlertMessageTokenType {
   Time = 'time',
   Link = 'link',
 }
+
+export enum AlertParamType {
+  Duration = 'duration',
+  Number = 'number',
+}

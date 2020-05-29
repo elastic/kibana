@@ -32,7 +32,7 @@ import {
 import { MonitoringConfig } from '../config';
 import { AlertSeverity } from '../../common/enums';
 import { ActionResult } from '../../../actions/common';
-import { CommonAlertFilter } from '../../common/types';
+import { CommonAlertFilter, CommonAlertParams, CommonBaseAlert } from '../../common/types';
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
 const ALERTS_UPDATE_FIELDS = ['name', 'tags', 'schedule', 'params', 'throttle', 'actions'];
@@ -45,6 +45,11 @@ export class BaseAlert {
   protected kibanaUrl!: string;
   public type!: string;
   public label!: string;
+  protected defaultParams: CommonAlertParams | {} = {};
+  public get paramDetails() {
+    return {};
+  }
+
   public defaultThrottle: string = '1m';
   public defaultInterval: string = '1m';
   protected alertType!: AlertType;
@@ -54,6 +59,15 @@ export class BaseAlert {
     if (rawAlert) {
       this.rawAlert = rawAlert;
     }
+  }
+
+  public serialize(): CommonBaseAlert {
+    return {
+      type: this.type,
+      label: this.label,
+      rawAlert: this.rawAlert,
+      paramDetails: this.paramDetails,
+    };
   }
 
   public initializeAlertType(
@@ -135,7 +149,7 @@ export class BaseAlert {
       actionIds.push(serverLogAction.id);
     }
 
-    const actions = actionIds.map(actionId => {
+    const actions = actionIds.map((actionId) => {
       return {
         group: 'default',
         id: actionId,
@@ -147,7 +161,7 @@ export class BaseAlert {
       data: {
         enabled: true,
         tags: [],
-        params: {},
+        params: this.defaultParams,
         consumer: 'monitoring',
         name: this.label,
         alertTypeId: this.type,
@@ -173,13 +187,31 @@ export class BaseAlert {
     })) as Alert;
   }
 
+  public async updateParams(alertsClient: AlertsClient, params: CommonAlertParams) {
+    if (!this.rawAlert) {
+      return null;
+    }
+
+    this.rawAlert = (await alertsClient.update({
+      id: this.rawAlert.id,
+      data: {
+        // TOOD: this will not scale, maybe an omit?
+        ...pick(this.rawAlert, ALERTS_UPDATE_FIELDS),
+        params: {
+          ...this.rawAlert.params,
+          ...params,
+        },
+      },
+    })) as Alert;
+  }
+
   public async updateOrAddAction(alertsClient: AlertsClient, action: AlertAction) {
     if (!this.rawAlert) {
       return null;
     }
 
     let actions = this.rawAlert.actions;
-    const index = this.rawAlert.actions.findIndex(_action => _action.id === action.id);
+    const index = this.rawAlert.actions.findIndex((_action) => _action.id === action.id);
     if (index === -1) {
       actions = [...this.rawAlert.actions, action];
     } else {
@@ -205,7 +237,7 @@ export class BaseAlert {
       return null;
     }
 
-    const index = this.rawAlert.actions.findIndex(_action => _action.id === actionId);
+    const index = this.rawAlert.actions.findIndex((_action) => _action.id === actionId);
     if (index === -1) {
       return null;
     }
@@ -274,7 +306,7 @@ export class BaseAlert {
     const uiSettings = (await this.getUiSettingsService()).asScopedToClient(
       services.savedObjectsClient
     );
-    const data = await this.fetchData(callCluster, clusters, uiSettings, availableCcs);
+    const data = await this.fetchData(params, callCluster, clusters, uiSettings, availableCcs);
 
     for (const item of data) {
       const cluster = clusters.find((c: AlertCluster) => c.clusterUuid === item.clusterUuid);
@@ -315,6 +347,7 @@ export class BaseAlert {
   }
 
   protected async fetchData(
+    params: CommonAlertParams,
     callCluster: any,
     clusters: AlertCluster[],
     uiSettings: IUiSettingsClient,

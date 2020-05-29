@@ -221,9 +221,11 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       sortable: getSortHandler('node_cpu_utilization'),
       render: (value, node) => {
         const style = {};
-        for (const { state } of alerts[ALERT_CPU_USAGE].states) {
-          if (state.nodeId === node.resolver) {
-            style.color = `${CommonAlertSeverityColorMap[state.ui.severity]}`;
+        if (alerts && alerts[ALERT_CPU_USAGE]) {
+          for (const { state } of alerts[ALERT_CPU_USAGE].states) {
+            if (state.nodeId === node.resolver) {
+              style.color = `${CommonAlertSeverityColorMap[state.ui.severity]}`;
+            }
           }
         }
 

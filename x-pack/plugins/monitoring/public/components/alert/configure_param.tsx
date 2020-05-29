@@ -16,22 +16,27 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { CommonBaseAlert } from '../../../common/types';
+import { CommonBaseAlert, CommonAlertParamDetail } from '../../../common/types';
 import { AlertPopoverContext } from './lib';
 import { Legacy } from '../../legacy_shims';
+import { AlertParamType } from '../../../common/enums';
+import { AlertPopoverConfigureNumberParam } from './configure_number_param';
 import { AlertPopoverConfigureDurationParam } from './configure_duration_param';
 
-interface AlertPopoverConfigureThrottleProps {
+interface AlertPopoverConfigureParamProps {
+  name: string;
+  details: CommonAlertParamDetail;
+  value: string | number;
   done: (alert: CommonBaseAlert) => void;
   cancel: () => void;
 }
-export const AlertPopoverConfigureThrottle: React.FC<AlertPopoverConfigureThrottleProps> = (
-  props: AlertPopoverConfigureThrottleProps
+export const AlertPopoverConfigureParam: React.FC<AlertPopoverConfigureParamProps> = (
+  props: AlertPopoverConfigureParamProps
 ) => {
-  const { done, cancel } = props;
+  const { done, cancel, name, details } = props;
   const context = React.useContext(AlertPopoverContext);
   const [isSaving, setIsSaving] = React.useState(false);
-  const [throttle, setThrottle] = React.useState(context.alert.rawAlert?.throttle);
+  const [body, setBody] = React.useState({});
 
   async function save() {
     setIsSaving(true);
@@ -41,12 +46,12 @@ export const AlertPopoverConfigureThrottle: React.FC<AlertPopoverConfigureThrott
         method: 'PUT',
         pathname: `/api/monitoring/v1/alert/${context.alert.type}`,
         body: JSON.stringify({
-          throttle,
+          params: body,
         }),
       });
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
-        title: 'Error saving throttle',
+        title: `Error saving ${name}`,
         text: err.message,
       });
     }
@@ -54,21 +59,40 @@ export const AlertPopoverConfigureThrottle: React.FC<AlertPopoverConfigureThrott
     done(alert);
   }
 
+  function mergeBody(newBody: {}) {
+    setBody({ ...body, ...newBody });
+  }
+  let configureUi = null;
+  switch (details.type) {
+    case AlertParamType.Number:
+      configureUi = (
+        <AlertPopoverConfigureNumberParam
+          name={name}
+          number={props.value as number}
+          setBody={mergeBody}
+        />
+      );
+      break;
+    case AlertParamType.Duration:
+      configureUi = (
+        <AlertPopoverConfigureDurationParam
+          name={name}
+          duration={props.value as string}
+          setBody={mergeBody}
+        />
+      );
+      break;
+  }
+
   return (
     <EuiOverlayMask>
       <EuiModal onClose={cancel} initialFocus="[name=popswitch]">
         <EuiModalHeader>
-          <EuiModalHeaderTitle>Configure throttle</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>Configure {name}</EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiFormRow label="Notify me every">
-            <AlertPopoverConfigureDurationParam
-              name={'throttle'}
-              duration={context.alert.rawAlert?.throttle as string}
-              setBody={(body: { throttle: string }) => setThrottle(body.throttle)}
-            />
-          </EuiFormRow>
+          <EuiFormRow label={details.rawLabel}>{configureUi}</EuiFormRow>
         </EuiModalBody>
 
         <EuiModalFooter>

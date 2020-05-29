@@ -26,6 +26,7 @@ import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertClusterHealthType, AlertSeverity } from '../../common/enums';
 import { fetchDefaultEmailAddress } from '../lib/alerts/fetch_default_email_address';
 import { fetchClusterHealth } from '../lib/alerts/fetch_cluster_health';
+import { CommonAlertParams } from '../../common/types';
 
 const RED_STATUS_MESSAGE = i18n.translate('xpack.monitoring.alerts.clusterStatus.redMessage', {
   defaultMessage: 'Allocate missing primary and replica shards',
@@ -54,6 +55,7 @@ export class ClusterHealthAlert extends BaseAlert {
   }
 
   protected async fetchData(
+    params: CommonAlertParams,
     callCluster: any,
     clusters: AlertCluster[],
     uiSettings: IUiSettingsClient,
@@ -64,7 +66,7 @@ export class ClusterHealthAlert extends BaseAlert {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
     const clustersHealth = await fetchClusterHealth(callCluster, clusters, esIndexPattern);
-    return clustersHealth.map(clusterHealth => {
+    return clustersHealth.map((clusterHealth) => {
       const shouldFire = clusterHealth.health !== AlertClusterHealthType.Green;
       const severity =
         clusterHealth.health === AlertClusterHealthType.Red

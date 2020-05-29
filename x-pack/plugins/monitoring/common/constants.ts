@@ -237,8 +237,6 @@ export const ALERT_PREFIX = 'monitoring_';
 export const ALERT_LICENSE_EXPIRATION = `${ALERT_PREFIX}alert_license_expiration`;
 export const ALERT_CLUSTER_HEALTH = `${ALERT_PREFIX}alert_cluster_health`;
 export const ALERT_CPU_USAGE = `${ALERT_PREFIX}alert_cpu_usage`;
-export const ALERT_CPU_USAGE_THRESHOLD_CONFIG = `monitoring:alert:cpuUsage:threshold`;
-export const ALERT_CPU_USAGE_THROTTLE_CONFIG = `monitoring:alert:cpuUsage:throttle`;
 
 /**
  * A listing of all alert types
