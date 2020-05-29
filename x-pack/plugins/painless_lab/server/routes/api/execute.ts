@@ -23,7 +23,7 @@ export function registerExecuteRoute({ router, license }: RouteDependencies) {
       const body = req.body;
 
       try {
-        const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
+        const callAsCurrentUser = ctx.core.elasticsearch.legacy.client.callAsCurrentUser;
         const response = await callAsCurrentUser('scriptsPainlessExecute', {
           body,
         });

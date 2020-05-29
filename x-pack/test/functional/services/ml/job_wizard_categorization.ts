@@ -41,7 +41,7 @@ export function MachineLearningJobWizardCategorizationProvider({ getService }: F
       );
       expect(comboBoxSelectedOptions).to.eql(
         expectedIdentifier,
-        `Expected categorization field selection to be '${expectedIdentifier}' (got ${comboBoxSelectedOptions}')`
+        `Expected categorization field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
       );
     },
 
@@ -56,7 +56,7 @@ export function MachineLearningJobWizardCategorizationProvider({ getService }: F
       const rows = await body[0].findAllByTagName('tr');
       expect(rows.length).to.eql(
         exampleCount,
-        `Expected categorization field examples table to have '${exampleCount}' rows (got ${rows.length}')`
+        `Expected categorization field examples table to have '${exampleCount}' rows (got '${rows.length}')`
       );
     },
   };
