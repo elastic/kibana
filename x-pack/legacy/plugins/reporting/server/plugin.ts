@@ -39,13 +39,7 @@ export class ReportingPlugin
     // legacy plugin status
     mirrorPluginStatus(xpackMainLegacy, reportingLegacy);
 
-    const browserDriverFactory = await createBrowserDriverFactory(config, this.logger); // required for validations :(
-    runValidations(config, elasticsearch, browserDriverFactory, this.logger);
-
-    // Register a function with server to manage the collection of usage stats
-    registerReportingUsageCollector(this.reportingCore, plugins);
-
-    // regsister setup internals
+    const browserDriverFactory = await createBrowserDriverFactory(config, this.logger);
     const deps = {
       browserDriverFactory,
       elasticsearch,
@@ -55,9 +49,11 @@ export class ReportingPlugin
       security,
       logger,
     };
-    this.reportingCore.pluginSetup(deps);
 
-    // Setup routing
+    runValidations(config, elasticsearch, browserDriverFactory, this.logger);
+
+    this.reportingCore.pluginSetup(deps);
+    registerReportingUsageCollector(this.reportingCore, plugins);
     registerRoutes(this.reportingCore);
 
     return {};
