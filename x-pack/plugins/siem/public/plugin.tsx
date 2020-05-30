@@ -64,13 +64,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const overviewSubPlugin = new (await import('./overview')).Overview();
       const timelinesSubPlugin = new (await import('./timelines')).Timelines();
       const endpointAlertsSubPlugin = new (await import('./endpoint_alerts')).EndpointAlerts();
-      const endpoitHostsSubPlugin = new (await import('./endpoint_hosts')).EndpointHosts();
-      const endpointPolicyListSubPlugin = new (
-        await import('./endpoint_policy/list')
-      ).EndpointPolicyList();
-      const endpointPolicyDetailsSubPlugin = new (
-        await import('./endpoint_policy/details')
-      ).EndpointPolicyDetails();
+      const endpointHostsSubPlugin = new (await import('./endpoint_hosts')).EndpointHosts();
+      const managementSubPlugin = new (await import('./management')).Management();
 
       const alertsStart = alertsSubPlugin.start();
       const casesStart = casesSubPlugin.start();
@@ -79,12 +74,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const overviewStart = overviewSubPlugin.start();
       const timelinesStart = timelinesSubPlugin.start();
       const endpointAlertsStart = endpointAlertsSubPlugin.start(coreStart, startPlugins);
-      const endpointHostsStart = endpoitHostsSubPlugin.start(coreStart, startPlugins);
-      const endpointPolicyListStart = endpointPolicyListSubPlugin.start(coreStart, startPlugins);
-      const endpointPolicyDetailsStart = endpointPolicyDetailsSubPlugin.start(
-        coreStart,
-        startPlugins
-      );
+      const endpointHostsStart = endpointHostsSubPlugin.start(coreStart, startPlugins);
+      const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
 
       return renderApp(services, params, {
         routes: [
@@ -96,8 +87,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...timelinesStart.routes,
           ...endpointAlertsStart.routes,
           ...endpointHostsStart.routes,
-          ...endpointPolicyListStart.routes,
-          ...endpointPolicyDetailsStart.routes,
+          ...managementSubPluginStart.routes,
         ],
         store: {
           initialState: {
@@ -106,8 +96,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...timelinesStart.store.initialState,
             ...endpointAlertsStart.store.initialState,
             ...endpointHostsStart.store.initialState,
-            ...endpointPolicyListStart.store.initialState,
-            ...endpointPolicyDetailsStart.store.initialState,
+            ...managementSubPluginStart.store.initialState,
           },
           reducer: {
             ...hostsStart.store.reducer,
@@ -115,22 +104,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...timelinesStart.store.reducer,
             ...endpointAlertsStart.store.reducer,
             ...endpointHostsStart.store.reducer,
-            ...endpointPolicyListStart.store.reducer,
-            ...endpointPolicyDetailsStart.store.reducer,
+            ...managementSubPluginStart.store.reducer,
           },
           middlewares: [
-            ...(endpointAlertsStart.store.middleware != null
-              ? [endpointAlertsStart.store.middleware]
-              : []),
-            ...(endpointHostsStart.store.middleware != null
-              ? [endpointHostsStart.store.middleware]
-              : []),
-            ...(endpointPolicyListStart.store.middleware != null
-              ? [endpointPolicyListStart.store.middleware]
-              : []),
-            ...(endpointPolicyDetailsStart.store.middleware != null
-              ? [endpointPolicyDetailsStart.store.middleware]
-              : []),
+            ...(endpointAlertsStart.store.middleware ?? []),
+            ...(endpointHostsStart.store.middleware ?? []),
+            ...(managementSubPluginStart.store.middleware ?? []),
           ],
         },
       });
