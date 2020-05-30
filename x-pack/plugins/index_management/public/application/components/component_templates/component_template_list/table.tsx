@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiInMemoryTable,
-  EuiLink,
   EuiButton,
   EuiInMemoryTableProps,
   EuiTableFieldDataColumnType,
@@ -85,20 +84,6 @@ export const ComponentTable: FunctionComponent<Props> = ({
             defaultMessage: 'Reload',
           })}
         </EuiButton>,
-        <EuiButton
-          href="#"
-          fill
-          iconType="plusInCircle"
-          data-test-subj="createComponentTemplateButton"
-          key="createComponentTemplateButton"
-        >
-          {i18n.translate(
-            'xpack.idxMgmt.componentTemplatesList.table.createComponentTemplateButtonLabel',
-            {
-              defaultMessage: 'Create a component template',
-            }
-          )}
-        </EuiButton>,
       ],
       box: {
         incremental: true,
@@ -145,12 +130,6 @@ export const ComponentTable: FunctionComponent<Props> = ({
           defaultMessage: 'Name',
         }),
         sortable: true,
-        render: (name: string) => (
-          // TODO placeholder for now
-          <EuiLink href={'#'} data-test-subj="componentTemplateDetailsLink">
-            {name}
-          </EuiLink>
-        ),
       },
       {
         field: 'isInUse',
@@ -205,37 +184,6 @@ export const ComponentTable: FunctionComponent<Props> = ({
           />
         ),
         actions: [
-          {
-            isPrimary: true,
-            name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.editActionLabel', {
-              defaultMessage: 'Edit',
-            }),
-            description: i18n.translate(
-              'xpack.idxMgmt.componentTemplatesList.table.editActionDescription',
-              {
-                defaultMessage: 'Edit this component template',
-              }
-            ),
-            type: 'icon',
-            icon: 'pencil',
-            // TODO placeholder for now
-            onClick: ({ name }) => {},
-          },
-          {
-            name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.cloneActionLabel', {
-              defaultMessage: 'Clone',
-            }),
-            description: i18n.translate(
-              'xpack.idxMgmt.componentTemplatesList.table.cloneActionDescription',
-              {
-                defaultMessage: 'Clone this component template',
-              }
-            ),
-            type: 'icon',
-            icon: 'copy',
-            // TODO placeholder for now
-            onClick: ({ name }) => {},
-          },
           {
             isPrimary: true,
             name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.deleteActionLabel', {

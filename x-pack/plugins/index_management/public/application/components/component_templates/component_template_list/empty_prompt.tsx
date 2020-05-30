@@ -38,14 +38,6 @@ export const EmptyPrompt: FunctionComponent = () => {
           </EuiLink>
         </p>
       }
-      // TODO Create button placeholder for now
-      actions={
-        <EuiButton href={'#'} iconType="plusInCircle" fill>
-          {i18n.translate('xpack.idxMgmt.home.componentTemplates.emptyPrompt.createButtonLabel', {
-            defaultMessage: 'Create a component template',
-          })}
-        </EuiButton>
-      }
     />
   );
 };

@@ -4,29 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexSettings, Aliases, Mappings } from '../../../../common';
+// Ideally, we shouldn't depend on anything in index management that is
+// outside of the components_templates directory
+// We could consider creating shared types or duplicating the types here if
+// the component_templates app were to move outside of index management
+import {
+  ComponentTemplateSerialized,
+  ComponentTemplateDeserialized,
+  ComponentTemplateListItem,
+} from '../../../../common';
 
-export interface ComponentTemplateSerialized {
-  template: {
-    settings?: IndexSettings;
-    aliases?: Aliases;
-    mappings?: Mappings;
-  };
-  version?: number;
-  _meta?: { [key: string]: any };
-}
-
-export interface ComponentTemplateDeserialized extends ComponentTemplateSerialized {
-  name: string;
-  _kbnMeta: {
-    usedBy: string[];
-  };
-}
-
-export interface ComponentTemplateListItem {
-  name: string;
-  isInUse: boolean;
-  hasMappings: boolean;
-  hasAliases: boolean;
-  hasSettings: boolean;
-}
+export { ComponentTemplateSerialized, ComponentTemplateDeserialized, ComponentTemplateListItem };

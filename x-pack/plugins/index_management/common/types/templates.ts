@@ -34,7 +34,7 @@ export interface TemplateV2Serialized extends TemplateBaseSerialized {
 
 export interface TemplateV2Es {
   name: string;
-  index_template: TemplateV2Serialized;
+  index_template: Omit<TemplateV2Serialized, 'name'>;
 }
 
 /**

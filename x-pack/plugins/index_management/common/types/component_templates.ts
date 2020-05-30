@@ -8,7 +8,7 @@ import { IndexSettings } from './indices';
 import { Aliases } from './aliases';
 import { Mappings } from './mappings';
 
-interface ComponentTemplateBase {
+export interface ComponentTemplateSerialized {
   template: {
     settings?: IndexSettings;
     aliases?: Aliases;
@@ -18,7 +18,7 @@ interface ComponentTemplateBase {
   _meta?: { [key: string]: any };
 }
 
-export interface ComponentTemplateDeserialized extends ComponentTemplateBase {
+export interface ComponentTemplateDeserialized extends ComponentTemplateSerialized {
   name: string;
   _kbnMeta: {
     usedBy: string[];
@@ -27,7 +27,7 @@ export interface ComponentTemplateDeserialized extends ComponentTemplateBase {
 
 export interface ComponentTemplateEs {
   name: string;
-  component_template: ComponentTemplateBase;
+  component_template: ComponentTemplateSerialized;
 }
 
 export interface ComponentTemplateListItem {
