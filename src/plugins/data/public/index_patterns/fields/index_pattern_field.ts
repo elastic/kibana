@@ -55,7 +55,6 @@ export class IndexPatternField implements IFieldType {
   readonly spec: FieldSpec;
   // not writable or serialized
   readonly indexPattern: IndexPattern;
-  readonly format: any; // todo how does this get set?
   readonly displayName: string;
   private readonly kbnFieldType: KbnFieldType;
 
@@ -161,6 +160,10 @@ export class IndexPatternField implements IFieldType {
 
   public get visualizable() {
     return this.aggregatable;
+  }
+
+  public get format() {
+    return this.indexPattern.formatterForField(this);
   }
 
   public toJSON() {
