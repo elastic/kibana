@@ -9,7 +9,7 @@ import { UICapabilities } from 'ui/capabilities';
 import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { Feature } from '../../../features/server';
 
-import { CheckPrivilegesAtResourceResponse } from './check_privileges';
+import { CheckPrivilegesResponse } from './check_privileges';
 import { Authorization } from './index';
 
 export function disableUICapabilitiesFactory(
@@ -19,8 +19,8 @@ export function disableUICapabilitiesFactory(
   authz: Authorization
 ) {
   const featureNavLinkIds = features
-    .map(feature => feature.navLinkId)
-    .filter(navLinkId => navLinkId != null);
+    .map((feature) => feature.navLinkId)
+    .filter((navLinkId) => navLinkId != null);
 
   const shouldDisableFeatureUICapability = (
     featureId: keyof UICapabilities,
@@ -60,7 +60,9 @@ export function disableUICapabilitiesFactory(
         return [authz.actions.ui.get(featureId, uiCapability)];
       }
       if (isObject(value)) {
-        return Object.keys(value).map(item => authz.actions.ui.get(featureId, uiCapability, item));
+        return Object.keys(value).map((item) =>
+          authz.actions.ui.get(featureId, uiCapability, item)
+        );
       }
       throw new Error(`Expected value type of boolean or object, but found ${value}`);
     }
@@ -77,7 +79,7 @@ export function disableUICapabilitiesFactory(
       []
     );
 
-    let checkPrivilegesResponse: CheckPrivilegesAtResourceResponse;
+    let checkPrivilegesResponse: CheckPrivilegesResponse;
     try {
       const checkPrivilegesDynamically = authz.checkPrivilegesDynamicallyWithRequest(request);
       checkPrivilegesResponse = await checkPrivilegesDynamically(uiActions);
@@ -105,7 +107,9 @@ export function disableUICapabilitiesFactory(
       }
 
       const action = authz.actions.ui.get(featureId, ...uiCapabilityParts);
-      return checkPrivilegesResponse.privileges[action] === true;
+      return checkPrivilegesResponse.privileges.some(
+        (x) => x.privilege === action && x.authorized === true
+      );
     };
 
     return mapValues(uiCapabilities, (featureUICapabilities, featureId) => {

@@ -8,23 +8,20 @@
 import contentDisposition from 'content-disposition';
 import * as _ from 'lodash';
 import { CSV_JOB_TYPE } from '../../../common/constants';
-import {
-  ExportTypeDefinition,
-  ExportTypesRegistry,
-  JobDocOutput,
-  JobSource,
-  ServerFacade,
-} from '../../../types';
-
-interface ICustomHeaders {
-  [x: string]: any;
-}
+import { statuses } from '../../lib/esqueue/constants/statuses';
+import { ExportTypesRegistry } from '../../lib/export_types_registry';
+import { ExportTypeDefinition, JobDocOutput, JobSource } from '../../types';
 
 type ExportTypeType = ExportTypeDefinition<unknown, unknown, unknown, unknown>;
 
+interface ErrorFromPayload {
+  message: string;
+}
+
+// A camelCase version of JobDocOutput
 interface Payload {
   statusCode: number;
-  content: any;
+  content: string | Buffer | ErrorFromPayload;
   contentType: string;
   headers: Record<string, any>;
 }
@@ -35,7 +32,7 @@ const getTitle = (exportType: ExportTypeType, title?: string): string =>
   `${title || DEFAULT_TITLE}.${exportType.jobContentExtension}`;
 
 const getReportingHeaders = (output: JobDocOutput, exportType: ExportTypeType) => {
-  const metaDataHeaders: ICustomHeaders = {};
+  const metaDataHeaders: Record<string, boolean> = {};
 
   if (exportType.jobType === CSV_JOB_TYPE) {
     const csvContainsFormulas = _.get(output, 'csv_contains_formulas', false);
@@ -48,20 +45,17 @@ const getReportingHeaders = (output: JobDocOutput, exportType: ExportTypeType) =
   return metaDataHeaders;
 };
 
-export function getDocumentPayloadFactory(
-  server: ServerFacade,
-  exportTypesRegistry: ExportTypesRegistry
-) {
-  function encodeContent(content: string | null, exportType: ExportTypeType) {
+export function getDocumentPayloadFactory(exportTypesRegistry: ExportTypesRegistry) {
+  function encodeContent(content: string | null, exportType: ExportTypeType): Buffer | string {
     switch (exportType.jobContentEncoding) {
       case 'base64':
-        return content ? Buffer.from(content, 'base64') : content; // Buffer.from rejects null
+        return content ? Buffer.from(content, 'base64') : ''; // convert null to empty string
       default:
-        return content;
+        return content ? content : ''; // convert null to empty string
     }
   }
 
-  function getCompleted(output: JobDocOutput, jobType: string, title: string) {
+  function getCompleted(output: JobDocOutput, jobType: string, title: string): Payload {
     const exportType = exportTypesRegistry.get((item: ExportTypeType) => item.jobType === jobType);
     const filename = getTitle(exportType, title);
     const headers = getReportingHeaders(output, exportType);
@@ -77,12 +71,13 @@ export function getDocumentPayloadFactory(
     };
   }
 
-  function getFailure(output: JobDocOutput) {
+  // @TODO: These should be semantic HTTP codes as 500/503's indicate
+  // error then these are really operating properly.
+  function getFailure(output: JobDocOutput): Payload {
     return {
       statusCode: 500,
       content: {
-        message: 'Reporting generation failed',
-        reason: output.content,
+        message: `Reporting generation failed: ${output.content}`,
       },
       contentType: 'application/json',
       headers: {},
@@ -93,7 +88,7 @@ export function getDocumentPayloadFactory(
     return {
       statusCode: 503,
       content: status,
-      contentType: 'application/json',
+      contentType: 'text/plain',
       headers: { 'retry-after': 30 },
     };
   }
@@ -102,11 +97,11 @@ export function getDocumentPayloadFactory(
     const { status, jobtype: jobType, payload: { title } = { title: '' } } = doc._source;
     const { output } = doc._source;
 
-    if (status === 'completed') {
+    if (status === statuses.JOB_STATUS_COMPLETED || status === statuses.JOB_STATUS_WARNINGS) {
       return getCompleted(output, jobType, title);
     }
 
-    if (status === 'failed') {
+    if (status === statuses.JOB_STATUS_FAILED) {
       return getFailure(output);
     }
 

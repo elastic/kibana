@@ -19,11 +19,18 @@
 
 import { get, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import { IRouter, SharedGlobalConfig } from 'kibana/server';
 
-import { IFieldType, indexPatterns, esFilters } from '../index';
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
+import { IFieldType, Filter } from '../index';
+import { findIndexPatternById, getFieldByName } from '../index_patterns';
+import { getRequestAbortedSignal } from '../lib';
 
-export function registerValueSuggestionsRoute(router: IRouter) {
+export function registerValueSuggestionsRoute(
+  router: IRouter,
+  config$: Observable<SharedGlobalConfig>
+) {
   router.post(
     {
       path: '/api/kibana/suggestions/values/{index}',
@@ -32,7 +39,7 @@ export function registerValueSuggestionsRoute(router: IRouter) {
           {
             index: schema.string(),
           },
-          { allowUnknowns: false }
+          { unknowns: 'allow' }
         ),
         body: schema.object(
           {
@@ -40,31 +47,29 @@ export function registerValueSuggestionsRoute(router: IRouter) {
             query: schema.string(),
             boolFilter: schema.maybe(schema.any()),
           },
-          { allowUnknowns: false }
+          { unknowns: 'allow' }
         ),
       },
     },
     async (context, request, response) => {
-      const { client: uiSettings } = context.core.uiSettings;
+      const config = await config$.pipe(first()).toPromise();
       const { field: fieldName, query, boolFilter } = request.body;
       const { index } = request.params;
-      const { dataClient } = context.core.elasticsearch;
+      const { client } = context.core.elasticsearch.legacy;
+      const signal = getRequestAbortedSignal(request.events.aborted$);
 
       const autocompleteSearchOptions = {
-        timeout: await uiSettings.get<number>('kibana.autocompleteTimeout'),
-        terminate_after: await uiSettings.get<number>('kibana.autocompleteTerminateAfter'),
+        timeout: `${config.kibana.autocompleteTimeout.asMilliseconds()}ms`,
+        terminate_after: config.kibana.autocompleteTerminateAfter.asMilliseconds(),
       };
 
-      const indexPattern = await indexPatterns.findIndexPatternById(
-        context.core.savedObjects.client,
-        index
-      );
+      const indexPattern = await findIndexPatternById(context.core.savedObjects.client, index);
 
-      const field = indexPattern && indexPatterns.getFieldByName(fieldName, indexPattern);
+      const field = indexPattern && getFieldByName(fieldName, indexPattern);
       const body = await getBody(autocompleteSearchOptions, field || fieldName, query, boolFilter);
 
       try {
-        const result = await dataClient.callAsCurrentUser('search', { index, body });
+        const result = await client.callAsCurrentUser('search', { index, body }, { signal });
 
         const buckets: any[] =
           get(result, 'aggregations.suggestions.buckets') ||
@@ -82,13 +87,13 @@ async function getBody(
   { timeout, terminate_after }: Record<string, any>,
   field: IFieldType | string,
   query: string,
-  boolFilter: esFilters.Filter[] = []
+  boolFilter: Filter[] = []
 ) {
   const isFieldObject = (f: any): f is IFieldType => Boolean(f && f.name);
 
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
   const getEscapedQuery = (q: string = '') =>
-    q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, match => `\\${match}`);
+    q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 
   // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
   const executionHint = 'map';

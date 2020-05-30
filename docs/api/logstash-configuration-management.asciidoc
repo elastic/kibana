@@ -2,9 +2,9 @@
 [[logstash-configuration-management-api]]
 == Logstash configuration management APIs
 
-Programmatically integrate with the Logstash configuration management feature.
+Programmatically integrate with Logstash configuration management.
 
-WARNING: Do not directly access the `.logstash` index. The structure of the `.logstash` index is subject to change, which could cause your integration to break. Instead, use the Logstash configuration management APIs. 
+WARNING: Do not directly access the `.logstash` index. The structure of the `.logstash` index is subject to change, which could cause your integration to break. Instead, use the Logstash configuration management APIs.
 
 The following Logstash configuration management APIs are available:
 
@@ -20,5 +20,3 @@ include::logstash-configuration-management/delete-pipeline.asciidoc[]
 include::logstash-configuration-management/list-pipeline.asciidoc[]
 include::logstash-configuration-management/create-logstash.asciidoc[]
 include::logstash-configuration-management/retrieve-pipeline.asciidoc[]
-
-

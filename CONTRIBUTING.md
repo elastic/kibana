@@ -13,25 +13,44 @@ A high level overview of our contributing guidelines.
   - ["My issue isn't getting enough attention"](#my-issue-isnt-getting-enough-attention)
   - ["I want to help!"](#i-want-to-help)
 - [How We Use Git and GitHub](#how-we-use-git-and-github)
+  - [Forking](#forking)
   - [Branching](#branching)
   - [Commits and Merging](#commits-and-merging)
+    - [Rebasing and fixing merge conflicts](#rebasing-and-fixing-merge-conflicts)
   - [What Goes Into a Pull Request](#what-goes-into-a-pull-request)
 - [Contributing Code](#contributing-code)
   - [Setting Up Your Development Environment](#setting-up-your-development-environment)
+    - [Increase node.js heap size](#increase-nodejs-heap-size)
+  - [Running Elasticsearch Locally](#running-elasticsearch-locally)
+    - [Nightly snapshot (recommended)](#nightly-snapshot-recommended)
+      - [Keeping data between snapshots](#keeping-data-between-snapshots)
+    - [Source](#source)
+    - [Archive](#archive)
+      - [Sample Data](#sample-data)
+  - [Running Elasticsearch Remotely](#running-elasticsearch-remotely)
+  - [Running remote clusters](#running-remote-clusters)
+  - [Running Kibana](#running-kibana)
+    - [Running Kibana in Open-Source mode](#running-kibana-in-open-source-mode)
+    - [Unsupported URL Type](#unsupported-url-type)
     - [Customizing `config/kibana.dev.yml`](#customizing-configkibanadevyml)
+    - [Potential Optimization Pitfalls](#potential-optimization-pitfalls)
     - [Setting Up SSL](#setting-up-ssl)
   - [Linting](#linting)
+    - [Setup Guide for VS Code Users](#setup-guide-for-vs-code-users)
   - [Internationalization](#internationalization)
+  - [Localization](#localization)
+  - [Styling with SASS](#styling-with-sass)
   - [Testing and Building](#testing-and-building)
     - [Debugging server code](#debugging-server-code)
     - [Instrumenting with Elastic APM](#instrumenting-with-elastic-apm)
-  - [Debugging Unit Tests](#debugging-unit-tests)
-  - [Unit Testing Plugins](#unit-testing-plugins)
-  - [Automated Accessibility Testing](#automated-accessibility-testing)
-  - [Cross-browser compatibility](#cross-browser-compatibility)
-    - [Testing compatibility locally](#testing-compatibility-locally)
-    - [Running Browser Automation Tests](#running-browser-automation-tests)
-      - [Browser Automation Notes](#browser-automation-notes)
+    - [Unit testing frameworks](#unit-testing-frameworks)
+    - [Running specific Kibana tests](#running-specific-kibana-tests)
+    - [Debugging Unit Tests](#debugging-unit-tests)
+    - [Unit Testing Plugins](#unit-testing-plugins)
+    - [Automated Accessibility Testing](#automated-accessibility-testing)
+    - [Cross-browser compatibility](#cross-browser-compatibility)
+      - [Testing compatibility locally](#testing-compatibility-locally)
+      - [Running Browser Automation Tests](#running-browser-automation-tests)
   - [Building OS packages](#building-os-packages)
   - [Writing documentation](#writing-documentation)
   - [Release Notes Process](#release-notes-process)
@@ -55,11 +74,9 @@ Granted that you share your thoughts, we might even be able to come up with crea
 
 First of all, **sorry about that!** We want you to have a great time with Kibana.
 
-Hosting meaningful discussions on GitHub can be challenging. For that reason, we'll sometimes ask that you join us on IRC _([#kibana](https://kiwiirc.com/client/irc.freenode.net/?#kibana) on freenode)_ to chat about your issues. You may also experience **faster response times** when engaging us via IRC.
-
 There's hundreds of open issues and prioritizing what to work on is an important aspect of our daily jobs. We prioritize issues according to impact and difficulty, so some issues can be neglected while we work on more pressing issues.
 
-Feel free to bump your issues if you think they've been neglected for a prolonged period, or just jump on IRC and let us have it!
+Feel free to bump your issues if you think they've been neglected for a prolonged period.
 
 ### "I want to help!"
 
@@ -172,6 +189,8 @@ Bootstrap Kibana and install all the dependencies
 ```bash
 yarn kbn bootstrap
 ```
+
+> Node.js native modules could be in use and node-gyp is the tool used to build them. There are tools you need to install per platform and python versions you need to be using. Please see https://github.com/nodejs/node-gyp#installation and follow the guide according your platform.
 
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
@@ -393,9 +412,9 @@ Note that for VSCode, to enable "live" linting of TypeScript (and other) file ty
 
 All user-facing labels and info texts in Kibana should be internationalized. Please take a look at the [readme](packages/kbn-i18n/README.md) and the [guideline](packages/kbn-i18n/GUIDELINE.md) of the i18n package on how to do so.
 
-In order to enable translations in the React parts of the application, the top most component of every `ReactDOM.render` call should be an `I18nContext`:
+In order to enable translations in the React parts of the application, the top most component of every `ReactDOM.render` call should be the `Context` component from the `i18n` core service:
 ```jsx
-import { I18nContext } from 'ui/i18n';
+const I18nContext = coreStart.i18n.Context;
 
 ReactDOM.render(
   <I18nContext>
@@ -407,6 +426,39 @@ ReactDOM.render(
 
 There are a number of tools created to support internationalization in Kibana that would allow one to validate internationalized labels,
 extract them to a `JSON` file or integrate translations back to Kibana. To know more, please read corresponding [readme](src/dev/i18n/README.md) file.
+
+### Localization
+
+We cannot support accepting contributions to the translations from any source other than the translators we have engaged to do the work.
+We are still to develop a proper process to accept any contributed translations. We certainly appreciate that people care enough about the localization effort to want to help improve the quality. We aim to build out a more comprehensive localization process for the future and will notify you once contributions can be supported, but for the time being, we are not able to incorporate suggestions.
+
+### Styling with SASS
+
+When writing a new component, create a sibling SASS file of the same name and import directly into the JS/TS component file. Doing so ensures the styles are never separated or lost on import and allows for better modularization (smaller individual plugin asset footprint).
+
+Any JavaScript (or TypeScript) file that imports SASS (.scss) files will automatically build with the [EUI](https://elastic.github.io/eui/#/guidelines/sass) & Kibana invisibles (SASS variables, mixins, functions) from the [`styling_constants.scss` file](https://github.com/elastic/kibana/blob/master/src/legacy/ui/public/styles/_styling_constants.scss). However, any Legacy (file path includes `/legacy`) files will not.
+
+**Example:**
+
+```tsx
+// component.tsx
+
+import './component.scss';
+
+export const Component = () => {
+  return (
+    <div className="plgComponent" />
+  );
+}
+```
+
+```scss
+// component.scss
+
+.plgComponent { ... }
+```
+
+Do not use the underscore `_` SASS file naming pattern when importing directly into a javascript file.
 
 ### Testing and Building
 
@@ -433,10 +485,10 @@ macOS users on a machine with a discrete graphics card may see significant speed
 - Uncheck the "Prefer integrated to discrete GPU" option
 - Restart iTerm
 
-### Debugging Server Code
+#### Debugging Server Code
 `yarn debug` will start the server with Node's inspect flag. Kibana's development mode will start three processes on ports `9229`, `9230`, and `9231`. Chrome's developer tools need to be configured to connect to all three connections. Add `localhost:<port>` for each Kibana process in Chrome's developer tools connection tab.
 
-### Instrumenting with Elastic APM
+#### Instrumenting with Elastic APM
 Kibana ships with the [Elastic APM Node.js Agent](https://github.com/elastic/apm-agent-nodejs) built-in for debugging purposes.
 
 Its default configuration is meant to be used by core Kibana developers only, but it can easily be re-configured to your needs.
@@ -456,26 +508,34 @@ module.exports = {
 };
 ```
 
+APM [Real User Monitoring agent](https://www.elastic.co/guide/en/apm/agent/rum-js/current/index.html) is not available in the Kibana distributables,
+however the agent can be enabled by setting `ELASTIC_APM_ACTIVE` to `true`.
+flags
+```
+ELASTIC_APM_ACTIVE=true yarn start
+// activates both Node.js and RUM agent
+```
+
 Once the agent is active, it will trace all incoming HTTP requests to Kibana, monitor for errors, and collect process-level metrics.
 The collected data will be sent to the APM Server and is viewable in the APM UI in Kibana.
 
-### Unit testing frameworks
+#### Unit testing frameworks
 Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still
 exist in Mocha but all new unit tests should be written in Jest. Mocha tests
 are contained in `__tests__` directories. Whereas Jest tests are stored in
 the same directory as source code files with the `.test.js` suffix.
 
-### Running specific Kibana tests
+#### Running specific Kibana tests
 
 The following table outlines possible test file locations and how to invoke them:
 
 | Test runner        | Test location                                                                                                                                           | Runner command (working directory is kibana root)                                       |
 | -----------------  | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Jest               | `src/**/*.test.js`<br>`src/**/*.test.ts`                                                                                                                | `node scripts/jest -t regexp [test path]`                                               |
-| Jest (integration) | `**/integration_tests/**/*.test.js`                                                                                                                     | `node scripts/jest_integration -t regexp [test path]`                                   |
+| Jest               | `src/**/*.test.js`<br>`src/**/*.test.ts`                                                                                                                | `yarn test:jest -t regexp [test path]`                                               |
+| Jest (integration) | `**/integration_tests/**/*.test.js`                                                                                                                     | `yarn test:jest_integration -t regexp [test path]`                                   |
 | Mocha              | `src/**/__tests__/**/*.js`<br>`!src/**/public/__tests__/*.js`<br>`packages/kbn-datemath/test/**/*.js`<br>`packages/kbn-dev-utils/src/**/__tests__/**/*.js`<br>`tasks/**/__tests__/**/*.js` | `node scripts/mocha --grep=regexp [test path]`       |
-| Functional         | `test/*integration/**/config.js`<br>`test/*functional/**/config.js`<br>`test/accessibility/config.js`                                                                                    | `node scripts/functional_tests_server --config test/[directory]/config.js`<br>`node scripts/functional_test_runner --config test/[directory]/config.js --grep=regexp`       |
-| Karma              | `src/**/public/__tests__/*.js`                                                                                                                          | `npm run test:dev`                                                                      |
+| Functional         | `test/*integration/**/config.js`<br>`test/*functional/**/config.js`<br>`test/accessibility/config.js`                                                                                    | `yarn test:ftr:server --config test/[directory]/config.js`<br>`yarn test:ftr:runner --config test/[directory]/config.js --grep=regexp`       |
+| Karma              | `src/**/public/__tests__/*.js`                                                                                                                          | `yarn test:karma:debug`                                                                      |
 
 For X-Pack tests located in `x-pack/` see [X-Pack Testing](x-pack/README.md#testing)
 
@@ -486,39 +546,21 @@ Test runner arguments:
  Examples:
   - Run the entire elasticsearch_service test suite:
     ```
-    node scripts/jest src/core/server/elasticsearch/elasticsearch_service.test.ts
+    yarn test:jest src/core/server/elasticsearch/elasticsearch_service.test.ts
     ```
   - Run the jest test case whose description matches `stops both admin and data clients`:
     ```
-    node scripts/jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts
+    yarn test:jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts
     ```
   - Run the api integration test case whose description matches the given string:
     ```
-    node scripts/functional_tests_server --config test/api_integration/config.js
-    node scripts/functional_test_runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'
+    yarn test:ftr:server --config test/api_integration/config.js
+    yarn test:ftr:runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'
     ```
 
-### Debugging Unit Tests
+#### Debugging Unit Tests
 
 The standard `yarn test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specialized tasks provide alternate methods for running the tests.
-
-To execute both server and browser tests, but skip linting, use `yarn test:quick`.
-
-```bash
-yarn test:quick
-```
-
-Use `yarn test:mocha` when you want to run the mocha tests.
-
-```bash
-yarn test:mocha
-```
-
-When you'd like to execute individual server-side test files, you can use the command below. Note that this command takes care of configuring Mocha with Babel compilation for you, and you'll be better off avoiding a globally installed `mocha` package. This command is great for development and for quickly identifying bugs.
-
-```bash
-node scripts/mocha <file>
-```
 
 You could also add the `--debug` option so that `node` is run using the `--debug-brk` flag. You'll need to connect a remote debugger such as [`node-inspector`](https://github.com/node-inspector/node-inspector) to proceed in this mode.
 
@@ -526,16 +568,16 @@ You could also add the `--debug` option so that `node` is run using the `--debug
 node scripts/mocha --debug <file>
 ```
 
-With `yarn test:browser`, you can run only the browser tests. Coverage reports are available for browser tests by running `yarn test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
+With `yarn test:karma`, you can run only the browser tests. Coverage reports are available for browser tests by running `yarn test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
 
 ```bash
-yarn test:browser
+yarn test:karma
 ```
 
-Using `yarn test:dev` initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
+Using `yarn test:karma:debug` initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
 
 ```bash
-yarn test:dev
+yarn test:karma:debug
 ```
 
 In the screenshot below, you'll notice the URL is `localhost:9876/debug.html`. You can append a `grep` query parameter to this URL and set it to a string value which will be used to exclude tests which don't match. For example, if you changed the URL to `localhost:9876/debug.html?query=my test` and then refreshed the browser, you'd only see tests run which contain "my test" in the test description.
@@ -543,7 +585,7 @@ In the screenshot below, you'll notice the URL is `localhost:9876/debug.html`. Y
 
 ![Browser test debugging](http://i.imgur.com/DwHxgfq.png)
 
-### Unit Testing Plugins
+#### Unit Testing Plugins
 
 This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/kibana/tree/master/packages/kbn-plugin-generator). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
 
@@ -551,10 +593,10 @@ To run the tests for just your particular plugin run the following command from 
 
 ```bash
 yarn test:mocha
-yarn test:browser --dev # remove the --dev flag to run them once and close
+yarn test:karma:debug # remove the debug flag to run them once and close
 ```
 
-### Automated Accessibility Testing
+#### Automated Accessibility Testing
 
 To run the tests locally:
 
@@ -571,11 +613,11 @@ can be run locally using their browser plugins:
 - [Chrome](https://chrome.google.com/webstore/detail/axe-web-accessibility-tes/lhdoppojpmngadmnindnejefpokejbdd?hl=en-US)
 - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/axe-devtools/)
 
-### Cross-browser Compatibility
+#### Cross-browser Compatibility
 
-#### Testing Compatibility Locally
+##### Testing Compatibility Locally
 
-##### Testing IE on OS X
+###### Testing IE on OS X
 
 * [Download VMWare Fusion](http://www.vmware.com/products/fusion/fusion-evaluation.html).
 * [Download IE virtual machines](https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/#downloads) for VMWare.
@@ -586,7 +628,7 @@ can be run locally using their browser plugins:
 * Now you can run your VM, open the browser, and navigate to `http://computer.local:5601` to test Kibana.
 * Alternatively you can use browserstack
 
-#### Running Browser Automation Tests
+##### Running Browser Automation Tests
 
 [Read about the `FunctionalTestRunner`](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html) to learn more about how you can run and develop functional tests for Kibana core and plugins.
 

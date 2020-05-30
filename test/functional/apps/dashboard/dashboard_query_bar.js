@@ -19,11 +19,12 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const pieChart = getService('pieChart');
   const queryBar = getService('queryBar');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'dashboard', 'discover']);
 
   describe('dashboard query bar', () => {
@@ -41,10 +42,11 @@ export default function({ getService, getPageObjects }) {
       await esArchiver.unload('dashboard/current/data');
 
       await queryBar.clickQuerySubmitButton();
-      const headers = await PageObjects.discover.getColumnHeaders();
-      expect(headers.length).to.be(0);
-
-      await pieChart.expectPieSliceCount(0);
+      await retry.tryForTime(5000, async () => {
+        const headers = await PageObjects.discover.getColumnHeaders();
+        expect(headers.length).to.be(0);
+        await pieChart.expectPieSliceCount(0);
+      });
     });
   });
 }

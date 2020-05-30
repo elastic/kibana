@@ -8,9 +8,25 @@ import * as chromiumDefinition from './chromium';
 
 export { ensureAllBrowsersDownloaded } from './download';
 export { createBrowserDriverFactory } from './create_browser_driver_factory';
-export { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
+
+export { HeadlessChromiumDriver } from './chromium/driver';
+export { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
 
 export const chromium = {
   paths: chromiumDefinition.paths,
   createDriverFactory: chromiumDefinition.createDriverFactory,
 };
+
+export interface BrowserDownload {
+  paths: {
+    archivesPath: string;
+    baseUrl: string;
+    packages: Array<{
+      archiveChecksum: string;
+      archiveFilename: string;
+      binaryChecksum: string;
+      binaryRelativePath: string;
+      platforms: string[];
+    }>;
+  };
+}

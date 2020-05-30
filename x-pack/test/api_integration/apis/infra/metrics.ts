@@ -7,16 +7,13 @@
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 
-import { InventoryMetric } from '../../../../legacy/plugins/infra/common/inventory_models/types';
-import {
-  InfraNodeType,
-  InfraTimerangeInput,
-} from '../../../../legacy/plugins/infra/public/graphql/types';
+import { InventoryMetric } from '../../../../plugins/infra/common/inventory_models/types';
+import { InfraNodeType, InfraTimerangeInput } from '../../../../plugins/infra/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { DATES } from './constants';
 
-import { NodeDetailsMetricDataResponse } from '../../../../legacy/plugins/infra/common/http_api/node_details_api';
+import { NodeDetailsMetricDataResponse } from '../../../../plugins/infra/common/http_api/node_details_api';
 const { min, max } = DATES['7.0.0'].hosts;
 
 interface NodeDetailsRequest {
@@ -28,7 +25,7 @@ interface NodeDetailsRequest {
   cloudId?: string;
 }
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
@@ -59,7 +56,7 @@ export default function({ getService }: FtrProviderContext) {
         nodeId: 'demo-stack-mysql-01',
         nodeType: 'host' as InfraNodeType,
       });
-      return data.then(resp => {
+      return data.then((resp) => {
         if (!resp) {
           return;
         }
@@ -88,7 +85,7 @@ export default function({ getService }: FtrProviderContext) {
         nodeId: 'demo-stack-mysql-01',
         nodeType: 'host' as InfraNodeType,
       });
-      return data.then(resp => {
+      return data.then((resp) => {
         if (!resp) {
           return;
         }

@@ -5,15 +5,20 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { ActionType } from '../../types';
+import { HttpSetup, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
+import { ActionTypeModel } from '../../types';
+import { TypeRegistry } from '../type_registry';
 
 export interface ActionsConnectorsContextValue {
-  addFlyoutVisible: boolean;
-  editFlyoutVisible: boolean;
-  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
-  actionTypesIndex: Record<string, ActionType> | undefined;
-  reloadConnectors: () => Promise<void>;
+  http: HttpSetup;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  toastNotifications: Pick<
+    ToastsApi,
+    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+  >;
+  capabilities: ApplicationStart['capabilities'];
+  reloadConnectors?: () => Promise<void>;
+  docLinks: DocLinksStart;
 }
 
 const ActionsConnectorsContext = createContext<ActionsConnectorsContextValue>(null as any);

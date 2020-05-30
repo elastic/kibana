@@ -75,7 +75,7 @@ describe('migrationsRetryCallCluster', () => {
     loggingServiceMock.clear(mockLogger);
   });
 
-  errors.forEach(errorName => {
+  errors.forEach((errorName) => {
     it('retries ES API calls that rejects with ' + errorName, () => {
       expect.assertions(1);
       const callEsApi = jest.fn();
@@ -87,6 +87,19 @@ describe('migrationsRetryCallCluster', () => {
       const retried = migrationsRetryCallCluster(callEsApi, mockLogger.get('mock log'), 1);
       return expect(retried('endpoint')).resolves.toMatchInlineSnapshot(`"success"`);
     });
+  });
+
+  it('retries ES API calls that rejects with snapshot_in_progress_exception', () => {
+    expect.assertions(1);
+    const callEsApi = jest.fn();
+    let i = 0;
+    callEsApi.mockImplementation(() => {
+      return i++ <= 2
+        ? Promise.reject({ body: { error: { type: 'snapshot_in_progress_exception' } } })
+        : Promise.resolve('success');
+    });
+    const retried = migrationsRetryCallCluster(callEsApi, mockLogger.get('mock log'), 1);
+    return expect(retried('endpoint')).resolves.toMatchInlineSnapshot(`"success"`);
   });
 
   it('rejects when ES API calls reject with other errors', async () => {

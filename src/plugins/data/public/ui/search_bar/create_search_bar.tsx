@@ -17,16 +17,17 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
-import { DataPublicPluginStart, esFilters, Query, TimeRange, SavedQuery } from '../..';
-import { QueryStart } from '../../query';
+import { QueryStart, SavedQuery } from '../../query';
 import { SearchBarOwnProps, SearchBar } from './search_bar';
 import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
+import { DataPublicPluginStart } from '../../types';
+import { Filter, Query, TimeRange } from '../../../common';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
@@ -43,7 +44,7 @@ export type StatefulSearchBarProps = SearchBarOwnProps & {
 
 // Respond to user changing the filters
 const defaultFiltersUpdated = (queryService: QueryStart) => {
-  return (filters: esFilters.Filter[]) => {
+  return (filters: Filter[]) => {
     queryService.filterManager.setFilters(filters);
   };
 };
@@ -117,13 +118,29 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
+    const { useDefaultBehaviors } = props;
     // Handle queries
-    const [query, setQuery] = useState<Query>(
-      props.query || {
-        query: '',
-        language: core.uiSettings.get('search:queryLanguage'),
+    const queryRef = useRef(props.query);
+    const onQuerySubmitRef = useRef(props.onQuerySubmit);
+    const defaultQuery = {
+      query: '',
+      language:
+        storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage'),
+    };
+    const [query, setQuery] = useState<Query>(props.query || defaultQuery);
+
+    useEffect(() => {
+      if (props.query !== queryRef.current) {
+        queryRef.current = props.query;
+        setQuery(props.query || defaultQuery);
       }
-    );
+    }, [defaultQuery, props.query]);
+
+    useEffect(() => {
+      if (props.onQuerySubmit !== onQuerySubmitRef.current) {
+        onQuerySubmitRef.current = props.onQuerySubmit;
+      }
+    }, [props.onQuerySubmit]);
 
     // handle service state updates.
     // i.e. filters being added from a visualization directly to filterManager.
@@ -145,21 +162,20 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
       setQuery,
       savedQueryId: props.savedQueryId,
       notifications: core.notifications,
-      uiSettings: core.uiSettings,
+      defaultLanguage: defaultQuery.language,
     });
 
     // Fire onQuerySubmit on query or timerange change
     useEffect(() => {
-      if (!props.useDefaultBehaviors) return;
-      if (props.onQuerySubmit)
-        props.onQuerySubmit(
-          {
-            dateRange: timeRange,
-            query,
-          },
-          true
-        );
-    }, [props, props.onQuerySubmit, props.useDefaultBehaviors, query, timeRange]);
+      if (!useDefaultBehaviors || !onQuerySubmitRef.current) return;
+      onQuerySubmitRef.current(
+        {
+          dateRange: timeRange,
+          query,
+        },
+        true
+      );
+    }, [query, timeRange, useDefaultBehaviors]);
 
     return (
       <KibanaContextProvider

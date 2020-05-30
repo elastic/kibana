@@ -24,7 +24,7 @@ import { sendRequestToES } from './send_request_to_es';
 import { track } from './track';
 
 // @ts-ignore
-import mappings from '../../../lib/mappings/mappings';
+import { retrieveAutoCompleteInfo } from '../../../lib/mappings/mappings';
 
 export const useSendCurrentRequestToES = () => {
   const {
@@ -39,7 +39,7 @@ export const useSendCurrentRequestToES = () => {
       const requests = await editor.getRequestsInRange();
       if (!requests.length) {
         notifications.toasts.add(
-          i18n.translate('console.notification.noReqeustSelectedTitle', {
+          i18n.translate('console.notification.error.noRequestSelectedTitle', {
             defaultMessage:
               'No request selected. Select a request by placing the cursor inside it.',
           })
@@ -55,7 +55,16 @@ export const useSendCurrentRequestToES = () => {
       const results = await sendRequestToES({ requests });
 
       results.forEach(({ request: { path, method, data } }) => {
-        history.addToHistory(path, method, data);
+        try {
+          history.addToHistory(path, method, data);
+        } catch (e) {
+          // Best effort, but notify the user.
+          notifications.toasts.addError(e, {
+            title: i18n.translate('console.notification.error.couldNotSaveRequestTitle', {
+              defaultMessage: 'Could not save request to history.',
+            }),
+          });
+        }
       });
 
       const { polling } = settings.toJSON();
@@ -64,7 +73,7 @@ export const useSendCurrentRequestToES = () => {
         // or templates may have changed, so we'll need to update this data. Assume that if
         // the user disables polling they're trying to optimize performance or otherwise
         // preserve resources, so they won't want this request sent either.
-        mappings.retrieveAutoCompleteInfo();
+        retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
       }
 
       dispatch({
@@ -74,14 +83,18 @@ export const useSendCurrentRequestToES = () => {
         },
       });
     } catch (e) {
-      if (e.response?.contentType) {
+      if (e?.response) {
         dispatch({
           type: 'requestFail',
           payload: e,
         });
       } else {
+        dispatch({
+          type: 'requestFail',
+          payload: undefined,
+        });
         notifications.toasts.addError(e, {
-          title: i18n.translate('console.notification.unknownRequestErrorTitle', {
+          title: i18n.translate('console.notification.error.unknownErrorTitle', {
             defaultMessage: 'Unknown Request Error',
           }),
         });

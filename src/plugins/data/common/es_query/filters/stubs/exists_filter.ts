@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { esFilters } from '../../..';
+import { ExistsFilter, FilterStateStore } from '..';
 
-export const existsFilter: esFilters.ExistsFilter = {
+export const existsFilter: ExistsFilter = {
   meta: {
     index: 'logstash-*',
     negate: false,
@@ -29,6 +29,6 @@ export const existsFilter: esFilters.ExistsFilter = {
     alias: null,
   },
   $state: {
-    store: esFilters.FilterStateStore.APP_STATE,
+    store: FilterStateStore.APP_STATE,
   },
 };

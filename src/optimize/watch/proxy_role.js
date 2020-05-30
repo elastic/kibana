@@ -26,10 +26,11 @@ export default (kbnServer, server, config) => {
     createProxyBundlesRoute({
       host: config.get('optimize.watchHost'),
       port: config.get('optimize.watchPort'),
+      buildHash: kbnServer.newPlatform.env.packageInfo.buildNum.toString(),
     })
   );
 
-  return fromNode(cb => {
+  return fromNode((cb) => {
     const timeout = setTimeout(() => {
       cb(new Error('Timeout waiting for the optimizer to become ready'));
     }, config.get('optimize.watchProxyTimeout'));
@@ -41,7 +42,7 @@ export default (kbnServer, server, config) => {
     if (!process.connected) return;
 
     process.send(['WORKER_BROADCAST', { optimizeReady: '?' }]);
-    process.on('message', msg => {
+    process.on('message', (msg) => {
       switch (get(msg, 'optimizeReady')) {
         case true:
           clearTimeout(timeout);

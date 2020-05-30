@@ -36,24 +36,24 @@ export class StringType extends Type<string> {
     let schema =
       options.hostname === true
         ? internals.string().hostname()
-        : internals.any().custom(value => {
+        : internals.any().custom((value) => {
             if (typeof value !== 'string') {
               return `expected value of type [string] but got [${typeDetect(value)}]`;
             }
           });
 
     if (options.minLength !== undefined) {
-      schema = schema.custom(value => {
+      schema = schema.custom((value) => {
         if (value.length < options.minLength!) {
-          return `value is [${value}] but it must have a minimum length of [${options.minLength}].`;
+          return `value has length [${value.length}] but it must have a minimum length of [${options.minLength}].`;
         }
       });
     }
 
     if (options.maxLength !== undefined) {
-      schema = schema.custom(value => {
+      schema = schema.custom((value) => {
         if (value.length > options.maxLength!) {
-          return `value is [${value}] but it must have a maximum length of [${options.maxLength}].`;
+          return `value has length [${value.length}] but it must have a maximum length of [${options.maxLength}].`;
         }
       });
     }
@@ -66,7 +66,7 @@ export class StringType extends Type<string> {
       case 'any.required':
         return `expected value of type [string] but got [${typeDetect(value)}]`;
       case 'string.hostname':
-        return `value is [${value}] but it must be a valid hostname (see RFC 1123).`;
+        return `value must be a valid hostname (see RFC 1123).`;
     }
   }
 }

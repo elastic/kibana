@@ -22,7 +22,7 @@ import { format as formatUrl } from 'url';
 import { OPTIMIZE_BUNDLE_DIR, esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { services } from './services';
 
-export default function() {
+export default function () {
   const servers = {
     kibana: kbnTestConfig.getUrlParts(),
     elasticsearch: esTestConfig.getUrlParts(),
@@ -56,6 +56,10 @@ export default function() {
         `--elasticsearch.password=${kibanaServerTestUser.password}`,
         `--home.disableWelcomeScreen=true`,
         '--telemetry.banner=false',
+        '--telemetry.optIn=false',
+        // These are *very* important to have them pointing to staging
+        '--telemetry.url=https://telemetry-staging.elastic.co/xpack/v2/send',
+        '--telemetry.optInStatusUrl=https://telemetry-staging.elastic.co/opt_in_status/v2/send',
         `--server.maxPayloadBytes=1679958`,
         // newsfeed mock service
         `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'newsfeed')}`,

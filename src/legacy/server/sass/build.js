@@ -34,8 +34,8 @@ const access = promisify(fs.access);
 const copyFile = promisify(fs.copyFile);
 const mkdirAsync = promisify(fs.mkdir);
 
-const UI_ASSETS_DIR = resolve(__dirname, '../../ui/public/assets');
-const DARK_THEME_IMPORTER = url => {
+const UI_ASSETS_DIR = resolve(__dirname, '../../../core/server/core_app/assets');
+const DARK_THEME_IMPORTER = (url) => {
   if (url.includes('eui_colors_light')) {
     return { file: url.replace('eui_colors_light', 'eui_colors_dark') };
   }
@@ -56,15 +56,7 @@ const makeAsset = (request, { path, root, boundry, copyRoot, urlRoot }) => {
 };
 
 export class Build {
-  constructor({
-    log,
-    sourcePath,
-    targetPath,
-    urlImports,
-    theme,
-    sourceMap = true,
-    outputStyle = 'nested',
-  }) {
+  constructor({ log, sourcePath, targetPath, urlImports, theme }) {
     this.log = log;
     this.sourcePath = sourcePath;
     this.sourceDir = dirname(this.sourcePath);
@@ -73,8 +65,6 @@ export class Build {
     this.urlImports = urlImports;
     this.theme = theme;
     this.includedFiles = [sourcePath];
-    this.sourceMap = sourceMap;
-    this.outputStyle = outputStyle;
   }
 
   /**
@@ -97,11 +87,11 @@ export class Build {
     const rendered = await renderSass({
       file: this.sourcePath,
       outFile: this.targetPath,
-      sourceMap: this.sourceMap,
-      outputStyle: this.outputStyle,
-      sourceMapEmbed: this.sourceMap,
-      includePaths: [resolve(__dirname, '../../../../node_modules')],
       importer: this.theme === 'dark' ? DARK_THEME_IMPORTER : undefined,
+      sourceMap: true,
+      outputStyle: 'nested',
+      sourceMapEmbed: true,
+      includePaths: [resolve(__dirname, '../../../../node_modules')],
     });
 
     const processor = postcss([autoprefixer]);
@@ -111,7 +101,7 @@ export class Build {
     if (this.urlImports) {
       processor.use(
         postcssUrl({
-          url: request => {
+          url: (request) => {
             if (!request.pathname) {
               return request.url;
             }
@@ -154,7 +144,7 @@ export class Build {
 
     // verify that asset sources exist and import is valid before writing anything
     await Promise.all(
-      urlAssets.map(async asset => {
+      urlAssets.map(async (asset) => {
         try {
           await access(asset.path);
         } catch (e) {
@@ -181,7 +171,7 @@ export class Build {
 
     // copy non-shared urlAssets
     await Promise.all(
-      urlAssets.map(async asset => {
+      urlAssets.map(async (asset) => {
         if (!asset.copyTo) {
           return;
         }

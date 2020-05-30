@@ -4,29 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cryptoFactory } from '../../../server/lib/crypto';
-import {
-  CreateJobFactory,
-  ConditionalHeaders,
-  ServerFacade,
-  RequestFacade,
-  ESQueueCreateJobFn,
-} from '../../../types';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { ReportingCore } from '../../../server';
+import { cryptoFactory } from '../../../server/lib';
+import { CreateJobFactory, ESQueueCreateJobFn } from '../../../server/types';
 import { JobParamsDiscoverCsv } from '../types';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsDiscoverCsv
->> = function createJobFactoryFn(server: ServerFacade) {
-  const crypto = cryptoFactory(server);
+>> = function createJobFactoryFn(reporting: ReportingCore) {
+  const config = reporting.getConfig();
+  const crypto = cryptoFactory(config.get('encryptionKey'));
+  const setupDeps = reporting.getPluginSetupDeps();
 
   return async function createJob(
     jobParams: JobParamsDiscoverCsv,
-    headers: ConditionalHeaders['headers'],
-    request: RequestFacade
+    context: RequestHandlerContext,
+    request: KibanaRequest
   ) {
-    const serializedEncryptedHeaders = await crypto.encrypt(headers);
+    const serializedEncryptedHeaders = await crypto.encrypt(request.headers);
 
-    const savedObjectsClient = request.getSavedObjectsClient();
+    const savedObjectsClient = context.core.savedObjects.client;
     const indexPatternSavedObject = await savedObjectsClient.get(
       'index-pattern',
       jobParams.indexPatternId!
@@ -35,7 +33,7 @@ export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
     return {
       headers: serializedEncryptedHeaders,
       indexPatternSavedObject,
-      basePath: request.getBasePath(),
+      basePath: setupDeps.basePath(request),
       ...jobParams,
     };
   };

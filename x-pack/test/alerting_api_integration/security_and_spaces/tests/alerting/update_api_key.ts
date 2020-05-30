@@ -36,7 +36,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
 
           const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
 
@@ -80,10 +80,12 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', undefined);
 
           await supertest
-            .put(`${getUrlPrefix(space.id)}/api/saved_objects/alert/${createdAlert.id}`)
+            .put(
+              `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
+            )
             .set('kbn-xsrf', 'foo')
             .send({
               attributes: {
@@ -134,7 +136,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add('other', createdAlert.id, 'alert');
+          objectRemover.add('other', createdAlert.id, 'alert', undefined);
 
           const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
 

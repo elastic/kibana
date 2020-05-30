@@ -4,23 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
-import { ElasticsearchServiceSetup } from 'kibana/server';
+import { EventEmitter } from 'events';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { AuthenticatedUser } from '../../../../../plugins/security/server';
+import { ESQueueCreateJobFn } from '../../server/types';
+import { ReportingCore } from '../core';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
-import {
-  EnqueueJobFn,
-  ESQueueCreateJobFn,
-  ImmediateCreateJobFn,
-  Job,
-  ServerFacade,
-  RequestFacade,
-  Logger,
-  ExportTypesRegistry,
-  CaptureConfig,
-  QueueConfig,
-  ConditionalHeaders,
-} from '../../types';
+import { LevelLogger } from './level_logger';
 
 interface ConfirmedJob {
   id: string;
@@ -29,46 +20,53 @@ interface ConfirmedJob {
   _primary_term: number;
 }
 
-interface EnqueueJobFactoryOpts {
-  exportTypesRegistry: ExportTypesRegistry;
-  esqueue: any;
-}
+export type Job = EventEmitter & {
+  id: string;
+  toJSON: () => {
+    id: string;
+  };
+};
+
+export type EnqueueJobFn = <JobParamsType>(
+  exportTypeId: string,
+  jobParams: JobParamsType,
+  user: AuthenticatedUser | null,
+  context: RequestHandlerContext,
+  request: KibanaRequest
+) => Promise<Job>;
 
 export function enqueueJobFactory(
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
-  parentLogger: Logger,
-  { exportTypesRegistry, esqueue }: EnqueueJobFactoryOpts
+  reporting: ReportingCore,
+  parentLogger: LevelLogger
 ): EnqueueJobFn {
+  const config = reporting.getConfig();
+  const queueTimeout = config.get('queue', 'timeout');
+  const browserType = config.get('capture', 'browser', 'type');
+  const maxAttempts = config.get('capture', 'maxAttempts');
   const logger = parentLogger.clone(['queue-job']);
-  const config = server.config();
-  const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');
-  const browserType = captureConfig.browser.type;
-  const maxAttempts = captureConfig.maxAttempts;
-  const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
 
   return async function enqueueJob<JobParamsType>(
     exportTypeId: string,
     jobParams: JobParamsType,
-    user: string,
-    headers: ConditionalHeaders['headers'],
-    request: RequestFacade
+    user: AuthenticatedUser | null,
+    context: RequestHandlerContext,
+    request: KibanaRequest
   ): Promise<Job> {
-    type CreateJobFn = ESQueueCreateJobFn<JobParamsType> | ImmediateCreateJobFn<JobParamsType>;
-
-    const exportType = exportTypesRegistry.getById(exportTypeId);
+    type CreateJobFn = ESQueueCreateJobFn<JobParamsType>;
+    const username = user ? user.username : false;
+    const esqueue = await reporting.getEsqueue();
+    const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
 
     if (exportType == null) {
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    // TODO: the createJobFn should be unwrapped in the register method of the export types registry
-    const createJob = exportType.createJobFactory(server, elasticsearch, logger) as CreateJobFn;
-    const payload = await createJob(jobParams, headers, request);
+    const createJob = exportType.createJobFactory(reporting, logger) as CreateJobFn;
+    const payload = await createJob(jobParams, context, request);
 
     const options = {
-      timeout: queueConfig.timeout,
-      created_by: get(user, 'username', false),
+      timeout: queueTimeout,
+      created_by: username,
       browser_type: browserType,
       max_attempts: maxAttempts,
     };

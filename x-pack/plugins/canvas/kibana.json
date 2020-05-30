@@ -4,7 +4,7 @@
     "kibanaVersion": "kibana",
     "configPath": ["xpack", "canvas"],
     "server": true,
-    "ui": false,
-    "requiredPlugins": [],
+    "ui": true,
+    "requiredPlugins": ["data", "embeddable", "expressions", "features", "home", "inspector", "uiActions"],
     "optionalPlugins": ["usageCollection"]
   }

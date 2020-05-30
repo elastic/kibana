@@ -15,7 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const aceEditor = getService('aceEditor');
 
-  describe('Role Mappings', function() {
+  describe('Role Mappings', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('roleMappings');
     });
@@ -28,7 +28,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('allows a role mapping to be created', async () => {
       await testSubjects.click('createRoleMappingButton');
       await testSubjects.setValue('roleMappingFormNameInput', 'new_role_mapping');
-      await testSubjects.setValue('roleMappingFormRoleComboBox', 'superuser');
+      await testSubjects.setValue('rolesDropdown', 'superuser');
       await browser.pressKeys(browser.keys.ENTER);
 
       await testSubjects.click('roleMappingsAddRuleButton');
@@ -124,7 +124,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       before(async () => {
         await Promise.all(
-          mappings.map(mapping => {
+          mappings.map((mapping) => {
             const { name, ...payload } = mapping;
             return security.roleMappings.create(name, payload);
           })
@@ -134,7 +134,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await Promise.all(mappings.map(mapping => security.roleMappings.delete(mapping.name)));
+        await Promise.all(mappings.map((mapping) => security.roleMappings.delete(mapping.name)));
       });
 
       it('displays a table of all role mappings', async () => {

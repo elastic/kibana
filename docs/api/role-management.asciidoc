@@ -2,9 +2,9 @@
 [[role-management-api]]
 == {kib} role management APIs
 
-Manage the roles that grant <<kibana-privileges, Kibana privileges>>.
+Manage the roles that grant <<kibana-privileges, {kib} privileges>>.
 
-WARNING: Do not use the {ref}/security-api.html#security-role-apis[{es} role management APIs] to manage {kib} roles. 
+WARNING: Do not use the {ref}/security-api.html#security-role-apis[{es} role management APIs] to manage {kib} roles.
 
 The following {kib} role management APIs are available:
 

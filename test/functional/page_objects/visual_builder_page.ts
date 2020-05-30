@@ -46,7 +46,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       fromTime = 'Sep 19, 2015 @ 06:31:44.000',
       toTime = 'Sep 22, 2015 @ 18:31:44.000'
     ) {
-      await PageObjects.common.navigateToUrl('visualize', 'create?type=metrics');
+      await PageObjects.common.navigateToUrl('visualize', 'create?type=metrics', {
+        useActualUrl: true,
+      });
       log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       // 2 sec sleep until https://github.com/elastic/kibana/issues/46353 is fixed
@@ -69,6 +71,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       if (!isPresent) {
         throw new Error(`TimeSeries chart is not loaded`);
       }
+    }
+
+    public async checkTimeSeriesIsLight() {
+      return await find.existsByCssSelector('.tvbVisTimeSeriesLight');
     }
 
     public async checkTimeSeriesLegendIsPresent() {
@@ -159,7 +165,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const variables = await testTableVariables.findAllByCssSelector(variablesSelector);
 
       const variablesKeyValueSelectorMap = await Promise.all(
-        variables.map(async variable => {
+        variables.map(async (variable) => {
           const subVars = await variable.findAllByCssSelector('td');
           const selector = await subVars[0].findByTagName('a');
           const key = await selector.getVisibleText();
@@ -305,9 +311,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async getRhythmChartLegendValue(nth = 0) {
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      const metricValue = (
-        await find.allByCssSelector(`.echLegendItem .echLegendItem__displayValue`)
-      )[nth];
+      const metricValue = (await find.allByCssSelector(`.echLegendItem .echLegendItem__extra`))[
+        nth
+      ];
       await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
     }
@@ -485,7 +491,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const labels = await testSubjects.findAll('aggRow');
       const label = labels[aggNth];
 
-      return (await label.findAllByCssSelector('[data-test-subj = "comboBoxInput"]'))[1];
+      return (await label.findAllByTestSubject('comboBoxInput'))[1];
     }
 
     public async clickColorPicker(): Promise<void> {
@@ -533,7 +539,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      */
     public async getAggregationCount(nth: number = 0): Promise<number> {
       const series = await this.getSeries();
-      const aggregation = await series[nth].findAllByCssSelector('[data-test-subj="draggable"]');
+      const aggregation = await series[nth].findAllByTestSubject('draggable');
       return aggregation.length;
     }
 

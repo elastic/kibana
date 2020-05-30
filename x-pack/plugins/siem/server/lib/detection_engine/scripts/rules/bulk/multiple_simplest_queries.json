@@ -1,0 +1,24 @@
+[
+  {
+    "name": "Simplest Query Number 1",
+    "description": "Simplest query with the least amount of fields required",
+    "rule_id": "query-rule-id-1",
+    "risk_score": 1,
+    "severity": "high",
+    "type": "query",
+    "from": "now-6m",
+    "to": "now",
+    "query": "user.name: root or user.name: admin"
+  },
+  {
+    "name": "Simplest Query Number 2",
+    "description": "Simplest query with the least amount of fields required",
+    "rule_id": "query-rule-id-2",
+    "risk_score": 2,
+    "severity": "low",
+    "type": "query",
+    "from": "now-6m",
+    "to": "now",
+    "query": "user.name: root or user.name: admin"
+  }
+]

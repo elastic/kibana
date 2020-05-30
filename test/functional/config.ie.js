@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const defaultConfig = await readConfigFile(require.resolve('./config'));
 
   return {
@@ -35,7 +35,6 @@ export default async function({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'telemetry:optIn': false,
         'state:storeInSessionStorage': true,
         'notifications:lifetime:info': 10000,
       },
@@ -43,7 +42,11 @@ export default async function({ readConfigFile }) {
 
     kbnTestServer: {
       ...defaultConfig.get('kbnTestServer'),
-      serverArgs: [...defaultConfig.get('kbnTestServer.serverArgs'), '--csp.strict=false'],
+      serverArgs: [
+        ...defaultConfig.get('kbnTestServer.serverArgs'),
+        '--csp.strict=false',
+        '--telemetry.optIn=false',
+      ],
     },
   };
 }

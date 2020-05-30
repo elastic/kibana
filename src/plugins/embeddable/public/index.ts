@@ -17,52 +17,68 @@
  * under the License.
  */
 
+import './index.scss';
+
 import { PluginInitializerContext } from 'src/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
+export { EMBEDDABLE_ORIGINATING_APP_PARAM } from './types';
 export {
-  ADD_PANEL_ACTION_ID,
-  APPLY_FILTER_ACTION,
-  APPLY_FILTER_TRIGGER,
-  PANEL_BADGE_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
+  ACTION_ADD_PANEL,
+  ACTION_APPLY_FILTER,
+  ACTION_EDIT_PANEL,
   Adapters,
   AddPanelAction,
-  CONTEXT_MENU_TRIGGER,
   Container,
   ContainerInput,
   ContainerOutput,
-  EDIT_PANEL_ACTION_ID,
+  CONTEXT_MENU_TRIGGER,
+  contextMenuTrigger,
+  defaultEmbeddableFactoryProvider,
   EditPanelAction,
   Embeddable,
   EmbeddableChildPanel,
   EmbeddableChildPanelProps,
+  EmbeddableContext,
   EmbeddableFactory,
+  EmbeddableFactoryDefinition,
   EmbeddableFactoryNotFoundError,
+  EmbeddableFactoryRenderer,
   EmbeddableInput,
   EmbeddableInstanceConfiguration,
   EmbeddableOutput,
   EmbeddablePanel,
+  EmbeddableRoot,
+  ValueClickTriggerContext,
+  RangeSelectTriggerContext,
   ErrorEmbeddable,
-  GetEmbeddableFactories,
-  GetEmbeddableFactory,
   IContainer,
   IEmbeddable,
+  isErrorEmbeddable,
+  openAddPanelFlyout,
   OutputSpec,
+  PANEL_BADGE_TRIGGER,
+  panelBadgeTrigger,
+  PANEL_NOTIFICATION_TRIGGER,
+  panelNotificationTrigger,
   PanelNotFoundError,
   PanelState,
   PropertySpec,
   ViewMode,
-  isErrorEmbeddable,
-  openAddPanelFlyout,
   withEmbeddableSubscription,
-  EmbeddableFactoryRenderer,
-  EmbeddableRoot,
+  SavedObjectEmbeddableInput,
+  isSavedObjectEmbeddableInput,
+  isRangeSelectTriggerContext,
+  isValueClickTriggerContext,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
 
-export { IEmbeddableSetup, IEmbeddableStart } from './plugin';
+export {
+  EmbeddableSetup,
+  EmbeddableStart,
+  EmbeddableSetupDependencies,
+  EmbeddableStartDependencies,
+} from './plugin';

@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
+export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
@@ -45,7 +45,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
 
     describe('application service compatibility layer', () => {
       it('can render legacy apps', async () => {
-        await PageObjects.common.navigateToApp('core_plugin_legacy');
+        await PageObjects.common.navigateToApp('core_legacy_compat');
         expect(await testSubjects.exists('coreLegacyCompatH1')).to.be(true);
       });
     });

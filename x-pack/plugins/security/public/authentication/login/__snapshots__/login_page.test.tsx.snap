@@ -1,0 +1,338 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoginPage disabled form states renders as expected when a connection to ES is not available 1`] = `
+<DisabledLoginForm
+  message={
+    <FormattedMessage
+      defaultMessage="See the Kibana logs for details and try reloading the page."
+      id="xpack.security.loginPage.esUnavailableMessage"
+      values={Object {}}
+    />
+  }
+  title={
+    <FormattedMessage
+      defaultMessage="Cannot connect to the Elasticsearch cluster"
+      id="xpack.security.loginPage.esUnavailableTitle"
+      values={Object {}}
+    />
+  }
+/>
+`;
+
+exports[`LoginPage disabled form states renders as expected when an unknown loginState layout is provided 1`] = `
+<DisabledLoginForm
+  message={
+    <FormattedMessage
+      defaultMessage="See the Kibana logs for details and try reloading the page."
+      id="xpack.security.loginPage.unknownLayoutMessage"
+      values={Object {}}
+    />
+  }
+  title={
+    <FormattedMessage
+      defaultMessage="Unsupported login form layout."
+      id="xpack.security.loginPage.unknownLayoutTitle"
+      values={Object {}}
+    />
+  }
+/>
+`;
+
+exports[`LoginPage disabled form states renders as expected when login is not enabled 1`] = `
+<DisabledLoginForm
+  message={
+    <FormattedMessage
+      defaultMessage="Contact your system administrator."
+      id="xpack.security.loginPage.noLoginMethodsAvailableMessage"
+      values={Object {}}
+    />
+  }
+  title={
+    <FormattedMessage
+      defaultMessage="Login is disabled."
+      id="xpack.security.loginPage.noLoginMethodsAvailableTitle"
+      values={Object {}}
+    />
+  }
+/>
+`;
+
+exports[`LoginPage disabled form states renders as expected when secure connection is required but not present 1`] = `
+<DisabledLoginForm
+  message={
+    <FormattedMessage
+      defaultMessage="Contact your system administrator."
+      id="xpack.security.loginPage.requiresSecureConnectionMessage"
+      values={Object {}}
+    />
+  }
+  title={
+    <FormattedMessage
+      defaultMessage="A secure connection is required for log in"
+      id="xpack.security.loginPage.requiresSecureConnectionTitle"
+      values={Object {}}
+    />
+  }
+/>
+`;
+
+exports[`LoginPage disabled form states renders as expected when xpack is not available 1`] = `
+<DisabledLoginForm
+  message={
+    <FormattedMessage
+      defaultMessage="To use the full set of free features in this distribution of Kibana, please update Elasticsearch to the default distribution."
+      id="xpack.security.loginPage.xpackUnavailableMessage"
+      values={Object {}}
+    />
+  }
+  title={
+    <FormattedMessage
+      defaultMessage="Cannot connect to the Elasticsearch cluster currently configured for Kibana."
+      id="xpack.security.loginPage.xpackUnavailableTitle"
+      values={Object {}}
+    />
+  }
+/>
+`;
+
+exports[`LoginPage enabled form state renders as expected 1`] = `
+<LoginForm
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "get": [MockFunction],
+    }
+  }
+  loginAssistanceMessage=""
+  notifications={
+    Object {
+      "toasts": Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      },
+    }
+  }
+  selector={
+    Object {
+      "enabled": false,
+      "providers": Array [
+        Object {
+          "name": "basic1",
+          "type": "basic",
+          "usesLoginForm": true,
+        },
+      ],
+    }
+  }
+/>
+`;
+
+exports[`LoginPage enabled form state renders as expected when info message is set 1`] = `
+<LoginForm
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "get": [MockFunction],
+    }
+  }
+  infoMessage="Your session has timed out. Please log in again."
+  loginAssistanceMessage=""
+  notifications={
+    Object {
+      "toasts": Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      },
+    }
+  }
+  selector={
+    Object {
+      "enabled": false,
+      "providers": Array [
+        Object {
+          "name": "basic1",
+          "type": "basic",
+          "usesLoginForm": true,
+        },
+      ],
+    }
+  }
+/>
+`;
+
+exports[`LoginPage enabled form state renders as expected when loginAssistanceMessage is set 1`] = `
+<LoginForm
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "get": [MockFunction],
+    }
+  }
+  infoMessage="Your session has timed out. Please log in again."
+  loginAssistanceMessage="This is an *important* message"
+  notifications={
+    Object {
+      "toasts": Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      },
+    }
+  }
+  selector={
+    Object {
+      "enabled": false,
+      "providers": Array [
+        Object {
+          "name": "basic1",
+          "type": "basic",
+          "usesLoginForm": true,
+        },
+      ],
+    }
+  }
+/>
+`;
+
+exports[`LoginPage enabled form state renders as expected when loginHelp is set 1`] = `
+<LoginForm
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "get": [MockFunction],
+    }
+  }
+  infoMessage="Your session has timed out. Please log in again."
+  loginAssistanceMessage=""
+  loginHelp="**some-help**"
+  notifications={
+    Object {
+      "toasts": Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      },
+    }
+  }
+  selector={
+    Object {
+      "enabled": false,
+      "providers": Array [
+        Object {
+          "name": "basic1",
+          "type": "basic",
+          "usesLoginForm": true,
+        },
+      ],
+    }
+  }
+/>
+`;
+
+exports[`LoginPage page renders as expected 1`] = `
+<div
+  className="loginWelcome login-form"
+>
+  <header
+    className="loginWelcome__header"
+  >
+    <div
+      className="loginWelcome__content eui-textCenter"
+    >
+      <EuiSpacer
+        size="xxl"
+      />
+      <span
+        className="loginWelcome__logo"
+      >
+        <EuiIcon
+          size="xxl"
+          type="logoElastic"
+        />
+      </span>
+      <EuiTitle
+        className="loginWelcome__title"
+        size="m"
+      >
+        <h1>
+          <FormattedMessage
+            defaultMessage="Welcome to Elastic"
+            id="xpack.security.loginPage.welcomeTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+      <EuiSpacer
+        size="xl"
+      />
+    </div>
+  </header>
+  <div
+    className="loginWelcome__content loginWelcome-body"
+  >
+    <EuiFlexGroup
+      gutterSize="l"
+    >
+      <EuiFlexItem>
+        <LoginForm
+          http={
+            Object {
+              "addLoadingCountSource": [MockFunction],
+              "get": [MockFunction],
+            }
+          }
+          loginAssistanceMessage=""
+          notifications={
+            Object {
+              "toasts": Object {
+                "add": [MockFunction],
+                "addDanger": [MockFunction],
+                "addError": [MockFunction],
+                "addInfo": [MockFunction],
+                "addSuccess": [MockFunction],
+                "addWarning": [MockFunction],
+                "get$": [MockFunction],
+                "remove": [MockFunction],
+              },
+            }
+          }
+          selector={
+            Object {
+              "enabled": false,
+              "providers": Array [
+                Object {
+                  "name": "basic1",
+                  "type": "basic",
+                  "usesLoginForm": true,
+                },
+              ],
+            }
+          }
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+</div>
+`;

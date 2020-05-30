@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ManagementSetup, ManagementApp } from 'src/plugins/management/public';
-import { CoreSetup, Capabilities } from 'src/core/public';
+import { StartServicesAccessor, Capabilities } from 'src/core/public';
+import {
+  ManagementSetup,
+  ManagementApp,
+  ManagementSectionId,
+} from '../../../../../src/plugins/management/public';
 import { SecurityLicense } from '../../../security/public';
 import { SpacesManager } from '../spaces_manager';
 import { PluginsStart } from '../plugin';
@@ -13,7 +17,7 @@ import { spacesManagementApp } from './spaces_management_app';
 
 interface SetupDeps {
   management: ManagementSetup;
-  getStartServices: CoreSetup<PluginsStart>['getStartServices'];
+  getStartServices: StartServicesAccessor<PluginsStart>;
   spacesManager: SpacesManager;
   securityLicense?: SecurityLicense;
 }
@@ -25,12 +29,11 @@ export class ManagementService {
   private registeredSpacesManagementApp?: ManagementApp;
 
   public setup({ getStartServices, management, spacesManager, securityLicense }: SetupDeps) {
-    const kibanaSection = management.sections.getSection('kibana');
-    if (kibanaSection) {
-      this.registeredSpacesManagementApp = kibanaSection.registerApp(
+    this.registeredSpacesManagementApp = management.sections
+      .getSection(ManagementSectionId.Kibana)
+      .registerApp(
         spacesManagementApp.create({ getStartServices, spacesManager, securityLicense })
       );
-    }
   }
 
   public start({ capabilities }: StartDeps) {

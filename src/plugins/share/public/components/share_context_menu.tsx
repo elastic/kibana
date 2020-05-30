@@ -21,8 +21,7 @@ import React, { Component } from 'react';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiContextMenu } from '@elastic/eui';
+import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
 import { HttpStart } from 'kibana/public';
 
@@ -152,7 +151,7 @@ export class ShareContextMenu extends Component<Props> {
             }
             return -1;
           })
-          .map(menuItem => {
+          .map((menuItem) => {
             menuItem['data-test-subj'] = `sharePanel-${menuItem.name.replace(' ', '')}`;
             delete menuItem.sortOrder;
             return menuItem;

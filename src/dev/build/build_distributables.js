@@ -35,6 +35,7 @@ import {
   CreateArchivesTask,
   CreateDebPackageTask,
   CreateDockerPackageTask,
+  CreateDockerUbiPackageTask,
   CreateEmptyDirsAndFilesTask,
   CreateNoticeFileTask,
   CreatePackageJsonTask,
@@ -43,6 +44,7 @@ import {
   DownloadNodeBuildsTask,
   ExtractNodeBuildsTask,
   InstallDependenciesTask,
+  BuildKibanaPlatformPluginsTask,
   OptimizeBuildTask,
   RemovePackageJsonDepsTask,
   RemoveWorkspacesTask,
@@ -53,6 +55,7 @@ import {
   VerifyExistingNodeBuildsTask,
   PathLengthTask,
   WriteShaSumsTask,
+  UuidVerificationTask,
 } from './tasks';
 
 export async function buildDistributables(options) {
@@ -66,6 +69,7 @@ export async function buildDistributables(options) {
     createRpmPackage,
     createDebPackage,
     createDockerPackage,
+    createDockerUbiPackage,
     versionQualifier,
     targetAllPlatforms,
   } = options;
@@ -118,6 +122,7 @@ export async function buildDistributables(options) {
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);
   await run(TranspileScssTask);
+  await run(BuildKibanaPlatformPluginsTask);
   await run(OptimizeBuildTask);
   await run(CleanClientModulesOnDLLTask);
   await run(CleanTypescriptTask);
@@ -134,6 +139,7 @@ export async function buildDistributables(options) {
   await run(CleanNodeBuildsTask);
 
   await run(PathLengthTask);
+  await run(UuidVerificationTask);
 
   /**
    * package platform-specific builds into archives
@@ -152,8 +158,11 @@ export async function buildDistributables(options) {
     await run(CreateRpmPackageTask);
   }
   if (createDockerPackage) {
-    // control w/ --docker or --skip-os-packages
+    // control w/ --docker or --skip-docker-ubi or --skip-os-packages
     await run(CreateDockerPackageTask);
+    if (createDockerUbiPackage) {
+      await run(CreateDockerUbiPackageTask);
+    }
   }
 
   /**

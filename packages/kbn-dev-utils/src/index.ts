@@ -18,12 +18,7 @@
  */
 
 export { withProcRunner, ProcRunner } from './proc_runner';
-export {
-  ToolingLog,
-  ToolingLogTextWriter,
-  pickLevelFromFlags,
-  ToolingLogCollectingWriter,
-} from './tooling_log';
+export * from './tooling_log';
 export { createAbsolutePathSerializer } from './serializers';
 export {
   CA_CERT_PATH,
@@ -42,3 +37,4 @@ export { run, createFailError, createFlagError, combineErrors, isFailError, Flag
 export { REPO_ROOT } from './repo_root';
 export { KbnClient } from './kbn_client';
 export * from './axios';
+export * from './ci_stats_reporter';

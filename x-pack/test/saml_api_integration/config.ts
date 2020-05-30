@@ -7,7 +7,7 @@
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaAPITestsConfig = await readConfigFile(
     require.resolve('../../../test/api_integration/config.js')
   );
@@ -19,6 +19,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
   return {
     testFiles: [require.resolve('./apis')],
     servers: xPackAPITestsConfig.get('servers'),
+    security: { disableTestUser: true },
     services: {
       randomness: kibanaAPITestsConfig.get('services.randomness'),
       legacyEs: kibanaAPITestsConfig.get('services.legacyEs'),
@@ -36,7 +37,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         'xpack.security.authc.token.timeout=15s',
         'xpack.security.authc.realms.saml.saml1.order=0',
         `xpack.security.authc.realms.saml.saml1.idp.metadata.path=${idpPath}`,
-        'xpack.security.authc.realms.saml.saml1.idp.entity_id=http://www.elastic.co',
+        'xpack.security.authc.realms.saml.saml1.idp.entity_id=http://www.elastic.co/saml1',
         `xpack.security.authc.realms.saml.saml1.sp.entity_id=http://localhost:${kibanaPort}`,
         `xpack.security.authc.realms.saml.saml1.sp.logout=http://localhost:${kibanaPort}/logout`,
         `xpack.security.authc.realms.saml.saml1.sp.acs=http://localhost:${kibanaPort}/api/security/saml/callback`,
@@ -49,7 +50,6 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
-        '--server.xsrf.whitelist=["/api/security/saml/callback"]',
         `--xpack.security.authc.providers=${JSON.stringify(['saml', 'basic'])}`,
         '--xpack.security.authc.saml.realm=saml1',
         '--xpack.security.authc.saml.maxRedirectURLSize=100b',

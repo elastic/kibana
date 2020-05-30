@@ -12,7 +12,7 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
       path: '/api/searchprofiler/profile',
       validate: {
         body: schema.object({
-          query: schema.object({}, { allowUnknowns: true }),
+          query: schema.object({}, { unknowns: 'allow' }),
           index: schema.string(),
         }),
       },
@@ -46,7 +46,7 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
         body: JSON.stringify(parsed, null, 2),
       };
       try {
-        const resp = await elasticsearch.dataClient.callAsCurrentUser('search', body);
+        const resp = await elasticsearch.legacy.client.callAsCurrentUser('search', body);
         return response.ok({
           body: {
             ok: true,

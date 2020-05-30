@@ -39,6 +39,7 @@ import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 const POSTCSS_CONFIG_PATH = require.resolve('./postcss.config');
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
+const EMPTY_MODULE_PATH = require.resolve('./intentionally_empty_module.js');
 const BABEL_EXCLUDE_RE = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
 const STATS_WARNINGS_FILTER = new RegExp(
   [
@@ -47,6 +48,10 @@ const STATS_WARNINGS_FILTER = new RegExp(
   ].join('')
 );
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
+
+const LEGACY_PRESETS = {
+  plugins: [require.resolve('@babel/plugin-transform-modules-commonjs')],
+};
 
 function recursiveIssuer(m) {
   if (m.issuer) {
@@ -62,7 +67,6 @@ export default class BaseOptimizer {
   constructor(opts) {
     this.logWithMetadata = opts.logWithMetadata || (() => null);
     this.uiBundles = opts.uiBundles;
-    this.newPlatformPluginInfo = opts.newPlatformPluginInfo;
     this.profile = opts.profile || false;
     this.workers = opts.workers;
 
@@ -105,7 +109,7 @@ export default class BaseOptimizer {
   }
 
   registerCompilerDoneHook() {
-    this.compiler.hooks.done.tap('base_optimizer-done', stats => {
+    this.compiler.hooks.done.tap('base_optimizer-done', (stats) => {
       // We are not done while we have an additional
       // compilation pass to run
       // We also don't need to emit the stats if we don't have
@@ -116,14 +120,14 @@ export default class BaseOptimizer {
 
       const path = this.uiBundles.resolvePath('stats.json');
       const content = JSON.stringify(stats.toJson());
-      writeFile(path, content, function(err) {
+      writeFile(path, content, function (err) {
         if (err) throw err;
       });
     });
   }
 
   warmupThreadLoaderPool() {
-    const baseModules = ['babel-loader', BABEL_PRESET_PATH];
+    const baseModules = ['babel-loader', BABEL_PRESET_PATH, LEGACY_PRESETS];
 
     threadLoader.warmup(
       // pool options, like passed to loader options
@@ -147,16 +151,12 @@ export default class BaseOptimizer {
       return 1;
     }
 
-    return Math.max(1, Math.min(cpus.length - 1, 7));
+    return Math.max(1, Math.min(cpus.length - 1, 3));
   }
 
   getThreadLoaderPoolConfig() {
     // Calculate the node options from the NODE_OPTIONS env var
-    const parsedNodeOptions = process.env.NODE_OPTIONS
-      ? // thread-loader could not receive empty string as options
-        // or it would break that's why we need to filter here
-        process.env.NODE_OPTIONS.split(/\s/).filter(opt => !!opt)
-      : [];
+    const parsedNodeOptions = process.env.NODE_OPTIONS ? process.env.NODE_OPTIONS.split(/\s/) : [];
 
     return {
       name: 'optimizer-thread-loader-main-pool',
@@ -226,7 +226,7 @@ export default class BaseOptimizer {
      * Creates the selection rules for a loader that will only pass for
      * source files that are eligible for automatic transpilation.
      */
-    const createSourceFileResourceSelector = test => {
+    const createSourceFileResourceSelector = (test) => {
       return [
         {
           test,
@@ -247,7 +247,6 @@ export default class BaseOptimizer {
       cache: true,
       entry: {
         ...this.uiBundles.toWebpackEntries(),
-        ...this._getDiscoveredPluginEntryPoints(),
         light_theme: [require.resolve('../legacy/ui/public/styles/bootstrap_light.less')],
         dark_theme: [require.resolve('../legacy/ui/public/styles/bootstrap_dark.less')],
       },
@@ -262,12 +261,6 @@ export default class BaseOptimizer {
         sourceMapFilename: '[file].map',
         publicPath: PUBLIC_PATH_PLACEHOLDER,
         devtoolModuleFilenameTemplate: '[absolute-resource-path]',
-
-        // When the entry point is loaded, assign it's exported `plugin`
-        // value to a key on the global `__kbnBundles__` object.
-        // NOTE: Only actually used by new platform plugins
-        library: ['__kbnBundles__', '[name]'],
-        libraryExport: 'plugin',
       },
 
       optimization: {
@@ -275,20 +268,22 @@ export default class BaseOptimizer {
           cacheGroups: {
             commons: {
               name: 'commons',
-              chunks: chunk =>
+              chunks: (chunk) =>
                 chunk.canBeInitial() && chunk.name !== 'light_theme' && chunk.name !== 'dark_theme',
               minChunks: 2,
               reuseExistingChunk: true,
             },
             light_theme: {
               name: 'light_theme',
-              test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'light_theme',
+              test: (m) =>
+                m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'light_theme',
               chunks: 'all',
               enforce: true,
             },
             dark_theme: {
               name: 'dark_theme',
-              test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'dark_theme',
+              test: (m) =>
+                m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'dark_theme',
               chunks: 'all',
               enforce: true,
             },
@@ -308,9 +303,14 @@ export default class BaseOptimizer {
           filename: '[name].style.css',
         }),
 
+        // ignore scss imports in new-platform code that finds its way into legacy bundles
+        new webpack.NormalModuleReplacementPlugin(/\.scss$/, (resource) => {
+          resource.request = EMPTY_MODULE_PATH;
+        }),
+
         // replace imports for `uiExports/*` modules with a synthetic module
         // created by create_ui_exports_module.js
-        new webpack.NormalModuleReplacementPlugin(/^uiExports\//, resource => {
+        new webpack.NormalModuleReplacementPlugin(/^uiExports\//, (resource) => {
           // the map of uiExport types to module ids
           const extensions = this.uiBundles.getAppExtensions();
 
@@ -332,7 +332,7 @@ export default class BaseOptimizer {
           ].join('');
         }),
 
-        ...this.uiBundles.getWebpackPluginProviders().map(provider => provider(webpack)),
+        ...this.uiBundles.getWebpackPluginProviders().map((provider) => provider(webpack)),
       ],
 
       module: {
@@ -378,7 +378,7 @@ export default class BaseOptimizer {
               },
             ]),
           },
-          ...this.uiBundles.getPostLoaders().map(loader => ({
+          ...this.uiBundles.getPostLoaders().map((loader) => ({
             enforce: 'post',
             ...loader,
           })),
@@ -396,7 +396,10 @@ export default class BaseOptimizer {
           'node_modules',
           fromRoot('node_modules'),
         ],
-        alias: this.uiBundles.getAliases(),
+        alias: {
+          ...this.uiBundles.getAliases(),
+          tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),
+        },
       },
 
       performance: {
@@ -524,18 +527,9 @@ export default class BaseOptimizer {
     );
   }
 
-  _getDiscoveredPluginEntryPoints() {
-    // New platform plugin entry points
-    return [...this.newPlatformPluginInfo.entries()].reduce(
-      (entryPoints, [pluginId, pluginInfo]) => {
-        entryPoints[`plugin/${pluginId}`] = pluginInfo.entryPointPath;
-        return entryPoints;
-      },
-      {}
-    );
-  }
-
   getPresets() {
-    return IS_CODE_COVERAGE ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH] : [BABEL_PRESET_PATH];
+    return IS_CODE_COVERAGE
+      ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH, LEGACY_PRESETS]
+      : [BABEL_PRESET_PATH, LEGACY_PRESETS];
   }
 }

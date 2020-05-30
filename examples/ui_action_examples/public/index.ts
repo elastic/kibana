@@ -18,9 +18,8 @@
  */
 
 import { UiActionExamplesPlugin } from './plugin';
-import { PluginInitializer } from '../../../src/core/public';
 
-export const plugin: PluginInitializer<void, void> = () => new UiActionExamplesPlugin();
+export const plugin = () => new UiActionExamplesPlugin();
 
 export { HELLO_WORLD_TRIGGER_ID } from './hello_world_trigger';
-export { HELLO_WORLD_ACTION_TYPE } from './hello_world_action';
+export { ACTION_HELLO_WORLD } from './hello_world_action';

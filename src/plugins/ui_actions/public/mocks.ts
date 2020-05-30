@@ -17,20 +17,23 @@
  * under the License.
  */
 
+import { CoreSetup, CoreStart } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '.';
 import { plugin as pluginInitializer } from '.';
-// eslint-disable-next-line
 import { coreMock } from '../../../core/public/mocks';
+import { TriggerId } from './types';
 
 export type Setup = jest.Mocked<UiActionsSetup>;
 export type Start = jest.Mocked<UiActionsStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
+    addTriggerAction: jest.fn(),
     attachAction: jest.fn(),
     detachAction: jest.fn(),
     registerAction: jest.fn(),
     registerTrigger: jest.fn(),
+    unregisterAction: jest.fn(),
   };
   return setupContract;
 };
@@ -38,24 +41,30 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const startContract: Start = {
     attachAction: jest.fn(),
-    registerAction: jest.fn(),
-    registerTrigger: jest.fn(),
+    unregisterAction: jest.fn(),
+    addTriggerAction: jest.fn(),
+    clear: jest.fn(),
     detachAction: jest.fn(),
     executeTriggerActions: jest.fn(),
+    fork: jest.fn(),
+    getAction: jest.fn(),
     getTrigger: jest.fn(),
-    getTriggerActions: jest.fn((id: string) => []),
+    getTriggerActions: jest.fn((id: TriggerId) => []),
     getTriggerCompatibleActions: jest.fn(),
+    registerAction: jest.fn(),
+    registerTrigger: jest.fn(),
   };
 
   return startContract;
 };
 
-const createPlugin = async () => {
+const createPlugin = (
+  coreSetup: CoreSetup = coreMock.createSetup(),
+  coreStart: CoreStart = coreMock.createStart()
+) => {
   const pluginInitializerContext = coreMock.createPluginInitializerContext();
-  const coreSetup = coreMock.createSetup();
-  const coreStart = coreMock.createStart();
   const plugin = pluginInitializer(pluginInitializerContext);
-  const setup = await plugin.setup(coreSetup);
+  const setup = plugin.setup(coreSetup);
 
   return {
     pluginInitializerContext,
@@ -63,7 +72,7 @@ const createPlugin = async () => {
     coreStart,
     plugin,
     setup,
-    doStart: async () => await plugin.start(coreStart),
+    doStart: (anotherCoreStart: CoreStart = coreStart) => plugin.start(anotherCoreStart),
   };
 };
 

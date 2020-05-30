@@ -20,10 +20,10 @@
 import Stream from 'stream';
 import moment from 'moment-timezone';
 import { get, _ } from 'lodash';
+import queryString from 'query-string';
 import numeral from '@elastic/numeral';
 import chalk from 'chalk';
 import stringify from 'json-stringify-safe';
-import querystring from 'querystring';
 import applyFiltersToKeys from './apply_filters_to_keys';
 import { inspect } from 'util';
 import { logWithMetadata } from './log_with_metadata';
@@ -38,7 +38,7 @@ function serializeError(err = {}) {
   };
 }
 
-const levelColor = function(code) {
+const levelColor = function (code) {
   if (code < 299) return chalk.green(code);
   if (code < 399) return chalk.yellow(code);
   if (code < 499) return chalk.magentaBright(code);
@@ -108,7 +108,7 @@ export default class TransformObjStream extends Stream.Transform {
         contentLength: contentLength,
       };
 
-      const query = querystring.stringify(event.query);
+      const query = queryString.stringify(event.query, { sort: false });
       if (query) data.req.url += '?' + query;
 
       data.message = data.req.method.toUpperCase() + ' ';
@@ -128,7 +128,7 @@ export default class TransformObjStream extends Stream.Transform {
       data.message += ' ';
       data.message += chalk.gray('load: [');
       data.message += get(data, 'os.load', [])
-        .map(function(val) {
+        .map(function (val) {
           return numeral(val).format('0.00');
         })
         .join(' ');

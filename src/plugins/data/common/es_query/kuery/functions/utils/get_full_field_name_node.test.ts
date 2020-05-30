@@ -24,7 +24,7 @@ import { IIndexPattern } from '../../../../index_patterns';
 // @ts-ignore
 import { getFullFieldNameNode } from './get_full_field_name_node';
 
-describe('getFullFieldNameNode', function() {
+describe('getFullFieldNameNode', function () {
   let indexPattern: IIndexPattern;
 
   beforeEach(() => {
@@ -79,9 +79,9 @@ describe('getFullFieldNameNode', function() {
 
   test('should skip error checking if no index pattern is passed in', () => {
     const nameNode = nodeTypes.literal.buildNode('os');
-    expect(() => getFullFieldNameNode(nameNode, null, 'machine')).not.toThrowError();
+    expect(() => getFullFieldNameNode(nameNode, undefined, 'machine')).not.toThrowError();
 
-    const result = getFullFieldNameNode(nameNode, null, 'machine');
+    const result = getFullFieldNameNode(nameNode, undefined, 'machine');
     expect(result).toEqual(nodeTypes.literal.buildNode('machine.os'));
   });
 });

@@ -18,17 +18,20 @@
  */
 
 export {
+  calculateObjectHash,
   defer,
   Defer,
-  of,
-  createGetterSetter,
   Get,
+  JsonArray,
+  JsonObject,
+  JsonValue,
+  of,
   Set,
   UiComponent,
   UiComponentInstance,
-  JsonValue,
-  JsonObject,
-  JsonArray,
+  url,
+  createGetterSetter,
+  defaultFeedbackMessage,
 } from '../common';
 export * from './core';
 export * from './errors';
@@ -71,5 +74,15 @@ export {
   StartSyncStateFnType,
   StopSyncStateFnType,
 } from './state_sync';
-export { removeQueryParam } from './history';
+export { Configurable, CollectConfigProps } from './ui';
+export { removeQueryParam, redirectWhenMissing } from './history';
 export { applyDiff } from './state_management/utils/diff_object';
+export { createStartServicesGetter, StartServicesGetter } from './core/create_start_service_getter';
+
+/** dummy plugin, we just want kibanaUtils to have its own bundle */
+export function plugin() {
+  return new (class KibanaUtilsPlugin {
+    setup() {}
+    start() {}
+  })();
+}

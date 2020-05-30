@@ -17,5 +17,7 @@
  * under the License.
  */
 
-export { Action } from './action';
-export { createAction } from './create_action';
+export * from './action';
+export * from './action_internal';
+export * from './create_action';
+export * from './incompatible_action_error';

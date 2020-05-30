@@ -20,12 +20,13 @@
 import KbnServer from 'src/legacy/server/kbn_server';
 
 // eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
+export default function (kibana: any) {
   return new kibana.Plugin({
     id: 'core_plugin_legacy',
     require: ['kibana'],
     uiExports: {
       app: {
+        id: 'core_legacy_compat',
         title: 'Core Legacy Compat',
         description: 'This is a sample plugin to test core to legacy compatibility',
         main: 'plugins/core_plugin_legacy/index',
@@ -36,7 +37,7 @@ export default function(kibana: any) {
       const router = http.createRouter();
 
       router.get({ path: '/api/np-http-in-legacy', validate: false }, async (context, req, res) => {
-        const response = await context.core.elasticsearch.adminClient.callAsInternalUser('ping');
+        const response = await context.core.elasticsearch.legacy.client.callAsInternalUser('ping');
         return res.ok({ body: `Pong in legacy via new platform: ${response}` });
       });
 

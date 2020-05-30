@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
@@ -25,18 +24,18 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { useEffect, useRef } from 'react';
 
-import { AppMountContext, AppMountDeprecated } from 'kibana/public';
-import { DevTool } from './plugin';
+import { AppMountContext, AppMountDeprecated, ScopedHistory } from 'kibana/public';
+import { DevToolApp } from './dev_tool';
 
 interface DevToolsWrapperProps {
-  devTools: readonly DevTool[];
-  activeDevTool: DevTool;
+  devTools: readonly DevToolApp[];
+  activeDevTool: DevToolApp;
   appMountContext: AppMountContext;
   updateRoute: (newRoute: string) => void;
 }
 
 interface MountedDevToolDescriptor {
-  devTool: DevTool;
+  devTool: DevToolApp;
   mountpoint: HTMLElement;
   unmountHandler: () => void;
 }
@@ -61,14 +60,14 @@ function DevToolsWrapper({
   return (
     <main className="devApp">
       <EuiTabs>
-        {devTools.map(currentDevTool => (
+        {devTools.map((currentDevTool) => (
           <EuiToolTip content={currentDevTool.tooltipContent} key={currentDevTool.id}>
             <EuiTab
-              disabled={currentDevTool.disabled}
+              disabled={currentDevTool.isDisabled()}
               isSelected={currentDevTool === activeDevTool}
               onClick={() => {
-                if (!currentDevTool.disabled) {
-                  updateRoute(`/dev_tools/${currentDevTool.id}`);
+                if (!currentDevTool.isDisabled()) {
+                  updateRoute(`/${currentDevTool.id}`);
                 }
               }}
             >
@@ -81,7 +80,7 @@ function DevToolsWrapper({
         className="devApp__container"
         role="tabpanel"
         data-test-subj={activeDevTool.id}
-        ref={async element => {
+        ref={async (element) => {
           if (
             element &&
             (mountedTool.current === null ||
@@ -91,7 +90,13 @@ function DevToolsWrapper({
             if (mountedTool.current) {
               mountedTool.current.unmountHandler();
             }
-            const params = { element, appBasePath: '', onAppLeave: () => undefined };
+            const params = {
+              element,
+              appBasePath: '',
+              onAppLeave: () => undefined,
+              // TODO: adapt to use Core's ScopedHistory
+              history: {} as any,
+            };
             const unmountHandler = isAppMountDeprecated(activeDevTool.mount)
               ? await activeDevTool.mount(appMountContext, params)
               : await activeDevTool.mount(params);
@@ -109,7 +114,7 @@ function DevToolsWrapper({
 
 function redirectOnMissingCapabilities(appMountContext: AppMountContext) {
   if (!appMountContext.core.application.capabilities.dev_tools.show) {
-    window.location.hash = '/home';
+    appMountContext.core.application.navigateToApp('home');
     return true;
   }
   return false;
@@ -130,13 +135,21 @@ function setBadge(appMountContext: AppMountContext) {
   });
 }
 
+function setTitle(appMountContext: AppMountContext) {
+  appMountContext.core.chrome.docTitle.change(
+    i18n.translate('devTools.pageTitle', {
+      defaultMessage: 'Dev Tools',
+    })
+  );
+}
+
 function setBreadcrumbs(appMountContext: AppMountContext) {
   appMountContext.core.chrome.setBreadcrumbs([
     {
       text: i18n.translate('devTools.k7BreadcrumbsDevToolsLabel', {
         defaultMessage: 'Dev Tools',
       }),
-      href: '#/dev_tools',
+      href: '#/',
     },
   ]);
 }
@@ -144,35 +157,39 @@ function setBreadcrumbs(appMountContext: AppMountContext) {
 export function renderApp(
   element: HTMLElement,
   appMountContext: AppMountContext,
-  basePath: string,
-  devTools: readonly DevTool[]
+  history: ScopedHistory,
+  devTools: readonly DevToolApp[]
 ) {
   if (redirectOnMissingCapabilities(appMountContext)) {
     return () => {};
   }
   setBadge(appMountContext);
   setBreadcrumbs(appMountContext);
+  setTitle(appMountContext);
   ReactDOM.render(
     <I18nProvider>
       <Router>
         <Switch>
-          {devTools.map(devTool => (
-            <Route
-              key={devTool.id}
-              path={`/dev_tools/${devTool.id}`}
-              exact={!devTool.enableRouting}
-              render={props => (
-                <DevToolsWrapper
-                  updateRoute={props.history.push}
-                  activeDevTool={devTool}
-                  devTools={devTools}
-                  appMountContext={appMountContext}
-                />
-              )}
-            />
-          ))}
-          <Route path="/dev_tools">
-            <Redirect to={`/dev_tools/${devTools[0].id}`} />
+          {devTools
+            // Only create routes for devtools that are not disabled
+            .filter((devTool) => !devTool.isDisabled())
+            .map((devTool) => (
+              <Route
+                key={devTool.id}
+                path={`/${devTool.id}`}
+                exact={!devTool.enableRouting}
+                render={(props) => (
+                  <DevToolsWrapper
+                    updateRoute={props.history.push}
+                    activeDevTool={devTool}
+                    devTools={devTools}
+                    appMountContext={appMountContext}
+                  />
+                )}
+              />
+            ))}
+          <Route path="/">
+            <Redirect to={`/${devTools[0].id}`} />
           </Route>
         </Switch>
       </Router>
@@ -180,7 +197,16 @@ export function renderApp(
     element
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  // dispatch synthetic hash change event to update hash history objects
+  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+  const unlisten = history.listen(() => {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+    unlisten();
+  };
 }
 
 function isAppMountDeprecated(mount: (...args: any[]) => any): mount is AppMountDeprecated {

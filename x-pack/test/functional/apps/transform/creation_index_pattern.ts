@@ -13,25 +13,27 @@ interface GroupByEntry {
   intervalLabel?: string;
 }
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('creation_index_pattern', function() {
-    this.tags(['smoke']);
+  describe('creation_index_pattern', function () {
     before(async () => {
-      await esArchiver.load('ml/ecommerce');
+      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await transform.testResources.setKibanaTimeZoneToUTC();
+
+      await transform.securityUI.loginAsTransformPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/ecommerce');
       await transform.api.cleanTransformIndices();
     });
 
     const testDataList = [
       {
         suiteTitle: 'batch transform with terms+date_histogram groups and avg agg',
-        source: 'ecommerce',
+        source: 'ft_ecommerce',
         groupByEntries: [
           {
             identifier: 'terms(category.keyword)',
@@ -53,9 +55,32 @@ export default function({ getService }: FtrProviderContext) {
         transformDescription:
           'ecommerce batch transform with groups terms(category.keyword) + date_histogram(order_date) 1m and aggregation avg(products.base_price)',
         get destinationIndex(): string {
-          return `dest_${this.transformId}`;
+          return `user-${this.transformId}`;
         },
         expected: {
+          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category.keyword": {'],
+          pivotAdvancedEditorValue: {
+            group_by: {
+              'category.keyword': {
+                terms: {
+                  field: 'category.keyword',
+                },
+              },
+              order_date: {
+                date_histogram: {
+                  field: 'order_date',
+                  calendar_interval: '1m',
+                },
+              },
+            },
+            aggregations: {
+              'products.base_price.avg': {
+                avg: {
+                  field: 'products.base_price',
+                },
+              },
+            },
+          },
           pivotPreview: {
             column: 0,
             values: [`Men's Accessories`],
@@ -65,8 +90,63 @@ export default function({ getService }: FtrProviderContext) {
             mode: 'batch',
             progress: '100',
           },
-          sourcePreview: {
-            columns: 6,
+          indexPreview: {
+            columns: 20,
+            rows: 5,
+          },
+        },
+      },
+      {
+        suiteTitle: 'batch transform with terms group and percentiles agg',
+        source: 'ft_ecommerce',
+        groupByEntries: [
+          {
+            identifier: 'terms(geoip.country_iso_code)',
+            label: 'geoip.country_iso_code',
+          } as GroupByEntry,
+        ],
+        aggregationEntries: [
+          {
+            identifier: 'percentiles(products.base_price)',
+            label: 'products.base_price.percentiles',
+          },
+        ],
+        transformId: `ec_2_${Date.now()}`,
+        transformDescription:
+          'ecommerce batch transform with group by terms(geoip.country_iso_code) and aggregation percentiles(products.base_price)',
+        get destinationIndex(): string {
+          return `user-${this.transformId}`;
+        },
+        expected: {
+          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "geoip.country_iso_code": {'],
+          pivotAdvancedEditorValue: {
+            group_by: {
+              'geoip.country_iso_code': {
+                terms: {
+                  field: 'geoip.country_iso_code',
+                },
+              },
+            },
+            aggregations: {
+              'products.base_price.percentiles': {
+                percentiles: {
+                  field: 'products.base_price',
+                  percents: [1, 5, 25, 50, 75, 95, 99],
+                },
+              },
+            },
+          },
+          pivotPreview: {
+            column: 0,
+            values: ['AE', 'CO', 'EG', 'FR', 'GB'],
+          },
+          row: {
+            status: 'stopped',
+            mode: 'batch',
+            progress: '100',
+          },
+          indexPreview: {
+            columns: 20,
             rows: 5,
           },
         },
@@ -74,9 +154,10 @@ export default function({ getService }: FtrProviderContext) {
     ];
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function() {
+      describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
+          await transform.testResources.deleteIndexPattern(testData.destinationIndex);
         });
 
         it('loads the home page', async () => {
@@ -100,14 +181,14 @@ export default function({ getService }: FtrProviderContext) {
           await transform.wizard.assertDefineStepActive();
         });
 
-        it('loads the source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreviewLoaded();
+        it('loads the index preview', async () => {
+          await transform.wizard.assertIndexPreviewLoaded();
         });
 
-        it('shows the source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreview(
-            testData.expected.sourcePreview.columns,
-            testData.expected.sourcePreview.rows
+        it('shows the index preview', async () => {
+          await transform.wizard.assertIndexPreview(
+            testData.expected.indexPreview.columns,
+            testData.expected.indexPreview.rows
           );
         });
 
@@ -149,6 +230,13 @@ export default function({ getService }: FtrProviderContext) {
         it('displays the advanced pivot editor switch', async () => {
           await transform.wizard.assertAdvancedPivotEditorSwitchExists();
           await transform.wizard.assertAdvancedPivotEditorSwitchCheckState(false);
+        });
+
+        it('displays the advanced configuration', async () => {
+          await transform.wizard.enabledAdvancedPivotEditor();
+          await transform.wizard.assertAdvancedPivotEditorContent(
+            testData.expected.pivotAdvancedEditorValueArr
+          );
         });
 
         it('loads the pivot preview', async () => {
@@ -200,14 +288,17 @@ export default function({ getService }: FtrProviderContext) {
 
         it('displays the create and start button', async () => {
           await transform.wizard.assertCreateAndStartButtonExists();
+          await transform.wizard.assertCreateAndStartButtonEnabled(true);
         });
 
         it('displays the create button', async () => {
           await transform.wizard.assertCreateButtonExists();
+          await transform.wizard.assertCreateButtonEnabled(true);
         });
 
         it('displays the copy to clipboard button', async () => {
-          await transform.wizard.assertCreateAndStartButtonExists();
+          await transform.wizard.assertCopyToClipboardButtonExists();
+          await transform.wizard.assertCopyToClipboardButtonEnabled(true);
         });
 
         it('creates the transform', async () => {
@@ -231,7 +322,7 @@ export default function({ getService }: FtrProviderContext) {
           await transform.table.refreshTransformList();
           await transform.table.filterWithSearchString(testData.transformId);
           const rows = await transform.table.parseTransformTable();
-          expect(rows.filter(row => row.id === testData.transformId)).to.have.length(1);
+          expect(rows.filter((row) => row.id === testData.transformId)).to.have.length(1);
         });
 
         it('job creation displays details for the created job in the job list', async () => {

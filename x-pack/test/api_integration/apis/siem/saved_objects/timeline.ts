@@ -15,12 +15,12 @@ import ApolloClient from 'apollo-client';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-import { deleteTimelineMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/delete/persist.gql_query';
-import { persistTimelineFavoriteMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/favorite/persist.gql_query';
-import { persistTimelineMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/persist.gql_query';
-import { TimelineResult } from '../../../../../legacy/plugins/siem/public/graphql/types';
+import { deleteTimelineMutation } from '../../../../../plugins/siem/public/timelines/containers/delete/persist.gql_query';
+import { persistTimelineFavoriteMutation } from '../../../../../plugins/siem/public/timelines/containers/favorite/persist.gql_query';
+import { persistTimelineMutation } from '../../../../../plugins/siem/public/timelines/containers/persist.gql_query';
+import { TimelineResult } from '../../../../../plugins/siem/public/graphql/types';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -162,7 +162,7 @@ export default function({ getService }: FtrProviderContext) {
         } = response.data && omitTypenameInTimeline(response.data.persistTimeline.timeline);
 
         expect(columns.map((col: { id: string }) => col.id)).to.eql(
-          timelineObject.columns.map(col => col.id)
+          timelineObject.columns.map((col) => col.id)
         );
         expect(dataProviders).to.eql(timelineObject.dataProviders);
         expect(dateRange).to.eql(timelineObject.dateRange);
@@ -192,7 +192,7 @@ export default function({ getService }: FtrProviderContext) {
           },
         });
 
-        expect(responseToTest.data!.persistTimeline.timeline.savedObjectId).to.be(savedObjectId);
+        expect(responseToTest.data!.persistTimeline.timeline.savedObjectId).to.eql(savedObjectId);
         expect(responseToTest.data!.persistTimeline.timeline.title).to.be(newTitle);
         expect(responseToTest.data!.persistTimeline.timeline.version).to.not.be.eql(version);
       });

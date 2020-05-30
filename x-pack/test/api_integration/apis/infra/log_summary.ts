@@ -12,16 +12,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import { fold } from 'fp-ts/lib/Either';
 
-import {
-  createPlainError,
-  throwErrors,
-} from '../../../../legacy/plugins/infra/common/runtime_types';
+import { createPlainError, throwErrors } from '../../../../plugins/infra/common/runtime_types';
 
 import {
   LOG_ENTRIES_SUMMARY_PATH,
   logEntriesSummaryRequestRT,
   logEntriesSummaryResponseRT,
-} from '../../../../legacy/plugins/infra/common/http_api/log_entries';
+} from '../../../../plugins/infra/common/http_api/log_entries';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -32,7 +29,7 @@ const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
@@ -41,9 +38,10 @@ export default function({ getService }: FtrProviderContext) {
     after(() => esArchiver.unload('infra/metrics_and_logs'));
 
     it('should return empty and non-empty consecutive buckets', async () => {
-      const startDate = EARLIEST_TIME_WITH_DATA;
-      const endDate = LATEST_TIME_WITH_DATA + (LATEST_TIME_WITH_DATA - EARLIEST_TIME_WITH_DATA);
-      const bucketSize = Math.ceil((endDate - startDate) / 10);
+      const startTimestamp = EARLIEST_TIME_WITH_DATA;
+      const endTimestamp =
+        LATEST_TIME_WITH_DATA + (LATEST_TIME_WITH_DATA - EARLIEST_TIME_WITH_DATA);
+      const bucketSize = Math.ceil((endTimestamp - startTimestamp) / 10);
 
       const { body } = await supertest
         .post(LOG_ENTRIES_SUMMARY_PATH)
@@ -51,8 +49,8 @@ export default function({ getService }: FtrProviderContext) {
         .send(
           logEntriesSummaryRequestRT.encode({
             sourceId: 'default',
-            startDate,
-            endDate,
+            startTimestamp,
+            endTimestamp,
             bucketSize,
             query: null,
           })
@@ -72,7 +70,7 @@ export default function({ getService }: FtrProviderContext) {
         pairs(
           logSummaryResponse.data.buckets,
           (first: any, second: any) => first.end === second.start
-        ).every(pair => pair)
+        ).every((pair) => pair)
       ).to.equal(true);
     });
   });

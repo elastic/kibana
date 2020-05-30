@@ -17,6 +17,7 @@ import {
   EuiIcon,
   EuiSwitch,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RoleMapping } from '../../../../../common/model';
 import { RolesAPIClient } from '../../../roles';
@@ -171,7 +172,7 @@ export class MappingInfoPanel extends Component<Props, State> {
             mode={this.state.rolesMode}
             canUseInlineScripts={this.props.canUseInlineScripts}
             canUseStoredScripts={this.props.canUseStoredScripts}
-            onChange={roleMapping => this.props.onChange(roleMapping)}
+            onChange={(roleMapping) => this.props.onChange(roleMapping)}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -239,7 +240,7 @@ export class MappingInfoPanel extends Component<Props, State> {
             mode={this.state.rolesMode}
             canUseInlineScripts={this.props.canUseInlineScripts}
             canUseStoredScripts={this.props.canUseStoredScripts}
-            onChange={roleMapping => this.props.onChange(roleMapping)}
+            onChange={(roleMapping) => this.props.onChange(roleMapping)}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -276,16 +277,16 @@ export class MappingInfoPanel extends Component<Props, State> {
         >
           <EuiSwitch
             name={'enabled'}
-            label={
-              <FormattedMessage
-                id="xpack.security.management.editRoleMapping.roleMappingEnabledLabel"
-                defaultMessage="Enable mapping"
-              />
-            }
+            label={i18n.translate(
+              'xpack.security.management.editRoleMapping.roleMappingEnabledLabel',
+              {
+                defaultMessage: 'Enable mapping',
+              }
+            )}
             showLabel={false}
             data-test-subj="roleMappingsEnabledSwitch"
             checked={this.props.roleMapping.enabled}
-            onChange={e => {
+            onChange={(e) => {
               this.props.onChange({
                 ...this.props.roleMapping,
                 enabled: e.target.checked,

@@ -39,16 +39,29 @@
  * @packageDocumentation
  */
 
-import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch';
+import {
+  ElasticsearchServiceSetup,
+  IScopedClusterClient,
+  configSchema as elasticsearchConfigSchema,
+  ElasticsearchServiceStart,
+} from './elasticsearch';
+
 import { HttpServiceSetup } from './http';
-import { IScopedRenderingClient } from './rendering';
+import { HttpResources } from './http_resources';
+
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
-import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
+import {
+  ISavedObjectTypeRegistry,
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
+} from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { UuidServiceSetup } from './uuid';
+import { MetricsServiceSetup } from './metrics';
+import { StatusServiceSetup } from './status';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -78,10 +91,14 @@ export {
   Headers,
   ScopedClusterClient,
   IScopedClusterClient,
+  ElasticsearchConfig,
   ElasticsearchClientConfig,
   ElasticsearchError,
   ElasticsearchErrorHelpers,
   ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
+  ElasticsearchStatusMeta,
+  NodesVersionCompatibility,
   APICaller,
   FakeRequest,
   ScopeableRequest,
@@ -93,9 +110,12 @@ export {
   AuthResultParams,
   AuthStatus,
   AuthToolkit,
+  AuthRedirected,
+  AuthRedirectedParams,
   AuthResult,
   AuthResultType,
   Authenticated,
+  AuthNotHandled,
   BasePath,
   IBasePath,
   CustomHttpResponseOptions,
@@ -127,6 +147,7 @@ export {
   OnPreResponseInfo,
   RedirectResponseOptions,
   RequestHandler,
+  RequestHandlerWrapper,
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
   ResponseError,
@@ -153,8 +174,18 @@ export {
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
+  DestructiveRouteMethod,
+  SafeRouteMethod,
 } from './http';
-export { RenderingServiceSetup, IRenderOptions } from './rendering';
+
+export {
+  HttpResourcesRenderOptions,
+  HttpResourcesResponseOptions,
+  HttpResourcesServiceToolkit,
+  HttpResourcesRequestHandler,
+} from './http_resources';
+
+export { IRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
 export {
@@ -195,9 +226,11 @@ export {
   SavedObjectsImportRetry,
   SavedObjectsImportUnknownError,
   SavedObjectsImportUnsupportedTypeError,
+  SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
+  SavedObjectUnsanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsSchema,
@@ -205,8 +238,11 @@ export {
   SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsAddToNamespacesOptions,
+  SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
+  SavedObjectStatusMeta,
   SavedObjectsDeleteOptions,
   ISavedObjectsRepository,
   SavedObjectsRepository,
@@ -218,14 +254,21 @@ export {
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
   SavedObjectTypeRegistry,
+  ISavedObjectTypeRegistry,
+  SavedObjectsNamespaceType,
   SavedObjectsType,
+  SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+  resolveSavedObjectsImportErrors,
 } from './saved_objects';
 
 export {
   IUiSettingsClient,
   UiSettingsParams,
+  PublicUiSettingsParams,
   UiSettingsType,
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
@@ -237,7 +280,25 @@ export {
   StringValidationRegexString,
 } from './ui_settings';
 
-export { RecursiveReadonly } from '../utils';
+export {
+  OpsMetrics,
+  OpsOsMetrics,
+  OpsServerMetrics,
+  OpsProcessMetrics,
+  MetricsServiceSetup,
+} from './metrics';
+
+export {
+  RecursiveReadonly,
+  DEFAULT_APP_CATEGORIES,
+  getFlattenedObject,
+  URLMeaningfulParts,
+  modifyUrl,
+  isRelativeUrl,
+  Freezable,
+  deepFreeze,
+  assertNever,
+} from '../utils';
 
 export {
   SavedObject,
@@ -261,14 +322,22 @@ export {
   LegacyInternals,
 } from './legacy';
 
+export {
+  CoreStatus,
+  ServiceStatus,
+  ServiceStatusLevel,
+  ServiceStatusLevels,
+  StatusServiceSetup,
+} from './status';
+
 /**
  * Plugin specific context passed to a route handler.
  *
- * Provides the following clients:
- *    - {@link IScopedRenderingClient | rendering} - Rendering client
- *      which uses the data of the incoming request
+ * Provides the following clients and services:
  *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
  *      which uses the credentials of the incoming request
+ *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
+ *      all the registered types.
  *    - {@link ScopedClusterClient | elasticsearch.dataClient} - Elasticsearch
  *      data client which uses the credentials of the incoming request
  *    - {@link ScopedClusterClient | elasticsearch.adminClient} - Elasticsearch
@@ -280,13 +349,14 @@ export {
  */
 export interface RequestHandlerContext {
   core: {
-    rendering: IScopedRenderingClient;
     savedObjects: {
       client: SavedObjectsClientContract;
+      typeRegistry: ISavedObjectTypeRegistry;
     };
     elasticsearch: {
-      dataClient: IScopedClusterClient;
-      adminClient: IScopedClusterClient;
+      legacy: {
+        client: IScopedClusterClient;
+      };
     };
     uiSettings: {
       client: IUiSettingsClient;
@@ -297,9 +367,13 @@ export interface RequestHandlerContext {
 /**
  * Context passed to the plugins `setup` method.
  *
+ * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
+ *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
+ * @typeParam TStart - the type of the consuming plugin's start contract. Should be the same as the
+ *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
  * @public
  */
-export interface CoreSetup<TPluginsStart extends object = object> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
   /** {@link CapabilitiesSetup} */
   capabilities: CapabilitiesSetup;
   /** {@link ContextSetup} */
@@ -307,21 +381,36 @@ export interface CoreSetup<TPluginsStart extends object = object> {
   /** {@link ElasticsearchServiceSetup} */
   elasticsearch: ElasticsearchServiceSetup;
   /** {@link HttpServiceSetup} */
-  http: HttpServiceSetup;
+  http: HttpServiceSetup & {
+    /** {@link HttpResources} */
+    resources: HttpResources;
+  };
+  /** {@link MetricsServiceSetup} */
+  metrics: MetricsServiceSetup;
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
+  /** {@link StatusServiceSetup} */
+  status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
   /** {@link UuidServiceSetup} */
   uuid: UuidServiceSetup;
-  /**
-   * Allows plugins to get access to APIs available in start inside async handlers.
-   * Promise will not resolve until Core and plugin dependencies have completed `start`.
-   * This should only be used inside handlers registered during `setup` that will only be executed
-   * after `start` lifecycle.
-   */
-  getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+  /** {@link StartServicesAccessor} */
+  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
+
+/**
+ * Allows plugins to get access to APIs available in start inside async handlers.
+ * Promise will not resolve until Core and plugin dependencies have completed `start`.
+ * This should only be used inside handlers registered during `setup` that will only be executed
+ * after `start` lifecycle.
+ *
+ * @public
+ */
+export type StartServicesAccessor<
+  TPluginsStart extends object = object,
+  TStart = unknown
+> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
 /**
  * Context passed to the plugins `start` method.
@@ -331,6 +420,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
 export interface CoreStart {
   /** {@link CapabilitiesStart} */
   capabilities: CapabilitiesStart;
+  /** {@link ElasticsearchServiceStart} */
+  elasticsearch: ElasticsearchServiceStart;
   /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
   /** {@link UiSettingsServiceStart} */
@@ -341,9 +432,20 @@ export {
   CapabilitiesSetup,
   CapabilitiesStart,
   ContextSetup,
-  IScopedRenderingClient,
+  HttpResources,
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,
   UuidServiceSetup,
+};
+
+/**
+ * Config schemas for the platform services.
+ *
+ * @alpha
+ */
+export const config = {
+  elasticsearch: {
+    schema: elasticsearchConfigSchema,
+  },
 };

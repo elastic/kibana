@@ -20,10 +20,16 @@
 import { TimedItemBuffer } from '../timed_item_buffer';
 import { runItemBufferTests } from './run_item_buffer_tests';
 
+jest.useFakeTimers();
+
+beforeEach(() => {
+  jest.clearAllTimers();
+});
+
 describe('TimedItemBuffer', () => {
   runItemBufferTests(TimedItemBuffer);
 
-  test('does not do unnecessary flushes', async () => {
+  test('does not do unnecessary flushes', () => {
     const onFlush = jest.fn();
     const buf = new TimedItemBuffer({
       onFlush,
@@ -37,7 +43,7 @@ describe('TimedItemBuffer', () => {
     expect(onFlush).toHaveBeenCalledTimes(1);
   });
 
-  test('does not do extra flush after timeout if buffer was flushed during timeout wait', async () => {
+  test('does not do extra flush after timeout if buffer was flushed during timeout wait', () => {
     const onFlush = jest.fn();
     const buf = new TimedItemBuffer({
       onFlush,
@@ -45,14 +51,14 @@ describe('TimedItemBuffer', () => {
     });
 
     buf.write(0);
-    await new Promise(r => setTimeout(r, 3));
+    jest.advanceTimersByTime(3);
     buf.flush();
-    await new Promise(r => setTimeout(r, 11));
+    jest.advanceTimersByTime(11);
 
     expect(onFlush).toHaveBeenCalledTimes(1);
   });
 
-  test('flushes buffer automatically after timeout reached', async () => {
+  test('flushes buffer automatically after timeout reached', () => {
     const onFlush = jest.fn();
     const buf = new TimedItemBuffer({
       onFlush,
@@ -63,12 +69,12 @@ describe('TimedItemBuffer', () => {
     buf.write(2);
     expect(onFlush).toHaveBeenCalledTimes(0);
 
-    await new Promise(r => setTimeout(r, 3));
+    jest.advanceTimersByTime(3);
     expect(onFlush).toHaveBeenCalledTimes(1);
     expect(onFlush).toHaveBeenCalledWith([1, 2]);
   });
 
-  test('does not call flush after timeout if flush was triggered because buffer size reached', async () => {
+  test('does not call flush after timeout if flush was triggered because buffer size reached', () => {
     const onFlush = jest.fn();
     const buf = new TimedItemBuffer({
       onFlush,
@@ -80,11 +86,11 @@ describe('TimedItemBuffer', () => {
     buf.write(2);
 
     expect(onFlush).toHaveBeenCalledTimes(1);
-    await new Promise(r => setTimeout(r, 3));
+    jest.advanceTimersByTime(3);
     expect(onFlush).toHaveBeenCalledTimes(1);
   });
 
-  test('does not automatically flush if `.clear()` was called', async () => {
+  test('does not automatically flush if `.clear()` was called', () => {
     const onFlush = jest.fn();
     const buf = new TimedItemBuffer({
       onFlush,
@@ -94,11 +100,11 @@ describe('TimedItemBuffer', () => {
 
     buf.write(1);
     buf.write(2);
-    await new Promise(r => setImmediate(r));
+    jest.advanceTimersByTime(1);
     buf.clear();
 
     expect(onFlush).toHaveBeenCalledTimes(0);
-    await new Promise(r => setTimeout(r, 6));
+    jest.advanceTimersByTime(6);
     expect(onFlush).toHaveBeenCalledTimes(0);
   });
 });

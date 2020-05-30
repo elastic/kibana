@@ -9,17 +9,12 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { skip } from 'rxjs/operators';
 import * as Rx from 'rxjs';
 import { mount } from 'enzyme';
-import { EmbeddableFactory } from '../../../../src/plugins/embeddable/public';
 import { TimeRangeEmbeddable, TimeRangeContainer, TIME_RANGE_EMBEDDABLE } from './test_helpers';
-import { TimeRangeEmbeddableFactory } from './test_helpers/time_range_embeddable_factory';
 import { CustomTimeRangeBadge } from './custom_time_range_badge';
 import { ReactElement } from 'react';
 import { nextTick } from 'test_utils/enzyme_helpers';
 
-test('Removing custom time range from badge resets embeddable back to container time', async done => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(TIME_RANGE_EMBEDDABLE, new TimeRangeEmbeddableFactory());
-
+test('Removing custom time range from badge resets embeddable back to container time', async (done) => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -79,8 +74,6 @@ test('Removing custom time range from badge resets embeddable back to container 
 });
 
 test(`badge is not compatible with embeddable that inherits from parent`, async () => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(TIME_RANGE_EMBEDDABLE, new TimeRangeEmbeddableFactory());
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -113,8 +106,6 @@ test(`badge is not compatible with embeddable that inherits from parent`, async 
 });
 
 test(`badge is compatible with embeddable that has custom time range`, async () => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(TIME_RANGE_EMBEDDABLE, new TimeRangeEmbeddableFactory());
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -148,8 +139,6 @@ test(`badge is compatible with embeddable that has custom time range`, async () 
 });
 
 test('Attempting to execute on incompatible embeddable throws an error', async () => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(TIME_RANGE_EMBEDDABLE, new TimeRangeEmbeddableFactory());
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },

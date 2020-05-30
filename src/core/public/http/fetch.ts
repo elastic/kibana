@@ -19,6 +19,7 @@
 
 import { merge } from 'lodash';
 import { format } from 'url';
+import { BehaviorSubject } from 'rxjs';
 
 import {
   IBasePath,
@@ -43,6 +44,7 @@ const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
 
 export class Fetch {
   private readonly interceptors = new Set<HttpInterceptor>();
+  private readonly requestCount$ = new BehaviorSubject(0);
 
   constructor(private readonly params: Params) {}
 
@@ -55,6 +57,10 @@ export class Fetch {
 
   public removeAllInterceptors() {
     this.interceptors.clear();
+  }
+
+  public getRequestCount$() {
+    return this.requestCount$.asObservable();
   }
 
   public readonly delete = this.shorthand('DELETE');
@@ -76,6 +82,7 @@ export class Fetch {
     // a halt is called we do not resolve or reject, halting handling of the promise.
     return new Promise<TResponseBody | HttpResponse<TResponseBody>>(async (resolve, reject) => {
       try {
+        this.requestCount$.next(this.requestCount$.value + 1);
         const interceptedOptions = await interceptRequest(
           optionsWithPath,
           this.interceptors,
@@ -98,6 +105,8 @@ export class Fetch {
         if (!(error instanceof HttpInterceptHaltError)) {
           reject(error);
         }
+      } finally {
+        this.requestCount$.next(this.requestCount$.value - 1);
       }
     });
   };
@@ -146,11 +155,7 @@ export class Fetch {
     try {
       response = await window.fetch(request);
     } catch (err) {
-      if (err.name === 'AbortError') {
-        throw err;
-      } else {
-        throw new HttpFetchError(err.message, request);
-      }
+      throw new HttpFetchError(err.message, err.name ?? 'Error', request);
     }
 
     const contentType = response.headers.get('Content-Type') || '';
@@ -170,11 +175,11 @@ export class Fetch {
         }
       }
     } catch (err) {
-      throw new HttpFetchError(err.message, request, response, body);
+      throw new HttpFetchError(err.message, err.name ?? 'Error', request, response, body);
     }
 
     if (!response.ok) {
-      throw new HttpFetchError(response.statusText, request, response, body);
+      throw new HttpFetchError(response.statusText, 'Error', request, response, body);
     }
 
     return { fetchOptions, request, response, body };
@@ -207,7 +212,7 @@ const validateFetchArguments = (
     );
   }
 
-  const invalidHeaders = Object.keys(fullOptions.headers ?? {}).filter(headerName =>
+  const invalidHeaders = Object.keys(fullOptions.headers ?? {}).filter((headerName) =>
     headerName.startsWith('kbn-')
   );
   if (invalidHeaders.length) {

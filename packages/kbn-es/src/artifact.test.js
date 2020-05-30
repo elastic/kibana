@@ -28,6 +28,7 @@ const log = new ToolingLog();
 let MOCKS;
 
 const PLATFORM = process.platform === 'win32' ? 'windows' : process.platform;
+const ARCHITECTURE = process.arch === 'arm64' ? 'aarch64' : 'x86_64';
 const MOCK_VERSION = 'test-version';
 const MOCK_URL = 'http://127.0.0.1:12345';
 const MOCK_FILENAME = 'test-filename';
@@ -38,25 +39,27 @@ const PERMANENT_SNAPSHOT_BASE_URL =
 
 const createArchive = (params = {}) => {
   const license = params.license || 'default';
+  const architecture = params.architecture || ARCHITECTURE;
 
   return {
     license: 'default',
+    architecture,
     version: MOCK_VERSION,
     url: MOCK_URL + `/${license}`,
     platform: PLATFORM,
-    filename: MOCK_FILENAME + `.${license}`,
+    filename: MOCK_FILENAME + `-${architecture}.${license}`,
     ...params,
   };
 };
 
-const mockFetch = mock =>
+const mockFetch = (mock) =>
   fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(mock))));
 
 const previousEnvVars = {};
 const ENV_VARS_TO_RESET = ['ES_SNAPSHOT_MANIFEST', 'KBN_ES_SNAPSHOT_USE_UNVERIFIED'];
 
 beforeAll(() => {
-  ENV_VARS_TO_RESET.forEach(key => {
+  ENV_VARS_TO_RESET.forEach((key) => {
     if (key in process.env) {
       previousEnvVars[key] = process.env[key];
       delete process.env[key];
@@ -65,7 +68,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  Object.keys(previousEnvVars).forEach(key => {
+  Object.keys(previousEnvVars).forEach((key) => {
     process.env[key] = previousEnvVars[key];
   });
 });
@@ -76,6 +79,12 @@ beforeEach(() => {
   MOCKS = {
     valid: {
       archives: [createArchive({ license: 'oss' }), createArchive({ license: 'default' })],
+    },
+    multipleArch: {
+      archives: [
+        createArchive({ architecture: 'fake_arch', license: 'oss' }),
+        createArchive({ architecture: ARCHITECTURE, license: 'oss' }),
+      ],
     },
   };
 });
@@ -95,7 +104,7 @@ const artifactTest = (requestedLicense, expectedLicense, fetchTimesCalled = 1) =
     expect(artifact.getUrl()).toEqual(MOCK_URL + `/${expectedLicense}`);
     expect(artifact.getChecksumUrl()).toEqual(MOCK_URL + `/${expectedLicense}.sha512`);
     expect(artifact.getChecksumType()).toEqual('sha512');
-    expect(artifact.getFilename()).toEqual(MOCK_FILENAME + `.${expectedLicense}`);
+    expect(artifact.getFilename()).toEqual(MOCK_FILENAME + `-${ARCHITECTURE}.${expectedLicense}`);
   };
 };
 
@@ -150,6 +159,17 @@ describe('Artifact', () => {
         await expect(Artifact.getSnapshot('default', 'INVALID_VERSION', log)).rejects.toThrow(
           "couldn't find an artifact"
         );
+      });
+    });
+
+    describe('with snapshots for multiple architectures', () => {
+      beforeEach(() => {
+        mockFetch(MOCKS.multipleArch);
+      });
+
+      it('should return artifact metadata for the correct architecture', async () => {
+        const artifact = await Artifact.getSnapshot('oss', MOCK_VERSION, log);
+        expect(artifact.getFilename()).toEqual(MOCK_FILENAME + `-${ARCHITECTURE}.oss`);
       });
     });
 

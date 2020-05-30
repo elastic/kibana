@@ -5,20 +5,22 @@
  */
 
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../common/constants';
-import { ConditionalHeaders, ServerFacade } from '../../../types';
+import { ReportingConfig, ReportingCore } from '../../../server';
+import { ConditionalHeaders } from '../../../server/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types'; // Logo is PDF only
 
 export const getCustomLogo = async ({
-  server,
+  reporting,
+  config,
   job,
   conditionalHeaders,
 }: {
-  server: ServerFacade;
+  reporting: ReportingCore;
+  config: ReportingConfig;
   job: JobDocPayloadPDF;
   conditionalHeaders: ConditionalHeaders;
 }) => {
-  const serverBasePath: string = server.config().get('server.basePath');
-
+  const serverBasePath: string = config.kbnConfig.get('server', 'basePath');
   const fakeRequest: any = {
     headers: conditionalHeaders.headers,
     // This is used by the spaces SavedObjectClientWrapper to determine the existing space.
@@ -27,19 +29,12 @@ export const getCustomLogo = async ({
     getBasePath: () => job.basePath || serverBasePath,
     path: '/',
     route: { settings: {} },
-    url: {
-      href: '/',
-    },
-    raw: {
-      req: {
-        url: '/',
-      },
-    },
+    url: { href: '/' },
+    raw: { req: { url: '/' } },
   };
 
-  const savedObjects = server.savedObjects;
-  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
-  const uiSettings = server.uiSettingsServiceFactory({ savedObjectsClient });
+  const savedObjectsClient = await reporting.getSavedObjectsClient(fakeRequest);
+  const uiSettings = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
   const logo: string = await uiSettings.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
   return { conditionalHeaders, logo };
 };

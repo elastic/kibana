@@ -35,7 +35,7 @@ import { EuiModalBody } from '@elastic/eui';
 import { toMountPoint } from '../../../src/plugins/kibana_react/public';
 import { UiActionsStart, createAction } from '../../../src/plugins/ui_actions/public';
 import { AppMountParameters, OverlayStart } from '../../../src/core/public';
-import { HELLO_WORLD_TRIGGER_ID, HELLO_WORLD_ACTION_TYPE } from '../../ui_action_examples/public';
+import { HELLO_WORLD_TRIGGER_ID, ACTION_HELLO_WORLD } from '../../ui_action_examples/public';
 import { TriggerContextExample } from './trigger_context_example';
 
 interface Props {
@@ -72,12 +72,13 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
                 from. Using the UI Action and Trigger API makes your plugin extensible by other
                 plugins. Any actions attached to the `HELLO_WORLD_TRIGGER_ID` will show up here!
               </p>
-              <EuiFieldText prepend="Name" value={name} onChange={e => setName(e.target.value)} />
+              <EuiFieldText prepend="Name" value={name} onChange={(e) => setName(e.target.value)} />
               <EuiButton
                 data-test-subj="addDynamicAction"
                 onClick={() => {
-                  const dynamicAction = createAction<{}>({
-                    type: `${HELLO_WORLD_ACTION_TYPE}-${name}`,
+                  const dynamicAction = createAction<typeof ACTION_HELLO_WORLD>({
+                    id: `${ACTION_HELLO_WORLD}-${name}`,
+                    type: ACTION_HELLO_WORLD,
                     getDisplayName: () => `Say hello to ${name}`,
                     execute: async () => {
                       const overlay = openModal(
@@ -94,8 +95,7 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
                       );
                     },
                   });
-                  uiActionsApi.registerAction(dynamicAction);
-                  uiActionsApi.attachAction(HELLO_WORLD_TRIGGER_ID, dynamicAction.type);
+                  uiActionsApi.addTriggerAction(HELLO_WORLD_TRIGGER_ID, dynamicAction);
                   setConfirmationText(
                     `You've successfully added a new action: ${dynamicAction.getDisplayName(
                       {}

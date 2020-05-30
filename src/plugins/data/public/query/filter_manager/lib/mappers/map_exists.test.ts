@@ -19,7 +19,12 @@
 
 import { mapExists } from './map_exists';
 import { mapQueryString } from './map_query_string';
-import { esFilters, IIndexPattern, IFieldType } from '../../../../../common';
+import {
+  IIndexPattern,
+  IFieldType,
+  buildExistsFilter,
+  buildEmptyFilter,
+} from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapExists()', () => {
@@ -32,15 +37,15 @@ describe('filter manager utilities', () => {
     });
 
     test('should return the key and value for matching filters', async () => {
-      const filter = esFilters.buildExistsFilter({ name: '_type' } as IFieldType, indexPattern);
+      const filter = buildExistsFilter({ name: '_type' } as IFieldType, indexPattern);
       const result = mapExists(filter);
 
       expect(result).toHaveProperty('key', '_type');
       expect(result).toHaveProperty('value', 'exists');
     });
 
-    test('should return undefined for none matching', async done => {
-      const filter = esFilters.buildEmptyFilter(true);
+    test('should return undefined for none matching', async (done) => {
+      const filter = buildEmptyFilter(true);
 
       try {
         mapQueryString(filter);

@@ -25,13 +25,13 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', undefined);
 
       const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/state`
       );
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       expect(response.body).to.key('alertInstances', 'previousStartedAt');
     });
 
@@ -51,7 +51,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
           params: {},
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', undefined);
 
       // wait for alert to actually execute
       await retry.try(async () => {
@@ -59,7 +59,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
           `${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/state`
         );
 
-        expect(response.statusCode).to.eql(200);
+        expect(response.status).to.eql(200);
         expect(response.body).to.key('alertInstances', 'alertTypeState', 'previousStartedAt');
         expect(response.body.alertTypeState.runCount).to.greaterThan(1);
       });

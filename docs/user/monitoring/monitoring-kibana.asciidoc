@@ -1,15 +1,15 @@
 [role="xpack"]
 [[monitoring-kibana]]
-=== Collecting {kib} monitoring data
+=== Collecting monitoring data using legacy collectors
 ++++
-<titleabbrev>Collecting monitoring data</titleabbrev>
+<titleabbrev>Legacy collection methods</titleabbrev>
 ++++
 
 If you enable the Elastic {monitor-features} in your cluster, you can 
 optionally collect metrics about {kib}. 
 
 The following method involves sending the metrics to the production cluster, 
-which ultimately routes them to the monitoring cluster. For an alternative 
+which ultimately routes them to the monitoring cluster. For the recommended 
 method, see <<monitoring-metricbeat>>. 
 
 To learn about monitoring in general, see 
@@ -61,8 +61,8 @@ For more information, see {ref}/monitoring-settings.html[Monitoring settings in 
 and {ref}/cluster-update-settings.html[Cluster update settings].
 --
 
-. Verify that `xpack.monitoring.enabled` and
-`xpack.monitoring.kibana.collection.enabled` are set to `true` in the 
+. Verify that `monitoring.enabled` and
+`monitoring.kibana.collection.enabled` are set to `true` in the 
 `kibana.yml` file. These are the default values. For 
 more information, see <<monitoring-settings-kb,Monitoring settings in {kib}>>.
 

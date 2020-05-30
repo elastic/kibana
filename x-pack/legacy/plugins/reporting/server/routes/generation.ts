@@ -4,89 +4,92 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import boom from 'boom';
+import Boom from 'boom';
 import { errors as elasticsearchErrors } from 'elasticsearch';
-import { Legacy } from 'kibana';
+import { kibanaResponseFactory } from 'src/core/server';
+import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import {
-  ExportTypesRegistry,
-  HeadlessChromiumDriverFactory,
-  Logger,
-  ReportingResponseToolkit,
-  ServerFacade,
-} from '../../types';
-import { createQueueFactory, enqueueJobFactory } from '../lib';
-import { ReportingSetupDeps } from '../plugin';
+import { LevelLogger as Logger } from '../lib';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
-import { makeRequestFacade } from './lib/make_request_facade';
+import { HandlerFunction } from './types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 
-export function registerJobGenerationRoutes(
-  server: ServerFacade,
-  plugins: ReportingSetupDeps,
-  exportTypesRegistry: ExportTypesRegistry,
-  browserDriverFactory: HeadlessChromiumDriverFactory,
-  logger: Logger
-) {
-  const config = server.config();
-  const DOWNLOAD_BASE_URL = config.get('server.basePath') + `${API_BASE_URL}/jobs/download`;
-  const { elasticsearch } = plugins;
-  const esqueue = createQueueFactory(server, elasticsearch, logger, {
-    exportTypesRegistry,
-    browserDriverFactory,
-  });
-  const enqueueJob = enqueueJobFactory(server, elasticsearch, logger, {
-    exportTypesRegistry,
-    esqueue,
-  });
+export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Logger) {
+  const config = reporting.getConfig();
+  const downloadBaseUrl =
+    config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
 
   /*
    * Generates enqueued job details to use in responses
    */
-  async function handler(
-    exportTypeId: string,
-    jobParams: object,
-    legacyRequest: Legacy.Request,
-    h: ReportingResponseToolkit
-  ) {
-    const request = makeRequestFacade(legacyRequest);
-    const user = request.pre.user;
-    const headers = request.headers;
+  const handler: HandlerFunction = async (user, exportTypeId, jobParams, context, req, res) => {
+    const licenseInfo = await reporting.getLicenseInfo();
+    const licenseResults = licenseInfo[exportTypeId];
 
-    const job = await enqueueJob(exportTypeId, jobParams, user, headers, request);
+    if (!licenseResults) {
+      return res.badRequest({ body: `Invalid export-type of ${exportTypeId}` });
+    }
+
+    if (!licenseResults.enableLinks) {
+      return res.forbidden({ body: licenseResults.message });
+    }
+
+    const enqueueJob = await reporting.getEnqueueJob();
+    const job = await enqueueJob(exportTypeId, jobParams, user, context, req);
 
     // return the queue's job information
     const jobJson = job.toJSON();
 
-    return h
-      .response({
-        path: `${DOWNLOAD_BASE_URL}/${jobJson.id}`,
+    return res.ok({
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: {
+        path: `${downloadBaseUrl}/${jobJson.id}`,
         job: jobJson,
-      })
-      .type('application/json');
-  }
+      },
+    });
+  };
 
-  function handleError(exportTypeId: string, err: Error) {
+  function handleError(res: typeof kibanaResponseFactory, err: Error | Boom) {
+    if (err instanceof Boom) {
+      return res.customError({
+        statusCode: err.output.statusCode,
+        body: err.output.payload.message,
+      });
+    }
+
     if (err instanceof esErrors['401']) {
-      return boom.unauthorized(`Sorry, you aren't authenticated`);
+      return res.unauthorized({
+        body: `Sorry, you aren't authenticated`,
+      });
     }
+
     if (err instanceof esErrors['403']) {
-      return boom.forbidden(`Sorry, you are not authorized to create ${exportTypeId} reports`);
+      return res.forbidden({
+        body: `Sorry, you are not authorized`,
+      });
     }
+
     if (err instanceof esErrors['404']) {
-      return boom.boomify(err, { statusCode: 404 });
+      return res.notFound({
+        body: err.message,
+      });
     }
-    return err;
+
+    return res.badRequest({
+      body: err.message,
+    });
   }
 
-  registerGenerateFromJobParams(server, plugins, handler, handleError, logger);
+  registerGenerateFromJobParams(reporting, handler, handleError);
 
   // Register beta panel-action download-related API's
-  if (config.get('xpack.reporting.csv.enablePanelActionDownload')) {
-    registerGenerateCsvFromSavedObject(server, plugins, handler, handleError, logger);
-    registerGenerateCsvFromSavedObjectImmediate(server, plugins, logger);
+  if (config.get('csv', 'enablePanelActionDownload')) {
+    registerGenerateCsvFromSavedObject(reporting, handler, handleError);
+    registerGenerateCsvFromSavedObjectImmediate(reporting, handleError, logger);
   }
 }

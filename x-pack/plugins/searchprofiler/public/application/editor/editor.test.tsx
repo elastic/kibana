@@ -6,10 +6,6 @@
 import 'brace';
 import 'brace/mode/json';
 
-jest.mock('./worker', () => {
-  return { workerModule: { id: 'ace/mode/json_worker', src: '' } };
-});
-
 import { registerTestBed } from '../../../../../test_utils';
 import { Editor, Props } from '.';
 
@@ -18,7 +14,7 @@ describe('Editor Component', () => {
     const props: Props = {
       initialValue: '',
       licenseEnabled: true,
-      onEditorReady: e => {},
+      onEditorReady: (e) => {},
     };
     // Ignore the warning about Worker not existing for now...
     const init = registerTestBed(Editor);

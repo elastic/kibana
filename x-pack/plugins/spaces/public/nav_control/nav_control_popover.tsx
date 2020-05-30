@@ -24,6 +24,7 @@ interface Props {
   anchorPosition: PopoverAnchorPosition;
   capabilities: Capabilities;
   navigateToApp: ApplicationStart['navigateToApp'];
+  serverBasePath: string;
 }
 
 interface State {
@@ -50,7 +51,7 @@ export class NavControlPopover extends Component<Props, State> {
 
   public componentDidMount() {
     this.activeSpace$ = this.props.spacesManager.onActiveSpaceChange$.subscribe({
-      next: activeSpace => {
+      next: (activeSpace) => {
         this.setState({
           activeSpace,
         });
@@ -86,7 +87,7 @@ export class NavControlPopover extends Component<Props, State> {
           id={popoutContentId}
           spaces={this.state.spaces}
           isLoading={this.state.loading}
-          onSelectSpace={this.onSelectSpace}
+          serverBasePath={this.props.serverBasePath}
           onManageSpacesClick={this.toggleSpaceSelector}
           capabilities={this.props.capabilities}
           navigateToApp={this.props.navigateToApp}
@@ -139,7 +140,7 @@ export class NavControlPopover extends Component<Props, State> {
     }
 
     return this.getButton(
-      <SpaceAvatar space={activeSpace} size={'s'} className={'spaceNavGraphic'} />,
+      <SpaceAvatar space={activeSpace} size={'s'} />,
       (activeSpace as Space).name
     );
   };
@@ -174,9 +175,5 @@ export class NavControlPopover extends Component<Props, State> {
     this.setState({
       showSpaceSelector: false,
     });
-  };
-
-  private onSelectSpace = (space: Space) => {
-    this.props.spacesManager.changeSelectedSpace(space);
   };
 }

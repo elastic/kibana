@@ -6,7 +6,7 @@
 
 import { Observable } from 'rxjs';
 import _, { countBy, groupBy, mapValues } from 'lodash';
-import { APICaller, CoreSetup } from 'kibana/server';
+import { APICaller, IClusterClient } from 'src/core/server';
 import { getNextMidnight } from '../../get_next_midnight';
 import { TaskInstance } from '../../../../../task_manager/server';
 import { ESSearchHit } from '../../../../../apm/typings/elasticsearch';
@@ -56,7 +56,7 @@ async function getStats(callCluster: APICaller, index: string) {
   const visTypes = groupBy(visSummaries, 'type');
 
   // get the final result
-  return mapValues(visTypes, curr => {
+  return mapValues(visTypes, (curr) => {
     const total = curr.length;
     const spacesBreakdown = countBy(curr, 'space');
     const spaceCounts: number[] = _.values(spacesBreakdown);
@@ -73,17 +73,15 @@ async function getStats(callCluster: APICaller, index: string) {
 export function visualizationsTaskRunner(
   taskInstance: TaskInstance,
   config: Observable<{ kibana: { index: string } }>,
-  es: CoreSetup['elasticsearch']
+  esClientPromise: Promise<IClusterClient>
 ) {
-  const { callAsInternalUser: callCluster } = es.createClient('data');
-
   return async () => {
     let stats;
     let error;
 
     try {
       const index = (await config.toPromise()).kibana.index;
-      stats = await getStats(callCluster, index);
+      stats = await getStats((await esClientPromise).callAsInternalUser, index);
     } catch (err) {
       if (err.constructor === Error) {
         error = err.message;

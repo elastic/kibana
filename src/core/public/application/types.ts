@@ -32,6 +32,7 @@ import { IUiSettingsClient } from '../ui_settings';
 import { RecursiveReadonly } from '../../utils';
 import { SavedObjectsStart } from '../saved_objects';
 import { AppCategory } from '../../types';
+import { ScopedHistory } from './scoped_history';
 
 /** @public */
 export interface AppBase {
@@ -64,6 +65,13 @@ export interface AppBase {
    * See {@link AppNavLinkStatus}
    */
   navLinkStatus?: AppNavLinkStatus;
+
+  /**
+   * Allow to define the default path a user should be directed to when navigating to the app.
+   * When defined, this value will be used as a default for the `path` option when calling {@link ApplicationStart.navigateToApp | navigateToApp}`,
+   * and will also be appended to the {@link ChromeNavLink | application navLink} in the navigation bar.
+   */
+  defaultPath?: string;
 
   /**
    * An {@link AppUpdater} observable that can be used to update the application {@link AppUpdatableFields} at runtime.
@@ -186,7 +194,10 @@ export enum AppNavLinkStatus {
  * Defines the list of fields that can be updated via an {@link AppUpdater}.
  * @public
  */
-export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip'>;
+export type AppUpdatableFields = Pick<
+  AppBase,
+  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'
+>;
 
 /**
  * Updater for applications.
@@ -199,7 +210,7 @@ export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefin
  * Extension of {@link AppBase | common app properties} with the mount function.
  * @public
  */
-export interface App extends AppBase {
+export interface App<HistoryLocationState = unknown> extends AppBase {
   /**
    * A mount function called when the user navigates to this app's route. May have signature of {@link AppMount} or
    * {@link AppMountDeprecated}.
@@ -208,7 +219,7 @@ export interface App extends AppBase {
    * When function has two arguments, it will be called with a {@link AppMountContext | context} as the first argument.
    * This behavior is **deprecated**, and consumers should instead use {@link CoreSetup.getStartServices}.
    */
-  mount: AppMount | AppMountDeprecated;
+  mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
 
   /**
    * Hide the UI chrome when the application is mounted. Defaults to `false`.
@@ -240,7 +251,9 @@ export interface LegacyApp extends AppBase {
  *
  * @public
  */
-export type AppMount = (params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+export type AppMount<HistoryLocationState = unknown> = (
+  params: AppMountParameters<HistoryLocationState>
+) => AppUnmount | Promise<AppUnmount>;
 
 /**
  * A mount function called when the user navigates to this app's route.
@@ -256,9 +269,9 @@ export type AppMount = (params: AppMountParameters) => AppUnmount | Promise<AppU
  * @deprecated
  * @public
  */
-export type AppMountDeprecated = (
+export type AppMountDeprecated<HistoryLocationState = unknown> = (
   context: AppMountContext,
-  params: AppMountParameters
+  params: AppMountParameters<HistoryLocationState>
 ) => AppUnmount | Promise<AppUnmount>;
 
 /**
@@ -304,15 +317,63 @@ export interface AppMountContext {
 }
 
 /** @public */
-export interface AppMountParameters {
+export interface AppMountParameters<HistoryLocationState = unknown> {
   /**
    * The container element to render the application into.
    */
   element: HTMLElement;
 
   /**
+   * A scoped history instance for your application. Should be used to wire up
+   * your applications Router.
+   *
+   * @example
+   * How to configure react-router with a base path:
+   *
+   * ```ts
+   * // inside your plugin's setup function
+   * export class MyPlugin implements Plugin {
+   *   setup({ application }) {
+   *     application.register({
+   *      id: 'my-app',
+   *      appRoute: '/my-app',
+   *      async mount(params) {
+   *        const { renderApp } = await import('./application');
+   *        return renderApp(params);
+   *      },
+   *    });
+   *  }
+   * }
+   * ```
+   *
+   * ```ts
+   * // application.tsx
+   * import React from 'react';
+   * import ReactDOM from 'react-dom';
+   * import { Router, Route } from 'react-router-dom';
+   *
+   * import { CoreStart, AppMountParameters } from 'src/core/public';
+   * import { MyPluginDepsStart } from './plugin';
+   *
+   * export renderApp = ({ element, history }: AppMountParameters) => {
+   *   ReactDOM.render(
+   *     <Router history={history}>
+   *       <Route path="/" exact component={HomePage} />
+   *     </Router>,
+   *     element
+   *   );
+   *
+   *   return () => ReactDOM.unmountComponentAtNode(element);
+   * }
+   * ```
+   */
+  history: ScopedHistory<HistoryLocationState>;
+
+  /**
    * The route path for configuring navigation to the application.
    * This string should not include the base path from HTTP.
+   *
+   * @deprecated Use {@link AppMountParameters.history} instead.
    *
    * @example
    *
@@ -340,10 +401,10 @@ export interface AppMountParameters {
    * import ReactDOM from 'react-dom';
    * import { BrowserRouter, Route } from 'react-router-dom';
    *
-   * import { CoreStart, AppMountParams } from 'src/core/public';
+   * import { CoreStart, AppMountParameters } from 'src/core/public';
    * import { MyPluginDepsStart } from './plugin';
    *
-   * export renderApp = ({ appBasePath, element }: AppMountParams) => {
+   * export renderApp = ({ appBasePath, element }: AppMountParameters) => {
    *   ReactDOM.render(
    *     // pass `appBasePath` to `basename`
    *     <BrowserRouter basename={appBasePath}>
@@ -377,7 +438,7 @@ export interface AppMountParameters {
    * import { CoreStart, AppMountParams } from 'src/core/public';
    * import { MyPluginDepsStart } from './plugin';
    *
-   * export renderApp = ({ appBasePath, element, onAppLeave }: AppMountParams) => {
+   * export renderApp = ({ element, history, onAppLeave }: AppMountParams) => {
    *    const { renderApp, hasUnsavedChanges } = await import('./application');
    *    onAppLeave(actions => {
    *      if(hasUnsavedChanges()) {
@@ -385,7 +446,7 @@ export interface AppMountParameters {
    *      }
    *      return actions.default();
    *    });
-   *    return renderApp(params);
+   *    return renderApp({ element, history });
    * }
    * ```
    */
@@ -488,6 +549,7 @@ export type Mounter<T = App | LegacyApp> = SelectivePartial<
     appRoute: string;
     appBasePath: string;
     mount: T extends LegacyApp ? LegacyAppMounter : AppMounter;
+    legacy: boolean;
     unmountBeforeMounting: T extends LegacyApp ? true : boolean;
   },
   T extends LegacyApp ? never : 'unmountBeforeMounting'
@@ -498,8 +560,9 @@ export interface ApplicationSetup {
   /**
    * Register an mountable application to the system.
    * @param app - an {@link App}
+   * @typeParam HistoryLocationState - shape of the `History` state on {@link AppMountParameters.history}, defaults to `unknown`.
    */
-  register(app: App): void;
+  register<HistoryLocationState = unknown>(app: App<HistoryLocationState>): void;
 
   /**
    * Register an application updater that can be used to change the {@link AppUpdatableFields} fields
@@ -551,7 +614,10 @@ export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'regist
    * @param plugin - opaque ID of the plugin that registers this application
    * @param app
    */
-  register(plugin: PluginOpaqueId, app: App): void;
+  register<HistoryLocationState = unknown>(
+    plugin: PluginOpaqueId,
+    app: App<HistoryLocationState>
+  ): void;
 
   /**
    * Register metadata about legacy applications. Legacy apps will not be mounted when navigated to.
@@ -587,24 +653,59 @@ export interface ApplicationStart {
    * Navigate to a given app
    *
    * @param appId
-   * @param options.path - optional path inside application to deep link to
+   * @param options.path - optional path inside application to deep link to.
+   *                       If undefined, will use {@link AppBase.defaultPath | the app's default path}` as default.
    * @param options.state - optional state to forward to the application
    */
   navigateToApp(appId: string, options?: { path?: string; state?: any }): Promise<void>;
 
   /**
-   * Returns a relative URL to a given app, including the global base path.
+   * Navigate to given url, which can either be an absolute url or a relative path, in a SPA friendly way when possible.
+   *
+   * If all these criteria are true for the given url:
+   * - (only for absolute URLs) The origin of the URL matches the origin of the browser's current location
+   * - The pathname of the URL starts with the current basePath (eg. /mybasepath/s/my-space)
+   * - The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)
+   *
+   * Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path.
+   * Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`
+   *
+   * @example
+   * ```ts
+   * // current url: `https://kibana:8080/base-path/s/my-space/app/dashboard`
+   *
+   * // will call `application.navigateToApp('discover', { path: '/some-path?foo=bar'})`
+   * application.navigateToUrl('https://kibana:8080/base-path/s/my-space/app/discover/some-path?foo=bar')
+   * application.navigateToUrl('/base-path/s/my-space/app/discover/some-path?foo=bar')
+   *
+   * // will perform a full page reload using `window.location.assign`
+   * application.navigateToUrl('https://elsewhere:8080/base-path/s/my-space/app/discover/some-path') // origin does not match
+   * application.navigateToUrl('/app/discover/some-path') // does not include the current basePath
+   * application.navigateToUrl('/base-path/s/my-space/app/unknown-app/some-path') // unknown application
+   * ```
+   *
+   * @param url - an absolute url, or a relative path, to navigate to.
+   */
+  navigateToUrl(url: string): Promise<void>;
+
+  /**
+   * Returns an URL to a given app, including the global base path.
+   * By default, the URL is relative (/basePath/app/my-app).
+   * Use the `absolute` option to generate an absolute url (http://host:port/basePath/app/my-app)
+   *
+   * Note that when generating absolute urls, the origin (protocol, host and port) are determined from the browser's location.
+   *
    * @param appId
    * @param options.path - optional path inside application to deep link to
+   * @param options.absolute - if true, will returns an absolute url instead of a relative one
    */
-  getUrlForApp(appId: string, options?: { path?: string }): string;
+  getUrlForApp(appId: string, options?: { path?: string; absolute?: boolean }): string;
 
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
    * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
    *
    * @deprecated
-   * @param pluginOpaqueId - The opaque ID of the plugin that is registering the context.
    * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
    * @param provider - A {@link IContextProvider} function
    */
@@ -612,11 +713,19 @@ export interface ApplicationStart {
     contextName: T,
     provider: IContextProvider<AppMountDeprecated, T>
   ): void;
+
+  /**
+   * An observable that emits the current application id and each subsequent id update.
+   */
+  currentAppId$: Observable<string | undefined>;
 }
 
 /** @internal */
 export interface InternalApplicationStart
-  extends Pick<ApplicationStart, 'capabilities' | 'navigateToApp' | 'getUrlForApp'> {
+  extends Pick<
+    ApplicationStart,
+    'capabilities' | 'navigateToApp' | 'navigateToUrl' | 'getUrlForApp' | 'currentAppId$'
+  > {
   /**
    * Apps available based on the current capabilities.
    * Should be used to show navigation links and make routing decisions.
@@ -640,7 +749,6 @@ export interface InternalApplicationStart
   ): void;
 
   // Internal APIs
-  currentAppId$: Observable<string | undefined>;
   getComponent(): JSX.Element | null;
 }
 

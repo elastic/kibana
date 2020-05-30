@@ -39,10 +39,7 @@ export interface PagerDutyActionParams {
 }
 
 export interface IndexActionParams {
-  index?: string;
-  refresh?: boolean;
-  executionTimeField?: string;
-  documents: string[];
+  documents: Array<Record<string, any>>;
 }
 
 export enum ServerLogLevelOptions {
@@ -75,8 +72,8 @@ interface EmailConfig {
 }
 
 interface EmailSecrets {
-  user: string;
-  password: string;
+  user: string | null;
+  password: string | null;
 }
 
 export interface EmailActionConnector extends ActionConnector {
@@ -85,7 +82,9 @@ export interface EmailActionConnector extends ActionConnector {
 }
 
 interface EsIndexConfig {
-  index?: string;
+  index: string;
+  executionTimeField?: string | null;
+  refresh?: boolean;
 }
 
 export interface EsIndexActionConnector extends ActionConnector {

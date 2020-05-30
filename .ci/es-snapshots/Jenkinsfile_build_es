@@ -25,8 +25,8 @@ def PROMOTE_WITHOUT_VERIFY = !!params.PROMOTE_WITHOUT_VERIFICATION
 timeout(time: 120, unit: 'MINUTES') {
   timestamps {
     ansiColor('xterm') {
-      node('linux && immutable') {
-        catchError {
+      node(workers.label('s')) {
+        catchErrors {
           def VERSION
           def SNAPSHOT_ID
           def DESTINATION

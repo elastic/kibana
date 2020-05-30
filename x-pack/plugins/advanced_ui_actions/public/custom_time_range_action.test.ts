@@ -10,9 +10,7 @@ import { skip } from 'rxjs/operators';
 import * as Rx from 'rxjs';
 import { mount } from 'enzyme';
 
-import { EmbeddableFactory } from '../../../../src/plugins/embeddable/public';
 import { TimeRangeEmbeddable, TimeRangeContainer, TIME_RANGE_EMBEDDABLE } from './test_helpers';
-import { TimeRangeEmbeddableFactory } from './test_helpers/time_range_embeddable_factory';
 import { CustomTimeRangeAction } from './custom_time_range_action';
 /* eslint-disable */
 import {
@@ -21,7 +19,6 @@ import {
 /* eslint-enable */
 
 import {
-  HelloWorldEmbeddableFactory,
   HelloWorldEmbeddable,
   HELLO_WORLD_EMBEDDABLE,
 } from '../../../../examples/embeddable_examples/public';
@@ -37,10 +34,7 @@ const createOpenModalMock = () => {
   return mock;
 };
 
-test('Custom time range action prevents embeddable from using container time', async done => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(TIME_RANGE_EMBEDDABLE, new TimeRangeEmbeddableFactory());
-
+test('Custom time range action prevents embeddable from using container time', async (done) => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -104,10 +98,7 @@ test('Custom time range action prevents embeddable from using container time', a
   container.updateInput({ timeRange: { from: 'now-30m', to: 'now-1m' } });
 });
 
-test('Removing custom time range action resets embeddable back to container time', async done => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(TIME_RANGE_EMBEDDABLE, new TimeRangeEmbeddableFactory());
-
+test('Removing custom time range action resets embeddable back to container time', async (done) => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -181,10 +172,7 @@ test('Removing custom time range action resets embeddable back to container time
   container.updateInput({ timeRange: { from: 'now-10m', to: 'now-5m' } });
 });
 
-test('Cancelling custom time range action leaves state alone', async done => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(TIME_RANGE_EMBEDDABLE, new TimeRangeEmbeddableFactory());
-
+test('Cancelling custom time range action leaves state alone', async (done) => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -244,8 +232,6 @@ test('Cancelling custom time range action leaves state alone', async done => {
 });
 
 test(`badge is compatible with embeddable that inherits from parent`, async () => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(TIME_RANGE_EMBEDDABLE, new TimeRangeEmbeddableFactory());
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -279,8 +265,6 @@ test(`badge is compatible with embeddable that inherits from parent`, async () =
 
 // TODO: uncomment when https://github.com/elastic/kibana/issues/43271 is fixed.
 // test('Embeddable that does not use time range in a container that has time range is incompatible', async () => {
-//   const embeddableFactories = new Map<string, EmbeddableFactory>();
-//   embeddableFactories.set(HELLO_WORLD_EMBEDDABLE, new HelloWorldEmbeddableFactory());
 // const container = new TimeRangeContainer(
 //   {
 //     timeRange: { from: 'now-15m', to: 'now' },
@@ -315,8 +299,6 @@ test(`badge is compatible with embeddable that inherits from parent`, async () =
 // });
 
 test('Attempting to execute on incompatible embeddable throws an error', async () => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(HELLO_WORLD_EMBEDDABLE, new HelloWorldEmbeddableFactory());
   const container = new HelloWorldContainer(
     {
       panels: {

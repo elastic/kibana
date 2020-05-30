@@ -39,7 +39,7 @@ test('fails if wrong input type', () => {
 test('fails if string input cannot be parsed', () => {
   const type = schema.arrayOf(schema.string());
   expect(() => type.validate('test')).toThrowErrorMatchingInlineSnapshot(
-    `"could not parse array value from [test]"`
+    `"could not parse array value from json input"`
   );
 });
 
@@ -53,7 +53,7 @@ test('fails with correct type if parsed input is not an array', () => {
 test('includes namespace in failure when wrong top-level type', () => {
   const type = schema.arrayOf(schema.string());
   expect(() => type.validate('test', {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: could not parse array value from [test]"`
+    `"[foo-namespace]: could not parse array value from json input"`
   );
 });
 
@@ -85,6 +85,38 @@ test('fails if mixed types of content in array', () => {
   );
 });
 
+test('fails if sparse content in array', () => {
+  const type = schema.arrayOf(schema.string());
+  expect(type.validate([])).toEqual([]);
+  expect(() => type.validate([undefined])).toThrowErrorMatchingInlineSnapshot(
+    `"[0]: sparse array are not allowed"`
+  );
+});
+
+test('fails if sparse content in array if optional', () => {
+  const type = schema.arrayOf(schema.maybe(schema.string()));
+  expect(type.validate([])).toEqual([]);
+  expect(() => type.validate([undefined])).toThrowErrorMatchingInlineSnapshot(
+    `"[0]: sparse array are not allowed"`
+  );
+});
+
+test('fails if sparse content in array if nullable', () => {
+  const type = schema.arrayOf(schema.nullable(schema.string()));
+  expect(type.validate([])).toEqual([]);
+  expect(type.validate([null])).toEqual([null]);
+  expect(() => type.validate([undefined])).toThrowErrorMatchingInlineSnapshot(
+    `"[0]: sparse array are not allowed"`
+  );
+});
+
+test('fails for null values if optional', () => {
+  const type = schema.arrayOf(schema.maybe(schema.string()));
+  expect(() => type.validate([null])).toThrowErrorMatchingInlineSnapshot(
+    `"[0]: expected value of type [string] but got [null]"`
+  );
+});
+
 test('returns empty array if input is empty but type has default value', () => {
   const type = schema.arrayOf(schema.string({ defaultValue: 'test' }));
   expect(type.validate([])).toEqual([]);
@@ -95,16 +127,9 @@ test('returns empty array if input is empty even if type is required', () => {
   expect(type.validate([])).toEqual([]);
 });
 
-test('fails for null values if optional', () => {
-  const type = schema.arrayOf(schema.maybe(schema.string()));
-  expect(() => type.validate([null])).toThrowErrorMatchingInlineSnapshot(
-    `"[0]: expected value of type [string] but got [null]"`
-  );
-});
-
 test('handles default values for undefined values', () => {
-  const type = schema.arrayOf(schema.string({ defaultValue: 'foo' }));
-  expect(type.validate([undefined])).toEqual(['foo']);
+  const type = schema.arrayOf(schema.string(), { defaultValue: ['foo'] });
+  expect(type.validate(undefined)).toEqual(['foo']);
 });
 
 test('array within array', () => {

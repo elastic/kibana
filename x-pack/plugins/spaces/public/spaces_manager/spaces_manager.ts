@@ -6,19 +6,21 @@
 import { Observable, BehaviorSubject } from 'rxjs';
 import { skipWhile } from 'rxjs/operators';
 import { HttpSetup } from 'src/core/public';
-import { SavedObjectsManagementRecord } from 'src/legacy/core_plugins/management/public';
+import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
 import { Space } from '../../common/model/space';
 import { GetSpacePurpose } from '../../common/model/types';
-import { ENTER_SPACE_PATH } from '../../common/constants';
 import { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
-import { addSpaceIdToPath } from '../../common';
 
 export class SpacesManager {
   private activeSpace$: BehaviorSubject<Space | null> = new BehaviorSubject<Space | null>(null);
 
+  private readonly serverBasePath: string;
+
   public readonly onActiveSpaceChange$: Observable<Space>;
 
-  constructor(private readonly serverBasePath: string, private readonly http: HttpSetup) {
+  constructor(private readonly http: HttpSetup) {
+    this.serverBasePath = http.basePath.serverBasePath;
+
     this.onActiveSpaceChange$ = this.activeSpace$
       .asObservable()
       .pipe(skipWhile((v: Space | null) => v == null)) as Observable<Space>;
@@ -97,10 +99,6 @@ export class SpacesManager {
         retries,
       }),
     });
-  }
-
-  public async changeSelectedSpace(space: Space) {
-    window.location.href = addSpaceIdToPath(this.serverBasePath, space.id, ENTER_SPACE_PATH);
   }
 
   public redirectToSpaceSelector() {

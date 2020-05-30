@@ -18,7 +18,8 @@
  */
 
 import { createSavedQueryService } from './saved_query_service';
-import { esFilters, SavedQueryAttributes } from '../..';
+import { FilterStateStore } from '../../../common';
+import { SavedQueryAttributes } from './types';
 
 const savedQueryAttributes: SavedQueryAttributes = {
   title: 'foo',
@@ -42,7 +43,7 @@ const savedQueryAttributesWithFilters: SavedQueryAttributes = {
   filters: [
     {
       query: { match_all: {} },
-      $state: { store: esFilters.FilterStateStore.APP_STATE },
+      $state: { store: FilterStateStore.APP_STATE },
       meta: {
         disabled: false,
         negate: false,
@@ -88,7 +89,7 @@ describe('saved query service', () => {
     mockSavedObjectsClient.delete.mockReset();
   });
 
-  describe('saveQuery', function() {
+  describe('saveQuery', function () {
     it('should create a saved object for the given attributes', async () => {
       mockSavedObjectsClient.create.mockReturnValue({
         id: 'foo',
@@ -164,19 +165,31 @@ describe('saved query service', () => {
       expect(error).not.toBe(null);
     });
   });
-  describe('findSavedQueries', function() {
+  describe('findSavedQueries', function () {
     it('should find and return saved queries without search text or pagination parameters', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
+        total: 5,
       });
 
       const response = await findSavedQueries();
-      expect(response).toEqual([{ id: 'foo', attributes: savedQueryAttributes }]);
+      expect(response.queries).toEqual([{ id: 'foo', attributes: savedQueryAttributes }]);
+    });
+
+    it('should return the total count along with the requested queries', async () => {
+      mockSavedObjectsClient.find.mockReturnValue({
+        savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
+        total: 5,
+      });
+
+      const response = await findSavedQueries();
+      expect(response.total).toEqual(5);
     });
 
     it('should find and return saved queries with search text matching the title field', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
+        total: 5,
       });
       const response = await findSavedQueries('foo');
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
@@ -187,7 +200,7 @@ describe('saved query service', () => {
         sortField: '_score',
         type: 'query',
       });
-      expect(response).toEqual([{ id: 'foo', attributes: savedQueryAttributes }]);
+      expect(response.queries).toEqual([{ id: 'foo', attributes: savedQueryAttributes }]);
     });
     it('should find and return parsed filters and timefilters items', async () => {
       const serializedSavedQueryAttributesWithFilters = {
@@ -197,16 +210,20 @@ describe('saved query service', () => {
       };
       mockSavedObjectsClient.find.mockReturnValue({
         savedObjects: [{ id: 'foo', attributes: serializedSavedQueryAttributesWithFilters }],
+        total: 5,
       });
       const response = await findSavedQueries('bar');
-      expect(response).toEqual([{ id: 'foo', attributes: savedQueryAttributesWithFilters }]);
+      expect(response.queries).toEqual([
+        { id: 'foo', attributes: savedQueryAttributesWithFilters },
+      ]);
     });
     it('should return an array of saved queries', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
+        total: 5,
       });
       const response = await findSavedQueries();
-      expect(response).toEqual(
+      expect(response.queries).toEqual(
         expect.objectContaining([
           {
             attributes: {
@@ -225,6 +242,7 @@ describe('saved query service', () => {
           { id: 'foo', attributes: savedQueryAttributes },
           { id: 'bar', attributes: savedQueryAttributesBar },
         ],
+        total: 5,
       });
       const response = await findSavedQueries(undefined, 2, 1);
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
@@ -235,7 +253,7 @@ describe('saved query service', () => {
         sortField: '_score',
         type: 'query',
       });
-      expect(response).toEqual(
+      expect(response.queries).toEqual(
         expect.objectContaining([
           {
             attributes: {
@@ -258,7 +276,7 @@ describe('saved query service', () => {
     });
   });
 
-  describe('getSavedQuery', function() {
+  describe('getSavedQuery', function () {
     it('should retrieve a saved query by id', async () => {
       mockSavedObjectsClient.get.mockReturnValue({ id: 'foo', attributes: savedQueryAttributes });
 
@@ -273,14 +291,14 @@ describe('saved query service', () => {
     });
   });
 
-  describe('deleteSavedQuery', function() {
+  describe('deleteSavedQuery', function () {
     it('should delete the saved query for the given ID', async () => {
       await deleteSavedQuery('foo');
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('query', 'foo');
     });
   });
 
-  describe('getAllSavedQueries', function() {
+  describe('getAllSavedQueries', function () {
     it('should return all the saved queries', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
@@ -306,7 +324,7 @@ describe('saved query service', () => {
     });
   });
 
-  describe('getSavedQueryCount', function() {
+  describe('getSavedQueryCount', function () {
     it('should return the total number of saved queries', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         total: 1,

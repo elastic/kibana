@@ -12,21 +12,24 @@ import {
   InfraNodeType,
   InfraTimerangeInput,
   InfraSnapshotGroupbyInput,
-} from '../../../../legacy/plugins/infra/server/graphql/types';
+} from '../../../../plugins/infra/server/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { SnapshotNodeResponse } from '../../../../legacy/plugins/infra/common/http_api/snapshot_api';
+import {
+  SnapshotNodeResponse,
+  SnapshotMetricInput,
+} from '../../../../plugins/infra/common/http_api/snapshot_api';
 import { DATES } from './constants';
 
 interface SnapshotRequest {
   filterQuery?: string | null;
-  metric: InfraSnapshotMetricInput;
+  metric: SnapshotMetricInput;
   groupBy: InfraSnapshotGroupbyInput[];
   nodeType: InfraNodeType;
   sourceId: string;
   timerange: InfraTimerangeInput;
 }
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const fetchSnapshot = async (
@@ -58,7 +61,7 @@ export default function({ getService }: FtrProviderContext) {
           nodeType: 'container' as InfraNodeType,
           groupBy: [],
         });
-        return resp.then(data => {
+        return resp.then((data) => {
           if (!resp) {
             return;
           }
@@ -104,7 +107,7 @@ export default function({ getService }: FtrProviderContext) {
           nodeType: 'pod' as InfraNodeType,
           groupBy: [],
         });
-        return resp.then(data => {
+        return resp.then((data) => {
           const snapshot = data;
           expect(snapshot).to.have.property('nodes');
           if (snapshot) {
@@ -136,7 +139,7 @@ export default function({ getService }: FtrProviderContext) {
           nodeType: 'container' as InfraNodeType,
           groupBy: [],
         });
-        return resp.then(data => {
+        return resp.then((data) => {
           const snapshot = data;
           expect(snapshot).to.have.property('nodes');
           if (snapshot) {
@@ -175,7 +178,7 @@ export default function({ getService }: FtrProviderContext) {
           nodeType: 'host' as InfraNodeType,
           groupBy: [],
         });
-        return resp.then(data => {
+        return resp.then((data) => {
           const snapshot = data;
           expect(snapshot).to.have.property('nodes');
           if (snapshot) {
@@ -189,12 +192,50 @@ export default function({ getService }: FtrProviderContext) {
             expect(firstNode).to.have.property('metric');
             expect(firstNode.metric).to.eql({
               name: 'cpu',
-              value: 0.009285714285714286,
-              max: 0.009285714285714286,
-              avg: 0.0015476190476190477,
+              value: 0.0032,
+              max: 0.0038333333333333336,
+              avg: 0.0027944444444444444,
             });
           }
         });
+      });
+
+      it('should work with custom metrics', async () => {
+        const data = await fetchSnapshot({
+          sourceId: 'default',
+          timerange: {
+            to: max,
+            from: min,
+            interval: '1m',
+          },
+          metric: {
+            type: 'custom',
+            field: 'system.cpu.user.pct',
+            aggregation: 'avg',
+            id: '1',
+          } as SnapshotMetricInput,
+          nodeType: 'host' as InfraNodeType,
+          groupBy: [],
+        });
+
+        const snapshot = data;
+        expect(snapshot).to.have.property('nodes');
+        if (snapshot) {
+          const { nodes } = snapshot;
+          expect(nodes.length).to.equal(1);
+          const firstNode = first(nodes);
+          expect(firstNode).to.have.property('path');
+          expect(firstNode.path.length).to.equal(1);
+          expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
+          expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
+          expect(firstNode).to.have.property('metric');
+          expect(firstNode.metric).to.eql({
+            name: 'custom',
+            value: 0.0016,
+            max: 0.0018333333333333333,
+            avg: 0.0013666666666666669,
+          });
+        }
       });
 
       it('should basically work with 1 grouping', () => {
@@ -209,7 +250,7 @@ export default function({ getService }: FtrProviderContext) {
           nodeType: 'host' as InfraNodeType,
           groupBy: [{ field: 'cloud.availability_zone' }],
         });
-        return resp.then(data => {
+        return resp.then((data) => {
           const snapshot = data;
           expect(snapshot).to.have.property('nodes');
           if (snapshot) {
@@ -237,7 +278,7 @@ export default function({ getService }: FtrProviderContext) {
           groupBy: [{ field: 'cloud.provider' }, { field: 'cloud.availability_zone' }],
         });
 
-        return resp.then(data => {
+        return resp.then((data) => {
           const snapshot = data;
           expect(snapshot).to.have.property('nodes');
           if (snapshot) {
@@ -265,7 +306,7 @@ export default function({ getService }: FtrProviderContext) {
           nodeType: 'host' as InfraNodeType,
           groupBy: [{ field: 'service.type' }],
         });
-        return resp.then(data => {
+        return resp.then((data) => {
           const snapshot = data;
           expect(snapshot).to.have.property('nodes');
           if (snapshot) {
@@ -279,9 +320,9 @@ export default function({ getService }: FtrProviderContext) {
             expect(firstNode).to.have.property('metric');
             expect(firstNode.metric).to.eql({
               name: 'cpu',
-              value: 0.009285714285714286,
-              max: 0.009285714285714286,
-              avg: 0.0015476190476190477,
+              value: 0.0032,
+              max: 0.0038333333333333336,
+              avg: 0.0027944444444444444,
             });
             const secondNode = nodes[1];
             expect(secondNode).to.have.property('path');
@@ -291,9 +332,9 @@ export default function({ getService }: FtrProviderContext) {
             expect(secondNode).to.have.property('metric');
             expect(secondNode.metric).to.eql({
               name: 'cpu',
-              value: 0.009285714285714286,
-              max: 0.009285714285714286,
-              avg: 0.0015476190476190477,
+              value: 0.0032,
+              max: 0.0038333333333333336,
+              avg: 0.0027944444444444444,
             });
           }
         });

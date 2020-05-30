@@ -24,13 +24,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', undefined);
 
       const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`
       );
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       expect(response.body).to.eql({
         id: createdAlert.id,
         name: 'abc',
@@ -61,7 +61,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', undefined);
 
       await supertest
         .get(`${getUrlPrefix(Spaces.other.id)}/api/alert/${createdAlert.id}`)

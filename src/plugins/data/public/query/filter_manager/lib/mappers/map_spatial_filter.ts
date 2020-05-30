@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { esFilters } from '../../../../../common';
+import { Filter, FILTERS } from '../../../../../common';
 
 // Use mapSpatialFilter mapper to avoid bloated meta with value and params for spatial filters.
-export const mapSpatialFilter = (filter: esFilters.Filter) => {
+export const mapSpatialFilter = (filter: Filter) => {
   if (
     filter.meta &&
     filter.meta.key &&
     filter.meta.alias &&
-    filter.meta.type === esFilters.FILTERS.SPATIAL_FILTER
+    filter.meta.type === FILTERS.SPATIAL_FILTER
   ) {
     return {
       key: filter.meta.key,

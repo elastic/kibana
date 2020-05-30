@@ -6,11 +6,20 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function endpointAPIIntegrationTests({ loadTestFile }: FtrProviderContext) {
-  describe('Endpoint plugin', function() {
+export default function endpointAPIIntegrationTests({
+  loadTestFile,
+  getService,
+}: FtrProviderContext) {
+  describe('Endpoint plugin', function () {
+    const ingestManager = getService('ingestManager');
     this.tags(['endpoint']);
+    before(async () => {
+      await ingestManager.setup();
+    });
+    loadTestFile(require.resolve('./alerts/index_pattern'));
     loadTestFile(require.resolve('./resolver'));
-    loadTestFile(require.resolve('./endpoints'));
+    loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./alerts'));
+    loadTestFile(require.resolve('./policy'));
   });
 }

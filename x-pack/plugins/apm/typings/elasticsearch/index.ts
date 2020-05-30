@@ -31,7 +31,10 @@ export type ESSearchResponse<
 > = Omit<SearchResponse<TDocument>, 'aggregations' | 'hits'> &
   (TSearchRequest extends { body: { aggs: AggregationInputMap } }
     ? {
-        aggregations?: AggregationResponseMap<TSearchRequest['body']['aggs'], TDocument>;
+        aggregations?: AggregationResponseMap<
+          TSearchRequest['body']['aggs'],
+          TDocument
+        >;
       }
     : {}) & {
     hits: Omit<SearchResponse<TDocument>['hits'], 'total'> &
@@ -49,6 +52,12 @@ export type ESSearchResponse<
 
 export interface ESFilter {
   [key: string]: {
-    [key: string]: string | string[] | number | boolean | Record<string, unknown> | ESFilter[];
+    [key: string]:
+      | string
+      | string[]
+      | number
+      | boolean
+      | Record<string, unknown>
+      | ESFilter[];
   };
 }

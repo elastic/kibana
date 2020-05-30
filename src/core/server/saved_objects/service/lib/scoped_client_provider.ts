@@ -19,6 +19,7 @@
 import { PriorityCollection } from './priority_collection';
 import { SavedObjectsClientContract } from '../../types';
 import { SavedObjectsRepositoryFactory } from '../../saved_objects_service';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { KibanaRequest } from '../../../http';
 
 /**
@@ -27,6 +28,7 @@ import { KibanaRequest } from '../../../http';
  */
 export interface SavedObjectsClientWrapperOptions {
   client: SavedObjectsClientContract;
+  typeRegistry: ISavedObjectTypeRegistry;
   request: KibanaRequest;
 }
 
@@ -44,8 +46,10 @@ export type SavedObjectsClientWrapperFactory = (
  */
 export type SavedObjectsClientFactory = ({
   request,
+  includedHiddenTypes,
 }: {
   request: KibanaRequest;
+  includedHiddenTypes?: string[];
 }) => SavedObjectsClientContract;
 
 /**
@@ -62,6 +66,7 @@ export type SavedObjectsClientFactoryProvider = (
  */
 export interface SavedObjectsClientProviderOptions {
   excludedWrappers?: string[];
+  includedHiddenTypes?: string[];
 }
 
 /**
@@ -84,9 +89,17 @@ export class SavedObjectsClientProvider {
   }>();
   private _clientFactory: SavedObjectsClientFactory;
   private readonly _originalClientFactory: SavedObjectsClientFactory;
+  private readonly _typeRegistry: ISavedObjectTypeRegistry;
 
-  constructor({ defaultClientFactory }: { defaultClientFactory: SavedObjectsClientFactory }) {
+  constructor({
+    defaultClientFactory,
+    typeRegistry,
+  }: {
+    defaultClientFactory: SavedObjectsClientFactory;
+    typeRegistry: ISavedObjectTypeRegistry;
+  }) {
     this._originalClientFactory = this._clientFactory = defaultClientFactory;
+    this._typeRegistry = typeRegistry;
   }
 
   addClientWrapperFactory(
@@ -94,7 +107,7 @@ export class SavedObjectsClientProvider {
     id: string,
     factory: SavedObjectsClientWrapperFactory
   ): void {
-    if (this._wrapperFactories.has(entry => entry.id === id)) {
+    if (this._wrapperFactories.has((entry) => entry.id === id)) {
       throw new Error(`wrapper factory with id ${id} is already defined`);
     }
 
@@ -111,13 +124,12 @@ export class SavedObjectsClientProvider {
 
   getClient(
     request: KibanaRequest,
-    options: SavedObjectsClientProviderOptions = {}
+    { includedHiddenTypes, excludedWrappers = [] }: SavedObjectsClientProviderOptions = {}
   ): SavedObjectsClientContract {
     const client = this._clientFactory({
       request,
+      includedHiddenTypes,
     });
-
-    const excludedWrappers = options.excludedWrappers || [];
 
     return this._wrapperFactories
       .toPrioritizedArray()
@@ -129,6 +141,7 @@ export class SavedObjectsClientProvider {
         return factory({
           request,
           client: clientToWrap,
+          typeRegistry: this._typeRegistry,
         });
       }, client);
   }

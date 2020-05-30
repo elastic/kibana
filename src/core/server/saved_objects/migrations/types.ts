@@ -21,13 +21,54 @@ import { SavedObjectUnsanitizedDoc } from '../serialization';
 import { SavedObjectsMigrationLogger } from './core/migration_logger';
 
 /**
- * A migration function defined for a {@link SavedObjectsType | saved objects type}
- * used to migrate it's {@link SavedObjectUnsanitizedDoc | documents}
+ * A migration function for a {@link SavedObjectsType | saved object type}
+ * used to migrate it to a given version
+ *
+ * @example
+ * ```typescript
+ * interface TypeV1Attributes {
+ *   someKey: string;
+ *   obsoleteProperty: number;
+ * }
+ *
+ * interface TypeV2Attributes {
+ *   someKey: string;
+ *   newProperty: string;
+ * }
+ *
+ * const migrateToV2: SavedObjectMigrationFn<TypeV1Attributes, TypeV2Attributes> = (doc, { log }) => {
+ *   const { obsoleteProperty, ...otherAttributes } = doc.attributes;
+ *   // instead of mutating `doc` we make a shallow copy so that we can use separate types for the input
+ *   // and output attributes. We don't need to make a deep copy, we just need to ensure that obsolete
+ *   // attributes are not present on the returned doc.
+ *   return {
+ *     ...doc,
+ *     attributes: {
+ *       ...otherAttributes,
+ *       newProperty: migrate(obsoleteProperty),
+ *     },
+ *   };
+ * };
+ * ```
+ *
+ * @public
  */
-export type SavedObjectMigrationFn = (
-  doc: SavedObjectUnsanitizedDoc,
-  log: SavedObjectsMigrationLogger
-) => SavedObjectUnsanitizedDoc;
+export type SavedObjectMigrationFn<InputAttributes = unknown, MigratedAttributes = unknown> = (
+  doc: SavedObjectUnsanitizedDoc<InputAttributes>,
+  context: SavedObjectMigrationContext
+) => SavedObjectUnsanitizedDoc<MigratedAttributes>;
+
+/**
+ * Migration context provided when invoking a {@link SavedObjectMigrationFn | migration handler}
+ *
+ * @public
+ */
+export interface SavedObjectMigrationContext {
+  /**
+   * logger instance to be used by the migration handler
+   */
+  log: SavedObjectsMigrationLogger;
+}
 
 /**
  * A map of {@link SavedObjectMigrationFn | migration functions} to be used for a given type.
@@ -47,5 +88,5 @@ export type SavedObjectMigrationFn = (
  * @public
  */
 export interface SavedObjectMigrationMap {
-  [version: string]: SavedObjectMigrationFn;
+  [version: string]: SavedObjectMigrationFn<any, any>;
 }

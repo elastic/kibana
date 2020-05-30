@@ -9,54 +9,51 @@ import { API_BASE_PATH, INDEX_PATTERNS } from './constants';
 export const registerHelpers = ({ supertest }) => {
   const getAllTemplates = () => supertest.get(`${API_BASE_PATH}/templates`);
 
-  const getOneTemplate = name => supertest.get(`${API_BASE_PATH}/templates/${name}`);
+  const getOneTemplate = (name, formatVersion = 1) =>
+    supertest.get(`${API_BASE_PATH}/templates/${name}?v=${formatVersion}`);
 
-  const getTemplatePayload = name => ({
+  const getTemplatePayload = (name, formatVersion = 1) => ({
     name,
     order: 1,
     indexPatterns: INDEX_PATTERNS,
     version: 1,
-    settings: {
-      number_of_shards: 1,
-      index: {
-        lifecycle: {
-          name: 'my_policy',
+    template: {
+      settings: {
+        number_of_shards: 1,
+        index: {
+          lifecycle: {
+            name: 'my_policy',
+          },
         },
+      },
+      mappings: {
+        _source: {
+          enabled: false,
+        },
+        properties: {
+          host_name: {
+            type: 'keyword',
+          },
+          created_at: {
+            type: 'date',
+            format: 'EEE MMM dd HH:mm:ss Z yyyy',
+          },
+        },
+      },
+      aliases: {
+        alias1: {},
       },
     },
-    mappings: {
-      _source: {
-        enabled: false,
-      },
-      properties: {
-        host_name: {
-          type: 'keyword',
-        },
-        created_at: {
-          type: 'date',
-          format: 'EEE MMM dd HH:mm:ss Z yyyy',
-        },
-      },
-    },
-    aliases: {
-      alias1: {},
+    _kbnMeta: {
+      formatVersion,
     },
   });
 
-  const createTemplate = payload =>
-    supertest
-      .put(`${API_BASE_PATH}/templates`)
-      .set('kbn-xsrf', 'xxx')
-      .send(payload);
+  const createTemplate = (payload) =>
+    supertest.put(`${API_BASE_PATH}/templates`).set('kbn-xsrf', 'xxx').send(payload);
 
-  const deleteTemplates = templatesToDelete =>
-    supertest
-      .delete(
-        `${API_BASE_PATH}/templates/${templatesToDelete
-          .map(template => encodeURIComponent(template))
-          .join(',')}`
-      )
-      .set('kbn-xsrf', 'xxx');
+  const deleteTemplates = (templates) =>
+    supertest.post(`${API_BASE_PATH}/delete-templates`).set('kbn-xsrf', 'xxx').send({ templates });
 
   const updateTemplate = (payload, templateName) =>
     supertest

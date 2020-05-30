@@ -7,15 +7,17 @@
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
-import { ExecutorError, TaskRunnerFactory } from './lib';
-import { ActionType } from './types';
+import { ExecutorError, TaskRunnerFactory, ILicenseState } from './lib';
+import { ActionType, PreConfiguredAction } from './types';
 import { ActionType as CommonActionType } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
 
-interface ConstructorOptions {
+export interface ActionTypeRegistryOpts {
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
   actionsConfigUtils: ActionsConfigurationUtilities;
+  licenseState: ILicenseState;
+  preconfiguredActions: PreConfiguredAction[];
 }
 
 export class ActionTypeRegistry {
@@ -23,11 +25,15 @@ export class ActionTypeRegistry {
   private readonly actionTypes: Map<string, ActionType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly actionsConfigUtils: ActionsConfigurationUtilities;
+  private readonly licenseState: ILicenseState;
+  private readonly preconfiguredActions: PreConfiguredAction[];
 
-  constructor(constructorParams: ConstructorOptions) {
+  constructor(constructorParams: ActionTypeRegistryOpts) {
     this.taskManager = constructorParams.taskManager;
     this.taskRunnerFactory = constructorParams.taskRunnerFactory;
     this.actionsConfigUtils = constructorParams.actionsConfigUtils;
+    this.licenseState = constructorParams.licenseState;
+    this.preconfiguredActions = constructorParams.preconfiguredActions;
   }
 
   /**
@@ -42,6 +48,30 @@ export class ActionTypeRegistry {
    */
   public ensureActionTypeEnabled(id: string) {
     this.actionsConfigUtils.ensureActionTypeEnabled(id);
+    this.licenseState.ensureLicenseForActionType(this.get(id));
+  }
+
+  /**
+   * Returns true if action type is enabled in the config and a valid license is used.
+   */
+  public isActionTypeEnabled(id: string) {
+    return (
+      this.actionsConfigUtils.isActionTypeEnabled(id) &&
+      this.licenseState.isLicenseValidForActionType(this.get(id)).isValid === true
+    );
+  }
+
+  /**
+   * Returns true if action type is enabled or it is a preconfigured action type.
+   */
+  public isActionExecutable(actionId: string, actionTypeId: string) {
+    return (
+      this.isActionTypeEnabled(actionTypeId) ||
+      (!this.isActionTypeEnabled(actionTypeId) &&
+        this.preconfiguredActions.find(
+          (preconfiguredAction) => preconfiguredAction.id === actionId
+        ) !== undefined)
+    );
   }
 
   /**
@@ -61,13 +91,13 @@ export class ActionTypeRegistry {
         )
       );
     }
-    this.actionTypes.set(actionType.id, actionType);
+    this.actionTypes.set(actionType.id, { ...actionType });
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {
         title: actionType.name,
         type: `actions:${actionType.id}`,
         maxAttempts: actionType.maxAttempts || 1,
-        getRetry(attempts: number, error: any) {
+        getRetry(attempts: number, error: unknown) {
           if (error instanceof ExecutorError) {
             return error.retry == null ? false : error.retry;
           }
@@ -103,7 +133,10 @@ export class ActionTypeRegistry {
     return Array.from(this.actionTypes).map(([actionTypeId, actionType]) => ({
       id: actionTypeId,
       name: actionType.name,
-      enabled: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
+      minimumLicenseRequired: actionType.minimumLicenseRequired,
+      enabled: this.isActionTypeEnabled(actionTypeId),
+      enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
+      enabledInLicense: this.licenseState.isLicenseValidForActionType(actionType).isValid === true,
     }));
   }
 }

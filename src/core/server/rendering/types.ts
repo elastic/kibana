@@ -23,7 +23,7 @@ import { Env } from '../config';
 import { ICspConfig } from '../csp';
 import { InternalHttpServiceSetup, KibanaRequest, LegacyRequest } from '../http';
 import { LegacyNavLink, LegacyServiceDiscoverPlugins } from '../legacy';
-import { PluginsServiceSetup, DiscoveredPlugin } from '../plugins';
+import { UiPlugins, DiscoveredPlugin } from '../plugins';
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
 
 /** @internal */
@@ -39,6 +39,7 @@ export interface RenderingMetadata {
     buildNumber: number;
     branch: string;
     basePath: string;
+    serverBasePath: string;
     env: Env;
     legacyMode: boolean;
     i18n: {
@@ -74,7 +75,7 @@ export interface RenderingMetadata {
 export interface RenderingSetupDeps {
   http: InternalHttpServiceSetup;
   legacyPlugins: LegacyServiceDiscoverPlugins;
-  plugins: PluginsServiceSetup;
+  uiPlugins: UiPlugins;
 }
 
 /** @public */
@@ -101,31 +102,8 @@ export interface IRenderOptions {
   vars?: Record<string, any>;
 }
 
-/** @public */
-export interface IScopedRenderingClient {
-  /**
-   * Generate a `KibanaResponse` which renders an HTML page bootstrapped
-   * with the `core` bundle. Intended as a response body for HTTP route handlers.
-   *
-   * @example
-   * ```ts
-   * router.get(
-   *   { path: '/', validate: false },
-   *   (context, request, response) =>
-   *     response.ok({
-   *       body: await context.core.rendering.render(),
-   *       headers: {
-   *         'content-security-policy': context.core.http.csp.header,
-   *       },
-   *     })
-   * );
-   * ```
-   */
-  render(options?: Pick<IRenderOptions, 'includeUserSettings'>): Promise<string>;
-}
-
 /** @internal */
-export interface RenderingServiceSetup {
+export interface InternalRenderingServiceSetup {
   /**
    * Generate a `KibanaResponse` which renders an HTML page bootstrapped
    * with the `core` bundle or the ID of another specified legacy bundle.

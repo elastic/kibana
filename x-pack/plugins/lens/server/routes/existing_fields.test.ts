@@ -57,6 +57,24 @@ describe('existingFields', () => {
     expect(result).toEqual(['geo.coordinates']);
   });
 
+  it('should handle objects with dotted fields', () => {
+    const result = existingFields(
+      [indexPattern({ 'geo.country_name': 'US' })],
+      [field('geo.country_name')]
+    );
+
+    expect(result).toEqual(['geo.country_name']);
+  });
+
+  it('should handle arrays with dotted fields on both sides', () => {
+    const result = existingFields(
+      [indexPattern({ 'process.cpu': [{ 'user.pct': 50 }] })],
+      [field('process.cpu.user.pct')]
+    );
+
+    expect(result).toEqual(['process.cpu.user.pct']);
+  });
+
   it('should be false if it hits a positive leaf before the end of the path', () => {
     const result = existingFields(
       [indexPattern({ geo: { coordinates: 32 } })],
@@ -91,6 +109,8 @@ describe('buildFieldList', () => {
     type: 'indexpattern',
     attributes: {
       title: 'testpattern',
+      type: 'type',
+      typeMeta: 'typemeta',
       fields: JSON.stringify([
         { name: 'foo', scripted: true, lang: 'painless', script: '2+2' },
         { name: 'bar' },
@@ -123,7 +143,7 @@ describe('buildFieldList', () => {
 
   it('uses field descriptors to determine the path', () => {
     const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
-    expect(fields.find(f => f.name === 'baz')).toMatchObject({
+    expect(fields.find((f) => f.name === 'baz')).toMatchObject({
       isAlias: false,
       isScript: false,
       name: 'baz',
@@ -133,7 +153,7 @@ describe('buildFieldList', () => {
 
   it('uses aliases to determine the path', () => {
     const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
-    expect(fields.find(f => f.isAlias)).toMatchObject({
+    expect(fields.find((f) => f.isAlias)).toMatchObject({
       isAlias: true,
       isScript: false,
       name: '@bar',
@@ -143,7 +163,7 @@ describe('buildFieldList', () => {
 
   it('supports scripted fields', () => {
     const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
-    expect(fields.find(f => f.isScript)).toMatchObject({
+    expect(fields.find((f) => f.isScript)).toMatchObject({
       isAlias: false,
       isScript: true,
       name: 'foo',

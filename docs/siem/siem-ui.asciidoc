@@ -35,7 +35,7 @@ image::siem/images/network-ui.png[]
 
 [float]
 [[detections-ui]]
-=== Detections
+=== Detections (beta)
 
 The Detections feature automatically searches for threats and creates 
 signals when they are detected. Signal detection rules define the conditions 
@@ -49,6 +49,22 @@ or the Detections API.
 
 [role="screenshot"]
 image::siem/images/detections-ui.png[]
+
+[float]
+[[cases-ui]]
+=== Cases (beta)
+
+Cases are used to open and track security issues directly in SIEM. 
+Cases list the original reporter and all users who contribute to a case
+(`participants`). Case comments support Markdown syntax, and allow linking to
+saved Timelines. Additionally, you can send cases to external systems from
+within SIEM (currently ServiceNow).
+
+For information about opening, updating, and closing cases, see
+{siem-guide}/cases-overview.html[Cases] in the SIEM Guide.
+
+[role="screenshot"]
+image::siem/images/cases-ui.png[]
 
 [float]
 [[timelines-ui]]

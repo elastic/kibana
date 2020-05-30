@@ -1,0 +1,17 @@
+{
+  "configPath": ["xpack", "uptime"],
+  "id": "uptime",
+  "kibanaVersion": "kibana",
+  "optionalPlugins": ["capabilities", "data", "home"],
+  "requiredPlugins": [
+    "alerting",
+    "embeddable",
+    "features",
+    "licensing",
+    "triggers_actions_ui",
+    "usageCollection"
+  ],
+  "server": true,
+  "ui": true,
+  "version": "8.0.0"
+}

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from '../../../../types';
+import { i18n } from '@kbn/i18n';
+import { LevelLogger } from '../../../../server/lib';
 import { GenerateCsvParams, SavedSearchGeneratorResult } from '../../types';
 import { createFlattenHit } from './flatten_hit';
 import { createFormatCsvValues } from './format_csv_values';
@@ -13,7 +14,7 @@ import { createHitIterator } from './hit_iterator';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 import { checkIfRowsHaveFormulas } from './check_cells_for_formulas';
 
-export function createGenerateCsv(logger: Logger) {
+export function createGenerateCsv(logger: LevelLogger) {
   const hitIterator = createHitIterator(logger);
 
   return async function generateCsv({
@@ -26,14 +27,17 @@ export function createGenerateCsv(logger: Logger) {
     cancellationToken,
     settings,
   }: GenerateCsvParams): Promise<SavedSearchGeneratorResult> {
-    const escapeValue = createEscapeValue(settings.quoteValues);
+    const escapeValue = createEscapeValue(settings.quoteValues, settings.escapeFormulaValues);
     const builder = new MaxSizeStringBuilder(settings.maxSizeBytes);
     const header = `${fields.map(escapeValue).join(settings.separator)}\n`;
+    const warnings: string[] = [];
+
     if (!builder.tryAppend(header)) {
       return {
         size: 0,
         content: '',
         maxSizeReached: true,
+        warnings: [],
       };
     }
 
@@ -82,11 +86,20 @@ export function createGenerateCsv(logger: Logger) {
     const size = builder.getSizeInBytes();
     logger.debug(`finished generating, total size in bytes: ${size}`);
 
+    if (csvContainsFormulas && settings.escapeFormulaValues) {
+      warnings.push(
+        i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.escapedFormulaValues', {
+          defaultMessage: 'CSV may contain formulas whose values have been escaped',
+        })
+      );
+    }
+
     return {
       content: builder.getString(),
-      csvContainsFormulas,
+      csvContainsFormulas: csvContainsFormulas && !settings.escapeFormulaValues,
       maxSizeReached,
       size,
+      warnings,
     };
   };
 }

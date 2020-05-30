@@ -61,10 +61,10 @@ export class DoSearch extends React.Component<Props, State> {
     this.abortController = new AbortController();
 
     this.props.search(this.abortController.signal).subscribe(
-      response => {
+      (response) => {
         this.setState({ response, error: undefined });
       },
-      error => {
+      (error) => {
         this.setState({ error, searching: false, response: undefined });
       },
       () => {
@@ -118,8 +118,8 @@ ${requestStr}
           <EuiFlexItem>
             <EuiText>Response:</EuiText>
             <EuiProgress
-              value={(this.state.response && this.state.response.percentComplete) || 0}
-              max={100}
+              value={this.state.response?.loaded ?? 0}
+              max={this.state.response?.total ?? 0}
             />
             <EuiCodeBlock
               language="json"

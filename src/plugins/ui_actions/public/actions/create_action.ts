@@ -17,20 +17,25 @@
  * under the License.
  */
 
-import { Action } from './action';
+import { ActionContextMapping } from '../types';
+import { ActionByType } from './action';
+import { ActionType } from '../types';
+import { ActionDefinition } from './action';
 
-export function createAction<ActionContext extends {} = {}>(
-  action: { type: string; execute: Action<ActionContext>['execute'] } & Partial<
-    Action<ActionContext>
-  >
-): Action<ActionContext> {
+interface ActionDefinitionByType<T extends ActionType>
+  extends Omit<ActionDefinition<ActionContextMapping[T]>, 'id'> {
+  id?: string;
+}
+
+export function createAction<T extends ActionType>(
+  action: ActionDefinitionByType<T>
+): ActionByType<T> {
   return {
     getIconType: () => undefined,
     order: 0,
     id: action.type,
     isCompatible: () => Promise.resolve(true),
     getDisplayName: () => '',
-    getHref: () => undefined,
     ...action,
-  };
+  } as ActionByType<T>;
 }

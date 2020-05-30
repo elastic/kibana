@@ -7,46 +7,33 @@ import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { ConnectorAddModal } from './connector_add_modal';
-import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult } from '../../../types';
-import { AppDeps } from '../../app';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
+import { ValidationResult, ActionType } from '../../../types';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('connector_add_modal', () => {
-  let deps: AppDeps | null;
+  let deps: any;
 
   beforeAll(async () => {
     const mocks = coreMock.createSetup();
     const [
       {
-        chrome,
-        docLinks,
         application: { capabilities },
       },
     ] = await mocks.getStartServices();
     deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
       toastNotifications: mocks.notifications.toasts,
-      injectedMetadata: mocks.injectedMetadata,
       http: mocks.http,
-      uiSettings: mocks.uiSettings,
       capabilities: {
         ...capabilities,
-        actions: {
-          delete: true,
-          save: true,
-          show: true,
+        siem: {
+          'actions:show': true,
+          'actions:save': true,
+          'actions:delete': true,
         },
       },
-      setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: {} as any,
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
   it('renders connector modal form if addModalVisible is true', () => {
@@ -67,41 +54,28 @@ describe('connector_add_modal', () => {
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
 
-    const actionType = {
+    const actionType: ActionType = {
       id: 'my-action-type',
       name: 'test',
       enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      minimumLicenseRequired: 'basic',
     };
 
-    const wrapper = deps
-      ? mountWithIntl(
-          <ActionsConnectorsContextProvider
-            value={{
-              addFlyoutVisible: true,
-              setAddFlyoutVisibility: state => {},
-              editFlyoutVisible: false,
-              setEditFlyoutVisibility: state => {},
-              actionTypesIndex: {
-                'my-action-type': { id: 'my-action-type', name: 'test', enabled: true },
-              },
-              reloadConnectors: () => {
-                return new Promise<void>(() => {});
-              },
-            }}
-          >
-            <ConnectorAddModal
-              addModalVisible={true}
-              setAddModalVisibility={() => {}}
-              actionType={actionType}
-              http={deps.http}
-              actionTypeRegistry={deps.actionTypeRegistry}
-              alertTypeRegistry={deps.alertTypeRegistry}
-              toastNotifications={deps.toastNotifications}
-            />
-          </ActionsConnectorsContextProvider>
-        )
-      : undefined;
-    expect(wrapper?.find('EuiModalHeader')).toHaveLength(1);
-    expect(wrapper?.find('[data-test-subj="saveActionButtonModal"]').exists()).toBeTruthy();
+    const wrapper = mountWithIntl(
+      <ConnectorAddModal
+        addModalVisible={true}
+        setAddModalVisibility={() => {}}
+        actionType={actionType}
+        http={deps!.http}
+        actionTypeRegistry={deps!.actionTypeRegistry}
+        toastNotifications={deps!.toastNotifications}
+        docLinks={deps!.docLinks}
+        capabilities={deps!.capabilities}
+      />
+    );
+    expect(wrapper.exists('.euiModalHeader')).toBeTruthy();
+    expect(wrapper.exists('[data-test-subj="saveActionButtonModal"]')).toBeTruthy();
   });
 });

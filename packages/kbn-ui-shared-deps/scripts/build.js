@@ -38,7 +38,7 @@ run(
     );
 
     /** @param {webpack.Stats} stats */
-    const onCompilationComplete = stats => {
+    const onCompilationComplete = (stats) => {
       const took = Math.round((stats.endTime - stats.startTime) / 1000);
 
       if (!stats.hasErrors() && !stats.hasWarnings()) {
@@ -55,7 +55,7 @@ run(
     };
 
     if (flags.watch) {
-      compiler.hooks.done.tap('report on stats', stats => {
+      compiler.hooks.done.tap('report on stats', (stats) => {
         try {
           onCompilationComplete(stats);
         } catch (error) {
@@ -64,12 +64,15 @@ run(
       });
 
       compiler.hooks.watchRun.tap('report on start', () => {
-        process.stdout.cursorTo(0, 0);
-        process.stdout.clearScreenDown();
+        if (process.stdout.isTTY) {
+          process.stdout.cursorTo(0, 0);
+          process.stdout.clearScreenDown();
+        }
+
         log.info('Running webpack compilation...');
       });
 
-      compiler.watch({}, error => {
+      compiler.watch({}, (error) => {
         if (error) {
           log.error('Fatal webpack error');
           log.error(error);

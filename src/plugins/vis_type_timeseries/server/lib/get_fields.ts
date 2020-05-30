@@ -22,9 +22,9 @@ import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 
 // @ts-ignore
 import { getIndexPatternObject } from './vis_data/helpers/get_index_pattern';
-import { isNestedField } from '../../../data/server';
+import { indexPatterns } from '../../../data/server';
 import { Framework } from '../plugin';
-import { FieldDescriptor, IndexPatternsFetcher } from '../../../data/server';
+import { IndexPatternFieldDescriptor, IndexPatternsFetcher } from '../../../data/server';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
 
 export async function getFields(
@@ -43,7 +43,7 @@ export async function getFields(
     payload: {},
     pre: {
       indexPatternsService: new IndexPatternsFetcher(
-        requestContext.core.elasticsearch.dataClient.callAsCurrentUser
+        requestContext.core.elasticsearch.legacy.client.callAsCurrentUser
       ),
     },
     getUiSettingsService: () => requestContext.core.uiSettings.client,
@@ -54,7 +54,7 @@ export async function getFields(
           getCluster: () => {
             return {
               callWithRequest: async (req: any, endpoint: string, params: any) => {
-                return await requestContext.core.elasticsearch.dataClient.callAsCurrentUser(
+                return await requestContext.core.elasticsearch.legacy.client.callAsCurrentUser(
                   endpoint,
                   params
                 );
@@ -68,7 +68,7 @@ export async function getFields(
       return await framework.globalConfig$
         .pipe(
           first(),
-          map(config => config.elasticsearch.shardTimeout.asMilliseconds())
+          map((config) => config.elasticsearch.shardTimeout.asMilliseconds())
         )
         .toPromise();
     },
@@ -83,7 +83,9 @@ export async function getFields(
     reqFacade,
     indexPatternString,
     capabilities
-  )) as FieldDescriptor[]).filter(field => field.aggregatable && !isNestedField(field));
+  )) as IndexPatternFieldDescriptor[]).filter(
+    (field) => field.aggregatable && !indexPatterns.isNestedField(field)
+  );
 
-  return uniq(fields, field => field.name);
+  return uniq(fields, (field) => field.name);
 }

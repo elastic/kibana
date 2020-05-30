@@ -31,12 +31,13 @@ import $ from 'jquery';
 import { cloneDeep, forOwn, get, set } from 'lodash';
 import React, { Fragment } from 'react';
 import * as Rx from 'rxjs';
-import { ChromeBreadcrumb } from 'kibana/public';
+import { ChromeBreadcrumb, EnvironmentMode, PackageInfo } from 'kibana/public';
+import { History } from 'history';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart, LegacyCoreStart } from 'kibana/public';
-import { modifyUrl } from '../../../../core/utils';
+import { modifyUrl } from '../../../../core/public';
 import { toMountPoint } from '../../../kibana_react/public';
 import { isSystemApiRequest, UrlOverflowService } from '../utils';
 import { formatAngularHttpError, isAngularHttpError } from '../notify/lib';
@@ -79,34 +80,55 @@ function isDummyRoute($route: any, isLocalAngular: boolean) {
 
 export const configureAppAngularModule = (
   angularModule: IModule,
-  newPlatform: LegacyCoreStart,
-  isLocalAngular: boolean
+  newPlatform:
+    | LegacyCoreStart
+    | {
+        core: CoreStart;
+        readonly env: {
+          mode: Readonly<EnvironmentMode>;
+          packageInfo: Readonly<PackageInfo>;
+        };
+      },
+  isLocalAngular: boolean,
+  getHistory?: () => History
 ) => {
-  const legacyMetadata = newPlatform.injectedMetadata.getLegacyMetadata();
+  const core = 'core' in newPlatform ? newPlatform.core : newPlatform;
+  const packageInfo =
+    'env' in newPlatform
+      ? newPlatform.env.packageInfo
+      : newPlatform.injectedMetadata.getLegacyMetadata();
 
-  forOwn(newPlatform.injectedMetadata.getInjectedVars(), (val, name) => {
-    if (name !== undefined) {
-      // The legacy platform modifies some of these values, clone to an unfrozen object.
-      angularModule.value(name, cloneDeep(val));
-    }
-  });
+  if ('injectedMetadata' in newPlatform) {
+    forOwn(newPlatform.injectedMetadata.getInjectedVars(), (val, name) => {
+      if (name !== undefined) {
+        // The legacy platform modifies some of these values, clone to an unfrozen object.
+        angularModule.value(name, cloneDeep(val));
+      }
+    });
+  }
 
   angularModule
-    .value('kbnVersion', newPlatform.injectedMetadata.getKibanaVersion())
-    .value('buildNum', legacyMetadata.buildNum)
-    .value('buildSha', legacyMetadata.buildSha)
-    .value('serverName', legacyMetadata.serverName)
-    .value('esUrl', getEsUrl(newPlatform))
-    .value('uiCapabilities', newPlatform.application.capabilities)
-    .config(setupCompileProvider(newPlatform))
+    .value('kbnVersion', packageInfo.version)
+    .value('buildNum', packageInfo.buildNum)
+    .value('buildSha', packageInfo.buildSha)
+    .value('esUrl', getEsUrl(core))
+    .value('uiCapabilities', core.application.capabilities)
+    .config(
+      setupCompileProvider(
+        'injectedMetadata' in newPlatform
+          ? newPlatform.injectedMetadata.getLegacyMetadata().devMode
+          : newPlatform.env.mode.dev
+      )
+    )
     .config(setupLocationProvider())
-    .config($setupXsrfRequestInterceptor(newPlatform))
-    .run(capture$httpLoadingCount(newPlatform))
-    .run($setupBreadcrumbsAutoClear(newPlatform, isLocalAngular))
-    .run($setupBadgeAutoClear(newPlatform, isLocalAngular))
-    .run($setupHelpExtensionAutoClear(newPlatform, isLocalAngular))
-    .run($setupUrlOverflowHandling(newPlatform, isLocalAngular))
-    .run($setupUICapabilityRedirect(newPlatform));
+    .config($setupXsrfRequestInterceptor(packageInfo.version))
+    .run(capture$httpLoadingCount(core))
+    .run(digestOnHashChange(getHistory))
+    .run($setupBreadcrumbsAutoClear(core, isLocalAngular))
+    .run($setupBadgeAutoClear(core, isLocalAngular))
+    .run($setupHelpExtensionAutoClear(core, isLocalAngular))
+    .run($setupUrlOverflowHandling(core, isLocalAngular))
+    .run($setupUICapabilityRedirect(core));
 };
 
 const getEsUrl = (newPlatform: CoreStart) => {
@@ -122,10 +144,21 @@ const getEsUrl = (newPlatform: CoreStart) => {
   };
 };
 
-const setupCompileProvider = (newPlatform: LegacyCoreStart) => (
-  $compileProvider: ICompileProvider
-) => {
-  if (!newPlatform.injectedMetadata.getLegacyMetadata().devMode) {
+const digestOnHashChange = (getHistory?: () => History) => ($rootScope: IRootScopeService) => {
+  if (!getHistory) return;
+  const unlisten = getHistory().listen(() => {
+    // dispatch synthetic hash change event to update hash history objects and angular routing
+    // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+    // this has to happen in the next tick to not change the existing timing of angular digest cycles.
+    setTimeout(() => {
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    }, 0);
+  });
+  $rootScope.$on('$destroy', unlisten);
+};
+
+const setupCompileProvider = (devMode: boolean) => ($compileProvider: ICompileProvider) => {
+  if (!devMode) {
     $compileProvider.debugInfoEnabled(false);
   }
 };
@@ -140,9 +173,7 @@ const setupLocationProvider = () => ($locationProvider: ILocationProvider) => {
   $locationProvider.hashPrefix('');
 };
 
-export const $setupXsrfRequestInterceptor = (newPlatform: LegacyCoreStart) => {
-  const version = newPlatform.injectedMetadata.getLegacyMetadata().version;
-
+export const $setupXsrfRequestInterceptor = (version: string) => {
   // Configure jQuery prefilter
   $.ajaxPrefilter(({ kbnXsrfToken = true }: any, originalOptions, jqXHR) => {
     if (kbnXsrfToken) {
@@ -177,10 +208,10 @@ const capture$httpLoadingCount = (newPlatform: CoreStart) => (
   $http: IHttpService
 ) => {
   newPlatform.http.addLoadingCountSource(
-    new Rx.Observable(observer => {
+    new Rx.Observable((observer) => {
       const unwatch = $rootScope.$watch(() => {
         const reqs = $http.pendingRequests || [];
-        observer.next(reqs.filter(req => !isSystemApiRequest(req)).length);
+        observer.next(reqs.filter((req) => !isSystemApiRequest(req)).length);
       });
 
       return unwatch;
@@ -211,7 +242,7 @@ const $setupUICapabilityRedirect = (newPlatform: CoreStart) => (
       }
 
       if (!get(newPlatform.application.capabilities, route.requireUICapability)) {
-        $injector.get('kbnUrl').change('/home');
+        $injector.get('$location').url('/home');
         event.preventDefault();
       }
     }

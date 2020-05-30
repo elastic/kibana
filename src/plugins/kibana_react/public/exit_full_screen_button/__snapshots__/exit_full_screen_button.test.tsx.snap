@@ -17,42 +17,78 @@ exports[`is rendered 1`] = `
       <button
         aria-label="Exit full screen mode"
         className="dshExitFullScreenButton"
+        data-test-subj="exitFullScreenModeLogo"
         onClick={[Function]}
       >
-        <span
-          className="dshExitFullScreenButton__logo"
-          data-test-subj="exitFullScreenModeLogo"
-        />
-        <span
-          className="dshExitFullScreenButton__text"
-          data-test-subj="exitFullScreenModeText"
+        <EuiFlexGroup
+          alignItems="center"
+          component="span"
+          gutterSize="s"
+          responsive={false}
         >
-          Exit full screen
-          <EuiIcon
-            size="s"
-            type="arrowLeft"
+          <span
+            className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
           >
-            <EuiIconEmpty
-              aria-hidden={true}
-              className="euiIcon euiIcon--small euiIcon-isLoading"
-              focusable="false"
-              role="img"
-              style={null}
+            <EuiFlexItem
+              grow={false}
             >
-              <svg
-                aria-hidden={true}
-                className="euiIcon euiIcon--small euiIcon-isLoading"
-                focusable="false"
-                height={16}
-                role="img"
-                style={null}
-                viewBox="0 0 16 16"
-                width={16}
-                xmlns="http://www.w3.org/2000/svg"
-              />
-            </EuiIconEmpty>
-          </EuiIcon>
-        </span>
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <EuiIcon
+                  size="l"
+                  type="logoElastic"
+                >
+                  <div
+                    data-euiicon-type="logoElastic"
+                    size="l"
+                  />
+                </EuiIcon>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              data-test-subj="exitFullScreenModeText"
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+                data-test-subj="exitFullScreenModeText"
+              >
+                <div>
+                  <EuiText
+                    className="dshExitFullScreenButton__text"
+                    size="s"
+                  >
+                    <div
+                      className="euiText euiText--small dshExitFullScreenButton__text"
+                    >
+                      <p>
+                        Exit full screen
+                      </p>
+                    </div>
+                  </EuiText>
+                </div>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <EuiIcon
+                  className="dshExitFullScreenButton__icon"
+                  type="fullScreen"
+                >
+                  <div
+                    className="dshExitFullScreenButton__icon"
+                    data-euiicon-type="fullScreen"
+                  />
+                </EuiIcon>
+              </div>
+            </EuiFlexItem>
+          </span>
+        </EuiFlexGroup>
       </button>
     </div>
   </div>

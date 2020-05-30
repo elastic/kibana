@@ -40,7 +40,9 @@ import { JsonWatchEditSimulateResults } from './json_watch_edit_simulate_results
 import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
 import { useAppContext } from '../../../../app_context';
 
-const actionModeOptions = Object.keys(ACTION_MODES).map(mode => ({
+import { useXJsonMode } from '../../../../shared_imports';
+
+const actionModeOptions = Object.keys(ACTION_MODES).map((mode) => ({
   text: ACTION_MODES[mode],
   value: ACTION_MODES[mode],
 }));
@@ -94,6 +96,8 @@ export const JsonWatchEditSimulate = ({
     ignoreCondition,
   } = executeDetails;
 
+  const { setXJson, convertToJson, xJsonMode, xJson } = useXJsonMode(alternativeInput);
+
   const columns = [
     {
       field: 'actionId',
@@ -120,7 +124,7 @@ export const JsonWatchEditSimulate = ({
           options={actionModeOptions}
           value={actionModes[row.actionId]}
           data-test-subj="actionModesSelect"
-          onChange={e => {
+          onChange={(e) => {
             setExecuteDetails(
               new ExecuteDetails({
                 ...executeDetails,
@@ -195,7 +199,7 @@ export const JsonWatchEditSimulate = ({
                   }
                   min={0}
                   data-test-subj="scheduledTimeInput"
-                  onChange={e => {
+                  onChange={(e) => {
                     const value = e.target.value;
                     setExecuteDetails(
                       new ExecuteDetails({
@@ -210,7 +214,7 @@ export const JsonWatchEditSimulate = ({
                 <EuiSelect
                   value={scheduledTimeUnit}
                   options={getScheduleTimeOptions(scheduledTimeValue)}
-                  onChange={e => {
+                  onChange={(e) => {
                     setExecuteDetails(
                       new ExecuteDetails({
                         ...executeDetails,
@@ -243,7 +247,7 @@ export const JsonWatchEditSimulate = ({
                   {getTimeUnitLabel(TIME_UNITS.SECOND, triggeredTimeValue)}
                 </EuiText>
               }
-              onChange={e => {
+              onChange={(e) => {
                 const value = e.target.value;
                 setExecuteDetails(
                   new ExecuteDetails({
@@ -284,7 +288,7 @@ export const JsonWatchEditSimulate = ({
             )}
             checked={ignoreCondition}
             data-test-subj="ignoreConditionSwitch"
-            onChange={e => {
+            onChange={(e) => {
               setExecuteDetails(
                 new ExecuteDetails({ ...executeDetails, ignoreCondition: e.target.checked })
               );
@@ -294,7 +298,6 @@ export const JsonWatchEditSimulate = ({
 
         <EuiDescribedFormGroup
           fullWidth
-          idAria="simulateExecutionActionModesDescription"
           title={
             <h2>
               {i18n.translate(
@@ -323,7 +326,6 @@ export const JsonWatchEditSimulate = ({
           }
         >
           <EuiFormRow
-            describedByIds={['simulateExecutionActionModesDescription']}
             label={i18n.translate(
               'xpack.watcher.sections.watchEdit.simulate.form.actionModesFieldLabel',
               {
@@ -342,7 +344,6 @@ export const JsonWatchEditSimulate = ({
 
         <EuiDescribedFormGroup
           fullWidth
-          idAria="simulateExecutionInputOverridesDescription"
           title={
             <h2>
               {i18n.translate(
@@ -361,7 +362,6 @@ export const JsonWatchEditSimulate = ({
         >
           <ErrableFormRow
             id="executeWatchJson"
-            describedByIds={['simulateExecutionInputOverridesDescription']}
             label={i18n.translate(
               'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputFieldLabel',
               {
@@ -374,23 +374,23 @@ export const JsonWatchEditSimulate = ({
             errors={executeWatchErrors}
           >
             <EuiCodeEditor
-              fullWidth
-              mode="json"
+              mode={xJsonMode}
               width="100%"
               height="200px"
-              theme="github"
+              theme="textmate"
               aria-label={i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputAriaLabel',
                 {
                   defaultMessage: 'Code editor',
                 }
               )}
-              value={alternativeInput}
-              onChange={(json: string) => {
+              value={xJson}
+              onChange={(xjson: string) => {
+                setXJson(xjson);
                 setExecuteDetails(
                   new ExecuteDetails({
                     ...executeDetails,
-                    alternativeInput: json,
+                    alternativeInput: convertToJson(xjson),
                   })
                 );
               }}

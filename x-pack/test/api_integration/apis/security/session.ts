@@ -8,8 +8,8 @@ import { Cookie, cookie } from 'request';
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+export default function ({ getService }: FtrProviderContext) {
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const config = getService('config');
 
   const kibanaServerConfig = config.get('servers.kibana');
@@ -25,15 +25,15 @@ export default function({ getService }: FtrProviderContext) {
       return response;
     };
     const getSessionInfo = async () =>
-      supertest
+      supertestWithoutAuth
         .get('/internal/security/session')
         .set('kbn-xsrf', 'xxx')
-        .set('kbn-system-api', 'true')
+        .set('kbn-system-request', 'true')
         .set('Cookie', sessionCookie.cookieString())
         .send()
         .expect(200);
     const extendSession = async () =>
-      supertest
+      supertestWithoutAuth
         .post('/internal/security/session')
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie.cookieString())
@@ -42,7 +42,7 @@ export default function({ getService }: FtrProviderContext) {
         .then(saveCookie);
 
     beforeEach(async () => {
-      await supertest
+      await supertestWithoutAuth
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
         .send({ username: validUsername, password: validPassword })
@@ -56,7 +56,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.now).to.be.a('number');
         expect(body.idleTimeoutExpiration).to.be.a('number');
         expect(body.lifespanExpiration).to.be(null);
-        expect(body.provider).to.be('basic');
+        expect(body.provider).to.eql({ type: 'basic', name: 'basic' });
       });
 
       it('should not extend the session', async () => {

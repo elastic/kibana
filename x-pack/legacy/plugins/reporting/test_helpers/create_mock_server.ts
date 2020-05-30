@@ -3,43 +3,33 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { memoize } from 'lodash';
-import { ServerFacade } from '../types';
 
-export const createMockServer = ({ settings = {} }: any): ServerFacade => {
-  const mockServer = {
-    expose: () => {
-      ' ';
-    },
-    config: memoize(() => ({ get: jest.fn() })),
-    info: {
-      protocol: 'http',
-    },
-    plugins: {
-      elasticsearch: {
-        getCluster: memoize(() => {
-          return {
-            callWithRequest: jest.fn(),
-          };
-        }),
-      },
-    },
-    savedObjects: {
-      getScopedSavedObjectsClient: jest.fn(),
-    },
-    uiSettingsServiceFactory: jest.fn().mockReturnValue({ get: jest.fn() }),
-  };
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createHttpServer, createCoreContext } from 'src/core/server/http/test_utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { coreMock } from 'src/core/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ContextService } from 'src/core/server/context/context_service';
 
-  const defaultSettings: any = {
-    'xpack.reporting.encryptionKey': 'testencryptionkey',
-    'server.basePath': '/sbp',
-    'server.host': 'localhost',
-    'server.port': 5601,
-    'xpack.reporting.kibanaServer': {},
-  };
-  mockServer.config().get.mockImplementation((key: any) => {
-    return key in settings ? settings[key] : defaultSettings[key];
+const coreId = Symbol('reporting');
+
+export const createMockServer = async () => {
+  const coreContext = createCoreContext({ coreId });
+  const contextService = new ContextService(coreContext);
+
+  const server = createHttpServer(coreContext);
+  const httpSetup = await server.setup({
+    context: contextService.setup({ pluginDependencies: new Map() }),
+  });
+  const handlerContext = coreMock.createRequestHandlerContext();
+
+  httpSetup.registerRouteHandlerContext(coreId, 'core', async (ctx, req, res) => {
+    return handlerContext;
   });
 
-  return (mockServer as unknown) as ServerFacade;
+  return {
+    server,
+    httpSetup,
+    handlerContext,
+  };
 };

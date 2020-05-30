@@ -31,29 +31,20 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce, compact, isEqual } from 'lodash';
 import { Toast } from 'src/core/public';
-import {
-  IDataPluginServices,
-  IIndexPattern,
-  PersistedLog,
-  SuggestionsComponent,
-  toUser,
-  fromUser,
-  matchPairs,
-  getQueryLog,
-  Query,
-} from '../..';
+import { IDataPluginServices, IIndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
 import { withKibana, KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
+import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
+import { SuggestionsComponent } from '..';
 
 interface Props {
   kibana: KibanaReactContextValue<IDataPluginServices>;
-  intl: InjectedIntl;
   indexPatterns: Array<IIndexPattern | string>;
   query: Query;
   disableAutoFocus?: boolean;
@@ -114,10 +105,10 @@ export class QueryStringInputUI extends Component<Props, State> {
 
   private fetchIndexPatterns = async () => {
     const stringPatterns = this.props.indexPatterns.filter(
-      indexPattern => typeof indexPattern === 'string'
+      (indexPattern) => typeof indexPattern === 'string'
     ) as string[];
     const objectPatterns = this.props.indexPatterns.filter(
-      indexPattern => typeof indexPattern !== 'string'
+      (indexPattern) => typeof indexPattern !== 'string'
     ) as IIndexPattern[];
 
     const objectPatternsFromStrings = (await fetchIndexPatterns(
@@ -184,11 +175,11 @@ export class QueryStringInputUI extends Component<Props, State> {
       return [];
     }
     const recentSearches = this.persistedLog.get();
-    const matchingRecentSearches = recentSearches.filter(recentQuery => {
+    const matchingRecentSearches = recentSearches.filter((recentQuery) => {
       const recentQueryString = typeof recentQuery === 'object' ? toUser(recentQuery) : recentQuery;
       return recentQueryString.includes(query);
     });
-    return matchingRecentSearches.map(recentSearch => {
+    return matchingRecentSearches.map((recentSearch) => {
       const text = toUser(recentSearch);
       const start = 0;
       const end = query.length;
@@ -365,8 +356,7 @@ export class QueryStringInputUI extends Component<Props, State> {
 
       if (notifications && docLinks) {
         const toast = notifications.toasts.add({
-          title: this.props.intl.formatMessage({
-            id: 'data.query.queryBar.KQLNestedQuerySyntaxInfoTitle',
+          title: i18n.translate('data.query.queryBar.KQLNestedQuerySyntaxInfoTitle', {
             defaultMessage: 'KQL nested query syntax',
           }),
           text: toMountPoint(
@@ -546,7 +536,7 @@ export class QueryStringInputUI extends Component<Props, State> {
                 onClick={this.onClickInput}
                 fullWidth
                 autoFocus={!this.props.disableAutoFocus}
-                inputRef={node => {
+                inputRef={(node) => {
                   if (node) {
                     this.inputRef = node;
                   }
@@ -593,4 +583,4 @@ export class QueryStringInputUI extends Component<Props, State> {
   }
 }
 
-export const QueryStringInput = injectI18n(withKibana(QueryStringInputUI));
+export const QueryStringInput = withKibana(QueryStringInputUI);

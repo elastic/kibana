@@ -19,7 +19,7 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 import { Subscription } from 'rxjs';
-import { ExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { Container } from '../../../containers';
 import { EmbeddableOutput, Embeddable, EmbeddableInput } from '../../../embeddables';
 import { CONTACT_CARD_EMBEDDABLE } from './contact_card_embeddable_factory';
@@ -37,12 +37,12 @@ export interface ContactCardEmbeddableOutput extends EmbeddableOutput {
 }
 
 export interface ContactCardEmbeddableOptions {
-  execAction: ExecuteTriggerActions;
+  execAction: UiActionsStart['executeTriggerActions'];
 }
 
 function getFullName(input: ContactCardEmbeddableInput) {
   const { nameTitle, firstName, lastName } = input;
-  const nameParts = [nameTitle, firstName, lastName].filter(name => name !== undefined);
+  const nameParts = [nameTitle, firstName, lastName].filter((name) => name !== undefined);
   return nameParts.join(' ');
 }
 

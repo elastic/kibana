@@ -26,6 +26,9 @@ const createSetupContract = (): Setup => {
     allowTrackUserAgent: jest.fn(),
     reportUiStats: jest.fn(),
     METRIC_TYPE,
+    __LEGACY: {
+      appChanged: jest.fn(),
+    },
   };
 
   return setupContract;

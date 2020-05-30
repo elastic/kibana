@@ -13,13 +13,14 @@ import {
   CLONE_ROLES_PATH,
 } from '../../../../plugins/security/public/management/management_urls';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
-  describe('Management', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/61173
+  describe.skip('Management', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {

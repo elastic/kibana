@@ -21,21 +21,15 @@
 
 // preloading (for faster webpack builds)
 import routes from 'ui/routes';
-import { uiModules } from 'ui/modules';
 import { npSetup } from 'ui/new_platform';
 
 // import the uiExports that we want to "use"
-import 'uiExports/home';
-import 'uiExports/visTypes';
-
-import 'uiExports/visualize';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/fieldFormatEditors';
 import 'uiExports/navbarExtensions';
 import 'uiExports/contextMenuActions';
 import 'uiExports/managementSections';
 import 'uiExports/indexManagement';
-import 'uiExports/docViews';
 import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
 import 'uiExports/inspectorViews';
@@ -44,21 +38,12 @@ import 'uiExports/shareContextMenuExtensions';
 import 'uiExports/interpreter';
 
 import 'ui/autoload/all';
-import 'ui/kbn_top_nav';
-import './home';
-import './discover/legacy';
-import './visualize/legacy';
-import './dashboard/legacy';
 import './management';
-import './dev_tools';
-import 'ui/agg_response';
-import 'ui/agg_types';
-import { showAppRedirectNotification } from 'ui/notify';
-import 'leaflet';
 import { localApplicationService } from './local_application_service';
 
-npSetup.plugins.kibanaLegacy.forwardApp('doc', 'discover', { keepPrefix: true });
-npSetup.plugins.kibanaLegacy.forwardApp('context', 'discover', { keepPrefix: true });
+npSetup.plugins.kibanaLegacy.registerLegacyAppAlias('doc', 'discover', { keepPrefix: true });
+npSetup.plugins.kibanaLegacy.registerLegacyAppAlias('context', 'discover', { keepPrefix: true });
+
 localApplicationService.attachToAngular(routes);
 
 routes.enable();
@@ -67,5 +52,3 @@ const { config } = npSetup.plugins.kibanaLegacy;
 routes.otherwise({
   redirectTo: `/${config.defaultAppId || 'discover'}`,
 });
-
-uiModules.get('kibana').run(showAppRedirectNotification);

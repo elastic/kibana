@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './spaces_menu.scss';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -14,7 +15,7 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
 import { Capabilities, ApplicationStart } from 'src/core/public';
-import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common/constants';
+import { addSpaceIdToPath, SPACE_SEARCH_COUNT_THRESHOLD, ENTER_SPACE_PATH } from '../../../common';
 import { Space } from '../../../common/model/space';
 import { ManageSpacesButton } from './manage_spaces_button';
 import { SpaceAvatar } from '../../space_avatar';
@@ -23,7 +24,7 @@ interface Props {
   id: string;
   spaces: Space[];
   isLoading: boolean;
-  onSelectSpace: (space: Space) => void;
+  serverBasePath: string;
   onManageSpacesClick: () => void;
   intl: InjectedIntl;
   capabilities: Capabilities;
@@ -79,7 +80,7 @@ class SpacesMenuUI extends Component<Props, State> {
 
     let filteredSpaces = spaces;
     if (searchTerm) {
-      filteredSpaces = spaces.filter(space => {
+      filteredSpaces = spaces.filter((space) => {
         const { name, description = '' } = space;
         return (
           name.toLowerCase().indexOf(searchTerm) >= 0 ||
@@ -184,7 +185,7 @@ class SpacesMenuUI extends Component<Props, State> {
       <EuiContextMenuItem
         key={space.id}
         icon={icon}
-        onClick={this.props.onSelectSpace.bind(this, space)}
+        href={addSpaceIdToPath(this.props.serverBasePath, space.id, ENTER_SPACE_PATH)}
         toolTipTitle={space.description && space.name}
         toolTipContent={space.description}
       >

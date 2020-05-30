@@ -21,17 +21,18 @@ import { Subscription } from 'rxjs';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CoreStart } from 'src/core/public';
-import { GetActionsCompatibleWithTrigger } from 'src/plugins/ui_actions/public';
+import { UiActionsService } from 'src/plugins/ui_actions/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { IContainer, PanelState, EmbeddableChildPanel } from '../..';
-import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../types';
+import { EmbeddableStart } from '../../../plugin';
 
 interface Props {
   container: IContainer;
-  getActions: GetActionsCompatibleWithTrigger;
-  getEmbeddableFactory: GetEmbeddableFactory;
-  getAllEmbeddableFactories: GetEmbeddableFactories;
+  getActions: UiActionsService['getTriggerCompatibleActions'];
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: CoreStart['overlays'];
+  application: CoreStart['application'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
@@ -51,7 +52,7 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    Object.values(this.props.container.getInput().panels).forEach(panelState => {
+    Object.values(this.props.container.getInput().panels).forEach((panelState) => {
       this.roots[panelState.explicitInput.id] = React.createRef();
     });
 
@@ -101,7 +102,7 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
   }
 
   private renderList() {
-    const list = Object.values(this.state.panels).map(panelState => {
+    const list = Object.values(this.state.panels).map((panelState) => {
       const item = (
         <EuiFlexItem key={panelState.explicitInput.id}>
           <EmbeddableChildPanel
@@ -112,6 +113,7 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
             getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
             overlays={this.props.overlays}
             notifications={this.props.notifications}
+            application={this.props.application}
             inspector={this.props.inspector}
             SavedObjectFinder={this.props.SavedObjectFinder}
           />

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const _ = require('lodash');
+import _ from 'lodash';
 import { ConstantComponent, ListComponent, SharedComponent } from './components';
 
 export class ParamComponent extends ConstantComponent {
@@ -52,7 +52,7 @@ export class UrlParams {
     _.defaults(description, defaults);
     _.each(
       description,
-      function(pDescription, param) {
+      function (pDescription, param) {
         const component = new ParamComponent(param, this.rootComponent, pDescription);
         if (Array.isArray(pDescription)) {
           new ListComponent(param, pDescription, component);

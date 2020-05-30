@@ -4,23 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ExportTypesRegistry,
-  HeadlessChromiumDriverFactory,
-  Logger,
-  ServerFacade,
-} from '../../types';
-import { ReportingSetupDeps } from '../plugin';
+import { LevelLogger as Logger } from '../lib';
 import { registerJobGenerationRoutes } from './generation';
 import { registerJobInfoRoutes } from './jobs';
+import { ReportingCore } from '../core';
 
-export function registerRoutes(
-  server: ServerFacade,
-  plugins: ReportingSetupDeps,
-  exportTypesRegistry: ExportTypesRegistry,
-  browserDriverFactory: HeadlessChromiumDriverFactory,
-  logger: Logger
-) {
-  registerJobGenerationRoutes(server, plugins, exportTypesRegistry, browserDriverFactory, logger);
-  registerJobInfoRoutes(server, plugins, exportTypesRegistry, logger);
+export function registerRoutes(reporting: ReportingCore, logger: Logger) {
+  registerJobGenerationRoutes(reporting, logger);
+  registerJobInfoRoutes(reporting);
 }

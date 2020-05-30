@@ -9,13 +9,13 @@ import { Observable, Subscription } from 'rxjs';
 import { Legacy } from 'kibana';
 import { Logger, KibanaRequest, CoreSetup } from '../../../../../src/core/server';
 import { SecurityPluginSetup } from '../../../security/server';
-import { LegacyAPI } from '../plugin';
 import { SpacesClient } from '../lib/spaces_client';
 import { ConfigType } from '../config';
 import { getSpaceIdFromPath, addSpaceIdToPath } from '../../common/lib/spaces_url_parser';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spaceIdToNamespace, namespaceToSpaceId } from '../lib/utils/namespace';
 import { Space } from '../../common/model/space';
+import { SpacesAuditLogger } from '../lib/audit_logger';
 
 type RequestFacade = KibanaRequest | Legacy.Request;
 
@@ -37,23 +37,23 @@ export interface SpacesServiceSetup {
 
 interface SpacesServiceDeps {
   http: CoreSetup['http'];
-  elasticsearch: CoreSetup['elasticsearch'];
+  getStartServices: CoreSetup['getStartServices'];
   authorization: SecurityPluginSetup['authz'] | null;
   config$: Observable<ConfigType>;
-  getSpacesAuditLogger(): any;
+  auditLogger: SpacesAuditLogger;
 }
 
 export class SpacesService {
   private configSubscription$?: Subscription;
 
-  constructor(private readonly log: Logger, private readonly getLegacyAPI: () => LegacyAPI) {}
+  constructor(private readonly log: Logger) {}
 
   public async setup({
     http,
-    elasticsearch,
+    getStartServices,
     authorization,
     config$,
-    getSpacesAuditLogger,
+    auditLogger,
   }: SpacesServiceDeps): Promise<SpacesServiceSetup> {
     const getSpaceId = (request: RequestFacade) => {
       // Currently utilized by reporting
@@ -69,23 +69,20 @@ export class SpacesService {
     };
 
     const getScopedClient = async (request: KibanaRequest) => {
+      const [coreStart] = await getStartServices();
+
       return config$
         .pipe(
-          map(config => {
-            const internalRepository = this.getLegacyAPI().savedObjects.getSavedObjectsRepository(
-              elasticsearch.adminClient.callAsInternalUser,
-              ['space']
-            );
+          map((config) => {
+            const internalRepository = coreStart.savedObjects.createInternalRepository(['space']);
 
-            const callCluster = elasticsearch.adminClient.asScoped(request).callAsCurrentUser;
-
-            const callWithRequestRepository = this.getLegacyAPI().savedObjects.getSavedObjectsRepository(
-              callCluster,
+            const callWithRequestRepository = coreStart.savedObjects.createScopedRepository(
+              request,
               ['space']
             );
 
             return new SpacesClient(
-              getSpacesAuditLogger(),
+              auditLogger,
               (message: string) => {
                 this.log.debug(message);
               },

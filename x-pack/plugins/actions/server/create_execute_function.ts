@@ -4,19 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from '../../../../src/core/server';
+import { SavedObjectsClientContract, KibanaRequest } from '../../../../src/core/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
-import { GetBasePathFunction } from './types';
+import {
+  GetBasePathFunction,
+  RawAction,
+  ActionTypeRegistryContract,
+  PreConfiguredAction,
+} from './types';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
-  getScopedSavedObjectsClient: (request: any) => SavedObjectsClientContract;
+  getScopedSavedObjectsClient: (request: KibanaRequest) => SavedObjectsClientContract;
   getBasePath: GetBasePathFunction;
+  isESOUsingEphemeralEncryptionKey: boolean;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  preconfiguredActions: PreConfiguredAction[];
 }
 
 export interface ExecuteOptions {
   id: string;
-  params: Record<string, any>;
+  params: Record<string, unknown>;
   spaceId: string;
   apiKey: string | null;
 }
@@ -24,9 +32,18 @@ export interface ExecuteOptions {
 export function createExecuteFunction({
   getBasePath,
   taskManager,
+  actionTypeRegistry,
   getScopedSavedObjectsClient,
+  isESOUsingEphemeralEncryptionKey,
+  preconfiguredActions,
 }: CreateExecuteFunctionOptions) {
   return async function execute({ id, params, spaceId, apiKey }: ExecuteOptions) {
+    if (isESOUsingEphemeralEncryptionKey === true) {
+      throw new Error(
+        `Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
+      );
+    }
+
     const requestHeaders: Record<string, string> = {};
 
     if (apiKey) {
@@ -35,7 +52,7 @@ export function createExecuteFunction({
 
     // Since we're using API keys and accessing elasticsearch can only be done
     // via a request, we're faking one with the proper authorization headers.
-    const fakeRequest: any = {
+    const fakeRequest: unknown = {
       headers: requestHeaders,
       getBasePath: () => getBasePath(spaceId),
       path: '/',
@@ -50,8 +67,13 @@ export function createExecuteFunction({
       },
     };
 
-    const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
-    const actionSavedObject = await savedObjectsClient.get('action', id);
+    const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest as KibanaRequest);
+    const actionTypeId = await getActionTypeId(id);
+
+    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId)) {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    }
+
     const actionTaskParamsRecord = await savedObjectsClient.create('action_task_params', {
       actionId: id,
       params,
@@ -59,7 +81,7 @@ export function createExecuteFunction({
     });
 
     await taskManager.schedule({
-      taskType: `actions:${actionSavedObject.attributes.actionTypeId}`,
+      taskType: `actions:${actionTypeId}`,
       params: {
         spaceId,
         actionTaskParamsId: actionTaskParamsRecord.id,
@@ -67,5 +89,15 @@ export function createExecuteFunction({
       state: {},
       scope: ['actions'],
     });
+
+    async function getActionTypeId(actionId: string): Promise<string> {
+      const pcAction = preconfiguredActions.find((action) => action.id === actionId);
+      if (pcAction) {
+        return pcAction.actionTypeId;
+      }
+
+      const actionSO = await savedObjectsClient.get<RawAction>('action', actionId);
+      return actionSO.attributes.actionTypeId;
+    }
   };
 }

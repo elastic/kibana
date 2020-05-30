@@ -25,7 +25,7 @@
     'Team:Operations',
     'renovate',
     'v8.0.0',
-    'v7.7.0',
+    'v7.9.0',
   ],
   major: {
     labels: [
@@ -33,7 +33,7 @@
       'Team:Operations',
       'renovate',
       'v8.0.0',
-      'v7.7.0',
+      'v7.9.0',
       'renovate:major',
     ],
   },
@@ -121,6 +121,14 @@
         packageNames: [
           'bluebird',
           '@types/bluebird',
+        ],
+      },
+      {
+        groupSlug: 'browserslist-useragent',
+        groupName: 'browserslist-useragent related packages',
+        packageNames: [
+          'browserslist-useragent',
+          '@types/browserslist-useragent',
         ],
       },
       {
@@ -238,7 +246,7 @@
           'Team:Operations',
           'renovate',
           'v8.0.0',
-          'v7.7.0',
+          'v7.9.0',
           ':ml',
         ],
       },
@@ -255,6 +263,14 @@
         groupName: 'eslint related packages',
         packagePatterns: [
           '(\\b|_)eslint(\\b|_)',
+        ],
+      },
+      {
+        groupSlug: 'estree',
+        groupName: 'estree related packages',
+        packageNames: [
+          'estree',
+          '@types/estree',
         ],
       },
       {
@@ -287,6 +303,14 @@
         packageNames: [
           'flot',
           '@types/flot',
+        ],
+      },
+      {
+        groupSlug: 'geojson',
+        groupName: 'geojson related packages',
+        packageNames: [
+          'geojson',
+          '@types/geojson',
         ],
       },
       {
@@ -374,6 +398,8 @@
           '@types/good-squeeze',
           'inert',
           '@types/inert',
+          'accept',
+          '@types/accept',
         ],
       },
       {
@@ -401,6 +427,14 @@
         ],
       },
       {
+        groupSlug: 'inquirer',
+        groupName: 'inquirer related packages',
+        packageNames: [
+          'inquirer',
+          '@types/inquirer',
+        ],
+      },
+      {
         groupSlug: 'intl-relativeformat',
         groupName: 'intl-relativeformat related packages',
         packageNames: [
@@ -421,6 +455,14 @@
         packageNames: [
           'jquery',
           '@types/jquery',
+        ],
+      },
+      {
+        groupSlug: 'js-search',
+        groupName: 'js-search related packages',
+        packageNames: [
+          'js-search',
+          '@types/js-search',
         ],
       },
       {
@@ -650,11 +692,27 @@
         ],
       },
       {
+        groupSlug: 'node-sass',
+        groupName: 'node-sass related packages',
+        packageNames: [
+          'node-sass',
+          '@types/node-sass',
+        ],
+      },
+      {
         groupSlug: 'nodemailer',
         groupName: 'nodemailer related packages',
         packageNames: [
           'nodemailer',
           '@types/nodemailer',
+        ],
+      },
+      {
+        groupSlug: 'normalize-path',
+        groupName: 'normalize-path related packages',
+        packageNames: [
+          'normalize-path',
+          '@types/normalize-path',
         ],
       },
       {
@@ -727,6 +785,14 @@
         packageNames: [
           'podium',
           '@types/podium',
+        ],
+      },
+      {
+        groupSlug: 'pretty-ms',
+        groupName: 'pretty-ms related packages',
+        packageNames: [
+          'pretty-ms',
+          '@types/pretty-ms',
         ],
       },
       {
@@ -807,11 +873,27 @@
         ],
       },
       {
+        groupSlug: 'set-value',
+        groupName: 'set-value related packages',
+        packageNames: [
+          'set-value',
+          '@types/set-value',
+        ],
+      },
+      {
         groupSlug: 'sinon',
         groupName: 'sinon related packages',
         packageNames: [
           'sinon',
           '@types/sinon',
+        ],
+      },
+      {
+        groupSlug: 'stats-lite',
+        groupName: 'stats-lite related packages',
+        packageNames: [
+          'stats-lite',
+          '@types/stats-lite',
         ],
       },
       {
@@ -862,6 +944,14 @@
         ],
       },
       {
+        groupSlug: 'tar',
+        groupName: 'tar related packages',
+        packageNames: [
+          'tar',
+          '@types/tar',
+        ],
+      },
+      {
         groupSlug: 'tar-fs',
         groupName: 'tar-fs related packages',
         packageNames: [
@@ -875,6 +965,22 @@
         packageNames: [
           'tempy',
           '@types/tempy',
+        ],
+      },
+      {
+        groupSlug: 'through2',
+        groupName: 'through2 related packages',
+        packageNames: [
+          'through2',
+          '@types/through2',
+        ],
+      },
+      {
+        groupSlug: 'through2-map',
+        groupName: 'through2-map related packages',
+        packageNames: [
+          'through2-map',
+          '@types/through2-map',
         ],
       },
       {
@@ -906,6 +1012,14 @@
         ],
       },
       {
+        groupSlug: 'use-resize-observer',
+        groupName: 'use-resize-observer related packages',
+        packageNames: [
+          'use-resize-observer',
+          '@types/use-resize-observer',
+        ],
+      },
+      {
         groupSlug: 'uuid',
         groupName: 'uuid related packages',
         packageNames: [
@@ -922,11 +1036,27 @@
         enabled: false,
       },
       {
+        groupSlug: 'vinyl',
+        groupName: 'vinyl related packages',
+        packageNames: [
+          'vinyl',
+          '@types/vinyl',
+        ],
+      },
+      {
         groupSlug: 'vinyl-fs',
         groupName: 'vinyl-fs related packages',
         packageNames: [
           'vinyl-fs',
           '@types/vinyl-fs',
+        ],
+      },
+      {
+        groupSlug: 'watchpack',
+        groupName: 'watchpack related packages',
+        packageNames: [
+          'watchpack',
+          '@types/watchpack',
         ],
       },
       {

@@ -25,7 +25,7 @@ const TEST_ANCHOR_FILTER_FIELD = 'geo.src';
 const TEST_ANCHOR_FILTER_VALUE = 'IN';
 const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
   const retry = getService('retry');
@@ -33,47 +33,57 @@ export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'context']);
 
   describe('context filters', function contextSize() {
-    beforeEach(async function() {
+    beforeEach(async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
       });
     });
 
-    it('should be addable via expanded doc table rows', async function() {
+    it('inclusive filter should be addable via expanded doc table rows', async function () {
       await docTable.toggleRowExpanded({ isAnchorRow: true });
 
       await retry.try(async () => {
         const anchorDetailsRow = await docTable.getAnchorDetailsRow();
         await docTable.addInclusiveFilter(anchorDetailsRow, TEST_ANCHOR_FILTER_FIELD);
         await PageObjects.context.waitUntilContextLoadingHasFinished();
-        // await docTable.toggleRowExpanded({ isAnchorRow: true });
         expect(
           await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, true)
         ).to.be(true);
         const fields = await docTable.getFields();
         const hasOnlyFilteredRows = fields
-          .map(row => row[2])
-          .every(fieldContent => fieldContent === TEST_ANCHOR_FILTER_VALUE);
+          .map((row) => row[2])
+          .every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
         expect(hasOnlyFilteredRows).to.be(true);
       });
     });
 
-    it('should be toggleable via the filter bar', async function() {
+    it('inclusive filter should be toggleable via the filter bar', async function () {
       await filterBar.addFilter(TEST_ANCHOR_FILTER_FIELD, 'IS', TEST_ANCHOR_FILTER_VALUE);
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       // disable filter
       await filterBar.toggleFilterEnabled(TEST_ANCHOR_FILTER_FIELD);
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
-      retry.try(async () => {
+      await retry.try(async () => {
         expect(
           await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, false)
         ).to.be(true);
         const fields = await docTable.getFields();
         const hasOnlyFilteredRows = fields
-          .map(row => row[2])
-          .every(fieldContent => fieldContent === TEST_ANCHOR_FILTER_VALUE);
+          .map((row) => row[2])
+          .every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
         expect(hasOnlyFilteredRows).to.be(false);
+      });
+    });
+
+    it('filter for presence should be addable via expanded doc table rows', async function () {
+      await docTable.toggleRowExpanded({ isAnchorRow: true });
+
+      await retry.try(async () => {
+        const anchorDetailsRow = await docTable.getAnchorDetailsRow();
+        await docTable.addExistsFilter(anchorDetailsRow, TEST_ANCHOR_FILTER_FIELD);
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
+        expect(await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, 'exists', true)).to.be(true);
       });
     });
   });

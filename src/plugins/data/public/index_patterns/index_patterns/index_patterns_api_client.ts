@@ -18,7 +18,7 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import { indexPatterns } from '../';
+import { IndexPatternMissingIndices } from '../lib';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 
@@ -45,8 +45,8 @@ export class IndexPatternsApiClient {
         query,
       })
       .catch((resp: any) => {
-        if (resp.body.statusCode === 404 && resp.body.statuscode === 'no_matching_indices') {
-          throw new indexPatterns.IndexPatternMissingIndices(resp.body.message);
+        if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
+          throw new IndexPatternMissingIndices(resp.body.message);
         }
 
         throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
@@ -54,13 +54,7 @@ export class IndexPatternsApiClient {
   }
 
   _getUrl(path: string[]) {
-    return (
-      API_BASE_URL +
-      path
-        .filter(Boolean)
-        .map(encodeURIComponent)
-        .join('/')
-    );
+    return API_BASE_URL + path.filter(Boolean).map(encodeURIComponent).join('/');
   }
 
   getFieldsForTimePattern(options: GetFieldsOptions = {}) {

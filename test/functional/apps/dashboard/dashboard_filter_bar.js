@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
@@ -27,6 +27,7 @@ export default function({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
   describe('dashboard filter bar', () => {
@@ -38,12 +39,12 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('dashboard');
     });
 
-    describe('Add a filter bar', function() {
+    describe('Add a filter bar', function () {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
       });
 
-      it('should show on an empty dashboard', async function() {
+      it('should show on an empty dashboard', async function () {
         await PageObjects.dashboard.clickNewDashboard();
         const hasAddFilter = await testSubjects.exists('addFilter');
         expect(hasAddFilter).to.be(true);
@@ -56,7 +57,7 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('filter editor field list', function() {
+    describe('filter editor field list', function () {
       this.tags(['skipFirefox']);
 
       before(async () => {
@@ -86,7 +87,7 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('filter pills', function() {
+    describe('filter pills', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -94,12 +95,12 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.timePicker.setDefaultDataRange();
       });
 
-      it('are not selected by default', async function() {
+      it('are not selected by default', async function () {
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(0);
       });
 
-      it('are added when a pie chart slice is clicked', async function() {
+      it('are added when a pie chart slice is clicked', async function () {
         await dashboardAddPanel.addVisualization('Rendering Test: pie');
         await PageObjects.dashboard.waitForRenderComplete();
         await pieChart.filterOnPieSlice('4,886');
@@ -126,12 +127,49 @@ export default function({ getService, getPageObjects }) {
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
-
         await pieChart.expectPieSliceCount(1);
+      });
+
+      it("restoring filters doesn't break back button", async () => {
+        await browser.goBack();
+        await PageObjects.dashboard.expectExistsDashboardLandingPage();
+        await browser.goForward();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+        await pieChart.expectPieSliceCount(1);
+      });
+
+      it("saving with pinned filter doesn't unpin them", async () => {
+        const filterKey = 'bytes';
+        await filterBar.toggleFilterPinned(filterKey);
+        await PageObjects.dashboard.switchToEditMode();
+        await PageObjects.dashboard.saveDashboard('saved with pinned filters', {
+          saveAsNew: true,
+        });
+        expect(await filterBar.isFilterPinned(filterKey)).to.be(true);
+        await pieChart.expectPieSliceCount(1);
+      });
+
+      it("navigating to a dashboard with global filter doesn't unpin it if same filter is saved with dashboard", async () => {
+        await PageObjects.dashboard.preserveCrossAppState();
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.loadSavedDashboard('with filters');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await filterBar.isFilterPinned('bytes')).to.be(true);
+        await pieChart.expectPieSliceCount(1);
+      });
+
+      it("pinned filters aren't saved", async () => {
+        await filterBar.removeFilter('bytes');
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.loadSavedDashboard('saved with pinned filters');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await filterBar.getFilterCount()).to.be(0);
+        await pieChart.expectPieSliceCount(5);
       });
     });
 
-    describe('saved search filtering', function() {
+    describe('saved search filtering', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -139,7 +177,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.timePicker.setDefaultDataRange();
       });
 
-      it('are added when a cell magnifying glass is clicked', async function() {
+      it('are added when a cell magnifying glass is clicked', async function () {
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await PageObjects.dashboard.waitForRenderComplete();
         await testSubjects.click('docTableCellFilter');

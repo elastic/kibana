@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 'react-router-dom';
+import { Router, Route, withRouter, RouteComponentProps } from 'react-router-dom';
 
 import {
   EuiPage,
@@ -94,7 +95,7 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
           {
             id: 'home',
             name: 'Home',
-            onClick: () => history.push('/'),
+            onClick: () => history.push(''),
             'data-test-subj': 'fooNavHome',
           },
           {
@@ -115,8 +116,8 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
   />
 ));
 
-const FooApp = ({ basename, context }: { basename: string; context: AppMountContext }) => (
-  <Router basename={basename}>
+const FooApp = ({ history, context }: { history: History; context: AppMountContext }) => (
+  <Router history={history}>
     <EuiPage>
       <EuiPageSideBar>
         <Nav navigateToApp={context.core.application.navigateToApp} />
@@ -127,11 +128,8 @@ const FooApp = ({ basename, context }: { basename: string; context: AppMountCont
   </Router>
 );
 
-export const renderApp = (
-  context: AppMountContext,
-  { appBasePath, element }: AppMountParameters
-) => {
-  ReactDOM.render(<FooApp basename={appBasePath} context={context} />, element);
+export const renderApp = (context: AppMountContext, { history, element }: AppMountParameters) => {
+  ReactDOM.render(<FooApp history={history} context={context} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

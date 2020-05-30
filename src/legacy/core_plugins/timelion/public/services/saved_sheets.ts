@@ -17,9 +17,9 @@
  * under the License.
  */
 import { npStart } from 'ui/new_platform';
-import { SavedObjectLoader } from 'ui/saved_objects';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
+import { SavedObjectLoader } from '../../../../../plugins/saved_objects/public';
 import { createSavedSheetClass } from './_saved_sheet';
 
 const module = uiModules.get('app/sheet');
@@ -28,6 +28,7 @@ const savedObjectsClient = npStart.core.savedObjects.client;
 const services = {
   savedObjectsClient,
   indexPatterns: npStart.plugins.data.indexPatterns,
+  search: npStart.plugins.data.search,
   chrome: npStart.core.chrome,
   overlays: npStart.core.overlays,
 };
@@ -39,7 +40,7 @@ export const savedSheetLoader = new SavedObjectLoader(
   savedObjectsClient,
   npStart.core.chrome
 );
-savedSheetLoader.urlFor = id => `#/${encodeURIComponent(id)}`;
+savedSheetLoader.urlFor = (id) => `#/${encodeURIComponent(id)}`;
 // Customize loader properties since adding an 's' on type doesn't work for type 'timelion-sheet'.
 savedSheetLoader.loaderProperties = {
   name: 'timelion-sheet',

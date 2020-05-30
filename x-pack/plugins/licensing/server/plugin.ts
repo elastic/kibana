@@ -12,20 +12,22 @@ import stringify from 'json-stable-stringify';
 
 import {
   CoreSetup,
-  CoreStart,
   Logger,
   Plugin,
   PluginInitializerContext,
   IClusterClient,
+  IScopedClusterClient,
+  ScopeableRequest,
 } from 'src/core/server';
 
 import { ILicense, PublicLicense, PublicFeatures } from '../common/types';
-import { LicensingPluginSetup } from './types';
+import { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { License } from '../common/license';
 import { createLicenseUpdate } from '../common/license_update';
 
 import { ElasticsearchError, RawLicense, RawFeatures } from './types';
 import { registerRoutes } from './routes';
+import { FeatureUsageService } from './services';
 
 import { LicenseConfigType } from './licensing_config';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
@@ -77,22 +79,49 @@ function sign({
  * A plugin for fetching, refreshing, and receiving information about the license for the
  * current Kibana instance.
  */
-export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
+export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPluginStart, {}, {}> {
   private stop$ = new Subject();
   private readonly logger: Logger;
   private readonly config$: Observable<LicenseConfigType>;
   private loggingSubscription?: Subscription;
+  private featureUsage = new FeatureUsageService();
+
+  private refresh?: () => Promise<ILicense>;
+  private license$?: Observable<ILicense>;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
     this.config$ = this.context.config.create<LicenseConfigType>();
   }
 
-  public async setup(core: CoreSetup) {
+  public async setup(core: CoreSetup<{}, LicensingPluginStart>) {
     this.logger.debug('Setting up Licensing plugin');
     const config = await this.config$.pipe(take(1)).toPromise();
     const pollingFrequency = config.api_polling_frequency;
-    const dataClient = await core.elasticsearch.dataClient;
+
+    async function callAsInternalUser(
+      ...args: Parameters<IScopedClusterClient['callAsInternalUser']>
+    ): ReturnType<IScopedClusterClient['callAsInternalUser']> {
+      const [coreStart] = await core.getStartServices();
+      const client = coreStart.elasticsearch.legacy.client;
+      return await client.callAsInternalUser(...args);
+    }
+
+    const dataClient: IClusterClient = {
+      callAsInternalUser,
+      asScoped(request?: ScopeableRequest): IScopedClusterClient {
+        return {
+          async callAsCurrentUser(
+            ...args: Parameters<IScopedClusterClient['callAsCurrentUser']>
+          ): ReturnType<IScopedClusterClient['callAsCurrentUser']> {
+            const [coreStart] = await core.getStartServices();
+            const client = coreStart.elasticsearch.legacy.client;
+            return await client.asScoped(request).callAsCurrentUser(...args);
+          },
+          callAsInternalUser,
+        };
+      },
+    };
 
     const { refresh, license$ } = this.createLicensePoller(
       dataClient,
@@ -101,13 +130,17 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
 
     core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
 
-    registerRoutes(core.http.createRouter());
+    registerRoutes(core.http.createRouter(), core.getStartServices);
     core.http.registerOnPreResponse(createOnPreResponseHandler(refresh, license$));
+
+    this.refresh = refresh;
+    this.license$ = license$;
 
     return {
       refresh,
       license$,
       createLicensePoller: this.createLicensePoller.bind(this),
+      featureUsage: this.featureUsage.setup(),
     };
   }
 
@@ -120,7 +153,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
       this.fetchLicense(clusterClient)
     );
 
-    this.loggingSubscription = license$.subscribe(license =>
+    this.loggingSubscription = license$.subscribe((license) =>
       this.logger.debug(
         'Imported license information from Elasticsearch:' +
           [
@@ -186,7 +219,17 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     return error.message;
   }
 
-  public async start(core: CoreStart) {}
+  public async start() {
+    if (!this.refresh || !this.license$) {
+      throw new Error('Setup has not been completed');
+    }
+    return {
+      refresh: this.refresh,
+      license$: this.license$,
+      featureUsage: this.featureUsage.start(),
+      createLicensePoller: this.createLicensePoller.bind(this),
+    };
+  }
 
   public stop() {
     this.stop$.next();

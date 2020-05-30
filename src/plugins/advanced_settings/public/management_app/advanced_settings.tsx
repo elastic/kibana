@@ -19,14 +19,7 @@
 
 import React, { Component } from 'react';
 import { Subscription } from 'rxjs';
-import {
-  Comparators,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  // @ts-ignore
-  Query,
-} from '@elastic/eui';
+import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
 import { useParams } from 'react-router-dom';
 import { CallOuts } from './components/call_outs';
@@ -38,7 +31,7 @@ import { ComponentRegistry } from '../';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
-import { FieldSetting, IQuery } from './types';
+import { FieldSetting, SettingsChanges } from './types';
 
 interface AdvancedSettingsProps {
   enableSaving: boolean;
@@ -54,7 +47,7 @@ interface AdvancedSettingsComponentProps extends AdvancedSettingsProps {
 
 interface AdvancedSettingsState {
   footerQueryMatched: boolean;
-  query: IQuery;
+  query: Query;
   filteredSettings: Record<string, FieldSetting[]>;
 }
 
@@ -132,7 +125,7 @@ export class AdvancedSettingsComponent extends Component<
   mapConfig(config: IUiSettingsClient) {
     const all = config.getAll();
     return Object.entries(all)
-      .map(setting => {
+      .map((setting) => {
         return toEditableConfig({
           def: setting[1],
           name: setting[0],
@@ -141,7 +134,7 @@ export class AdvancedSettingsComponent extends Component<
           isOverridden: config.isOverridden(setting[0]),
         });
       })
-      .filter(c => !c.readonly)
+      .filter((c) => !c.readonly)
       .sort(Comparators.property('name', Comparators.default('asc')));
   }
 
@@ -156,7 +149,7 @@ export class AdvancedSettingsComponent extends Component<
     }, {});
   }
 
-  onQueryChange = ({ query }: { query: IQuery }) => {
+  onQueryChange = ({ query }: { query: Query }) => {
     this.setState({
       query,
       filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
@@ -175,6 +168,13 @@ export class AdvancedSettingsComponent extends Component<
     this.setState({
       footerQueryMatched: matched,
     });
+  };
+
+  saveConfig = async (changes: SettingsChanges) => {
+    const arr = Object.entries(changes).map(([key, value]) =>
+      this.props.uiSettings.set(key, value)
+    );
+    return Promise.all(arr);
   };
 
   render() {
@@ -205,18 +205,19 @@ export class AdvancedSettingsComponent extends Component<
         <AdvancedSettingsVoiceAnnouncement queryText={query.text} settings={filteredSettings} />
 
         <Form
-          settings={filteredSettings}
+          settings={this.groupedSettings}
+          visibleSettings={filteredSettings}
           categories={this.categories}
           categoryCounts={this.categoryCounts}
           clearQuery={this.clearQuery}
-          save={this.props.uiSettings.set.bind(this.props.uiSettings)}
-          clear={this.props.uiSettings.remove.bind(this.props.uiSettings)}
+          save={this.saveConfig}
           showNoResultsMessage={!footerQueryMatched}
           enableSaving={this.props.enableSaving}
           dockLinks={this.props.dockLinks}
           toasts={this.props.toasts}
         />
         <PageFooter
+          toasts={this.props.toasts}
           query={query}
           onQueryMatchChange={this.onFooterQueryMatchChange}
           enableSaving={this.props.enableSaving}

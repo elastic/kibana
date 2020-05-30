@@ -187,7 +187,7 @@ export class AlertUtils {
     const alertBody = getDefaultAlwaysFiringAlertData(reference, actionId);
     const response = await request.send({ ...alertBody, ...overwrites });
     if (response.statusCode === 200) {
-      objRemover.add(this.space.id, response.body.id, 'alert');
+      objRemover.add(this.space.id, response.body.id, 'alert', undefined);
     }
     return response;
   }
@@ -257,19 +257,28 @@ export class AlertUtils {
       ...overwrites,
     });
     if (response.statusCode === 200) {
-      objRemover.add(this.space.id, response.body.id, 'alert');
+      objRemover.add(this.space.id, response.body.id, 'alert', undefined);
     }
     return response;
   }
 }
 
 function getDefaultAlwaysFiringAlertData(reference: string, actionId: string) {
+  const messageTemplate = `
+alertId: {{alertId}},
+alertName: {{alertName}},
+spaceId: {{spaceId}},
+tags: {{tags}},
+alertInstanceId: {{alertInstanceId}},
+instanceContextValue: {{context.instanceContextValue}},
+instanceStateValue: {{state.instanceStateValue}}
+`.trim();
   return {
     enabled: true,
     name: 'abc',
     schedule: { interval: '1m' },
     throttle: '1m',
-    tags: [],
+    tags: ['tag-A', 'tag-B'],
     alertTypeId: 'test.always-firing',
     consumer: 'bar',
     params: {
@@ -283,8 +292,7 @@ function getDefaultAlwaysFiringAlertData(reference: string, actionId: string) {
         params: {
           index: ES_TEST_INDEX_NAME,
           reference,
-          message:
-            'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
+          message: messageTemplate,
         },
       },
     ],

@@ -22,10 +22,10 @@ import React from 'react';
 import { UseField, Props as UseFieldProps } from './use_field';
 import { FieldHook } from '../types';
 
-type FieldsArray = Array<{ id: string } & Omit<UseFieldProps, 'children'>>;
+type FieldsArray = Array<{ id: string } & Omit<UseFieldProps<unknown>, 'children'>>;
 
 interface Props {
-  fields: { [key: string]: Omit<UseFieldProps, 'children'> };
+  fields: { [key: string]: Exclude<UseFieldProps<unknown>, 'children'> };
   children: (fields: { [key: string]: FieldHook }) => JSX.Element;
 }
 
@@ -41,7 +41,7 @@ export const UseMultiFields = ({ fields, children }: Props) => {
     const { id } = fieldsArray[index];
     return (
       <UseField {...fields[id]}>
-        {field => {
+        {(field) => {
           hookFields[id] = field;
           return index === fieldsArray.length - 1 ? children(hookFields) : renderField(index + 1);
         }}

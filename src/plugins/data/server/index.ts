@@ -20,8 +20,36 @@
 import { PluginInitializerContext } from '../../../core/server';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
+import {
+  buildQueryFilter,
+  buildCustomFilter,
+  buildEmptyFilter,
+  buildExistsFilter,
+  buildFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildRangeFilter,
+  isFilterDisabled,
+} from '../common';
+
 /*
- * esQuery and esKuery helper namespaces:
+ * Filter helper namespace:
+ */
+
+export const esFilters = {
+  buildQueryFilter,
+  buildCustomFilter,
+  buildEmptyFilter,
+  buildExistsFilter,
+  buildFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildRangeFilter,
+  isFilterDisabled,
+};
+
+/*
+ * esQuery and esKuery:
  */
 
 import {
@@ -29,6 +57,7 @@ import {
   fromKueryExpression,
   toElasticsearchQuery,
   buildEsQuery,
+  buildQueryFromFilters,
   getEsQueryConfig,
 } from '../common';
 
@@ -39,12 +68,15 @@ export const esKuery = {
 };
 
 export const esQuery = {
+  buildQueryFromFilters,
   getEsQueryConfig,
   buildEsQuery,
 };
 
+export { EsQueryConfig, KueryNode } from '../common';
+
 /*
- * Field Formatters helper namespace:
+ * Field Formats:
  */
 
 import {
@@ -53,7 +85,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DurationFormat,
   IpFormat,
@@ -65,16 +96,16 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  serializeFieldFormat,
 } from '../common/field_formats';
 
 export const fieldFormats = {
   FieldFormatsRegistry,
   FieldFormat,
-
+  serializeFieldFormat,
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DurationFormat,
   IpFormat,
@@ -87,58 +118,104 @@ export const fieldFormats = {
   StringFormat,
   TruncateFormat,
 };
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DataServerPlugin(initializerContext);
-}
+
+export { IFieldFormatsRegistry, FieldFormatsGetConfigFn, FieldFormatConfig } from '../common';
+
+/*
+ * Index patterns:
+ */
+
+import { isNestedField, isFilterable } from '../common';
+
+export const indexPatterns = {
+  isFilterable,
+  isNestedField,
+};
+
+export {
+  IndexPatternsFetcher,
+  FieldDescriptor as IndexPatternFieldDescriptor,
+  shouldReadFieldFromDocValues, // used only in logstash_fields fixture
+} from './index_patterns';
+
+export {
+  IIndexPattern,
+  IFieldType,
+  IFieldSubType,
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  IndexPatternAttributes,
+} from '../common';
+
+/**
+ * Search
+ */
+
+import {
+  dateHistogramInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  isValidEsInterval,
+  isValidInterval,
+  parseEsInterval,
+  parseInterval,
+  toAbsoluteDates,
+} from '../common';
+
+export { ParsedInterval } from '../common';
+
+export {
+  ISearch,
+  ISearchCancel,
+  ISearchOptions,
+  IRequestTypesMap,
+  IResponseTypesMap,
+  ISearchContext,
+  TSearchStrategyProvider,
+  getDefaultSearchParams,
+  getTotalLoaded,
+} from './search';
+
+// Search namespace
+export const search = {
+  aggs: {
+    dateHistogramInterval,
+    InvalidEsCalendarIntervalError,
+    InvalidEsIntervalFormatError,
+    isValidEsInterval,
+    isValidInterval,
+    parseEsInterval,
+    parseInterval,
+    toAbsoluteDates,
+  },
+};
 
 /**
  * Types to be shared externally
  * @public
  */
-export { IRequestTypesMap, IResponseTypesMap } from './search';
 
 export {
-  EsQueryConfig,
-  // es query
-  esFilters,
-  KueryNode,
   // kbn field types
   castEsToKbnFieldTypeName,
-  getKbnFieldType,
-  getKbnTypeNames,
-  // index patterns
-  IIndexPattern,
-  isFilterable,
-  IFieldType,
-  IFieldSubType,
-  // kbn field types
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
   // query
+  Filter,
   Query,
   // timefilter
   RefreshInterval,
   TimeRange,
   // utils
   parseInterval,
-  isNestedField,
-  IFieldFormatsRegistry,
-  FieldFormatsGetConfigFn,
-  FieldFormatConfig,
 } from '../common';
 
 /**
  * Static code to be shared externally
  * @public
  */
-export {
-  IndexPatternsFetcher,
-  FieldDescriptor,
-  shouldReadFieldFromDocValues,
-  indexPatterns,
-} from './index_patterns';
 
-export * from './search';
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DataServerPlugin(initializerContext);
+}
 
 export {
   DataServerPlugin as Plugin,

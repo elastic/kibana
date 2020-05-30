@@ -6,11 +6,11 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const PageObjects = getPageObjects(['common', 'settings', 'security', 'error', 'header']);
   let version: string = '';
 
   describe('feature controls saved objects management', () => {
@@ -52,10 +52,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_all_role'),
           security.user.delete('global_all_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
@@ -170,10 +170,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_som_read_role'),
           security.user.delete('global_som_read_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
@@ -293,10 +293,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_visualize_all_role'),
           security.user.delete('global_visualize_all_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
@@ -306,6 +306,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
           });
+          await PageObjects.header.waitUntilLoadingHasFinished();
           await testSubjects.existOrFail('homeApp');
         });
       });
@@ -320,6 +321,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
               ensureCurrentUrl: false,
             }
           );
+          await PageObjects.header.waitUntilLoadingHasFinished();
           await testSubjects.existOrFail('homeApp');
         });
       });

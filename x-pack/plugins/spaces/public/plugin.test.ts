@@ -7,9 +7,10 @@
 import { coreMock } from 'src/core/public/mocks';
 import { SpacesPlugin } from './plugin';
 import { homePluginMock } from '../../../../src/plugins/home/public/mocks';
-import { ManagementSection } from '../../../../src/plugins/management/public';
+import { ManagementSection, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { managementPluginMock } from '../../../../src/plugins/management/public/mocks';
 import { advancedSettingsMock } from '../../../../src/plugins/advanced_settings/public/mocks';
+import { featuresPluginMock } from '../../features/public/mocks';
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
@@ -34,7 +35,7 @@ describe('Spaces plugin', () => {
 
       const kibanaSection = new ManagementSection(
         {
-          id: 'kibana',
+          id: ManagementSectionId.Kibana,
           title: 'Mock Kibana Section',
           order: 1,
         },
@@ -101,7 +102,7 @@ describe('Spaces plugin', () => {
       const plugin = new SpacesPlugin();
       plugin.setup(coreSetup, {});
 
-      plugin.start(coreStart, {});
+      plugin.start(coreStart, { features: featuresPluginMock.createStart() });
 
       expect(coreStart.chrome.navControls.registerLeft).toHaveBeenCalled();
     });

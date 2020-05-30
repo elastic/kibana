@@ -6,13 +6,14 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   describe('embed in dashboard', () => {
     before(async () => {
@@ -110,6 +111,16 @@ export default function({ getPageObjects, getService }) {
       await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
       const afterRefreshTimerTimestamp = await getRequestTimestamp();
       expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
+    });
+
+    // see https://github.com/elastic/kibana/issues/61596 on why it is specific to maps
+    it("dashboard's back button should navigate to previous page", async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
+      await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
+      await PageObjects.dashboard.waitForRenderComplete();
+      await browser.goBack();
+      expect(await PageObjects.dashboard.onDashboardLandingPage()).to.be(true);
     });
   });
 }

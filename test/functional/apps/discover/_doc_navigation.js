@@ -19,39 +19,33 @@
 
 import expect from '@kbn/expect';
 
-const TEST_COLUMN_NAMES = ['@message'];
-const TEST_FILTER_COLUMN_NAMES = [
-  ['extension', 'jpg'],
-  ['geo.src', 'IN'],
-];
-
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
 
   describe('doc link in discover', function contextSize() {
-    this.tags('smoke');
-    before(async function() {
+    before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await Promise.all(
-        TEST_COLUMN_NAMES.map(columnName => PageObjects.discover.clickFieldListItemAdd(columnName))
-      );
-      await Promise.all(
-        TEST_FILTER_COLUMN_NAMES.map(async ([columnName, value]) => {
-          await PageObjects.discover.clickFieldListItem(columnName);
-          await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
-        })
-      );
+      await PageObjects.discover.waitForDocTableLoadingComplete();
     });
 
-    it('should open the doc view of the selected document', async function() {
+    it('should open the doc view of the selected document', async function () {
       // navigate to the doc view
       await docTable.clickRowToggle({ rowIndex: 0 });
-      await (await docTable.getRowActions({ rowIndex: 0 }))[1].click();
+
+      // click the open action
+      await retry.try(async () => {
+        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+        if (!rowActions.length) {
+          throw new Error('row actions empty, trying again');
+        }
+        await rowActions[1].click();
+      });
 
       const hasDocHit = await testSubjects.exists('doc-hit');
       expect(hasDocHit).to.be(true);

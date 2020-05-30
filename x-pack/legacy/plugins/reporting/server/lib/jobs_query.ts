@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { get } from 'lodash';
-import { JobSource, ServerFacade } from '../../types';
+import { AuthenticatedUser } from '../../../../../plugins/security/server';
+import { ReportingConfig } from '../';
+import { JobSource } from '../types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 const defaultSize = 10;
@@ -37,13 +40,14 @@ interface CountAggResult {
   count: number;
 }
 
-export function jobsQueryFactory(server: ServerFacade, elasticsearch: ElasticsearchServiceSetup) {
-  const index = server.config().get('xpack.reporting.index');
-  const { callAsInternalUser } = elasticsearch.adminClient;
+const getUsername = (user: AuthenticatedUser | null) => (user ? user.username : false);
 
-  function getUsername(user: any) {
-    return get(user, 'username', false);
-  }
+export function jobsQueryFactory(
+  config: ReportingConfig,
+  elasticsearch: ElasticsearchServiceSetup
+) {
+  const index = config.get('index');
+  const { callAsInternalUser } = elasticsearch.adminClient;
 
   function execQuery(queryType: string, body: QueryBody) {
     const defaultBody: Record<string, object> = {
@@ -61,7 +65,7 @@ export function jobsQueryFactory(server: ServerFacade, elasticsearch: Elasticsea
       body: Object.assign(defaultBody[queryType] || {}, body),
     };
 
-    return callAsInternalUser(queryType, query).catch(err => {
+    return callAsInternalUser(queryType, query).catch((err) => {
       if (err instanceof esErrors['401']) return;
       if (err instanceof esErrors['403']) return;
       if (err instanceof esErrors['404']) return;
@@ -72,13 +76,18 @@ export function jobsQueryFactory(server: ServerFacade, elasticsearch: Elasticsea
   type Result = number;
 
   function getHits(query: Promise<Result>) {
-    return query.then(res => get(res, 'hits.hits', []));
+    return query.then((res) => get(res, 'hits.hits', []));
   }
 
   return {
-    list(jobTypes: string[], user: any, page = 0, size = defaultSize, jobIds: string[] | null) {
+    list(
+      jobTypes: string[],
+      user: AuthenticatedUser | null,
+      page = 0,
+      size = defaultSize,
+      jobIds: string[] | null
+    ) {
       const username = getUsername(user);
-
       const body: QueryBody = {
         size,
         from: size * page,
@@ -102,9 +111,8 @@ export function jobsQueryFactory(server: ServerFacade, elasticsearch: Elasticsea
       return getHits(execQuery('search', body));
     },
 
-    count(jobTypes: string[], user: any) {
+    count(jobTypes: string[], user: AuthenticatedUser | null) {
       const username = getUsername(user);
-
       const body: QueryBody = {
         query: {
           constant_score: {
@@ -123,9 +131,12 @@ export function jobsQueryFactory(server: ServerFacade, elasticsearch: Elasticsea
       });
     },
 
-    get(user: any, id: string, opts: GetOpts = {}): Promise<JobSource<unknown> | void> {
+    get(
+      user: AuthenticatedUser | null,
+      id: string,
+      opts: GetOpts = {}
+    ): Promise<JobSource<unknown> | void> {
       if (!id) return Promise.resolve();
-
       const username = getUsername(user);
 
       const body: QueryBody = {
@@ -147,10 +158,24 @@ export function jobsQueryFactory(server: ServerFacade, elasticsearch: Elasticsea
         };
       }
 
-      return getHits(execQuery('search', body)).then(hits => {
+      return getHits(execQuery('search', body)).then((hits) => {
         if (hits.length !== 1) return;
         return hits[0];
       });
+    },
+
+    async delete(deleteIndex: string, id: string) {
+      try {
+        const query = { id, index: deleteIndex };
+        return callAsInternalUser('delete', query);
+      } catch (error) {
+        throw new Error(
+          i18n.translate('xpack.reporting.jobsQuery.deleteError', {
+            defaultMessage: 'Could not delete the report: {error}',
+            values: { error: error.message },
+          })
+        );
+      }
     },
   };
 }

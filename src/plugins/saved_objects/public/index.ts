@@ -17,5 +17,25 @@
  * under the License.
  */
 
-export { OnSaveProps, SavedObjectSaveModal, SaveResult, showSaveModal } from './save_modal';
+import { SavedObjectsPublicPlugin } from './plugin';
+
+export {
+  OnSaveProps,
+  SavedObjectSaveModal,
+  SavedObjectSaveModalOrigin,
+  SaveModalState,
+  SaveResult,
+  showSaveModal,
+} from './save_modal';
 export { getSavedObjectFinder, SavedObjectFinderUi, SavedObjectMetaData } from './finder';
+export {
+  SavedObjectLoader,
+  createSavedObjectClass,
+  checkForDuplicateTitle,
+  saveWithConfirmation,
+  isErrorNonFatal,
+} from './saved_object';
+export { SavedObjectSaveOpts, SavedObjectKibanaServices, SavedObject } from './types';
+export { SavedObjectsStart } from './plugin';
+
+export const plugin = () => new SavedObjectsPublicPlugin();

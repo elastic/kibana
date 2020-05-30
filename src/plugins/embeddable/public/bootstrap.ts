@@ -16,61 +16,52 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { UiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsSetup } from '../../ui_actions/public';
 import {
-  CONTEXT_MENU_TRIGGER,
-  APPLY_FILTER_TRIGGER,
+  contextMenuTrigger,
   createFilterAction,
+  panelBadgeTrigger,
+  EmbeddableContext,
+  CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
+  ACTION_ADD_PANEL,
+  ACTION_CUSTOMIZE_PANEL,
+  ACTION_INSPECT_PANEL,
+  REMOVE_PANEL_ACTION,
+  ACTION_EDIT_PANEL,
+  FilterActionContext,
+  ACTION_APPLY_FILTER,
+  panelNotificationTrigger,
+  PANEL_NOTIFICATION_TRIGGER,
 } from './lib';
+
+declare module '../../ui_actions/public' {
+  export interface TriggerContextMapping {
+    [CONTEXT_MENU_TRIGGER]: EmbeddableContext;
+    [PANEL_BADGE_TRIGGER]: EmbeddableContext;
+    [PANEL_NOTIFICATION_TRIGGER]: EmbeddableContext;
+  }
+
+  export interface ActionContextMapping {
+    [ACTION_CUSTOMIZE_PANEL]: EmbeddableContext;
+    [ACTION_ADD_PANEL]: EmbeddableContext;
+    [ACTION_INSPECT_PANEL]: EmbeddableContext;
+    [REMOVE_PANEL_ACTION]: EmbeddableContext;
+    [ACTION_EDIT_PANEL]: EmbeddableContext;
+    [ACTION_APPLY_FILTER]: FilterActionContext;
+  }
+}
 
 /**
  * This method initializes Embeddable plugin with initial set of
  * triggers and actions.
- *
- * @param api
  */
 export const bootstrap = (uiActions: UiActionsSetup) => {
-  const triggerContext = {
-    id: CONTEXT_MENU_TRIGGER,
-    title: 'Context menu',
-    description: 'Triggered on top-right corner context-menu select.',
-    actionIds: [],
-  };
-  const triggerFilter = {
-    id: APPLY_FILTER_TRIGGER,
-    title: 'Filter click',
-    description: 'Triggered when user applies filter to an embeddable.',
-    actionIds: [],
-  };
-  const triggerBadge = {
-    id: PANEL_BADGE_TRIGGER,
-    title: 'Panel badges',
-    description: 'Actions appear in title bar when an embeddable loads in a panel',
-    actionIds: [],
-  };
-  const selectRangeTrigger = {
-    id: SELECT_RANGE_TRIGGER,
-    title: 'Select range',
-    description: 'Applies a range filter',
-    actionIds: [],
-  };
-  const valueClickTrigger = {
-    id: VALUE_CLICK_TRIGGER,
-    title: 'Value clicked',
-    description: 'Value was clicked',
-    actionIds: [],
-  };
+  uiActions.registerTrigger(contextMenuTrigger);
+  uiActions.registerTrigger(panelBadgeTrigger);
+  uiActions.registerTrigger(panelNotificationTrigger);
+
   const actionApplyFilter = createFilterAction();
 
-  uiActions.registerTrigger(triggerContext);
-  uiActions.registerTrigger(triggerFilter);
   uiActions.registerAction(actionApplyFilter);
-  uiActions.registerTrigger(triggerBadge);
-  uiActions.registerTrigger(selectRangeTrigger);
-  uiActions.registerTrigger(valueClickTrigger);
-  // uiActions.attachAction(triggerFilter.id, actionApplyFilter.id);
 };

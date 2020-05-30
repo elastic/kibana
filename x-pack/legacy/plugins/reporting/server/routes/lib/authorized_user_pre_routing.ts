@@ -4,56 +4,48 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { Legacy } from 'kibana';
+import { RequestHandler, RouteMethod } from 'src/core/server';
 import { AuthenticatedUser } from '../../../../../../plugins/security/server';
-import { Logger, ServerFacade } from '../../../types';
 import { getUserFactory } from '../../lib/get_user';
-import { ReportingSetupDeps } from '../../plugin';
+import { ReportingCore } from '../../core';
 
+type ReportingUser = AuthenticatedUser | null;
 const superuserRole = 'superuser';
 
-export type PreRoutingFunction = (
-  request: Legacy.Request
-) => Promise<Boom<null> | AuthenticatedUser | null>;
+export type RequestHandlerUser = RequestHandler extends (...a: infer U) => infer R
+  ? (user: ReportingUser, ...a: U) => R
+  : never;
 
 export const authorizedUserPreRoutingFactory = function authorizedUserPreRoutingFn(
-  server: ServerFacade,
-  plugins: ReportingSetupDeps,
-  logger: Logger
+  reporting: ReportingCore
 ) {
-  const getUser = getUserFactory(server, plugins.security);
-  const config = server.config();
+  const config = reporting.getConfig();
+  const setupDeps = reporting.getPluginSetupDeps();
+  const getUser = getUserFactory(setupDeps.security);
+  return <P, Q, B>(handler: RequestHandlerUser): RequestHandler<P, Q, B, RouteMethod> => {
+    return (context, req, res) => {
+      let user: ReportingUser = null;
+      if (setupDeps.security) {
+        // find the authenticated user, or null if security is not enabled
+        user = getUser(req);
+        if (!user) {
+          // security is enabled but the user is null
+          return res.unauthorized({ body: `Sorry, you aren't authenticated` });
+        }
+      }
 
-  return async function authorizedUserPreRouting(request: Legacy.Request) {
-    const xpackInfo = server.plugins.xpack_main.info;
+      if (user) {
+        // check allowance with the configured set of roleas + "superuser"
+        const allowedRoles = config.get('roles', 'allow') || [];
+        const authorizedRoles = [superuserRole, ...allowedRoles];
 
-    if (!xpackInfo || !xpackInfo.isAvailable()) {
-      logger.warn('Unable to authorize user before xpack info is available.', [
-        'authorizedUserPreRouting',
-      ]);
-      return Boom.notFound();
-    }
+        if (!user.roles.find((role) => authorizedRoles.includes(role))) {
+          // user's roles do not allow
+          return res.forbidden({ body: `Sorry, you don't have access to Reporting` });
+        }
+      }
 
-    const security = xpackInfo.feature('security');
-    if (!security.isEnabled() || !security.isAvailable()) {
-      return null;
-    }
-
-    const user = await getUser(request);
-
-    if (!user) {
-      return Boom.unauthorized(`Sorry, you aren't authenticated`);
-    }
-
-    const authorizedRoles = [
-      superuserRole,
-      ...(config.get('xpack.reporting.roles.allow') as string[]),
-    ];
-    if (!user.roles.find(role => authorizedRoles.includes(role))) {
-      return Boom.forbidden(`Sorry, you don't have access to Reporting`);
-    }
-
-    return user;
+      return handler(user, context, req, res);
+    };
   };
 };

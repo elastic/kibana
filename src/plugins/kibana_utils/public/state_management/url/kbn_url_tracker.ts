@@ -19,7 +19,7 @@
 
 import { createHashHistory, History, UnregisterCallback } from 'history';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { AppBase, ToastsSetup } from 'kibana/public';
+import { AppUpdater, ToastsSetup } from 'kibana/public';
 import { setStateToKbnUrl } from './kbn_url_storage';
 import { unhashUrl } from './hash_unhash_url';
 
@@ -36,6 +36,8 @@ export interface KbnUrlTracker {
    * Unregistering the url tracker. This won't reset the current state of the nav link
    */
   stop: () => void;
+  setActiveUrl: (newUrl: string) => void;
+  getActiveUrl: () => string;
 }
 
 /**
@@ -56,7 +58,11 @@ export function createKbnUrlTracker({
   navLinkUpdater$,
   toastNotifications,
   history,
+  getHistory,
   storage,
+  shouldTrackUrlUpdate = () => {
+    return true;
+  },
 }: {
   /**
    * Base url of the current app. This will be used as a prefix for the
@@ -81,13 +87,13 @@ export function createKbnUrlTracker({
     stateUpdate$: Observable<unknown>;
   }>;
   /**
-   * Key used to store the current sub url in session storage. This key should only be used for one active url tracker at any given ntime.
+   * Key used to store the current sub url in session storage. This key should only be used for one active url tracker at any given time.
    */
   storageKey: string;
   /**
    * App updater subject passed into the application definition to change nav link url.
    */
-  navLinkUpdater$: BehaviorSubject<(app: AppBase) => { activeUrl?: string } | undefined>;
+  navLinkUpdater$: BehaviorSubject<AppUpdater>;
   /**
    * Toast notifications service to show toasts in error cases.
    */
@@ -96,12 +102,24 @@ export function createKbnUrlTracker({
    * History object to use to track url changes. If this isn't provided, a local history instance will be created.
    */
   history?: History;
+
+  /**
+   * Lazily retrieve history instance
+   */
+  getHistory?: () => History;
+
   /**
    * Storage object to use to persist currently active url. If this isn't provided, the browser wide session storage instance will be used.
    */
   storage?: Storage;
+  /**
+   * Checks if pathname belongs to current app. It's used in history listener to define whether it's necessary to set pathname as active url or not.
+   * The default implementation compares the app name to the first part of pathname. Consumers can override this function for more complex cases.
+   *
+   * @param {string} pathname A location's pathname which comes to history listener
+   */
+  shouldTrackUrlUpdate?: (pathname: string) => boolean;
 }): KbnUrlTracker {
-  const historyInstance = history || createHashHistory();
   const storageInstance = storage || sessionStorage;
 
   // local state storing current listeners and active url
@@ -110,7 +128,7 @@ export function createKbnUrlTracker({
   let unsubscribeGlobalState: Subscription[] | undefined;
 
   function setNavLink(hash: string) {
-    navLinkUpdater$.next(() => ({ activeUrl: baseUrl + hash }));
+    navLinkUpdater$.next(() => ({ defaultPath: hash }));
   }
 
   function getActiveSubUrl(url: string) {
@@ -125,25 +143,32 @@ export function createKbnUrlTracker({
     }
 
     if (unsubscribeGlobalState) {
-      unsubscribeGlobalState.forEach(sub => sub.unsubscribe());
+      unsubscribeGlobalState.forEach((sub) => sub.unsubscribe());
       unsubscribeGlobalState = undefined;
     }
   }
 
+  function setActiveUrl(newUrl: string) {
+    const urlWithHashes = baseUrl + '#' + newUrl;
+    let urlWithStates = '';
+    try {
+      urlWithStates = unhashUrl(urlWithHashes);
+    } catch (e) {
+      toastNotifications.addDanger(e.message);
+    }
+
+    activeUrl = getActiveSubUrl(urlWithStates || urlWithHashes);
+    storageInstance.setItem(storageKey, activeUrl);
+  }
+
   function onMountApp() {
     unsubscribe();
+    const historyInstance = history || (getHistory && getHistory()) || createHashHistory();
     // track current hash when within app
-    unsubscribeURLHistory = historyInstance.listen(location => {
-      const urlWithHashes = baseUrl + '#' + location.pathname + location.search;
-      let urlWithStates = '';
-      try {
-        urlWithStates = unhashUrl(urlWithHashes);
-      } catch (e) {
-        toastNotifications.addDanger(e.message);
+    unsubscribeURLHistory = historyInstance.listen((location) => {
+      if (shouldTrackUrlUpdate(location.hash)) {
+        setActiveUrl(location.hash.substr(1));
       }
-
-      activeUrl = getActiveSubUrl(urlWithStates || urlWithHashes);
-      storageInstance.setItem(storageKey, activeUrl);
     });
   }
 
@@ -151,7 +176,7 @@ export function createKbnUrlTracker({
     unsubscribe();
     // propagate state updates when in other apps
     unsubscribeGlobalState = stateParams.map(({ stateUpdate$, kbnUrlKey }) =>
-      stateUpdate$.subscribe(state => {
+      stateUpdate$.subscribe((state) => {
         const updatedUrl = setStateToKbnUrl(
           kbnUrlKey,
           state,
@@ -187,6 +212,10 @@ export function createKbnUrlTracker({
     },
     stop() {
       unsubscribe();
+    },
+    setActiveUrl,
+    getActiveUrl() {
+      return activeUrl;
     },
   };
 }

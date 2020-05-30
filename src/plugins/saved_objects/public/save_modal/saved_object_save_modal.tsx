@@ -39,7 +39,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../legacy/core_plugins/visualizations/public/embeddable/constants';
 
 export interface OnSaveProps {
   newTitle: string;
@@ -54,13 +53,15 @@ interface Props {
   onClose: () => void;
   title: string;
   showCopyOnSave: boolean;
+  initialCopyOnSave?: boolean;
   objectType: string;
   confirmButtonLabel?: React.ReactNode;
-  options?: React.ReactNode;
+  options?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
   description?: string;
+  showDescription: boolean;
 }
 
-interface State {
+export interface SaveModalState {
   title: string;
   copyOnSave: boolean;
   isTitleDuplicateConfirmed: boolean;
@@ -71,11 +72,11 @@ interface State {
 
 const generateId = htmlIdGenerator();
 
-export class SavedObjectSaveModal extends React.Component<Props, State> {
+export class SavedObjectSaveModal extends React.Component<Props, SaveModalState> {
   private warning = React.createRef<HTMLDivElement>();
   public readonly state = {
     title: this.props.title,
-    copyOnSave: false,
+    copyOnSave: Boolean(this.props.initialCopyOnSave),
     isTitleDuplicateConfirmed: false,
     hasTitleDuplicate: false,
     isLoading: false,
@@ -108,7 +109,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
               {this.renderDuplicateTitleCallout(duplicateWarningId)}
 
               <EuiForm>
-                {this.props.objectType !== VISUALIZE_EMBEDDABLE_TYPE && this.props.description && (
+                {!this.props.showDescription && this.props.description && (
                   <EuiFormRow>
                     <EuiText color="subdued">{this.props.description}</EuiText>
                   </EuiFormRow>
@@ -139,7 +140,9 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
 
                 {this.renderViewDescription()}
 
-                {this.props.options}
+                {typeof this.props.options === 'function'
+                  ? this.props.options(this.state)
+                  : this.props.options}
               </EuiForm>
             </EuiModalBody>
 
@@ -160,7 +163,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
   }
 
   private renderViewDescription = () => {
-    if (this.props.objectType !== VISUALIZE_EMBEDDABLE_TYPE) {
+    if (!this.props.showDescription) {
       return;
     }
 
@@ -289,7 +292,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
             <p>
               <FormattedMessage
                 id="savedObjects.saveModal.duplicateTitleDescription"
-                defaultMessage="Clicking {confirmSaveLabel} overwrites the existing {objectType}."
+                defaultMessage="Clicking {confirmSaveLabel} will save the {objectType} with this duplicate title."
                 values={{
                   objectType: this.props.objectType,
                   confirmSaveLabel: (

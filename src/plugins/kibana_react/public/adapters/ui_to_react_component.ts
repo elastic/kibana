@@ -18,7 +18,7 @@
  */
 
 import { FC, createElement as h, useRef, useLayoutEffect, useMemo } from 'react';
-import { UiComponent, UiComponentInstance } from '../../../kibana_utils/common';
+import { UiComponent, UiComponentInstance } from '../../../kibana_utils/public';
 
 /**
  * Transforms `UiComponent` into a React component.
@@ -26,7 +26,7 @@ import { UiComponent, UiComponentInstance } from '../../../kibana_utils/common';
 export const uiToReactComponent = <Props extends object>(
   Comp: UiComponent<Props>,
   as: string = 'div'
-): FC<Props> => props => {
+): FC<Props> => (props) => {
   const ref = useRef<HTMLDivElement>();
   const comp = useMemo<UiComponentInstance<Props>>(() => Comp(), [Comp]);
 

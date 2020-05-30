@@ -54,6 +54,7 @@ import {
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  NavType,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -64,7 +65,7 @@ import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
-import { DocLinksStart } from './doc_links';
+import { DocLinksSetup, DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 export { PackageInfo, EnvironmentMode } from '../server/types';
 import {
@@ -77,7 +78,17 @@ import {
 } from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
-export { RecursiveReadonly, DEFAULT_APP_CATEGORIES } from '../utils';
+export {
+  RecursiveReadonly,
+  DEFAULT_APP_CATEGORIES,
+  getFlattenedObject,
+  URLMeaningfulParts,
+  modifyUrl,
+  isRelativeUrl,
+  Freezable,
+  deepFreeze,
+  assertNever,
+} from '../utils';
 export {
   AppCategory,
   UiSettingsParams,
@@ -108,6 +119,7 @@ export {
   AppNavLinkStatus,
   AppUpdatableFields,
   AppUpdater,
+  ScopedHistory,
 } from './application';
 
 export {
@@ -142,6 +154,7 @@ export {
 export {
   HttpHeadersInit,
   HttpRequestInit,
+  HttpFetchError,
   HttpFetchOptions,
   HttpFetchOptionsWithPath,
   HttpFetchQuery,
@@ -167,13 +180,19 @@ export {
   ToastInputFields,
   ToastsSetup,
   ToastsStart,
+  ToastOptions,
   ErrorToastOptions,
 } from './notifications';
 
-export { MountPoint, UnmountCallback } from './types';
+export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
+ *
+ * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
+ *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
+ * @typeParam TStart - the type of the consuming plugin's start contract. Should be the same as the
+ *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
  *
  * @public
  *
@@ -181,7 +200,7 @@ export { MountPoint, UnmountCallback } from './types';
  * navigation in the generated docs until there's a fix for
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
-export interface CoreSetup<TPluginsStart extends object = object> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
   /**
@@ -189,6 +208,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
    * @deprecated
    */
   context: ContextSetup;
+  /** {@link DocLinksSetup} */
+  docLinks: DocLinksSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
@@ -206,14 +227,21 @@ export interface CoreSetup<TPluginsStart extends object = object> {
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
-
-  /**
-   * Allows plugins to get access to APIs available in start inside async
-   * handlers, such as {@link App.mount}. Promise will not resolve until Core
-   * and plugin dependencies have completed `start`.
-   */
-  getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+  /** {@link StartServicesAccessor} */
+  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
+
+/**
+ * Allows plugins to get access to APIs available in start inside async
+ * handlers, such as {@link App.mount}. Promise will not resolve until Core
+ * and plugin dependencies have completed `start`.
+ *
+ * @public
+ */
+export type StartServicesAccessor<
+  TPluginsStart extends object = object,
+  TStart = unknown
+> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
 /**
  * Core services exposed to the `Plugin` start lifecycle
@@ -266,7 +294,7 @@ export interface CoreStart {
  * @public
  * @deprecated
  */
-export interface LegacyCoreSetup extends CoreSetup<any> {
+export interface LegacyCoreSetup extends CoreSetup<any, any> {
   /** @deprecated */
   injectedMetadata: InjectedMetadataSetup;
 }
@@ -312,6 +340,7 @@ export {
   HandlerParameters,
   IContextProvider,
   ContextSetup,
+  DocLinksSetup,
   DocLinksStart,
   FatalErrorInfo,
   FatalErrorsSetup,
@@ -329,4 +358,5 @@ export {
   PluginOpaqueId,
   IUiSettingsClient,
   UiSettingsState,
+  NavType,
 };

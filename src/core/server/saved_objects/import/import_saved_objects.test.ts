@@ -19,7 +19,7 @@
 
 import { Readable } from 'stream';
 import { SavedObject } from '../types';
-import { importSavedObjects } from './import_saved_objects';
+import { importSavedObjectsFromStream } from './import_saved_objects';
 import { savedObjectsClientMock } from '../../mocks';
 
 const emptyResponse = {
@@ -76,7 +76,7 @@ describe('importSavedObjects()', () => {
         this.push(null);
       },
     });
-    const result = await importSavedObjects({
+    const result = await importSavedObjectsFromStream({
       readStream,
       objectLimit: 1,
       overwrite: false,
@@ -95,7 +95,7 @@ describe('importSavedObjects()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push(null);
       },
     });
@@ -103,7 +103,7 @@ describe('importSavedObjects()', () => {
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects,
     });
-    const result = await importSavedObjects({
+    const result = await importSavedObjectsFromStream({
       readStream,
       objectLimit: 4,
       overwrite: false,
@@ -178,7 +178,7 @@ describe('importSavedObjects()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push(null);
       },
     });
@@ -186,7 +186,7 @@ describe('importSavedObjects()', () => {
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects,
     });
-    const result = await importSavedObjects({
+    const result = await importSavedObjectsFromStream({
       readStream,
       objectLimit: 4,
       overwrite: false,
@@ -262,7 +262,7 @@ describe('importSavedObjects()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push(null);
       },
     });
@@ -270,7 +270,7 @@ describe('importSavedObjects()', () => {
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects,
     });
-    const result = await importSavedObjects({
+    const result = await importSavedObjectsFromStream({
       readStream,
       objectLimit: 4,
       overwrite: true,
@@ -345,13 +345,13 @@ describe('importSavedObjects()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push(null);
       },
     });
     savedObjectsClient.find.mockResolvedValueOnce(emptyResponse);
     savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects.map(savedObject => ({
+      saved_objects: savedObjects.map((savedObject) => ({
         type: savedObject.type,
         id: savedObject.id,
         error: {
@@ -362,7 +362,7 @@ describe('importSavedObjects()', () => {
         references: [],
       })),
     });
-    const result = await importSavedObjects({
+    const result = await importSavedObjectsFromStream({
       readStream,
       objectLimit: 4,
       overwrite: false,
@@ -460,7 +460,7 @@ describe('importSavedObjects()', () => {
         },
       ],
     });
-    const result = await importSavedObjects({
+    const result = await importSavedObjectsFromStream({
       readStream,
       objectLimit: 4,
       overwrite: false,
@@ -527,7 +527,7 @@ describe('importSavedObjects()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push({ id: '1', type: 'wigwags', attributes: { title: 'my title' }, references: [] });
         this.push(null);
       },
@@ -536,7 +536,7 @@ describe('importSavedObjects()', () => {
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects,
     });
-    const result = await importSavedObjects({
+    const result = await importSavedObjectsFromStream({
       readStream,
       objectLimit: 5,
       overwrite: false,

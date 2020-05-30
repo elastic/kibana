@@ -86,6 +86,7 @@ export interface AggregationOptionsByType {
   percentiles: {
     field: string;
     percents?: number[];
+    hdr?: { number_of_significant_value_digits: number };
   };
   extended_stats: {
     field: string;
@@ -126,6 +127,16 @@ export interface AggregationOptionsByType {
     combine_script: Script;
     reduce_script: Script;
   };
+  date_range: {
+    field: string;
+    format?: string;
+    ranges: Array<
+      | { from: string | number }
+      | { to: string | number }
+      | { from: string | number; to: string | number }
+    >;
+    keyed?: boolean;
+  };
 }
 
 type AggregationType = keyof AggregationOptionsByType;
@@ -135,6 +146,15 @@ type AggregationOptionsMap = Unionize<
     [TAggregationType in AggregationType]: AggregationOptionsByType[TAggregationType];
   }
 > & { aggs?: AggregationInputMap };
+
+interface DateRangeBucket {
+  key: string;
+  to?: number;
+  from?: number;
+  to_as_string?: string;
+  from_as_string?: string;
+  doc_count: number;
+}
 
 export interface AggregationInputMap {
   [key: string]: AggregationOptionsMap;
@@ -147,13 +167,19 @@ type BucketSubAggregationResponse<
   ? AggregationResponseMap<TAggregationInputMap, TDocument>
   : {};
 
-interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOptionsMap, TDocument> {
+interface AggregationResponsePart<
+  TAggregationOptionsMap extends AggregationOptionsMap,
+  TDocument
+> {
   terms: {
     buckets: Array<
       {
         doc_count: number;
         key: string | number;
-      } & BucketSubAggregationResponse<TAggregationOptionsMap['aggs'], TDocument>
+      } & BucketSubAggregationResponse<
+        TAggregationOptionsMap['aggs'],
+        TDocument
+      >
     >;
   };
   histogram: {
@@ -161,7 +187,10 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
       {
         doc_count: number;
         key: number;
-      } & BucketSubAggregationResponse<TAggregationOptionsMap['aggs'], TDocument>
+      } & BucketSubAggregationResponse<
+        TAggregationOptionsMap['aggs'],
+        TDocument
+      >
     >;
   };
   date_histogram: {
@@ -170,7 +199,10 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
         doc_count: number;
         key: number;
         key_as_string: string;
-      } & BucketSubAggregationResponse<TAggregationOptionsMap['aggs'], TDocument>
+      } & BucketSubAggregationResponse<
+        TAggregationOptionsMap['aggs'],
+        TDocument
+      >
     >;
   };
   avg: MetricsAggregationResponsePart;
@@ -215,7 +247,10 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
   } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
   filters: TAggregationOptionsMap extends { filters: { filters: any[] } }
     ? Array<
-        { doc_count: number } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>
+        { doc_count: number } & AggregationResponseMap<
+          TAggregationOptionsMap['aggs'],
+          TDocument
+        >
       >
     : TAggregationOptionsMap extends {
         filters: {
@@ -249,7 +284,10 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
       {
         key: Record<GetCompositeKeys<TAggregationOptionsMap>, number>;
         doc_count: number;
-      } & BucketSubAggregationResponse<TAggregationOptionsMap['aggs'], TDocument>
+      } & BucketSubAggregationResponse<
+        TAggregationOptionsMap['aggs'],
+        TDocument
+      >
     >;
   };
   diversified_sampler: {
@@ -257,6 +295,11 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
   } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
   scripted_metric: {
     value: unknown;
+  };
+  date_range: {
+    buckets: TAggregationOptionsMap extends { date_range: { keyed: true } }
+      ? Record<string, DateRangeBucket>
+      : { buckets: DateRangeBucket[] };
   };
 }
 
@@ -267,7 +310,7 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
 
 // type MissingAggregationResponseTypes = Exclude<
 //   AggregationType,
-//   keyof AggregationResponsePart<{}>
+//   keyof AggregationResponsePart<{}, unknown>
 // >;
 
 export type AggregationResponseMap<

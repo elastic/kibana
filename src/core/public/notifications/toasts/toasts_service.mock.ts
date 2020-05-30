@@ -25,6 +25,7 @@ const createToastsApiMock = () => {
     get$: jest.fn(() => new Observable()),
     add: jest.fn(),
     remove: jest.fn(),
+    addInfo: jest.fn(),
     addSuccess: jest.fn(),
     addWarning: jest.fn(),
     addDanger: jest.fn(),

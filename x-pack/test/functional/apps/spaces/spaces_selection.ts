@@ -20,10 +20,13 @@ export default function spaceSelectorFunctonalTests({
     'spaceSelector',
   ]);
 
-  describe('Spaces', function() {
-    this.tags('smoke');
+  describe('Spaces', function () {
+    this.tags('includeFirefox');
     describe('Space Selector', () => {
-      before(async () => await esArchiver.load('spaces/selector'));
+      before(async () => {
+        await esArchiver.load('spaces/selector');
+        await PageObjects.security.forceLogout();
+      });
       after(async () => await esArchiver.unload('spaces/selector'));
 
       afterEach(async () => {
@@ -33,7 +36,7 @@ export default function spaceSelectorFunctonalTests({
       it('allows user to navigate to different spaces', async () => {
         const spaceId = 'another-space';
 
-        await PageObjects.security.login(null, null, {
+        await PageObjects.security.login(undefined, undefined, {
           expectSpaceSelector: true,
         });
 
@@ -53,7 +56,7 @@ export default function spaceSelectorFunctonalTests({
 
     describe('Spaces Data', () => {
       const spaceId = 'another-space';
-      const sampleDataHash = '/home/tutorial_directory/sampleData';
+      const sampleDataHash = '/tutorial_directory/sampleData';
 
       const expectDashboardRenders = async (dashName: string) => {
         await listingTable.searchForItemWithName(dashName);
@@ -64,7 +67,7 @@ export default function spaceSelectorFunctonalTests({
 
       before(async () => {
         await esArchiver.load('spaces/selector');
-        await PageObjects.security.login(null, null, {
+        await PageObjects.security.login(undefined, undefined, {
           expectSpaceSelector: true,
         });
         await PageObjects.spaceSelector.clickSpaceCard('default');

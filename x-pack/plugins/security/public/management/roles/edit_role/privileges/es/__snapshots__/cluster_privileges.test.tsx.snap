@@ -6,6 +6,7 @@ exports[`it renders without crashing 1`] = `
     key="clusterPrivs"
   >
     <EuiComboBox
+      async={false}
       compressed={false}
       data-test-subj="cluster-privileges-combobox"
       fullWidth={false}
@@ -28,6 +29,7 @@ exports[`it renders without crashing 1`] = `
       }
       selectedOptions={Array []}
       singleSelection={false}
+      sortMatchesBy="none"
     />
   </EuiFlexItem>
 </EuiFlexGroup>

@@ -237,7 +237,7 @@ describe('#getAll', () => {
         expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
           mockAuthorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       describe(`with purpose='${scenario.purpose}'`, () => {
         test(`throws Boom.forbidden when user isn't authorized for any spaces`, async () => {
           const username = Symbol();
@@ -250,14 +250,10 @@ describe('#getAll', () => {
           mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
           mockCheckPrivilegesAtSpaces.mockReturnValue({
             username,
-            spacePrivileges: {
-              [savedObjects[0].id]: {
-                [privilege]: false,
-              },
-              [savedObjects[1].id]: {
-                [privilege]: false,
-              },
-            },
+            privileges: [
+              { resource: savedObjects[0].id, privilege, authorized: false },
+              { resource: savedObjects[1].id, privilege, authorized: false },
+            ],
           });
           const maxSpaces = 1234;
           const mockConfig = createMockConfig({
@@ -293,7 +289,7 @@ describe('#getAll', () => {
           expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
           expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
           expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
-            savedObjects.map(savedObject => savedObject.id),
+            savedObjects.map((savedObject) => savedObject.id),
             privilege
           );
           expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(
@@ -314,14 +310,10 @@ describe('#getAll', () => {
           mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
           mockCheckPrivilegesAtSpaces.mockReturnValue({
             username,
-            spacePrivileges: {
-              [savedObjects[0].id]: {
-                [privilege]: true,
-              },
-              [savedObjects[1].id]: {
-                [privilege]: false,
-              },
-            },
+            privileges: [
+              { resource: savedObjects[0].id, privilege, authorized: true },
+              { resource: savedObjects[1].id, privilege, authorized: false },
+            ],
           });
           const mockInternalRepository = {
             find: jest.fn().mockReturnValue({
@@ -356,7 +348,7 @@ describe('#getAll', () => {
           expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
           expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
           expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
-            savedObjects.map(savedObject => savedObject.id),
+            savedObjects.map((savedObject) => savedObject.id),
             privilege
           );
           expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);

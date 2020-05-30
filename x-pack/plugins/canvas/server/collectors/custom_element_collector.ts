@@ -6,14 +6,13 @@
 
 import { SearchParams } from 'elasticsearch';
 import { get } from 'lodash';
-import { fromExpression } from '@kbn/interpreter/common';
 import { collectFns } from './collector_helpers';
 import {
-  ExpressionAST,
   TelemetryCollector,
   TelemetryCustomElement,
   TelemetryCustomElementDocument,
 } from '../../types';
+import { parseExpression } from '../../../../../src/plugins/expressions/common';
 
 const CUSTOM_ELEMENT_TYPE = 'canvas-element';
 interface CustomElementSearch {
@@ -61,7 +60,7 @@ export function summarizeCustomElements(
   const functionSet = new Set<string>();
 
   const parsedContents: TelemetryCustomElement[] = customElements
-    .map(element => element.content)
+    .map((element) => element.content)
     .map(parseJsonOrNull)
     .filter(isCustomElement);
 
@@ -77,9 +76,9 @@ export function summarizeCustomElements(
 
   let totalElements = 0;
 
-  parsedContents.map(contents => {
-    contents.selectedNodes.map(node => {
-      const ast: ExpressionAST = fromExpression(node.expression) as ExpressionAST; // TODO: Remove once fromExpression is properly typed
+  parsedContents.map((contents) => {
+    contents.selectedNodes.map((node) => {
+      const ast = parseExpression(node.expression);
       collectFns(ast, (cFunction: string) => {
         functionSet.add(cFunction);
       });
@@ -115,7 +114,7 @@ const customElementCollector: TelemetryCollector = async function customElementC
   const esResponse = await callCluster<CustomElementSearch>('search', customElementParams);
 
   if (get<number>(esResponse, 'hits.hits.length') > 0) {
-    const customElements = esResponse.hits.hits.map(hit => hit._source[CUSTOM_ELEMENT_TYPE]);
+    const customElements = esResponse.hits.hits.map((hit) => hit._source[CUSTOM_ELEMENT_TYPE]);
     return summarizeCustomElements(customElements);
   }
 

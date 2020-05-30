@@ -25,7 +25,7 @@ const KIBANA_INSTALL_DIR =
   process.env.KIBANA_INSTALL_DIR ||
   `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
 
-module.exports = function(grunt) {
+module.exports = function (grunt) {
   function createKbnServerTask({ runBuild, flags = [] }) {
     return {
       options: {
@@ -43,7 +43,7 @@ module.exports = function(grunt) {
         ...flags,
 
         // allow the user to override/inject flags by defining cli args starting with `--kbnServer.`
-        ...grunt.option.flags().reduce(function(flags, flag) {
+        ...grunt.option.flags().reduce(function (flags, flag) {
           if (flag.startsWith('--kbnServer.')) {
             flags.push(`--${flag.slice(12)}`);
           }
@@ -54,10 +54,11 @@ module.exports = function(grunt) {
     };
   }
 
-  const browserTestServerFlags = [
+  const karmaTestServerFlags = [
     '--env.name=development',
     '--plugins.initialize=false',
     '--optimize.bundleFilter=tests',
+    '--optimize.validateSyntaxOfNodeModules=false',
     '--server.port=5610',
     '--migrations.skip=true',
   ];
@@ -117,11 +118,11 @@ module.exports = function(grunt) {
     }),
 
     // used by the test tasks
-    //    runs the check_core_api_changes script to ensure API changes are explictily accepted
-    checkCoreApiChanges: scriptWithGithubChecks({
+    //    runs the check_published_api_changes script to ensure API changes are explictily accepted
+    checkDocApiChanges: scriptWithGithubChecks({
       title: 'Check core API changes',
       cmd: NODE,
-      args: ['scripts/check_core_api_changes'],
+      args: ['scripts/check_published_api_changes'],
     }),
 
     // used by the test and jenkins:unit tasks
@@ -170,27 +171,27 @@ module.exports = function(grunt) {
       ],
     }),
 
-    // used by the test:browser task
+    // used by the test:karma task
     //    runs the kibana server to serve the browser test bundle
-    browserTestServer: createKbnServerTask({
-      flags: [...browserTestServerFlags],
+    karmaTestServer: createKbnServerTask({
+      flags: [...karmaTestServerFlags],
     }),
     browserSCSS: createKbnServerTask({
-      flags: [...browserTestServerFlags, '--optimize', '--optimize.enabled=false'],
+      flags: [...karmaTestServerFlags, '--optimize', '--optimize.enabled=false'],
     }),
 
     // used by the test:coverage task
     //    runs the kibana server to serve the instrumented version of the browser test bundle
-    browserTestCoverageServer: createKbnServerTask({
-      flags: [...browserTestServerFlags, '--tests_bundle.instrument=true'],
+    karmaTestCoverageServer: createKbnServerTask({
+      flags: [...karmaTestServerFlags, '--tests_bundle.instrument=true'],
     }),
 
-    // used by the test:dev task
+    // used by the test:karma:debug task
     //    runs the kibana server to serve the browser test bundle, but listens for changes
     //    to the public/browser code and rebuilds the test bundle on changes
-    devBrowserTestServer: createKbnServerTask({
+    karmaTestDebugServer: createKbnServerTask({
       flags: [
-        ...browserTestServerFlags,
+        ...karmaTestServerFlags,
         '--dev',
         '--no-dev-config',
         '--no-watch',
@@ -208,6 +209,12 @@ module.exports = function(grunt) {
       },
       cmd: NODE,
       args: ['scripts/notice', '--validate'],
+    }),
+
+    test_hardening: scriptWithGithubChecks({
+      title: 'Node.js hardening tests',
+      cmd: NODE,
+      args: ['scripts/test_hardening.js'],
     }),
 
     apiIntegrationTests: scriptWithGithubChecks({
@@ -231,6 +238,8 @@ module.exports = function(grunt) {
         'test/server_integration/http/ssl/config.js',
         '--config',
         'test/server_integration/http/ssl_redirect/config.js',
+        '--config',
+        'test/server_integration/http/cache/config.js',
         '--bail',
         '--debug',
         '--kibana-install-dir',
@@ -304,7 +313,7 @@ module.exports = function(grunt) {
       'test:jest_integration'
     ),
     test_projects: gruntTaskWithGithubChecks('Project tests', 'test:projects'),
-    test_browser_ci: gruntTaskWithGithubChecks('Browser tests', 'test:browser-ci'),
+    test_karma_ci: gruntTaskWithGithubChecks('Browser tests', 'test:karma-ci'),
 
     ...getFunctionalTestGroupRunConfigs({
       kibanaInstallDir: KIBANA_INSTALL_DIR,

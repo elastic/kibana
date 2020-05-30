@@ -6,16 +6,17 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const config = getService('config');
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects([
     'common',
+    'error',
     'discover',
     'timePicker',
     'security',
     'spaceSelector',
-    'settings',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -50,8 +51,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        await PageObjects.settings.setNavType('individual');
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Discover');
       });
 
@@ -59,7 +59,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('discoverSaveButton', { timeout: 10000 });
+        await testSubjects.existOrFail('discoverSaveButton', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
 
       it('shows "visualize" field button', async () => {
@@ -93,21 +95,18 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('Discover');
       });
 
-      it(`redirects to the home page`, async () => {
-        // to test whether they're being redirected properly, we first load
-        // the discover app in the default space, and then we load up the discover
-        // app in the custom space and ensure we end up on the home page
-        await PageObjects.common.navigateToApp('discover');
+      it(`shows 404`, async () => {
         await PageObjects.common.navigateToUrl('discover', '', {
           basePath: '/s/custom_space',
           shouldLoginIfPrompted: false,
           ensureCurrentUrl: false,
+          useActualUrl: true,
         });
-        await PageObjects.spaceSelector.expectHomePage('custom_space');
+        await PageObjects.error.expectNotFound();
       });
     });
 
@@ -156,7 +155,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
     });
   });

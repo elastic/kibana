@@ -17,20 +17,35 @@
  * under the License.
  */
 
-import { ConnectableObservable, Observable, Subscription } from 'rxjs';
-import { filter, first, map, publishReplay, switchMap, take } from 'rxjs/operators';
+import { ConnectableObservable, Observable, Subscription, Subject } from 'rxjs';
+import {
+  filter,
+  first,
+  map,
+  publishReplay,
+  switchMap,
+  take,
+  shareReplay,
+  takeUntil,
+} from 'rxjs/operators';
 
 import { CoreService } from '../../types';
 import { merge } from '../../utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { ClusterClient, ScopeableRequest } from './cluster_client';
+import {
+  ClusterClient,
+  ScopeableRequest,
+  IClusterClient,
+  ICustomClusterClient,
+} from './cluster_client';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
-import { InternalElasticsearchServiceSetup } from './types';
+import { InternalElasticsearchServiceSetup, ElasticsearchServiceStart } from './types';
 import { CallAPIOptions } from './api_types';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
+import { calculateStatus$ } from './status';
 
 /** @internal */
 interface CoreClusterClients {
@@ -44,24 +59,25 @@ interface SetupDeps {
 }
 
 /** @internal */
-export class ElasticsearchService implements CoreService<InternalElasticsearchServiceSetup> {
+export class ElasticsearchService
+  implements CoreService<InternalElasticsearchServiceSetup, ElasticsearchServiceStart> {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
-  private subscriptions: {
-    client?: Subscription;
-    esNodesCompatibility?: Subscription;
-  } = {
-    client: undefined,
-    esNodesCompatibility: undefined,
-  };
+  private subscription?: Subscription;
+  private stop$ = new Subject();
   private kibanaVersion: string;
+  private createClient?: (
+    type: string,
+    clientConfig?: Partial<ElasticsearchClientConfig>
+  ) => ICustomClusterClient;
+  private adminClient?: IClusterClient;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
     this.log = coreContext.logger.get('elasticsearch-service');
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
-      .pipe(map(rawConfig => new ElasticsearchConfig(rawConfig)));
+      .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
   }
 
   public async setup(deps: SetupDeps): Promise<InternalElasticsearchServiceSetup> {
@@ -69,7 +85,7 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
 
     const clients$ = this.config$.pipe(
       filter(() => {
-        if (this.subscriptions.client !== undefined) {
+        if (this.subscription !== undefined) {
           this.log.error('Clients cannot be changed after they are created');
           return false;
         }
@@ -77,8 +93,8 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
         return true;
       }),
       switchMap(
-        config =>
-          new Observable<CoreClusterClients>(subscriber => {
+        (config) =>
+          new Observable<CoreClusterClients>((subscriber) => {
             this.log.debug(`Creating elasticsearch clients`);
 
             const coreClients = {
@@ -100,14 +116,14 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
       publishReplay(1)
     ) as ConnectableObservable<CoreClusterClients>;
 
-    this.subscriptions.client = clients$.connect();
+    this.subscription = clients$.connect();
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    const adminClient$ = clients$.pipe(map(clients => clients.adminClient));
-    const dataClient$ = clients$.pipe(map(clients => clients.dataClient));
+    const adminClient$ = clients$.pipe(map((clients) => clients.adminClient));
+    const dataClient$ = clients$.pipe(map((clients) => clients.dataClient));
 
-    const adminClient = {
+    this.adminClient = {
       async callAsInternalUser(
         endpoint: string,
         clientParams: Record<string, any> = {},
@@ -116,9 +132,9 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
         const client = await adminClient$.pipe(take(1)).toPromise();
         return await client.callAsInternalUser(endpoint, clientParams, options);
       },
-      asScoped(request: ScopeableRequest) {
+      asScoped: (request: ScopeableRequest) => {
         return {
-          callAsInternalUser: adminClient.callAsInternalUser,
+          callAsInternalUser: this.adminClient!.callAsInternalUser,
           async callAsCurrentUser(
             endpoint: string,
             clientParams: Record<string, any> = {},
@@ -132,6 +148,7 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
         };
       },
     };
+
     const dataClient = {
       async callAsInternalUser(
         endpoint: string,
@@ -159,48 +176,47 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
     };
 
     const esNodesCompatibility$ = pollEsNodesVersion({
-      callWithInternalUser: adminClient.callAsInternalUser,
+      callWithInternalUser: this.adminClient.callAsInternalUser,
       log: this.log,
       ignoreVersionMismatch: config.ignoreVersionMismatch,
       esVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),
       kibanaVersion: this.kibanaVersion,
-    }).pipe(publishReplay(1));
+    }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
 
-    this.subscriptions.esNodesCompatibility = (esNodesCompatibility$ as ConnectableObservable<
-      unknown
-    >).connect();
-
-    // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
-    esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
-      if (!isCompatible && message) {
-        this.log.error(message);
-      }
-    });
+    this.createClient = (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
+      const finalConfig = merge({}, config, clientConfig);
+      return this.createClusterClient(type, finalConfig, deps.http.getAuthHeaders);
+    };
 
     return {
-      legacy: { config$: clients$.pipe(map(clients => clients.config)) },
-
-      adminClient,
-      dataClient,
+      legacy: { config$: clients$.pipe(map((clients) => clients.config)) },
       esNodesCompatibility$,
-
-      createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
-        const finalConfig = merge({}, config, clientConfig);
-        return this.createClusterClient(type, finalConfig, deps.http.getAuthHeaders);
-      },
+      adminClient: this.adminClient,
+      dataClient,
+      createClient: this.createClient,
+      status$: calculateStatus$(esNodesCompatibility$),
     };
   }
 
-  public async start() {}
+  public async start() {
+    if (typeof this.adminClient === 'undefined' || typeof this.createClient === 'undefined') {
+      throw new Error('ElasticsearchService needs to be setup before calling start');
+    } else {
+      return {
+        legacy: {
+          client: this.adminClient,
+          createClient: this.createClient,
+        },
+      };
+    }
+  }
 
   public async stop() {
     this.log.debug('Stopping elasticsearch service');
-    // TODO(TS-3.7-ESLINT)
-    // eslint-disable-next-line no-unused-expressions
-    this.subscriptions.client?.unsubscribe();
-    // eslint-disable-next-line no-unused-expressions
-    this.subscriptions.esNodesCompatibility?.unsubscribe();
-    this.subscriptions = { client: undefined, esNodesCompatibility: undefined };
+    if (this.subscription !== undefined) {
+      this.subscription.unsubscribe();
+    }
+    this.stop$.next();
   }
 
   private createClusterClient(

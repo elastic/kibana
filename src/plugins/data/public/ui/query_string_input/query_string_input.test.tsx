@@ -102,8 +102,8 @@ describe('QueryStringInput', () => {
         indexPatterns: [stubIndexPatternWithFields],
       })
     );
-
-    expect(component).toMatchSnapshot();
+    expect(component.find(EuiFieldText).props().value).toBe(kqlQuery.query);
+    expect(component.find(QueryLanguageSwitcher).prop('language')).toBe(kqlQuery.language);
   });
 
   it('Should pass the query language to the language switcher', () => {
@@ -114,8 +114,7 @@ describe('QueryStringInput', () => {
         indexPatterns: [stubIndexPatternWithFields],
       })
     );
-
-    expect(component).toMatchSnapshot();
+    expect(component.find(QueryLanguageSwitcher).prop('language')).toBe(luceneQuery.language);
   });
 
   it('Should disable autoFocus on EuiFieldText when disableAutoFocus prop is true', () => {
@@ -127,8 +126,7 @@ describe('QueryStringInput', () => {
         disableAutoFocus: true,
       })
     );
-
-    expect(component).toMatchSnapshot();
+    expect(component.find(EuiFieldText).prop('autoFocus')).toBeFalsy();
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {
@@ -162,10 +160,7 @@ describe('QueryStringInput', () => {
       )
     );
 
-    component
-      .find(QueryLanguageSwitcher)
-      .props()
-      .onSelectLanguage('lucene');
+    component.find(QueryLanguageSwitcher).props().onSelectLanguage('lucene');
     expect(mockStorage.set).toHaveBeenCalledWith('kibana.userQueryLanguage', 'lucene');
     expect(mockCallback).toHaveBeenCalledWith({ query: '', language: 'lucene' });
   });

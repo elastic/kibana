@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import url from 'url';
-
 import { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 import { toastNotifications } from '../../notify/toasts';
+import { npSetup } from '../../new_platform';
+import { areHashesDifferentButDecodedHashesEquals } from './sub_url_hooks_utils';
 
 export function registerSubUrlHooks(angularModule, internals) {
   angularModule.run(($rootScope, Private, $location) => {
@@ -40,6 +40,7 @@ export function registerSubUrlHooks(angularModule, internals) {
 
     function onRouteChange($event) {
       if (subUrlRouteFilter($event)) {
+        updateUsage($event);
         updateSubUrls();
       }
     }
@@ -47,17 +48,10 @@ export function registerSubUrlHooks(angularModule, internals) {
     $rootScope.$on('$locationChangeStart', (e, newUrl) => {
       // This handler fixes issue #31238 where browser back navigation
       // fails due to angular 1.6 parsing url encoded params wrong.
-      const parsedAbsUrl = url.parse($location.absUrl());
-      const absUrlHash = parsedAbsUrl.hash ? parsedAbsUrl.hash.slice(1) : '';
-      const decodedAbsUrlHash = decodeURIComponent(absUrlHash);
-
-      const parsedNewUrl = url.parse(newUrl);
-      const newHash = parsedNewUrl.hash ? parsedNewUrl.hash.slice(1) : '';
-      const decodedHash = decodeURIComponent(newHash);
-
-      if (absUrlHash !== newHash && decodedHash === decodedAbsUrlHash) {
+      if (areHashesDifferentButDecodedHashesEquals($location.absUrl(), newUrl)) {
         // replace the urlencoded hash with the version that angular sees.
-        $location.url(absUrlHash).replace();
+        const newHash = newUrl.split('#')[1] || '';
+        $location.url(newHash).replace();
       }
     });
 
@@ -65,6 +59,13 @@ export function registerSubUrlHooks(angularModule, internals) {
     $rootScope.$on('$routeUpdate', onRouteChange);
     updateSubUrls();
   });
+}
+
+function updateUsage($event) {
+  const scope = $event.targetScope;
+  const app = scope.chrome.getApp();
+  const appId = app.id === 'kibana' ? scope.getFirstPathSegment() : app.id;
+  if (npSetup.plugins.usageCollection) npSetup.plugins.usageCollection.__LEGACY.appChanged(appId);
 }
 
 /**

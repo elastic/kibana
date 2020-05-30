@@ -4,38 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchServiceSetup, KibanaRequest } from '../../../../../../../../src/core/server';
-import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
-import { CancellationToken } from '../../../../common/cancellation_token';
-import { ServerFacade, RequestFacade, Logger } from '../../../../types';
 import {
-  JobParamsDiscoverCsv,
-  CsvResultFromSearch,
-  SearchRequest,
-  GenerateCsvParams,
-} from '../../../csv/types';
-import {
-  IndexPatternField,
-  QueryFilter,
-  SavedSearchObjectAttributes,
-  SearchPanel,
-  SearchSource,
-} from '../../types';
-import { getDataSource } from './get_data_source';
-import { getFilters } from './get_filters';
-
+  IUiSettingsClient,
+  KibanaRequest,
+  RequestHandlerContext,
+} from '../../../../../../../../src/core/server';
 import {
   esQuery,
   EsQueryConfig,
-  esFilters,
+  Filter,
   IIndexPattern,
   Query,
-  // Reporting uses an unconventional directory structure so the linter marks this as a violation, server files should
-  // be moved under reporting/server/
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../../src/plugins/data/server';
+import { CancellationToken } from '../../../../../../../plugins/reporting/common';
+import { LevelLogger } from '../../../../server/lib';
+import { ReportingCore } from '../../../../server';
+import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
+import {
+  CsvResultFromSearch,
+  GenerateCsvParams,
+  JobParamsDiscoverCsv,
+  SearchRequest,
+} from '../../../csv/types';
+import { IndexPatternField, QueryFilter, SearchPanel, SearchSource } from '../../types';
+import { getDataSource } from './get_data_source';
+import { getFilters } from './get_filters';
 
-const getEsQueryConfig = async (config: any) => {
+const getEsQueryConfig = async (config: IUiSettingsClient) => {
   const configs = await Promise.all([
     config.get('query:allowLeadingWildcards'),
     config.get('query:queryString:options'),
@@ -49,31 +44,29 @@ const getEsQueryConfig = async (config: any) => {
   } as EsQueryConfig;
 };
 
-const getUiSettings = async (config: any) => {
+const getUiSettings = async (config: IUiSettingsClient) => {
   const configs = await Promise.all([config.get('csv:separator'), config.get('csv:quoteValues')]);
   const [separator, quoteValues] = configs;
   return { separator, quoteValues };
 };
 
 export async function generateCsvSearch(
-  req: RequestFacade,
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
-  logger: Logger,
+  reporting: ReportingCore,
+  context: RequestHandlerContext,
+  req: KibanaRequest,
   searchPanel: SearchPanel,
-  jobParams: JobParamsDiscoverCsv
+  jobParams: JobParamsDiscoverCsv,
+  logger: LevelLogger
 ): Promise<CsvResultFromSearch> {
-  const { savedObjects, uiSettingsServiceFactory } = server;
-  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
-    KibanaRequest.from(req.getRawRequest())
-  );
+  const savedObjectsClient = context.core.savedObjects.client;
   const { indexPatternSavedObjectId, timerange } = searchPanel;
-  const savedSearchObjectAttr = searchPanel.attributes as SavedSearchObjectAttributes;
+  const savedSearchObjectAttr = searchPanel.attributes;
   const { indexPatternSavedObject } = await getDataSource(
     savedObjectsClient,
     indexPatternSavedObjectId
   );
-  const uiConfig = uiSettingsServiceFactory({ savedObjectsClient });
+
+  const uiConfig = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
   const esQueryConfig = await getEsQueryConfig(uiConfig);
 
   const {
@@ -146,7 +139,7 @@ export async function generateCsvSearch(
       query: esQuery.buildEsQuery(
         indexPatternSavedObject as IIndexPattern,
         (searchSourceQuery as unknown) as Query,
-        (combinedFilter as unknown) as esFilters.Filter,
+        (combinedFilter as unknown) as Filter,
         esQueryConfig
       ),
       script_fields: scriptFieldsConfig,
@@ -154,11 +147,10 @@ export async function generateCsvSearch(
     },
   };
 
-  const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(
-    KibanaRequest.from(req.getRawRequest())
-  );
+  const config = reporting.getConfig();
+  const elasticsearch = await reporting.getElasticsearchService();
+  const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(req);
   const callCluster = (...params: [string, object]) => callAsCurrentUser(...params);
-  const config = server.config();
   const uiSettings = await getUiSettings(uiConfig);
 
   const generateCsvParams: GenerateCsvParams = {
@@ -171,8 +163,9 @@ export async function generateCsvSearch(
     cancellationToken: new CancellationToken(),
     settings: {
       ...uiSettings,
-      maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),
-      scroll: config.get('xpack.reporting.csv.scroll'),
+      maxSizeBytes: config.get('csv', 'maxSizeBytes'),
+      scroll: config.get('csv', 'scroll'),
+      escapeFormulaValues: config.get('csv', 'escapeFormulaValues'),
       timezone,
     },
   };

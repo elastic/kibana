@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { expectFixtureEql } from '../graphql/helpers/expect_fixture_eql';
+import { expectFixtureEql } from './helper/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { assertCloseTo } from '../../../../../legacy/plugins/uptime/server/lib/helper';
+import { assertCloseTo } from '../../../../../plugins/uptime/server/lib/helper';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   describe('pingHistogram', () => {
     const supertest = getService('supertest');
 

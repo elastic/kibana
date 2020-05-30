@@ -17,14 +17,107 @@
  * under the License.
  */
 
+import './index.scss';
+
 import { PluginInitializerContext } from '../../../core/public';
 
 /*
- * esQuery and esKuery helper namespaces:
+ * Filters:
  */
 
 import {
-  doesKueryExpressionHaveLuceneSyntaxError,
+  buildEmptyFilter,
+  buildExistsFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildQueryFilter,
+  buildRangeFilter,
+  disableFilter,
+  FILTERS,
+  FilterStateStore,
+  getDisplayValueFromFilter,
+  getPhraseFilterField,
+  getPhraseFilterValue,
+  isExistsFilter,
+  isFilterPinned,
+  isMatchAllFilter,
+  isMissingFilter,
+  isPhraseFilter,
+  isPhrasesFilter,
+  isQueryStringFilter,
+  isRangeFilter,
+  toggleFilterNegated,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+} from '../common';
+
+import { FilterLabel } from './ui/filter_bar';
+
+import {
+  generateFilters,
+  onlyDisabledFiltersChanged,
+  changeTimeFilter,
+  mapAndFlattenFilters,
+  extractTimeFilter,
+  convertRangeFilterToTimeRangeString,
+} from './query';
+
+// Filter helpers namespace:
+export const esFilters = {
+  FilterLabel,
+
+  FILTERS,
+  FilterStateStore,
+
+  buildEmptyFilter,
+  buildPhrasesFilter,
+  buildExistsFilter,
+  buildPhraseFilter,
+  buildQueryFilter,
+  buildRangeFilter,
+
+  isPhraseFilter,
+  isExistsFilter,
+  isPhrasesFilter,
+  isRangeFilter,
+  isMatchAllFilter,
+  isMissingFilter,
+  isQueryStringFilter,
+  isFilterPinned,
+
+  toggleFilterNegated,
+  disableFilter,
+  getPhraseFilterField,
+  getPhraseFilterValue,
+  getDisplayValueFromFilter,
+
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  generateFilters,
+  onlyDisabledFiltersChanged,
+
+  changeTimeFilter,
+  convertRangeFilterToTimeRangeString,
+  mapAndFlattenFilters,
+  extractTimeFilter,
+};
+
+export {
+  RangeFilter,
+  RangeFilterMeta,
+  RangeFilterParams,
+  ExistsFilter,
+  PhrasesFilter,
+  PhraseFilter,
+  CustomFilter,
+  MatchAllFilter,
+} from '../common';
+
+/*
+ * esQuery and esKuery:
+ */
+
+import {
   fromKueryExpression,
   toElasticsearchQuery,
   nodeTypes,
@@ -37,7 +130,6 @@ import {
 
 export const esKuery = {
   nodeTypes,
-  doesKueryExpressionHaveLuceneSyntaxError,
   fromKueryExpression,
   toElasticsearchQuery,
 };
@@ -50,8 +142,10 @@ export const esQuery = {
   decorateQuery,
 };
 
+export { EsQueryConfig, KueryNode } from '../common';
+
 /*
- * Field Formatters helper namespace:
+ * Field Formatters:
  */
 
 import {
@@ -64,7 +158,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DurationFormat,
   IpFormat,
@@ -76,11 +169,18 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  serializeFieldFormat,
 } from '../common/field_formats';
 
+import { DateFormat } from './field_formats';
+export { baseFormattersPublic } from './field_formats';
+
+// Field formats helpers namespace:
 export const fieldFormats = {
   FieldFormat,
   FieldFormatsRegistry, // exported only for tests. Consider mock.
+
+  serialize: serializeFieldFormat,
 
   DEFAULT_CONVERTER_COLOR,
   HTML_CONTEXT_TYPE,
@@ -104,38 +204,73 @@ export const fieldFormats = {
   TruncateFormat,
 };
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DataPublicPlugin(initializerContext);
-}
-
-/**
- * Types to be shared externally
- * @public
- */
-export { IRequestTypesMap, IResponseTypesMap } from './search';
-export * from './types';
 export {
-  EsQueryConfig,
-  // index patterns
-  IIndexPattern,
-  IFieldType,
-  IFieldSubType,
-  // kbn field types
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
-  // query
-  Query,
-  // timefilter
-  RefreshInterval,
-  TimeRange,
-  // Field Formats
   IFieldFormat,
+  FieldFormatInstanceType,
   IFieldFormatsRegistry,
   FieldFormatsContentType,
   FieldFormatsGetConfigFn,
   FieldFormatConfig,
   FieldFormatId,
+  FieldFormat,
 } from '../common';
+
+/*
+ * Index patterns:
+ */
+
+import { isNestedField, isFilterable } from '../common';
+
+import {
+  ILLEGAL_CHARACTERS_KEY,
+  CONTAINS_SPACES_KEY,
+  ILLEGAL_CHARACTERS_VISIBLE,
+  ILLEGAL_CHARACTERS,
+  isDefault,
+  validateIndexPattern,
+  getFromSavedObject,
+  flattenHitWrapper,
+  formatHitProvider,
+} from './index_patterns';
+
+// Index patterns namespace:
+export const indexPatterns = {
+  ILLEGAL_CHARACTERS_KEY,
+  CONTAINS_SPACES_KEY,
+  ILLEGAL_CHARACTERS_VISIBLE,
+  ILLEGAL_CHARACTERS,
+  isDefault,
+  isFilterable,
+  isNestedField,
+  validate: validateIndexPattern,
+  getFromSavedObject,
+  flattenHitWrapper,
+  formatHitProvider,
+};
+
+export {
+  IndexPatternsContract,
+  IndexPattern,
+  IIndexPatternFieldList,
+  Field as IndexPatternField,
+  TypeMeta as IndexPatternTypeMeta,
+  AggregationRestrictions as IndexPatternAggRestrictions,
+  // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
+  getIndexPatternFieldListCreator,
+} from './index_patterns';
+
+export {
+  IIndexPattern,
+  IFieldType,
+  IFieldSubType,
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  IndexPatternAttributes,
+} from '../common';
+
+/*
+ * Autocomplete query suggestions:
+ */
 
 export {
   QuerySuggestion,
@@ -146,26 +281,180 @@ export {
   QuerySuggestionField,
 } from './autocomplete';
 
-export * from './field_formats';
-export * from './index_patterns';
-export * from './search';
-export * from './query';
-export * from './ui';
-export {
-  // es query
-  esFilters,
-  KueryNode,
-  // index patterns
-  isFilterable,
-  // kbn field types
-  castEsToKbnFieldTypeName,
-  getKbnFieldType,
-  getKbnTypeNames,
-  // utils
+/*
+ * Search:
+ */
+
+import {
+  // aggs
+  CidrMask,
+  intervalOptions,
+  isDateHistogramBucketAggConfig,
+  isNumberType,
+  isStringType,
+  isType,
+  parentPipelineType,
+  propFilter,
+  siblingPipelineType,
+  termsAggFilter,
+  // expressions utils
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  // tabify
+  tabifyAggResponse,
+  tabifyGetColumns,
+} from './search';
+
+import {
+  dateHistogramInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  isValidEsInterval,
+  isValidInterval,
+  parseEsInterval,
   parseInterval,
-  isNestedField,
+  toAbsoluteDates,
 } from '../common';
 
-// Export plugin after all other imports
+export { ParsedInterval } from '../common';
+
+export {
+  // aggs
+  AggGroupLabels,
+  AggGroupName,
+  AggGroupNames,
+  AggParam,
+  AggParamOption,
+  AggParamType,
+  AggConfigOptions,
+  BUCKET_TYPES,
+  IAggConfig,
+  IAggConfigs,
+  IAggType,
+  IFieldParamType,
+  IMetricAggType,
+  METRIC_TYPES,
+  OptionedParamType,
+  OptionedValueProp,
+  // search
+  ES_SEARCH_STRATEGY,
+  SYNC_SEARCH_STRATEGY,
+  getEsPreference,
+  getSearchErrorType,
+  ISearchContext,
+  TSearchStrategyProvider,
+  ISearchStrategy,
+  ISearch,
+  ISearchOptions,
+  IRequestTypesMap,
+  IResponseTypesMap,
+  ISearchGeneric,
+  IEsSearchResponse,
+  IEsSearchRequest,
+  ISyncSearchRequest,
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
+  SearchRequest,
+  SearchResponse,
+  SearchError,
+  ISearchSource,
+  parseSearchSourceJSON,
+  injectSearchSourceReferences,
+  extractSearchSourceReferences,
+  SearchSourceFields,
+  EsQuerySortValue,
+  SortDirection,
+  FetchOptions,
+  // tabify
+  TabbedAggColumn,
+  TabbedAggRow,
+  TabbedTable,
+  SearchInterceptor,
+  RequestTimeoutError,
+} from './search';
+
+// Search namespace
+export const search = {
+  aggs: {
+    CidrMask,
+    dateHistogramInterval,
+    intervalOptions,
+    InvalidEsCalendarIntervalError,
+    InvalidEsIntervalFormatError,
+    isDateHistogramBucketAggConfig, // TODO: remove in build_pipeline refactor
+    isNumberType,
+    isStringType,
+    isType,
+    isValidEsInterval,
+    isValidInterval,
+    parentPipelineType,
+    parseEsInterval,
+    parseInterval,
+    propFilter,
+    siblingPipelineType,
+    termsAggFilter,
+    toAbsoluteDates,
+  },
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  tabifyAggResponse,
+  tabifyGetColumns,
+};
+
+/*
+ * UI components
+ */
+
+export {
+  SearchBar,
+  SearchBarProps,
+  StatefulSearchBarProps,
+  FilterBar,
+  QueryStringInput,
+  IndexPatternSelect,
+} from './ui';
+
+/**
+ * Types to be shared externally
+ * @public
+ */
+export { Filter, Query, RefreshInterval, TimeRange } from '../common';
+
+export {
+  createSavedQueryService,
+  connectToQueryState,
+  syncQueryStateWithUrl,
+  QueryState,
+  getTime,
+  getQueryLog,
+  getDefaultQuery,
+  FilterManager,
+  SavedQuery,
+  SavedQueryService,
+  SavedQueryTimeFilter,
+  InputTimeRange,
+  TimeHistory,
+  TimefilterContract,
+  TimeHistoryContract,
+} from './query';
+
+export {
+  // kbn field types
+  castEsToKbnFieldTypeName,
+  getKbnTypeNames,
+} from '../common';
+
+/*
+ * Plugin setup
+ */
+
 import { DataPublicPlugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DataPublicPlugin(initializerContext);
+}
+
+export { DataPublicPluginSetup, DataPublicPluginStart, IDataPluginServices } from './types';
+
+// Export plugin after all other imports
 export { DataPublicPlugin as Plugin };

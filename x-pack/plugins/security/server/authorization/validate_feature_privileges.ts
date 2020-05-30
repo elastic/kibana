@@ -5,21 +5,27 @@
  */
 
 import { Feature } from '../../../features/server';
-import { areActionsFullyCovered } from '../../common/privilege_calculator_utils';
-import { Actions } from './actions';
-import { featurePrivilegeBuilderFactory } from './privileges/feature_privilege_builder';
 
-export function validateFeaturePrivileges(actions: Actions, features: Feature[]) {
-  const featurePrivilegeBuilder = featurePrivilegeBuilderFactory(actions);
+export function validateFeaturePrivileges(features: Feature[]) {
   for (const feature of features) {
-    if (feature.privileges.all != null && feature.privileges.read != null) {
-      const allActions = featurePrivilegeBuilder.getActions(feature.privileges.all, feature);
-      const readActions = featurePrivilegeBuilder.getActions(feature.privileges.read, feature);
-      if (!areActionsFullyCovered(allActions, readActions)) {
-        throw new Error(
-          `${feature.id}'s "all" privilege should be a superset of the "read" privilege.`
-        );
-      }
-    }
+    const seenPrivilegeIds = new Set<string>();
+    Object.keys(feature.privileges ?? {}).forEach((privilegeId) => {
+      seenPrivilegeIds.add(privilegeId);
+      seenPrivilegeIds.add(`minimal_${privilegeId}`);
+    });
+
+    const subFeatureEntries = feature.subFeatures ?? [];
+    subFeatureEntries.forEach((subFeature) => {
+      subFeature.privilegeGroups.forEach((subFeaturePrivilegeGroup) => {
+        subFeaturePrivilegeGroup.privileges.forEach((subFeaturePrivilege) => {
+          if (seenPrivilegeIds.has(subFeaturePrivilege.id)) {
+            throw new Error(
+              `Feature '${feature.id}' already has a privilege with ID '${subFeaturePrivilege.id}'. Sub feature '${subFeature.name}' cannot also specify this.`
+            );
+          }
+          seenPrivilegeIds.add(subFeaturePrivilege.id);
+        });
+      });
+    });
   }
 }

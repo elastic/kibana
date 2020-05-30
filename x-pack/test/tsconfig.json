@@ -3,7 +3,8 @@
   "compilerOptions": {
     "types": [
       "mocha",
-      "node"
+      "node",
+      "flot"
     ]
   },
   "include": [

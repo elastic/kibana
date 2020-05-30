@@ -7,16 +7,16 @@
 import expect from '@kbn/expect';
 import gql from 'graphql-tag';
 
-import { sourceQuery } from '../../../../legacy/plugins/infra/public/containers/source/query_source.gql_query';
+import { sourceQuery } from '../../../../plugins/infra/public/containers/source/query_source.gql_query';
 import {
   sourceConfigurationFieldsFragment,
   sourceStatusFieldsFragment,
-} from '../../../../legacy/plugins/infra/public/containers/source/source_fields_fragment.gql_query';
-import { SourceQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
+} from '../../../../plugins/infra/public/containers/source/source_fields_fragment.gql_query';
+import { SourceQuery } from '../../../../plugins/infra/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { sharedFragments } from '../../../../legacy/plugins/infra/common/graphql/shared';
+import { sharedFragments } from '../../../../plugins/infra/common/graphql/shared';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
@@ -162,7 +162,7 @@ export default function({ getService }: FtrProviderContext) {
             () => {
               expect().fail('should have failed with a conflict');
             },
-            err => {
+            (err) => {
               expect(err.message).to.contain('conflict');
             }
           );

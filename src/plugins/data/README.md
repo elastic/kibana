@@ -6,4 +6,4 @@
 - `filter`
 - `index_patterns`
 - `query`
-- `search`
+- `search`: Elasticsearch API service and strategies

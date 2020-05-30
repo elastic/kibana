@@ -19,32 +19,26 @@
 
 import { coreMock } from '../../../../core/public/mocks';
 import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
-import { CoreSetup } from '../../../../core/public';
+import { CoreStart } from 'kibana/public';
 
 describe('Sync search strategy', () => {
-  let mockCoreSetup: MockedKeys<CoreSetup>;
-  const mockSearch = jest.fn();
+  let mockCoreStart: MockedKeys<CoreStart>;
 
   beforeEach(() => {
-    mockCoreSetup = coreMock.createSetup();
+    mockCoreStart = coreMock.createStart();
   });
 
   it('returns a strategy with `search` that calls the backend API', () => {
-    mockCoreSetup.http.fetch.mockImplementationOnce(() => Promise.resolve());
+    mockCoreStart.http.fetch.mockImplementationOnce(() => Promise.resolve());
 
-    const syncSearch = syncSearchStrategyProvider(
-      {
-        core: mockCoreSetup,
-      },
-      mockSearch
-    );
-    syncSearch.search(
-      {
-        serverStrategy: SYNC_SEARCH_STRATEGY,
-      },
-      {}
-    );
-    expect(mockCoreSetup.http.fetch.mock.calls[0][0]).toEqual({
+    const syncSearch = syncSearchStrategyProvider({
+      core: mockCoreStart,
+      getSearchStrategy: jest.fn(),
+    });
+    const request = { serverStrategy: SYNC_SEARCH_STRATEGY };
+    syncSearch.search(request, {});
+
+    expect(mockCoreStart.http.fetch.mock.calls[0][0]).toEqual({
       path: `/internal/search/${SYNC_SEARCH_STRATEGY}`,
       body: JSON.stringify({
         serverStrategy: 'SYNC_SEARCH_STRATEGY',
@@ -52,5 +46,48 @@ describe('Sync search strategy', () => {
       method: 'POST',
       signal: undefined,
     });
+  });
+
+  it('increments and decrements loading count on success', async () => {
+    const expectedLoadingCountValues = [0, 1, 0];
+    const receivedLoadingCountValues: number[] = [];
+
+    mockCoreStart.http.fetch.mockResolvedValueOnce('response');
+
+    const syncSearch = syncSearchStrategyProvider({
+      core: mockCoreStart,
+      getSearchStrategy: jest.fn(),
+    });
+    const request = { serverStrategy: SYNC_SEARCH_STRATEGY };
+
+    const loadingCount$ = mockCoreStart.http.addLoadingCountSource.mock.calls[0][0];
+    loadingCount$.subscribe((value) => receivedLoadingCountValues.push(value));
+
+    await syncSearch.search(request, {}).toPromise();
+
+    expect(receivedLoadingCountValues).toEqual(expectedLoadingCountValues);
+  });
+
+  it('increments and decrements loading count on failure', async () => {
+    expect.assertions(1);
+    const expectedLoadingCountValues = [0, 1, 0];
+    const receivedLoadingCountValues: number[] = [];
+
+    mockCoreStart.http.fetch.mockRejectedValueOnce('error');
+
+    const syncSearch = syncSearchStrategyProvider({
+      core: mockCoreStart,
+      getSearchStrategy: jest.fn(),
+    });
+    const request = { serverStrategy: SYNC_SEARCH_STRATEGY };
+
+    const loadingCount$ = mockCoreStart.http.addLoadingCountSource.mock.calls[0][0];
+    loadingCount$.subscribe((value) => receivedLoadingCountValues.push(value));
+
+    try {
+      await syncSearch.search(request, {}).toPromise();
+    } catch (e) {
+      expect(receivedLoadingCountValues).toEqual(expectedLoadingCountValues);
+    }
   });
 });

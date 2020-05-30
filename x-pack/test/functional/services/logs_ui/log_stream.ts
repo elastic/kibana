@@ -6,6 +6,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { TabsParams } from '../../page_objects/infra_logs_page';
 
 export function LogStreamPageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['infraLogs']);
@@ -13,15 +14,15 @@ export function LogStreamPageProvider({ getPageObjects, getService }: FtrProvide
   const testSubjects = getService('testSubjects');
 
   return {
-    async navigateTo() {
-      pageObjects.infraLogs.navigateToTab('stream');
+    async navigateTo(params?: TabsParams['stream']) {
+      await pageObjects.infraLogs.navigateToTab('stream', params);
     },
 
     async getColumnHeaderLabels(): Promise<string[]> {
       const columnHeaderElements: WebElementWrapper[] = await testSubjects.findAll(
         '~logColumnHeader'
       );
-      return await Promise.all(columnHeaderElements.map(element => element.getVisibleText()));
+      return await Promise.all(columnHeaderElements.map((element) => element.getVisibleText()));
     },
 
     async getStreamEntries(minimumItems = 1): Promise<WebElementWrapper[]> {

@@ -1,20 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`appends records via multiple appenders.: console logs 1`] = `"[2012-02-01T00:00:00.000Z][INFO ][some-context] You know, just for your info."`;
+exports[`appends records via multiple appenders.: console logs 1`] = `"[2012-01-31T23:33:22.011Z][INFO ][some-context] You know, just for your info."`;
 
 exports[`appends records via multiple appenders.: file logs 1`] = `
-"[2012-02-01T00:00:00.000Z][WARN ][tests] Config is not ready!
+"[2012-01-31T23:33:22.011Z][WARN ][tests] Config is not ready!
 "
 `;
 
 exports[`appends records via multiple appenders.: file logs 2`] = `
-"[2012-02-01T00:00:00.000Z][ERROR][tests.child] Too bad that config is not ready :/
+"[2012-01-31T23:33:22.011Z][ERROR][tests.child] Too bad that config is not ready :/
 "
 `;
 
 exports[`asLoggerFactory() only allows to create new loggers. 1`] = `
 Object {
-  "@timestamp": "2012-02-01T00:00:00.000Z",
+  "@timestamp": "2012-01-31T18:33:22.011-05:00",
   "context": "test.context",
   "level": "TRACE",
   "message": "buffered trace message",
@@ -24,7 +24,7 @@ Object {
 
 exports[`asLoggerFactory() only allows to create new loggers. 2`] = `
 Object {
-  "@timestamp": "2012-02-01T00:00:00.000Z",
+  "@timestamp": "2012-01-31T13:33:22.011-05:00",
   "context": "test.context",
   "level": "INFO",
   "message": "buffered info message",
@@ -37,7 +37,7 @@ Object {
 
 exports[`asLoggerFactory() only allows to create new loggers. 3`] = `
 Object {
-  "@timestamp": "2012-02-01T00:00:00.000Z",
+  "@timestamp": "2012-01-31T08:33:22.011-05:00",
   "context": "test.context",
   "level": "FATAL",
   "message": "buffered fatal message",
@@ -47,7 +47,7 @@ Object {
 
 exports[`flushes memory buffer logger and switches to real logger once config is provided: buffered messages 1`] = `
 Object {
-  "@timestamp": "2012-02-01T00:00:00.000Z",
+  "@timestamp": "2012-02-01T09:33:22.011-05:00",
   "context": "test.context",
   "level": "INFO",
   "message": "buffered info message",
@@ -60,7 +60,7 @@ Object {
 
 exports[`flushes memory buffer logger and switches to real logger once config is provided: new messages 1`] = `
 Object {
-  "@timestamp": "2012-02-01T00:00:00.000Z",
+  "@timestamp": "2012-01-31T23:33:22.011-05:00",
   "context": "test.context",
   "level": "INFO",
   "message": "some new info message",
@@ -71,7 +71,7 @@ Object {
 exports[`uses \`root\` logger if context is not specified. 1`] = `
 Array [
   Array [
-    "[2012-02-01T00:00:00.000Z][INFO ][root] This message goes to a root context.",
+    "[2012-01-31T23:33:22.011Z][INFO ][root] This message goes to a root context.",
   ],
 ]
 `;
@@ -86,7 +86,7 @@ Object {
   "message": "trace message",
   "meta": undefined,
   "pid": Any<Number>,
-  "timestamp": 2012-02-01T00:00:00.000Z,
+  "timestamp": 2012-02-01T14:33:22.011Z,
 }
 `;
 
@@ -102,6 +102,6 @@ Object {
     "some": "value",
   },
   "pid": Any<Number>,
-  "timestamp": 2012-02-01T00:00:00.000Z,
+  "timestamp": 2012-02-01T14:33:22.011Z,
 }
 `;

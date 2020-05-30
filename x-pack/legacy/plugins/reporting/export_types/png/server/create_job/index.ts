@@ -4,28 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  CreateJobFactory,
-  ServerFacade,
-  RequestFacade,
-  ESQueueCreateJobFn,
-  ConditionalHeaders,
-} from '../../../../types';
 import { validateUrls } from '../../../../common/validate_urls';
-import { cryptoFactory } from '../../../../server/lib/crypto';
+import { cryptoFactory } from '../../../../server/lib';
+import { CreateJobFactory, ESQueueCreateJobFn } from '../../../../server/types';
 import { JobParamsPNG } from '../../types';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPNG
->> = function createJobFactoryFn(server: ServerFacade) {
-  const crypto = cryptoFactory(server);
+>> = function createJobFactoryFn(reporting) {
+  const config = reporting.getConfig();
+  const setupDeps = reporting.getPluginSetupDeps();
+  const crypto = cryptoFactory(config.get('encryptionKey'));
 
   return async function createJob(
-    { objectType, title, relativeUrl, browserTimezone, layout }: JobParamsPNG,
-    headers: ConditionalHeaders['headers'],
-    request: RequestFacade
+    { objectType, title, relativeUrl, browserTimezone, layout },
+    context,
+    req
   ) {
-    const serializedEncryptedHeaders = await crypto.encrypt(headers);
+    const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
 
     validateUrls([relativeUrl]);
 
@@ -36,7 +32,7 @@ export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
       headers: serializedEncryptedHeaders,
       browserTimezone,
       layout,
-      basePath: request.getBasePath(),
+      basePath: setupDeps.basePath(req),
       forceNow: new Date().toISOString(),
     };
   };

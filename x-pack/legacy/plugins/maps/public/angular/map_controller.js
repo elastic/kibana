@@ -5,69 +5,132 @@
  */
 
 import _ from 'lodash';
-import chrome from 'ui/chrome';
+import rison from 'rison-node';
 import 'ui/directives/listen';
 import 'ui/directives/storage';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { capabilities } from 'ui/capabilities';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
-import { timefilter } from 'ui/timefilter';
+import {
+  getTimeFilter,
+  getIndexPatternService,
+  getInspector,
+  getNavigation,
+  getData,
+  getCoreI18n,
+  getCoreChrome,
+  getMapsCapabilities,
+  getToasts,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createMapStore } from '../../../../../plugins/maps/public/reducers/store';
 import { Provider } from 'react-redux';
-import { createMapStore } from '../reducers/store';
-import { GisMap } from '../connected_components/gis_map';
-import { addHelpMenuToAppChrome } from '../help_menu_util';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { GisMap } from '../../../../../plugins/maps/public/connected_components/gis_map';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { addHelpMenuToAppChrome } from '../../../../../plugins/maps/public/help_menu_util';
 import {
   setSelectedLayer,
   setRefreshConfig,
   setGotoWithCenter,
   replaceLayerList,
   setQuery,
-  clearTransientLayerStateAndCloseFlyout,
-} from '../actions/map_actions';
-import { DEFAULT_IS_LAYER_TOC_OPEN, FLYOUT_STATE } from '../reducers/ui';
-import {
+  setMapSettings,
   enableFullScreen,
   updateFlyout,
   setReadOnly,
   setIsLayerTOCOpen,
   setOpenTOCDetails,
-} from '../actions/ui_actions';
-import { getIsFullScreen } from '../selectors/ui_selectors';
-import { copyPersistentState } from '../reducers/util';
+  openMapSettings,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/actions';
+import {
+  DEFAULT_IS_LAYER_TOC_OPEN,
+  FLYOUT_STATE,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/reducers/ui';
+import {
+  getIsFullScreen,
+  getFlyoutDisplay,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/selectors/ui_selectors';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { copyPersistentState } from '../../../../../plugins/maps/public/reducers/util';
 import {
   getQueryableUniqueIndexPatternIds,
   hasDirtyState,
   getLayerListRaw,
-} from '../selectors/map_selectors';
-import { getInspectorAdapters } from '../reducers/non_serializable_instances';
-import { docTitle } from 'ui/doc_title';
-import { indexPatternService, getInspector } from '../kibana_services';
-import { toastNotifications } from 'ui/notify';
-import { getInitialLayers } from './get_initial_layers';
-import { getInitialQuery } from './get_initial_query';
-import { getInitialTimeFilters } from './get_initial_time_filters';
-import { getInitialRefreshConfig } from './get_initial_refresh_config';
-import { MAP_SAVED_OBJECT_TYPE, MAP_APP_PATH } from '../../common/constants';
-import { npStart } from 'ui/new_platform';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/selectors/map_selectors';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInitialLayers } from '../../../../../plugins/maps/public/angular/get_initial_layers';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInitialQuery } from '../../../../../plugins/maps/public/angular/get_initial_query';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInitialTimeFilters } from '../../../../../plugins/maps/public/angular/get_initial_time_filters';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInitialRefreshConfig } from '../../../../../plugins/maps/public/angular/get_initial_refresh_config';
+import { MAP_SAVED_OBJECT_TYPE, MAP_APP_PATH } from '../../../../../plugins/maps/common/constants';
+import { npSetup, npStart } from 'ui/new_platform';
 import { esFilters } from '../../../../../../src/plugins/data/public';
 import {
   SavedObjectSaveModal,
   showSaveModal,
 } from '../../../../../../src/plugins/saved_objects/public';
-
-const savedQueryService = npStart.plugins.data.query.savedQueries;
+import { loadKbnTopNavDirectives } from '../../../../../../src/plugins/kibana_legacy/public';
+import {
+  bindSetupCoreAndPlugins as bindNpSetupCoreAndPlugins,
+  bindStartCoreAndPlugins as bindNpStartCoreAndPlugins,
+} from '../../../../../plugins/maps/public/plugin'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 const app = uiModules.get(MAP_APP_PATH, []);
 
+// Init required services. Necessary while in legacy
+const config = _.get(npSetup, 'plugins.maps.config', {});
+const kibanaVersion = npSetup.core.injectedMetadata.getKibanaVersion();
+bindNpSetupCoreAndPlugins(npSetup.core, npSetup.plugins, config, kibanaVersion);
+bindNpStartCoreAndPlugins(npStart.core, npStart.plugins);
+
+loadKbnTopNavDirectives(getNavigation().ui);
+
+function getInitialLayersFromUrlParam() {
+  const locationSplit = window.location.href.split('?');
+  if (locationSplit.length <= 1) {
+    return [];
+  }
+  const mapAppParams = new URLSearchParams(locationSplit[1]);
+  if (!mapAppParams.has('initialLayers')) {
+    return [];
+  }
+
+  try {
+    return rison.decode_array(mapAppParams.get('initialLayers'));
+  } catch (e) {
+    getToasts().addWarning({
+      title: i18n.translate('xpack.maps.initialLayers.unableToParseTitle', {
+        defaultMessage: `Inital layers not added to map`,
+      }),
+      text: i18n.translate('xpack.maps.initialLayers.unableToParseMessage', {
+        defaultMessage: `Unable to parse contents of 'initialLayers' parameter. Error: {errorMsg}`,
+        values: { errorMsg: e.message },
+      }),
+    });
+    return [];
+  }
+}
+
 app.controller(
   'GisMapController',
   ($scope, $route, kbnUrl, localStorage, AppState, globalState) => {
-    const { filterManager } = npStart.plugins.data.query;
+    const savedQueryService = getData().query.savedQueries;
+    const { filterManager } = getData().query;
     const savedMap = $route.current.locals.map;
     $scope.screenTitle = savedMap.title;
     let unsubscribe;
@@ -79,7 +142,15 @@ app.controller(
       return _.get($state, 'filters', []);
     }
 
-    $scope.$listen(globalState, 'fetch_with_changes', diff => {
+    const visibleSubscription = getCoreChrome()
+      .getIsVisible$()
+      .subscribe((isVisible) => {
+        $scope.$evalAsync(() => {
+          $scope.isVisible = isVisible;
+        });
+      });
+
+    $scope.$listen(globalState, 'fetch_with_changes', (diff) => {
       if (diff.includes('time') || diff.includes('filters')) {
         onQueryChange({
           filters: [...globalState.filters, ...getAppStateFilters()],
@@ -91,7 +162,7 @@ app.controller(
       }
     });
 
-    $scope.$listen($state, 'fetch_with_changes', function(diff) {
+    $scope.$listen($state, 'fetch_with_changes', function (diff) {
       if ((diff.includes('query') || diff.includes('filters')) && $state.query) {
         onQueryChange({
           filters: [...globalState.filters, ...getAppStateFilters()],
@@ -133,20 +204,20 @@ app.controller(
     });
 
     /* Saved Queries */
-    $scope.showSaveQuery = capabilities.get().maps.saveQuery;
+    $scope.showSaveQuery = getMapsCapabilities().saveQuery;
 
     $scope.$watch(
-      () => capabilities.get().maps.saveQuery,
-      newCapability => {
+      () => getMapsCapabilities().saveQuery,
+      (newCapability) => {
         $scope.showSaveQuery = newCapability;
       }
     );
 
-    $scope.onQuerySaved = savedQuery => {
+    $scope.onQuerySaved = (savedQuery) => {
       $scope.savedQuery = savedQuery;
     };
 
-    $scope.onSavedQueryUpdated = savedQuery => {
+    $scope.onSavedQueryUpdated = (savedQuery) => {
       $scope.savedQuery = { ...savedQuery };
     };
 
@@ -187,7 +258,7 @@ app.controller(
       }
     }
 
-    $scope.$watch('savedQuery', newSavedQuery => {
+    $scope.$watch('savedQuery', (newSavedQuery) => {
       if (!newSavedQuery) return;
 
       $state.savedQuery = newSavedQuery.id;
@@ -196,13 +267,13 @@ app.controller(
 
     $scope.$watch(
       () => $state.savedQuery,
-      newSavedQueryId => {
+      (newSavedQueryId) => {
         if (!newSavedQueryId) {
           $scope.savedQuery = undefined;
           return;
         }
         if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
-          savedQueryService.getSavedQuery(newSavedQueryId).then(savedQuery => {
+          savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
             $scope.$evalAsync(() => {
               $scope.savedQuery = savedQuery;
               updateStateFromSavedQuery(savedQuery);
@@ -239,19 +310,19 @@ app.controller(
     }
 
     $scope.indexPatterns = [];
-    $scope.onQuerySubmit = function({ dateRange, query }) {
+    $scope.onQuerySubmit = function ({ dateRange, query }) {
       onQueryChange({
         query,
         time: dateRange,
         refresh: true,
       });
     };
-    $scope.updateFiltersAndDispatch = function(filters) {
+    $scope.updateFiltersAndDispatch = function (filters) {
       onQueryChange({
         filters,
       });
     };
-    $scope.onRefreshChange = function({ isPaused, refreshInterval }) {
+    $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
       $scope.refreshConfig = {
         isPaused,
         interval: refreshInterval ? refreshInterval : $scope.refreshConfig.interval,
@@ -262,8 +333,8 @@ app.controller(
     };
 
     function addFilters(newFilters) {
-      newFilters.forEach(filter => {
-        filter.$state = esFilters.FilterStateStore.APP_STATE;
+      newFilters.forEach((filter) => {
+        filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
       });
       $scope.updateFiltersAndDispatch([...$scope.filters, ...newFilters]);
     }
@@ -274,9 +345,15 @@ app.controller(
       const layerListConfigOnly = copyPersistentState(layerList);
 
       const savedLayerList = savedMap.getLayerList();
-      const oldConfig = savedLayerList ? savedLayerList : initialLayerListConfig;
 
-      return !_.isEqual(layerListConfigOnly, oldConfig);
+      return !savedLayerList
+        ? !_.isEqual(layerListConfigOnly, initialLayerListConfig)
+        : // savedMap stores layerList as a JSON string using JSON.stringify.
+          // JSON.stringify removes undefined properties from objects.
+          // savedMap.getLayerList converts the JSON string back into Javascript array of objects.
+          // Need to perform the same process for layerListConfigOnly to compare apples to apples
+          // and avoid undefined properties in layerListConfigOnly triggering unsaved changes.
+          !_.isEqual(JSON.parse(JSON.stringify(layerListConfigOnly)), savedLayerList);
     }
 
     function isOnMapNow() {
@@ -300,7 +377,7 @@ app.controller(
       // clear old UI state
       store.dispatch(setSelectedLayer(null));
       store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      store.dispatch(setReadOnly(!capabilities.get().maps.save));
+      store.dispatch(setReadOnly(!getMapsCapabilities().save));
 
       handleStoreChanges(store);
       unsubscribe = store.subscribe(() => {
@@ -321,6 +398,9 @@ app.controller(
         if (mapState.filters) {
           savedObjectFilters = mapState.filters;
         }
+        if (mapState.settings) {
+          store.dispatch(setMapSettings(mapState.settings));
+        }
       }
 
       if (savedMap.uiStateJSON) {
@@ -331,7 +411,7 @@ app.controller(
         store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
       }
 
-      const layerList = getInitialLayers(savedMap.layerListJSON);
+      const layerList = getInitialLayers(savedMap.layerListJSON, getInitialLayersFromUrlParam());
       initialLayerListConfig = copyPersistentState(layerList);
       store.dispatch(replaceLayerList(layerList));
       store.dispatch(setRefreshConfig($scope.refreshConfig));
@@ -358,9 +438,9 @@ app.controller(
     let prevIndexPatternIds;
     async function updateIndexPatterns(nextIndexPatternIds) {
       const indexPatterns = [];
-      const getIndexPatternPromises = nextIndexPatternIds.map(async indexPatternId => {
+      const getIndexPatternPromises = nextIndexPatternIds.map(async (indexPatternId) => {
         try {
-          const indexPattern = await indexPatternService.get(indexPatternId);
+          const indexPattern = await getIndexPatternService().get(indexPatternId);
           indexPatterns.push(indexPattern);
         } catch (err) {
           // unable to fetch index pattern
@@ -379,6 +459,7 @@ app.controller(
 
     $scope.isFullScreen = false;
     $scope.isSaveDisabled = false;
+    $scope.isOpenSettingsDisabled = false;
     function handleStoreChanges(store) {
       const nextIsFullScreen = getIsFullScreen(store.getState());
       if (nextIsFullScreen !== $scope.isFullScreen) {
@@ -400,10 +481,20 @@ app.controller(
           $scope.isSaveDisabled = nextIsSaveDisabled;
         });
       }
+
+      const flyoutDisplay = getFlyoutDisplay(store.getState());
+      const nextIsOpenSettingsDisabled = flyoutDisplay !== FLYOUT_STATE.NONE;
+      if (nextIsOpenSettingsDisabled !== $scope.isOpenSettingsDisabled) {
+        $scope.$evalAsync(() => {
+          $scope.isOpenSettingsDisabled = nextIsOpenSettingsDisabled;
+        });
+      }
     }
 
     $scope.$on('$destroy', () => {
       window.removeEventListener('beforeunload', beforeUnload);
+      visibleSubscription.unsubscribe();
+      getCoreChrome().setIsVisible(true);
 
       if (unsubscribe) {
         unsubscribe();
@@ -415,7 +506,7 @@ app.controller(
     });
 
     const updateBreadcrumbs = () => {
-      chrome.breadcrumbs.set([
+      getCoreChrome().setBreadcrumbs([
         {
           text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
             defaultMessage: 'Maps',
@@ -440,18 +531,17 @@ app.controller(
     };
     updateBreadcrumbs();
 
-    addHelpMenuToAppChrome(chrome);
+    addHelpMenuToAppChrome();
 
     async function doSave(saveOptions) {
-      await store.dispatch(clearTransientLayerStateAndCloseFlyout());
       savedMap.syncWithStore(store.getState());
       let id;
 
       try {
         id = await savedMap.save(saveOptions);
-        docTitle.change(savedMap.title);
+        getCoreChrome().docTitle.change(savedMap.title);
       } catch (err) {
-        toastNotifications.addDanger({
+        getToasts().addDanger({
           title: i18n.translate('xpack.maps.mapController.saveErrorMessage', {
             defaultMessage: `Error on saving '{title}'`,
             values: { title: savedMap.title },
@@ -463,7 +553,7 @@ app.controller(
       }
 
       if (id) {
-        toastNotifications.addSuccess({
+        getToasts().addSuccess({
           title: i18n.translate('xpack.maps.mapController.saveSuccessMessage', {
             defaultMessage: `Saved '{title}'`,
             values: { title: savedMap.title },
@@ -483,8 +573,8 @@ app.controller(
     }
 
     // Hide angular timepicer/refresh UI from top nav
-    timefilter.disableTimeRangeSelector();
-    timefilter.disableAutoRefreshSelector();
+    getTimeFilter().disableTimeRangeSelector();
+    getTimeFilter().disableAutoRefreshSelector();
     $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
     $scope.topNavMenu = [
       {
@@ -497,6 +587,7 @@ app.controller(
         }),
         testId: 'mapsFullScreenMode',
         run() {
+          getCoreChrome().setIsVisible(false);
           store.dispatch(enableFullScreen());
         },
       },
@@ -514,7 +605,23 @@ app.controller(
           getInspector().open(inspectorAdapters, {});
         },
       },
-      ...(capabilities.get().maps.save
+      {
+        id: 'mapSettings',
+        label: i18n.translate('xpack.maps.mapController.openSettingsButtonLabel', {
+          defaultMessage: `Map settings`,
+        }),
+        description: i18n.translate('xpack.maps.mapController.openSettingsDescription', {
+          defaultMessage: `Open map settings`,
+        }),
+        testId: 'openSettingsButton',
+        disableButton() {
+          return $scope.isOpenSettingsDisabled;
+        },
+        run() {
+          store.dispatch(openMapSettings());
+        },
+      },
+      ...(getMapsCapabilities().save
         ? [
             {
               id: 'save',
@@ -550,7 +657,7 @@ app.controller(
                     isTitleDuplicateConfirmed,
                     onTitleDuplicate,
                   };
-                  return doSave(saveOptions).then(response => {
+                  return doSave(saveOptions).then((response) => {
                     // If the save wasn't successful, put the original values back.
                     if (!response.id || response.error) {
                       savedMap.title = currentTitle;
@@ -566,9 +673,10 @@ app.controller(
                     title={savedMap.title}
                     showCopyOnSave={savedMap.id ? true : false}
                     objectType={MAP_SAVED_OBJECT_TYPE}
+                    showDescription={false}
                   />
                 );
-                showSaveModal(saveModal, npStart.core.i18n.Context);
+                showSaveModal(saveModal, getCoreI18n().Context);
               },
             },
           ]

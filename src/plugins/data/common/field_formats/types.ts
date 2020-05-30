@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { FieldFormat } from './field_format';
 
 /** @public **/
@@ -81,11 +80,14 @@ export type IFieldFormat = PublicMethodsOf<FieldFormat>;
  */
 export type FieldFormatId = FIELD_FORMAT_IDS | string;
 
-export type IFieldFormatType = (new (
+/** @internal **/
+export type FieldFormatInstanceType = (new (
   params?: any,
   getConfig?: FieldFormatsGetConfigFn
 ) => FieldFormat) & {
+  // Static properties:
   id: FieldFormatId;
+  title: string;
   fieldType: string | string[];
 };
 

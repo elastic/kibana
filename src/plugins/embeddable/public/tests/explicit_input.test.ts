@@ -35,13 +35,12 @@ import { isErrorEmbeddable } from '../lib';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 // eslint-disable-next-line
 import { coreMock } from '../../../../core/public/mocks';
-import { esFilters } from '../../../../plugins/data/public';
+import { esFilters, Filter } from '../../../../plugins/data/public';
 
 const { setup, doStart, coreStart, uiActions } = testPlugin(
   coreMock.createSetup(),
   coreMock.createStart()
 );
-const start = doStart();
 
 setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
 const factory = new SlowContactCardEmbeddableFactory({
@@ -51,8 +50,10 @@ const factory = new SlowContactCardEmbeddableFactory({
 setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, factory);
 setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE, new HelloWorldEmbeddableFactory());
 
+const start = doStart();
+
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
-  const derivedFilter: esFilters.Filter = {
+  const derivedFilter: Filter = {
     $state: { store: esFilters.FilterStateStore.APP_STATE },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },
@@ -78,7 +79,7 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
   ]);
 });
 
-test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async done => {
+test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async (done) => {
   const container = new HelloWorldContainer(
     { id: 'hello', panels: {} },
     {
@@ -87,6 +88,7 @@ test('Explicit embeddable input mapped to undefined with no inherited value will
       getEmbeddableFactory: start.getEmbeddableFactory,
       notifications: coreStart.notifications,
       overlays: coreStart.overlays,
+      application: coreStart.application,
       inspector: {} as any,
       SavedObjectFinder: () => null,
     }
@@ -135,6 +137,7 @@ test('Explicit input tests in async situations', (done: () => void) => {
       getEmbeddableFactory: start.getEmbeddableFactory,
       notifications: coreStart.notifications,
       overlays: coreStart.overlays,
+      application: coreStart.application,
       inspector: {} as any,
       SavedObjectFinder: () => null,
     }

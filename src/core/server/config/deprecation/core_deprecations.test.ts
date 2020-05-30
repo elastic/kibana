@@ -28,11 +28,11 @@ const applyCoreDeprecations = (settings: Record<string, any> = {}) => {
   const deprecationMessages: string[] = [];
   const migrated = applyDeprecations(
     settings,
-    deprecations.map(deprecation => ({
+    deprecations.map((deprecation) => ({
       deprecation,
       path: '',
     })),
-    msg => deprecationMessages.push(msg)
+    (msg) => deprecationMessages.push(msg)
   );
   return {
     messages: deprecationMessages,
@@ -78,6 +78,19 @@ describe('core deprecations', () => {
       delete process.env.DATA_PATH;
       const { messages } = applyCoreDeprecations();
       expect(messages).toHaveLength(0);
+    });
+  });
+
+  describe('xsrfDeprecation', () => {
+    it('logs a warning if server.xsrf.whitelist is set', () => {
+      const { messages } = applyCoreDeprecations({
+        server: { xsrf: { whitelist: ['/path'] } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. It will be removed in 8.0 release. Instead, supply the \\"kbn-xsrf\\" header.",
+        ]
+      `);
     });
   });
 

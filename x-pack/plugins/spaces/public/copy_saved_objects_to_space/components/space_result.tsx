@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './space_result.scss';
 import React from 'react';
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
-import { SavedObjectsManagementRecord } from '../../../../../../src/legacy/core_plugins/management/public';
+import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
 import { SummarizedCopyToSpaceResult } from '../index';
 import { SpaceAvatar } from '../../space_avatar';
 import { Space } from '../../../common/model/space';
@@ -32,7 +33,7 @@ export const SpaceResult = (props: Props) => {
     savedObject,
     conflictResolutionInProgress,
   } = props;
-  const spaceHasPendingOverwrites = retries.some(r => r.overwrite);
+  const spaceHasPendingOverwrites = retries.some((r) => r.overwrite);
 
   return (
     <EuiAccordion

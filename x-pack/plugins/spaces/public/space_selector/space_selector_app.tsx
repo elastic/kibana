@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, AppMountParameters } from 'src/core/public';
+import { StartServicesAccessor, ApplicationSetup, AppMountParameters } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { SpacesManager } from '../spaces_manager';
 
 interface CreateDeps {
-  application: CoreSetup['application'];
+  application: ApplicationSetup;
   spacesManager: SpacesManager;
-  getStartServices: CoreSetup['getStartServices'];
+  getStartServices: StartServicesAccessor;
 }
 
 export const spaceSelectorApp = Object.freeze({
@@ -29,7 +29,10 @@ export const spaceSelectorApp = Object.freeze({
           getStartServices(),
           import('./space_selector'),
         ]);
-        return renderSpaceSelectorApp(coreStart.i18n, params.element, { spacesManager });
+        return renderSpaceSelectorApp(coreStart.i18n, params.element, {
+          spacesManager,
+          serverBasePath: coreStart.http.basePath.serverBasePath,
+        });
       },
     });
   },

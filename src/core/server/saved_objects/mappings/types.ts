@@ -45,6 +45,9 @@
  * @public
  */
 export interface SavedObjectsTypeMappingDefinition {
+  /** The dynamic property of the mapping. either `false` or 'strict'. Defaults to `false` */
+  dynamic?: false | 'strict';
+  /** The underlying properties of the type mapping */
   properties: SavedObjectsMappingProperties;
 }
 
@@ -128,11 +131,13 @@ export interface IndexMappingMeta {
  */
 export interface SavedObjectsCoreFieldMapping {
   type: string;
+  null_value?: number | boolean | string;
   index?: boolean;
   enabled?: boolean;
   fields?: {
     [subfield: string]: {
       type: string;
+      ignore_above?: number;
     };
   };
 }

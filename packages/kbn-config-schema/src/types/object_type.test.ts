@@ -18,6 +18,7 @@
  */
 
 import { schema } from '..';
+import { TypeOf } from './object_type';
 
 test('returns value by default', () => {
   const type = schema.object({
@@ -28,6 +29,11 @@ test('returns value by default', () => {
   };
 
   expect(type.validate(value)).toEqual({ name: 'test' });
+});
+
+test('returns empty object if undefined', () => {
+  const type = schema.object({});
+  expect(type.validate(undefined)).toEqual({});
 });
 
 test('properly parse the value if input is a string', () => {
@@ -44,7 +50,7 @@ test('fails if string input cannot be parsed', () => {
     name: schema.string(),
   });
   expect(() => type.validate(`invalidjson`)).toThrowErrorMatchingInlineSnapshot(
-    `"could not parse object value from [invalidjson]"`
+    `"could not parse object value from json input"`
   );
 });
 
@@ -112,14 +118,26 @@ test('undefined object within object', () => {
     }),
   });
 
+  expect(type.validate(undefined)).toEqual({
+    foo: {
+      bar: 'hello world',
+    },
+  });
+
   expect(type.validate({})).toEqual({
+    foo: {
+      bar: 'hello world',
+    },
+  });
+
+  expect(type.validate({ foo: {} })).toEqual({
     foo: {
       bar: 'hello world',
     },
   });
 });
 
-test('object within object with required', () => {
+test('object within object with key without defaultValue', () => {
   const type = schema.object({
     foo: schema.object({
       bar: schema.string(),
@@ -127,6 +145,9 @@ test('object within object with required', () => {
   });
   const value = { foo: {} };
 
+  expect(() => type.validate(undefined)).toThrowErrorMatchingInlineSnapshot(
+    `"[foo.bar]: expected value of type [string] but got [undefined]"`
+  );
   expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
     `"[foo.bar]: expected value of type [string] but got [undefined]"`
   );
@@ -161,7 +182,7 @@ test('called with wrong type', () => {
   const type = schema.object({});
 
   expect(() => type.validate('foo')).toThrowErrorMatchingInlineSnapshot(
-    `"could not parse object value from [foo]"`
+    `"could not parse object value from json input"`
   );
   expect(() => type.validate(123)).toThrowErrorMatchingInlineSnapshot(
     `"expected a plain object value, but found [number] instead."`
@@ -256,10 +277,10 @@ test('individual keys can validated', () => {
   );
 });
 
-test('allow unknown keys when allowUnknowns = true', () => {
+test('allow unknown keys when unknowns = `allow`', () => {
   const type = schema.object(
     { foo: schema.string({ defaultValue: 'test' }) },
-    { allowUnknowns: true }
+    { unknowns: 'allow' }
   );
 
   expect(
@@ -272,10 +293,10 @@ test('allow unknown keys when allowUnknowns = true', () => {
   });
 });
 
-test('allowUnknowns = true affects only own keys', () => {
+test('unknowns = `allow` affects only own keys', () => {
   const type = schema.object(
     { foo: schema.object({ bar: schema.string() }) },
-    { allowUnknowns: true }
+    { unknowns: 'allow' }
   );
 
   expect(() =>
@@ -288,14 +309,68 @@ test('allowUnknowns = true affects only own keys', () => {
   ).toThrowErrorMatchingInlineSnapshot(`"[foo.baz]: definition for this key is missing"`);
 });
 
-test('does not allow unknown keys when allowUnknowns = false', () => {
+test('does not allow unknown keys when unknowns = `forbid`', () => {
   const type = schema.object(
     { foo: schema.string({ defaultValue: 'test' }) },
-    { allowUnknowns: false }
+    { unknowns: 'forbid' }
   );
   expect(() =>
     type.validate({
       bar: 'baz',
     })
   ).toThrowErrorMatchingInlineSnapshot(`"[bar]: definition for this key is missing"`);
+});
+
+test('allow and remove unknown keys when unknowns = `ignore`', () => {
+  const type = schema.object(
+    { foo: schema.string({ defaultValue: 'test' }) },
+    { unknowns: 'ignore' }
+  );
+
+  expect(
+    type.validate({
+      bar: 'baz',
+    })
+  ).toEqual({
+    foo: 'test',
+  });
+});
+
+test('unknowns = `ignore` affects only own keys', () => {
+  const type = schema.object(
+    { foo: schema.object({ bar: schema.string() }) },
+    { unknowns: 'ignore' }
+  );
+
+  expect(() =>
+    type.validate({
+      foo: {
+        bar: 'bar',
+        baz: 'baz',
+      },
+    })
+  ).toThrowErrorMatchingInlineSnapshot(`"[foo.baz]: definition for this key is missing"`);
+});
+
+test('handles optional properties', () => {
+  const type = schema.object({
+    required: schema.string(),
+    optional: schema.maybe(schema.string()),
+  });
+
+  type SchemaType = TypeOf<typeof type>;
+
+  let foo: SchemaType = {
+    required: 'foo',
+  };
+  foo = {
+    required: 'hello',
+    optional: undefined,
+  };
+  foo = {
+    required: 'hello',
+    optional: 'bar',
+  };
+
+  expect(foo).toBeDefined();
 });

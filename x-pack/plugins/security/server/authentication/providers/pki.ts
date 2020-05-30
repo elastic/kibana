@@ -9,8 +9,9 @@ import { DetailedPeerCertificate } from 'tls';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { BaseAuthenticationProvider } from './base';
+import { HTTPAuthorizationHeader } from '../http_authentication';
 import { Tokens } from '../tokens';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * The state supported by the provider.
@@ -28,16 +29,12 @@ interface ProviderState {
 }
 
 /**
- * Parses request's `Authorization` HTTP header if present and extracts authentication scheme.
- * @param request Request instance to extract authentication scheme for.
+ * Checks whether current request can initiate new session.
+ * @param request Request instance.
  */
-function getRequestAuthenticationScheme(request: KibanaRequest) {
-  const authorization = request.headers.authorization;
-  if (!authorization || typeof authorization !== 'string') {
-    return '';
-  }
-
-  return authorization.split(/\s+/)[0].toLowerCase();
+function canStartNewSession(request: KibanaRequest) {
+  // We should try to establish new session only if request requires authentication.
+  return request.route.options.authRequired === true;
 }
 
 /**
@@ -50,6 +47,15 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
   static readonly type = 'pki';
 
   /**
+   * Performs initial login request.
+   * @param request Request instance.
+   */
+  public async login(request: KibanaRequest) {
+    this.logger.debug('Trying to perform a login.');
+    return await this.authenticateViaPeerCertificate(request);
+  }
+
+  /**
    * Performs PKI request authentication.
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
@@ -57,28 +63,22 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    const authenticationScheme = getRequestAuthenticationScheme(request);
-    if (authenticationScheme && authenticationScheme !== 'bearer') {
-      this.logger.debug(`Unsupported authentication scheme: ${authenticationScheme}`);
+    if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
+      this.logger.debug('Cannot authenticate requests with `Authorization` header.');
       return AuthenticationResult.notHandled();
     }
 
     let authenticationResult = AuthenticationResult.notHandled();
-    if (authenticationScheme) {
-      // We should get rid of `Bearer` scheme support as soon as Reporting doesn't need it anymore.
-      authenticationResult = await this.authenticateWithBearerScheme(request);
-    }
-
-    if (state && authenticationResult.notHandled()) {
+    if (state) {
       authenticationResult = await this.authenticateViaState(request, state);
 
       // If access token expired or doesn't match to the certificate fingerprint we should try to get
-      // a new one in exchange to peer certificate chain.
-      if (
+      // a new one in exchange to peer certificate chain assuming request can initiate new session.
+      const invalidAccessToken =
         authenticationResult.notHandled() ||
         (authenticationResult.failed() &&
-          Tokens.isAccessTokenExpiredError(authenticationResult.error))
-      ) {
+          Tokens.isAccessTokenExpiredError(authenticationResult.error));
+      if (invalidAccessToken && canStartNewSession(request)) {
         authenticationResult = await this.authenticateViaPeerCertificate(request);
         // If we have an active session that we couldn't use to authenticate user and at the same time
         // we couldn't use peer's certificate to establish a new one, then we should respond with 401
@@ -86,12 +86,15 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
         if (authenticationResult.notHandled()) {
           return AuthenticationResult.failed(Boom.unauthorized());
         }
+      } else if (invalidAccessToken) {
+        return AuthenticationResult.notHandled();
       }
     }
 
     // If we couldn't authenticate by means of all methods above, let's try to check if we can authenticate
     // request using its peer certificate chain, otherwise just return authentication result we have.
-    return authenticationResult.notHandled()
+    // We shouldn't establish new session if authentication isn't required for this particular request.
+    return authenticationResult.notHandled() && canStartNewSession(request)
       ? await this.authenticateViaPeerCertificate(request)
       : authenticationResult;
   }
@@ -116,27 +119,17 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
       return DeauthenticationResult.failed(err);
     }
 
-    return DeauthenticationResult.redirectTo(`${this.options.basePath.serverBasePath}/logged_out`);
+    return DeauthenticationResult.redirectTo(
+      `${this.options.basePath.serverBasePath}/security/logged_out`
+    );
   }
 
   /**
-   * Tries to authenticate request with `Bearer ***` Authorization header by passing it to the Elasticsearch backend.
-   * @param request Request instance.
+   * Returns HTTP authentication scheme (`Bearer`) that's used within `Authorization` HTTP header
+   * that provider attaches to all successfully authenticated requests to Elasticsearch.
    */
-  private async authenticateWithBearerScheme(request: KibanaRequest) {
-    this.logger.debug('Trying to authenticate request using "Bearer" authentication scheme.');
-
-    try {
-      const user = await this.getUser(request);
-
-      this.logger.debug('Request has been authenticated using "Bearer" authentication scheme.');
-      return AuthenticationResult.succeeded(user);
-    } catch (err) {
-      this.logger.debug(
-        `Failed to authenticate request using "Bearer" authentication scheme: ${err.message}`
-      );
-      return AuthenticationResult.failed(err);
-    }
+  public getHTTPAuthenticationScheme() {
+    return 'bearer';
   }
 
   /**
@@ -184,7 +177,9 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      const authHeaders = { authorization: `Bearer ${accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via state.');
@@ -235,7 +230,9 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
 
     try {
       // Then attempt to query for the user details using the new token
-      const authHeaders = { authorization: `Bearer ${accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('User has been authenticated with new access token');

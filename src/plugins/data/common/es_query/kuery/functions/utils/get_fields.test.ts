@@ -48,7 +48,7 @@ describe('getFields', () => {
 
       expect(results).toHaveLength(1);
       expect(Array.isArray(results)).toBeTruthy();
-      expect(results[0].name).toBe('extension');
+      expect(results![0].name).toBe('extension');
     });
 
     test('should not match a wildcard in a literal node', () => {
@@ -59,14 +59,14 @@ describe('getFields', () => {
             name: 'foo*',
           },
         ],
-      };
+      } as IIndexPattern;
 
       const fieldNameNode = nodeTypes.literal.buildNode('foo*');
       const results = getFields(fieldNameNode, indexPatternWithWildField);
 
       expect(results).toHaveLength(1);
       expect(Array.isArray(results)).toBeTruthy();
-      expect(results[0].name).toBe('foo*');
+      expect(results![0].name).toBe('foo*');
 
       const actual = getFields(nodeTypes.literal.buildNode('fo*'), indexPatternWithWildField);
       expect(actual).toEqual([]);
@@ -87,8 +87,8 @@ describe('getFields', () => {
 
       expect(Array.isArray(results)).toBeTruthy();
       expect(results).toHaveLength(2);
-      expect(results.find((field: IFieldType) => field.name === 'machine.os')).toBeDefined();
-      expect(results.find((field: IFieldType) => field.name === 'machine.os.raw')).toBeDefined();
+      expect(results!.find((field: IFieldType) => field.name === 'machine.os')).toBeDefined();
+      expect(results!.find((field: IFieldType) => field.name === 'machine.os.raw')).toBeDefined();
     });
   });
 });

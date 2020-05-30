@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { URL } from 'url';
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -34,7 +35,7 @@ const SecretsSchema = schema.object(secretsSchemaProps);
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
 const ParamsSchema = schema.object({
-  message: schema.string(),
+  message: schema.string({ minLength: 1 }),
 });
 
 // action type definition
@@ -49,6 +50,7 @@ export function getActionType({
 }): ActionType {
   return {
     id: '.slack',
+    minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.slackTitle', {
       defaultMessage: 'Slack',
     }),
@@ -66,8 +68,17 @@ function valdiateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   secretsObject: ActionTypeSecretsType
 ) {
+  let url: URL;
   try {
-    configurationUtilities.ensureWhitelistedUri(secretsObject.webhookUrl);
+    url = new URL(secretsObject.webhookUrl);
+  } catch (err) {
+    return i18n.translate('xpack.actions.builtin.slack.slackConfigurationErrorNoHostname', {
+      defaultMessage: 'error configuring slack action: unable to parse host name from webhookUrl',
+    });
+  }
+
+  try {
+    configurationUtilities.ensureWhitelistedHostname(url.hostname);
   } catch (whitelistError) {
     return i18n.translate('xpack.actions.builtin.slack.slackConfigurationError', {
       defaultMessage: 'error configuring slack action: {message}',
@@ -110,7 +121,7 @@ async function slackExecutor(
     if (status === 429) {
       return pipe(
         getRetryAfterIntervalFromHeaders(headers),
-        map(retry => retryResultSeconds(actionId, err.message, retry)),
+        map((retry) => retryResultSeconds(actionId, err.message, retry)),
         getOrElse(() => retryResult(actionId, err.message))
       );
     }
@@ -145,7 +156,7 @@ async function slackExecutor(
   return successResult(actionId, result);
 }
 
-function successResult(actionId: string, data: any): ActionTypeExecutorResult {
+function successResult(actionId: string, data: unknown): ActionTypeExecutorResult {
   return { status: 'ok', data, actionId };
 }
 

@@ -5,38 +5,23 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { Authentication, AuthenticationResult, SAMLLoginStep } from '../../authentication';
+import { Authentication, AuthenticationResult, SAMLLogin } from '../../authentication';
 import { defineSAMLRoutes } from './saml';
-import { ConfigType } from '../../config';
 import { IRouter, RequestHandler, RouteConfig } from '../../../../../../src/core/server';
 
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  httpServiceMock,
-  loggingServiceMock,
-} from '../../../../../../src/core/server/mocks';
-import { authenticationMock } from '../../authentication/index.mock';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { authorizationMock } from '../../authorization/index.mock';
+import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('SAML authentication routes', () => {
   let router: jest.Mocked<IRouter>;
   let authc: jest.Mocked<Authentication>;
   beforeEach(() => {
-    router = httpServiceMock.createRouter();
-    authc = authenticationMock.create();
+    const routeParamsMock = routeDefinitionParamsMock.create();
+    router = routeParamsMock.router;
+    authc = routeParamsMock.authc;
 
-    defineSAMLRoutes({
-      router,
-      clusterClient: elasticsearchServiceMock.createClusterClient(),
-      basePath: httpServiceMock.createBasePath(),
-      logger: loggingServiceMock.create().get(),
-      config: { authc: { providers: ['saml'] } } as ConfigType,
-      authc,
-      authz: authorizationMock.create(),
-      csp: httpServiceMock.createSetupContract().csp,
-    });
+    defineSAMLRoutes(routeParamsMock);
   });
 
   describe('Assertion consumer service endpoint', () => {
@@ -52,7 +37,7 @@ describe('SAML authentication routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ authRequired: false });
+      expect(routeConfig.options).toEqual({ authRequired: false, xsrfRequired: false });
       expect(routeConfig.validate).toEqual({
         body: expect.any(Type),
         query: undefined,
@@ -99,9 +84,9 @@ describe('SAML authentication routes', () => {
       );
 
       expect(authc.login).toHaveBeenCalledWith(request, {
-        provider: 'saml',
+        provider: { type: 'saml' },
         value: {
-          step: SAMLLoginStep.SAMLResponseReceived,
+          type: SAMLLogin.LoginWithSAMLResponse,
           samlResponse: 'saml-response',
         },
       });
@@ -178,9 +163,9 @@ describe('SAML authentication routes', () => {
       );
 
       expect(authc.login).toHaveBeenCalledWith(request, {
-        provider: 'saml',
+        provider: { type: 'saml' },
         value: {
-          step: SAMLLoginStep.SAMLResponseReceived,
+          type: SAMLLogin.LoginWithSAMLResponse,
           samlResponse: 'saml-response',
         },
       });

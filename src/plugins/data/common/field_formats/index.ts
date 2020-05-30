@@ -27,7 +27,6 @@ export {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DurationFormat,
   IpFormat,
@@ -41,7 +40,7 @@ export {
   TruncateFormat,
 } from './converters';
 
-export { getHighlightRequest } from './utils';
+export { getHighlightRequest, serializeFieldFormat } from './utils';
 
 export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
 export { FIELD_FORMAT_IDS } from './types';
@@ -53,6 +52,6 @@ export {
   FieldFormatConfig,
   FieldFormatId,
   // Used in data plugin only
-  IFieldFormatType,
+  FieldFormatInstanceType,
   IFieldFormat,
 } from './types';

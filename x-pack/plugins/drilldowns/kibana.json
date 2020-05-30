@@ -1,0 +1,8 @@
+{
+  "id": "drilldowns",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["uiActions", "embeddable", "advancedUiActions"],
+  "configPath": ["xpack", "drilldowns"]
+}

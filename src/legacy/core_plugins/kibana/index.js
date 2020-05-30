@@ -21,47 +21,31 @@ import Fs from 'fs';
 import { resolve } from 'path';
 import { promisify } from 'util';
 
-import { migrations } from './migrations';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
-import { managementApi } from './server/routes/api/management';
-import * as systemApi from './server/lib/system_api';
-import mappings from './mappings.json';
-import { getUiSettingDefaults } from './ui_setting_defaults';
+import { getUiSettingDefaults } from './server/ui_setting_defaults';
 import { registerCspCollector } from './server/lib/csp_usage_collector';
 import { injectVars } from './inject_vars';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { kbnBaseUrl } from '../../../plugins/kibana_legacy/server';
 
 const mkdirAsync = promisify(Fs.mkdir);
 
-export default function(kibana) {
-  const kbnBaseUrl = '/app/kibana';
+export default function (kibana) {
   return new kibana.Plugin({
     id: 'kibana',
-    config: function(Joi) {
+    config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         index: Joi.string().default('.kibana'),
-        autocompleteTerminateAfter: Joi.number()
-          .integer()
-          .min(1)
-          .default(100000),
+        autocompleteTerminateAfter: Joi.number().integer().min(1).default(100000),
         // TODO Also allow units here like in elasticsearch config once this is moved to the new platform
-        autocompleteTimeout: Joi.number()
-          .integer()
-          .min(1)
-          .default(1000),
+        autocompleteTimeout: Joi.number().integer().min(1).default(1000),
       }).default();
     },
 
     uiExports: {
-      hacks: [
-        'plugins/kibana/discover/legacy',
-        'plugins/kibana/dev_tools',
-        'plugins/kibana/visualize/legacy',
-        'plugins/kibana/dashboard/legacy',
-      ],
       app: {
         id: 'kibana',
         title: 'Kibana',
@@ -70,47 +54,6 @@ export default function(kibana) {
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       links: [
-        {
-          id: 'kibana:discover',
-          title: i18n.translate('kbn.discoverTitle', {
-            defaultMessage: 'Discover',
-          }),
-          order: -1003,
-          url: `${kbnBaseUrl}#/discover`,
-          euiIconType: 'discoverApp',
-          category: DEFAULT_APP_CATEGORIES.analyze,
-        },
-        {
-          id: 'kibana:visualize',
-          title: i18n.translate('kbn.visualizeTitle', {
-            defaultMessage: 'Visualize',
-          }),
-          order: -1002,
-          url: `${kbnBaseUrl}#/visualize`,
-          euiIconType: 'visualizeApp',
-          category: DEFAULT_APP_CATEGORIES.analyze,
-        },
-        {
-          id: 'kibana:dashboard',
-          title: i18n.translate('kbn.dashboardTitle', {
-            defaultMessage: 'Dashboard',
-          }),
-          order: -1001,
-          url: `${kbnBaseUrl}#/dashboards`,
-          euiIconType: 'dashboardApp',
-          disableSubUrlTracking: true,
-          category: DEFAULT_APP_CATEGORIES.analyze,
-        },
-        {
-          id: 'kibana:dev_tools',
-          title: i18n.translate('kbn.devToolsTitle', {
-            defaultMessage: 'Dev Tools',
-          }),
-          order: 9001,
-          url: '/app/kibana#/dev_tools',
-          euiIconType: 'devToolsApp',
-          category: DEFAULT_APP_CATEGORIES.management,
-        },
         {
           id: 'kibana:stack_management',
           title: i18n.translate('kbn.managementTitle', {
@@ -123,105 +66,6 @@ export default function(kibana) {
           category: DEFAULT_APP_CATEGORIES.management,
         },
       ],
-
-      savedObjectsManagement: {
-        'index-pattern': {
-          icon: 'indexPatternApp',
-          defaultSearchField: 'title',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return obj.attributes.title;
-          },
-          getEditUrl(obj) {
-            return `/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`;
-          },
-          getInAppUrl(obj) {
-            return {
-              path: `/app/kibana#/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`,
-              uiCapabilitiesPath: 'management.kibana.index_patterns',
-            };
-          },
-        },
-        visualization: {
-          icon: 'visualizeApp',
-          defaultSearchField: 'title',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return obj.attributes.title;
-          },
-          getEditUrl(obj) {
-            return `/management/kibana/objects/savedVisualizations/${encodeURIComponent(obj.id)}`;
-          },
-          getInAppUrl(obj) {
-            return {
-              path: `/app/kibana#/visualize/edit/${encodeURIComponent(obj.id)}`,
-              uiCapabilitiesPath: 'visualize.show',
-            };
-          },
-        },
-        search: {
-          icon: 'discoverApp',
-          defaultSearchField: 'title',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return obj.attributes.title;
-          },
-          getEditUrl(obj) {
-            return `/management/kibana/objects/savedSearches/${encodeURIComponent(obj.id)}`;
-          },
-          getInAppUrl(obj) {
-            return {
-              path: `/app/kibana#/discover/${encodeURIComponent(obj.id)}`,
-              uiCapabilitiesPath: 'discover.show',
-            };
-          },
-        },
-        dashboard: {
-          icon: 'dashboardApp',
-          defaultSearchField: 'title',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return obj.attributes.title;
-          },
-          getEditUrl(obj) {
-            return `/management/kibana/objects/savedDashboards/${encodeURIComponent(obj.id)}`;
-          },
-          getInAppUrl(obj) {
-            return {
-              path: `/app/kibana#/dashboard/${encodeURIComponent(obj.id)}`,
-              uiCapabilitiesPath: 'dashboard.show',
-            };
-          },
-        },
-        url: {
-          defaultSearchField: 'url',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return `/goto/${encodeURIComponent(obj.id)}`;
-          },
-        },
-        config: {
-          isImportableAndExportable: true,
-          getInAppUrl() {
-            return {
-              path: `/app/kibana#/management/kibana/settings`,
-              uiCapabilitiesPath: 'advancedSettings.show',
-            };
-          },
-          getTitle(obj) {
-            return `Advanced Settings [${obj.id}]`;
-          },
-        },
-      },
-
-      savedObjectSchemas: {
-        'sample-data-telemetry': {
-          isNamespaceAgnostic: true,
-        },
-        'kql-telemetry': {
-          isNamespaceAgnostic: true,
-        },
-      },
 
       injectDefaultVars(server, options) {
         const mapConfig = server.config().get('map');
@@ -243,68 +87,10 @@ export default function(kibana) {
         };
       },
 
-      mappings,
       uiSettingDefaults: getUiSettingDefaults(),
-
-      migrations,
     },
 
-    uiCapabilities: async function() {
-      return {
-        discover: {
-          show: true,
-          createShortUrl: true,
-          save: true,
-          saveQuery: true,
-        },
-        visualize: {
-          show: true,
-          createShortUrl: true,
-          delete: true,
-          save: true,
-          saveQuery: true,
-        },
-        dashboard: {
-          createNew: true,
-          show: true,
-          showWriteControls: true,
-          saveQuery: true,
-        },
-        catalogue: {
-          discover: true,
-          dashboard: true,
-          visualize: true,
-          console: true,
-          advanced_settings: true,
-          index_patterns: true,
-        },
-        advancedSettings: {
-          show: true,
-          save: true,
-        },
-        indexPatterns: {
-          save: true,
-        },
-        savedObjectsManagement: {
-          delete: true,
-          edit: true,
-          read: true,
-        },
-        management: {
-          /*
-           * Management settings correspond to management section/link ids, and should not be changed
-           * without also updating those definitions.
-           */
-          kibana: {
-            settings: true,
-            index_patterns: true,
-            objects: true,
-          },
-        },
-      };
-    },
-
-    preInit: async function(server) {
+    preInit: async function (server) {
       try {
         // Create the data directory (recursively, if the a parent dir doesn't exist).
         // If it already exists, does nothing.
@@ -316,14 +102,12 @@ export default function(kibana) {
       }
     },
 
-    init: async function(server) {
+    init: async function (server) {
       const { usageCollection } = server.newPlatform.setup.plugins;
       // routes
       importApi(server);
       exportApi(server);
-      managementApi(server);
       registerCspCollector(usageCollection, server);
-      server.expose('systemApi', systemApi);
       server.injectUiAppVars('kibana', () => injectVars(server));
     },
   });

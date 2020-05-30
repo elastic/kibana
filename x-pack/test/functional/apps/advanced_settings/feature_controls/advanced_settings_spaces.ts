@@ -6,14 +6,16 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const config = getService('config');
 
-  describe('spaces feature controls', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/57413
+  describe.skip('spaces feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
     });
@@ -40,8 +42,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        await PageObjects.settings.setNavType('individual');
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Stack Management');
       });
 
@@ -57,7 +58,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('space with Advanced Settings disabled', () => {
+    describe('space with Advanced Settings disabled', function () {
+      this.tags('skipCoverage');
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
@@ -81,7 +83,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
         });
         await testSubjects.existOrFail('managementHome', {
-          timeout: 10000,
+          timeout: config.get('timeouts.waitFor'),
         });
       });
     });

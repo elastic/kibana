@@ -79,3 +79,15 @@ export const mockUuidService = uuidServiceMock.create();
 jest.doMock('./uuid/uuid_service', () => ({
   UuidService: jest.fn(() => mockUuidService),
 }));
+
+import { metricsServiceMock } from './metrics/metrics_service.mock';
+export const mockMetricsService = metricsServiceMock.create();
+jest.doMock('./metrics/metrics_service', () => ({
+  MetricsService: jest.fn(() => mockMetricsService),
+}));
+
+import { statusServiceMock } from './status/status_service.mock';
+export const mockStatusService = statusServiceMock.create();
+jest.doMock('./status/status_service', () => ({
+  StatusService: jest.fn(() => mockStatusService),
+}));

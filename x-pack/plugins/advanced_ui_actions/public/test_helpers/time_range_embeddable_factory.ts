@@ -7,7 +7,7 @@
 import {
   EmbeddableInput,
   IContainer,
-  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
 } from '../../../../../src/plugins/embeddable/public';
 import { TimeRange } from '../../../../../src/plugins/data/public';
 import { TIME_RANGE_EMBEDDABLE, TimeRangeEmbeddable } from './time_range_embeddable';
@@ -16,10 +16,11 @@ interface EmbeddableTimeRangeInput extends EmbeddableInput {
   timeRange: TimeRange;
 }
 
-export class TimeRangeEmbeddableFactory extends EmbeddableFactory<EmbeddableTimeRangeInput> {
+export class TimeRangeEmbeddableFactory
+  implements EmbeddableFactoryDefinition<EmbeddableTimeRangeInput> {
   public readonly type = TIME_RANGE_EMBEDDABLE;
 
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 

@@ -16,82 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
 
-import { i18n } from '@kbn/i18n';
-import { first } from 'rxjs/operators';
-import { TypeOf } from '@kbn/config-schema';
-import {
-  CoreSetup,
-  PluginInitializerContext,
-  RecursiveReadonly,
-} from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
-import { ConfigSchema } from './config';
-import loadFunctions from './lib/load_functions';
-import { functionsRoute } from './routes/functions';
-import { validateEsRoute } from './routes/validate_es';
-import { runRoute } from './routes/run';
-import { ConfigManager } from './lib/config_manager';
+export class TimelionPlugin implements Plugin {
+  constructor(context: PluginInitializerContext) {}
 
-/**
- * Describes public Timelion plugin contract returned at the `setup` stage.
- */
-export interface PluginSetupContract {
-  uiEnabled: boolean;
-}
-
-/**
- * Represents Timelion Plugin instance that will be managed by the Kibana plugin system.
- */
-export class Plugin {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
-
-  public async setup(core: CoreSetup): Promise<RecursiveReadonly<PluginSetupContract>> {
-    const config = await this.initializerContext.config
-      .create<TypeOf<typeof ConfigSchema>>()
-      .pipe(first())
-      .toPromise();
-
-    const configManager = new ConfigManager(this.initializerContext.config);
-
-    const functions = loadFunctions('series_functions');
-
-    const getFunction = (name: string) => {
-      if (functions[name]) {
-        return functions[name];
-      }
-
-      throw new Error(
-        i18n.translate('timelion.noFunctionErrorMessage', {
-          defaultMessage: 'No such function: {name}',
-          values: { name },
-        })
-      );
-    };
-
-    const logger = this.initializerContext.logger.get('timelion');
-
-    const router = core.http.createRouter();
-
-    const deps = {
-      configManager,
-      functions,
-      getFunction,
-      logger,
-    };
-
-    functionsRoute(router, deps);
-    runRoute(router, deps);
-    validateEsRoute(router);
-
-    return deepFreeze({ uiEnabled: config.ui.enabled });
+  setup(core: CoreSetup) {
+    core.savedObjects.registerType({
+      name: 'timelion-sheet',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          description: { type: 'text' },
+          hits: { type: 'integer' },
+          kibanaSavedObjectMeta: {
+            properties: {
+              searchSourceJSON: { type: 'text' },
+            },
+          },
+          timelion_chart_height: { type: 'integer' },
+          timelion_columns: { type: 'integer' },
+          timelion_interval: { type: 'keyword' },
+          timelion_other_interval: { type: 'keyword' },
+          timelion_rows: { type: 'integer' },
+          timelion_sheet: { type: 'text' },
+          title: { type: 'text' },
+          version: { type: 'integer' },
+        },
+      },
+    });
   }
-
-  public start() {
-    this.initializerContext.logger.get().debug('Starting plugin');
-  }
-
-  public stop() {
-    this.initializerContext.logger.get().debug('Stopping plugin');
-  }
+  start() {}
+  stop() {}
 }

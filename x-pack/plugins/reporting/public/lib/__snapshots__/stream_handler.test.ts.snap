@@ -95,7 +95,9 @@ Array [
             id="xpack.reporting.publicNotifier.error.checkManagement"
             values={
               Object {
-                "path": <a>
+                "path": <a
+                  href="/#management"
+                >
                   <FormattedMessage
                     defaultMessage="Management > Kibana > Reporting"
                     id="xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel"

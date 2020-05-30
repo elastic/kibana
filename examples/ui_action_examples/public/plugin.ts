@@ -19,27 +19,45 @@
 
 import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../src/plugins/ui_actions/public';
-import { createHelloWorldAction } from './hello_world_action';
-import { helloWorldTrigger } from './hello_world_trigger';
+import { createHelloWorldAction, ACTION_HELLO_WORLD } from './hello_world_action';
+import { helloWorldTrigger, HELLO_WORLD_TRIGGER_ID } from './hello_world_trigger';
 
-interface UiActionExamplesSetupDependencies {
+export interface UiActionExamplesSetupDependencies {
   uiActions: UiActionsSetup;
 }
 
-interface UiActionExamplesStartDependencies {
+export interface UiActionExamplesStartDependencies {
   uiActions: UiActionsStart;
+}
+
+declare module '../../../src/plugins/ui_actions/public' {
+  export interface TriggerContextMapping {
+    [HELLO_WORLD_TRIGGER_ID]: {};
+  }
+
+  export interface ActionContextMapping {
+    [ACTION_HELLO_WORLD]: {};
+  }
 }
 
 export class UiActionExamplesPlugin
   implements
     Plugin<void, void, UiActionExamplesSetupDependencies, UiActionExamplesStartDependencies> {
-  public setup(core: CoreSetup, deps: UiActionExamplesSetupDependencies) {
-    deps.uiActions.registerTrigger(helloWorldTrigger);
+  public setup(
+    core: CoreSetup<UiActionExamplesStartDependencies>,
+    { uiActions }: UiActionExamplesSetupDependencies
+  ) {
+    uiActions.registerTrigger(helloWorldTrigger);
+
+    const helloWorldAction = createHelloWorldAction(async () => ({
+      openModal: (await core.getStartServices())[0].overlays.openModal,
+    }));
+
+    uiActions.registerAction(helloWorldAction);
+    uiActions.addTriggerAction(helloWorldTrigger.id, helloWorldAction);
   }
 
-  public start(coreStart: CoreStart, deps: UiActionExamplesStartDependencies) {
-    deps.uiActions.registerAction(createHelloWorldAction(coreStart.overlays.openModal));
-  }
+  public start(core: CoreStart, plugins: UiActionExamplesStartDependencies) {}
 
   public stop() {}
 }

@@ -17,49 +17,78 @@
  * under the License.
  */
 
-import { UiComponent } from 'src/plugins/kibana_utils/common';
+import { UiComponent } from 'src/plugins/kibana_utils/public';
+import { ActionType, ActionContextMapping } from '../types';
+import { Presentable } from '../util/presentable';
 
-export interface Action<ActionContext extends {} = {}> {
+export type ActionByType<T extends ActionType> = Action<ActionContextMapping[T], T>;
+
+export interface Action<Context extends {} = {}, T = ActionType>
+  extends Partial<Presentable<Context>> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
    * Higher numbers are displayed first.
    */
   order?: number;
 
+  /**
+   * A unique identifier for this action instance.
+   */
   id: string;
 
-  readonly type: string;
+  /**
+   * The action type is what determines the context shape.
+   */
+  readonly type: T;
 
   /**
    * Optional EUI icon type that can be displayed along with the title.
    */
-  getIconType(context: ActionContext): string | undefined;
+  getIconType(context: Context): string | undefined;
 
   /**
    * Returns a title to be displayed to the user.
    * @param context
    */
-  getDisplayName(context: ActionContext): string;
+  getDisplayName(context: Context): string;
 
   /**
    * `UiComponent` to render when displaying this action as a context menu item.
    * If not provided, `getDisplayName` will be used instead.
    */
-  MenuItem?: UiComponent<{ context: ActionContext }>;
+  MenuItem?: UiComponent<{ context: Context }>;
 
   /**
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
-  isCompatible(context: ActionContext): Promise<boolean>;
-
-  /**
-   * If this returns something truthy, this is used in addition to the `execute` method when clicked.
-   */
-  getHref?(context: ActionContext): string | undefined;
+  isCompatible(context: Context): Promise<boolean>;
 
   /**
    * Executes the action.
    */
-  execute(context: ActionContext): Promise<void>;
+  execute(context: Context): Promise<void>;
 }
+
+/**
+ * A convenience interface used to register an action.
+ */
+export interface ActionDefinition<Context extends object = object>
+  extends Partial<Presentable<Context>> {
+  /**
+   * ID of the action that uniquely identifies this action in the actions registry.
+   */
+  readonly id: string;
+
+  /**
+   * ID of the factory for this action. Used to construct dynamic actions.
+   */
+  readonly type?: ActionType;
+
+  /**
+   * Executes the action.
+   */
+  execute(context: Context): Promise<void>;
+}
+
+export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;

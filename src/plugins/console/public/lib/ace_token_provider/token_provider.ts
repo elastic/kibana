@@ -36,7 +36,7 @@ const toToken = (lineNumber: number, column: number, token: TokenInfo): Token =>
 
 const toTokens = (lineNumber: number, tokens: TokenInfo[]): Token[] => {
   let acc = '';
-  return tokens.map(token => {
+  return tokens.map((token) => {
     const column = acc.length + 1;
     acc += token.value;
     return toToken(lineNumber, column, token);
@@ -66,7 +66,10 @@ export class AceTokensProvider implements TokensProvider {
   getTokens(lineNumber: number): Token[] | null {
     if (lineNumber < 1) return null;
 
-    const lineCount = this.session.doc.getAllLines().length;
+    // Important: must use a .session.getLength because this is a cached value.
+    // Calculating line length here will lead to performance issues because this function
+    // may be called inside of tight loops.
+    const lineCount = this.session.getLength();
     if (lineNumber > lineCount) {
       return null;
     }

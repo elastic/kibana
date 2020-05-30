@@ -25,7 +25,7 @@ import {
   stubIndexPattern,
   stubFields,
 } from '../../../../stubs';
-import { esFilters } from '../../../../index';
+import { toggleFilterNegated } from '../../../../../common';
 import {
   getFieldFromFilter,
   getFilterableFields,
@@ -54,7 +54,7 @@ describe('Filter editor utils', () => {
     });
 
     it('should return "is not" for phrase filter', () => {
-      const negatedPhraseFilter = esFilters.toggleFilterNegated(phraseFilter);
+      const negatedPhraseFilter = toggleFilterNegated(phraseFilter);
       const operator = getOperatorFromFilter(negatedPhraseFilter);
       expect(operator).not.toBeUndefined();
       expect(operator && operator.type).toBe('phrase');
@@ -69,7 +69,7 @@ describe('Filter editor utils', () => {
     });
 
     it('should return "is not one of" for negated phrases filter', () => {
-      const negatedPhrasesFilter = esFilters.toggleFilterNegated(phrasesFilter);
+      const negatedPhrasesFilter = toggleFilterNegated(phrasesFilter);
       const operator = getOperatorFromFilter(negatedPhrasesFilter);
       expect(operator).not.toBeUndefined();
       expect(operator && operator.type).toBe('phrases');
@@ -84,7 +84,7 @@ describe('Filter editor utils', () => {
     });
 
     it('should return "is not between" for negated range filter', () => {
-      const negatedRangeFilter = esFilters.toggleFilterNegated(rangeFilter);
+      const negatedRangeFilter = toggleFilterNegated(rangeFilter);
       const operator = getOperatorFromFilter(negatedRangeFilter);
       expect(operator).not.toBeUndefined();
       expect(operator && operator.type).toBe('range');
@@ -99,7 +99,7 @@ describe('Filter editor utils', () => {
     });
 
     it('should return "does not exists" for negated exists filter', () => {
-      const negatedExistsFilter = esFilters.toggleFilterNegated(existsFilter);
+      const negatedExistsFilter = toggleFilterNegated(existsFilter);
       const operator = getOperatorFromFilter(negatedExistsFilter);
       expect(operator).not.toBeUndefined();
       expect(operator && operator.type).toBe('exists');
@@ -115,7 +115,7 @@ describe('Filter editor utils', () => {
 
     it('limits the fields to the filterable fields', () => {
       const fieldOptions = getFilterableFields(stubIndexPattern);
-      const nonFilterableFields = fieldOptions.filter(field => !field.filterable);
+      const nonFilterableFields = fieldOptions.filter((field) => !field.filterable);
       expect(nonFilterableFields.length).toBe(0);
     });
   });
@@ -124,14 +124,14 @@ describe('Filter editor utils', () => {
     it('returns range for number fields', () => {
       const [field] = stubFields.filter(({ type }) => type === 'number');
       const operatorOptions = getOperatorOptions(field);
-      const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
+      const rangeOperator = operatorOptions.find((operator) => operator.type === 'range');
       expect(rangeOperator).not.toBeUndefined();
     });
 
     it('does not return range for string fields', () => {
       const [field] = stubFields.filter(({ type }) => type === 'string');
       const operatorOptions = getOperatorOptions(field);
-      const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
+      const rangeOperator = operatorOptions.find((operator) => operator.type === 'range');
       expect(rangeOperator).toBeUndefined();
     });
   });

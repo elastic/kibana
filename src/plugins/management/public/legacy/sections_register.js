@@ -17,47 +17,28 @@
  * under the License.
  */
 
-import { LegacyManagementSection } from './section';
 import { i18n } from '@kbn/i18n';
+import { LegacyManagementSection } from './section';
+import { managementSections } from '../management_sections';
 
 export class LegacyManagementAdapter {
   main = undefined;
-  init = capabilities => {
+  init = (capabilities) => {
     this.main = new LegacyManagementSection(
       'management',
       {
         display: i18n.translate('management.displayName', {
-          // todo
           defaultMessage: 'Stack Management',
         }),
       },
       capabilities
     );
 
-    this.main.register('data', {
-      display: i18n.translate('management.connectDataDisplayName', {
-        // todo
-        defaultMessage: 'Connect Data',
-      }),
-      order: 0,
-    });
-
-    this.main.register('elasticsearch', {
-      display: 'Elasticsearch',
-      order: 20,
-      icon: 'logoElasticsearch',
-    });
-
-    this.main.register('kibana', {
-      display: 'Kibana',
-      order: 30,
-      icon: 'logoKibana',
-    });
-
-    this.main.register('logstash', {
-      display: 'Logstash',
-      order: 30,
-      icon: 'logoLogstash',
+    managementSections.forEach(({ id, title }, idx) => {
+      this.main.register(id, {
+        display: title,
+        order: idx,
+      });
     });
 
     return this.main;

@@ -4,34 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchServiceSetup, KibanaRequest } from '../../../../../../../src/core/server';
-import { CSV_JOB_TYPE } from '../../../common/constants';
-import { cryptoFactory } from '../../../server/lib';
-import { ESQueueWorkerExecuteFn, ExecuteJobFactory, Logger, ServerFacade } from '../../../types';
+import Hapi from 'hapi';
+import { IUiSettingsClient, KibanaRequest } from '../../../../../../../src/core/server';
+import { CSV_BOM_CHARS, CSV_JOB_TYPE } from '../../../common/constants';
+import { ReportingCore } from '../../../server';
+import { cryptoFactory, LevelLogger } from '../../../server/lib';
+import { getFieldFormats } from '../../../server/services';
+import { ESQueueWorkerExecuteFn, ExecuteJobFactory } from '../../../server/types';
 import { JobDocPayloadDiscoverCsv } from '../types';
 import { fieldFormatMapFactory } from './lib/field_format_map';
 import { createGenerateCsv } from './lib/generate_csv';
-import { getFieldFormats } from '../../../server/services';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadDiscoverCsv
->> = function executeJobFactoryFn(
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
-  parentLogger: Logger
-) {
-  const crypto = cryptoFactory(server);
-  const config = server.config();
+>> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: LevelLogger) {
+  const config = reporting.getConfig();
+  const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job']);
-  const serverBasePath = config.get('server.basePath');
+  const serverBasePath = config.kbnConfig.get('server', 'basePath');
 
   return async function executeJob(
     jobId: string,
     job: JobDocPayloadDiscoverCsv,
     cancellationToken: any
   ) {
+    const elasticsearch = await reporting.getElasticsearchService();
     const jobLogger = logger.clone([jobId]);
 
     const {
@@ -40,87 +38,92 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
       indexPatternSavedObject,
       metaFields,
       conflictedTypesFields,
-      headers: serializedEncryptedHeaders,
+      headers,
       basePath,
     } = job;
 
-    let decryptedHeaders;
-    try {
-      decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
-    } catch (err) {
-      jobLogger.error(err);
-      throw new Error(
-        i18n.translate(
-          'xpack.reporting.exportTypes.csv.executeJob.failedToDecryptReportJobDataErrorMessage',
-          {
-            defaultMessage:
-              'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
-            values: { encryptionKey: 'xpack.reporting.encryptionKey', err: err.toString() },
-          }
-        )
-      );
-    }
+    const decryptHeaders = async () => {
+      try {
+        if (typeof headers !== 'string') {
+          throw new Error(
+            i18n.translate(
+              'xpack.reporting.exportTypes.csv.executeJob.missingJobHeadersErrorMessage',
+              {
+                defaultMessage: 'Job headers are missing',
+              }
+            )
+          );
+        }
+        return await crypto.decrypt(headers);
+      } catch (err) {
+        logger.error(err);
+        throw new Error(
+          i18n.translate(
+            'xpack.reporting.exportTypes.csv.executeJob.failedToDecryptReportJobDataErrorMessage',
+            {
+              defaultMessage: 'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
+              values: { encryptionKey: 'xpack.reporting.encryptionKey', err: err.toString() },
+            }
+          )
+        ); // prettier-ignore
+      }
+    };
 
-    const fakeRequest = {
-      headers: decryptedHeaders,
+    const fakeRequest = KibanaRequest.from({
+      headers: await decryptHeaders(),
       // This is used by the spaces SavedObjectClientWrapper to determine the existing space.
       // We use the basePath from the saved job, which we'll have post spaces being implemented;
       // or we use the server base path, which uses the default space
       getBasePath: () => basePath || serverBasePath,
       path: '/',
       route: { settings: {} },
-      url: {
-        href: '/',
-      },
-      raw: {
-        req: {
-          url: '/',
-        },
-      },
-    };
+      url: { href: '/' },
+      raw: { req: { url: '/' } },
+    } as Hapi.Request);
 
-    const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(
-      KibanaRequest.from(fakeRequest as Hapi.Request)
-    );
-    const callEndpoint = (endpoint: string, clientParams = {}, options = {}) => {
-      return callAsCurrentUser(endpoint, clientParams, options);
+    const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(fakeRequest);
+    const callEndpoint = (endpoint: string, clientParams = {}, options = {}) =>
+      callAsCurrentUser(endpoint, clientParams, options);
+
+    const savedObjectsClient = await reporting.getSavedObjectsClient(fakeRequest);
+    const uiSettingsClient = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
+
+    const getFormatsMap = async (client: IUiSettingsClient) => {
+      const fieldFormats = await getFieldFormats().fieldFormatServiceFactory(client);
+      return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
     };
-    const savedObjects = server.savedObjects;
-    const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
-      (fakeRequest as unknown) as KibanaRequest
-    );
-    const uiConfig = server.uiSettingsServiceFactory({
-      savedObjectsClient,
-    });
+    const getUiSettings = async (client: IUiSettingsClient) => {
+      const [separator, quoteValues, timezone] = await Promise.all([
+        client.get('csv:separator'),
+        client.get('csv:quoteValues'),
+        client.get('dateFormat:tz'),
+      ]);
+
+      if (timezone === 'Browser') {
+        logger.warn(
+          i18n.translate('xpack.reporting.exportTypes.csv.executeJob.dateFormateSetting', {
+            defaultMessage: 'Kibana Advanced Setting "{dateFormatTimezone}" is set to "Browser". Dates will be formatted as UTC to avoid ambiguity.',
+            values: { dateFormatTimezone: 'dateFormat:tz' }
+          })
+        ); // prettier-ignore
+      }
+
+      return {
+        separator,
+        quoteValues,
+        timezone,
+      };
+    };
 
     const [formatsMap, uiSettings] = await Promise.all([
-      (async () => {
-        const fieldFormats = await getFieldFormats().fieldFormatServiceFactory(uiConfig);
-        return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
-      })(),
-      (async () => {
-        const [separator, quoteValues, timezone] = await Promise.all([
-          uiConfig.get('csv:separator'),
-          uiConfig.get('csv:quoteValues'),
-          uiConfig.get('dateFormat:tz'),
-        ]);
-
-        if (timezone === 'Browser') {
-          jobLogger.warn(
-            `Kibana Advanced Setting "dateFormat:tz" is set to "Browser". Dates will be formatted as UTC to avoid ambiguity.`
-          );
-        }
-
-        return {
-          separator,
-          quoteValues,
-          timezone,
-        };
-      })(),
+      getFormatsMap(uiSettingsClient),
+      getUiSettings(uiSettingsClient),
     ]);
 
     const generateCsv = createGenerateCsv(jobLogger);
-    const { content, maxSizeReached, size, csvContainsFormulas } = await generateCsv({
+    const bom = config.get('csv', 'useByteOrderMarkEncoding') ? CSV_BOM_CHARS : '';
+
+    const { content, maxSizeReached, size, csvContainsFormulas, warnings } = await generateCsv({
       searchRequest,
       fields,
       metaFields,
@@ -130,18 +133,21 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
       formatsMap,
       settings: {
         ...uiSettings,
-        checkForFormulas: config.get('xpack.reporting.csv.checkForFormulas'),
-        maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),
-        scroll: config.get('xpack.reporting.csv.scroll'),
+        checkForFormulas: config.get('csv', 'checkForFormulas'),
+        maxSizeBytes: config.get('csv', 'maxSizeBytes'),
+        scroll: config.get('csv', 'scroll'),
+        escapeFormulaValues: config.get('csv', 'escapeFormulaValues'),
       },
     });
 
+    // @TODO: Consolidate these one-off warnings into the warnings array (max-size reached and csv contains formulas)
     return {
       content_type: 'text/csv',
-      content,
+      content: bom + content,
       max_size_reached: maxSizeReached,
       size,
       csv_contains_formulas: csvContainsFormulas,
+      warnings,
     };
   };
 };

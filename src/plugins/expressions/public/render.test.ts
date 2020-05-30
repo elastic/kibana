@@ -19,9 +19,10 @@
 
 import { ExpressionRenderHandler, render } from './render';
 import { Observable } from 'rxjs';
-import { IInterpreterRenderHandlers, RenderError } from './types';
+import { RenderError } from './types';
 import { getRenderersRegistry } from './services';
 import { first, take, toArray } from 'rxjs/operators';
+import { IInterpreterRenderHandlers } from '../common';
 
 const element: HTMLElement = {} as HTMLElement;
 const mockNotificationService = {
@@ -127,8 +128,8 @@ describe('ExpressionRenderHandler', () => {
     it('sends a next observable once rendering is complete', () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
       expect.assertions(1);
-      return new Promise(resolve => {
-        expressionRenderHandler.render$.subscribe(renderCount => {
+      return new Promise((resolve) => {
+        expressionRenderHandler.render$.subscribe((renderCount) => {
           expect(renderCount).toBe(1);
           resolve();
         });

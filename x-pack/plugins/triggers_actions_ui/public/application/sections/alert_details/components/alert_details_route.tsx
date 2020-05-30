@@ -41,7 +41,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
   const [alert, setAlert] = useState<Alert | null>(null);
   const [alertType, setAlertType] = useState<AlertType | null>(null);
   const [actionTypes, setActionTypes] = useState<ActionType[] | null>(null);
-
+  const [refreshToken, requestRefresh] = React.useState<number>();
   useEffect(() => {
     getAlertData(
       alertId,
@@ -53,10 +53,15 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
       setActionTypes,
       toastNotifications
     );
-  }, [alertId, http, loadActionTypes, loadAlert, loadAlertTypes, toastNotifications]);
+  }, [alertId, http, loadActionTypes, loadAlert, loadAlertTypes, toastNotifications, refreshToken]);
 
   return alert && alertType && actionTypes ? (
-    <AlertDetails alert={alert} alertType={alertType} actionTypes={actionTypes} />
+    <AlertDetails
+      alert={alert}
+      alertType={alertType}
+      actionTypes={actionTypes}
+      requestRefresh={async () => requestRefresh(Date.now())}
+    />
   ) : (
     <div
       style={{
@@ -85,11 +90,11 @@ export async function getAlertData(
 
     const [loadedAlertType, loadedActionTypes] = await Promise.all<AlertType, ActionType[]>([
       loadAlertTypes()
-        .then(types => types.find(type => type.id === loadedAlert.alertTypeId))
+        .then((types) => types.find((type) => type.id === loadedAlert.alertTypeId))
         .then(throwIfAbsent(`Invalid Alert Type: ${loadedAlert.alertTypeId}`)),
       loadActionTypes().then(
         throwIfIsntContained(
-          new Set(loadedAlert.actions.map(action => action.actionTypeId)),
+          new Set(loadedAlert.actions.map((action) => action.actionTypeId)),
           (requiredActionType: string) => `Invalid Action Type: ${requiredActionType}`,
           (action: ActionType) => action.id
         )
@@ -113,6 +118,6 @@ export async function getAlertData(
   }
 }
 
-export const AlertDetailsRouteWithApi = withActionOperations(
-  withBulkAlertOperations(AlertDetailsRoute)
-);
+const AlertDetailsRouteWithApi = withActionOperations(withBulkAlertOperations(AlertDetailsRoute));
+// eslint-disable-next-line import/no-default-export
+export { AlertDetailsRouteWithApi as default };

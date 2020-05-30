@@ -9,14 +9,14 @@ and actions.
 
 ## Basic Usage - Logging Events
 
-Follow these steps to use `event_log` in your plugin: 
+Follow these steps to use `eventLog` in your plugin: 
 
-1. Declare `event_log` as a dependency in `kibana.json`:
+1. Declare `eventLog` as a dependency in `kibana.json`:
 
 ```json
 {
   ...
-  "requiredPlugins": ["event_log"],
+  "requiredPlugins": ["eventLog"],
   ...
 }
 ```
@@ -28,13 +28,13 @@ API provided in the `setup` stage:
 ...
 import { IEventLogger, IEventLogService } from '../../event_log/server';
 interface PluginSetupDependencies {
-  event_log: IEventLogService;
+  eventLog: IEventLogService;
 }
 ...
-public setup(core: CoreSetup, { event_log }: PluginSetupDependencies) {
+public setup(core: CoreSetup, { eventLog }: PluginSetupDependencies) {
   ...
-  event_log.registerProviderActions('my-plugin', ['action-1, action-2']);
-  const eventLogger: IEventLogger = event_log.getLogger({ event: { provider: 'my-plugin' } });
+  eventLog.registerProviderActions('my-plugin', ['action-1, action-2']);
+  const eventLogger: IEventLogger = eventLog.getLogger({ event: { provider: 'my-plugin' } });
   ...
 }
 ...
@@ -73,7 +73,7 @@ a new elasticsearch index referred to as the "event log".
 Example events are actions firing, alerts running their scheduled functions,
 alerts scheduling actions to run, etc.
 
-This functionality will be provided in a new NP plugin `event_log`, and will
+This functionality will be provided in a new NP plugin `eventLog`, and will
 provide server-side plugin APIs to write to the event log, and run limited
 queries against it. For now, access via HTTP will not be available, due to
 security concerns and lack of use cases.
@@ -125,7 +125,6 @@ Here's the event written to the event log index:
       "duration": 1000000
     },
     "kibana": {
-      "namespace": "default",
       "saved_objects": [
         {
           "type": "action",
@@ -275,9 +274,15 @@ PUT _ilm/policy/event_log_policy
       "hot": {                      
         "actions": {
           "rollover": {             
-            "max_size": "5GB",
+            "max_size": "50GB",
             "max_age": "30d"
           }
+        }
+      },
+      "delete": {
+        "min_age": "90d",
+        "actions": {
+          "delete": {}
         }
       }
     }
@@ -286,10 +291,11 @@ PUT _ilm/policy/event_log_policy
 ```
 
 This means that ILM would "rollover" the current index, say
-`.kibana-event-log-000001` by creating a new index `.kibana-event-log-000002`,
+`.kibana-event-log-8.0.0-000001` by creating a new index `.kibana-event-log-8.0.0-000002`,
 which would "inherit" everything from the index template, and then ILM will
 set the write index of the the alias to the new index.  This would happen
-when the original index grew past 5 GB, or was created more than 30 days ago.
+when the original index grew past 50 GB, or was created more than 30 days ago.
+After rollover, the indices will be removed after 90 days to avoid disks to fill up.
 
 For more relevant information on ILM, see:
 [getting started with ILM doc][] and [write index alias behavior][]:

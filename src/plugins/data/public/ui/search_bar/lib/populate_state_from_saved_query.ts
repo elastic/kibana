@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { QueryStart, SavedQuery } from '../../..';
+import { QueryStart, SavedQuery } from '../../../query';
 
 export const populateStateFromSavedQuery = (
   queryService: QueryStart,

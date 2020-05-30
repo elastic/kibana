@@ -5,8 +5,13 @@
  */
 
 import { HttpSetup } from 'kibana/public';
+import * as t from 'io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { pick } from 'lodash';
+import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerting/common';
 import { BASE_ALERT_API_PATH } from '../constants';
-import { Alert, AlertType, AlertWithoutId } from '../../types';
+import { Alert, AlertType, AlertWithoutId, AlertTaskState } from '../../types';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
   return await http.get(`${BASE_ALERT_API_PATH}/types`);
@@ -20,6 +25,27 @@ export async function loadAlert({
   alertId: string;
 }): Promise<Alert> {
   return await http.get(`${BASE_ALERT_API_PATH}/${alertId}`);
+}
+
+type EmptyHttpResponse = '';
+export async function loadAlertState({
+  http,
+  alertId,
+}: {
+  http: HttpSetup;
+  alertId: string;
+}): Promise<AlertTaskState> {
+  return await http
+    .get(`${BASE_ALERT_API_PATH}/${alertId}/state`)
+    .then((state: AlertTaskState | EmptyHttpResponse) => (state ? state : {}))
+    .then((state: AlertTaskState) => {
+      return pipe(
+        alertStateSchema.decode(state),
+        fold((e: t.Errors) => {
+          throw new Error(`Alert "${alertId}" has invalid state`);
+        }, t.identity)
+      );
+    });
 }
 
 export async function loadAlerts({
@@ -48,7 +74,9 @@ export async function loadAlerts({
     filters.push(
       [
         '(',
-        actionTypesFilter.map(id => `alert.attributes.actions:{ actionTypeId:${id} }`).join(' OR '),
+        actionTypesFilter
+          .map((id) => `alert.attributes.actions:{ actionTypeId:${id} }`)
+          .join(' OR '),
         ')',
       ].join('')
     );
@@ -61,12 +89,10 @@ export async function loadAlerts({
       search: searchText,
       filter: filters.length ? filters.join(' and ') : undefined,
       default_search_operator: 'AND',
+      sort_field: 'name.keyword',
+      sort_order: 'asc',
     },
   });
-}
-
-export async function deleteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
-  await http.delete(`${BASE_ALERT_API_PATH}/${id}`);
 }
 
 export async function deleteAlerts({
@@ -75,8 +101,18 @@ export async function deleteAlerts({
 }: {
   ids: string[];
   http: HttpSetup;
-}): Promise<void> {
-  await Promise.all(ids.map(id => deleteAlert({ http, id })));
+}): Promise<{ successes: string[]; errors: string[] }> {
+  const successes: string[] = [];
+  const errors: string[] = [];
+  await Promise.all(ids.map((id) => http.delete(`${BASE_ALERT_API_PATH}/${id}`))).then(
+    function (fulfilled) {
+      successes.push(...fulfilled);
+    },
+    function (rejected) {
+      errors.push(...rejected);
+    }
+  );
+  return { successes, errors };
 }
 
 export async function createAlert({
@@ -101,7 +137,9 @@ export async function updateAlert({
   id: string;
 }): Promise<Alert> {
   return await http.put(`${BASE_ALERT_API_PATH}/${id}`, {
-    body: JSON.stringify(alert),
+    body: JSON.stringify(
+      pick(alert, ['throttle', 'name', 'tags', 'schedule', 'params', 'actions'])
+    ),
   });
 }
 
@@ -116,7 +154,7 @@ export async function enableAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => enableAlert({ id, http })));
+  await Promise.all(ids.map((id) => enableAlert({ id, http })));
 }
 
 export async function disableAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
@@ -130,7 +168,31 @@ export async function disableAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => disableAlert({ id, http })));
+  await Promise.all(ids.map((id) => disableAlert({ id, http })));
+}
+
+export async function muteAlertInstance({
+  id,
+  instanceId,
+  http,
+}: {
+  id: string;
+  instanceId: string;
+  http: HttpSetup;
+}): Promise<void> {
+  await http.post(`${BASE_ALERT_API_PATH}/${id}/alert_instance/${instanceId}/_mute`);
+}
+
+export async function unmuteAlertInstance({
+  id,
+  instanceId,
+  http,
+}: {
+  id: string;
+  instanceId: string;
+  http: HttpSetup;
+}): Promise<void> {
+  await http.post(`${BASE_ALERT_API_PATH}/${id}/alert_instance/${instanceId}/_unmute`);
 }
 
 export async function muteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
@@ -138,7 +200,7 @@ export async function muteAlert({ id, http }: { id: string; http: HttpSetup }): 
 }
 
 export async function muteAlerts({ ids, http }: { ids: string[]; http: HttpSetup }): Promise<void> {
-  await Promise.all(ids.map(id => muteAlert({ http, id })));
+  await Promise.all(ids.map((id) => muteAlert({ http, id })));
 }
 
 export async function unmuteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
@@ -152,5 +214,9 @@ export async function unmuteAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => unmuteAlert({ id, http })));
+  await Promise.all(ids.map((id) => unmuteAlert({ id, http })));
+}
+
+export async function health({ http }: { http: HttpSetup }): Promise<AlertingFrameworkHealth> {
+  return await http.get(`${BASE_ALERT_API_PATH}/_health`);
 }

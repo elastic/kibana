@@ -37,7 +37,7 @@ export class ProviderCollection {
 
   public getPageObjects = (names: string[]) => {
     const pageObjects: Record<string, any> = {};
-    names.forEach(name => (pageObjects[name] = this.getPageObject(name)));
+    names.forEach((name) => (pageObjects[name] = this.getPageObject(name)));
     return pageObjects;
   };
 
@@ -68,8 +68,17 @@ export class ProviderCollection {
     }
   }
 
+  public invokeProviderFn(provider: (args: any) => any) {
+    return provider({
+      getService: this.getService,
+      hasService: this.hasService,
+      getPageObject: this.getPageObject,
+      getPageObjects: this.getPageObjects,
+    });
+  }
+
   private findProvider(type: string, name: string) {
-    return this.providers.find(p => p.type === type && p.name === name);
+    return this.providers.find((p) => p.type === type && p.name === name);
   }
 
   private getProvider(type: string, name: string) {
@@ -89,12 +98,7 @@ export class ProviderCollection {
       }
 
       if (!instances.has(provider)) {
-        let instance = provider({
-          getService: this.getService,
-          hasService: this.hasService,
-          getPageObject: this.getPageObject,
-          getPageObjects: this.getPageObjects,
-        });
+        let instance = this.invokeProviderFn(provider);
 
         if (instance && typeof instance.then === 'function') {
           instance = createAsyncInstance(type, name, instance);

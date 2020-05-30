@@ -17,55 +17,93 @@
  * under the License.
  */
 
-import { IEmbeddableSetup, IEmbeddableStart } from '../../../src/plugins/embeddable/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
 import { HelloWorldEmbeddableFactory, HELLO_WORLD_EMBEDDABLE } from './hello_world';
-import { TODO_EMBEDDABLE, TodoEmbeddableFactory } from './todo';
-import { MULTI_TASK_TODO_EMBEDDABLE, MultiTaskTodoEmbeddableFactory } from './multi_task_todo';
+import { TODO_EMBEDDABLE, TodoEmbeddableFactory, TodoInput, TodoOutput } from './todo';
+import {
+  MULTI_TASK_TODO_EMBEDDABLE,
+  MultiTaskTodoEmbeddableFactory,
+  MultiTaskTodoInput,
+  MultiTaskTodoOutput,
+} from './multi_task_todo';
 import {
   SEARCHABLE_LIST_CONTAINER,
   SearchableListContainerFactory,
 } from './searchable_list_container';
 import { LIST_CONTAINER, ListContainerFactory } from './list_container';
+import { createSampleData } from './create_sample_data';
+import { TodoRefInput, TodoRefOutput, TODO_REF_EMBEDDABLE } from './todo/todo_ref_embeddable';
+import { TodoRefEmbeddableFactory } from './todo/todo_ref_embeddable_factory';
 
-interface EmbeddableExamplesSetupDependencies {
-  embeddable: IEmbeddableSetup;
+export interface EmbeddableExamplesSetupDependencies {
+  embeddable: EmbeddableSetup;
 }
 
-interface EmbeddableExamplesStartDependencies {
-  embeddable: IEmbeddableStart;
+export interface EmbeddableExamplesStartDependencies {
+  embeddable: EmbeddableStart;
+}
+
+export interface EmbeddableExamplesStart {
+  createSampleData: () => Promise<void>;
 }
 
 export class EmbeddableExamplesPlugin
   implements
-    Plugin<void, void, EmbeddableExamplesSetupDependencies, EmbeddableExamplesStartDependencies> {
-  public setup(core: CoreSetup, deps: EmbeddableExamplesSetupDependencies) {
+    Plugin<
+      void,
+      EmbeddableExamplesStart,
+      EmbeddableExamplesSetupDependencies,
+      EmbeddableExamplesStartDependencies
+    > {
+  public setup(
+    core: CoreSetup<EmbeddableExamplesStartDependencies>,
+    deps: EmbeddableExamplesSetupDependencies
+  ) {
     deps.embeddable.registerEmbeddableFactory(
       HELLO_WORLD_EMBEDDABLE,
       new HelloWorldEmbeddableFactory()
     );
 
-    deps.embeddable.registerEmbeddableFactory(TODO_EMBEDDABLE, new TodoEmbeddableFactory());
-
-    deps.embeddable.registerEmbeddableFactory(
+    deps.embeddable.registerEmbeddableFactory<MultiTaskTodoInput, MultiTaskTodoOutput>(
       MULTI_TASK_TODO_EMBEDDABLE,
       new MultiTaskTodoEmbeddableFactory()
     );
-  }
 
-  public start(core: CoreStart, deps: EmbeddableExamplesStartDependencies) {
-    // These are registered in the start method because `getEmbeddableFactory `
-    // is only available in start. We could reconsider this I think and make it
-    // available in both.
     deps.embeddable.registerEmbeddableFactory(
       SEARCHABLE_LIST_CONTAINER,
-      new SearchableListContainerFactory(deps.embeddable.getEmbeddableFactory)
+      new SearchableListContainerFactory(async () => ({
+        embeddableServices: (await core.getStartServices())[1].embeddable,
+      }))
     );
 
     deps.embeddable.registerEmbeddableFactory(
       LIST_CONTAINER,
-      new ListContainerFactory(deps.embeddable.getEmbeddableFactory)
+      new ListContainerFactory(async () => ({
+        embeddableServices: (await core.getStartServices())[1].embeddable,
+      }))
     );
+
+    deps.embeddable.registerEmbeddableFactory<TodoInput, TodoOutput>(
+      TODO_EMBEDDABLE,
+      new TodoEmbeddableFactory(async () => ({
+        openModal: (await core.getStartServices())[0].overlays.openModal,
+      }))
+    );
+
+    deps.embeddable.registerEmbeddableFactory<TodoRefInput, TodoRefOutput>(
+      TODO_REF_EMBEDDABLE,
+      new TodoRefEmbeddableFactory(async () => ({
+        savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
+        getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+      }))
+    );
+  }
+
+  public start(core: CoreStart, deps: EmbeddableExamplesStartDependencies) {
+    return {
+      createSampleData: () => createSampleData(core.savedObjects.client),
+    };
   }
 
   public stop() {}

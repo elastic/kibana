@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile, getService }) {
+export default function ({ loadTestFile, getService }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('maps app', function() {
+  describe('maps app', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {
@@ -27,9 +27,11 @@ export default function({ loadTestFile, getService }) {
       await esArchiver.unload('maps/kibana');
     });
 
-    describe('', function() {
+    describe('', function () {
       this.tags('ciGroup7');
       loadTestFile(require.resolve('./documents_source'));
+      loadTestFile(require.resolve('./blended_vector_layer'));
+      loadTestFile(require.resolve('./vector_styling'));
       loadTestFile(require.resolve('./saved_object_management'));
       loadTestFile(require.resolve('./sample_data'));
       loadTestFile(require.resolve('./feature_controls/maps_security'));
@@ -37,14 +39,17 @@ export default function({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./full_screen_mode'));
     });
 
-    describe('', function() {
+    describe('', function () {
       this.tags('ciGroup10');
       loadTestFile(require.resolve('./es_geo_grid_source'));
+      loadTestFile(require.resolve('./es_pew_pew_source'));
       loadTestFile(require.resolve('./joins'));
       loadTestFile(require.resolve('./add_layer_panel'));
       loadTestFile(require.resolve('./import_geojson'));
       loadTestFile(require.resolve('./layer_errors'));
       loadTestFile(require.resolve('./embeddable'));
+      loadTestFile(require.resolve('./visualize_create_menu'));
+      loadTestFile(require.resolve('./discover'));
     });
   });
 }
