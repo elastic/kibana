@@ -40,11 +40,13 @@ export function getFilterAggConfig(
     },
     setUiConfigFromEs(esAggDefinition) {
       const filterAgg = Object.keys(esAggDefinition)[0] as FilterAggType;
-      const config = getFilterAggTypeConfig(filterAgg);
+      const filterAggConfig = esAggDefinition[filterAgg];
+      const aggTypeConfig = getFilterAggTypeConfig(filterAgg, filterAggConfig);
 
+      this.field = Object.keys(filterAggConfig)[0];
       this.aggConfig = {
         filterAgg,
-        aggTypeConfig: config,
+        aggTypeConfig,
       };
     },
   };
@@ -54,14 +56,17 @@ export function getFilterAggConfig(
  * Returns a form component for provided filter aggregation type.
  */
 export function getFilterAggTypeConfig(
-  filterAggType?: FilterAggType
+  filterAggType?: FilterAggType,
+  config?: { [key: string]: any }
 ): FilterAggConfigUnion['aggTypeConfig'] {
   switch (filterAggType) {
     case FILTERS.TERM:
+      const value = typeof config === 'object' ? Object.values(config)[0] : '';
+
       return {
         FilterAggFormComponent: FilterTermForm,
         filterAggConfig: {
-          value: '',
+          value,
         },
         setUiConfigFromEs() {},
         getEsAggConfig(fieldName) {

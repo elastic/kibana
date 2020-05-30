@@ -84,10 +84,15 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   // Update configuration based on the aggregation type
   useEffect(() => {
     if (agg === aggConfigDef.agg) return;
-    const config = getAggFormConfig(agg);
+    const config = getAggFormConfig(agg, {
+      agg,
+      aggName,
+      dropDownName: aggName,
+      field,
+    });
     if (config === undefined) return;
     setAggConfigDef(config);
-  }, [agg, aggConfigDef.agg]);
+  }, [agg, aggConfigDef.agg, aggName, field]);
 
   const availableFields: EuiSelectOption[] = [];
   const availableAggs: EuiSelectOption[] = [];

@@ -15,6 +15,10 @@ import { PivotAggsConfigFilter } from '../sections/create_transform/components/s
 
 export type PivotSupportedAggs = typeof PIVOT_SUPPORTED_AGGS[keyof typeof PIVOT_SUPPORTED_AGGS];
 
+export function isPivotSupportedAggs(arg: any): arg is PivotSupportedAggs {
+  return Object.values(PIVOT_SUPPORTED_AGGS).includes(arg);
+}
+
 export const PIVOT_SUPPORTED_AGGS = {
   AVG: 'avg',
   CARDINALITY: 'cardinality',
@@ -85,27 +89,36 @@ export interface PivotAggsConfigBase {
 /**
  * Resolves agg UI config from provided ES agg definition
  */
-export function getAggConfigFromEsAgg(esAggDefinition: Record<string, any>) {
+export function getAggConfigFromEsAgg(esAggDefinition: Record<string, any>, aggName: string) {
   const aggKeys = Object.keys(esAggDefinition);
 
   // Find the main aggregation key
   const agg = aggKeys.find((aggKey) => aggKey !== 'aggs');
 
-  if (!agg) {
-    throw new Error('Invalid aggregation definition');
+  if (!isPivotSupportedAggs(agg)) {
+    throw new Error(`Aggregation "${agg}" is not supported`);
   }
 
-  const config = getAggFormConfig(agg);
+  const commonConfig: PivotAggsConfigBase = {
+    ...esAggDefinition[agg],
+    agg,
+    aggName,
+    dropDownName: aggName,
+  };
+
+  const config = getAggFormConfig(agg, commonConfig);
 
   if (aggKeys.includes('agg')) {
-    // process sub-aggregation
+    // TODO process sub-aggregation
   }
 
   if (!config) {
-    return;
+    return commonConfig;
   }
 
-  return config.mappers.setUiConfigFromEs(esAggDefinition);
+  config.setUiConfigFromEs(esAggDefinition[agg]);
+
+  return config;
 }
 
 export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {

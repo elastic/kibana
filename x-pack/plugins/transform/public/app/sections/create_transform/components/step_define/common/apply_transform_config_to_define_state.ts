@@ -18,7 +18,7 @@ import {
 import { Dictionary } from '../../../../../../../common/types/common';
 
 import { StepDefineExposedState } from './types';
-import { PivotSupportedAggs } from '../../../../../common/pivot_aggs';
+import { getAggConfigFromEsAgg, PivotSupportedAggs } from '../../../../../common/pivot_aggs';
 
 export function applyTransformConfigToDefineState(
   state: StepDefineExposedState,
@@ -31,13 +31,7 @@ export function applyTransformConfigToDefineState(
       const aggConfig = transformConfig.pivot.aggregations[
         aggName as PivotSupportedAggs
       ] as Dictionary<any>;
-      const agg = Object.keys(aggConfig)[0];
-      aggList[aggName] = {
-        ...aggConfig[agg],
-        agg,
-        aggName,
-        dropDownName: aggName,
-      } as PivotAggsConfig;
+      aggList[aggName] = getAggConfigFromEsAgg(aggConfig, aggName) as PivotAggsConfig;
       return aggList;
     }, {} as PivotAggsConfigDict);
 
