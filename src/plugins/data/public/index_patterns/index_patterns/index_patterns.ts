@@ -23,7 +23,9 @@ import {
   IUiSettingsClient,
   HttpStart,
   CoreStart,
+  NotificationsStart,
 } from 'src/core/public';
+import { i18n } from '@kbn/i18n';
 
 import { createIndexPatternCache } from './_pattern_cache';
 import { IndexPattern } from './index_pattern';
@@ -32,12 +34,7 @@ import {
   createEnsureDefaultIndexPattern,
   EnsureDefaultIndexPattern,
 } from './ensure_default_index_pattern';
-import {
-  getIndexPatternFieldListCreator,
-  CreateIndexPatternFieldList,
-  Field,
-  FieldSpec,
-} from '../fields';
+import { IndexPatternField, OnUnknownType } from '../fields';
 import { FieldFormatsStart } from '../../field_formats';
 
 const indexPatternCache = createIndexPatternCache();
@@ -53,13 +50,8 @@ export class IndexPatternsService {
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<IndexPatternSavedObjectAttrs>> | null;
   private apiClient: IndexPatternsApiClient;
+  private toastNotifications: NotificationsStart['toasts'];
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
-  createFieldList: CreateIndexPatternFieldList;
-  createField: (
-    indexPattern: IndexPattern,
-    spec: FieldSpec | Field,
-    shortDotsEnable: boolean
-  ) => Field;
 
   constructor(
     core: CoreStart,
@@ -69,18 +61,18 @@ export class IndexPatternsService {
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
     this.config = core.uiSettings;
+    this.toastNotifications = core.notifications.toasts;
     this.savedObjectsClient = savedObjectsClient;
     this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(core);
-    this.createFieldList = getIndexPatternFieldListCreator({
-      fieldFormats,
-      toastNotifications: core.notifications.toasts,
-    });
-    this.createField = (indexPattern, spec, shortDotsEnable) => {
-      return new Field(indexPattern, spec, shortDotsEnable, {
-        fieldFormats,
-        toastNotifications: core.notifications.toasts,
-      });
-    };
+  }
+
+  public createField(
+    indexPattern: IndexPattern,
+    spec: IndexPatternField['spec'],
+    displayName: string,
+    onUnknownType: OnUnknownType
+  ) {
+    return new IndexPatternField(indexPattern, spec, displayName, onUnknownType);
   }
 
   private async refreshSavedObjectsCache() {
@@ -172,13 +164,38 @@ export class IndexPatternsService {
     return indexPatternCache.set(id, indexPattern);
   };
 
+  onUnknownType = (toastNotifications: NotificationsStart['toasts']) => ({
+    type,
+    name,
+    indexPatternTitle,
+  }: {
+    type: string;
+    name: string;
+    indexPatternTitle: string;
+  }) => {
+    const title = i18n.translate('data.indexPatterns.unknownFieldHeader', {
+      values: { type },
+      defaultMessage: 'Unknown field type {type}',
+    });
+    const text = i18n.translate('data.indexPatterns.unknownFieldErrorMessage', {
+      values: { name, title: indexPatternTitle },
+      defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
+    });
+
+    toastNotifications.addDanger({
+      title,
+      text,
+    });
+  };
+
   make = (id?: string): Promise<IndexPattern> => {
     const indexPattern = new IndexPattern(
       id,
       (cfg: any) => this.config.get(cfg),
       this.savedObjectsClient,
       this.apiClient,
-      indexPatternCache
+      indexPatternCache,
+      this.onUnknownType(this.toastNotifications)
     );
 
     return indexPattern.init();

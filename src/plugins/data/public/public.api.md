@@ -841,7 +841,8 @@ export type IMetricAggType = MetricAggType;
 // @public (undocumented)
 export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IIndexPatternsApiClient" needs to be exported by the entry point index.d.ts
-    constructor(id: string | undefined, getConfig: any, savedObjectsClient: SavedObjectsClientContract, apiClient: IIndexPatternsApiClient, patternCache: any);
+    // Warning: (ae-forgotten-export) The symbol "OnUnknownType" needs to be exported by the entry point index.d.ts
+    constructor(id: string | undefined, getConfig: any, savedObjectsClient: SavedObjectsClientContract, apiClient: IIndexPatternsApiClient, patternCache: any, onUnknownType: OnUnknownType);
     // (undocumented)
     [key: string]: any;
     // (undocumented)
@@ -864,6 +865,8 @@ export class IndexPattern implements IIndexPattern {
     formatField: any;
     // (undocumented)
     formatHit: any;
+    // (undocumented)
+    formatterForField(field: IndexPatternField | IndexPatternField['spec']): any;
     // (undocumented)
     getAggregationRestrictions(): Record<string, Record<string, {
         agg?: string | undefined;
@@ -917,7 +920,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     refreshFields(): Promise<void | Error | never[] | undefined>;
     // (undocumented)
-    removeScriptedField(field: IFieldType): Promise<void | Error>;
+    removeScriptedField(fieldName: string): Promise<void | Error>;
     // (undocumented)
     save(saveAttempts?: number): Promise<void | Error>;
     // (undocumented)
@@ -962,50 +965,69 @@ export interface IndexPatternAttributes {
     typeMeta: string;
 }
 
-// Warning: (ae-missing-release-tag) "Field" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "IndexPatternField" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export class IndexPatternField implements IFieldType {
+    constructor(indexPattern: IndexPattern, spec: FieldSpec, displayName: string, // make this part of spec?
+    onUnknownType: OnUnknownType);
     // (undocumented)
-    $$spec: FieldSpec;
-    // Warning: (ae-forgotten-export) The symbol "FieldDependencies" needs to be exported by the entry point index.d.ts
-    constructor(indexPattern: IndexPattern, spec: FieldSpec | IndexPatternField, shortDotsEnable: boolean, { fieldFormats, toastNotifications }: FieldDependencies);
+    get aggregatable(): boolean;
     // (undocumented)
-    aggregatable?: boolean;
+    get conflictDescriptions(): Record<string, string[]> | undefined;
+    set conflictDescriptions(conflictDescriptions: Record<string, string[]> | undefined);
     // (undocumented)
-    conflictDescriptions?: Record<string, string[]>;
+    get count(): number;
+    set count(count: number);
     // (undocumented)
-    count?: number;
+    readonly displayName: string;
     // (undocumented)
-    displayName?: string;
+    get esTypes(): string[] | undefined;
     // (undocumented)
-    esTypes?: string[];
+    get filterable(): boolean;
     // (undocumented)
-    filterable?: boolean;
+    readonly format: any;
     // (undocumented)
-    format: any;
+    readonly indexPattern: IndexPattern;
     // (undocumented)
-    indexPattern?: IndexPattern;
+    get lang(): string | undefined;
+    set lang(lang: string | undefined);
     // (undocumented)
-    lang?: string;
+    get name(): string;
     // (undocumented)
-    name: string;
+    get readFromDocValues(): boolean | undefined;
     // (undocumented)
-    readFromDocValues?: boolean;
+    get script(): string | undefined;
+    set script(script: string | undefined);
     // (undocumented)
-    script?: string;
+    get scripted(): boolean;
     // (undocumented)
-    scripted?: boolean;
+    get searchable(): boolean;
     // (undocumented)
-    searchable?: boolean;
+    get sortable(): boolean;
     // (undocumented)
-    sortable?: boolean;
+    readonly spec: FieldSpec;
     // (undocumented)
-    subType?: IFieldSubType;
+    get subType(): IFieldSubType | undefined;
     // (undocumented)
-    type: string;
+    toJSON(): {
+        count: number;
+        script: string | undefined;
+        lang: string | undefined;
+        conflictDescriptions: Record<string, string[]> | undefined;
+        name: string;
+        type: string;
+        esTypes: string[] | undefined;
+        scripted: boolean;
+        searchable: boolean;
+        aggregatable: boolean;
+        readFromDocValues: boolean | undefined;
+        subType: IFieldSubType | undefined;
+    };
     // (undocumented)
-    visualizable?: boolean;
+    get type(): string;
+    // (undocumented)
+    get visualizable(): boolean;
 }
 
 // Warning: (ae-missing-release-tag) "indexPatterns" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

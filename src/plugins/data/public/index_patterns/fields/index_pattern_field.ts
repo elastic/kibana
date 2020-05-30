@@ -1,0 +1,183 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+import { IndexPattern } from '../index_patterns';
+
+import {
+  IFieldType,
+  IFieldSubType,
+  KbnFieldType,
+  getKbnFieldType,
+  KBN_FIELD_TYPES,
+} from '../../../common';
+
+export interface FieldSpec {
+  count: number;
+  script?: string;
+  lang?: string;
+  conflictDescriptions?: Record<string, string[]>;
+
+  name: string;
+  type: string;
+  esTypes?: string[];
+  scripted: boolean;
+  searchable: boolean;
+  aggregatable: boolean;
+  readFromDocValues?: boolean;
+  subType?: IFieldSubType;
+  indexed?: boolean;
+} // todo
+
+export type OnUnknownType = (unknownType: {
+  type: string;
+  name: string;
+  indexPatternTitle: string;
+}) => void;
+
+// todo export typeof IndexPatternField and see where IFieldType is used
+export class IndexPatternField implements IFieldType {
+  // implements...
+  readonly spec: FieldSpec;
+  // not writable or serialized
+  readonly indexPattern: IndexPattern;
+  readonly format: any; // todo how does this get set?
+  readonly displayName: string;
+  private readonly kbnFieldType: KbnFieldType;
+
+  constructor(
+    indexPattern: IndexPattern,
+    spec: FieldSpec,
+    displayName: string, // make this part of spec?
+    onUnknownType: OnUnknownType
+  ) {
+    this.indexPattern = indexPattern;
+    this.spec = spec;
+    this.displayName = displayName;
+
+    spec.type = spec.name === '_source' ? '_source' : spec.type;
+
+    this.kbnFieldType = getKbnFieldType(spec.type);
+    if (spec.type && this.kbnFieldType.name === KBN_FIELD_TYPES.UNKNOWN) {
+      onUnknownType({ type: spec.type, name: spec.name, indexPatternTitle: indexPattern.title });
+    }
+  }
+
+  // writable attrs
+  public get count() {
+    return this.spec.count;
+  }
+
+  public set count(count) {
+    this.spec.count = count;
+  }
+
+  public get script() {
+    return this.spec.script;
+  }
+
+  public set script(script) {
+    this.spec.script = script;
+  }
+
+  public get lang() {
+    return this.spec.lang;
+  }
+
+  public set lang(lang) {
+    this.spec.lang = lang;
+  }
+
+  public get conflictDescriptions() {
+    return this.spec.conflictDescriptions;
+  }
+
+  public set conflictDescriptions(conflictDescriptions) {
+    this.spec.conflictDescriptions = conflictDescriptions;
+  }
+
+  // read only attrs
+  public get name() {
+    return this.spec.name;
+  }
+
+  public get type() {
+    return this.spec.type;
+  }
+
+  public get esTypes() {
+    return this.spec.esTypes;
+  }
+
+  public get scripted() {
+    return this.spec.scripted;
+  }
+
+  public get searchable() {
+    return this.spec.searchable || this.scripted;
+  }
+
+  public get aggregatable() {
+    return this.spec.aggregatable || this.scripted;
+  }
+
+  public get readFromDocValues() {
+    return this.spec.readFromDocValues && !this.scripted;
+  }
+
+  public get subType() {
+    return this.spec.subType;
+  }
+
+  // not writable, not serialized
+  public get sortable() {
+    return (
+      this.name === '_score' ||
+      ((this.spec.indexed || this.aggregatable) && this.kbnFieldType.sortable)
+    );
+  }
+
+  public get filterable() {
+    return (
+      this.name === '_id' ||
+      this.scripted ||
+      ((this.spec.indexed || this.searchable) && this.kbnFieldType.filterable)
+    );
+  }
+
+  public get visualizable() {
+    return this.aggregatable;
+  }
+
+  public toJSON() {
+    return {
+      count: this.count,
+      script: this.script,
+      lang: this.lang,
+      conflictDescriptions: this.conflictDescriptions,
+
+      name: this.name,
+      type: this.type,
+      esTypes: this.esTypes,
+      scripted: this.scripted,
+      searchable: this.searchable,
+      aggregatable: this.aggregatable,
+      readFromDocValues: this.readFromDocValues,
+      subType: this.subType,
+    };
+  }
+}

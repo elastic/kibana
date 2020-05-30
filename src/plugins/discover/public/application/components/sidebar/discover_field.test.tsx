@@ -72,8 +72,7 @@ function getComponent(selected = false, showDetails = false, useShortDots = fals
     aggregatable: true,
     readFromDocValues: true,
     format: null,
-    routes: {},
-    $$spec: {},
+    spec: {},
   } as IndexPatternField;
 
   const props = {

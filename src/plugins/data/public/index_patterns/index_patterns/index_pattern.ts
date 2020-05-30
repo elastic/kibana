@@ -32,12 +32,16 @@ import {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IIndexPattern,
-  IFieldType,
   META_FIELDS_SETTING,
 } from '../../../common';
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
-import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '../fields';
+import {
+  IndexPatternField,
+  IIndexPatternFieldList,
+  getIndexPatternFieldListCreator,
+  OnUnknownType,
+} from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
@@ -99,11 +103,13 @@ export class IndexPattern implements IIndexPattern {
     getConfig: any,
     savedObjectsClient: SavedObjectsClientContract,
     apiClient: IIndexPatternsApiClient,
-    patternCache: any
+    patternCache: any,
+    onUnknownType: OnUnknownType
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
     this.patternCache = patternCache;
+    this.onUnknownType = onUnknownType;
     // instead of storing config we rather store the getter only as np uiSettingsClient has circular references
     // which cause problems when being consumed from angular
     this.getConfig = getConfig;
@@ -275,31 +281,32 @@ export class IndexPattern implements IIndexPattern {
     }
 
     this.fields.add(
-      new Field(
+      new IndexPatternField(
         this,
         {
           name,
           script,
-          fieldType,
+          type: fieldType,
           scripted: true,
           lang,
           aggregatable: true,
-          filterable: true,
           searchable: true,
+          count: 0,
+          readFromDocValues: false,
         },
-        false,
-        {
-          fieldFormats: getFieldFormats(),
-          toastNotifications: getNotifications().toasts,
-        }
+        name,
+        this.onUnknownType
       )
     );
 
     await this.save();
   }
 
-  removeScriptedField(field: IFieldType) {
-    this.fields.remove(field);
+  removeScriptedField(fieldName: string) {
+    const field = this.fields.getByName(fieldName);
+    if (field) {
+      this.fields.remove(field);
+    }
     return this.save();
   }
 
@@ -357,7 +364,7 @@ export class IndexPattern implements IIndexPattern {
     return this.fields.getByName(this.timeFieldName);
   }
 
-  getFieldByName(name: string): Field | void {
+  getFieldByName(name: string): IndexPatternField | void {
     if (!this.fields || !this.fields.getByName) return;
     return this.fields.getByName(name);
   }
@@ -385,6 +392,16 @@ export class IndexPattern implements IIndexPattern {
     return body;
   }
 
+  formatterForField(field: IndexPatternField | IndexPatternField['spec']) {
+    return (
+      this.fieldFormatMap[field.name] ||
+      getFieldFormats().getDefaultInstance(
+        field.type as KBN_FIELD_TYPES,
+        field.esTypes as ES_FIELD_TYPES[]
+      )
+    );
+  }
+
   async create(allowOverride: boolean = false) {
     const _create = async (duplicateId?: string) => {
       if (duplicateId) {
@@ -393,7 +410,8 @@ export class IndexPattern implements IIndexPattern {
           this.getConfig,
           this.savedObjectsClient,
           this.patternCache,
-          this.fieldsFetcher
+          this.fieldsFetcher,
+          this.onUnknownType
         );
         await duplicatePattern.destroy();
       }
@@ -442,7 +460,8 @@ export class IndexPattern implements IIndexPattern {
             this.getConfig,
             this.savedObjectsClient,
             this.patternCache,
-            this.fieldsFetcher
+            this.fieldsFetcher,
+            this.onUnknownType
           );
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned

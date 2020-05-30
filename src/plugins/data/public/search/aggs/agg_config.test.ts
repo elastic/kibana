@@ -25,7 +25,7 @@ import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
 import { MetricAggType } from './metrics/metric_agg_type';
-import { Field as IndexPatternField, IndexPattern } from '../../index_patterns';
+import { IndexPatternField, IndexPattern } from '../../index_patterns';
 import { stubIndexPatternWithFields } from '../../../public/stubs';
 import { FieldFormatsStart } from '../../field_formats';
 import { fieldFormatsServiceMock } from '../../field_formats/mocks';

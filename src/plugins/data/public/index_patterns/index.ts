@@ -28,7 +28,11 @@ export {
 } from './lib';
 export { flattenHitWrapper, formatHitProvider } from './index_patterns';
 
-export { getIndexPatternFieldListCreator, Field, IIndexPatternFieldList } from './fields';
+export {
+  getIndexPatternFieldListCreator,
+  IIndexPatternFieldList,
+  IndexPatternField,
+} from './fields';
 
 // TODO: figure out how to replace IndexPatterns in get_inner_angular.
 export {

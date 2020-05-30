@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import { Field } from './field';
+import { IndexPatternField, FieldSpec } from './index_pattern_field';
 import { IndexPattern } from '..';
-import { notificationServiceMock } from '../../../../../core/public/mocks';
-import { FieldFormatsStart } from '../../field_formats';
 import { KBN_FIELD_TYPES } from '../../../common';
 
 describe('Field', function () {
@@ -29,14 +27,11 @@ describe('Field', function () {
   }
 
   function getField(values = {}) {
-    return new Field(
+    return new IndexPatternField(
       fieldValues.indexPattern as IndexPattern,
-      { ...fieldValues, ...values },
-      false,
-      {
-        fieldFormats: {} as FieldFormatsStart,
-        toastNotifications: notificationServiceMock.createStartContract().toasts,
-      }
+      { ...fieldValues, ...values } as FieldSpec,
+      'displayName',
+      () => {}
     );
   }
 
@@ -51,6 +46,7 @@ describe('Field', function () {
     filterable: true,
     searchable: true,
     sortable: true,
+    indexed: true,
     readFromDocValues: false,
     visualizable: true,
     scripted: true,
@@ -62,7 +58,7 @@ describe('Field', function () {
     format: { name: 'formatName' },
     $$spec: {},
     conflictDescriptions: { a: ['b', 'c'], d: ['e'] },
-  } as Field;
+  };
 
   it('the correct properties are writable', () => {
     const field = getField();
@@ -82,72 +78,6 @@ describe('Field', function () {
     expect(field.conflictDescriptions).toEqual(fieldValues.conflictDescriptions);
     field.conflictDescriptions = {};
     expect(field.conflictDescriptions).toEqual({});
-  });
-
-  it('the correct properties are not writable', () => {
-    const field = getField();
-
-    expect(field.name).toEqual(fieldValues.name);
-    field.name = 'newName';
-    expect(field.name).toEqual(fieldValues.name);
-
-    expect(field.type).toEqual(fieldValues.type);
-    field.type = 'newType';
-    expect(field.type).toEqual(fieldValues.type);
-
-    expect(field.esTypes).toEqual(fieldValues.esTypes);
-    field.esTypes = ['newType'];
-    expect(field.esTypes).toEqual(fieldValues.esTypes);
-
-    expect(field.scripted).toEqual(fieldValues.scripted);
-    field.scripted = false;
-    expect(field.scripted).toEqual(fieldValues.scripted);
-
-    expect(field.searchable).toEqual(fieldValues.searchable);
-    field.searchable = false;
-    expect(field.searchable).toEqual(fieldValues.searchable);
-
-    expect(field.aggregatable).toEqual(fieldValues.aggregatable);
-    field.aggregatable = false;
-    expect(field.aggregatable).toEqual(fieldValues.aggregatable);
-
-    expect(field.readFromDocValues).toEqual(fieldValues.readFromDocValues);
-    field.readFromDocValues = true;
-    expect(field.readFromDocValues).toEqual(fieldValues.readFromDocValues);
-
-    expect(field.subType).toEqual(fieldValues.subType);
-    field.subType = {};
-    expect(field.subType).toEqual(fieldValues.subType);
-
-    // not writable, not serialized
-    expect(() => {
-      field.indexPattern = {} as IndexPattern;
-    }).toThrow();
-
-    // computed fields
-    expect(() => {
-      field.format = { name: 'newFormatName' };
-    }).toThrow();
-
-    expect(() => {
-      field.sortable = false;
-    }).toThrow();
-
-    expect(() => {
-      field.filterable = false;
-    }).toThrow();
-
-    expect(() => {
-      field.visualizable = false;
-    }).toThrow();
-
-    expect(() => {
-      field.displayName = 'newDisplayName';
-    }).toThrow();
-
-    expect(() => {
-      field.$$spec = { a: 'b' };
-    }).toThrow();
   });
 
   it('sets type field when _source field', () => {
@@ -214,10 +144,12 @@ describe('Field', function () {
   });
 
   it('exports the property to JSON', () => {
-    const field = new Field({ fieldFormatMap: { name: {} } } as IndexPattern, fieldValues, false, {
-      fieldFormats: {} as FieldFormatsStart,
-      toastNotifications: notificationServiceMock.createStartContract().toasts,
-    });
+    const field = new IndexPatternField(
+      { fieldFormatMap: { name: {} } } as IndexPattern,
+      fieldValues,
+      'displayName',
+      () => {}
+    );
     expect(flatten(field)).toMatchSnapshot();
   });
 });

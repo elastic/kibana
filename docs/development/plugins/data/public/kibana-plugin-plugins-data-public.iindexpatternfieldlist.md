@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface IIndexPatternFieldList extends Array<Field> 
+export interface IIndexPatternFieldList extends Array<IndexPatternField> 
 ```
 
 ## Methods

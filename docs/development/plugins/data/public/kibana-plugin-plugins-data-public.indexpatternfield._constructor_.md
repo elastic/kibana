@@ -4,12 +4,13 @@
 
 ## IndexPatternField.(constructor)
 
-Constructs a new instance of the `Field` class
+Constructs a new instance of the `IndexPatternField` class
 
 <b>Signature:</b>
 
 ```typescript
-constructor(indexPattern: IndexPattern, spec: FieldSpec | Field, shortDotsEnable: boolean, { fieldFormats, toastNotifications }: FieldDependencies);
+constructor(indexPattern: IndexPattern, spec: FieldSpec, displayName: string, // make this part of spec?
+    onUnknownType: OnUnknownType);
 ```
 
 ## Parameters
@@ -17,7 +18,7 @@ constructor(indexPattern: IndexPattern, spec: FieldSpec | Field, shortDotsEnable
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  indexPattern | <code>IndexPattern</code> |  |
-|  spec | <code>FieldSpec &#124; Field</code> |  |
-|  shortDotsEnable | <code>boolean</code> |  |
-|  { fieldFormats, toastNotifications } | <code>FieldDependencies</code> |  |
+|  spec | <code>FieldSpec</code> |  |
+|  displayName | <code>string</code> |  |
+|  onUnknownType | <code>OnUnknownType</code> |  |
 
