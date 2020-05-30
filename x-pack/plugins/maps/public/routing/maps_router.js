@@ -8,10 +8,9 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { getCoreI18n } from '../kibana_services';
-import { MapsListView } from './routes/list_view';
-import { MapsCreateEditView } from './routes/create_edit_view';
+import { MapsListView } from './routes/list';
+import { MapsCreateEditView } from './routes/create_edit';
 import { createKbnUrlStateStorage } from '../../../../../src/plugins/kibana_utils/public';
-import { useGlobalStateSyncing } from './state_syncing/global_sync';
 
 export function renderApp(context, { appBasePath, element, history }) {
   render(<App history={history} appBasePath={appBasePath} />, element);
@@ -20,9 +19,6 @@ export function renderApp(context, { appBasePath, element, history }) {
 
 const App = ({ history, appBasePath }) => {
   const kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
-
-  // Init sync utils
-  useGlobalStateSyncing(kbnUrlStateStorage);
 
   const I18nContext = getCoreI18n().Context;
   return (

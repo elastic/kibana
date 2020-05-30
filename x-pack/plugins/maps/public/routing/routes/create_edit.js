@@ -7,6 +7,7 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
+import { i18n } from '@kbn/i18n';
 import { GisMap } from '../../connected_components/gis_map';
 import { createMapStore } from '../../reducers/store';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -42,11 +43,13 @@ import { getInitialRefreshConfig } from '../../angular/get_initial_refresh_confi
 import { getInitialQuery } from '../../angular/get_initial_query';
 import { getMapsSavedObjectLoader } from '../../angular/services/gis_map_saved_object_loader';
 import { MapsTopNavMenu } from '../page_elements/top_nav_menu';
+import { useGlobalStateSyncing } from '../state_syncing/global_sync';
 
 export const MapsCreateEditView = withRouter(
   class extends React.Component {
     visibleSubscription = null;
-    unsubscribe = null;
+    storeSyncUnsubscribe = null;
+    globalSyncUnsubscribe = null;
 
     constructor(props) {
       super(props);
@@ -67,18 +70,29 @@ export const MapsCreateEditView = withRouter(
     }
 
     componentDidMount() {
+      const { match, kbnUrlStateStorage } = this.props;
+
+      // Init sync utils
+      this.globalSyncUnsubscribe = useGlobalStateSyncing(kbnUrlStateStorage);
+
       // Monitor visibility
       this.visibleSubscription = getCoreChrome()
         .getIsVisible$()
         .subscribe((isVisible) => this.setState({ isVisible }));
 
-      const { savedMapId } = this.props.match.params;
+      const { savedMapId } = match.params;
       this.initMap(savedMapId);
     }
 
     componentWillUnmount() {
-      if (this.unsubscribe) {
-        this.unsubscribe();
+      if (this.storeSyncUnsubscribe) {
+        this.storeSyncUnsubscribe();
+      }
+      if (this.globalSyncUnsubscribe) {
+        this.globalSyncUnsubscribe();
+      }
+      if (this.visibleSubscription) {
+        this.visibleSubscription.unsubscribe();
       }
     }
 
@@ -291,7 +305,7 @@ export const MapsCreateEditView = withRouter(
       this.clearUi();
 
       await this.handleStoreChanges();
-      this.unsubscribe = store.subscribe(async () => {
+      this.storeSyncUnsubscribe = store.subscribe(async () => {
         await this.handleStoreChanges(store);
       });
 
