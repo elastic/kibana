@@ -88,20 +88,6 @@ export const ComponentTable: FunctionComponent<Props> = ({
             defaultMessage: 'Reload',
           })}
         </EuiButton>,
-        <EuiButton
-          href="#"
-          fill
-          iconType="plusInCircle"
-          data-test-subj="createComponentTemplateButton"
-          key="createComponentTemplateButton"
-        >
-          {i18n.translate(
-            'xpack.idxMgmt.componentTemplatesList.table.createComponentTemplateButtonLabel',
-            {
-              defaultMessage: 'Create a component template',
-            }
-          )}
-        </EuiButton>,
       ],
       box: {
         incremental: true,
@@ -210,37 +196,6 @@ export const ComponentTable: FunctionComponent<Props> = ({
           />
         ),
         actions: [
-          {
-            isPrimary: true,
-            name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.editActionLabel', {
-              defaultMessage: 'Edit',
-            }),
-            description: i18n.translate(
-              'xpack.idxMgmt.componentTemplatesList.table.editActionDescription',
-              {
-                defaultMessage: 'Edit this component template',
-              }
-            ),
-            type: 'icon',
-            icon: 'pencil',
-            // TODO placeholder for now
-            onClick: ({ name }) => {},
-          },
-          {
-            name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.cloneActionLabel', {
-              defaultMessage: 'Clone',
-            }),
-            description: i18n.translate(
-              'xpack.idxMgmt.componentTemplatesList.table.cloneActionDescription',
-              {
-                defaultMessage: 'Clone this component template',
-              }
-            ),
-            type: 'icon',
-            icon: 'copy',
-            // TODO placeholder for now
-            onClick: ({ name }) => {},
-          },
           {
             isPrimary: true,
             name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.deleteActionLabel', {

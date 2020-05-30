@@ -31,5 +31,3 @@ export {
 export { getFormRow, Field } from '../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export { isJSON } from '../../../../src/plugins/es_ui_shared/static/validators/string';
-
-export { SectionLoading } from '../../../../src/plugins/es_ui_shared/public';

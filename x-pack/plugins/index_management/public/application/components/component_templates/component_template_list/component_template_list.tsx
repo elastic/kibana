@@ -80,7 +80,7 @@ export const ComponentTemplateList: React.FunctionComponent<RouteComponentProps<
             if (deleteResponse?.hasDeletedComponentTemplates) {
               // refetch the component templates
               sendRequest();
-              // go back to list view (if deleted from details flyout)
+              // go back to list view if deleted from details flyout
               goToList();
             }
             setComponentTemplatesToDelete([]);
