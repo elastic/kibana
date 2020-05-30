@@ -33,6 +33,8 @@ export interface AgentConfig extends NewAgentConfig {
   revision: number;
 }
 
+export type AgentConfigSOAttributes = Omit<AgentConfig, 'id'>;
+
 export type FullAgentConfigDatasource = Pick<
   Datasource,
   'id' | 'name' | 'namespace' | 'enabled'
