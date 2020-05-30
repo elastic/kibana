@@ -7,20 +7,20 @@
 // It is important that we use this specific monaco instance so that
 // editor settings are registered against the instance our React component
 // uses.
-import { monaco } from '@kbn/monaco';
+// import { monaco } from '@kbn/monaco';
 
 // @ts-ignore
-import workerSrc from 'raw-loader!monaco-editor/min/vs/base/worker/workerMain.js';
+// import workerSrc from 'raw-loader!monaco-editor/min/vs/base/worker/workerMain.js';
 
-import { monacoPainlessLang } from '../lib';
+// import { monacoPainlessLang } from '../lib';
 
-const LANGUAGE_ID = 'painless';
+// const LANGUAGE_ID = 'painless';
 
 // Safely check whether these globals are present
-const CAN_CREATE_WORKER = typeof Blob === 'function' && typeof Worker === 'function';
+// const CAN_CREATE_WORKER = typeof Blob === 'function' && typeof Worker === 'function';
 
 export class LanguageService {
-  private originalMonacoEnvironment: any;
+  // private originalMonacoEnvironment: any;
 
   public setup() {
     // monaco.languages.register({ id: LANGUAGE_ID });

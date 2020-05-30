@@ -13,7 +13,7 @@ interface Props {
 }
 
 export function Editor({ code, onChange }: Props) {
-  const { XJsonLang, xJson, convertToJson, setXJson } = Monaco.useXJsonMode(code);
+  const { XJsonLang, xJson, setXJson } = Monaco.useXJsonMode(code);
   return (
     <CodeEditor
       languageId={XJsonLang.ID}
