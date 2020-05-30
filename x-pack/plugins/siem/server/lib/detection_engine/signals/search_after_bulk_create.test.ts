@@ -15,8 +15,8 @@ import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import uuid from 'uuid';
-import { listMock } from '../../../../../lists/server';
 import { getListItemResponseMock } from '../../../../../lists/common/schemas/response/list_item_schema.mock';
+import { listMock } from '../../../../../lists/server/mocks';
 
 describe('searchAfterAndBulkCreate', () => {
   let mockService: AlertServicesMock;
