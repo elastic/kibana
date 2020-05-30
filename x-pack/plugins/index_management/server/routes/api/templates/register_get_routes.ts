@@ -14,7 +14,7 @@ export function registerGetAllRoute({ router, license }: RouteDependencies) {
   router.get(
     { path: addBasePath('/templates'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
 
       const indexTemplatesByName = await callAsCurrentUser('indices.getTemplate');
@@ -42,7 +42,7 @@ export function registerGetOneRoute({ router, license, lib }: RouteDependencies)
     },
     license.guardApiRoute(async (ctx, req, res) => {
       const { name } = req.params as typeof paramsSchema.type;
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
 
       const { v: version } = req.query as TypeOf<typeof querySchema>;
 

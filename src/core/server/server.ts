@@ -247,20 +247,21 @@ export class Server {
       coreId,
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {
-        const savedObjectsClient = this.coreStart!.savedObjects.getScopedClient(req);
-        const uiSettingsClient = coreSetup.uiSettings.asScopedToClient(savedObjectsClient);
+        const coreStart = this.coreStart!;
+        const savedObjectsClient = coreStart.savedObjects.getScopedClient(req);
 
         return {
           savedObjects: {
             client: savedObjectsClient,
-            typeRegistry: this.coreStart!.savedObjects.getTypeRegistry(),
+            typeRegistry: coreStart.savedObjects.getTypeRegistry(),
           },
           elasticsearch: {
-            adminClient: coreSetup.elasticsearch.adminClient.asScoped(req),
-            dataClient: coreSetup.elasticsearch.dataClient.asScoped(req),
+            legacy: {
+              client: coreStart.elasticsearch.legacy.client.asScoped(req),
+            },
           },
           uiSettings: {
-            client: uiSettingsClient,
+            client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
           },
         };
       }
