@@ -24,7 +24,7 @@ const createLangWorkerConfig = (lang) => ({
   entry: path.resolve(__dirname, 'src', lang, 'worker', `${lang}.worker.ts`),
   output: {
     path: path.resolve(__dirname, 'target/public'),
-    filename: `${lang}.worker.js`,
+    filename: `${lang}.editor.worker.js`,
   },
   resolve: {
     modules: ['node_modules'],
