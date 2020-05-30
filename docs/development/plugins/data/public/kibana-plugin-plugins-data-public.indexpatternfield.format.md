@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-readonly format: any;
+get format(): any;
 ```

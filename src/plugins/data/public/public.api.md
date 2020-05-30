@@ -986,7 +986,7 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     get filterable(): boolean;
     // (undocumented)
-    readonly format: any;
+    get format(): any;
     // (undocumented)
     readonly indexPattern: IndexPattern;
     // (undocumented)
