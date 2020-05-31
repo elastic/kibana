@@ -63,8 +63,6 @@ export class CrossClusterReplicationPlugin implements Plugin {
       },
     });
 
-    ccrApp.enable();
-
     const config = this.initializerContext.config.get<ClientConfigType>();
 
     licensing.license$
@@ -73,18 +71,12 @@ export class CrossClusterReplicationPlugin implements Plugin {
       .then((license) => {
         const licenseStatus = license.check(PLUGIN.ID, PLUGIN.minimumLicenseType);
         const isLicenseOk = licenseStatus.state === 'valid';
-        toasts.addSuccess(`License OK: ${isLicenseOk}`);
-        toasts.addSuccess(
-          `Enabled: ${config.ui.enabled}. RC UI enabled: ${remoteClusters.isUiEnabled}`
-        );
         // remoteClusters.isUiEnabled is driven by the xpack.remote_clusters.ui.enabled setting.
         // The CCR UI depends upon the Remote Clusters UI (e.g. by cross-linking to it), so if
         // the Remote Clusters UI is disabled we can't show the CCR UI.
         const isCcrUiEnabled = config.ui.enabled && remoteClusters.isUiEnabled;
 
         if (isLicenseOk && isCcrUiEnabled) {
-          ccrApp.enable();
-
           if (indexManagement) {
             const propertyPath = 'isFollowerIndex';
 
@@ -101,6 +93,8 @@ export class CrossClusterReplicationPlugin implements Plugin {
 
             indexManagement.extensionsService.addBadge(followerBadgeExtension);
           }
+        } else {
+          ccrApp.disable();
         }
       });
   }
