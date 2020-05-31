@@ -6,10 +6,7 @@
 /x-pack/plugins/dashboard_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
 /x-pack/plugins/graph/ @elastic/kibana-app
-/src/legacy/server/url_shortening/ @elastic/kibana-app
-/src/legacy/server/sample_data/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
-/src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
 /src/plugins/dashboard/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
 /src/plugins/input_control_vis/ @elastic/kibana-app
@@ -142,6 +139,7 @@
 /config/kibana.yml @elastic/kibana-platform
 /x-pack/plugins/features/  @elastic/kibana-platform
 /x-pack/plugins/licensing/  @elastic/kibana-platform
+/x-pack/plugins/cloud/ @elastic/kibana-platform
 /packages/kbn-config-schema/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
 /src/legacy/server/http/ @elastic/kibana-platform
@@ -157,7 +155,6 @@
 /x-pack/legacy/plugins/security/  @elastic/kibana-security
 /x-pack/legacy/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
-/x-pack/legacy/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /x-pack/plugins/security/  @elastic/kibana-security
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security

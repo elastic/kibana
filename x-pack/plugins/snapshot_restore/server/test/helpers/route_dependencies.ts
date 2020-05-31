@@ -12,7 +12,7 @@ license.getStatus = jest.fn().mockReturnValue({ isValid: true });
 export const routeDependencies = {
   license,
   config: {
-    isSecurityEnabled: true,
+    isSecurityEnabled: jest.fn().mockReturnValue(true),
     isCloudEnabled: false,
     isSlmEnabled: true,
   },

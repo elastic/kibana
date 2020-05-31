@@ -11,6 +11,12 @@ Some APM app features are provided via a REST API:
 * <<agent-config-api>>
 * <<apm-annotation-api>>
 
+[float]
+[[apm-api-example]]
+=== Using the APIs
+
+Users interacting with APM APIs must have <<apm-app-api-user,sufficient privileges>>.
+In addition, there are request headers to be aware of, like `kbn-xsrf: true`, and `Content-Type: applicaton/json`.
 Here's an example CURL request that adds an annotation to the APM app:
 
 [source,curl]
@@ -32,16 +38,8 @@ curl -X POST \
     }'
 ----
 
-For more information, the Kibana <<api,REST API reference>> provides information on how to use Kibana APIs,
-like required request headers and authentication options.
-
-// AGENT CONFIG API
-// GET --> Feature (APM) Read
-// CREATE/EDIT/DELETE --> Feature (APM) All
-
-// ANNOTATION API
-// Feature (APM) All
-// Index: `observability-annotations`. Privileges: `create_index`, `create_doc`, `manage`, and `read`.
+The Kibana <<api,REST API reference>> provides additional information on how to use Kibana APIs,
+required request headers, and token-based authentication options.
 
 ////
 *******************************************************
@@ -60,6 +58,8 @@ The following Agent configuration APIs are available:
 * <<apm-delete-config>> to delete an Agent configuration.
 * <<apm-list-config>> to list all Agent configurations.
 * <<apm-search-config>> to search for an Agent configuration.
+
+See <<apm-app-api-config-manager>> for information on the privileges required to use this API endpoint.
 
 ////
 *******************************************************
@@ -326,6 +326,8 @@ The following APIs are available:
 
 By default, annotations are stored in a newly created `observability-annotations` index.
 The name of this index can be changed in your `config.yml` by editing `xpack.observability.annotations.index`.
+
+See <<apm-app-api-annotation-manager>> for information on the privileges required to use this API endpoint.
 
 ////
 *******************************************************
