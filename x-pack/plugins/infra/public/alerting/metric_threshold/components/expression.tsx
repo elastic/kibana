@@ -138,7 +138,7 @@ export const Expressions: React.FC<Props> = props => {
   ]);
 
   const onGroupByChange = useCallback(
-    (group: string | null) => {
+    (group: string | null | string[]) => {
       setAlertParams('groupBy', group || '');
     },
     [setAlertParams]
@@ -206,7 +206,10 @@ export const Expressions: React.FC<Props> = props => {
         convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedIndexPattern) || ''
       );
     } else if (md && md.currentOptions?.groupBy && md.series) {
-      const filter = `${md.currentOptions?.groupBy}: "${md.series.id}"`;
+      const { groupBy } = md.currentOptions;
+      const filter = Array.isArray(groupBy)
+        ? groupBy.map((field, index) => `${field}: "${md.series?.keys?.[index]}"`).join(' and ')
+        : `${groupBy}: "${md.series.id}"`;
       setAlertParams('filterQueryText', filter);
       setAlertParams(
         'filterQuery',

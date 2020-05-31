@@ -22,10 +22,14 @@ import { IngestManagerAppContext } from '../../plugin';
 describe('test agent acks services', () => {
   it('should succeed on valid and matched actions', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
-    const mockStartEncryptedSOClient = encryptedSavedObjectsMock.createStart();
+    const mockStartEncryptedSOPlugin = encryptedSavedObjectsMock.createStart();
     appContextService.start(({
-      encryptedSavedObjects: mockStartEncryptedSOClient,
+      encryptedSavedObjects: mockStartEncryptedSOPlugin,
     } as unknown) as IngestManagerAppContext);
+
+    const [
+      { value: mockStartEncryptedSOClient },
+    ] = mockStartEncryptedSOPlugin.getClient.mock.results;
 
     mockStartEncryptedSOClient.getDecryptedAsInternalUser.mockReturnValue(
       Promise.resolve({

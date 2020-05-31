@@ -3,7 +3,7 @@
 === Track deployments with annotations
 
 ++++
-<titleabbrev>Track deployments</titleabbrev>
+<titleabbrev>Track deployments with annotations</titleabbrev>
 ++++
 
 For enhanced visibility into your deployments, we offer deployment annotations on all transaction charts.
@@ -11,7 +11,11 @@ This feature automatically tags new deployments, so you can easily see if your d
 for an end-user, or if the memory/CPU footprint of your application has changed.
 Being able to identify bad deployments quickly enables you to rollback and fix issues without causing costly outages.
 
-Deployment annotations are automatically enabled, and appear when the `service.version` of your app changes.
+Deployment annotations are enabled by default, and can be created with the <<apm-annotation-api,annotation API>>.
+If there are no created annotations for the selected time period,
+the APM app will automatically annotate your data if the `service.version` of your application changes.
+
+NOTE: If custom annotations have been created for the selected time period, any derived annotations, i.e., those created automatically when `service.version` changes, will not be shown.
 
 [role="screenshot"]
 image::apm/images/apm-transaction-annotation.png[Example view of transactions annotation in the APM app in Kibana]

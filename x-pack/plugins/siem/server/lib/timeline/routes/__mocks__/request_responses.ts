@@ -12,7 +12,7 @@ import {
 } from '../../../../../common/constants';
 import stream from 'stream';
 import { requestMock } from '../../../detection_engine/routes/__mocks__';
-import { SavedTimeline, TimelineType } from '../../../../../common/types/timeline';
+import { SavedTimeline, TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
 import { updateTimelineSchema } from '../schemas/update_timelines_schema';
 import { createTimelineSchema } from '../schemas/create_timelines_schema';
 
@@ -86,7 +86,8 @@ export const createDraftTimelineWithoutTimelineId = {
   timeline: inputTimeline,
   timelineId: null,
   version: null,
-  timelineType: TimelineType.draft,
+  timelineType: TimelineType.default,
+  status: TimelineStatus.draft,
 };
 
 export const createTemplateTimelineWithoutTimelineId = {
@@ -153,16 +154,22 @@ export const getImportTimelinesRequestEnableOverwrite = (filename?: string) =>
     },
   });
 
-export const getDraftTimelinesRequest = () =>
+export const getDraftTimelinesRequest = (timelineType: TimelineType) =>
   requestMock.create({
     method: 'get',
     path: TIMELINE_DRAFT_URL,
+    query: {
+      timelineType,
+    },
   });
 
-export const cleanDraftTimelinesRequest = () =>
+export const cleanDraftTimelinesRequest = (timelineType: TimelineType) =>
   requestMock.create({
     method: 'post',
     path: TIMELINE_DRAFT_URL,
+    body: {
+      timelineType,
+    },
   });
 
 export const mockTimelinesSavedObjects = () => ({

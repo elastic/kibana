@@ -23,6 +23,7 @@ import 'angular-sanitize';
 
 import { i18n } from '@kbn/i18n';
 
+import routes from 'ui/routes';
 import { capabilities } from 'ui/capabilities';
 import { docTitle } from 'ui/doc_title';
 import { fatalError, toastNotifications } from 'ui/notify';
@@ -62,9 +63,9 @@ document.title = 'Timelion - Kibana';
 
 const app = require('ui/modules').get('apps/timelion', ['i18n', 'ngSanitize']);
 
-require('ui/routes').enable();
+routes.enable();
 
-require('ui/routes').when('/:id?', {
+routes.when('/:id?', {
   template: rootTemplate,
   reloadOnSearch: false,
   k7Breadcrumbs: ($injector, $route) =>
