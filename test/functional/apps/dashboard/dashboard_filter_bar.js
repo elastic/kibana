@@ -205,12 +205,9 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('filter from unrelated index pattern is still applicable if field name is found', async function () {
-        const hasUnrelatedIndexPatternFilter = await filterBar.hasFilter('animal', 'exists', true);
-        expect(hasUnrelatedIndexPatternFilter).to.be(true);
-
         const hasUnrelatedIndexPatternFilterPhrase = await filterBar.hasFilter(
-          'animal',
-          'Cat',
+          '@timestamp',
+          '123',
           true
         );
         expect(hasUnrelatedIndexPatternFilterPhrase).to.be(true);
