@@ -100,8 +100,8 @@ export const BackgroundSessionExampleApp = ({
             placeholder="Create or restore background session"
             isClearable={false}
             singleSelection={true}
-            selectedOptions={sessionHistory.filter(item => item.label === sessionId)}
-            onChange={selectedOptions => {
+            selectedOptions={sessionHistory.filter((item) => item.label === sessionId)}
+            onChange={(selectedOptions) => {
               if (selectedOptions.length) {
                 const sid = selectedOptions[0].label;
                 setSessionId(sid);
@@ -261,7 +261,7 @@ export const BackgroundSessionExampleApp = ({
             <EuiFormRow label="Number of words">
               <EuiFieldText
                 value={wordCount}
-                onChange={e => {
+                onChange={(e) => {
                   setWordCount(e.target.value);
                 }}
               />

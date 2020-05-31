@@ -138,7 +138,7 @@ describe('Background session service', () => {
       expect(bulkGetSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should expire IDs', async cb => {
+    it('should expire IDs', async (cb) => {
       mockScopedClient().bulkGet.mockResolvedValueOnce(undefined as any);
       const mockIdMapping = createMockIdMapping(
         [[MOCK_KEY_HASH, MOCK_ASYNC_ID]],
@@ -160,7 +160,7 @@ describe('Background session service', () => {
       }, 100);
     });
 
-    it('should update saved object ids and clear them', async cb => {
+    it('should update saved object ids and clear them', async (cb) => {
       // Mock internalSavedObjectsClient
       const updateSpy = jest.fn().mockResolvedValue(true);
       createMockInternalSavedObjectClient(updateSpy);
@@ -184,7 +184,7 @@ describe('Background session service', () => {
       }, 100);
     });
 
-    it('should keep ids in mem in case of update failure', async cb => {
+    it('should keep ids in mem in case of update failure', async (cb) => {
       // Mock internalSavedObjectsClient
       const updateSpy = jest.fn().mockResolvedValue(false);
       createMockInternalSavedObjectClient(updateSpy);
@@ -208,7 +208,7 @@ describe('Background session service', () => {
       }, 100);
     });
 
-    it('should give up on id if update retries exceeded', async cb => {
+    it('should give up on id if update retries exceeded', async (cb) => {
       // Mock internalSavedObjectsClient
       const updateSpy = jest.fn().mockResolvedValue(false);
       createMockInternalSavedObjectClient(updateSpy);

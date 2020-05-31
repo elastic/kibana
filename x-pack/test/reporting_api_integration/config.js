@@ -8,7 +8,7 @@ import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { format as formatUrl } from 'url';
 import { ReportingAPIProvider } from './services';
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const apiConfig = await readConfigFile(require.resolve('../api_integration/config'));
   const functionalConfig = await readConfigFile(require.resolve('../functional/config')); // Reporting API tests need a fully working UI
 

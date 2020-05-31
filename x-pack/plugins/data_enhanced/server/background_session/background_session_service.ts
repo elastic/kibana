@@ -115,7 +115,7 @@ export class BackgroundSessionService {
    * context of a user's session.
    */
   private async getAllMappedSavedObjects() {
-    const activeMappingIds = Array.from(this.idMapping.keys()).map(sessionId => {
+    const activeMappingIds = Array.from(this.idMapping.keys()).map((sessionId) => {
       return {
         id: sessionId,
         type: BACKGROUND_SESSION_TYPE,
@@ -142,9 +142,7 @@ export class BackgroundSessionService {
       {
         sessionId,
         creation: moment().toISOString(),
-        expiration: moment()
-          .add(BACKGROUND_SESSION_STORE_DAYS, 'd')
-          .toISOString(),
+        expiration: moment().add(BACKGROUND_SESSION_STORE_DAYS, 'd').toISOString(),
         idMapping: {},
         status: BackgroundSessionStatus.Running,
       },
@@ -178,7 +176,7 @@ export class BackgroundSessionService {
         }
       );
       if (res && !res.error) {
-        sessionInfo.requests.forEach(async searchId => {
+        sessionInfo.requests.forEach(async (searchId) => {
           try {
             const updateResult = await this.updateExpirationHandler(searchId);
           } catch (eUpdate) {

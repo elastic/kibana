@@ -45,7 +45,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
    */
   public runBeyondTimeout = async () => {
     this.hideToast();
-    this.timeoutSubscriptions.forEach(subscription => subscription.unsubscribe());
+    this.timeoutSubscriptions.forEach((subscription) => subscription.unsubscribe());
     this.timeoutSubscriptions.clear();
     const stored = await this.backgroundSessionService.store();
     if (stored) {

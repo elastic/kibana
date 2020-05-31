@@ -103,10 +103,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private readonly preconfiguredActions: PreConfiguredAction[];
 
   constructor(initContext: PluginInitializerContext) {
-    this.config = initContext.config
-      .create<ActionsConfig>()
-      .pipe(first())
-      .toPromise();
+    this.config = initContext.config.create<ActionsConfig>().pipe(first()).toPromise();
 
     this.kibanaIndex = initContext.config.legacy.globalConfig$
       .pipe(
@@ -264,7 +261,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
         preconfiguredActions,
       }),
-      isActionTypeEnabled: id => {
+      isActionTypeEnabled: (id) => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id);
       },
       isActionExecutable: (actionId: string, actionTypeId: string) => {
@@ -293,7 +290,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     savedObjects: SavedObjectsServiceStart,
     elasticsearch: ElasticsearchServiceStart
   ): (request: KibanaRequest) => Services {
-    return request => ({
+    return (request) => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: savedObjects.getScopedClient(request),
       getScopedCallCluster(clusterClient: IClusterClient) {

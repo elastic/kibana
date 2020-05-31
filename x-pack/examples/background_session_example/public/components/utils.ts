@@ -41,7 +41,7 @@ export const doMyCustomSearch = async (
 export const getAggConfig = async (data: DataPublicPluginStart, indexPatternId: string) => {
   const indexPattern = await data.indexPatterns.get(indexPatternId);
   const aggConfigs = data.search.aggs.createAggConfigs(indexPattern);
-  return function() {
+  return function () {
     aggConfigs.createAggConfig({
       enabled: true,
       type: METRIC_TYPES.MAX,

@@ -17,7 +17,7 @@ export interface DemoBody {
 
 const demoWords: Map<string, string[]> = new Map();
 
-const snooze = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const snooze = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const getUUID = uuid;
 const getData = async (wordCount: number) => {
   await snooze(1000);
