@@ -13,6 +13,7 @@ import { LevelLogger as Logger } from '../lib';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
+import { registerLegacy } from './legacy';
 import { HandlerFunction } from './types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
@@ -86,6 +87,7 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
   }
 
   registerGenerateFromJobParams(reporting, handler, handleError);
+  registerLegacy(reporting, handler, handleError, logger); // 7.x only
 
   // Register beta panel-action download-related API's
   if (config.get('csv', 'enablePanelActionDownload')) {
