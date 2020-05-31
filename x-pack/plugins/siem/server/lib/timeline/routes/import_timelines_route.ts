@@ -184,7 +184,8 @@ export const importTimelinesRoute = (
                           version,
                           templateTimelineVersion ?? null,
                           timeline,
-                          templateTimeline
+                          templateTimeline,
+                          parsedTimelineObject
                         );
                         if (errorObj != null) {
                           return siemResponse.error(errorObj);

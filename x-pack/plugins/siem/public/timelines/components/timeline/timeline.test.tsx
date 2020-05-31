@@ -9,6 +9,7 @@ import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
+import { TimelineType } from '../../../../common/types/timeline';
 import { timelineQuery } from '../../containers/index.gql_query';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { Direction } from '../../../graphql/types';
@@ -77,6 +78,7 @@ describe('Timeline', () => {
       sort,
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
+      timelineType: TimelineType.default,
     };
   });
 

@@ -214,6 +214,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
     operator,
     providerId,
     value,
+    type,
   }) => {
     if (this.props.onDataProviderEdited != null) {
       this.props.onDataProviderEdited({
@@ -224,6 +225,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
         operator,
         providerId,
         value,
+        type,
       });
     }
 
@@ -231,7 +233,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
   };
 
   private onFilterForFieldPresent = () => {
-    const { andProviderId, field, timelineId, providerId, value } = this.props;
+    const { andProviderId, field, timelineId, providerId, value, type } = this.props;
 
     if (this.props.onDataProviderEdited != null) {
       this.props.onDataProviderEdited({
@@ -242,6 +244,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
         operator: EXISTS_OPERATOR,
         providerId,
         value,
+        type,
       });
     }
 

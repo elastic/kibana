@@ -7,6 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import { mockIndexPattern } from '../../../../common/mock';
 import { createKibanaCoreStartMock } from '../../../../common/mock/kibana_core';
 import { TestProviders } from '../../../../common/mock/test_providers';
@@ -39,6 +40,7 @@ describe('Header', () => {
           onToggleDataProviderExcluded={jest.fn()}
           show={true}
           showCallOutUnauthorizedMsg={false}
+          timelineType={TimelineType.default}
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -59,6 +61,7 @@ describe('Header', () => {
             onToggleDataProviderExcluded={jest.fn()}
             show={true}
             showCallOutUnauthorizedMsg={false}
+            timelineType={TimelineType.default}
           />
         </TestProviders>
       );
@@ -81,6 +84,7 @@ describe('Header', () => {
             onToggleDataProviderExcluded={jest.fn()}
             show={false}
             showCallOutUnauthorizedMsg={false}
+            timelineType={TimelineType.default}
           />
         </TestProviders>
       );
@@ -103,6 +107,7 @@ describe('Header', () => {
             onToggleDataProviderExcluded={jest.fn()}
             show={true}
             showCallOutUnauthorizedMsg={true}
+            timelineType={TimelineType.default}
           />
         </TestProviders>
       );

@@ -52,12 +52,6 @@ interface OwnProps<TCache = object> {
   onOpenTimeline?: (timeline: TimelineModel) => void;
 }
 
-/**
- * CreateTemplateTimelineBtn
- * Remove the comment here to enable template timeline
- */
-export const disableTemplate = true;
-
 export type OpenTimelineOwnProps = OwnProps &
   Pick<
     OpenTimelineProps,
@@ -230,7 +224,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     }, []);
 
     const openTimeline: OnOpenTimeline = useCallback(
-      ({ duplicate, timelineId }: { duplicate: boolean; timelineId: string }) => {
+      ({ duplicate, timelineId, templateTimelineId }) => {
         if (isModal && closeModalTimeline != null) {
           closeModalTimeline();
         }
@@ -240,6 +234,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           duplicate,
           onOpenTimeline,
           timelineId,
+          templateTimelineId,
           updateIsLoading,
           updateTimeline,
         });
@@ -281,8 +276,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
-        tabs={!disableTemplate ? timelineTabs : undefined}
+        tabs={timelineTabs}
         title={title}
+        timelineType={timelineType}
         totalSearchResultsCount={totalCount}
       />
     ) : (
@@ -308,8 +304,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
-        tabs={!disableTemplate ? timelineFilters : undefined}
+        tabs={timelineFilters}
         title={title}
+        timelineType={timelineType}
         totalSearchResultsCount={totalCount}
       />
     );

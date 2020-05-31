@@ -52,7 +52,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
   hideUntitled = false,
   timelineId,
   timelineTitle,
-  timelineType = TimelineType.default,
+  timelineType = TimelineType.template,
   onTimelineChange,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

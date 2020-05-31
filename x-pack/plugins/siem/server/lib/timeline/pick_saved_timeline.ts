@@ -47,6 +47,7 @@ export const pickSavedTimeline = (
     savedTimeline.templateTimelineVersion = null;
   } else {
     savedTimeline.timelineType = savedTimeline.timelineType ?? TimelineType.default;
+    savedTimeline.status = savedTimeline.status ?? TimelineStatus.active;
     savedTimeline.templateTimelineId = null;
     savedTimeline.templateTimelineVersion = null;
   }

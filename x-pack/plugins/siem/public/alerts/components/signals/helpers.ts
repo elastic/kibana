@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isEmpty } from 'lodash/fp';
+import { get, getOr, isEmpty } from 'lodash/fp';
 import { Filter, esKuery, KueryNode } from '../../../../../../../src/plugins/data/public';
 import {
   DataProvider,
+  DataProviderType,
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Ecs } from '../../../graphql/types';
+import { Ecs, TimelineType } from '../../../graphql/types';
+
+const TEMPLATE_FIELD_VALUE_REGEX = new RegExp(/^{.*}$/);
+
+const isTemplateFieldValue = (value: string) => TEMPLATE_FIELD_VALUE_REGEX.test(value.trim());
 
 interface FindValueToChangeInQuery {
   field: string;
@@ -102,6 +107,7 @@ export const findValueToChangeInQuery = (
 };
 
 export const replaceTemplateFieldFromQuery = (query: string, ecsData: Ecs): string => {
+  // if default
   if (query.trim() !== '') {
     const valueToChange = findValueToChangeInQuery(esKuery.fromKueryExpression(query));
     return valueToChange.reduce((newQuery, vtc) => {
@@ -135,30 +141,54 @@ export const replaceTemplateFieldFromMatchFilters = (filters: Filter[], ecsData:
 
 export const reformatDataProviderWithNewValue = <T extends DataProvider | DataProvidersAnd>(
   dataProvider: T,
-  ecsData: Ecs
+  ecsData: Ecs,
+  timelineType: TimelineType = TimelineType.default
 ): T => {
-  if (templateFields.includes(dataProvider.queryMatch.field)) {
-    const newValue = getStringArray(dataProvider.queryMatch.field, ecsData);
-    if (newValue.length) {
-      dataProvider.id = dataProvider.id.replace(dataProvider.name, newValue[0]);
+  if (timelineType === TimelineType.default) {
+    if (templateFields.includes(dataProvider.queryMatch.field)) {
+      const newValue = getStringArray(dataProvider.queryMatch.field, ecsData);
+      if (newValue.length) {
+        dataProvider.id = dataProvider.id.replace(dataProvider.name, newValue[0]);
+        dataProvider.name = newValue[0];
+        dataProvider.queryMatch.value = newValue[0];
+        dataProvider.queryMatch.displayField = undefined;
+        dataProvider.queryMatch.displayValue = undefined;
+      }
+    }
+    return dataProvider;
+  }
+
+  if (timelineType === TimelineType.template) {
+    if (isTemplateFieldValue(`${dataProvider.queryMatch.value}`)) {
+      const newValue = getOr(false, `${dataProvider.queryMatch.value}`.slice(1, -1), ecsData);
+
+      if (!newValue) {
+        dataProvider.enabled = false;
+      }
+
+      dataProvider.id = dataProvider.id.replace(dataProvider.name, newValue);
       dataProvider.name = newValue[0];
       dataProvider.queryMatch.value = newValue[0];
       dataProvider.queryMatch.displayField = undefined;
       dataProvider.queryMatch.displayValue = undefined;
+      dataProvider.type = DataProviderType.default;
     }
+
+    return dataProvider;
   }
   return dataProvider;
 };
 
 export const replaceTemplateFieldFromDataProviders = (
   dataProviders: DataProvider[],
-  ecsData: Ecs
+  ecsData: Ecs,
+  timelineType: TimelineType
 ): DataProvider[] =>
   dataProviders.map((dataProvider) => {
-    const newDataProvider = reformatDataProviderWithNewValue(dataProvider, ecsData);
+    const newDataProvider = reformatDataProviderWithNewValue(dataProvider, ecsData, timelineType);
     if (newDataProvider.and != null && !isEmpty(newDataProvider.and)) {
       newDataProvider.and = newDataProvider.and.map((andDataProvider) =>
-        reformatDataProviderWithNewValue(andDataProvider, ecsData)
+        reformatDataProviderWithNewValue(andDataProvider, ecsData, timelineType)
       );
     }
     return newDataProvider;

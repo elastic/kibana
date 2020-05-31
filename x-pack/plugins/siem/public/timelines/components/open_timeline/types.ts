@@ -8,7 +8,10 @@ import { SetStateAction, Dispatch } from 'react';
 import { AllTimelinesVariables } from '../../containers/all';
 import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../../graphql/types';
-import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+import {
+  TimelineTypeLiteral,
+  TimelineTypeLiteralWithNull,
+} from '../../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -48,7 +51,7 @@ export interface OpenTimelineResult {
   savedObjectId?: string | null;
   title?: string | null;
   templateTimelineId?: string | null;
-  type?: TimelineTypeLiteral;
+  timelineType?: TimelineTypeLiteral;
   updated?: number | null;
   updatedBy?: string | null;
 }
@@ -76,9 +79,11 @@ export type OnDeleteOneTimeline = (timelineIds: string[]) => void;
 export type OnOpenTimeline = ({
   duplicate,
   timelineId,
+  templateTimelineId,
 }: {
   duplicate: boolean;
-  timelineId: string;
+  timelineId?: string;
+  templateTimelineId?: string;
 }) => void;
 
 export type OnOpenDeleteTimelineModal = (selectedItem: OpenTimelineResult) => void;
@@ -111,7 +116,12 @@ export interface OnTableChangeParams {
 /** Invoked by the EUI table implementation when the user interacts with the table */
 export type OnTableChange = (tableChange: OnTableChangeParams) => void;
 
-export type ActionTimelineToShow = 'duplicate' | 'delete' | 'export' | 'selectable';
+export type ActionTimelineToShow =
+  | 'createFromTemplate'
+  | 'duplicate'
+  | 'delete'
+  | 'export'
+  | 'selectable';
 
 export interface OpenTimelineProps {
   /** Invoked when the user clicks the delete (trash) icon on an individual timeline */
@@ -168,6 +178,8 @@ export interface OpenTimelineProps {
   totalSearchResultsCount: number;
   /** Hide action on timeline if needed it */
   hideActions?: ActionTimelineToShow[];
+  /** Type of searchResults  */
+  timelineType: TimelineTypeLiteralWithNull;
 }
 
 export interface UpdateTimeline {

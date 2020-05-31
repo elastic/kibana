@@ -10,6 +10,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines_page';
 import { OpenTimelineResult, OpenTimelineProps } from '../types';
 import { TimelinesTableProps } from '../timelines_table';
@@ -47,6 +48,7 @@ describe('OpenTimelineModal', () => {
     sortField: DEFAULT_SORT_FIELD,
     tabs: <div />,
     title,
+    timelineType: TimelineType.default,
     totalSearchResultsCount: mockSearchResults.length,
   });
 

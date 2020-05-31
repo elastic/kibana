@@ -79,6 +79,8 @@ const buildQueryForAndProvider = (
 export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
   dataProviders
     .reduce((query, dataProvider: DataProvider, i) => {
+      if (dataProvider.type === 'template') return query;
+
       const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
       const openParen = i >= 0 && dataProviders.length > 1 ? '(' : '';
       const closeParen = i >= 0 && dataProviders.length > 1 ? ')' : '';

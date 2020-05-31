@@ -33,6 +33,21 @@ export const getActionsColumns = ({
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
 }): [TimelineActionsOverflowColumns] => {
+  const createFromTemplate = {
+    name: i18n.CREATE_TIMELINE_FROM_TEMPLATE,
+    icon: 'timeline',
+    onClick: ({ savedObjectId }: OpenTimelineResult) => {
+      onOpenTimeline({
+        duplicate: true,
+        templateTimelineId: savedObjectId!,
+      });
+    },
+    type: 'icon',
+    enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
+    description: i18n.CREATE_TIMELINE_FROM_TEMPLATE,
+    'data-test-subj': 'create-from-template',
+  };
+
   const openAsDuplicateColumn = {
     name: i18n.OPEN_AS_DUPLICATE,
     icon: 'copy',
@@ -74,6 +89,7 @@ export const getActionsColumns = ({
     {
       width: '40px',
       actions: [
+        actionTimelineToShow.includes('createFromTemplate') ? createFromTemplate : null,
         actionTimelineToShow.includes('duplicate') ? openAsDuplicateColumn : null,
         actionTimelineToShow.includes('export') ? exportTimelineAction : null,
         actionTimelineToShow.includes('delete') && deleteTimelines != null

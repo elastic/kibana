@@ -22,7 +22,11 @@ import styled from 'styled-components';
 
 import { BrowserFields } from '../../../common/containers/source';
 import { OnDataProviderEdited } from '../timeline/events';
-import { QueryOperator } from '../timeline/data_providers/data_provider';
+import {
+  DataProvider,
+  DataProviderType,
+  QueryOperator,
+} from '../timeline/data_providers/data_provider';
 
 import {
   getCategorizedFieldNames,
@@ -56,6 +60,7 @@ interface Props {
   providerId: string;
   timelineId: string;
   value: string | number;
+  type?: DataProvider['type'];
 }
 
 const sanatizeValue = (value: string | number): string =>
@@ -83,6 +88,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
     providerId,
     timelineId,
     value,
+    type = DataProviderType.default,
   }) => {
     const [updatedField, setUpdatedField] = useState<EuiComboBoxOptionOption[]>([{ label: field }]);
     const [updatedOperator, setUpdatedOperator] = useState<EuiComboBoxOptionOption[]>(
@@ -107,6 +113,10 @@ export const StatefulEditDataProvider = React.memo<Props>(
 
     const onFieldSelected = useCallback((selectedField: EuiComboBoxOptionOption[]) => {
       setUpdatedField(selectedField);
+
+      if (type === DataProviderType.template) {
+        setUpdatedValue(`{${selectedField[0].label}}`);
+      }
 
       focusInput();
     }, []);
@@ -190,7 +200,8 @@ export const StatefulEditDataProvider = React.memo<Props>(
             <EuiSpacer />
           </EuiFlexItem>
 
-          {updatedOperator.length > 0 &&
+          {type !== DataProviderType.template &&
+          updatedOperator.length > 0 &&
           updatedOperator[0].label !== i18n.EXISTS &&
           updatedOperator[0].label !== i18n.DOES_NOT_EXIST ? (
             <EuiFlexItem grow={false}>
@@ -235,6 +246,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
                       operator: getQueryOperatorFromSelection(updatedOperator),
                       providerId,
                       value: updatedValue,
+                      type,
                     });
                   }}
                   size="s"

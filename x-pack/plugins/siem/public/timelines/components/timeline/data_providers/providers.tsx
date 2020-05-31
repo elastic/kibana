@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-beautiful-dnd';
 import styled, { css } from 'styled-components';
 
-import { AndOrBadge } from '../and_or_badge';
+import { AndOrBadge, AddFieldBadge } from '../and_or_badge';
 import { BrowserFields } from '../../../../common/containers/source';
 import {
   getTimelineProviderDroppableId,
@@ -79,9 +79,7 @@ const Parens = styled.span`
 `;
 
 const AndOrBadgeContainer = styled.div<{ hideBadge: boolean }>`
-  span {
-    visibility: ${({ hideBadge }) => (hideBadge ? 'hidden' : 'inherit')};
-  }
+  display: ${({ hideBadge }) => (hideBadge ? 'none' : 'block')};
 `;
 
 const LastAndOrBadgeInGroup = styled.div`
@@ -133,6 +131,9 @@ export const Providers = React.memo<Props>(
         {dataProviderGroups.map((group, groupIndex) => (
           <EuiFlexGroup alignItems="center" gutterSize="none" key={`droppable-${groupIndex}`}>
             <OrFlexItem grow={false}>
+              <AndOrBadgeContainer hideBadge={groupIndex !== 0}>
+                <AddFieldBadge />
+              </AndOrBadgeContainer>
               <AndOrBadgeContainer hideBadge={groupIndex === 0}>
                 <AndOrBadge type="or" />
               </AndOrBadgeContainer>

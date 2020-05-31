@@ -64,6 +64,9 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
         kqlQuery: {
           type: 'text',
         },
+        type: {
+          type: 'text',
+        },
         queryMatch: {
           properties: {
             field: {
@@ -98,6 +101,9 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
               type: 'boolean',
             },
             kqlQuery: {
+              type: 'text',
+            },
+            type: {
               type: 'text',
             },
             queryMatch: {

@@ -40,11 +40,12 @@ const PAGE_SIZE = 3;
 const StatefulRecentTimelinesComponent = React.memo<Props>(
   ({ apolloClient, filterBy, updateIsLoading, updateTimeline }) => {
     const onOpenTimeline: OnOpenTimeline = useCallback(
-      ({ duplicate, timelineId }: { duplicate: boolean; timelineId: string }) => {
+      ({ duplicate, timelineId, templateTimelineId }) => {
         queryTimelineById({
           apolloClient,
           duplicate,
           timelineId,
+          templateTimelineId,
           updateIsLoading,
           updateTimeline,
         });

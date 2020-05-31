@@ -11,6 +11,11 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       grow={false}
     >
       <styled.div
+        hideBadge={false}
+      >
+        <AddFieldBadge />
+      </styled.div>
+      <styled.div
         hideBadge={true}
       >
         <AndOrBadge
@@ -58,6 +63,11 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
+      <styled.div
+        hideBadge={true}
+      >
+        <AddFieldBadge />
+      </styled.div>
       <styled.div
         hideBadge={false}
       >
@@ -107,6 +117,11 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       grow={false}
     >
       <styled.div
+        hideBadge={true}
+      >
+        <AddFieldBadge />
+      </styled.div>
+      <styled.div
         hideBadge={false}
       >
         <AndOrBadge
@@ -154,6 +169,11 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
+      <styled.div
+        hideBadge={true}
+      >
+        <AddFieldBadge />
+      </styled.div>
       <styled.div
         hideBadge={false}
       >
@@ -203,6 +223,11 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       grow={false}
     >
       <styled.div
+        hideBadge={true}
+      >
+        <AddFieldBadge />
+      </styled.div>
+      <styled.div
         hideBadge={false}
       >
         <AndOrBadge
@@ -250,6 +275,11 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
+      <styled.div
+        hideBadge={true}
+      >
+        <AddFieldBadge />
+      </styled.div>
       <styled.div
         hideBadge={false}
       >
@@ -299,6 +329,11 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       grow={false}
     >
       <styled.div
+        hideBadge={true}
+      >
+        <AddFieldBadge />
+      </styled.div>
+      <styled.div
         hideBadge={false}
       >
         <AndOrBadge
@@ -346,6 +381,11 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
+      <styled.div
+        hideBadge={true}
+      >
+        <AddFieldBadge />
+      </styled.div>
       <styled.div
         hideBadge={false}
       >
@@ -395,6 +435,11 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       grow={false}
     >
       <styled.div
+        hideBadge={true}
+      >
+        <AddFieldBadge />
+      </styled.div>
+      <styled.div
         hideBadge={false}
       >
         <AndOrBadge
@@ -443,6 +488,11 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       grow={false}
     >
       <styled.div
+        hideBadge={true}
+      >
+        <AddFieldBadge />
+      </styled.div>
+      <styled.div
         hideBadge={false}
       >
         <AndOrBadge
@@ -490,6 +540,11 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
+      <styled.div
+        hideBadge={true}
+      >
+        <AddFieldBadge />
+      </styled.div>
       <styled.div
         hideBadge={false}
       >

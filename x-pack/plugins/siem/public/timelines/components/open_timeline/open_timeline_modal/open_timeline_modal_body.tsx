@@ -8,6 +8,8 @@ import { EuiModalBody, EuiModalHeader } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { TimelineType } from '../../../../../common/types/timeline';
+
 import { OpenTimelineProps, ActionTimelineToShow } from '../types';
 import { SearchRow } from '../search_row';
 import { TimelinesTable } from '../timelines_table';
@@ -44,13 +46,20 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     sortField,
     tabs,
     title,
+    timelineType,
     totalSearchResultsCount,
   }) => {
     const actionsToShow = useMemo(() => {
-      const actions: ActionTimelineToShow[] =
-        onDeleteSelected != null && deleteTimelines != null
-          ? ['delete', 'duplicate']
-          : ['duplicate'];
+      const actions: ActionTimelineToShow[] = ['duplicate'];
+
+      if (onDeleteSelected != null && deleteTimelines != null) {
+        actions.unshift('delete');
+      }
+
+      if (timelineType === TimelineType.template) {
+        actions.unshift('createFromTemplate');
+      }
+
       return actions.filter((action) => !hideActions.includes(action));
     }, [onDeleteSelected, deleteTimelines, hideActions]);
 
@@ -97,6 +106,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
             sortDirection={sortDirection}
             sortField={sortField}
             totalSearchResultsCount={totalSearchResultsCount}
+            timelineType={timelineType}
           />
         </EuiModalBody>
       </>

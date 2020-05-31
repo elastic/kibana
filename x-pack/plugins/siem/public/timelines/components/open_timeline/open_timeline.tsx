@@ -11,6 +11,7 @@ import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineProps, OpenTimelineResult, ActionTimelineToShow } from './types';
 import { SearchRow } from './search_row';
 import { TimelinesTable } from './timelines_table';
+import { TimelineType } from '../../../../common/types/timeline';
 import { ImportDataModal } from '../../../common/components/import_data_modal';
 import * as i18n from './translations';
 import { importTimelines } from '../../containers/api';
@@ -33,7 +34,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     isLoading,
     itemIdToExpandedNotesRowMap,
     importDataModalToggle,
-    onAddTimelinesToFavorites,
     onDeleteSelected,
     onlyFavorites,
     onOpenTimeline,
@@ -53,6 +53,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     sortField,
     tabs,
     totalSearchResultsCount,
+    timelineType,
   }) => {
     const tableRef = useRef<EuiBasicTable<OpenTimelineResult>>();
 
@@ -116,13 +117,19 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       }
     }, [setImportDataModalToggle, refetch, searchResults, totalSearchResultsCount]);
 
-    const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(
-      () =>
-        onDeleteSelected != null && deleteTimelines != null
-          ? ['delete', 'duplicate', 'export', 'selectable']
-          : ['duplicate', 'export', 'selectable'],
-      [onDeleteSelected, deleteTimelines]
-    );
+    const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
+      const timelineActions = ['duplicate', 'export', 'selectable'];
+
+      if (onDeleteSelected != null && deleteTimelines != null) {
+        timelineActions.unshift('delete');
+      }
+
+      if (timelineType === TimelineType.template) {
+        timelineActions.unshift('createFromTemplate');
+      }
+
+      return timelineActions as ActionTimelineToShow[];
+    }, [onDeleteSelected, deleteTimelines]);
 
     return (
       <>
@@ -208,6 +215,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             sortField={sortField}
             tableRef={tableRef}
             totalSearchResultsCount={totalSearchResultsCount}
+            timelineType={timelineType}
           />
         </EuiPanel>
       </>

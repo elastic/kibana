@@ -8,25 +8,28 @@
 
 import React from 'react';
 
+import { TimelineType, TimelineTypeLiteralWithNull } from '../../../../../common/types/timeline';
+
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 
 import * as i18n from '../translations';
 import { OpenTimelineResult } from '../types';
 
 /**
- * Returns the extended columns that are specific to the `All Timelines` view
+ * Returns the template columns that are specific to the `Timelines` view
  * of the `Timelines` page
  */
-export const getExtendedColumns = (showExtendedColumns: boolean) => {
-  if (!showExtendedColumns) return [];
+
+export const getTemplateColumns = (timelineType: TimelineTypeLiteralWithNull) => {
+  if (timelineType !== TimelineType.default) return [];
 
   return [
     {
       dataType: 'string',
-      field: 'updatedBy',
-      name: i18n.MODIFIED_BY,
-      render: (updatedBy: OpenTimelineResult['updatedBy']) => (
-        <div data-test-subj="username">{defaultToEmptyTag(updatedBy)}</div>
+      field: 'templateTimelineId',
+      name: i18n.TIMELINE_TEMPLATE,
+      render: (templateTimelineId: OpenTimelineResult['templateTimelineId']) => (
+        <div data-test-subj="timelineType">{defaultToEmptyTag(templateTimelineId)}</div>
       ),
       sortable: false,
     },

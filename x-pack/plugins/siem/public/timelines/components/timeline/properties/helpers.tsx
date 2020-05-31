@@ -23,6 +23,7 @@ import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
+import { TimelineStatus } from '../../../../../common/types/timeline';
 import { Note } from '../../../../common/lib/note';
 import { Notes } from '../../notes';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
@@ -124,7 +125,7 @@ interface NewCaseProps {
 
 export const NewCase = React.memo<NewCaseProps>(({ onClosePopover, timelineId, timelineTitle }) => {
   const history = useHistory();
-  const { savedObjectId } = useSelector((state: State) =>
+  const { savedObjectId, status } = useSelector((state: State) =>
     timelineSelectors.selectTimeline(state, timelineId)
   );
   const handleClick = useCallback(() => {
@@ -148,6 +149,7 @@ export const NewCase = React.memo<NewCaseProps>(({ onClosePopover, timelineId, t
       iconSide="left"
       iconType="paperClip"
       onClick={handleClick}
+      disabled={!!savedObjectId || status === TimelineStatus.draft}
     >
       {i18n.ATTACH_TIMELINE_TO_NEW_CASE}
     </EuiButtonEmpty>

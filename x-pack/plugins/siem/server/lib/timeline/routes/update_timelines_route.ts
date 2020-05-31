@@ -57,7 +57,8 @@ export const updateTimelinesRoute = (
           version,
           templateTimelineVersion ?? null,
           existTimeline,
-          existTemplateTimeline
+          existTemplateTimeline,
+          timeline
         );
         if (errorObj != null) {
           return siemResponse.error(errorObj);

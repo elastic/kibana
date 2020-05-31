@@ -361,6 +361,7 @@ describe('StatefulEditDataProvider', () => {
       field: 'client.address',
       id: 'test',
       operator: ':',
+      type: 'default',
       providerId: 'hosts-table-hostName-test-host',
       value: 'test-host',
     });

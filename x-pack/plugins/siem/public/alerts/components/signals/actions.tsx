@@ -10,7 +10,14 @@ import moment from 'moment';
 
 import { updateSignalStatus } from '../../containers/detection_engine/signals/api';
 import { SendSignalToTimelineActionProps, UpdateSignalStatusActionProps } from './types';
-import { TimelineNonEcsData, GetOneTimeline, TimelineResult, Ecs } from '../../../graphql/types';
+import {
+  TimelineStatus,
+  TimelineNonEcsData,
+  GetOneTimeline,
+  TimelineResult,
+  Ecs,
+  TimelineType,
+} from '../../../graphql/types';
 import { oneTimelineQuery } from '../../../timelines/containers/one/index.gql_query';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import {
@@ -125,12 +132,18 @@ export const sendSignalToTimelineAction = async ({
         const filters = replaceTemplateFieldFromMatchFilters(timeline.filters ?? [], ecsData);
         const dataProviders = replaceTemplateFieldFromDataProviders(
           timeline.dataProviders ?? [],
-          ecsData
+          ecsData,
+          timeline.timelineType
         );
+
         createTimeline({
           from,
           timeline: {
             ...timeline,
+            timelineType: TimelineType.default,
+            templateTimelineId: timelineId,
+            templateTimelineVersion: resultingTimeline.templateTimelineVersion ?? null,
+            status: TimelineStatus.draft,
             dataProviders,
             eventType: 'all',
             filters,

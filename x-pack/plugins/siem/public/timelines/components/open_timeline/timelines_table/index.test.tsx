@@ -62,7 +62,7 @@ describe('TimelinesTable', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find('thead tr th').at(4).text()).toContain(i18n.MODIFIED_BY);
+    expect(wrapper.find('thead tr th').at(5).text()).toContain(i18n.MODIFIED_BY);
   });
 
   test('it renders the notes column in the position of the Modified By column when showExtendedColumns is false', () => {
@@ -79,7 +79,7 @@ describe('TimelinesTable', () => {
     expect(
       wrapper
         .find('thead tr th')
-        .at(5)
+        .at(6)
         .find('[data-test-subj="notes-count-header-icon"]')
         .first()
         .exists()

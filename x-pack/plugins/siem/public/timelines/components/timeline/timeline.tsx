@@ -9,6 +9,7 @@ import { getOr, isEmpty } from 'lodash/fp';
 import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { TimelineType } from '../../../../common/types/timeline';
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
 import { BrowserFields } from '../../../common/containers/source';
 import { TimelineQuery } from '../../containers/index';
@@ -109,6 +110,7 @@ export interface Props {
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   usersViewing: string[];
+  timelineType: TimelineType;
 }
 
 /** The parent Timeline component */
@@ -138,6 +140,7 @@ export const TimelineComponent: React.FC<Props> = ({
   showCallOutUnauthorizedMsg,
   start,
   sort,
+  timelineType,
   toggleColumn,
   usersViewing,
 }) => {
@@ -185,6 +188,7 @@ export const TimelineComponent: React.FC<Props> = ({
             onToggleDataProviderExcluded={onToggleDataProviderExcluded}
             show={show}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+            timelineType={timelineType}
           />
         </TimelineHeaderContainer>
       </StyledEuiFlyoutHeader>

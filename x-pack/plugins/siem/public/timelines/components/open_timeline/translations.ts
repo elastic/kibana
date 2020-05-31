@@ -73,6 +73,13 @@ export const MODIFIED_BY = i18n.translate('xpack.siem.open.timeline.modifiedByTa
   defaultMessage: 'Modified by',
 });
 
+export const TIMELINE_TEMPLATE = i18n.translate(
+  'xpack.siem.open.timeline.timelineTemplateTableHeader',
+  {
+    defaultMessage: 'Timeline Template',
+  }
+);
+
 export const NOTES = i18n.translate('xpack.siem.open.timeline.notesTooltip', {
   defaultMessage: 'Notes',
 });
@@ -80,6 +87,13 @@ export const NOTES = i18n.translate('xpack.siem.open.timeline.notesTooltip', {
 export const ONLY_FAVORITES = i18n.translate('xpack.siem.open.timeline.onlyFavoritesButtonLabel', {
   defaultMessage: 'Only favorites',
 });
+
+export const CREATE_TIMELINE_FROM_TEMPLATE = i18n.translate(
+  'xpack.siem.open.timeline.createTimelineFromTemplateTooltip',
+  {
+    defaultMessage: 'Create timeline from template',
+  }
+);
 
 export const OPEN_AS_DUPLICATE = i18n.translate('xpack.siem.open.timeline.openAsDuplicateTooltip', {
   defaultMessage: 'Duplicate timeline',

@@ -10,7 +10,13 @@ import { Action } from 'typescript-fsa';
 import uuid from 'uuid';
 import { Dispatch } from 'redux';
 import { oneTimelineQuery } from '../../containers/one/index.gql_query';
-import { TimelineResult, GetOneTimeline, NoteResult } from '../../../graphql/types';
+import {
+  TimelineStatus,
+  TimelineType,
+  TimelineResult,
+  GetOneTimeline,
+  NoteResult,
+} from '../../../graphql/types';
 import {
   addNotes as dispatchAddNotes,
   updateNote as dispatchUpdateNote,
@@ -190,7 +196,8 @@ export const formatTimelineResultToModel = (
 export interface QueryTimelineById<TCache> {
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   duplicate?: boolean;
-  timelineId: string;
+  timelineId?: string;
+  templateTimelineId?: string;
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
   updateIsLoading: ({
@@ -207,6 +214,7 @@ export const queryTimelineById = <TCache>({
   apolloClient,
   duplicate = false,
   timelineId,
+  templateTimelineId,
   onOpenTimeline,
   openTimeline = true,
   updateIsLoading,
@@ -218,7 +226,7 @@ export const queryTimelineById = <TCache>({
       .query<GetOneTimeline.Query, GetOneTimeline.Variables>({
         query: oneTimelineQuery,
         fetchPolicy: 'no-cache',
-        variables: { id: timelineId },
+        variables: { id: (timelineId ?? templateTimelineId) as string },
       })
       // eslint-disable-next-line
       .then(result => {
@@ -238,6 +246,12 @@ export const queryTimelineById = <TCache>({
             notes,
             timeline: {
               ...timeline,
+              ...(templateTimelineId
+                ? {
+                    timelineType: TimelineType.default,
+                    status: TimelineStatus.draft,
+                  }
+                : {}),
               show: openTimeline,
             },
             to: getOr(to, 'dateRange.end', timeline),

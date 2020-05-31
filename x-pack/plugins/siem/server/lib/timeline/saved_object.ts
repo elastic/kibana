@@ -145,9 +145,9 @@ export const getAllTimeline = async (
     /**
      * CreateTemplateTimelineBtn
      * Remove the comment here to enable template timeline and apply the change below
-     * filter: getTimelineTypeFilter(timelineType, false)
      */
-    filter: getTimelineTypeFilter(TimelineType.default, false),
+    filter: getTimelineTypeFilter(timelineType, false),
+    // filter: getTimelineTypeFilter(TimelineType.default, false),
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
   };
@@ -243,6 +243,7 @@ export const persistTimeline = async (
   timeline: SavedTimeline
 ): Promise<ResponseTimeline> => {
   const savedObjectsClient = request.context.core.savedObjects.client;
+
   try {
     if (timelineId == null) {
       // Create new timeline
@@ -258,6 +259,9 @@ export const persistTimeline = async (
         timeline: newTimeline,
       };
     }
+
+    // TODO: disallow for changing state from active to draft
+
     // Update Timeline
     await savedObjectsClient.update(
       timelineSavedObjectType,

@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimelineSavedObject } from '../../../../../common/types/timeline';
+/* eslint-disable complexity */
+
+import {
+  TimelineSavedObject,
+  SavedTimeline,
+  TimelineStatus,
+} from '../../../../../common/types/timeline';
 
 export const UPDATE_TIMELINE_ERROR_MESSAGE =
   'CREATE timeline with PATCH is not allowed, please use POST instead';
@@ -15,13 +21,16 @@ export const NO_MATCH_VERSION_ERROR_MESSAGE =
 export const NO_MATCH_ID_ERROR_MESSAGE =
   "Timeline id doesn't match with existing template timeline";
 export const TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE = 'Template timelineVersion conflict';
+export const UPDATE_ACTIVE_TIMELINE_STATUS_ERROR_MESSAGE =
+  "Changing 'active' Timeline status is not allowed";
 
 export const checkIsFailureCases = (
   isHandlingTemplateTimeline: boolean,
   version: string | null,
   templateTimelineVersion: number | null,
   existTimeline: TimelineSavedObject | null,
-  existTemplateTimeline: TimelineSavedObject | null
+  existTemplateTimeline: TimelineSavedObject | null,
+  timeline: SavedTimeline
 ) => {
   if (!isHandlingTemplateTimeline && existTimeline == null) {
     return {
@@ -72,6 +81,15 @@ export const checkIsFailureCases = (
     // Throw error you can not update a template timeline version with an old version
     return {
       body: TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
+      statusCode: 409,
+    };
+  } else if (
+    timeline.status === TimelineStatus.draft &&
+    (existTimeline?.status === TimelineStatus.active ||
+      existTemplateTimeline?.status === TimelineStatus.active)
+  ) {
+    return {
+      body: UPDATE_ACTIVE_TIMELINE_STATUS_ERROR_MESSAGE,
       statusCode: 409,
     };
   } else {

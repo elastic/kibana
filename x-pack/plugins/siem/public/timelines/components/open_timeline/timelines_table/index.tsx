@@ -5,8 +5,10 @@
  */
 
 import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
+
+import { TimelineTypeLiteralWithNull } from '../../../../../common/types/timeline';
 
 import * as i18n from '../translations';
 import {
@@ -24,6 +26,7 @@ import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
+import { getTemplateColumns } from './template_columns';
 
 // there are a number of type mismatches across this file
 const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -38,9 +41,6 @@ const BasicTable = styled(EuiBasicTable)`
   }
 `;
 BasicTable.displayName = 'BasicTable';
-
-const getExtendedColumnsIfEnabled = (showExtendedColumns: boolean) =>
-  showExtendedColumns ? [...getExtendedColumns()] : [];
 
 /**
  * Returns the column definitions (passed as the `columns` prop to
@@ -58,6 +58,7 @@ export const getTimelinesTableColumns = ({
   onOpenTimeline,
   onToggleShowNotes,
   showExtendedColumns,
+  timelineType,
 }: {
   actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
@@ -68,24 +69,24 @@ export const getTimelinesTableColumns = ({
   onSelectionChange: OnSelectionChange;
   onToggleShowNotes: OnToggleShowNotes;
   showExtendedColumns: boolean;
-}) => {
-  return [
-    ...getCommonColumns({
-      itemIdToExpandedNotesRowMap,
-      onOpenTimeline,
-      onToggleShowNotes,
-    }),
-    ...getExtendedColumnsIfEnabled(showExtendedColumns),
-    ...getIconHeaderColumns(),
-    ...getActionsColumns({
-      actionTimelineToShow,
-      deleteTimelines,
-      enableExportTimelineDownloader,
-      onOpenDeleteTimelineModal,
-      onOpenTimeline,
-    }),
-  ];
-};
+  timelineType: TimelineTypeLiteralWithNull;
+}) => [
+  ...getCommonColumns({
+    itemIdToExpandedNotesRowMap,
+    onOpenTimeline,
+    onToggleShowNotes,
+  }),
+  ...getTemplateColumns(timelineType),
+  ...getExtendedColumns(showExtendedColumns),
+  ...getIconHeaderColumns(),
+  ...getActionsColumns({
+    actionTimelineToShow,
+    deleteTimelines,
+    enableExportTimelineDownloader,
+    onOpenDeleteTimelineModal,
+    onOpenTimeline,
+  }),
+];
 
 export interface TimelinesTableProps {
   actionTimelineToShow: ActionTimelineToShow[];
@@ -108,6 +109,7 @@ export interface TimelinesTableProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tableRef?: React.MutableRefObject<_EuiBasicTable<any> | undefined>;
   totalSearchResultsCount: number;
+  timelineType: TimelineTypeLiteralWithNull;
 }
 
 /**
@@ -135,6 +137,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     sortDirection,
     tableRef,
     totalSearchResultsCount,
+    timelineType,
   }) => {
     const pagination = {
       hidePerPageOptions: !showExtendedColumns,
@@ -162,9 +165,10 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
       onSelectionChange,
     };
     const basicTableProps = tableRef != null ? { ref: tableRef } : {};
-    return (
-      <BasicTable
-        columns={getTimelinesTableColumns({
+
+    const columns = useMemo(
+      () =>
+        getTimelinesTableColumns({
           actionTimelineToShow,
           deleteTimelines,
           itemIdToExpandedNotesRowMap,
@@ -174,7 +178,25 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
           onSelectionChange,
           onToggleShowNotes,
           showExtendedColumns,
-        })}
+          timelineType,
+        }),
+      [
+        actionTimelineToShow,
+        deleteTimelines,
+        itemIdToExpandedNotesRowMap,
+        enableExportTimelineDownloader,
+        onOpenDeleteTimelineModal,
+        onOpenTimeline,
+        onSelectionChange,
+        onToggleShowNotes,
+        showExtendedColumns,
+        timelineType,
+      ]
+    );
+
+    return (
+      <BasicTable
+        columns={columns}
         compressed
         data-test-subj="timelines-table"
         isExpandable={true}
