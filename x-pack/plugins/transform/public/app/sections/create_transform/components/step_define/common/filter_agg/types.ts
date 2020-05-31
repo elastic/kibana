@@ -16,7 +16,6 @@ type FilterAggForm<T> = FC<{
   onChange: (arg: Partial<{ config: Partial<T>; validationResult: ValidationResult }>) => void;
   /** Selected field for the aggregation */
   selectedField?: string;
-  validationResult?: ValidationResult;
 }>;
 
 interface FilterAggTypeConfig<U> {
@@ -30,6 +29,7 @@ interface FilterAggTypeConfig<U> {
   setUiConfigFromEs: (arg: { [key: string]: any }) => any;
   /** Converts UI agg config form to ES agg request object */
   getEsAggConfig: (field?: string) => { [key: string]: any };
+  isValid?: () => boolean;
 }
 
 /** Filter agg type definition */
@@ -38,8 +38,6 @@ interface FilterAggProps<K extends FilterAggType, U> {
   filterAgg: K;
   /** Definition of the filter agg config */
   aggTypeConfig: FilterAggTypeConfig<U>;
-  /** Validation result of the entire filter aggregation form */
-  validationResult?: ValidationResult;
 }
 
 /** Filter term agg */

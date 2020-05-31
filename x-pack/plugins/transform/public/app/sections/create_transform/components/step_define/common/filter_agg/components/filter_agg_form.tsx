@@ -69,11 +69,10 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
       </EuiFormRow>
       {aggConfig.filterAgg && (
         <filterAggTypeConfig.FilterAggFormComponent
-          config={aggConfig.aggTypeConfig?.filterAggConfig}
+          config={filterAggTypeConfig?.filterAggConfig}
           onChange={(update: any) => {
             onChange({
               ...aggConfig,
-              validationResult: update.validationResult,
               aggTypeConfig: {
                 ...filterAggTypeConfig,
                 filterAggConfig: update.config,

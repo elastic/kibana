@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
+import { useUpdateEffect } from 'react-use';
 import { useApi } from '../../../../../../../hooks';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
-import { requiredValidator } from '../../../../../../../../../../ml/common/util/validators';
 import { FilterAggConfigTerm } from '../types';
 
 /**
@@ -18,7 +18,6 @@ import { FilterAggConfigTerm } from '../types';
  */
 export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggFormComponent'] = ({
   config,
-  validationResult,
   onChange,
   selectedField,
 }) => {
@@ -28,10 +27,10 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   const [options, setOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const validators = useMemo(() => requiredValidator(), []);
-
   const onSearchChange = useCallback(
     (searchValue) => {
+      if (selectedField === undefined) return;
+
       setIsLoading(true);
       setOptions([]);
 
@@ -40,7 +39,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
         body: {
           query: {
             wildcard: {
-              region: {
+              [selectedField]: {
                 value: `*${searchValue}*`,
               },
             },
@@ -72,9 +71,23 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   useEffect(() => {
     // Simulate initial load.
     onSearchChange('');
-  }, [onSearchChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useUpdateEffect(() => {
+    // Reset value control on field change
+    if (!selectedField) return;
+    onChange({
+      config: {
+        value: undefined,
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedField]);
 
   const selectedOptions = config?.value ? [{ label: config.value }] : undefined;
+
+  if (selectedField === undefined) return null;
 
   return (
     <EuiFormRow
@@ -98,7 +111,6 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
             config: {
               value: selected[0].label,
             },
-            validationResult: validators(selected[0].label),
           });
         }}
         onSearchChange={debounce(onSearchChange, 600)}

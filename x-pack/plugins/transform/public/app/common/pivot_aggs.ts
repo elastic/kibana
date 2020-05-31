@@ -108,7 +108,7 @@ export function getAggConfigFromEsAgg(esAggDefinition: Record<string, any>, aggN
 
   const config = getAggFormConfig(agg, commonConfig);
 
-  if (aggKeys.includes('agg')) {
+  if (aggKeys.includes('aggs')) {
     // TODO process sub-aggregation
   }
 
@@ -123,6 +123,8 @@ export function getAggConfigFromEsAgg(esAggDefinition: Record<string, any>, aggN
 
 export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
   field: EsFieldName;
+  /** Indicates if the configuration is valid */
+  isValid?: () => boolean;
 }
 
 export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
@@ -136,15 +138,12 @@ export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
   }>;
   /** Aggregation specific configuration */
   aggConfig: Partial<T>;
-  /**
-   * Indicates if the user's input is required after quick adding of the aggregation
-   * from the suggestions.
-   */
-  forceEdit?: boolean;
   /** Set UI configuration from ES aggregation definition */
   setUiConfigFromEs: (arg: { [key: string]: any }) => void;
   /** Converts UI agg config form to ES agg request object */
-  getEsAggConfig: () => { [key: string]: any };
+  getEsAggConfig: () => { [key: string]: any } | null;
+  /** Updates agg config*/
+  updateAggConfig?: (update: Partial<T>) => void;
 }
 
 interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {
@@ -163,7 +162,7 @@ export function isPivotAggsConfigWithUiSupport(arg: any): arg is PivotAggsConfig
     arg.hasOwnProperty('aggName') &&
     arg.hasOwnProperty('dropDownName') &&
     arg.hasOwnProperty('field') &&
-    Object.values(PIVOT_SUPPORTED_AGGS).includes(arg.agg)
+    isPivotSupportedAggs(arg.agg)
   );
 }
 
@@ -196,8 +195,8 @@ export type PivotAggsConfigDict = Dictionary<PivotAggsConfig>;
  */
 export function getEsAggFromAggConfig(
   pivotAggsConfig: PivotAggsConfigBase | PivotAggsConfigWithExtendedForm
-): PivotAgg {
-  let esAgg: { [key: string]: any } = { ...pivotAggsConfig };
+): PivotAgg | null {
+  let esAgg: { [key: string]: any } | null = { ...pivotAggsConfig };
 
   delete esAgg.agg;
   delete esAgg.aggName;
@@ -205,6 +204,10 @@ export function getEsAggFromAggConfig(
 
   if (isPivotAggsWithExtendedForm(pivotAggsConfig)) {
     esAgg = pivotAggsConfig.getEsAggConfig();
+
+    if (esAgg === null) {
+      return null;
+    }
   }
 
   return {

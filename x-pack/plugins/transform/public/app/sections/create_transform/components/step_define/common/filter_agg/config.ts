@@ -11,7 +11,6 @@ import {
   FilterAggConfigRange,
   FilterAggConfigTerm,
   FilterAggConfigUnion,
-  isPivotAggsConfigFilter,
   PivotAggsConfigFilterInit,
 } from './types';
 
@@ -25,13 +24,10 @@ export function getFilterAggConfig(
     ...commonConfig,
     AggFormComponent: FilterAggForm,
     aggConfig: {},
-    forceEdit: true,
     getEsAggConfig() {
       // ensure the configuration has been completed
-      if (!isPivotAggsConfigFilter(this)) {
-        // eslint-disable-next-line no-console
-        console.warn('Config is not ready yet');
-        return {};
+      if (!this.isValid!()) {
+        return null;
       }
       const esAgg = this.aggConfig.aggTypeConfig?.getEsAggConfig(this.field);
       return {
@@ -49,6 +45,15 @@ export function getFilterAggConfig(
         aggTypeConfig,
       };
     },
+    updateAggConfig(update) {
+      this.aggConfig = {
+        ...this.aggConfig,
+        ...update,
+      };
+    },
+    isValid() {
+      return this.aggConfig.filterAgg !== undefined && this.aggConfig.aggTypeConfig.isValid();
+    },
   };
 }
 
@@ -61,7 +66,7 @@ export function getFilterAggTypeConfig(
 ): FilterAggConfigUnion['aggTypeConfig'] {
   switch (filterAggType) {
     case FILTERS.TERM:
-      const value = typeof config === 'object' ? Object.values(config)[0] : '';
+      const value = typeof config === 'object' ? Object.values(config)[0] : undefined;
 
       return {
         FilterAggFormComponent: FilterTermForm,
@@ -76,6 +81,9 @@ export function getFilterAggTypeConfig(
           return {
             [fieldName]: this.filterAggConfig.value,
           };
+        },
+        isValid() {
+          return this.filterAggConfig?.value !== undefined;
         },
       } as FilterAggConfigTerm['aggTypeConfig'];
     case FILTERS.RANGE:

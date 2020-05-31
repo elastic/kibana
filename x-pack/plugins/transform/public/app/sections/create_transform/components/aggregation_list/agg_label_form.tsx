@@ -35,7 +35,7 @@ export const AggLabelForm: React.FC<Props> = ({
   options,
 }) => {
   const [isPopoverVisible, setPopoverVisibility] = useState(
-    isPivotAggsConfigWithUiSupport(item) ? item.forceEdit : false
+    isPivotAggsConfigWithUiSupport(item) && item.isValid!() === false
   );
 
   function update(updateItem: PivotAggsConfig) {

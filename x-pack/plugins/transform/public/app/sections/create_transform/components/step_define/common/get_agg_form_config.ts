@@ -22,6 +22,6 @@ export function getAggFormConfig(
     case PIVOT_SUPPORTED_AGGS.FILTER:
       return getFilterAggConfig(commonConfig);
     default:
-      return;
+      return commonConfig;
   }
 }
