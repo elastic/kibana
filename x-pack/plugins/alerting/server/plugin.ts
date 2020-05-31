@@ -216,7 +216,7 @@ export class AlertingPlugin {
       getSpaceId(request: KibanaRequest) {
         return spaces?.getSpaceId(request);
       },
-      preconfiguredActions: plugins.actions.preconfiguredActions,
+      actions: plugins.actions,
     });
 
     taskRunnerFactory.initialize({
@@ -291,7 +291,7 @@ export class AlertingPlugin {
     savedObjects: SavedObjectsServiceStart,
     request: KibanaRequest
   ) {
-    return savedObjects.getScopedClient(request, { includedHiddenTypes: ['alert'] });
+    return savedObjects.getScopedClient(request, { includedHiddenTypes: ['alert', 'action'] });
   }
 
   public stop() {

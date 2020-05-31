@@ -23,15 +23,15 @@ describe('getDurationRt', () => {
         '0m',
         '-1m',
         '1ms',
-        '1s'
-      ].map(input => {
+        '1s',
+      ].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(customDurationRt.decode(input))).toBeFalsy();
         });
       });
     });
     describe('it should return correct error message', () => {
-      ['0m', '-1m', '1ms', '1s'].map(input => {
+      ['0m', '-1m', '1ms', '1s'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           const result = customDurationRt.decode(input);
           const message = PathReporter.report(result)[0];
@@ -41,7 +41,7 @@ describe('getDurationRt', () => {
       });
     });
     describe('it should accept', () => {
-      ['1m', '2m', '1000m'].map(input => {
+      ['1m', '2m', '1000m'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(customDurationRt.decode(input))).toBeTruthy();
         });
@@ -68,15 +68,15 @@ describe('getDurationRt', () => {
         '0ms',
         '-1ms',
         '0m',
-        '1m'
-      ].map(input => {
+        '1m',
+      ].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(customDurationRt.decode(input))).toBeFalsy();
         });
       });
     });
     describe('it should return correct error message', () => {
-      ['-1s', '0s', '2s', '1001ms', '0ms', '-1ms', '0m', '1m'].map(input => {
+      ['-1s', '0s', '2s', '1001ms', '0ms', '-1ms', '0m', '1m'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           const result = customDurationRt.decode(input);
           const message = PathReporter.report(result)[0];
@@ -86,7 +86,7 @@ describe('getDurationRt', () => {
       });
     });
     describe('it should accept', () => {
-      ['1s', '1ms', '50ms', '1000ms'].map(input => {
+      ['1s', '1ms', '50ms', '1000ms'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(customDurationRt.decode(input))).toBeTruthy();
         });
@@ -98,7 +98,7 @@ describe('getDurationRt', () => {
 
     describe('it should not accept', () => {
       [undefined, null, '', 0, 'foo', true, false, '2m', '61s', '60001ms'].map(
-        input => {
+        (input) => {
           it(`${JSON.stringify(input)}`, () => {
             expect(isRight(customDurationRt.decode(input))).toBeFalsy();
           });
@@ -106,7 +106,7 @@ describe('getDurationRt', () => {
       );
     });
     describe('it should return correct error message', () => {
-      ['2m', '61s', '60001ms'].map(input => {
+      ['2m', '61s', '60001ms'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           const result = customDurationRt.decode(input);
           const message = PathReporter.report(result)[0];
@@ -116,7 +116,7 @@ describe('getDurationRt', () => {
       });
     });
     describe('it should accept', () => {
-      ['1m', '0m', '-1m', '60s', '6000ms', '1ms', '1s'].map(input => {
+      ['1m', '0m', '-1m', '60s', '6000ms', '1ms', '1s'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(customDurationRt.decode(input))).toBeTruthy();
         });

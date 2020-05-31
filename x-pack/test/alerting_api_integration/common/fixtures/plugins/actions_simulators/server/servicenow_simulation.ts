@@ -31,7 +31,7 @@ export function initPlugin(router: IRouter, path: string) {
     // ServiceNow simulator: create a servicenow action pointing here, and you can get
     // different responses based on the message posted. See the README.md for
     // more info.
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -50,7 +50,7 @@ export function initPlugin(router: IRouter, path: string) {
       },
       validate: {},
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -69,7 +69,7 @@ export function initPlugin(router: IRouter, path: string) {
       },
       validate: {},
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory

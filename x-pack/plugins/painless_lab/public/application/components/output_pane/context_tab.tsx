@@ -64,7 +64,7 @@ export const ContextTab: FunctionComponent = () => {
         <EuiSuperSelect
           options={painlessContextOptions}
           valueOfSelected={context}
-          onChange={nextContext => updatePayload({ context: nextContext })}
+          onChange={(nextContext) => updatePayload({ context: nextContext })}
           itemLayoutAlign="top"
           hasDividers
           fullWidth
@@ -103,7 +103,7 @@ export const ContextTab: FunctionComponent = () => {
           <EuiFieldText
             fullWidth
             value={index || ''}
-            onChange={e => {
+            onChange={(e) => {
               const nextIndex = e.target.value;
               updatePayload({ index: nextIndex });
             }}
@@ -143,7 +143,7 @@ export const ContextTab: FunctionComponent = () => {
               languageId="json"
               height={150}
               value={query}
-              onChange={nextQuery => updatePayload({ query: nextQuery })}
+              onChange={(nextQuery) => updatePayload({ query: nextQuery })}
               options={{
                 fontSize: 12,
                 minimap: {
@@ -182,7 +182,7 @@ export const ContextTab: FunctionComponent = () => {
               languageId="json"
               height={400}
               value={document}
-              onChange={nextDocument => updatePayload({ document: nextDocument })}
+              onChange={(nextDocument) => updatePayload({ document: nextDocument })}
               options={{
                 fontSize: 12,
                 minimap: {

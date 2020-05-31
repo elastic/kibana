@@ -34,7 +34,7 @@ export const createAsyncInstance = <T>(
 ): AsyncInstance<T> => {
   let instance: T | symbol = INITIALIZING;
 
-  const initPromise = promiseForValue.then(v => (instance = v));
+  const initPromise = promiseForValue.then((v) => (instance = v));
   const loadingTarget = {
     init() {
       return initPromise;

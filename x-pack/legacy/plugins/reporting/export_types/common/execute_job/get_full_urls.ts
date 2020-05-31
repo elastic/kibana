@@ -58,7 +58,7 @@ export function getFullUrls<JobDocPayloadType>({
 
   validateUrls(relativeUrls);
 
-  const urls = relativeUrls.map(relativeUrl => {
+  const urls = relativeUrls.map((relativeUrl) => {
     const parsedRelative: UrlWithStringQuery = urlParse(relativeUrl);
     const jobUrl = getAbsoluteUrl({
       basePath: job.basePath,

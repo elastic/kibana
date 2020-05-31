@@ -71,7 +71,7 @@ async function fetchIndicesCall(
   });
 
   // The two responses should be equal in the number of indices returned
-  return catHits.map(hit => {
+  return catHits.map((hit) => {
     const index = indices[hit.index];
     const aliases = Object.keys(index.aliases);
 

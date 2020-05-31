@@ -41,7 +41,7 @@ export const usePivotConfig = (
 
     const aggNameConflictMessages = getAggNameConflictToastMessages(aggName, aggList, groupByList);
     if (aggNameConflictMessages.length > 0) {
-      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
+      aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
       return;
     }
 
@@ -59,7 +59,7 @@ export const usePivotConfig = (
       groupByListWithoutPrevious
     );
     if (aggNameConflictMessages.length > 0) {
-      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
+      aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
       return;
     }
 
@@ -82,7 +82,7 @@ export const usePivotConfig = (
 
     const aggNameConflictMessages = getAggNameConflictToastMessages(aggName, aggList, groupByList);
     if (aggNameConflictMessages.length > 0) {
-      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
+      aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
       return;
     }
 
@@ -100,7 +100,7 @@ export const usePivotConfig = (
       groupByList
     );
     if (aggNameConflictMessages.length > 0) {
-      aggNameConflictMessages.forEach(m => toastNotifications.addDanger(m));
+      aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
       return;
     }
 

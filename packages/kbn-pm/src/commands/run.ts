@@ -43,7 +43,7 @@ export const RunCommand: ICommand = {
       chalk.bold(`\nRunning script [${chalk.green(scriptName)}] in batched topological order\n`)
     );
 
-    await parallelizeBatches(batchedProjects, async pkg => {
+    await parallelizeBatches(batchedProjects, async (pkg) => {
       if (pkg.hasScript(scriptName)) {
         await pkg.runScriptStreaming(scriptName, scriptArgs);
       }

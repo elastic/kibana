@@ -84,7 +84,7 @@ import { MlTooltipComponent } from '../components/chart_tooltip';
 import { hasMatchingPoints } from './has_matching_points';
 
 function mapSwimlaneOptionsToEuiOptions(options) {
-  return options.map(option => ({
+  return options.map((option) => ({
     value: option,
     text: option,
   }));
@@ -190,12 +190,12 @@ export class Explorer extends React.Component {
     this.anomaliesTablePreviousArgs = null;
   }
 
-  viewByChangeHandler = e => explorerService.setViewBySwimlaneFieldName(e.target.value);
+  viewByChangeHandler = (e) => explorerService.setViewBySwimlaneFieldName(e.target.value);
 
   isSwimlaneSelectActive = false;
   onSwimlaneEnterHandler = () => this.setSwimlaneSelectActive(true);
   onSwimlaneLeaveHandler = () => this.setSwimlaneSelectActive(false);
-  setSwimlaneSelectActive = active => {
+  setSwimlaneSelectActive = (active) => {
     if (this.isSwimlaneSelectActive && !active && this.disableDragSelectOnMouseLeave) {
       this.dragSelect.stop();
       this.isSwimlaneSelectActive = active;
@@ -210,7 +210,7 @@ export class Explorer extends React.Component {
   };
 
   // Listener for click events in the swimlane to load corresponding anomaly data.
-  swimlaneCellClick = selectedCells => {
+  swimlaneCellClick = (selectedCells) => {
     // If selectedCells is an empty object we clear any existing selection,
     // otherwise we save the new selection in AppState and update the Explorer.
     if (Object.keys(selectedCells).length === 0) {
@@ -276,7 +276,7 @@ export class Explorer extends React.Component {
     }
   };
 
-  updateLanguage = language => this.setState({ language });
+  updateLanguage = (language) => this.setState({ language });
 
   render() {
     const { showCharts, severity } = this.props;
@@ -416,7 +416,7 @@ export class Explorer extends React.Component {
             >
               {showOverallSwimlane && (
                 <MlTooltipComponent>
-                  {tooltipService => (
+                  {(tooltipService) => (
                     <ExplorerSwimlane
                       chartWidth={swimlaneContainerWidth}
                       filterActive={filterActive}
@@ -498,7 +498,7 @@ export class Explorer extends React.Component {
                       data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
                     >
                       <MlTooltipComponent>
-                        {tooltipService => (
+                        {(tooltipService) => (
                           <ExplorerSwimlane
                             chartWidth={swimlaneContainerWidth}
                             filterActive={filterActive}

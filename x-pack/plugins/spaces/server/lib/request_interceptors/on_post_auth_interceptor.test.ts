@@ -121,10 +121,7 @@ describe.skip('onPostAuthInterceptor', () => {
     // Mock esNodesCompatibility$ to prevent `root.start()` from blocking on ES version check
     elasticsearch.esNodesCompatibility$ = elasticsearchServiceMock.createInternalSetup().esNodesCompatibility$;
 
-    const loggingMock = loggingServiceMock
-      .create()
-      .asLoggerFactory()
-      .get('xpack', 'spaces');
+    const loggingMock = loggingServiceMock.create().asLoggerFactory().get('xpack', 'spaces');
 
     const featuresPlugin = {
       getFeatures: () =>
@@ -156,7 +153,7 @@ describe.skip('onPostAuthInterceptor', () => {
       return {
         get: (type: string, id: string) => {
           if (type === 'space') {
-            const space = availableSpaces.find(s => s.id === id);
+            const space = availableSpaces.find((s) => s.id === id);
             if (space) {
               return space;
             }
@@ -177,7 +174,7 @@ describe.skip('onPostAuthInterceptor', () => {
       http: (http as unknown) as CoreSetup['http'],
       getStartServices: async () => [coreStart, {}, {}],
       authorization: securityMock.createSetup().authz,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
+      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
 
@@ -192,7 +189,7 @@ describe.skip('onPostAuthInterceptor', () => {
         if (testOptions.simulateGetSingleSpaceFailure) {
           throw Boom.unauthorized('missing credendials', 'Protected Elasticsearch');
         }
-        const space = availableSpaces.find(s => s.id === spaceId);
+        const space = availableSpaces.find((s) => s.id === spaceId);
         if (!space) {
           throw SavedObjectsErrorHelpers.createGenericNotFoundError('space', spaceId);
         }

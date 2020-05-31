@@ -100,12 +100,12 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
             >
               <EuiSelect
                 fullWidth
-                options={agentConfigs.map(config => ({
+                options={agentConfigs.map((config) => ({
                   value: config.id,
                   text: config.name,
                 }))}
                 value={selectedAgentConfigId}
-                onChange={e => setSelectedAgentConfigId(e.target.value)}
+                onChange={(e) => setSelectedAgentConfigId(e.target.value)}
               />
             </EuiFormRow>
           </EuiFlexItem>

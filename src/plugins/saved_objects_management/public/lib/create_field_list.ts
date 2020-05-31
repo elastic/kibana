@@ -89,7 +89,7 @@ const createFields = (key: string, value: any, parents: string[] = []): ObjectFi
   return [field];
 };
 
-const addFieldsFromClass = function(
+const addFieldsFromClass = function (
   Class: { mapping: Record<string, string>; searchSource: any },
   fields: ObjectField[]
 ) {

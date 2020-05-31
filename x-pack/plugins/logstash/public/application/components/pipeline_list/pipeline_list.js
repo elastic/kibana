@@ -108,7 +108,7 @@ class PipelineListUi extends React.Component {
 
     return pipelinesService
       .getPipelineList()
-      .then(pipelines => {
+      .then((pipelines) => {
         this.setState({
           isLoading: false,
           isForbidden: false,
@@ -124,7 +124,7 @@ class PipelineListUi extends React.Component {
           });
         }
       })
-      .catch(err => {
+      .catch((err) => {
         this.setState({
           isLoading: false,
           message: this.getErrorPrompt(),
@@ -159,7 +159,7 @@ class PipelineListUi extends React.Component {
   checkMonitoringAccess = () => {
     const { clusterService, monitoringService } = this.props;
 
-    clusterService.isClusterInfoAvailable().then(isAvailable => {
+    clusterService.isClusterInfoAvailable().then((isAvailable) => {
       this.setState({
         showAddRoleAlert: !isAvailable,
         showEnableMonitoringAlert: !monitoringService.isMonitoringEnabled(),
@@ -215,7 +215,7 @@ class PipelineListUi extends React.Component {
     const pipelineIds = selection.map(({ id }) => id);
     return pipelinesService
       .deletePipelines(pipelineIds)
-      .then(results => {
+      .then((results) => {
         const { numSuccesses, numErrors } = results;
 
         if (numSuccesses === 1 && numErrors === 0) {
@@ -276,7 +276,7 @@ class PipelineListUi extends React.Component {
 
         this.loadPipelines();
       })
-      .catch(err => {
+      .catch((err) => {
         return licenseService.checkValidity().then(() => toastNotifications.addDanger(err));
       });
   };
@@ -285,7 +285,7 @@ class PipelineListUi extends React.Component {
     this.showDeletePipelinesModal();
   };
 
-  onSelectionChange = selection => this.setState({ selection });
+  onSelectionChange = (selection) => this.setState({ selection });
 
   render() {
     const { clonePipeline, createPipeline, isReadOnly, openPipeline } = this.props;
