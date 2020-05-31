@@ -39,8 +39,9 @@ import { IndexPatternMissingIndices } from '../lib';
 import {
   IndexPatternField,
   IIndexPatternFieldList,
-  getIndexPatternFieldListCreator,
+  FieldList,
   OnUnknownType,
+  FieldSpec,
 } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
@@ -117,12 +118,12 @@ export class IndexPattern implements IIndexPattern {
     this.shortDotsEnable = this.getConfig('shortDots:enable');
     this.metaFields = this.getConfig(META_FIELDS_SETTING);
 
-    this.createFieldList = getIndexPatternFieldListCreator({
-      fieldFormats: getFieldFormats(),
-      toastNotifications: getNotifications().toasts,
-    });
+    /*
+    this.createFieldList = (fieldSpecs: FieldSpec[]) =>
+      new FieldList(this, fieldSpecs, this.shortDotsEnable, this.onUnknownType);
+      */
 
-    this.fields = this.createFieldList(this, [], this.shortDotsEnable);
+    this.fields = new FieldList(this, [], this.shortDotsEnable, this.onUnknownType);
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig(META_FIELDS_SETTING));
     this.flattenHit = flattenHitWrapper(this, this.getConfig(META_FIELDS_SETTING));
     this.formatHit = formatHitProvider(
@@ -144,38 +145,35 @@ export class IndexPattern implements IIndexPattern {
     return FieldFormat && new FieldFormat(mapping.params, this.getConfig);
   }
 
-  private initFields(input?: any) {
-    const newValue = input || this.fields;
-
-    this.fields = this.createFieldList(this, newValue, this.shortDotsEnable);
-  }
-
-  private isFieldRefreshRequired(): boolean {
-    if (!this.fields) {
+  private isFieldRefreshRequired(specs?: FieldSpec[]): boolean {
+    if (!specs) {
       return true;
     }
 
-    return this.fields.every((field) => {
+    return specs.every((spec) => {
       // See https://github.com/elastic/kibana/pull/8421
-      const hasFieldCaps = 'aggregatable' in field && 'searchable' in field;
+      const hasFieldCaps = 'aggregatable' in spec && 'searchable' in spec;
 
       // See https://github.com/elastic/kibana/pull/11969
-      const hasDocValuesFlag = 'readFromDocValues' in field;
+      const hasDocValuesFlag = 'readFromDocValues' in spec;
 
       return !hasFieldCaps || !hasDocValuesFlag;
     });
   }
 
-  private async indexFields(forceFieldRefresh: boolean = false) {
+  private async indexFields(forceFieldRefresh: boolean = false, specs?: FieldSpec[]) {
     if (!this.id) {
       return;
     }
 
-    if (forceFieldRefresh || this.isFieldRefreshRequired()) {
+    if (forceFieldRefresh || this.isFieldRefreshRequired(specs)) {
       await this.refreshFields();
+    } else {
+      if (specs) {
+        // i'm not sure if this is needed
+        this.fields.replaceAll(specs);
+      }
     }
-
-    this.initFields();
   }
 
   private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
@@ -192,13 +190,19 @@ export class IndexPattern implements IIndexPattern {
     });
 
     // give index pattern all of the values in _source
+    // don't overwrite field list
+    const fieldList = this.fields;
     _.assign(this, response._source);
+    this.fields = fieldList;
+    // todo have list and its assigned, but not with field objects
+    // todo don't assign field list yet
 
     if (!this.title && this.id) {
       this.title = this.id;
     }
 
-    return this.indexFields(forceFieldRefresh);
+    // todo pass field list
+    return this.indexFields(forceFieldRefresh, response._source.fields);
   }
 
   getComputedFields() {
@@ -280,24 +284,17 @@ export class IndexPattern implements IIndexPattern {
       throw new DuplicateField(name);
     }
 
-    this.fields.add(
-      new IndexPatternField(
-        this,
-        {
-          name,
-          script,
-          type: fieldType,
-          scripted: true,
-          lang,
-          aggregatable: true,
-          searchable: true,
-          count: 0,
-          readFromDocValues: false,
-        },
-        name,
-        this.onUnknownType
-      )
-    );
+    this.fields.add({
+      name, // todo display name
+      script,
+      type: fieldType,
+      scripted: true,
+      lang,
+      aggregatable: true,
+      searchable: true,
+      count: 0,
+      readFromDocValues: false,
+    });
 
     await this.save();
   }
@@ -339,11 +336,11 @@ export class IndexPattern implements IIndexPattern {
   }
 
   getNonScriptedFields() {
-    return _.where(this.fields, { scripted: false });
+    return [...this.fields.filter((field) => !field.scripted)];
   }
 
   getScriptedFields() {
-    return _.where(this.fields, { scripted: true });
+    return [...this.fields.filter((field) => field.scripted)];
   }
 
   isTimeBased(): boolean {
@@ -438,6 +435,7 @@ export class IndexPattern implements IIndexPattern {
   }
 
   async save(saveAttempts: number = 0): Promise<void | Error> {
+    // console.log('save', JSON.stringify(this.fields));
     if (!this.id) return;
     const body = this.prepBody();
     // What keys changed since they last pulled the index pattern
@@ -516,9 +514,9 @@ export class IndexPattern implements IIndexPattern {
 
   async _fetchFields() {
     const fields = await this.fieldsFetcher.fetch(this);
-    const scripted = this.getScriptedFields();
+    const scripted = this.getScriptedFields().map((field) => field.spec);
     const all = fields.concat(scripted);
-    await this.initFields(all);
+    this.fields.replaceAll(all);
   }
 
   refreshFields() {

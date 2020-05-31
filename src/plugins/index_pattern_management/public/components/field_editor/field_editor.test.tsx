@@ -113,6 +113,7 @@ describe('FieldEditor', () => {
   beforeEach(() => {
     indexPattern = ({
       fields: fields as IIndexPatternFieldList,
+      formatterForField: () => ({ params: () => ({}) }),
     } as unknown) as IndexPattern;
   });
 

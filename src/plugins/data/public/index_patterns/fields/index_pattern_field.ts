@@ -65,10 +65,8 @@ export class IndexPatternField implements IFieldType {
     onUnknownType: OnUnknownType
   ) {
     this.indexPattern = indexPattern;
-    this.spec = spec;
+    this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
     this.displayName = displayName;
-
-    spec.type = spec.name === '_source' ? '_source' : spec.type;
 
     this.kbnFieldType = getKbnFieldType(spec.type);
     if (spec.type && this.kbnFieldType.name === KBN_FIELD_TYPES.UNKNOWN) {

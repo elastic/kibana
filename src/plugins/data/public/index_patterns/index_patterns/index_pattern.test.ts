@@ -236,9 +236,8 @@ describe('IndexPattern', () => {
       mockFieldsFetcherResponse = [];
 
       const newFields = indexPattern.getNonScriptedFields();
-
       expect(newFields).toHaveLength(2);
-      expect(newFields.map((f) => f.name)).toEqual(['foo', 'bar']);
+      expect([...newFields.map((f) => f.name)]).toEqual(['foo', 'bar']);
     });
 
     test('should preserve the scripted fields', async () => {
