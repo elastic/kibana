@@ -42,13 +42,13 @@
 
 .globalFilterItem-isError {
   .globalFilterLabel__value {
-    color: $euiColorDanger;
+    color: makeHighContrastColor($euiColorDangerText, $euiColorLightShade);
   }
 }
 
 .globalFilterItem-isWarning {
   .globalFilterLabel__value {
-    color: $euiColorWarning;
+    color: makeHighContrastColor($euiColorWarningText, $euiColorLightShade);
   }
 }
 
