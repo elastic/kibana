@@ -44,8 +44,8 @@ package-lock.json
 *.sublime-*
 npm-debug.log*
 .tern-project
-x-pack/plugins/apm/tsconfig.json
-apm.tsconfig.json
-/x-pack/legacy/plugins/apm/e2e/snapshots.js
-/x-pack/plugins/apm/e2e/snapshots.js
 .nyc_output
+
+# apm plugin
+/x-pack/plugins/apm/tsconfig.json
+apm.tsconfig.json

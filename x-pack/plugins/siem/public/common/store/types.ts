@@ -62,6 +62,17 @@ export type ImmutableMiddlewareFactory<S = State> = (
 ) => ImmutableMiddleware<S, AppAction>;
 
 /**
+ * Takes application-standard middleware dependencies
+ * and returns an array of redux middleware.
+ * Middleware will be of the `ImmutableMiddleware` variety. Not able to directly
+ * change actions or state.
+ */
+export type ImmutableMultipleMiddlewareFactory<S = State> = (
+  coreStart: CoreStart,
+  depsStart: Pick<StartPlugins, 'data' | 'ingestManager'>
+) => Array<ImmutableMiddleware<S, AppAction>>;
+
+/**
  * Simple type for a redux selector.
  */
 type Selector<S, R> = (state: S) => R;

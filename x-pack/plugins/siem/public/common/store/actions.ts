@@ -6,8 +6,8 @@
 
 import { HostAction } from '../../endpoint_hosts/store/action';
 import { AlertAction } from '../../endpoint_alerts/store/action';
-import { PolicyListAction } from '../../endpoint_policy/store/policy_list';
-import { PolicyDetailsAction } from '../../endpoint_policy/store/policy_details';
+import { PolicyListAction } from '../../management/pages/policy/store/policy_list';
+import { PolicyDetailsAction } from '../../management/pages/policy/store/policy_details';
 
 export { appActions } from './app';
 export { dragAndDropActions } from './drag_and_drop';
