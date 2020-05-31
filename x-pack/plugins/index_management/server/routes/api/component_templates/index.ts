@@ -4,4 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerComponentTemplateRoutes } from './register_component_template_routes';
+import { RouteDependencies } from '../../../types';
+
+import { registerGetAllRoute } from './get';
+import { registerCreateRoute } from './create';
+import { registerUpdateRoute } from './update';
+import { registerDeleteRoute } from './delete';
+
+export function registerComponentTemplateRoutes(dependencies: RouteDependencies) {
+  registerGetAllRoute(dependencies);
+  registerCreateRoute(dependencies);
+  registerUpdateRoute(dependencies);
+  registerDeleteRoute(dependencies);
+}
