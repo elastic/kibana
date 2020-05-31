@@ -31,7 +31,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
             all: ['search', 'query', 'index-pattern'],
             read: [],
           },
-          ui: ['show', 'save', 'saveQuery'],
+          ui: ['show', 'save', 'saveQuery', 'saveIndexPattern'],
         },
         read: {
           app: ['discover', 'kibana'],
