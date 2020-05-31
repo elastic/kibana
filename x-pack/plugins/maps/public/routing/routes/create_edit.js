@@ -328,10 +328,11 @@ export const MapsCreateEditView = withRouter(
         savedMap,
         initialLayerListConfig,
         isVisible,
+        isFullScreen,
       } = this.state;
       const initialized = !!query && !!time && !!refreshConfig;
       return (
-        <div id="maps-plugin" ng-class="{mapFullScreen: isFullScreen}">
+        <div id="maps-plugin" className={isFullScreen ? 'mapFullScreen' : ''}>
           {initialized ? (
             <MapsTopNavMenu
               savedMap={savedMap}
