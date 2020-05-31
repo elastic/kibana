@@ -101,7 +101,7 @@ export const SupportedFieldsMessage: FC<Props> = ({ jobType }) => {
     return (
       <Fragment>
         <FormattedMessage
-          id="xpack.ml.dataframe.analytics.create.sourceIndexFieldCheckError"
+          id="xpack.ml.dataframe.analytics.create.sourceIndexFieldsCheckError"
           defaultMessage="There was a problem checking for supported fields for job type. Please refresh the page and try again."
         />
         <EuiSpacer size="s" />

@@ -63,7 +63,7 @@ export const Page: FC = () => {
 
   const analyticsWizardSteps = [
     {
-      title: i18n.translate('xpack.dataframe.analytics.creation.configurationStepTitle', {
+      title: i18n.translate('xpack.ml.dataframe.analytics.creation.configurationStepTitle', {
         defaultMessage: 'Configuration',
       }),
       children: (
@@ -78,7 +78,7 @@ export const Page: FC = () => {
         currentStep >= ANALYTICS_STEPS.CONFIGURATION ? undefined : ('incomplete' as EuiStepStatus),
     },
     {
-      title: i18n.translate('xpack.dataframe.analytics.creation.advancedStepTitle', {
+      title: i18n.translate('xpack.ml.dataframe.analytics.creation.advancedStepTitle', {
         defaultMessage: 'Additional options',
       }),
       children: (
@@ -93,7 +93,7 @@ export const Page: FC = () => {
       'data-test-subj': 'mlAnalyticsCreateJobWizardAdvancedStep',
     },
     {
-      title: i18n.translate('xpack.dataframe.analytics.creation.detailsStepTitle', {
+      title: i18n.translate('xpack.ml.dataframe.analytics.creation.detailsStepTitle', {
         defaultMessage: 'Job details',
       }),
       children: (
@@ -108,7 +108,7 @@ export const Page: FC = () => {
       'data-test-subj': 'mlAnalyticsCreateJobWizardDetailsStep',
     },
     {
-      title: i18n.translate('xpack.dataframe.analytics.creation.createStepTitle', {
+      title: i18n.translate('xpack.ml.dataframe.analytics.creation.createStepTitle', {
         defaultMessage: 'Create',
       }),
       children: <CreateStep {...createAnalyticsForm} step={currentStep} />,
@@ -128,7 +128,7 @@ export const Page: FC = () => {
                   <EuiTitle size="m">
                     <h1>
                       <FormattedMessage
-                        id="xpack.dataframe.analytics.creationPageTitle"
+                        id="xpack.ml.dataframe.analytics.creationPageTitle"
                         defaultMessage="Create analytics job"
                       />
                     </h1>
@@ -137,7 +137,7 @@ export const Page: FC = () => {
                 <EuiFlexItem grow={false}>
                   <h2>
                     <FormattedMessage
-                      id="xpack.dataframe.analytics.creationPageSourceIndexTitle"
+                      id="xpack.ml.dataframe.analytics.creationPageSourceIndexTitle"
                       defaultMessage="Source index pattern: {indexTitle}"
                       values={{ indexTitle: currentIndexPattern.title }}
                     />

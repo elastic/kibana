@@ -111,7 +111,7 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
     );
 
     hyperSecondCol.push({
-      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.nNeighbors', {
+      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.method', {
         defaultMessage: 'Method',
       }),
       description: method !== undefined ? method : UNSET_CONFIG_ITEM,

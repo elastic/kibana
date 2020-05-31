@@ -62,6 +62,7 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
           options={Object.values(ANALYSIS_CONFIG_TYPE).map((jobType) => ({
             value: jobType,
             text: jobType.replace(/_/g, ' '),
+            'data-test-subj': `mlAnalyticsCreation-${jobType}-option`,
           }))}
           value={type}
           hasNoInitialSelection={true}

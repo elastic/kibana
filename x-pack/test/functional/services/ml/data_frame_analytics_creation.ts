@@ -57,7 +57,8 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async selectJobType(jobType: string) {
-      await testSubjects.selectValue('mlAnalyticsCreateJobWizardJobTypeSelect', jobType);
+      await testSubjects.click('mlAnalyticsCreateJobWizardJobTypeSelect');
+      await testSubjects.click(`mlAnalyticsCreation-${jobType}-option`);
       await this.assertJobTypeSelection(jobType);
     },
 

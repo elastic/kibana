@@ -37,7 +37,7 @@ export const ConfigurationStepDetails: FC<Props> = ({ setCurrentStep, state }) =
 
   const detailsFirstCol = [
     {
-      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.jobType', {
+      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.sourceIndex', {
         defaultMessage: 'Source index',
       }),
       description: currentIndexPattern.title || UNSET_CONFIG_ITEM,

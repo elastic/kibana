@@ -170,16 +170,16 @@ export default function ({ getService }: FtrProviderContext) {
         //   });
         // });
 
-        it('creates the destination index and writes results to it', async () => {
-          await ml.api.assertIndicesExist(testData.destinationIndex);
-          await ml.api.assertIndicesNotEmpty(testData.destinationIndex);
-        });
+        // it('creates the destination index and writes results to it', async () => {
+        //   await ml.api.assertIndicesExist(testData.destinationIndex);
+        //   await ml.api.assertIndicesNotEmpty(testData.destinationIndex);
+        // });
 
-        it('displays the results view for created job', async () => {
-          await ml.dataFrameAnalyticsTable.openResultsView();
-          await ml.dataFrameAnalytics.assertClassificationEvaluatePanelElementsExists();
-          await ml.dataFrameAnalytics.assertClassificationTablePanelExists();
-        });
+        // it('displays the results view for created job', async () => {
+        //   await ml.dataFrameAnalyticsTable.openResultsView();
+        //   await ml.dataFrameAnalytics.assertClassificationEvaluatePanelElementsExists();
+        //   await ml.dataFrameAnalytics.assertClassificationTablePanelExists();
+        // });
       });
     }
   });

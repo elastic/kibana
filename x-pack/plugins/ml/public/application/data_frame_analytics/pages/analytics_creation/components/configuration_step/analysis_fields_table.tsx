@@ -109,7 +109,7 @@ export const AnalysisFieldsTable: FC<{
     {
       type: 'field_value_selection',
       field: 'is_included',
-      name: i18n.translate('ml.dataframe.analytics.create.excludedFilterLabel', {
+      name: i18n.translate('xpack.ml.dataframe.analytics.create.excludedFilterLabel', {
         defaultMessage: 'Is included',
       }),
       multiSelect: false,
@@ -118,7 +118,7 @@ export const AnalysisFieldsTable: FC<{
           value: true,
           view: (
             <EuiText grow={false}>
-              {i18n.translate('ml.dataframe.analytics.create.isIncludedOption', {
+              {i18n.translate('xpack.ml.dataframe.analytics.create.isIncludedOption', {
                 defaultMessage: 'Yes',
               })}
             </EuiText>
@@ -128,7 +128,7 @@ export const AnalysisFieldsTable: FC<{
           value: false,
           view: (
             <EuiText grow={false}>
-              {i18n.translate('ml.dataframe.analytics.create.isNotIncludedOption', {
+              {i18n.translate('xpack.ml.dataframe.analytics.create.isNotIncludedOption', {
                 defaultMessage: 'No',
               })}
             </EuiText>

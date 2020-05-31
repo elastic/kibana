@@ -8,9 +8,12 @@ import React, { FC } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-const continueButtonText = i18n.translate('xpack.dataframe.analytics.creation.continueButtonText', {
-  defaultMessage: 'Continue',
-});
+const continueButtonText = i18n.translate(
+  'xpack.ml.dataframe.analytics.creation.continueButtonText',
+  {
+    defaultMessage: 'Continue',
+  }
+);
 
 export const ContinueButton: FC<{ isDisabled: boolean; onClick: any }> = ({
   isDisabled,
