@@ -43,6 +43,7 @@ interface OwnProps {
   timelineId?: string;
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
+  toggleTypeProvider: () => void;
   value: string | number;
 }
 
@@ -56,6 +57,25 @@ const MyEuiPopover = styled((EuiPopover as unknown) as FunctionComponent)<
 `;
 
 MyEuiPopover.displayName = 'MyEuiPopover';
+
+interface GetProviderActionsProps {
+  andProviderId?: string;
+  browserFields?: BrowserFields;
+  deleteItem: () => void;
+  field: string;
+  isEnabled: boolean;
+  isExcluded: boolean;
+  isLoading: boolean;
+  onDataProviderEdited?: OnDataProviderEdited;
+  onFilterForFieldPresent: () => void;
+  operator: QueryOperator;
+  providerId: string;
+  timelineId?: string;
+  toggleEnabled: () => void;
+  toggleExcluded: () => void;
+  toggleType: () => void;
+  value: string | number;
+}
 
 export const getProviderActions = ({
   andProviderId,
@@ -72,24 +92,9 @@ export const getProviderActions = ({
   timelineId,
   toggleEnabled,
   toggleExcluded,
+  toggleType,
   value,
-}: {
-  andProviderId?: string;
-  browserFields?: BrowserFields;
-  deleteItem: () => void;
-  field: string;
-  isEnabled: boolean;
-  isExcluded: boolean;
-  isLoading: boolean;
-  onDataProviderEdited?: OnDataProviderEdited;
-  onFilterForFieldPresent: () => void;
-  operator: QueryOperator;
-  providerId: string;
-  timelineId?: string;
-  toggleEnabled: () => void;
-  toggleExcluded: () => void;
-  value: string | number;
-}): EuiContextMenuPanelDescriptor[] => [
+}: GetProviderActionsProps): EuiContextMenuPanelDescriptor[] => [
   {
     id: 0,
     items: [
@@ -120,6 +125,13 @@ export const getProviderActions = ({
         icon: 'logstashFilter',
         name: i18n.FILTER_FOR_FIELD_PRESENT,
         onClick: onFilterForFieldPresent,
+      },
+      {
+        className: FILTER_FOR_FIELD_PRESENT_CLASS_NAME,
+        disabled: isLoading,
+        icon: 'logstashFilter',
+        name: i18n.FILTER_FOR_FIELD_PRESENT,
+        onClick: toggleType,
       },
       {
         className: DELETE_CLASS_NAME,
@@ -169,6 +181,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
       timelineId,
       toggleEnabledProvider,
       toggleExcludedProvider,
+      toggleTypeProvider,
       value,
     } = this.props;
 
@@ -187,6 +200,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
       timelineId,
       toggleEnabled: toggleEnabledProvider,
       toggleExcluded: toggleExcludedProvider,
+      toggleType: toggleTypeProvider,
       value,
     });
 

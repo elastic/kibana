@@ -238,6 +238,7 @@ export const queryTimelineById = <TCache>({
         if (onOpenTimeline != null) {
           onOpenTimeline(timeline);
         } else if (updateTimeline) {
+          console.error('updateTimeline', timeline, templateTimelineId);
           const { from, to } = getTimeRangeSettings();
           updateTimeline({
             duplicate,
@@ -248,6 +249,7 @@ export const queryTimelineById = <TCache>({
               ...timeline,
               ...(templateTimelineId
                 ? {
+                    templateTimelineId,
                     timelineType: TimelineType.default,
                     status: TimelineStatus.draft,
                   }

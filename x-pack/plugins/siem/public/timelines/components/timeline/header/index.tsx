@@ -17,6 +17,7 @@ import {
   OnDataProviderRemoved,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
+  OnToggleDataProviderType,
 } from '../events';
 import { StatefulSearchOrFilter } from '../search_or_filter';
 import { BrowserFields } from '../../../../common/containers/source';
@@ -34,6 +35,7 @@ interface Props {
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
+  onToggleDataProviderType: OnToggleDataProviderType;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
   timelineType: TimelineType;
@@ -49,6 +51,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
   onDataProviderRemoved,
   onToggleDataProviderEnabled,
   onToggleDataProviderExcluded,
+  onToggleDataProviderType,
   show,
   showCallOutUnauthorizedMsg,
   timelineType,
@@ -73,6 +76,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
           onDataProviderRemoved={onDataProviderRemoved}
           onToggleDataProviderEnabled={onToggleDataProviderEnabled}
           onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+          onToggleDataProviderType={onToggleDataProviderType}
         />
         <AddDataProviderPopover
           browserFields={browserFields}
@@ -105,6 +109,7 @@ export const TimelineHeader = React.memo(
     prevProps.onDataProviderRemoved === nextProps.onDataProviderRemoved &&
     prevProps.onToggleDataProviderEnabled === nextProps.onToggleDataProviderEnabled &&
     prevProps.onToggleDataProviderExcluded === nextProps.onToggleDataProviderExcluded &&
+    prevProps.onToggleDataProviderType === nextProps.onToggleDataProviderType &&
     prevProps.show === nextProps.show &&
     prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
     prevProps.timelineType === nextProps.timelineType

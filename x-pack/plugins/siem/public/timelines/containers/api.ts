@@ -75,6 +75,7 @@ export const persistTimeline = async ({
   timeline,
   version,
 }: RequestPersistTimeline): Promise<TimelineResponse> => {
+  console.error('timeline', timeline);
   if (timelineId == null && timeline.status === TimelineStatus.draft) {
     const draftTimeline = await cleanDraftTimeline({ timelineType: timeline.timelineType! });
     return patchTimeline({

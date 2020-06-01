@@ -131,6 +131,7 @@ export const FlyoutButton = React.memo<FlyoutButtonProps>(
                 onDataProviderRemoved={noop}
                 onToggleDataProviderEnabled={noop}
                 onToggleDataProviderExcluded={noop}
+                onToggleDataProviderType={noop}
               />
             )}
           </WithSource>

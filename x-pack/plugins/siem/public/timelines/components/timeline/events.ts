@@ -26,6 +26,9 @@ export type OnToggleDataProviderExcluded = (excluded: {
   andProviderId?: string;
 }) => void;
 
+/** Invoked when a user toggles type (can "default" or "template") of a data provider */
+export type OnToggleDataProviderType = (excluded: { providerId: string }) => void;
+
 /** Invoked when a user edits the properties of a data provider */
 export type OnDataProviderEdited = ({
   andProviderId,

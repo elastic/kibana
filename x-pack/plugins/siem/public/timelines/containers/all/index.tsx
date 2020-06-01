@@ -47,40 +47,40 @@ export interface AllTimelinesVariables {
 
 export const ALL_TIMELINE_QUERY_ID = 'FETCH_ALL_TIMELINES';
 
-export const getAllTimeline = memoizeOne(
-  (variables: string, timelines: TimelineResult[]): OpenTimelineResult[] =>
-    timelines.map((timeline) => ({
-      created: timeline.created,
-      description: timeline.description,
-      eventIdToNoteIds:
-        timeline.eventIdToNoteIds != null
-          ? timeline.eventIdToNoteIds.reduce((acc, note) => {
-              if (note.eventId != null) {
-                const notes = getOr([], note.eventId, acc);
-                return { ...acc, [note.eventId]: [...notes, note.noteId] };
-              }
-              return acc;
-            }, {})
-          : null,
-      favorite: timeline.favorite,
-      noteIds: timeline.noteIds,
-      notes:
-        timeline.notes != null
-          ? timeline.notes.map((note) => ({ ...note, savedObjectId: note.noteId }))
-          : null,
-      pinnedEventIds:
-        timeline.pinnedEventIds != null
-          ? timeline.pinnedEventIds.reduce(
-              (acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }),
-              {}
-            )
-          : null,
-      savedObjectId: timeline.savedObjectId,
-      title: timeline.title,
-      updated: timeline.updated,
-      updatedBy: timeline.updatedBy,
-      timelineType: timeline.timelineType ?? TimelineType.default,
-    }))
+export const getAllTimeline = memoizeOne((timelines: TimelineResult[]): OpenTimelineResult[] =>
+  timelines.map((timeline) => ({
+    created: timeline.created,
+    description: timeline.description,
+    eventIdToNoteIds:
+      timeline.eventIdToNoteIds != null
+        ? timeline.eventIdToNoteIds.reduce((acc, note) => {
+            if (note.eventId != null) {
+              const notes = getOr([], note.eventId, acc);
+              return { ...acc, [note.eventId]: [...notes, note.noteId] };
+            }
+            return acc;
+          }, {})
+        : null,
+    favorite: timeline.favorite,
+    noteIds: timeline.noteIds,
+    notes:
+      timeline.notes != null
+        ? timeline.notes.map((note) => ({ ...note, savedObjectId: note.noteId }))
+        : null,
+    pinnedEventIds:
+      timeline.pinnedEventIds != null
+        ? timeline.pinnedEventIds.reduce(
+            (acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }),
+            {}
+          )
+        : null,
+    savedObjectId: timeline.savedObjectId,
+    title: timeline.title,
+    updated: timeline.updated,
+    updatedBy: timeline.updatedBy,
+    timelineType: timeline.timelineType ?? TimelineType.default,
+    templateTimelineId: timeline.templateTimelineId,
+  }))
 );
 
 export const useGetAllTimeline = (): AllTimelinesArgs => {
@@ -143,7 +143,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
                 fetchAllTimeline,
                 loading: false,
                 totalCount,
-                timelines: getAllTimeline(JSON.stringify(variables), timelines as TimelineResult[]),
+                timelines: getAllTimeline(timelines as TimelineResult[]),
               });
             }
           }

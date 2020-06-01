@@ -32,6 +32,7 @@ interface ProviderItemBadgeProps {
   timelineId?: string;
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
+  toggleTypeProvider: () => void;
   val: string | number;
 }
 
@@ -51,6 +52,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     timelineId,
     toggleEnabledProvider,
     toggleExcludedProvider,
+    toggleTypeProvider,
     val,
   }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -72,6 +74,11 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
       toggleExcludedProvider();
       closePopover();
     }, [toggleExcludedProvider]);
+
+    const onToggleTypeProvider = useCallback(() => {
+      toggleTypeProvider();
+      closePopover();
+    }, [toggleTypeProvider]);
 
     const [providerRegistered, setProviderRegistered] = useState(false);
 
@@ -131,6 +138,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
             timelineId={timelineId}
             toggleEnabledProvider={onToggleEnabledProvider}
             toggleExcludedProvider={onToggleExcludedProvider}
+            toggleTypeProvider={onToggleTypeProvider}
             value={val}
           />
         )}

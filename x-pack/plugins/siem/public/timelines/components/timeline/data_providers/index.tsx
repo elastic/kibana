@@ -19,6 +19,7 @@ import {
   OnDataProviderRemoved,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
+  OnToggleDataProviderType,
 } from '../events';
 import { TimelineContext } from '../timeline_context';
 
@@ -34,6 +35,7 @@ interface Props {
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
+  onToggleDataProviderType: OnToggleDataProviderType;
 }
 
 const DropTargetDataProvidersContainer = styled.div`
@@ -97,6 +99,7 @@ export const DataProviders = React.memo<Props>(
     onDataProviderRemoved,
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
+    onToggleDataProviderType,
   }) => {
     return (
       <DropTargetDataProvidersContainer className="drop-target-data-providers-container">
@@ -116,6 +119,7 @@ export const DataProviders = React.memo<Props>(
                     onDataProviderRemoved={onDataProviderRemoved}
                     onToggleDataProviderEnabled={onToggleDataProviderEnabled}
                     onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+                    onToggleDataProviderType={onToggleDataProviderType}
                   />
                 ) : (
                   <DroppableWrapper isDropDisabled={isLoading} droppableId={getDroppableId(id)}>

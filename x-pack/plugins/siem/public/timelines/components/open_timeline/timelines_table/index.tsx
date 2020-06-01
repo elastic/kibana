@@ -166,6 +166,8 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     };
     const basicTableProps = tableRef != null ? { ref: tableRef } : {};
 
+    console.error('searchResults', searchResults);
+
     const columns = useMemo(
       () =>
         getTimelinesTableColumns({

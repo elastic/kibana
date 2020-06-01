@@ -22,9 +22,10 @@ import {
   OnDataProviderRemoved,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
+  OnToggleDataProviderType,
 } from '../events';
 
-import { DataProvider, DataProvidersAnd, IS_OPERATOR } from './data_provider';
+import { DataProvider, DataProviderType, DataProvidersAnd, IS_OPERATOR } from './data_provider';
 import { EMPTY_GROUP, flattenIntoAndGroups } from './helpers';
 import { ProviderItemBadge } from './provider_item_badge';
 
@@ -38,6 +39,7 @@ interface Props {
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
+  onToggleDataProviderType: OnToggleDataProviderType;
 }
 
 /**
@@ -119,6 +121,7 @@ export const Providers = React.memo<Props>(
     onDataProviderRemoved,
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
+    onToggleDataProviderType,
   }) => {
     // Transform the dataProviders into flattened groups, and append an empty group
     const dataProviderGroups: DataProvidersAnd[][] = useMemo(
@@ -227,6 +230,24 @@ export const Providers = React.memo<Props>(
                                       : onToggleDataProviderExcluded({
                                           providerId: dataProvider.id,
                                           excluded: !dataProvider.excluded,
+                                        })
+                                  }
+                                  toggleTypeProvider={() =>
+                                    index > 0
+                                      ? onToggleDataProviderType({
+                                          providerId: group[0].id,
+                                          type:
+                                            dataProvider.type === DataProviderType.template
+                                              ? DataProviderType.default
+                                              : DataProviderType.template,
+                                          andProviderId: dataProvider.id,
+                                        })
+                                      : onToggleDataProviderType({
+                                          providerId: dataProvider.id,
+                                          type:
+                                            dataProvider.type === DataProviderType.template
+                                              ? DataProviderType.default
+                                              : DataProviderType.template,
                                         })
                                   }
                                   val={

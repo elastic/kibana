@@ -21,6 +21,7 @@ import {
   OnDataProviderEdited,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
+  OnToggleDataProviderType,
 } from './events';
 import { Timeline } from './timeline';
 
@@ -57,6 +58,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     timelineType,
     updateDataProviderEnabled,
     updateDataProviderExcluded,
+    updateDataProviderType,
     updateItemsPerPage,
     upsertColumn,
     usersViewing,
@@ -97,6 +99,17 @@ const StatefulTimelineComponent = React.memo<Props>(
         updateDataProviderExcluded!({
           id,
           excluded,
+          providerId,
+          andProviderId,
+        }),
+      [id]
+    );
+
+    const onToggleDataProviderType: OnToggleDataProviderType = useCallback(
+      ({ providerId, type, andProviderId }) =>
+        updateDataProviderType!({
+          id,
+          type,
           providerId,
           andProviderId,
         }),
@@ -175,6 +188,7 @@ const StatefulTimelineComponent = React.memo<Props>(
             onDataProviderRemoved={onDataProviderRemoved}
             onToggleDataProviderEnabled={onToggleDataProviderEnabled}
             onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+            onToggleDataProviderType={onToggleDataProviderType}
             show={show!}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
             sort={sort!}

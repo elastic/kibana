@@ -104,6 +104,7 @@ export interface Props {
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
+  onToggleDataProviderType: OnToggleDataProviderType;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
   start: number;
@@ -136,6 +137,7 @@ export const TimelineComponent: React.FC<Props> = ({
   onDataProviderRemoved,
   onToggleDataProviderEnabled,
   onToggleDataProviderExcluded,
+  onToggleDataProviderType,
   show,
   showCallOutUnauthorizedMsg,
   start,
@@ -186,6 +188,7 @@ export const TimelineComponent: React.FC<Props> = ({
             onDataProviderRemoved={onDataProviderRemoved}
             onToggleDataProviderEnabled={onToggleDataProviderEnabled}
             onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+            onToggleDataProviderType={onToggleDataProviderType}
             show={show}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
             timelineType={timelineType}

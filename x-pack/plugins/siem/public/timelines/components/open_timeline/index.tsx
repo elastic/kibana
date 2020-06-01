@@ -229,6 +229,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           closeModalTimeline();
         }
 
+        console.error('aaa', timelineId, templateTimelineId);
+
         queryTimelineById({
           apolloClient,
           duplicate,
