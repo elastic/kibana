@@ -23,8 +23,9 @@ import {
   showSaveModal,
 } from '../../../../../../src/plugins/saved_objects/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { clearTransientLayerStateAndCloseFlyout } from '../../actions';
+import { removePreviewLayers, updateFlyout } from '../../actions';
 import { updateBreadcrumbs } from './breadcrumbs';
+import { FLYOUT_STATE } from '../../reducers/ui';
 
 /**
  * @return {null}
@@ -75,7 +76,7 @@ export function MapsTopNavMenu(props) {
         initialLayerListConfig,
         isOpenSettingsDisabled,
         setIsOpenSettingsDisabled,
-        isSaveDisabled,
+        isSaveDisabled
       )}
       indexPatterns={indexPatterns || []}
       filters={filterManager.getFilters()}
@@ -234,7 +235,8 @@ function topNavConfig(
 }
 
 async function doSave(store, savedMap, saveOptions, initialLayerListConfig) {
-  await store.dispatch(clearTransientLayerStateAndCloseFlyout());
+  await store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
+  await store.dispatch(removePreviewLayers());
   savedMap.syncWithStore(store.getState());
   let id;
 
