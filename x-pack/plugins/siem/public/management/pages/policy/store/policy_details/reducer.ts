@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { fullPolicy, isOnPolicyDetailsPage } from './selectors';
-import { PolicyDetailsState } from '../../types';
 import { Immutable, PolicyConfig, UIPolicyConfig } from '../../../../../../common/endpoint/types';
 import { ImmutableReducer } from '../../../../../common/store';
 import { AppAction } from '../../../../../common/store/actions';
+import { PolicyDetailsState } from '../../types';
 
 export const initialPolicyDetailsState: Immutable<PolicyDetailsState> = {
   policyItem: undefined,

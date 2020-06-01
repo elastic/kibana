@@ -30,6 +30,7 @@ import { initialHostListState } from '../../endpoint_hosts/store/reducer';
 import { initialManagementState } from '../../management/store/reducer';
 import { AlertListState } from '../../../common/endpoint_alerts/types';
 import { HostState } from '../../endpoint_hosts/types';
+import { ManagementState } from '../../management/types';
 
 export const mockGlobalState: State = {
   app: {

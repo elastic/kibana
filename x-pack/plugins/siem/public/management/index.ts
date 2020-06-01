@@ -8,11 +8,11 @@ import { CoreStart } from 'kibana/public';
 import { Reducer, CombinedState } from 'redux';
 import { managementRoutes } from './routes';
 import { StartPlugins } from '../types';
-import { MANAGEMENT_STORE_GLOBAL_NAMESPACE } from './common/constants';
 import { SecuritySubPluginWithStore } from '../app/types';
-import { ManagementState, managementReducer } from './store/reducer';
+import { managementReducer } from './store/reducer';
 import { AppAction } from '../common/store/actions';
 import { managementMiddlewareFactory } from './store/middleware';
+import { ManagementState } from './types';
 
 export { getManagementUrl } from './common/routing';
 
@@ -46,8 +46,8 @@ export class Management {
           management: undefined,
         },
         reducer: {
-          management: managementReducer as ManagementPluginReducer,
-        },
+          management: managementReducer,
+        } as ManagementPluginReducer,
         middleware: managementMiddlewareFactory(core, plugins),
       },
     };

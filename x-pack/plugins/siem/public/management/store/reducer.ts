@@ -18,8 +18,8 @@ import {
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
 } from '../common/constants';
 import { ImmutableCombineReducers } from '../../common/store';
-import { PolicyListState, PolicyDetailsState } from '../pages/policy/types';
 import { Immutable } from '../../../common/endpoint/types';
+import { ManagementState } from '../types';
 
 const immutableCombineReducers: ImmutableCombineReducers = combineReducers;
 

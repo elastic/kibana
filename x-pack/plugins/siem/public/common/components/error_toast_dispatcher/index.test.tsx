@@ -12,7 +12,7 @@ import { apolloClientObservable, mockGlobalState, SUB_PLUGINS_REDUCER } from '..
 import { createStore } from '../../store/store';
 
 import { ErrorToastDispatcher } from '.';
-import { State } from '../../store/reducer';
+import { State } from '../../store/types';
 
 describe('Error Toast Dispatcher', () => {
   const state: State = mockGlobalState;

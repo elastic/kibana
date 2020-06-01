@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PolicyListState } from '../../types';
 import { isOnPolicyListPage } from './selectors';
 import { ImmutableReducer } from '../../../../../common/store';
 import { AppAction } from '../../../../../common/store/actions';
 import { Immutable } from '../../../../../../common/endpoint/types';
+import { PolicyListState } from '../../types';
 
 export const initialPolicyListState: Immutable<PolicyListState> = {
   policyItems: [],
