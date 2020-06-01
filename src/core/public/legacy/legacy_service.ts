@@ -46,7 +46,10 @@ interface StartDeps {
 }
 
 interface BootstrapModule {
-  bootstrap: MountPoint;
+  bootstrap?: MountPoint;
+  default?: {
+    bootstrap: MountPoint;
+  };
 }
 
 /**
@@ -170,10 +173,16 @@ export class LegacyPlatformService {
       throw new Error('Bootstrap module must be loaded before `start`');
     }
 
-    this.targetDomElement = targetDomElement;
-
     // `targetDomElement` is always defined when in legacy mode
-    this.bootstrapModule.bootstrap(this.targetDomElement!);
+    this.targetDomElement = targetDomElement!;
+
+    if (this.bootstrapModule.default) {
+      this.bootstrapModule.default.bootstrap(this.targetDomElement);
+    } else if (this.bootstrapModule.bootstrap) {
+      this.bootstrapModule.bootstrap(this.targetDomElement);
+    } else {
+      throw new Error('legacy bootstrap module does not export a bootstrap() function');
+    }
   }
 
   public stop() {
