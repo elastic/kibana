@@ -8266,7 +8266,6 @@
     "xpack.ingestManager.configDetails.datasourcesTable.streamsCountColumnTitle": "流计数",
     "xpack.ingestManager.configDetails.subTabs.datasourcesTabText": "数据源",
     "xpack.ingestManager.configDetails.subTabs.settingsTabText": "设置",
-    "xpack.ingestManager.configDetails.subTabs.yamlTabText": "YAML",
     "xpack.ingestManager.configDetails.summary.datasources": "数据源",
     "xpack.ingestManager.configDetails.summary.lastUpdated": "最后更新时间",
     "xpack.ingestManager.configDetails.summary.revision": "修订",

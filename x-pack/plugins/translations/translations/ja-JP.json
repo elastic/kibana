@@ -8262,7 +8262,6 @@
     "xpack.ingestManager.configDetails.datasourcesTable.streamsCountColumnTitle": "ストリーム",
     "xpack.ingestManager.configDetails.subTabs.datasourcesTabText": "データソース",
     "xpack.ingestManager.configDetails.subTabs.settingsTabText": "設定",
-    "xpack.ingestManager.configDetails.subTabs.yamlTabText": "YAML",
     "xpack.ingestManager.configDetails.summary.datasources": "データソース",
     "xpack.ingestManager.configDetails.summary.lastUpdated": "最終更新日:",
     "xpack.ingestManager.configDetails.summary.revision": "リビジョン",
