@@ -173,7 +173,7 @@ describe('mlAuthz', () => {
       const mockMlCapabilities = jest.fn();
       mlMock.mlSystemProvider.mockImplementation(() => ({
         mlInfo: jest.fn(),
-        mlSearch: jest.fn(),
+        mlAnomalySearch: jest.fn(),
         mlCapabilities: mockMlCapabilities,
       }));
 
@@ -194,7 +194,7 @@ describe('mlAuthz', () => {
       const mockMlCapabilities = jest.fn();
       mlMock.mlSystemProvider.mockImplementation(() => ({
         mlInfo: jest.fn(),
-        mlSearch: jest.fn(),
+        mlAnomalySearch: jest.fn(),
         mlCapabilities: mockMlCapabilities,
       }));
 

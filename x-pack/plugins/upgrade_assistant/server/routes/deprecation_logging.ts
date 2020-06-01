@@ -23,14 +23,16 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
       async (
         {
           core: {
-            elasticsearch: { dataClient },
+            elasticsearch: {
+              legacy: { client },
+            },
           },
         },
         request,
         response
       ) => {
         try {
-          const result = await getDeprecationLoggingStatus(dataClient);
+          const result = await getDeprecationLoggingStatus(client);
           return response.ok({ body: result });
         } catch (e) {
           return response.internalError({ body: e });
@@ -52,7 +54,9 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
       async (
         {
           core: {
-            elasticsearch: { dataClient },
+            elasticsearch: {
+              legacy: { client },
+            },
           },
         },
         request,
@@ -61,7 +65,7 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
         try {
           const { isEnabled } = request.body as { isEnabled: boolean };
           return response.ok({
-            body: await setDeprecationLogging(dataClient, isEnabled),
+            body: await setDeprecationLogging(client, isEnabled),
           });
         } catch (e) {
           return response.internalError({ body: e });

@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  IScopedClusterClient,
-  RequestHandlerContext,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import { xpackMocks } from '../../../../mocks';
 import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
 import { IndexPatternRetriever } from './alerts/index_pattern';
 
@@ -68,19 +65,8 @@ export function createRouteHandlerContext(
   dataClient: jest.Mocked<IScopedClusterClient>,
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>
 ) {
-  return ({
-    core: {
-      elasticsearch: {
-        dataClient,
-      },
-      savedObjects: {
-        client: savedObjectsClient,
-      },
-    },
-    /**
-     * Using unknown here because the object defined is not a full `RequestHandlerContext`. We don't
-     * need all of the fields required to run the tests, but the `routeHandler` function requires a
-     * `RequestHandlerContext`.
-     */
-  } as unknown) as RequestHandlerContext;
+  const context = xpackMocks.createRequestHandlerContext();
+  context.core.elasticsearch.legacy.client = dataClient;
+  context.core.savedObjects.client = savedObjectsClient;
+  return context;
 }
