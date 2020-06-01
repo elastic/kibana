@@ -41,8 +41,8 @@ export function MapsTopNavMenu(props) {
     setRefreshConfig,
     initialLayerListConfig,
     isVisible,
+    indexPatterns,
   } = props;
-  const [indexPatterns, setIndexPatterns] = useState([]);
   const [savedQuery, setSavedQuery] = useState(null);
   const { filterManager } = getData().query;
   const showSaveQuery = getMapsCapabilities().saveQuery;
@@ -63,8 +63,8 @@ export function MapsTopNavMenu(props) {
     <TopNavMenu
       appName="maps"
       config={topNavConfig(store, savedMap, initialLayerListConfig)}
-      indexPatterns={indexPatterns}
-      filters={filterManager.getFilters()}
+      indexPatterns={indexPatterns || []}
+      filters={filterManager.getFilters() || []}
       query={query}
       onQuerySubmit={function ({ dateRange, query }) {
         onQueryChange({

@@ -59,7 +59,8 @@ export const MapsCreateEditView = withRouter(
       super(props);
       this.state = {
         store: createMapStore(),
-        prevIndexPatternIds: undefined,
+        indexPatterns: [],
+        prevIndexPatternIds: [],
         // TODO: Replace empty object w/ global state replacement
         globalState: {},
         filters: [],
@@ -127,7 +128,6 @@ export const MapsCreateEditView = withRouter(
     }
 
     async updateIndexPatterns(nextIndexPatternIds) {
-      const { prevIndexPatternIds } = this.state;
       const indexPatterns = [];
       const getIndexPatternPromises = nextIndexPatternIds.map(async (indexPatternId) => {
         try {
@@ -139,10 +139,6 @@ export const MapsCreateEditView = withRouter(
       });
 
       await Promise.all(getIndexPatternPromises);
-      // ignore outdated results
-      if (prevIndexPatternIds !== nextIndexPatternIds) {
-        return;
-      }
       this.setState({
         indexPatterns,
       });
@@ -336,6 +332,7 @@ export const MapsCreateEditView = withRouter(
         initialLayerListConfig,
         isVisible,
         isFullScreen,
+        indexPatterns,
       } = this.state;
       const initialized = !!query && !!time && !!refreshConfig;
       return (
@@ -358,6 +355,7 @@ export const MapsCreateEditView = withRouter(
               }}
               initialLayerListConfig={initialLayerListConfig}
               isVisible={isVisible}
+              indexPatterns={indexPatterns}
             />
           ) : null}
           <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
