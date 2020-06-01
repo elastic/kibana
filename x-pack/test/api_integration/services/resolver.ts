@@ -7,7 +7,7 @@ import {
   TreeOptions,
   Tree,
   EndpointDocGenerator,
-} from '../../../plugins/siem/common/endpoint/generate_data';
+} from '../../../plugins/security_solution/common/endpoint/generate_data';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 /**

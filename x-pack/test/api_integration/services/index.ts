@@ -19,7 +19,10 @@ import {
   InfraOpsGraphQLClientProvider,
   InfraOpsGraphQLClientFactoryProvider,
 } from './infraops_graphql_client';
-import { SiemGraphQLClientProvider, SiemGraphQLClientFactoryProvider } from './siem_graphql_client';
+import {
+  SecuritySolutionGraphQLClientProvider,
+  SecuritySolutionGraphQLClientFactoryProvider,
+} from './siem_graphql_client';
 import { InfraOpsSourceConfigurationProvider } from './infraops_source_configuration';
 import { InfraLogSourceConfigurationProvider } from './infra_log_source_configuration';
 import { MachineLearningProvider } from './ml';
@@ -38,8 +41,8 @@ export const services = {
   infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
   infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
   infraLogSourceConfiguration: InfraLogSourceConfigurationProvider,
-  siemGraphQLClient: SiemGraphQLClientProvider,
-  siemGraphQLClientFactory: SiemGraphQLClientFactoryProvider,
+  securitySolutionGraphQLClient: SecuritySolutionGraphQLClientProvider,
+  securitySolutionGraphQLClientFactory: SecuritySolutionGraphQLClientFactoryProvider,
   supertestWithoutAuth: SupertestWithoutAuthProvider,
   usageAPI: UsageAPIProvider,
   ml: MachineLearningProvider,

@@ -5,8 +5,8 @@
  */
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { AlertData } from '../../../../../plugins/siem/common/endpoint_alerts/types';
-import { AlertId } from '../../../../../plugins/siem/server/endpoint/alerts/handlers/lib/index';
+import { AlertData } from '../../../../../plugins/security_solution/common/endpoint_alerts/types';
+import { AlertId } from '../../../../../plugins/security_solution/server/endpoint/alerts/handlers/lib/index';
 
 /**
  * The number of alert documents in the es archive.

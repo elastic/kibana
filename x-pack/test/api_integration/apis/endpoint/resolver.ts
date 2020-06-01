@@ -14,10 +14,14 @@ import {
   ResolverChildren,
   ResolverTree,
   LegacyEndpointEvent,
-} from '../../../../plugins/siem/common/endpoint/types';
-import { parentEntityId } from '../../../../plugins/siem/common/endpoint/models/event';
+} from '../../../../plugins/security_solution/common/endpoint/types';
+import { parentEntityId } from '../../../../plugins/security_solution/common/endpoint/models/event';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { Event, Tree, TreeNode } from '../../../../plugins/siem/common/endpoint/generate_data';
+import {
+  Event,
+  Tree,
+  TreeNode,
+} from '../../../../plugins/security_solution/common/endpoint/generate_data';
 import { Options, GeneratedTrees } from '../../services/resolver';
 
 /**

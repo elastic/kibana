@@ -228,12 +228,12 @@
 /x-pack/test/plugin_functional/plugins/resolver_test/ @elastic/endpoint-app-team @elastic/siem
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/endpoint-app-team @elastic/siem
 
-# SIEM
-/x-pack/plugins/siem/ @elastic/siem @elastic/endpoint-app-team
+# Security Solution
+/x-pack/plugins/security_solution/ @elastic/siem @elastic/endpoint-app-team
 /x-pack/test/detection_engine_api_integration @elastic/siem @elastic/endpoint-app-team
-/x-pack/test/api_integration/apis/siem @elastic/siem @elastic/endpoint-app-team
+/x-pack/test/api_integration/apis/security_solution @elastic/siem @elastic/endpoint-app-team
 /x-pack/plugins/case @elastic/siem @elastic/endpoint-app-team
 /x-pack/plugins/lists @elastic/siem @elastic/endpoint-app-team
 
 # Security Intelligence And Analytics
-/x-pack/plugins/siem/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
+/x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics

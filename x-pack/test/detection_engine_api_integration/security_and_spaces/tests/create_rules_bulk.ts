@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/siem/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext): void => {
           {
             error: {
               message:
-                'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
+                'To create a rule, the index must exist first. Index .security_solution-signals-default does not exist',
               status_code: 400,
             },
             rule_id: 'rule-1',

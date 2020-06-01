@@ -17,7 +17,7 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
 
   echo " -> Running SIEM cyclic dependency test"
   cd "$XPACK_DIR"
-  checks-reporter-with-killswitch "X-Pack SIEM cyclic dependency test" node plugins/siem/scripts/check_circular_deps
+  checks-reporter-with-killswitch "X-Pack SIEM cyclic dependency test" node plugins/security_solution/scripts/check_circular_deps
   echo ""
   echo ""
 
