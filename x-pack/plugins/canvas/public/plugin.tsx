@@ -28,7 +28,6 @@ import { Start as InspectorStart } from '../../../../src/plugins/inspector/publi
 import { argTypeSpecs } from './expression_types/arg_types';
 import { transitions } from './transitions';
 import { getPluginApi, CanvasApi } from './plugin_api';
-import { initFunctions } from './functions';
 import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
 export { CoreStart, CoreSetup };
 
@@ -117,14 +116,6 @@ export class CanvasPlugin
 
     plugins.home.featureCatalogue.register(featureCatalogueEntry);
 
-    // Register core canvas stuff
-    canvasApi.addFunctions(
-      initFunctions({
-        timefilter: plugins.data.query.timefilter.timefilter,
-        prependBasePath: core.http.basePath.prepend,
-        typesRegistry: plugins.expressions.__LEGACY.types,
-      })
-    );
     canvasApi.addArgumentUIs(argTypeSpecs);
     canvasApi.addTransitions(transitions);
 
