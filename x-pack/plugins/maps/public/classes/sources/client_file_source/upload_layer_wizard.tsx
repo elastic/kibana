@@ -28,7 +28,7 @@ export const uploadLayerWizardConfig: LayerWizard = {
   icon: 'importAction',
   isIndexingSource: true,
   renderWizard: ({
-    previewLayer,
+    previewLayers,
     mapColors,
     isIndexingTriggered,
     onRemove,
@@ -38,13 +38,13 @@ export const uploadLayerWizardConfig: LayerWizard = {
   }: RenderWizardArguments) => {
     function previewGeojsonFile(geojsonFile: unknown, name: string) {
       if (!geojsonFile) {
-        previewLayer(null);
+        previewLayers([]);
         return;
       }
       const sourceDescriptor = GeojsonFileSource.createDescriptor(geojsonFile, name);
       const layerDescriptor = VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
       // TODO figure out a better way to handle passing this information back to layer_addpanel
-      previewLayer(layerDescriptor, true);
+      previewLayers([layerDescriptor], true);
     }
 
     function viewIndexedData(indexResponses: {
@@ -72,7 +72,7 @@ export const uploadLayerWizardConfig: LayerWizard = {
         )
       );
       if (!indexPatternId || !geoField) {
-        previewLayer(null);
+        previewLayers([]);
       } else {
         const esSearchSourceConfig = {
           indexPatternId,
@@ -85,7 +85,7 @@ export const uploadLayerWizardConfig: LayerWizard = {
               ? SCALING_TYPES.CLUSTERS
               : SCALING_TYPES.LIMIT,
         };
-        previewLayer(createDefaultLayerDescriptor(esSearchSourceConfig, mapColors));
+        previewLayers([createDefaultLayerDescriptor(esSearchSourceConfig, mapColors)]);
         importSuccessHandler(indexResponses);
       }
     }
