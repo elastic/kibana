@@ -40,8 +40,10 @@ export const fetchExceptionListById = async ({
 }: ApiCallByIdProps): Promise<ExceptionListSchema> => Promise.resolve(getExceptionListSchemaMock());
 
 export const fetchExceptionListItemsByListId = async ({
+  filterOptions,
   http,
   listId,
+  pagination,
   signal,
 }: ApiCallByListIdProps): Promise<FoundExceptionListItemSchema> =>
   Promise.resolve({ data: [getExceptionListItemSchemaMock()], page: 1, per_page: 20, total: 1 });
