@@ -59,14 +59,15 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
     'xpack.infra.metrics.alerting.threshold.alerting.valueActionVariableDescription',
     {
       defaultMessage:
-        'The value of the metric in the specified condition. Usage: (ctx.value.condition0).',
+        'The value of the metric in the specified condition. Usage: (ctx.value.condition0, ctx.value.condition1, etc...).',
     }
   );
 
   const metricActionVariableDescription = i18n.translate(
     'xpack.infra.metrics.alerting.threshold.alerting.metricActionVariableDescription',
     {
-      defaultMessage: 'The metric name in the specified condition. Usage: (ctx.metric.condition0).',
+      defaultMessage:
+        'The metric name in the specified condition. Usage: (ctx.metric.condition0, ctx.metric.condition1, etc...).',
     }
   );
 
@@ -74,7 +75,7 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
     'xpack.infra.metrics.alerting.threshold.alerting.thresholdActionVariableDescription',
     {
       defaultMessage:
-        'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.condition0).',
+        'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.condition0, ctx.threshold.condition1, etc...).',
     }
   );
 
