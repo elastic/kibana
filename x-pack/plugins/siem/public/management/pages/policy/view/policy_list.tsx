@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, CSSProperties } from 'react';
 import {
   EuiBasicTable,
   EuiText,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiTableFieldDataColumnType,
   EuiLink,
-  EuiContextMenuItem,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -35,6 +36,12 @@ interface TableChangeCallbackArguments {
   page: { index: number; size: number };
 }
 
+const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
 const PolicyLink: React.FC<{ name: string; route: string; href: string }> = ({
   name,
   route,
@@ -43,7 +50,12 @@ const PolicyLink: React.FC<{ name: string; route: string; href: string }> = ({
   const clickHandler = useNavigateByRouterEventHandler(route);
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink href={href} onClick={clickHandler} data-test-subj="policyNameLink">
+    <EuiLink
+      href={href}
+      onClick={clickHandler}
+      data-test-subj="policyNameLink"
+      style={NO_WRAP_TRUNCATE_STYLE}
+    >
       {name}
     </EuiLink>
   );
@@ -95,12 +107,12 @@ export const PolicyList = React.memo(() => {
   const columns: Array<EuiTableFieldDataColumnType<Immutable<PolicyData>>> = useMemo(
     () => [
       {
-        field: '',
+        field: 'name',
         name: i18n.translate('xpack.siem.endpoint.policyList.nameField', {
           defaultMessage: 'Policy Name',
         }),
         // eslint-disable-next-line react/display-name
-        render: (item: Immutable<PolicyData>) => {
+        render: (name: string, item: Immutable<PolicyData>) => {
           const routePath = getManagementUrl({
             name: 'policyDetails',
             policyId: item.id,
@@ -108,16 +120,12 @@ export const PolicyList = React.memo(() => {
           });
           const routeUrl = getManagementUrl({ name: 'policyDetails', policyId: item.id });
           return (
-            <>
-              <EuiFlexItem grow={false}>
-                <PolicyLink name={item.name} route={routePath} href={routeUrl} />
+            <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
+              <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
+                <PolicyLink name={name} route={routePath} href={routeUrl} />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiText
-                  color="subdued"
-                  size="xs"
-                  style={{ marginLeft: '6px', whiteSpace: 'nowrap' }}
-                >
+                <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
                   <FormattedMessage
                     id="xpack.siem.endpoint.policyList.revision"
                     defaultMessage="rev. {revNumber}"
@@ -125,10 +133,9 @@ export const PolicyList = React.memo(() => {
                   />
                 </EuiText>
               </EuiFlexItem>
-            </>
+            </EuiFlexGroup>
           );
         },
-        truncateText: true,
       },
       {
         field: 'created_by',
@@ -185,7 +192,8 @@ export const PolicyList = React.memo(() => {
             // eslint-disable-next-line react/display-name
             render: (item: Immutable<PolicyData>) => {
               return (
-                <EuiContextMenuItem icon="link" key="datasourceEdit">
+                <>
+                  <EuiIcon type="link" style={{ marginRight: '6px' }} />
                   <LinkToApp
                     data-test-subj="agentConfigLink"
                     appId="ingestManager"
@@ -196,10 +204,10 @@ export const PolicyList = React.memo(() => {
                   >
                     <FormattedMessage
                       id="xpack.siem.endpoint.policyList.agentConfigAction"
-                      defaultMessage="View Agent Config"
+                      defaultMessage="View Agent Configuration"
                     />
                   </LinkToApp>
-                </EuiContextMenuItem>
+                </>
               );
             },
           },
