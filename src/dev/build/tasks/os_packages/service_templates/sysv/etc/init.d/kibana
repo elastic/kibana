@@ -17,7 +17,6 @@
 
 name=kibana
 program=/usr/share/kibana/bin/kibana
-args=-c\\\ /etc/kibana/kibana.yml
 pidfile="/var/run/$name.pid"
 
 [ -r /etc/default/$name ] && . /etc/default/$name
