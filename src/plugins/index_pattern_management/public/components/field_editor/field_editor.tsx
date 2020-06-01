@@ -116,8 +116,6 @@ export interface FieldEditorState {
   fieldTypes: string[];
   fieldTypeFormats: FieldTypeFormat[];
   existingFieldNames: string[];
-  // field: FieldClone;
-  // field: IndexPatternField;
   fieldFormatId?: string;
   fieldFormatParams: { [key: string]: unknown };
   showScriptingHelp: boolean;
@@ -132,7 +130,6 @@ export interface FieldEditorState {
 
 export interface FieldEdiorProps {
   indexPattern: IndexPattern;
-  // field: IndexPatternField;
   spec: IndexPatternField['spec'];
   services: {
     redirectAway: () => void;
