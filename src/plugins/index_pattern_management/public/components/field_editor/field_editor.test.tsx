@@ -74,7 +74,7 @@ jest.mock('./components/field_format_editor', () => ({
 const fields: IndexPatternField[] = [
   {
     name: 'foobar',
-  } as IndexPatternField, // todo should be spec instead
+  } as IndexPatternField,
 ];
 
 // @ts-ignore

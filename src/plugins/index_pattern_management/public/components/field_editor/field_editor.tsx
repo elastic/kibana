@@ -150,7 +150,6 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     super(props, context);
 
     const { spec, indexPattern } = props;
-    // const { field, indexPattern } = props;
 
     this.state = {
       isReady: false,
@@ -160,7 +159,6 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       fieldTypes: [],
       fieldTypeFormats: [],
       existingFieldNames: indexPattern.fields.map((f: IFieldType) => f.name),
-      // field: { ...field },
       fieldFormatId: undefined,
       fieldFormatParams: {},
       showScriptingHelp: false,
@@ -169,7 +167,6 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       hasScriptError: false,
       isSaving: false,
       format: props.indexPattern.getFormatterForField(spec),
-      // spec: { ...field.spec },
       spec: { ...spec },
     };
     this.supportedLangs = getSupportedScriptingLanguages();
@@ -214,7 +211,6 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     });
   }
 
-  // todo something stricter
   onFieldChange = (fieldName: string, value: string | number) => {
     const { spec } = this.state;
     (spec as any)[fieldName] = value;
@@ -226,7 +222,6 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { spec } = this.state;
     const DefaultFieldFormat = data.fieldFormats.getDefaultType(type) as FieldFormatInstanceType;
 
-    // todo make sure this sort of thing works
     spec.type = type;
 
     const newFormat = new DefaultFieldFormat(null, (key) => uiSettings.get(key));

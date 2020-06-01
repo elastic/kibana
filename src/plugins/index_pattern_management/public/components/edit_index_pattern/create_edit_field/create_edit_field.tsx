@@ -55,7 +55,7 @@ export const CreateEditField = withRouter(
             scripted: true,
             type: 'number',
             name: undefined,
-          } as unknown) as IndexPatternField); // todo
+          } as unknown) as IndexPatternField);
 
     const url = `/patterns/${indexPattern.id}`;
 

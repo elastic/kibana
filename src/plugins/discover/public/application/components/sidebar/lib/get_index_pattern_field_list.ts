@@ -23,7 +23,7 @@ export function getIndexPatternFieldList(
   indexPattern: IndexPattern,
   fieldCounts: Record<string, number>
 ) {
-  if (!indexPattern || !fieldCounts) return []; // todo take another look at this
+  if (!indexPattern || !fieldCounts) return [];
 
   const fieldNamesInDocs = Object.keys(fieldCounts);
   const fieldNamesInIndexPattern = map(indexPattern.fields, 'name');
@@ -36,5 +36,5 @@ export function getIndexPatternFieldList(
     } as IndexPatternField);
   });
 
-  return [...indexPattern.fields.slice(0), ...unknownTypes];
+  return [...indexPattern.fields, ...unknownTypes];
 }

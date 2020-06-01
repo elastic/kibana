@@ -164,7 +164,6 @@ export class IndexPattern implements IIndexPattern {
       await this.refreshFields();
     } else {
       if (specs) {
-        // i'm not sure if this is needed
         this.fields.replaceAll(specs);
       }
     }
@@ -184,18 +183,14 @@ export class IndexPattern implements IIndexPattern {
     });
 
     // give index pattern all of the values in _source
-    // don't overwrite field list
     const fieldList = this.fields;
     _.assign(this, response._source);
     this.fields = fieldList;
-    // todo have list and its assigned, but not with field objects
-    // todo don't assign field list yet
 
     if (!this.title && this.id) {
       this.title = this.id;
     }
 
-    // todo pass field list
     return this.indexFields(forceFieldRefresh, response._source.fields);
   }
 
@@ -279,7 +274,7 @@ export class IndexPattern implements IIndexPattern {
     }
 
     this.fields.add({
-      name, // todo display name
+      name,
       script,
       type: fieldType,
       scripted: true,
@@ -429,7 +424,6 @@ export class IndexPattern implements IIndexPattern {
   }
 
   async save(saveAttempts: number = 0): Promise<void | Error> {
-    // console.log('save', JSON.stringify(this.fields));
     if (!this.id) return;
     const body = this.prepBody();
     // What keys changed since they last pulled the index pattern
@@ -509,8 +503,7 @@ export class IndexPattern implements IIndexPattern {
   async _fetchFields() {
     const fields = await this.fieldsFetcher.fetch(this);
     const scripted = this.getScriptedFields().map((field) => field.spec);
-    const all = fields.concat(scripted);
-    this.fields.replaceAll(all);
+    this.fields.replaceAll([...fields, ...scripted]);
   }
 
   refreshFields() {
