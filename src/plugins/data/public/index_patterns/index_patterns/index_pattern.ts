@@ -383,7 +383,7 @@ export class IndexPattern implements IIndexPattern {
     return body;
   }
 
-  formatterForField(field: IndexPatternField | IndexPatternField['spec']) {
+  getFormatterForField(field: IndexPatternField | IndexPatternField['spec']) {
     return (
       this.fieldFormatMap[field.name] ||
       getFieldFormats().getDefaultInstance(

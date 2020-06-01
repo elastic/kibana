@@ -168,7 +168,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       hasFormatError: false,
       hasScriptError: false,
       isSaving: false,
-      format: props.indexPattern.formatterForField(spec),
+      format: props.indexPattern.getFormatterForField(spec),
       // spec: { ...field.spec },
       spec: { ...spec },
     };
@@ -517,8 +517,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         {fieldFormatId ? (
           <FieldFormatEditor
             fieldType={spec.type}
-            fieldFormat={indexPattern.formatterForField(spec)}
-            // fieldFormat={field.format}
+            fieldFormat={indexPattern.getFormatterForField(spec)}
             fieldFormatId={fieldFormatId}
             fieldFormatParams={fieldFormatParams}
             fieldFormatEditors={indexPatternManagementStart.fieldFormatEditors}

@@ -70,8 +70,6 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     this.indexPattern = indexPattern;
     this.shortDotsEnable = shortDotsEnable;
     this.onUnknownType = onUnknownType;
-
-    // console.log('field list', specs);
     specs.map((field) => this.add(field));
   }
 

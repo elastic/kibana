@@ -26,7 +26,7 @@ import {
 
 jest.mock('brace/mode/groovy', () => ({}));
 
-import { FieldEditor } from './field_editor';
+import { FieldEditor, FieldEdiorProps } from './field_editor';
 
 import { mockManagementPlugin } from '../../mocks';
 import { createComponentWithContext } from '../test_utils';
@@ -113,16 +113,16 @@ describe('FieldEditor', () => {
   beforeEach(() => {
     indexPattern = ({
       fields: fields as IIndexPatternFieldList,
-      formatterForField: () => ({ params: () => ({}) }),
+      getFormatterForField: () => ({ params: () => ({}) }),
     } as unknown) as IndexPattern;
   });
 
   it('should render create new scripted field correctly', async () => {
-    const component = createComponentWithContext(
+    const component = createComponentWithContext<FieldEdiorProps>(
       FieldEditor,
       {
         indexPattern,
-        field: (field as unknown) as IndexPatternField,
+        spec: (field as unknown) as IndexPatternField,
         services: { redirectAway: () => {} },
       },
       mockContext
@@ -147,7 +147,7 @@ describe('FieldEditor', () => {
       return flds[name] as IndexPatternField;
     };
 
-    const component = createComponentWithContext(
+    const component = createComponentWithContext<FieldEdiorProps>(
       FieldEditor,
       {
         indexPattern,
@@ -177,7 +177,7 @@ describe('FieldEditor', () => {
       return flds[name] as IndexPatternField;
     };
 
-    const component = createComponentWithContext(
+    const component = createComponentWithContext<FieldEdiorProps>(
       FieldEditor,
       {
         indexPattern,
@@ -194,7 +194,7 @@ describe('FieldEditor', () => {
 
   it('should show conflict field warning', async () => {
     const testField = { ...field };
-    const component = createComponentWithContext(
+    const component = createComponentWithContext<FieldEdiorProps>(
       FieldEditor,
       {
         indexPattern,
@@ -219,7 +219,7 @@ describe('FieldEditor', () => {
         text: ['index_name_3'],
       },
     };
-    const component = createComponentWithContext(
+    const component = createComponentWithContext<FieldEdiorProps>(
       FieldEditor,
       {
         indexPattern,

@@ -41,7 +41,7 @@ export interface FieldSpec {
   readFromDocValues?: boolean;
   subType?: IFieldSubType;
   indexed?: boolean;
-} // todo
+}
 
 export type OnUnknownType = (unknownType: {
   type: string;
@@ -49,9 +49,7 @@ export type OnUnknownType = (unknownType: {
   indexPatternTitle: string;
 }) => void;
 
-// todo export typeof IndexPatternField and see where IFieldType is used
 export class IndexPatternField implements IFieldType {
-  // implements...
   readonly spec: FieldSpec;
   // not writable or serialized
   readonly indexPattern: IndexPattern;
@@ -61,7 +59,7 @@ export class IndexPatternField implements IFieldType {
   constructor(
     indexPattern: IndexPattern,
     spec: FieldSpec,
-    displayName: string, // make this part of spec?
+    displayName: string,
     onUnknownType: OnUnknownType
   ) {
     this.indexPattern = indexPattern;
@@ -161,7 +159,7 @@ export class IndexPatternField implements IFieldType {
   }
 
   public get format() {
-    return this.indexPattern.formatterForField(this);
+    return this.indexPattern.getFormatterForField(this);
   }
 
   public toJSON() {
