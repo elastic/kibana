@@ -21,7 +21,7 @@ declare module 'hapi' {
     xpack_main: XPackMainPlugin;
     security?: SecurityPlugin;
     actions?: ActionsPlugin;
-    alerting?: AlertingPlugin;
+    alerts?: AlertingPlugin;
     task_manager?: TaskManager;
   }
 }
