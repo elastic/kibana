@@ -33,7 +33,7 @@ export const CreateTimelineBtnComponent: React.FC<OwnProps> = ({
   const uiCapabilities = useKibana().services.application.capabilities;
   const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
   const dispatch = useDispatch();
-  const showTimeline = useCallback(() => timelineActions.showTimeline, []);
+  const showTimeline = useCallback(() => dispatch(timelineActions.showTimeline(), []));
   const createTimeline = useCallback(
     ({ id, show }) => {
       return dispatch(
