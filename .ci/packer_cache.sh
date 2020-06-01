@@ -35,19 +35,19 @@ mkdir -p ".geckodriver"
 cp "node_modules/geckodriver/geckodriver.tar.gz" .geckodriver/geckodriver.tar.gz
 echo "$geckodriverPkgVersion" > .geckodriver/pkgVersion
 
-echo "Creating bootstrap_cache archive"
-
 # archive cacheable directories
 mkdir -p "$HOME/.kibana/bootstrap_cache"
 tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
+  node_modules \
+  packages/*/node_modules \
+  x-pack/node_modules \
+  x-pack/legacy/plugins/*/node_modules \
   x-pack/legacy/plugins/reporting/.chromium \
+  test/plugin_functional/plugins/*/node_modules \
+  examples/*/node_modules \
   .es \
   .chromedriver \
   .geckodriver;
-
-echo "Adding node_modules"
-# Find all of the node_modules directories that aren't test fixtures, and aren't inside other node_modules directories, and append them to the tar
-find . -type d -name node_modules -not -path '*__fixtures__*' -prune -print0 | xargs -0I % tar -rf "$HOME/.kibana/bootstrap_cache/$branch.tar" "%"
 
 echo "created $HOME/.kibana/bootstrap_cache/$branch.tar"
 
