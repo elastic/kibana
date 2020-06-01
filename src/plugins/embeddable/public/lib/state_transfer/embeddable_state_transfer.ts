@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, forOwn } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { CoreStart, ScopedHistory } from '../../../../../core/public';
 import {
   EmbeddableOriginatingAppState,
