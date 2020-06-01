@@ -306,6 +306,12 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   /** If required, a warning will appear if accessors are empty */
   required?: boolean;
   dataTestSubj?: string;
+
+  /**
+   * When the dimension editor is enabled for this group, all dimensions in the group
+   * will render the extra tab for the dimension editor
+   */
+  enableDimensionEditor?: boolean;
 };
 
 interface VisualizationDimensionChangeProps<T> {
