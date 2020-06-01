@@ -1,5 +1,5 @@
 [role="xpack"]
-[[uptime-app-overview]]
+[[uptime-app]]
 == Uptime app
 
 The Uptime app allows you to monitor the status of network endpoints via HTTP/S, TCP, and ICMP.
@@ -10,6 +10,7 @@ and easily view a high-level snapshot of your environment at any point in time.
 image::images/uptime-overview.png[Uptime app overview]
 
 [role="xpack"]
+[[uptime-app-overview]]
 === Overview
 
 The Uptime overview is intended to help you quickly identify and diagnose outages and

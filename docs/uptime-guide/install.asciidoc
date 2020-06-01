@@ -57,7 +57,7 @@ Additional information is available in {heartbeat-ref}/heartbeat-configuration.h
 image::images/uptime-setup.png[Installation instructions on the Uptime page in Kibana]
 
 [[setup-security]]
-=== Step 4: Setup Security
+=== Step 4: Set up Security
 
 Secure your installation by following the {heartbeat-ref}/securing-heartbeat.html[Secure Heartbeat] documentation.
 
