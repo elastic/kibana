@@ -49,17 +49,12 @@ export function getFieldsWithGeoTileAgg(fields) {
 }
 
 export function supportsGeoTileAgg(field) {
-  console.log(field, field.name);
-  // TODO add geo_shape support with license check
   if (!field || !field.aggregatable || indexPatterns.isNestedField(field)) {
-    console.log('not supported');
     return false;
   }
   if (field.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
-    console.log('supportted vbecause point');
     return true;
-  } else if (field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE && getIsGoldPlus()) {
-    console.log('supported becahse shape');
+  } else if (field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE && field.aggregatable && getIsGoldPlus()) {
     return true;
   } else {
     return false;

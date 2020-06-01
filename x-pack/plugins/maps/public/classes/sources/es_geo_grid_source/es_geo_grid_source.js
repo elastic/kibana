@@ -21,6 +21,7 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
+import { clamp } from '../../../elasticsearch_geo_utils';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -146,7 +147,10 @@ export class ESGeoGridSource extends AbstractESAggSource {
     registerCancelCallback,
     bucketsPerGrid,
     isRequestStillActive,
+    bufferedExtent,
   }) {
+    console.log('geotilegrid');
+
     const gridsPerRequest = Math.floor(DEFAULT_MAX_BUCKETS_LIMIT / bucketsPerGrid);
     const aggs = {
       compositeSplit: {
@@ -155,10 +159,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
           sources: [
             {
               gridSplit: {
-                geotile_grid: {
-                  field: this._descriptor.geoField,
-                  precision,
-                },
+                geotile_grid: this._buildGeotileGridDsl(precision, bufferedExtent),
               },
             },
           ],
@@ -234,13 +235,13 @@ export class ESGeoGridSource extends AbstractESAggSource {
     precision,
     layerName,
     registerCancelCallback,
+    bufferedExtent,
   }) {
+    console.log('non compiste agg');
+
     searchSource.setField('aggs', {
       gridSplit: {
-        geotile_grid: {
-          field: this._descriptor.geoField,
-          precision,
-        },
+        geotile_grid: this._buildGeotileGridDsl(precision, bufferedExtent),
         aggs: {
           gridCentroid: {
             geo_centroid: {
@@ -265,7 +266,39 @@ export class ESGeoGridSource extends AbstractESAggSource {
     return convertRegularRespToGeoJson(esResponse, this._descriptor.requestType);
   }
 
+  _buildGeotileGridDsl(precision, bounds) {
+    console.log('b', bounds);
+
+    const bottom = clamp(bounds.minLat, -90, 90);
+    const top = clamp(bounds.maxLat, -90, 90);
+
+    let esBbox;
+    if (bounds.maxLon - bounds.minLon >= 360) {
+      console.log('spans globe');
+      esBbox = {
+        top_left: [-180, top],
+        bottom_right: [180, bottom],
+      };
+    } else {
+      const newMinlon = ((bounds.minLon + 180 + 360) % 360) - 180;
+      const newMaxlon = ((bounds.maxLon + 180 + 360) % 360) - 180;
+      console.log(newMinlon < newMaxlon ? 'does not span dateline' : 'spans dateline');
+      esBbox = {
+        top_left: [newMinlon, top],
+        bottom_right: [newMaxlon, bottom],
+      };
+    }
+
+    return {
+      field: this._descriptor.geoField,
+      precision,
+      bounds: esBbox,
+    };
+  }
+
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback, isRequestStillActive) {
+    console.log('la', layerName, searchFilters);
+
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
 
@@ -282,6 +315,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
             precision: searchFilters.geogridPrecision,
             layerName,
             registerCancelCallback,
+            bufferedExtent: searchFilters.buffer,
           })
         : await this._compositeAggRequest({
             searchSource,
@@ -291,6 +325,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
             registerCancelCallback,
             bucketsPerGrid,
             isRequestStillActive,
+            bufferedExtent: searchFilters.buffer,
           });
 
     return {
