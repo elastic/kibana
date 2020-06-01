@@ -30,7 +30,7 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = ({ jobId }) => {
     }
   };
 
-  const refreshMessage = useCallback(() => fetchMessages(), [jobId]);
+  const refreshMessage = useCallback(fetchMessages, [jobId]);
 
   useEffect(() => {
     fetchMessages();

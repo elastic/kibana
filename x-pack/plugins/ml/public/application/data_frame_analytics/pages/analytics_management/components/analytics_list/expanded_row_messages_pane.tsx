@@ -58,7 +58,7 @@ export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId }) => {
       messages={messages}
       loading={isLoading}
       error={errorMessage}
-      refreshMessage={() => getMessagesFactory()()}
+      refreshMessage={getMessagesFactory()}
     />
   );
 };
