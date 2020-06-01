@@ -20,7 +20,7 @@ import {
 
 const mockRouteContext = ({
   core: {
-    elasticsearch: { dataClient: elasticsearchServiceMock.createScopedClusterClient() },
+    elasticsearch: { legacy: { client: elasticsearchServiceMock.createScopedClusterClient() } },
   },
 } as unknown) as RequestHandlerContext;
 
@@ -76,7 +76,7 @@ describe('Retrieve ES Fields', () => {
       },
     });
 
-    const callAsCurrentUserMock = mockRouteContext.core.elasticsearch.dataClient
+    const callAsCurrentUserMock = mockRouteContext.core.elasticsearch.legacy.client
       .callAsCurrentUser as jest.Mock;
 
     callAsCurrentUserMock.mockResolvedValueOnce(mockResults);
@@ -104,7 +104,7 @@ describe('Retrieve ES Fields', () => {
       },
     });
 
-    const callAsCurrentUserMock = mockRouteContext.core.elasticsearch.dataClient
+    const callAsCurrentUserMock = mockRouteContext.core.elasticsearch.legacy.client
       .callAsCurrentUser as jest.Mock;
 
     callAsCurrentUserMock.mockResolvedValueOnce(mockResults);
@@ -132,7 +132,7 @@ describe('Retrieve ES Fields', () => {
       },
     });
 
-    const callAsCurrentUserMock = mockRouteContext.core.elasticsearch.dataClient
+    const callAsCurrentUserMock = mockRouteContext.core.elasticsearch.legacy.client
       .callAsCurrentUser as jest.Mock;
 
     callAsCurrentUserMock.mockResolvedValueOnce(mockResults);
@@ -152,7 +152,7 @@ describe('Retrieve ES Fields', () => {
       },
     });
 
-    const callAsCurrentUserMock = mockRouteContext.core.elasticsearch.dataClient
+    const callAsCurrentUserMock = mockRouteContext.core.elasticsearch.legacy.client
       .callAsCurrentUser as jest.Mock;
 
     callAsCurrentUserMock.mockRejectedValueOnce(new Error('Index not found'));

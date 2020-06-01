@@ -8,10 +8,10 @@ import ApolloClient from 'apollo-client';
 import * as H from 'history';
 import { ActionCreator } from 'typescript-fsa';
 import {
-  IIndexPattern,
-  Query,
   Filter,
   FilterManager,
+  IIndexPattern,
+  Query,
   SavedQueryService,
 } from 'src/plugins/data/public';
 
@@ -46,6 +46,7 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
+  management: [],
   network: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,
