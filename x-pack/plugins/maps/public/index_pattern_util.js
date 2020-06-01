@@ -30,10 +30,8 @@ export function getTermsFields(fields) {
   });
 }
 
-export const AGGREGATABLE_GEO_FIELD_TYPES = [ES_GEO_FIELD_TYPE.GEO_POINT];
-
 export function getAggregatableGeoFieldTypes() {
-  const aggregatableFieldTypes = [...AGGREGATABLE_GEO_FIELD_TYPES];
+  const aggregatableFieldTypes = [ES_GEO_FIELD_TYPE.GEO_POINT];
   if (getIsGoldPlus()) {
     aggregatableFieldTypes.push(ES_GEO_FIELD_TYPE.GEO_SHAPE);
   }
