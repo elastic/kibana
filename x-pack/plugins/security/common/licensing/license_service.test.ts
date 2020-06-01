@@ -197,7 +197,7 @@ describe('license features', function () {
   });
 
   it('should allow all basic features + audit logging for standard license', () => {
-    const mockRawLicense = licensingMock.createLicense({
+    const mockRawLicense = licenseMock.createLicense({
       license: { mode: 'standard', type: 'standard' },
       features: { security: { isEnabled: true, isAvailable: true } },
     });
