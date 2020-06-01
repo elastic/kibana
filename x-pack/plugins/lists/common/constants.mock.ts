@@ -28,3 +28,4 @@ export const META = {};
 export const TYPE = 'ip';
 export const VALUE = '127.0.0.1';
 export const VALUE_2 = '255.255.255';
+export const NAMESPACE_TYPE = 'single';
