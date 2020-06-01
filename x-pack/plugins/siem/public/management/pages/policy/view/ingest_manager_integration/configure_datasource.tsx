@@ -32,13 +32,13 @@ export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent
                   href={`${services.application.getUrlForApp('siem')}${policyUrl}`}
                 >
                   <FormattedMessage
-                    id="xpack.endpoint.ingestManager.editDatasource.stepConfigure"
+                    id="xpack.siem.endpoint.ingestManager.editDatasource.stepConfigure"
                     defaultMessage="View and configure Security Policy"
                   />
                 </LinkToApp>
               ) : (
                 <FormattedMessage
-                  id="xpack.endpoint.ingestManager.createDatasource.stepConfigure"
+                  id="xpack.siem.endpoint.ingestManager.createDatasource.stepConfigure"
                   defaultMessage="The recommended Security Policy has been associated with this data source. The Security Policy can be edited in the Security application once your data source has been saved."
                 />
               )}
