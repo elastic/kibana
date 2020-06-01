@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useMemo, CSSProperties } from 'react';
+import React, { useCallback, useEffect, useMemo, CSSProperties, useState } from 'react';
 import {
   EuiBasicTable,
   EuiText,
@@ -12,7 +12,11 @@ import {
   EuiFlexItem,
   EuiTableFieldDataColumnType,
   EuiLink,
-  EuiIcon,
+  EuiPopover,
+  EuiContextMenuPanelProps,
+  EuiContextMenuItem,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -47,6 +51,35 @@ const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
 });
+
+// eslint-disable-next-line react/display-name
+export const TableRowActions = React.memo<{ items: EuiContextMenuPanelProps['items'] }>(
+  ({ items }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
+    const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+
+    return (
+      <EuiPopover
+        anchorPosition="downRight"
+        panelPaddingSize="none"
+        button={
+          <EuiButtonIcon
+            iconType="boxesHorizontal"
+            onClick={handleToggleMenu}
+            aria-label={i18n.translate('xpack.siem.endpoint.policyList.actionMenu', {
+              defaultMessage: 'Open',
+            })}
+          />
+        }
+        isOpen={isOpen}
+        closePopover={handleCloseMenu}
+      >
+        <EuiContextMenuPanel items={items} />
+      </EuiPopover>
+    );
+  }
+);
 
 const PolicyLink: React.FC<{ name: string; route: string; href: string }> = ({
   name,
@@ -198,22 +231,25 @@ export const PolicyList = React.memo(() => {
             // eslint-disable-next-line react/display-name
             render: (item: Immutable<PolicyData>) => {
               return (
-                <>
-                  <EuiIcon type="link" style={{ marginRight: '6px' }} />
-                  <LinkToApp
-                    data-test-subj="agentConfigLink"
-                    appId="ingestManager"
-                    appPath={`#/configs/${item.config_id}`}
-                    href={`${services.application.getUrlForApp('ingestManager')}#/configs/${
-                      item.config_id
-                    }`}
-                  >
-                    <FormattedMessage
-                      id="xpack.siem.endpoint.policyList.agentConfigAction"
-                      defaultMessage="View Agent Configuration"
-                    />
-                  </LinkToApp>
-                </>
+                <TableRowActions
+                  items={[
+                    <EuiContextMenuItem icon="link" key="agentConfigLink">
+                      <LinkToApp
+                        data-test-subj="agentConfigLink"
+                        appId="ingestManager"
+                        appPath={`#/configs/${item.config_id}`}
+                        href={`${services.application.getUrlForApp('ingestManager')}#/configs/${
+                          item.config_id
+                        }`}
+                      >
+                        <FormattedMessage
+                          id="xpack.siem.endpoint.policyList.agentConfigAction"
+                          defaultMessage="View Agent Configuration"
+                        />
+                      </LinkToApp>
+                    </EuiContextMenuItem>,
+                  ]}
+                />
               );
             },
           },
