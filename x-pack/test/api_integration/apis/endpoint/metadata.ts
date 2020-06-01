@@ -11,10 +11,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
  */
 const numberOfHostsInFixture = 3;
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  describe('test metadata api', () => {
+  describe.skip('test metadata api', () => {
     describe('POST /api/endpoint/metadata when index is empty', () => {
       it('metadata api should return empty result when index is empty', async () => {
         await esArchiver.unload('endpoint/metadata/api_feature');

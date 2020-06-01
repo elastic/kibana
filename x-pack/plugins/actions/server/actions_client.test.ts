@@ -30,7 +30,7 @@ let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistry: ActionTypeRegistry;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
-const executor: ExecutorType = async options => {
+const executor: ExecutorType = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
 
@@ -418,6 +418,74 @@ describe('getAll()', () => {
         isPreconfigured: true,
         name: 'test',
         referencedByCount: 2,
+      },
+    ]);
+  });
+});
+
+describe('getBulk()', () => {
+  test('calls getBulk savedObjectsClient with parameters', async () => {
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+          },
+          references: [],
+        },
+      ],
+    });
+    scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
+      aggregations: {
+        '1': { doc_count: 6 },
+        testPreconfigured: { doc_count: 2 },
+      },
+    });
+
+    actionsClient = new ActionsClient({
+      actionTypeRegistry,
+      savedObjectsClient,
+      scopedClusterClient,
+      defaultKibanaIndex,
+      preconfiguredActions: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          secrets: {},
+          isPreconfigured: true,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+      ],
+    });
+    const result = await actionsClient.getBulk(['1', 'testPreconfigured']);
+    expect(result).toEqual([
+      {
+        actionTypeId: '.slack',
+        config: {
+          foo: 'bar',
+        },
+        id: 'testPreconfigured',
+        isPreconfigured: true,
+        name: 'test',
+        secrets: {},
+      },
+      {
+        actionTypeId: 'test',
+        config: {
+          foo: 'bar',
+        },
+        id: '1',
+        isPreconfigured: false,
+        name: 'test',
       },
     ]);
   });

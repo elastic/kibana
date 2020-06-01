@@ -44,8 +44,8 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
             getEmbeddableFactory={plugins.embeddable.getEmbeddableFactory}
             getAllEmbeddableFactories={plugins.embeddable.getEmbeddableFactories}
             notifications={core.notifications}
-            overlays={core.overlays}
             application={core.application}
+            overlays={core.overlays}
             inspector={plugins.inspector}
             SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
           />
@@ -71,7 +71,7 @@ export const embeddableRendererFactory = (core: CoreStart, plugins: StartDeps) =
 
       if (!embeddablesRegistry[uniqueId]) {
         const factory = Array.from(plugins.embeddable.getEmbeddableFactories()).find(
-          embeddableFactory => embeddableFactory.type === embeddableType
+          (embeddableFactory) => embeddableFactory.type === embeddableType
         ) as EmbeddableFactory<EmbeddableInput>;
 
         if (!factory) {
@@ -84,7 +84,7 @@ export const embeddableRendererFactory = (core: CoreStart, plugins: StartDeps) =
         embeddablesRegistry[uniqueId] = embeddableObject;
         ReactDOM.unmountComponentAtNode(domNode);
 
-        const subscription = embeddableObject.getInput$().subscribe(function(updatedInput) {
+        const subscription = embeddableObject.getInput$().subscribe(function (updatedInput) {
           const updatedExpression = embeddableInputToExpression(updatedInput, embeddableType);
 
           if (updatedExpression) {
@@ -112,6 +112,7 @@ export const embeddableRendererFactory = (core: CoreStart, plugins: StartDeps) =
         });
       } else {
         embeddablesRegistry[uniqueId].updateInput(input);
+        embeddablesRegistry[uniqueId].reload();
       }
     },
   });

@@ -22,7 +22,7 @@ const convertMethods = require('./convert/methods');
 const convertPaths = require('./convert/paths');
 const convertParts = require('./convert/parts');
 
-module.exports = spec => {
+module.exports = (spec) => {
   const result = {};
   /**
    * TODO:
@@ -34,16 +34,19 @@ module.exports = spec => {
    * from being used in autocompletion. It would be really nice if we could use this information
    * instead of just not including it.
    */
-  Object.keys(spec).forEach(api => {
+  Object.keys(spec).forEach((api) => {
     const source = spec[api];
-
-    if (source.url.paths.every(path => Boolean(path.deprecated))) {
-      return;
-    }
 
     if (!source.url) {
       return result;
     }
+
+    if (source.url.path) {
+      if (source.url.paths.every((path) => Boolean(path.deprecated))) {
+        return;
+      }
+    }
+
     const convertedSpec = (result[api] = {});
     if (source.params) {
       const urlParams = convertParams(source.params);
@@ -58,10 +61,10 @@ module.exports = spec => {
 
     if (source.url.paths) {
       // We filter out all deprecated url patterns here.
-      const paths = source.url.paths.filter(path => !path.deprecated);
+      const paths = source.url.paths.filter((path) => !path.deprecated);
       patterns = convertPaths(paths);
-      paths.forEach(pathsObject => {
-        pathsObject.methods.forEach(method => methodSet.add(method));
+      paths.forEach((pathsObject) => {
+        pathsObject.methods.forEach((method) => methodSet.add(method));
         if (pathsObject.parts) {
           for (const partName of Object.keys(pathsObject.parts)) {
             urlComponents[partName] = pathsObject.parts[partName];
@@ -76,7 +79,7 @@ module.exports = spec => {
     if (Object.keys(urlComponents).length) {
       const components = convertParts(urlComponents);
       const hasComponents =
-        Object.keys(components).filter(c => {
+        Object.keys(components).filter((c) => {
           return Boolean(components[c]);
         }).length > 0;
       if (hasComponents) {

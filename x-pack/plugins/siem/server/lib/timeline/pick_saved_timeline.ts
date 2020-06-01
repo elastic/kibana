@@ -5,9 +5,10 @@
  */
 
 import uuid from 'uuid';
+import { isEmpty } from 'lodash/fp';
 import { AuthenticatedUser } from '../../../../security/common/model';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
-import { SavedTimeline, TimelineType } from '../../../common/types/timeline';
+import { SavedTimeline, TimelineType, TimelineStatus } from '../../../common/types/timeline';
 
 export const pickSavedTimeline = (
   timelineId: string | null,
@@ -38,8 +39,14 @@ export const pickSavedTimeline = (
         savedTimeline.templateTimelineVersion = savedTimeline.templateTimelineVersion + 1;
       }
     }
+  } else if (savedTimeline.status === TimelineStatus.draft) {
+    savedTimeline.status = !isEmpty(savedTimeline.title)
+      ? TimelineStatus.active
+      : TimelineStatus.draft;
+    savedTimeline.templateTimelineId = null;
+    savedTimeline.templateTimelineVersion = null;
   } else {
-    savedTimeline.timelineType = TimelineType.default;
+    savedTimeline.timelineType = savedTimeline.timelineType ?? TimelineType.default;
     savedTimeline.templateTimelineId = null;
     savedTimeline.templateTimelineVersion = null;
   }

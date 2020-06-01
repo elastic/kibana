@@ -168,26 +168,35 @@ export async function unfreezeIndices(indices: string[]) {
 }
 
 export async function loadIndexSettings(indexName: string) {
-  const response = await httpService.httpClient.get(`${API_BASE_PATH}/settings/${indexName}`);
+  const response = await httpService.httpClient.get(
+    `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`
+  );
   return response;
 }
 
 export async function updateIndexSettings(indexName: string, body: object) {
-  const response = await httpService.httpClient.put(`${API_BASE_PATH}/settings/${indexName}`, {
-    body: JSON.stringify(body),
-  });
+  const response = await httpService.httpClient.put(
+    `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`,
+    {
+      body: JSON.stringify(body),
+    }
+  );
   // Only track successful requests.
   uiMetricService.trackMetric('count', UIM_UPDATE_SETTINGS);
   return response;
 }
 
 export async function loadIndexStats(indexName: string) {
-  const response = await httpService.httpClient.get(`${API_BASE_PATH}/stats/${indexName}`);
+  const response = await httpService.httpClient.get(
+    `${API_BASE_PATH}/stats/${encodeURIComponent(indexName)}`
+  );
   return response;
 }
 
 export async function loadIndexMapping(indexName: string) {
-  const response = await httpService.httpClient.get(`${API_BASE_PATH}/mapping/${indexName}`);
+  const response = await httpService.httpClient.get(
+    `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`
+  );
   return response;
 }
 

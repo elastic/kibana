@@ -14,9 +14,6 @@ import {
 } from '../../features/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { createDefaultSpace } from './lib/create_default_space';
-// @ts-ignore
-import { AuditLogger } from '../../../../server/lib/audit_logger';
 import { SpacesAuditLogger } from './lib/audit_logger';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
 import { registerSpacesUsageCollector } from './usage_collection';
@@ -29,16 +26,8 @@ import { initInternalSpacesApi } from './routes/api/internal';
 import { initSpacesViewsRoutes } from './routes/views';
 import { setupCapabilities } from './capabilities';
 import { SpacesSavedObjectsService } from './saved_objects';
-
-/**
- * Describes a set of APIs that is available in the legacy platform only and required by this plugin
- * to function properly.
- */
-export interface LegacyAPI {
-  auditLogger: {
-    create: (pluginId: string) => AuditLogger;
-  };
-}
+import { DefaultSpaceService } from './default_space';
+import { SpacesLicenseService } from '../common/licensing';
 
 export interface PluginsSetup {
   features: FeaturesPluginSetup;
@@ -54,13 +43,6 @@ export interface PluginsStart {
 
 export interface SpacesPluginSetup {
   spacesService: SpacesServiceSetup;
-  __legacyCompat: {
-    registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
-    // TODO: We currently need the legacy plugin to inform this plugin when it is safe to create the default space.
-    // The NP does not have the equivilent ES connection/health/comapt checks that the legacy world does.
-    // See: https://github.com/elastic/kibana/issues/43456
-    createDefaultSpace: () => Promise<void>;
-  };
 }
 
 export class Plugin {
@@ -72,23 +54,9 @@ export class Plugin {
 
   private readonly log: Logger;
 
-  private legacyAPI?: LegacyAPI;
-  private readonly getLegacyAPI = () => {
-    if (!this.legacyAPI) {
-      throw new Error('Legacy API is not registered!');
-    }
-    return this.legacyAPI;
-  };
+  private readonly spacesLicenseService = new SpacesLicenseService();
 
-  private spacesAuditLogger?: SpacesAuditLogger;
-  private readonly getSpacesAuditLogger = () => {
-    if (!this.spacesAuditLogger) {
-      this.spacesAuditLogger = new SpacesAuditLogger(
-        this.getLegacyAPI().auditLogger.create(this.pluginId)
-      );
-    }
-    return this.spacesAuditLogger;
-  };
+  private defaultSpaceService?: DefaultSpaceService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ConfigType>();
@@ -108,15 +76,28 @@ export class Plugin {
       http: core.http,
       getStartServices: core.getStartServices,
       authorization: plugins.security ? plugins.security.authz : null,
-      getSpacesAuditLogger: this.getSpacesAuditLogger,
+      auditLogger: new SpacesAuditLogger(plugins.security?.audit.getLogger(this.pluginId)),
       config$: this.config$,
     });
 
     const savedObjectsService = new SpacesSavedObjectsService();
     savedObjectsService.setup({ core, spacesService });
 
+    const { license } = this.spacesLicenseService.setup({ license$: plugins.licensing.license$ });
+
+    this.defaultSpaceService = new DefaultSpaceService();
+    this.defaultSpaceService.setup({
+      coreStatus: core.status,
+      getSavedObjects: async () => (await core.getStartServices())[0].savedObjects,
+      license$: plugins.licensing.license$,
+      spacesLicense: license,
+      logger: this.log,
+    });
+
     initSpacesViewsRoutes({
       httpResources: core.http.resources,
+      basePath: core.http.basePath,
+      logger: this.log,
     });
 
     const externalRouter = core.http.createRouter();
@@ -163,19 +144,12 @@ export class Plugin {
 
     return {
       spacesService,
-      __legacyCompat: {
-        registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-          this.legacyAPI = legacyAPI;
-        },
-        createDefaultSpace: async () => {
-          const [coreStart] = await core.getStartServices();
-          return await createDefaultSpace({
-            savedObjects: coreStart.savedObjects,
-          });
-        },
-      },
     };
   }
 
-  public stop() {}
+  public stop() {
+    if (this.defaultSpaceService) {
+      this.defaultSpaceService.stop();
+    }
+  }
 }

@@ -38,7 +38,7 @@ export class DashboardToDashboardDrilldown
 
   public readonly euiIcon = 'dashboardApp';
 
-  private readonly ReactCollectConfig: React.FC<CollectConfigContainer['props']> = props => (
+  private readonly ReactCollectConfig: React.FC<CollectConfigContainer['props']> = (props) => (
     <CollectConfigContainer {...props} params={this.params} />
   );
 
@@ -59,12 +59,7 @@ export class DashboardToDashboardDrilldown
     config: Config,
     context: ActionContext<VisualizeEmbeddableContract>
   ): Promise<string> => {
-    const dashboardPath = await this.getDestinationUrl(config, context);
-    const dashboardHash = dashboardPath.split('#')[1];
-
-    return this.params.start().core.application.getUrlForApp('kibana', {
-      path: `#${dashboardHash}`,
-    });
+    return this.getDestinationUrl(config, context);
   };
 
   public readonly execute = async (
@@ -74,7 +69,7 @@ export class DashboardToDashboardDrilldown
     const dashboardPath = await this.getDestinationUrl(config, context);
     const dashboardHash = dashboardPath.split('#')[1];
 
-    await this.params.start().core.application.navigateToApp('kibana', {
+    await this.params.start().core.application.navigateToApp('dashboards', {
       path: `#${dashboardHash}`,
     });
   };
@@ -98,7 +93,7 @@ export class DashboardToDashboardDrilldown
     const existingFilters =
       (config.useCurrentFilters
         ? currentFilters
-        : currentFilters?.filter(f => esFilters.isFilterPinned(f))) ?? [];
+        : currentFilters?.filter((f) => esFilters.isFilterPinned(f))) ?? [];
 
     // if useCurrentDashboardDataRange is enabled, then preserve current time range
     // if undefined is passed, then destination dashboard will figure out time range itself
@@ -132,9 +127,9 @@ export class DashboardToDashboardDrilldown
       }
     })();
 
-    if (context.timeFieldName) {
+    if (context.data.timeFieldName) {
       const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
-        context.timeFieldName,
+        context.data.timeFieldName,
         filtersFromEvent
       );
       filtersFromEvent = restOfFilters;

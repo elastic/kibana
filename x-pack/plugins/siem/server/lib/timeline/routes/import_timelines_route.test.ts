@@ -12,6 +12,7 @@ import {
   createMockConfig,
 } from '../../detection_engine/routes/__mocks__';
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
+import { TimelineStatus } from '../../../../common/types/timeline';
 import { SecurityPluginSetup } from '../../../../../../plugins/security/server';
 
 import {
@@ -33,6 +34,7 @@ describe('import timelines', () => {
   let mockPersistTimeline: jest.Mock;
   let mockPersistPinnedEventOnTimeline: jest.Mock;
   let mockPersistNote: jest.Mock;
+  let mockGetTupleDuplicateErrorsAndUniqueTimeline: jest.Mock;
   const newTimelineSavedObjectId = '79deb4c0-6bc1-11ea-9999-f5341fb7a189';
   const newTimelineVersion = '9999';
   beforeEach(() => {
@@ -56,6 +58,7 @@ describe('import timelines', () => {
     mockPersistTimeline = jest.fn();
     mockPersistPinnedEventOnTimeline = jest.fn();
     mockPersistNote = jest.fn();
+    mockGetTupleDuplicateErrorsAndUniqueTimeline = jest.fn();
 
     jest.doMock('../create_timelines_stream_from_ndjson', () => {
       return {
@@ -73,9 +76,9 @@ describe('import timelines', () => {
       const originalModule = jest.requireActual('./utils/import_timelines');
       return {
         ...originalModule,
-        getTupleDuplicateErrorsAndUniqueTimeline: jest
-          .fn()
-          .mockReturnValue([mockDuplicateIdErrors, mockUniqueParsedObjects]),
+        getTupleDuplicateErrorsAndUniqueTimeline: mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue(
+          [mockDuplicateIdErrors, mockUniqueParsedObjects]
+        ),
       };
     });
   });
@@ -133,10 +136,23 @@ describe('import timelines', () => {
       expect(mockPersistTimeline.mock.calls[0][2]).toBeNull();
     });
 
-    test('should Create a new timeline savedObject witn given timeline', async () => {
+    test('should Create a new timeline savedObject with given timeline', async () => {
       const mockRequest = getImportTimelinesRequest();
       await server.inject(mockRequest, context);
       expect(mockPersistTimeline.mock.calls[0][3]).toEqual(mockParsedTimelineObject);
+    });
+
+    test('should Create a new timeline savedObject with given draft timeline', async () => {
+      mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue([
+        mockDuplicateIdErrors,
+        [{ ...mockUniqueParsedObjects[0], status: TimelineStatus.draft }],
+      ]);
+      const mockRequest = getImportTimelinesRequest();
+      await server.inject(mockRequest, context);
+      expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
+        ...mockParsedTimelineObject,
+        status: TimelineStatus.active,
+      });
     });
 
     test('should Create new pinned events', async () => {

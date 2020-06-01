@@ -35,11 +35,12 @@ import { FeatureCatalogueCategory } from '../../services';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { createAppNavigationHandler } from './app_navigation_handler';
 
 const ALL_TAB_ID = 'all';
 const OTHERS_TAB_ID = 'others';
 
-const isOtherCategory = directory => {
+const isOtherCategory = (directory) => {
   return (
     directory.category !== FeatureCatalogueCategory.DATA &&
     directory.category !== FeatureCatalogueCategory.ADMIN
@@ -80,7 +81,7 @@ export class FeatureDirectory extends React.Component {
     };
   }
 
-  onSelectedTabChanged = id => {
+  onSelectedTabChanged = (id) => {
     this.setState({
       selectedTabId: id,
     });
@@ -101,7 +102,7 @@ export class FeatureDirectory extends React.Component {
 
   renderDirectories = () => {
     return this.props.directories
-      .filter(directory => {
+      .filter((directory) => {
         if (this.state.selectedTabId === ALL_TAB_ID) {
           return true;
         }
@@ -110,10 +111,11 @@ export class FeatureDirectory extends React.Component {
         }
         return this.state.selectedTabId === directory.category;
       })
-      .map(directory => {
+      .map((directory) => {
         return (
           <EuiFlexItem key={directory.id}>
             <Synopsis
+              onClick={createAppNavigationHandler(directory.path)}
               description={directory.description}
               iconType={directory.icon}
               title={directory.title}

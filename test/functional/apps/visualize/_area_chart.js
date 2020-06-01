@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const find = getService('find');
   const inspector = getService('inspector');
@@ -61,7 +61,7 @@ export default function({ getService, getPageObjects }) {
       return PageObjects.visEditor.clickGo();
     };
 
-    before(async function() {
+    before(async function () {
       await security.testUser.setRoles([
         'kibana_admin',
         'long_window_logstash',
@@ -70,31 +70,35 @@ export default function({ getService, getPageObjects }) {
       await initAreaChart();
     });
 
-    it('should save and load with special characters', async function() {
+    after(async function () {
+      await security.testUser.restoreDefaults();
+    });
+
+    it('should save and load with special characters', async function () {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(
         vizNamewithSpecialChars
       );
     });
 
-    it('should save and load with non-ascii characters', async function() {
+    it('should save and load with non-ascii characters', async function () {
       const vizNamewithSpecialChars = `${vizName1} with Umlaut ä`;
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(
         vizNamewithSpecialChars
       );
     });
 
-    it('should save and load', async function() {
+    it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visChart.waitForVisualization();
     });
 
-    it('should have inspector enabled', async function() {
+    it('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
     });
 
-    it('should show correct chart', async function() {
+    it('should show correct chart', async function () {
       const xAxisLabels = [
         '2015-09-20 00:00',
         '2015-09-21 00:00',
@@ -143,7 +147,7 @@ export default function({ getService, getPageObjects }) {
       expect(paths).to.eql(expectedAreaChartData);
     });
 
-    it('should show correct data', async function() {
+    it('should show correct data', async function () {
       const expectedTableData = [
         ['2015-09-20 00:00', '37'],
         ['2015-09-20 03:00', '202'],
@@ -282,8 +286,8 @@ export default function({ getService, getPageObjects }) {
     describe('embedded mode', () => {
       it('should hide side editor if embed is set to true in url', async () => {
         const url = await browser.getCurrentUrl();
-        const embedUrl = url.split('/visualize/').pop() + '&embed=true';
-        await PageObjects.common.navigateToUrl('visualize', embedUrl);
+        const embedUrl = url.split('/visualize#').pop() + '&embed=true';
+        await PageObjects.common.navigateToUrl('visualize', embedUrl, { useActualUrl: true });
         await PageObjects.header.waitUntilLoadingHasFinished();
         const sideEditorExists = await PageObjects.visualize.getSideEditorExists();
         expect(sideEditorExists).to.be(false);
@@ -291,12 +295,8 @@ export default function({ getService, getPageObjects }) {
 
       after(async () => {
         const url = await browser.getCurrentUrl();
-        const embedUrl = url
-          .split('/visualize/')
-          .pop()
-          .replace('embed=true', '');
-        await PageObjects.common.navigateToUrl('visualize', embedUrl);
-        await security.testUser.restoreDefaults();
+        const embedUrl = url.split('/visualize#').pop().replace('embed=true', '');
+        await PageObjects.common.navigateToUrl('visualize', embedUrl, { useActualUrl: true });
       });
     });
 
@@ -435,7 +435,7 @@ export default function({ getService, getPageObjects }) {
         log.debug('Click Date Histogram');
         await PageObjects.visEditor.selectAggregation('Date Histogram');
         await PageObjects.visEditor.selectField('@timestamp');
-        await PageObjects.visEditor.setInterval('Yearly');
+        await PageObjects.visEditor.setInterval('Year');
         await PageObjects.visEditor.clickGo();
         // This svg area is composed by 7 years (2013 - 2019).
         // 7 points are used to draw the upper line (usually called y1)
@@ -458,7 +458,7 @@ export default function({ getService, getPageObjects }) {
         log.debug('Click Date Histogram');
         await PageObjects.visEditor.selectAggregation('Date Histogram');
         await PageObjects.visEditor.selectField('@timestamp');
-        await PageObjects.visEditor.setInterval('Monthly');
+        await PageObjects.visEditor.setInterval('Month');
         await PageObjects.visEditor.clickGo();
         // This svg area is composed by 67 months 3 (2013) + 5 * 12 + 4 (2019)
         // 67 points are used to draw the upper line (usually called y1)

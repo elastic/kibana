@@ -116,6 +116,7 @@ export interface ApplicationStart {
         path?: string;
         state?: any;
     }): Promise<void>;
+    navigateToUrl(url: string): Promise<void>;
     // @deprecated
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }
@@ -285,6 +286,7 @@ export interface ChromeNavLink {
     readonly disableSubUrlTracking?: boolean;
     readonly euiIconType?: string;
     readonly hidden?: boolean;
+    readonly href?: string;
     readonly icon?: string;
     readonly id: string;
     // @internal
@@ -313,7 +315,7 @@ export interface ChromeNavLinks {
 }
 
 // @public (undocumented)
-export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase'>>;
+export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase' | 'href'>>;
 
 // @public
 export interface ChromeRecentlyAccessed {
@@ -382,6 +384,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     application: ApplicationSetup;
     // @deprecated (undocumented)
     context: ContextSetup;
+    // (undocumented)
+    docLinks: DocLinksSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
@@ -471,7 +475,7 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
 }>;
 
 // @public (undocumented)
-export interface DocLinksStart {
+export interface DocLinksSetup {
     // (undocumented)
     readonly DOC_LINK_VERSION: string;
     // (undocumented)
@@ -564,6 +568,9 @@ export interface DocLinksStart {
         readonly management: Record<string, string>;
     };
 }
+
+// @public (undocumented)
+export type DocLinksStart = DocLinksSetup;
 
 // @public (undocumented)
 export interface EnvironmentMode {

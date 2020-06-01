@@ -20,14 +20,14 @@
 import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  describe('search services', function() {
+  describe('search services', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/dashboard/current/data');
       await esArchiver.load('../functional/fixtures/es_archiver/dashboard/current/kibana');
@@ -40,7 +40,7 @@ export default function({ getService, getPageObjects, loadTestFile }: FtrProvide
       await appsMenu.clickLink('Search Explorer');
     });
 
-    after(async function() {
+    after(async function () {
       await esArchiver.unload('../functional/fixtures/es_archiver/dashboard/current/data');
       await esArchiver.unload('../functional/fixtures/es_archiver/dashboard/current/kibana');
     });

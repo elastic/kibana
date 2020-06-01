@@ -13,7 +13,7 @@ import {
   SavedObjectReference,
   SavedObject,
 } from 'src/core/server';
-import { PreConfiguredAction } from '../../actions/server';
+import { ActionsClient } from '../../actions/server';
 import {
   Alert,
   PartialAlert,
@@ -24,7 +24,6 @@ import {
   IntervalSchedule,
   SanitizedAlert,
   AlertTaskState,
-  RawAlertAction,
 } from './types';
 import { validateAlertTypeParams } from './lib';
 import {
@@ -32,7 +31,7 @@ import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '../../../plugins/security/server';
-import { EncryptedSavedObjectsPluginStart } from '../../../plugins/encrypted_saved_objects/server';
+import { EncryptedSavedObjectsClient } from '../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../plugins/task_manager/server';
 import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 import { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
@@ -50,13 +49,13 @@ interface ConstructorOptions {
   taskManager: TaskManagerStartContract;
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceId?: string;
   namespace?: string;
   getUserName: () => Promise<string | null>;
   createAPIKey: () => Promise<CreateAPIKeyResult>;
   invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>;
-  preconfiguredActions: PreConfiguredAction[];
+  getActionsClient: () => Promise<ActionsClient>;
 }
 
 export interface FindOptions {
@@ -127,8 +126,8 @@ export class AlertsClient {
   private readonly invalidateAPIKey: (
     params: InvalidateAPIKeyParams
   ) => Promise<InvalidateAPIKeyResult>;
-  private preconfiguredActions: PreConfiguredAction[];
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  private readonly getActionsClient: () => Promise<ActionsClient>;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
 
   constructor({
     alertTypeRegistry,
@@ -140,8 +139,8 @@ export class AlertsClient {
     getUserName,
     createAPIKey,
     invalidateAPIKey,
-    encryptedSavedObjectsPlugin,
-    preconfiguredActions,
+    encryptedSavedObjectsClient,
+    getActionsClient,
   }: ConstructorOptions) {
     this.logger = logger;
     this.getUserName = getUserName;
@@ -152,8 +151,8 @@ export class AlertsClient {
     this.savedObjectsClient = savedObjectsClient;
     this.createAPIKey = createAPIKey;
     this.invalidateAPIKey = invalidateAPIKey;
-    this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
-    this.preconfiguredActions = preconfiguredActions;
+    this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
+    this.getActionsClient = getActionsClient;
   }
 
   public async create({ data, options }: CreateOptions): Promise<Alert> {
@@ -252,7 +251,7 @@ export class AlertsClient {
     let apiKeyToInvalidate: string | null = null;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
         RawAlert
       >('alert', id, { namespace: this.namespace });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
@@ -281,7 +280,7 @@ export class AlertsClient {
     let alertSavedObject: SavedObject<RawAlert>;
 
     try {
-      alertSavedObject = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+      alertSavedObject = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
         RawAlert
       >('alert', id, { namespace: this.namespace });
     } catch (e) {
@@ -377,7 +376,7 @@ export class AlertsClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
         RawAlert
       >('alert', id, { namespace: this.namespace });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
@@ -417,9 +416,7 @@ export class AlertsClient {
     }
 
     try {
-      const apiKeyId = Buffer.from(apiKey, 'base64')
-        .toString()
-        .split(':')[0];
+      const apiKeyId = Buffer.from(apiKey, 'base64').toString().split(':')[0];
       const response = await this.invalidateAPIKey({ id: apiKeyId });
       if (response.apiKeysEnabled === true && response.result.error_count > 0) {
         this.logger.error(`Failed to invalidate API Key [id="${apiKeyId}"]`);
@@ -435,7 +432,7 @@ export class AlertsClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
         RawAlert
       >('alert', id, { namespace: this.namespace });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
@@ -479,7 +476,7 @@ export class AlertsClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
         RawAlert
       >('alert', id, { namespace: this.namespace });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
@@ -543,7 +540,7 @@ export class AlertsClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const { attributes, version } = await this.savedObjectsClient.get('alert', alertId);
+    const { attributes, version } = await this.savedObjectsClient.get<Alert>('alert', alertId);
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
       mutedInstanceIds.push(alertInstanceId);
@@ -566,7 +563,7 @@ export class AlertsClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const { attributes, version } = await this.savedObjectsClient.get('alert', alertId);
+    const { attributes, version } = await this.savedObjectsClient.get<Alert>('alert', alertId);
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
       await this.savedObjectsClient.update(
@@ -602,8 +599,8 @@ export class AlertsClient {
     actions: RawAlert['actions'],
     references: SavedObjectReference[]
   ) {
-    return actions.map((action, i) => {
-      const reference = references.find(ref => ref.name === action.actionRef);
+    return actions.map((action) => {
+      const reference = references.find((ref) => ref.name === action.actionRef);
       if (!reference) {
         throw new Error(`Reference ${action.actionRef} not found`);
       }
@@ -648,10 +645,10 @@ export class AlertsClient {
 
   private validateActions(alertType: AlertType, actions: NormalizedAlertAction[]): void {
     const { actionGroups: alertTypeActionGroups } = alertType;
-    const usedAlertActionGroups = actions.map(action => action.group);
+    const usedAlertActionGroups = actions.map((action) => action.group);
     const availableAlertTypeActionGroups = new Set(pluck(alertTypeActionGroups, 'id'));
     const invalidActionGroups = usedAlertActionGroups.filter(
-      group => !availableAlertTypeActionGroups.has(group)
+      (group) => !availableAlertTypeActionGroups.has(group)
     );
     if (invalidActionGroups.length) {
       throw Boom.badRequest(
@@ -668,58 +665,31 @@ export class AlertsClient {
   private async denormalizeActions(
     alertActions: NormalizedAlertAction[]
   ): Promise<{ actions: RawAlert['actions']; references: SavedObjectReference[] }> {
-    const actionMap = new Map<string, unknown>();
-    // map preconfigured actions
-    for (const alertAction of alertActions) {
-      const action = this.preconfiguredActions.find(
-        preconfiguredAction => preconfiguredAction.id === alertAction.id
-      );
-      if (action !== undefined) {
-        actionMap.set(action.id, action);
-      }
-    }
-    // Fetch action objects in bulk
-    // Excluding preconfigured actions to avoid an not found error, which is already mapped
-    const actionIds = [
-      ...new Set(
-        alertActions
-          .filter(alertAction => !actionMap.has(alertAction.id))
-          .map(alertAction => alertAction.id)
-      ),
-    ];
-    if (actionIds.length > 0) {
-      const bulkGetOpts = actionIds.map(id => ({ id, type: 'action' }));
-      const bulkGetResult = await this.savedObjectsClient.bulkGet(bulkGetOpts);
-
-      for (const action of bulkGetResult.saved_objects) {
-        if (action.error) {
-          throw Boom.badRequest(
-            `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
-          );
-        }
-        actionMap.set(action.id, action);
-      }
-    }
-    // Extract references and set actionTypeId
+    const actionsClient = await this.getActionsClient();
+    const actionIds = [...new Set(alertActions.map((alertAction) => alertAction.id))];
+    const actionResults = await actionsClient.getBulk(actionIds);
     const references: SavedObjectReference[] = [];
     const actions = alertActions.map(({ id, ...alertAction }, i) => {
-      const actionRef = `action_${i}`;
-      references.push({
-        id,
-        name: actionRef,
-        type: 'action',
-      });
-      const actionMapValue = actionMap.get(id);
-      // if action is a save object, than actionTypeId should be under attributes property
-      // if action is a preconfigured, than actionTypeId is the action property
-      const actionTypeId = actionIds.find(actionId => actionId === id)
-        ? (actionMapValue as SavedObject<Record<string, string>>).attributes.actionTypeId
-        : (actionMapValue as RawAlertAction).actionTypeId;
-      return {
-        ...alertAction,
-        actionRef,
-        actionTypeId,
-      };
+      const actionResultValue = actionResults.find((action) => action.id === id);
+      if (actionResultValue) {
+        const actionRef = `action_${i}`;
+        references.push({
+          id,
+          name: actionRef,
+          type: 'action',
+        });
+        return {
+          ...alertAction,
+          actionRef,
+          actionTypeId: actionResultValue.actionTypeId,
+        };
+      } else {
+        return {
+          ...alertAction,
+          actionRef: '',
+          actionTypeId: '',
+        };
+      }
     });
     return {
       actions,

@@ -7,45 +7,9 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { USER } from '../../../../functional/services/machine_learning/security_common';
-import { Job } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
-
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-};
-
-const SINGLE_METRIC_JOB_CONFIG: Job = {
-  job_id: `jobs_summary_fq_single_${Date.now()}`,
-  description: 'mean(responsetime) on farequote dataset with 15m bucket span',
-  groups: ['farequote', 'automated', 'single-metric'],
-  analysis_config: {
-    bucket_span: '15m',
-    influencers: [],
-    detectors: [
-      {
-        function: 'mean',
-        field_name: 'responsetime',
-      },
-    ],
-  },
-  data_description: { time_field: '@timestamp' },
-  analysis_limits: { model_memory_limit: '10mb' },
-  model_plot_config: { enabled: true },
-};
-
-const MULTI_METRIC_JOB_CONFIG: Job = {
-  job_id: `jobs_summary_fq_multi_${Date.now()}`,
-  description: 'mean(responsetime) partition=airline on farequote dataset with 1h bucket span',
-  groups: ['farequote', 'automated', 'multi-metric'],
-  analysis_config: {
-    bucket_span: '1h',
-    influencers: ['airline'],
-    detectors: [{ function: 'mean', field_name: 'responsetime', partition_field_name: 'airline' }],
-  },
-  data_description: { time_field: '@timestamp' },
-  analysis_limits: { model_memory_limit: '20mb' },
-  model_plot_config: { enabled: true },
-};
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { USER } from '../../../../functional/services/ml/security_common';
+import { MULTI_METRIC_JOB_CONFIG, SINGLE_METRIC_JOB_CONFIG } from './common_jobs';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -211,7 +175,7 @@ export default ({ getService }: FtrProviderContext) => {
     const { body } = await supertest
       .post('/api/ml/jobs/jobs_summary')
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_HEADERS)
+      .set(COMMON_REQUEST_HEADERS)
       .send(requestBody)
       .expect(expectedResponsecode);
 
@@ -230,9 +194,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   function getGroups(jobs: Array<{ groups: string[] }>) {
     const groupIds: string[] = [];
-    jobs.forEach(job => {
+    jobs.forEach((job) => {
       const groups = job.groups;
-      groups.forEach(group => {
+      groups.forEach((group) => {
         if (groupIds.indexOf(group) === -1) {
           groupIds.push(group);
         }
@@ -241,7 +205,7 @@ export default ({ getService }: FtrProviderContext) => {
     return groupIds.sort();
   }
 
-  describe('jobs_summary', function() {
+  describe('jobs_summary', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -258,7 +222,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     for (const testData of testDataListNoJobId) {
-      describe('gets job summary with no job IDs supplied', function() {
+      describe('gets job summary with no job IDs supplied', function () {
         it(`${testData.testTitle}`, async () => {
           const body = await runJobsSummaryRequest(
             testData.user,
@@ -295,7 +259,7 @@ export default ({ getService }: FtrProviderContext) => {
     }
 
     for (const testData of testDataListWithJobId) {
-      describe('gets job summary with job ID supplied', function() {
+      describe('gets job summary with job ID supplied', function () {
         it(`${testData.testTitle}`, async () => {
           const body = await runJobsSummaryRequest(
             testData.user,
@@ -354,7 +318,7 @@ export default ({ getService }: FtrProviderContext) => {
     }
 
     for (const testData of testDataListNegative) {
-      describe('rejects request', function() {
+      describe('rejects request', function () {
         it(testData.testTitle, async () => {
           const body = await runJobsSummaryRequest(
             testData.user,
@@ -362,9 +326,7 @@ export default ({ getService }: FtrProviderContext) => {
             testData.expected.responseCode
           );
 
-          expect(body)
-            .to.have.property('error')
-            .eql(testData.expected.error);
+          expect(body).to.have.property('error').eql(testData.expected.error);
 
           expect(body).to.have.property('message');
         });

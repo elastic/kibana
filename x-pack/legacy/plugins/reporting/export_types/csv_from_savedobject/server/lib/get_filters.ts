@@ -6,14 +6,8 @@
 
 import { badRequest } from 'boom';
 import moment from 'moment-timezone';
-
-import {
-  Filter,
-  QueryFilter,
-  SavedSearchObjectAttributes,
-  SearchSourceFilter,
-  TimeRangeParams,
-} from '../../types';
+import { TimeRangeParams } from '../../../../server/types';
+import { Filter, QueryFilter, SavedSearchObjectAttributes, SearchSourceFilter } from '../../types';
 
 export function getFilters(
   indexPatternId: string,
@@ -28,7 +22,7 @@ export function getFilters(
   let timezone: string | null;
 
   if (indexPatternTimeField) {
-    if (!timerange) {
+    if (!timerange || !timerange.min || !timerange.max) {
       throw badRequest(
         `Time range params are required for index pattern [${indexPatternId}], using time field [${indexPatternTimeField}]`
       );

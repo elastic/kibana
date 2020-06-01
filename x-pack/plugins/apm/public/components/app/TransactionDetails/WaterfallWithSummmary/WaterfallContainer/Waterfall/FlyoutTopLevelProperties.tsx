@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   SERVICE_NAME,
-  TRANSACTION_NAME
+  TRANSACTION_NAME,
 } from '../../../../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../../../shared/Links/apm/TransactionDetailLink';
@@ -27,7 +27,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
   const stickyProperties = [
     {
       label: i18n.translate('xpack.apm.transactionDetails.serviceLabel', {
-        defaultMessage: 'Service'
+        defaultMessage: 'Service',
       }),
       fieldName: SERVICE_NAME,
       val: (
@@ -35,11 +35,11 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
           {transaction.service.name}
         </TransactionOverviewLink>
       ),
-      width: '25%'
+      width: '25%',
     },
     {
       label: i18n.translate('xpack.apm.transactionDetails.transactionLabel', {
-        defaultMessage: 'Transaction'
+        defaultMessage: 'Transaction',
       }),
       fieldName: TRANSACTION_NAME,
       val: (
@@ -53,8 +53,8 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
           {transaction.transaction.name}
         </TransactionDetailLink>
       ),
-      width: '25%'
-    }
+      width: '25%',
+    },
   ];
 
   return <StickyProperties stickyProperties={stickyProperties} />;

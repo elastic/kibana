@@ -8,6 +8,9 @@ import uuid from 'uuid';
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { SetupPlugins } from '../../../../plugin';
+import { buildMlAuthz } from '../../../machine_learning/authz';
+import { throwHttpError } from '../../../machine_learning/validation';
 import { createRules } from '../../rules/create_rules';
 import { RuleAlertParamsRest } from '../../types';
 import { readRules } from '../../rules/read_rules';
@@ -19,13 +22,12 @@ import {
   createBulkErrorObject,
   buildRouteValidation,
   buildSiemResponse,
-  validateLicenseForRuleType,
 } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 
-export const createRulesBulkRoute = (router: IRouter) => {
+export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
@@ -39,7 +41,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const alertsClient = context.alerting?.getAlertsClient();
-      const clusterClient = context.core.elasticsearch.dataClient;
+      const clusterClient = context.core.elasticsearch.legacy.client;
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.siem?.getSiemClient();
 
@@ -47,13 +49,15 @@ export const createRulesBulkRoute = (router: IRouter) => {
         return siemResponse.error({ statusCode: 404 });
       }
 
+      const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+
       const ruleDefinitions = request.body;
       const dupes = getDuplicates(ruleDefinitions, 'rule_id');
 
       const rules = await Promise.all(
         ruleDefinitions
-          .filter(rule => rule.rule_id == null || !dupes.includes(rule.rule_id))
-          .map(async payloadRule => {
+          .filter((rule) => rule.rule_id == null || !dupes.includes(rule.rule_id))
+          .map(async (payloadRule) => {
             const {
               actions,
               anomaly_threshold: anomalyThreshold,
@@ -89,7 +93,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
             } = payloadRule;
             const ruleIdOrUuid = ruleId ?? uuid.v4();
             try {
-              validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+              throwHttpError(await mlAuthz.validateRuleType(type));
 
               const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
               const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
@@ -163,7 +167,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
       );
       const rulesBulk = [
         ...rules,
-        ...dupes.map(ruleId =>
+        ...dupes.map((ruleId) =>
           createBulkErrorObject({
             ruleId,
             statusCode: 409,

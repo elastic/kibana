@@ -7,8 +7,8 @@
 import numeral from '@elastic/numeral';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { defaults, get } from 'lodash';
-import { Logger } from '../../../types';
-import { ReportingConfig } from '../../types';
+import { ReportingConfig } from '../../';
+import { LevelLogger } from '../../lib';
 
 const KIBANA_MAX_SIZE_BYTES_PATH = 'csv.maxSizeBytes';
 const ES_MAX_SIZE_BYTES_PATH = 'http.max_content_length';
@@ -16,9 +16,9 @@ const ES_MAX_SIZE_BYTES_PATH = 'http.max_content_length';
 export async function validateMaxContentLength(
   config: ReportingConfig,
   elasticsearch: ElasticsearchServiceSetup,
-  logger: Logger
+  logger: LevelLogger
 ) {
-  const { callAsInternalUser } = elasticsearch.dataClient;
+  const { callAsInternalUser } = elasticsearch.legacy.client;
 
   const elasticClusterSettingsResponse = await callAsInternalUser('cluster.getSettings', {
     includeDefaults: true,

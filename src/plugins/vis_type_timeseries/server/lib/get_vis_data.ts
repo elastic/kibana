@@ -77,7 +77,7 @@ export function getVisData(
           getCluster: () => {
             return {
               callWithRequest: async (req: any, endpoint: string, params: any) => {
-                return await requestContext.core.elasticsearch.dataClient.callAsCurrentUser(
+                return await requestContext.core.elasticsearch.legacy.client.callAsCurrentUser(
                   endpoint,
                   params
                 );
@@ -91,13 +91,13 @@ export function getVisData(
       return await framework.globalConfig$
         .pipe(
           first(),
-          map(config => config.elasticsearch.shardTimeout.asMilliseconds())
+          map((config) => config.elasticsearch.shardTimeout.asMilliseconds())
         )
         .toPromise();
     },
   };
   const promises = (reqFacade.payload as GetVisDataOptions).panels.map(getPanelData(reqFacade));
-  return Promise.all(promises).then(res => {
+  return Promise.all(promises).then((res) => {
     return res.reduce((acc, data) => {
       return _.assign(acc as any, data);
     }, {});

@@ -4,22 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { XPackInfo } from '../../../xpack_main/server/lib/xpack_info';
-import { XPackInfoLicense } from '../../../xpack_main/server/lib/xpack_info_license';
-import { ExportTypesRegistry, ExportTypeDefinition } from '../../types';
+import { ILicense } from '../../../../../plugins/licensing/server';
+import { ExportTypeDefinition } from '../types';
+import { ExportTypesRegistry } from './export_types_registry';
 
-interface LicenseCheckResult {
+export interface LicenseCheckResult {
   showLinks: boolean;
   enableLinks: boolean;
   message?: string;
+  jobTypes?: string[];
 }
 
 const messages = {
   getUnavailable: () => {
     return 'You cannot use Reporting because license information is not available at this time.';
   },
-  getExpired: (license: XPackInfoLicense) => {
-    return `You cannot use Reporting because your ${license.getType()} license has expired.`;
+  getExpired: (license: ILicense) => {
+    return `You cannot use Reporting because your ${license.type} license has expired.`;
   },
 };
 
@@ -28,8 +29,8 @@ const makeManagementFeature = (
 ) => {
   return {
     id: 'management',
-    checkLicense: (license: XPackInfoLicense | null) => {
-      if (!license) {
+    checkLicense: (license?: ILicense) => {
+      if (!license || !license.type) {
         return {
           showLinks: true,
           enableLinks: false,
@@ -37,7 +38,7 @@ const makeManagementFeature = (
         };
       }
 
-      if (!license.isActive()) {
+      if (!license.isActive) {
         return {
           showLinks: true,
           enableLinks: false,
@@ -46,8 +47,8 @@ const makeManagementFeature = (
       }
 
       const validJobTypes = exportTypes
-        .filter(exportType => license.isOneOf(exportType.validLicenses))
-        .map(exportType => exportType.jobType);
+        .filter((exportType) => exportType.validLicenses.includes(license.type || ''))
+        .map((exportType) => exportType.jobType);
 
       return {
         showLinks: validJobTypes.length > 0,
@@ -63,8 +64,8 @@ const makeExportTypeFeature = (
 ) => {
   return {
     id: exportType.id,
-    checkLicense: (license: XPackInfoLicense | null) => {
-      if (!license) {
+    checkLicense: (license?: ILicense) => {
+      if (!license || !license.type) {
         return {
           showLinks: true,
           enableLinks: false,
@@ -72,17 +73,15 @@ const makeExportTypeFeature = (
         };
       }
 
-      if (!license.isOneOf(exportType.validLicenses)) {
+      if (!exportType.validLicenses.includes(license.type)) {
         return {
           showLinks: false,
           enableLinks: false,
-          message: `Your ${license.getType()} license does not support ${
-            exportType.name
-          } Reporting. Please upgrade your license.`,
+          message: `Your ${license.type} license does not support ${exportType.name} Reporting. Please upgrade your license.`,
         };
       }
 
-      if (!license.isActive()) {
+      if (!license.isActive) {
         return {
           showLinks: true,
           enableLinks: false,
@@ -98,18 +97,18 @@ const makeExportTypeFeature = (
   };
 };
 
-export function checkLicenseFactory(exportTypesRegistry: ExportTypesRegistry) {
-  return function checkLicense(xpackInfo: XPackInfo) {
-    const license = xpackInfo === null || !xpackInfo.isAvailable() ? null : xpackInfo.license;
-    const exportTypes = Array.from(exportTypesRegistry.getAll());
-    const reportingFeatures = [
-      ...exportTypes.map(makeExportTypeFeature),
-      makeManagementFeature(exportTypes),
-    ];
+export function checkLicense(
+  exportTypesRegistry: ExportTypesRegistry,
+  license: ILicense | undefined
+) {
+  const exportTypes = Array.from(exportTypesRegistry.getAll());
+  const reportingFeatures = [
+    ...exportTypes.map(makeExportTypeFeature),
+    makeManagementFeature(exportTypes),
+  ];
 
-    return reportingFeatures.reduce((result, feature) => {
-      result[feature.id] = feature.checkLicense(license);
-      return result;
-    }, {} as Record<string, LicenseCheckResult>);
-  };
+  return reportingFeatures.reduce((result, feature) => {
+    result[feature.id] = feature.checkLicense(license);
+    return result;
+  }, {} as Record<string, LicenseCheckResult>);
 }

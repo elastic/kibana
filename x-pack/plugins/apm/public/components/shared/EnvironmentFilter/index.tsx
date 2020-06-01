@@ -7,15 +7,15 @@
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useFetcher } from '../../../hooks/useFetcher';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import {
   ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED
+  ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
+import { useEnvironments, ALL_OPTION } from '../../../hooks/useEnvironments';
 
 function updateEnvironmentUrl(
   location: ReturnType<typeof useLocation>,
@@ -27,23 +27,16 @@ function updateEnvironmentUrl(
     ...location,
     search: fromQuery({
       ...toQuery(location.search),
-      environment: nextEnvironmentQueryParam
-    })
+      environment: nextEnvironmentQueryParam,
+    }),
   });
 }
-
-const ALL_OPTION = {
-  value: ENVIRONMENT_ALL,
-  text: i18n.translate('xpack.apm.filter.environment.allLabel', {
-    defaultMessage: 'All'
-  })
-};
 
 const NOT_DEFINED_OPTION = {
   value: ENVIRONMENT_NOT_DEFINED,
   text: i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
-    defaultMessage: 'Not defined'
-  })
+    defaultMessage: 'Not defined',
+  }),
 };
 
 const SEPARATOR_OPTION = {
@@ -51,15 +44,15 @@ const SEPARATOR_OPTION = {
     'xpack.apm.filter.environment.selectEnvironmentLabel',
     { defaultMessage: 'Select environment' }
   )} -`,
-  disabled: true
+  disabled: true,
 };
 
 function getOptions(environments: string[]) {
   const environmentOptions = environments
-    .filter(env => env !== ENVIRONMENT_NOT_DEFINED)
-    .map(environment => ({
+    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED)
+    .map((environment) => ({
       value: environment,
-      text: environment
+      text: environment,
     }));
 
   return [
@@ -68,42 +61,30 @@ function getOptions(environments: string[]) {
       ? [NOT_DEFINED_OPTION]
       : []),
     ...(environmentOptions.length > 0 ? [SEPARATOR_OPTION] : []),
-    ...environmentOptions
+    ...environmentOptions,
   ];
 }
 
 export const EnvironmentFilter: React.FC = () => {
   const location = useLocation();
-  const { urlParams, uiFilters } = useUrlParams();
-  const { start, end, serviceName } = urlParams;
+  const { uiFilters, urlParams } = useUrlParams();
 
   const { environment } = uiFilters;
-  const { data: environments = [], status = 'loading' } = useFetcher(
-    callApmApi => {
-      if (start && end) {
-        return callApmApi({
-          pathname: '/api/apm/ui_filters/environments',
-          params: {
-            query: {
-              start,
-              end,
-              serviceName
-            }
-          }
-        });
-      }
-    },
-    [start, end, serviceName]
-  );
+  const { serviceName, start, end } = urlParams;
+  const { environments, status = 'loading' } = useEnvironments({
+    serviceName,
+    start,
+    end,
+  });
 
   return (
     <EuiSelect
       prepend={i18n.translate('xpack.apm.filter.environment.label', {
-        defaultMessage: 'environment'
+        defaultMessage: 'environment',
       })}
       options={getOptions(environments)}
       value={environment || ENVIRONMENT_ALL}
-      onChange={event => {
+      onChange={(event) => {
         updateEnvironmentUrl(location, event.target.value);
       }}
       isLoading={status === 'loading'}

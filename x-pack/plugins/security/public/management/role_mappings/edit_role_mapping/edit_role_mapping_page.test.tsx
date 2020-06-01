@@ -64,10 +64,7 @@ describe('EditRoleMappingPage', () => {
       target: { value: 'my-role-mapping' },
     });
 
-    wrapper
-      .find(RoleComboBox)
-      .props()
-      .onChange(['foo_role']);
+    wrapper.find(RoleComboBox).props().onChange(['foo_role']);
 
     findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
 
@@ -127,10 +124,7 @@ describe('EditRoleMappingPage', () => {
 
     findTestSubject(wrapper, 'switchToRolesButton').simulate('click');
 
-    wrapper
-      .find(RoleComboBox)
-      .props()
-      .onChange(['foo_role']);
+    wrapper.find(RoleComboBox).props().onChange(['foo_role']);
 
     findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
     wrapper.find('button[id="addRuleOption"]').simulate('click');

@@ -8,7 +8,7 @@ export enum severity {
   critical = 'critical',
   major = 'major',
   minor = 'minor',
-  warning = 'warning'
+  warning = 'warning',
 }
 
 export function getMlPrefix(serviceName: string, transactionType?: string) {
@@ -21,10 +21,7 @@ export function getMlJobId(serviceName: string, transactionType?: string) {
 }
 
 export function getMlJobServiceName(jobId: string) {
-  return jobId
-    .split('-')
-    .slice(0, -2)
-    .join('-');
+  return jobId.split('-').slice(0, -2).join('-');
 }
 
 export function getMlIndex(serviceName: string, transactionType?: string) {

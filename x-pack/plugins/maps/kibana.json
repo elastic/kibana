@@ -4,8 +4,9 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "maps"],
   "requiredPlugins": [
-    "inspector",
     "licensing",
+    "features",
+    "inspector",
     "home",
     "data",
     "fileUpload",
@@ -13,7 +14,9 @@
     "navigation",
     "visualizations",
     "embeddable",
-    "mapsLegacy"
+    "mapsLegacy",
+    "usageCollection"
   ],
-  "ui": true
+  "ui": true,
+  "server": true
 }

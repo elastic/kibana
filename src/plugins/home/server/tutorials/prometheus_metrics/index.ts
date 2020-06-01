@@ -56,7 +56,7 @@ export function prometheusMetricsSpecProvider(context: TutorialContext): Tutoria
         label: i18n.translate('home.tutorials.prometheusMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

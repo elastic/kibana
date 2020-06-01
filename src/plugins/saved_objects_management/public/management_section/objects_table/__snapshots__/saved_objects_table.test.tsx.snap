@@ -280,7 +280,7 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
       "search": [MockFunction],
       "searchSource": Object {
         "create": [MockFunction],
-        "fromJSON": [MockFunction],
+        "createEmpty": [MockFunction],
       },
       "setInterceptor": [MockFunction],
     }
@@ -391,10 +391,10 @@ exports[`SavedObjectsTable should render normally 1`] = `
         Object {
           "id": "1",
           "meta": Object {
-            "editUrl": "#/management/kibana/index_patterns/1",
+            "editUrl": "#/management/kibana/indexPatterns/patterns/1",
             "icon": "indexPatternApp",
             "inAppUrl": Object {
-              "path": "/management/kibana/index_patterns/1",
+              "path": "/management/kibana/indexPatterns/patterns/1",
               "uiCapabilitiesPath": "management.kibana.index_patterns",
             },
             "title": "MyIndexPattern*",
@@ -433,7 +433,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
             "editUrl": "#/management/kibana/objects/savedVisualizations/4",
             "icon": "visualizeApp",
             "inAppUrl": Object {
-              "path": "/visualize/edit/4",
+              "path": "/edit/4",
               "uiCapabilitiesPath": "visualize.show",
             },
             "title": "MyViz",

@@ -20,11 +20,12 @@ import { getTimeUnitLabel } from '../lib/get_time_unit_label';
 import { TIME_UNITS } from '../../application/constants';
 import { getTimeOptions } from '../lib/get_time_options';
 import { ClosablePopoverTitle } from './components';
+import { IErrorObject } from '../../types';
 
 interface ForLastExpressionProps {
   timeWindowSize?: number;
   timeWindowUnit?: string;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
   onChangeWindowSize: (selectedWindowSize: number | undefined) => void;
   onChangeWindowUnit: (selectedWindowUnit: string) => void;
   popupPosition?:
@@ -99,7 +100,7 @@ export const ForLastExpression = ({
                 isInvalid={errors.timeWindowSize.length > 0 && timeWindowSize !== undefined}
                 min={0}
                 value={timeWindowSize || ''}
-                onChange={e => {
+                onChange={(e) => {
                   const { value } = e.target;
                   const timeWindowSizeVal = value !== '' ? parseInt(value, 10) : undefined;
                   onChangeWindowSize(timeWindowSizeVal);
@@ -111,7 +112,7 @@ export const ForLastExpression = ({
             <EuiSelect
               data-test-subj="timeWindowUnitSelect"
               value={timeWindowUnit}
-              onChange={e => {
+              onChange={(e) => {
                 onChangeWindowUnit(e.target.value);
               }}
               options={getTimeOptions(timeWindowSize ?? 1)}

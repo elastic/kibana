@@ -48,6 +48,7 @@ import {
 } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../..';
+import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -71,6 +72,7 @@ interface SearchEmbeddableConfig {
   $compile: ng.ICompileService;
   savedSearch: SavedSearch;
   editUrl: string;
+  editPath: string;
   indexPatterns?: IndexPattern[];
   editable: boolean;
   filterManager: FilterManager;
@@ -102,6 +104,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       $compile,
       savedSearch,
       editUrl,
+      editPath,
       indexPatterns,
       editable,
       filterManager,
@@ -112,7 +115,14 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   ) {
     super(
       initialInput,
-      { defaultTitle: savedSearch.title, editUrl, indexPatterns, editable },
+      {
+        defaultTitle: savedSearch.title,
+        editUrl,
+        editPath,
+        editApp: 'discover',
+        indexPatterns,
+        editable,
+      },
       parent
     );
 
@@ -202,7 +212,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
 
     this.pushContainerStateParamsToScope(searchScope);
 
-    searchScope.setSortOrder = sort => {
+    searchScope.setSortOrder = (sort) => {
       this.updateInput({ sort });
     };
 
@@ -239,7 +249,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
         operator,
         indexPattern.id!
       );
-      filters = filters.map(filter => ({
+      filters = filters.map((filter) => ({
         ...filter,
         $state: { store: esFilters.FilterStateStore.APP_STATE },
       }));
@@ -264,13 +274,13 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
-    searchSource.setField('size', getServices().uiSettings.get('discover:sampleSize'));
+    searchSource.setField('size', getServices().uiSettings.get(SAMPLE_SIZE_SETTING));
     searchSource.setField(
       'sort',
       getSortForSearchSource(
         this.searchScope.sort,
         this.searchScope.indexPattern,
-        getServices().uiSettings.get('discover:sort:defaultOrder')
+        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
       )
     );
 
@@ -338,6 +348,9 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       this.prevFilters = this.input.filters;
       this.prevQuery = this.input.query;
       this.prevTimeRange = this.input.timeRange;
+    } else if (this.searchScope) {
+      // trigger a digest cycle to make sure non-fetch relevant changes are propagated
+      this.searchScope.$applyAsync();
     }
   }
 }

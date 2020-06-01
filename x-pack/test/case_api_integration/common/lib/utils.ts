@@ -23,37 +23,52 @@ export const getConfigurationOutput = (update = false): Partial<CasesConfigureRe
   };
 };
 
-export const removeServerGeneratedPropertiesFromConfigure = (
-  config: Partial<CasesConfigureResponse>
-): Partial<CasesConfigureResponse> => {
-  const { created_at, updated_at, version, ...rest } = config;
-  return rest;
-};
-
-export const deleteConfiguration = async (es: Client): Promise<void> => {
-  await es.deleteByQuery({
-    index: '.kibana',
-    q: 'type:cases-configure',
-    wait_for_completion: true,
-    refresh: true,
-    body: {},
-  });
-};
-
-export const getConnector = () => ({
+export const getServiceNowConnector = () => ({
   name: 'ServiceNow Connector',
   actionTypeId: '.servicenow',
   secrets: {
     username: 'admin',
-    password: 'admin',
+    password: 'password',
   },
   config: {
-    apiUrl: 'localhost',
+    apiUrl: 'http://some.non.existent.com',
     casesConfiguration: {
       mapping: [
         {
           source: 'title',
           target: 'short_description',
+          actionType: 'overwrite',
+        },
+        {
+          source: 'description',
+          target: 'description',
+          actionType: 'append',
+        },
+        {
+          source: 'comments',
+          target: 'comments',
+          actionType: 'append',
+        },
+      ],
+    },
+  },
+});
+
+export const getJiraConnector = () => ({
+  name: 'Jira Connector',
+  actionTypeId: '.jira',
+  secrets: {
+    email: 'elastic@elastic.co',
+    apiToken: 'token',
+  },
+  config: {
+    apiUrl: 'http://some.non.existent.com',
+    projectKey: 'pkey',
+    casesConfiguration: {
+      mapping: [
+        {
+          source: 'title',
+          target: 'summary',
           actionType: 'overwrite',
         },
         {
@@ -70,3 +85,50 @@ export const getConnector = () => ({
     },
   },
 });
+
+export const removeServerGeneratedPropertiesFromConfigure = (
+  config: Partial<CasesConfigureResponse>
+): Partial<CasesConfigureResponse> => {
+  const { created_at, updated_at, version, ...rest } = config;
+  return rest;
+};
+
+export const deleteCasesUserActions = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.kibana',
+    q: 'type:cases-user-actions',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+  });
+};
+
+export const deleteCases = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.kibana',
+    q: 'type:cases',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+  });
+};
+
+export const deleteComments = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.kibana',
+    q: 'type:cases-comments',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+  });
+};
+
+export const deleteConfiguration = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.kibana',
+    q: 'type:cases-configure',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+  });
+};
