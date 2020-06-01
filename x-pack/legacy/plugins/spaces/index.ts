@@ -33,7 +33,13 @@ export const spaces = (kibana: Record<string, any>) =>
     configPrefix: 'xpack.spaces',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
-
+    config(Joi: any) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      })
+        .unknown()
+        .default();
+    },
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: [],
