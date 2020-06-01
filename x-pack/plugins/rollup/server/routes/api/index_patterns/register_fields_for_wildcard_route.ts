@@ -25,7 +25,7 @@ const getFieldsForWildcardRequest = async (
   response: any,
   IndexPatternsFetcher: any
 ) => {
-  const { callAsCurrentUser } = context.core.elasticsearch.dataClient;
+  const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
   const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
   const { pattern, meta_fields: metaFields } = request.query;
 
