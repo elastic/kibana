@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
+import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 import {
@@ -213,7 +214,7 @@ export {
  * @public
  */
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new DataServerPlugin(initializerContext);
 }
 
@@ -221,4 +222,11 @@ export {
   DataServerPlugin as Plugin,
   DataPluginSetup as PluginSetup,
   DataPluginStart as PluginStart,
+};
+
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    autocomplete: true,
+  },
+  schema: configSchema,
 };

@@ -9,12 +9,12 @@ Constructs a new instance of the `DataServerPlugin` class
 <b>Signature:</b>
 
 ```typescript
-constructor(initializerContext: PluginInitializerContext);
+constructor(initializerContext: PluginInitializerContext<ConfigSchema>);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  initializerContext | <code>PluginInitializerContext</code> |  |
+|  initializerContext | <code>PluginInitializerContext&lt;ConfigSchema&gt;</code> |  |
 

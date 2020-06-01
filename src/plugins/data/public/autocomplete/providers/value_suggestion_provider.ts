@@ -38,6 +38,8 @@ interface ValueSuggestionsGetFnArgs {
   signal?: AbortSignal;
 }
 
+export const getEmptyValueSuggestions = (() => Promise.resolve([])) as ValueSuggestionsGetFn;
+
 export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsGetFn => {
   const requestSuggestions = memoize(
     (index: string, field: IFieldType, query: string, boolFilter: any = [], signal?: AbortSignal) =>

@@ -17,24 +17,17 @@
  * under the License.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
-import { registerRoutes } from './routes';
-import { ConfigSchema, configSchema } from '../../config';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export class AutocompleteService implements Plugin<void> {
-  private valueSuggestionsEnabled: boolean = true;
+export const configSchema = schema.object({
+  autocomplete: schema.object({
+    querySuggestions: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+    valueSuggestions: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+  }),
+});
 
-  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
-    initializerContext.config.create<TypeOf<typeof configSchema>>().subscribe((configUpdate) => {
-      this.valueSuggestionsEnabled = configUpdate.autocomplete.valueSuggestions.enabled;
-    });
-  }
-
-  public setup(core: CoreSetup) {
-    if (this.valueSuggestionsEnabled)
-      registerRoutes(core, this.initializerContext.config.legacy.globalConfig$);
-  }
-
-  public start() {}
-}
+export type ConfigSchema = TypeOf<typeof configSchema>;

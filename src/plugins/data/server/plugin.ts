@@ -18,6 +18,7 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { ConfigSchema } from '../config';
 import { IndexPatternsService } from './index_patterns';
 import { ISearchSetup } from './search';
 import { SearchService } from './search/search_service';
@@ -51,7 +52,7 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
   private readonly fieldFormats = new FieldFormatsService();
   private readonly queryService = new QueryService();
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
     this.scriptsService = new ScriptsService();
     this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
