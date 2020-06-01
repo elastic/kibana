@@ -6,7 +6,11 @@
 
 jest.mock('./kibana_services', () => ({}));
 
-import { getSourceFields, getAggregatableGeoFieldTypes } from './index_pattern_util';
+import {
+  getSourceFields,
+  getAggregatableGeoFieldTypes,
+  supportsGeoTileAgg,
+} from './index_pattern_util';
 import { ES_GEO_FIELD_TYPE } from '../common/constants';
 
 describe('getSourceFields', () => {
@@ -29,15 +33,53 @@ describe('getSourceFields', () => {
   });
 });
 
-describe('getAggregatableGeoFieldTypes', () => {
+describe('Gold+ licensing', () => {
+  const testStubs = [
+    {
+      field: {
+        type: 'geo_point',
+        aggregatable: true,
+      },
+      supportedInBasic: true,
+      supportedInGold: true,
+    },
+    {
+      field: {
+        type: 'geo_shape',
+        aggregatable: false,
+      },
+      supportedInBasic: false,
+      supportedInGold: false,
+    },
+    {
+      field: {
+        type: 'geo_shape',
+        aggregatable: true,
+      },
+      supportedInBasic: false,
+      supportedInGold: true,
+    },
+  ];
+
   describe('basic license', () => {
     beforeEach(() => {
       require('./kibana_services').getIsGoldPlus = () => false;
     });
 
-    test('Should only include geo_point fields ', () => {
-      const aggregatableGeoFieldTypes = getAggregatableGeoFieldTypes();
-      expect(aggregatableGeoFieldTypes).toEqual([ES_GEO_FIELD_TYPE.GEO_POINT]);
+    describe('getAggregatableGeoFieldTypes', () => {
+      test('Should only include geo_point fields ', () => {
+        const aggregatableGeoFieldTypes = getAggregatableGeoFieldTypes();
+        expect(aggregatableGeoFieldTypes).toEqual([ES_GEO_FIELD_TYPE.GEO_POINT]);
+      });
+    });
+
+    describe('supportsGeoTileAgg', () => {
+      testStubs.forEach((stub, index) => {
+        test(`stub: ${index}`, () => {
+          const supported = supportsGeoTileAgg(stub.field);
+          expect(supported).toEqual(stub.supportedInBasic);
+        });
+      });
     });
   });
 
@@ -45,12 +87,22 @@ describe('getAggregatableGeoFieldTypes', () => {
     beforeEach(() => {
       require('./kibana_services').getIsGoldPlus = () => true;
     });
-    test('Should include geo_shape fields', () => {
-      const aggregatableGeoFieldTypes = getAggregatableGeoFieldTypes();
-      expect(aggregatableGeoFieldTypes).toEqual([
-        ES_GEO_FIELD_TYPE.GEO_POINT,
-        ES_GEO_FIELD_TYPE.GEO_SHAPE,
-      ]);
+    describe('getAggregatableGeoFieldTypes', () => {
+      test('Should add geo_shape fields', () => {
+        const aggregatableGeoFieldTypes = getAggregatableGeoFieldTypes();
+        expect(aggregatableGeoFieldTypes).toEqual([
+          ES_GEO_FIELD_TYPE.GEO_POINT,
+          ES_GEO_FIELD_TYPE.GEO_SHAPE,
+        ]);
+      });
+    });
+    describe('supportsGeoTileAgg', () => {
+      testStubs.forEach((stub, index) => {
+        test(`stub: ${index}`, () => {
+          const supported = supportsGeoTileAgg(stub.field);
+          expect(supported).toEqual(stub.supportedInGold);
+        });
+      });
     });
   });
 });
