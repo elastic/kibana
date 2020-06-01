@@ -14,15 +14,10 @@ import { AS_TELEMETRY_NAME, ITelemetrySavedObject } from '../../saved_objects/ap
  * Register the telemetry collector
  */
 
-interface Dependencies {
-  savedObjects: SavedObjectsServiceStart;
-  usageCollection: UsageCollectionSetup;
-}
-
-export const registerTelemetryUsageCollector = ({
-  usageCollection,
-  savedObjects,
-}: Dependencies) => {
+export const registerTelemetryUsageCollector = (
+  usageCollection: UsageCollectionSetup,
+  savedObjects: SavedObjectsServiceStart
+) => {
   const telemetryUsageCollector = usageCollection.makeUsageCollector({
     type: 'app_search',
     fetch: async () => fetchTelemetryMetrics(savedObjects),

@@ -51,7 +51,7 @@ describe('EngineTable', () => {
   it('contains engine links which send telemetry', () => {
     const engineLinks = wrapper.find(EuiLink);
 
-    engineLinks.forEach(link => {
+    engineLinks.forEach((link) => {
       expect(link.prop('href')).toEqual('http://localhost:3002/as/engines/test-engine');
       link.simulate('click');
 

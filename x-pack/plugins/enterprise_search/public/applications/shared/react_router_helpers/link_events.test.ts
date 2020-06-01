@@ -95,7 +95,7 @@ describe('letBrowserHandleEvent', () => {
   });
 });
 
-const targetValue = value => {
+const targetValue = (value) => {
   return {
     getAttribute: () => value,
   };

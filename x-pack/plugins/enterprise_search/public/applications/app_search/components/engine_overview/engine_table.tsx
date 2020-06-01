@@ -38,7 +38,7 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
   pagination: { totalEngines, pageIndex = 0, onPaginate },
 }) => {
   const { enterpriseSearchUrl, http } = useContext(KibanaContext) as IKibanaContext;
-  const engineLinkProps = name => ({
+  const engineLinkProps = (name) => ({
     href: `${enterpriseSearchUrl}/as/engines/${name}`,
     target: '_blank',
     onClick: () =>
@@ -56,7 +56,7 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
       name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.name', {
         defaultMessage: 'Name',
       }),
-      render: name => <EuiLink {...engineLinkProps(name)}>{name}</EuiLink>,
+      render: (name) => <EuiLink {...engineLinkProps(name)}>{name}</EuiLink>,
       width: '30%',
       truncateText: true,
       mobileOptions: {
@@ -75,7 +75,7 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
         }
       ),
       dataType: 'string',
-      render: dateString => (
+      render: (dateString) => (
         // e.g., January 1, 1970
         <FormattedDate value={new Date(dateString)} year="numeric" month="long" day="numeric" />
       ),
@@ -89,7 +89,7 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
         }
       ),
       dataType: 'number',
-      render: number => <FormattedNumber value={number} />,
+      render: (number) => <FormattedNumber value={number} />,
       truncateText: true,
     },
     {
@@ -101,7 +101,7 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
         }
       ),
       dataType: 'number',
-      render: number => <FormattedNumber value={number} />,
+      render: (number) => <FormattedNumber value={number} />,
       truncateText: true,
     },
     {
@@ -113,7 +113,7 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
         }
       ),
       dataType: 'string',
-      render: name => (
+      render: (name) => (
         <EuiLink {...engineLinkProps(name)}>
           <FormattedMessage
             id="xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage"

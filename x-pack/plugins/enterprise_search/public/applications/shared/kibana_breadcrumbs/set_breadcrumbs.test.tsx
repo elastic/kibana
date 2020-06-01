@@ -23,7 +23,7 @@ describe('SetAppSearchBreadcrumbs', () => {
     jest.clearAllMocks();
   });
 
-  const mountSetAppSearchBreadcrumbs = props => {
+  const mountSetAppSearchBreadcrumbs = (props) => {
     return mountWithKibanaContext(<SetAppSearchBreadcrumbs {...props} />, {
       http: {},
       enterpriseSearchUrl: 'http://localhost:3002',

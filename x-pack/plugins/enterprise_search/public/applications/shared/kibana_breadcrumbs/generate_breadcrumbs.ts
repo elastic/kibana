@@ -25,7 +25,7 @@ export const generateBreadcrumb = ({ text, path, history }: IGenerateBreadcrumbP
 
   if (path && history) {
     breadcrumb.href = history.createHref({ pathname: path });
-    breadcrumb.onClick = event => {
+    breadcrumb.onClick = (event) => {
       if (letBrowserHandleEvent(event)) return;
       event.preventDefault();
       history.push(path);

@@ -105,11 +105,7 @@ describe('EngineOverview', () => {
     });
 
     describe('pagination', () => {
-      const getTablePagination = () =>
-        wrapper
-          .find(EngineTable)
-          .first()
-          .prop('pagination');
+      const getTablePagination = () => wrapper.find(EngineTable).first().prop('pagination');
 
       it('passes down page data from the API', () => {
         const pagination = getTablePagination();
