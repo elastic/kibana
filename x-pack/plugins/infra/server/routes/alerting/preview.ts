@@ -5,7 +5,6 @@
  */
 
 import * as rt from 'io-ts';
-import Boom from 'boom';
 import { createValidationFunction } from '../../../common/runtime_types';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../lib/alerting/metric_threshold/types';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../lib/alerting/inventory_metric_threshold/types';
@@ -120,10 +119,6 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
             throw new Error('Unknown alert type');
         }
       } catch (error) {
-        if (Boom.isBoom(error)) {
-          throw error;
-        }
-
         return response.customError({
           statusCode: error.statusCode ?? 500,
           body: {
