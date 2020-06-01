@@ -181,7 +181,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       enabledLangs,
       union(this.supportedLangs, this.deprecatedLangs)
     );
+
     spec.lang = spec.lang && scriptingLangs.includes(spec.lang) ? spec.lang : undefined;
+    if (spec.scripted && !spec.lang) {
+      spec.lang = scriptingLangs[0];
+    }
 
     const fieldTypes = get(FIELD_TYPES_BY_LANG, spec.lang || '', DEFAULT_FIELD_TYPES);
     spec.type = fieldTypes.includes(spec.type) ? spec.type : fieldTypes[0];
@@ -536,17 +540,12 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           value={spec.count}
           data-test-subj="editorFieldCount"
           onChange={(e) => {
-            this.onPopularityChange(e.target.value ? Number(e.target.value) : 0);
+            this.onFieldChange('count', e.target.value ? Number(e.target.value) : '');
           }}
         />
       </EuiFormRow>
     );
   }
-
-  onPopularityChange = (value: number) => {
-    this.state.spec.count = value;
-    this.forceUpdate();
-  };
 
   onScriptChange = (value: string) => {
     this.setState({
