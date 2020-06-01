@@ -38,7 +38,17 @@ export const updateExceptionListRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { _tags, tags, name, description, id, list_id: listId, meta, type } = request.body;
+        const {
+          _tags,
+          tags,
+          name,
+          description,
+          id,
+          list_id: listId,
+          meta,
+          namespace_type: namespaceType,
+          type,
+        } = request.body;
         const exceptionLists = getExceptionListClient(context);
         if (id == null && listId == null) {
           return siemResponse.error({
@@ -53,7 +63,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
             listId,
             meta,
             name,
-            namespaceType: 'single', // TODO: Bubble this up
+            namespaceType,
             tags,
             type,
           });
