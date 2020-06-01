@@ -244,7 +244,7 @@ export type ProcessPositions = Map<ResolverEvent, Vector2>;
 /**
  * An array of vectors2 forming an polyline. Used to connect process nodes in the graph.
  */
-export type EdgeLineSegment = Vector2[];
+export type EdgeLineSegment = [Vector2, Vector2, string?];
 
 /**
  * Used to provide precalculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.

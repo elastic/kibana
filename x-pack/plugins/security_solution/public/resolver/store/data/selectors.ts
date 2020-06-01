@@ -17,7 +17,7 @@ import {
   Vector2,
 } from '../../types';
 import { ResolverEvent } from '../../../../common/endpoint/types';
-
+import { eventTimestamp } from '../../../../common/endpoint/models/event';
 import { add as vector2Add, applyMatrix3 } from '../../lib/vector2';
 import { isGraphableProcess, uniquePidForProcess } from '../../models/process_event';
 import {
@@ -27,6 +27,7 @@ import {
   size,
   levelOrder,
 } from '../../models/indexed_process_tree';
+import { getRelativeTimeDifference } from '../../lib/dates';
 
 const unit = 100;
 const distanceBetweenNodesInUnits = 2;
@@ -154,6 +155,7 @@ function processEdgeLineSegments(
   positions: ProcessPositions
 ): EdgeLineSegment[] {
   const edgeLineSegments: EdgeLineSegment[] = [];
+  let elapsedTime: string = '';
   for (const metadata of levelOrderWithWidths(indexedProcessTree, widths)) {
     /**
      * We only handle children, drawing lines back to their parents. The root has no parent, so we skip it
@@ -173,6 +175,12 @@ function processEdgeLineSegments(
       throw new Error();
     }
 
+    const parentTime = eventTimestamp(parent);
+    const processTime = eventTimestamp(process);
+    if (parentTime && processTime) {
+      elapsedTime = getRelativeTimeDifference(parentTime, processTime);
+    }
+
     /**
      * The point halfway between the parent and child on the y axis, we sometimes have a hard angle here in the edge line
      */
@@ -188,14 +196,18 @@ function processEdgeLineSegments(
      *     |         |
      *     B         C
      */
-    const lineFromProcessToMidwayLine: EdgeLineSegment = [[position[0], midwayY], position];
+    const lineFromProcessToMidwayLine: EdgeLineSegment = [
+      [position[0], midwayY],
+      position,
+      elapsedTime,
+    ];
 
     const siblings = indexedProcessTreeChildren(indexedProcessTree, parent);
     const isFirstChild = process === siblings[0];
 
     if (metadata.isOnlyChild) {
       // add a single line segment directly from parent to child. We don't do the 'pitchfork' in this case.
-      edgeLineSegments.push([parentPosition, position]);
+      edgeLineSegments.push([parentPosition, position, elapsedTime]);
     } else if (isFirstChild) {
       /**
        * If the parent has multiple children, we draw the 'midway' line, and the line from the
@@ -347,7 +359,7 @@ function processPositions(
        */
       positions.set(process, [0, 0]);
     } else {
-      const { process, parent, width, parentWidth } = metadata;
+      const { process, parent, isOnlyChild, width, parentWidth } = metadata;
 
       // Reinit counters when parent changes
       if (lastProcessedParentNode !== parent) {
@@ -387,7 +399,14 @@ function processPositions(
       /**
        * The y axis gains `-distanceBetweenNodes` as we move down the screen 1 unit at a time.
        */
-      const position = vector2Add([xOffset, -distanceBetweenNodes], parentPosition);
+      let yDistanceBetweenNodes = -distanceBetweenNodes;
+
+      if (!isOnlyChild) {
+        // Make space on leaves to show elapsed time
+        yDistanceBetweenNodes *= 2;
+      }
+
+      const position = vector2Add([xOffset, yDistanceBetweenNodes], parentPosition);
 
       positions.set(process, position);
 
@@ -470,10 +489,14 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
     }
 
     for (const edgeLineSegment of edgeLineSegments) {
-      const transformedSegment = [];
-      for (const point of edgeLineSegment) {
-        transformedSegment.push(applyMatrix3(point, isometricTransformMatrix));
-      }
+      // const transformedSegment = [];
+      const [startPoint, endPoint, elapsedTime] = edgeLineSegment;
+      const transformedSegment: EdgeLineSegment = [
+        applyMatrix3(startPoint, isometricTransformMatrix),
+        applyMatrix3(endPoint, isometricTransformMatrix),
+        elapsedTime,
+      ];
+
       transformedEdgeLineSegments.push(transformedSegment);
     }
 

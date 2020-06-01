@@ -5,81 +5,38 @@
  */
 
 import React, { memo } from 'react';
-import { saturate } from 'polished';
-
-import {
-  htmlIdGenerator,
-  euiPaletteForTemperature,
-  euiPaletteForStatus,
-  colorPalette,
-} from '@elastic/eui';
+import euiThemeAmsterdamDark from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
+import euiThemeAmsterdamLight from '@elastic/eui/dist/eui_theme_amsterdam_light.json';
+import { htmlIdGenerator, ButtonColor } from '@elastic/eui';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import { useUiSetting } from '../../common/lib/kibana';
+import { DEFAULT_DARK_MODE } from '../../../common/constants';
 
-/**
- * Generating from `colorPalette` function: This could potentially
- * pick up a palette shift and decouple from raw hex
- */
-const [euiColorEmptyShade, , , , , euiColor85Shade, euiColorFullShade] = colorPalette(
-  ['#ffffff', '#000000'],
-  7
-);
-
-/**
- * Base Colors - sourced from EUI
- */
-const resolverPalette: Record<string, string | string[]> = {
-  temperatures: euiPaletteForTemperature(7),
-  statii: euiPaletteForStatus(7),
-  fullShade: euiColorFullShade,
-  emptyShade: euiColorEmptyShade,
-};
-
-/**
- * Defines colors by semantics like so:
- * `danger`, `attention`, `enabled`, `disabled`
- * Or by function like:
- * `colorBlindBackground`, `subMenuForeground`
- */
 type ResolverColorNames =
-  | 'ok'
-  | 'empty'
+  | 'descriptionText'
   | 'full'
-  | 'warning'
-  | 'strokeBehindEmpty'
+  | 'graphControls'
+  | 'graphControlsBackground'
   | 'resolverBackground'
-  | 'runningProcessStart'
-  | 'runningProcessEnd'
-  | 'runningTriggerStart'
-  | 'runningTriggerEnd'
-  | 'activeNoWarning'
-  | 'activeWarning'
-  | 'fullLabelBackground'
-  | 'inertDescription'
-  | 'labelBackgroundTerminatedProcess'
-  | 'labelBackgroundTerminatedTrigger'
-  | 'labelBackgroundRunningProcess'
-  | 'labelBackgroundRunningTrigger';
+  | 'resolverEdge'
+  | 'resolverEdgeText';
 
-export const NamedColors: Record<ResolverColorNames, string> = {
-  ok: saturate(0.5, resolverPalette.temperatures[0]),
-  empty: euiColorEmptyShade,
-  full: euiColorFullShade,
-  strokeBehindEmpty: euiColor85Shade,
-  warning: resolverPalette.statii[3],
-  resolverBackground: euiColorFullShade,
-  runningProcessStart: '#006BB4',
-  runningProcessEnd: '#017D73',
-  runningTriggerStart: '#BD281E',
-  runningTriggerEnd: '#DD0A73',
-  activeNoWarning: '#0078FF',
-  activeWarning: '#C61F38',
-  fullLabelBackground: '#3B3C41',
-  labelBackgroundTerminatedProcess: '#8A96A8',
-  labelBackgroundTerminatedTrigger: '#8A96A8',
-  labelBackgroundRunningProcess: '#8A96A8',
-  labelBackgroundRunningTrigger: '#8A96A8',
-  inertDescription: '#747474',
-};
+type ColorMap = Record<ResolverColorNames, string>;
+interface NodeStyleConfig {
+  cubeSymbol: string;
+  descriptionFill: string;
+  descriptionText: string;
+  isLabelFilled: boolean;
+  labelButtonFill: ButtonColor;
+}
+
+export interface NodeStyleMap {
+  runningProcessCube: NodeStyleConfig;
+  runningTriggerCube: NodeStyleConfig;
+  terminatedProcessCube: NodeStyleConfig;
+  terminatedTriggerCube: NodeStyleConfig;
+}
 
 const idGenerator = htmlIdGenerator();
 
@@ -401,3 +358,63 @@ export const SymbolDefinitions = styled(SymbolDefinitionsComponent)`
   width: 0;
   height: 0;
 `;
+
+export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleMap } => {
+  const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
+  const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
+
+  const getColor = (lightOption: string, darkOption: string): string => {
+    return isDarkMode ? darkOption : lightOption;
+  };
+
+  const colorMap = {
+    descriptionText: theme.euiColorDarkestShade,
+    full: theme.euiColorFullShade,
+    graphControls: theme.euiColorDarkestShade,
+    graphControlsBackground: theme.euiColorEmptyShade,
+    resolverBackground: theme.euiColorEmptyShade,
+    resolverEdge: getColor(theme.euiColorLightestShade, theme.euiColorDarkestShade),
+    resolverEdgeText: getColor(theme.euiColorDarkShade, theme.euiColorLightShade),
+  };
+
+  const nodeAssets = {
+    runningProcessCube: {
+      cubeSymbol: `#${SymbolIds.runningProcessCube}`,
+      descriptionFill: colorMap.descriptionText,
+      descriptionText: i18n.translate('xpack.siem.endpoint.resolver.runningProcess', {
+        defaultMessage: 'Running Process',
+      }),
+      isLabelFilled: true,
+      labelButtonFill: 'primary',
+    },
+    runningTriggerCube: {
+      cubeSymbol: `#${SymbolIds.runningTriggerCube}`,
+      descriptionFill: colorMap.descriptionText,
+      descriptionText: i18n.translate('xpack.siem.endpoint.resolver.runningTrigger', {
+        defaultMessage: 'Running Trigger',
+      }),
+      isLabelFilled: true,
+      labelButtonFill: 'danger',
+    },
+    terminatedProcessCube: {
+      cubeSymbol: `#${SymbolIds.terminatedProcessCube}`,
+      descriptionFill: colorMap.descriptionText,
+      descriptionText: i18n.translate('xpack.siem.endpoint.resolver.terminatedProcess', {
+        defaultMessage: 'Terminated Process',
+      }),
+      isLabelFilled: false,
+      labelButtonFill: 'primary',
+    },
+    terminatedTriggerCube: {
+      cubeSymbol: `#${SymbolIds.terminatedTriggerCube}`,
+      descriptionFill: colorMap.descriptionText,
+      descriptionText: i18n.translate('xpack.siem.endpoint.resolver.terminatedTrigger', {
+        defaultMessage: 'Terminated Trigger',
+      }),
+      isLabelFilled: false,
+      labelButtonFill: 'danger',
+    },
+  };
+
+  return { colorMap, nodeAssets };
+};

@@ -9,6 +9,7 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
   htmlIdGenerator,
+  EuiButton,
   EuiI18nNumber,
   EuiKeyboardAccessible,
   EuiFlexGroup,
@@ -18,47 +19,12 @@ import { useSelector } from 'react-redux';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
-import { SymbolIds, NamedColors } from './defs';
+import { SymbolIds, useResolverTheme, NodeStyleMap } from './defs';
 import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
 import * as processModel from '../models/process_event';
 import * as selectors from '../store/selectors';
-
-const nodeAssets = {
-  runningProcessCube: {
-    cubeSymbol: `#${SymbolIds.runningProcessCube}`,
-    labelBackground: NamedColors.labelBackgroundRunningProcess,
-    descriptionFill: NamedColors.empty,
-    descriptionText: i18n.translate('xpack.securitySolution.endpoint.resolver.runningProcess', {
-      defaultMessage: 'Running Process',
-    }),
-  },
-  runningTriggerCube: {
-    cubeSymbol: `#${SymbolIds.runningTriggerCube}`,
-    labelBackground: NamedColors.labelBackgroundRunningTrigger,
-    descriptionFill: NamedColors.empty,
-    descriptionText: i18n.translate('xpack.securitySolution.endpoint.resolver.runningTrigger', {
-      defaultMessage: 'Running Trigger',
-    }),
-  },
-  terminatedProcessCube: {
-    cubeSymbol: `#${SymbolIds.terminatedProcessCube}`,
-    labelBackground: NamedColors.labelBackgroundTerminatedProcess,
-    descriptionFill: NamedColors.empty,
-    descriptionText: i18n.translate('xpack.securitySolution.endpoint.resolver.terminatedProcess', {
-      defaultMessage: 'Terminated Process',
-    }),
-  },
-  terminatedTriggerCube: {
-    cubeSymbol: `#${SymbolIds.terminatedTriggerCube}`,
-    labelBackground: NamedColors.labelBackgroundTerminatedTrigger,
-    descriptionFill: NamedColors.empty,
-    descriptionText: i18n.translate('xpack.securitySolution.endpoint.resolver.terminatedTrigger', {
-      defaultMessage: 'Terminated Trigger',
-    }),
-  },
-};
 
 /**
  * Take a gross `schemaName` and return a beautiful translated one.
@@ -317,7 +283,8 @@ const ProcessEventDotComponents = React.memo(
 
     const markerBaseSize = 15;
     const markerSize = markerBaseSize;
-    const markerPositionOffset = -markerBaseSize / 2;
+    const markerPositionYOffset = -markerBaseSize / 2 + 3; // + 3 to align nodes centrally on edge
+    const markerPositionXOffset = -markerBaseSize / 2;
 
     /**
      * An element that should be animated when the node is clicked.
@@ -333,7 +300,10 @@ const ProcessEventDotComponents = React.memo(
           })
         | null;
     } = React.createRef();
-    const { cubeSymbol, labelBackground, descriptionText } = nodeAssets[nodeType(event)];
+    const { colorMap, nodeAssets } = useResolverTheme();
+    const { cubeSymbol, descriptionText, isLabelFilled, labelButtonFill } = nodeAssets[
+      nodeType(event)
+    ];
     const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
 
     const nodeId = useMemo(() => resolverNodeIdGenerator(selfId), [
@@ -460,7 +430,7 @@ const ProcessEventDotComponents = React.memo(
               <use
                 xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
                 x={-11.35}
-                y={-11.35}
+                y={-8.35}
                 width={markerSize * 1.5}
                 height={markerSize * 1.5}
                 className="backing"
@@ -468,8 +438,8 @@ const ProcessEventDotComponents = React.memo(
               <use
                 role="presentation"
                 xlinkHref={cubeSymbol}
-                x={markerPositionOffset}
-                y={markerPositionOffset}
+                x={markerPositionXOffset}
+                y={markerPositionYOffset}
                 width={markerSize}
                 height={markerSize}
                 opacity="1"
@@ -497,10 +467,10 @@ const ProcessEventDotComponents = React.memo(
               top: '30%',
               position: 'absolute',
               width: '50%',
-              color: NamedColors.full,
+              color: colorMap.full,
               fontSize: `${scaledTypeSize}px`,
               lineHeight: '140%',
-              backgroundColor: NamedColors.resolverBackground,
+              backgroundColor: colorMap.resolverBackground,
               padding: '.25rem',
             }}
           >
@@ -509,7 +479,7 @@ const ProcessEventDotComponents = React.memo(
               style={{
                 textTransform: 'uppercase',
                 letterSpacing: '-0.01px',
-                backgroundColor: NamedColors.resolverBackground,
+                backgroundColor: colorMap.resolverBackground,
                 lineHeight: '1',
                 fontWeight: 'bold',
                 fontSize: '0.8rem',
@@ -517,35 +487,18 @@ const ProcessEventDotComponents = React.memo(
                 margin: '0',
                 textAlign: 'left',
                 padding: '0',
-                color: NamedColors.empty,
+                color: colorMap.descriptionText,
               }}
             >
               {descriptionText}
             </div>
-            <div
-              className={magFactorX >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
-              data-test-subject="nodeLabel"
-              id={labelId}
-              style={{
-                backgroundColor: labelBackground,
-                padding: '.15rem 0',
-                textAlign: 'center',
-                maxWidth: '20rem',
-                minWidth: '12rem',
-                width: '60%',
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis',
-                contain: 'content',
-                margin: '.25rem 0 .35rem 0',
-              }}
-            >
+            <EuiButton fill={isLabelFilled} color={labelButtonFill} size="s">
               <span className="euiButton__content">
                 <span className="euiButton__text" data-test-subj={'euiButton__text'}>
                   {eventModel.eventName(event)}
                 </span>
               </span>
-            </div>
+            </EuiButton>
             {magFactorX >= 2 && (
               <EuiFlexGroup justifyContent="flexStart" gutterSize="xs">
                 <EuiFlexItem grow={false} className="related-dropdown">
@@ -619,7 +572,7 @@ export const ProcessEventDot = styled(ProcessEventDotComponents)`
   }
 `;
 
-const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = {
+const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
   processCreated: 'runningProcessCube',
   processRan: 'runningProcessCube',
   processTerminated: 'terminatedProcessCube',
@@ -628,7 +581,7 @@ const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = 
   unknownEvent: 'runningProcessCube',
 };
 
-function nodeType(processEvent: ResolverEvent): keyof typeof nodeAssets {
+function nodeType(processEvent: ResolverEvent): keyof NodeStyleMap {
   const processType = processModel.eventType(processEvent);
 
   if (processType in processTypeToCube) {

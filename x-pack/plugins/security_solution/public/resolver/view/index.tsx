@@ -15,7 +15,7 @@ import { Panel } from './panel';
 import { GraphControls } from './graph_controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
-import { SymbolDefinitions, NamedColors } from './defs';
+import { SymbolDefinitions, useResolverTheme } from './defs';
 import { ResolverAction } from '../types';
 import { ResolverEvent } from '../../../common/endpoint/types';
 import * as eventModel from '../../../common/endpoint/models/event';
@@ -36,8 +36,6 @@ const StyledResolverContainer = styled.div`
   contain: layout;
 `;
 
-const bgColor = NamedColors.resolverBackground;
-
 export const Resolver = styled(
   React.memo(function Resolver({
     className,
@@ -46,6 +44,7 @@ export const Resolver = styled(
     className?: string;
     selectedEvent?: ResolverEvent;
   }) {
+    const { colorMap } = useResolverTheme();
     const { processNodePositions, edgeLineSegments } = useSelector(
       selectors.processNodePositionsAndEdgeLineSegments
     );
@@ -90,8 +89,9 @@ export const Resolver = styled(
             tabIndex={0}
             aria-activedescendant={activeDescendantId || undefined}
           >
-            {edgeLineSegments.map(([startPosition, endPosition], index) => (
+            {edgeLineSegments.map(([startPosition, endPosition, elapsedTime], index) => (
               <EdgeLine
+                elapsedTime={elapsedTime}
                 key={index}
                 startPosition={startPosition}
                 endPosition={endPosition}
@@ -147,5 +147,5 @@ export const Resolver = styled(
    */
   overflow: hidden;
   contain: strict;
-  background-color: ${bgColor};
+  background-color: ${() => useResolverTheme().colorMap.resolverBackground};
 `;

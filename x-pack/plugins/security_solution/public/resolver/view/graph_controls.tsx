@@ -13,6 +13,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { SideEffectContext } from './side_effect_context';
 import { ResolverAction, Vector2 } from '../types';
 import * as selectors from '../store/selectors';
+import { useResolverTheme } from './defs';
 
 /**
  * Controls for zooming, panning, and centering in Resolver
@@ -160,8 +161,8 @@ export const GraphControls = styled(GraphControlsComponent)`
   position: absolute;
   top: 5px;
   right: 5px;
-  background-color: #d4d4d4;
-  color: #333333;
+  background-color: ${() => useResolverTheme().colorMap.graphControlsBackground};
+  color: ${() => useResolverTheme().colorMap.graphControls};
 
   .zoom-controls {
     display: flex;
