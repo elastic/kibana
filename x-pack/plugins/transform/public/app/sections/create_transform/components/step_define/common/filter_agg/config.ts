@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PivotAggsConfigWithUiBase } from '../../../../../../common/pivot_aggs';
+import {
+  isPivotAggsConfigWithUiSupport,
+  PivotAggsConfigBase,
+  PivotAggsConfigWithUiBase,
+} from '../../../../../../common/pivot_aggs';
 import { FILTERS } from './constants';
 import { FilterAggForm, FilterEditorForm, FilterRangeForm, FilterTermForm } from './components';
 import {
@@ -18,9 +22,12 @@ import {
 /**
  * Gets initial basic configuration of the filter aggregation.
  */
-export function getFilterAggConfig(commonConfig: PivotAggsConfigWithUiBase): PivotAggsConfigFilter {
+export function getFilterAggConfig(
+  commonConfig: PivotAggsConfigWithUiBase | PivotAggsConfigBase
+): PivotAggsConfigFilter {
   return {
     ...commonConfig,
+    field: isPivotAggsConfigWithUiSupport(commonConfig) ? commonConfig.field : '',
     AggFormComponent: FilterAggForm,
     aggConfig: {},
     getEsAggConfig() {
@@ -38,6 +45,7 @@ export function getFilterAggConfig(commonConfig: PivotAggsConfigWithUiBase): Piv
       const filterAggConfig = esAggDefinition[filterAgg];
       const aggTypeConfig = getFilterAggTypeConfig(filterAgg, filterAggConfig);
 
+      // TODO consider moving field to the filter agg type level
       this.field = Object.keys(filterAggConfig)[0];
       this.aggConfig = {
         filterAgg,

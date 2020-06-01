@@ -76,7 +76,7 @@ export type PivotAgg = {
 };
 
 export type PivotAggDict = {
-  [key in PivotSupportedAggs]: PivotAgg;
+  [key in AggName]: PivotAgg;
 };
 
 // The internal representation of an aggregation definition.
@@ -108,15 +108,13 @@ export function getAggConfigFromEsAgg(esAggDefinition: Record<string, any>, aggN
 
   const config = getAggFormConfig(agg, commonConfig);
 
+  if (isPivotAggsWithExtendedForm(config)) {
+    config.setUiConfigFromEs(esAggDefinition[agg]);
+  }
+
   if (aggKeys.includes('aggs')) {
     // TODO process sub-aggregation
   }
-
-  if (!config) {
-    return commonConfig;
-  }
-
-  config.setUiConfigFromEs(esAggDefinition[agg]);
 
   return config;
 }

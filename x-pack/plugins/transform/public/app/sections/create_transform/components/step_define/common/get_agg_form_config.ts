@@ -6,6 +6,7 @@
 
 import {
   PIVOT_SUPPORTED_AGGS,
+  PivotAggsConfigBase,
   PivotAggsConfigWithUiBase,
   PivotSupportedAggs,
 } from '../../../../../common/pivot_aggs';
@@ -16,7 +17,7 @@ import { getFilterAggConfig } from './filter_agg/config';
  */
 export function getAggFormConfig(
   agg: PivotSupportedAggs | string,
-  commonConfig: PivotAggsConfigWithUiBase
+  commonConfig: PivotAggsConfigBase | PivotAggsConfigWithUiBase
 ) {
   switch (agg) {
     case PIVOT_SUPPORTED_AGGS.FILTER:
