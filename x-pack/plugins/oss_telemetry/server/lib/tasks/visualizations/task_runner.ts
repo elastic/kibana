@@ -10,12 +10,14 @@ import { first } from 'rxjs/operators';
 
 import { APICaller, IClusterClient } from 'src/core/server';
 import { getNextMidnight } from '../../get_next_midnight';
+import { getPastDays } from '../../get_past_days';
 import { TaskInstance } from '../../../../../task_manager/server';
 import { ESSearchHit } from '../../../../../apm/typings/elasticsearch';
 
 interface VisSummary {
   type: string;
   space: string;
+  past_days: number;
 }
 
 /*
@@ -26,7 +28,11 @@ async function getStats(callCluster: APICaller, index: string) {
     size: 10000, // elasticsearch index.max_result_window default value
     index,
     ignoreUnavailable: true,
-    filterPath: ['hits.hits._id', 'hits.hits._source.visualization'],
+    filterPath: [
+      'hits.hits._id',
+      'hits.hits._source.visualization',
+      'hits.hits._source.updated_at',
+    ],
     body: {
       query: {
         bool: { filter: { term: { type: 'visualization' } } },
@@ -43,13 +49,14 @@ async function getStats(callCluster: APICaller, index: string) {
   const visSummaries: VisSummary[] = esResponse.hits.hits.map(
     (hit: ESSearchHit<{ visState: string }>) => {
       const spacePhrases: string[] = hit._id.split(':');
+      const lastUpdated: string = _.get(hit, '_source.updated_at');
       const space = spacePhrases.length === 3 ? spacePhrases[0] : 'default'; // if in a custom space, the format of a saved object ID is space:type:id
       const visualization = _.get(hit, '_source.visualization', { visState: '{}' });
       const visState: { type?: string } = JSON.parse(visualization.visState);
-
       return {
         type: visState.type || '_na_',
         space,
+        past_days: getPastDays(lastUpdated),
       };
     }
   );
@@ -68,6 +75,8 @@ async function getStats(callCluster: APICaller, index: string) {
       spaces_min: _.min(spaceCounts),
       spaces_max: _.max(spaceCounts),
       spaces_avg: total / spaceCounts.length,
+      saved_30_days_total: curr.filter((c) => c.past_days <= 30).length,
+      saved_90_days_total: curr.filter((c) => c.past_days <= 90).length,
     };
   });
 }
