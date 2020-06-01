@@ -13,18 +13,18 @@ import { SyntheticEvent } from 'react';
 
 type THandleEvent = (event: SyntheticEvent) => boolean;
 
-export const letBrowserHandleEvent: THandleEvent = event =>
+export const letBrowserHandleEvent: THandleEvent = (event) =>
   event.defaultPrevented ||
   isModifiedEvent(event) ||
   !isLeftClickEvent(event) ||
   isTargetBlank(event);
 
-const isModifiedEvent: THandleEvent = event =>
+const isModifiedEvent: THandleEvent = (event) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
-const isLeftClickEvent: THandleEvent = event => event.button === 0;
+const isLeftClickEvent: THandleEvent = (event) => event.button === 0;
 
-const isTargetBlank: THandleEvent = event => {
+const isTargetBlank: THandleEvent = (event) => {
   const target = event.target.getAttribute('target');
   return !!target && target !== '_self';
 };

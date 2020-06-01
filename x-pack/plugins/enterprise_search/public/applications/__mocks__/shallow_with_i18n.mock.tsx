@@ -20,7 +20,7 @@ const { intl } = intlProvider.getChildContext();
  *
  * const wrapper = shallowWithIntl(<Component />);
  */
-export const shallowWithIntl = children => {
+export const shallowWithIntl = (children) => {
   return shallow(<I18nProvider>{children}</I18nProvider>, {
     context: { intl },
     childContextTypes: { intl },

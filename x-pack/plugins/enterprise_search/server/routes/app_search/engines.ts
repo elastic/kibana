@@ -5,6 +5,7 @@
  */
 
 import fetch from 'node-fetch';
+import querystring from 'querystring';
 import { schema } from '@kbn/config-schema';
 
 import { ENGINES_PAGE_SIZE } from '../../../common/constants';
@@ -25,7 +26,13 @@ export function registerEnginesRoute({ router, config, log }) {
         const appSearchUrl = config.host;
         const { type, pageIndex } = request.query;
 
-        const url = `${appSearchUrl}/as/engines/collection?type=${type}&page[current]=${pageIndex}&page[size]=${ENGINES_PAGE_SIZE}`;
+        const params = querystring.stringify({
+          type,
+          'page[current]': pageIndex,
+          'page[size]': ENGINES_PAGE_SIZE,
+        });
+        const url = `${encodeURI(appSearchUrl)}/as/engines/collection?${params}`;
+
         const enginesResponse = await fetch(url, {
           headers: { Authorization: request.headers.authorization },
         });

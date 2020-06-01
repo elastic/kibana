@@ -42,10 +42,7 @@ describe('NoUserState', () => {
     getUserName.mockImplementationOnce(() => 'dolores-abernathy');
     const wrapper = shallowWithIntl(<NoUserState />);
     const prompt = wrapper.find(EuiEmptyPrompt).dive();
-    const description1 = prompt
-      .find(FormattedMessage)
-      .at(1)
-      .dive();
+    const description1 = prompt.find(FormattedMessage).at(1).dive();
 
     expect(description1.find(EuiCode).prop('children')).toContain('dolores-abernathy');
   });

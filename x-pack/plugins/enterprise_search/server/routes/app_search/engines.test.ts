@@ -46,7 +46,7 @@ describe('engine routes', () => {
     describe('when the underlying App Search API returns a 200', () => {
       beforeEach(() => {
         AppSearchAPI.shouldBeCalledWith(
-          `http://localhost:3002/as/engines/collection?type=indexed&page[current]=1&page[size]=10`,
+          `http://localhost:3002/as/engines/collection?type=indexed&page%5Bcurrent%5D=1&page%5Bsize%5D=10`,
           { headers: { Authorization: AUTH_HEADER } }
         ).andReturn({
           results: [{ name: 'engine1' }],
@@ -67,7 +67,7 @@ describe('engine routes', () => {
     describe('when the underlying App Search API redirects to /login', () => {
       beforeEach(() => {
         AppSearchAPI.shouldBeCalledWith(
-          `http://localhost:3002/as/engines/collection?type=indexed&page[current]=1&page[size]=10`,
+          `http://localhost:3002/as/engines/collection?type=indexed&page%5Bcurrent%5D=1&page%5Bsize%5D=10`,
           { headers: { Authorization: AUTH_HEADER } }
         ).andReturnRedirect();
       });
@@ -85,7 +85,7 @@ describe('engine routes', () => {
     describe('when the App Search URL is invalid', () => {
       beforeEach(() => {
         AppSearchAPI.shouldBeCalledWith(
-          `http://localhost:3002/as/engines/collection?type=indexed&page[current]=1&page[size]=10`,
+          `http://localhost:3002/as/engines/collection?type=indexed&page%5Bcurrent%5D=1&page%5Bsize%5D=10`,
           { headers: { Authorization: AUTH_HEADER } }
         ).andReturnError();
       });
@@ -104,7 +104,7 @@ describe('engine routes', () => {
     describe('when the App Search API returns invalid data', () => {
       beforeEach(() => {
         AppSearchAPI.shouldBeCalledWith(
-          `http://localhost:3002/as/engines/collection?type=indexed&page[current]=1&page[size]=10`,
+          `http://localhost:3002/as/engines/collection?type=indexed&page%5Bcurrent%5D=1&page%5Bsize%5D=10`,
           { headers: { Authorization: AUTH_HEADER } }
         ).andReturnInvalidData();
       });
