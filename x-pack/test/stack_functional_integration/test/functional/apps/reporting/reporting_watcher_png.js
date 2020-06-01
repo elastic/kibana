@@ -22,7 +22,6 @@ export default ({ getService, getPageObjects }) => {
     const REPORTING_TEST_EMAILS = process.env.REPORTING_TEST_EMAILS;
 
     const PageObjects = getPageObjects(['common']);
-
     describe('PNG Reporting watch', () => {
       let id = 'watcher_png_report-';
       id = id + new Date().getTime(); // For debugging.
@@ -75,7 +74,7 @@ export default ({ getService, getPageObjects }) => {
         },
       };
 
-      it('should successfully add a new watch for PDF Reporting', async () => {
+      it('should successfully add a new watch for PNG Reporting', async () => {
         await putWatcher(watch, id, body, client, log);
       });
       it('should be successful and increment revision', async () => {
