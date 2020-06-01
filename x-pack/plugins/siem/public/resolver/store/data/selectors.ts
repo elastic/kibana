@@ -82,6 +82,16 @@ export const graphableProcesses = createSelector(
 );
 
 /**
+ * A Set of ids for graphable processes 
+ */
+export const graphableProcessesEntityIds = createSelector(
+  graphableProcesses,
+  function (graphableProcesses) {
+    return new Set(graphableProcesses.map(uniquePidForProcess));
+  }
+);
+
+/**
  * In laying out the graph, we precalculate the 'width' of each subtree. The 'width' of the subtree is determined by its
  * descedants and the rule that each process node must be at least 1 unit apart. Enforcing that all nodes are at least
  * 1 unit apart on the x axis makes it easy to prevent the UI components from overlapping. There will always be space.

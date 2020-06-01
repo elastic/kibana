@@ -20,10 +20,17 @@ import { ResolverEvent } from '../../../common/endpoint/types';
 import * as event from '../../../common/endpoint/models/event';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
+import * as dataSelectors from '../store/data/selectors';
 import { useHistory } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
-import { urlFromQueryParams } from '../../endpoint_alerts/view/url_from_query_params';
+import { displayNameRecord } from './process_event_dot';
+
+const PanelContent = memo(function PanelContent() {
+  return (
+    <></>
+  )
+})
 
 const HorizontalRule = memo(function HorizontalRule() {
   return (
@@ -53,23 +60,76 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
 
   const history = useHistory();
   const urlSearch = location.search;
-  const queryParams: {crumbId: string, crumbEvent: string} = useMemo(() => { 
-    return Object.assign({crumbId: '', crumbEvent: ''}, querystring.parse(urlSearch.slice(1))) },
+  const queryParams: {readonly crumbId: string, readonly crumbEvent: string} = useMemo(() => { 
+    return Object.assign({crumbId: '', crumbEvent: ''}, querystring.parse(urlSearch.slice(1)))},
   [urlSearch]);
-
-  const {crumbId, crumbEvent} = queryParams;
   
+  const graphableProcesses = useSelector(dataSelectors.graphableProcesses);
+  const graphableProcessEntityIds = useSelector(dataSelectors.graphableProcessesEntityIds);
+  const relatedEvents = useSelector(selectors.relatedEvents);
+  /**
+   * Determine which set of breadcrumbs to display based on the query parameters
+   * for the table & breadcrumb nav
+   */
   const whichTableViewAndBreadcrumbsToRender = useMemo(()=>{
+    const {crumbId, crumbEvent} = queryParams;
+    if(graphableProcessEntityIds.has(crumbEvent)){
+      const processSubject = graphableProcesses.find(evt=>event.entityId(evt)===crumbEvent);
+      if(!processSubject){
+        //should never happen, but bail out to default
+        return console.log('default'),'default';
+      }
+      const relatedEventsState = relatedEvents.get(processSubject)!;
+      if(relatedEventsState === 'waitingForRelatedEventData'){
+        //Related event data hasn't been fetched for this process yet:
+        //The UI around the menu should dispatch the /events effect for this.
+        return console.log('waiting'),'waiting';
+      }
+      if(relatedEventsState === 'error'){
+        //return as error if there was a service error requesting the /events
+        return console.log('serviceError'),'serviceError';
+      }
+      if(typeof relatedEventsState === 'object'){
+        const eventFromCrumbId = relatedEventsState.relatedEvents.find(
+          ({relatedEvent})=>{
+            return event.entityId(relatedEvent) === crumbId 
+          }
+        )
+        if(!eventFromCrumbId){
+          //Return an indication that it no longer exists (it may have been removed/purged/etc.)
+          return console.log('relatedEventDNE'),'relatedEventDNE';
+        }
+        return console.log('relatedEventDetail'),'relatedEventDetail';
+      }
+    }
+    else if(graphableProcessEntityIds.has(crumbId)) {
+      if(crumbEvent === ''){
+        //If there is no crumbEvent param, it's for the process detail
+        //Note: this view should handle its own effect for requesting /events
+        return console.log('processDetail'),'processDetail';
+      }
+      if(crumbEvent === 'all'){
+        //If crumbEvent param is the special `all`, it's for the view that shows the counts for all a particulat process' related events.
+        //Note: this view should handle its own effect for requesting /events
+        return console.log('processEventList'),'processEventList';
+      }
+      if(crumbEvent in displayNameRecord){
+        //If crumbEvent is one of the known event types, it's for a related event view narrowed by that type
+        return console.log('processEventListNarrowedByType'),'processEventListNarrowedByType';
+      }
+    }
+    //The default 'Event List' / 'List of all processes' view
+    return console.log('default'),'default';
+  },[queryParams,graphableProcessEntityIds,relatedEvents]);
 
-  },[crumbId, crumbEvent])
 
   /**
-   * This updates both the breadcrumb nav and the table view to go along with it
+   * This updates he breadcrumb nav, the table view and URL history
    */
   const updateCrumbs = useCallback(
-    (newCrumbs) => {
-      const newQueryParms = Object.assign(queryParams, newCrumbs);
-      const relativeURL = urlFromQueryParams(newQueryParms);
+    (newCrumbs: typeof queryParams) => {
+      const newQueryParms = {...queryParams, ...newCrumbs};
+      const relativeURL = {search: querystring.stringify(newQueryParms)};
       return history.push(relativeURL);
     },
     [history, queryParams]
