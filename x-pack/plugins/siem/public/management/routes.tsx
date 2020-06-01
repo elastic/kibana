@@ -12,7 +12,7 @@ import { MANAGEMENT_ROUTING_ROOT_PATH } from './common/constants';
 /**
  * Returns the React Router Routes for the management area
  */
-export const getManagementRoutes = () => [
+export const managementRoutes = () => [
   // Mounts the Management interface on `/management`
   <Route path={MANAGEMENT_ROUTING_ROOT_PATH} component={ManagementContainer} />,
 ];

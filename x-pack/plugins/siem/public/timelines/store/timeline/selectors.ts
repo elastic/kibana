@@ -7,7 +7,7 @@
 import { createSelector } from 'reselect';
 
 import { isFromKueryExpressionValid } from '../../../common/lib/keury';
-import { State } from '../../../common/store/reducer';
+import { State } from '../../../common/store/types';
 
 import { TimelineModel } from './model';
 import { AutoSavedWarningMsg, TimelineById } from './types';

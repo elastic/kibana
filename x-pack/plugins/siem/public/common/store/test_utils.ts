@@ -5,9 +5,8 @@
  */
 
 import { Dispatch } from 'redux';
-import { State } from './reducer';
+import { State, ImmutableMiddlewareFactory } from './types';
 import { AppAction } from './actions';
-import { ImmutableMiddlewareFactory } from './types';
 
 /**
  * Utilities for testing Redux middleware

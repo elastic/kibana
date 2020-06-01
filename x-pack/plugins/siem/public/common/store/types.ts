@@ -4,19 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Dispatch,
-  Action as ReduxAction,
-  AnyAction as ReduxAnyAction,
-  Action,
-  Middleware,
-} from 'redux';
+import { Dispatch, Action, Middleware, CombinedState } from 'redux';
 
 import { CoreStart } from '../../../../../../src/core/public';
-import { Immutable } from '../../../common/endpoint_alerts/types';
-import { State } from './reducer';
 import { StartPlugins } from '../../types';
 import { AppAction } from './actions';
+import { Immutable } from '../../../common/endpoint/types';
+import { AppState } from './app/reducer';
+import { InputsState } from './inputs/reducer';
+import { HostsPluginState } from '../../hosts/store';
+import { DragAndDropState } from './drag_and_drop/reducer';
+import { TimelinePluginState } from '../../timelines/store/timeline';
+import { NetworkPluginState } from '../../network/store';
+import { EndpointAlertsPluginState } from '../../endpoint_alerts';
+import { EndpointHostsPluginState } from '../../endpoint_hosts';
+import { ManagementPluginState } from '../../management';
+
+/**
+ * The redux `State` type for the Security App.
+ * We use `CombinedState` to wrap our shape because we create our reducer using `combineReducers`.
+ * `combineReducers` returns a type wrapped in `CombinedState`.
+ * `CombinedState` is required for redux to know what keys to make optional when preloaded state into a store.
+ */
+export type State = CombinedState<
+  HostsPluginState &
+    NetworkPluginState &
+    TimelinePluginState &
+    EndpointAlertsPluginState &
+    EndpointHostsPluginState &
+    ManagementPluginState & {
+      app: AppState;
+      dragAndDrop: DragAndDropState;
+      inputs: InputsState;
+    }
+>;
 
 export type KueryFilterQueryKind = 'kuery' | 'lucene';
 
@@ -67,60 +88,73 @@ export type ImmutableMiddlewareFactory<S = State> = (
  * Middleware will be of the `ImmutableMiddleware` variety. Not able to directly
  * change actions or state.
  */
-export type ImmutableMultipleMiddlewareFactory<S = State> = (
+export type SecuritySubPluginMiddlewareFactory = (
   coreStart: CoreStart,
   depsStart: Pick<StartPlugins, 'data' | 'ingestManager'>
-) => Array<ImmutableMiddleware<S, AppAction>>;
-
-/**
- * Simple type for a redux selector.
- */
-type Selector<S, R> = (state: S) => R;
-
-/**
- * Takes a selector and an `ImmutableMiddleware`. The
- * middleware's version of `getState` will receive
- * the result of the selector instead of the global state.
- *
- * This allows middleware to have knowledge of only a subsection of state.
- *
- * `selector` returns an `Immutable` version of the substate.
- * `middleware` must be an `ImmutableMiddleware`.
- *
- * Returns a regular middleware, meant to be used with `applyMiddleware`.
- */
-export type SubstateMiddlewareFactory = <Substate>(
-  selector: Selector<State, Immutable<Substate>>,
-  middleware: ImmutableMiddleware<Substate, AppAction>
-) => Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>;
+) => Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;
 
 /**
  * Like `Reducer` from `redux` but it accepts immutable versions of `state` and `action`.
  * Use this type for all Reducers in order to help enforce our pattern of immutable state.
  */
-export type ImmutableReducer<State, Action> = (
-  state: Immutable<State> | undefined,
-  action: Immutable<Action>
-) => State | Immutable<State>;
+export type ImmutableReducer<S, A> = (
+  state: Immutable<S> | undefined,
+  action: Immutable<A>
+) => S | Immutable<S>;
 
 /**
  * A alternate interface for `redux`'s `combineReducers`. Will work with the same underlying implementation,
  * but will enforce that `Immutable` versions of `state` and `action` are received.
  */
-export type ImmutableCombineReducers = <S, A extends ReduxAction = ReduxAnyAction>(
-  reducers: ImmutableReducersMapObject<S, A>
-) => ImmutableReducer<S, A>;
+export type ImmutableCombineReducers = <M extends ImmutableReducersMapObject<unknown, never>>(
+  reducers: M
+) => ImmutableReducer<
+  CombinedState<StateFromImmutableReducersMapObject<M>>,
+  ActionFromImmutableReducersMapObject<M>
+>;
 
 /**
+ * Helper type for `ImmutableCombineReducers`. Infers the combined state type from an immutable reducer map.
+ */
+type StateFromImmutableReducersMapObject<M> = M extends ImmutableReducersMapObject<unknown, never>
+  ? { [P in keyof M]: M[P] extends ImmutableReducer<infer S, infer _A> ? S : never }
+  : never;
+
+/**
+ * Helper type for `ImmutableCombineReducers`. Infers the combined action type from an immutable reducer map.
+ */
+type ActionFromImmutableReducersMapObject<M> = M extends ImmutableReducersMapObject<unknown, never>
+  ? ActionFromImmutableReducer<ImmutableReducerFromImmutableReducersMapObject<M>>
+  : never;
+
+/**
+ * Helper type for `ImmutableCombineReducers`. Infers the combined reducer type from an immutable reducer map.
+ */
+type ImmutableReducerFromImmutableReducersMapObject<M> = M extends {
+  [P in keyof M]: infer R;
+}
+  ? R extends ImmutableReducer<infer _S, infer _A>
+    ? R
+    : never
+  : never;
+
+/**
+ * Helper type for `ImmutableCombineReducers`. Infers the action type for an immutable reducer.
+ */
+type ActionFromImmutableReducer<R> = R extends ImmutableReducer<infer _S, infer A> ? A : never;
+
+/**
+ * Helper type for `ImmutableCombineReducers`.
  * Like `redux`'s `ReducersMapObject` (which is used by `combineReducers`) but enforces that
  * the `state` and `action` received are `Immutable` versions.
  */
-type ImmutableReducersMapObject<S, A extends ReduxAction = ReduxAction> = {
+type ImmutableReducersMapObject<S, A extends Action = Action> = {
   [K in keyof S]: ImmutableReducer<S[K], A>;
 };
 
 /**
  * A better type for createStructuredSelector. This doesn't support the options object.
+ * https://github.com/reduxjs/reselect/pull/454
  */
 export type CreateStructuredSelector = <
   SelectorMap extends { [key: string]: (...args: never[]) => unknown }

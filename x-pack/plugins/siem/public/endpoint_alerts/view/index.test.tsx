@@ -12,7 +12,7 @@ import { Store } from 'redux';
 import { mockAlertResultList } from '../store/mock_alert_result_list';
 import { alertPageTestRender } from './test_helpers/render_alert_page';
 import { DepsStartMock } from '../../common/mock/endpoint';
-import { State } from '../../common/store/reducer';
+import { State } from '../../common/store/types';
 import { AppAction } from '../../common/store/actions';
 
 describe('when on the alerting page', () => {

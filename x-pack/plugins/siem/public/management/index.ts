@@ -5,16 +5,23 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { managementReducer, getManagementInitialState, managementMiddlewareFactory } from './store';
-import { getManagementRoutes } from './routes';
+import { Reducer } from 'redux';
+import { managementRoutes } from './routes';
 import { StartPlugins } from '../types';
 import { MANAGEMENT_STORE_GLOBAL_NAMESPACE } from './common/constants';
 import { SecuritySubPluginWithStore } from '../app/types';
-import { Immutable } from '../../common/endpoint/types';
-import { ManagementStoreGlobalNamespace } from './types';
-import { ManagementState } from './store/types';
+import { ManagementState, managementReducer } from './store/reducer';
+import { AppAction } from '../common/store/actions';
+import { managementMiddlewareFactory } from './store/middleware';
 
 export { getManagementUrl } from './common/routing';
+
+export interface ManagementPluginState {
+  management: ManagementState;
+}
+export interface ManagementPluginReducer {
+  management: Reducer<ManagementState, AppAction>;
+}
 
 export class Management {
   public setup() {}
@@ -22,15 +29,18 @@ export class Management {
   public start(
     core: CoreStart,
     plugins: StartPlugins
-  ): SecuritySubPluginWithStore<ManagementStoreGlobalNamespace, Immutable<ManagementState>> {
+  ): SecuritySubPluginWithStore<'management', ManagementState> {
     return {
-      routes: getManagementRoutes(),
+      routes: managementRoutes(),
       store: {
         initialState: {
-          [MANAGEMENT_STORE_GLOBAL_NAMESPACE]: getManagementInitialState(),
+          [MANAGEMENT_STORE_GLOBAL_NAMESPACE]: undefined,
         },
         reducer: {
-          [MANAGEMENT_STORE_GLOBAL_NAMESPACE]: managementReducer,
+          [MANAGEMENT_STORE_GLOBAL_NAMESPACE]: managementReducer as Reducer<
+            ManagementState,
+            AppAction
+          >,
         },
         middleware: managementMiddlewareFactory(core, plugins),
       },

@@ -7,9 +7,13 @@
 import { hostsReducer } from '../../hosts/store';
 import { networkReducer } from '../../network/store';
 import { timelineReducer } from '../../timelines/store/timeline/reducer';
-import { hostListReducer } from '../../endpoint_hosts/store';
-import { alertListReducer } from '../../endpoint_alerts/store';
-import { managementReducer } from '../../management/store';
+import { managementReducer } from '../../management/store/reducer';
+import { ManagementPluginReducer } from '../../management';
+import { SubPluginsInitReducer } from '../store';
+import { EndpointAlertsPluginReducer } from '../../endpoint_alerts';
+import { EndpointHostsPluginReducer } from '../../endpoint_hosts';
+import { alertListReducer } from '../../endpoint_alerts/store/reducer';
+import { hostListReducer } from '../../endpoint_hosts/store/reducer';
 
 interface Global extends NodeJS.Global {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,11 +22,12 @@ interface Global extends NodeJS.Global {
 
 export const globalNode: Global = global;
 
-export const SUB_PLUGINS_REDUCER = {
+export const SUB_PLUGINS_REDUCER: SubPluginsInitReducer = {
   hosts: hostsReducer,
   network: networkReducer,
   timeline: timelineReducer,
-  hostList: hostListReducer,
-  alertList: alertListReducer,
-  management: managementReducer,
+  // Cast back from 'Immutable' type
+  hostList: hostListReducer as EndpointHostsPluginReducer['hostList'],
+  alertList: alertListReducer as EndpointAlertsPluginReducer['alertList'],
+  management: managementReducer as ManagementPluginReducer['management'],
 };

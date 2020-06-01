@@ -7,7 +7,7 @@
 import { get } from 'lodash/fp';
 import { createSelector } from 'reselect';
 
-import { State } from '../../common/store/reducer';
+import { State } from '../../common/store/types';
 
 import { GenericHostsModel, HostsType, HostsTableType } from './model';
 

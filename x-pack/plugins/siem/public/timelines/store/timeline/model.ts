@@ -14,7 +14,7 @@ import {
   TimelineType,
   TimelineStatus,
 } from '../../../graphql/types';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
+import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';

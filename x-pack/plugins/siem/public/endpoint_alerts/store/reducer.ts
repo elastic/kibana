@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Immutable, AlertListState } from '../../../common/endpoint_alerts/types';
+import { Immutable } from '../../../common/endpoint/types';
+import { AlertListState } from '../../../common/endpoint_alerts/types';
 import { ImmutableReducer } from '../../common/store';
 import { AppAction } from '../../common/store/actions';
 
-export const initialAlertListState = (): Immutable<AlertListState> => {
+const initialAlertListState = (): Immutable<AlertListState> => {
   return {
     alerts: [],
     alertDetails: undefined,

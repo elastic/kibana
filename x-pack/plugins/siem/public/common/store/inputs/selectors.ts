@@ -6,7 +6,7 @@
 
 import { createSelector } from 'reselect';
 
-import { State } from '../reducer';
+import { State } from '../types';
 
 import { InputsModel, InputsRange, GlobalQuery } from './model';
 

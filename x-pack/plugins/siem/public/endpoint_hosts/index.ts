@@ -4,15 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Reducer } from 'redux';
 import { SecuritySubPluginWithStore } from '../app/types';
-import { getEndpointHostsRoutes } from './routes';
+import { endpointHostsRoutes } from './routes';
 import { initialHostListState, hostListReducer } from './store/reducer';
-import { Immutable } from '../../common/endpoint/types';
 import { HostState } from './types';
 import { hostMiddlewareFactory } from './store/middleware';
 import { CoreStart } from '../../../../../src/core/public';
 import { StartPlugins } from '../types';
 import { substateMiddlewareFactory } from '../common/store';
+import { AppAction } from '../common/store/actions';
+
+export interface EndpointHostsPluginReducer {
+  hostList: Reducer<HostState, AppAction>;
+}
+
+export interface EndpointHostsPluginState {
+  hostList: HostState;
+}
 
 export class EndpointHosts {
   public setup() {}
@@ -20,19 +29,19 @@ export class EndpointHosts {
   public start(
     core: CoreStart,
     plugins: StartPlugins
-  ): SecuritySubPluginWithStore<'hostList', Immutable<HostState>> {
+  ): SecuritySubPluginWithStore<'hostList', HostState> {
     const { data, ingestManager } = plugins;
     const middleware = [
-      substateMiddlewareFactory(
+      substateMiddlewareFactory<HostState>(
         (globalState) => globalState.hostList,
         hostMiddlewareFactory(core, { data, ingestManager })
       ),
     ];
     return {
-      routes: getEndpointHostsRoutes(),
+      routes: endpointHostsRoutes(),
       store: {
         initialState: { hostList: initialHostListState() },
-        reducer: { hostList: hostListReducer },
+        reducer: { hostList: hostListReducer as Reducer<HostState, AppAction> },
         middleware,
       },
     };

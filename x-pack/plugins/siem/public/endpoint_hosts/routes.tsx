@@ -9,7 +9,7 @@ import { Route } from 'react-router-dom';
 
 import { HostList } from './view';
 
-export const getEndpointHostsRoutes = () => [
+export const endpointHostsRoutes = () => [
   <Route path="/:pageName(endpoint-hosts)">
     <HostList />
   </Route>,

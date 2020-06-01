@@ -7,12 +7,13 @@
 import { Store, createStore, applyMiddleware } from 'redux';
 import { History, createBrowserHistory } from 'history';
 import { alertListReducer } from './reducer';
-import { AlertListState, AlertResultList, Immutable } from '../../../common/endpoint_alerts/types';
+import { AlertListState, AlertResultList } from '../../../common/endpoint_alerts/types';
 import { alertMiddlewareFactory } from './middleware';
 import { coreMock } from 'src/core/public/mocks';
 import { DepsStartMock, depsStartMock } from '../../common/mock/endpoint';
 import { isOnAlertPage } from './selectors';
 import { mockAlertResultList } from './mock_alert_result_list';
+import { Immutable } from '../../../common/endpoint/types';
 
 describe('alert list tests', () => {
   let store: Store;

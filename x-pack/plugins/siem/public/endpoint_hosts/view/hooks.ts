@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
 import { HostState } from '../types';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { State } from '../../common/store/reducer';
+import { State } from '../../common/store/types';
 
 export function useHostSelector<TSelected>(selector: (state: HostState) => TSelected) {
   return useSelector(function (state: State) {

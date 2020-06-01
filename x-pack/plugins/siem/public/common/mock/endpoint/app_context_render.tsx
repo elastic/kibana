@@ -15,10 +15,12 @@ import { depsStartMock } from './dependencies_start_mock';
 import { MiddlewareActionSpyHelper, createSpyMiddleware } from '../../store/test_utils';
 import { apolloClientObservable } from '../test_providers';
 import { createStore, State, substateMiddlewareFactory } from '../../store';
-import { hostMiddlewareFactory } from '../../../endpoint_hosts/store';
 import { alertMiddlewareFactory } from '../../../endpoint_alerts/store/middleware';
 import { AppRootProvider } from './app_root_provider';
-import { managementMiddlewareFactory } from '../../../management/store';
+import { managementMiddlewareFactory } from '../../../management/store/middleware';
+import { HostState } from '../../../endpoint_hosts/types';
+import { AlertListState } from '../../../../common/endpoint_alerts/types';
+import { hostMiddlewareFactory } from '../../../endpoint_hosts/store/middleware';
 import { SUB_PLUGINS_REDUCER, mockGlobalState } from '..';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
@@ -56,13 +58,12 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const coreStart = coreMock.createStart({ basePath: '/mock' });
   const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
-  const state: State = mockGlobalState;
-  const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, [
-    substateMiddlewareFactory(
+  const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, apolloClientObservable, [
+    substateMiddlewareFactory<HostState>(
       (globalState) => globalState.hostList,
       hostMiddlewareFactory(coreStart, depsStart)
     ),
-    substateMiddlewareFactory(
+    substateMiddlewareFactory<AlertListState>(
       (globalState) => globalState.alertList,
       alertMiddlewareFactory(coreStart, depsStart)
     ),
@@ -76,7 +77,6 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     </AppRootProvider>
   );
   const render: UiRender = (ui, options) => {
-    // @ts-ignore
     return reactRender(ui, {
       wrapper: AppWrapper as React.ComponentType,
       ...options,
