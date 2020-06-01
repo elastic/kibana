@@ -12,6 +12,9 @@ import {
 import { FILTERS } from './constants';
 import { FilterAggForm, FilterEditorForm, FilterRangeForm, FilterTermForm } from './components';
 import {
+  FilterAggConfigBase,
+  FilterAggConfigBool,
+  FilterAggConfigExists,
   FilterAggConfigRange,
   FilterAggConfigTerm,
   FilterAggConfigUnion,
@@ -67,7 +70,7 @@ export function getFilterAggConfig(
 export function getFilterAggTypeConfig(
   filterAggType: FilterAggConfigUnion['filterAgg'] | FilterAggType,
   config?: { [key: string]: any }
-): FilterAggConfigUnion['aggTypeConfig'] {
+): FilterAggConfigUnion['aggTypeConfig'] | FilterAggConfigBase['aggTypeConfig'] {
   switch (filterAggType) {
     case FILTERS.TERM:
       const value = typeof config === 'object' ? Object.values(config)[0] : undefined;
@@ -118,13 +121,29 @@ export function getFilterAggTypeConfig(
             field: fieldName,
           };
         },
-      };
+      } as FilterAggConfigExists['aggTypeConfig'];
+    case FILTERS.BOOL:
+      return {
+        FilterAggFormComponent: FilterEditorForm,
+        filterAggConfig: JSON.stringify(
+          {
+            must: [],
+            must_not: [],
+            should: [],
+          },
+          null,
+          2
+        ),
+        getEsAggConfig(fieldName) {
+          return JSON.parse(this.filterAggConfig!);
+        },
+      } as FilterAggConfigBool['aggTypeConfig'];
     default:
       return {
         FilterAggFormComponent: FilterEditorForm,
-        filterAggConfig: {},
+        filterAggConfig: '',
         getEsAggConfig() {
-          return { ...this.filterAggConfig };
+          return this.filterAggConfig !== undefined ? JSON.parse(this.filterAggConfig!) : {};
         },
       };
   }

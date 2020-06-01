@@ -21,16 +21,16 @@ type FilterAggForm<T> = FC<{
 
 interface FilterAggTypeConfig<U> {
   /** Form component */
-  FilterAggFormComponent?: FilterAggForm<U>;
+  FilterAggFormComponent?: U extends undefined ? undefined : FilterAggForm<U>;
   /** Filter agg type configuration*/
-  filterAggConfig?: U;
+  filterAggConfig?: U extends undefined ? undefined : U;
   /** Converts UI agg config form to ES agg request object */
   getEsAggConfig: (field?: string) => { [key: string]: any };
   isValid?: () => boolean;
 }
 
 /** Filter agg type definition */
-interface FilterAggProps<K extends FilterAggType, U extends {}> {
+interface FilterAggProps<K extends FilterAggType, U> {
   /** Filter aggregation type */
   filterAgg: K;
   /** Definition of the filter agg config */
@@ -44,8 +44,19 @@ export type FilterAggConfigRange = FilterAggProps<
   'range',
   { gt?: number; lt?: number; lte?: number; gte?: number }
 >;
+/** Filter exists agg */
+export type FilterAggConfigExists = FilterAggProps<'exists', undefined>;
+/** Filter bool agg */
+export type FilterAggConfigBool = FilterAggProps<'bool', string>;
 
-export type FilterAggConfigUnion = FilterAggConfigTerm | FilterAggConfigRange;
+/** General type for filter agg */
+export type FilterAggConfigEditor = FilterAggProps<FilterAggType, string>;
+
+export type FilterAggConfigUnion =
+  | FilterAggConfigTerm
+  | FilterAggConfigRange
+  | FilterAggConfigBool
+  | FilterAggConfigExists;
 
 /**
  * Union type for filter aggregations

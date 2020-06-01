@@ -4,9 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
-import { EuiCodeEditor } from '@elastic/eui';
+import React from 'react';
+import { EuiCodeEditor, EuiSpacer } from '@elastic/eui';
+import { FilterAggConfigEditor } from '../types';
 
-export const FilterEditorForm: FC = () => {
-  return <EuiCodeEditor value={''} mode="json" style={{ width: '100%' }} theme="textmate" />;
+export const FilterEditorForm: FilterAggConfigEditor['aggTypeConfig']['FilterAggFormComponent'] = ({
+  config,
+  onChange,
+}) => {
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiCodeEditor
+        value={config}
+        onChange={(d) => {
+          onChange({ config: d });
+        }}
+        mode="json"
+        style={{ width: '100%' }}
+        theme="textmate"
+        height="300px"
+      />
+    </>
+  );
 };
