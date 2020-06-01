@@ -8,7 +8,6 @@ import * as t from 'io-ts';
 import { Either, left, fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import {
   dependentRulesSchema,
   RequiredRulesSchema,
@@ -16,6 +15,7 @@ import {
   requiredRulesSchema,
 } from './rules_schema';
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
+import { isMlRule } from '../../../machine_learning/helpers';
 
 export const addSavedId = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (typeAndTimelineOnly.type === 'saved_query') {

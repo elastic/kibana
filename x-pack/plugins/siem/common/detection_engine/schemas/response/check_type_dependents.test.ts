@@ -19,19 +19,10 @@ import { getBaseResponsePayload, getMlRuleResponsePayload } from './__mocks__/ut
 import { left } from 'fp-ts/lib/Either';
 import { RulesSchema } from './rules_schema';
 import { TypeAndTimelineOnly } from './type_timeline_only_schema';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
-import { exactCheck } from '../../../../../../common/exact_check';
-import { foldLeftRight, getPaths } from '../../../../../../common/test_utils';
+import { exactCheck } from '../../../exact_check';
+import { foldLeftRight, getPaths } from '../../../test_utils';
 
 describe('check_type_dependents', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   describe('checkTypeDependents', () => {
     test('it should validate a type of "query" without anything extra', () => {
       const payload = getBaseResponsePayload();

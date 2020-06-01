@@ -7,9 +7,8 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import * as t from 'io-ts';
 import { isObject } from 'lodash/fp';
-import { Either, fold, right, left } from 'fp-ts/lib/Either';
+import { Either } from 'fp-ts/lib/Either';
 
-import { pipe } from 'fp-ts/lib/pipeable';
 import { checkTypeDependents } from './check_type_dependents';
 import {
   actions,
@@ -56,7 +55,6 @@ import {
   note,
 } from './schemas';
 import { ListsDefaultArray } from '../types/lists_default_array';
-import { hasListsFeature } from '../../../feature_flags';
 
 /**
  * This is the required fields for the rules schema response. Put all required properties on
@@ -155,29 +153,10 @@ export const rulesSchema = new t.Type<
   'RulesSchema',
   (input: unknown): input is RulesWithoutTypeDependentsSchema => isObject(input),
   (input): Either<t.Errors, RulesWithoutTypeDependentsSchema> => {
-    const output = checkTypeDependents(input);
-    if (!hasListsFeature()) {
-      // TODO: (LIST-FEATURE) Remove this after the lists feature is an accepted feature for a particular release
-      return removeList(output);
-    } else {
-      return output;
-    }
+    return checkTypeDependents(input);
   },
   t.identity
 );
-
-// TODO: (LIST-FEATURE) Remove this after the lists feature is an accepted feature for a particular release
-export const removeList = (
-  decoded: Either<t.Errors, RequiredRulesSchema>
-): Either<t.Errors, RequiredRulesSchema> => {
-  const onLeft = (errors: t.Errors): Either<t.Errors, RequiredRulesSchema> => left(errors);
-  const onRight = (decodedValue: RequiredRulesSchema): Either<t.Errors, RequiredRulesSchema> => {
-    delete decodedValue.exceptions_list;
-    return right(decodedValue);
-  };
-  const folded = fold(onLeft, onRight);
-  return pipe(decoded, folded);
-};
 
 /**
  * This is the correct type you want to use for Rules that are outputted from the

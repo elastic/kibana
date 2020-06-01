@@ -7,19 +7,10 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { PrePackagedRulesSchema, prePackagedRulesSchema } from './prepackaged_rules_schema';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
-import { exactCheck } from '../../../../../../common/exact_check';
-import { getPaths, foldLeftRight } from '../../../../../../common/test_utils';
+import { exactCheck } from '../../../exact_check';
+import { foldLeftRight, getPaths } from '../../../test_utils';
 
 describe('prepackaged_rules_schema', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   test('it should validate an empty prepackaged response with defaults', () => {
     const payload: PrePackagedRulesSchema = { rules_installed: 0, rules_updated: 0 };
     const decoded = prePackagedRulesSchema.decode(payload);

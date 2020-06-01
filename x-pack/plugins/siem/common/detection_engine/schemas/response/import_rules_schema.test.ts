@@ -8,20 +8,11 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { left, Either } from 'fp-ts/lib/Either';
 import { ImportRulesSchema, importRulesSchema } from './import_rules_schema';
 import { ErrorSchema } from './error_schema';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
 import { Errors } from 'io-ts';
-import { exactCheck } from '../../../../../../common/exact_check';
-import { foldLeftRight, getPaths } from '../../../../../../common/test_utils';
+import { exactCheck } from '../../../exact_check';
+import { foldLeftRight, getPaths } from '../../../test_utils';
 
 describe('import_rules_schema', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   test('it should validate an empty import response with no errors', () => {
     const payload: ImportRulesSchema = { success: true, success_count: 0, errors: [] };
     const decoded = importRulesSchema.decode(payload);
