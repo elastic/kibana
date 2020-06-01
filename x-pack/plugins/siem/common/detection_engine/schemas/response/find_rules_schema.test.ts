@@ -9,19 +9,10 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { getFindResponseSingle, getBaseResponsePayload } from './__mocks__/utils';
 import { left } from 'fp-ts/lib/Either';
 import { RulesSchema } from './rules_schema';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
-import { getPaths, foldLeftRight } from '../../../../../../common/test_utils';
-import { exactCheck } from '../../../../../../common/exact_check';
+import { exactCheck } from '../../../exact_check';
+import { foldLeftRight, getPaths } from '../../../test_utils';
 
 describe('find_rules_schema', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   test('it should validate a typical single find rules response', () => {
     const payload = getFindResponseSingle();
     const decoded = findRulesSchema.decode(payload);

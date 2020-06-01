@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  PrePackagedRulesStatusSchema,
+  prePackagedRulesStatusSchema,
+} from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_status_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse } from '../utils';
@@ -12,10 +16,6 @@ import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { findRules } from '../../rules/find_rules';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
-import {
-  PrePackagedRulesStatusSchema,
-  prePackagedRulesStatusSchema,
-} from '../schemas/response/prepackaged_rules_status_schema';
 import { validate } from './validate';
 
 export const getPrepackagedRulesStatusRoute = (router: IRouter) => {

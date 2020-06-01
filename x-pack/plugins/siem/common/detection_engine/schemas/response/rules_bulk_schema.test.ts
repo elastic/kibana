@@ -11,19 +11,10 @@ import { getBaseResponsePayload, getErrorPayload } from './__mocks__/utils';
 import { RulesBulkSchema, rulesBulkSchema } from './rules_bulk_schema';
 import { RulesSchema } from './rules_schema';
 import { ErrorSchema } from './error_schema';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
-import { exactCheck } from '../../../../../../common/exact_check';
-import { foldLeftRight, getPaths } from '../../../../../../common/test_utils';
+import { exactCheck } from '../../../exact_check';
+import { foldLeftRight, getPaths } from '../../../test_utils';
 
 describe('prepackaged_rule_schema', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   test('it should validate a regular message and and error together with a uuid', () => {
     const payload: RulesBulkSchema = [getBaseResponsePayload(), getErrorPayload()];
     const decoded = rulesBulkSchema.decode(payload);

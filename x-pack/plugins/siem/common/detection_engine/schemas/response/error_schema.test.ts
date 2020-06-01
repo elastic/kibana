@@ -9,19 +9,10 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { getErrorPayload } from './__mocks__/utils';
 import { errorSchema, ErrorSchema } from './error_schema';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
-import { exactCheck } from '../../../../../../common/exact_check';
-import { getPaths, foldLeftRight } from '../../../../../../common/test_utils';
+import { exactCheck } from '../../../exact_check';
+import { foldLeftRight, getPaths } from '../../../test_utils';
 
 describe('error_schema', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   test('it should validate an error with a UUID given for id', () => {
     const error = getErrorPayload();
     const decoded = errorSchema.decode(getErrorPayload());

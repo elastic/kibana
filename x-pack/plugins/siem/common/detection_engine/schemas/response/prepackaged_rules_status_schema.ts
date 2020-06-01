@@ -7,14 +7,21 @@
 import * as t from 'io-ts';
 
 /* eslint-disable @typescript-eslint/camelcase */
-import { rules_installed, rules_updated } from './schemas';
+import {
+  rules_installed,
+  rules_custom_installed,
+  rules_not_installed,
+  rules_not_updated,
+} from '../common/schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
-export const prePackagedRulesSchema = t.exact(
+export const prePackagedRulesStatusSchema = t.exact(
   t.type({
+    rules_custom_installed,
     rules_installed,
-    rules_updated,
+    rules_not_installed,
+    rules_not_updated,
   })
 );
 
-export type PrePackagedRulesSchema = t.TypeOf<typeof prePackagedRulesSchema>;
+export type PrePackagedRulesStatusSchema = t.TypeOf<typeof prePackagedRulesStatusSchema>;

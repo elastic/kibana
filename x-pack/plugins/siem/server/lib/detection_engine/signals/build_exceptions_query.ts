@@ -3,8 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import {
+  ListOperator,
+  ListValues,
+  List,
+} from '../../../../common/detection_engine/schemas/types/lists_default_array';
 import { Query } from '../../../../../../../src/plugins/data/server';
-import { List, ListOperator, ListValues } from '../routes/schemas/types/lists_default_array';
 import { RuleAlertParams, Language } from '../types';
 
 type Operators = 'and' | 'or' | 'not';

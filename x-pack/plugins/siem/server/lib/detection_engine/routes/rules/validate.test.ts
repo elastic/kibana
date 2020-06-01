@@ -14,9 +14,9 @@ import {
 } from './validate';
 import { getResult } from '../__mocks__/request_responses';
 import { FindResult } from '../../../../../../alerts/server';
-import { RulesSchema } from '../schemas/response/rules_schema';
 import { BulkError } from '../utils';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 
 export const ruleOutput: RulesSchema = {
   actions: [],
