@@ -5,3 +5,4 @@
  */
 
 export { CancellationToken } from './cancellation_token';
+export { Poller } from './poller';

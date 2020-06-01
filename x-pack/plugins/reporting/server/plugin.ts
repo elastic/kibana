@@ -6,33 +6,84 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import { ConfigType, createConfig$ } from './config';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
+import { ReportingCore } from './core';
+import { ReportingConfigType } from './config';
+import { createBrowserDriverFactory } from './browsers';
+import { buildConfig, createConfig$ } from './config';
+import { createQueueFactory, enqueueJobFactory, LevelLogger, runValidations } from './lib';
+import { registerRoutes } from './routes';
+import { setFieldFormats } from './services';
+import { ReportingSetup, ReportingSetupDeps, ReportingStart, ReportingStartDeps } from './types';
+import { registerReportingUsageCollector } from './usage';
 
-export interface PluginsSetup {
-  /** @deprecated */
-  __legacy: {
-    config$: Observable<ConfigType>;
-  };
-}
+export class ReportingPlugin
+  implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
+  private readonly initializerContext: PluginInitializerContext<ReportingConfigType>;
+  private logger: LevelLogger;
+  private reportingCore: ReportingCore | null = null;
+  private config$: Observable<ReportingConfigType>;
 
-export class ReportingPlugin implements Plugin<PluginsSetup> {
-  private readonly log: Logger;
-
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.log = this.initializerContext.logger.get();
+  constructor(context: PluginInitializerContext<ReportingConfigType>) {
+    this.logger = new LevelLogger(context.logger.get('reporting'));
+    this.initializerContext = context;
+    this.config$ = context.config.create<ReportingConfigType>();
   }
 
-  public async setup(core: CoreSetup): Promise<PluginsSetup> {
-    return {
-      __legacy: {
-        config$: createConfig$(core, this.initializerContext, this.log).pipe(first()),
-      },
-    };
+  public async setup(core: CoreSetup, plugins: ReportingSetupDeps) {
+    const { elasticsearch, licensing, security } = plugins;
+    const { initializerContext: initContext } = this;
+    const router = core.http.createRouter();
+    const basePath = core.http.basePath.get;
+
+    const coreConfig = await createConfig$(core, this.config$, this.logger)
+      .pipe(first())
+      .toPromise(); // apply computed defaults to config
+    const reportingConfig = buildConfig(initContext, core, coreConfig); // combine kbnServer configs
+    this.reportingCore = new ReportingCore(reportingConfig);
+
+    const browserDriverFactory = await createBrowserDriverFactory(reportingConfig, this.logger);
+
+    this.reportingCore.pluginSetup({
+      browserDriverFactory,
+      elasticsearch,
+      licensing,
+      basePath,
+      router,
+      security,
+    });
+
+    runValidations(reportingConfig, elasticsearch, browserDriverFactory, this.logger);
+    registerReportingUsageCollector(this.reportingCore, plugins);
+    registerRoutes(this.reportingCore, this.logger);
+
+    return {};
   }
 
-  public start() {}
-  public stop() {}
-}
+  public async start(core: CoreStart, plugins: ReportingStartDeps) {
+    const { logger } = this;
+    const reportingCore = this.getReportingCore();
 
-export { ConfigType };
+    const esqueue = await createQueueFactory(reportingCore, logger);
+    const enqueueJob = enqueueJobFactory(reportingCore, logger);
+
+    reportingCore.pluginStart({
+      savedObjects: core.savedObjects,
+      uiSettings: core.uiSettings,
+      esqueue,
+      enqueueJob,
+    });
+
+    setFieldFormats(plugins.data.fieldFormats);
+    logger.info('reporting plugin started');
+
+    return {};
+  }
+
+  public getReportingCore() {
+    if (!this.reportingCore) {
+      throw new Error('Setup is not ready');
+    }
+    return this.reportingCore;
+  }
+}

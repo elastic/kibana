@@ -12,9 +12,7 @@
     "licensing",
     "uiActions",
     "embeddable",
-    "share",
-    "kibanaLegacy",
-    "licensing"
+    "share"
   ],
   "server": true,
   "ui": true
