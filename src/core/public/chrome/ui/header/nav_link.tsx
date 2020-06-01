@@ -66,7 +66,6 @@ export function createEuiListItem({
     onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
       onClick();
       if (
-        navigateToApp &&
         !externalLink && // ignore external links
         !legacyMode && // ignore when in legacy mode
         !legacy && // ignore links to legacy apps
