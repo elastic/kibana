@@ -44,32 +44,33 @@ export const EndpointOverview = React.memo<Props>(({ data, loading, id }) => {
       idPrefix="endpoint-overview"
     />
   );
-  const columnOne: DescriptionList[] = [
-    {
-      title: i18n.ENDPOINT_POLICY,
-      description: data.endpointPolicy
-        ? getDefaultRenderer('host.endpoint.endpointPolicy', data)
-        : getEmptyTagValue(),
-    },
+  const descriptionLists: Readonly<DescriptionList[][]> = [
+    [
+      {
+        title: i18n.ENDPOINT_POLICY,
+        description: data.endpointPolicy
+          ? getDefaultRenderer('host.endpoint.endpointPolicy', data)
+          : getEmptyTagValue(),
+      },
+    ],
+    [
+      {
+        title: i18n.POLICY_STATUS,
+        description: data.policyStatus
+          ? getDefaultRenderer('host.endpoint.policyStatus', data)
+          : getEmptyTagValue(),
+      },
+    ],
+    [
+      {
+        title: i18n.SENSORVERSION,
+        description: data.sensorversion
+          ? getDefaultRenderer('host.endpoint.sensorversion', data)
+          : getEmptyTagValue(),
+      },
+    ],
+    [], // needs 4 columns for design
   ];
-  const columnTwo: DescriptionList[] = [
-    {
-      title: i18n.POLICY_STATUS,
-      description: data.policyStatus
-        ? getDefaultRenderer('host.endpoint.policyStatus', data)
-        : getEmptyTagValue(),
-    },
-  ];
-  const columnThree: DescriptionList[] = [
-    {
-      title: i18n.SENSORVERSION,
-      description: data.sensorversion
-        ? getDefaultRenderer('host.endpoint.sensorversion', data)
-        : getEmptyTagValue(),
-    },
-  ];
-
-  const descriptionLists: Readonly<DescriptionList[][]> = [columnOne, columnTwo, columnThree];
 
   return (
     <InspectButtonContainer>
