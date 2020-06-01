@@ -8,6 +8,8 @@ import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
 import { Filter } from '../../../../../../../src/plugins/data/public';
 
+import { disableTemplate } from '../../../../common/constants';
+
 import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
 import {
@@ -18,8 +20,6 @@ import {
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../graphql/types';
 import { TimelineTypeLiteral } from '../../../../common/types/timeline';
-
-import { disableTemplate } from '../../components/open_timeline';
 
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';

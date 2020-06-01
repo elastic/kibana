@@ -14,18 +14,21 @@ import {
   EuiToolTip,
   EuiAvatar,
 } from '@elastic/eui';
-import { Description, NotesButton, NewCase } from './helpers';
+
+import { disableTemplate } from '../../../../../common/constants';
+import { TimelineType } from '../../../../../common/types/timeline';
+
+import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
+import { useKibana } from '../../../../common/lib/kibana';
+import { Note } from '../../../../common/lib/note';
+
+import { AssociateNote } from '../../notes/helpers';
 import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal/open_timeline_modal_button';
 import { OpenTimelineModal } from '../../open_timeline/open_timeline_modal';
-import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 
 import * as i18n from './translations';
-import { AssociateNote } from '../../notes/helpers';
-import { Note } from '../../../../common/lib/note';
+import { Description, NotesButton, NewCase } from './helpers';
 import { CreateTimelineBtn } from './create_timeline_btn';
-import { TimelineType } from '../../../../../common/types/timeline';
-import { useKibana } from '../../../../common/lib/kibana';
-import { disableTemplate } from '../../open_timeline';
 
 export const PropertiesRightStyle = styled(EuiFlexGroup)`
   margin-right: 5px;

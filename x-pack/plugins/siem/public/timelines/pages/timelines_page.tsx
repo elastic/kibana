@@ -9,11 +9,13 @@ import ApolloClient from 'apollo-client';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
+import { disableTemplate } from '../../../common/constants';
+
 import { HeaderPage } from '../../common/components/header_page';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { StatefulOpenTimeline, disableTemplate } from '../components/open_timeline';
+import { StatefulOpenTimeline } from '../components/open_timeline';
 import * as i18n from './translations';
 import {
   NEW_TIMELINE,
