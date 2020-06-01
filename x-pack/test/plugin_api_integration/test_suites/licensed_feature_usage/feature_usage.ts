@@ -44,6 +44,16 @@ export default function ({ getService }: FtrProviderContext) {
             license_level: 'platinum',
             name: 'Test feature C',
           },
+          {
+            last_used: null,
+            license_level: 'gold',
+            name: 'Subfeature privileges',
+          },
+          {
+            last_used: null,
+            license_level: 'gold',
+            name: 'Pre-access agreement',
+          },
         ],
       });
     });
