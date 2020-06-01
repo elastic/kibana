@@ -45,7 +45,6 @@ function LayerPanels(
   }
 ) {
   const {
-    framePublicAPI,
     activeVisualization,
     visualizationState,
     dispatch,
@@ -109,12 +108,10 @@ function LayerPanels(
           {...props}
           key={layerId}
           layerId={layerId}
-          activeVisualization={activeVisualization}
           visualizationState={visualizationState}
           updateVisualization={setVisualizationState}
           updateDatasource={updateDatasource}
           updateAll={updateAll}
-          frame={framePublicAPI}
           isOnlyLayer={layerIds.length === 1}
           onRemoveLayer={() => {
             dispatch({
