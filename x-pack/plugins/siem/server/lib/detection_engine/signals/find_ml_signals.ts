@@ -27,14 +27,14 @@ export const findMlSignals = async ({
   from: string;
   to: string;
 }) => {
-  const { mlSearch } = ml.mlSystemProvider(callCluster, request);
+  const { mlAnomalySearch } = ml.mlSystemProvider(callCluster, request);
   const params = {
     jobIds: [jobId],
     threshold: anomalyThreshold,
     earliestMs: dateMath.parse(from)?.valueOf() ?? 0,
     latestMs: dateMath.parse(to)?.valueOf() ?? 0,
   };
-  const relevantAnomalies = await getAnomalies(params, mlSearch);
+  const relevantAnomalies = await getAnomalies(params, mlAnomalySearch);
 
   return relevantAnomalies;
 };

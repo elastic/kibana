@@ -30,7 +30,9 @@ const createRequestContextMock = (
     alerting: { getAlertsClient: jest.fn(() => clients.alertsClient) },
     core: {
       ...coreContext,
-      elasticsearch: { ...coreContext.elasticsearch, dataClient: clients.clusterClient },
+      elasticsearch: {
+        legacy: { ...coreContext.elasticsearch, client: clients.clusterClient },
+      },
       savedObjects: { client: clients.savedObjectsClient },
     },
     licensing: clients.licensing,
