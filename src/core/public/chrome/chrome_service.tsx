@@ -36,7 +36,7 @@ import { ChromeDocTitle, DocTitleService } from './doc_title';
 import { ChromeNavControls, NavControlsService } from './nav_controls';
 import { ChromeNavLinks, NavLinksService } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
-import { Header, LoadingIndicator } from './ui';
+import { Header } from './ui';
 import { NavType } from './ui/header';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
@@ -214,31 +214,29 @@ export class ChromeService {
       docTitle,
 
       getHeaderComponent: () => (
-        <React.Fragment>
-          <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
-          <Header
-            application={application}
-            appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
-            badge$={badge$.pipe(takeUntil(this.stop$))}
-            basePath={http.basePath}
-            breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
-            kibanaDocLink={docLinks.links.kibana}
-            forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
-            helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
-            helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
-            homeHref={http.basePath.prepend('/app/kibana#/home')}
-            isVisible$={this.isVisible$}
-            kibanaVersion={injectedMetadata.getKibanaVersion()}
-            legacyMode={injectedMetadata.getLegacyMode()}
-            navLinks$={navLinks.getNavLinks$()}
-            recentlyAccessed$={recentlyAccessed.get$()}
-            navControlsLeft$={navControls.getLeft$()}
-            navControlsRight$={navControls.getRight$()}
-            onIsLockedUpdate={setIsNavDrawerLocked}
-            isLocked$={getIsNavDrawerLocked$}
-            navType$={getNavType$}
-          />
-        </React.Fragment>
+        <Header
+          loadingCount$={http.getLoadingCount$()}
+          application={application}
+          appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
+          badge$={badge$.pipe(takeUntil(this.stop$))}
+          basePath={http.basePath}
+          breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
+          kibanaDocLink={docLinks.links.kibana}
+          forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
+          helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
+          helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
+          homeHref={http.basePath.prepend('/app/kibana#/home')}
+          isVisible$={this.isVisible$}
+          kibanaVersion={injectedMetadata.getKibanaVersion()}
+          legacyMode={injectedMetadata.getLegacyMode()}
+          navLinks$={navLinks.getNavLinks$()}
+          recentlyAccessed$={recentlyAccessed.get$()}
+          navControlsLeft$={navControls.getLeft$()}
+          navControlsRight$={navControls.getRight$()}
+          onIsLockedUpdate={setIsNavDrawerLocked}
+          isLocked$={getIsNavDrawerLocked$}
+          navType$={getNavType$}
+        />
       ),
 
       setAppTitle: (appTitle: string) => appTitle$.next(appTitle),
