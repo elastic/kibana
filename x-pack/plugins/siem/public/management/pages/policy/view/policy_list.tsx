@@ -164,11 +164,14 @@ export const PolicyList = React.memo(() => {
       },
       {
         field: 'package',
-        name: i18n.translate('xpack.siem.endpoint.policyList.versionField', {
+        name: i18n.translate('xpack.siem.endpoint.policyList.versionFieldLabel', {
           defaultMessage: 'Version',
         }),
         render(pkg) {
-          return `${pkg.title}  v${pkg.version}`;
+          return i18n.translate('xpack.siem.endpoint.policyList.versionField', {
+            defaultMessage: '{title} v{version}',
+            values: pkg,
+          });
         },
       },
       {
