@@ -14,7 +14,7 @@ import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 // @ts-ignore
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
-import { APP_ICON, APP_ID, createMapPath, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, createMapPath } from '../common/constants';
 import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
 // @ts-ignore
@@ -142,21 +142,19 @@ export class MapsPlugin implements Plugin {
     }
 
     let routesInitialized = false;
-    if (licensing) {
-      licensing.license$.subscribe((license: ILicense) => {
-        const { state } = license.check(APP_ID, 'basic');
-        if (state === 'valid' && !routesInitialized) {
-          routesInitialized = true;
-          initRoutes(
-            core.http.createRouter(),
-            license.uid,
-            currentConfig,
-            this.kibanaVersion,
-            this._logger
-          );
-        }
-      });
-    }
+    licensing.license$.subscribe((license: ILicense) => {
+      const { state } = license.check('maps', 'basic');
+      if (state === 'valid' && !routesInitialized) {
+        routesInitialized = true;
+        initRoutes(
+          core.http.createRouter(),
+          license.uid,
+          currentConfig,
+          this.kibanaVersion,
+          this._logger
+        );
+      }
+    });
 
     this._initHomeData(home, core.http.basePath.prepend, currentConfig);
 

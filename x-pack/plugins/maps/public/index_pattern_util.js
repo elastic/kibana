@@ -7,7 +7,6 @@
 import { getIndexPatternService, getIsGoldPlus } from './kibana_services';
 import { indexPatterns } from '../../../../src/plugins/data/public';
 import { ES_GEO_FIELD_TYPE } from '../common/constants';
-import {isGeneralJobOverride} from "../../ml/common/types/modules";
 
 export async function getIndexPatternsFromIds(indexPatternIds = []) {
   const promises = [];
@@ -36,10 +35,7 @@ export const AGGREGATABLE_GEO_FIELD_TYPES = [ES_GEO_FIELD_TYPE.GEO_POINT];
 export function getAggregatableGeoFieldTypes() {
   const aggregatableFieldTypes = [...AGGREGATABLE_GEO_FIELD_TYPES];
   if (getIsGoldPlus()) {
-    console.log('is gold plus');
     aggregatableFieldTypes.push(ES_GEO_FIELD_TYPE.GEO_SHAPE);
-  } else {
-    console.log('os not gold plius');
   }
   return aggregatableFieldTypes;
 }

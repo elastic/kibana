@@ -423,13 +423,18 @@ export function makeESBbox({ maxLat, maxLon, minLat, minLon }) {
   return esBbox;
 }
 
-export function makeGeoGridTileDsl(field, bounds, precision) {
+export function makeGeotileGridDsl(field, bounds, precision) {
   const esBbox = makeESBbox(bounds);
   return {
     bounds: esBbox,
     field,
     precision,
   };
+}
+
+export function makeSizedGeotileGridDsl(field, bounds, precision, size) {
+  const dsl = makeGeotileGridDsl(field, bounds, precision);
+  return { size, ...dsl };
 }
 
 export function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
