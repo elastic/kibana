@@ -101,6 +101,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
 }
 
 type CoreSetupMockType = MockedKeys<CoreSetup> & {
+  elasticsearch: ReturnType<typeof elasticsearchServiceMock.createSetup>;
   getStartServices: jest.MockedFunction<StartServicesAccessor<any, any>>;
 };
 
@@ -199,8 +200,9 @@ function createCoreRequestHandlerContextMock() {
       typeRegistry: savedObjectsTypeRegistryMock.create(),
     },
     elasticsearch: {
-      adminClient: elasticsearchServiceMock.createScopedClusterClient(),
-      dataClient: elasticsearchServiceMock.createScopedClusterClient(),
+      legacy: {
+        client: elasticsearchServiceMock.createScopedClusterClient(),
+      },
     },
     uiSettings: {
       client: uiSettingsServiceMock.createClient(),

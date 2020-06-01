@@ -3,6 +3,7 @@
 /.es
 /build
 /built_assets
+/config/apm.dev.js
 /data
 /html_docs
 /optimize
@@ -25,7 +26,8 @@ target
 /src/plugins/vis_type_timelion/public/_generated_/**
 /src/plugins/vis_type_timelion/public/webpackShims/jquery.flot.*
 /x-pack/legacy/plugins/**/__tests__/fixtures/**
-/x-pack/plugins/apm/e2e/cypress/**/snapshots.js
+/x-pack/plugins/apm/e2e/**/snapshots.js
+/x-pack/plugins/apm/e2e/tmp/*
 /x-pack/plugins/canvas/canvas_plugin
 /x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts
 /x-pack/plugins/canvas/shareable_runtime/build
