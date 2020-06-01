@@ -92,8 +92,20 @@ export function getFilterAggTypeConfig(
     case FILTERS.RANGE:
       return {
         FilterAggFormComponent: FilterRangeForm,
-        getEsAggConfig() {
-          return {};
+        filterAggConfig: typeof config === 'object' ? Object.values(config)[0] : undefined,
+        getEsAggConfig(fieldName) {
+          if (fieldName === undefined || !this.filterAggConfig) {
+            throw new Error(`Config ${FILTERS.RANGE} is not completed`);
+          }
+          return {
+            [fieldName]: this.filterAggConfig,
+          };
+        },
+        isValid() {
+          return (
+            this.filterAggConfig &&
+            Object.values(this.filterAggConfig).filter((v) => v !== undefined).length > 0
+          );
         },
       } as FilterAggConfigRange['aggTypeConfig'];
     case FILTERS.EXISTS:

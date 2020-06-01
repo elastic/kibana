@@ -42,7 +42,7 @@ export type FilterAggConfigTerm = FilterAggProps<'term', { value: string }>;
 /** Filter range agg */
 export type FilterAggConfigRange = FilterAggProps<
   'range',
-  { gt?: string; lt?: string; lte?: string; gte?: string }
+  { gt?: number; lt?: number; lte?: number; gte?: number }
 >;
 
 export type FilterAggConfigUnion = FilterAggConfigTerm | FilterAggConfigRange;
