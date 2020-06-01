@@ -11,18 +11,19 @@ import { coreMock } from '../../../../../src/core/public/mocks';
 import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { asyncSearchStrategyProvider } from './async_search_strategy';
+import { IAsyncSearchOptions } from '.';
 
 describe('Async search strategy', () => {
-  let mockCoreSetup: MockedKeys<CoreSetup>;
-  let mockDataSetup: MockedKeys<DataPublicPluginSetup>;
+  let mockCoreSetup: jest.Mocked<CoreSetup>;
+  let mockDataSetup: jest.Mocked<DataPublicPluginSetup>;
   const mockSearch = jest.fn();
   const mockRequest = { params: {}, serverStrategy: 'foo' };
-  const mockOptions = { pollInterval: 0 };
+  const mockOptions: IAsyncSearchOptions = { pollInterval: 0 };
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockDataSetup = dataPluginMock.createSetupContract();
-    mockDataSetup.search.getSearchStrategy.mockReturnValue({ search: mockSearch });
+    (mockDataSetup.search.getSearchStrategy as jest.Mock).mockReturnValue({ search: mockSearch });
     mockSearch.mockReset();
   });
 
@@ -46,17 +47,7 @@ describe('Async search strategy', () => {
         of({ id: 1, total: 2, loaded: 2, is_running: false, is_partial: false })
       );
 
-    const asyncSearch = asyncSearchStrategyProvider({
-      core: mockCoreStart,
-      getSearchStrategy: jest.fn().mockImplementation(() => {
-        return () => {
-          return {
-            search: mockSearch,
-          };
-        };
-      }),
-    });
-
+    const asyncSearch = asyncSearchStrategyProvider(mockCoreSetup, mockDataSetup);
     expect(mockSearch).toBeCalledTimes(0);
 
     await asyncSearch.search(mockRequest, mockOptions).toPromise();
@@ -70,17 +61,7 @@ describe('Async search strategy', () => {
       .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2, is_running: false, is_partial: true }))
       .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2, is_running: false, is_partial: true }));
 
-    const asyncSearch = asyncSearchStrategyProvider({
-      core: mockCoreStart,
-      getSearchStrategy: jest.fn().mockImplementation(() => {
-        return () => {
-          return {
-            search: mockSearch,
-          };
-        };
-      }),
-    });
-
+    const asyncSearch = asyncSearchStrategyProvider(mockCoreSetup, mockDataSetup);
     expect(mockSearch).toBeCalledTimes(0);
 
     await asyncSearch
