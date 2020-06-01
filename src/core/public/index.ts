@@ -35,6 +35,8 @@
  * @packageDocumentation
  */
 
+import './index.scss';
+
 import {
   ChromeBadge,
   ChromeBrand,
@@ -360,3 +362,5 @@ export {
   UiSettingsState,
   NavType,
 };
+
+export { bootstrap } from './bootstrap';

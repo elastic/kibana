@@ -38,11 +38,27 @@ const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 
-const STATIC_BUNDLE_PLUGINS = [
-  { id: 'data', dirname: 'data' },
-  { id: 'kibanaReact', dirname: 'kibana_react' },
-  { id: 'kibanaUtils', dirname: 'kibana_utils' },
-  { id: 'esUiShared', dirname: 'es_ui_shared' },
+const SHARED_BUNDLES = [
+  {
+    id: 'entry/core',
+    rootRelativeDir: 'src/core/public',
+  },
+  {
+    id: 'plugin/data',
+    rootRelativeDir: 'src/plugins/data/public',
+  },
+  {
+    id: 'plugin/kibanaReact',
+    rootRelativeDir: 'src/plugins/kibana_react/public',
+  },
+  {
+    id: 'plugin/kibanaUtils',
+    rootRelativeDir: 'src/plugins/kibana_utils/public',
+  },
+  {
+    id: 'plugin/esUiShared',
+    rootRelativeDir: 'src/plugins/es_ui_shared/public',
+  },
 ];
 
 /**
@@ -57,18 +73,8 @@ const STATIC_BUNDLE_PLUGINS = [
  * @param request the request for a module from a commonjs require() call or import statement
  */
 function dynamicExternals(bundle: Bundle, context: string, request: string) {
-  // ignore imports that have loaders defined
-  if (request.includes('!')) {
-    return;
-  }
-
-  // ignore requests that don't include a /{dirname}/public for one of our
-  // "static" bundles as a cheap way to avoid doing path resolution
-  // for paths that couldn't possibly resolve to what we're looking for
-  const reqToStaticBundle = STATIC_BUNDLE_PLUGINS.some((p) =>
-    request.includes(`/${p.dirname}/public`)
-  );
-  if (!reqToStaticBundle) {
+  // ignore imports that have loaders defined or are not relative seeming
+  if (request.includes('!') || !request.startsWith('.')) {
     return;
   }
 
@@ -76,9 +82,9 @@ function dynamicExternals(bundle: Bundle, context: string, request: string) {
   const rootRelative = normalizePath(
     Path.relative(bundle.sourceRoot, Path.resolve(context, request))
   );
-  for (const { id, dirname } of STATIC_BUNDLE_PLUGINS) {
-    if (rootRelative === `src/plugins/${dirname}/public`) {
-      return `__kbnBundles__['plugin/${id}']`;
+  for (const sharedBundle of SHARED_BUNDLES) {
+    if (rootRelative === sharedBundle.rootRelativeDir) {
+      return `__kbnBundles__['${sharedBundle.id}']`;
     }
   }
 
@@ -112,13 +118,9 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
           info.absoluteResourcePath
         )}${info.query}`,
       jsonpFunction: `${bundle.id}_bundle_jsonpfunction`,
-      ...(bundle.type === 'plugin'
-        ? {
-            // When the entry point is loaded, assign it's exported `plugin`
-            // value to a key on the global `__kbnBundles__` object.
-            library: ['__kbnBundles__', `plugin/${bundle.id}`],
-          }
-        : {}),
+      // When the entry point is loaded, assign it's default export
+      // to a key on the global `__kbnBundles__` object.
+      library: ['__kbnBundles__', `${bundle.type}/${bundle.id}`],
     },
 
     optimization: {

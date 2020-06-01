@@ -25,39 +25,40 @@
  * src/legacy/ui/ui_bundles/app_entry_template.js
  */
 
-import './index.scss';
 import { i18n } from '@kbn/i18n';
 import { CoreSystem } from './core_system';
 
-const injectedMetadata = JSON.parse(
-  document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
-);
+export function bootstrap() {
+  const injectedMetadata = JSON.parse(
+    document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
+  );
 
-/**
- * `apmConfig` would be populated with relavant APM RUM agent
- * configuration if server is started with `ELASTIC_APM_ACTIVE=true`
- */
-if (process.env.IS_KIBANA_DISTRIBUTABLE !== 'true' && injectedMetadata.vars.apmConfig != null) {
-  // @ts-ignore
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { init } = require('@elastic/apm-rum');
-  init(injectedMetadata.vars.apmConfig);
-}
+  /**
+   * `apmConfig` would be populated with relavant APM RUM agent
+   * configuration if server is started with `ELASTIC_APM_ACTIVE=true`
+   */
+  if (process.env.IS_KIBANA_DISTRIBUTABLE !== 'true' && injectedMetadata.vars.apmConfig != null) {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { init } = require('@elastic/apm-rum');
+    init(injectedMetadata.vars.apmConfig);
+  }
 
-i18n
-  .load(injectedMetadata.i18n.translationsUrl)
-  .catch((e) => e)
-  .then(async (i18nError) => {
-    const coreSystem = new CoreSystem({
-      injectedMetadata,
-      rootDomElement: document.body,
-      browserSupportsCsp: !(window as any).__kbnCspNotEnforced__,
+  i18n
+    .load(injectedMetadata.i18n.translationsUrl)
+    .catch((e) => e)
+    .then(async (i18nError) => {
+      const coreSystem = new CoreSystem({
+        injectedMetadata,
+        rootDomElement: document.body,
+        browserSupportsCsp: !(window as any).__kbnCspNotEnforced__,
+      });
+
+      const setup = await coreSystem.setup();
+      if (i18nError && setup) {
+        setup.fatalErrors.add(i18nError);
+      }
+
+      await coreSystem.start();
     });
-
-    const setup = await coreSystem.setup();
-    if (i18nError && setup) {
-      setup.fatalErrors.add(i18nError);
-    }
-
-    await coreSystem.start();
-  });
+}

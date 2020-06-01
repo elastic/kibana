@@ -73,16 +73,25 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
     }
 
     load([
-        {{#each jsDependencyPaths}}
-          '{{this}}',
-        {{/each}}
+      {{#each jsDependencyPaths}}
+        '{{this}}',
+      {{/each}}
     ], function () {
       load([
-        '{{entryBundlePath}}',
+        {{#if finalBundlePath}}
+          {{finalBundlePath}},
+        {{/if}}
         {{#each styleSheetPaths}}
           '{{this}}',
         {{/each}}
-      ]);
+      ], function () {
+        if (!__kbnBundles__ || !__kbnBundles__['entry/core'] || typeof __kbnBundles__['entry/core'].bootstrap !== 'function') {
+          console.error('entry/core bundle did not load correctly');
+          failure();
+        } else {
+          __kbnBundles__['entry/core'].bootstrap()
+        }
+      });
     });
   }
 }

@@ -166,7 +166,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           ),
           `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
           ...(isCore
-            ? []
+            ? [`${regularBundlePath}/core/core.entry.js`]
             : [
                 `${dllBundlePath}/vendors_runtime.bundle.dll.js`,
                 ...dllJsChunks,
@@ -199,9 +199,7 @@ export function uiRenderMixin(kbnServer, server, config) {
             jsDependencyPaths,
             styleSheetPaths,
             publicPathMap,
-            entryBundlePath: isCore
-              ? `${regularBundlePath}/core/core.entry.js`
-              : `${regularBundlePath}/${app.getId()}.bundle.js`,
+            finalBundlePath: isCore ? undefined : `${regularBundlePath}/${app.getId()}.bundle.js`,
           },
         });
 
