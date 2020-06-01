@@ -8,6 +8,7 @@
 
 import ApolloClient from 'apollo-client';
 
+import { AlertStateStatus } from '../../../../common/detection_engine/types';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import {
   TimelineRowAction,
@@ -207,7 +208,7 @@ export const getAlertActions = ({
   onAlertStatusUpdateSuccess: (count: number, status: string) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
-  status: 'open' | 'closed';
+  status: AlertStateStatus;
   updateTimelineIsLoading: UpdateTimelineLoading;
 }): TimelineRowAction[] => [
   {

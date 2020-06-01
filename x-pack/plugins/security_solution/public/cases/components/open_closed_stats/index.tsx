@@ -6,11 +6,12 @@
 
 import React, { useMemo } from 'react';
 import { EuiDescriptionList, EuiLoadingSpinner } from '@elastic/eui';
+import { AlertStateStatus } from '../../../../common/detection_engine/types';
 import * as i18n from '../all_cases/translations';
 
 export interface Props {
   caseCount: number | null;
-  caseStatus: 'open' | 'closed';
+  caseStatus: AlertStateStatus;
   isLoading: boolean;
   dataTestSubj?: string;
 }

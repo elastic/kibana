@@ -6,6 +6,7 @@
 
 import ApolloClient from 'apollo-client';
 
+import { AlertStateStatus } from '../../../../common/detection_engine/types';
 import { Ecs } from '../../../graphql/types';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { inputsModel } from '../../../common/store';
@@ -22,7 +23,7 @@ export interface SetEventsDeletedProps {
 
 export interface UpdateAlertsStatusProps {
   alertIds: string[];
-  status: 'open' | 'closed';
+  status: AlertStateStatus;
 }
 
 export type UpdateAlertsStatusCallback = (
@@ -34,7 +35,7 @@ export type UpdateAlertsStatus = ({ alertIds, status }: UpdateAlertsStatusProps)
 export interface UpdateAlertStatusActionProps {
   query?: string;
   alertIds: string[];
-  status: 'open' | 'closed';
+  status: AlertStateStatus;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   onAlertStatusUpdateSuccess: (count: number, status: string) => void;

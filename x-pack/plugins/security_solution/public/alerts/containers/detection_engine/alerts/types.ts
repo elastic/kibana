@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertStateStatus } from '../../../../../common/detection_engine/types';
+
 export interface BasicSignals {
   signal: AbortSignal;
 }
@@ -36,7 +38,7 @@ export interface AlertSearchResponse<Hit = {}, Aggregations = {} | undefined>
 
 export interface UpdateAlertStatusProps {
   query: object;
-  status: 'open' | 'closed';
+  status: AlertStateStatus;
   signal?: AbortSignal; // TODO: implement cancelling
 }
 
