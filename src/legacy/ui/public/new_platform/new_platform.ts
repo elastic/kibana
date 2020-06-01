@@ -174,7 +174,9 @@ export const legacyAppRegister = (app: App<any>) => {
   }
   legacyAppRegistered = true;
 
-  require('ui/chrome').setRootController(app.id, ($scope: IScope, $element: JQLite) => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { default: chrome } = require('ui/chrome');
+  chrome.setRootController(app.id, ($scope: IScope, $element: JQLite) => {
     const element = document.createElement('div');
     $element[0].appendChild(element);
 

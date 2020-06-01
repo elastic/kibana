@@ -18,8 +18,9 @@
  */
 
 import $ from 'jquery';
+import { uiModules } from 'ui/modules';
 
-const app = require('ui/modules').get('apps/timelion', []);
+const app = uiModules.get('apps/timelion', []);
 app.directive('timelionGrid', function () {
   return {
     restrict: 'A',

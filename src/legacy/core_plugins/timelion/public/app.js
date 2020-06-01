@@ -45,6 +45,7 @@ import './directives/saved_object_save_as_checkbox';
 import './services/saved_sheet_register';
 
 import rootTemplate from 'plugins/timelion/index.html';
+import { uiModules } from 'ui/modules';
 
 import { loadKbnTopNavDirectives } from '../../../../plugins/kibana_legacy/public';
 loadKbnTopNavDirectives(npStart.plugins.navigation.ui);
@@ -61,7 +62,7 @@ require('plugins/timelion/directives/timelion_options_sheet');
 
 document.title = 'Timelion - Kibana';
 
-const app = require('ui/modules').get('apps/timelion', ['i18n', 'ngSanitize']);
+const app = uiModules.get('apps/timelion', ['i18n', 'ngSanitize']);
 
 routes.enable();
 
