@@ -54,11 +54,8 @@ interface SearchServiceStartDependencies {
 }
 
 /**
- * The search plugin exposes two registration methods for other plugins:
- *  -  registerSearchStrategyProvider for plugins to add their own custom
- * search strategies
- *  -  registerSearchStrategyContext for plugins to expose information
- * and/or functionality for other search strategies to use
+ * The search plugin exposes a method `registerSearchStrategy` for other plugins
+ * to add their own custom search strategies.
  *
  * It also comes with two search strategy implementations - SYNC_SEARCH_STRATEGY and ES_SEARCH_STRATEGY.
  */
@@ -140,8 +137,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const aggTypesStart = this.aggTypesRegistry.start();
 
     const search: ISearchGeneric = (request, options, strategyName) => {
-      const { search } = this.getSearchStrategy(strategyName || DEFAULT_SEARCH_STRATEGY);
-      return this.searchInterceptor.search(search as any, request, options);
+      const { search: defaultSearch } = this.getSearchStrategy(
+        strategyName || DEFAULT_SEARCH_STRATEGY
+      );
+      return this.searchInterceptor.search(defaultSearch as any, request, options);
     };
 
     const legacySearch = {
