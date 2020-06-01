@@ -23,8 +23,14 @@ import { DEFAULT_QUERY_LANGUAGE } from '../../../common';
 
 const defaultSearchQueryLanguageSetting = DEFAULT_QUERY_LANGUAGE;
 
+export interface Usage {
+  optInCount: number;
+  optOutCount: number;
+  defaultQueryLanguage: string;
+}
+
 export function fetchProvider(index: string) {
-  return async (callCluster: APICaller) => {
+  return async (callCluster: APICaller): Promise<Usage> => {
     const [response, config] = await Promise.all([
       callCluster('get', {
         index,
@@ -38,7 +44,7 @@ export function fetchProvider(index: string) {
       }),
     ]);
 
-    const queryLanguageConfigValue = get(
+    const queryLanguageConfigValue: string | null | undefined = get(
       config,
       'hits.hits[0]._source.config.search:queryLanguage'
     );

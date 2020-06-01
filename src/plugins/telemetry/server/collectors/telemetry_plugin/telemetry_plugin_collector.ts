@@ -80,10 +80,15 @@ export function registerTelemetryPluginUsageCollector(
   usageCollection: UsageCollectionSetup,
   options: TelemetryPluginUsageCollectorOptions
 ) {
-  const collector = usageCollection.makeUsageCollector({
+  const collector = usageCollection.makeUsageCollector<TelemetryUsageStats>({
     type: 'telemetry',
     isReady: () => typeof options.getSavedObjectsClient() !== 'undefined',
     fetch: createCollectorFetch(options),
+    mapping: {
+      opt_in_status: { type: 'boolean' },
+      usage_fetcher: { type: 'keyword' },
+      last_reported: { type: 'long' },
+    },
   });
 
   usageCollection.registerCollector(collector);

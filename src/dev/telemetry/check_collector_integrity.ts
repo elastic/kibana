@@ -32,7 +32,7 @@ export function checkMatchingMapping(
 }
 
 export function checkCompatibleTypeDescriptor(usageCollections: ParsedUsageCollection[]) {
-  return usageCollections.map(([, collectorDetails]) => {
+  return usageCollections.map(([collectorPath, collectorDetails]) => {
     const typeDescriptorKinds = flattenKeys(
       pickDeep(collectorDetails.fetch.typeDescriptor, 'kind')
     );
@@ -53,9 +53,13 @@ export function checkCompatibleTypeDescriptor(usageCollections: ParsedUsageColle
       diff,
       message: Object.entries(diff).map(([key]) => {
         const interfaceKey = key.replace('.kind', '');
-        const expectedDescriptorType = kindToDescriptorName(_.get(transformedMappingKinds, key));
-        const actualDescriptorType = kindToDescriptorName(_.get(typeDescriptorKinds, key));
-        return `incompatible Type key (${collectorDetails.fetch.typeName}.${interfaceKey}): expected (${expectedDescriptorType}) got (${actualDescriptorType}).`;
+        try {
+          const expectedDescriptorType = kindToDescriptorName(_.get(transformedMappingKinds, key));
+          const actualDescriptorType = kindToDescriptorName(_.get(typeDescriptorKinds, key));
+          return `incompatible Type key (${collectorDetails.fetch.typeName}.${interfaceKey}): expected (${expectedDescriptorType}) got (${actualDescriptorType}).`;
+        } catch (err) {
+          throw Error(`Error converting ${key} in ${collectorPath}.\n${err}`);
+        }
       }),
     };
   });

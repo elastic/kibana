@@ -120,7 +120,7 @@ function getCollectionConfigNode(
 
 function extractCollectorDetails(
   collectorNode: ts.CallExpression,
-  typeChecker: ts.TypeChecker,
+  program: ts.Program,
   sourceFile: ts.SourceFile
 ): CollectorDetails {
   if (collectorNode.arguments.length > 1) {
@@ -159,7 +159,7 @@ function extractCollectorDetails(
 
   const usageTypeNode = collectorNodeType[0];
   const usageTypeName = usageTypeNode.getText();
-  const usageType: Descriptor = getDescriptor(usageTypeNode, typeChecker);
+  const usageType: Descriptor = getDescriptor(usageTypeNode, program);
   const snapshot = fetchProperty.getFullText();
   const fnHash = crypto.createHash('md5').update(snapshot).digest('hex');
 
@@ -196,14 +196,14 @@ export type ParsedUsageCollection = [string, CollectorDetails];
 
 export function* parseUsageCollection(
   sourceFile: ts.SourceFile,
-  typeChecker: ts.TypeChecker
+  program: ts.Program
 ): Generator<ParsedUsageCollection> {
   const relativePath = path.relative(process.cwd(), sourceFile.fileName);
   if (sourceHasUsageCollector(sourceFile)) {
     for (const node of traverseNodes(sourceFile)) {
       if (isMakeUsageCollectorFunction(node, sourceFile)) {
         try {
-          const collectorDetails = extractCollectorDetails(node, typeChecker, sourceFile);
+          const collectorDetails = extractCollectorDetails(node, program, sourceFile);
           yield [relativePath, collectorDetails];
         } catch (err) {
           throw createFailError(`Error extracting collector in ${relativePath}\n${err}`);

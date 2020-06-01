@@ -17,11 +17,29 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
-import { UsageCollectionPlugin } from './plugin';
+import { ParsedUsageCollection } from '../ts_parser';
 
-export { AllowedMappingTypes, CollectorOptions, Collector } from './collector';
-export { UsageCollectionSetup } from './plugin';
-export { config } from './config';
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new UsageCollectionPlugin(initializerContext);
+export const parsedImportedUsageInterface: ParsedUsageCollection[] = [
+  [
+    'src/dev/telemetry/__fixture__/imported_usage_interface.ts',
+    {
+      collectorName: 'imported_usage_interface_collector',
+      mapping: {
+        value: {
+          locale: {
+            type: 'keyword',
+          },
+        },
+      },
+      fetch: {
+        typeName: 'Usage',
+        typeDescriptor: {
+          locale: {
+            kind: 142,
+          },
+        },
+        signature: '5c889378c954e9ef600d9623b0ce8e7f',
+      },
+    },
+  ],
+];

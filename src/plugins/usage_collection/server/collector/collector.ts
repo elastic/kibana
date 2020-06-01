@@ -21,12 +21,14 @@ import { Logger, APICaller } from 'kibana/server';
 
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
 
-type AllowedMappingTypes = 'keyword' | 'text' | 'number' | 'boolean';
+type AllowedMappingTypes = 'keyword' | 'text' | 'number' | 'boolean' | 'long' | 'date' | 'float';
 
 type Purify<T extends string> = { [P in T]: T }[T];
 
 type MakeMappingFrom<Base> = {
-  [Key in Purify<Extract<keyof Base, string>>]: Base[Key] extends object
+  [Key in Purify<Extract<keyof Base, string>>]: Base[Key] extends Array<infer U>
+    ? { type: AllowedMappingTypes }
+    : Base[Key] extends object
     ? MakeMappingFrom<Base[Key]>
     : { type: AllowedMappingTypes };
 };

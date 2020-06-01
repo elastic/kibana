@@ -12,8 +12,6 @@ interface IdToFlagMap {
   [key: string]: boolean;
 }
 
-const ROLLUP_USAGE_TYPE = 'rollups';
-
 // elasticsearch index.max_result_window default value
 const ES_MAX_RESULT_WINDOW_DEFAULT_VALUE = 1000;
 
@@ -174,13 +172,42 @@ async function fetchRollupVisualizations(
   };
 }
 
+interface Usage {
+  index_patterns: {
+    total: number;
+  };
+  saved_searches: {
+    total: number;
+  };
+  visualizations: {
+    total: number;
+    saved_searches: {
+      total: number;
+    };
+  };
+}
+
 export function registerRollupUsageCollector(
   usageCollection: UsageCollectionSetup,
   kibanaIndex: string
 ): void {
-  const collector = usageCollection.makeUsageCollector({
-    type: ROLLUP_USAGE_TYPE,
+  const collector = usageCollection.makeUsageCollector<Usage>({
+    type: 'rollups',
     isReady: () => true,
+    mapping: {
+      index_patterns: {
+        total: { type: 'long' },
+      },
+      saved_searches: {
+        total: { type: 'long' },
+      },
+      visualizations: {
+        saved_searches: {
+          total: { type: 'long' },
+        },
+        total: { type: 'long' },
+      },
+    },
     fetch: async (callCluster: CallCluster) => {
       const rollupIndexPatterns = await fetchRollupIndexPatterns(kibanaIndex, callCluster);
       const rollupIndexPatternToFlagMap = createIdToFlagMap(rollupIndexPatterns);

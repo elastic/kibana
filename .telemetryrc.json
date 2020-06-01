@@ -15,15 +15,11 @@
       "src/plugins/kibana_react/",
       "src/plugins/testbed/",
       "src/plugins/kibana_utils/",
-      "src/plugins/data/server/kql_telemetry/usage_collector/make_kql_usage_collector.ts",
-      "src/plugins/home/server/services/sample_data/usage/collector.ts",
-      "src/plugins/kibana_usage_collection/server/collectors/application_usage/telemetry_application_usage_collector.ts",
       "src/plugins/kibana_usage_collection/server/collectors/kibana/kibana_usage_collector.ts",
+      "src/plugins/kibana_usage_collection/server/collectors/application_usage/telemetry_application_usage_collector.ts",
       "src/plugins/kibana_usage_collection/server/collectors/management/telemetry_management_collector.ts",
       "src/plugins/kibana_usage_collection/server/collectors/ui_metric/telemetry_ui_metric_collector.ts",
-      "src/plugins/telemetry/server/collectors/telemetry_plugin/telemetry_plugin_collector.ts",
-      "src/plugins/telemetry/server/collectors/usage/telemetry_usage_collector.ts",
-      "src/plugins/vis_type_timeseries/server/validation_telemetry/validation_telemetry_service.ts"
+      "src/plugins/telemetry/server/collectors/usage/telemetry_usage_collector.ts"
     ]
   }
 ]

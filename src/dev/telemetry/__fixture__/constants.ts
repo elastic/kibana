@@ -16,12 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import moment, { Moment } from 'moment';
 
-import { PluginInitializerContext } from 'kibana/server';
-import { UsageCollectionPlugin } from './plugin';
+export interface Usage {
+  locale: string;
+}
 
-export { AllowedMappingTypes, CollectorOptions, Collector } from './collector';
-export { UsageCollectionSetup } from './plugin';
-export { config } from './config';
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new UsageCollectionPlugin(initializerContext);
+export interface WithUnion {
+  prop1: string | null;
+  prop2: string | null | undefined;
+  prop3?: string | null;
+  prop4: 'opt1' | 'opt2';
+  prop5: 123 | 431;
+}
+
+export interface WithMoment {
+  prop1: Moment;
+  prop2: moment.Moment;
+}
+
+export interface WithConflictingUnion {
+  prop1: 123 | 'str';
+}
+
+export interface WithUnsupportedUnion {
+  prop1: 123 | Moment;
+}

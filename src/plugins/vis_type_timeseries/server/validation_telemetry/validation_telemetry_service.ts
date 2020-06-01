@@ -24,6 +24,9 @@ import { tsvbTelemetrySavedObjectType } from '../saved_objects';
 export interface ValidationTelemetryServiceSetup {
   logFailedValidation: () => void;
 }
+export interface Usage {
+  failed_validations: number;
+}
 
 export class ValidationTelemetryService implements Plugin<ValidationTelemetryServiceSetup> {
   private kibanaIndex: string = '';
@@ -43,7 +46,7 @@ export class ValidationTelemetryService implements Plugin<ValidationTelemetrySer
     });
     if (usageCollection) {
       usageCollection.registerCollector(
-        usageCollection.makeUsageCollector({
+        usageCollection.makeUsageCollector<Usage>({
           type: 'tsvb-validation',
           isReady: () => this.kibanaIndex !== '',
           fetch: async (callCluster: APICaller) => {
@@ -62,6 +65,9 @@ export class ValidationTelemetryService implements Plugin<ValidationTelemetrySer
                 failed_validations: 0,
               };
             }
+          },
+          mapping: {
+            failed_validations: { type: 'long' },
           },
         })
       );

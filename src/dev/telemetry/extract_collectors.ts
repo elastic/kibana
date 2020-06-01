@@ -57,14 +57,10 @@ export async function getProgramPaths({
 
   return fullPaths;
 }
-// const fullPaths = await getProgramPaths({ root, exclude });
+
 export function* extractCollectors(fullPaths: string[], tsConfig: any) {
-  // const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
-  // if (!tsConfig) {
-  //   throw new Error('Could not find a valid tsconfig.json.');
-  // }
   const program = ts.createProgram(fullPaths, tsConfig);
-  const checker = program.getTypeChecker();
+  program.getTypeChecker();
   const sourceFiles = fullPaths.map((fullPath) => {
     const sourceFile = program.getSourceFile(fullPath);
     if (!sourceFile) {
@@ -74,6 +70,6 @@ export function* extractCollectors(fullPaths: string[], tsConfig: any) {
   });
 
   for (const sourceFile of sourceFiles) {
-    yield* parseUsageCollection(sourceFile, checker);
+    yield* parseUsageCollection(sourceFile, program);
   }
 }

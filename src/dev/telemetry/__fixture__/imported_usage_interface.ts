@@ -16,12 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { CollectorSet } from '../../../plugins/usage_collection/server/collector';
+import { loggingServiceMock } from '../../../core/server/mocks';
+import { Usage } from './constants';
 
-import { PluginInitializerContext } from 'kibana/server';
-import { UsageCollectionPlugin } from './plugin';
+const { makeUsageCollector } = new CollectorSet({
+  logger: loggingServiceMock.createLogger(),
+  maximumWaitTimeForAllCollectorsInS: 0,
+});
 
-export { AllowedMappingTypes, CollectorOptions, Collector } from './collector';
-export { UsageCollectionSetup } from './plugin';
-export { config } from './config';
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new UsageCollectionPlugin(initializerContext);
+export const myCollector = makeUsageCollector<Usage>({
+  type: 'imported_usage_interface_collector',
+  isReady: () => true,
+  fetch() {
+    return {
+      locale: 'en',
+    };
+  },
+  mapping: {
+    locale: {
+      type: 'keyword',
+    },
+  },
+});

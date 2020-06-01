@@ -1,3 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ts-test throws when mapping fields is not defined 1`] = `"usageCollector.mapping must be defined."`;
+exports[`ts-test throws when mapping fields is not defined 1`] = `
+"Error extracting collector in src/dev/telemetry/__fixture__/unmapped_collector.ts
+Error: usageCollector.mapping must be defined."
+`;

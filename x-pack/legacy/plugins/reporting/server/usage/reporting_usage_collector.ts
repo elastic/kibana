@@ -8,13 +8,13 @@ import { first, map } from 'rxjs/operators';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ReportingCore } from '../';
-import { KIBANA_REPORTING_TYPE } from '../../common/constants';
 import { ReportingConfig } from '../../server';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { ReportingSetupDeps } from '../types';
 import { GetLicense } from './';
 import { getReportingUsage } from './get_reporting_usage';
 import { RangeStats } from './types';
+import { reportingUsageMapping } from './cg_usage_mapping';
 
 // places the reporting data as kibana stats
 const METATYPE = 'kibana_stats';
@@ -30,11 +30,11 @@ export function getReportingUsageCollector(
   isReady: () => Promise<boolean>
 ) {
   return usageCollection.makeUsageCollector({
-    type: KIBANA_REPORTING_TYPE,
+    type: 'reporting',
+    mapping: reportingUsageMapping,
     fetch: (callCluster: CallCluster) =>
       getReportingUsage(config, getLicense, callCluster, exportTypesRegistry),
     isReady,
-
     /*
      * Format the response data into a model for internal upload
      * 1. Make this data part of the "kibana_stats" type

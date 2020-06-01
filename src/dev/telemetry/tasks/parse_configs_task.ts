@@ -23,9 +23,12 @@ import { TaskContext } from './task_context';
 
 export function parseConfigsTask() {
   const kibanaRoot = path.join(__dirname, '../../../../');
-  // const xpackRoot = path.join(kibanaRoot, 'x-pack');
+  const xpackRoot = path.join(kibanaRoot, 'x-pack');
 
-  const configRoots = [kibanaRoot];
+  const configRoots = [
+    // kibanaRoot,
+    xpackRoot,
+  ];
 
   return configRoots.map((configRoot) => ({
     task: async (context: TaskContext) => {

@@ -20,6 +20,12 @@ const BUCKET_SIZE = 3600;
 // take buckets in the last day
 const BUCKET_NUMBER = 24;
 
+interface Usage {
+  last_24_hours: {
+    hits: UptimeTelemetry;
+  };
+}
+
 export class KibanaTelemetryAdapter {
   public static registerUsageCollector = (
     usageCollector: UsageCollectionSetup,
@@ -39,8 +45,36 @@ export class KibanaTelemetryAdapter {
     usageCollector: UsageCollectionSetup,
     getSavedObjectsClient: () => ISavedObjectsRepository | undefined
   ) {
-    return usageCollector.makeUsageCollector({
+    return usageCollector.makeUsageCollector<Usage, Usage>({
       type: 'uptime',
+      mapping: {
+        last_24_hours: {
+          hits: {
+            autoRefreshEnabled: {
+              type: 'boolean',
+            },
+            autorefreshInterval: { type: 'long' },
+            dateRangeEnd: { type: 'date' },
+            dateRangeStart: { type: 'date' },
+            monitor_frequency: { type: 'long' },
+            monitor_name_stats: {
+              avg_length: { type: 'float' },
+              max_length: { type: 'long' },
+              min_length: { type: 'long' },
+            },
+            monitor_page: { type: 'long' },
+            no_of_unique_monitors: { type: 'long' },
+            no_of_unique_observer_locations: { type: 'long' },
+            observer_location_name_stats: {
+              avg_length: { type: 'float' },
+              max_length: { type: 'long' },
+              min_length: { type: 'long' },
+            },
+            overview_page: { type: 'long' },
+            settings_page: { type: 'long' },
+          },
+        },
+      },
       fetch: async (callCluster: APICaller) => {
         const savedObjectsClient = getSavedObjectsClient()!;
         if (savedObjectsClient) {

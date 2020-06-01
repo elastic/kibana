@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet } from '../../../plugins/usage_collection/server/collector';
+import { CollectorSet, CollectorOptions } from '../../../plugins/usage_collection/server/collector';
 import { loggingServiceMock } from '../../../core/server/mocks';
 
 const collectorSet = new CollectorSet({
@@ -28,7 +28,7 @@ interface Usage {
   locale: string;
 }
 
-function createCollector() {
+function createCollector(): CollectorOptions<Usage> {
   return {
     type: 'from_fn_collector',
     isReady: () => true,
@@ -39,14 +39,14 @@ function createCollector() {
     },
     mapping: {
       locale: {
-        type: 'keyword' as 'keyword',
+        type: 'keyword',
       },
     },
   };
 }
 
 export function defineCollectorFromVariable() {
-  const fromVarCollector = {
+  const fromVarCollector: CollectorOptions<Usage> = {
     type: 'from_variable_collector',
     isReady: () => true,
     fetch(): Usage {
@@ -56,7 +56,7 @@ export function defineCollectorFromVariable() {
     },
     mapping: {
       locale: {
-        type: 'keyword' as 'keyword',
+        type: 'keyword',
       },
     },
   };

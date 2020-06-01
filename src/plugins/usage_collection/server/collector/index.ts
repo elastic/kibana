@@ -18,5 +18,5 @@
  */
 
 export { CollectorSet } from './collector_set';
-export { Collector } from './collector';
+export { Collector, AllowedMappingTypes, CollectorOptions } from './collector';
 export { UsageCollector } from './usage_collector';

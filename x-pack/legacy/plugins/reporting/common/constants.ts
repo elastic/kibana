@@ -53,12 +53,6 @@ export const KBN_SCREENSHOT_HEADER_BLACKLIST_STARTS_WITH_PATTERN = ['proxy-'];
 
 export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
 
-/**
- * The type name used within the Monitoring index to publish reporting stats.
- * @type {string}
- */
-export const KIBANA_REPORTING_TYPE = 'reporting';
-
 export const PDF_JOB_TYPE = 'printable_pdf';
 export const PNG_JOB_TYPE = 'PNG';
 export const CSV_JOB_TYPE = 'csv';

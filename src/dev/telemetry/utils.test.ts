@@ -16,12 +16,3 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { PluginInitializerContext } from 'kibana/server';
-import { UsageCollectionPlugin } from './plugin';
-
-export { AllowedMappingTypes, CollectorOptions, Collector } from './collector';
-export { UsageCollectionSetup } from './plugin';
-export { config } from './config';
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new UsageCollectionPlugin(initializerContext);

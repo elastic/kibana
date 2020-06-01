@@ -9,7 +9,6 @@ import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
-import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
 import { PluginsSetup } from '../plugin';
 
 type CallCluster = <T = unknown>(
@@ -119,7 +118,24 @@ export interface UsageStats {
   count?: number;
   usesFeatureControls?: boolean;
   disabledFeatures?: {
-    [featureId: string]: number;
+    indexPatterns?: number;
+    discover?: number;
+    canvas?: number;
+    maps?: number;
+    siem?: number;
+    monitoring?: number;
+    graph?: number;
+    uptime?: number;
+    savedObjectsManagement?: number;
+    timelion?: number;
+    dev_tools?: number;
+    advancedSettings?: number;
+    infrastructure?: number;
+    visualize?: number;
+    logs?: number;
+    dashboard?: number;
+    ml?: number;
+    apm?: number;
   };
 }
 
@@ -129,6 +145,11 @@ interface CollectorDeps {
   licensing: PluginsSetup['licensing'];
 }
 
+interface BulkUpload {
+  usage: {
+    spaces: UsageStats;
+  };
+}
 /*
  * @param {Object} server
  * @return {Object} kibana usage stats type collection object
@@ -137,9 +158,35 @@ export function getSpacesUsageCollector(
   usageCollection: UsageCollectionSetup,
   deps: CollectorDeps
 ) {
-  return usageCollection.makeUsageCollector({
-    type: KIBANA_SPACES_STATS_TYPE,
+  return usageCollection.makeUsageCollector<UsageStats, BulkUpload>({
+    type: 'spaces',
     isReady: () => true,
+    mapping: {
+      usesFeatureControls: { type: 'boolean' },
+      disabledFeatures: {
+        indexPatterns: { type: 'long' },
+        discover: { type: 'long' },
+        canvas: { type: 'long' },
+        maps: { type: 'long' },
+        siem: { type: 'long' },
+        monitoring: { type: 'long' },
+        graph: { type: 'long' },
+        uptime: { type: 'long' },
+        savedObjectsManagement: { type: 'long' },
+        timelion: { type: 'long' },
+        dev_tools: { type: 'long' },
+        advancedSettings: { type: 'long' },
+        infrastructure: { type: 'long' },
+        visualize: { type: 'long' },
+        logs: { type: 'long' },
+        dashboard: { type: 'long' },
+        ml: { type: 'long' },
+        apm: { type: 'long' },
+      },
+      available: { type: 'boolean' },
+      enabled: { type: 'boolean' },
+      count: { type: 'long' },
+    },
     fetch: async (callCluster: CallCluster) => {
       const license = await deps.licensing.license$.pipe(take(1)).toPromise();
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
