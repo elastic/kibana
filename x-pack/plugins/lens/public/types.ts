@@ -290,6 +290,12 @@ export type VisualizationLayerWidgetProps<T = unknown> = VisualizationConfigProp
   setState: (newState: T) => void;
 };
 
+export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfigProps<T> & {
+  groupId: string;
+  accessor: string;
+  setState: (newState: T) => void;
+};
+
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
 
@@ -300,6 +306,12 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   /** If required, a warning will appear if accessors are empty */
   required?: boolean;
   dataTestSubj?: string;
+
+  /**
+   * When the dimension editor is enabled for this group, all dimensions in the group
+   * will render the extra tab for the dimension editor
+   */
+  enableDimensionEditor?: boolean;
 };
 
 interface VisualizationDimensionChangeProps<T> {
@@ -458,6 +470,15 @@ export interface Visualization<T = unknown, P = unknown> {
    * look at its internal state to determine which dimension is being affected.
    */
   removeDimension: (props: VisualizationDimensionChangeProps<T>) => T;
+
+  /**
+   * Additional editor that gets rendered inside the dimension popover.
+   * This can be used to configure dimension-specific options
+   */
+  renderDimensionEditor?: (
+    domElement: Element,
+    props: VisualizationDimensionEditorProps<T>
+  ) => void;
 
   /**
    * The frame will call this function on all visualizations at different times. The
