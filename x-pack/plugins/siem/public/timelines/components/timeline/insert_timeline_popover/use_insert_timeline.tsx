@@ -28,14 +28,11 @@ export const useInsertTimeline = <T extends FormData>(form: FormHook<T>, fieldNa
       ].join('');
       form.setFieldValue(fieldName, newValue);
     },
-    [form]
+    [basePath, cursorPosition.end, cursorPosition.start, fieldName, form]
   );
-  const handleCursorChange = useCallback(
-    (cp: CursorPosition) => {
-      setCursorPosition(cp);
-    },
-    [cursorPosition]
-  );
+  const handleCursorChange = useCallback((cp: CursorPosition) => {
+    setCursorPosition(cp);
+  }, []);
   return {
     cursorPosition,
     handleCursorChange,

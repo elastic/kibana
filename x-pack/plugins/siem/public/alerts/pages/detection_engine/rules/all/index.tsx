@@ -236,9 +236,9 @@ export const AllRules = React.memo<AllRulesProps>(
         reFetchRules: reFetchRulesData,
       });
     }, [
-      dispatch,
       dispatchToaster,
       hasMlPermissions,
+      hasNoPermissions,
       history,
       loadingRuleIds,
       loadingRulesAction,
@@ -313,7 +313,7 @@ export const AllRules = React.memo<AllRulesProps>(
           ))}
         </EuiTabs>
       ),
-      [allRulesTabs, allRulesTab, setAllRulesTab]
+      [allRulesTab, setAllRulesTab]
     );
 
     return (

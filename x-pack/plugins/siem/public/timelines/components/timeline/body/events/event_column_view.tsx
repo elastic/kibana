@@ -89,7 +89,7 @@ export const EventColumnView = React.memo<Props>(
           </EventsTdContent>
         )) ?? []
       );
-    }, [ecsData, timelineTypeContext.timelineActions]);
+    }, [ecsData, id, timelineTypeContext.timelineActions]);
 
     return (
       <EventsTrData data-test-subj="event-column-view">

@@ -66,12 +66,12 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     const onToggleEnabledProvider = useCallback(() => {
       toggleEnabledProvider();
       closePopover();
-    }, [toggleEnabledProvider]);
+    }, [closePopover, toggleEnabledProvider]);
 
     const onToggleExcludedProvider = useCallback(() => {
       toggleExcludedProvider();
       closePopover();
-    }, [toggleExcludedProvider]);
+    }, [closePopover, toggleExcludedProvider]);
 
     const [providerRegistered, setProviderRegistered] = useState(false);
 
@@ -95,7 +95,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
       () => () => {
         unRegisterProvider();
       },
-      []
+      [unRegisterProvider]
     );
 
     return (

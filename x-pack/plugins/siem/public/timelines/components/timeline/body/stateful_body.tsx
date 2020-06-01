@@ -90,7 +90,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     const onAddNoteToEvent: AddNoteToEvent = useCallback(
       ({ eventId, noteId }: { eventId: string; noteId: string }) =>
         addNoteToEvent!({ id, eventId, noteId }),
-      [id]
+      [addNoteToEvent, id]
     );
 
     const onRowSelected: OnRowSelected = useCallback(
@@ -127,28 +127,36 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       (sorted) => {
         updateSort!({ id, sort: sorted });
       },
-      [id]
+      [id, updateSort]
     );
 
     const onColumnRemoved: OnColumnRemoved = useCallback(
       (columnId) => removeColumn!({ id, columnId }),
-      [id]
+      [id, removeColumn]
     );
 
     const onColumnResized: OnColumnResized = useCallback(
       ({ columnId, delta }) => applyDeltaToColumnWidth!({ id, columnId, delta }),
-      [id]
+      [applyDeltaToColumnWidth, id]
     );
 
-    const onPinEvent: OnPinEvent = useCallback((eventId) => pinEvent!({ id, eventId }), [id]);
+    const onPinEvent: OnPinEvent = useCallback((eventId) => pinEvent!({ id, eventId }), [
+      id,
+      pinEvent,
+    ]);
 
-    const onUnPinEvent: OnUnPinEvent = useCallback((eventId) => unPinEvent!({ id, eventId }), [id]);
+    const onUnPinEvent: OnUnPinEvent = useCallback((eventId) => unPinEvent!({ id, eventId }), [
+      id,
+      unPinEvent,
+    ]);
 
-    const onUpdateNote: UpdateNote = useCallback((note: Note) => updateNote!({ note }), []);
+    const onUpdateNote: UpdateNote = useCallback((note: Note) => updateNote!({ note }), [
+      updateNote,
+    ]);
 
     const onUpdateColumns: OnUpdateColumns = useCallback(
       (columns) => updateColumns!({ id, columns }),
-      [id]
+      [id, updateColumns]
     );
 
     // Sync to timelineTypeContext.selectAll so parent components can select all events
@@ -156,7 +164,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       if (timelineTypeContext.selectAll) {
         onSelectAll({ isSelected: true });
       }
-    }, [timelineTypeContext.selectAll]); // onSelectAll dependency not necessary
+    }, [onSelectAll, timelineTypeContext.selectAll]); // onSelectAll dependency not necessary
 
     return (
       <Body

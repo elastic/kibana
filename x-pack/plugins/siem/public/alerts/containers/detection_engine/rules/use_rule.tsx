@@ -55,7 +55,7 @@ export const useRule = (id: string | undefined): ReturnRule => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [id]);
+  }, [dispatchToaster, id]);
 
   return [loading, rule];
 };

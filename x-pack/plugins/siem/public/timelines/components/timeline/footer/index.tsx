@@ -260,7 +260,7 @@ export const FooterComponent = ({
     if (updatedAt === null || !isLoading) {
       setUpdatedAt(getUpdatedAt());
     }
-  }, [isLoading]);
+  }, [getUpdatedAt, isLoading, paginationLoading, updatedAt]);
 
   if (isLoading && !paginationLoading) {
     return (

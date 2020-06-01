@@ -169,19 +169,19 @@ export const useUserInfo = (): State => {
     if (loading !== privilegeLoading || indexNameLoading) {
       dispatch({ type: 'updateLoading', loading: privilegeLoading || indexNameLoading });
     }
-  }, [loading, privilegeLoading, indexNameLoading]);
+  }, [loading, privilegeLoading, indexNameLoading, dispatch]);
 
   useEffect(() => {
     if (!loading && hasIndexManage !== hasApiIndexManage && hasApiIndexManage != null) {
       dispatch({ type: 'updateHasIndexManage', hasIndexManage: hasApiIndexManage });
     }
-  }, [loading, hasIndexManage, hasApiIndexManage]);
+  }, [loading, hasIndexManage, hasApiIndexManage, dispatch]);
 
   useEffect(() => {
     if (!loading && hasIndexWrite !== hasApiIndexWrite && hasApiIndexWrite != null) {
       dispatch({ type: 'updateHasIndexWrite', hasIndexWrite: hasApiIndexWrite });
     }
-  }, [loading, hasIndexWrite, hasApiIndexWrite]);
+  }, [loading, hasIndexWrite, hasApiIndexWrite, dispatch]);
 
   useEffect(() => {
     if (
@@ -191,31 +191,31 @@ export const useUserInfo = (): State => {
     ) {
       dispatch({ type: 'updateIsSignalIndexExists', isSignalIndexExists: isApiSignalIndexExists });
     }
-  }, [loading, isSignalIndexExists, isApiSignalIndexExists]);
+  }, [loading, isSignalIndexExists, isApiSignalIndexExists, dispatch]);
 
   useEffect(() => {
     if (!loading && isAuthenticated !== isApiAuthenticated && isApiAuthenticated != null) {
       dispatch({ type: 'updateIsAuthenticated', isAuthenticated: isApiAuthenticated });
     }
-  }, [loading, isAuthenticated, isApiAuthenticated]);
+  }, [loading, isAuthenticated, isApiAuthenticated, dispatch]);
 
   useEffect(() => {
     if (!loading && hasEncryptionKey !== isApiEncryptionKey && isApiEncryptionKey != null) {
       dispatch({ type: 'updateHasEncryptionKey', hasEncryptionKey: isApiEncryptionKey });
     }
-  }, [loading, hasEncryptionKey, isApiEncryptionKey]);
+  }, [loading, hasEncryptionKey, isApiEncryptionKey, dispatch]);
 
   useEffect(() => {
     if (!loading && canUserCRUD !== capabilitiesCanUserCRUD && capabilitiesCanUserCRUD != null) {
       dispatch({ type: 'updateCanUserCRUD', canUserCRUD: capabilitiesCanUserCRUD });
     }
-  }, [loading, canUserCRUD, capabilitiesCanUserCRUD]);
+  }, [loading, canUserCRUD, capabilitiesCanUserCRUD, dispatch]);
 
   useEffect(() => {
     if (!loading && signalIndexName !== apiSignalIndexName && apiSignalIndexName != null) {
       dispatch({ type: 'updateSignalIndexName', signalIndexName: apiSignalIndexName });
     }
-  }, [loading, signalIndexName, apiSignalIndexName]);
+  }, [loading, signalIndexName, apiSignalIndexName, dispatch]);
 
   useEffect(() => {
     if (

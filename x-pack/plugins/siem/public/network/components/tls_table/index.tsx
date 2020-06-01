@@ -108,7 +108,7 @@ const TlsTableComponent = React.memo<TlsTableProps>(
       [sort, type, tableType, updateNetworkTable]
     );
 
-    const columns = useMemo(() => getTlsColumns(tlsTableId), [tlsTableId]);
+    const columns = useMemo(() => getTlsColumns(tlsTableId), []);
 
     return (
       <PaginatedTable

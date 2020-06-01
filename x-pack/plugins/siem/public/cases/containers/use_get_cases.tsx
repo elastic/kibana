@@ -150,45 +150,49 @@ export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
     dispatch({ type: 'UPDATE_FILTER_OPTIONS', payload: newFilters });
   }, []);
 
-  const fetchCases = useCallback((filterOptions: FilterOptions, queryParams: QueryParams) => {
-    let didCancel = false;
-    const abortCtrl = new AbortController();
+  const fetchCases = useCallback(
+    (filterOptions: FilterOptions, queryParams: QueryParams) => {
+      let didCancel = false;
+      const abortCtrl = new AbortController();
 
-    const fetchData = async () => {
-      dispatch({ type: 'FETCH_INIT', payload: 'cases' });
-      try {
-        const response = await getCases({
-          filterOptions,
-          queryParams,
-          signal: abortCtrl.signal,
-        });
-        if (!didCancel) {
-          dispatch({
-            type: 'FETCH_CASES_SUCCESS',
-            payload: response,
+      const fetchData = async () => {
+        dispatch({ type: 'FETCH_INIT', payload: 'cases' });
+        try {
+          const response = await getCases({
+            filterOptions,
+            queryParams,
+            signal: abortCtrl.signal,
           });
+          if (!didCancel) {
+            dispatch({
+              type: 'FETCH_CASES_SUCCESS',
+              payload: response,
+            });
+          }
+        } catch (error) {
+          if (!didCancel) {
+            errorToToaster({
+              title: i18n.ERROR_TITLE,
+              error: error.body && error.body.message ? new Error(error.body.message) : error,
+              dispatchToaster,
+            });
+            dispatch({ type: 'FETCH_FAILURE', payload: 'cases' });
+          }
         }
-      } catch (error) {
-        if (!didCancel) {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
-          dispatch({ type: 'FETCH_FAILURE', payload: 'cases' });
-        }
-      }
-    };
-    fetchData();
-    return () => {
-      abortCtrl.abort();
-      didCancel = true;
-    };
-  }, []);
+      };
+      fetchData();
+      return () => {
+        abortCtrl.abort();
+        didCancel = true;
+      };
+    },
+    [dispatchToaster]
+  );
 
   useEffect(() => fetchCases(state.filterOptions, state.queryParams), [
     state.queryParams,
     state.filterOptions,
+    fetchCases,
   ]);
 
   const dispatchUpdateCaseProperty = useCallback(
@@ -224,12 +228,12 @@ export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
         didCancel = true;
       };
     },
-    [state.filterOptions, state.queryParams]
+    [dispatchToaster, fetchCases, state.filterOptions, state.queryParams]
   );
 
   const refetchCases = useCallback(() => {
     fetchCases(state.filterOptions, state.queryParams);
-  }, [state.filterOptions, state.queryParams]);
+  }, [fetchCases, state.filterOptions, state.queryParams]);
 
   return {
     ...state,

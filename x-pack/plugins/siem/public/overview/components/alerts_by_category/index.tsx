@@ -71,7 +71,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
         deleteQuery({ id: ID });
       }
     };
-  }, []);
+  }, [deleteQuery]);
 
   const kibana = useKibana();
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
@@ -95,7 +95,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
         `${SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${UNIT(totalCount)}`,
       legendPosition: Position.Right,
     }),
-    []
+    [defaultNumberFormat]
   );
 
   return (

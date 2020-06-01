@@ -32,7 +32,7 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
         });
         setIsInitializing(false);
       }
-    }, [search]);
+    }, [dispatch, isInitializing, search]);
     useEffect(() => {
       if (pageName && !deepEqual(route.pathName, pathname)) {
         if (isInitializing && detailName == null) {
@@ -81,7 +81,20 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
           });
         }
       }
-    }, [pathname, search, pageName, detailName, tabName, flowTarget, state]);
+    }, [
+      pathname,
+      search,
+      pageName,
+      detailName,
+      tabName,
+      flowTarget,
+      state,
+      route.pathName,
+      route.state,
+      isInitializing,
+      dispatch,
+      history,
+    ]);
     return null;
   }
 );

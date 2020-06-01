@@ -123,7 +123,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         setMyStepData({ ...data, isNew: false } as DefineStepRule);
       }
     }
-  }, [form]);
+  }, [form, setStepData]);
 
   useEffect(() => {
     const { isNew, ...values } = myStepData;
@@ -132,13 +132,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       setMyStepData(newValues);
       setFieldValue(form, schema, newValues);
     }
-  }, [defaultValues, setMyStepData, setFieldValue]);
+  }, [defaultValues, setMyStepData, myStepData, form]);
 
   useEffect(() => {
     if (setForm != null) {
       setForm(RuleStep.defineRule, form);
     }
-  }, [form]);
+  }, [form, setForm]);
 
   const handleResetIndices = useCallback(() => {
     const indexField = form.getFields().index;

@@ -94,20 +94,20 @@ export const RuleSwitchComponent = ({
       }
       setMyIsLoading(false);
     },
-    [dispatch, id]
+    [dispatch, dispatchToaster, id, onChange]
   );
 
   useEffect(() => {
     if (myEnabled !== enabled) {
       setMyEnabled(enabled);
     }
-  }, [enabled]);
+  }, [enabled, myEnabled]);
 
   useEffect(() => {
     if (myIsLoading !== isLoading) {
       setMyIsLoading(isLoading ?? false);
     }
-  }, [isLoading]);
+  }, [isLoading, myIsLoading]);
 
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceAround">

@@ -74,7 +74,7 @@ export const useSiemJobs = (refetchData: boolean): Return => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [refetchData, userPermissions]);
+  }, [dispatchToaster, refetchData, siemDefaultIndex, userPermissions]);
 
   return [loading, siemJobs];
 };

@@ -62,7 +62,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
         setMyStepData({ ...data, isNew: false } as ScheduleStepRule);
       }
     }
-  }, [form]);
+  }, [form, setStepData]);
 
   useEffect(() => {
     const { isNew, ...initDefaultValue } = myStepData;
@@ -74,13 +74,13 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
       setMyStepData(myDefaultValues);
       setFieldValue(form, schema, myDefaultValues);
     }
-  }, [defaultValues]);
+  }, [defaultValues, form, myStepData]);
 
   useEffect(() => {
     if (setForm != null) {
       setForm(RuleStep.scheduleRule, form);
     }
-  }, [form]);
+  }, [form, setForm]);
 
   return isReadOnlyView && myStepData != null ? (
     <StepContentWrapper addPadding={addPadding}>

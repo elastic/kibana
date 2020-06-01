@@ -126,7 +126,7 @@ export const AddItem = ({
       inputsRef.current[haveBeenKeyboardDeleted].focus();
       setHaveBeenKeyboardDeleted(-1);
     }
-  }, [haveBeenKeyboardDeleted, inputsRef.current]);
+  }, [haveBeenKeyboardDeleted]);
 
   const values = field.value as string[];
   return (

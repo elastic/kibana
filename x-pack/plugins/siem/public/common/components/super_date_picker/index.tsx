@@ -117,7 +117,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           refetchQuery(queries);
         }
       },
-      [end, id, isQuickSelection, kqlQuery, start, timelineId]
+      [end, id, isQuickSelection, kqlQuery, queries, start, timelineId, updateReduxTime]
     );
 
     const onRefreshChange = useCallback(
@@ -136,7 +136,17 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           refetchQuery(queries);
         }
       },
-      [id, isQuickSelection, duration, policy, toStr]
+      [
+        duration,
+        policy,
+        isQuickSelection,
+        toStr,
+        setDuration,
+        id,
+        stopAutoReload,
+        startAutoReload,
+        queries,
+      ]
     );
 
     const refetchQuery = (newQueries: inputsModel.GlobalGraphqlQuery[]) => {
@@ -175,7 +185,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           setIsQuickSelection(newIsQuickSelection);
         }
       },
-      [recentlyUsedRanges, kqlQuery]
+      [updateReduxTime, id, kqlQuery, timelineId, recentlyUsedRanges]
     );
 
     const endDate = kind === 'relative' ? toStr : new Date(end).toISOString();

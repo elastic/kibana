@@ -45,7 +45,7 @@ export const HelpMenu = React.memo(() => {
         },
       ],
     });
-  }, []);
+  }, [chrome, docLinks.ELASTIC_WEBSITE_URL, docLinks.links.siem.guide]);
 
   return null;
 });

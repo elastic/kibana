@@ -45,7 +45,7 @@ const RulesTableFiltersComponent = ({
 
   useEffect(() => {
     reFetchTags();
-  }, [rulesCustomInstalled, rulesInstalled]);
+  }, [reFetchTags, rulesCustomInstalled, rulesInstalled]);
 
   // Propagate filter changes to parent
   useEffect(() => {

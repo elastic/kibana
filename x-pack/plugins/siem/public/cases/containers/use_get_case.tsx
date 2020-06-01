@@ -118,10 +118,10 @@ export const useGetCase = (caseId: string): UseGetCase => {
       didCancel = true;
       abortCtrl.abort();
     };
-  }, [caseId]);
+  }, [caseId, dispatchToaster]);
 
   useEffect(() => {
     callFetch();
-  }, [caseId]);
+  }, [callFetch, caseId]);
   return { ...state, fetchCase: callFetch, updateCase };
 };

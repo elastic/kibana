@@ -31,7 +31,7 @@ export const AlertsView = ({
       `${i18n.SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${i18n.UNIT(
         totalCount
       )}`,
-    []
+    [defaultNumberFormat]
   );
   const alertsHistogramConfigs: MatrixHisrogramConfigs = useMemo(
     () => ({

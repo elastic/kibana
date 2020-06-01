@@ -191,7 +191,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
         ))}
       </EuiTabs>
     ),
-    [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
+    [ruleDetailTab, setRuleDetailTab]
   );
   const ruleError = useMemo(
     () =>

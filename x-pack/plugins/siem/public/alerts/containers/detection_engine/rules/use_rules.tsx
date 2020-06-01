@@ -95,10 +95,13 @@ export const useRules = ({
     filterOptions.filter,
     filterOptions.sortField,
     filterOptions.sortOrder,
-    filterOptions.tags?.sort().join(),
     filterOptions.showCustomRules,
     filterOptions.showElasticRules,
     refetchPrePackagedRulesStatus,
+    filterOptions,
+    pagination,
+    dispatchRulesInReducer,
+    dispatchToaster,
   ]);
 
   return [loading, rules, reFetchRules.current];

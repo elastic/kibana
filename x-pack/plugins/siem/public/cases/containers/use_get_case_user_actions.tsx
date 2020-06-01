@@ -210,13 +210,13 @@ export const useGetCaseUserActions = (
         abortCtrl.abort();
       };
     },
-    [caseUserActionsState, caseConnectorId]
+    [caseUserActionsState, caseConnectorId, dispatchToaster]
   );
 
   useEffect(() => {
     if (!isEmpty(caseId)) {
       fetchCaseUserActions(caseId);
     }
-  }, [caseId, caseConnectorId]);
+  }, [caseId, caseConnectorId, fetchCaseUserActions]);
   return { ...caseUserActionsState, fetchCaseUserActions };
 };

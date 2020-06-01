@@ -25,7 +25,7 @@ export const useShowTimeline = () => {
     } else if (!showTimeline) {
       setShowTimeline(true);
     }
-  }, [currentLocation.pathname]);
+  }, [currentLocation.pathname, showTimeline]);
 
   return [showTimeline];
 };

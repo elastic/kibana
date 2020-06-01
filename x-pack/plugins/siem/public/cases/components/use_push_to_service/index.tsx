@@ -141,7 +141,15 @@ export const usePushToService = ({
       errors = [...errors, getKibanaConfigError()];
     }
     return errors;
-  }, [actionLicense, caseStatus, connectors.length, caseConnectorId, loadingLicense, urlSearch]);
+  }, [
+    actionLicense,
+    connectors.length,
+    caseConnectorId,
+    loadingLicense,
+    isValidConnector,
+    caseStatus,
+    urlSearch,
+  ]);
 
   const pushToServiceButton = useMemo(() => {
     return (
@@ -161,15 +169,15 @@ export const usePushToService = ({
       </EuiButton>
     );
   }, [
-    caseConnectorId,
-    caseConnectorName,
-    connectors,
-    errorsMsg,
     handlePushToService,
     isLoading,
     loadingLicense,
+    errorsMsg.length,
     userCanCrud,
     isValidConnector,
+    caseServices,
+    caseConnectorId,
+    caseConnectorName,
   ]);
 
   const objToReturn = useMemo(() => {

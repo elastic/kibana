@@ -79,7 +79,7 @@ export const usePostComment = (caseId: string): UsePostComment => {
         cancel = true;
       };
     },
-    [caseId]
+    [caseId, dispatchToaster]
   );
 
   return { ...state, postComment: postMyComment };

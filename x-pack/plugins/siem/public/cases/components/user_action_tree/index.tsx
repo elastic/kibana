@@ -85,32 +85,29 @@ export const UserActionTree = React.memo(
           updateCase,
         });
       },
-      [caseData, handleManageMarkdownEditId, patchComment, updateCase]
+      [caseData.id, fetchUserActions, patchComment, updateCase]
     );
 
-    const handleOutlineComment = useCallback(
-      (id: string) => {
-        const moveToTarget = document.getElementById(`${id}-permLink`);
-        if (moveToTarget != null) {
-          const yOffset = -60;
-          const y = moveToTarget.getBoundingClientRect().top + window.pageYOffset + yOffset;
-          window.scrollTo({
-            top: y,
-            behavior: 'smooth',
-          });
-          if (id === 'add-comment') {
-            moveToTarget.getElementsByTagName('textarea')[0].focus();
-          }
+    const handleOutlineComment = useCallback((id: string) => {
+      const moveToTarget = document.getElementById(`${id}-permLink`);
+      if (moveToTarget != null) {
+        const yOffset = -60;
+        const y = moveToTarget.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({
+          top: y,
+          behavior: 'smooth',
+        });
+        if (id === 'add-comment') {
+          moveToTarget.getElementsByTagName('textarea')[0].focus();
         }
+      }
+      window.clearTimeout(handlerTimeoutId.current);
+      setSelectedOutlineCommentId(id);
+      handlerTimeoutId.current = window.setTimeout(() => {
+        setSelectedOutlineCommentId('');
         window.clearTimeout(handlerTimeoutId.current);
-        setSelectedOutlineCommentId(id);
-        handlerTimeoutId.current = window.setTimeout(() => {
-          setSelectedOutlineCommentId('');
-          window.clearTimeout(handlerTimeoutId.current);
-        }, 2400);
-      },
-      [handlerTimeoutId.current]
-    );
+      }, 2400);
+    }, []);
 
     const handleManageQuote = useCallback(
       (quote: string) => {
@@ -155,7 +152,7 @@ export const UserActionTree = React.memo(
           showLoading={false}
         />
       ),
-      [caseData.id, handleUpdate, insertQuote, userCanCrud]
+      [caseData.id, handleManageMarkdownEditId, handleUpdate, insertQuote, userCanCrud]
     );
 
     useEffect(() => {
@@ -165,7 +162,7 @@ export const UserActionTree = React.memo(
           handleOutlineComment(commentId);
         }
       }
-    }, [commentId, initLoading, isLoadingUserActions, isLoadingIds]);
+    }, [commentId, initLoading, isLoadingUserActions, isLoadingIds, handleOutlineComment]);
     return (
       <>
         <UserActionItem

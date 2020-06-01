@@ -93,7 +93,7 @@ export const Create = React.memo(() => {
     if (isValid) {
       await postCase(data);
     }
-  }, [form]);
+  }, [form, postCase]);
 
   const handleSetIsCancel = useCallback(() => {
     setIsCancel(true);

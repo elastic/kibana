@@ -103,7 +103,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, []);
+  }, [dispatchToaster]);
 
   return { loading, ...signalIndex };
 };

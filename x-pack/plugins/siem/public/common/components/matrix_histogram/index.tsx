@@ -130,9 +130,10 @@ export const MatrixHistogramComponent: React.FC<
       startDate,
       legendPosition,
       endDate,
-      dispatchSetAbsoluteRangeDatePicker,
       yTickFormatter,
       showLegend,
+      dispatchSetAbsoluteRangeDatePicker,
+      setAbsoluteRangeDatePickerTarget,
     ]
   );
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -145,7 +146,7 @@ export const MatrixHistogramComponent: React.FC<
         stackByOptions.find((co) => co.value === event.target.value) ?? defaultStackByOption
       );
     },
-    []
+    [defaultStackByOption, stackByOptions]
   );
 
   const { data, loading, inspect, totalCount, refetch = noop } = useQuery<{}, HistogramAggregation>(

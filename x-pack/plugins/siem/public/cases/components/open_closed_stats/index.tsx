@@ -24,7 +24,7 @@ export const OpenClosedStats = React.memo<Props>(
           description: isLoading ? <EuiLoadingSpinner /> : caseCount ?? 'N/A',
         },
       ],
-      [caseCount, caseStatus, isLoading, dataTestSubj]
+      [caseCount, caseStatus, isLoading]
     );
     return (
       <EuiDescriptionList

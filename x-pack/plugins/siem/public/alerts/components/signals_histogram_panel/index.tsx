@@ -131,14 +131,17 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
           totalSignalsObj.value,
           totalSignalsObj.relation === 'gte' ? '>' : totalSignalsObj.relation === 'lte' ? '<' : ''
         ),
-      [totalSignalsObj]
+      [defaultNumberFormat, totalSignalsObj.relation, totalSignalsObj.value]
     );
 
-    const setSelectedOptionCallback = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedStackByOption(
-        stackByOptions?.find((co) => co.value === event.target.value) ?? defaultStackByOption
-      );
-    }, []);
+    const setSelectedOptionCallback = useCallback(
+      (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedStackByOption(
+          stackByOptions?.find((co) => co.value === event.target.value) ?? defaultStackByOption
+        );
+      },
+      [defaultStackByOption, stackByOptions]
+    );
 
     const formattedSignalsData = useMemo(() => formatSignalsData(signalsData), [signalsData]);
 
@@ -175,7 +178,7 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
           deleteQuery({ id: uniqueQueryId });
         }
       };
-    }, []);
+    }, [deleteQuery, uniqueQueryId]);
 
     useEffect(() => {
       if (refetch != null && setQuery != null) {
@@ -189,7 +192,7 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
           refetch,
         });
       }
-    }, [setQuery, isLoadingSignals, signalsData, response, request, refetch]);
+    }, [setQuery, isLoadingSignals, signalsData, response, request, refetch, uniqueQueryId]);
 
     useEffect(() => {
       setTotalSignalsObj(
@@ -219,7 +222,15 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
           !isEmpty(converted) ? [converted] : []
         )
       );
-    }, [selectedStackByOption.value, from, to, query, filters]);
+    }, [
+      selectedStackByOption.value,
+      from,
+      to,
+      query,
+      filters,
+      kibana.services.uiSettings,
+      setSignalsQuery,
+    ]);
 
     const linkButton = useMemo(() => {
       if (showLinkToSignals) {

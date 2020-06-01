@@ -54,7 +54,18 @@ export const SiemNavigationComponent: React.FC<
         chrome
       );
     }
-  }, [chrome, pathName, search, navTabs, urlState, state]);
+  }, [
+    chrome,
+    pathName,
+    search,
+    navTabs,
+    urlState,
+    state,
+    detailName,
+    pageName,
+    tabName,
+    flowTarget,
+  ]);
 
   return (
     <TabNavigation

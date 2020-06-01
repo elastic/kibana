@@ -173,7 +173,7 @@ export const useWithSource = (sourceId: string, indices: string[]) => {
     const signal = abortCtrl.signal;
     fetchSource(signal);
     return () => abortCtrl.abort();
-  }, [apolloClient, sourceId, indices]);
+  }, [apolloClient, sourceId, indices, fetchSource]);
 
   return { indicesExist, browserFields, indexPattern, loading, errorMessage };
 };

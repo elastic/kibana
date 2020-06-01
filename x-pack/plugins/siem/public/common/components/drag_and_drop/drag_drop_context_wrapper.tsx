@@ -125,7 +125,7 @@ export const DragDropContextWrapperComponent = React.memo<Props & PropsFromRedux
           }
         }
       },
-      [dataProviders, activeTimelineDataProviders, browserFields]
+      [dataProviders, activeTimelineDataProviders, browserFields, dispatch, onAddedToTimeline]
     );
     return (
       // @ts-ignore

@@ -120,7 +120,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         isSubscribed = false;
         subscriptions.unsubscribe();
       };
-    }, []);
+    }, [filterManager, filters, setFilters]);
 
     useEffect(() => {
       const filterWithoutDropArea = filterManager
@@ -129,7 +129,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       if (!deepEqual(filters, filterWithoutDropArea)) {
         filterManager.setFilters(filters);
       }
-    }, [filters]);
+    }, [filterManager, filters]);
 
     useEffect(() => {
       setFilterQueryConverted({
@@ -188,7 +188,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       return () => {
         isSubscribed = false;
       };
-    }, [savedQueryId]);
+    }, [filters, savedQueryId, savedQueryServices]);
 
     const onChangedQuery = useCallback(
       (newQuery: Query) => {
@@ -203,7 +203,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           );
         }
       },
-      [filterQueryDraft]
+      [filterQueryDraft, setKqlFilterQueryDraft]
     );
 
     const onSubmitQuery = useCallback(
@@ -232,7 +232,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           });
         }
       },
-      [filterQuery, timelineId]
+      [applyKqlFilterQuery, filterQuery, setKqlFilterQueryDraft, timelineId, updateReduxTime]
     );
 
     const onSavedQuery = useCallback(
@@ -274,7 +274,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           setSavedQueryId(null);
         }
       },
-      [dataProvidersDsl, savedQueryId, savedQueryServices]
+      [dataProvidersDsl, savedQueryId, savedQueryServices, setSavedQueryId]
     );
 
     return (

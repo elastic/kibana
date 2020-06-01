@@ -216,7 +216,6 @@ const EditRulePageComponent: FC = () => {
       myScheduleRuleForm,
       myActionsRuleForm,
       setStepsForm,
-      stepsForm,
       actionMessageParams,
     ]
   );
@@ -266,12 +265,16 @@ const EditRulePageComponent: FC = () => {
       setTabHasError(invalidForms);
     }
   }, [
-    stepsForm,
-    myAboutRuleForm,
-    myDefineRuleForm,
-    myScheduleRuleForm,
-    myActionsRuleForm,
     selectedTab,
+    myAboutRuleForm.isValid,
+    myAboutRuleForm.data,
+    myDefineRuleForm.isValid,
+    myDefineRuleForm.data,
+    myScheduleRuleForm.isValid,
+    myScheduleRuleForm.data,
+    myActionsRuleForm.isValid,
+    myActionsRuleForm.data,
+    setRule,
     ruleId,
   ]);
 
@@ -320,7 +323,7 @@ const EditRulePageComponent: FC = () => {
       setInitForm(true);
       setSelectedTab(tab);
     },
-    [selectedTab, stepsForm.current]
+    [selectedTab]
   );
 
   useEffect(() => {
@@ -338,7 +341,7 @@ const EditRulePageComponent: FC = () => {
   useEffect(() => {
     const tabIndex = rule?.immutable ? 3 : 0;
     setSelectedTab(tabs[tabIndex]);
-  }, [rule]);
+  }, [rule, tabs]);
 
   if (isSaved) {
     displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);

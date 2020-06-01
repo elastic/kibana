@@ -89,11 +89,11 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
     return () => {
       didCancel = true;
     };
-  }, [security]);
+  }, [dispatchToaster, security]);
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [fetchUser]);
   return user;
 };
 

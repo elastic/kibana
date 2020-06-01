@@ -78,7 +78,7 @@ export const ScheduleItem = ({
       setTimeType(e.target.value);
       field.setValue(`${timeVal}${e.target.value}`);
     },
-    [timeVal]
+    [field, timeVal]
   );
 
   const onChangeTimeVal = useCallback(
@@ -87,7 +87,7 @@ export const ScheduleItem = ({
       setTimeVal(sanitizedValue);
       field.setValue(`${sanitizedValue}${timeType}`);
     },
-    [timeType]
+    [field, timeType]
   );
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export const ScheduleItem = ({
         setTimeType(filterTimeType[0]);
       }
     }
-  }, [field.value]);
+  }, [field.value, timeType, timeVal]);
 
   // EUI missing some props
   const rest = { disabled: isDisabled };

@@ -50,11 +50,11 @@ export const useConnectors = (): ReturnConnectors => {
       didCancel = true;
       abortCtrl.abort();
     };
-  }, []);
+  }, [dispatchToaster]);
 
   useEffect(() => {
     refetchConnectors();
-  }, []);
+  }, [refetchConnectors]);
 
   return {
     loading,

@@ -82,7 +82,16 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     return () => {
       deleteEventQuery({ id, inputId: 'global' });
     };
-  }, []);
+  }, [
+    columns,
+    createTimeline,
+    deleteEventQuery,
+    id,
+    itemsPerPage,
+    showCheckboxes,
+    showRowRenderers,
+    sort,
+  ]);
 
   const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
     (itemsChangedPerPage) => updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }),

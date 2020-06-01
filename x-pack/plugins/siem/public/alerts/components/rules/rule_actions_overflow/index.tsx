@@ -101,7 +101,7 @@ const RuleActionsOverflowComponent = ({
             </EuiContextMenuItem>,
           ]
         : [],
-    [rule, userHasNoPermissions]
+    [dispatchToaster, onRuleDeletedCallback, rule, userHasNoPermissions]
   );
 
   const handlePopoverOpen = useCallback(() => {

@@ -87,7 +87,7 @@ const AlertDetailsOverviewComponent = memo(() => {
         history.push(locationObject);
       }
     },
-    [alertDetailsTabId]
+    [alertDetailsTabId, history, queryParams]
   );
 
   return (

@@ -153,20 +153,32 @@ export const EmbeddedMapComponent = ({
     return () => {
       isSubscribed = false;
     };
-  }, [loadingKibanaIndexPatterns, kibanaIndexPatterns]);
+  }, [
+    loadingKibanaIndexPatterns,
+    kibanaIndexPatterns,
+    siemDefaultIndices,
+    filters,
+    query,
+    startDate,
+    endDate,
+    setQuery,
+    portalNode,
+    services.embeddable,
+    dispatchToaster,
+  ]);
 
   // queryExpression updated useEffect
   useEffect(() => {
     if (embeddable != null) {
       embeddable.updateInput({ query });
     }
-  }, [query]);
+  }, [embeddable, query]);
 
   useEffect(() => {
     if (embeddable != null) {
       embeddable.updateInput({ filters });
     }
-  }, [filters]);
+  }, [embeddable, filters]);
 
   // DateRange updated useEffect
   useEffect(() => {
@@ -177,7 +189,7 @@ export const EmbeddedMapComponent = ({
       };
       embeddable.updateInput({ timeRange });
     }
-  }, [startDate, endDate]);
+  }, [startDate, endDate, embeddable]);
 
   return isError ? null : (
     <Embeddable>

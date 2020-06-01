@@ -59,34 +59,37 @@ export const usePostCase = (): UsePostCase => {
   });
   const [, dispatchToaster] = useStateToaster();
 
-  const postMyCase = useCallback(async (data: CasePostRequest) => {
-    let cancel = false;
-    const abortCtrl = new AbortController();
+  const postMyCase = useCallback(
+    async (data: CasePostRequest) => {
+      let cancel = false;
+      const abortCtrl = new AbortController();
 
-    try {
-      dispatch({ type: 'FETCH_INIT' });
-      const response = await postCase(data, abortCtrl.signal);
-      if (!cancel) {
-        dispatch({
-          type: 'FETCH_SUCCESS',
-          payload: response,
-        });
+      try {
+        dispatch({ type: 'FETCH_INIT' });
+        const response = await postCase(data, abortCtrl.signal);
+        if (!cancel) {
+          dispatch({
+            type: 'FETCH_SUCCESS',
+            payload: response,
+          });
+        }
+      } catch (error) {
+        if (!cancel) {
+          errorToToaster({
+            title: i18n.ERROR_TITLE,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
+          });
+          dispatch({ type: 'FETCH_FAILURE' });
+        }
       }
-    } catch (error) {
-      if (!cancel) {
-        errorToToaster({
-          title: i18n.ERROR_TITLE,
-          error: error.body && error.body.message ? new Error(error.body.message) : error,
-          dispatchToaster,
-        });
-        dispatch({ type: 'FETCH_FAILURE' });
-      }
-    }
-    return () => {
-      abortCtrl.abort();
-      cancel = true;
-    };
-  }, []);
+      return () => {
+        abortCtrl.abort();
+        cancel = true;
+      };
+    },
+    [dispatchToaster]
+  );
 
   return { ...state, postCase: postMyCase };
 };

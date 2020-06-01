@@ -130,12 +130,9 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   });
   const [deleteBulk, setDeleteBulk] = useState<DeleteCase[]>([]);
   const filterRefetch = useRef<() => void>();
-  const setFilterRefetch = useCallback(
-    (refetchFilter: () => void) => {
-      filterRefetch.current = refetchFilter;
-    },
-    [filterRefetch.current]
-  );
+  const setFilterRefetch = useCallback((refetchFilter: () => void) => {
+    filterRefetch.current = refetchFilter;
+  }, []);
   const refreshCases = useCallback(
     (dataRefresh = true) => {
       if (dataRefresh) refetchCases();
@@ -146,7 +143,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
         filterRefetch.current();
       }
     },
-    [filterOptions, queryParams, filterRefetch.current]
+    [refetchCases, fetchCasesStatus, setSelectedCases]
   );
 
   useEffect(() => {
@@ -158,7 +155,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       refreshCases();
       dispatchResetIsUpdated();
     }
-  }, [isDeleted, isUpdated]);
+  }, [dispatchResetIsDeleted, dispatchResetIsUpdated, isDeleted, isUpdated, refreshCases]);
   const confirmDeleteModal = useMemo(
     () => (
       <ConfirmDeleteCaseModal
@@ -172,13 +169,22 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
         )}
       />
     ),
-    [deleteBulk, deleteThisCase, isDisplayConfirmDeleteModal]
+    [
+      deleteBulk,
+      deleteThisCase,
+      handleOnDeleteConfirm,
+      handleToggleModal,
+      isDisplayConfirmDeleteModal,
+    ]
   );
 
-  const toggleDeleteModal = useCallback((deleteCase: Case) => {
-    handleToggleModal();
-    setDeleteThisCase(deleteCase);
-  }, []);
+  const toggleDeleteModal = useCallback(
+    (deleteCase: Case) => {
+      handleToggleModal();
+      setDeleteThisCase(deleteCase);
+    },
+    [handleToggleModal]
+  );
 
   const toggleBulkDeleteModal = useCallback(
     (caseIds: string[]) => {
@@ -192,14 +198,14 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       const convertToDeleteCases: DeleteCase[] = caseIds.map((id) => ({ id }));
       setDeleteBulk(convertToDeleteCases);
     },
-    [selectedCases]
+    [handleToggleModal, selectedCases]
   );
 
   const handleUpdateCaseStatus = useCallback(
     (status: string) => {
       updateBulkStatus(selectedCases, status);
     },
-    [selectedCases]
+    [selectedCases, updateBulkStatus]
   );
 
   const selectedCaseIds = useMemo(
@@ -220,7 +226,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
         })}
       />
     ),
-    [selectedCaseIds, filterOptions.status, toggleBulkDeleteModal]
+    [filterOptions.status, toggleBulkDeleteModal, selectedCaseIds, handleUpdateCaseStatus]
   );
   const handleDispatchUpdate = useCallback(
     (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
@@ -261,7 +267,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       setQueryParams(newQueryParams);
       refreshCases(false);
     },
-    [queryParams]
+    [queryParams, refreshCases, setQueryParams]
   );
 
   const onFilterChangedCallback = useCallback(
@@ -274,7 +280,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       setFilters(newFilterOptions);
       refreshCases(false);
     },
-    [filterOptions, queryParams]
+    [refreshCases, setFilters, setQueryParams]
   );
 
   const memoizedGetCasesColumns = useMemo(
@@ -296,7 +302,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   };
   const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
     () => ({ onSelectionChange: setSelectedCases }),
-    [selectedCases]
+    [setSelectedCases]
   );
   const isCasesLoading = useMemo(
     () => loading.indexOf('cases') > -1 || loading.indexOf('caseUpdate') > -1,

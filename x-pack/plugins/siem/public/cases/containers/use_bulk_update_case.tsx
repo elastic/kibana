@@ -68,59 +68,65 @@ export const useUpdateCases = (): UseUpdateCases => {
   });
   const [, dispatchToaster] = useStateToaster();
 
-  const dispatchUpdateCases = useCallback((cases: BulkUpdateStatus[]) => {
-    let cancel = false;
-    const abortCtrl = new AbortController();
+  const dispatchUpdateCases = useCallback(
+    (cases: BulkUpdateStatus[]) => {
+      let cancel = false;
+      const abortCtrl = new AbortController();
 
-    const patchData = async () => {
-      try {
-        dispatch({ type: 'FETCH_INIT' });
-        const patchResponse = await patchCasesStatus(cases, abortCtrl.signal);
-        if (!cancel) {
-          const resultCount = Object.keys(patchResponse).length;
-          const firstTitle = patchResponse[0].title;
+      const patchData = async () => {
+        try {
+          dispatch({ type: 'FETCH_INIT' });
+          const patchResponse = await patchCasesStatus(cases, abortCtrl.signal);
+          if (!cancel) {
+            const resultCount = Object.keys(patchResponse).length;
+            const firstTitle = patchResponse[0].title;
 
-          dispatch({ type: 'FETCH_SUCCESS', payload: true });
-          const messageArgs = {
-            totalCases: resultCount,
-            caseTitle: resultCount === 1 ? firstTitle : '',
-          };
-          const message =
-            resultCount && patchResponse[0].status === 'open'
-              ? i18n.REOPENED_CASES(messageArgs)
-              : i18n.CLOSED_CASES(messageArgs);
+            dispatch({ type: 'FETCH_SUCCESS', payload: true });
+            const messageArgs = {
+              totalCases: resultCount,
+              caseTitle: resultCount === 1 ? firstTitle : '',
+            };
+            const message =
+              resultCount && patchResponse[0].status === 'open'
+                ? i18n.REOPENED_CASES(messageArgs)
+                : i18n.CLOSED_CASES(messageArgs);
 
-          displaySuccessToast(message, dispatchToaster);
+            displaySuccessToast(message, dispatchToaster);
+          }
+        } catch (error) {
+          if (!cancel) {
+            errorToToaster({
+              title: i18n.ERROR_TITLE,
+              error: error.body && error.body.message ? new Error(error.body.message) : error,
+              dispatchToaster,
+            });
+            dispatch({ type: 'FETCH_FAILURE' });
+          }
         }
-      } catch (error) {
-        if (!cancel) {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
-          dispatch({ type: 'FETCH_FAILURE' });
-        }
-      }
-    };
-    patchData();
-    return () => {
-      cancel = true;
-      abortCtrl.abort();
-    };
-  }, []);
+      };
+      patchData();
+      return () => {
+        cancel = true;
+        abortCtrl.abort();
+      };
+    },
+    [dispatchToaster]
+  );
 
   const dispatchResetIsUpdated = useCallback(() => {
     dispatch({ type: 'RESET_IS_UPDATED' });
   }, []);
 
-  const updateBulkStatus = useCallback((cases: Case[], status: string) => {
-    const updateCasesStatus: BulkUpdateStatus[] = cases.map((theCase) => ({
-      status,
-      id: theCase.id,
-      version: theCase.version,
-    }));
-    dispatchUpdateCases(updateCasesStatus);
-  }, []);
+  const updateBulkStatus = useCallback(
+    (cases: Case[], status: string) => {
+      const updateCasesStatus: BulkUpdateStatus[] = cases.map((theCase) => ({
+        status,
+        id: theCase.id,
+        version: theCase.version,
+      }));
+      dispatchUpdateCases(updateCasesStatus);
+    },
+    [dispatchUpdateCases]
+  );
   return { ...state, updateBulkStatus, dispatchResetIsUpdated };
 };

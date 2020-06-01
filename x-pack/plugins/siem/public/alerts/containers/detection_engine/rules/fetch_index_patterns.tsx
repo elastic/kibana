@@ -94,7 +94,7 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [indices]);
+  }, [apolloClient, dispatchToaster, indices]);
 
   return [{ browserFields, isLoading, indices, indicesExists, indexPatterns }, setIndices];
 };

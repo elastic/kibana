@@ -53,7 +53,7 @@ export const withConnectorFlyout = <T extends ActionConnector>({
       if (!isEmpty(apiUrl)) {
         secretKeys.forEach((key: string) => editActionSecrets(key, ''));
       }
-    }, []);
+    }, [apiUrl, editActionSecrets]);
 
     if (isEmpty(mapping)) {
       editActionConfig('casesConfiguration', {
@@ -64,7 +64,7 @@ export const withConnectorFlyout = <T extends ActionConnector>({
 
     const handleOnChangeActionConfig = useCallback(
       (key: string, value: string) => editActionConfig(key, value),
-      []
+      [editActionConfig]
     );
 
     const handleOnBlurActionConfig = useCallback(
@@ -73,12 +73,12 @@ export const withConnectorFlyout = <T extends ActionConnector>({
           editActionConfig(key, '');
         }
       },
-      [action.config]
+      [action.config, configKeysWithDefault, editActionConfig]
     );
 
     const handleOnChangeSecretConfig = useCallback(
       (key: string, value: string) => editActionSecrets(key, value),
-      []
+      [editActionSecrets]
     );
 
     const handleOnBlurSecretConfig = useCallback(
@@ -87,7 +87,7 @@ export const withConnectorFlyout = <T extends ActionConnector>({
           editActionSecrets(key, '');
         }
       },
-      [action.secrets]
+      [action.secrets, editActionSecrets]
     );
 
     const handleOnChangeMappingConfig = useCallback(
@@ -96,7 +96,7 @@ export const withConnectorFlyout = <T extends ActionConnector>({
           ...action.config.casesConfiguration,
           mapping: newMapping,
         }),
-      [action.config]
+      [action.config.casesConfiguration, editActionConfig]
     );
 
     return (

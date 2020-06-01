@@ -79,10 +79,10 @@ export const useGetReporters = (): UseGetReporters => {
       didCancel = true;
       abortCtrl.abort();
     };
-  }, [reportersState]);
+  }, [dispatchToaster, reportersState]);
 
   useEffect(() => {
     fetchReporters();
-  }, []);
+  }, [fetchReporters]);
   return { ...reportersState, fetchReporters };
 };

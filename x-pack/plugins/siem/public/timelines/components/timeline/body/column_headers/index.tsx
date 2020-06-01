@@ -156,6 +156,7 @@ export const ColumnHeadersComponent = ({
       timelineId,
       draggingIndex,
       onColumnRemoved,
+      onColumnSorted,
       onFilterChange,
       onColumnResized,
       sort,

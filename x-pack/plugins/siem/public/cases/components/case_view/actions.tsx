@@ -44,7 +44,13 @@ const CaseViewActionsComponent: React.FC<CaseViewActions> = ({
         onConfirm={handleOnDeleteConfirm.bind(null, [{ id: caseData.id, title: caseData.title }])}
       />
     ),
-    [isDisplayConfirmDeleteModal, caseData]
+    [
+      caseData.title,
+      caseData.id,
+      isDisplayConfirmDeleteModal,
+      handleToggleModal,
+      handleOnDeleteConfirm,
+    ]
   );
   const propertyActions = useMemo(
     () => [

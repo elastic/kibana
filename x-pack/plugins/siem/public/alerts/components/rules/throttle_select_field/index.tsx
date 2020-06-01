@@ -31,7 +31,7 @@ export const ThrottleSelectField: ThrottleSelectField = (props) => {
       props.field.setValue(throttle);
       props.handleChange(throttle);
     },
-    [props.field.setValue, props.handleChange]
+    [props]
   );
   const newEuiFieldProps = { ...props.euiFieldProps, onChange };
   return <SelectField {...props} euiFieldProps={newEuiFieldProps} />;

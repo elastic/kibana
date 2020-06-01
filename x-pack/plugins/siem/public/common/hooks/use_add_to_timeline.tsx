@@ -159,7 +159,7 @@ export const useAddToTimeline = ({
         document.body.classList.remove(IS_DRAGGING_CLASS_NAME); // it was not possible to perform a drag and drop
       }
     }, 0);
-  }, [_sensorApiSingleton, draggableId]);
+  }, [draggableId, fieldName]);
 
   return startDragToTimeline;
 };

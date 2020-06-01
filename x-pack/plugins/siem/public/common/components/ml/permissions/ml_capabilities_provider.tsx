@@ -60,7 +60,7 @@ export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ c
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, []);
+  }, [dispatchToaster]);
 
   return (
     <MlCapabilitiesContext.Provider value={capabilities}>{children}</MlCapabilitiesContext.Provider>

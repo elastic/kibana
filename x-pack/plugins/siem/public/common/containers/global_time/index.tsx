@@ -59,7 +59,7 @@ export const GlobalTimeComponent: React.FC<GlobalTimeProps> = ({
     return () => {
       deleteAllQuery({ id: 'global' });
     };
-  }, []);
+  }, [deleteAllQuery, isInitializing]);
 
   return (
     <>

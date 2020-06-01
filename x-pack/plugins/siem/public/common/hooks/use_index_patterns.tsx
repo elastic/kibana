@@ -45,7 +45,7 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
     return () => {
       isSubscribed = false;
     };
-  }, [refreshToggle]);
+  }, [dispatchToaster, refreshToggle, savedObjects]);
 
   return [isLoading, indexPatterns];
 };

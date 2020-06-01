@@ -69,11 +69,11 @@ export const useGetCasesStatus = (): UseGetCasesStatus => {
       didCancel = true;
       abortCtrl.abort();
     };
-  }, [casesStatusState]);
+  }, [casesStatusState, dispatchToaster]);
 
   useEffect(() => {
     fetchCasesStatus();
-  }, []);
+  }, [fetchCasesStatus]);
 
   return {
     ...casesStatusState,

@@ -35,7 +35,7 @@ export const AnomaliesQueryTabBody = ({
         deleteQuery({ id: ID });
       }
     };
-  }, []);
+  }, [deleteQuery]);
 
   const [, siemJobs] = useSiemJobs(true);
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);

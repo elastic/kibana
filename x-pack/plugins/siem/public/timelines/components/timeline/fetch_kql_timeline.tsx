@@ -38,7 +38,7 @@ const TimelineKqlFetchComponent = memo<OwnProps>(
           timelineId: id,
         }),
       });
-    }, [kueryFilterQueryDraft, kueryFilterQuery, id]);
+    }, [kueryFilterQueryDraft, kueryFilterQuery, id, setTimelineQuery, inputId, indexPattern]);
     return null;
   },
   (prevProps, nextProps) =>

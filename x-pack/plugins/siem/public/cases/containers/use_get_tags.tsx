@@ -59,7 +59,7 @@ export const useGetTags = (): UseGetTags => {
   });
   const [, dispatchToaster] = useStateToaster();
 
-  const callFetch = () => {
+  const callFetch = useCallback(() => {
     let didCancel = false;
     const abortCtrl = new AbortController();
 
@@ -86,9 +86,9 @@ export const useGetTags = (): UseGetTags => {
       abortCtrl.abort();
       didCancel = true;
     };
-  };
+  });
   useEffect(() => {
     callFetch();
-  }, []);
+  }, [callFetch]);
   return { ...state, fetchTags: callFetch };
 };

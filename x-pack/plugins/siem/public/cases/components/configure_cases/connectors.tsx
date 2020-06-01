@@ -68,7 +68,7 @@ const ConnectorsComponent: React.FC<Props> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [connectorsName, updateConnectorDisabled]
+    [connectorsName, handleShowEditFlyout, updateConnectorDisabled]
   );
 
   return (

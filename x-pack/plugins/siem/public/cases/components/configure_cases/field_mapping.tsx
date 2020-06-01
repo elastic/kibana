@@ -95,7 +95,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
       const myMapping = mapping ?? defaultMapping;
       onChangeMapping(setActionTypeToMapping(caseField, newActionType, myMapping));
     },
-    [mapping]
+    [defaultMapping, mapping, onChangeMapping]
   );
 
   const onChangeThirdParty = useCallback(
@@ -103,7 +103,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
       const myMapping = mapping ?? defaultMapping;
       onChangeMapping(setThirdPartyToMapping(caseField, newThirdPartyField, myMapping));
     },
-    [mapping]
+    [defaultMapping, mapping, onChangeMapping]
   );
 
   const selectedConnector = connectorsConfiguration[connectorActionTypeId] ?? { fields: {} };

@@ -65,10 +65,10 @@ export const useGetActionLicense = (): ActionLicenseState => {
       didCancel = true;
       abortCtrl.abort();
     };
-  }, [actionLicenseState]);
+  }, [actionLicenseState, dispatchToaster]);
 
   useEffect(() => {
     fetchActionLicense();
-  }, []);
+  }, [fetchActionLicense]);
   return { ...actionLicenseState };
 };

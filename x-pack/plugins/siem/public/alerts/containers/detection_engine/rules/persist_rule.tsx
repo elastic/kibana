@@ -53,7 +53,7 @@ export const usePersistRule = (): ReturnPersistRule => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule]);
+  }, [dispatchToaster, rule]);
 
   return [{ isLoading, isSaved }, setRule];
 };

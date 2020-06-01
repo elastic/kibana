@@ -134,7 +134,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
         window.setTimeout(() => updateSearch(updateSearchBar), 0);
       },
-      [id, end, filterQuery, fromStr, queries, start, toStr]
+      [id, toStr, end, fromStr, start, filterManager, filterQuery, queries, updateSearch]
     );
 
     const onRefresh = useCallback(
@@ -153,14 +153,14 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           queries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
         }
       },
-      [id, queries, filterManager]
+      [updateSearch, id, filterManager, queries]
     );
 
     const onSaved = useCallback(
       (newSavedQuery: SavedQuery) => {
         setSavedQuery({ id, savedQuery: newSavedQuery });
       },
-      [id]
+      [id, setSavedQuery]
     );
 
     const onSavedQueryUpdated = useCallback(
@@ -196,7 +196,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
         updateSearch(updateSearchBar);
       },
-      [id, end, fromStr, start, toStr]
+      [id, toStr, end, fromStr, start, filterManager, updateSearch]
     );
 
     const onClearSavedQuery = useCallback(() => {
@@ -218,7 +218,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           filterManager,
         });
       }
-    }, [id, end, filterManager, fromStr, start, toStr, savedQuery]);
+    }, [savedQuery, updateSearch, id, toStr, end, fromStr, start, filterManager]);
 
     useEffect(() => {
       let isSubscribed = true;
@@ -241,7 +241,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
         isSubscribed = false;
         subscriptions.unsubscribe();
       };
-    }, []);
+    }, [filterManager, id, setSearchBarFilter]);
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
     return (
       <SearchBarContainer data-test-subj={`${id}DatePicker`}>

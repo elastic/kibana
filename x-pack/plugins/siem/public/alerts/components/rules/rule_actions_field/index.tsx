@@ -56,7 +56,7 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
       updatedActions[index] = deepMerge(updatedActions[index], { id });
       field.setValue(updatedActions);
     },
-    [field.setValue, actions]
+    [actions, field]
   );
 
   const setAlertProperty = useCallback(
@@ -71,7 +71,7 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
       updatedActions[index].params[key] = value;
       field.setValue(updatedActions);
     },
-    [field.setValue, actions]
+    [actions, field]
   );
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
       );
       setSupportedActionTypes(supportedTypes);
     })();
-  }, []);
+  }, [http]);
 
   useEffect(() => {
     if (field.form.isSubmitting || !field.errors.length) {

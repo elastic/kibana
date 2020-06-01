@@ -101,7 +101,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
         ...values.slice(index + 1),
       ]);
     },
-    [field]
+    [field, values]
   );
 
   const values = field.value as IMitreEnterpriseAttack[];

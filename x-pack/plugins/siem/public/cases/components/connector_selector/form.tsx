@@ -33,7 +33,7 @@ export const ConnectorSelector = ({
 
   useEffect(() => {
     field.setValue(defaultValue);
-  }, [defaultValue]);
+  }, [defaultValue, field]);
 
   const handleContentChange = useCallback(
     (newContent: string) => {

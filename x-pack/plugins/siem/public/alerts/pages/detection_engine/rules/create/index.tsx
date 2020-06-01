@@ -155,7 +155,7 @@ const CreateRulePageComponent: React.FC = () => {
         }
       }
     },
-    [isStepRuleInReadOnlyView, openAccordionId, stepsData.current, setRule]
+    [isStepRuleInReadOnlyView, openAccordionId, setRule]
   );
 
   const setStepsForm = useCallback((step: RuleStep, form: FormHook<FormData>) => {
@@ -171,7 +171,7 @@ const CreateRulePageComponent: React.FC = () => {
       }
       return 'passive';
     },
-    [openAccordionId, stepsData.current]
+    [openAccordionId]
   );
 
   const defineRuleButton = (

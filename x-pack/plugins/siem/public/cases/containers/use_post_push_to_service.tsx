@@ -146,7 +146,7 @@ export const usePostPushToService = (): UsePostPushToService => {
         abortCtrl.abort();
       };
     },
-    []
+    [dispatchToaster]
   );
 
   return { ...state, postPushToService };

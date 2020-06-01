@@ -64,7 +64,7 @@ export const useRuleStatus = (id: string | undefined | null): ReturnRuleStatus =
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [id]);
+  }, [dispatchToaster, id]);
 
   return [loading, ruleStatus, fetchRuleStatus.current];
 };
@@ -119,7 +119,7 @@ export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rules]);
+  }, [dispatchToaster, rules]);
 
   return { loading, rulesStatuses };
 };

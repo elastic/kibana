@@ -16,7 +16,7 @@ export const useEditTimelineActions = () => {
   const onCloseDeleteTimelineModal = useCallback(() => {
     setIsDeleteTimelineModalOpen(false);
     setActionTimeline(null);
-  }, [actionItem]);
+  }, []);
 
   const onOpenDeleteTimelineModal = useCallback((selectedActionItem?: OpenTimelineResult) => {
     setIsDeleteTimelineModalOpen(true);

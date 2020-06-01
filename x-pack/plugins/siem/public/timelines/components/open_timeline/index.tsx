@@ -125,7 +125,16 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         onlyUserFavorite: onlyFavorites,
         timelineType,
       });
-    }, [pageIndex, pageSize, search, sortField, sortDirection, timelineType, onlyFavorites]);
+    }, [
+      fetchAllTimeline,
+      pageIndex,
+      pageSize,
+      search,
+      sortField,
+      sortDirection,
+      onlyFavorites,
+      timelineType,
+    ]);
 
     /** Invoked when the user presses enters to submit the text in the search input */
     const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {
@@ -191,7 +200,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       resetSelectionState();
 
       // TODO: the query must re-execute to show the results of the deletion
-    }, [selectedItems, deleteTimelines]);
+    }, [deleteTimelines, selectedItems, resetSelectionState]);
 
     /** Invoked when the user selects (or de-selects) timelines */
     const onSelectionChange: OnSelectionChange = useCallback(
@@ -244,7 +253,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           updateTimeline,
         });
       },
-      [apolloClient, updateIsLoading, updateTimeline]
+      [apolloClient, closeModalTimeline, isModal, onOpenTimeline, updateIsLoading, updateTimeline]
     );
 
     useEffect(() => {

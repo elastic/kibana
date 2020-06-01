@@ -95,7 +95,7 @@ export const GenericDownloaderComponent = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [ids]);
+  }, [dispatchToaster, exportSelectedData, filename, ids, onExportFailure, onExportSuccess]);
 
   return <InvisibleAnchor ref={anchorRef} />;
 };

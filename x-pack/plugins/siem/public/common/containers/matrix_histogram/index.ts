@@ -113,6 +113,8 @@ export const useQuery = <Hit, Aggs, TCache = object>({
     startDate,
     endDate,
     data,
+    apolloClient,
+    dispatchToaster,
   ]);
 
   return { data, loading, inspect, totalCount, refetch: refetch.current };

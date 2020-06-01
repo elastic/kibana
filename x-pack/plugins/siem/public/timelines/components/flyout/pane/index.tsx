@@ -65,14 +65,14 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
         );
       }
     },
-    [dispatch]
+    [dispatch, timelineId]
   );
   const resizableDefaultSize = useMemo(
     () => ({
       width,
       height: '100%',
     }),
-    []
+    [width]
   );
   const resizableHandleComponent = useMemo(
     () => ({

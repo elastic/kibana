@@ -66,13 +66,13 @@ const CasesTableFiltersComponent = ({
       const newReporters = selectedReporters.filter((r) => reporters.includes(r));
       handleSelectedReporters(newReporters);
     }
-  }, [reporters]);
+  }, [handleSelectedReporters, reporters, selectedReporters]);
   useEffect(() => {
     if (selectedTags.length) {
       const newTags = selectedTags.filter((t) => tags.includes(t));
       handleSelectedTags(newTags);
     }
-  }, [tags]);
+  }, [handleSelectedTags, selectedTags, tags]);
 
   const handleSelectedReporters = useCallback(
     (newReporters) => {
@@ -84,7 +84,7 @@ const CasesTableFiltersComponent = ({
         onFilterChanged({ reporters: reportersObj });
       }
     },
-    [selectedReporters, respReporters]
+    [selectedReporters, respReporters, onFilterChanged]
   );
 
   const handleSelectedTags = useCallback(
@@ -94,7 +94,7 @@ const CasesTableFiltersComponent = ({
         onFilterChanged({ tags: newTags });
       }
     },
-    [selectedTags]
+    [onFilterChanged, selectedTags]
   );
   const handleOnSearch = useCallback(
     (newSearch) => {
@@ -104,7 +104,7 @@ const CasesTableFiltersComponent = ({
         onFilterChanged({ search: trimSearch });
       }
     },
-    [search]
+    [onFilterChanged, search]
   );
   const handleToggleFilter = useCallback(
     (showOpen) => {
@@ -113,7 +113,7 @@ const CasesTableFiltersComponent = ({
         onFilterChanged({ status: showOpen ? 'open' : 'closed' });
       }
     },
-    [showOpenCases]
+    [onFilterChanged, showOpenCases]
   );
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">

@@ -253,7 +253,16 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
       didCancel = true;
       abortCtrl.abort();
     };
-  }, [state.firstLoad]);
+  }, [
+    dispatchToaster,
+    setClosureType,
+    setConnector,
+    setCurrentConfiguration,
+    setFirstLoad,
+    setLoading,
+    setVersion,
+    state.firstLoad,
+  ]);
 
   const persistCaseConfigure = useCallback(
     async ({ connectorId, connectorName, closureType }: ConnectorConfiguration) => {
@@ -311,12 +320,20 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
         abortCtrl.abort();
       };
     },
-    [state.version]
+    [
+      dispatchToaster,
+      setClosureType,
+      setConnector,
+      setCurrentConfiguration,
+      setPersistLoading,
+      setVersion,
+      state.version,
+    ]
   );
 
   useEffect(() => {
     refetchCaseConfigure();
-  }, []);
+  }, [refetchCaseConfigure]);
 
   return {
     ...state,

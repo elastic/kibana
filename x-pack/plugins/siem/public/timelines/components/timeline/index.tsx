@@ -77,7 +77,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
       (providerId: string, andProviderId?: string) =>
         removeProvider!({ id, providerId, andProviderId }),
-      [id]
+      [id, removeProvider]
     );
 
     const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = useCallback(
@@ -88,7 +88,7 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           andProviderId,
         }),
-      [id]
+      [id, updateDataProviderEnabled]
     );
 
     const onToggleDataProviderExcluded: OnToggleDataProviderExcluded = useCallback(
@@ -99,7 +99,7 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           andProviderId,
         }),
-      [id]
+      [id, updateDataProviderExcluded]
     );
 
     const onDataProviderEditedLocal: OnDataProviderEdited = useCallback(
@@ -113,12 +113,12 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           value,
         }),
-      [id]
+      [id, onDataProviderEdited]
     );
 
     const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
-      [id]
+      [id, updateItemsPerPage]
     );
 
     const toggleColumn = useCallback(
@@ -140,14 +140,14 @@ const StatefulTimelineComponent = React.memo<Props>(
           });
         }
       },
-      [columns, id]
+      [columns, id, removeColumn, upsertColumn]
     );
 
     useEffect(() => {
       if (createTimeline != null) {
         createTimeline({ id, columns: defaultHeaders, show: false });
       }
-    }, []);
+    }, [createTimeline, id]);
 
     return (
       <WithSource sourceId="default" indexToAdd={indexToAdd}>

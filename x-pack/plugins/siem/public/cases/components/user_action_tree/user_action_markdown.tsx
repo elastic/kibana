@@ -74,7 +74,7 @@ export const UserActionMarkdown = ({
         updateTimeline: dispatchUpdateTimeline(dispatch),
       });
     },
-    [apolloClient]
+    [apolloClient, dispatch]
   );
 
   const handleSaveAction = useCallback(async () => {
@@ -85,37 +85,34 @@ export const UserActionMarkdown = ({
     onChangeEditable(id);
   }, [form, id, onChangeEditable, onSaveContent]);
 
-  const renderButtons = useCallback(
-    ({ cancelAction, saveAction }) => {
-      return (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="user-action-cancel-markdown"
-              size="s"
-              onClick={cancelAction}
-              iconType="cross"
-            >
-              {i18n.CANCEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="user-action-save-markdown"
-              color="secondary"
-              fill
-              iconType="save"
-              onClick={saveAction}
-              size="s"
-            >
-              {i18n.SAVE}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    },
-    [handleCancelAction, handleSaveAction]
-  );
+  const renderButtons = useCallback(({ cancelAction, saveAction }) => {
+    return (
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            data-test-subj="user-action-cancel-markdown"
+            size="s"
+            onClick={cancelAction}
+            iconType="cross"
+          >
+            {i18n.CANCEL}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="user-action-save-markdown"
+            color="secondary"
+            fill
+            iconType="save"
+            onClick={saveAction}
+            size="s"
+          >
+            {i18n.SAVE}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }, []);
   return isEditable ? (
     <Form form={form} data-test-subj="user-action-markdown-form">
       <UseField

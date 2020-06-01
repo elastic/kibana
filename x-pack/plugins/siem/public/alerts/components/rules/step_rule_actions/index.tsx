@@ -99,7 +99,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         }
       }
     },
-    [form]
+    [form, setStepData]
   );
 
   useEffect(() => {
@@ -112,13 +112,13 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       setMyStepData(myDefaultValues);
       setFieldValue(form, schema, myDefaultValues);
     }
-  }, [defaultValues]);
+  }, [defaultValues, form, myStepData, schema]);
 
   useEffect(() => {
     if (setForm != null) {
       setForm(RuleStep.ruleActions, form);
     }
-  }, [form]);
+  }, [form, setForm]);
 
   const updateThrottle = useCallback((throttle) => setMyStepData({ ...myStepData, throttle }), [
     myStepData,
@@ -142,7 +142,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         options: throttleOptions,
       },
     }),
-    [isLoading, updateThrottle]
+    [isLoading, throttleOptions, updateThrottle]
   );
 
   return isReadOnlyView && myStepData != null ? (

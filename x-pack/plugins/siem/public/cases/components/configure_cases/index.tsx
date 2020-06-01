@@ -77,7 +77,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
 
   // ActionsConnectorsContextProvider reloadConnectors prop expects a Promise<void>.
   // TODO: Fix it if reloadConnectors type change.
-  const reloadConnectors = useCallback(async () => refetchConnectors(), []);
+  const reloadConnectors = useCallback(async () => refetchConnectors(), [refetchConnectors]);
   const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
   const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connectorId === 'none';
 
@@ -85,19 +85,13 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     setEditFlyoutVisibility(true);
   }, []);
 
-  const handleSetAddFlyoutVisibility = useCallback(
-    (isVisible: boolean) => {
-      setAddFlyoutVisibility(isVisible);
-    },
-    [currentConfiguration, connectorId, closureType]
-  );
+  const handleSetAddFlyoutVisibility = useCallback((isVisible: boolean) => {
+    setAddFlyoutVisibility(isVisible);
+  }, []);
 
-  const handleSetEditFlyoutVisibility = useCallback(
-    (isVisible: boolean) => {
-      setEditFlyoutVisibility(isVisible);
-    },
-    [currentConfiguration, connectorId, closureType]
-  );
+  const handleSetEditFlyoutVisibility = useCallback((isVisible: boolean) => {
+    setEditFlyoutVisibility(isVisible);
+  }, []);
 
   const onChangeConnector = useCallback(
     (id: string) => {
@@ -113,7 +107,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         closureType,
       });
     },
-    [connectorId, closureType, version]
+    [setConnector, persistCaseConfigure, connectors, closureType]
   );
 
   const onChangeClosureType = useCallback(
@@ -125,7 +119,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         closureType: type,
       });
     },
-    [connectorId, closureType, version]
+    [setClosureType, persistCaseConfigure, connectorId, connectors]
   );
 
   useEffect(() => {
@@ -141,7 +135,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     ) {
       setConnectorIsValid(true);
     }
-  }, [connectors, connectorId]);
+  }, [connectors, connectorId, isLoadingConnectors]);
 
   useEffect(() => {
     if (!isLoadingConnectors && connectorId !== 'none') {
@@ -149,7 +143,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         connectors.find((c) => c.id === connectorId) as ActionConnectorTableItem
       );
     }
-  }, [connectors, connectorId]);
+  }, [connectors, connectorId, isLoadingConnectors]);
 
   return (
     <FormWrapper>

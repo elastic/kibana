@@ -47,7 +47,7 @@ export const useEditTimelineBatchActions = ({
       disableExportTimelineDownloader();
       onCloseDeleteTimelineModal();
     },
-    [disableExportTimelineDownloader, onCloseDeleteTimelineModal, tableRef.current]
+    [disableExportTimelineDownloader, onCloseDeleteTimelineModal, tableRef]
   );
 
   const selectedIds = useMemo(() => getExportedIds(selectedItems ?? []), [selectedItems]);

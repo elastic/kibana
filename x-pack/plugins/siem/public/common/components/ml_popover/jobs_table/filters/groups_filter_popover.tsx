@@ -46,7 +46,7 @@ export const GroupsFilterPopoverComponent = ({
 
   useEffect(() => {
     onSelectedGroupsChanged(selectedGroups);
-  }, [selectedGroups.sort().join()]);
+  }, [onSelectedGroupsChanged, selectedGroups]);
 
   return (
     <EuiPopover

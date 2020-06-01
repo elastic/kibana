@@ -183,7 +183,7 @@ export const useKpiMatrixStatus = (
         };
       })
     );
-  }, [data]);
+  }, [data, from, id, mappings, narrowDateRange, to]);
 
   return statItemsProps;
 };

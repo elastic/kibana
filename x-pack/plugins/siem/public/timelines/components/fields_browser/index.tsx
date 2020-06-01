@@ -108,7 +108,7 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Pro
           setSelectedCategoryId(newSelectedCategoryId);
         }, INPUT_TIMEOUT);
       },
-      [browserFields, filterInput, inputTimeoutId.current]
+      [browserFields]
     );
 
     /**
@@ -124,9 +124,12 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Pro
      * columns in the timeline, this function dispatches the action that
      * causes the timeline display those columns.
      */
-    const updateColumnsAndSelectCategoryId = useCallback((columns: ColumnHeaderOptions[]) => {
-      onUpdateColumns(columns); // show the category columns in the timeline
-    }, []);
+    const updateColumnsAndSelectCategoryId = useCallback(
+      (columns: ColumnHeaderOptions[]) => {
+        onUpdateColumns(columns); // show the category columns in the timeline
+      },
+      [onUpdateColumns]
+    );
 
     /** Invoked when the field browser should be hidden */
     const hideFieldBrowser = useCallback(() => {

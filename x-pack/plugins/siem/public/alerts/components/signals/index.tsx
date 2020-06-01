@@ -110,7 +110,16 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
       });
     }
     return null;
-  }, [browserFields, globalFilters, globalQuery, indexPatterns, kibana, to, from]);
+  }, [
+    browserFields,
+    indexPatterns,
+    kibana.services.uiSettings,
+    defaultFilters,
+    globalFilters,
+    globalQuery,
+    from,
+    to,
+  ]);
 
   // Callback for creating a new timeline -- utilized by row/batch actions
   const createTimelineCallback = useCallback(
@@ -136,14 +145,14 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
       setEventsLoading!({ id: SIGNALS_PAGE_TIMELINE_ID, eventIds, isLoading });
     },
-    [setEventsLoading, SIGNALS_PAGE_TIMELINE_ID]
+    [setEventsLoading]
   );
 
   const setEventsDeletedCallback = useCallback(
     ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
       setEventsDeleted!({ id: SIGNALS_PAGE_TIMELINE_ID, eventIds, isDeleted });
     },
-    [setEventsDeleted, SIGNALS_PAGE_TIMELINE_ID]
+    [setEventsDeleted]
   );
 
   // Catches state change isSelectAllChecked->false upon user selection change to reset utility bar

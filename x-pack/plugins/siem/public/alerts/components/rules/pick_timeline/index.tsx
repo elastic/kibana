@@ -39,7 +39,7 @@ export const PickTimeline = ({
       setTimelineId(id);
       setTimelineTitle(title);
     }
-  }, [field.value]);
+  }, [field.value, timelineId, timelineTitle]);
 
   const handleOnTimelineChange = useCallback(
     (title: string, id: string | null) => {
@@ -49,7 +49,7 @@ export const PickTimeline = ({
         field.setValue({ id, title });
       }
     },
-    [field]
+    [field, timelineId, timelineTitle]
   );
 
   return (

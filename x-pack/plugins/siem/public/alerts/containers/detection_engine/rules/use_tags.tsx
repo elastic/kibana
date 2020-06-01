@@ -53,7 +53,7 @@ export const useTags = (): ReturnTags => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, []);
+  }, [dispatchToaster]);
 
   return [loading, tags, reFetchTags.current];
 };

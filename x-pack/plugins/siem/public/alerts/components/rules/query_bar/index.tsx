@@ -111,7 +111,7 @@ export const QueryBarDefineRule = ({
       isSubscribed = false;
       subscriptions.unsubscribe();
     };
-  }, [field.value]);
+  }, [field, field.value, filterManager]);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -143,7 +143,7 @@ export const QueryBarDefineRule = ({
     return () => {
       isSubscribed = false;
     };
-  }, [field.value]);
+  }, [field.value, filterManager, queryDraft, savedQuery, savedQueryServices]);
 
   const onSubmitQuery = useCallback(
     (newQuery: Query, timefilter?: SavedQueryTimeFilter) => {
@@ -179,7 +179,7 @@ export const QueryBarDefineRule = ({
         }
       }
     },
-    [field.value]
+    [field]
   );
 
   const onCloseTimelineModal = useCallback(() => {

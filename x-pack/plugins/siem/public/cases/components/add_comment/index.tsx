@@ -59,7 +59,7 @@ export const AddComment = React.memo<AddCommentProps>(
           `${comment}${comment.length > 0 ? '\n\n' : ''}${insertQuote}`
         );
       }
-    }, [insertQuote]);
+    }, [form, insertQuote]);
 
     const onSubmit = useCallback(async () => {
       const { isValid, data } = await form.submit();
@@ -70,7 +70,7 @@ export const AddComment = React.memo<AddCommentProps>(
         await postComment(data, onCommentPosted);
         form.reset();
       }
-    }, [form, onCommentPosted, onCommentSaving]);
+    }, [form, onCommentPosted, onCommentSaving, postComment]);
     return (
       <span id="add-comment-permLink">
         {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}

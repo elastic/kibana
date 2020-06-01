@@ -91,7 +91,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
     }
 
     return connectorsFormatted;
-  }, [connectors]);
+  }, [appendAddConnectorButton, connectors]);
 
   return (
     <EuiSuperSelect

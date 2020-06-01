@@ -101,7 +101,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
         setMyStepData({ ...data, isNew: false } as AboutStepRule);
       }
     }
-  }, [form]);
+  }, [form, setStepData]);
 
   useEffect(() => {
     const { isNew, ...initDefaultValue } = myStepData;
@@ -113,13 +113,13 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
       setMyStepData(myDefaultValues);
       setFieldValue(form, schema, myDefaultValues);
     }
-  }, [defaultValues]);
+  }, [defaultValues, form, myStepData]);
 
   useEffect(() => {
     if (setForm != null) {
       setForm(RuleStep.aboutRule, form);
     }
-  }, [form]);
+  }, [form, setForm]);
 
   return isReadOnlyView && myStepData.name != null ? (
     <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>

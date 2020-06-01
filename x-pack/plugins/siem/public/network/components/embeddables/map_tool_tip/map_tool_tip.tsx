@@ -80,10 +80,11 @@ export const MapToolTipComponent = ({
     fetchFeatureProps();
   }, [
     featureIndex,
-    features
-      .map((f) => `${f.id}-${f.layerId}`)
-      .sort()
-      .join(),
+    features,
+    getLayerName,
+    isLoadingNextFeature,
+    loadFeatureGeometry,
+    loadFeatureProperties,
   ]);
 
   if (isError) {

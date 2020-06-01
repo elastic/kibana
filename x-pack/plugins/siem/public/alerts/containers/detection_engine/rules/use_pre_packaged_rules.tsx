@@ -185,7 +185,14 @@ export const usePrePackagedRules = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [canUserCRUD, hasIndexWrite, isAuthenticated, hasEncryptionKey, isSignalIndexExists]);
+  }, [
+    canUserCRUD,
+    hasIndexWrite,
+    isAuthenticated,
+    hasEncryptionKey,
+    isSignalIndexExists,
+    dispatchToaster,
+  ]);
 
   return {
     loading,

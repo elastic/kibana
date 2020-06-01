@@ -168,7 +168,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
         abortCtrl.abort();
       };
     },
-    [apolloClient, allTimelines]
+    [apolloClient, allTimelines, dispatch, dispatchToaster]
   );
 
   useEffect(() => {

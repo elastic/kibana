@@ -84,7 +84,7 @@ export function useLastEventTimeQuery<TCache = object>(
     const signal = abortCtrl.signal;
     fetchLastEventTime(signal);
     return () => abortCtrl.abort();
-  }, [apolloClient, indexKey, details.hostName, details.ip]);
+  }, [apolloClient, indexKey, details.hostName, details.ip, fetchLastEventTime]);
 
   return { lastSeen, loading, errorMessage };
 }

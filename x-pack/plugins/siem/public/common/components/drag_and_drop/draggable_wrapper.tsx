@@ -126,7 +126,7 @@ export const DraggableWrapper = React.memo<Props>(
       () => () => {
         unRegisterProvider();
       },
-      []
+      [unRegisterProvider]
     );
 
     const hoverContent = useMemo(

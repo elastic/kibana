@@ -122,13 +122,17 @@ export const useAnomaliesTableData = ({
       abortCtrl.abort();
     };
   }, [
-    influencersOrCriteriaToString(influencers),
-    influencersOrCriteriaToString(criteriaFields),
     startDate,
     endDate,
     skip,
     userPermissions,
-    siemJobIds.sort().join(),
+    influencers,
+    criteriaFields,
+    siemJobIds,
+    anomalyScore,
+    threshold,
+    timeZone,
+    dispatchToaster,
   ]);
 
   return [loading, tableData];

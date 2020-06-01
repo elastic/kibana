@@ -109,7 +109,17 @@ export const ImportDataModalComponent = ({
         errorToToaster({ title: errorMessage, error, dispatchToaster });
       }
     }
-  }, [selectedFiles, overwrite]);
+  }, [
+    selectedFiles,
+    importData,
+    overwrite,
+    importComplete,
+    cleanupAndCloseModal,
+    successMessage,
+    dispatchToaster,
+    errorMessage,
+    failedDetailed,
+  ]);
 
   const handleCloseModal = useCallback(() => {
     setSelectedFiles(null);

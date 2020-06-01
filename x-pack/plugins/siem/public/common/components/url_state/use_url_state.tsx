@@ -206,11 +206,11 @@ export const useUrlStateHooks = ({
     } else if (pathName !== prevProps.pathName) {
       handleInitialize(type, pageName === SiemPageName.detections);
     }
-  }, [isInitializing, history, pathName, pageName, prevProps, urlState]);
+  }, [isInitializing, history, pathName, pageName, prevProps, urlState, handleInitialize, search]);
 
   useEffect(() => {
     document.title = `${getTitle(pageName, detailName, navTabs)} - Kibana`;
-  }, [pageName]);
+  }, [detailName, navTabs, pageName]);
 
   return null;
 };

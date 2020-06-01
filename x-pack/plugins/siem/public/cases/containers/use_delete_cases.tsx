@@ -78,39 +78,42 @@ export const useDeleteCases = (): UseDeleteCase => {
   });
   const [, dispatchToaster] = useStateToaster();
 
-  const dispatchDeleteCases = useCallback((cases: DeleteCase[]) => {
-    let cancel = false;
-    const abortCtrl = new AbortController();
+  const dispatchDeleteCases = useCallback(
+    (cases: DeleteCase[]) => {
+      let cancel = false;
+      const abortCtrl = new AbortController();
 
-    const deleteData = async () => {
-      try {
-        dispatch({ type: 'FETCH_INIT' });
-        const caseIds = cases.map((theCase) => theCase.id);
-        await deleteCases(caseIds, abortCtrl.signal);
-        if (!cancel) {
-          dispatch({ type: 'FETCH_SUCCESS', payload: true });
-          displaySuccessToast(
-            i18n.DELETED_CASES(cases.length, cases.length === 1 ? cases[0].title : ''),
-            dispatchToaster
-          );
+      const deleteData = async () => {
+        try {
+          dispatch({ type: 'FETCH_INIT' });
+          const caseIds = cases.map((theCase) => theCase.id);
+          await deleteCases(caseIds, abortCtrl.signal);
+          if (!cancel) {
+            dispatch({ type: 'FETCH_SUCCESS', payload: true });
+            displaySuccessToast(
+              i18n.DELETED_CASES(cases.length, cases.length === 1 ? cases[0].title : ''),
+              dispatchToaster
+            );
+          }
+        } catch (error) {
+          if (!cancel) {
+            errorToToaster({
+              title: i18n.ERROR_DELETING,
+              error: error.body && error.body.message ? new Error(error.body.message) : error,
+              dispatchToaster,
+            });
+            dispatch({ type: 'FETCH_FAILURE' });
+          }
         }
-      } catch (error) {
-        if (!cancel) {
-          errorToToaster({
-            title: i18n.ERROR_DELETING,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
-          dispatch({ type: 'FETCH_FAILURE' });
-        }
-      }
-    };
-    deleteData();
-    return () => {
-      abortCtrl.abort();
-      cancel = true;
-    };
-  }, []);
+      };
+      deleteData();
+      return () => {
+        abortCtrl.abort();
+        cancel = true;
+      };
+    },
+    [dispatchToaster]
+  );
 
   const dispatchToggleDeleteModal = useCallback(() => {
     dispatch({ type: 'DISPLAY_MODAL', payload: !state.isDisplayConfirmDeleteModal });
@@ -118,18 +121,18 @@ export const useDeleteCases = (): UseDeleteCase => {
 
   const dispatchResetIsDeleted = useCallback(() => {
     dispatch({ type: 'RESET_IS_DELETED' });
-  }, [state.isDisplayConfirmDeleteModal]);
+  }, []);
 
   const handleOnDeleteConfirm = useCallback(
     (cases: DeleteCase[]) => {
       dispatchDeleteCases(cases);
       dispatchToggleDeleteModal();
     },
-    [state.isDisplayConfirmDeleteModal]
+    [dispatchDeleteCases, dispatchToggleDeleteModal]
   );
   const handleToggleModal = useCallback(() => {
     dispatchToggleDeleteModal();
-  }, [state.isDisplayConfirmDeleteModal]);
+  }, [dispatchToggleDeleteModal]);
 
   return { ...state, dispatchResetIsDeleted, handleOnDeleteConfirm, handleToggleModal };
 };

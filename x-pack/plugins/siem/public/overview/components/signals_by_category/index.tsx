@@ -61,7 +61,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
       const [min, max] = x;
       setAbsoluteRangeDatePicker({ id: setAbsoluteRangeDatePickerTarget, from: min, to: max });
     },
-    [setAbsoluteRangeDatePicker]
+    [setAbsoluteRangeDatePicker, setAbsoluteRangeDatePickerTarget]
   );
 
   const defaultStackByOption =

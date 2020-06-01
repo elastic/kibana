@@ -139,7 +139,7 @@ export const NewCase = React.memo<NewCaseProps>(({ onClosePopover, timelineId, t
         },
       },
     });
-  }, [onClosePopover, history, timelineId, timelineTitle]);
+  }, [onClosePopover, history, timelineId, savedObjectId, timelineTitle]);
 
   return (
     <EuiButtonEmpty

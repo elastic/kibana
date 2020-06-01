@@ -111,7 +111,7 @@ export const useUpdateComment = (): UseUpdateComment => {
         abortCtrl.abort();
       };
     },
-    []
+    [dispatchToaster]
   );
 
   return { ...state, patchComment: dispatchUpdateComment };

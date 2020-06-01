@@ -174,7 +174,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     return () => {
       _isMounted = false;
     };
-  }, []);
+  }, [initialRender, maxDelay]);
 
   // Number of current columns plus one for actions.
   const columnCount = columnHeaders.length + 1;

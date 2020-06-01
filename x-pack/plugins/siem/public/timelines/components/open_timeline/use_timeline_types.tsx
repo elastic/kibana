@@ -26,28 +26,28 @@ export const useTimelineTypes = (): {
     tabName === TimelineType.default || tabName === TimelineType.template ? tabName : null
   );
 
-  const getFilterOrTabs: (timelineTabsStyle: TimelineTabsStyle) => TimelineTab[] = (
-    timelineTabsStyle: TimelineTabsStyle
-  ) => [
-    {
-      id: TimelineType.default,
-      name:
-        timelineTabsStyle === TimelineTabsStyle.filter
-          ? i18n.FILTER_TIMELINES(i18n.TAB_TIMELINES)
-          : i18n.TAB_TIMELINES,
-      href: getTimelineTabsUrl(TimelineType.default, urlSearch),
-      disabled: false,
-    },
-    {
-      id: TimelineType.template,
-      name:
-        timelineTabsStyle === TimelineTabsStyle.filter
-          ? i18n.FILTER_TIMELINES(i18n.TAB_TEMPLATES)
-          : i18n.TAB_TEMPLATES,
-      href: getTimelineTabsUrl(TimelineType.template, urlSearch),
-      disabled: false,
-    },
-  ];
+  const getFilterOrTabs: (timelineTabsStyle: TimelineTabsStyle) => TimelineTab[] = useCallback(
+    (timelineTabsStyle: TimelineTabsStyle) => [
+      {
+        id: TimelineType.default,
+        name:
+          timelineTabsStyle === TimelineTabsStyle.filter
+            ? i18n.FILTER_TIMELINES(i18n.TAB_TIMELINES)
+            : i18n.TAB_TIMELINES,
+        href: getTimelineTabsUrl(TimelineType.default, urlSearch),
+        disabled: false,
+      },
+      {
+        id: TimelineType.template,
+        name:
+          timelineTabsStyle === TimelineTabsStyle.filter
+            ? i18n.FILTER_TIMELINES(i18n.TAB_TEMPLATES)
+            : i18n.TAB_TEMPLATES,
+        href: getTimelineTabsUrl(TimelineType.template, urlSearch),
+        disabled: false,
+      },
+    ]
+  );
 
   const onFilterClicked = useCallback(
     (timelineTabsStyle, tabId) => {
@@ -79,7 +79,7 @@ export const useTimelineTypes = (): {
         <EuiSpacer size="m" />
       </>
     );
-  }, [tabName]);
+  }, [getFilterOrTabs, onFilterClicked, tabName]);
 
   const timelineFilters = useMemo(() => {
     return (
@@ -95,7 +95,7 @@ export const useTimelineTypes = (): {
         ))}
       </>
     );
-  }, [timelineType]);
+  }, [getFilterOrTabs, onFilterClicked, timelineType]);
 
   return {
     timelineType,

@@ -79,7 +79,7 @@ export function useFirstLastSeenHostQuery<TCache = object>(
     const signal = abortCtrl.signal;
     fetchFirstLastSeenHost(signal);
     return () => abortCtrl.abort();
-  }, []);
+  }, [fetchFirstLastSeenHost]);
 
   return { firstSeen, lastSeen, loading, errorMessage };
 }

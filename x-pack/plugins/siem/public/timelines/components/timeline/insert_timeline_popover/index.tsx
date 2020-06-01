@@ -52,7 +52,7 @@ export const InsertTimelinePopoverComponent: React.FC<Props> = ({
       );
       setRouterState(null);
     }
-  }, [routerState]);
+  }, [dispatch, onTimelineChange, routerState]);
 
   const handleClosePopover = useCallback(() => {
     setIsPopoverOpen(false);

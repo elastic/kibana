@@ -78,7 +78,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
             serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
           },
         }),
-      [indexPattern, timelineId]
+      [applyKqlFilterQuery, indexPattern, timelineId]
     );
 
     const setFilterQueryDraftFromKueryExpression = useCallback(
@@ -90,7 +90,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
             expression,
           },
         }),
-      [timelineId]
+      [setKqlFilterQueryDraft, timelineId]
     );
 
     const setFiltersInTimeline = useCallback(
@@ -99,7 +99,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
           id: timelineId,
           filters: newFilters,
         }),
-      [timelineId]
+      [setFilters, timelineId]
     );
 
     const setSavedQueryInTimeline = useCallback(
@@ -108,7 +108,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
           id: timelineId,
           savedQueryId: newSavedQueryId,
         }),
-      [timelineId]
+      [setSavedQueryId, timelineId]
     );
 
     const handleUpdateEventType = useCallback(
@@ -117,7 +117,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
           id: timelineId,
           eventType: newEventType,
         }),
-      [timelineId]
+      [timelineId, updateEventType]
     );
 
     return (

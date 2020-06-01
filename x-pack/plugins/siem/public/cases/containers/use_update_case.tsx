@@ -118,7 +118,7 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
         abortCtrl.abort();
       };
     },
-    []
+    [caseId, dispatchToaster]
   );
 
   return { ...state, updateCaseProperty: dispatchUpdateCaseProperty };

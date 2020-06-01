@@ -83,7 +83,7 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, []);
+  }, [dispatchToaster]);
 
   return { loading, ...privilegeUser };
 };

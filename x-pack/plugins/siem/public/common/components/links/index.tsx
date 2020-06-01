@@ -242,7 +242,7 @@ const ReputationLinkComponent: React.FC<{
           name: isDefaultReputationLink(name) ? defaultNameMapping[name] : name,
           url_template: url_template.replace(`{{ip}}`, encodeURIComponent(domain)),
         })),
-    [ipReputationLinksSetting, domain, defaultNameMapping, allItemsLimit]
+    [ipReputationLinksSetting, domain, allItemsLimit]
   );
 
   return ipReputationLinks?.length > 0 ? (

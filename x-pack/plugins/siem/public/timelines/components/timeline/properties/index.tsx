@@ -84,7 +84,7 @@ export const Properties = React.memo<Props>(
     const onOpenTimelineModal = useCallback(() => {
       onClosePopover();
       setShowTimelineModal(true);
-    }, []);
+    }, [onClosePopover]);
 
     const datePickerWidth = useMemo(
       () =>

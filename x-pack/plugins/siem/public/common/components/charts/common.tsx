@@ -101,7 +101,7 @@ const theme: PartialTheme = {
 export const useTheme = () => {
   const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
   const defaultTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
-  const themeValue = useMemo(() => mergeWithDefaultTheme(theme, defaultTheme), []);
+  const themeValue = useMemo(() => mergeWithDefaultTheme(theme, defaultTheme), [defaultTheme]);
 
   return themeValue;
 };

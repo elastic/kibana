@@ -180,7 +180,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
 
   useEffect(() => {
     scrollViews();
-  }, [selectedCategoryId, timelineId]);
+  }, [scrollViews, selectedCategoryId, timelineId]);
 
   return (
     <EuiOutsideClickDetector

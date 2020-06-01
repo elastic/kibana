@@ -114,10 +114,7 @@ const UsersTableComponent = React.memo<UsersTableProps>(
       [sort, type, updateNetworkTable]
     );
 
-    const columns = useMemo(() => getUsersColumns(flowTarget, usersTableId), [
-      flowTarget,
-      usersTableId,
-    ]);
+    const columns = useMemo(() => getUsersColumns(flowTarget, usersTableId), [flowTarget]);
 
     return (
       <PaginatedTable
