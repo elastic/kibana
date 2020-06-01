@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   let nullableEventId = '';
 
-  describe('Endpoint alert API', () => {
+  describe.skip('Endpoint alert API', () => {
     describe('when data is in elasticsearch', () => {
       before(async () => {
         await esArchiver.load('endpoint/alerts/api_feature');

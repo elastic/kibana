@@ -120,8 +120,8 @@ export const AlertIndex = memo(() => {
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
 
   const handleFlyoutClose = useCallback(() => {
-    const { selected_alert, ...paramsWithoutSelectedAlert } = queryParams;
-    history.push(urlFromQueryParams(paramsWithoutSelectedAlert));
+    const { active_details_tab, selected_alert, ...paramsWithoutFlyoutDetails } = queryParams;
+    history.push(urlFromQueryParams(paramsWithoutFlyoutDetails));
   }, [history, queryParams]);
 
   const timestampForRows: Map<AlertData, number> = useMemo(() => {

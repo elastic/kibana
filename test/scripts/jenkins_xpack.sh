@@ -10,13 +10,19 @@ echo ""
 
 echo " -> Running jest tests"
 cd "$XPACK_DIR"
-checks-reporter-with-killswitch "X-Pack Jest" node --max-old-space-size=6144 scripts/jest --ci --verbose --detectOpenHandles
+checks-reporter-with-killswitch "X-Pack Jest" node --max-old-space-size=6144 scripts/jest --ci --verbose
 echo ""
 echo ""
 
 echo " -> Running SIEM cyclic dependency test"
 cd "$XPACK_DIR"
 checks-reporter-with-killswitch "X-Pack SIEM cyclic dependency test" node plugins/siem/scripts/check_circular_deps
+echo ""
+echo ""
+
+echo " -> Running List cyclic dependency test"
+cd "$XPACK_DIR"
+checks-reporter-with-killswitch "X-Pack List cyclic dependency test" node plugins/lists/scripts/check_circular_deps
 echo ""
 echo ""
 

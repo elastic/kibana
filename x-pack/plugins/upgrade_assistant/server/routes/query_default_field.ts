@@ -33,7 +33,9 @@ export function registerQueryDefaultFieldRoutes({ router }: RouteDependencies) {
       async (
         {
           core: {
-            elasticsearch: { adminClient },
+            elasticsearch: {
+              legacy: { client },
+            },
           },
         },
         request,
@@ -48,7 +50,7 @@ export function registerQueryDefaultFieldRoutes({ router }: RouteDependencies) {
 
           return response.ok({
             body: await addDefaultField(
-              adminClient,
+              client,
               indexName,
               new Set(fieldTypes),
               otherFields ? new Set(otherFields) : undefined
