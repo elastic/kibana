@@ -32,7 +32,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
   const [agentConfig, setAgentConfig] = useState<NewAgentConfig>({
     name: '',
     description: '',
-    namespace: '',
+    namespace: 'default',
     is_default: undefined,
     monitoring_enabled: ['logs', 'metrics'],
   });
@@ -76,7 +76,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
         agentConfig={agentConfig}
         updateAgentConfig={updateAgentConfig}
         withSysMonitoring={withSysMonitoring}
-        updateSysMonitoring={newValue => setWithSysMonitoring(newValue)}
+        updateSysMonitoring={(newValue) => setWithSysMonitoring(newValue)}
         validation={validation}
       />
     </EuiFlyoutBody>
@@ -102,6 +102,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
               setIsLoading(true);
               try {
                 const { data, error } = await createAgentConfig();
+                setIsLoading(false);
                 if (data?.success) {
                   notifications.toasts.addSuccess(
                     i18n.translate(
@@ -112,6 +113,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
                       }
                     )
                   );
+                  onClose();
                 } else {
                   notifications.toasts.addDanger(
                     error
@@ -125,14 +127,13 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
                   );
                 }
               } catch (e) {
+                setIsLoading(false);
                 notifications.toasts.addDanger(
                   i18n.translate('xpack.ingestManager.createAgentConfig.errorNotificationTitle', {
                     defaultMessage: 'Unable to create agent config',
                   })
                 );
               }
-              setIsLoading(false);
-              onClose();
             }}
           >
             <FormattedMessage

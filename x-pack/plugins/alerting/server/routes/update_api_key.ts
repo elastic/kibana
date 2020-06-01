@@ -33,7 +33,7 @@ export const updateApiKeyRoute = (router: IRouter, licenseState: LicenseState) =
       },
     },
     handleDisabledApiKeysError(
-      router.handleLegacyErrors(async function(
+      router.handleLegacyErrors(async function (
         context: RequestHandlerContext,
         req: KibanaRequest<TypeOf<typeof paramSchema>, unknown, unknown>,
         res: KibanaResponseFactory

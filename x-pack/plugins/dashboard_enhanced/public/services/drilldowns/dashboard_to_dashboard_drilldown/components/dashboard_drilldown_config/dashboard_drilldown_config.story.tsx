@@ -27,9 +27,9 @@ const InteractiveDemo: React.FC = () => {
       dashboards={dashboards}
       currentFilters={currentFilters}
       keepRange={keepRange}
-      onDashboardSelect={id => setActiveDashboardId(id)}
-      onCurrentFiltersToggle={() => setCurrentFilters(old => !old)}
-      onKeepRangeToggle={() => setKeepRange(old => !old)}
+      onDashboardSelect={(id) => setActiveDashboardId(id)}
+      onCurrentFiltersToggle={() => setCurrentFilters((old) => !old)}
+      onKeepRangeToggle={() => setKeepRange((old) => !old)}
       onSearchChange={() => {}}
       isLoading={false}
     />
@@ -44,7 +44,7 @@ storiesOf(
     <DashboardDrilldownConfig
       activeDashboardId={'dashboard2'}
       dashboards={dashboards}
-      onDashboardSelect={e => console.log('onDashboardSelect', e)}
+      onDashboardSelect={(e) => console.log('onDashboardSelect', e)}
       onSearchChange={() => {}}
       isLoading={false}
     />
@@ -53,7 +53,7 @@ storiesOf(
     <DashboardDrilldownConfig
       activeDashboardId={'dashboard2'}
       dashboards={dashboards}
-      onDashboardSelect={e => console.log('onDashboardSelect', e)}
+      onDashboardSelect={(e) => console.log('onDashboardSelect', e)}
       onCurrentFiltersToggle={() => console.log('onCurrentFiltersToggle')}
       onKeepRangeToggle={() => console.log('onKeepRangeToggle')}
       onSearchChange={() => {}}

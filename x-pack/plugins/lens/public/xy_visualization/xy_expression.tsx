@@ -39,6 +39,7 @@ import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
 import { parseInterval } from '../../../../../src/plugins/data/common';
 import { EmptyPlaceholder } from '../shared_components';
+import { desanitizeFilterContext } from '../utils';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -156,7 +157,7 @@ export const getXyChartRenderer = (dependencies: {
 });
 
 function getIconForSeriesType(seriesType: SeriesType): IconType {
-  return visualizationTypes.find(c => c.id === seriesType)!.icon || 'empty';
+  return visualizationTypes.find((c) => c.id === seriesType)!.icon || 'empty';
 }
 
 const MemoizedChart = React.memo(XYChart);
@@ -197,7 +198,7 @@ export function XYChart({
       !accessors.length ||
       !data.tables[layerId] ||
       data.tables[layerId].rows.length === 0 ||
-      data.tables[layerId].rows.every(row => typeof row[xAccessor] === 'undefined')
+      data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')
     );
   });
 
@@ -225,8 +226,8 @@ export function XYChart({
 
   const chartHasMoreThanOneSeries =
     filteredLayers.length > 1 ||
-    filteredLayers.some(layer => layer.accessors.length > 1) ||
-    filteredLayers.some(layer => layer.splitAccessor);
+    filteredLayers.some((layer) => layer.accessors.length > 1) ||
+    filteredLayers.some((layer) => layer.splitAccessor);
   const shouldRotate = isHorizontalChart(filteredLayers);
 
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
@@ -240,7 +241,7 @@ export function XYChart({
       for (const layer of filteredLayers) {
         if (
           layer.xAccessor &&
-          data.tables[layer.layerId].rows.some(row => row[layer.xAccessor!] !== firstRowValue)
+          data.tables[layer.layerId].rows.some((row) => row[layer.xAccessor!] !== firstRowValue)
         ) {
           return false;
         }
@@ -261,7 +262,7 @@ export function XYChart({
     return undefined;
   }
 
-  const isTimeViz = data.dateRange && filteredLayers.every(l => l.xScaleType === 'time');
+  const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
 
   const xDomain = isTimeViz
     ? {
@@ -293,7 +294,7 @@ export function XYChart({
           const table = data.tables[filteredLayers[0].layerId];
 
           const xAxisColumnIndex = table.columns.findIndex(
-            el => el.id === filteredLayers[0].xAccessor
+            (el) => el.id === filteredLayers[0].xAccessor
           );
           const timeFieldName = table.columns[xAxisColumnIndex]?.meta?.aggConfigParams?.field;
 
@@ -310,7 +311,7 @@ export function XYChart({
           const xySeries = series as XYChartSeriesIdentifier;
           const xyGeometry = geometry as GeometryValue;
 
-          const layer = filteredLayers.find(l =>
+          const layer = filteredLayers.find((l) =>
             xySeries.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
           );
           if (!layer) {
@@ -322,9 +323,9 @@ export function XYChart({
           const points = [
             {
               row: table.rows.findIndex(
-                row => layer.xAccessor && row[layer.xAccessor] === xyGeometry.x
+                (row) => layer.xAccessor && row[layer.xAccessor] === xyGeometry.x
               ),
-              column: table.columns.findIndex(col => col.id === layer.xAccessor),
+              column: table.columns.findIndex((col) => col.id === layer.xAccessor),
               value: xyGeometry.x,
             },
           ];
@@ -334,19 +335,19 @@ export function XYChart({
 
             points.push({
               row: table.rows.findIndex(
-                row => layer.splitAccessor && row[layer.splitAccessor] === pointValue
+                (row) => layer.splitAccessor && row[layer.splitAccessor] === pointValue
               ),
-              column: table.columns.findIndex(col => col.id === layer.splitAccessor),
+              column: table.columns.findIndex((col) => col.id === layer.splitAccessor),
               value: pointValue,
             });
           }
 
-          const xAxisFieldName = table.columns.find(el => el.id === layer.xAccessor)?.meta
+          const xAxisFieldName = table.columns.find((el) => el.id === layer.xAccessor)?.meta
             ?.aggConfigParams?.field;
           const timeFieldName = xDomain && xAxisFieldName;
 
           const context: LensFilterEvent['data'] = {
-            data: points.map(point => ({
+            data: points.map((point) => ({
               row: point.row,
               column: point.column,
               value: point.value,
@@ -354,7 +355,7 @@ export function XYChart({
             })),
             timeFieldName,
           };
-          onClickValue(context);
+          onClickValue(desanitizeFilterContext(context));
         }}
       />
 
@@ -364,7 +365,7 @@ export function XYChart({
         title={xTitle}
         showGridLines={false}
         hide={filteredLayers[0].hide}
-        tickFormat={d => xAxisFormatter.convert(d)}
+        tickFormat={(d) => xAxisFormatter.convert(d)}
       />
 
       <Axis
@@ -373,7 +374,7 @@ export function XYChart({
         title={args.yTitle}
         showGridLines={false}
         hide={filteredLayers[0].hide}
-        tickFormat={d => yAxisFormatter.convert(d)}
+        tickFormat={(d) => yAxisFormatter.convert(d)}
       />
 
       {filteredLayers.map(
@@ -400,10 +401,14 @@ export function XYChart({
           // For date histogram chart type, we're getting the rows that represent intervals without data.
           // To not display them in the legend, they need to be filtered out.
           const rows = table.rows.filter(
-            row =>
+            (row) =>
               xAccessor &&
-              row[xAccessor] &&
-              !(splitAccessor && !row[splitAccessor] && accessors.every(accessor => !row[accessor]))
+              typeof row[xAccessor] !== 'undefined' &&
+              !(
+                splitAccessor &&
+                typeof row[splitAccessor] === 'undefined' &&
+                accessors.every((accessor) => typeof row[accessor] === 'undefined')
+              )
           );
 
           const seriesProps: SeriesSpec = {
@@ -418,7 +423,7 @@ export function XYChart({
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             timeZone,
             name(d) {
-              const splitHint = table.columns.find(col => col.id === splitAccessor)?.formatHint;
+              const splitHint = table.columns.find((col) => col.id === splitAccessor)?.formatHint;
 
               // For multiple y series, the name of the operation is used on each, either:
               // * Key - Y name

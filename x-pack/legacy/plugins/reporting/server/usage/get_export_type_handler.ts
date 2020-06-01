@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
+import { FeaturesAvailability } from './';
 
 /*
  * Gets a handle to the Reporting export types registry and returns a few
@@ -21,10 +21,10 @@ export function getExportTypesHandler(exportTypesRegistry: ExportTypesRegistry) 
      * @param {Object} xpackInfo: xpack_main plugin info object
      * @return {Object} availability of each export type
      */
-    getAvailability(xpackInfo: XPackMainPlugin['info']) {
+    getAvailability(featuresAvailability: FeaturesAvailability): { [exportType: string]: boolean } {
       const exportTypesAvailability: { [exportType: string]: boolean } = {};
-      const xpackInfoAvailable = xpackInfo && xpackInfo.isAvailable();
-      const licenseType: string | undefined = xpackInfo.license.getType();
+      const xpackInfoAvailable = featuresAvailability && featuresAvailability.isAvailable();
+      const licenseType = featuresAvailability.license.getType();
       if (!licenseType) {
         throw new Error('No license type returned from XPackMainPlugin#info!');
       }

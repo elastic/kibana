@@ -4,16 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESQueueInstance, Logger } from '../../types';
 import { ReportingCore } from '../core';
+import { JobDocOutput, JobSource } from '../types';
 import { createTaggedLogger } from './create_tagged_logger'; // TODO remove createTaggedLogger once esqueue is removed
 import { createWorkerFactory } from './create_worker';
+import { Job } from './enqueue_job';
 // @ts-ignore
 import { Esqueue } from './esqueue';
+import { LevelLogger } from './level_logger';
+
+interface ESQueueWorker {
+  on: (event: string, handler: any) => void;
+}
+
+export interface ESQueueInstance {
+  addJob: (type: string, payload: unknown, options: object) => Job;
+  registerWorker: <JobParamsType>(
+    pluginId: string,
+    workerFn: GenericWorkerFn<JobParamsType>,
+    workerOptions: {
+      kibanaName: string;
+      kibanaId: string;
+      interval: number;
+      intervalErrorMultiplier: number;
+    }
+  ) => ESQueueWorker;
+}
+
+// GenericWorkerFn is a generic for ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<JobDocPayloadType>,
+type GenericWorkerFn<JobParamsType> = (
+  jobSource: JobSource<JobParamsType>,
+  ...workerRestArgs: any[]
+) => void | Promise<JobDocOutput>;
 
 export async function createQueueFactory<JobParamsType, JobPayloadType>(
   reporting: ReportingCore,
-  logger: Logger
+  logger: LevelLogger
 ): Promise<ESQueueInstance> {
   const config = reporting.getConfig();
   const queueIndexInterval = config.get('queue', 'indexInterval');
@@ -26,7 +52,7 @@ export async function createQueueFactory<JobParamsType, JobPayloadType>(
     interval: queueIndexInterval,
     timeout: queueTimeout,
     dateSeparator: '.',
-    client: elasticsearch.dataClient,
+    client: elasticsearch.legacy.client,
     logger: createTaggedLogger(logger, ['esqueue', 'queue-worker']),
   };
 

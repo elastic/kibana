@@ -17,47 +17,47 @@ import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
 
-export const servicesRoute = createRoute(core => ({
+export const servicesRoute = createRoute((core) => ({
   path: '/api/apm/services',
   params: {
-    query: t.intersection([uiFiltersRt, rangeRt])
+    query: t.intersection([uiFiltersRt, rangeRt]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const services = await getServices(setup);
 
     return services;
-  }
+  },
 }));
 
 export const serviceAgentNameRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/agent_name',
   params: {
     path: t.type({
-      serviceName: t.string
+      serviceName: t.string,
     }),
-    query: rangeRt
+    query: rangeRt,
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
     return getServiceAgentName(serviceName, setup);
-  }
+  },
 }));
 
 export const serviceTransactionTypesRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/transaction_types',
   params: {
     path: t.type({
-      serviceName: t.string
+      serviceName: t.string,
     }),
-    query: rangeRt
+    query: rangeRt,
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
     return getServiceTransactionTypes(serviceName, setup);
-  }
+  },
 }));
 
 export const serviceNodeMetadataRoute = createRoute(() => ({
@@ -65,29 +65,29 @@ export const serviceNodeMetadataRoute = createRoute(() => ({
   params: {
     path: t.type({
       serviceName: t.string,
-      serviceNodeName: t.string
+      serviceNodeName: t.string,
     }),
-    query: t.intersection([uiFiltersRt, rangeRt])
+    query: t.intersection([uiFiltersRt, rangeRt]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName, serviceNodeName } = context.params.path;
     return getServiceNodeMetadata({ setup, serviceName, serviceNodeName });
-  }
+  },
 }));
 
 export const serviceAnnotationsRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/annotation/search',
   params: {
     path: t.type({
-      serviceName: t.string
+      serviceName: t.string,
     }),
     query: t.intersection([
       rangeRt,
       t.partial({
-        environment: t.string
-      })
-    ])
+        environment: t.string,
+      }),
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -104,38 +104,38 @@ export const serviceAnnotationsRoute = createRoute(() => ({
       serviceName,
       environment,
       annotationsClient,
-      apiCaller: context.core.elasticsearch.dataClient.callAsCurrentUser
+      apiCaller: context.core.elasticsearch.legacy.client.callAsCurrentUser,
     });
-  }
+  },
 }));
 
 export const serviceAnnotationsCreateRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/annotation',
   method: 'POST',
   options: {
-    tags: ['access:apm', 'access:apm_write']
+    tags: ['access:apm', 'access:apm_write'],
   },
   params: {
     path: t.type({
-      serviceName: t.string
+      serviceName: t.string,
     }),
     body: t.intersection([
       t.type({
         '@timestamp': dateAsStringRt,
         service: t.intersection([
           t.type({
-            version: t.string
+            version: t.string,
           }),
           t.partial({
-            environment: t.string
-          })
-        ])
+            environment: t.string,
+          }),
+        ]),
       }),
       t.partial({
         message: t.string,
-        tags: t.array(t.string)
-      })
-    ])
+        tags: t.array(t.string),
+      }),
+    ]),
   },
   handler: async ({ request, context }) => {
     const annotationsClient = await context.plugins.observability?.getScopedAnnotationsClient(
@@ -153,13 +153,13 @@ export const serviceAnnotationsCreateRoute = createRoute(() => ({
       message: body.service.version,
       ...body,
       annotation: {
-        type: 'deployment'
+        type: 'deployment',
       },
       service: {
         ...body.service,
-        name: path.serviceName
+        name: path.serviceName,
       },
-      tags: unique(['apm'].concat(body.tags ?? []))
+      tags: unique(['apm'].concat(body.tags ?? [])),
     });
-  }
+  },
 }));

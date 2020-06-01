@@ -59,7 +59,8 @@ const KEYWORD_MAPPING_FIELD = {
   type: 'keyword',
 };
 
-describe('<TemplateCreate />', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/67833
+describe.skip('<TemplateCreate />', () => {
   let testBed: TemplateFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -259,7 +260,7 @@ describe('<TemplateCreate />', () => {
         expect(
           find('summaryTabContent')
             .find('.euiTab')
-            .map(t => t.text())
+            .map((t) => t.text())
         ).toEqual(['Summary', 'Request']);
       });
 

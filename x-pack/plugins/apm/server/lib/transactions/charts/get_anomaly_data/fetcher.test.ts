@@ -21,8 +21,8 @@ describe('anomalyAggsFetcher', () => {
         setup: {
           client: { search: clientSpy },
           start: 100000,
-          end: 200000
-        } as any
+          end: 200000,
+        } as any,
       });
     });
 
@@ -42,7 +42,7 @@ describe('anomalyAggsFetcher', () => {
 
     return expect(
       anomalySeriesFetcher({
-        setup: { client: { search: failedRequestSpy } }
+        setup: { client: { search: failedRequestSpy } },
       } as any)
     ).resolves.toEqual(undefined);
   });
@@ -53,7 +53,7 @@ describe('anomalyAggsFetcher', () => {
 
     return expect(
       anomalySeriesFetcher({
-        setup: { client: { search: failedRequestSpy } }
+        setup: { client: { search: failedRequestSpy } },
       } as any)
     ).rejects.toThrow(otherError);
   });

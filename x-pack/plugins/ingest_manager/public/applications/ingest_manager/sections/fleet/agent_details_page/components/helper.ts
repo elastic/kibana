@@ -33,7 +33,7 @@ export function unflattenMetadata(flattened: { [k: string]: string }) {
     }
 
     let metadataPart = metadata;
-    keyParts.forEach(keyPart => {
+    keyParts.forEach((keyPart) => {
       if (!metadataPart[keyPart]) {
         metadataPart[keyPart] = {};
       }

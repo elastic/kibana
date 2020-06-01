@@ -6,15 +6,16 @@
 
 import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
-import { QUERY } from '../../../../common/constants';
 import {
   Check,
   Histogram,
+  HistogramPoint,
   MonitorSummary,
   CursorDirection,
   SortOrder,
 } from '../../../../common/runtime_types';
 import { MonitorEnricher } from './fetch_page';
+import { getHistogramInterval } from '../../helper/get_histogram_interval';
 
 export const enrichMonitorGroups: MonitorEnricher = async (
   queryContext: QueryContext,
@@ -270,7 +271,7 @@ export const enrichMonitorGroups: MonitorEnricher = async (
 
   const histogramMap = await getHistogramForMonitors(queryContext, monitorIds);
 
-  const resItems = summaries.map(summary => ({
+  const resItems = summaries.map((summary) => ({
     ...summary,
     histogram: histogramMap[summary.monitor_id],
   }));
@@ -295,6 +296,11 @@ const getHistogramForMonitors = async (
         bool: {
           filter: [
             {
+              range: {
+                'summary.down': { gt: 0 },
+              },
+            },
+            {
               terms: {
                 'monitor.id': monitorIds,
               },
@@ -311,25 +317,25 @@ const getHistogramForMonitors = async (
         },
       },
       aggs: {
-        by_id: {
-          terms: {
-            field: 'monitor.id',
-            size: queryContext.size,
+        histogram: {
+          date_histogram: {
+            field: '@timestamp',
+            // 12 seems to be a good size for performance given
+            // long monitor lists of up to 100 on the overview page
+            fixed_interval:
+              getHistogramInterval(queryContext.dateRangeStart, queryContext.dateRangeEnd, 12) +
+              'ms',
+            missing: 0,
           },
           aggs: {
-            histogram: {
-              auto_date_histogram: {
-                field: '@timestamp',
-                buckets: QUERY.DEFAULT_BUCKET_COUNT,
-                missing: 0,
+            by_id: {
+              terms: {
+                field: 'monitor.id',
+                size: Math.max(monitorIds.length, 1),
               },
               aggs: {
-                status: {
-                  terms: {
-                    field: 'monitor.status',
-                    size: 2,
-                    shard_size: 2,
-                  },
+                totalDown: {
+                  sum: { field: 'summary.down' },
                 },
               },
             },
@@ -340,32 +346,32 @@ const getHistogramForMonitors = async (
   };
   const result = await queryContext.search(params);
 
-  const buckets: any[] = get(result, 'aggregations.by_id.buckets', []);
-  return buckets.reduce((map: { [key: string]: any }, item: any) => {
-    const points = get(item, 'histogram.buckets', []).map((histogram: any) => {
-      const status = get(histogram, 'status.buckets', []).reduce(
-        (statuses: { up: number; down: number }, bucket: any) => {
-          if (bucket.key === 'up') {
-            statuses.up = bucket.doc_count;
-          } else if (bucket.key === 'down') {
-            statuses.down = bucket.doc_count;
-          }
-          return statuses;
-        },
-        { up: 0, down: 0 }
-      );
-      return {
-        timestamp: histogram.key,
-        ...status,
-      };
+  const histoBuckets: any[] = result.aggregations.histogram.buckets;
+  const simplified = histoBuckets.map((histoBucket: any): { timestamp: number; byId: any } => {
+    const byId: { [key: string]: number } = {};
+    histoBucket.by_id.buckets.forEach((idBucket: any) => {
+      byId[idBucket.key] = idBucket.totalDown.value;
     });
-
-    map[item.key] = {
-      count: item.doc_count,
-      points,
+    return {
+      timestamp: parseInt(histoBucket.key, 10),
+      byId,
     };
-    return map;
-  }, {});
+  });
+
+  const histosById: { [key: string]: Histogram } = {};
+  monitorIds.forEach((id: string) => {
+    const points: HistogramPoint[] = [];
+    simplified.forEach((simpleHisto) => {
+      points.push({
+        timestamp: simpleHisto.timestamp,
+        up: undefined,
+        down: simpleHisto.byId[id],
+      });
+    });
+    histosById[id] = { points };
+  });
+
+  return histosById;
 };
 
 const cursorDirectionToOrder = (cd: CursorDirection): 'asc' | 'desc' => {

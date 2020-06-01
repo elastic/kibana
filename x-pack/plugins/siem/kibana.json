@@ -7,9 +7,11 @@
     "actions",
     "alerting",
     "data",
+    "dataEnhanced",
     "embeddable",
     "features",
     "home",
+    "ingestManager",
     "inspector",
     "licensing",
     "maps",
@@ -22,7 +24,8 @@
     "newsfeed",
     "security",
     "spaces",
-    "usageCollection"
+    "usageCollection",
+    "lists"
   ],
   "server": true,
   "ui": true

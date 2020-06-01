@@ -61,7 +61,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
 
       try {
         const alertsClient = context.alerting?.getAlertsClient();
-        const clusterClient = context.core.elasticsearch.dataClient;
+        const clusterClient = context.core.elasticsearch.legacy.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.siem?.getSiemClient();
 
@@ -106,7 +106,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
           const batchParseObjects = chunkParseObjects.shift() ?? [];
           const newImportRuleResponse = await Promise.all(
             batchParseObjects.reduce<Array<Promise<ImportRuleResponse>>>((accum, parsedRule) => {
-              const importsWorkerPromise = new Promise<ImportRuleResponse>(async resolve => {
+              const importsWorkerPromise = new Promise<ImportRuleResponse>(async (resolve) => {
                 if (parsedRule instanceof Error) {
                   // If the JSON object had a validation or parse error then we return
                   // early with the error and an (unknown) for the ruleId
@@ -256,8 +256,8 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
           ];
         }
 
-        const errorsResp = importRuleResponse.filter(resp => isBulkError(resp)) as BulkError[];
-        const successes = importRuleResponse.filter(resp => {
+        const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
+        const successes = importRuleResponse.filter((resp) => {
           if (isImportRegular(resp)) {
             return resp.status_code === 200;
           } else {

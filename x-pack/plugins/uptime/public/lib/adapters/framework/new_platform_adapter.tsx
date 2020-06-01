@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { get } from 'lodash';
@@ -39,16 +39,11 @@ export const getKibanaFrameworkAdapter = (
     triggers_actions_ui,
   } = plugins;
 
-  alertTypeInitializers.forEach(init => {
+  alertTypeInitializers.forEach((init) => {
     const alertInitializer = init({ autocomplete });
     if (!triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)) {
       triggers_actions_ui.alertTypeRegistry.register(init({ autocomplete }));
     }
-  });
-
-  let breadcrumbs: ChromeBreadcrumb[] = [];
-  core.chrome.getBreadcrumbs$().subscribe((nextBreadcrumbs?: ChromeBreadcrumb[]) => {
-    breadcrumbs = nextBreadcrumbs || [];
   });
 
   const { apm, infrastructure, logs } = getIntegratedAppAvailability(
@@ -68,7 +63,6 @@ export const getKibanaFrameworkAdapter = (
     isApmAvailable: apm,
     isInfraAvailable: infrastructure,
     isLogsAvailable: logs,
-    kibanaBreadcrumbs: breadcrumbs,
     plugins,
     startPlugins,
     renderGlobalHelpControls: () =>
@@ -97,6 +91,10 @@ export const getKibanaFrameworkAdapter = (
       if (element) {
         ReactDOM.render(<UptimeApp {...props} />, element);
       }
+
+      return () => {
+        ReactDOM.unmountComponentAtNode(element);
+      };
     },
   };
 };

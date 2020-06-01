@@ -78,7 +78,7 @@ export class FeatureTable extends Component<Props, State> {
 
         return 0;
       })
-      .map(feature => {
+      .map((feature) => {
         return {
           featureId: feature.id,
           feature,
@@ -98,7 +98,7 @@ export class FeatureTable extends Component<Props, State> {
             ...acc,
             [featureId]: (
               <FeatureTableExpandedRow
-                feature={featurePrivileges.find(f => f.id === featureId)!}
+                feature={featurePrivileges.find((f) => f.id === featureId)!}
                 privilegeIndex={this.props.privilegeIndex}
                 onChange={this.props.onChange}
                 privilegeCalculator={this.props.privilegeCalculator}
@@ -208,7 +208,7 @@ export class FeatureTable extends Component<Props, State> {
             this.props.privilegeIndex
           );
 
-          const options = primaryFeaturePrivileges.map(privilege => {
+          const options = primaryFeaturePrivileges.map((privilege) => {
             return {
               id: `${feature.id}_${privilege.id}`,
               label: privilege.name,
@@ -268,7 +268,7 @@ export class FeatureTable extends Component<Props, State> {
   private toggleExpandedFeature = (featureId: string) => {
     if (this.state.expandedFeatures.includes(featureId)) {
       this.setState({
-        expandedFeatures: this.state.expandedFeatures.filter(ef => ef !== featureId),
+        expandedFeatures: this.state.expandedFeatures.filter((ef) => ef !== featureId),
       });
     } else {
       this.setState({

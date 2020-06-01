@@ -11,7 +11,7 @@ import { UserScenarios } from '../scenarios';
 export default function uiCapabilitesTests({ loadTestFile, getService }: FtrProviderContext) {
   const securityService = getService('security');
 
-  describe('ui capabilities', function() {
+  describe('ui capabilities', function () {
     this.tags('ciGroup9');
 
     before(async () => {
@@ -21,7 +21,7 @@ export default function uiCapabilitesTests({ loadTestFile, getService }: FtrProv
         await securityService.user.create(user.username, {
           password: user.password,
           full_name: user.fullName,
-          roles: roles.map(role => role.name),
+          roles: roles.map((role) => role.name),
         });
 
         for (const role of roles) {

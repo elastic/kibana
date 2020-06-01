@@ -13,8 +13,21 @@ import { createInitialInputsState, initialInputsState, inputsReducer, InputsStat
 import { HostsPluginState, HostsPluginReducer } from '../../hosts/store';
 import { NetworkPluginState, NetworkPluginReducer } from '../../network/store';
 import { TimelinePluginState, TimelinePluginReducer } from '../../timelines/store/timeline';
+import {
+  EndpointAlertsPluginState,
+  EndpointAlertsPluginReducer,
+} from '../../endpoint_alerts/store';
+import { EndpointHostsPluginState, EndpointHostsPluginReducer } from '../../endpoint_hosts/store';
 
-export interface State extends HostsPluginState, NetworkPluginState, TimelinePluginState {
+import { ManagementPluginReducer, ManagementPluginState } from '../../management/store/types';
+
+export interface State
+  extends HostsPluginState,
+    NetworkPluginState,
+    TimelinePluginState,
+    EndpointAlertsPluginState,
+    EndpointHostsPluginState,
+    ManagementPluginState {
   app: AppState;
   dragAndDrop: DragAndDropState;
   inputs: InputsState;
@@ -26,10 +39,19 @@ export const initialState: Pick<State, 'app' | 'dragAndDrop' | 'inputs'> = {
   inputs: initialInputsState,
 };
 
-type SubPluginsInitState = HostsPluginState & NetworkPluginState & TimelinePluginState;
+type SubPluginsInitState = HostsPluginState &
+  NetworkPluginState &
+  TimelinePluginState &
+  EndpointAlertsPluginState &
+  EndpointHostsPluginState &
+  ManagementPluginState;
+
 export type SubPluginsInitReducer = HostsPluginReducer &
   NetworkPluginReducer &
-  TimelinePluginReducer;
+  TimelinePluginReducer &
+  EndpointAlertsPluginReducer &
+  EndpointHostsPluginReducer &
+  ManagementPluginReducer;
 
 export const createInitialState = (pluginsInitState: SubPluginsInitState): State => ({
   ...initialState,

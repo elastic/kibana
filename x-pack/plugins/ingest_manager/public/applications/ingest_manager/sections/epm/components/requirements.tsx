@@ -16,11 +16,11 @@ export interface RequirementsProps {
 }
 
 const FlexGroup = styled(EuiFlexGroup)`
-  padding: 0 0 ${props => props.theme.eui.paddingSizes.m} 0;
+  padding: 0 0 ${(props) => props.theme.eui.paddingSizes.m} 0;
   margin: 0;
 `;
 const StyledVersion = styled(Version)`
-  font-size: ${props => props.theme.eui.euiFontSizeXS};
+  font-size: ${(props) => props.theme.eui.euiFontSizeXS};
 `;
 
 export function Requirements(props: RequirementsProps) {

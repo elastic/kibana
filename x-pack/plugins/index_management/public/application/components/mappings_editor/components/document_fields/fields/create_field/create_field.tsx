@@ -51,7 +51,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   });
 
   useEffect(() => {
-    const subscription = form.subscribe(updatedFieldForm => {
+    const subscription = form.subscribe((updatedFieldForm) => {
       dispatch({ type: 'fieldForm.update', value: updatedFieldForm });
     });
 

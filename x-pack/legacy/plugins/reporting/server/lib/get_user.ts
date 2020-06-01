@@ -4,16 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
+import { SecurityPluginSetup } from '../../../../../plugins/security/server';
 import { KibanaRequest } from '../../../../../../src/core/server';
-import { Logger } from '../../types';
-import { ReportingSetupDeps } from '../types';
 
-export function getUserFactory(security: ReportingSetupDeps['security'], logger: Logger) {
-  /*
-   * Legacy.Request because this is called from routing middleware
-   */
-  return async (request: Legacy.Request) => {
-    return security?.authc.getCurrentUser(KibanaRequest.from(request)) ?? null;
+export function getUserFactory(security?: SecurityPluginSetup) {
+  return (request: KibanaRequest) => {
+    return security?.authc.getCurrentUser(request) ?? null;
   };
 }

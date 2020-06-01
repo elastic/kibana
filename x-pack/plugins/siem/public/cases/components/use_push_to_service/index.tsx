@@ -67,11 +67,15 @@ export const usePushToService = ({
   }, [caseId, caseServices, caseConnectorId, caseConnectorName, postPushToService, updateCase]);
 
   const errorsMsg = useMemo(() => {
-    let errors: Array<{ title: string; description: JSX.Element }> = [];
+    let errors: Array<{
+      title: string;
+      description: JSX.Element;
+      errorType?: 'primary' | 'success' | 'warning' | 'danger';
+    }> = [];
     if (actionLicense != null && !actionLicense.enabledInLicense) {
       errors = [...errors, getLicenseError()];
     }
-    if (connectors.length === 0 && !loadingLicense) {
+    if (connectors.length === 0 && caseConnectorId === 'none' && !loadingLicense) {
       errors = [
         ...errors,
         {
@@ -115,6 +119,7 @@ export const usePushToService = ({
               id="xpack.siem.case.caseView.pushToServiceDisableByInvalidConnector"
             />
           ),
+          errorType: 'danger',
         },
       ];
     }

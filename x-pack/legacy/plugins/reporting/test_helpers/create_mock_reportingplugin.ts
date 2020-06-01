@@ -12,16 +12,21 @@ jest.mock('../server/lib/create_queue');
 jest.mock('../server/lib/enqueue_job');
 jest.mock('../server/lib/validate');
 
+import { of } from 'rxjs';
 import { EventEmitter } from 'events';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { coreMock } from 'src/core/server/mocks';
-import { ReportingPlugin, ReportingCore, ReportingConfig } from '../server';
+import { ReportingConfig, ReportingCore, ReportingPlugin } from '../server';
 import { ReportingSetupDeps, ReportingStartDeps } from '../server/types';
+import { ReportingInternalSetup } from '../server/core';
 
 const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => {
   return {
     elasticsearch: setupMock.elasticsearch,
     security: setupMock.security,
+    licensing: {
+      license$: of({ isAvailable: true, isActive: true, type: 'basic' }),
+    } as any,
     usageCollection: {} as any,
     __LEGACY: { plugins: { xpack_main: { status: new EventEmitter() } } } as any,
   };
@@ -48,8 +53,18 @@ const createMockReportingPlugin = async (config: ReportingConfig): Promise<Repor
   return plugin;
 };
 
-export const createMockReportingCore = async (config: ReportingConfig): Promise<ReportingCore> => {
+export const createMockReportingCore = async (
+  config: ReportingConfig,
+  setupDepsMock?: ReportingInternalSetup
+): Promise<ReportingCore> => {
   config = config || {};
   const plugin = await createMockReportingPlugin(config);
-  return plugin.getReportingCore();
+  const core = plugin.getReportingCore();
+
+  if (setupDepsMock) {
+    // @ts-ignore overwriting private properties
+    core.pluginSetupDeps = setupDepsMock;
+  }
+
+  return core;
 };

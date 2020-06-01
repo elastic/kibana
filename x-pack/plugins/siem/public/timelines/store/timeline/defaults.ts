@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 import { Direction } from '../../../graphql/types';
 import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/constants';
@@ -35,7 +35,7 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   },
   loadingEventIds: [],
   title: '',
-  timelineType: TimelineType.draft,
+  timelineType: TimelineType.default,
   templateTimelineId: null,
   templateTimelineVersion: null,
   noteIds: [],
@@ -54,6 +54,7 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   },
+  status: TimelineStatus.draft,
   width: DEFAULT_TIMELINE_WIDTH,
   version: null,
 };
