@@ -53,7 +53,7 @@ import {
   filters,
   meta,
   note,
-} from './schemas';
+} from '../common/schemas';
 import { ListsDefaultArray } from '../types/lists_default_array';
 
 /**

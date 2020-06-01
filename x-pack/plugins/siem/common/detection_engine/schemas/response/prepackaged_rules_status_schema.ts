@@ -12,7 +12,7 @@ import {
   rules_custom_installed,
   rules_not_installed,
   rules_not_updated,
-} from './schemas';
+} from '../common/schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
 export const prePackagedRulesStatusSchema = t.exact(

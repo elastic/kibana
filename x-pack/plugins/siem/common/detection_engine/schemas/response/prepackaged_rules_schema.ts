@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 
 /* eslint-disable @typescript-eslint/camelcase */
-import { rules_installed, rules_updated } from './schemas';
+import { rules_installed, rules_updated } from '../common/schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
 export const prePackagedRulesSchema = t.exact(
