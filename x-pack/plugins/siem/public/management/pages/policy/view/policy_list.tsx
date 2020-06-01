@@ -36,6 +36,12 @@ interface TableChangeCallbackArguments {
   page: { index: number; size: number };
 }
 
+interface PackageData {
+  name: string;
+  title: string;
+  version: string;
+}
+
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -174,7 +180,7 @@ export const PolicyList = React.memo(() => {
         name: i18n.translate('xpack.siem.endpoint.policyList.versionFieldLabel', {
           defaultMessage: 'Version',
         }),
-        render(pkg) {
+        render(pkg: Immutable<PackageData>) {
           return i18n.translate('xpack.siem.endpoint.policyList.versionField', {
             defaultMessage: '{title} v{version}',
             values: {
