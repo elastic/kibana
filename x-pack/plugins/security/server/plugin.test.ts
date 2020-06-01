@@ -39,9 +39,7 @@ describe('Security Plugin', () => {
     mockCoreSetup.http.isTlsEnabled = true;
 
     mockClusterClient = elasticsearchServiceMock.createCustomClusterClient();
-    mockCoreSetup.elasticsearch.createClient.mockReturnValue(
-      (mockClusterClient as unknown) as jest.Mocked<ICustomClusterClient>
-    );
+    mockCoreSetup.elasticsearch.legacy.createClient.mockReturnValue(mockClusterClient);
 
     mockDependencies = ({
       licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
@@ -116,8 +114,8 @@ describe('Security Plugin', () => {
     it('properly creates cluster client instance', async () => {
       await plugin.setup(mockCoreSetup, mockDependencies);
 
-      expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledTimes(1);
-      expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledWith('security', {
+      expect(mockCoreSetup.elasticsearch.legacy.createClient).toHaveBeenCalledTimes(1);
+      expect(mockCoreSetup.elasticsearch.legacy.createClient).toHaveBeenCalledWith('security', {
         plugins: [elasticsearchClientPlugin],
       });
     });

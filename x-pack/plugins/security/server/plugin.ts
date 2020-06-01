@@ -129,7 +129,7 @@ export class Plugin {
       .pipe(first())
       .toPromise();
 
-    this.clusterClient = core.elasticsearch.createClient('security', {
+    this.clusterClient = core.elasticsearch.legacy.createClient('security', {
       plugins: [elasticsearchClientPlugin],
     });
 
