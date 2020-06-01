@@ -9,22 +9,20 @@ import { AlertListState } from '../../../common/endpoint_alerts/types';
 import { ImmutableReducer } from '../../common/store';
 import { AppAction } from '../../common/store/actions';
 
-const initialAlertListState = (): Immutable<AlertListState> => {
-  return {
-    alerts: [],
-    alertDetails: undefined,
-    pageSize: 10,
-    pageIndex: 0,
-    total: 0,
-    location: undefined,
-    searchBar: {
-      patterns: [],
-    },
-  };
+export const initialAlertListState: Immutable<AlertListState> = {
+  alerts: [],
+  alertDetails: undefined,
+  pageSize: 10,
+  pageIndex: 0,
+  total: 0,
+  location: undefined,
+  searchBar: {
+    patterns: [],
+  },
 };
 
 export const alertListReducer: ImmutableReducer<AlertListState, AppAction> = (
-  state = initialAlertListState(),
+  state = initialAlertListState,
   action
 ) => {
   if (action.type === 'serverReturnedAlertsData') {

@@ -15,7 +15,7 @@ import { BrowserFields } from '../../containers/source';
 import { dragAndDropModel, dragAndDropSelectors } from '../../store';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
-import { State } from '../../store/reducer';
+import { State } from '../../store/types';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { reArrangeProviders } from '../../../timelines/components/timeline/data_providers/helpers';
 import { ACTIVE_TIMELINE_REDUX_ID } from '../top_n';

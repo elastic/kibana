@@ -7,7 +7,7 @@
 import { Reducer } from 'redux';
 import { SecuritySubPluginWithStore } from '../app/types';
 import { endpointHostsRoutes } from './routes';
-import { initialHostListState, hostListReducer } from './store/reducer';
+import { hostListReducer } from './store/reducer';
 import { HostState } from './types';
 import { hostMiddlewareFactory } from './store/middleware';
 import { CoreStart } from '../../../../../src/core/public';
@@ -15,12 +15,20 @@ import { StartPlugins } from '../types';
 import { substateMiddlewareFactory } from '../common/store';
 import { AppAction } from '../common/store/actions';
 
-export interface EndpointHostsPluginReducer {
-  hostList: Reducer<HostState, AppAction>;
-}
-
+/**
+ * Internally, our state is sometimes immutable, ignore that in our external
+ * interface.
+ */
 export interface EndpointHostsPluginState {
   hostList: HostState;
+}
+
+/**
+ * Internally, we use `ImmutableReducer`, but we present a regular reducer
+ * externally for compatibility w/ regular redux.
+ */
+export interface EndpointHostsPluginReducer {
+  hostList: Reducer<HostState, AppAction>;
 }
 
 export class EndpointHosts {
@@ -40,8 +48,8 @@ export class EndpointHosts {
     return {
       routes: endpointHostsRoutes(),
       store: {
-        initialState: { hostList: initialHostListState() },
-        reducer: { hostList: hostListReducer as Reducer<HostState, AppAction> },
+        initialState: { hostList: undefined },
+        reducer: { hostList: hostListReducer } as EndpointHostsPluginReducer,
         middleware,
       },
     };

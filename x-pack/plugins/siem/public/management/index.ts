@@ -5,7 +5,7 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { Reducer } from 'redux';
+import { Reducer, CombinedState } from 'redux';
 import { managementRoutes } from './routes';
 import { StartPlugins } from '../types';
 import { MANAGEMENT_STORE_GLOBAL_NAMESPACE } from './common/constants';
@@ -16,11 +16,20 @@ import { managementMiddlewareFactory } from './store/middleware';
 
 export { getManagementUrl } from './common/routing';
 
+/**
+ * Internally, our state is sometimes immutable, ignore that in our external
+ * interface.
+ */
 export interface ManagementPluginState {
   management: ManagementState;
 }
+
+/**
+ * Internally, we use `ImmutableReducer`, but we present a regular reducer
+ * externally for compatibility w/ regular redux.
+ */
 export interface ManagementPluginReducer {
-  management: Reducer<ManagementState, AppAction>;
+  management: Reducer<CombinedState<ManagementState>, AppAction>;
 }
 
 export class Management {
@@ -34,13 +43,10 @@ export class Management {
       routes: managementRoutes(),
       store: {
         initialState: {
-          [MANAGEMENT_STORE_GLOBAL_NAMESPACE]: undefined,
+          management: undefined,
         },
         reducer: {
-          [MANAGEMENT_STORE_GLOBAL_NAMESPACE]: managementReducer as Reducer<
-            ManagementState,
-            AppAction
-          >,
+          management: managementReducer as ManagementPluginReducer,
         },
         middleware: managementMiddlewareFactory(core, plugins),
       },

@@ -5,21 +5,28 @@
  */
 
 import { combineReducers } from 'redux';
-import { policyDetailsReducer } from '../pages/policy/store/policy_details/reducer';
-import { policyListReducer } from '../pages/policy/store/policy_list/reducer';
+import {
+  policyDetailsReducer,
+  initialPolicyDetailsState,
+} from '../pages/policy/store/policy_details/reducer';
+import {
+  policyListReducer,
+  initialPolicyListState,
+} from '../pages/policy/store/policy_list/reducer';
 import {
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
 } from '../common/constants';
 import { ImmutableCombineReducers } from '../../common/store';
 import { PolicyListState, PolicyDetailsState } from '../pages/policy/types';
+import { Immutable } from '../../../common/endpoint/types';
 
 const immutableCombineReducers: ImmutableCombineReducers = combineReducers;
 
-export interface ManagementState {
-  policyList: PolicyListState;
-  policyDetails: PolicyDetailsState;
-}
+export const initialManagementState: Immutable<ManagementState> = {
+  policyList: initialPolicyListState,
+  policyDetails: initialPolicyDetailsState,
+};
 
 /**
  * Redux store reducer for the SIEM Management section

@@ -27,11 +27,9 @@ import { networkModel } from '../../network/store';
 import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 import { initialAlertListState } from '../../endpoint_alerts/store/reducer';
 import { initialHostListState } from '../../endpoint_hosts/store/reducer';
-import { getManagementInitialState } from '../../management/store';
-
-const alertList = initialAlertListState();
-const hostList = initialHostListState();
-const management = getManagementInitialState();
+import { initialManagementState } from '../../management/store/reducer';
+import { AlertListState } from '../../../common/endpoint_alerts/types';
+import { HostState } from '../../endpoint_hosts/types';
 
 export const mockGlobalState: State = {
   app: {
@@ -233,7 +231,7 @@ export const mockGlobalState: State = {
       },
     },
   },
-  alertList,
-  hostList,
-  management,
+  alertList: initialAlertListState as AlertListState,
+  hostList: initialHostListState as HostState,
+  management: initialManagementState as ManagementState,
 };

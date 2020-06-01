@@ -15,10 +15,18 @@ import { CoreStart } from '../../../../../src/core/public';
 import { StartPlugins } from '../types';
 import { AppAction } from '../common/store/actions';
 
+/**
+ * Internally, our state is sometimes immutable, ignore that in our external
+ * interface.
+ */
 export interface EndpointAlertsPluginState {
   alertList: AlertListState;
 }
 
+/**
+ * Internally, we use `ImmutableReducer`, but we present a regular reducer
+ * externally for compatibility w/ regular redux.
+ */
 export interface EndpointAlertsPluginReducer {
   alertList: Reducer<AlertListState, AppAction>;
 }
@@ -42,7 +50,7 @@ export class EndpointAlerts {
       routes: endpointAlertsRoutes(),
       store: {
         initialState: { alertList: undefined },
-        reducer: { alertList: alertListReducer as Reducer<AlertListState, AppAction> },
+        reducer: { alertList: alertListReducer } as EndpointAlertsPluginReducer,
         middleware,
       },
     };
