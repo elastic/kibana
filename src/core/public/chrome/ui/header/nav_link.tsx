@@ -59,10 +59,7 @@ export function createEuiListItem({
   let { href } = link;
 
   if (legacy) {
-    const legacyHref = link.url && !active ? link.url : link.baseUrl;
-    if (href !== legacyHref) {
-      href = legacyHref;
-    }
+    href = link.url && !active ? link.url : link.baseUrl;
   }
 
   return {
