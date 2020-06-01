@@ -36,8 +36,8 @@ const getSavedObjectRelativeUrl = (objectType, savedObjectId, queryString) => {
   return `/app/kibana#${hash}?${queryString || ''}`;
 };
 
-export function compatibilityShimFactory(server, logger) {
-  return function compatibilityShimFactory(createJobFn) {
+export function compatibilityShimFactory(logger) {
+  return function (createJobFn) {
     return async function (
       {
         savedObjectId, // deprecating
@@ -48,8 +48,8 @@ export function compatibilityShimFactory(server, logger) {
         relativeUrls,
         layout,
       },
-      headers,
-      request
+      context,
+      req
     ) {
       // input validation and deprecation logging
       if (savedObjectId) {
@@ -78,7 +78,7 @@ export function compatibilityShimFactory(server, logger) {
         kibanaRelativeUrls = relativeUrls;
       } else {
         kibanaRelativeUrls = [getSavedObjectRelativeUrl(objectType, savedObjectId, queryString)];
-        logger.warning(
+        logger.warn(
           `The relativeUrls have been derived from saved object parameters. ` +
             `This functionality will be removed with the next major version.`
         );
@@ -93,14 +93,14 @@ export function compatibilityShimFactory(server, logger) {
             reportTitle = await getSavedObjectTitle(
               objectType,
               savedObjectId,
-              request.getSavedObjectsClient()
+              context.core.savedObjects.client
             );
-            logger.warning(
+            logger.warn(
               `The title has been derived from saved object parameters. This ` +
                 `functionality will be removed with the next major version.`
             );
           } else {
-            logger.warning(
+            logger.warn(
               `A title parameter should be provided with the job generation ` +
                 `request. Please use Kibana to regenerate your POST URL to have a ` +
                 `title included in the PDF.`
@@ -120,7 +120,7 @@ export function compatibilityShimFactory(server, logger) {
         layout,
       };
 
-      return await createJobFn(transformedJobParams, headers, request);
+      return await createJobFn(transformedJobParams, context, req);
     };
   };
 }

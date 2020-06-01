@@ -4,22 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { validateUrls } from '../../../../common/validate_urls';
 import { cryptoFactory } from '../../../../server/lib';
 import { CreateJobFactory, ESQueueCreateJobFn } from '../../../../server/types';
 import { JobParamsPDF } from '../../types';
+// @ts-ignore no module def (deprecated module)
+import { compatibilityShimFactory } from './compatibility_shim';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPDF
->> = function createJobFactoryFn(reporting) {
+>> = function createJobFactoryFn(reporting, logger) {
   const config = reporting.getConfig();
   const setupDeps = reporting.getPluginSetupDeps();
   const crypto = cryptoFactory(config.get('encryptionKey'));
+  const compatibilityShim = compatibilityShimFactory(logger);
 
-  return async function createJobFn(
+  return compatibilityShim(async function createJobFn(
     { title, relativeUrls, browserTimezone, layout, objectType }: JobParamsPDF,
-    context,
-    req
+    context: RequestHandlerContext,
+    req: KibanaRequest
   ) {
     const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
 
@@ -31,9 +35,9 @@ export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
       forceNow: new Date().toISOString(),
       headers: serializedEncryptedHeaders,
       layout,
-      relativeUrls,
+      objects: relativeUrls.map((u) => ({ relativeUrl: u })),
       title,
-      objectType,
+      type: objectType, // Note: this changes the shape of the job params object
     };
-  };
+  });
 };
