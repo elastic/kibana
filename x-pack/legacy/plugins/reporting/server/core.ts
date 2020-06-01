@@ -5,33 +5,35 @@
  */
 
 import * as Rx from 'rxjs';
-import { first, mapTo } from 'rxjs/operators';
+import { first, mapTo, map } from 'rxjs/operators';
 import {
   ElasticsearchServiceSetup,
   KibanaRequest,
-  SavedObjectsClient,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
+  IRouter,
+  SavedObjectsClientContract,
+  BasePath,
 } from 'src/core/server';
-import { ReportingPluginSpecOptions } from '../';
-// @ts-ignore no module definition
-import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
-import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
-import { PLUGIN_ID } from '../common/constants';
+import { SecurityPluginSetup } from '../../../../plugins/security/server';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 import { screenshotsObservableFactory } from '../export_types/common/lib/screenshots';
-import { ServerFacade } from '../server/types';
+import { ScreenshotsObservableFn } from '../server/types';
 import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
-import { checkLicenseFactory, getExportTypesRegistry, LevelLogger } from './lib';
+import { checkLicense, getExportTypesRegistry } from './lib';
 import { ESQueueInstance } from './lib/create_queue';
 import { EnqueueJobFn } from './lib/enqueue_job';
-import { registerRoutes } from './routes';
-import { ReportingSetupDeps } from './types';
 
-interface ReportingInternalSetup {
+export interface ReportingInternalSetup {
   browserDriverFactory: HeadlessChromiumDriverFactory;
   elasticsearch: ElasticsearchServiceSetup;
+  licensing: LicensingPluginSetup;
+  basePath: BasePath['get'];
+  router: IRouter;
+  security: SecurityPluginSetup;
 }
+
 interface ReportingInternalStart {
   enqueueJob: EnqueueJobFn;
   esqueue: ESQueueInstance;
@@ -46,30 +48,10 @@ export class ReportingCore {
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>();
   private exportTypesRegistry = getExportTypesRegistry();
 
-  constructor(private logger: LevelLogger, private config: ReportingConfig) {}
-
-  legacySetup(
-    xpackMainPlugin: XPackMainPlugin,
-    reporting: ReportingPluginSpecOptions,
-    __LEGACY: ServerFacade,
-    plugins: ReportingSetupDeps
-  ) {
-    // legacy plugin status
-    mirrorPluginStatus(xpackMainPlugin, reporting);
-
-    // legacy license check
-    const checkLicense = checkLicenseFactory(this.exportTypesRegistry);
-    (xpackMainPlugin as any).status.once('green', () => {
-      // Register a function that is called whenever the xpack info changes,
-      // to re-compute the license check results for this plugin
-      xpackMainPlugin.info.feature(PLUGIN_ID).registerLicenseCheckResultsGenerator(checkLicense);
-    });
-
-    // legacy routes
-    registerRoutes(this, __LEGACY, plugins, this.logger);
-  }
+  constructor(private config: ReportingConfig) {}
 
   public pluginSetup(reportingSetupDeps: ReportingInternalSetup) {
+    this.pluginSetupDeps = reportingSetupDeps;
     this.pluginSetup$.next(reportingSetupDeps);
   }
 
@@ -96,23 +78,35 @@ export class ReportingCore {
     return (await this.getPluginStartDeps()).enqueueJob;
   }
 
-  public getConfig() {
+  public async getLicenseInfo() {
+    const { licensing } = this.getPluginSetupDeps();
+    return await licensing.license$
+      .pipe(
+        map((license) => checkLicense(this.getExportTypesRegistry(), license)),
+        first()
+      )
+      .toPromise();
+  }
+
+  public getConfig(): ReportingConfig {
     return this.config;
   }
-  public async getScreenshotsObservable() {
-    const { browserDriverFactory } = await this.getPluginSetupDeps();
+
+  public getScreenshotsObservable(): ScreenshotsObservableFn {
+    const { browserDriverFactory } = this.getPluginSetupDeps();
     return screenshotsObservableFactory(this.config.get('capture'), browserDriverFactory);
+  }
+
+  public getPluginSetupDeps() {
+    if (!this.pluginSetupDeps) {
+      throw new Error(`"pluginSetupDeps" dependencies haven't initialized yet`);
+    }
+    return this.pluginSetupDeps;
   }
 
   /*
    * Outside dependencies
    */
-  private async getPluginSetupDeps() {
-    if (this.pluginSetupDeps) {
-      return this.pluginSetupDeps;
-    }
-    return await this.pluginSetup$.pipe(first()).toPromise();
-  }
 
   private async getPluginStartDeps() {
     if (this.pluginStartDeps) {
@@ -122,15 +116,15 @@ export class ReportingCore {
   }
 
   public async getElasticsearchService() {
-    return (await this.getPluginSetupDeps()).elasticsearch;
+    return this.getPluginSetupDeps().elasticsearch;
   }
 
   public async getSavedObjectsClient(fakeRequest: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
-    return savedObjects.getScopedClient(fakeRequest) as SavedObjectsClient;
+    return savedObjects.getScopedClient(fakeRequest) as SavedObjectsClientContract;
   }
 
-  public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClient) {
+  public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
     const { uiSettings: uiSettingsService } = await this.getPluginStartDeps();
     const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
     return scopedUiSettingsService;
