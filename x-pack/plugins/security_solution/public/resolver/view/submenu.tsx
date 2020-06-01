@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useState, useMemo, useCallback } from 'react';
-import { EuiSelectable, EuiButton } from '@elastic/eui';
+import { EuiSelectable, EuiButton, EuiPopover, ButtonColor } from '@elastic/eui';
 import styled from 'styled-components';
 
 /**
@@ -98,11 +98,17 @@ OptionList.displayName = 'OptionList';
  */
 const NodeSubMenuComponents = React.memo(
   ({
+    buttonColor,
     menuTitle,
     menuAction,
     optionsWithActions,
     className,
-  }: { menuTitle: string; className?: string; menuAction: () => unknown } & {
+  }: {
+    menuTitle: string;
+    className?: string;
+    menuAction: () => unknown;
+    buttonColor: ButtonColor;
+  } & {
     optionsWithActions?: ResolverSubmenuOptionList | string | undefined;
   }) => {
     const [menuIsOpen, setMenuOpen] = useState(false);
@@ -126,6 +132,8 @@ const NodeSubMenuComponents = React.memo(
       [menuAction]
     );
 
+    const closePopover = () => setMenuOpen(false);
+
     const isMenuLoading = optionsWithActions === 'waitingForRelatedEventData';
 
     if (!optionsWithActions) {
@@ -135,7 +143,7 @@ const NodeSubMenuComponents = React.memo(
        */
       return (
         <div className={className}>
-          <EuiButton onClick={handleMenuActionClick} color="ghost" size="s" tabIndex={-1}>
+          <EuiButton onClick={handleMenuActionClick} color={buttonColor} size="s" tabIndex={-1}>
             {menuTitle}
           </EuiButton>
         </div>
@@ -145,23 +153,35 @@ const NodeSubMenuComponents = React.memo(
      * When called with a set of `optionsWithActions`:
      * Render with a panel of options that appear when the menu host button is clicked
      */
+
+    const button = (
+      <EuiButton
+        onClick={
+          typeof optionsWithActions === 'object' ? handleMenuOpenClick : handleMenuActionClick
+        }
+        color={buttonColor}
+        size="s"
+        iconType={menuIsOpen ? 'arrowUp' : 'arrowDown'}
+        iconSide="right"
+        tabIndex={-1}
+      >
+        {menuTitle}
+      </EuiButton>
+    );
+
     return (
       <div className={className + (menuIsOpen ? ' is-open' : '')}>
-        <EuiButton
-          onClick={
-            typeof optionsWithActions === 'object' ? handleMenuOpenClick : handleMenuActionClick
-          }
-          color="ghost"
-          size="s"
-          iconType={menuIsOpen ? 'arrowUp' : 'arrowDown'}
-          iconSide="right"
-          tabIndex={-1}
+        <EuiPopover
+          id="popover"
+          panelPaddingSize="none"
+          button={button}
+          isOpen={menuIsOpen}
+          closePopover={closePopover}
         >
-          {menuTitle}
-        </EuiButton>
-        {menuIsOpen && typeof optionsWithActions === 'object' && (
-          <OptionList isLoading={isMenuLoading} subMenuOptions={optionsWithActions} />
-        )}
+          {menuIsOpen && typeof optionsWithActions === 'object' && (
+            <OptionList isLoading={isMenuLoading} subMenuOptions={optionsWithActions} />
+          )}
+        </EuiPopover>
       </div>
     );
   }
@@ -170,11 +190,25 @@ const NodeSubMenuComponents = React.memo(
 NodeSubMenuComponents.displayName = 'NodeSubMenu';
 
 export const NodeSubMenu = styled(NodeSubMenuComponents)`
-  margin: 0;
+  margin: 2px 0 0 0;
   padding: 0;
   border: none;
   display: flex;
   flex-flow: column;
+
+  .euiButton {
+    background-color: transparent;
+    border-color: ${(props) => props.buttonColor};
+    border-style: solid;
+    border-width: 1px;
+    width: 100%;
+  }
+
+  .euiPopover__anchor {
+    display: flex;
+    width: 100%;
+  }
+
   &.is-open .euiButton {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;

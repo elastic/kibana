@@ -44,7 +44,6 @@ export const Resolver = styled(
     className?: string;
     selectedEvent?: ResolverEvent;
   }) {
-    const { colorMap } = useResolverTheme();
     const { processNodePositions, edgeLineSegments } = useSelector(
       selectors.processNodePositionsAndEdgeLineSegments
     );

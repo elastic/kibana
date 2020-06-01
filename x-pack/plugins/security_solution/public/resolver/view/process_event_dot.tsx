@@ -503,6 +503,7 @@ const ProcessEventDotComponents = React.memo(
               <EuiFlexGroup justifyContent="flexStart" gutterSize="xs">
                 <EuiFlexItem grow={false} className="related-dropdown">
                   <NodeSubMenu
+                    buttonColor={labelButtonFill}
                     menuTitle={subMenuAssets.relatedEvents.title}
                     optionsWithActions={relatedEventStatusOrOptions}
                     menuAction={handleRelatedEventRequest}
@@ -510,6 +511,7 @@ const ProcessEventDotComponents = React.memo(
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <NodeSubMenu
+                    buttonColor={labelButtonFill}
                     menuTitle={subMenuAssets.relatedAlerts.title}
                     menuAction={handleRelatedAlertsRequest}
                   />
