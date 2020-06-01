@@ -61,9 +61,17 @@ const fullyMatchingIds = async (
     const monitorId: string = monBucket.key;
     const groups: MonitorLocCheckGroup[] = [];
 
+    // Did at least one location match?
+    let matched = false;
     for (const locBucket of monBucket.location.buckets) {
       const location = locBucket.key;
       const topSource = locBucket.top.hits.hits[0]._source;
+      const stillMatchingTopSource = locBucket.still_matching.top.hits.hits[0]._source;
+      // If the most recent document still matches the most recent document matching the current filters
+      // we can include this in the result
+      if (stillMatchingTopSource['@timestamp'] >= topSource['@timestamp']) {
+        matched = true;
+      }
       const checkGroup = topSource.monitor.check_group;
       const status = topSource.summary.down > 0 ? 'down' : 'up';
 
@@ -82,8 +90,8 @@ const fullyMatchingIds = async (
       });
     }
 
-    // We only truly match the monitor if one of the most recent check groups was found in the potential matches phase
-    if (groups.some((g) => potentialMatchCheckGroups.has(g.checkGroup))) {
+    // If one location matched, include data from all locations in the result set
+    if (matched) {
       matching.set(monitorId, groups);
     }
   }
@@ -123,6 +131,25 @@ export const mostRecentCheckGroups = async (
                       includes: ['monitor.check_group', '@timestamp', 'summary.up', 'summary.down'],
                     },
                     size: 1,
+                  },
+                },
+                still_matching: {
+                  filter: queryContext.filterClause || { match_all: {} },
+                  aggs: {
+                    top: {
+                      top_hits: {
+                        sort: [{ '@timestamp': 'desc' }],
+                        _source: {
+                          includes: [
+                            'monitor.check_group',
+                            '@timestamp',
+                            'summary.up',
+                            'summary.down',
+                          ],
+                        },
+                        size: 1,
+                      },
+                    },
                   },
                 },
               },
