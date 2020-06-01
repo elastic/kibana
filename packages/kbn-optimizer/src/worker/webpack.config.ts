@@ -148,13 +148,6 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
 
       rules: [
         {
-          include: [`${Path.resolve(bundle.contextDir, bundle.entry)}${entryExtension}`],
-          loader: UiSharedDeps.publicPathLoader,
-          options: {
-            key: bundle.id,
-          },
-        },
-        {
           test: /\.css$/,
           include: /node_modules/,
           use: [
@@ -282,6 +275,13 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
               babelrc: false,
               presets: [BABEL_PRESET_PATH],
             },
+          },
+        },
+        {
+          include: [`${Path.resolve(bundle.contextDir, bundle.entry)}${entryExtension}`],
+          loader: UiSharedDeps.publicPathLoader,
+          options: {
+            key: bundle.id,
           },
         },
         {
