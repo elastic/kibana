@@ -26,6 +26,10 @@ export const SEARCH_OR_FILTER_CONTAINER =
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
+export const TIMELINE = (id: string) => {
+  return `[data-test-subj="title-${id}"]`;
+};
+
 export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
 
 export const TIMELINE_DATA_PROVIDERS_EMPTY =
