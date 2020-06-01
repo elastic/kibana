@@ -23,6 +23,7 @@ pidfile="/var/run/$name.pid"
 [ -r /etc/default/$name ] && . /etc/default/$name
 [ -r /etc/sysconfig/$name ] && . /etc/sysconfig/$name
 
+export KIBANA_PATH_CONF
 export NODE_OPTIONS
 
 [ -z "$nice" ] && nice=0
