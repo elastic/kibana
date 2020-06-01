@@ -11,3 +11,5 @@ nice=""
 KILL_ON_STOP_TIMEOUT=0
 
 BABEL_CACHE_PATH="/var/lib/kibana/optimize/.babel_register_cache.json"
+
+KIBANA_PATH_CONF="/etc/kibana"
