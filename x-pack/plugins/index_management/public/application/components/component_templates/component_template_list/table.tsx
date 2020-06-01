@@ -185,6 +185,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
         ),
         actions: [
           {
+            'data-test-subj': 'deleteComponentTemplateButton',
             isPrimary: true,
             name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.deleteActionLabel', {
               defaultMessage: 'Delete',

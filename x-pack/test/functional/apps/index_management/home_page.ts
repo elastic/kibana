@@ -47,5 +47,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(templateList).to.be(true);
       });
     });
+
+    describe('Component templates', () => {
+      it('renders the component templates tab', async () => {
+        // Navigate to the component templates tab
+        await pageObjects.indexManagement.changeTabs('component_templatesTab');
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify url
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain(`/component_templates`);
+
+        // Verify content
+        const componentTemplateList = await testSubjects.exists('componentTemplateList');
+        expect(componentTemplateList).to.be(true);
+      });
+    });
   });
 };

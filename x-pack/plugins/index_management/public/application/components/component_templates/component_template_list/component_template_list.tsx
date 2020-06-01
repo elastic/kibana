@@ -28,7 +28,7 @@ export const ComponentTemplateList: React.FunctionComponent = () => {
     trackMetric('loaded', UIM_COMPONENT_TEMPLATE_LIST_LOAD);
   }, [trackMetric]);
 
-  if (data?.length === 0) {
+  if (data && data.length === 0) {
     return <EmptyPrompt />;
   }
 
