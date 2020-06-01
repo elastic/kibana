@@ -1257,7 +1257,7 @@ Then this dependencies will be used to embed Actions form or register your own a
    const initialAlert = ({
         name: 'test',
         params: {},
-        consumer: 'alerting',
+        consumer: 'alerts',
         alertTypeId: '.index-threshold',
         schedule: {
           interval: '1m',

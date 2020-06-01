@@ -22,12 +22,12 @@ import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 import { SanitizedAlert } from '../../../../x-pack/plugins/alerts/common';
 import { PluginSetupContract as AlertingSetup } from '../../../../x-pack/plugins/alerts/public';
 
-export function registerNavigation(alerting: AlertingSetup) {
+export function registerNavigation(alerts: AlertingSetup) {
   // register default navigation
-  alerting.registerDefaultNavigation(
+  alerts.registerDefaultNavigation(
     ALERTING_EXAMPLE_APP_ID,
     (alert: SanitizedAlert) => `/alert/${alert.id}`
   );
 
-  registerPeopleInSpaceNavigation(alerting);
+  registerPeopleInSpaceNavigation(alerts);
 }

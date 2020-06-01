@@ -32,7 +32,7 @@ interface PluginsStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   management: ManagementStart;
-  alerting?: AlertingStart;
+  alerts?: AlertingStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
 }
 
@@ -83,7 +83,7 @@ export class Plugin
           boot({
             dataPlugin: plugins.data,
             charts: plugins.charts,
-            alerting: plugins.alerting,
+            alerts: plugins.alerts,
             element: params.element,
             toastNotifications: core.notifications.toasts,
             http: core.http,

@@ -27,7 +27,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
   public setup(core: CoreSetup<FixtureStartDeps>, { features, actions, alerts }: FixtureSetupDeps) {
     features.registerFeature({
       id: 'alerts',
-      name: 'Alerting',
+      name: 'Alerts',
       app: ['alerts', 'kibana'],
       privileges: {
         all: {

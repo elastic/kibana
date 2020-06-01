@@ -44,7 +44,7 @@ export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
-  alerting?: AlertingPluginPublicSetup;
+  alerts?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
   home: HomePublicPluginSetup;
@@ -53,7 +53,7 @@ export interface ApmPluginSetupDeps {
 }
 
 export interface ApmPluginStartDeps {
-  alerting?: AlertingPluginPublicStart;
+  alerts?: AlertingPluginPublicStart;
   data: DataPublicPluginStart;
   home: void;
   licensing: void;

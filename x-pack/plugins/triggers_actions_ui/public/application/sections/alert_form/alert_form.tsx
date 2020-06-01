@@ -168,7 +168,7 @@ export const AlertForm = ({
     : null;
 
   const alertTypeRegistryList =
-    alert.consumer === 'alerting'
+    alert.consumer === 'alerts'
       ? alertTypeRegistry
           .list()
           .filter(

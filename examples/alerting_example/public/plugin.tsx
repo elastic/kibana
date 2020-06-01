@@ -30,12 +30,12 @@ export type Setup = void;
 export type Start = void;
 
 export interface AlertingExamplePublicSetupDeps {
-  alerting: AlertingSetup;
+  alerts: AlertingSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface AlertingExamplePublicStartDeps {
-  alerting: AlertingSetup;
+  alerts: AlertingSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
@@ -44,7 +44,7 @@ export interface AlertingExamplePublicStartDeps {
 export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
   public setup(
     core: CoreSetup<AlertingExamplePublicStartDeps, Start>,
-    { alerting, triggers_actions_ui }: AlertingExamplePublicSetupDeps
+    { alerts, triggers_actions_ui }: AlertingExamplePublicSetupDeps
   ) {
     core.application.register({
       id: 'AlertingExample',
@@ -59,7 +59,7 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamp
     triggers_actions_ui.alertTypeRegistry.register(getAlwaysFiringAlertType());
     triggers_actions_ui.alertTypeRegistry.register(getPeopleInSpaceAlertType());
 
-    registerNavigation(alerting);
+    registerNavigation(alerts);
   }
 
   public start() {}

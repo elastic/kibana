@@ -34,7 +34,7 @@ export interface AppDeps {
   dataPlugin: DataPublicPluginStart;
   charts: ChartsPluginStart;
   chrome: ChromeStart;
-  alerting?: AlertingStart;
+  alerts?: AlertingStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   docLinks: DocLinksStart;
   toastNotifications: ToastsSetup;

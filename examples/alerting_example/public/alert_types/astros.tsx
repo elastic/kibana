@@ -36,8 +36,8 @@ import { SanitizedAlert } from '../../../../x-pack/plugins/alerts/common';
 import { PluginSetupContract as AlertingSetup } from '../../../../x-pack/plugins/alerts/public';
 import { AlertTypeModel } from '../../../../x-pack/plugins/triggers_actions_ui/public';
 
-export function registerNavigation(alerting: AlertingSetup) {
-  alerting.registerNavigation(
+export function registerNavigation(alerts: AlertingSetup) {
+  alerts.registerNavigation(
     ALERTING_EXAMPLE_APP_ID,
     'example.people-in-space',
     (alert: SanitizedAlert) => `/astros/${alert.id}`
