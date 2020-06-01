@@ -40,23 +40,28 @@ const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 
 const SHARED_BUNDLES = [
   {
-    id: 'entry/core',
+    type: 'entry',
+    id: 'core',
     rootRelativeDir: 'src/core/public',
   },
   {
-    id: 'plugin/data',
+    type: 'plugin',
+    id: 'data',
     rootRelativeDir: 'src/plugins/data/public',
   },
   {
-    id: 'plugin/kibanaReact',
+    type: 'plugin',
+    id: 'kibanaReact',
     rootRelativeDir: 'src/plugins/kibana_react/public',
   },
   {
-    id: 'plugin/kibanaUtils',
+    type: 'plugin',
+    id: 'kibanaUtils',
     rootRelativeDir: 'src/plugins/kibana_utils/public',
   },
   {
-    id: 'plugin/esUiShared',
+    type: 'plugin',
+    id: 'esUiShared',
     rootRelativeDir: 'src/plugins/es_ui_shared/public',
   },
 ];
@@ -84,7 +89,10 @@ function dynamicExternals(bundle: Bundle, context: string, request: string) {
   );
   for (const sharedBundle of SHARED_BUNDLES) {
     if (rootRelative === sharedBundle.rootRelativeDir) {
-      return `__kbnBundles__['${sharedBundle.id}']`;
+      const exportId = `${sharedBundle.type}/${sharedBundle.id}`;
+      if (exportId !== `${bundle.type}/${bundle.id}`) {
+        return `__kbnBundles__['${exportId}']`;
+      }
     }
   }
 
