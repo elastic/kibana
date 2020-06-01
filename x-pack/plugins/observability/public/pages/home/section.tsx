@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import styled from 'styled-components';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 
 export interface ISection {
@@ -25,6 +26,18 @@ export interface ISection {
   target?: '_blank';
 }
 
+const Link = styled(EuiButtonEmpty)`
+  height: auto;
+  &:focus {
+    background-color: transparent;
+  }
+  &:hover {
+    .title {
+      text-decoration: underline;
+    }
+  }
+`;
+
 export const Section = ({ section }: { section: ISection }) => {
   const { core } = usePluginContext();
   const { id, icon, title, description, href } = section;
@@ -35,7 +48,7 @@ export const Section = ({ section }: { section: ISection }) => {
         <EuiIcon type={icon} size="l" color="black" />
       </EuiFlexItem>
       <EuiFlexItem style={{ textAlign: 'left' }}>
-        <EuiTitle size="xs">
+        <EuiTitle size="xs" className="title">
           <h3>
             {i18n.translate(`observability.section.${id}.title`, {
               defaultMessage: title,
@@ -43,11 +56,13 @@ export const Section = ({ section }: { section: ISection }) => {
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText size="s" style={{ whiteSpace: 'normal' }} color="default">
-          {i18n.translate(`observability.section.${id}.description`, {
-            defaultMessage: description,
-          })}
-        </EuiText>
+        {description && (
+          <EuiText size="s" style={{ whiteSpace: 'normal' }} color="default">
+            {i18n.translate(`observability.section.${id}.description`, {
+              defaultMessage: description,
+            })}
+          </EuiText>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -55,13 +70,13 @@ export const Section = ({ section }: { section: ISection }) => {
   if (href) {
     return (
       <EuiFlexItem>
-        <EuiButtonEmpty
+        <Link
           target={section.target}
           href={core.http.basePath.prepend(href)}
-          style={{ height: 'auto' }}
+          style={{ textDecoration: 'none' }}
         >
           {sectionContent}
-        </EuiButtonEmpty>
+        </Link>
       </EuiFlexItem>
     );
   }
