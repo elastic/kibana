@@ -18,7 +18,6 @@ import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 // @ts-ignore Untyped local
 import { App } from './components/app';
 import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
-import { initInterpreter } from './lib/run_interpreter';
 import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
@@ -37,6 +36,7 @@ import { startServices, services } from './services';
 import { destroyHistory } from './lib/history_provider';
 // @ts-ignore Untyped local
 import { stopRouter } from './lib/router_provider';
+import { initFunctions } from './functions';
 // @ts-ignore Untyped local
 import { appUnload } from './state/actions/app';
 
@@ -82,15 +82,25 @@ export const initializeCanvas = async (
   registries: SetupRegistries,
   appUpdater: BehaviorSubject<AppUpdater>
 ) => {
-  startServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
+  await startServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
+
+  // Adding these functions here instead of in plugin.ts.
+  // Some of these functions have deep dependencies into Canvas, which was bulking up the size
+  // of our bundle entry point. Moving them here pushes that load to when canvas is actually loaded.
+  const canvasFunctions = initFunctions({
+    timefilter: setupPlugins.data.query.timefilter.timefilter,
+    prependBasePath: coreSetup.http.basePath.prepend,
+    typesRegistry: setupPlugins.expressions.__LEGACY.types,
+  });
+
+  for (const fn of canvasFunctions) {
+    services.expressions.getService().registerFunction(fn);
+  }
 
   // Create Store
   const canvasStore = await createStore(coreSetup, setupPlugins);
 
-  // Init Interpreter
-  initInterpreter(startPlugins.expressions, setupPlugins.expressions).then(() => {
-    registerLanguage(Object.values(startPlugins.expressions.getFunctions()));
-  });
+  registerLanguage(Object.values(services.expressions.getService().getFunctions()));
 
   // Init Registries
   initRegistries();
