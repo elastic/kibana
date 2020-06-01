@@ -48,8 +48,6 @@ export const MapsCreateEditView = class extends React.Component {
     this.state = {
       indexPatterns: [],
       prevIndexPatternIds: [],
-      // TODO: Replace empty object w/ global state replacement
-      globalState: {},
       filters: [],
       showSaveQuery: getMapsCapabilities().saveQuery,
       layerList: [],
@@ -168,9 +166,8 @@ export const MapsCreateEditView = class extends React.Component {
     }
   };
 
-  // TODO: Replace empty object w/ app state replacement
   getAppStateFilters() {
-    return _.get({}, 'filters', []);
+    return this.appStateManager.getFilters() || [];
   }
 
   syncAppAndGlobalState() {
@@ -226,20 +223,21 @@ export const MapsCreateEditView = class extends React.Component {
   }
 
   initFilters(savedMap) {
-    const { globalState, mapsAppState, setRefreshConfig } = this.props;
+    const { setRefreshConfig, kbnUrlStateStorage } = this.props;
+    const globalState = getGlobalState(kbnUrlStateStorage);
     const mapStateJSON = savedMap ? savedMap.mapStateJSON : undefined;
     const query = getInitialQuery({
       mapStateJSON,
-      appState: mapsAppState,
+      appState: this.appStateManager.getAppState(),
       userQueryLanguage: getUiSettings().get('search:queryLanguage'),
     });
     const time = getInitialTimeFilters({
       mapStateJSON,
-      globalState: globalState,
+      globalState,
     });
     const refreshConfig = getInitialRefreshConfig({
       mapStateJSON,
-      globalState: globalState,
+      globalState,
     });
     this.setState({ query, time, refreshConfig });
     setRefreshConfig(refreshConfig);
@@ -413,10 +411,4 @@ export const MapsCreateEditView = class extends React.Component {
       </div>
     );
   }
-};
-
-MapsCreateEditView.defaultProps = {
-  mapsAppState: {},
-  localStorage: {},
-  globalState: {},
 };

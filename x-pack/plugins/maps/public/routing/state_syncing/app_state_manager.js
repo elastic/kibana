@@ -33,4 +33,12 @@ export class AppStateManager {
   getFilters() {
     return this.filters;
   }
+
+  getAppState() {
+    return {
+      query: this.query,
+      savedQuery: this.savedQuery,
+      filters: this.filters,
+    };
+  }
 }
