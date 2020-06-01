@@ -9,12 +9,28 @@ import {
   CreateExceptionListSchemaPartial,
   ExceptionListItemSchema,
   ExceptionListSchema,
-  FoundExceptionListItemSchema,
+  NamespaceType,
 } from '../../common/schemas';
 import { HttpStart } from '../../../../../src/core/public';
 
+export interface FilterExceptionsOptions {
+  filter: string;
+  tags: string[];
+}
+
+export interface Pagination {
+  page: number;
+  perPage: number;
+  total: number;
+}
+
+export interface ExceptionItemsAndPagination {
+  items: ExceptionListItemSchema[];
+  pagination: Pagination;
+}
+
 export interface ExceptionListAndItems extends ExceptionListSchema {
-  exceptionItems: FoundExceptionListItemSchema;
+  exceptionItems: ExceptionItemsAndPagination;
 }
 
 export type AddExceptionList = ExceptionListSchema | CreateExceptionListSchemaPartial;
@@ -27,20 +43,27 @@ export interface PersistHookProps {
 }
 
 export interface UseExceptionListProps {
+  filterOptions?: FilterExceptionsOptions;
   http: HttpStart;
   id: string | undefined;
+  namespaceType: NamespaceType;
   onError: (arg: Error) => void;
+  pagination?: Pagination;
 }
 
 export interface ApiCallByListIdProps {
   http: HttpStart;
   listId: string;
+  namespaceType: NamespaceType;
+  filterOptions?: FilterExceptionsOptions;
+  pagination?: Pagination;
   signal: AbortSignal;
 }
 
 export interface ApiCallByIdProps {
   http: HttpStart;
   id: string;
+  namespaceType: NamespaceType;
   signal: AbortSignal;
 }
 

@@ -3,11 +3,11 @@
 
 :include-xpack:  true
 :lang:           en
-:kib-repo-dir:   {docdir}
+:kib-repo-dir:   {kibana-root}/docs
 :blog-ref:       https://www.elastic.co/blog/
 :wikipedia:      https://en.wikipedia.org/wiki
 
-include::{asciidoc-dir}/../../shared/versions/stack/{source_branch}.asciidoc[]
+include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 
 :docker-repo:    docker.elastic.co/kibana/kibana
 :docker-image:   docker.elastic.co/kibana/kibana:{version}
@@ -18,7 +18,7 @@ include::{asciidoc-dir}/../../shared/versions/stack/{source_branch}.asciidoc[]
 :blob:           {repo}blob/{branch}/
 :security-ref:   https://www.elastic.co/community/security/
 
-include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
+include::{docs-root}/shared/attributes.asciidoc[]
 
 include::user/index.asciidoc[]
 
