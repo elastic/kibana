@@ -6,7 +6,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import { mockExceptionItem } from '../mock';
+import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { createKibanaCoreStartMock } from '../../common/mocks/kibana_core';
 
 import { ReturnPersistExceptionItem, usePersistExceptionItem } from './persist_exception_item';
@@ -32,7 +32,7 @@ describe('usePersistExceptionItem', () => {
         () => usePersistExceptionItem({ http: mockKibanaHttpService, onError })
       );
       await waitForNextUpdate();
-      result.current[1](mockExceptionItem);
+      result.current[1](getExceptionListItemSchemaMock());
       rerender();
       expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);
     });
@@ -45,7 +45,7 @@ describe('usePersistExceptionItem', () => {
         usePersistExceptionItem({ http: mockKibanaHttpService, onError })
       );
       await waitForNextUpdate();
-      result.current[1](mockExceptionItem);
+      result.current[1](getExceptionListItemSchemaMock());
       await waitForNextUpdate();
       expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
     });
