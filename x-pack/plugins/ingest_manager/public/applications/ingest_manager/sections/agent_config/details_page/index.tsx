@@ -183,14 +183,6 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
         isSelected: tabId === '' || tabId === 'datasources',
       },
       {
-        id: 'yaml',
-        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.yamlTabText', {
-          defaultMessage: 'YAML',
-        }),
-        href: getHref('configuration_details', { configId, tabId: 'yaml' }),
-        isSelected: tabId === 'yaml',
-      },
-      {
         id: 'settings',
         name: i18n.translate('xpack.ingestManager.configDetails.subTabs.settingsTabText', {
           defaultMessage: 'Settings',
