@@ -88,12 +88,14 @@ function dynamicExternals(bundle: Bundle, context: string, request: string) {
     Path.relative(bundle.sourceRoot, Path.resolve(context, request))
   );
   for (const sharedBundle of SHARED_BUNDLES) {
-    if (rootRelative === sharedBundle.rootRelativeDir) {
-      const exportId = `${sharedBundle.type}/${sharedBundle.id}`;
-      if (exportId !== `${bundle.type}/${bundle.id}`) {
-        return `__kbnBundles__['${exportId}']`;
-      }
+    if (
+      rootRelative !== sharedBundle.rootRelativeDir ||
+      `${bundle.type}/${bundle.id}` === `${sharedBundle.type}/${sharedBundle.id}`
+    ) {
+      continue;
     }
+
+    return `__kbnBundles__['${sharedBundle.type}/${sharedBundle.id}']`;
   }
 
   // import doesn't match a root public import
