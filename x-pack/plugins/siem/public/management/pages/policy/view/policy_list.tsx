@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiText,
   EuiFlexItem,
   EuiTableFieldDataColumnType,
   EuiLink,
-  EuiPopover,
-  EuiButtonIcon,
-  EuiContextMenuPanel,
   EuiContextMenuItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -21,7 +18,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { useLocation, useHistory } from 'react-router-dom';
 import { createStructuredSelector } from 'reselect';
-import { EuiContextMenuPanelProps } from '@elastic/eui/src/components/context_menu/context_menu_panel';
 import { CreateStructuredSelector } from '../../../../common/store';
 import * as selectors from '../store/policy_list/selectors';
 import { usePolicyListSelector } from './policy_hooks';
@@ -52,33 +48,6 @@ const PolicyLink: React.FC<{ name: string; route: string; href: string }> = ({
     </EuiLink>
   );
 };
-
-// eslint-disable-next-line react/display-name
-const TableRowActions = React.memo<{ items: EuiContextMenuPanelProps['items'] }>(({ items }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
-  const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
-
-  return (
-    <EuiPopover
-      anchorPosition="downRight"
-      panelPaddingSize="none"
-      button={
-        <EuiButtonIcon
-          iconType="boxesHorizontal"
-          onClick={handleToggleMenu}
-          aria-label={i18n.translate('xpack.siem.endpoint.policyList.actionsText', {
-            defaultMessage: 'Open',
-          })}
-        />
-      }
-      isOpen={isOpen}
-      closePopover={handleCloseMenu}
-    >
-      <EuiContextMenuPanel items={items} />
-    </EuiPopover>
-  );
-});
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const PolicyList = React.memo(() => {
@@ -205,10 +174,11 @@ export const PolicyList = React.memo(() => {
       {
         field: '',
         name: 'Actions',
-        render(item: Immutable<PolicyData>) {
-          return (
-            <TableRowActions
-              items={[
+        actions: [
+          {
+            // eslint-disable-next-line react/display-name
+            render: (item: Immutable<PolicyData>) => {
+              return (
                 <EuiContextMenuItem icon="link" key="datasourceEdit">
                   <LinkToApp
                     data-test-subj="agentConfigLink"
@@ -223,11 +193,11 @@ export const PolicyList = React.memo(() => {
                       defaultMessage="View Agent config"
                     />
                   </LinkToApp>
-                </EuiContextMenuItem>,
-              ]}
-            />
-          );
-        },
+                </EuiContextMenuItem>
+              );
+            },
+          },
+        ],
       },
     ],
     [services.application]
