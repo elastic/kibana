@@ -7,7 +7,7 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import * as api from '../api';
-import { mockExceptionList } from '../mock';
+import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 import { createKibanaCoreStartMock } from '../../common/mocks/kibana_core';
 import { PersistHookProps } from '../types';
 
@@ -39,7 +39,7 @@ describe('usePersistExceptionList', () => {
         ReturnPersistExceptionList
       >(() => usePersistExceptionList({ http: mockKibanaHttpService, onError }));
       await waitForNextUpdate();
-      result.current[1](mockExceptionList);
+      result.current[1](getExceptionListSchemaMock());
       rerender();
 
       expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);
@@ -53,7 +53,7 @@ describe('usePersistExceptionList', () => {
         ReturnPersistExceptionList
       >(() => usePersistExceptionList({ http: mockKibanaHttpService, onError }));
       await waitForNextUpdate();
-      result.current[1](mockExceptionList);
+      result.current[1](getExceptionListSchemaMock());
       await waitForNextUpdate();
 
       expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
@@ -70,7 +70,7 @@ describe('usePersistExceptionList', () => {
         ReturnPersistExceptionList
       >(() => usePersistExceptionList({ http: mockKibanaHttpService, onError }));
       await waitForNextUpdate();
-      result.current[1](mockExceptionList);
+      result.current[1](getExceptionListSchemaMock());
       await waitForNextUpdate();
 
       expect(result.current).toEqual([{ isLoading: false, isSaved: false }, result.current[1]]);
