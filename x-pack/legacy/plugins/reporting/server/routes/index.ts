@@ -4,18 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReportingCore } from '../';
 import { LevelLogger as Logger } from '../lib';
-import { ReportingSetupDeps, ServerFacade } from '../types';
 import { registerJobGenerationRoutes } from './generation';
 import { registerJobInfoRoutes } from './jobs';
+import { ReportingCore } from '../core';
 
-export function registerRoutes(
-  reporting: ReportingCore,
-  server: ServerFacade,
-  plugins: ReportingSetupDeps,
-  logger: Logger
-) {
-  registerJobGenerationRoutes(reporting, server, plugins, logger);
-  registerJobInfoRoutes(reporting, server, plugins, logger);
+export function registerRoutes(reporting: ReportingCore, logger: Logger) {
+  registerJobGenerationRoutes(reporting, logger);
+  registerJobInfoRoutes(reporting);
 }
