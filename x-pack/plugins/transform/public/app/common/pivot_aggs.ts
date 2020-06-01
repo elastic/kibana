@@ -123,17 +123,13 @@ export function getAggConfigFromEsAgg(esAggDefinition: Record<string, any>, aggN
 
 export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
   field: EsFieldName;
-  /** Indicates if the configuration is valid */
-  isValid?: () => boolean;
 }
 
 export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
   /** Form component */
   AggFormComponent: FC<{
-    // aggConfig: Partial<T>;
-    // onChange: (arg: Partial<T>) => void;
-    aggConfig: any;
-    onChange: (arg: any) => void;
+    aggConfig: Partial<T>;
+    onChange: (arg: Partial<T>) => void;
     selectedField: string;
   }>;
   /** Aggregation specific configuration */
@@ -142,8 +138,8 @@ export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
   setUiConfigFromEs: (arg: { [key: string]: any }) => void;
   /** Converts UI agg config form to ES agg request object */
   getEsAggConfig: () => { [key: string]: any } | null;
-  /** Updates agg config*/
-  updateAggConfig?: (update: Partial<T>) => void;
+  /** Indicates if the configuration is valid */
+  isValid: () => boolean;
 }
 
 interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {

@@ -109,7 +109,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
         onChange={(selected) => {
           onChange({
             config: {
-              value: selected[0].label,
+              value: selected.length > 0 ? selected[0].label : undefined,
             },
           });
         }}

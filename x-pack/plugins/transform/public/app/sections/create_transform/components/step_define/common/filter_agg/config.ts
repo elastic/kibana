@@ -5,28 +5,27 @@
  */
 
 import { PivotAggsConfigWithUiBase } from '../../../../../../common/pivot_aggs';
-import { FilterAggType, FILTERS } from './constants';
+import { FILTERS } from './constants';
 import { FilterAggForm, FilterEditorForm, FilterRangeForm, FilterTermForm } from './components';
 import {
   FilterAggConfigRange,
   FilterAggConfigTerm,
   FilterAggConfigUnion,
-  PivotAggsConfigFilterInit,
+  FilterAggType,
+  PivotAggsConfigFilter,
 } from './types';
 
 /**
  * Gets initial basic configuration of the filter aggregation.
  */
-export function getFilterAggConfig(
-  commonConfig: PivotAggsConfigWithUiBase
-): PivotAggsConfigFilterInit {
+export function getFilterAggConfig(commonConfig: PivotAggsConfigWithUiBase): PivotAggsConfigFilter {
   return {
     ...commonConfig,
     AggFormComponent: FilterAggForm,
     aggConfig: {},
     getEsAggConfig() {
       // ensure the configuration has been completed
-      if (!this.isValid!()) {
+      if (!this.isValid()) {
         return null;
       }
       const esAgg = this.aggConfig.aggTypeConfig?.getEsAggConfig(this.field);
@@ -45,14 +44,11 @@ export function getFilterAggConfig(
         aggTypeConfig,
       };
     },
-    updateAggConfig(update) {
-      this.aggConfig = {
-        ...this.aggConfig,
-        ...update,
-      };
-    },
     isValid() {
-      return this.aggConfig.filterAgg !== undefined && this.aggConfig.aggTypeConfig.isValid();
+      return (
+        this.aggConfig?.filterAgg !== undefined &&
+        (this.aggConfig.aggTypeConfig?.isValid ? this.aggConfig.aggTypeConfig.isValid() : true)
+      );
     },
   };
 }
@@ -61,7 +57,7 @@ export function getFilterAggConfig(
  * Returns a form component for provided filter aggregation type.
  */
 export function getFilterAggTypeConfig(
-  filterAggType?: FilterAggType,
+  filterAggType: FilterAggConfigUnion['filterAgg'] | FilterAggType,
   config?: { [key: string]: any }
 ): FilterAggConfigUnion['aggTypeConfig'] {
   switch (filterAggType) {
@@ -73,10 +69,9 @@ export function getFilterAggTypeConfig(
         filterAggConfig: {
           value,
         },
-        setUiConfigFromEs() {},
         getEsAggConfig(fieldName) {
           if (fieldName === undefined || !this.filterAggConfig) {
-            throw new Error('Config is not completed');
+            throw new Error(`Config ${FILTERS.TERM} is not completed`);
           }
           return {
             [fieldName]: this.filterAggConfig.value,
@@ -89,17 +84,27 @@ export function getFilterAggTypeConfig(
     case FILTERS.RANGE:
       return {
         FilterAggFormComponent: FilterRangeForm,
-        setUiConfigFromEs() {},
         getEsAggConfig() {
           return {};
         },
       } as FilterAggConfigRange['aggTypeConfig'];
+    case FILTERS.EXISTS:
+      return {
+        getEsAggConfig(fieldName) {
+          if (fieldName === undefined) {
+            throw new Error(`Config ${FILTERS.EXISTS} is not completed`);
+          }
+          return {
+            field: fieldName,
+          };
+        },
+      };
     default:
       return {
         FilterAggFormComponent: FilterEditorForm,
-        setUiConfigFromEs() {},
+        filterAggConfig: {},
         getEsAggConfig() {
-          return {};
+          return { ...this.filterAggConfig };
         },
       };
   }

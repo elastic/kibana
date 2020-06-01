@@ -5,35 +5,32 @@
  */
 
 import { FC } from 'react';
-import { FilterAggType } from './constants';
-import { ValidationResult } from '../../../../../../../../../ml/common/util/validators';
 import { PivotAggsConfigWithExtra } from '../../../../../../common/pivot_aggs';
+import { FILTERS } from './constants';
+
+export type FilterAggType = typeof FILTERS[keyof typeof FILTERS];
 
 type FilterAggForm<T> = FC<{
   /** Filter aggregation related configuration */
   config: Partial<T> | undefined;
   /** Callback for configuration updates */
-  onChange: (arg: Partial<{ config: Partial<T>; validationResult: ValidationResult }>) => void;
+  onChange: (arg: Partial<{ config: Partial<T> }>) => void;
   /** Selected field for the aggregation */
   selectedField?: string;
 }>;
 
 interface FilterAggTypeConfig<U> {
   /** Form component */
-  FilterAggFormComponent: FilterAggForm<U>;
+  FilterAggFormComponent?: FilterAggForm<U>;
   /** Filter agg type configuration*/
   filterAggConfig?: U;
-  /**
-   * Mappers for aggregation objects
-   */
-  setUiConfigFromEs: (arg: { [key: string]: any }) => any;
   /** Converts UI agg config form to ES agg request object */
   getEsAggConfig: (field?: string) => { [key: string]: any };
   isValid?: () => boolean;
 }
 
 /** Filter agg type definition */
-interface FilterAggProps<K extends FilterAggType, U> {
+interface FilterAggProps<K extends FilterAggType, U extends {}> {
   /** Filter aggregation type */
   filterAgg: K;
   /** Definition of the filter agg config */
@@ -50,18 +47,14 @@ export type FilterAggConfigRange = FilterAggProps<
 
 export type FilterAggConfigUnion = FilterAggConfigTerm | FilterAggConfigRange;
 
-/** Union type for filter aggregations */
-export type PivotAggsConfigFilter = PivotAggsConfigWithExtra<FilterAggConfigUnion>;
+/**
+ * Union type for filter aggregations
+ * TODO find out if it's possible to use {@link FilterAggConfigUnion} instead of {@link FilterAggConfigBase}.
+ * ATM TS is not able to infer a type.
+ */
+export type PivotAggsConfigFilter = PivotAggsConfigWithExtra<FilterAggConfigBase>;
 
 export interface FilterAggConfigBase {
   filterAgg?: FilterAggType;
   aggTypeConfig?: any;
 }
-
-export function isPivotAggsConfigFilter(arg: any): arg is PivotAggsConfigFilter {
-  return arg?.aggConfig?.filterAgg !== undefined;
-}
-
-export type PivotAggsConfigFilterInit = Omit<PivotAggsConfigFilter, 'aggConfig'> & {
-  aggConfig: FilterAggConfigBase;
-};

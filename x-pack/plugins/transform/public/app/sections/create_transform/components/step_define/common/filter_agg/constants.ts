@@ -5,6 +5,7 @@
  */
 
 import { KBN_FIELD_TYPES } from '../../../../../../../../../../../src/plugins/data/common';
+import { FilterAggType } from './types';
 
 export const FILTERS = {
   CUSTOM: 'custom',
@@ -23,8 +24,6 @@ export const FILTERS = {
   BOOL: 'bool',
 } as const;
 
-export type FilterAggType = typeof FILTERS[keyof typeof FILTERS];
-
 export const filterAggsFieldSupport: { [key: string]: FilterAggType[] } = {
   [KBN_FIELD_TYPES.ATTACHMENT]: [],
   [KBN_FIELD_TYPES.BOOLEAN]: [],
@@ -39,3 +38,5 @@ export const filterAggsFieldSupport: { [key: string]: FilterAggType[] } = {
   [KBN_FIELD_TYPES.UNKNOWN]: [],
   [KBN_FIELD_TYPES.CONFLICT]: [],
 };
+
+export const commonFilterAggs = [FILTERS.BOOL, FILTERS.EXISTS];

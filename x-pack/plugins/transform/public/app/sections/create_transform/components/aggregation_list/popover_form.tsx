@@ -175,6 +175,9 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   if (formValid && agg === PIVOT_SUPPORTED_AGGS.PERCENTILES) {
     formValid = validPercents;
   }
+  if (isPivotAggsWithExtendedForm(aggConfigDef)) {
+    formValid = validAggName && aggConfigDef.isValid();
+  }
 
   return (
     <EuiForm style={{ width: '300px' }}>
@@ -232,10 +235,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           onChange={(update) => {
             setAggConfigDef({
               ...aggConfigDef,
-              aggConfig: {
-                ...aggConfigDef.aggConfig,
-                ...update,
-              },
+              aggConfig: update,
             });
           }}
         />

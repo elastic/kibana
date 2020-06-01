@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FilterAggType, filterAggsFieldSupport, FILTERS } from './constants';
+export { filterAggsFieldSupport, FILTERS } from './constants';
+export { FilterAggType } from './types';

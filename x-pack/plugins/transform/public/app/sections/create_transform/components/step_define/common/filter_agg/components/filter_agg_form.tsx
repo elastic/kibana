@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useUpdateEffect } from 'react-use';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
-import { filterAggsFieldSupport, FilterAggType, FILTERS } from '../constants';
+import { commonFilterAggs, filterAggsFieldSupport } from '../constants';
 import { IndexPattern } from '../../../../../../../../../../../../src/plugins/data/public';
 import { getFilterAggTypeConfig } from '../config';
-import { PivotAggsConfigFilter } from '../types';
+import { FilterAggType, PivotAggsConfigFilter } from '../types';
 
 /**
  * Resolves supported filters for provided field.
@@ -26,11 +27,14 @@ export function getSupportedFilterAggs(
     throw new Error(`The field ${fieldName} does not exist in the index`);
   }
 
-  return [FILTERS.BOOL, ...filterAggsFieldSupport[field.type]];
+  return [...commonFilterAggs, ...filterAggsFieldSupport[field.type]];
 }
 
 /**
  * Component for filter aggregation related controls.
+ *
+ * Responsible for the filter agg type selection and rendering of
+ * the corresponded field set.
  */
 export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
   aggConfig,
@@ -38,10 +42,20 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
   selectedField,
 }) => {
   const { indexPattern } = useContext(CreateTransformWizardContext);
-  const filterAggsOptions = getSupportedFilterAggs(selectedField, indexPattern!);
 
-  const filterAggTypeConfig =
-    aggConfig.aggTypeConfig || getFilterAggTypeConfig(aggConfig.filterAgg);
+  const filterAggsOptions = useMemo(() => getSupportedFilterAggs(selectedField, indexPattern!), [
+    indexPattern,
+    selectedField,
+  ]);
+
+  useUpdateEffect(() => {
+    // reset filter agg on field change
+    onChange({
+      filterAgg: undefined,
+    });
+  }, [selectedField]);
+
+  const filterAggTypeConfig = aggConfig?.aggTypeConfig;
 
   return (
     <>
@@ -59,15 +73,16 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
           )}
           value={aggConfig.filterAgg}
           onChange={(e) => {
+            // have to reset aggTypeConfig of filterAgg change
+            const filterAgg = e.target.value as FilterAggType;
             onChange({
-              ...aggConfig,
-              // @ts-ignore
-              filterAgg: e.target.value,
+              filterAgg,
+              aggTypeConfig: getFilterAggTypeConfig(filterAgg),
             });
           }}
         />
       </EuiFormRow>
-      {aggConfig.filterAgg && (
+      {filterAggTypeConfig?.FilterAggFormComponent && (
         <filterAggTypeConfig.FilterAggFormComponent
           config={filterAggTypeConfig?.filterAggConfig}
           onChange={(update: any) => {
