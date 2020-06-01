@@ -135,17 +135,27 @@ export function App({
 
   useEffect(() => {
     onAppLeave((actions) => {
-      if (isSaveable && !_.isEqual(lastKnownDoc?.expression, state.persistedDoc?.expression)) {
+      // Confirm when the user has made any changes to an existing doc
+      // or when the user has configured something without saving
+      if (
+        core.application.capabilities.visualize.save &&
+        (state.persistedDoc?.expression
+          ? !_.isEqual(lastKnownDoc?.expression, state.persistedDoc.expression)
+          : lastKnownDoc?.expression)
+      ) {
         return actions.confirm(
           i18n.translate('xpack.lens.app.unsavedWorkMessage', {
             defaultMessage: 'Leave Lens with unsaved work?',
+          }),
+          i18n.translate('xpack.lens.app.unsavedWorkTitle', {
+            defaultMessage: 'Unsaved changes',
           })
         );
       } else {
         return actions.default();
       }
     });
-  }, [isSaveable, lastKnownDoc, onAppLeave, state.persistedDoc]);
+  }, [lastKnownDoc, onAppLeave, state.persistedDoc, core.application.capabilities.visualize.save]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {

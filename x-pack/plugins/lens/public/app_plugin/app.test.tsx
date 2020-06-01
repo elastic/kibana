@@ -1082,5 +1082,29 @@ describe('Lens App', () => {
       expect(defaultLeave).toHaveBeenCalled();
       expect(confirmLeave).not.toHaveBeenCalled();
     });
+
+    it('should confirm when the latest doc is invalid', async () => {
+      defaultArgs.editorFrame = frame;
+      instance = mount(<App {...defaultArgs} />);
+      await act(async () => {
+        instance.setProps({ docId: '1234' });
+      });
+
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      act(() =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({ id: '1234', expression: null } as unknown) as Document,
+        })
+      );
+      instance.update();
+
+      const lastCall =
+        defaultArgs.onAppLeave.mock.calls[defaultArgs.onAppLeave.mock.calls.length - 1][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+
+      expect(confirmLeave).toHaveBeenCalled();
+      expect(defaultLeave).not.toHaveBeenCalled();
+    });
   });
 });
