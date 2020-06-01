@@ -20,9 +20,9 @@ interface TimelineObjectProps {
 }
 
 export class TimelineObject {
-  private id: string | null;
+  public readonly id: string | null;
   private type: TimelineTypeLiteral;
-  private version: string | number | null;
+  public readonly version: string | number | null;
   private frameworkRequest: FrameworkRequest;
 
   public data: TimelineSavedObject | null;
@@ -69,6 +69,10 @@ export class TimelineObject {
   }
 
   public get isCreatable() {
+    if (this.type === TimelineType.template) {
+      // Cannot create template timeline without template timeline id
+      return !this.isExists && this.id != null;
+    }
     return !this.isExists;
   }
 
@@ -78,6 +82,10 @@ export class TimelineObject {
 
   public get getVersion() {
     return this.version;
+  }
+
+  public get getId() {
+    return this.id;
   }
 
   private isVersionConflict() {

@@ -43,9 +43,15 @@ export const createTimelinesRoute = (
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
 
         const { timelineId, timeline, version } = request.body;
-        const { templateTimelineId, templateTimelineVersion, timelineType, title } = timeline;
-
+        const {
+          templateTimelineId,
+          templateTimelineVersion,
+          timelineType,
+          title,
+          status,
+        } = timeline;
         const compareTimelinesStatus = new CompareTimelinesStatus({
+          status,
           title,
           timelineType,
           timelineInput: {
@@ -85,7 +91,6 @@ export const createTimelinesRoute = (
         }
       } catch (err) {
         const error = transformError(err);
-
         return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,

@@ -125,6 +125,7 @@ export class CompareTimelinesStatus {
       this.status,
       this.timelineObject.getVersion?.toString() ?? null,
       version != null && typeof version === 'string' ? parseInt(version, 10) : version,
+      this.templateTimelineObject.getId,
       this.timelineObject.getData,
       this.templateTimelineObject.getData
     );

@@ -19,6 +19,8 @@ export const CREATE_TIMELINE_ERROR_MESSAGE =
   'UPDATE timeline with POST is not allowed, please use PATCH instead';
 export const CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
   'UPDATE template timeline with POST is not allowed, please use PATCH instead';
+export const CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE =
+  'Create template timeline without a template timeline ID is not allowed';
 export const EMPTY_TITLE_ERROR_MESSAGE = 'Title cannot be empty';
 export const UPDATE_STATUS_ERROR_MESSAGE = 'Update timeline status is is not allowed';
 
@@ -58,6 +60,7 @@ export const checkIsUpdateFailureCases = (
   status: TimelineStatus | null | undefined,
   version: string | null,
   templateTimelineVersion: number | null,
+  templateTimelineId: string | null | undefined,
   existTimeline: TimelineSavedObject | null,
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
@@ -148,6 +151,7 @@ export const checkIsCreateFailureCases = (
   status: TimelineStatus | null | undefined,
   version: string | null,
   templateTimelineVersion: number | null,
+  templateTimelineId: string | null | undefined,
   existTimeline: TimelineSavedObject | null,
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
@@ -162,6 +166,11 @@ export const checkIsCreateFailureCases = (
       body: CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
       statusCode: 405,
     };
+  } else if (isHandlingTemplateTimeline && templateTimelineId == null) {
+    return {
+      body: CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE,
+      statusCode: 405,
+    };
   } else {
     return null;
   }
@@ -172,6 +181,7 @@ export const checkIsCreateViaImportFailureCases = (
   status: TimelineStatus | null | undefined,
   version: string | null,
   templateTimelineVersion: number | null,
+  templateTimelineId: string | null | undefined,
   existTimeline: TimelineSavedObject | null,
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
@@ -185,6 +195,11 @@ export const checkIsCreateViaImportFailureCases = (
     // Throw error to create template timeline in patch
     return {
       body: getImportExistingTimelineError(existTemplateTimeline.savedObjectId, timelineType),
+      statusCode: 405,
+    };
+  } else if (isHandlingTemplateTimeline && templateTimelineId == null) {
+    return {
+      body: CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE,
       statusCode: 405,
     };
   } else {

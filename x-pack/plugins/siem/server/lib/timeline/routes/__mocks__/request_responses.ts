@@ -72,7 +72,7 @@ export const inputTimeline: SavedTimeline = {
 export const inputTemplateTimeline = {
   ...inputTimeline,
   timelineType: TimelineType.template,
-  templateTimelineId: null,
+  templateTimelineId: '79deb4c0-6bc1-11ea-inpt-templatea189',
   templateTimelineVersion: null,
 };
 
@@ -94,11 +94,11 @@ export const createDraftTimelineWithoutTimelineId = {
 };
 
 export const createTemplateTimelineWithoutTimelineId = {
-  templateTimelineId: null,
   timeline: inputTemplateTimeline,
   timelineId: null,
   version: null,
   timelineType: TimelineType.template,
+  status: TimelineStatus.active,
 };
 
 export const createTimelineWithTimelineId = {
