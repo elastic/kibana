@@ -14,8 +14,8 @@ describe('#setup', () => {
     expect(featureUsage.register).toHaveBeenCalledTimes(2);
     expect(featureUsage.register.mock.calls.map((c) => c[0])).toMatchInlineSnapshot(`
       Array [
-        "security_sub_feature_privileges",
-        "security_pre_access_agreement",
+        "Subfeature privileges",
+        "Pre-access agreement",
       ]
     `);
   });
@@ -28,7 +28,7 @@ describe('start contract', () => {
     const startContract = securityFeatureUsage.start({ featureUsage });
     startContract.recordSubFeaturePrivilegeUsage();
     expect(featureUsage.notifyUsage).toHaveBeenCalledTimes(1);
-    expect(featureUsage.notifyUsage).toHaveBeenCalledWith('security_sub_feature_privileges');
+    expect(featureUsage.notifyUsage).toHaveBeenCalledWith('Subfeature privileges');
   });
 
   it('notifies when pre-access agreement is used', () => {
@@ -37,6 +37,6 @@ describe('start contract', () => {
     const startContract = securityFeatureUsage.start({ featureUsage });
     startContract.recordPreAccessAgreementUsage();
     expect(featureUsage.notifyUsage).toHaveBeenCalledTimes(1);
-    expect(featureUsage.notifyUsage).toHaveBeenCalledWith('security_pre_access_agreement');
+    expect(featureUsage.notifyUsage).toHaveBeenCalledWith('Pre-access agreement');
   });
 });
