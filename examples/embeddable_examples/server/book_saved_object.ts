@@ -17,17 +17,24 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'kibana/server';
-import { todoSavedObject } from './todo_saved_object';
-import { bookSavedObject } from './book_saved_object';
+import { SavedObjectsType } from 'kibana/server';
 
-export class EmbeddableExamplesPlugin implements Plugin {
-  public setup(core: CoreSetup) {
-    core.savedObjects.registerType(todoSavedObject);
-    core.savedObjects.registerType(bookSavedObject);
-  }
-
-  public start(core: CoreStart) {}
-
-  public stop() {}
-}
+export const bookSavedObject: SavedObjectsType = {
+  name: 'book',
+  hidden: false,
+  namespaceType: 'agnostic',
+  mappings: {
+    properties: {
+      title: {
+        type: 'keyword',
+      },
+      author: {
+        type: 'keyword',
+      },
+      readIt: {
+        type: 'boolean',
+      },
+    },
+  },
+  migrations: {},
+};
