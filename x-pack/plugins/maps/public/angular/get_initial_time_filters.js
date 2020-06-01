@@ -6,7 +6,7 @@
 
 import { getUiSettings } from '../kibana_services';
 
-export function getInitialTimeFilters({ mapStateJSON, globalState = {} }) {
+export function getInitialTimeFilters({ mapStateJSON, globalState }) {
   if (mapStateJSON) {
     const mapState = JSON.parse(mapStateJSON);
     if (mapState.timeFilters) {

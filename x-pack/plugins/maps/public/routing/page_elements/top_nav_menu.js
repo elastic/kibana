@@ -21,7 +21,7 @@ import { getInspectorAdapters } from '../../reducers/non_serializable_instances'
 import {
   SavedObjectSaveModal,
   showSaveModal,
-} from '../../../../../../src/plugins/saved_objects/public/save_modal';
+} from '../../../../../../src/plugins/saved_objects/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { clearTransientLayerStateAndCloseFlyout } from '../../actions';
 import { updateBreadcrumbs } from './breadcrumbs';
@@ -36,18 +36,22 @@ export function MapsTopNavMenu(props) {
     store,
     query,
     onQueryChange,
+    onQuerySaved,
+    onSavedQueryUpdated,
+    savedQuery,
     time,
     refreshConfig,
     setRefreshConfig,
     initialLayerListConfig,
     isVisible,
     indexPatterns,
+    updateFiltersAndDispatch,
+    isSaveDisabled,
   } = props;
-  const [savedQuery, setSavedQuery] = useState(null);
   const { filterManager } = getData().query;
   const showSaveQuery = getMapsCapabilities().saveQuery;
   const onClearSavedQuery = () => {
-    setSavedQuery(null);
+    // setSavedQuery(null);
     // TODO: Update saved query in state
     // delete $state.savedQuery;
     onQueryChange({
@@ -59,12 +63,22 @@ export function MapsTopNavMenu(props) {
     });
   };
 
+  // Nav settings
+  const [isOpenSettingsDisabled, setIsOpenSettingsDisabled] = useState(false);
+
   return isVisible ? (
     <TopNavMenu
       appName="maps"
-      config={topNavConfig(store, savedMap, initialLayerListConfig)}
+      config={topNavConfig(
+        store,
+        savedMap,
+        initialLayerListConfig,
+        isOpenSettingsDisabled,
+        setIsOpenSettingsDisabled,
+        isSaveDisabled,
+      )}
       indexPatterns={indexPatterns || []}
-      filters={filterManager.getFilters() || []}
+      filters={filterManager.getFilters()}
       query={query}
       onQuerySubmit={function ({ dateRange, query }) {
         onQueryChange({
@@ -73,11 +87,7 @@ export function MapsTopNavMenu(props) {
           refresh: true,
         });
       }}
-      onFiltersUpdated={function (filters) {
-        onQueryChange({
-          filters,
-        });
-      }}
+      onFiltersUpdated={updateFiltersAndDispatch}
       dateRangeFrom={time.from}
       dateRangeTo={time.to}
       isRefreshPaused={refreshConfig.isPaused}
@@ -98,16 +108,21 @@ export function MapsTopNavMenu(props) {
       showDatePicker={true}
       showSaveQuery={showSaveQuery}
       savedQuery={savedQuery}
-      onSaved={setSavedQuery}
-      onSavedQueryUpdated={(savedQuery) => setSavedQuery({ ...savedQuery })}
+      onSaved={onQuerySaved}
+      onSavedQueryUpdated={onSavedQueryUpdated}
       onClearSavedQuery={onClearSavedQuery}
     />
   ) : null;
 }
 
-function topNavConfig(store, savedMap, initialLayerListConfig) {
-  const [isOpenSettingsDisabled, setIsOpenSettingsDisabled] = useState(false);
-  const [isSaveDisabled, setIsSaveDisabled] = useState(false);
+function topNavConfig(
+  store,
+  savedMap,
+  initialLayerListConfig,
+  isOpenSettingsDisabled,
+  setIsOpenSettingsDisabled,
+  isSaveDisabled
+) {
   return [
     {
       id: 'full-screen',

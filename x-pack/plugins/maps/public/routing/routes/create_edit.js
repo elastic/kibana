@@ -48,17 +48,22 @@ import {
   updateGlobalState,
   useGlobalStateSyncing,
 } from '../state_syncing/global_sync';
+import { esFilters } from '../../../../../../src/plugins/data/public';
+import { AppStateManager } from '../state_syncing/app_state_manager';
+import { useAppStateSyncing } from '../state_syncing/app_sync';
 
 export const MapsCreateEditView = withRouter(
   class extends React.Component {
     visibleSubscription = null;
     storeSyncUnsubscribe = null;
     globalSyncUnsubscribe = null;
+    appSyncUnsubscribe = null;
+    appStateManager = new AppStateManager();
+    store = createMapStore();
 
     constructor(props) {
       super(props);
       this.state = {
-        store: createMapStore(),
         indexPatterns: [],
         prevIndexPatternIds: [],
         // TODO: Replace empty object w/ global state replacement
@@ -71,6 +76,7 @@ export const MapsCreateEditView = withRouter(
         isSaveDisabled: false,
         isOpenSettingsDisabled: false,
         isFullScreen: false,
+        savedQuery: null,
       };
     }
 
@@ -79,6 +85,7 @@ export const MapsCreateEditView = withRouter(
 
       // Init sync utils
       this.globalSyncUnsubscribe = useGlobalStateSyncing(kbnUrlStateStorage);
+      this.appSyncUnsubscribe = useAppStateSyncing(this.appStateManager, kbnUrlStateStorage);
 
       // Monitor visibility
       this.visibleSubscription = getCoreChrome()
@@ -95,6 +102,9 @@ export const MapsCreateEditView = withRouter(
       }
       if (this.globalSyncUnsubscribe) {
         this.globalSyncUnsubscribe();
+      }
+      if (this.appSyncUnsubscribe) {
+        this.appSyncUnsubscribe();
       }
       if (this.visibleSubscription) {
         this.visibleSubscription.unsubscribe();
@@ -146,7 +156,6 @@ export const MapsCreateEditView = withRouter(
 
     async handleStoreChanges() {
       const {
-        store,
         prevIndexPatternIds,
         isSaveDisabled,
         isOpenSettingsDisabled,
@@ -154,23 +163,23 @@ export const MapsCreateEditView = withRouter(
       } = this.state;
       const storeUpdates = {};
 
-      const nextIsFullScreen = getIsFullScreen(store.getState());
+      const nextIsFullScreen = getIsFullScreen(this.store.getState());
       if (nextIsFullScreen !== isFullScreen) {
         storeUpdates.isFullScreen = nextIsFullScreen;
       }
 
-      const nextIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
+      const nextIndexPatternIds = getQueryableUniqueIndexPatternIds(this.store.getState());
       if (nextIndexPatternIds !== prevIndexPatternIds) {
         storeUpdates.prevIndexPatternIds = nextIndexPatternIds;
         await this.updateIndexPatterns(nextIndexPatternIds);
       }
 
-      const nextIsSaveDisabled = hasDirtyState(store.getState());
+      const nextIsSaveDisabled = hasDirtyState(this.store.getState());
       if (nextIsSaveDisabled !== isSaveDisabled) {
         storeUpdates.isSaveDisabled = nextIsSaveDisabled;
       }
 
-      const flyoutDisplay = getFlyoutDisplay(store.getState());
+      const flyoutDisplay = getFlyoutDisplay(this.store.getState());
       const nextIsOpenSettingsDisabled = flyoutDisplay !== FLYOUT_STATE.NONE;
       if (nextIsOpenSettingsDisabled !== isOpenSettingsDisabled) {
         storeUpdates.isOpenSettingsDisabled = nextIsOpenSettingsDisabled;
@@ -186,8 +195,8 @@ export const MapsCreateEditView = withRouter(
     }
 
     dispatchSetQuery(refresh) {
-      const { store, filters, query, time } = this.state;
-      store.dispatch(
+      const { filters, query, time } = this.state;
+      this.store.dispatch(
         setQuery({
           filters,
           query,
@@ -195,6 +204,28 @@ export const MapsCreateEditView = withRouter(
           refresh,
         })
       );
+    }
+
+    syncAppAndGlobalState() {
+      const { query, time, refreshConfig } = this.state;
+      const { kbnUrlStateStorage } = this.props;
+      const { filterManager } = getData().query;
+
+      // appState
+      this.appStateManager.setQueryAndFilters({
+        query: query,
+        filters: filterManager.getAppFilters(),
+      });
+
+      // globalState
+      updateGlobalState(kbnUrlStateStorage, {
+        time: time,
+        refreshInterval: {
+          pause: refreshConfig.isPaused,
+          value: refreshConfig.interval,
+        },
+        filters: filterManager.getGlobalFilters(),
+      });
     }
 
     onQueryChange = async ({ filters, query, time, refresh }) => {
@@ -211,7 +242,7 @@ export const MapsCreateEditView = withRouter(
       if (time) {
         newState.time = time;
       }
-      // this.syncAppAndGlobalState();
+      this.syncAppAndGlobalState();
       this.dispatchSetQuery(refresh);
       updateGlobalState(kbnUrlStateStorage, newState);
       this.setState(newState);
@@ -239,12 +270,10 @@ export const MapsCreateEditView = withRouter(
         globalState: globalState,
       });
       this.setState({ query, time, refreshConfig });
-      this.state.store.dispatch(setRefreshConfig(refreshConfig));
+      this.store.dispatch(setRefreshConfig(refreshConfig));
     }
 
     async initMapAndLayerSettings(savedMapId) {
-      const { store } = this.state;
-
       // Get saved map & layer settings
       let layerList;
       const savedMap = await this._fetchSavedMap(savedMapId);
@@ -254,7 +283,7 @@ export const MapsCreateEditView = withRouter(
       } else {
         layerList = getInitialLayers(this.getInitialLayersFromUrlParam());
       }
-      store.dispatch(replaceLayerList(layerList));
+      this.store.dispatch(replaceLayerList(layerList));
       this.setState({
         initialLayerListConfig: copyPersistentState(layerList),
         savedMap,
@@ -262,12 +291,63 @@ export const MapsCreateEditView = withRouter(
       return savedMap;
     }
 
+    updateFiltersAndDispatch = (filters) => {
+      this.onQueryChange({
+        filters,
+      });
+    };
+
+    addFilters(newFilters) {
+      newFilters.forEach((filter) => {
+        filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
+      });
+      this.updateFiltersAndDispatch([...this.state.filters, ...newFilters]);
+    }
+
+    onRefreshChange = ({ isPaused, refreshInterval }) => {
+      const { refreshConfig } = this.state;
+      this.setState({
+        refreshConfig: {
+          isPaused,
+          interval: refreshInterval ? refreshInterval : refreshConfig.interval,
+        },
+      });
+      this.syncAppAndGlobalState();
+
+      this.store.dispatch(setRefreshConfig(refreshConfig));
+    };
+
+    updateStateFromSavedQuery(savedQuery) {
+      const { filterManager } = getData().query;
+      const savedQueryFilters = savedQuery.attributes.filters || [];
+      const globalFilters = filterManager.getGlobalFilters();
+      const allFilters = [...savedQueryFilters, ...globalFilters];
+
+      if (savedQuery.attributes.timefilter) {
+        if (savedQuery.attributes.timefilter.refreshInterval) {
+          this.onRefreshChange({
+            isPaused: savedQuery.attributes.timefilter.refreshInterval.pause,
+            refreshInterval: savedQuery.attributes.timefilter.refreshInterval.value,
+          });
+        }
+        this.onQueryChange({
+          filters: allFilters,
+          query: savedQuery.attributes.query,
+          time: savedQuery.attributes.timefilter,
+        });
+      } else {
+        this.onQueryChange({
+          filters: allFilters,
+          query: savedQuery.attributes.query,
+        });
+      }
+    }
+
     syncStoreAndGetFilters(savedMap) {
-      const { store } = this.state;
       let savedObjectFilters = [];
       if (savedMap.mapStateJSON) {
         const mapState = JSON.parse(savedMap.mapStateJSON);
-        store.dispatch(
+        this.store.dispatch(
           setGotoWithCenter({
             lat: mapState.center.lat,
             lon: mapState.center.lon,
@@ -278,38 +358,35 @@ export const MapsCreateEditView = withRouter(
           savedObjectFilters = mapState.filters;
         }
         if (mapState.settings) {
-          store.dispatch(setMapSettings(mapState.settings));
+          this.store.dispatch(setMapSettings(mapState.settings));
         }
       }
 
       if (savedMap.uiStateJSON) {
         const uiState = JSON.parse(savedMap.uiStateJSON);
-        store.dispatch(
+        this.store.dispatch(
           setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN))
         );
-        store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
+        this.store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
       }
       return savedObjectFilters;
     }
 
     clearUi() {
-      const { store } = this.state;
-      // clear old UI state
-      store.dispatch(setSelectedLayer(null));
-      store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      store.dispatch(setReadOnly(!getMapsCapabilities().save));
+      this.store.dispatch(setSelectedLayer(null));
+      this.store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      this.store.dispatch(setReadOnly(!getMapsCapabilities().save));
     }
 
     async initMap(savedMapId) {
       const { kbnUrlStateStorage } = this.props;
       const globalState = getGlobalState(kbnUrlStateStorage);
-      const { store } = this.state;
       const savedMap = await this.initMapAndLayerSettings(savedMapId);
       this.clearUi();
 
       await this.handleStoreChanges();
-      this.storeSyncUnsubscribe = store.subscribe(async () => {
-        await this.handleStoreChanges(store);
+      this.storeSyncUnsubscribe = this.store.subscribe(async () => {
+        await this.handleStoreChanges(this.store);
       });
 
       const savedObjectFilters = this.syncStoreAndGetFilters(savedMap);
@@ -324,7 +401,6 @@ export const MapsCreateEditView = withRouter(
 
     render() {
       const {
-        store,
         query,
         time,
         refreshConfig,
@@ -333,6 +409,7 @@ export const MapsCreateEditView = withRouter(
         isVisible,
         isFullScreen,
         indexPatterns,
+        isSaveDisabled,
       } = this.state;
       const initialized = !!query && !!time && !!refreshConfig;
       return (
@@ -340,7 +417,7 @@ export const MapsCreateEditView = withRouter(
           {initialized ? (
             <MapsTopNavMenu
               savedMap={savedMap}
-              store={store}
+              store={this.store}
               query={query}
               onQueryChange={this.onQueryChange}
               time={time}
@@ -356,12 +433,24 @@ export const MapsCreateEditView = withRouter(
               initialLayerListConfig={initialLayerListConfig}
               isVisible={isVisible}
               indexPatterns={indexPatterns}
+              updateFiltersAndDispatch={this.updateFiltersAndDispatch}
+              onQuerySaved={(query) => {
+                this.setState({ savedQuery: query });
+                this.appStateManager.setQueryAndFilters({ savedQuery: query });
+                this.updateStateFromSavedQuery(query);
+              }}
+              onSavedQueryUpdated={(query) => {
+                this.setState({ savedQuery: { ...query } });
+                this.appStateManager.setQueryAndFilters({ savedQuery: query });
+                this.updateStateFromSavedQuery(query);
+              }}
+              isSaveDisabled={isSaveDisabled}
             />
           ) : null}
           <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
           <div id="react-maps-root">
-            <Provider store={store}>
-              <GisMap addFilters={null} />
+            <Provider store={this.store}>
+              <GisMap addFilters={this.addFilters} />
             </Provider>
           </div>
         </div>
