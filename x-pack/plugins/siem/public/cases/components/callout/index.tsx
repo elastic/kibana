@@ -66,7 +66,7 @@ const CaseCallOutComponent = ({ title, message, messages }: CaseCallOutProps) =>
             )}
             <EuiButton
               data-test-subj={`callout-dismiss-${key}`}
-              color="primary"
+              color={key === 'success' ? 'secondary' : key}
               onClick={handleCallOut}
             >
               {i18n.DISMISS_CALLOUT}
