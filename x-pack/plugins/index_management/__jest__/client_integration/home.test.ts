@@ -20,8 +20,6 @@ const removeWhiteSpaceOnArrayValues = (array: any[]) =>
     return value.trim();
   });
 
-jest.mock('ui/new_platform');
-
 describe('<IndexManagementHome />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: IdxMgmtHomeTestBed;

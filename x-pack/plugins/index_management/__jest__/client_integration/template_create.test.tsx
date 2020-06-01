@@ -19,8 +19,6 @@ import {
 
 const { setup } = pageHelpers.templateCreate;
 
-jest.mock('ui/new_platform');
-
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
