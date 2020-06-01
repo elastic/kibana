@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-<<<<<<< HEAD
-import { ISearchOptions } from '../../../../../src/plugins/data/public';
-=======
 import {
   IKibanaSearchResponse,
   ISearchOptions,
@@ -19,7 +16,6 @@ export interface IAsyncSearchRequest extends ISyncSearchRequest {
    */
   id?: string;
 }
->>>>>>> 96e0e911ea3a63e1d174d2f1583da59e609b3088
 
 export interface IAsyncSearchOptions extends ISearchOptions {
   /**
