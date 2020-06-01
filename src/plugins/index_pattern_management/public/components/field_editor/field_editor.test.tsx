@@ -74,7 +74,7 @@ jest.mock('./components/field_format_editor', () => ({
 const fields: IndexPatternField[] = [
   {
     name: 'foobar',
-  } as IndexPatternField,
+  } as IndexPatternField, // todo should be spec instead
 ];
 
 // @ts-ignore
@@ -151,7 +151,7 @@ describe('FieldEditor', () => {
       FieldEditor,
       {
         indexPattern,
-        field: (testField as unknown) as IndexPatternField,
+        spec: (testField as unknown) as IndexPatternField,
         services: { redirectAway: () => {} },
       },
       mockContext
@@ -181,7 +181,7 @@ describe('FieldEditor', () => {
       FieldEditor,
       {
         indexPattern,
-        field: (testField as unknown) as IndexPatternField,
+        spec: (testField as unknown) as IndexPatternField,
         services: { redirectAway: () => {} },
       },
       mockContext
@@ -198,7 +198,7 @@ describe('FieldEditor', () => {
       FieldEditor,
       {
         indexPattern,
-        field: (testField as unknown) as IndexPatternField,
+        spec: (testField as unknown) as IndexPatternField,
         services: { redirectAway: () => {} },
       },
       mockContext
@@ -223,7 +223,7 @@ describe('FieldEditor', () => {
       FieldEditor,
       {
         indexPattern,
-        field: (testField as unknown) as IndexPatternField,
+        spec: (testField as unknown) as IndexPatternField,
         services: { redirectAway: () => {} },
       },
       mockContext
