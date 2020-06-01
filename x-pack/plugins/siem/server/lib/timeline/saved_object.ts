@@ -7,7 +7,7 @@
 import { getOr } from 'lodash/fp';
 
 import { SavedObjectsFindOptions } from '../../../../../../src/core/server';
-import { UNAUTHENTICATED_USER } from '../../../common/constants';
+import { UNAUTHENTICATED_USER, disableTemplate } from '../../../common/constants';
 import { NoteSavedObject } from '../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../common/types/timeline/pinned_event';
 import {
@@ -122,7 +122,6 @@ const getTimelineTypeFilter = (
   const draftFilter = includeDraft
     ? `siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`
     : `not siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`;
-
   return `${typeFilter} and ${draftFilter}`;
 };
 
@@ -147,7 +146,7 @@ export const getAllTimeline = async (
      * Remove the comment here to enable template timeline and apply the change below
      * filter: getTimelineTypeFilter(timelineType, false)
      */
-    filter: getTimelineTypeFilter(TimelineType.default, false),
+    filter: getTimelineTypeFilter(disableTemplate ? TimelineType.default : timelineType, false),
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
   };

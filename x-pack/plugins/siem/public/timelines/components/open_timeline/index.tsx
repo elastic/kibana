@@ -42,6 +42,7 @@ import {
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { useTimelineTypes } from './use_timeline_types';
+import { disableTemplate } from '../../../../common/constants';
 
 interface OwnProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
@@ -51,12 +52,6 @@ interface OwnProps<TCache = object> {
   hideActions?: ActionTimelineToShow[];
   onOpenTimeline?: (timeline: TimelineModel) => void;
 }
-
-/**
- * CreateTemplateTimelineBtn
- * Remove the comment here to enable template timeline
- */
-export const disableTemplate = true;
 
 export type OpenTimelineOwnProps = OwnProps &
   Pick<

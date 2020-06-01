@@ -52,6 +52,7 @@ export const updateTimelinesRoute = (
           templateTimelineId != null
             ? await getTemplateTimeline(frameworkRequest, templateTimelineId)
             : null;
+
         const errorObj = checkIsFailureCases(
           isHandlingTemplateTimeline,
           version,
