@@ -8,19 +8,10 @@ import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { TypeAndTimelineOnly, typeAndTimelineOnlySchema } from './type_timeline_only_schema';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
-import { exactCheck } from '../../../../../../common/exact_check';
-import { foldLeftRight, getPaths } from '../../../../../../common/test_utils';
+import { exactCheck } from '../../../exact_check';
+import { foldLeftRight, getPaths } from '../../../test_utils';
 
 describe('prepackaged_rule_schema', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   test('it should validate a a type and timeline_id together', () => {
     const payload: TypeAndTimelineOnly = {
       type: 'query',

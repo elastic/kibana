@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 
 /* eslint-disable @typescript-eslint/camelcase */
-import { timeline_id, type } from './schemas';
+import { timeline_id, type } from '../common/schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
 /**
