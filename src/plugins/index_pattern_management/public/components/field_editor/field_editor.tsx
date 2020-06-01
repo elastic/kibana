@@ -536,12 +536,17 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           value={spec.count}
           data-test-subj="editorFieldCount"
           onChange={(e) => {
-            this.onFieldChange('count', e.target.value ? Number(e.target.value) : '');
+            this.onPopularityChange(e.target.value ? Number(e.target.value) : 0);
           }}
         />
       </EuiFormRow>
     );
   }
+
+  onPopularityChange = (value: number) => {
+    this.state.spec.count = value;
+    this.forceUpdate();
+  };
 
   onScriptChange = (value: string) => {
     this.setState({
