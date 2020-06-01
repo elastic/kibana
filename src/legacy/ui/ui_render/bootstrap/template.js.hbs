@@ -78,14 +78,14 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       {{/each}}
     ], function () {
       load([
-        {{#if finalBundlePath}}
-          '{{finalBundlePath}}',
+        {{#if legacyBundlePath}}
+          '{{legacyBundlePath}}',
         {{/if}}
         {{#each styleSheetPaths}}
           '{{this}}',
         {{/each}}
       ], function () {
-        {{#unless finalBundlePath}}
+        {{#unless legacyBundlePath}}
           if (!__kbnBundles__ || !__kbnBundles__['entry/core'] || typeof __kbnBundles__['entry/core'].__kbnBootstrap__ !== 'function') {
             console.error('entry/core bundle did not load correctly');
             failure();
