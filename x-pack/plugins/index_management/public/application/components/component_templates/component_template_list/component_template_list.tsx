@@ -42,7 +42,7 @@ export const ComponentTemplateList: React.FunctionComponent<RouteComponentProps<
     return history.push(`${appBasePath}component_templates`);
   };
 
-  if (data?.length === 0) {
+  if (data && data.length === 0) {
     return <EmptyPrompt />;
   }
 
