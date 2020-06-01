@@ -151,7 +151,7 @@ export type LegacyAppSpec = Partial<LegacyNavLink> & {
  * @internal
  * @deprecated
  */
-export type LegacyNavLink = Omit<ChromeNavLink, 'baseUrl' | 'legacy' | 'order'> & {
+export type LegacyNavLink = Omit<ChromeNavLink, 'baseUrl' | 'legacy' | 'order' | 'href'> & {
   order: number;
 };
 
