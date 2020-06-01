@@ -25,6 +25,7 @@ import {
   createSpyMiddleware,
 } from '../../../../common/store/test_utils';
 import { urlFromQueryParams } from '../view/url_from_query_params';
+import { getManagementUrl } from '../../..';
 
 describe('host list pagination: ', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
@@ -56,7 +57,7 @@ describe('host list pagination: ', () => {
     queryParams = () => uiQueryParams(store.getState());
 
     historyPush = (nextQueryParams: HostIndexUIQueryParams): void => {
-      return history.push(urlFromQueryParams(nextQueryParams));
+      return history.push(getManagementUrl({ name: 'endpointList', ...nextQueryParams }));
     };
   });
 

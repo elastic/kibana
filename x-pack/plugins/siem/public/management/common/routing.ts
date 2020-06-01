@@ -38,9 +38,15 @@ export type GetManagementUrlProps = {
    */
   excludePrefix?: boolean;
 } & (
-  | { name: 'default' | 'endpointList' | 'policyList' }
+  | ({ name: 'default' | 'endpointList' } & HostIndexUIQueryParams)
+  // Make `selected_host` required
+  | ({ name: 'endpointPolicyResponse' | 'endpointDetails' } & Omit<
+      HostIndexUIQueryParams,
+      'selected_host'
+    > &
+      Required<Extract<HostIndexUIQueryParams, 'selected_host'>>)
+  | { name: 'policyList' }
   | { name: 'policyDetails'; policyId: string }
-  | ({ name: 'endpointDetails' } & HostIndexUIQueryParams)
 );
 
 // Prefix is (almost) everything to the left of where the Router was mounted. In SIEM, since
@@ -54,38 +60,47 @@ const URL_PREFIX = '#';
 export const getManagementUrl = (props: GetManagementUrlProps): string => {
   let url = props.excludePrefix ? '' : URL_PREFIX;
 
-  switch (props.name) {
-    case 'default':
-      url += generatePath(MANAGEMENT_ROUTING_ROOT_PATH, {
-        pageName: SiemPageName.management,
-      });
-      break;
-    case 'endpointList':
+  if (props.name === 'default' || props.name === 'endpointList') {
+    const { name, excludePrefix, ...queryParams } = props;
+    const urlQueryParams = querystringStringify<HostIndexUIQueryParams, typeof queryParams>(
+      queryParams
+    );
+    if (name === 'endpointList') {
       url += generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
         pageName: SiemPageName.management,
         tabName: ManagementSubTab.endpoints,
       });
-      break;
-    case 'endpointDetails':
-      const { name, excludePrefix, ...queryParams } = props;
-      url += `${generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
+    } else {
+      url += generatePath(MANAGEMENT_ROUTING_ROOT_PATH, {
         pageName: SiemPageName.management,
-        tabName: ManagementSubTab.endpoints,
-      })}?${querystringStringify<HostIndexUIQueryParams, typeof queryParams>(queryParams)}`;
-      break;
-    case 'policyList':
-      url += generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
-        pageName: SiemPageName.management,
-        tabName: ManagementSubTab.policies,
       });
-      break;
-    case 'policyDetails':
-      url += generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
-        pageName: SiemPageName.management,
-        tabName: ManagementSubTab.policies,
-        policyId: props.policyId,
-      });
-      break;
+    }
+    if (urlQueryParams) {
+      url += `?${urlQueryParams}`;
+    }
+  } else if ('endpointDetails') {
+    const { name, excludePrefix, ...queryParams } = props;
+    url += `${generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
+      pageName: SiemPageName.management,
+      tabName: ManagementSubTab.endpoints,
+    })}?${querystringStringify<HostIndexUIQueryParams, typeof queryParams>(queryParams)}`;
+  } else if ('endpointPolicyResponse') {
+    const { name, excludePrefix, ...queryParams } = props;
+    url += `${generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
+      pageName: SiemPageName.management,
+      tabName: ManagementSubTab.endpoints,
+    })}?${querystringStringify<HostIndexUIQueryParams, typeof queryParams>(queryParams)}`;
+  } else if ('policyList') {
+    url += generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
+      pageName: SiemPageName.management,
+      tabName: ManagementSubTab.policies,
+    });
+  } else if ('policyDetails') {
+    url += generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
+      pageName: SiemPageName.management,
+      tabName: ManagementSubTab.policies,
+      policyId: props.policyId,
+    });
   }
 
   return url;

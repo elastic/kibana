@@ -22,7 +22,6 @@ import { createStructuredSelector } from 'reselect';
 import { HostDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useHostSelector } from './hooks';
-import { urlFromQueryParams } from './url_from_query_params';
 import { HOST_STATUS_TO_HEALTH_COLOR } from './host_constants';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { CreateStructuredSelector } from '../../../../common/store';
@@ -79,8 +78,11 @@ export const HostList = () => {
   const onTableChange = useCallback(
     ({ page }: { page: { index: number; size: number } }) => {
       const { index, size } = page;
+      // FIXME: PT: if host details is open, table is not displaying correct number of rows
       history.push(
-        urlFromQueryParams({
+        getManagementUrl({
+          name: 'endpointList',
+          excludePrefix: true,
           ...queryParams,
           page_index: JSON.stringify(index),
           page_size: JSON.stringify(size),

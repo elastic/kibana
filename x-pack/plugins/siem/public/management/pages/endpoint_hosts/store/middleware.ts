@@ -39,7 +39,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<Immutable<HostSta
         });
       }
     }
-    if (action.type === 'userChangedUrl' && hasSelectedHost(state) !== false) {
+    if (action.type === 'userChangedUrl' && hasSelectedHost(state) === true) {
       // If user navigated directly to a host details page, load the host list
       if (listData(state).length === 0) {
         const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(state);
