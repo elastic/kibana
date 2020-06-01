@@ -51,7 +51,9 @@ describe('POST /api/reporting/generate', () => {
     ({ server, httpSetup } = await setupServer());
     const mockDeps = ({
       elasticsearch: {
-        adminClient: { callAsInternalUser: jest.fn() },
+        legacy: {
+          client: { callAsInternalUser: jest.fn() },
+        },
       },
       security: {
         authc: {
