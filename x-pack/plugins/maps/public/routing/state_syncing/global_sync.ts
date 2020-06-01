@@ -12,3 +12,21 @@ export function useGlobalStateSyncing(kbnUrlStateStorage: IKbnUrlStateStorage) {
   const { stop } = syncQueryStateWithUrl(getData().query, kbnUrlStateStorage);
   return stop;
 }
+
+export function getGlobalState(kbnUrlStateStorage: IKbnUrlStateStorage) {
+  return kbnUrlStateStorage.get('_g');
+}
+
+export function updateGlobalState(kbnUrlStateStorage: IKbnUrlStateStorage, newState: unknown) {
+  const globalState = getGlobalState(kbnUrlStateStorage);
+  kbnUrlStateStorage.set(
+    '_g',
+    {
+      ...globalState,
+      ...newState,
+    },
+    {
+      replace: true,
+    }
+  );
+}

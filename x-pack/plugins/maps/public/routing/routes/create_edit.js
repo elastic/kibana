@@ -43,7 +43,11 @@ import { getInitialRefreshConfig } from '../../angular/get_initial_refresh_confi
 import { getInitialQuery } from '../../angular/get_initial_query';
 import { getMapsSavedObjectLoader } from '../../angular/services/gis_map_saved_object_loader';
 import { MapsTopNavMenu } from '../page_elements/top_nav_menu';
-import { useGlobalStateSyncing } from '../state_syncing/global_sync';
+import {
+  getGlobalState,
+  updateGlobalState,
+  useGlobalStateSyncing,
+} from '../state_syncing/global_sync';
 
 export const MapsCreateEditView = withRouter(
   class extends React.Component {
@@ -199,20 +203,22 @@ export const MapsCreateEditView = withRouter(
 
     onQueryChange = async ({ filters, query, time, refresh }) => {
       const { filterManager } = getData().query;
+      const { kbnUrlStateStorage } = this.props;
+      const newState = {};
       if (filters) {
         filterManager.setFilters(filters); // Maps and merges filters
-        this.setState({
-          filters: filterManager.getFilters(),
-        });
+        newState.filters = filterManager.getFilters();
       }
       if (query) {
-        this.setState({ query });
+        newState.query = query;
       }
       if (time) {
-        this.setState({ time });
+        newState.time = time;
       }
       // this.syncAppAndGlobalState();
       this.dispatchSetQuery(refresh);
+      updateGlobalState(kbnUrlStateStorage, newState);
+      this.setState(newState);
     };
 
     async _fetchSavedMap(savedObjectId) {
@@ -299,7 +305,8 @@ export const MapsCreateEditView = withRouter(
     }
 
     async initMap(savedMapId) {
-      const { globalState } = this.props;
+      const { kbnUrlStateStorage } = this.props;
+      const globalState = getGlobalState(kbnUrlStateStorage);
       const { store } = this.state;
       const savedMap = await this.initMapAndLayerSettings(savedMapId);
       this.clearUi();
