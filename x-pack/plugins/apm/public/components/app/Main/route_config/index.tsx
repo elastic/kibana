@@ -50,13 +50,6 @@ const renderAsRedirectTo = (to: string) => {
 export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
-    path: '',
-    render: renderAsRedirectTo('/services'),
-    breadcrumb: 'APM',
-    name: RouteName.HOME,
-  },
-  {
-    exact: true,
     path: '/',
     render: renderAsRedirectTo('/services'),
     breadcrumb: 'APM',
