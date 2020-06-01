@@ -166,13 +166,14 @@ export function uiRenderMixin(kbnServer, server, config) {
           ),
           `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
           ...(isCore
-            ? [`${regularBundlePath}/core/core.entry.js`]
+            ? []
             : [
                 `${dllBundlePath}/vendors_runtime.bundle.dll.js`,
                 ...dllJsChunks,
                 `${regularBundlePath}/commons.bundle.js`,
               ]),
 
+          `${regularBundlePath}/core/core.entry.js`,
           ...kpPluginIds.map(
             (pluginId) => `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`
           ),

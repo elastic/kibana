@@ -79,18 +79,20 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
     ], function () {
       load([
         {{#if finalBundlePath}}
-          {{finalBundlePath}},
+          '{{finalBundlePath}}',
         {{/if}}
         {{#each styleSheetPaths}}
           '{{this}}',
         {{/each}}
       ], function () {
-        if (!__kbnBundles__ || !__kbnBundles__['entry/core'] || typeof __kbnBundles__['entry/core'].bootstrap !== 'function') {
-          console.error('entry/core bundle did not load correctly');
-          failure();
-        } else {
-          __kbnBundles__['entry/core'].bootstrap()
-        }
+        {{#unless finalBundlePath}}
+          if (!__kbnBundles__ || !__kbnBundles__['entry/core'] || typeof __kbnBundles__['entry/core'].bootstrap !== 'function') {
+            console.error('entry/core bundle did not load correctly');
+            failure();
+          } else {
+            __kbnBundles__['entry/core'].bootstrap()
+          }
+        {{/unless}}
       });
     });
   }
