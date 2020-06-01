@@ -363,4 +363,4 @@ export {
   NavType,
 };
 
-export { bootstrap } from './bootstrap';
+export { __kbnBootstrap__ } from './kbn_bootstrap';

@@ -28,7 +28,8 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSystem } from './core_system';
 
-export function bootstrap() {
+/** @internal */
+export function __kbnBootstrap__() {
   const injectedMetadata = JSON.parse(
     document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
   );

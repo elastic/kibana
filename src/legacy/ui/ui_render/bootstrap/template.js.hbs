@@ -86,11 +86,11 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
         {{/each}}
       ], function () {
         {{#unless finalBundlePath}}
-          if (!__kbnBundles__ || !__kbnBundles__['entry/core'] || typeof __kbnBundles__['entry/core'].bootstrap !== 'function') {
+          if (!__kbnBundles__ || !__kbnBundles__['entry/core'] || typeof __kbnBundles__['entry/core'].__kbnBootstrap__ !== 'function') {
             console.error('entry/core bundle did not load correctly');
             failure();
           } else {
-            __kbnBundles__['entry/core'].bootstrap()
+            __kbnBundles__['entry/core'].__kbnBootstrap__()
           }
         {{/unless}}
       });
