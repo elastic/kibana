@@ -30,7 +30,7 @@ export class MockRouter {
     this.router = httpServiceMock.createRouter();
   };
 
-  public callRoute = async request => {
+  public callRoute = async (request) => {
     const [_, handler] = this.router[this.method].mock.calls[0];
 
     const context = {} as jest.Mocked<RequestHandlerContext>;
@@ -41,18 +41,18 @@ export class MockRouter {
    * Schema validation helpers
    */
 
-  public validateRoute = request => {
+  public validateRoute = (request) => {
     const [config] = this.router[this.method].mock.calls[0];
     const validate = config.validate as RouteValidatorConfig<{}, {}, {}>;
 
     validate[this.payload].validate(request[this.payload]);
   };
 
-  public shouldValidate = request => {
+  public shouldValidate = (request) => {
     expect(() => this.validateRoute(request)).not.toThrow();
   };
 
-  public shouldThrow = request => {
+  public shouldThrow = (request) => {
     expect(() => this.validateRoute(request)).toThrow();
   };
 }

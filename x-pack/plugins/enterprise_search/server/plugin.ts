@@ -10,7 +10,6 @@ import {
   Plugin,
   PluginInitializerContext,
   CoreSetup,
-  CoreStart,
   Logger,
   SavedObjectsServiceStart,
 } from 'src/core/server';
@@ -52,26 +51,22 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry
      */
-    registerTelemetryRoute({
-      ...dependencies,
-      getSavedObjectsService: () => {
-        if (!this.savedObjectsServiceStart) {
-          throw new Error('Saved Objects Start service not available');
-        }
-        return this.savedObjectsServiceStart;
-      },
-    });
     savedObjects.registerType(appSearchTelemetryType);
-    if (usageCollection) {
-      getStartServices().then(([{ savedObjects: savedObjectsStarted }]) => {
-        registerTelemetryUsageCollector({ usageCollection, savedObjects: savedObjectsStarted });
+
+    getStartServices().then(([coreStart]) => {
+      const savedObjectsStarted = coreStart.savedObjects as SavedObjectsServiceStart;
+
+      registerTelemetryRoute({
+        ...dependencies,
+        getSavedObjectsService: () => savedObjectsStarted,
       });
-    }
+      if (usageCollection) {
+        registerTelemetryUsageCollector(usageCollection, savedObjectsStarted);
+      }
+    });
   }
 
-  public start({ savedObjects }: CoreStart) {
-    this.savedObjectsServiceStart = savedObjects;
-  }
+  public start() {}
 
   public stop() {}
 }
