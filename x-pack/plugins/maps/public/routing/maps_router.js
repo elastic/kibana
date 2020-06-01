@@ -11,6 +11,8 @@ import { getCoreI18n } from '../kibana_services';
 import { MapsListView } from './routes/list';
 import { MapsCreateEditView } from './routes/create_edit';
 import { createKbnUrlStateStorage } from '../../../../../src/plugins/kibana_utils/public';
+import { getStore } from './store_operations';
+import { Provider } from 'react-redux';
 
 export function renderApp(context, { appBasePath, element, history }) {
   render(<App history={history} appBasePath={appBasePath} />, element);
@@ -19,33 +21,36 @@ export function renderApp(context, { appBasePath, element, history }) {
 
 const App = ({ history, appBasePath }) => {
   const kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
+  const store = getStore();
 
   const I18nContext = getCoreI18n().Context;
   return (
     <I18nContext>
-      <Router basename={appBasePath} history={history}>
-        <Switch>
-          <Route
-            path={`/map/:savedMapId`}
-            render={() => <MapsCreateEditView kbnUrlStateStorage={kbnUrlStateStorage} />}
-          />
-          <Route
-            path={`/map`}
-            render={() => <MapsCreateEditView kbnUrlStateStorage={kbnUrlStateStorage} />}
-          />
-          <Route
-            path={``}
-            render={({ location }) => {
-              return location.hash ? (
-                <Redirect to={`${appBasePath}${location.hash.replace('#', '')}`} />
-              ) : (
-                <MapsListView />
-              );
-            }}
-          />
-          <Route component={MapsListView} />
-        </Switch>
-      </Router>
+      <Provider store={store}>
+        <Router basename={appBasePath} history={history}>
+          <Switch>
+            <Route
+              path={`/map/:savedMapId`}
+              render={() => <MapsCreateEditView kbnUrlStateStorage={kbnUrlStateStorage} />}
+            />
+            <Route
+              path={`/map`}
+              render={() => <MapsCreateEditView kbnUrlStateStorage={kbnUrlStateStorage} />}
+            />
+            <Route
+              path={``}
+              render={({ location }) => {
+                return location.hash ? (
+                  <Redirect to={`${appBasePath}${location.hash.replace('#', '')}`} />
+                ) : (
+                  <MapsListView />
+                );
+              }}
+            />
+            <Route component={MapsListView} />
+          </Switch>
+        </Router>
+      </Provider>
     </I18nContext>
   );
 };

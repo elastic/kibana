@@ -15,17 +15,14 @@ import {
   getCoreI18n,
   getData,
   getUiSettings,
-} from '../../kibana_services';
-import { enableFullScreen, openMapSettings } from '../../actions/ui_actions';
-import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
+} from '../../../kibana_services';
+import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 import {
   SavedObjectSaveModal,
   showSaveModal,
-} from '../../../../../../src/plugins/saved_objects/public';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { removePreviewLayers, updateFlyout } from '../../actions';
-import { updateBreadcrumbs } from './breadcrumbs';
-import { FLYOUT_STATE } from '../../reducers/ui';
+} from '../../../../../../../src/plugins/saved_objects/public';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import { updateBreadcrumbs } from '../breadcrumbs';
 
 /**
  * @return {null}
@@ -34,7 +31,6 @@ export function MapsTopNavMenu(props) {
   const { TopNavMenu } = getNavigation().ui;
   const {
     savedMap,
-    store,
     query,
     onQueryChange,
     onQuerySaved,
@@ -43,11 +39,16 @@ export function MapsTopNavMenu(props) {
     time,
     refreshConfig,
     setRefreshConfig,
+    setRefreshStoreConfig,
     initialLayerListConfig,
     isVisible,
     indexPatterns,
     updateFiltersAndDispatch,
     isSaveDisabled,
+    closeFlyout,
+    enableFullScreen,
+    openMapSettings,
+    syncSavedMap,
   } = props;
   const { filterManager } = getData().query;
   const showSaveQuery = getMapsCapabilities().saveQuery;
@@ -71,12 +72,15 @@ export function MapsTopNavMenu(props) {
     <TopNavMenu
       appName="maps"
       config={topNavConfig(
-        store,
         savedMap,
         initialLayerListConfig,
         isOpenSettingsDisabled,
         setIsOpenSettingsDisabled,
-        isSaveDisabled
+        isSaveDisabled,
+        closeFlyout,
+        enableFullScreen,
+        openMapSettings,
+        syncSavedMap
       )}
       indexPatterns={indexPatterns || []}
       filters={filterManager.getFilters()}
@@ -99,7 +103,7 @@ export function MapsTopNavMenu(props) {
             isPaused,
             interval: refreshInterval ? refreshInterval : refreshConfig.interval,
           },
-          () => store.dispatch(setRefreshConfig(refreshConfig))
+          () => setRefreshStoreConfig(refreshConfig)
         );
         // TODO: Global sync state
         // syncAppAndGlobalState();
@@ -122,7 +126,11 @@ function topNavConfig(
   initialLayerListConfig,
   isOpenSettingsDisabled,
   setIsOpenSettingsDisabled,
-  isSaveDisabled
+  isSaveDisabled,
+  closeFlyout,
+  enableFullScreen,
+  openMapSettings,
+  syncSavedMap
 ) {
   return [
     {
@@ -136,7 +144,7 @@ function topNavConfig(
       testId: 'mapsFullScreenMode',
       run() {
         getCoreChrome().setIsVisible(false);
-        store.dispatch(enableFullScreen());
+        enableFullScreen();
       },
     },
     {
@@ -166,7 +174,7 @@ function topNavConfig(
         return isOpenSettingsDisabled;
       },
       run() {
-        store.dispatch(openMapSettings());
+        openMapSettings();
       },
     },
     ...(getMapsCapabilities().save
@@ -205,15 +213,19 @@ function topNavConfig(
                   isTitleDuplicateConfirmed,
                   onTitleDuplicate,
                 };
-                return doSave(store, savedMap, saveOptions, initialLayerListConfig).then(
-                  (response) => {
-                    // If the save wasn't successful, put the original values back.
-                    if (!response.id || response.error) {
-                      savedMap.title = currentTitle;
-                    }
-                    return response;
+                return doSave(
+                  savedMap,
+                  saveOptions,
+                  initialLayerListConfig,
+                  closeFlyout,
+                  syncSavedMap
+                ).then((response) => {
+                  // If the save wasn't successful, put the original values back.
+                  if (!response.id || response.error) {
+                    savedMap.title = currentTitle;
                   }
-                );
+                  return response;
+                });
               };
 
               const saveModal = (
@@ -234,10 +246,9 @@ function topNavConfig(
   ];
 }
 
-async function doSave(store, savedMap, saveOptions, initialLayerListConfig) {
-  await store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
-  await store.dispatch(removePreviewLayers());
-  savedMap.syncWithStore(store.getState());
+async function doSave(savedMap, saveOptions, initialLayerListConfig, closeFlyout, syncSavedMap) {
+  closeFlyout();
+  syncSavedMap(savedMap);
   let id;
 
   try {
@@ -264,7 +275,7 @@ async function doSave(store, savedMap, saveOptions, initialLayerListConfig) {
       'data-test-subj': 'saveMapSuccess',
     });
 
-    updateBreadcrumbs(store, savedMap, initialLayerListConfig);
+    updateBreadcrumbs(savedMap, initialLayerListConfig);
 
     // TODO: handle redirect if id doesn't match
     // if (savedMap.id !== $route.current.params.id) {

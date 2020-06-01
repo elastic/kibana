@@ -10,13 +10,14 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import _ from 'lodash';
 import { getLayerListRaw } from '../../selectors/map_selectors';
 import { copyPersistentState } from '../../reducers/util';
+import { getStore } from '../store_operations';
 
 function isOnMapNow() {
   return window.location.hash.startsWith(`#/${MAP_SAVED_OBJECT_TYPE}`);
 }
 
-function hasUnsavedChanges(store, savedMap, initialLayerListConfig) {
-  const state = store.getState();
+function hasUnsavedChanges(savedMap, initialLayerListConfig) {
+  const state = getStore.getState();
   const layerList = getLayerListRaw(state);
   const layerListConfigOnly = copyPersistentState(layerList);
 
@@ -32,14 +33,14 @@ function hasUnsavedChanges(store, savedMap, initialLayerListConfig) {
       !_.isEqual(JSON.parse(JSON.stringify(layerListConfigOnly)), savedLayerList);
 }
 
-export const updateBreadcrumbs = (store, savedMap, initialLayerListConfig) => {
+export const updateBreadcrumbs = (savedMap, initialLayerListConfig) => {
   getCoreChrome().setBreadcrumbs([
     {
       text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
         defaultMessage: 'Maps',
       }),
       onClick: () => {
-        if (isOnMapNow() && hasUnsavedChanges(store, savedMap, initialLayerListConfig)) {
+        if (isOnMapNow() && hasUnsavedChanges(savedMap, initialLayerListConfig)) {
           const navigateAway = window.confirm(
             i18n.translate('xpack.maps.mapController.unsavedChangesWarning', {
               defaultMessage: `Your unsaved changes might not be saved`,
