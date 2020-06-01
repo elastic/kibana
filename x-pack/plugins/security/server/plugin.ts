@@ -100,14 +100,6 @@ export class Plugin {
     return this.featureUsageServiceStart!;
   };
 
-  private legacyAPI?: LegacyAPI;
-  private readonly getLegacyAPI = () => {
-    if (!this.legacyAPI) {
-      throw new Error('Legacy API is not registered!');
-    }
-    return this.legacyAPI;
-  };
-
   private readonly auditService = new AuditService(this.initializerContext.logger.get('audit'));
 
   private readonly getSpacesService = () => {
