@@ -190,7 +190,7 @@ export const PolicyList = React.memo(() => {
                   >
                     <FormattedMessage
                       id="xpack.siem.endpoint.policyList.agentConfigAction"
-                      defaultMessage="View Agent config"
+                      defaultMessage="View Agent Config"
                     />
                   </LinkToApp>
                 </EuiContextMenuItem>
@@ -227,6 +227,7 @@ export const PolicyList = React.memo(() => {
         pagination={paginationSetup}
         onChange={handleTableChange}
         data-test-subj="policyTable"
+        hasActions={false}
       />
       <SpyRoute />
     </ManagementPageView>
