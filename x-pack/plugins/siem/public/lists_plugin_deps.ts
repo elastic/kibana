@@ -8,8 +8,6 @@ export {
   useExceptionList,
   usePersistExceptionItem,
   usePersistExceptionList,
-  mockExceptionItem,
-  mockExceptionList,
   mockNewExceptionItem,
   mockNewExceptionList,
 } from '../../lists/public';

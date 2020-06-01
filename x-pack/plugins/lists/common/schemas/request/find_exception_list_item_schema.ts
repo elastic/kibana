@@ -8,8 +8,16 @@
 
 import * as t from 'io-ts';
 
-import { filter, list_id, page, per_page, sort_field, sort_order } from '../common/schemas';
+import {
+  NamespaceType,
+  filter,
+  list_id,
+  namespace_type,
+  sort_field,
+  sort_order,
+} from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
+import { StringToPositiveNumber } from '../types/string_to_positive_number';
 
 export const findExceptionListItemSchema = t.intersection([
   t.exact(
@@ -20,8 +28,9 @@ export const findExceptionListItemSchema = t.intersection([
   t.exact(
     t.partial({
       filter, // defaults to undefined if not set during decode
-      page, // defaults to undefined if not set during decode
-      per_page, // defaults to undefined if not set during decode
+      namespace_type, // defaults to 'single' if not set during decode
+      page: StringToPositiveNumber, // defaults to undefined if not set during decode
+      per_page: StringToPositiveNumber, // defaults to undefined if not set during decode
       sort_field, // defaults to undefined if not set during decode
       sort_order, // defaults to undefined if not set during decode
     })
@@ -29,6 +38,19 @@ export const findExceptionListItemSchema = t.intersection([
 ]);
 
 export type FindExceptionListItemSchemaPartial = t.TypeOf<typeof findExceptionListItemSchema>;
+
+// This type is used after a decode since some things are defaults after a decode.
+export type FindExceptionListItemSchemaPartialDecoded = Omit<
+  FindExceptionListItemSchemaPartial,
+  'namespace_type'
+> & {
+  namespace_type: NamespaceType;
+};
+
+// This type is used after a decode since some things are defaults after a decode.
+export type FindExceptionListItemSchemaDecoded = RequiredKeepUndefined<
+  FindExceptionListItemSchemaPartialDecoded
+>;
 
 export type FindExceptionListItemSchema = RequiredKeepUndefined<
   t.TypeOf<typeof findExceptionListItemSchema>
