@@ -80,6 +80,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
 
   syncCircleRadiusWithMb(mbLayerId, mbMap) {
     const circleRadius = this.getMbSizeExpression();
+    console.log('cr', circleRadius);
     mbMap.setPaintProperty(mbLayerId, 'circle-radius', circleRadius);
   }
 

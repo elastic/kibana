@@ -400,6 +400,38 @@ export function getBoundingBoxGeometry(geometry) {
   return formatEnvelopeAsPolygon(extent);
 }
 
+export function makeESBbox({ maxLat, maxLon, minLat, minLon }) {
+  const bottom = clamp(minLat, -90, 90);
+  const top = clamp(maxLat, -90, 90);
+  let esBbox;
+  if (maxLon - minLon >= 360) {
+    esBbox = {
+      top_left: [-180, top],
+      bottom_right: [180, bottom],
+    };
+  } else {
+    //This ensures bbox goes West->East in the happy case
+    //but will be formatted East->West in case it crosses the date-line
+    const newMinlon = ((minLon + 180 + 360) % 360) - 180;
+    const newMaxlon = ((maxLon + 180 + 360) % 360) - 180;
+    esBbox = {
+      top_left: [newMinlon, top],
+      bottom_right: [newMaxlon, bottom],
+    };
+  }
+
+  return esBbox;
+}
+
+export function makeGeoGridTileDsl(field, bounds, precision) {
+  const esBbox = makeESBbox(bounds);
+  return {
+    bounds: esBbox,
+    field,
+    precision,
+  };
+}
+
 export function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
   // GeoJSON mandates that the outer polygon must be counterclockwise to avoid ambiguous polygons
   // when the shape crosses the dateline

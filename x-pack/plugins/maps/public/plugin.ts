@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 // @ts-ignore
 import { MapView } from './inspector/views/map_view';
@@ -21,30 +21,30 @@ import {
   setIndexPatternSelect,
   setIndexPatternService,
   setInspector,
+  setIsGoldPlus,
+  setKibanaCommonConfig,
+  setKibanaVersion,
   setLicenseId,
+  setMapAppConfig,
   setMapsCapabilities,
   setNavigation,
   setSavedObjectsClient,
+  setSearchService,
   setTimeFilter,
   setToasts,
   setUiActions,
   setUiSettings,
   setVisualizations,
-  setSearchService,
-  setMapAppConfig,
-  setKibanaCommonConfig,
-  setKibanaVersion,
-  setIsGoldPlus,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
-import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
-import { MapsXPackConfig, MapsConfigType } from '../config';
+import { MapsConfigType, MapsXPackConfig } from '../config';
 import { ILicense } from '../../licensing/common/types';
 
 export interface MapsPluginSetupDependencies {
@@ -79,15 +79,12 @@ export const bindSetupCoreAndPlugins = (
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   const { fileUpload, data, inspector, licensing } = plugins;
-
-  console.log('licensing', licensing);
-
-  licensing.license$.subscribe((license: ILicense) => {
-    console.log('l', license);
-    const gold = license.check('maps', 'gold');
-    console.log('g', gold);
-    setIsGoldPlus(gold.state === 'valid');
-  });
+  if (licensing) {
+    licensing.license$.subscribe((license: ILicense) => {
+      const gold = license.check(APP_ID, 'gold');
+      setIsGoldPlus(gold.state === 'valid');
+    });
+  }
 
   setInspector(inspector);
   setFileUpload(fileUpload);
