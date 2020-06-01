@@ -52,7 +52,7 @@ export async function createQueueFactory<JobParamsType, JobPayloadType>(
     interval: queueIndexInterval,
     timeout: queueTimeout,
     dateSeparator: '.',
-    client: elasticsearch.dataClient,
+    client: elasticsearch.legacy.client,
     logger: createTaggedLogger(logger, ['esqueue', 'queue-worker']),
   };
 
