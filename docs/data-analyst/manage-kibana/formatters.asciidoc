@@ -1,0 +1,9 @@
+[[formatters]]
+= Formatters
+
+[partintro]
+--
+
+Value prop.
+
+include::string-formatter.asciidoc[]

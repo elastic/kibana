@@ -74,12 +74,12 @@ GENERATE REPORTS//
 include::reporting/index.asciidoc[]
 include::reporting/automating-report-generation.asciidoc[]
 include::reporting/configuring-reporting.asciidoc[]
-include::chromium-sandbox.asciidoc[]
-include::reporting-troubleshooting.asciidoc[]
-include::development/index.asciidoc[]
-
+include::reporting/chromium-sandbox.asciidoc[]
+include::reporting/reporting-troubleshooting.asciidoc[]
 
 MANAGE KIBANA//
-include::
+include::{kib-repo-dir}/management/advanced-options.asciidoc[]
+include::{kib-repo-dir}/management/managing-saved-objects.asciidoc[]
+
 
 include::redirects.asciidoc[]
