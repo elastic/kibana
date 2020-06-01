@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 
 import { rulesSchema } from './rules_schema';
-import { page, perPage, total } from './schemas';
+import { page, perPage, total } from '../common/schemas';
 
 export const findRulesSchema = t.exact(
   t.type({

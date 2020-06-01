@@ -7,7 +7,7 @@
 import { ReferencesDefaultArray } from './references_default_array';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { getPaths, foldLeftRight } from '../../../../../../common/test_utils';
+import { foldLeftRight, getPaths } from '../../../test_utils';
 
 describe('references_default_array', () => {
   test('it should validate an empty array', () => {
