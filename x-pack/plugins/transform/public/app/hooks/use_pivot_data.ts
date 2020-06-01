@@ -35,6 +35,7 @@ import {
 
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
+import { isPivotAggsWithExtendedForm } from '../common/pivot_aggs';
 
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
   return (a: string, b: string) => {
@@ -132,6 +133,14 @@ export const usePivotData = (
           defaultMessage: 'Please choose at least one group-by field and aggregation.',
         })
       );
+      return;
+    }
+
+    const isConfigInvalid = aggsArr.some(
+      (agg) => isPivotAggsWithExtendedForm(agg) && !agg.isValid()
+    );
+
+    if (isConfigInvalid) {
       return;
     }
 
