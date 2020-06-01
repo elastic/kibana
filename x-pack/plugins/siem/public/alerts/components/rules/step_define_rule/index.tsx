@@ -203,7 +203,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 config={{
                   ...schema.queryBar,
                   labelAppend: (
-                    <MyLabelButton onClick={handleOpenTimelineSearch}>
+                    <MyLabelButton
+                      data-test-subj="importQueryFromSavedTimeline"
+                      onClick={handleOpenTimelineSearch}
+                    >
                       {i18n.IMPORT_TIMELINE_QUERY}
                     </MyLabelButton>
                   ),

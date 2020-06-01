@@ -105,10 +105,11 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
 
             if (app === 'uptime' || app === 'metrics' || app === 'logs') {
               event.preventDefault();
+              const search = parsed.search || '';
+
+              const path = `${rest.join('/')}${search}`;
               core.application.navigateToApp(app, {
-                path: `${rest.join('/')}${
-                  parsed.search ? `&${parsed.search}` : ''
-                }`,
+                path,
               });
             }
           },
