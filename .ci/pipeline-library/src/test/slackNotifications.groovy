@@ -18,7 +18,7 @@ class SlackNotificationsTest extends KibanaBasePipelineTest {
     def failureMessage = slackNotifications.getTestFailures()
 
     assertEquals(
-      "*Test Failures*\n• <${Mocks.TEST_FAILURE_URL}|${Mocks.TEST_FAILURE_NAME_SHORT}>",
+      "*Test Failures*\n• <${Mocks.TEST_FAILURE_URL}|x-pack/test/functional/apps/fake/test·ts.Fake test &lt;Component&gt; should &amp; pass &amp;>",
       failureMessage
     )
   }
@@ -54,7 +54,7 @@ class SlackNotificationsTest extends KibanaBasePipelineTest {
     )
 
     assertEquals(
-      "*Test Failures*\n• <https://localhost/|x-pack/test/functional/apps/fake/test·ts.Fake test &lt;Component&gt; should pass &amp;>",
+      "*Test Failures*\n• <https://localhost/|x-pack/test/functional/apps/fake/test·ts.Fake test &lt;Component&gt; should &amp; pass &amp;>",
       args.blocks[2].text.text.toString()
     )
   }

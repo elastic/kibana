@@ -7,8 +7,7 @@ class KibanaBasePipelineTest extends BasePipelineTest {
 
   public def Mocks = [
     TEST_FAILURE_URL: "https://localhost/",
-    TEST_FAILURE_NAME_SHORT: "x-pack/test/functional/apps/fake/test·ts.Fake test <Component> should pass &",
-    TEST_FAILURE_NAME: "Kibana Pipeline / kibana-xpack-agent / Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/fake/test·ts.Fake test <Component> should pass &",
+    TEST_FAILURE_NAME: "Kibana Pipeline / kibana-xpack-agent / Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/fake/test·ts.Fake test <Component> should & pass &",
   ]
 
   @Before
