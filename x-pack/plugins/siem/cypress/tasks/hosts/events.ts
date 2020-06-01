@@ -7,7 +7,6 @@
 import { drag, drop } from '../common';
 import {
   CLOSE_MODAL,
-  DRAGGABLE_HEADER,
   EVENTS_VIEWER_FIELDS_BUTTON,
   FIELDS_BROWSER_CONTAINER,
   HOST_GEO_CITY_NAME_CHECKBOX,
@@ -17,6 +16,7 @@ import {
   RESET_FIELDS,
   SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/hosts/events';
+import { DRAGGABLE_HEADER } from '../../screens/timeline';
 
 export const addsHostGeoCityNameToHeader = () => {
   cy.get(HOST_GEO_CITY_NAME_CHECKBOX).check({

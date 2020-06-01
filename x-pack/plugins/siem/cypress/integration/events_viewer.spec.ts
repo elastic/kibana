@@ -11,13 +11,13 @@ import {
 } from '../screens/fields_browser';
 import {
   HEADER_SUBTITLE,
-  HEADERS_GROUP,
   HOST_GEO_CITY_NAME_HEADER,
   HOST_GEO_COUNTRY_NAME_HEADER,
   INSPECT_MODAL,
   LOAD_MORE,
   LOCAL_EVENTS_COUNT,
 } from '../screens/hosts/events';
+import { HEADERS_GROUP } from '../screens/timeline';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from '../tasks/fields_browser';
 import { loginAndWaitForPage } from '../tasks/login';
@@ -153,7 +153,7 @@ describe('Events Viewer', () => {
     });
   });
 
-  context('Events columns', () => {
+  context.skip('Events columns', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_PAGE);
       openEvents();

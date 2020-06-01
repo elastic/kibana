@@ -6,9 +6,6 @@
 
 export const CLOSE_MODAL = '[data-test-subj="modal-inspect-close"]';
 
-export const DRAGGABLE_HEADER =
-  '[data-test-subj="headers-group"] [data-test-subj="draggable-header"]';
-
 export const EVENTS_VIEWER_FIELDS_BUTTON =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="show-field-browser-gear"]';
 
@@ -18,8 +15,6 @@ export const FIELDS_BROWSER_CONTAINER = '[data-test-subj="fields-browser-contain
 
 export const HEADER_SUBTITLE =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="header-panel-subtitle"]';
-
-export const HEADERS_GROUP = '[data-test-subj="headers-group"]';
 
 export const HOST_GEO_CITY_NAME_CHECKBOX = '[data-test-subj="field-host.geo.city_name-checkbox"]';
 
