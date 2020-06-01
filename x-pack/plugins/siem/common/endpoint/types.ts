@@ -41,14 +41,30 @@ type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
+export interface EventStats {
+  /**
+   * The total number of related events (all events except process and alerts) that exist for a node.
+   */
+  total: number;
+  /**
+   * A mapping of ECS event.category to the number of related events are marked with that category
+   * For example:
+   *  {
+   *    network: 5,
+   *    file: 2
+   *  }
+   */
+  categories: Record<string, number>;
+}
+
 /**
  * Statistical information for a node in a resolver tree.
  */
 export interface ResolverNodeStats {
   /**
-   * The total number of related events (all events except process and alerts) that exist for a node.
+   * The stats for related events (excludes alerts and process events) for a particular node in the resolver tree.
    */
-  totalEvents: number;
+  events: EventStats;
   /**
    * The total number of alerts that exist for a node.
    */

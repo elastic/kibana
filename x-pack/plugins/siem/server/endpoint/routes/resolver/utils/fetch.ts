@@ -173,10 +173,13 @@ export class Fetcher {
     const statsQuery = new StatsQuery(this.indexPattern, this.endpointID);
     const ids = tree.ids();
     const res = await statsQuery.search(this.client, ids);
-    const alerts = res?.alerts || {};
-    const events = res?.events || {};
+    const alerts = res.alerts;
+    const events = res.events;
     ids.forEach((id) => {
-      tree.addStats(id, { totalAlerts: alerts[id] || 0, totalEvents: events[id] || 0 });
+      tree.addStats(id, {
+        totalAlerts: alerts[id] || 0,
+        events: events[id] || { total: 0, categories: {} },
+      });
     });
   }
 }

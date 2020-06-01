@@ -7,7 +7,7 @@ import * as yargs from 'yargs';
 import seedrandom from 'seedrandom';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { EndpointDocGenerator, Event } from '../../common/endpoint/generate_data';
+import { EndpointDocGenerator, Event, EventCategory } from '../../common/endpoint/generate_data';
 import { default as eventMapping } from './event_mapping.json';
 import { default as alertMapping } from './alert_mapping.json';
 import { default as policyMapping } from './policy_mapping.json';
@@ -246,7 +246,7 @@ async function main() {
         argv.ancestors,
         argv.generations,
         argv.children,
-        argv.relatedEvents,
+        [{ category: EventCategory.Random, count: argv.relatedEvents }],
         argv.percentWithRelated,
         argv.percentTerminated,
         argv.maxChildrenPerNode

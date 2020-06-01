@@ -24,7 +24,7 @@ interface EventOptions {
   entityID?: string;
   parentEntityID?: string;
   eventType?: string;
-  eventCategory?: string;
+  eventCategory?: string | string[];
   processName?: string;
 }
 
@@ -75,21 +75,53 @@ const POLICIES: Array<{ name: string; id: string }> = [
 const FILE_OPERATIONS: string[] = ['creation', 'open', 'rename', 'execution', 'deletion'];
 
 interface EventInfo {
-  category: string;
+  category: string | string[];
   /**
    * This denotes the `event.type` field for when an event is created, this can be `start` or `creation`
    */
   creationType: string;
 }
 
+export enum ECSCategory {
+  Driver = 'driver',
+  File = 'file',
+  Network = 'network',
+  Registry = 'registry',
+  Authentication = 'authentication',
+  Session = 'session',
+}
+
+/**
+ * Endpoint event categories
+ */
+export enum EventCategory {
+  /**
+   * The Random category allows the related event categories to be chosen randomly
+   */
+  Random = 'random',
+  Driver = 'driver',
+  File = 'file',
+  Network = 'network',
+  Registry = 'registry',
+  Security = 'security',
+}
+
+export interface RelatedEventInfo {
+  category: EventCategory;
+  count: number;
+}
+
 // These are from the v1 schemas and aren't all valid ECS event categories, still in flux
-const OTHER_EVENT_CATEGORIES: EventInfo[] = [
-  { category: 'driver', creationType: 'start' },
-  { category: 'file', creationType: 'creation' },
-  { category: 'library', creationType: 'start' },
-  { category: 'network', creationType: 'start' },
-  { category: 'registry', creationType: 'creation' },
-];
+const OTHER_EVENT_CATEGORIES: Record<Exclude<EventCategory, EventCategory.Random>, EventInfo> = {
+  [EventCategory.Security]: {
+    category: [ECSCategory.Authentication, ECSCategory.Session],
+    creationType: 'start',
+  },
+  [EventCategory.Driver]: { category: ECSCategory.Driver, creationType: 'start' },
+  [EventCategory.File]: { category: ECSCategory.File, creationType: 'creation' },
+  [EventCategory.Network]: { category: ECSCategory.Network, creationType: 'start' },
+  [EventCategory.Registry]: { category: ECSCategory.Registry, creationType: 'creation' },
+};
 
 interface HostInfo {
   elastic: {
@@ -164,7 +196,7 @@ export interface TreeOptions {
   ancestors?: number;
   generations?: number;
   children?: number;
-  relatedEvents?: number;
+  relatedEvents?: RelatedEventInfo[];
   percentWithRelated?: number;
   percentTerminated?: number;
   alwaysGenMaxChildrenPerNode?: boolean;
@@ -452,7 +484,7 @@ export class EndpointDocGenerator {
    * @param alertAncestors - number of ancestor generations to create relative to the alert
    * @param childGenerations - number of child generations to create relative to the alert
    * @param maxChildrenPerNode - maximum number of children for any given node in the tree
-   * @param relatedEventsPerNode - number of related events (file, registry, etc) to create for each process event in the tree
+   * @param relatedEventsPerNode - Array of RelatedEventInfo objects describing the related events that should be generated for each process node
    * @param percentNodesWithRelated - percent of nodes which should have related events
    * @param percentTerminated - percent of nodes which will have process termination events
    * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
@@ -461,7 +493,7 @@ export class EndpointDocGenerator {
     alertAncestors?: number,
     childGenerations?: number,
     maxChildrenPerNode?: number,
-    relatedEventsPerNode?: number,
+    relatedEventsPerNode?: RelatedEventInfo[],
     percentNodesWithRelated?: number,
     percentTerminated?: number,
     alwaysGenMaxChildrenPerNode?: boolean
@@ -490,13 +522,13 @@ export class EndpointDocGenerator {
   /**
    * Creates an alert event and associated process ancestry. The alert event will always be the last event in the return array.
    * @param alertAncestors - number of ancestor generations to create
-   * @param relatedEventsPerNode - number of related events to add to each process node being created
+   * @param relatedEventsPerNode - Array of RelatedEventInfo objects describing the related events that should be generated for each process node
    * @param pctWithRelated - percent of ancestors that will have related events
    * @param pctWithTerminated - percent of ancestors that will have termination events
    */
   public createAlertEventAncestry(
     alertAncestors = 3,
-    relatedEventsPerNode = 5,
+    relatedEventsPerNode: RelatedEventInfo[] = [{ category: EventCategory.Random, count: 5 }],
     pctWithRelated = 30,
     pctWithTerminated = 100
   ): Event[] {
@@ -576,7 +608,7 @@ export class EndpointDocGenerator {
    * @param root - The process event to use as the root node of the tree
    * @param generations - number of child generations to create. The root node is not counted as a generation.
    * @param maxChildrenPerNode - maximum number of children for any given node in the tree
-   * @param relatedEventsPerNode - number of related events (file, registry, etc) to create for each process event in the tree
+   * @param relatedEventsPerNode - Array of RelatedEventInfo objects describing the related events that should be generated for each process node
    * @param percentNodesWithRelated - percent of nodes which should have related events
    * @param percentChildrenTerminated - percent of nodes which will have process termination events
    * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
@@ -585,7 +617,7 @@ export class EndpointDocGenerator {
     root: Event,
     generations = 2,
     maxChildrenPerNode = 2,
-    relatedEventsPerNode = 3,
+    relatedEventsPerNode: RelatedEventInfo[] = [{ category: EventCategory.Random, count: 3 }],
     percentNodesWithRelated = 100,
     percentChildrenTerminated = 100,
     alwaysGenMaxChildrenPerNode = false
@@ -651,25 +683,33 @@ export class EndpointDocGenerator {
   /**
    * Creates related events for a process event
    * @param node - process event to relate events to by entityID
-   * @param numRelatedEvents - number of related events to generate
+   * @param relatedEvents - the categories of related events to generate with a specified count for each category
    * @param processDuration - maximum number of seconds after process event that related event timestamp can be
    */
   public *relatedEventsGenerator(
     node: Event,
-    numRelatedEvents = 10,
+    relatedEvents: RelatedEventInfo[] = [{ category: EventCategory.Random, count: 10 }],
     processDuration: number = 6 * 3600
   ) {
-    for (let i = 0; i < numRelatedEvents; i++) {
-      const eventInfo = this.randomChoice(OTHER_EVENT_CATEGORIES);
+    for (const event of relatedEvents) {
+      let eventInfo: EventInfo;
 
-      const ts = node['@timestamp'] + this.randomN(processDuration) * 1000;
-      yield this.generateEvent({
-        timestamp: ts,
-        entityID: node.process.entity_id,
-        parentEntityID: node.process.parent?.entity_id,
-        eventCategory: eventInfo.category,
-        eventType: eventInfo.creationType,
-      });
+      for (let i = 0; i < event.count; i++) {
+        if (event.category === EventCategory.Random) {
+          eventInfo = this.randomChoice(Object.values(OTHER_EVENT_CATEGORIES));
+        } else {
+          eventInfo = OTHER_EVENT_CATEGORIES[event.category];
+        }
+
+        const ts = node['@timestamp'] + this.randomN(processDuration) * 1000;
+        yield this.generateEvent({
+          timestamp: ts,
+          entityID: node.process.entity_id,
+          parentEntityID: node.process.parent?.entity_id,
+          eventCategory: eventInfo.category,
+          eventType: eventInfo.creationType,
+        });
+      }
     }
   }
 
