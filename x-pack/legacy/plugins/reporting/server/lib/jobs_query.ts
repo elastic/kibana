@@ -47,7 +47,7 @@ export function jobsQueryFactory(
   elasticsearch: ElasticsearchServiceSetup
 ) {
   const index = config.get('index');
-  const { callAsInternalUser } = elasticsearch.adminClient;
+  const { callAsInternalUser } = elasticsearch.legacy.client;
 
   function execQuery(queryType: string, body: QueryBody) {
     const defaultBody: Record<string, object> = {
