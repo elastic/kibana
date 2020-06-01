@@ -13,7 +13,7 @@ import {
   SavedObjectReference,
   SavedObject,
 } from 'src/core/server';
-import { PreConfiguredAction } from '../../actions/server';
+import { ActionsClient } from '../../actions/server';
 import {
   Alert,
   PartialAlert,
@@ -24,7 +24,6 @@ import {
   IntervalSchedule,
   SanitizedAlert,
   AlertTaskState,
-  RawAlertAction,
 } from './types';
 import { validateAlertTypeParams } from './lib';
 import {
@@ -56,7 +55,7 @@ interface ConstructorOptions {
   getUserName: () => Promise<string | null>;
   createAPIKey: () => Promise<CreateAPIKeyResult>;
   invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>;
-  preconfiguredActions: PreConfiguredAction[];
+  getActionsClient: () => Promise<ActionsClient>;
 }
 
 export interface MuteOptions extends IndexType {
@@ -134,7 +133,7 @@ export class AlertsClient {
   private readonly invalidateAPIKey: (
     params: InvalidateAPIKeyParams
   ) => Promise<InvalidateAPIKeyResult>;
-  private preconfiguredActions: PreConfiguredAction[];
+  private readonly getActionsClient: () => Promise<ActionsClient>;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
 
   constructor({
@@ -148,7 +147,7 @@ export class AlertsClient {
     createAPIKey,
     invalidateAPIKey,
     encryptedSavedObjectsClient,
-    preconfiguredActions,
+    getActionsClient,
   }: ConstructorOptions) {
     this.logger = logger;
     this.getUserName = getUserName;
@@ -160,7 +159,7 @@ export class AlertsClient {
     this.createAPIKey = createAPIKey;
     this.invalidateAPIKey = invalidateAPIKey;
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
-    this.preconfiguredActions = preconfiguredActions;
+    this.getActionsClient = getActionsClient;
   }
 
   public async create({ data, options }: CreateOptions): Promise<Alert> {
@@ -601,7 +600,7 @@ export class AlertsClient {
     actions: RawAlert['actions'],
     references: SavedObjectReference[]
   ) {
-    return actions.map((action, i) => {
+    return actions.map((action) => {
       const reference = references.find((ref) => ref.name === action.actionRef);
       if (!reference) {
         throw new Error(`Reference ${action.actionRef} not found`);
@@ -667,58 +666,31 @@ export class AlertsClient {
   private async denormalizeActions(
     alertActions: NormalizedAlertAction[]
   ): Promise<{ actions: RawAlert['actions']; references: SavedObjectReference[] }> {
-    const actionMap = new Map<string, unknown>();
-    // map preconfigured actions
-    for (const alertAction of alertActions) {
-      const action = this.preconfiguredActions.find(
-        (preconfiguredAction) => preconfiguredAction.id === alertAction.id
-      );
-      if (action !== undefined) {
-        actionMap.set(action.id, action);
-      }
-    }
-    // Fetch action objects in bulk
-    // Excluding preconfigured actions to avoid an not found error, which is already mapped
-    const actionIds = [
-      ...new Set(
-        alertActions
-          .filter((alertAction) => !actionMap.has(alertAction.id))
-          .map((alertAction) => alertAction.id)
-      ),
-    ];
-    if (actionIds.length > 0) {
-      const bulkGetOpts = actionIds.map((id) => ({ id, type: 'action' }));
-      const bulkGetResult = await this.savedObjectsClient.bulkGet(bulkGetOpts);
-
-      for (const action of bulkGetResult.saved_objects) {
-        if (action.error) {
-          throw Boom.badRequest(
-            `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
-          );
-        }
-        actionMap.set(action.id, action);
-      }
-    }
-    // Extract references and set actionTypeId
+    const actionsClient = await this.getActionsClient();
+    const actionIds = [...new Set(alertActions.map((alertAction) => alertAction.id))];
+    const actionResults = await actionsClient.getBulk(actionIds);
     const references: SavedObjectReference[] = [];
     const actions = alertActions.map(({ id, ...alertAction }, i) => {
-      const actionRef = `action_${i}`;
-      references.push({
-        id,
-        name: actionRef,
-        type: 'action',
-      });
-      const actionMapValue = actionMap.get(id);
-      // if action is a save object, than actionTypeId should be under attributes property
-      // if action is a preconfigured, than actionTypeId is the action property
-      const actionTypeId = actionIds.find((actionId) => actionId === id)
-        ? (actionMapValue as SavedObject<Record<string, string>>).attributes.actionTypeId
-        : (actionMapValue as RawAlertAction).actionTypeId;
-      return {
-        ...alertAction,
-        actionRef,
-        actionTypeId,
-      };
+      const actionResultValue = actionResults.find((action) => action.id === id);
+      if (actionResultValue) {
+        const actionRef = `action_${i}`;
+        references.push({
+          id,
+          name: actionRef,
+          type: 'action',
+        });
+        return {
+          ...alertAction,
+          actionRef,
+          actionTypeId: actionResultValue.actionTypeId,
+        };
+      } else {
+        return {
+          ...alertAction,
+          actionRef: '',
+          actionTypeId: '',
+        };
+      }
     });
     return {
       actions,

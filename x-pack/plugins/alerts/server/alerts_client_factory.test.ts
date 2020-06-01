@@ -13,6 +13,7 @@ import { loggingServiceMock, savedObjectsClientMock } from '../../../../src/core
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { AuthenticatedUser } from '../../security/public';
 import { securityMock } from '../../security/server/mocks';
+import { actionsMock } from '../../actions/server/mocks';
 
 jest.mock('./alerts_client');
 
@@ -25,7 +26,7 @@ const alertsClientFactoryParams: jest.Mocked<AlertsClientFactoryOpts> = {
   getSpaceId: jest.fn(),
   spaceIdToNamespace: jest.fn(),
   encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
-  preconfiguredActions: [],
+  actions: actionsMock.createStart(),
 };
 const fakeRequest = ({
   headers: {},
@@ -65,7 +66,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
     createAPIKey: expect.any(Function),
     invalidateAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
-    preconfiguredActions: [],
+    getActionsClient: expect.any(Function),
   });
 });
 
@@ -93,6 +94,16 @@ test('getUserName() returns a name when security is enabled', async () => {
   } as unknown) as AuthenticatedUser);
   const userNameResult = await constructorCall.getUserName();
   expect(userNameResult).toEqual('bob');
+});
+
+test('getActionsClient() returns ActionsClient', async () => {
+  const factory = new AlertsClientFactory();
+  factory.initialize(alertsClientFactoryParams);
+  factory.create(KibanaRequest.from(fakeRequest), savedObjectsClient);
+  const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
+
+  const actionsClient = await constructorCall.getActionsClient();
+  expect(actionsClient).not.toBe(null);
 });
 
 test('createAPIKey() returns { apiKeysEnabled: false } when security is disabled', async () => {

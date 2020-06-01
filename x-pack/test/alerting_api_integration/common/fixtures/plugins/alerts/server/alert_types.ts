@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { times } from 'lodash';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
@@ -14,7 +14,7 @@ export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
   { alerts }: Pick<FixtureSetupDeps, 'alerts'>
 ) {
-  const clusterClient = core.elasticsearch.adminClient;
+  const clusterClient = core.elasticsearch.legacy.client;
   const alwaysFiringAlertType: AlertType = {
     id: 'test.always-firing',
     name: 'Test: Always Firing',

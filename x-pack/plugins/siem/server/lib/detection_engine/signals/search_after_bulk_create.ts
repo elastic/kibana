@@ -81,7 +81,7 @@ export const searchAfterAndBulkCreate = async ({
   let sortId; // tells us where to start our next search_after query
   let searchResultSize = 0;
 
-  /* 
+  /*
     The purpose of `maxResults` is to ensure we do not perform
     extra search_after's. This will be reset on each
     iteration, although it really only matters for the first

@@ -13,6 +13,7 @@ import { TaskStatus } from '../../task_manager/server';
 import { IntervalSchedule } from './types';
 import { resolvable } from './test_utils';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
+import { actionsClientMock } from '../../actions/server/mocks';
 
 const taskManager = taskManagerMock.start();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -30,7 +31,7 @@ const alertsClientParams = {
   invalidateAPIKey: jest.fn(),
   logger: loggingServiceMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
-  preconfiguredActions: [],
+  getActionsClient: jest.fn(),
 };
 
 beforeEach(() => {
@@ -42,6 +43,34 @@ beforeEach(() => {
   });
   alertsClientParams.getUserName.mockResolvedValue('elastic');
   taskManager.runNow.mockResolvedValue({ id: '' });
+  const actionsClient = actionsClientMock.create();
+  actionsClient.getBulk.mockResolvedValueOnce([
+    {
+      id: '1',
+      isPreconfigured: false,
+      actionTypeId: 'test',
+      name: 'test',
+      config: {
+        foo: 'bar',
+      },
+    },
+    {
+      id: '2',
+      isPreconfigured: false,
+      actionTypeId: 'test2',
+      name: 'test2',
+      config: {
+        foo: 'bar',
+      },
+    },
+    {
+      id: 'testPreconfigured',
+      actionTypeId: '.slack',
+      isPreconfigured: true,
+      name: 'test',
+    },
+  ]);
+  alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
 });
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
@@ -97,18 +126,6 @@ describe('create()', () => {
 
   test('creates an alert', async () => {
     const data = getMockData();
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-      ],
-    });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -297,26 +314,6 @@ describe('create()', () => {
         },
       ],
     });
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-        {
-          id: '2',
-          type: 'action',
-          attributes: {
-            actionTypeId: 'test2',
-          },
-          references: [],
-        },
-      ],
-    });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -435,16 +432,6 @@ describe('create()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
-      {
-        id: '1',
-        type: 'action',
-      },
-      {
-        id: '2',
-        type: 'action',
-      },
-    ]);
   });
 
   test('creates a disabled alert', async () => {
@@ -549,7 +536,9 @@ describe('create()', () => {
 
   test('throws error if loading actions fails', async () => {
     const data = getMockData();
-    savedObjectsClient.bulkGet.mockRejectedValueOnce(new Error('Test Error'));
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getBulk.mockRejectedValueOnce(new Error('Test Error'));
+    alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test Error"`
     );
@@ -1903,26 +1892,6 @@ describe('update()', () => {
   });
 
   test('updates given parameters', async () => {
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-        {
-          id: '2',
-          type: 'action',
-          attributes: {
-            actionTypeId: 'test2',
-          },
-          references: [],
-        },
-      ],
-    });
     savedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
