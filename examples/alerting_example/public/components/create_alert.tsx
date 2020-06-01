@@ -36,6 +36,7 @@ export const CreateAlert = ({
   docLinks,
   data,
   toastNotifications,
+  capabilities,
 }: AlertingExampleComponentParams) => {
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 
@@ -60,6 +61,7 @@ export const CreateAlert = ({
             docLinks,
             charts,
             dataFieldsFormats: data.fieldFormats,
+            capabilities,
           }}
         >
           <AlertAdd

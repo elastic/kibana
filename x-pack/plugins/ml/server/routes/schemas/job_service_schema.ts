@@ -40,9 +40,8 @@ export const forceStartDatafeedSchema = schema.object({
 });
 
 export const jobIdsSchema = schema.object({
-  jobIds: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.maybe(schema.string()))])
-  ),
+  /** Optional list of job IDs. */
+  jobIds: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
 });
 
 export const jobsWithTimerangeSchema = {

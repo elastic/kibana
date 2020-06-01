@@ -31,7 +31,7 @@ import { url as urlUtils } from '../../../common';
  * e.g.:
  *
  * given an url:
- * http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')
+ * http://localhost:5601/oxf/app/kibana#/management/kibana/indexPatterns/patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')
  * will return object:
  * {_a: {tab: 'indexedFields'}, _b: {f: 'test', i: '', l: ''}};
  */
@@ -57,7 +57,7 @@ export function getStatesFromKbnUrl(
  * e.g.:
  *
  * given an url:
- * http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')
+ * http://localhost:5601/oxf/app/kibana#/management/kibana/indexPatterns/patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')
  * and key '_a'
  * will return object:
  * {tab: 'indexedFields'}
@@ -74,12 +74,12 @@ export function getStateFromKbnUrl<State>(
  * Doesn't actually updates history
  *
  * e.g.:
- * given a url: http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')
+ * given a url: http://localhost:5601/oxf/app/kibana#/management/kibana/indexPatterns/patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')
  * key: '_a'
  * and state: {tab: 'other'}
  *
  * will return url:
- * http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:other)&_b=(f:test,i:'',l:'')
+ * http://localhost:5601/oxf/app/kibana#/management/kibana/indexPatterns/patterns/id?_a=(tab:other)&_b=(f:test,i:'',l:'')
  */
 export function setStateToKbnUrl<State>(
   key: string,
@@ -87,7 +87,7 @@ export function setStateToKbnUrl<State>(
   { useHash = false }: { useHash: boolean } = { useHash: false },
   rawUrl = window.location.href
 ): string {
-  return replaceUrlHashQuery(rawUrl, query => {
+  return replaceUrlHashQuery(rawUrl, (query) => {
     const encoded = encodeState(state, useHash);
     return {
       ...query,
@@ -154,7 +154,7 @@ export const createKbnUrlControls = (
   let shouldReplace = true;
 
   function updateUrl(newUrl: string, replace = false): string | undefined {
-    const currentUrl = getCurrentUrl();
+    const currentUrl = getCurrentUrl(history);
     if (newUrl === currentUrl) return undefined; // skip update
 
     const historyPath = getRelativeToHistoryPath(newUrl, history);
@@ -165,7 +165,7 @@ export const createKbnUrlControls = (
       history.push(historyPath);
     }
 
-    return getCurrentUrl();
+    return getCurrentUrl(history);
   }
 
   // queue clean up
@@ -187,7 +187,10 @@ export const createKbnUrlControls = (
 
   function getPendingUrl() {
     if (updateQueue.length === 0) return undefined;
-    const resultUrl = updateQueue.reduce((url, nextUpdate) => nextUpdate(url), getCurrentUrl());
+    const resultUrl = updateQueue.reduce(
+      (url, nextUpdate) => nextUpdate(url),
+      getCurrentUrl(history)
+    );
 
     return resultUrl;
   }

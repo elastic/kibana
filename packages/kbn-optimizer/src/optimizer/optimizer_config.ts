@@ -23,7 +23,7 @@ import Os from 'os';
 import { Bundle, WorkerConfig } from '../common';
 
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
-import { getBundles } from './get_bundles';
+import { getPluginBundles } from './get_plugin_bundles';
 
 function pickMaxWorkerCount(dist: boolean) {
   // don't break if cpus() returns nothing, or an empty array
@@ -60,6 +60,9 @@ interface Options {
   pluginScanDirs?: string[];
   /** absolute paths that should be added to the default scan dirs */
   extraPluginScanDirs?: string[];
+
+  /** flag that causes the core bundle to be built along with plugins */
+  includeCoreBundle?: boolean;
 }
 
 interface ParsedOptions {
@@ -72,6 +75,7 @@ interface ParsedOptions {
   pluginPaths: string[];
   pluginScanDirs: string[];
   inspectWorkers: boolean;
+  includeCoreBundle: boolean;
 }
 
 export class OptimizerConfig {
@@ -83,6 +87,7 @@ export class OptimizerConfig {
     const profileWebpack = !!options.profileWebpack;
     const inspectWorkers = !!options.inspectWorkers;
     const cache = options.cache !== false && !process.env.KBN_OPTIMIZER_NO_CACHE;
+    const includeCoreBundle = !!options.includeCoreBundle;
 
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {
@@ -91,17 +96,17 @@ export class OptimizerConfig {
 
     /**
      * BEWARE: this needs to stay roughly synchronized with
-     * `src/core/server/config/env.ts` which determins which paths
+     * `src/core/server/config/env.ts` which determines which paths
      * should be searched for plugins to load
      */
     const pluginScanDirs = options.pluginScanDirs || [
       Path.resolve(repoRoot, 'src/plugins'),
       ...(oss ? [] : [Path.resolve(repoRoot, 'x-pack/plugins')]),
       Path.resolve(repoRoot, 'plugins'),
-      ...(examples ? [Path.resolve('examples')] : []),
+      ...(examples ? [Path.resolve('examples'), Path.resolve('x-pack/examples')] : []),
       Path.resolve(repoRoot, '../kibana-extra'),
     ];
-    if (!pluginScanDirs.every(p => Path.isAbsolute(p))) {
+    if (!pluginScanDirs.every((p) => Path.isAbsolute(p))) {
       throw new TypeError('pluginScanDirs must all be absolute paths');
     }
 
@@ -113,7 +118,7 @@ export class OptimizerConfig {
     }
 
     const pluginPaths = options.pluginPaths || [];
-    if (!pluginPaths.every(s => Path.isAbsolute(s))) {
+    if (!pluginPaths.every((s) => Path.isAbsolute(s))) {
       throw new TypeError('pluginPaths must all be absolute paths');
     }
 
@@ -134,13 +139,28 @@ export class OptimizerConfig {
       pluginScanDirs,
       pluginPaths,
       inspectWorkers,
+      includeCoreBundle,
     };
   }
 
   static create(inputOptions: Options) {
     const options = OptimizerConfig.parseOptions(inputOptions);
     const plugins = findKibanaPlatformPlugins(options.pluginScanDirs, options.pluginPaths);
-    const bundles = getBundles(plugins, options.repoRoot);
+    const bundles = [
+      ...(options.includeCoreBundle
+        ? [
+            new Bundle({
+              type: 'entry',
+              id: 'core',
+              entry: './public/entry_point',
+              sourceRoot: options.repoRoot,
+              contextDir: Path.resolve(options.repoRoot, 'src/core'),
+              outputDir: Path.resolve(options.repoRoot, 'src/core/target/public'),
+            }),
+          ]
+        : []),
+      ...getPluginBundles(plugins, options.repoRoot),
+    ];
 
     return new OptimizerConfig(
       bundles,

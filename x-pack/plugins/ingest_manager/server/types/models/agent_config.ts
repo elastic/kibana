@@ -9,8 +9,11 @@ import { AgentConfigStatus } from '../../../common';
 
 const AgentConfigBaseSchema = {
   name: schema.string(),
-  namespace: schema.maybe(schema.string()),
+  namespace: schema.string({ minLength: 1 }),
   description: schema.maybe(schema.string()),
+  monitoring_enabled: schema.maybe(
+    schema.arrayOf(schema.oneOf([schema.literal('logs'), schema.literal('metrics')]))
+  ),
 };
 
 export const NewAgentConfigSchema = schema.object({
@@ -25,6 +28,6 @@ export const AgentConfigSchema = schema.object({
     schema.literal(AgentConfigStatus.Inactive),
   ]),
   datasources: schema.oneOf([schema.arrayOf(schema.string()), schema.arrayOf(DatasourceSchema)]),
-  updated_on: schema.string(),
+  updated_at: schema.string(),
   updated_by: schema.string(),
 });

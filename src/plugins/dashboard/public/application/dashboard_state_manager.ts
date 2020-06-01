@@ -34,6 +34,7 @@ import { FilterUtils } from './lib/filter_utils';
 import {
   DashboardAppState,
   DashboardAppStateDefaults,
+  DashboardAppStateInUrl,
   DashboardAppStateTransitions,
   SavedDashboardPanel,
 } from '../types';
@@ -138,8 +139,8 @@ export class DashboardStateManager {
     this.stateContainer = createStateContainer<DashboardAppState, DashboardAppStateTransitions>(
       initialState,
       {
-        set: state => (prop, value) => ({ ...state, [prop]: value }),
-        setOption: state => (option, value) => ({
+        set: (state) => (prop, value) => ({ ...state, [prop]: value }),
+        setOption: (state) => (option, value) => ({
           ...state,
           options: {
             ...state.options,
@@ -161,15 +162,16 @@ export class DashboardStateManager {
 
     this.stateContainerChangeSub = this.stateContainer.state$.subscribe(() => {
       this.isDirty = this.checkIsDirty();
-      this.changeListeners.forEach(listener => listener({ dirty: this.isDirty }));
+      this.changeListeners.forEach((listener) => listener({ dirty: this.isDirty }));
     });
 
     // setup state syncing utils. state container will be synced with url into `this.STATE_STORAGE_KEY` query param
-    this.stateSyncRef = syncState<DashboardAppState>({
+    this.stateSyncRef = syncState<DashboardAppStateInUrl>({
       storageKey: this.STATE_STORAGE_KEY,
       stateContainer: {
         ...this.stateContainer,
-        set: (state: DashboardAppState | null) => {
+        get: () => this.toUrlState(this.stateContainer.get()),
+        set: (state: DashboardAppStateInUrl | null) => {
           // sync state required state container to be able to handle null
           // overriding set() so it could handle null coming from url
           if (state) {
@@ -216,7 +218,7 @@ export class DashboardStateManager {
     const savedDashboardPanelMap: { [key: string]: SavedDashboardPanel } = {};
 
     const input = dashboardContainer.getInput();
-    this.getPanels().forEach(savedDashboardPanel => {
+    this.getPanels().forEach((savedDashboardPanel) => {
       if (input.panels[savedDashboardPanel.panelIndex] !== undefined) {
         savedDashboardPanelMap[savedDashboardPanel.panelIndex] = savedDashboardPanel;
       } else {
@@ -227,7 +229,7 @@ export class DashboardStateManager {
 
     const convertedPanelStateMap: { [key: string]: SavedDashboardPanel } = {};
 
-    Object.values(input.panels).forEach(panelState => {
+    Object.values(input.panels).forEach((panelState) => {
       if (savedDashboardPanelMap[panelState.explicitInput.id] === undefined) {
         dirty = true;
       }
@@ -269,7 +271,7 @@ export class DashboardStateManager {
       this.setQuery(input.query);
     }
 
-    this.changeListeners.forEach(listener => listener({ dirty }));
+    this.changeListeners.forEach((listener) => listener({ dirty }));
   }
 
   public getFullScreenMode() {
@@ -558,9 +560,9 @@ export class DashboardStateManager {
    */
   private saveState({ replace }: { replace: boolean }): boolean {
     // schedules setting current state to url
-    this.kbnUrlStateStorage.set<DashboardAppState>(
+    this.kbnUrlStateStorage.set<DashboardAppStateInUrl>(
       this.STATE_STORAGE_KEY,
-      this.stateContainer.get()
+      this.toUrlState(this.stateContainer.get())
     );
     // immediately forces scheduled updates and changes location
     return this.kbnUrlStateStorage.flush({ replace });
@@ -619,5 +621,14 @@ export class DashboardStateManager {
     const initial = _.omit(this.stateDefaults, propsToIgnore);
     const current = _.omit(this.stateContainer.get(), propsToIgnore);
     return !_.isEqual(initial, current);
+  }
+
+  private toUrlState(state: DashboardAppState): DashboardAppStateInUrl {
+    if (state.viewMode === ViewMode.VIEW) {
+      const { panels, ...stateWithoutPanels } = state;
+      return stateWithoutPanels;
+    }
+
+    return state;
   }
 }

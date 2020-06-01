@@ -20,12 +20,14 @@ export const API_GENERATE_IMMEDIATE = `${API_BASE_URL_V1}/generate/immediate/csv
 export const CONTENT_TYPE_CSV = 'text/csv';
 export const CSV_REPORTING_ACTION = 'downloadCsvReport';
 export const CSV_BOM_CHARS = '\ufeff';
+export const CSV_FORMULA_CHARS = ['=', '+', '-', '@'];
 
 export const WHITELISTED_JOB_CONTENT_TYPES = [
   'application/json',
   'application/pdf',
   CONTENT_TYPE_CSV,
   'image/png',
+  'text/plain',
 ];
 
 // See:

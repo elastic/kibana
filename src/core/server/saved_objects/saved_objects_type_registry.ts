@@ -64,7 +64,7 @@ export class SavedObjectTypeRegistry {
    * Return all {@link SavedObjectsType | types} currently registered that are importable/exportable.
    */
   public getImportableAndExportableTypes() {
-    return this.getAllTypes().filter(type => this.isImportableAndExportable(type.name));
+    return this.getAllTypes().filter((type) => this.isImportableAndExportable(type.name));
   }
 
   /**
@@ -72,11 +72,7 @@ export class SavedObjectTypeRegistry {
    * resolves to `false` if the type is not registered
    */
   public isNamespaceAgnostic(type: string) {
-    return (
-      this.types.get(type)?.namespaceType === 'agnostic' ||
-      this.types.get(type)?.namespaceAgnostic ||
-      false
-    );
+    return this.types.get(type)?.namespaceType === 'agnostic';
   }
 
   /**
@@ -84,6 +80,7 @@ export class SavedObjectTypeRegistry {
    * resolves to `true` if the type is not registered
    */
   public isSingleNamespace(type: string) {
+    // in the case we somehow registered a type with an invalid `namespaceType`, treat it as single-namespace
     return !this.isNamespaceAgnostic(type) && !this.isMultiNamespace(type);
   }
 
@@ -92,7 +89,7 @@ export class SavedObjectTypeRegistry {
    * resolves to `false` if the type is not registered
    */
   public isMultiNamespace(type: string) {
-    return !this.isNamespaceAgnostic(type) && this.types.get(type)?.namespaceType === 'multiple';
+    return this.types.get(type)?.namespaceType === 'multiple';
   }
 
   /**

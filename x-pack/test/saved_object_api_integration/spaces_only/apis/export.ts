@@ -13,7 +13,7 @@ const createTestCases = (spaceId: string) => {
   return Object.values(cases);
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

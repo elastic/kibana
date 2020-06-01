@@ -19,7 +19,7 @@ import { startAnalytics } from '../../services/analytics_service';
 import {
   checkPermission,
   createPermissionFailureMessage,
-} from '../../../../../privilege/check_privilege';
+} from '../../../../../capabilities/check_capabilities';
 
 import { DataFrameAnalyticsListRow, isCompletedAnalyticsJob } from './common';
 

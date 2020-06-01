@@ -45,12 +45,12 @@ jest.mock('../../services/job_service', () => ({
   },
 }));
 jest.mock('../../services/ml_api_service', () => 'ml');
-jest.mock('../../privilege/check_privilege', () => ({
+jest.mock('../../capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));
 
 jest.mock('../../../../../../../src/plugins/kibana_react/public', () => ({
-  withKibana: comp => {
+  withKibana: (comp) => {
     return comp;
   },
 }));

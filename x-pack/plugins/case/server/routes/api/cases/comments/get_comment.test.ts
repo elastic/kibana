@@ -15,6 +15,7 @@ import {
 } from '../../__fixtures__';
 import { flattenCommentSavedObject } from '../../utils';
 import { initGetCommentApi } from './get_comment';
+import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
 
 describe('GET comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -23,7 +24,7 @@ describe('GET comment', () => {
   });
   it(`returns the comment`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments/{comment_id}',
+      path: CASE_COMMENT_DETAILS_URL,
       method: 'get',
       params: {
         case_id: 'mock-id-1',
@@ -40,7 +41,7 @@ describe('GET comment', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    const myPayload = mockCaseComments.find(s => s.id === 'mock-comment-1');
+    const myPayload = mockCaseComments.find((s) => s.id === 'mock-comment-1');
     expect(myPayload).not.toBeUndefined();
     if (myPayload != null) {
       expect(response.payload).toEqual(flattenCommentSavedObject(myPayload));
@@ -48,7 +49,7 @@ describe('GET comment', () => {
   });
   it(`returns an error when getComment throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments/{comment_id}',
+      path: CASE_COMMENT_DETAILS_URL,
       method: 'get',
       params: {
         case_id: 'mock-id-1',

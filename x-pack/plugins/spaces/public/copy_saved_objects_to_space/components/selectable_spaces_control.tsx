@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './selectable_spaces_control.scss';
 import React, { Fragment, useState } from 'react';
 import { EuiSelectable, EuiLoadingSpinner } from '@elastic/eui';
 import { SpaceAvatar } from '../../space_avatar';
@@ -30,7 +31,7 @@ export const SelectableSpacesControl = (props: Props) => {
   //  TODO: update once https://github.com/elastic/eui/issues/2071 is fixed
   if (options.length === 0) {
     setOptions(
-      props.spaces.map(space => ({
+      props.spaces.map((space) => ({
         label: space.name,
         prepend: <SpaceAvatar space={space} size={'s'} />,
         checked: props.selectedSpaceIds.includes(space.id) ? 'on' : null,
@@ -44,8 +45,8 @@ export const SelectableSpacesControl = (props: Props) => {
     if (props.disabled) return;
 
     const selectedSpaceIds = selectedOptions
-      .filter(opt => opt.checked)
-      .map(opt => opt['data-space-id']);
+      .filter((opt) => opt.checked)
+      .map((opt) => opt['data-space-id']);
 
     props.onChange(selectedSpaceIds);
     // TODO: remove once https://github.com/elastic/eui/issues/2071 is fixed
@@ -59,7 +60,7 @@ export const SelectableSpacesControl = (props: Props) => {
   return (
     <EuiSelectable
       options={options as any[]}
-      onChange={newOptions => updateSelectedSpaces(newOptions as SpaceOption[])}
+      onChange={(newOptions) => updateSelectedSpaces(newOptions as SpaceOption[])}
       listProps={{
         bordered: true,
         rowHeight: 40,

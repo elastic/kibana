@@ -7,7 +7,7 @@ import { TypeOf } from '@kbn/config-schema';
 import Boom from 'boom';
 import { RequestHandler } from 'src/core/server';
 import { appContextService, datasourceService } from '../../services';
-import { ensureInstalledPackage } from '../../services/epm/packages';
+import { ensureInstalledPackage, getPackageInfo } from '../../services/epm/packages';
 import {
   GetDatasourcesRequestSchema,
   GetOneDatasourceRequestSchema,
@@ -74,7 +74,7 @@ export const createDatasourceHandler: RequestHandler<
   TypeOf<typeof CreateDatasourceRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const newData = { ...request.body };
   try {
@@ -85,12 +85,13 @@ export const createDatasourceHandler: RequestHandler<
         pkgName: request.body.package.name,
         callCluster,
       });
-
+      const pkgInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: request.body.package.name,
+        pkgVersion: request.body.package.version,
+      });
       newData.inputs = (await datasourceService.assignPackageStream(
-        {
-          pkgName: request.body.package.name,
-          pkgVersion: request.body.package.version,
-        },
+        pkgInfo,
         request.body.inputs
       )) as TypeOf<typeof CreateDatasourceRequestSchema.body>['inputs'];
     }
@@ -127,13 +128,14 @@ export const updateDatasourceHandler: RequestHandler<
     const pkg = newData.package || datasource.package;
     const inputs = newData.inputs || datasource.inputs;
     if (pkg && (newData.inputs || newData.package)) {
-      newData.inputs = (await datasourceService.assignPackageStream(
-        {
-          pkgName: pkg.name,
-          pkgVersion: pkg.version,
-        },
-        inputs
-      )) as TypeOf<typeof CreateDatasourceRequestSchema.body>['inputs'];
+      const pkgInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: pkg.name,
+        pkgVersion: pkg.version,
+      });
+      newData.inputs = (await datasourceService.assignPackageStream(pkgInfo, inputs)) as TypeOf<
+        typeof CreateDatasourceRequestSchema.body
+      >['inputs'];
     }
 
     const updatedDatasource = await datasourceService.update(

@@ -19,11 +19,11 @@ export async function SiemCypressTestRunner({ getService }: FtrProviderContext) 
   await esArchiver.load('empty_kibana');
   await esArchiver.load('auditbeat');
 
-  await withProcRunner(log, async procs => {
+  await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
       cmd: 'yarn',
       args: ['cypress:run'],
-      cwd: resolve(__dirname, '../../legacy/plugins/siem'),
+      cwd: resolve(__dirname, '../../plugins/siem'),
       env: {
         FORCE_COLOR: '1',
         CYPRESS_baseUrl: Url.format(config.get('servers.kibana')),

@@ -19,6 +19,8 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { Assign, Ensure } from '@kbn/utility-types';
+import { ExpressionAstFunction, ExpressionAstArgument } from 'src/plugins/expressions/public';
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
@@ -27,17 +29,30 @@ import { ISearchSource } from '../search_source';
 import { FieldFormatsContentType, KBN_FIELD_TYPES } from '../../../common';
 import { FieldFormatsStart } from '../../field_formats';
 
-export interface AggConfigOptions {
-  type: IAggType;
-  enabled?: boolean;
-  id?: string;
-  params?: Record<string, any>;
-  schema?: string;
+type State = string | number | boolean | null | undefined | SerializableState;
+
+/** @internal **/
+export interface SerializableState {
+  [key: string]: State | State[];
 }
+
+/** @internal **/
+export type AggConfigSerialized = Ensure<
+  {
+    type: string;
+    enabled?: boolean;
+    id?: string;
+    params?: SerializableState;
+    schema?: string;
+  },
+  SerializableState
+>;
 
 export interface AggConfigDependencies {
   fieldFormats: FieldFormatsStart;
 }
+
+export type AggConfigOptions = Assign<AggConfigSerialized, { type: IAggType }>;
 
 /**
  * @name AggConfig
@@ -60,12 +75,12 @@ export class AggConfig {
   static ensureIds(list: any[]) {
     const have: IAggConfig[] = [];
     const haveNot: AggConfigOptions[] = [];
-    list.forEach(function(obj) {
+    list.forEach(function (obj) {
       (obj.id ? have : haveNot).push(obj);
     });
 
     let nextId = AggConfig.nextId(have);
-    haveNot.forEach(function(obj) {
+    haveNot.forEach(function (obj) {
       obj.id = String(nextId++);
     });
 
@@ -80,7 +95,7 @@ export class AggConfig {
   static nextId(list: IAggConfig[]) {
     return (
       1 +
-      list.reduce(function(max, obj) {
+      list.reduce(function (max, obj) {
         return Math.max(max, +obj.id || 0);
       }, 0)
     );
@@ -139,7 +154,7 @@ export class AggConfig {
     from = from || this.params || {};
     const to = (this.params = {} as any);
 
-    this.getAggParams().forEach(aggParam => {
+    this.getAggParams().forEach((aggParam) => {
       let val = from[aggParam.name];
 
       if (val == null) {
@@ -257,7 +272,10 @@ export class AggConfig {
     return configDsl;
   }
 
-  toJSON() {
+  /**
+   * @returns Returns a serialized representation of an AggConfig.
+   */
+  serialize(): AggConfigSerialized {
     const params = this.params;
 
     const outParams = _.transform(
@@ -281,7 +299,64 @@ export class AggConfig {
       enabled: this.enabled,
       type: this.type && this.type.name,
       schema: this.schema,
-      params: outParams,
+      params: outParams as SerializableState,
+    };
+  }
+
+  /**
+   * @deprecated - Use serialize() instead.
+   */
+  toJSON(): AggConfigSerialized {
+    return this.serialize();
+  }
+
+  /**
+   * @returns Returns an ExpressionAst representing the function for this agg type.
+   */
+  toExpressionAst(): ExpressionAstFunction | undefined {
+    const functionName = this.type && this.type.expressionName;
+    const { type, ...rest } = this.serialize();
+    if (!functionName || !rest.params) {
+      // Return undefined - there is no matching expression function for this agg
+      return;
+    }
+
+    // Go through each of the params and convert to an array of expression args.
+    const params = Object.entries(rest.params).reduce((acc, [key, value]) => {
+      const deserializedParam = this.getAggParams().find((p) => p.name === key);
+
+      if (deserializedParam && deserializedParam.toExpressionAst) {
+        // If the param provides `toExpressionAst`, we call it with the value
+        const paramExpressionAst = deserializedParam.toExpressionAst(this.getParam(key));
+        if (paramExpressionAst) {
+          acc[key] = [
+            {
+              type: 'expression',
+              chain: [paramExpressionAst],
+            },
+          ];
+        }
+      } else if (typeof value === 'object') {
+        // For object params which don't provide `toExpressionAst`, we stringify
+        acc[key] = [JSON.stringify(value)];
+      } else if (typeof value !== 'undefined') {
+        // Everything else just gets stored in an array if it is defined
+        acc[key] = [value];
+      }
+
+      return acc;
+    }, {} as Record<string, ExpressionAstArgument[]>);
+
+    return {
+      type: 'function',
+      function: functionName,
+      arguments: {
+        ...params,
+        // Expression args which are provided to all functions
+        id: [this.id],
+        enabled: [this.enabled],
+        ...(this.schema ? { schema: [this.schema] } : {}), // schema may be undefined
+      },
     };
   }
 
@@ -379,7 +454,7 @@ export class AggConfig {
     if (this.__typeDecorations) {
       _.forOwn(
         this.__typeDecorations,
-        function(prop, name: string | undefined) {
+        function (prop, name: string | undefined) {
           // @ts-ignore
           delete this[name];
         },

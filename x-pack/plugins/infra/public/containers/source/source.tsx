@@ -21,7 +21,7 @@ import { updateSourceMutation } from './update_source.gql_query';
 
 type Source = SourceQuery.Query['source'];
 
-const pickIndexPattern = (source: Source | undefined, type: 'logs' | 'metrics' | 'both') => {
+export const pickIndexPattern = (source: Source | undefined, type: 'logs' | 'metrics' | 'both') => {
   if (!source) {
     return 'unknown-index';
   }
@@ -54,7 +54,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
           },
         });
       },
-      onResolve: response => {
+      onResolve: (response) => {
         setSource(response.data.source);
       },
     },
@@ -82,7 +82,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
           },
         });
       },
-      onResolve: response => {
+      onResolve: (response) => {
         if (response.data) {
           setSource(response.data.createSource.source);
         }
@@ -112,7 +112,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
           },
         });
       },
-      onResolve: response => {
+      onResolve: (response) => {
         if (response.data) {
           setSource(response.data.updateSource.source);
         }
@@ -134,7 +134,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
         loadSourceRequest.state,
         createSourceConfigurationRequest.state,
         updateSourceConfigurationRequest.state,
-      ].some(state => state === 'pending'),
+      ].some((state) => state === 'pending'),
     [
       loadSourceRequest.state,
       createSourceConfigurationRequest.state,

@@ -1,6 +1,8 @@
 @import '@elastic/eui/src/components/header/variables';
 @import '@elastic/eui/src/components/nav_drawer/variables';
 
+// TODO #64541
+// Delete this whole file
 .mgtAdvancedSettingsForm__bottomBar {
   margin-left: $euiNavDrawerWidthCollapsed;
   z-index: 9; // Puts it inuder the nav drawer when expanded

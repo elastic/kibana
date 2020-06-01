@@ -7,18 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import { map, trunc } from 'lodash';
 import open from 'opn';
-import { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
+import { ElementHandle, EvaluateFn, Page, Response, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
 import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
-import { LevelLogger } from '../../../../server/lib';
-import {
-  ConditionalHeaders,
-  ConditionalHeadersConditions,
-  ElementPosition,
-  InterceptedRequest,
-  NetworkPolicy,
-} from '../../../../types';
-import { allowRequest } from '../../network_policy';
+import { LevelLogger } from '../../../lib';
+import { ConditionalHeaders, ElementPosition } from '../../../types';
+import { allowRequest, NetworkPolicy } from '../../network_policy';
 
 export interface ChromiumDriverOptions {
   inspect: boolean;
@@ -38,12 +32,32 @@ interface EvaluateMetaOpts {
   context: string;
 }
 
+type ConditionalHeadersConditions = ConditionalHeaders['conditions'];
+
+interface InterceptedRequest {
+  requestId: string;
+  request: {
+    url: string;
+    method: string;
+    headers: {
+      [key: string]: string;
+    };
+    initialPriority: string;
+    referrerPolicy: string;
+  };
+  frameId: string;
+  resourceType: string;
+}
+
 const WAIT_FOR_DELAY_MS: number = 100;
 
 export class HeadlessChromiumDriver {
   private readonly page: Page;
   private readonly inspect: boolean;
   private readonly networkPolicy: NetworkPolicy;
+
+  private listenersAttached = false;
+  private interceptedCount = 0;
 
   constructor(page: Page, { inspect, networkPolicy }: ChromiumDriverOptions) {
     this.page = page;
@@ -76,11 +90,119 @@ export class HeadlessChromiumDriver {
     logger: LevelLogger
   ): Promise<void> {
     logger.info(`opening url ${url}`);
-    // @ts-ignore
-    const client = this.page._client;
-    let interceptedCount = 0;
+
+    // Reset intercepted request count
+    this.interceptedCount = 0;
 
     await this.page.setRequestInterception(true);
+
+    this.registerListeners(conditionalHeaders, logger);
+
+    await this.page.goto(url, { waitUntil: 'domcontentloaded' });
+
+    if (this.inspect) {
+      await this.launchDebugger();
+    }
+
+    await this.waitForSelector(
+      pageLoadSelector,
+      { timeout },
+      { context: 'waiting for page load selector' },
+      logger
+    );
+    logger.info(`handled ${this.interceptedCount} page requests`);
+  }
+
+  public async screenshot(elementPosition: ElementPosition): Promise<string> {
+    const { boundingClientRect, scroll } = elementPosition;
+    const screenshot = await this.page.screenshot({
+      clip: {
+        x: boundingClientRect.left + scroll.x,
+        y: boundingClientRect.top + scroll.y,
+        height: boundingClientRect.height,
+        width: boundingClientRect.width,
+      },
+    });
+
+    return screenshot.toString('base64');
+  }
+
+  public async evaluate(
+    { fn, args = [] }: EvaluateOpts,
+    meta: EvaluateMetaOpts,
+    logger: LevelLogger
+  ) {
+    logger.debug(`evaluate ${meta.context}`);
+    const result = await this.page.evaluate(fn, ...args);
+    return result;
+  }
+
+  public async waitForSelector(
+    selector: string,
+    opts: WaitForSelectorOpts,
+    context: EvaluateMetaOpts,
+    logger: LevelLogger
+  ): Promise<ElementHandle<Element>> {
+    const { timeout } = opts;
+    logger.debug(`waitForSelector ${selector}`);
+    const resp = await this.page.waitFor(selector, { timeout }); // override default 30000ms
+    logger.debug(`waitForSelector ${selector} resolved`);
+    return resp;
+  }
+
+  public async waitFor(
+    {
+      fn,
+      args,
+      toEqual,
+      timeout,
+    }: {
+      fn: EvaluateFn;
+      args: SerializableOrJSHandle[];
+      toEqual: number;
+      timeout: number;
+    },
+    context: EvaluateMetaOpts,
+    logger: LevelLogger
+  ): Promise<void> {
+    const startTime = Date.now();
+
+    while (true) {
+      const result = await this.evaluate({ fn, args }, context, logger);
+      if (result === toEqual) {
+        return;
+      }
+
+      if (Date.now() - startTime > timeout) {
+        throw new Error(
+          `Timed out waiting for the items selected to equal ${toEqual}. Found: ${result}. Context: ${context.context}`
+        );
+      }
+      await new Promise((r) => setTimeout(r, WAIT_FOR_DELAY_MS));
+    }
+  }
+
+  public async setViewport(
+    { width, height, zoom }: ViewZoomWidthHeight,
+    logger: LevelLogger
+  ): Promise<void> {
+    logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
+
+    await this.page.setViewport({
+      width: Math.floor(width / zoom),
+      height: Math.floor(height / zoom),
+      deviceScaleFactor: zoom,
+      isMobile: false,
+    });
+  }
+
+  private registerListeners(conditionalHeaders: ConditionalHeaders, logger: LevelLogger) {
+    if (this.listenersAttached) {
+      return;
+    }
+
+    // @ts-ignore
+    const client = this.page._client;
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
     // puppeteer's API will cause map tile requests to hang indefinitely:
@@ -92,6 +214,7 @@ export class HeadlessChromiumDriver {
         requestId,
         request: { url: interceptedUrl },
       } = interceptedRequest;
+
       const allowed = !interceptedUrl.startsWith('file://');
       const isData = interceptedUrl.startsWith('data:');
 
@@ -151,13 +274,14 @@ export class HeadlessChromiumDriver {
           );
         }
       }
-      interceptedCount = interceptedCount + (isData ? 0 : 1);
+
+      this.interceptedCount = this.interceptedCount + (isData ? 0 : 1);
     });
 
     // Even though 3xx redirects go through our request
     // handler, we should probably inspect responses just to
     // avoid being bamboozled by some malicious request
-    this.page.on('response', interceptedResponse => {
+    this.page.on('response', (interceptedResponse: Response) => {
       const interceptedUrl = interceptedResponse.url();
       const allowed = !interceptedUrl.startsWith('file://');
 
@@ -174,107 +298,7 @@ export class HeadlessChromiumDriver {
       }
     });
 
-    await this.page.goto(url, { waitUntil: 'domcontentloaded' });
-
-    if (this.inspect) {
-      await this.launchDebugger();
-    }
-
-    await this.waitForSelector(
-      pageLoadSelector,
-      { timeout },
-      { context: 'waiting for page load selector' },
-      logger
-    );
-    logger.info(`handled ${interceptedCount} page requests`);
-  }
-
-  public async screenshot(elementPosition: ElementPosition): Promise<string> {
-    let clip;
-    if (elementPosition) {
-      const { boundingClientRect, scroll = { x: 0, y: 0 } } = elementPosition;
-      clip = {
-        x: boundingClientRect.left + scroll.x,
-        y: boundingClientRect.top + scroll.y,
-        height: boundingClientRect.height,
-        width: boundingClientRect.width,
-      };
-    }
-
-    const screenshot = await this.page.screenshot({
-      clip,
-    });
-
-    return screenshot.toString('base64');
-  }
-
-  public async evaluate(
-    { fn, args = [] }: EvaluateOpts,
-    meta: EvaluateMetaOpts,
-    logger: LevelLogger
-  ) {
-    logger.debug(`evaluate ${meta.context}`);
-    const result = await this.page.evaluate(fn, ...args);
-    return result;
-  }
-
-  public async waitForSelector(
-    selector: string,
-    opts: WaitForSelectorOpts,
-    context: EvaluateMetaOpts,
-    logger: LevelLogger
-  ): Promise<ElementHandle<Element>> {
-    const { timeout } = opts;
-    logger.debug(`waitForSelector ${selector}`);
-    const resp = await this.page.waitFor(selector, { timeout }); // override default 30000ms
-    logger.debug(`waitForSelector ${selector} resolved`);
-    return resp;
-  }
-
-  public async waitFor(
-    {
-      fn,
-      args,
-      toEqual,
-      timeout,
-    }: {
-      fn: EvaluateFn;
-      args: SerializableOrJSHandle[];
-      toEqual: number;
-      timeout: number;
-    },
-    context: EvaluateMetaOpts,
-    logger: LevelLogger
-  ): Promise<void> {
-    const startTime = Date.now();
-
-    while (true) {
-      const result = await this.evaluate({ fn, args }, context, logger);
-      if (result === toEqual) {
-        return;
-      }
-
-      if (Date.now() - startTime > timeout) {
-        throw new Error(
-          `Timed out waiting for the items selected to equal ${toEqual}. Found: ${result}. Context: ${context.context}`
-        );
-      }
-      await new Promise(r => setTimeout(r, WAIT_FOR_DELAY_MS));
-    }
-  }
-
-  public async setViewport(
-    { width, height, zoom }: ViewZoomWidthHeight,
-    logger: LevelLogger
-  ): Promise<void> {
-    logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
-
-    await this.page.setViewport({
-      width: Math.floor(width / zoom),
-      height: Math.floor(height / zoom),
-      deviceScaleFactor: zoom,
-      isMobile: false,
-    });
+    this.listenersAttached = true;
   }
 
   private async launchDebugger() {

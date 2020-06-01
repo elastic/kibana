@@ -29,10 +29,12 @@ export const modelMemoryLimitSchema = schema.object({
 });
 
 export const validateJobSchema = schema.object({
-  duration: schema.object({
-    start: schema.maybe(schema.number()),
-    end: schema.maybe(schema.number()),
-  }),
+  duration: schema.maybe(
+    schema.object({
+      start: schema.maybe(schema.number()),
+      end: schema.maybe(schema.number()),
+    })
+  ),
   fields: schema.maybe(schema.any()),
   job: schema.object(anomalyDetectionJobSchema),
 });

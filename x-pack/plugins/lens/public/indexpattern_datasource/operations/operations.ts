@@ -52,20 +52,22 @@ export function getOperationDisplay() {
   return display;
 }
 
+function getSortScoreByPriority(a: GenericOperationDefinition, b: GenericOperationDefinition) {
+  return (b.priority || Number.NEGATIVE_INFINITY) - (a.priority || Number.NEGATIVE_INFINITY);
+}
+
 /**
  * Returns all `OperationType`s that can build a column using `buildColumn` based on the
  * passed in field.
  */
-export function getOperationTypesForField(field: IndexPatternField) {
+export function getOperationTypesForField(field: IndexPatternField): OperationType[] {
   return operationDefinitions
     .filter(
-      operationDefinition =>
+      (operationDefinition) =>
         'getPossibleOperationForField' in operationDefinition &&
         operationDefinition.getPossibleOperationForField(field)
     )
-    .sort(
-      (a, b) => (b.priority || Number.NEGATIVE_INFINITY) - (a.priority || Number.NEGATIVE_INFINITY)
-    )
+    .sort(getSortScoreByPriority)
     .map(({ type }) => type);
 }
 
@@ -131,8 +133,8 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
     }
   };
 
-  operationDefinitions.forEach(operationDefinition => {
-    indexPattern.fields.forEach(field => {
+  operationDefinitions.sort(getSortScoreByPriority).forEach((operationDefinition) => {
+    indexPattern.fields.forEach((field) => {
       addToMap(
         {
           type: 'field',
@@ -154,13 +156,6 @@ function getPossibleOperationForField(
   return 'getPossibleOperationForField' in operationDefinition
     ? operationDefinition.getPossibleOperationForField(field)
     : undefined;
-}
-
-function getDefinition(findFunction: (definition: GenericOperationDefinition) => boolean) {
-  const candidates = operationDefinitions.filter(findFunction);
-  return candidates.reduce((a, b) =>
-    (a.priority || Number.NEGATIVE_INFINITY) > (b.priority || Number.NEGATIVE_INFINITY) ? a : b
-  );
 }
 
 /**
@@ -204,7 +199,7 @@ export function buildColumn({
   suggestedPriority,
   previousColumn,
 }: {
-  op?: OperationType;
+  op: OperationType;
   columns: Partial<Record<string, IndexPatternColumn>>;
   suggestedPriority: DimensionPriority | undefined;
   layerId: string;
@@ -212,15 +207,7 @@ export function buildColumn({
   field: IndexPatternField;
   previousColumn?: IndexPatternColumn;
 }): IndexPatternColumn {
-  let operationDefinition: GenericOperationDefinition | undefined;
-
-  if (op) {
-    operationDefinition = operationDefinitionMap[op];
-  } else if (field) {
-    operationDefinition = getDefinition(definition =>
-      Boolean(getPossibleOperationForField(definition, field))
-    );
-  }
+  const operationDefinition = operationDefinitionMap[op];
 
   if (!operationDefinition) {
     throw new Error('No suitable operation found for given parameters');

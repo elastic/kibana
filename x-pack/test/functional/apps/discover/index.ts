@@ -5,11 +5,12 @@
  */
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('discover', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('discover', function () {
     this.tags('ciGroup8');
 
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./preserve_url'));
+    loadTestFile(require.resolve('./reporting'));
   });
 }

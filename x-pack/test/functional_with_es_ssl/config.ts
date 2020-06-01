@@ -10,8 +10,23 @@ import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
+// .server-log is specifically not enabled
+const enabledActionTypes = [
+  '.email',
+  '.index',
+  '.pagerduty',
+  '.servicenow',
+  '.slack',
+  '.webhook',
+  'test.authorization',
+  'test.failing',
+  'test.index-record',
+  'test.noop',
+  'test.rate-limit',
+];
+
 // eslint-disable-next-line import/no-default-export
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
   const servers = {
@@ -36,7 +51,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('apps'),
       triggersActions: {
         pathname: '/app/kibana',
-        hash: '/management/kibana/triggersActions',
+        hash: '/management/insightsAndAlerting/triggersActions',
       },
     },
     esTestCluster: {
@@ -50,18 +65,20 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.hosts=https://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
-        '--xpack.actions.enabled=true',
-        '--xpack.alerting.enabled=true',
-        `--xpack.actions.preconfigured=${JSON.stringify([
-          {
-            id: 'my-slack1',
+        `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+        `--xpack.actions.preconfigured=${JSON.stringify({
+          'my-slack1': {
             actionTypeId: '.slack',
-            name: 'Slack#xyz',
+            name: 'Slack#xyztest',
             config: {
               webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
             },
           },
-        ])}`,
+          'my-server-log': {
+            actionTypeId: '.server-log',
+            name: 'Serverlog#xyz',
+          },
+        })}`,
       ],
     },
   };

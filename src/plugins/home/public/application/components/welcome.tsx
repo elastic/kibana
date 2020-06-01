@@ -31,7 +31,6 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiIcon,
   EuiPortal,
 } from '@elastic/eui';
@@ -61,7 +60,7 @@ export class Welcome extends React.Component<Props> {
   };
 
   private redirecToSampleData() {
-    const path = this.services.addBasePath('#/home/tutorial_directory/sampleData');
+    const path = this.services.addBasePath('#/tutorial_directory/sampleData');
     window.location.href = path;
   }
 
@@ -141,20 +140,9 @@ export class Welcome extends React.Component<Props> {
               </span>
               <EuiTitle size="l" className="homWelcome__title">
                 <h1>
-                  <FormattedMessage
-                    id="home.welcomeTitle"
-                    defaultMessage="Welcome to Elastic Kibana"
-                  />
+                  <FormattedMessage id="home.welcomeTitle" defaultMessage="Welcome to Elastic" />
                 </h1>
               </EuiTitle>
-              <EuiText size="s" color="subdued" className="homWelcome__subtitle">
-                <p>
-                  <FormattedMessage
-                    id="home.welcomeDescription"
-                    defaultMessage="Your window into the Elastic Stack"
-                  />
-                </p>
-              </EuiText>
               <EuiSpacer size="m" />
             </div>
           </header>

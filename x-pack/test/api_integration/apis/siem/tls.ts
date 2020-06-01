@@ -5,13 +5,13 @@
  */
 
 import expect from '@kbn/expect';
-import { tlsQuery } from '../../../../legacy/plugins/siem/public/containers/tls/index.gql_query';
+import { tlsQuery } from '../../../../plugins/siem/public/network/containers/tls/index.gql_query';
 import {
   Direction,
   TlsFields,
   FlowTarget,
   GetTlsQuery,
-} from '../../../../legacy/plugins/siem/public/graphql/types';
+} from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
@@ -88,7 +88,7 @@ const expectedOverviewSourceResult = {
   totalCount: 3,
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('Tls Test with Packetbeat', () => {
@@ -120,7 +120,7 @@ export default function({ getService }: FtrProviderContext) {
               inspect: false,
             },
           })
-          .then(resp => {
+          .then((resp) => {
             const tls = resp.data.source.Tls;
             expect(tls.edges.length).to.be(1);
             expect(tls.totalCount).to.be(1);
@@ -152,7 +152,7 @@ export default function({ getService }: FtrProviderContext) {
               inspect: false,
             },
           })
-          .then(resp => {
+          .then((resp) => {
             const tls = resp.data.source.Tls;
             expect(tls.edges.length).to.be(1);
             expect(tls.totalCount).to.be(1);
@@ -189,7 +189,7 @@ export default function({ getService }: FtrProviderContext) {
               inspect: false,
             },
           })
-          .then(resp => {
+          .then((resp) => {
             const tls = resp.data.source.Tls;
             expect(tls.pageInfo).to.eql(expectedOverviewSourceResult.pageInfo);
             expect(tls.edges[0]).to.eql(expectedOverviewSourceResult.edges[0]);
@@ -220,7 +220,7 @@ export default function({ getService }: FtrProviderContext) {
               inspect: false,
             },
           })
-          .then(resp => {
+          .then((resp) => {
             const tls = resp.data.source.Tls;
             expect(tls.pageInfo).to.eql(expectedOverviewDestinationResult.pageInfo);
             expect(tls.edges[0]).to.eql(expectedOverviewDestinationResult.edges[0]);

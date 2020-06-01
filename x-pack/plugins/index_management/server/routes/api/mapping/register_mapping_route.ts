@@ -13,9 +13,9 @@ const paramsSchema = schema.object({
 });
 
 function formatHit(hit: { [key: string]: { mappings: any } }, indexName: string) {
-  const mapping = hit[indexName].mappings;
+  const mappings = hit[indexName].mappings;
   return {
-    mapping,
+    mappings,
   };
 }
 
@@ -30,7 +30,7 @@ export function registerMappingRoute({ router, license, lib }: RouteDependencies
       };
 
       try {
-        const hit = await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
+        const hit = await ctx.core.elasticsearch.legacy.client.callAsCurrentUser(
           'indices.getMapping',
           params
         );

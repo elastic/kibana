@@ -18,7 +18,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
+import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
+  useBreadcrumbs,
   usePagination,
   useGetEnrollmentAPIKeys,
   useGetAgentConfigs,
@@ -29,7 +31,6 @@ import {
 import { EnrollmentAPIKey } from '../../../types';
 import { SearchBar } from '../../../components/search_bar';
 import { NewEnrollmentTokenFlyout } from './components/new_enrollment_key_flyout';
-import {} from '@elastic/eui';
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
 
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
@@ -125,6 +126,7 @@ const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
 };
 
 export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
+  useBreadcrumbs('fleet_enrollment_tokens');
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [search, setSearch] = useState('');
   const { pagination, setPagination, pageSizeOptions } = usePagination();
@@ -176,7 +178,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Config',
       }),
       render: (configId: string) => {
-        const config = agentConfigs.find(c => c.id === configId);
+        const config = agentConfigs.find((c) => c.id === configId);
         return <>{config ? config.name : configId}</>;
       },
     },
@@ -244,14 +246,14 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         <EuiFlexItem>
           <SearchBar
             value={search}
-            onChange={newSearch => {
+            onChange={(newSearch) => {
               setPagination({
                 ...pagination,
                 currentPage: 1,
               });
               setSearch(newSearch);
             }}
-            fieldPrefix="enrollment_api_keys"
+            fieldPrefix={ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

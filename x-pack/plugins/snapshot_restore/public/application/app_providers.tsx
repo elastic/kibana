@@ -5,8 +5,8 @@
  */
 import React from 'react';
 
-import { API_BASE_PATH } from '../../common/constants';
-import { AuthorizationProvider } from './lib/authorization';
+import { API_BASE_PATH } from '../../common';
+import { AuthorizationProvider } from '../shared_imports';
 import { AppContextProvider, AppDependencies } from './app_context';
 
 interface Props {
@@ -18,10 +18,11 @@ export const AppProviders = ({ appDependencies, children }: Props) => {
   const { core } = appDependencies;
   const {
     i18n: { Context: I18nContext },
+    http,
   } = core;
 
   return (
-    <AuthorizationProvider privilegesEndpoint={`${API_BASE_PATH}privileges`}>
+    <AuthorizationProvider httpClient={http} privilegesEndpoint={`${API_BASE_PATH}privileges`}>
       <I18nContext>
         <AppContextProvider value={appDependencies}>{children}</AppContextProvider>
       </I18nContext>

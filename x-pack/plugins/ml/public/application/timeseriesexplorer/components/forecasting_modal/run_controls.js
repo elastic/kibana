@@ -23,8 +23,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-// don't use something like plugins/ml/../common
-// because it won't work with the jest tests
 import { JOB_STATE } from '../../../../../common/constants/states';
 import { FORECAST_DURATION_MAX_DAYS } from './forecasting_modal';
 import { ForecastProgress } from './forecast_progress';
@@ -32,7 +30,7 @@ import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import {
   checkPermission,
   createPermissionFailureMessage,
-} from '../../../privilege/check_privilege';
+} from '../../../capabilities/check_capabilities';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 

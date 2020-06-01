@@ -48,7 +48,7 @@ export function mssqlMetricsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-mssql.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/mssql.svg',
+    euiIconType: '/plugins/home/assets/logos/mssql.svg',
     isBeta: false,
     artifacts: {
       dashboards: [
@@ -65,7 +65,7 @@ export function mssqlMetricsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/mssql_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/mssql_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

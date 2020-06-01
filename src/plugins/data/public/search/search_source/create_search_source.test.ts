@@ -20,36 +20,40 @@ import { createSearchSource as createSearchSourceFactory } from './create_search
 import { IIndexPattern } from '../../../common/index_patterns';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { Filter } from '../../../common/es_query/filters';
+import { coreMock } from '../../../../../core/public/mocks';
+import { dataPluginMock } from '../../mocks';
 
-describe('createSearchSource', function() {
-  let createSearchSource: ReturnType<typeof createSearchSourceFactory>;
+describe('createSearchSource', () => {
   const indexPatternMock: IIndexPattern = {} as IIndexPattern;
   let indexPatternContractMock: jest.Mocked<IndexPatternsContract>;
+  let dependencies: any;
+  let createSearchSource: ReturnType<typeof createSearchSourceFactory>;
 
   beforeEach(() => {
+    const core = coreMock.createStart();
+    const data = dataPluginMock.createStartContract();
+
+    dependencies = {
+      searchService: data.search,
+      uiSettings: core.uiSettings,
+      injectedMetadata: core.injectedMetadata,
+    };
+
     indexPatternContractMock = ({
       get: jest.fn().mockReturnValue(Promise.resolve(indexPatternMock)),
     } as unknown) as jest.Mocked<IndexPatternsContract>;
-    createSearchSource = createSearchSourceFactory(indexPatternContractMock);
-  });
 
-  it('should fail if JSON is invalid', () => {
-    expect(createSearchSource('{', [])).rejects.toThrow();
-    expect(createSearchSource('0', [])).rejects.toThrow();
-    expect(createSearchSource('"abcdefg"', [])).rejects.toThrow();
+    createSearchSource = createSearchSourceFactory(indexPatternContractMock, dependencies);
   });
 
   it('should set fields', async () => {
-    const searchSource = await createSearchSource(
-      JSON.stringify({
-        highlightAll: true,
-        query: {
-          query: '',
-          language: 'kuery',
-        },
-      }),
-      []
-    );
+    const searchSource = await createSearchSource({
+      highlightAll: true,
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+    });
     expect(searchSource.getOwnField('highlightAll')).toBe(true);
     expect(searchSource.getOwnField('query')).toEqual({
       query: '',
@@ -57,64 +61,32 @@ describe('createSearchSource', function() {
     });
   });
 
-  it('should resolve referenced index pattern', async () => {
-    const searchSource = await createSearchSource(
-      JSON.stringify({
-        indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-      }),
-      [
-        {
-          id: '123-456',
-          type: 'index-pattern',
-          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        },
-      ]
-    );
-    expect(indexPatternContractMock.get).toHaveBeenCalledWith('123-456');
-    expect(searchSource.getOwnField('index')).toBe(indexPatternMock);
-  });
-
   it('should set filters and resolve referenced index patterns', async () => {
-    const searchSource = await createSearchSource(
-      JSON.stringify({
-        filter: [
-          {
-            meta: {
-              alias: null,
-              negate: false,
-              disabled: false,
-              type: 'phrase',
-              key: 'category.keyword',
-              params: {
-                query: "Men's Clothing",
-              },
-              indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+    const searchSource = await createSearchSource({
+      filter: [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'category.keyword',
+            params: {
+              query: "Men's Clothing",
             },
-            query: {
-              match_phrase: {
-                'category.keyword': "Men's Clothing",
-              },
-            },
-            $state: {
-              store: 'appState',
+            index: '123-456',
+          },
+          query: {
+            match_phrase: {
+              'category.keyword': "Men's Clothing",
             },
           },
-        ],
-      }),
-      [
-        {
-          id: '123-456',
-          type: 'index-pattern',
-          name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
         },
-      ]
-    );
+      ],
+    });
     const filters = searchSource.getOwnField('filter') as Filter[];
     expect(filters[0]).toMatchInlineSnapshot(`
       Object {
-        "$state": Object {
-          "store": "appState",
-        },
         "meta": Object {
           "alias": null,
           "disabled": false,
@@ -136,13 +108,10 @@ describe('createSearchSource', function() {
   });
 
   it('should migrate legacy queries on the fly', async () => {
-    const searchSource = await createSearchSource(
-      JSON.stringify({
-        highlightAll: true,
-        query: 'a:b',
-      }),
-      []
-    );
+    const searchSource = await createSearchSource({
+      highlightAll: true,
+      query: 'a:b' as any,
+    });
     expect(searchSource.getOwnField('query')).toEqual({
       query: 'a:b',
       language: 'lucene',

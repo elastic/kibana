@@ -5,7 +5,7 @@
  */
 
 import { healthRoute } from './health';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
+import { httpServiceMock } from 'src/core/server/mocks';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { verifyApiAccess } from '../lib/license_api_access';
@@ -22,7 +22,7 @@ beforeEach(() => {
 
 describe('healthRoute', () => {
   it('registers the route', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     const licenseState = mockLicenseState();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -35,7 +35,7 @@ describe('healthRoute', () => {
   });
 
   it('queries the usage api', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     const licenseState = mockLicenseState();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -43,16 +43,16 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const elasticsearch = elasticsearchServiceMock.createSetup();
-    elasticsearch.adminClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
+    const esClient = elasticsearchServiceMock.createClusterClient();
+    esClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
 
-    const [context, req, res] = mockHandlerArguments({ elasticsearch }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
 
     await handler(context, req, res);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
 
-    expect(elasticsearch.adminClient.callAsInternalUser.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(esClient.callAsInternalUser.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "transport.request",
         Object {
@@ -64,7 +64,7 @@ describe('healthRoute', () => {
   });
 
   it('evaluates whether Encrypted Saved Objects is using an ephemeral encryption key', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     const licenseState = mockLicenseState();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -72,10 +72,10 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const elasticsearch = elasticsearchServiceMock.createSetup();
-    elasticsearch.adminClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
+    const esClient = elasticsearchServiceMock.createClusterClient();
+    esClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
 
-    const [context, req, res] = mockHandlerArguments({ elasticsearch }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
@@ -88,7 +88,7 @@ describe('healthRoute', () => {
   });
 
   it('evaluates missing security info from the usage api to mean that the security plugin is disbled', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     const licenseState = mockLicenseState();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -96,10 +96,10 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const elasticsearch = elasticsearchServiceMock.createSetup();
-    elasticsearch.adminClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
+    const esClient = elasticsearchServiceMock.createClusterClient();
+    esClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
 
-    const [context, req, res] = mockHandlerArguments({ elasticsearch }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
@@ -112,7 +112,7 @@ describe('healthRoute', () => {
   });
 
   it('evaluates missing security http info from the usage api to mean that the security plugin is disbled', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     const licenseState = mockLicenseState();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -120,10 +120,10 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const elasticsearch = elasticsearchServiceMock.createSetup();
-    elasticsearch.adminClient.callAsInternalUser.mockReturnValue(Promise.resolve({ security: {} }));
+    const esClient = elasticsearchServiceMock.createClusterClient();
+    esClient.callAsInternalUser.mockReturnValue(Promise.resolve({ security: {} }));
 
-    const [context, req, res] = mockHandlerArguments({ elasticsearch }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
@@ -136,7 +136,7 @@ describe('healthRoute', () => {
   });
 
   it('evaluates security enabled, and missing ssl info from the usage api to mean that the user cannot generate keys', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     const licenseState = mockLicenseState();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -144,12 +144,10 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const elasticsearch = elasticsearchServiceMock.createSetup();
-    elasticsearch.adminClient.callAsInternalUser.mockReturnValue(
-      Promise.resolve({ security: { enabled: true } })
-    );
+    const esClient = elasticsearchServiceMock.createClusterClient();
+    esClient.callAsInternalUser.mockReturnValue(Promise.resolve({ security: { enabled: true } }));
 
-    const [context, req, res] = mockHandlerArguments({ elasticsearch }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
@@ -162,7 +160,7 @@ describe('healthRoute', () => {
   });
 
   it('evaluates security enabled, SSL info present but missing http info from the usage api to mean that the user cannot generate keys', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     const licenseState = mockLicenseState();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -170,12 +168,12 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const elasticsearch = elasticsearchServiceMock.createSetup();
-    elasticsearch.adminClient.callAsInternalUser.mockReturnValue(
+    const esClient = elasticsearchServiceMock.createClusterClient();
+    esClient.callAsInternalUser.mockReturnValue(
       Promise.resolve({ security: { enabled: true, ssl: {} } })
     );
 
-    const [context, req, res] = mockHandlerArguments({ elasticsearch }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
@@ -188,7 +186,7 @@ describe('healthRoute', () => {
   });
 
   it('evaluates security and tls enabled to mean that the user can generate keys', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     const licenseState = mockLicenseState();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -196,12 +194,12 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const elasticsearch = elasticsearchServiceMock.createSetup();
-    elasticsearch.adminClient.callAsInternalUser.mockReturnValue(
+    const esClient = elasticsearchServiceMock.createClusterClient();
+    esClient.callAsInternalUser.mockReturnValue(
       Promise.resolve({ security: { enabled: true, ssl: { http: { enabled: true } } } })
     );
 
-    const [context, req, res] = mockHandlerArguments({ elasticsearch }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {

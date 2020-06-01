@@ -24,6 +24,7 @@ export { ExtendedBoundsParamEditor } from './extended_bounds';
 export { FieldParamEditor } from './field';
 export { FiltersParamEditor } from './filters';
 export { HasExtendedBoundsParamEditor } from './has_extended_bounds';
+export { IncludeExcludeParamEditor } from './include_exclude';
 export { IpRangesParamEditor } from './ip_ranges';
 export { IpRangeTypeParamEditor } from './ip_range_type';
 export { IsFilteredByCollarParamEditor } from './is_filtered_by_collar';

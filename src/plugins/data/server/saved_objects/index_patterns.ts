@@ -23,7 +23,7 @@ import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migration
 export const indexPatternSavedObjectType: SavedObjectsType = {
   name: 'index-pattern',
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   management: {
     icon: 'indexPatternApp',
     defaultSearchField: 'title',
@@ -32,11 +32,11 @@ export const indexPatternSavedObjectType: SavedObjectsType = {
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`;
+      return `/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`;
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/kibana#/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`,
+        path: `/app/kibana#/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'management.kibana.index_patterns',
       };
     },

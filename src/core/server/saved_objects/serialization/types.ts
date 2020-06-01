@@ -45,13 +45,10 @@ export interface SavedObjectsRawDocSource {
 }
 
 /**
- * A saved object type definition that allows for miscellaneous, unknown
- * properties, as current discussions around security, ACLs, etc indicate
- * that future props are likely to be added. Migrations support this
- * scenario out of the box.
+ * Saved Object base document
  */
-interface SavedObjectDoc {
-  attributes: any;
+interface SavedObjectDoc<T = unknown> {
+  attributes: T;
   id?: string; // NOTE: SavedObjectDoc is used for uncreated objects where `id` is optional
   type: string;
   namespace?: string;
@@ -59,8 +56,6 @@ interface SavedObjectDoc {
   migrationVersion?: SavedObjectsMigrationVersion;
   version?: string;
   updated_at?: string;
-
-  [rootProp: string]: any;
 }
 
 interface Referencable {
@@ -68,14 +63,18 @@ interface Referencable {
 }
 
 /**
- * We want to have two types, one that guarantees a "references" attribute
- * will exist and one that allows it to be null. Since we're not migrating
- * all the saved objects to have a "references" array, we need to support
- * the scenarios where it may be missing (ex migrations).
+ * Describes Saved Object documents from Kibana < 7.0.0 which don't have a
+ * `references` root property defined. This type should only be used in
+ * migrations.
  *
  * @public
  */
-export type SavedObjectUnsanitizedDoc = SavedObjectDoc & Partial<Referencable>;
+export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial<Referencable>;
 
-/** @public */
-export type SavedObjectSanitizedDoc = SavedObjectDoc & Referencable;
+/**
+ * Describes Saved Object documents that have passed through the migration
+ * framework and are guaranteed to have a `references` root property.
+ *
+ * @public
+ */
+export type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & Referencable;

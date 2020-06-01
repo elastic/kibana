@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { createSearchSource } from './search_source';
-import { SearchAggsSetup, SearchAggsStart, SearchAggsStartLegacy } from './aggs';
+import { SearchAggsSetup, SearchAggsStart } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
-import { LegacyApiCaller } from './es_client';
+import { LegacyApiCaller } from './legacy/es_client';
 import { SearchInterceptor } from './search_interceptor';
+import { ISearchSource, SearchSourceFields } from './search_source';
 
 /**
  * Search strategy interface contains a search method that takes in
@@ -50,7 +50,7 @@ export type TRegisterSearchStrategy = <T extends TStrategyTypes>(
  */
 export type TGetSearchStrategy = <T extends TStrategyTypes>(name: T) => ISearchStrategy<T>;
 
-interface ISearchStartLegacy {
+export interface ISearchStartLegacy {
   esClient: LegacyApiCaller;
 }
 
@@ -76,6 +76,9 @@ export interface ISearchStart {
   aggs: SearchAggsStart;
   setInterceptor: (searchInterceptor: SearchInterceptor) => void;
   search: ISearchGeneric;
-  createSearchSource: ReturnType<typeof createSearchSource>;
-  __LEGACY: ISearchStartLegacy & SearchAggsStartLegacy;
+  searchSource: {
+    create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
+    createEmpty: () => ISearchSource;
+  };
+  __LEGACY: ISearchStartLegacy;
 }

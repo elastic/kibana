@@ -10,7 +10,7 @@ import overviewFixtureGreenPlatinum from './fixtures/overview_green_platinum';
 import overviewFixtureRedPlatinum from './fixtures/overview_red_platinum';
 import overviewFixtureShardsRelocating from './fixtures/overview_shards_relocating';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

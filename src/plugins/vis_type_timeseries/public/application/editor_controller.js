@@ -21,7 +21,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { fetchIndexPatternFields } from './lib/fetch_fields';
 import { getSavedObjectsClient, getUISettings, getI18n } from '../services';
-import { VisEditor } from './components/vis_editor';
+import { VisEditor } from './components/vis_editor_lazy';
 
 export class EditorController {
   constructor(el, vis, eventEmitter, embeddableHandler) {

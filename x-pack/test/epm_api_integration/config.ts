@@ -6,7 +6,7 @@
 
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
 
   return {
@@ -28,7 +28,6 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.ingestManager.epm.enabled=true',
         '--xpack.ingestManager.epm.registryUrl=http://localhost:6666',
       ],
     },

@@ -13,21 +13,21 @@ import { SavedObjectTypeRegistry } from 'src/core/server';
 const typeRegistry = new SavedObjectTypeRegistry();
 typeRegistry.registerType({
   name: 'foo',
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   hidden: false,
   mappings: { properties: {} },
 });
 
 typeRegistry.registerType({
   name: 'bar',
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   hidden: false,
   mappings: { properties: {} },
 });
 
 typeRegistry.registerType({
   name: 'space',
-  namespaceAgnostic: true,
+  namespaceType: 'agnostic',
   hidden: true,
   mappings: { properties: {} },
 });
@@ -55,7 +55,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 [
   { id: DEFAULT_SPACE_ID, expectedNamespace: undefined },
   { id: 'space_1', expectedNamespace: 'space_1' },
-].forEach(currentSpace => {
+].forEach((currentSpace) => {
   describe(`${currentSpace.id} space`, () => {
     const createSpacesSavedObjectsClient = async () => {
       const request = createMockRequest();

@@ -5,7 +5,7 @@
  */
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
-import { AlertsClient } from './alerts_client';
+import { AlertsClient, CreateOptions } from './alerts_client';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../plugins/task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
@@ -13,11 +13,12 @@ import { TaskStatus } from '../../../plugins/task_manager/server';
 import { IntervalSchedule } from './types';
 import { resolvable } from './test_utils';
 import { encryptedSavedObjectsMock } from '../../../plugins/encrypted_saved_objects/server/mocks';
+import { actionsClientMock } from '../../actions/server/mocks';
 
 const taskManager = taskManagerMock.start();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const savedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createStart();
+const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 
 const alertsClientParams = {
   taskManager,
@@ -29,8 +30,8 @@ const alertsClientParams = {
   createAPIKey: jest.fn(),
   invalidateAPIKey: jest.fn(),
   logger: loggingServiceMock.create().get(),
-  encryptedSavedObjectsPlugin: encryptedSavedObjects,
-  preconfiguredActions: [],
+  encryptedSavedObjectsClient: encryptedSavedObjects,
+  getActionsClient: jest.fn(),
 };
 
 beforeEach(() => {
@@ -42,9 +43,38 @@ beforeEach(() => {
   });
   alertsClientParams.getUserName.mockResolvedValue('elastic');
   taskManager.runNow.mockResolvedValue({ id: '' });
+  const actionsClient = actionsClientMock.create();
+  actionsClient.getBulk.mockResolvedValueOnce([
+    {
+      id: '1',
+      isPreconfigured: false,
+      actionTypeId: 'test',
+      name: 'test',
+      config: {
+        foo: 'bar',
+      },
+    },
+    {
+      id: '2',
+      isPreconfigured: false,
+      actionTypeId: 'test2',
+      name: 'test2',
+      config: {
+        foo: 'bar',
+      },
+    },
+    {
+      id: 'testPreconfigured',
+      actionTypeId: '.slack',
+      isPreconfigured: true,
+      name: 'test',
+    },
+  ]);
+  alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
 });
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).Date = class Date {
   constructor() {
     return mockedDate;
@@ -54,7 +84,7 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
   }
 };
 
-function getMockData(overwrites: Record<string, any> = {}) {
+function getMockData(overwrites: Record<string, unknown> = {}): CreateOptions['data'] {
   return {
     enabled: true,
     name: 'abc',
@@ -90,23 +120,12 @@ describe('create()', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
       async executor() {},
+      producer: 'alerting',
     });
   });
 
   test('creates an alert', async () => {
     const data = getMockData();
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-      ],
-    });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -295,26 +314,6 @@ describe('create()', () => {
         },
       ],
     });
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-        {
-          id: '2',
-          type: 'action',
-          attributes: {
-            actionTypeId: 'test2',
-          },
-          references: [],
-        },
-      ],
-    });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -433,16 +432,6 @@ describe('create()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
-      {
-        id: '1',
-        type: 'action',
-      },
-      {
-        id: '2',
-        type: 'action',
-      },
-    ]);
   });
 
   test('creates a disabled alert', async () => {
@@ -538,6 +527,7 @@ describe('create()', () => {
         }),
       },
       async executor() {},
+      producer: 'alerting',
     });
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
@@ -546,7 +536,9 @@ describe('create()', () => {
 
   test('throws error if loading actions fails', async () => {
     const data = getMockData();
-    savedObjectsClient.bulkGet.mockRejectedValueOnce(new Error('Test Error'));
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getBulk.mockRejectedValueOnce(new Error('Test Error'));
+    alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test Error"`
     );
@@ -1895,30 +1887,11 @@ describe('update()', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
       async executor() {},
+      producer: 'alerting',
     });
   });
 
   test('updates given parameters', async () => {
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-        {
-          id: '2',
-          type: 'action',
-          attributes: {
-            actionTypeId: 'test2',
-          },
-          references: [],
-        },
-      ],
-    });
     savedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -2437,6 +2410,7 @@ describe('update()', () => {
         }),
       },
       async executor() {},
+      producer: 'alerting',
     });
     await expect(
       alertsClient.update({
@@ -2668,6 +2642,7 @@ describe('update()', () => {
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
         async executor() {},
+        producer: 'alerting',
       });
       savedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [
@@ -2799,7 +2774,7 @@ describe('update()', () => {
       expect(taskManager.runNow).not.toHaveBeenCalled();
     });
 
-    test('updating the alert should not wait for the rerun the task to complete', async done => {
+    test('updating the alert should not wait for the rerun the task to complete', async (done) => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 

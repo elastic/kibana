@@ -6,7 +6,7 @@
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
-import { checkPermission } from '../../../../../privilege/check_privilege';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 
@@ -76,6 +76,7 @@ export interface State {
     numTopFeatureImportanceValuesValid: boolean;
     previousJobType: null | AnalyticsJobType;
     previousSourceIndex: EsIndexName | undefined;
+    requiredFieldsError: string | undefined;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
@@ -133,6 +134,7 @@ export const getInitialState = (): State => ({
     numTopFeatureImportanceValuesValid: true,
     previousJobType: null,
     previousSourceIndex: undefined,
+    requiredFieldsError: undefined,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
@@ -218,7 +220,7 @@ export const getJobConfigFromFormState = (
       // the into an array of indices to be in the correct format for
       // the data frame analytics API.
       index: formState.sourceIndex.includes(',')
-        ? formState.sourceIndex.split(',').map(d => d.trim())
+        ? formState.sourceIndex.split(',').map((d) => d.trim())
         : formState.sourceIndex,
     },
     dest: {

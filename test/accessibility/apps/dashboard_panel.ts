@@ -19,7 +19,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'settings']);
   const a11y = getService('a11y');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -28,7 +28,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dashboard Panel', () => {
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
       await PageObjects.home.addSampleDataSet('flights');
       await PageObjects.common.navigateToApp('dashboard');
       await testSubjects.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');

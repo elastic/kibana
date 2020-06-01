@@ -55,22 +55,12 @@ exports[`is rendered 1`] = `
                 data-test-subj="exitFullScreenModeText"
               >
                 <div>
-                  <EuiTitle
-                    className="dshExitFullScreenButton__title"
-                    size="xxxs"
-                  >
-                    <p
-                      className="euiTitle euiTitle--xxxsmall dshExitFullScreenButton__title"
-                    >
-                      Elastic Kibana
-                    </p>
-                  </EuiTitle>
                   <EuiText
                     className="dshExitFullScreenButton__text"
-                    size="xs"
+                    size="s"
                   >
                     <div
-                      className="euiText euiText--extraSmall dshExitFullScreenButton__text"
+                      className="euiText euiText--small dshExitFullScreenButton__text"
                     >
                       <p>
                         Exit full screen

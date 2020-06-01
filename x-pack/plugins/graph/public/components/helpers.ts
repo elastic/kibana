@@ -5,5 +5,5 @@
  */
 
 export function isEqual<T extends object>(a: T, b: T) {
-  return (Object.keys(a) as Array<keyof T>).every(key => a[key] === b[key]);
+  return (Object.keys(a) as Array<keyof T>).every((key) => a[key] === b[key]);
 }

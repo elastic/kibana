@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PromiseReturnType } from '../../../../typings/common';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../helpers/setup_request';
 import { getBuckets } from './get_buckets';
 import { getDistributionMax } from './get_distribution_max';
@@ -31,7 +31,7 @@ export async function getTransactionDistribution({
   transactionType,
   transactionId,
   traceId,
-  setup
+  setup,
 }: {
   serviceName: string;
   transactionName: string;
@@ -66,6 +66,6 @@ export async function getTransactionDistribution({
   return {
     noHits,
     buckets,
-    bucketSize
+    bucketSize,
   };
 }

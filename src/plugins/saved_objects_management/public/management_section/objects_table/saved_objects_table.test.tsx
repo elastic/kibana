@@ -88,6 +88,7 @@ describe('SavedObjectsTable', () => {
   let overlays: ReturnType<typeof overlayServiceMock.createStartContract>;
   let notifications: ReturnType<typeof notificationServiceMock.createStartContract>;
   let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
+  let search: ReturnType<typeof dataPluginMock.createStartContract>['search'];
 
   const shallowRender = (overrides: Partial<SavedObjectsTableProps> = {}) => {
     return (shallowWithI18nProvider(
@@ -106,6 +107,7 @@ describe('SavedObjectsTable', () => {
     overlays = overlayServiceMock.createStartContract();
     notifications = notificationServiceMock.createStartContract();
     savedObjects = savedObjectsServiceMock.createStartContract();
+    search = dataPluginMock.createStartContract().search;
 
     const applications = applicationServiceMock.createStartContract();
     applications.capabilities = {
@@ -141,6 +143,7 @@ describe('SavedObjectsTable', () => {
       perPageConfig: 15,
       goInspectObject: () => {},
       canGoInApp: () => true,
+      search,
     };
 
     findObjectsMock.mockImplementation(() => ({
@@ -152,9 +155,9 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MyIndexPattern*`,
             icon: 'indexPatternApp',
-            editUrl: '#/management/kibana/index_patterns/1',
+            editUrl: '#/management/kibana/indexPatterns/patterns/1',
             inAppUrl: {
-              path: '/management/kibana/index_patterns/1',
+              path: '/management/kibana/indexPatterns/patterns/1',
               uiCapabilitiesPath: 'management.kibana.index_patterns',
             },
           },
@@ -193,7 +196,7 @@ describe('SavedObjectsTable', () => {
             icon: 'visualizeApp',
             editUrl: '#/management/kibana/objects/savedVisualizations/4',
             inAppUrl: {
-              path: '/visualize/edit/4',
+              path: '/edit/4',
               uiCapabilitiesPath: 'visualize.show',
             },
           },
@@ -206,7 +209,7 @@ describe('SavedObjectsTable', () => {
     const component = shallowRender({ perPageConfig: 15 });
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -220,7 +223,7 @@ describe('SavedObjectsTable', () => {
     const component = shallowRender({ perPageConfig: 15 });
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -234,7 +237,7 @@ describe('SavedObjectsTable', () => {
         { id: '3', type: 'dashboard' },
       ] as SavedObjectWithMetadata[];
 
-      const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
+      const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
         _id: obj.id,
         _source: {},
       }));
@@ -249,7 +252,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -270,7 +273,7 @@ describe('SavedObjectsTable', () => {
         { id: '3', type: 'dashboard' },
       ] as SavedObjectWithMetadata[];
 
-      const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
+      const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
         _id: obj.id,
         _source: {},
       }));
@@ -291,7 +294,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -313,7 +316,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender();
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -327,7 +330,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender();
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -357,7 +360,7 @@ describe('SavedObjectsTable', () => {
       });
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -385,7 +388,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender();
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -399,7 +402,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender();
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -415,7 +418,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender();
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -428,7 +431,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender();
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -467,7 +470,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender();
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -491,7 +494,7 @@ describe('SavedObjectsTable', () => {
       ] as SavedObjectWithMetadata[];
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -509,7 +512,7 @@ describe('SavedObjectsTable', () => {
         { id: '3', type: 'dashboard' },
       ] as SavedObjectWithMetadata[];
 
-      const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
+      const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
         id: obj.id,
         type: obj.type,
         source: {},
@@ -526,7 +529,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 

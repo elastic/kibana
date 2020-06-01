@@ -24,6 +24,7 @@ import { BUCKET_TYPES } from './bucket_agg_types';
 import { FieldFormatsGetConfigFn, NumberFormat } from '../../../../common';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
+import { InternalStartServices } from '../../../types';
 
 const buckets = [
   {
@@ -50,10 +51,11 @@ describe('Range Agg', () => {
 
   beforeEach(() => {
     aggTypesDependencies = {
-      getInternalStartServices: () => ({
-        fieldFormats: fieldFormatsServiceMock.createStartContract(),
-        notifications: notificationServiceMock.createStartContract(),
-      }),
+      getInternalStartServices: () =>
+        (({
+          fieldFormats: fieldFormatsServiceMock.createStartContract(),
+          notifications: notificationServiceMock.createStartContract(),
+        } as unknown) as InternalStartServices),
     };
 
     mockDataServices();

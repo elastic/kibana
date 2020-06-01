@@ -23,7 +23,6 @@ import {
 } from 'kibana/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { SecurityPluginSetup } from '../../../../security/public';
-import { MlConfigType } from '../../../common/types/ml_config';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
@@ -40,10 +39,9 @@ export interface DependencyCache {
   savedObjectsClient: SavedObjectsClientContract | null;
   application: ApplicationStart | null;
   http: HttpStart | null;
-  security: SecurityPluginSetup | null;
+  security: SecurityPluginSetup | undefined | null;
   i18n: I18nStart | null;
   urlGenerators: SharePluginStart['urlGenerators'] | null;
-  mlConfig: MlConfigType | null;
 }
 
 const cache: DependencyCache = {
@@ -64,7 +62,6 @@ const cache: DependencyCache = {
   security: null,
   i18n: null,
   urlGenerators: null,
-  mlConfig: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
@@ -85,7 +82,6 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.security = deps.security || null;
   cache.i18n = deps.i18n || null;
   cache.urlGenerators = deps.urlGenerators || null;
-  cache.mlConfig = deps.mlConfig || null;
 }
 
 export function getTimefilter() {
@@ -206,16 +202,9 @@ export function getGetUrlGenerator() {
   return cache.urlGenerators.getUrlGenerator;
 }
 
-export function getMlConfig() {
-  if (cache.mlConfig === null) {
-    throw new Error("mlConfig hasn't been initialized");
-  }
-  return cache.mlConfig;
-}
-
 export function clearCache() {
   console.log('clearing dependency cache'); // eslint-disable-line no-console
-  Object.keys(cache).forEach(k => {
+  Object.keys(cache).forEach((k) => {
     cache[k as keyof DependencyCache] = null;
   });
 }

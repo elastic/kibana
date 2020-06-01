@@ -15,7 +15,11 @@ import {
   ISyncSearchRequest,
   SYNC_SEARCH_STRATEGY,
 } from '../../../../../src/plugins/data/public';
+<<<<<<< HEAD
 import { IAsyncSearchOptions } from './types';
+=======
+import { IAsyncSearchRequest, IAsyncSearchOptions, IAsyncSearchResponse } from './types';
+>>>>>>> 96e0e911ea3a63e1d174d2f1583da59e609b3088
 
 export const ASYNC_SEARCH_STRATEGY = 'ASYNC_SEARCH_STRATEGY';
 
@@ -51,10 +55,22 @@ export function asyncSearchStrategyProvider(
         )
       : NEVER;
 
+<<<<<<< HEAD
     return syncSearch.search(request, options).pipe(
       expand(response => {
         // If the response indicates it is complete, stop polling and complete the observable
         if ((response.loaded ?? 0) >= (response.total ?? 0)) return EMPTY;
+=======
+      return search(request, options).pipe(
+        expand((response: IAsyncSearchResponse) => {
+          // If the response indicates of an error, stop polling and complete the observable
+          if (!response || (response.is_partial && !response.is_running)) {
+            return throwError(new AbortError());
+          }
+
+          // If the response indicates it is complete, stop polling and complete the observable
+          if (!response.is_running) return EMPTY;
+>>>>>>> 96e0e911ea3a63e1d174d2f1583da59e609b3088
 
         id = response.id;
 

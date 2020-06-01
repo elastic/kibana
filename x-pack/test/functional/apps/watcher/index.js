@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }) {
-  describe('watcher app', function() {
-    this.tags(['ciGroup1', 'smoke']);
+export default function ({ loadTestFile }) {
+  describe('watcher app', function () {
+    this.tags(['ciGroup1', 'includeFirefox']);
 
     //loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./watcher_test'));

@@ -13,7 +13,6 @@ import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
 import { getErrorMessage } from '../../../../common/util/errors';
 import { SavedSearchQuery } from '../../contexts/ml';
-import { SortDirection } from '../../components/ml_in_memory_table';
 
 export type IndexName = string;
 export type IndexPattern = string;
@@ -54,12 +53,8 @@ export interface ClassificationAnalysis {
 }
 
 export interface LoadExploreDataArg {
-  field: string;
-  direction: SortDirection;
+  filterByIsTraining?: boolean;
   searchQuery: SavedSearchQuery;
-  requiresKeyword?: boolean;
-  pageIndex?: number;
-  pageSize?: number;
 }
 
 export const SEARCH_SIZE = 1000;
@@ -96,7 +91,7 @@ export interface FieldSelectionItem {
 }
 
 export interface DfAnalyticsExplainResponse {
-  field_selection: FieldSelectionItem[];
+  field_selection?: FieldSelectionItem[];
   memory_estimation: {
     expected_memory_without_disk: string;
     expected_memory_with_disk: string;
@@ -272,6 +267,11 @@ export const isResultsSearchBoolQuery = (arg: any): arg is ResultsSearchBoolQuer
   return keys.length === 1 && keys[0] === 'bool';
 };
 
+export const isQueryStringQuery = (arg: any): arg is QueryStringQuery => {
+  const keys = Object.keys(arg);
+  return keys.length === 1 && keys[0] === 'query_string';
+};
+
 export const isRegressionEvaluateResponse = (arg: any): arg is RegressionEvaluateResponse => {
   const keys = Object.keys(arg);
   return (
@@ -343,7 +343,7 @@ export const useRefreshAnalyticsList = (
 
       subscriptions.push(
         distinct$
-          .pipe(filter(state => state === REFRESH_ANALYTICS_LIST_STATE.REFRESH))
+          .pipe(filter((state) => state === REFRESH_ANALYTICS_LIST_STATE.REFRESH))
           .subscribe(() => typeof callback.onRefresh === 'function' && callback.onRefresh())
       );
     }
@@ -351,7 +351,7 @@ export const useRefreshAnalyticsList = (
     if (typeof callback.isLoading === 'function') {
       subscriptions.push(
         distinct$.subscribe(
-          state =>
+          (state) =>
             typeof callback.isLoading === 'function' &&
             callback.isLoading(state === REFRESH_ANALYTICS_LIST_STATE.LOADING)
         )
@@ -359,7 +359,7 @@ export const useRefreshAnalyticsList = (
     }
 
     return () => {
-      subscriptions.map(sub => sub.unsubscribe());
+      subscriptions.map((sub) => sub.unsubscribe());
     };
   }, []);
 
@@ -396,6 +396,10 @@ interface ResultsSearchTermQuery {
   term: Dictionary<any>;
 }
 
+interface QueryStringQuery {
+  query_string: Dictionary<any>;
+}
+
 export type ResultsSearchQuery = ResultsSearchBoolQuery | ResultsSearchTermQuery | SavedSearchQuery;
 
 export function getEvalQueryBody({
@@ -405,20 +409,44 @@ export function getEvalQueryBody({
   ignoreDefaultQuery,
 }: {
   resultsField: string;
-  isTraining: boolean;
+  isTraining?: boolean;
   searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
 }) {
-  let query: ResultsSearchQuery = {
+  let query: any;
+
+  const trainingQuery: ResultsSearchQuery = {
     term: { [`${resultsField}.is_training`]: { value: isTraining } },
   };
 
-  if (searchQuery !== undefined && ignoreDefaultQuery === true) {
-    query = searchQuery;
-  } else if (searchQuery !== undefined && isResultsSearchBoolQuery(searchQuery)) {
-    const searchQueryClone = cloneDeep(searchQuery);
-    searchQueryClone.bool.must.push(query);
+  const searchQueryClone = cloneDeep(searchQuery);
+
+  if (isResultsSearchBoolQuery(searchQueryClone)) {
+    if (searchQueryClone.bool.must === undefined) {
+      searchQueryClone.bool.must = [];
+    }
+
+    if (isTraining !== undefined) {
+      searchQueryClone.bool.must.push(trainingQuery);
+    }
+
     query = searchQueryClone;
+  } else if (isQueryStringQuery(searchQueryClone)) {
+    query = {
+      bool: {
+        must: [searchQueryClone],
+      },
+    };
+    if (isTraining !== undefined) {
+      query.bool.must.push(trainingQuery);
+    }
+  } else {
+    // Not a bool or string query so we need to create it so can add the trainingQuery
+    query = {
+      bool: {
+        must: isTraining !== undefined ? [trainingQuery] : [],
+      },
+    };
   }
   return query;
 }
@@ -434,7 +462,7 @@ interface EvaluateMetrics {
 }
 
 interface LoadEvalDataConfig {
-  isTraining: boolean;
+  isTraining?: boolean;
   index: string;
   dependentVariable: string;
   resultsField: string;
@@ -513,7 +541,7 @@ interface TrackTotalHitsSearchResponse {
 
 interface LoadDocsCountConfig {
   ignoreDefaultQuery?: boolean;
-  isTraining: boolean;
+  isTraining?: boolean;
   searchQuery: SavedSearchQuery;
   resultsField: string;
   destIndex: string;

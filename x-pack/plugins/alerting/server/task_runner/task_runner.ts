@@ -5,7 +5,7 @@
  */
 
 import { pick, mapValues, omit, without } from 'lodash';
-import { Logger, SavedObject } from '../../../../../src/core/server';
+import { Logger, SavedObject, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';
@@ -25,7 +25,7 @@ import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { AlertInstances } from '../alert_instance/alert_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { IEvent, IEventLogger } from '../../../event_log/server';
+import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 
 const FALLBACK_RETRY_INTERVAL: IntervalSchedule = { interval: '5m' };
@@ -62,7 +62,7 @@ export class TaskRunner {
     // scoped with the API key to fetch the remaining data.
     const {
       attributes: { apiKey },
-    } = await this.context.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAlert>(
+    } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
       'alert',
       alertId,
       { namespace }
@@ -93,7 +93,7 @@ export class TaskRunner {
       },
     };
 
-    return this.context.getServices(fakeRequest);
+    return this.context.getServices((fakeRequest as unknown) as KibanaRequest);
   }
 
   private getExecutionHandler(
@@ -106,8 +106,8 @@ export class TaskRunner {
     references: SavedObject['references']
   ) {
     // Inject ids into actions
-    const actionsWithIds = actions.map(action => {
-      const actionReference = references.find(obj => obj.name === action.actionRef);
+    const actionsWithIds = actions.map((action) => {
+      const actionReference = references.find((obj) => obj.name === action.actionRef);
       if (!actionReference) {
         throw new Error(`Action reference "${action.actionRef}" not found in alert id: ${alertId}`);
       }
@@ -166,7 +166,7 @@ export class TaskRunner {
 
     const alertInstances = mapValues<RawAlertInstance, AlertInstance>(
       alertRawInstances,
-      rawAlertInstance => new AlertInstance(rawAlertInstance)
+      (rawAlertInstance) => new AlertInstance(rawAlertInstance)
     );
 
     const originalAlertInstanceIds = Object.keys(alertInstances);
@@ -174,11 +174,20 @@ export class TaskRunner {
     const alertLabel = `${this.alertType.id}:${alertId}: '${name}'`;
     const event: IEvent = {
       event: { action: EVENT_LOG_ACTIONS.execute },
-      kibana: { saved_objects: [{ type: 'alert', id: alertId, namespace }] },
+      kibana: {
+        saved_objects: [
+          {
+            rel: SAVED_OBJECT_REL_PRIMARY,
+            type: 'alert',
+            id: alertId,
+            namespace,
+          },
+        ],
+      },
     };
     eventLogger.startTiming(event);
 
-    let updatedAlertTypeState: void | Record<string, any>;
+    let updatedAlertTypeState: void | Record<string, unknown>;
     try {
       updatedAlertTypeState = await this.alertType.executor({
         alertId,
@@ -202,12 +211,16 @@ export class TaskRunner {
       event.message = `alert execution failure: ${alertLabel}`;
       event.error = event.error || {};
       event.error.message = err.message;
+      event.event = event.event || {};
+      event.event.outcome = 'failure';
       eventLogger.logEvent(event);
       throw err;
     }
 
     eventLogger.stopTiming(event);
     event.message = `alert executed: ${alertLabel}`;
+    event.event = event.event || {};
+    event.event.outcome = 'success';
     eventLogger.logEvent(event);
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
@@ -246,7 +259,7 @@ export class TaskRunner {
       alertTypeState: updatedAlertTypeState || undefined,
       alertInstances: mapValues<AlertInstance, RawAlertInstance>(
         instancesWithScheduledActions,
-        alertInstance => alertInstance.toRaw()
+        (alertInstance) => alertInstance.toRaw()
       ),
     };
   }
@@ -341,7 +354,7 @@ export class TaskRunner {
           };
         }
       ),
-      runAt: resolveErr<Date | undefined, Error>(runAt, err => {
+      runAt: resolveErr<Date | undefined, Error>(runAt, (err) => {
         return isAlertSavedObjectNotFoundError(err, alertId)
           ? undefined
           : getNextRunAt(
@@ -389,7 +402,14 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
         alerting: {
           instance_id: id,
         },
-        saved_objects: [{ type: 'alert', id: params.alertId, namespace: params.namespace }],
+        saved_objects: [
+          {
+            rel: SAVED_OBJECT_REL_PRIMARY,
+            type: 'alert',
+            id: params.alertId,
+            namespace: params.namespace,
+          },
+        ],
       },
       message,
     };

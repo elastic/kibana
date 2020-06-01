@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormLabel } from '@elastic/eui';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { AlertAdd } from './alert_add';
+import AlertAdd from './alert_add';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
 import { AlertsContextProvider, useAlertsContext } from '../../context/alerts_context';
@@ -41,11 +41,16 @@ describe('alert_add', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
-    const mockes = coreMock.createSetup();
+    const mocks = coreMock.createSetup();
+    const [
+      {
+        application: { capabilities },
+      },
+    ] = await mocks.getStartServices();
     deps = {
-      toastNotifications: mockes.notifications.toasts,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
+      toastNotifications: mocks.notifications.toasts,
+      http: mocks.http,
+      uiSettings: mocks.uiSettings,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       actionTypeRegistry: actionTypeRegistry as any,
@@ -53,7 +58,7 @@ describe('alert_add', () => {
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
 
-    mockes.http.get.mockResolvedValue({
+    mocks.http.get.mockResolvedValue({
       isSufficientlySecure: true,
       hasPermanentEncryptionKey: true,
     });
@@ -66,6 +71,7 @@ describe('alert_add', () => {
         return { errors: {} };
       },
       alertParamsExpression: TestExpression,
+      requiresAppContext: false,
     };
 
     const actionTypeModel = {
@@ -104,6 +110,14 @@ describe('alert_add', () => {
             uiSettings: deps.uiSettings,
             docLinks: deps.docLinks,
             metadata: { test: 'some value', fields: ['test'] },
+            capabilities: {
+              ...capabilities,
+              actions: {
+                delete: true,
+                save: true,
+                show: true,
+              },
+            },
           }}
         >
           <AlertAdd
@@ -128,10 +142,7 @@ describe('alert_add', () => {
     expect(wrapper.find('[data-test-subj="addAlertFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveAlertButton"]').exists()).toBeTruthy();
 
-    wrapper
-      .find('[data-test-subj="my-alert-type-SelectOption"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
 
     expect(wrapper.contains('Metadata: some value. Fields: test.')).toBeTruthy();
   });

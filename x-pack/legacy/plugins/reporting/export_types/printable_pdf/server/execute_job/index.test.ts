@@ -4,25 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
-import { createMockReportingCore, createMockBrowserDriverFactory } from '../../../../test_helpers';
-import { cryptoFactory } from '../../../../server/lib/crypto';
-import { LevelLogger } from '../../../../server/lib';
-import { CancellationToken } from '../../../../types';
-import { ReportingCore, CaptureConfig } from '../../../../server/types';
-import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { JobDocPayloadPDF } from '../../types';
-import { executeJobFactory } from './index';
-
 jest.mock('../lib/generate_pdf', () => ({ generatePdfObservableFactory: jest.fn() }));
+
+import * as Rx from 'rxjs';
+import { CancellationToken } from '../../../../../../../plugins/reporting/common';
+import { ReportingCore } from '../../../../server';
+import { cryptoFactory, LevelLogger } from '../../../../server/lib';
+import { createMockReportingCore } from '../../../../test_helpers';
+import { JobDocPayloadPDF } from '../../types';
+import { generatePdfObservableFactory } from '../lib/generate_pdf';
+import { executeJobFactory } from './index';
 
 let mockReporting: ReportingCore;
 
 const cancellationToken = ({
   on: jest.fn(),
 } as unknown) as CancellationToken;
-
-const captureConfig = {} as CaptureConfig;
 
 const mockLoggerFactory = {
   get: jest.fn().mockImplementation(() => ({
@@ -46,6 +43,7 @@ beforeEach(async () => {
     'server.basePath': '/sbp',
   };
   const reportingConfig = {
+    index: '.reports-test',
     encryptionKey: mockEncryptionKey,
     'kibanaServer.hostname': 'localhost',
     'kibanaServer.port': 5601,
@@ -72,16 +70,64 @@ beforeEach(async () => {
 
 afterEach(() => (generatePdfObservableFactory as jest.Mock).mockReset());
 
+test(`passes browserTimezone to generatePdf`, async () => {
+  const encryptedHeaders = await encryptHeaders({});
+  const generatePdfObservable = (await generatePdfObservableFactory(mockReporting)) as jest.Mock;
+  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
+
+  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
+  const browserTimezone = 'UTC';
+  await executeJob(
+    'pdfJobId',
+    getJobDocPayload({
+      relativeUrl: '/app/kibana#/something',
+      browserTimezone,
+      headers: encryptedHeaders,
+    }),
+    cancellationToken
+  );
+
+  expect(generatePdfObservable.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        LevelLogger {
+          "_logger": Object {
+            "get": [MockFunction],
+          },
+          "_tags": Array [
+            "printable_pdf",
+            "execute",
+            "pdfJobId",
+          ],
+          "warning": [Function],
+        },
+        undefined,
+        Array [
+          "http://localhost:5601/sbp/app/kibana#/something",
+        ],
+        "UTC",
+        Object {
+          "conditions": Object {
+            "basePath": "/sbp",
+            "hostname": "localhost",
+            "port": 5601,
+            "protocol": "http",
+          },
+          "headers": Object {},
+        },
+        undefined,
+        false,
+      ],
+    ]
+  `);
+});
+
 test(`returns content_type of application/pdf`, async () => {
   const logger = getMockLogger();
   const executeJob = await executeJobFactory(mockReporting, logger);
-  const mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger);
   const encryptedHeaders = await encryptHeaders({});
 
-  const generatePdfObservable = generatePdfObservableFactory(
-    captureConfig,
-    mockBrowserDriverFactory
-  );
+  const generatePdfObservable = await generatePdfObservableFactory(mockReporting);
   (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of(Buffer.from('')));
 
   const { content_type: contentType } = await executeJob(
@@ -94,12 +140,7 @@ test(`returns content_type of application/pdf`, async () => {
 
 test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const testContent = 'test content';
-  const mockBrowserDriverFactory = await createMockBrowserDriverFactory(getMockLogger());
-
-  const generatePdfObservable = generatePdfObservableFactory(
-    captureConfig,
-    mockBrowserDriverFactory
-  );
+  const generatePdfObservable = await generatePdfObservableFactory(mockReporting);
   (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
   const executeJob = await executeJobFactory(mockReporting, getMockLogger());

@@ -29,11 +29,11 @@ export const findRoute = (router: IRouter) => {
         query: findOptionsSchema,
       },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, FindOptionsType, any, any>,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, FindOptionsType, unknown>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       if (!context.eventLog) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for eventLog' });
       }

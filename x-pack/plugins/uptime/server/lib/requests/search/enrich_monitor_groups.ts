@@ -6,14 +6,14 @@
 
 import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
-import { QUERY, STATES } from '../../../../../../legacy/plugins/uptime/common/constants';
 import {
-  MonitorSummary,
-  SummaryHistogram,
   Check,
+  Histogram,
+  HistogramPoint,
+  MonitorSummary,
   CursorDirection,
   SortOrder,
-} from '../../../../../../legacy/plugins/uptime/common/graphql/types';
+} from '../../../../common/runtime_types';
 import { MonitorEnricher } from './fetch_page';
 
 export const enrichMonitorGroups: MonitorEnricher = async (
@@ -137,11 +137,11 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                         if (curCheck.tls == null) {
                           curCheck.tls = new HashMap();
                         }
-                        if (!doc["tls.certificate_not_valid_after"].isEmpty()) {
-                          curCheck.tls.certificate_not_valid_after = doc["tls.certificate_not_valid_after"][0];
+                        if (!doc["tls.server.x509.not_after"].isEmpty()) {
+                          curCheck.tls.not_after = doc["tls.server.x509.not_after"][0];
                         }
-                        if (!doc["tls.certificate_not_valid_before"].isEmpty()) {
-                          curCheck.tls.certificate_not_valid_before = doc["tls.certificate_not_valid_before"][0];
+                        if (!doc["tls.server.x509.not_before"].isEmpty()) {
+                          curCheck.tls.not_before = doc["tls.server.x509.not_before"][0];
                         }
 
                         state.checksByAgentIdIP[agentIdIP] = curCheck;
@@ -250,11 +250,8 @@ export const enrichMonitorGroups: MonitorEnricher = async (
   const summaries: MonitorSummary[] = monitorBuckets.map((monitor: any) => {
     const monitorId = get<string>(monitor, 'key.monitor_id');
     monitorIds.push(monitorId);
-    let state = get<any>(monitor, 'state.value');
-    state = {
-      ...state,
-      timestamp: state['@timestamp'],
-    };
+    const state: any = monitor.state?.value;
+    state.timestamp = state['@timestamp'];
     const { checks } = state;
     if (checks) {
       state.checks = sortBy<SortChecks, Check>(checks, checksSortBy);
@@ -273,7 +270,7 @@ export const enrichMonitorGroups: MonitorEnricher = async (
 
   const histogramMap = await getHistogramForMonitors(queryContext, monitorIds);
 
-  const resItems = summaries.map(summary => ({
+  const resItems = summaries.map((summary) => ({
     ...summary,
     histogram: histogramMap[summary.monitor_id],
   }));
@@ -289,7 +286,7 @@ export const enrichMonitorGroups: MonitorEnricher = async (
 const getHistogramForMonitors = async (
   queryContext: QueryContext,
   monitorIds: string[]
-): Promise<{ [key: string]: SummaryHistogram }> => {
+): Promise<{ [key: string]: Histogram }> => {
   const params = {
     index: queryContext.heartbeatIndices,
     body: {
@@ -297,6 +294,11 @@ const getHistogramForMonitors = async (
       query: {
         bool: {
           filter: [
+            {
+              range: {
+                'summary.down': { gt: 0 },
+              },
+            },
             {
               terms: {
                 'monitor.id': monitorIds,
@@ -314,25 +316,23 @@ const getHistogramForMonitors = async (
         },
       },
       aggs: {
-        by_id: {
-          terms: {
-            field: 'monitor.id',
-            size: STATES.LEGACY_STATES_QUERY_SIZE,
+        histogram: {
+          auto_date_histogram: {
+            field: '@timestamp',
+            // 12 seems to be a good size for performance given
+            // long monitor lists of up to 100 on the overview page
+            buckets: 12,
+            missing: 0,
           },
           aggs: {
-            histogram: {
-              auto_date_histogram: {
-                field: '@timestamp',
-                buckets: QUERY.DEFAULT_BUCKET_COUNT,
-                missing: 0,
+            by_id: {
+              terms: {
+                field: 'monitor.id',
+                size: Math.max(monitorIds.length, 1),
               },
               aggs: {
-                status: {
-                  terms: {
-                    field: 'monitor.status',
-                    size: 2,
-                    shard_size: 2,
-                  },
+                totalDown: {
+                  sum: { field: 'summary.down' },
                 },
               },
             },
@@ -343,32 +343,32 @@ const getHistogramForMonitors = async (
   };
   const result = await queryContext.search(params);
 
-  const buckets: any[] = get(result, 'aggregations.by_id.buckets', []);
-  return buckets.reduce((map: { [key: string]: any }, item: any) => {
-    const points = get(item, 'histogram.buckets', []).map((histogram: any) => {
-      const status = get(histogram, 'status.buckets', []).reduce(
-        (statuses: { up: number; down: number }, bucket: any) => {
-          if (bucket.key === 'up') {
-            statuses.up = bucket.doc_count;
-          } else if (bucket.key === 'down') {
-            statuses.down = bucket.doc_count;
-          }
-          return statuses;
-        },
-        { up: 0, down: 0 }
-      );
-      return {
-        timestamp: histogram.key,
-        ...status,
-      };
+  const histoBuckets: any[] = result.aggregations.histogram.buckets;
+  const simplified = histoBuckets.map((histoBucket: any): { timestamp: number; byId: any } => {
+    const byId: { [key: string]: number } = {};
+    histoBucket.by_id.buckets.forEach((idBucket: any) => {
+      byId[idBucket.key] = idBucket.totalDown.value;
     });
-
-    map[item.key] = {
-      count: item.doc_count,
-      points,
+    return {
+      timestamp: parseInt(histoBucket.key, 10),
+      byId,
     };
-    return map;
-  }, {});
+  });
+
+  const histosById: { [key: string]: Histogram } = {};
+  monitorIds.forEach((id: string) => {
+    const points: HistogramPoint[] = [];
+    simplified.forEach((simpleHisto) => {
+      points.push({
+        timestamp: simpleHisto.timestamp,
+        up: undefined,
+        down: simpleHisto.byId[id],
+      });
+    });
+    histosById[id] = { points };
+  });
+
+  return histosById;
 };
 
 const cursorDirectionToOrder = (cd: CursorDirection): 'asc' | 'desc' => {

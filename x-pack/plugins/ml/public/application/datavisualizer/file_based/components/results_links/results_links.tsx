@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
 import { ml } from '../../../../services/ml_api_service';
 import { isFullLicense } from '../../../../license';
-import { checkPermission } from '../../../../privilege/check_privilege';
+import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import { useMlKibana } from '../../../../contexts/kibana';
 
@@ -89,7 +89,7 @@ export const ResultsLinks: FC<Props> = ({
               />
             }
             description=""
-            href={`${basePath.get()}/app/kibana#/discover?&_a=(index:'${indexPatternId}')${globalStateString}`}
+            href={`${basePath.get()}/app/discover#/?&_a=(index:'${indexPatternId}')${globalStateString}`}
           />
         </EuiFlexItem>
       )}
@@ -139,7 +139,7 @@ export const ResultsLinks: FC<Props> = ({
             />
           }
           description=""
-          href={`${basePath.get()}/app/kibana#/management/elasticsearch/index_management/indices/filter/${index}`}
+          href={`${basePath.get()}/app/kibana#/management/data/index_management/indices/filter/${index}`}
         />
       </EuiFlexItem>
 
@@ -153,8 +153,8 @@ export const ResultsLinks: FC<Props> = ({
             />
           }
           description=""
-          href={`${basePath.get()}/app/kibana#/management/kibana/index_patterns/${
-            createIndexPattern ? indexPatternId : ''
+          href={`${basePath.get()}/app/kibana#/management/kibana/indexPatterns${
+            createIndexPattern ? `/patterns/${indexPatternId}` : ''
           }`}
         />
       </EuiFlexItem>

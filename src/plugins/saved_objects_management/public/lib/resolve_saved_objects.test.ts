@@ -25,6 +25,7 @@ import {
 } from './resolve_saved_objects';
 import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
 import { IndexPatternsContract } from '../../../data/public';
+import { dataPluginMock } from '../../../data/public/mocks';
 
 class SavedObjectNotFound extends Error {
   constructor(options: Record<string, any>) {
@@ -233,6 +234,19 @@ describe('resolveSavedObjects', () => {
   });
 
   describe('resolveIndexPatternConflicts', () => {
+    let dependencies: Parameters<typeof resolveIndexPatternConflicts>[3];
+
+    beforeEach(() => {
+      const search = dataPluginMock.createStartContract().search;
+
+      dependencies = {
+        indexPatterns: ({
+          get: (id: string) => Promise.resolve({ id }),
+        } as unknown) as IndexPatternsContract,
+        search,
+      };
+    });
+
     it('should resave resolutions', async () => {
       const save = jest.fn();
 
@@ -284,11 +298,13 @@ describe('resolveSavedObjects', () => {
 
       const overwriteAll = false;
 
-      await resolveIndexPatternConflicts(resolutions, conflictedIndexPatterns, overwriteAll, ({
-        get: (id: string) => Promise.resolve({ id }),
-      } as unknown) as IndexPatternsContract);
-      expect(conflictedIndexPatterns[0].obj.searchSource!.getField('index')!.id).toEqual('2');
-      expect(conflictedIndexPatterns[1].obj.searchSource!.getField('index')!.id).toEqual('4');
+      await resolveIndexPatternConflicts(
+        resolutions,
+        conflictedIndexPatterns,
+        overwriteAll,
+        dependencies
+      );
+
       expect(save.mock.calls.length).toBe(2);
       expect(save).toHaveBeenCalledWith({ confirmOverwrite: !overwriteAll });
     });
@@ -345,13 +361,13 @@ describe('resolveSavedObjects', () => {
 
       const overwriteAll = false;
 
-      await resolveIndexPatternConflicts(resolutions, conflictedIndexPatterns, overwriteAll, ({
-        get: (id: string) => Promise.resolve({ id }),
-      } as unknown) as IndexPatternsContract);
+      await resolveIndexPatternConflicts(
+        resolutions,
+        conflictedIndexPatterns,
+        overwriteAll,
+        dependencies
+      );
 
-      expect(conflictedIndexPatterns[0].obj.searchSource!.getField('filter')).toEqual([
-        { meta: { index: 'newFilterIndex' } },
-      ]);
       expect(save.mock.calls.length).toBe(2);
     });
   });

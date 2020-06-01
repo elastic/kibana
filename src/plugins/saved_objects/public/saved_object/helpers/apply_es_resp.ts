@@ -17,9 +17,13 @@
  * under the License.
  */
 import _ from 'lodash';
-import { EsResponse, SavedObject, SavedObjectConfig } from '../../types';
+import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
 import { expandShorthand, SavedObjectNotFound } from '../../../../kibana_utils/public';
-import { DataPublicPluginStart, IndexPattern } from '../../../../data/public';
+import {
+  IndexPattern,
+  injectSearchSourceReferences,
+  parseSearchSourceJSON,
+} from '../../../../data/public';
 
 /**
  * A given response of and ElasticSearch containing a plain saved object is applied to the given
@@ -29,7 +33,7 @@ export async function applyESResp(
   resp: EsResponse,
   savedObject: SavedObject,
   config: SavedObjectConfig,
-  createSearchSource: DataPublicPluginStart['search']['createSearchSource']
+  dependencies: SavedObjectKibanaServices
 ) {
   const mapping = expandShorthand(config.mapping);
   const esType = config.type || '';
@@ -63,9 +67,21 @@ export async function applyESResp(
   _.assign(savedObject, savedObject._source);
   savedObject.lastSavedTitle = savedObject.title;
 
-  if (config.searchSource) {
+  if (meta.searchSourceJSON) {
     try {
-      savedObject.searchSource = await createSearchSource(meta.searchSourceJSON, resp.references);
+      let searchSourceValues = parseSearchSourceJSON(meta.searchSourceJSON);
+
+      if (config.searchSource) {
+        searchSourceValues = injectSearchSourceReferences(
+          searchSourceValues as any,
+          resp.references
+        );
+        savedObject.searchSource = await dependencies.search.searchSource.create(
+          searchSourceValues
+        );
+      } else {
+        savedObject.searchSourceFields = searchSourceValues;
+      }
     } catch (error) {
       if (
         error.constructor.name === 'SavedObjectNotFound' &&

@@ -70,6 +70,9 @@ export class KibanaFramework {
       case 'put':
         this.router.put(routeConfig, handler);
         break;
+      case 'patch':
+        this.router.patch(routeConfig, handler);
+        break;
     }
   }
 
@@ -210,7 +213,7 @@ export class KibanaFramework {
         }
       : {};
 
-    return elasticsearch.dataClient.callAsCurrentUser(endpoint, {
+    return elasticsearch.legacy.client.callAsCurrentUser(endpoint, {
       ...params,
       ...frozenIndicesParams,
     });
@@ -220,7 +223,7 @@ export class KibanaFramework {
     return new IndexPatternsFetcher((...rest: Parameters<APICaller>) => {
       rest[1] = rest[1] || {};
       rest[1].allowNoIndices = true;
-      return requestContext.core.elasticsearch.adminClient.callAsCurrentUser(...rest);
+      return requestContext.core.elasticsearch.legacy.client.callAsCurrentUser(...rest);
     });
   }
 
@@ -245,7 +248,7 @@ export class KibanaFramework {
     timerange: { min: number; max: number },
     filters: any[]
   ): Promise<InfraTSVBResponse> {
-    const { getVisData } = this.plugins.metrics;
+    const { getVisData } = this.plugins.visTypeTimeseries;
     if (typeof getVisData !== 'function') {
       throw new Error('TSVB is not available');
     }

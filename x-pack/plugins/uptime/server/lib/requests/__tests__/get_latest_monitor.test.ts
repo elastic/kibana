@@ -5,14 +5,14 @@
  */
 
 import { getLatestMonitor } from '../get_latest_monitor';
-import { defaultDynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 describe('getLatestMonitor', () => {
   let expectedGetLatestSearchParams: any;
   let mockEsSearchResult: any;
   beforeEach(() => {
     expectedGetLatestSearchParams = {
-      index: defaultDynamicSettings.heartbeatIndices,
+      index: DYNAMIC_SETTINGS_DEFAULTS.heartbeatIndices,
       body: {
         query: {
           bool: {
@@ -32,7 +32,14 @@ describe('getLatestMonitor', () => {
           },
         },
         size: 1,
-        _source: ['url', 'monitor', 'observer', 'tls', '@timestamp'],
+        _source: [
+          'url',
+          'monitor',
+          'observer',
+          '@timestamp',
+          'tls.server.x509.not_after',
+          'tls.server.x509.not_before',
+        ],
         sort: {
           '@timestamp': { order: 'desc' },
         },
@@ -64,7 +71,7 @@ describe('getLatestMonitor', () => {
     const mockEsClient = jest.fn(async (_request: any, _params: any) => mockEsSearchResult);
     const result = await getLatestMonitor({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateStart: 'now-1h',
       dateEnd: 'now',
       monitorId: 'testMonitor',
@@ -83,6 +90,10 @@ describe('getLatestMonitor', () => {
           "type": "http",
         },
         "timestamp": "123456",
+        "tls": Object {
+          "not_after": undefined,
+          "not_before": undefined,
+        },
       }
     `);
     expect(result.timestamp).toBe('123456');

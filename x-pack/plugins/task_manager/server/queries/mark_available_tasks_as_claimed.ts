@@ -55,6 +55,7 @@ export const IdleTaskWithExpiredRunAt: MustCondition<TermFilter | RangeFilter> =
 };
 
 // TODO: Fix query clauses to support this
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const InactiveTasks: BoolClauseWithAnyCondition<any> = {
   bool: {
     must_not: [
@@ -103,7 +104,7 @@ export const updateFields = (fieldUpdates: {
   [field: string]: string | number | Date;
 }): ScriptClause => ({
   source: Object.keys(fieldUpdates)
-    .map(field => `ctx._source.task.${field}=params.${field};`)
+    .map((field) => `ctx._source.task.${field}=params.${field};`)
     .join(' '),
   lang: 'painless',
   params: fieldUpdates,

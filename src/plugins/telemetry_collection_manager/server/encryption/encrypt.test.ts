@@ -22,14 +22,14 @@ import { encryptTelemetry, getKID } from './encrypt';
 
 describe('getKID', () => {
   it(`returns 'kibana_dev' kid for development`, async () => {
-    const isProd = false;
-    const kid = getKID(isProd);
+    const useProdKey = false;
+    const kid = getKID(useProdKey);
     expect(kid).toBe('kibana_dev');
   });
 
   it(`returns 'kibana_prod' kid for development`, async () => {
-    const isProd = true;
-    const kid = getKID(isProd);
+    const useProdKey = true;
+    const kid = getKID(useProdKey);
     expect(kid).toBe('kibana');
   });
 });
@@ -41,19 +41,19 @@ describe('encryptTelemetry', () => {
 
   it('encrypts payload', async () => {
     const payload = { some: 'value' };
-    await encryptTelemetry(payload, { isProd: true });
+    await encryptTelemetry(payload, { useProdKey: true });
     expect(createRequestEncryptor).toBeCalledWith(telemetryJWKS);
   });
 
-  it('uses kibana kid on { isProd: true }', async () => {
+  it('uses kibana kid on { useProdKey: true }', async () => {
     const payload = { some: 'value' };
-    await encryptTelemetry(payload, { isProd: true });
+    await encryptTelemetry(payload, { useProdKey: true });
     expect(mockEncrypt).toBeCalledWith('kibana', payload);
   });
 
-  it('uses kibana_dev kid on { isProd: false }', async () => {
+  it('uses kibana_dev kid on { useProdKey: false }', async () => {
     const payload = { some: 'value' };
-    await encryptTelemetry(payload, { isProd: false });
+    await encryptTelemetry(payload, { useProdKey: false });
     expect(mockEncrypt).toBeCalledWith('kibana_dev', payload);
   });
 });

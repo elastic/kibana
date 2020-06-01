@@ -23,10 +23,6 @@ describe('Spaces Plugin', () => {
       const spacesSetup = await plugin.setup(core, { features, licensing });
       expect(spacesSetup).toMatchInlineSnapshot(`
         Object {
-          "__legacyCompat": Object {
-            "createDefaultSpace": [Function],
-            "registerLegacyAPI": [Function],
-          },
           "spacesService": Object {
             "getActiveSpace": [Function],
             "getBasePath": [Function],
@@ -81,7 +77,7 @@ describe('Spaces Plugin', () => {
 
       expect(core.savedObjects.registerType).toHaveBeenCalledWith({
         name: 'space',
-        namespaceAgnostic: true,
+        namespaceType: 'agnostic',
         hidden: true,
         mappings: expect.any(Object),
         migrations: expect.any(Object),

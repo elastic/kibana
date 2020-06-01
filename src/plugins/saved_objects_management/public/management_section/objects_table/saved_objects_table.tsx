@@ -73,6 +73,7 @@ import {
   SavedObjectsManagementActionServiceStart,
 } from '../../services';
 import { Header, Table, Flyout, Relationships } from './components';
+import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 
 interface ExportAllOption {
   id: string;
@@ -86,6 +87,7 @@ export interface SavedObjectsTableProps {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   http: HttpStart;
+  search: DataPublicPluginStart['search'];
   overlays: OverlayStart;
   notifications: NotificationsStart;
   applications: ApplicationStart;
@@ -161,7 +163,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const { allowedTypes } = this.props;
     const { queryText, visibleTypes } = parseQuery(this.state.activeQuery);
 
-    const filteredTypes = allowedTypes.filter(type => !visibleTypes || visibleTypes.includes(type));
+    const filteredTypes = allowedTypes.filter(
+      (type) => !visibleTypes || visibleTypes.includes(type)
+    );
 
     // These are the saved objects visible in the table.
     const filteredSavedObjectCounts = await getSavedObjectCounts(
@@ -173,7 +177,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const exportAllOptions: ExportAllOption[] = [];
     const exportAllSelectedOptions: Record<string, boolean> = {};
 
-    Object.keys(filteredSavedObjectCounts).forEach(id => {
+    Object.keys(filteredSavedObjectCounts).forEach((id) => {
       // Add this type as a bulk-export option.
       exportAllOptions.push({
         id,
@@ -188,7 +192,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     // the table filter dropdown.
     const savedObjectCounts = await getSavedObjectCounts(this.props.http, allowedTypes, queryText);
 
-    this.setState(state => ({
+    this.setState((state) => ({
       ...state,
       savedObjectCounts,
       exportAllOptions,
@@ -216,7 +220,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       perPage,
       page: page + 1,
       fields: ['id'],
-      type: allowedTypes.filter(type => !visibleTypes || visibleTypes.includes(type)),
+      type: allowedTypes.filter((type) => !visibleTypes || visibleTypes.includes(type)),
     };
     if (findOptions.type.length > 1) {
       findOptions.sortField = 'type';
@@ -310,7 +314,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   onExport = async (includeReferencesDeep: boolean) => {
     const { selectedSavedObjects } = this.state;
     const { notifications, http } = this.props;
-    const objectsToExport = selectedSavedObjects.map(obj => ({ id: obj.id, type: obj.type }));
+    const objectsToExport = selectedSavedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
 
     let blob;
     try {
@@ -416,13 +420,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     this.setState({ isDeleting: true });
 
-    const indexPatterns = selectedSavedObjects.filter(object => object.type === 'index-pattern');
+    const indexPatterns = selectedSavedObjects.filter((object) => object.type === 'index-pattern');
     if (indexPatterns.length) {
       await this.props.indexPatterns.clearCache();
     }
 
     const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
-    const deletes = objects.savedObjects.map(object =>
+    const deletes = objects.savedObjects.map((object) =>
       savedObjectsClient.delete(object.type, object.id)
     );
     await Promise.all(deletes);
@@ -454,7 +458,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }
     const { applications } = this.props;
     const newIndexPatternUrl = applications.getUrlForApp('kibana', {
-      path: '#/management/kibana/index_pattern',
+      path: '#/management/kibana/indexPattern',
     });
 
     return (
@@ -467,6 +471,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         newIndexPatternUrl={newIndexPatternUrl}
         allowedTypes={this.props.allowedTypes}
         overlays={this.props.overlays}
+        search={this.props.search}
       />
     );
   }
@@ -589,7 +594,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   changeIncludeReferencesDeep = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       isIncludeReferencesDeepChecked: !state.isIncludeReferencesDeepChecked,
     }));
   };
@@ -638,7 +643,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
               <EuiCheckboxGroup
                 options={exportAllOptions}
                 idToSelectedMap={exportAllSelectedOptions}
-                onChange={optionId => {
+                onChange={(optionId) => {
                   const newExportAllSelectedOptions = {
                     ...exportAllSelectedOptions,
                     ...{
@@ -710,7 +715,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       onSelectionChange: this.onSelectionChanged,
     };
 
-    const filterOptions = allowedTypes.map(type => ({
+    const filterOptions = allowedTypes.map((type) => ({
       value: type,
       name: type,
       view: `${type} (${savedObjectCounts[type] || 0})`,

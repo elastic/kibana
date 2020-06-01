@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'header',
     'common',
@@ -26,12 +26,12 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
 
-  async function assertExpectedMetric() {
+  async function assertExpectedMetric(metricCount: string = '19,986') {
     await PageObjects.lens.assertExactText(
       '[data-test-subj="lns_metric_title"]',
       'Maximum of bytes'
     );
-    await PageObjects.lens.assertExactText('[data-test-subj="lns_metric_value"]', '19,986');
+    await PageObjects.lens.assertExactText('[data-test-subj="lns_metric_value"]', metricCount);
   }
 
   async function assertExpectedTable() {
@@ -40,7 +40,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       'Maximum of bytes'
     );
     await PageObjects.lens.assertExactText(
-      '[data-test-subj="lnsDataTable"] tbody .euiTableCellContent__text',
+      '[data-test-subj="lnsDataTable"] [data-test-subj="lnsDataTableCellValue"]',
       '19,986'
     );
   }
@@ -61,11 +61,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   async function clickOnBarHistogram() {
     const el = await elasticChart.getCanvas();
 
-    await browser
-      .getActions()
-      .move({ x: 5, y: 5, origin: el._webElement })
-      .click()
-      .perform();
+    await browser.getActions().move({ x: 5, y: 5, origin: el._webElement }).click().perform();
   }
 
   describe('lens smokescreen tests', () => {
@@ -86,7 +82,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await assertExpectedMetric();
     });
 
-    it('click on the bar in XYChart adds proper filters/timerange', async () => {
+    it('click on the bar in XYChart adds proper filters/timerange in dashboard', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();

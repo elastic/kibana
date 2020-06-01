@@ -19,7 +19,7 @@ export async function installILMPolicy(
   );
   if (!ilmPaths.length) return;
   await Promise.all(
-    ilmPaths.map(async path => {
+    ilmPaths.map(async (path) => {
       const body = Registry.getAsset(path).toString('utf-8');
       const { file } = Registry.pathParts(path);
       const name = file.substr(0, file.lastIndexOf('.'));

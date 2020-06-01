@@ -5,9 +5,10 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
-import { logConfiguration } from '../log_configuration';
 import { createBrowserDriverFactory } from './browsers';
-import { ReportingCore, ReportingConfig } from './core';
+import { ReportingConfig } from './config';
+import { ReportingCore } from './core';
+import { registerRoutes } from './routes';
 import { createQueueFactory, enqueueJobFactory, LevelLogger, runValidations } from './lib';
 import { setFieldFormats } from './services';
 import { ReportingSetup, ReportingSetupDeps, ReportingStart, ReportingStartDeps } from './types';
@@ -24,24 +25,34 @@ export class ReportingPlugin
   constructor(context: PluginInitializerContext, config: ReportingConfig) {
     this.config = config;
     this.logger = new LevelLogger(context.logger.get('reporting'));
-    this.reportingCore = new ReportingCore(this.logger, this.config);
+    this.reportingCore = new ReportingCore(this.config);
   }
 
   public async setup(core: CoreSetup, plugins: ReportingSetupDeps) {
     const { config } = this;
-    const { elasticsearch, __LEGACY } = plugins;
+    const { elasticsearch, __LEGACY, licensing, security } = plugins;
+    const router = core.http.createRouter();
+    const basePath = core.http.basePath.get;
+    const { xpack_main: xpackMainLegacy, reporting: reportingLegacy } = __LEGACY.plugins;
 
-    const browserDriverFactory = await createBrowserDriverFactory(config, this.logger); // required for validations :(
+    // legacy plugin status
+    mirrorPluginStatus(xpackMainLegacy, reportingLegacy);
+
+    const browserDriverFactory = await createBrowserDriverFactory(config, this.logger);
+    const deps = {
+      browserDriverFactory,
+      elasticsearch,
+      licensing,
+      basePath,
+      router,
+      security,
+    };
+
     runValidations(config, elasticsearch, browserDriverFactory, this.logger);
 
-    const { xpack_main: xpackMainLegacy, reporting: reportingLegacy } = __LEGACY.plugins;
-    this.reportingCore.legacySetup(xpackMainLegacy, reportingLegacy, __LEGACY, plugins);
-
-    // Register a function with server to manage the collection of usage stats
+    this.reportingCore.pluginSetup(deps);
     registerReportingUsageCollector(this.reportingCore, plugins);
-
-    // regsister setup internals
-    this.reportingCore.pluginSetup({ browserDriverFactory, elasticsearch });
+    registerRoutes(this.reportingCore, this.logger);
 
     return {};
   }
@@ -60,8 +71,6 @@ export class ReportingPlugin
     });
 
     setFieldFormats(plugins.data.fieldFormats);
-
-    logConfiguration(this.config.get('capture'), this.logger);
 
     return {};
   }

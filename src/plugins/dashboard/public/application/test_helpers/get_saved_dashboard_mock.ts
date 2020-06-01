@@ -17,17 +17,19 @@
  * under the License.
  */
 
-import { searchSourceMock } from '../../../../data/public/mocks';
+import { dataPluginMock } from '../../../../data/public/mocks';
 import { SavedObjectDashboard } from '../../saved_dashboards';
 
 export function getSavedDashboardMock(
   config?: Partial<SavedObjectDashboard>
 ): SavedObjectDashboard {
+  const searchSource = dataPluginMock.createStartContract();
+
   return {
     id: '123',
     title: 'my dashboard',
     panelsJSON: '[]',
-    searchSource: searchSourceMock,
+    searchSource: searchSource.search.searchSource.create(),
     copyOnSave: false,
     timeRestore: false,
     timeTo: 'now',

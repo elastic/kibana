@@ -11,13 +11,13 @@ import {
   CoreStart,
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID } from '../common/constants';
 
 import { IngestManagerConfigType } from '../common/types';
-import { setupRouteService } from '../common';
+import { setupRouteService, appRoutesService } from '../common';
 
 export { IngestManagerConfigType } from '../common/types';
 
@@ -64,16 +64,26 @@ export class IngestManagerPlugin
           IngestManagerStartDeps,
           IngestManagerStart
         ];
-        const { renderApp } = await import('./applications/ingest_manager');
-        return renderApp(coreStart, params, deps, startDeps, config);
+        const { renderApp, teardownIngestManager } = await import('./applications/ingest_manager');
+        const unmount = renderApp(coreStart, params, deps, startDeps, config);
+
+        return () => {
+          unmount();
+          teardownIngestManager(coreStart);
+        };
       },
     });
   }
 
   public async start(core: CoreStart): Promise<IngestManagerStart> {
     try {
-      const { isInitialized: success } = await core.http.post(setupRouteService.getSetupPath());
-      return { success };
+      const permissionsResponse = await core.http.get(appRoutesService.getCheckPermissionsPath());
+      if (permissionsResponse.success) {
+        const { isInitialized: success } = await core.http.post(setupRouteService.getSetupPath());
+        return { success };
+      } else {
+        throw new Error(permissionsResponse.error);
+      }
     } catch (error) {
       return { success: false, error: { message: error.body?.message || 'Unknown error' } };
     }

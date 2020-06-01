@@ -23,6 +23,15 @@ import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
+
+export interface AggParamsTopHit extends BaseAggParams {
+  field: string;
+  aggregate: 'min' | 'max' | 'sum' | 'average' | 'concat';
+  sortField?: string;
+  size?: number;
+  sortOrder?: 'desc' | 'asc';
+}
 
 export interface TopHitMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
@@ -71,7 +80,7 @@ export const getTopHitMetricAgg = ({ getInternalStartServices }: TopHitMetricAgg
           type: 'field',
           onlyAggregatable: false,
           filterFieldTypes: Object.values(KBN_FIELD_TYPES).filter(
-            type => type !== KBN_FIELD_TYPES.HISTOGRAM
+            (type) => type !== KBN_FIELD_TYPES.HISTOGRAM
           ),
           write(agg, output) {
             const field = agg.getParam('field');
@@ -221,7 +230,7 @@ export const getTopHitMetricAgg = ({ getInternalStartServices }: TopHitMetricAgg
         const path = agg.getParam('field').name;
 
         let values = _.flatten(
-          hits.map(hit =>
+          hits.map((hit) =>
             path === '_source' ? hit._source : agg.getIndexPattern().flattenHit(hit, true)[path]
           )
         );

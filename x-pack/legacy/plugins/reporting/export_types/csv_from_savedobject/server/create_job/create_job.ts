@@ -6,10 +6,11 @@
 
 import { notFound, notImplemented } from 'boom';
 import { get } from 'lodash';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
-import { cryptoFactory } from '../../../../server/lib';
-import { CreateJobFactory, ImmediateCreateJobFn, Logger, RequestFacade } from '../../../../types';
+import { cryptoFactory, LevelLogger } from '../../../../server/lib';
+import { CreateJobFactory, TimeRangeParams } from '../../../../server/types';
 import {
   JobDocPayloadPanelCsv,
   JobParamsPanelCsv,
@@ -17,10 +18,20 @@ import {
   SavedObjectServiceError,
   SavedSearchObjectAttributesJSON,
   SearchPanel,
-  TimeRangeParams,
   VisObjectAttributesJSON,
 } from '../../types';
 import { createJobSearch } from './create_job_search';
+
+export type ImmediateCreateJobFn<JobParamsType> = (
+  jobParams: JobParamsType,
+  headers: KibanaRequest['headers'],
+  context: RequestHandlerContext,
+  req: KibanaRequest
+) => Promise<{
+  type: string | null;
+  title: string;
+  jobParams: JobParamsType;
+}>;
 
 interface VisData {
   title: string;
@@ -30,28 +41,28 @@ interface VisData {
 
 export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
   JobParamsPanelCsv
->> = function createJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
+>> = function createJobFactoryFn(reporting: ReportingCore, parentLogger: LevelLogger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
   return async function createJob(
     jobParams: JobParamsPanelCsv,
-    headers: any,
-    req: RequestFacade
+    headers: KibanaRequest['headers'],
+    context: RequestHandlerContext,
+    req: KibanaRequest
   ): Promise<JobDocPayloadPanelCsv> {
     const { savedObjectType, savedObjectId } = jobParams;
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
-    const client = req.getSavedObjectsClient();
 
     const { panel, title, visType }: VisData = await Promise.resolve()
-      .then(() => client.get(savedObjectType, savedObjectId))
+      .then(() => context.core.savedObjects.client.get(savedObjectType, savedObjectId))
       .then(async (savedObject: SavedObject) => {
         const { attributes, references } = savedObject;
         const {
           kibanaSavedObjectMeta: kibanaSavedObjectMetaJSON,
         } = attributes as SavedSearchObjectAttributesJSON;
-        const { timerange } = req.payload as { timerange: TimeRangeParams };
+        const { timerange } = req.body as { timerange: TimeRangeParams };
 
         if (!kibanaSavedObjectMetaJSON) {
           throw new Error('Could not parse saved object data!');

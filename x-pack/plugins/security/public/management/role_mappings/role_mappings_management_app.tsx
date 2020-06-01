@@ -11,11 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { PluginStartDependencies } from '../../plugin';
-import { RolesAPIClient } from '../roles';
-import { RoleMappingsAPIClient } from './role_mappings_api_client';
 import { DocumentationLinksService } from './documentation_links';
-import { RoleMappingsGridPage } from './role_mappings_grid';
-import { EditRoleMappingPage } from './edit_role_mapping';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
@@ -31,7 +27,6 @@ export const roleMappingsManagementApp = Object.freeze({
         defaultMessage: 'Role Mappings',
       }),
       async mount({ basePath, element, setBreadcrumbs }) {
-        const [{ docLinks, http, notifications, i18n: i18nStart }] = await getStartServices();
         const roleMappingsBreadcrumbs = [
           {
             text: i18n.translate('xpack.security.roleMapping.breadcrumb', {
@@ -40,6 +35,20 @@ export const roleMappingsManagementApp = Object.freeze({
             href: `#${basePath}`,
           },
         ];
+
+        const [
+          [{ docLinks, http, notifications, i18n: i18nStart }],
+          { RoleMappingsGridPage },
+          { EditRoleMappingPage },
+          { RoleMappingsAPIClient },
+          { RolesAPIClient },
+        ] = await Promise.all([
+          getStartServices(),
+          import('./role_mappings_grid'),
+          import('./edit_role_mapping'),
+          import('./role_mappings_api_client'),
+          import('../roles'),
+        ]);
 
         const roleMappingsAPIClient = new RoleMappingsAPIClient(http);
         const dockLinksService = new DocumentationLinksService(docLinks);

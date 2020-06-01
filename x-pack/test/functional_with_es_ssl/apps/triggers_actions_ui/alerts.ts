@@ -39,7 +39,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdAlert;
   }
 
-  describe('alerts', function() {
+  describe('alerts', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
@@ -68,7 +68,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await nameInput.click();
 
       await testSubjects.click('.slack-ActionTypeSelectOption');
-      await testSubjects.click('createActionConnectorButton');
+      await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();
       await testSubjects.setValue('nameInput', slackConnectorName);
       await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
@@ -126,193 +126,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
     });
 
-    it('should edit an alert', async () => {
-      const createdAlert = await createAlert({
-        alertTypeId: '.index-threshold',
-        name: generateUniqueKey(),
-        params: {
-          aggType: 'count',
-          termSize: 5,
-          thresholdComparator: '>',
-          timeWindowSize: 5,
-          timeWindowUnit: 'm',
-          groupBy: 'all',
-          threshold: [1000, 5000],
-          index: ['.kibana_1'],
-          timeField: 'alert',
-        },
-      });
-      await pageObjects.common.navigateToApp('triggersActions');
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResults).to.eql([
-        {
-          name: createdAlert.name,
-          tagsText: 'foo, bar',
-          alertType: 'Index threshold',
-          interval: '1m',
-        },
-      ]);
-      const editLink = await testSubjects.findAll('alertsTableCell-editLink');
-      await editLink[0].click();
-
-      const updatedAlertName = `Changed Alert Name ${generateUniqueKey()}`;
-      await testSubjects.setValue('alertNameInput', updatedAlertName, { clearWithKeyboard: true });
-
-      await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
-
-      const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Updated '${updatedAlertName}'`);
-      await pageObjects.common.navigateToApp('triggersActions');
-      await pageObjects.triggersActionsUI.searchAlerts(updatedAlertName);
-
-      const searchResultsAfterEdit = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterEdit).to.eql([
-        {
-          name: updatedAlertName,
-          tagsText: 'foo, bar',
-          alertType: 'Index threshold',
-          interval: '1m',
-        },
-      ]);
-    });
-
-    it('should set an alert throttle', async () => {
-      const alertName = `edit throttle ${generateUniqueKey()}`;
-      const createdAlert = await createAlert({
-        alertTypeId: '.index-threshold',
-        name: alertName,
-        params: {
-          aggType: 'count',
-          termSize: 5,
-          thresholdComparator: '>',
-          timeWindowSize: 5,
-          timeWindowUnit: 'm',
-          groupBy: 'all',
-          threshold: [1000, 5000],
-          index: ['.kibana_1'],
-          timeField: 'alert',
-        },
-      });
-      await pageObjects.common.navigateToApp('triggersActions');
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResults).to.eql([
-        {
-          name: createdAlert.name,
-          tagsText: 'foo, bar',
-          alertType: 'Index threshold',
-          interval: '1m',
-        },
-      ]);
-
-      const editLink = await testSubjects.findAll('alertsTableCell-editLink');
-      await editLink[0].click();
-
-      await testSubjects.setValue('throttleInput', '1', { clearWithKeyboard: true });
-
-      await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
-
-      expect(await pageObjects.common.closeToast()).to.eql(`Updated '${createdAlert.name}'`);
-
-      await pageObjects.common.navigateToApp('triggersActions');
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-      await (await testSubjects.findAll('alertsTableCell-editLink'))[0].click();
-      const throttleInput = await testSubjects.find('throttleInput');
-      expect(await throttleInput.getAttribute('value')).to.eql('1');
-    });
-
-    it('should unset an alert throttle', async () => {
-      const alertName = `edit throttle ${generateUniqueKey()}`;
-      const createdAlert = await createAlert({
-        alertTypeId: '.index-threshold',
-        name: alertName,
-        throttle: '10m',
-        params: {
-          aggType: 'count',
-          termSize: 5,
-          thresholdComparator: '>',
-          timeWindowSize: 5,
-          timeWindowUnit: 'm',
-          groupBy: 'all',
-          threshold: [1000, 5000],
-          index: ['.kibana_1'],
-          timeField: 'alert',
-        },
-      });
-      await pageObjects.common.navigateToApp('triggersActions');
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResults).to.eql([
-        {
-          name: createdAlert.name,
-          tagsText: 'foo, bar',
-          alertType: 'Index threshold',
-          interval: '1m',
-        },
-      ]);
-
-      const editLink = await testSubjects.findAll('alertsTableCell-editLink');
-      await editLink[0].click();
-
-      const throttleInputToUnsetValue = await testSubjects.find('throttleInput');
-
-      expect(await throttleInputToUnsetValue.getAttribute('value')).to.eql('10');
-      await throttleInputToUnsetValue.click();
-      await throttleInputToUnsetValue.clearValueWithKeyboard();
-
-      expect(await throttleInputToUnsetValue.getAttribute('value')).to.eql('');
-
-      await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
-
-      expect(await pageObjects.common.closeToast()).to.eql(`Updated '${createdAlert.name}'`);
-
-      await pageObjects.common.navigateToApp('triggersActions');
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-      await (await testSubjects.findAll('alertsTableCell-editLink'))[0].click();
-      const throttleInput = await testSubjects.find('throttleInput');
-      expect(await throttleInput.getAttribute('value')).to.eql('');
-    });
-
-    it('should reset alert when canceling an edit', async () => {
-      const createdAlert = await createAlert({
-        alertTypeId: '.index-threshold',
-        name: generateUniqueKey(),
-        params: {
-          aggType: 'count',
-          termSize: 5,
-          thresholdComparator: '>',
-          timeWindowSize: 5,
-          timeWindowUnit: 'm',
-          groupBy: 'all',
-          threshold: [1000, 5000],
-          index: ['.kibana_1'],
-          timeField: 'alert',
-        },
-      });
-      await pageObjects.common.navigateToApp('triggersActions');
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      const editLink = await testSubjects.findAll('alertsTableCell-editLink');
-      await editLink[0].click();
-
-      const updatedAlertName = `Changed Alert Name ${generateUniqueKey()}`;
-      await testSubjects.setValue('alertNameInput', updatedAlertName);
-
-      await testSubjects.click('cancelSaveEditedAlertButton');
-      await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedAlertButton"]');
-
-      const editLinkPostCancel = await testSubjects.findAll('alertsTableCell-editLink');
-      await editLinkPostCancel[0].click();
-
-      const nameInputAfterCancel = await testSubjects.find('alertNameInput');
-      const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
-      expect(textAfterCancel).to.eql(createdAlert.name);
-    });
-
     it('should search for tags', async () => {
       const createdAlert = await createAlert();
       await pageObjects.common.navigateToApp('triggersActions');
@@ -343,15 +156,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      await pageObjects.triggersActionsUI.toggleSwitch('enableSwitch');
+      await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
 
-      const enableSwitchAfterDisable = await testSubjects.find('enableSwitch');
-      const isChecked = await enableSwitchAfterDisable.getAttribute('aria-checked');
-      expect(isChecked).to.eql('false');
+      const disableSwitchAfterDisable = await testSubjects.find('disableSwitch');
+      const isChecked = await disableSwitchAfterDisable.getAttribute('aria-checked');
+      expect(isChecked).to.eql('true');
     });
 
     it('should re-enable single alert', async () => {
@@ -361,21 +174,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      await pageObjects.triggersActionsUI.toggleSwitch('enableSwitch');
+      await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
 
-      await pageObjects.triggersActionsUI.toggleSwitch('enableSwitch');
+      await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
 
-      const enableSwitchAfterReEnable = await testSubjects.find('enableSwitch');
-      const isChecked = await enableSwitchAfterReEnable.getAttribute('aria-checked');
-      expect(isChecked).to.eql('true');
+      const disableSwitchAfterReEnable = await testSubjects.find('disableSwitch');
+      const isChecked = await disableSwitchAfterReEnable.getAttribute('aria-checked');
+      expect(isChecked).to.eql('false');
     });
 
     it('should mute single alert', async () => {
@@ -507,9 +320,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      const enableSwitch = await testSubjects.find('enableSwitch');
-      const isChecked = await enableSwitch.getAttribute('aria-checked');
-      expect(isChecked).to.eql('false');
+      const disableSwitch = await testSubjects.find('disableSwitch');
+      const isChecked = await disableSwitch.getAttribute('aria-checked');
+      expect(isChecked).to.eql('true');
     });
 
     it('should enable all selection', async () => {
@@ -532,9 +345,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
-      const enableSwitch = await testSubjects.find('enableSwitch');
-      const isChecked = await enableSwitch.getAttribute('aria-checked');
-      expect(isChecked).to.eql('true');
+      const disableSwitch = await testSubjects.find('disableSwitch');
+      const isChecked = await disableSwitch.getAttribute('aria-checked');
+      expect(isChecked).to.eql('false');
     });
 
     it('should delete all selection', async () => {

@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
+import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
+import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
+import { ReportingCore } from '../';
 import { API_BASE_GENERATE_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
-import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
-import { ReportingCore, ReportingSetupDeps } from '../types';
-import { makeRequestFacade } from './lib/make_request_facade';
-import { getRouteOptionsCsv } from './lib/route_config_factories';
-import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
+import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 
 /*
  * This function registers API Endpoints for queuing Reporting jobs. The API inputs are:
@@ -25,22 +23,31 @@ import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types
  */
 export function registerGenerateCsvFromSavedObject(
   reporting: ReportingCore,
-  server: ServerFacade,
-  plugins: ReportingSetupDeps,
   handleRoute: HandlerFunction,
-  handleRouteError: HandlerErrorFunction,
-  logger: Logger
+  handleRouteError: HandlerErrorFunction
 ) {
-  const config = reporting.getConfig();
-  const routeOptions = getRouteOptionsCsv(config, plugins, logger);
-
-  server.route({
-    path: `${API_BASE_GENERATE_V1}/csv/saved-object/{savedObjectType}:{savedObjectId}`,
-    method: 'POST',
-    options: routeOptions,
-    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
-      const requestFacade = makeRequestFacade(legacyRequest);
-
+  const setupDeps = reporting.getPluginSetupDeps();
+  const userHandler = authorizedUserPreRoutingFactory(reporting);
+  const { router } = setupDeps;
+  router.post(
+    {
+      path: `${API_BASE_GENERATE_V1}/csv/saved-object/{savedObjectType}:{savedObjectId}`,
+      validate: {
+        params: schema.object({
+          savedObjectType: schema.string({ minLength: 2 }),
+          savedObjectId: schema.string({ minLength: 2 }),
+        }),
+        body: schema.object({
+          state: schema.object({}),
+          timerange: schema.object({
+            timezone: schema.string({ defaultValue: 'UTC' }),
+            min: schema.nullable(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
+            max: schema.nullable(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
+          }),
+        }),
+      },
+    },
+    userHandler(async (user, context, req, res) => {
       /*
        * 1. Build `jobParams` object: job data that execution will need to reference in various parts of the lifecycle
        * 2. Pass the jobParams and other common params to `handleRoute`, a shared function to enqueue the job with the params
@@ -48,19 +55,31 @@ export function registerGenerateCsvFromSavedObject(
        */
       let result: QueuedJobPayload<any>;
       try {
-        const jobParams = getJobParamsFromRequest(requestFacade, { isImmediate: false });
-        result = await handleRoute(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, legacyRequest, h); // pass the original request because the handler will make the request facade on its own
+        const jobParams = getJobParamsFromRequest(req, { isImmediate: false });
+        result = await handleRoute(
+          user,
+          CSV_FROM_SAVEDOBJECT_JOB_TYPE,
+          jobParams,
+          context,
+          req,
+          res
+        );
       } catch (err) {
-        throw handleRouteError(CSV_FROM_SAVEDOBJECT_JOB_TYPE, err);
+        return handleRouteError(res, err);
       }
 
       if (get(result, 'source.job') == null) {
-        throw new Error(
-          `The Export handler is expected to return a result with job info! ${result}`
-        );
+        return res.badRequest({
+          body: `The Export handler is expected to return a result with job info! ${result}`,
+        });
       }
 
-      return result;
-    },
-  });
+      return res.ok({
+        body: result,
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
+    })
+  );
 }

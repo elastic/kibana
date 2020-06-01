@@ -301,16 +301,16 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                     >
                       <EuiImage
                         alt=""
-                        url="/plugins/kibana/home/assets/welcome_graphic_light_2x.png"
+                        url="/plugins/home/assets/welcome_graphic_light_2x.png"
                       >
                         <figure
-                          className="euiImage"
-                          role="figure"
+                          className="euiImage "
                         >
                           <img
                             alt=""
                             className="euiImage__img"
-                            src="/plugins/kibana/home/assets/welcome_graphic_light_2x.png"
+                            src="/plugins/home/assets/welcome_graphic_light_2x.png"
+                            style={Object {}}
                           />
                         </figure>
                       </EuiImage>
@@ -667,14 +667,13 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
             <EuiButton
               aria-label="Create new visualization button"
               data-test-subj="addVisualizationButton"
-              fill={true}
-              iconSide="right"
-              iconType="arrowDown"
+              iconSide="left"
+              iconType="plusInCircle"
               size="s"
             >
               <button
                 aria-label="Create new visualization button"
-                className="euiButton euiButton--primary euiButton--small euiButton--iconRight euiButton--fill"
+                className="euiButton euiButton--primary euiButton--small"
                 data-test-subj="addVisualizationButton"
                 type="button"
               >
@@ -685,12 +684,12 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                     aria-hidden="true"
                     className="euiButton__icon"
                     size="m"
-                    type="arrowDown"
+                    type="plusInCircle"
                   >
                     <div
                       aria-hidden="true"
                       className="euiButton__icon"
-                      data-euiicon-type="arrowDown"
+                      data-euiicon-type="plusInCircle"
                       size="m"
                     />
                   </EuiIcon>
@@ -996,16 +995,16 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                     >
                       <EuiImage
                         alt=""
-                        url="/plugins/kibana/home/assets/welcome_graphic_light_2x.png"
+                        url="/plugins/home/assets/welcome_graphic_light_2x.png"
                       >
                         <figure
-                          className="euiImage"
-                          role="figure"
+                          className="euiImage "
                         >
                           <img
                             alt=""
                             className="euiImage__img"
-                            src="/plugins/kibana/home/assets/welcome_graphic_light_2x.png"
+                            src="/plugins/home/assets/welcome_graphic_light_2x.png"
+                            style={Object {}}
                           />
                         </figure>
                       </EuiImage>

@@ -28,9 +28,7 @@ import { initDashboardAppDirective } from './dashboard_app';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import {
   createKbnUrlStateStorage,
-  ensureDefaultIndexPattern,
   redirectWhenMissing,
-  InvalidJSONProperty,
   SavedObjectNotFound,
 } from '../../../kibana_utils/public';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
@@ -40,7 +38,7 @@ import { syncQueryStateWithUrl } from '../../../data/public';
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
 
-  app.directive('dashboardListing', function(reactDirective) {
+  app.directive('dashboardListing', function (reactDirective) {
     return reactDirective(DashboardListing, [
       ['core', { watchDepth: 'reference' }],
       ['createItem', { watchDepth: 'reference' }],
@@ -51,6 +49,7 @@ export function initDashboardApp(app, deps) {
       ['listingLimit', { watchDepth: 'reference' }],
       ['hideWriteControls', { watchDepth: 'reference' }],
       ['initialFilter', { watchDepth: 'reference' }],
+      ['initialPageSize', { watchDepth: 'reference' }],
     ]);
   });
 
@@ -62,14 +61,14 @@ export function initDashboardApp(app, deps) {
   }
 
   app.factory('history', () => createHashHistory());
-  app.factory('kbnUrlStateStorage', history =>
+  app.factory('kbnUrlStateStorage', (history) =>
     createKbnUrlStateStorage({
       history,
       useHash: deps.uiSettings.get('state:storeInSessionStorage'),
     })
   );
 
-  app.config(function($routeProvider) {
+  app.config(function ($routeProvider) {
     const defaults = {
       reloadOnSearch: false,
       requireUICapability: 'dashboard.show',
@@ -91,10 +90,16 @@ export function initDashboardApp(app, deps) {
     };
 
     $routeProvider
+      .when('/', {
+        redirectTo: DashboardConstants.LANDING_PAGE_PATH,
+      })
       .when(DashboardConstants.LANDING_PAGE_PATH, {
         ...defaults,
         template: dashboardListingTemplate,
-        controller: function($scope, kbnUrlStateStorage, history) {
+        controller: function ($scope, kbnUrlStateStorage, history) {
+          deps.core.chrome.docTitle.change(
+            i18n.translate('dashboard.dashboardPageTitle', { defaultMessage: 'Dashboards' })
+          );
           const service = deps.savedDashboards;
           const dashboardConfig = deps.dashboardConfig;
 
@@ -104,11 +109,12 @@ export function initDashboardApp(app, deps) {
             kbnUrlStateStorage
           );
 
-          $scope.listingLimit = deps.uiSettings.get('savedObjects:listingLimit');
+          $scope.listingLimit = deps.savedObjects.settings.getListingLimit();
+          $scope.initialPageSize = deps.savedObjects.settings.getPerPage();
           $scope.create = () => {
             history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
           };
-          $scope.find = search => {
+          $scope.find = (search) => {
             return service.find(search, $scope.listingLimit);
           };
           $scope.editItem = ({ id }) => {
@@ -117,8 +123,8 @@ export function initDashboardApp(app, deps) {
           $scope.getViewUrl = ({ id }) => {
             return deps.addBasePath(`#${createDashboardEditUrl(id)}`);
           };
-          $scope.delete = dashboards => {
-            return service.delete(dashboards.map(d => d.id));
+          $scope.delete = (dashboards) => {
+            return service.delete(dashboards.map((d) => d.id));
           };
           $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
           $scope.initialFilter = parse(history.location.search).filter || EMPTY_FILTER;
@@ -137,8 +143,8 @@ export function initDashboardApp(app, deps) {
           });
         },
         resolve: {
-          dash: function($route, history) {
-            return ensureDefaultIndexPattern(deps.core, deps.data, history).then(() => {
+          dash: function ($route, history) {
+            return deps.data.indexPatterns.ensureDefaultIndexPattern(history).then(() => {
               const savedObjectsClient = deps.savedObjectsClient;
               const title = $route.current.params.title;
               if (title) {
@@ -148,10 +154,11 @@ export function initDashboardApp(app, deps) {
                     search_fields: 'title',
                     type: 'dashboard',
                   })
-                  .then(results => {
+                  .then((results) => {
                     // The search isn't an exact match, lets see if we can find a single exact match to use
                     const matchingDashboards = results.savedObjects.filter(
-                      dashboard => dashboard.attributes.title.toLowerCase() === title.toLowerCase()
+                      (dashboard) =>
+                        dashboard.attributes.title.toLowerCase() === title.toLowerCase()
                     );
                     if (matchingDashboards.length === 1) {
                       history.replace(createDashboardEditUrl(matchingDashboards[0].id));
@@ -172,12 +179,14 @@ export function initDashboardApp(app, deps) {
         controller: createNewDashboardCtrl,
         requireUICapability: 'dashboard.createNew',
         resolve: {
-          dash: history =>
-            ensureDefaultIndexPattern(deps.core, deps.data, history)
+          dash: (history) =>
+            deps.data.indexPatterns
+              .ensureDefaultIndexPattern(history)
               .then(() => deps.savedDashboards.get())
               .catch(
                 redirectWhenMissing({
                   history,
+                  navigateToApp: deps.core.application.navigateToApp,
                   mapping: {
                     dashboard: DashboardConstants.LANDING_PAGE_PATH,
                   },
@@ -191,12 +200,13 @@ export function initDashboardApp(app, deps) {
         template: dashboardTemplate,
         controller: createNewDashboardCtrl,
         resolve: {
-          dash: function($route, history) {
+          dash: function ($route, history) {
             const id = $route.current.params.id;
 
-            return ensureDefaultIndexPattern(deps.core, deps.data, history)
+            return deps.data.indexPatterns
+              .ensureDefaultIndexPattern(history)
               .then(() => deps.savedDashboards.get(id))
-              .then(savedDashboard => {
+              .then((savedDashboard) => {
                 deps.chrome.recentlyAccessed.add(
                   savedDashboard.getFullPath(),
                   savedDashboard.title,
@@ -204,14 +214,7 @@ export function initDashboardApp(app, deps) {
                 );
                 return savedDashboard;
               })
-              .catch(error => {
-                // A corrupt dashboard was detected (e.g. with invalid JSON properties)
-                if (error instanceof InvalidJSONProperty) {
-                  deps.core.notifications.toasts.addDanger(error.message);
-                  history.push(DashboardConstants.LANDING_PAGE_PATH);
-                  return;
-                }
-
+              .catch((error) => {
                 // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
                 // See https://github.com/elastic/kibana/issues/10951 for more context.
                 if (error instanceof SavedObjectNotFound && id === 'create') {
@@ -229,26 +232,20 @@ export function initDashboardApp(app, deps) {
                   );
                   return new Promise(() => {});
                 } else {
-                  throw error;
+                  // E.g. a corrupt or deleted dashboard
+                  deps.core.notifications.toasts.addDanger(error.message);
+                  history.push(DashboardConstants.LANDING_PAGE_PATH);
+                  return new Promise(() => {});
                 }
-              })
-              .catch(
-                redirectWhenMissing({
-                  history,
-                  mapping: {
-                    dashboard: DashboardConstants.LANDING_PAGE_PATH,
-                  },
-                  toastNotifications: deps.core.notifications.toasts,
-                })
-              );
+              });
           },
         },
       })
-      .when(`dashboard/:tail*?`, {
-        redirectTo: `/${deps.config.defaultAppId}`,
-      })
-      .when(`dashboards/:tail*?`, {
-        redirectTo: `/${deps.config.defaultAppId}`,
+      .otherwise({
+        template: '<span></span>',
+        controller: function () {
+          deps.navigateToDefaultApp();
+        },
       });
   });
 }

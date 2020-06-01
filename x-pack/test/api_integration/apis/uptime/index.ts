@@ -6,7 +6,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const es = getService('legacyEs');
 
   describe('uptime', () => {
@@ -20,7 +20,6 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./get_all_pings'));
-    loadTestFile(require.resolve('./graphql'));
     loadTestFile(require.resolve('./rest'));
   });
 }

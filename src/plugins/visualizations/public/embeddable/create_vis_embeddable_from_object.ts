@@ -28,8 +28,9 @@ import {
   getTimeFilter,
   getCapabilities,
 } from '../services';
+import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 
-export const createVisEmbeddableFromObject = async (
+export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDeps) => async (
   vis: Vis,
   input: Partial<VisualizeInput> & { id: string },
   parent?: IContainer
@@ -39,8 +40,9 @@ export const createVisEmbeddableFromObject = async (
   try {
     const visId = vis.id as string;
 
+    const editPath = visId ? savedVisualizations.urlFor(visId) : '';
     const editUrl = visId
-      ? getHttp().basePath.prepend(`/app/kibana${savedVisualizations.urlFor(visId)}`)
+      ? getHttp().basePath.prepend(`/app/visualize${savedVisualizations.urlFor(visId)}`)
       : '';
     const isLabsEnabled = getUISettings().get<boolean>('visualize:enableLabs');
 
@@ -56,8 +58,10 @@ export const createVisEmbeddableFromObject = async (
       {
         vis,
         indexPatterns,
+        editPath,
         editUrl,
         editable,
+        deps,
       },
       input,
       parent

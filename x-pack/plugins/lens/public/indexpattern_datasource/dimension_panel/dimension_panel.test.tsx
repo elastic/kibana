@@ -751,7 +751,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         indexPatterns: {
           1: {
             ...state.indexPatterns['1'],
-            fields: state.indexPatterns['1'].fields.filter(field => field.name !== 'memory'),
+            fields: state.indexPatterns['1'].fields.filter((field) => field.name !== 'memory'),
           },
         },
       };
@@ -865,7 +865,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       expect(options![0]['data-test-subj']).not.toContain('Incompatible');
 
-      options![1].options!.map(operation =>
+      options![1].options!.map((operation) =>
         expect(operation['data-test-subj']).toContain('Incompatible')
       );
     });
@@ -950,10 +950,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
       );
 
       act(() => {
-        wrapper
-          .find('[data-test-subj="lns-indexPatternDimension-min"]')
-          .first()
-          .prop('onClick')!({} as React.MouseEvent<{}, MouseEvent>);
+        wrapper.find('[data-test-subj="lns-indexPatternDimension-min"]').first().prop('onClick')!(
+          {} as React.MouseEvent<{}, MouseEvent>
+        );
       });
 
       expect(changeColumn).toHaveBeenCalledWith({
@@ -1377,6 +1376,44 @@ describe('IndexPatternDimensionEditorPanel', () => {
               }),
             }),
           }),
+        },
+      });
+    });
+
+    it('does not set the size of the terms aggregation', () => {
+      const dragging = {
+        field: { type: 'string', name: 'mystring', aggregatable: true },
+        indexPatternId: 'foo',
+      };
+      const testState = dragDropState();
+      onDrop({
+        ...defaultProps,
+        dragDropContext: {
+          ...dragDropContext,
+          dragging,
+        },
+        droppedItem: dragging,
+        state: testState,
+        columnId: 'col2',
+        filterOperations: (op: OperationMetadata) => op.isBucketed,
+        layerId: 'myLayer',
+      });
+
+      expect(setState).toBeCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith({
+        ...testState,
+        layers: {
+          myLayer: {
+            ...testState.layers.myLayer,
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              ...testState.layers.myLayer.columns,
+              col2: expect.objectContaining({
+                operationType: 'terms',
+                params: expect.objectContaining({ size: 3 }),
+              }),
+            },
+          },
         },
       });
     });

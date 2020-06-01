@@ -5,13 +5,13 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
-import { CANVAS_TYPE } from '../../../../legacy/plugins/canvas/common/lib/constants';
+import { CANVAS_TYPE } from '../../common/lib/constants';
 import { removeAttributesId } from './migrations/remove_attributes_id';
 
 export const workpadType: SavedObjectsType = {
   name: CANVAS_TYPE,
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   mappings: {
     dynamic: false,
     properties: {
@@ -29,5 +29,19 @@ export const workpadType: SavedObjectsType = {
   },
   migrations: {
     '7.0.0': removeAttributesId,
+  },
+  management: {
+    importableAndExportable: true,
+    icon: 'canvasApp',
+    defaultSearchField: 'name',
+    getTitle(obj) {
+      return obj.attributes.name;
+    },
+    getInAppUrl(obj) {
+      return {
+        path: `/app/canvas#/workpad/${encodeURIComponent(obj.id)}`,
+        uiCapabilitiesPath: 'canvas.show',
+      };
+    },
   },
 };

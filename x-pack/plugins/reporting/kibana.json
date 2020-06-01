@@ -2,6 +2,9 @@
   "id": "reporting",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
+  "optionalPlugins": [
+    "usageCollection"
+  ],
   "configPath": ["xpack", "reporting"],
   "requiredPlugins": [
     "home",
@@ -10,8 +13,9 @@
     "uiActions",
     "embeddable",
     "share",
-    "kibanaLegacy"
+    "kibanaLegacy",
+    "licensing"
   ],
-  "server": false,
+  "server": true,
   "ui": true
 }

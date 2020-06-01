@@ -31,12 +31,15 @@ import {
   ACTION_EDIT_PANEL,
   FilterActionContext,
   ACTION_APPLY_FILTER,
+  panelNotificationTrigger,
+  PANEL_NOTIFICATION_TRIGGER,
 } from './lib';
 
 declare module '../../ui_actions/public' {
   export interface TriggerContextMapping {
     [CONTEXT_MENU_TRIGGER]: EmbeddableContext;
     [PANEL_BADGE_TRIGGER]: EmbeddableContext;
+    [PANEL_NOTIFICATION_TRIGGER]: EmbeddableContext;
   }
 
   export interface ActionContextMapping {
@@ -56,6 +59,7 @@ declare module '../../ui_actions/public' {
 export const bootstrap = (uiActions: UiActionsSetup) => {
   uiActions.registerTrigger(contextMenuTrigger);
   uiActions.registerTrigger(panelBadgeTrigger);
+  uiActions.registerTrigger(panelNotificationTrigger);
 
   const actionApplyFilter = createFilterAction();
 

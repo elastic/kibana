@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -28,25 +26,6 @@ import { categorizationExamplesProvider } from '../models/job_service/new_job';
  * Routes for job service
  */
 export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
-  async function hasPermissionToCreateJobs(
-    callAsCurrentUser: IScopedClusterClient['callAsCurrentUser']
-  ) {
-    if (mlLicense.isSecurityEnabled() === false) {
-      return true;
-    }
-
-    const resp = await callAsCurrentUser('ml.privilegeCheck', {
-      body: {
-        cluster: [
-          'cluster:admin/xpack/ml/job/put',
-          'cluster:admin/xpack/ml/job/open',
-          'cluster:admin/xpack/ml/datafeeds/put',
-        ],
-      },
-    });
-    return resp.has_all_requested;
-  }
-
   /**
    * @apiGroup JobService
    *
@@ -61,6 +40,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/jobs/force_start_datafeeds',
       validate: {
         body: forceStartDatafeedSchema,
+      },
+      options: {
+        tags: ['access:ml:canStartStopDatafeed'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -93,6 +75,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         body: datafeedIdsSchema,
       },
+      options: {
+        tags: ['access:ml:canStartStopDatafeed'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -123,6 +108,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/jobs/delete_jobs',
       validate: {
         body: jobIdsSchema,
+      },
+      options: {
+        tags: ['access:ml:canDeleteJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -155,6 +143,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         body: jobIdsSchema,
       },
+      options: {
+        tags: ['access:ml:canCloseJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -176,15 +167,23 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
    *
    * @api {post} /api/ml/jobs/jobs_summary Jobs summary
    * @apiName JobsSummary
-   * @apiDescription Creates a summary jobs list. Jobs include job stats, datafeed stats, and calendars.
+   * @apiDescription Returns a list of anomaly detection jobs, with summary level information for every job.
+   *  For any supplied job IDs, full job information will be returned, which include the analysis configuration,
+   *  job stats, datafeed stats, and calendars.
    *
    * @apiSchema (body) jobIdsSchema
+   *
+   * @apiSuccess {Array} jobsList list of jobs. For any supplied job IDs, the job object will contain a fullJob property
+   *    which includes the full configuration and stats for the job.
    */
   router.post(
     {
       path: '/api/ml/jobs/jobs_summary',
       validate: {
         body: jobIdsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -217,6 +216,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         body: schema.object(jobsWithTimerangeSchema),
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -247,6 +249,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         body: jobIdsSchema,
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -274,6 +279,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/jobs/groups',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -304,6 +312,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         body: schema.object(updateGroupsSchema),
       },
+      options: {
+        tags: ['access:ml:canUpdateJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -331,6 +342,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/jobs/deleting_jobs_tasks',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -361,6 +375,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         body: jobIdsSchema,
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -390,6 +407,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: schema.object({ indexPattern: schema.string() }),
         query: schema.maybe(schema.object({ rollup: schema.maybe(schema.string()) })),
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -423,6 +443,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/jobs/new_job_line_chart',
       validate: {
         body: schema.object(chartSchema),
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -476,6 +499,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         body: schema.object(chartSchema),
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -524,6 +550,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/jobs/all_jobs_and_group_ids',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -553,6 +582,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/jobs/look_back_progress',
       validate: {
         body: schema.object(lookBackProgressSchema),
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -585,17 +617,12 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         body: schema.object(categorizationFieldExamplesSchema),
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        // due to the use of the _analyze endpoint which is called by the kibana user,
-        // basic job creation privileges are required to use this endpoint
-        if ((await hasPermissionToCreateJobs(context.ml!.mlClient.callAsCurrentUser)) === false) {
-          throw Boom.forbidden(
-            'Insufficient privileges, the machine_learning_admin role is required.'
-          );
-        }
-
         const { validateCategoryExamples } = categorizationExamplesProvider(
           context.ml!.mlClient.callAsCurrentUser,
           context.ml!.mlClient.callAsInternalUser
@@ -645,6 +672,9 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/jobs/top_categories',
       validate: {
         body: schema.object(topCategoriesSchema),
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

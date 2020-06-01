@@ -17,10 +17,10 @@ import {
 } from '@elastic/eui';
 
 import { SnapshotDetails } from '../../../../../../common/types';
+import { Error } from '../../../../../shared_imports';
 import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
-import { Error } from '../../../../components/section_error';
 import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
 import { SendRequestResponse } from '../../../../../shared_imports';
 
@@ -210,7 +210,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
           render: ({ snapshot, repository }: SnapshotDetails) => {
             return (
               <SnapshotDeleteProvider>
-                {deleteSnapshotPrompt => {
+                {(deleteSnapshotPrompt) => {
                   const isDeleteDisabled = Boolean(lastSuccessfulManagedSnapshot)
                     ? snapshot === lastSuccessfulManagedSnapshot!.snapshot
                     : false;
@@ -330,9 +330,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
           );
         }}
       </SnapshotDeleteProvider>
-    ) : (
-      undefined
-    ),
+    ) : undefined,
     toolsRight: (
       <EuiButton
         color="secondary"
@@ -358,7 +356,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
           defaultMessage: 'Repository',
         }),
         multiSelect: false,
-        options: repositories.map(repository => ({
+        options: repositories.map((repository) => ({
           value: repository,
           view: repository,
         })),

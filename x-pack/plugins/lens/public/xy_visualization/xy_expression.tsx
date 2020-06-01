@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import moment from 'moment';
 import {
   Chart,
   Settings,
@@ -20,23 +21,25 @@ import {
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
-  IInterpreterRenderHandlers,
-  ExpressionRenderDefinition,
   ExpressionFunctionDefinition,
+  ExpressionRenderDefinition,
   ExpressionValueSearchContext,
 } from 'src/plugins/expressions/public';
-import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EmbeddableVisTriggerContext } from '../../../../../src/plugins/embeddable/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
-import { LensMultiTable, FormatFactory } from '../types';
+import {
+  LensMultiTable,
+  FormatFactory,
+  ILensInterpreterRenderHandlers,
+  LensFilterEvent,
+  LensBrushEvent,
+} from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { parseInterval } from '../../../../../src/plugins/data/common';
-import { getExecuteTriggerActions } from './services';
+import { EmptyPlaceholder } from '../shared_components';
+import { desanitizeFilterContext } from '../utils';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -58,7 +61,9 @@ type XYChartRenderProps = XYChartProps & {
   chartTheme: PartialTheme;
   formatFactory: FormatFactory;
   timeZone: string;
-  executeTriggerActions: UiActionsStart['executeTriggerActions'];
+  histogramBarTarget: number;
+  onClickValue: (data: LensFilterEvent['data']) => void;
+  onSelectRange: (data: LensBrushEvent['data']) => void;
 };
 
 export const xyChart: ExpressionFunctionDefinition<
@@ -110,6 +115,7 @@ export const xyChart: ExpressionFunctionDefinition<
 export const getXyChartRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartTheme: PartialTheme;
+  histogramBarTarget: number;
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
@@ -119,9 +125,18 @@ export const getXyChartRenderer = (dependencies: {
   }),
   validate: () => undefined,
   reuseDomNode: true,
-  render: async (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
-    const executeTriggerActions = getExecuteTriggerActions();
+  render: async (
+    domNode: Element,
+    config: XYChartProps,
+    handlers: ILensInterpreterRenderHandlers
+  ) => {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    const onClickValue = (data: LensFilterEvent['data']) => {
+      handlers.event({ name: 'filter', data });
+    };
+    const onSelectRange = (data: LensBrushEvent['data']) => {
+      handlers.event({ name: 'brush', data });
+    };
     const formatFactory = await dependencies.formatFactory;
     ReactDOM.render(
       <I18nProvider>
@@ -130,7 +145,9 @@ export const getXyChartRenderer = (dependencies: {
           formatFactory={formatFactory}
           chartTheme={dependencies.chartTheme}
           timeZone={dependencies.timeZone}
-          executeTriggerActions={executeTriggerActions}
+          histogramBarTarget={dependencies.histogramBarTarget}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       </I18nProvider>,
       domNode,
@@ -140,7 +157,7 @@ export const getXyChartRenderer = (dependencies: {
 });
 
 function getIconForSeriesType(seriesType: SeriesType): IconType {
-  return visualizationTypes.find(c => c.id === seriesType)!.icon || 'empty';
+  return visualizationTypes.find((c) => c.id === seriesType)!.icon || 'empty';
 }
 
 const MemoizedChart = React.memo(XYChart);
@@ -169,37 +186,38 @@ export function XYChart({
   formatFactory,
   timeZone,
   chartTheme,
-  executeTriggerActions,
+  histogramBarTarget,
+  onClickValue,
+  onSelectRange,
 }: XYChartRenderProps) {
   const { legend, layers } = args;
 
-  if (Object.values(data.tables).every(table => table.rows.length === 0)) {
-    const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
-    return (
-      <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
-        <EuiIcon type={icon} color="subdued" size="l" />
-        <EuiSpacer size="s" />
-        <p>
-          <FormattedMessage
-            id="xpack.lens.xyVisualization.noDataLabel"
-            defaultMessage="No results found"
-          />
-        </p>
-      </EuiText>
+  const filteredLayers = layers.filter(({ layerId, xAccessor, accessors }) => {
+    return !(
+      !xAccessor ||
+      !accessors.length ||
+      !data.tables[layerId] ||
+      data.tables[layerId].rows.length === 0 ||
+      data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')
     );
+  });
+
+  if (filteredLayers.length === 0) {
+    const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
+    return <EmptyPlaceholder icon={icon} />;
   }
 
   // use formatting hint of first x axis column to format ticks
-  const xAxisColumn = Object.values(data.tables)[0].columns.find(
-    ({ id }) => id === layers[0].xAccessor
+  const xAxisColumn = data.tables[filteredLayers[0].layerId].columns.find(
+    ({ id }) => id === filteredLayers[0].xAccessor
   );
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.formatHint);
 
   // use default number formatter for y axis and use formatting hint if there is just a single y column
   let yAxisFormatter = formatFactory({ id: 'number' });
-  if (layers.length === 1 && layers[0].accessors.length === 1) {
+  if (filteredLayers.length === 1 && filteredLayers[0].accessors.length === 1) {
     const firstYAxisColumn = Object.values(data.tables)[0].columns.find(
-      ({ id }) => id === layers[0].accessors[0]
+      ({ id }) => id === filteredLayers[0].accessors[0]
     );
     if (firstYAxisColumn && firstYAxisColumn.formatHint) {
       yAxisFormatter = formatFactory(firstYAxisColumn.formatHint);
@@ -207,25 +225,53 @@ export function XYChart({
   }
 
   const chartHasMoreThanOneSeries =
-    layers.length > 1 || data.tables[layers[0].layerId].columns.length > 2;
-  const shouldRotate = isHorizontalChart(layers);
+    filteredLayers.length > 1 ||
+    filteredLayers.some((layer) => layer.accessors.length > 1) ||
+    filteredLayers.some((layer) => layer.splitAccessor);
+  const shouldRotate = isHorizontalChart(filteredLayers);
 
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
 
-  // add minInterval only for single row value as it cannot be determined from dataset
+  function calculateMinInterval() {
+    // check all the tables to see if all of the rows have the same timestamp
+    // that would mean that chart will draw a single bar
+    const isSingleTimestampInXDomain = () => {
+      const firstRowValue =
+        data.tables[filteredLayers[0].layerId].rows[0][filteredLayers[0].xAccessor!];
+      for (const layer of filteredLayers) {
+        if (
+          layer.xAccessor &&
+          data.tables[layer.layerId].rows.some((row) => row[layer.xAccessor!] !== firstRowValue)
+        ) {
+          return false;
+        }
+      }
+      return true;
+    };
 
-  const minInterval = layers.every(layer => data.tables[layer.layerId].rows.length <= 1)
-    ? parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds()
+    // add minInterval only for single point in domain
+    if (data.dateRange && isSingleTimestampInXDomain()) {
+      if (xAxisColumn?.meta?.aggConfigParams?.interval !== 'auto')
+        return parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds();
+
+      const { fromDate, toDate } = data.dateRange;
+      const duration = moment(toDate).diff(moment(fromDate));
+      const targetMs = duration / histogramBarTarget;
+      return isNaN(targetMs) ? 0 : Math.max(Math.floor(targetMs), 1);
+    }
+    return undefined;
+  }
+
+  const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
+
+  const xDomain = isTimeViz
+    ? {
+        min: data.dateRange?.fromDate.getTime(),
+        max: data.dateRange?.toDate.getTime(),
+        minInterval: calculateMinInterval(),
+      }
     : undefined;
 
-  const xDomain =
-    data.dateRange && layers.every(l => l.xScaleType === 'time')
-      ? {
-          min: data.dateRange.fromDate.getTime(),
-          max: data.dateRange.toDate.getTime(),
-          minInterval,
-        }
-      : undefined;
   return (
     <Chart>
       <Settings
@@ -235,12 +281,37 @@ export function XYChart({
         theme={chartTheme}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
+        onBrushEnd={({ x }) => {
+          if (!x) {
+            return;
+          }
+          const [min, max] = x;
+          // in the future we want to make it also for histogram
+          if (!xAxisColumn || !isTimeViz) {
+            return;
+          }
+
+          const table = data.tables[filteredLayers[0].layerId];
+
+          const xAxisColumnIndex = table.columns.findIndex(
+            (el) => el.id === filteredLayers[0].xAccessor
+          );
+          const timeFieldName = table.columns[xAxisColumnIndex]?.meta?.aggConfigParams?.field;
+
+          const context: LensBrushEvent['data'] = {
+            range: [min, max],
+            table,
+            column: xAxisColumnIndex,
+            timeFieldName,
+          };
+          onSelectRange(context);
+        }}
         onElementClick={([[geometry, series]]) => {
           // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
           const xySeries = series as XYChartSeriesIdentifier;
           const xyGeometry = geometry as GeometryValue;
 
-          const layer = layers.find(l =>
+          const layer = filteredLayers.find((l) =>
             xySeries.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
           );
           if (!layer) {
@@ -252,9 +323,9 @@ export function XYChart({
           const points = [
             {
               row: table.rows.findIndex(
-                row => layer.xAccessor && row[layer.xAccessor] === xyGeometry.x
+                (row) => layer.xAccessor && row[layer.xAccessor] === xyGeometry.x
               ),
-              column: table.columns.findIndex(col => col.id === layer.xAccessor),
+              column: table.columns.findIndex((col) => col.id === layer.xAccessor),
               value: xyGeometry.x,
             },
           ];
@@ -264,32 +335,27 @@ export function XYChart({
 
             points.push({
               row: table.rows.findIndex(
-                row => layer.splitAccessor && row[layer.splitAccessor] === pointValue
+                (row) => layer.splitAccessor && row[layer.splitAccessor] === pointValue
               ),
-              column: table.columns.findIndex(col => col.id === layer.splitAccessor),
+              column: table.columns.findIndex((col) => col.id === layer.splitAccessor),
               value: pointValue,
             });
           }
 
-          const xAxisFieldName: string | undefined = table.columns.find(
-            col => col.id === layer.xAccessor
-          )?.meta?.aggConfigParams?.field;
-
+          const xAxisFieldName = table.columns.find((el) => el.id === layer.xAccessor)?.meta
+            ?.aggConfigParams?.field;
           const timeFieldName = xDomain && xAxisFieldName;
 
-          const context: EmbeddableVisTriggerContext = {
-            data: {
-              data: points.map(point => ({
-                row: point.row,
-                column: point.column,
-                value: point.value,
-                table,
-              })),
-            },
+          const context: LensFilterEvent['data'] = {
+            data: points.map((point) => ({
+              row: point.row,
+              column: point.column,
+              value: point.value,
+              table,
+            })),
             timeFieldName,
           };
-
-          executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
+          onClickValue(desanitizeFilterContext(context));
         }}
       />
 
@@ -298,8 +364,8 @@ export function XYChart({
         position={shouldRotate ? Position.Left : Position.Bottom}
         title={xTitle}
         showGridLines={false}
-        hide={layers[0].hide}
-        tickFormat={d => xAxisFormatter.convert(d)}
+        hide={filteredLayers[0].hide}
+        tickFormat={(d) => xAxisFormatter.convert(d)}
       />
 
       <Axis
@@ -307,11 +373,11 @@ export function XYChart({
         position={shouldRotate ? Position.Bottom : Position.Left}
         title={args.yTitle}
         showGridLines={false}
-        hide={layers[0].hide}
-        tickFormat={d => yAxisFormatter.convert(d)}
+        hide={filteredLayers[0].hide}
+        tickFormat={(d) => yAxisFormatter.convert(d)}
       />
 
-      {layers.map(
+      {filteredLayers.map(
         (
           {
             splitAccessor,
@@ -326,16 +392,6 @@ export function XYChart({
           },
           index
         ) => {
-          if (
-            !xAccessor ||
-            !accessors.length ||
-            !data.tables[layerId] ||
-            data.tables[layerId].rows.length === 0 ||
-            data.tables[layerId].rows.every(row => typeof row[xAccessor] === 'undefined')
-          ) {
-            return;
-          }
-
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
@@ -345,13 +401,19 @@ export function XYChart({
           // For date histogram chart type, we're getting the rows that represent intervals without data.
           // To not display them in the legend, they need to be filtered out.
           const rows = table.rows.filter(
-            row =>
-              !(splitAccessor && !row[splitAccessor] && accessors.every(accessor => !row[accessor]))
+            (row) =>
+              xAccessor &&
+              typeof row[xAccessor] !== 'undefined' &&
+              !(
+                splitAccessor &&
+                typeof row[splitAccessor] === 'undefined' &&
+                accessors.every((accessor) => typeof row[accessor] === 'undefined')
+              )
           );
 
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
-            stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
+            stackAccessors: seriesType.includes('stacked') ? [xAccessor as string] : [],
             id: splitAccessor || accessors.join(','),
             xAccessor,
             yAccessors: accessors,
@@ -361,7 +423,7 @@ export function XYChart({
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             timeZone,
             name(d) {
-              const splitHint = table.columns.find(col => col.id === splitAccessor)?.formatHint;
+              const splitHint = table.columns.find((col) => col.id === splitAccessor)?.formatHint;
 
               // For multiple y series, the name of the operation is used on each, either:
               // * Key - Y name

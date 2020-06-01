@@ -25,6 +25,8 @@ import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
 import { registerReindexIndicesRoutes, createReindexWorker } from './routes/reindex_indices';
 import { registerTelemetryRoutes } from './routes/telemetry';
+import { telemetrySavedObjectType, reindexOperationSavedObjectType } from './saved_object_types';
+
 import { RouteDependencies } from './types';
 
 interface PluginsSetup {
@@ -57,10 +59,13 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   }
 
   setup(
-    { http, getStartServices, capabilities }: CoreSetup,
+    { http, getStartServices, capabilities, savedObjects }: CoreSetup,
     { usageCollection, cloud, licensing }: PluginsSetup
   ) {
     this.licensing = licensing;
+
+    savedObjects.registerType(reindexOperationSavedObjectType);
+    savedObjects.registerType(telemetrySavedObjectType);
 
     const router = http.createRouter();
 
@@ -85,8 +90,12 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     registerTelemetryRoutes(dependencies);
 
     if (usageCollection) {
-      getStartServices().then(([{ savedObjects, elasticsearch }]) => {
-        registerUpgradeAssistantUsageCollector({ elasticsearch, usageCollection, savedObjects });
+      getStartServices().then(([{ savedObjects: savedObjectsService, elasticsearch }]) => {
+        registerUpgradeAssistantUsageCollector({
+          elasticsearch,
+          usageCollection,
+          savedObjects: savedObjectsService,
+        });
       });
     }
   }

@@ -8,12 +8,12 @@ import React, { useState, useEffect } from 'react';
 import { IFieldType } from 'src/plugins/data/public';
 // @ts-ignore
 import { EuiSuggest, EuiSuggestItemProps } from '@elastic/eui';
-import { useDebounce } from '../hooks';
-import { useStartDeps } from '../hooks/use_deps';
-import { INDEX_NAME } from '../constants';
+import { i18n } from '@kbn/i18n';
+import { useDebounce, useStartDeps } from '../hooks';
+import { INDEX_NAME, AGENT_SAVED_OBJECT_TYPE } from '../constants';
 
 const DEBOUNCE_SEARCH_MS = 150;
-const HIDDEN_FIELDS = ['agents.actions'];
+const HIDDEN_FIELDS = [`${AGENT_SAVED_OBJECT_TYPE}.actions`];
 
 interface Suggestion {
   label: string;
@@ -31,9 +31,15 @@ interface Props {
   value: string;
   fieldPrefix: string;
   onChange: (newValue: string) => void;
+  placeholder?: string;
 }
 
-export const SearchBar: React.FunctionComponent<Props> = ({ value, fieldPrefix, onChange }) => {
+export const SearchBar: React.FunctionComponent<Props> = ({
+  value,
+  fieldPrefix,
+  onChange,
+  placeholder,
+}) => {
   const { suggestions } = useSuggestions(fieldPrefix, value);
 
   // TODO fix type when correctly typed in EUI
@@ -53,10 +59,15 @@ export const SearchBar: React.FunctionComponent<Props> = ({ value, fieldPrefix, 
       // @ts-ignore
       value={value}
       icon={'search'}
-      placeholder={'Search'}
+      placeholder={
+        placeholder ||
+        i18n.translate('xpack.ingestManager.defaultSearchPlaceholderText', {
+          defaultMessage: 'Search',
+        })
+      }
       onInputChange={onChangeSearch}
       onItemClick={onAutocompleteClick}
-      suggestions={suggestions.map(suggestion => {
+      suggestions={suggestions.map((suggestion) => {
         return {
           ...suggestion,
           // For type
@@ -93,7 +104,6 @@ function useSuggestions(fieldPrefix: string, search: string) {
       const res = (await data.indexPatterns.getFieldsForWildcard({
         pattern: INDEX_NAME,
       })) as IFieldType[];
-
       if (!data || !data.autocomplete) {
         throw new Error('Missing data plugin');
       }
@@ -114,7 +124,7 @@ function useSuggestions(fieldPrefix: string, search: string) {
           selectionEnd: query.length,
         })
       )
-        .filter(suggestion => {
+        .filter((suggestion) => {
           if (suggestion.type === 'conjunction') {
             return true;
           }

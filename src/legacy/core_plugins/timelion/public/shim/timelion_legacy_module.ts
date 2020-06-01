@@ -41,7 +41,7 @@ export const initTimelionLegacyModule = once((timelionPanels: Map<string, Panel>
 
   uiModules
     .get('apps/timelion', [])
-    .controller('TimelionVisController', function($scope: any) {
+    .controller('TimelionVisController', function ($scope: any) {
       $scope.$on('timelionChartRendered', (event: any) => {
         event.stopPropagation();
         $scope.renderComplete();

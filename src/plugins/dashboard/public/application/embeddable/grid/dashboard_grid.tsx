@@ -29,9 +29,10 @@ import _ from 'lodash';
 import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout } from 'react-grid-layout';
+import { GridData } from '../../../../common';
 import { ViewMode, EmbeddableChildPanel } from '../../../embeddable_plugin';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
-import { DashboardPanelState, GridData } from '../types';
+import { DashboardPanelState } from '../types';
 import { withKibana } from '../../../../../kibana_react/public';
 import { DashboardContainerInput } from '../dashboard_container';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
@@ -198,7 +199,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   }
 
   public buildLayoutFromPanels = (): GridData[] => {
-    return _.map(this.state.panels, panel => {
+    return _.map(this.state.panels, (panel) => {
       return panel.gridData;
     });
   };
@@ -249,7 +250,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       }
     });
 
-    return _.map(panelsInOrder, panel => {
+    return _.map(panelsInOrder, (panel) => {
       const expandPanel =
         expandedPanelId !== undefined && expandedPanelId === panel.explicitInput.id;
       const hidePanel = expandedPanelId !== undefined && expandedPanelId !== panel.explicitInput.id;
@@ -263,7 +264,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           className={classes}
           key={panel.explicitInput.id}
           data-test-subj="dashboardPanel"
-          ref={reactGridItem => {
+          ref={(reactGridItem) => {
             this.gridItems[panel.explicitInput.id] = reactGridItem;
           }}
         >
@@ -274,6 +275,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
             getEmbeddableFactory={this.props.kibana.services.embeddable.getEmbeddableFactory}
             getAllEmbeddableFactories={this.props.kibana.services.embeddable.getEmbeddableFactories}
             overlays={this.props.kibana.services.overlays}
+            application={this.props.kibana.services.application}
             notifications={this.props.kibana.services.notifications}
             inspector={this.props.kibana.services.inspector}
             SavedObjectFinder={this.props.kibana.services.SavedObjectFinder}

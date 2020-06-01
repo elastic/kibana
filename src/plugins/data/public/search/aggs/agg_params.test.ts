@@ -25,13 +25,15 @@ import { AggParamType } from '../aggs/param_types/agg';
 import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 import { notificationServiceMock } from '../../../../../../src/core/public/mocks';
 import { AggTypeDependencies } from './agg_type';
+import { InternalStartServices } from '../../types';
 
 describe('AggParams class', () => {
   const aggTypesDependencies: AggTypeDependencies = {
-    getInternalStartServices: () => ({
-      fieldFormats: fieldFormatsServiceMock.createStartContract(),
-      notifications: notificationServiceMock.createStartContract(),
-    }),
+    getInternalStartServices: () =>
+      (({
+        fieldFormats: fieldFormatsServiceMock.createStartContract(),
+        notifications: notificationServiceMock.createStartContract(),
+      } as unknown) as InternalStartServices),
   };
 
   describe('constructor args', () => {
@@ -66,7 +68,7 @@ describe('AggParams class', () => {
       expect(aggParams[0] instanceof OptionedParamType).toBeTruthy();
     });
 
-    it('Always converts the params to a BaseParamType', function() {
+    it('Always converts the params to a BaseParamType', function () {
       const params = [
         {
           name: 'height',
@@ -86,7 +88,7 @@ describe('AggParams class', () => {
 
       expect(aggParams).toHaveLength(params.length);
 
-      aggParams.forEach(aggParam => expect(aggParam instanceof BaseParamType).toBeTruthy());
+      aggParams.forEach((aggParam) => expect(aggParam instanceof BaseParamType).toBeTruthy());
     });
   });
 });

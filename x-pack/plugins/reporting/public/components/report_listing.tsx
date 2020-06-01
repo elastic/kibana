@@ -16,14 +16,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
-import { Component, Fragment, default as React } from 'react';
+import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 import { ApplicationStart, ToastsSetup } from 'src/core/public';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
 import { Poller } from '../../common/poller';
-import { JobStatuses, JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG } from '../../constants';
+import { JobStatuses } from '../../constants';
 import { checkLicense } from '../lib/license_check';
 import { JobQueueEntry, ReportingAPIClient } from '../lib/reporting_api_client';
+import { ClientConfigType } from '../plugin';
 import {
   ReportDeleteButton,
   ReportDownloadButton,
@@ -53,6 +54,7 @@ export interface Props {
   intl: InjectedIntl;
   apiClient: ReportingAPIClient;
   license$: LicensingPluginSetup['license$'];
+  pollConfig: ClientConfigType['poll'];
   redirect: ApplicationStart['navigateToApp'];
   toasts: ToastsSetup;
 }
@@ -85,6 +87,12 @@ const jobStatusLabelsMap = new Map<JobStatuses, string>([
     JobStatuses.COMPLETED,
     i18n.translate('xpack.reporting.jobStatuses.completedText', {
       defaultMessage: 'Completed',
+    }),
+  ],
+  [
+    JobStatuses.WARNINGS,
+    i18n.translate('xpack.reporting.jobStatuses.warningText', {
+      defaultMessage: 'Completed with warnings',
     }),
   ],
   [
@@ -161,12 +169,10 @@ class ReportListingUi extends Component<Props, State> {
       functionToPoll: () => {
         return this.fetchJobs();
       },
-      pollFrequencyInMillis:
-        JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG.jobCompletionNotifier.interval,
+      pollFrequencyInMillis: this.props.pollConfig.jobsRefresh.interval,
       trailing: false,
       continuePollingOnError: true,
-      pollFrequencyErrorMultiplier:
-        JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG.jobCompletionNotifier.intervalErrorMultiplier,
+      pollFrequencyErrorMultiplier: this.props.pollConfig.jobsRefresh.intervalErrorMultiplier,
     });
     this.poller.start();
     this.licenseSubscription = this.props.license$.subscribe(this.licenseHandler);
@@ -185,13 +191,13 @@ class ReportListingUi extends Component<Props, State> {
   };
 
   private onSelectionChange = (jobs: Job[]) => {
-    this.setState(current => ({ ...current, selectedJobs: jobs }));
+    this.setState((current) => ({ ...current, selectedJobs: jobs }));
   };
 
   private removeRecord = (record: Job) => {
     const { jobs } = this.state;
-    const filtered = jobs.filter(j => j.id !== record.id);
-    this.setState(current => ({ ...current, jobs: filtered }));
+    const filtered = jobs.filter((j) => j.id !== record.id);
+    this.setState((current) => ({ ...current, jobs: filtered }));
   };
 
   private renderDeleteButton = () => {
@@ -410,7 +416,11 @@ class ReportListingUi extends Component<Props, State> {
             statusTimestamp = this.formatDate(record.started_at);
           } else if (
             record.completed_at &&
-            (status === JobStatuses.COMPLETED || status === JobStatuses.FAILED)
+            ([
+              JobStatuses.COMPLETED,
+              JobStatuses.FAILED,
+              JobStatuses.WARNINGS,
+            ] as string[]).includes(status)
           ) {
             statusTimestamp = this.formatDate(record.completed_at);
           }

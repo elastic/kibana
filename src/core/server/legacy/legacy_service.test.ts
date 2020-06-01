@@ -22,7 +22,10 @@ jest.mock('../../../cli/cluster/cluster_manager');
 jest.mock('./config/legacy_deprecation_adapters', () => ({
   convertLegacyDeprecationProvider: (provider: any) => Promise.resolve(provider),
 }));
-import { findLegacyPluginSpecsMock } from './legacy_service.test.mocks';
+import {
+  findLegacyPluginSpecsMock,
+  logLegacyThirdPartyPluginDeprecationWarningMock,
+} from './legacy_service.test.mocks';
 
 import { BehaviorSubject, throwError } from 'rxjs';
 
@@ -41,6 +44,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mock';
+import { httpResourcesMock } from '../http_resources/http_resources_service.mock';
 import { setupMock as renderingServiceMock } from '../rendering/__mocks__/rendering_service';
 import { uuidServiceMock } from '../uuid/uuid_service.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
@@ -86,23 +90,11 @@ beforeEach(() => {
           getAuthHeaders: () => undefined,
         } as any,
       },
+      httpResources: httpResourcesMock.createSetupContract(),
       savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       plugins: {
         initialized: true,
         contracts: new Map([['plugin-id', 'plugin-value']]),
-        uiPlugins: {
-          public: new Map([['plugin-id', {} as DiscoveredPlugin]]),
-          internal: new Map([
-            [
-              'plugin-id',
-              {
-                publicTargetDir: 'path/to/target/public',
-                publicAssetsDir: '/plugins/name/assets/',
-              },
-            ],
-          ]),
-          browserConfigs: new Map(),
-        },
       },
       rendering: renderingServiceMock,
       metrics: metricsServiceMock.createInternalSetupContract(),
@@ -110,6 +102,19 @@ beforeEach(() => {
       status: statusServiceMock.createInternalSetupContract(),
     },
     plugins: { 'plugin-id': 'plugin-value' },
+    uiPlugins: {
+      public: new Map([['plugin-id', {} as DiscoveredPlugin]]),
+      internal: new Map([
+        [
+          'plugin-id',
+          {
+            publicTargetDir: 'path/to/target/public',
+            publicAssetsDir: '/plugins/name/assets/',
+          },
+        ],
+      ]),
+      browserConfigs: new Map(),
+    },
   };
 
   startDeps = {
@@ -348,7 +353,7 @@ describe('once LegacyService is set up without connection info', () => {
 
 describe('once LegacyService is set up in `devClusterMaster` mode', () => {
   beforeEach(() => {
-    configService.atPath.mockImplementation(path => {
+    configService.atPath.mockImplementation((path) => {
       return new BehaviorSubject(
         path === 'dev' ? { basePathProxyTargetPort: 100500 } : { basePath: '/abc' }
       );
@@ -442,7 +447,7 @@ describe('#discoverPlugins()', () => {
 
   it(`register legacy plugin's deprecation providers`, async () => {
     findLegacyPluginSpecsMock.mockImplementation(
-      settings =>
+      (settings) =>
         Promise.resolve({
           pluginSpecs: [
             {
@@ -473,6 +478,38 @@ describe('#discoverPlugins()', () => {
     expect(configService.addDeprecationProvider).toHaveBeenCalledTimes(2);
     expect(configService.addDeprecationProvider).toHaveBeenCalledWith('', 'providerA');
     expect(configService.addDeprecationProvider).toHaveBeenCalledWith('', 'providerB');
+  });
+
+  it(`logs deprecations for legacy third party plugins`, async () => {
+    const pluginSpecs = [
+      { getId: () => 'pluginA', getDeprecationsProvider: () => undefined },
+      { getId: () => 'pluginB', getDeprecationsProvider: () => undefined },
+    ];
+    findLegacyPluginSpecsMock.mockImplementation(
+      (settings) =>
+        Promise.resolve({
+          pluginSpecs,
+          pluginExtendedConfig: settings,
+          disabledPluginSpecs: [],
+          uiExports: {},
+          navLinks: [],
+        }) as any
+    );
+
+    const legacyService = new LegacyService({
+      coreId,
+      env,
+      logger,
+      configService: configService as any,
+    });
+
+    await legacyService.discoverPlugins();
+
+    expect(logLegacyThirdPartyPluginDeprecationWarningMock).toHaveBeenCalledTimes(1);
+    expect(logLegacyThirdPartyPluginDeprecationWarningMock).toHaveBeenCalledWith({
+      specs: pluginSpecs,
+      log: expect.any(Object),
+    });
   });
 });
 

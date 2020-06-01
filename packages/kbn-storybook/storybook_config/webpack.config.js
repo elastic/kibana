@@ -29,7 +29,7 @@ const { currentConfig } = require('../../../built_assets/storybook/current.confi
 module.exports = async ({ config }) => {
   // Find and alter the CSS rule to replace the Kibana public path string with a path
   // to the route we've added in middleware.js
-  const cssRule = config.module.rules.find(rule => rule.test.source.includes('.css$'));
+  const cssRule = config.module.rules.find((rule) => rule.test.source.includes('.css$'));
   cssRule.use.push({
     loader: 'string-replace-loader',
     options: {
@@ -46,6 +46,13 @@ module.exports = async ({ config }) => {
     loaders: 'babel-loader',
     options: {
       presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+    },
+  });
+
+  config.module.rules.push({
+    test: /\.(html|md|txt|tmpl)$/,
+    use: {
+      loader: 'raw-loader',
     },
   });
 

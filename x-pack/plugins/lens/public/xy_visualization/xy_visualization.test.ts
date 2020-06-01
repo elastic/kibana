@@ -27,7 +27,7 @@ function exampleState(): State {
 }
 
 describe('xy_visualization', () => {
-  describe('getDescription', () => {
+  describe('#getDescription', () => {
     function mixedState(...types: SeriesType[]) {
       const state = exampleState();
       return {
@@ -77,6 +77,45 @@ describe('xy_visualization', () => {
       );
       expect(xyVisualization.getDescription(mixedState('bar_horizontal_stacked')).label).toEqual(
         'Stacked horizontal bar chart'
+      );
+    });
+  });
+
+  describe('#getVisualizationTypeId', () => {
+    function mixedState(...types: SeriesType[]) {
+      const state = exampleState();
+      return {
+        ...state,
+        layers: types.map((t, i) => ({
+          ...state.layers[0],
+          layerId: `layer_${i}`,
+          seriesType: t,
+        })),
+      };
+    }
+
+    it('should show mixed when each layer is different', () => {
+      expect(xyVisualization.getVisualizationTypeId(mixedState('bar', 'line'))).toEqual('mixed');
+    });
+
+    it('should show the preferredSeriesType if there are no layers', () => {
+      expect(xyVisualization.getVisualizationTypeId(mixedState())).toEqual('bar');
+    });
+
+    it('should combine multiple layers into one type', () => {
+      expect(
+        xyVisualization.getVisualizationTypeId(mixedState('bar_horizontal', 'bar_horizontal'))
+      ).toEqual('bar_horizontal');
+    });
+
+    it('should return the subtype for single layers', () => {
+      expect(xyVisualization.getVisualizationTypeId(mixedState('area'))).toEqual('area');
+      expect(xyVisualization.getVisualizationTypeId(mixedState('line'))).toEqual('line');
+      expect(xyVisualization.getVisualizationTypeId(mixedState('area_stacked'))).toEqual(
+        'area_stacked'
+      );
+      expect(xyVisualization.getVisualizationTypeId(mixedState('bar_horizontal_stacked'))).toEqual(
+        'bar_horizontal_stacked'
       );
     });
   });
@@ -277,7 +316,7 @@ describe('xy_visualization', () => {
         layerId: 'first',
       }).groups;
       expect(options).toHaveLength(3);
-      expect(options.map(o => o.groupId)).toEqual(['x', 'y', 'breakdown']);
+      expect(options.map((o) => o.groupId)).toEqual(['x', 'y', 'breakdown']);
     });
 
     it('should only accept bucketed operations for x', () => {
@@ -286,7 +325,7 @@ describe('xy_visualization', () => {
         frame,
         layerId: 'first',
       }).groups;
-      const filterOperations = options.find(o => o.groupId === 'x')!.filterOperations;
+      const filterOperations = options.find((o) => o.groupId === 'x')!.filterOperations;
 
       const exampleOperation: Operation = {
         dataType: 'number',
@@ -315,7 +354,7 @@ describe('xy_visualization', () => {
         frame,
         layerId: 'first',
       }).groups;
-      expect(options.find(o => o.groupId === 'x')?.supportsMoreColumns).toBe(false);
+      expect(options.find((o) => o.groupId === 'x')?.supportsMoreColumns).toBe(false);
     });
 
     it('should allow number operations on y', () => {
@@ -324,7 +363,7 @@ describe('xy_visualization', () => {
         frame,
         layerId: 'first',
       }).groups;
-      const filterOperations = options.find(o => o.groupId === 'y')!.filterOperations;
+      const filterOperations = options.find((o) => o.groupId === 'y')!.filterOperations;
       const exampleOperation: Operation = {
         dataType: 'number',
         isBucketed: false,
@@ -336,7 +375,7 @@ describe('xy_visualization', () => {
         { ...exampleOperation, dataType: 'boolean' },
         { ...exampleOperation, dataType: 'date' },
       ];
-      expect(ops.filter(filterOperations).map(x => x.dataType)).toEqual(['number']);
+      expect(ops.filter(filterOperations).map((x) => x.dataType)).toEqual(['number']);
     });
   });
 });

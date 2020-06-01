@@ -9,12 +9,15 @@ import {
   CoreSetup,
   KibanaRequest,
   RequestHandlerContext,
-  Logger
+  Logger,
 } from 'src/core/server';
 import { PickByValue, Optional } from 'utility-types';
 import { Observable } from 'rxjs';
 import { Server } from 'hapi';
-import { FetchOptions } from '../../../../legacy/plugins/apm/public/services/rest/callApi';
+import { ObservabilityPluginSetup } from '../../../observability/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FetchOptions } from '../../public/services/rest/callApi';
+import { SecurityPluginSetup } from '../../../security/public';
 import { APMConfig } from '..';
 
 export interface Params {
@@ -61,8 +64,9 @@ export type APMRequestHandlerContext<
   params: { query: { _debug: boolean } } & TDecodedParams;
   config: APMConfig;
   logger: Logger;
-  __LEGACY: {
-    server: APMLegacyServer;
+  plugins: {
+    observability?: ObservabilityPluginSetup;
+    security?: SecurityPluginSetup;
   };
 };
 
@@ -107,7 +111,10 @@ export interface ServerAPI<TRouteState extends RouteState> {
     context: {
       config$: Observable<APMConfig>;
       logger: Logger;
-      __LEGACY: { server: Server };
+      plugins: {
+        observability?: ObservabilityPluginSetup;
+        security?: SecurityPluginSetup;
+      };
     }
   ) => void;
 }

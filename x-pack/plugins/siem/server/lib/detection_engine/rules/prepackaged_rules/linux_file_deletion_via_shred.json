@@ -1,0 +1,35 @@
+{
+  "description": "Malware or other files dropped or created on a system by an adversary may leave traces behind as to what was done within a network and how. Adversaries may remove these files over the course of an intrusion to keep their footprint low or remove them at the end as part of the post-intrusion cleanup process.",
+  "index": [
+    "auditbeat-*"
+  ],
+  "language": "kuery",
+  "name": "File Deletion via Shred",
+  "query": "event.action:(executed or process_started) and process.name:shred and process.args:(\"-u\" or \"--remove\" or \"-z\" or \"--zero\")",
+  "risk_score": 21,
+  "rule_id": "a1329140-8de3-4445-9f87-908fb6d824f4",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1107",
+          "name": "File Deletion",
+          "reference": "https://attack.mitre.org/techniques/T1107/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

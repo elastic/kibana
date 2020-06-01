@@ -13,7 +13,7 @@ export class Plugin {
   setup(coreSetup, plugins) {
     registerFeature(plugins.home);
 
-    plugins.devTools.register({
+    const devTool = plugins.devTools.register({
       order: 6,
       title: i18n.translate('xpack.grokDebugger.displayName', {
         defaultMessage: 'Grok Debugger',
@@ -26,6 +26,14 @@ export class Plugin {
         const { renderApp } = await import('./render_app');
         return renderApp(license, element, coreStart);
       },
+    });
+
+    plugins.licensing.license$.subscribe((license) => {
+      if (!license.isActive && !devTool.isDisabled()) {
+        devTool.disable();
+      } else if (devTool.isDisabled()) {
+        devTool.enable();
+      }
     });
   }
 

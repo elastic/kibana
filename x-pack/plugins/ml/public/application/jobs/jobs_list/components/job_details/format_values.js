@@ -63,6 +63,12 @@ export function formatValues([key, value]) {
     // numbers rounded to 3 decimal places
     case 'average_search_time_per_bucket_ms':
     case 'exponential_average_search_time_per_hour_ms':
+    case 'total_bucket_processing_time_ms':
+    case 'minimum_bucket_processing_time_ms':
+    case 'maximum_bucket_processing_time_ms':
+    case 'average_bucket_processing_time_ms':
+    case 'exponential_average_bucket_processing_time_ms':
+    case 'exponential_average_bucket_processing_time_per_hour_ms':
       value = typeof value === 'number' ? roundToDecimalPlace(value, 3).toLocaleString() : value;
       break;
 
@@ -78,9 +84,9 @@ export function formatValues([key, value]) {
 export function filterObjects(obj, allowArrays, allowObjects) {
   return Object.keys(obj)
     .filter(
-      k => allowObjects || typeof obj[k] !== 'object' || (allowArrays && Array.isArray(obj[k]))
+      (k) => allowObjects || typeof obj[k] !== 'object' || (allowArrays && Array.isArray(obj[k]))
     )
-    .map(k => {
+    .map((k) => {
       let item = obj[k];
       if (Array.isArray(item)) {
         item = item.join(', ');

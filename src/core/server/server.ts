@@ -29,7 +29,8 @@ import {
 import { CoreApp } from './core_app';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
-import { RenderingService, RenderingServiceSetup } from './rendering';
+import { HttpResourcesService } from './http_resources';
+import { RenderingService } from './rendering';
 import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { UiSettingsService } from './ui_settings';
@@ -71,6 +72,7 @@ export class Server {
   private readonly uiSettings: UiSettingsService;
   private readonly uuid: UuidService;
   private readonly metrics: MetricsService;
+  private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
   private readonly coreApp: CoreApp;
 
@@ -99,13 +101,14 @@ export class Server {
     this.metrics = new MetricsService(core);
     this.status = new StatusService(core);
     this.coreApp = new CoreApp(core);
+    this.httpResources = new HttpResourcesService(core);
   }
 
   public async setup() {
     this.log.debug('setting up server');
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
-    const pluginDependencies = await this.plugins.discover();
+    const { pluginTree, uiPlugins } = await this.plugins.discover();
     const legacyPlugins = await this.legacy.discoverPlugins();
 
     // Immediately terminate in case of invalid configuration
@@ -117,10 +120,7 @@ export class Server {
       // 1) Can access context from any NP plugin
       // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
       //    New Platform plugins.
-      pluginDependencies: new Map([
-        ...pluginDependencies,
-        [this.legacy.legacyId, [...pluginDependencies.keys()]],
-      ]),
+      pluginDependencies: new Map([...pluginTree, [this.legacy.legacyId, [...pluginTree.keys()]]]),
     });
 
     const uuidSetup = await this.uuid.setup();
@@ -148,6 +148,17 @@ export class Server {
 
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
+    const renderingSetup = await this.rendering.setup({
+      http: httpSetup,
+      legacyPlugins,
+      uiPlugins,
+    });
+
+    const httpResourcesSetup = this.httpResources.setup({
+      http: httpSetup,
+      rendering: renderingSetup,
+    });
+
     const statusSetup = this.status.setup({
       elasticsearch: elasticsearchServiceSetup,
       savedObjects: savedObjectsSetup,
@@ -158,28 +169,25 @@ export class Server {
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
-      metrics: metricsSetup,
       savedObjects: savedObjectsSetup,
       status: statusSetup,
       uiSettings: uiSettingsSetup,
       uuid: uuidSetup,
+      metrics: metricsSetup,
+      rendering: renderingSetup,
+      httpResources: httpResourcesSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.pluginsInitialized = pluginsSetup.initialized;
 
-    const renderingSetup = await this.rendering.setup({
-      http: httpSetup,
-      legacyPlugins,
-      plugins: pluginsSetup,
-    });
-
     await this.legacy.setup({
       core: { ...coreSetup, plugins: pluginsSetup, rendering: renderingSetup },
       plugins: mapToObject(pluginsSetup.contracts),
+      uiPlugins,
     });
 
-    this.registerCoreContext(coreSetup, renderingSetup);
+    this.registerCoreContext(coreSetup);
     this.coreApp.setup(coreSetup);
 
     return coreSetup;
@@ -212,7 +220,9 @@ export class Server {
     });
 
     await this.http.start();
-    await this.rendering.start();
+    await this.rendering.start({
+      legacy: this.legacy,
+    });
     await this.metrics.start();
 
     return this.coreStart;
@@ -232,32 +242,26 @@ export class Server {
     await this.status.stop();
   }
 
-  private registerCoreContext(coreSetup: InternalCoreSetup, rendering: RenderingServiceSetup) {
+  private registerCoreContext(coreSetup: InternalCoreSetup) {
     coreSetup.http.registerRouteHandlerContext(
       coreId,
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {
-        const savedObjectsClient = this.coreStart!.savedObjects.getScopedClient(req);
-        const uiSettingsClient = coreSetup.uiSettings.asScopedToClient(savedObjectsClient);
+        const coreStart = this.coreStart!;
+        const savedObjectsClient = coreStart.savedObjects.getScopedClient(req);
 
         return {
-          rendering: {
-            render: async (options = {}) =>
-              rendering.render(req, uiSettingsClient, {
-                ...options,
-                vars: await this.legacy.legacyInternals!.getVars('core', req),
-              }),
-          },
           savedObjects: {
             client: savedObjectsClient,
-            typeRegistry: this.coreStart!.savedObjects.getTypeRegistry(),
+            typeRegistry: coreStart.savedObjects.getTypeRegistry(),
           },
           elasticsearch: {
-            adminClient: coreSetup.elasticsearch.adminClient.asScoped(req),
-            dataClient: coreSetup.elasticsearch.dataClient.asScoped(req),
+            legacy: {
+              client: coreStart.elasticsearch.legacy.client.asScoped(req),
+            },
           },
           uiSettings: {
-            client: uiSettingsClient,
+            client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
           },
         };
       }

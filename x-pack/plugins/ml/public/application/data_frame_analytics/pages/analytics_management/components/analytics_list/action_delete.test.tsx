@@ -7,13 +7,13 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import * as CheckPrivilige from '../../../../../privilege/check_privilege';
+import * as CheckPrivilige from '../../../../../capabilities/check_capabilities';
 
 import { DeleteAction } from './action_delete';
 
 import mockAnalyticsListItem from './__mocks__/analytics_list_item.json';
 
-jest.mock('../../../../../privilege/check_privilege', () => ({
+jest.mock('../../../../../capabilities/check_capabilities', () => ({
   checkPermission: jest.fn(() => false),
   createPermissionFailureMessage: jest.fn(),
 }));
@@ -26,7 +26,7 @@ describe('DeleteAction', () => {
 
   test('When canDeleteDataFrameAnalytics permission is true, button should not be disabled.', () => {
     const mock = jest.spyOn(CheckPrivilige, 'checkPermission');
-    mock.mockImplementation(p => p === 'canDeleteDataFrameAnalytics');
+    mock.mockImplementation((p) => p === 'canDeleteDataFrameAnalytics');
     const { getByTestId } = render(<DeleteAction item={mockAnalyticsListItem} />);
 
     expect(getByTestId('mlAnalyticsJobDeleteButton')).not.toHaveAttribute('disabled');

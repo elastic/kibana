@@ -5,19 +5,46 @@
  */
 import Boom from 'boom';
 import { SavedObjectsBulkResponse } from 'kibana/server';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { encryptedSavedObjectsMock } from '../../../../../plugins/encrypted_saved_objects/server/mocks';
+
 import {
   Agent,
   AgentAction,
   AgentActionSOAttributes,
   AgentEvent,
 } from '../../../common/types/models';
-import { AGENT_TYPE_PERMANENT } from '../../../common/constants';
+import { AGENT_TYPE_PERMANENT, AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { acknowledgeAgentActions } from './acks';
+import { appContextService } from '../app_context';
+import { IngestManagerAppContext } from '../../plugin';
 
 describe('test agent acks services', () => {
   it('should succeed on valid and matched actions', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
+    const mockStartEncryptedSOPlugin = encryptedSavedObjectsMock.createStart();
+    appContextService.start(({
+      encryptedSavedObjects: mockStartEncryptedSOPlugin,
+    } as unknown) as IngestManagerAppContext);
+
+    const [
+      { value: mockStartEncryptedSOClient },
+    ] = mockStartEncryptedSOPlugin.getClient.mock.results;
+
+    mockStartEncryptedSOClient.getDecryptedAsInternalUser.mockReturnValue(
+      Promise.resolve({
+        id: 'action1',
+        references: [],
+        type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+        attributes: {
+          type: 'CONFIG_CHANGE',
+          agent_id: 'id',
+          sent_at: '2020-03-14T19:45:02.620Z',
+          timestamp: '2019-01-04T14:32:03.36764-05:00',
+          created_at: '2020-03-14T19:45:02.620Z',
+        },
+      })
+    );
 
     mockSavedObjectsClient.bulkGet.mockReturnValue(
       Promise.resolve({
@@ -25,7 +52,7 @@ describe('test agent acks services', () => {
           {
             id: 'action1',
             references: [],
-            type: 'agent_actions',
+            type: AGENT_ACTION_SAVED_OBJECT_TYPE,
             attributes: {
               type: 'CONFIG_CHANGE',
               agent_id: 'id',
@@ -114,7 +141,7 @@ describe('test agent acks services', () => {
           {
             id: 'action1',
             references: [],
-            type: 'agent_actions',
+            type: AGENT_ACTION_SAVED_OBJECT_TYPE,
             attributes: {
               type: 'CONFIG_CHANGE',
               agent_id: 'id',

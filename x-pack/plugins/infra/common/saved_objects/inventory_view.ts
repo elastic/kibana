@@ -5,21 +5,31 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ElasticsearchMappingOf } from '../../server/utils/typed_elasticsearch_mappings';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { WaffleViewState } from '../../public/pages/inventory_view/hooks/use_waffle_view_state';
+import { SavedObjectsType } from 'src/core/server';
 
-export const inventoryViewSavedObjectType = 'inventory-view';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedViewSavedObject } from '../../public/hooks/use_saved_view';
+export const inventoryViewSavedObjectName = 'inventory-view';
 
-export const inventoryViewSavedObjectMappings: {
-  [inventoryViewSavedObjectType]: ElasticsearchMappingOf<SavedViewSavedObject<WaffleViewState>>;
-} = {
-  [inventoryViewSavedObjectType]: {
+export const inventoryViewSavedObjectType: SavedObjectsType = {
+  name: inventoryViewSavedObjectName,
+  hidden: false,
+  namespaceType: 'single',
+  management: {
+    importableAndExportable: true,
+  },
+  mappings: {
     properties: {
       name: {
         type: 'keyword',
+      },
+      sort: {
+        properties: {
+          by: {
+            type: 'keyword',
+          },
+          direction: {
+            type: 'keyword',
+          },
+        },
       },
       metric: {
         properties: {
@@ -37,6 +47,19 @@ export const inventoryViewSavedObjectMappings: {
           },
           label: {
             type: 'keyword',
+          },
+        },
+      },
+      legend: {
+        properties: {
+          palette: {
+            type: 'keyword',
+          },
+          steps: {
+            type: 'long',
+          },
+          reverseColors: {
+            type: 'boolean',
           },
         },
       },

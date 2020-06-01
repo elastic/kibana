@@ -23,12 +23,8 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SnapshotDetails as ISnapshotDetails } from '../../../../../../common/types';
-import {
-  SectionError,
-  SectionLoading,
-  SnapshotDeleteProvider,
-  Error,
-} from '../../../../components';
+import { SectionError, Error } from '../../../../../shared_imports';
+import { SectionLoading, SnapshotDeleteProvider } from '../../../../components';
 import { useServices } from '../../../../app_context';
 import {
   UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
@@ -102,7 +98,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
       <Fragment>
         <EuiSpacer size="s" />
         <EuiTabs>
-          {tabOptions.map(tab => (
+          {tabOptions.map((tab) => (
             <EuiTab
               onClick={() => {
                 uiMetricService.trackUiMetric(panelTypeToUiMetricMap[tab.id]);
@@ -185,7 +181,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
                 <SnapshotDeleteProvider>
-                  {deleteSnapshotPrompt => {
+                  {(deleteSnapshotPrompt) => {
                     return (
                       <EuiButtonEmpty
                         color="danger"

@@ -5,6 +5,7 @@
  */
 
 import React, { memo, useState, useCallback, useMemo } from 'react';
+import { isEmpty } from 'lodash';
 
 import { euiStyled } from '../../../../../observability/public';
 import { isTimestampColumn } from '../../../utils/log_entry';
@@ -32,6 +33,7 @@ interface LogEntryRowProps {
   isHighlighted: boolean;
   logEntry: LogEntry;
   openFlyoutWithItem?: (id: string) => void;
+  openViewLogInContext?: (entry: LogEntry) => void;
   scale: TextScale;
   wrap: boolean;
 }
@@ -46,6 +48,7 @@ export const LogEntryRow = memo(
     isHighlighted,
     logEntry,
     openFlyoutWithItem,
+    openViewLogInContext,
     scale,
     wrap,
   }: LogEntryRowProps) => {
@@ -62,6 +65,16 @@ export const LogEntryRow = memo(
       openFlyoutWithItem,
       logEntry.id,
     ]);
+
+    const handleOpenViewLogInContext = useCallback(() => openViewLogInContext?.(logEntry), [
+      openViewLogInContext,
+      logEntry,
+    ]);
+
+    const hasContext = useMemo(() => !isEmpty(logEntry.context), [logEntry]);
+    const hasActionFlyoutWithItem = openFlyoutWithItem !== undefined;
+    const hasActionViewLogInContext = hasContext && openViewLogInContext !== undefined;
+    const hasActionsMenu = hasActionFlyoutWithItem || hasActionViewLogInContext;
 
     const logEntryColumnsById = useMemo(
       () =>
@@ -107,7 +120,7 @@ export const LogEntryRow = memo(
         isHighlighted={isHighlighted}
         scale={scale}
       >
-        {columnConfigurations.map(columnConfiguration => {
+        {columnConfigurations.map((columnConfiguration) => {
           if (isTimestampLogColumnConfiguration(columnConfiguration)) {
             const column = logEntryColumnsById[columnConfiguration.timestampColumn.id];
             const columnWidth = columnWidths[columnConfiguration.timestampColumn.id];
@@ -165,18 +178,23 @@ export const LogEntryRow = memo(
             );
           }
         })}
-        <LogEntryColumn
-          key="logColumn iconLogColumn iconLogColumn:details"
-          {...columnWidths[iconColumnId]}
-        >
-          <LogEntryActionsColumn
-            isHovered={isHovered}
-            isMenuOpen={isMenuOpen}
-            onOpenMenu={openMenu}
-            onCloseMenu={closeMenu}
-            onViewDetails={openFlyout}
-          />
-        </LogEntryColumn>
+        {hasActionsMenu ? (
+          <LogEntryColumn
+            key="logColumn iconLogColumn iconLogColumn:details"
+            {...columnWidths[iconColumnId]}
+          >
+            <LogEntryActionsColumn
+              isHovered={isHovered}
+              isMenuOpen={isMenuOpen}
+              onOpenMenu={openMenu}
+              onCloseMenu={closeMenu}
+              onViewDetails={hasActionFlyoutWithItem ? openFlyout : undefined}
+              onViewLogInContext={
+                hasActionViewLogInContext ? handleOpenViewLogInContext : undefined
+              }
+            />
+          </LogEntryColumn>
+        ) : null}
       </LogEntryRowWrapper>
     );
   }
@@ -191,15 +209,15 @@ export const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
   role: 'row',
 }))<LogEntryRowWrapperProps>`
   align-items: stretch;
-  color: ${props => props.theme.eui.euiTextColor};
+  color: ${(props) => props.theme.eui.euiTextColor};
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   justify-content: flex-start;
   overflow: hidden;
 
-  ${props => monospaceTextStyle(props.scale)};
-  ${props => (props.isHighlighted ? highlightedContentStyle : '')}
+  ${(props) => monospaceTextStyle(props.scale)};
+  ${(props) => (props.isHighlighted ? highlightedContentStyle : '')}
 
   &:hover {
     ${hoveredContentStyle}

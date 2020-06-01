@@ -36,7 +36,7 @@ export class MetricTile extends Component {
 
     const metrics = [].concat(value);
     return metrics
-      .map(function(metric) {
+      .map(function (metric) {
         return formatNumber(metric, type);
       })
       .join(', ');
@@ -54,7 +54,7 @@ Wrapper component that simply maps each metric to MetricTile inside a FlexGroup
 */
 const MetricTiles = ({ metrics }) => (
   <EuiFlexGrid columns={3}>
-    {metrics.map(metric => (
+    {metrics.map((metric) => (
       <EuiFlexItem key={metric.name}>
         <MetricTile metric={metric} />
       </EuiFlexItem>

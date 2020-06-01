@@ -9,24 +9,24 @@
  */
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { EuiSelect } from '@elastic/eui';
 
 const limitOptions = [5, 10, 25, 50];
 
-const euiOptions = limitOptions.map(limit => ({
+const euiOptions = limitOptions.map((limit) => ({
   value: limit,
   text: `${limit}`,
 }));
 
-export const limit$ = new Subject<number>();
 export const defaultLimit = limitOptions[1];
+export const limit$ = new BehaviorSubject<number>(defaultLimit);
 
 export const useSwimlaneLimit = (): [number, (newLimit: number) => void] => {
   const limit = useObservable(limit$, defaultLimit);
 
-  return [limit, (newLimit: number) => limit$.next(newLimit)];
+  return [limit!, (newLimit: number) => limit$.next(newLimit)];
 };
 
 export const SelectLimit = () => {

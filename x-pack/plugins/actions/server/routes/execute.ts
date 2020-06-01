@@ -32,7 +32,7 @@ export const executeActionRoute = (
 ) => {
   router.post(
     {
-      path: `${BASE_ACTION_API_PATH}/{id}/_execute`,
+      path: `${BASE_ACTION_API_PATH}/action/{id}/_execute`,
       validate: {
         body: bodySchema,
         params: paramSchema,
@@ -41,11 +41,11 @@ export const executeActionRoute = (
         tags: ['access:actions-read'],
       },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, any, TypeOf<typeof bodySchema>, any>,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, unknown, TypeOf<typeof bodySchema>>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
       const { params } = req.body;
       const { id } = req.params;

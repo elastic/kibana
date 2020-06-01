@@ -35,7 +35,7 @@ const getFieldByIdFactory = (additionalFields: Field[]) => (id: string) => {
     if (id === MLCATEGORY) {
       field = mlCategory;
     } else if (additionalFields.length) {
-      field = additionalFields.find(f => f.id === id) || null;
+      field = additionalFields.find((f) => f.id === id) || null;
     }
   }
   return field;
@@ -52,7 +52,7 @@ export function getRichDetectors(
 
   const getFieldById = getFieldByIdFactory(additionalFields);
 
-  return detectors.map(d => {
+  return detectors.map((d) => {
     let field = null;
     let byField = null;
     let overField = null;
@@ -86,13 +86,13 @@ export function getRichDetectors(
 export function createFieldOptions(fields: Field[], additionalFields: Field[]) {
   return [
     ...fields
-      .filter(f => f.id !== EVENT_RATE_FIELD_ID)
-      .map(f => ({
+      .filter((f) => f.id !== EVENT_RATE_FIELD_ID)
+      .map((f) => ({
         label: f.name,
       })),
     ...additionalFields
-      .filter(f => fields.some(f2 => f2.id === f.id) === false)
-      .map(f => ({
+      .filter((f) => fields.some((f2) => f2.id === f.id) === false)
+      .map((f) => ({
         label: f.id,
       })),
   ].sort((a, b) => a.label.localeCompare(b.label));
@@ -150,7 +150,7 @@ function getDetectors(job: Job, datafeed: Datafeed) {
   } else {
     // all other detectors.
     detectors = processFieldlessAggs(detectors);
-    detectors = detectors.map(d => {
+    detectors = detectors.map((d) => {
       switch (d.function) {
         // if sparse data functions were used, replace them with their non-sparse versions
         // the sparse data flag has already been determined and set, so this information is not being lost.
@@ -182,7 +182,7 @@ function getDetectors(job: Job, datafeed: Datafeed) {
 
 // if a fieldless function is used, add EVENT_RATE_FIELD_ID as its field
 function processFieldlessAggs(detectors: Detector[]) {
-  return detectors.map(d => {
+  return detectors.map((d) => {
     switch (d.function) {
       case ML_JOB_AGGREGATION.COUNT:
       case ML_JOB_AGGREGATION.HIGH_COUNT:
@@ -287,7 +287,7 @@ export function advancedStartDatafeed(jobCreator: JobCreatorType) {
 }
 
 export function aggFieldPairsCanBeCharted(afs: AggFieldPair[]) {
-  return afs.some(a => a.agg.dslName === null) === false;
+  return afs.some((a) => a.agg.dslName === null) === false;
 }
 
 export function getJobCreatorTitle(jobCreator: JobCreatorType) {
@@ -298,7 +298,7 @@ export function getJobCreatorTitle(jobCreator: JobCreatorType) {
       });
     case JOB_TYPE.MULTI_METRIC:
       return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.multiMetric', {
-        defaultMessage: 'Multi metric',
+        defaultMessage: 'Multi-metric',
       });
     case JOB_TYPE.POPULATION:
       return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.population', {
@@ -324,7 +324,7 @@ export function collectAggs(o: any, aggFields: Field[]) {
   for (const i in o) {
     if (o[i] !== null && typeof o[i] === 'object') {
       if (i === 'aggregations' || i === 'aggs') {
-        Object.keys(o[i]).forEach(k => {
+        Object.keys(o[i]).forEach((k) => {
           if (k !== 'aggregations' && k !== 'aggs') {
             aggFields.push({
               id: k,

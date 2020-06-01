@@ -25,11 +25,11 @@ import { SavedObjectsType } from '../../types';
 
 const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
-  types.forEach(type =>
+  types.forEach((type) =>
     registry.registerType({
       name: 'unknown',
-      namespaceAgnostic: false,
       hidden: false,
+      namespaceType: 'single',
       mappings: { properties: {} },
       migrations: {},
       ...type,
@@ -77,7 +77,7 @@ describe('KibanaMigrator', () => {
       // and should only be done once
       const callClusterCommands = clusterStub.mock.calls
         .map(([callClusterPath]) => callClusterPath)
-        .filter(callClusterPath => callClusterPath === 'cat.templates');
+        .filter((callClusterPath) => callClusterPath === 'cat.templates');
       expect(callClusterCommands.length).toBe(1);
     });
 
@@ -87,10 +87,7 @@ describe('KibanaMigrator', () => {
 
       options.callCluster = clusterStub;
       const migrator = new KibanaMigrator(options);
-      const migratorStatus = migrator
-        .getStatus$()
-        .pipe(take(3))
-        .toPromise();
+      const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
       await migrator.runMigrations();
       const { status, result } = await migratorStatus;
       expect(status).toEqual('completed');
@@ -120,7 +117,7 @@ function mockOptions(): KibanaMigratorOptions {
       {
         name: 'testtype',
         hidden: false,
-        namespaceAgnostic: false,
+        namespaceType: 'single',
         mappings: {
           properties: {
             name: { type: 'keyword' },
@@ -131,7 +128,7 @@ function mockOptions(): KibanaMigratorOptions {
       {
         name: 'testtype2',
         hidden: false,
-        namespaceAgnostic: false,
+        namespaceType: 'single',
         indexPattern: 'other-index',
         mappings: {
           properties: {

@@ -11,7 +11,7 @@ import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import introspectionQueryResultData from '../../../legacy/plugins/siem/public/graphql/introspection.json';
+import introspectionQueryResultData from '../../../plugins/siem/public/graphql/introspection.json';
 
 interface SiemGraphQLClientFactoryOptions {
   username?: string;
@@ -28,7 +28,7 @@ export function SiemGraphQLClientFactoryProvider({ getService }: FtrProviderCont
   const superAuth: string = config.get('servers.elasticsearch.auth');
   const [superUsername, superPassword] = superAuth.split(':');
 
-  return function(options?: SiemGraphQLClientFactoryOptions) {
+  return function (options?: SiemGraphQLClientFactoryOptions) {
     const { username = superUsername, password = superPassword, basePath = null } = options || {};
 
     const kbnURLWithoutAuth = formatUrl({ ...config.get('servers.kibana'), auth: false });

@@ -41,6 +41,7 @@ export const EventSchema = schema.maybe(
         start: ecsDate(),
         duration: ecsNumber(),
         end: ecsDate(),
+        outcome: ecsString(),
       })
     ),
     error: schema.maybe(
@@ -64,6 +65,7 @@ export const EventSchema = schema.maybe(
         saved_objects: schema.maybe(
           schema.arrayOf(
             schema.object({
+              rel: ecsString(),
               namespace: ecsString(),
               id: ecsString(),
               type: ecsString(),

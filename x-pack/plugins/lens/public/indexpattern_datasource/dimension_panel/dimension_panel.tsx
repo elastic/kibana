@@ -63,13 +63,13 @@ const getOperationFieldSupportMatrix = (props: Props): OperationFieldSupportMatr
 
   const filteredOperationsByMetadata = getAvailableOperationsByMetadata(
     currentIndexPattern
-  ).filter(operation => props.filterOperations(operation.operationMetaData));
+  ).filter((operation) => props.filterOperations(operation.operationMetaData));
 
   const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
   const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
 
   filteredOperationsByMetadata.forEach(({ operations }) => {
-    operations.forEach(operation => {
+    operations.forEach((operation) => {
       if (supportedOperationsByField[operation.field]) {
         supportedOperationsByField[operation.field]!.push(operation.operationType);
       } else {
@@ -140,12 +140,16 @@ export function onDrop(
     operationsForNewField &&
     operationsForNewField.includes(selectedColumn.operationType);
 
+  if (!operationsForNewField || operationsForNewField.length === 0) {
+    return false;
+  }
+
   // If only the field has changed use the onFieldChange method on the operation to get the
   // new column, otherwise use the regular buildColumn to get a new column.
   const newColumn = hasFieldChanged
     ? changeField(selectedColumn, currentIndexPattern, droppedItem.field)
     : buildColumn({
-        op: operationsForNewField ? operationsForNewField[0] : undefined,
+        op: operationsForNewField[0],
         columns: props.state.layers[props.layerId].columns,
         indexPattern: currentIndexPattern,
         layerId,
@@ -188,7 +192,7 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   return (
     <EuiLink
       id={columnId}
-      className="lnsConfigPanel__triggerLink"
+      className="lnsLayerPanel__triggerLink"
       onClick={() => {
         props.togglePopover();
       }}

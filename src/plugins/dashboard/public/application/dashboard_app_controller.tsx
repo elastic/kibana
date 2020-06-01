@@ -21,12 +21,15 @@ import _, { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import angular from 'angular';
 
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { History } from 'history';
 import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
+import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
+import { TimeRange } from 'src/plugins/data/public';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
@@ -87,6 +90,7 @@ export interface DashboardAppControllerDependencies extends RenderDeps {
   dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
+  navigation: NavigationStart;
 }
 
 export class DashboardAppController {
@@ -123,10 +127,13 @@ export class DashboardAppController {
     history,
     kbnUrlStateStorage,
     usageCollection,
+    navigation,
   }: DashboardAppControllerDependencies) {
     const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
     const timefilter = queryService.timefilter.timefilter;
+    let showSearchBar = true;
+    let showQueryBar = true;
 
     let lastReloadRequestTime = 0;
     const dash = ($scope.dash = $route.current.locals.dash);
@@ -153,7 +160,7 @@ export class DashboardAppController {
         set: ({ filters }) => dashboardStateManager.setFilters(filters || []),
         get: () => ({ filters: dashboardStateManager.appState.filters }),
         state$: dashboardStateManager.appState$.pipe(
-          map(state => ({
+          map((state) => ({
             filters: state.filters,
           }))
         ),
@@ -221,7 +228,7 @@ export class DashboardAppController {
       }
 
       let panelIndexPatterns: IndexPattern[] = [];
-      Object.values(container.getChildIds()).forEach(id => {
+      Object.values(container.getChildIds()).forEach((id) => {
         const embeddableInstance = container.getChild(id);
         if (isErrorEmbeddable(embeddableInstance)) return;
         const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
@@ -235,13 +242,16 @@ export class DashboardAppController {
           $scope.indexPatterns = panelIndexPatterns;
         });
       } else {
-        indexPatterns.getDefault().then(defaultIndexPattern => {
+        indexPatterns.getDefault().then((defaultIndexPattern) => {
           $scope.$evalAsync(() => {
             $scope.indexPatterns = [defaultIndexPattern as IndexPattern];
           });
         });
       }
     };
+
+    const showFilterBar = () =>
+      $scope.model.filters.length > 0 || !dashboardStateManager.getFullScreenMode();
 
     const getEmptyScreenProps = (
       shouldShowEditHelp: boolean,
@@ -310,7 +320,6 @@ export class DashboardAppController {
         refreshInterval: timefilter.getRefreshInterval(),
       };
       $scope.panels = dashboardStateManager.getPanels();
-      $scope.screenTitle = dashboardStateManager.getTitle();
     };
 
     updateState();
@@ -412,7 +421,7 @@ export class DashboardAppController {
       dirty: !dash.id,
     };
 
-    dashboardStateManager.registerChangeListener(status => {
+    dashboardStateManager.registerChangeListener((status) => {
       this.appStatus.dirty = status.dirty || !dash.id;
       updateState();
     });
@@ -475,7 +484,7 @@ export class DashboardAppController {
         differences.filters = appStateDashboardInput.filters;
       }
 
-      Object.keys(_.omit(containerInput, 'filters')).forEach(key => {
+      Object.keys(_.omit(containerInput, 'filters')).forEach((key) => {
         const containerValue = (containerInput as { [key: string]: unknown })[key];
         const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[
           key
@@ -497,7 +506,7 @@ export class DashboardAppController {
       }
     };
 
-    $scope.updateQueryAndFetch = function({ query, dateRange }) {
+    $scope.updateQueryAndFetch = function ({ query, dateRange }) {
       if (dateRange) {
         timefilter.setTime(dateRange);
       }
@@ -515,49 +524,8 @@ export class DashboardAppController {
       }
     };
 
-    $scope.onRefreshChange = function({ isPaused, refreshInterval }) {
-      timefilter.setRefreshInterval({
-        pause: isPaused,
-        value: refreshInterval ? refreshInterval : $scope.model.refreshInterval.value,
-      });
-    };
-
-    $scope.onFiltersUpdated = filters => {
-      // The filters will automatically be set when the queryFilter emits an update event (see below)
-      queryFilter.setFilters(filters);
-    };
-
-    $scope.onQuerySaved = savedQuery => {
-      $scope.savedQuery = savedQuery;
-    };
-
-    $scope.onSavedQueryUpdated = savedQuery => {
-      $scope.savedQuery = { ...savedQuery };
-    };
-
-    $scope.onClearSavedQuery = () => {
-      delete $scope.savedQuery;
-      dashboardStateManager.setSavedQueryId(undefined);
-      dashboardStateManager.applyFilters(
-        {
-          query: '',
-          language:
-            localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
-        },
-        queryFilter.getGlobalFilters()
-      );
-      // Making this method sync broke the updates.
-      // Temporary fix, until we fix the complex state in this file.
-      setTimeout(() => {
-        queryFilter.setFilters(queryFilter.getGlobalFilters());
-      }, 0);
-    };
-
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
-      const savedQueryFilters = savedQuery.attributes.filters || [];
-      const globalFilters = queryFilter.getGlobalFilters();
-      const allFilters = [...globalFilters, ...savedQueryFilters];
-
+      const allFilters = filterManager.getFilters();
       dashboardStateManager.applyFilters(savedQuery.attributes.query, allFilters);
       if (savedQuery.attributes.timefilter) {
         timefilter.setTime({
@@ -586,7 +554,7 @@ export class DashboardAppController {
       () => {
         return dashboardStateManager.getSavedQueryId();
       },
-      newSavedQueryId => {
+      (newSavedQueryId) => {
         if (!newSavedQueryId) {
           $scope.savedQuery = undefined;
           return;
@@ -611,10 +579,52 @@ export class DashboardAppController {
 
     $scope.$watch(
       () => dashboardCapabilities.saveQuery,
-      newCapability => {
+      (newCapability) => {
         $scope.showSaveQuery = newCapability as boolean;
       }
     );
+
+    const onSavedQueryIdChange = (savedQueryId?: string) => {
+      dashboardStateManager.setSavedQueryId(savedQueryId);
+    };
+
+    const getNavBarProps = () => {
+      const isFullScreenMode = dashboardStateManager.getFullScreenMode();
+      const screenTitle = dashboardStateManager.getTitle();
+      return {
+        appName: 'dashboard',
+        config: $scope.isVisible ? $scope.topNavMenu : undefined,
+        className: isFullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,
+        screenTitle,
+        showSearchBar,
+        showQueryBar,
+        showFilterBar: showFilterBar(),
+        indexPatterns: $scope.indexPatterns,
+        showSaveQuery: $scope.showSaveQuery,
+        query: $scope.model.query,
+        savedQuery: $scope.savedQuery,
+        onSavedQueryIdChange,
+        savedQueryId: dashboardStateManager.getSavedQueryId(),
+        useDefaultBehaviors: true,
+        onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }): void => {
+          if (!payload.query) {
+            $scope.updateQueryAndFetch({ query: $scope.model.query, dateRange: payload.dateRange });
+          } else {
+            $scope.updateQueryAndFetch({ query: payload.query, dateRange: payload.dateRange });
+          }
+        },
+      };
+    };
+    const dashboardNavBar = document.getElementById('dashboardChrome');
+    const updateNavBar = () => {
+      ReactDOM.render(<navigation.ui.TopNavMenu {...getNavBarProps()} />, dashboardNavBar);
+    };
+
+    const unmountNavBar = () => {
+      if (dashboardNavBar) {
+        ReactDOM.unmountComponentAtNode(dashboardNavBar);
+      }
+    };
 
     $scope.timefilterSubscriptions$ = new Subscription();
 
@@ -702,11 +712,13 @@ export class DashboardAppController {
             }),
           }
         )
-        .then(isConfirmed => {
+        .then((isConfirmed) => {
           if (isConfirmed) {
             revertChangesAndExitEditMode();
           }
         });
+
+      updateNavBar();
     };
 
     /**
@@ -723,7 +735,7 @@ export class DashboardAppController {
      */
     function save(saveOptions: SavedObjectSaveOpts): Promise<SaveResult> {
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
-        .then(function(id) {
+        .then(function (id) {
           if (id) {
             notifications.toasts.addSuccess({
               title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
@@ -746,7 +758,7 @@ export class DashboardAppController {
           }
           return { id };
         })
-        .catch(error => {
+        .catch((error) => {
           notifications.toasts.addDanger({
             title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
               defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
@@ -760,9 +772,6 @@ export class DashboardAppController {
           return { error };
         });
     }
-
-    $scope.showFilterBar = () =>
-      $scope.model.filters.length > 0 || !dashboardStateManager.getFullScreenMode();
 
     $scope.showAddPanel = () => {
       dashboardStateManager.setFullScreenMode(false);
@@ -785,7 +794,11 @@ export class DashboardAppController {
     const navActions: {
       [key: string]: NavAction;
     } = {};
-    navActions[TopNavIds.FULL_SCREEN] = () => dashboardStateManager.setFullScreenMode(true);
+    navActions[TopNavIds.FULL_SCREEN] = () => {
+      dashboardStateManager.setFullScreenMode(true);
+      showQueryBar = false;
+      updateNavBar();
+    };
     navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(ViewMode.VIEW);
     navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(ViewMode.EDIT);
     navActions[TopNavIds.SAVE] = () => {
@@ -858,6 +871,7 @@ export class DashboardAppController {
           if ((response as { error: Error }).error) {
             dashboardStateManager.setTitle(currentTitle);
           }
+          updateNavBar();
           return response;
         });
       };
@@ -890,7 +904,7 @@ export class DashboardAppController {
       }
     };
 
-    navActions[TopNavIds.OPTIONS] = anchorElement => {
+    navActions[TopNavIds.OPTIONS] = (anchorElement) => {
       showOptionsPopover({
         anchorElement,
         useMargins: dashboardStateManager.getUseMargins(),
@@ -906,7 +920,7 @@ export class DashboardAppController {
 
     if (share) {
       // the share button is only availabale if "share" plugin contract enabled
-      navActions[TopNavIds.SHARE] = anchorElement => {
+      navActions[TopNavIds.SHARE] = (anchorElement) => {
         share.toggleShareContextMenu({
           anchorElement,
           allowEmbed: true,
@@ -936,9 +950,12 @@ export class DashboardAppController {
       },
     });
 
-    const visibleSubscription = chrome.getIsVisible$().subscribe(isVisible => {
+    const visibleSubscription = chrome.getIsVisible$().subscribe((isVisible) => {
       $scope.$evalAsync(() => {
         $scope.isVisible = isVisible;
+        showSearchBar = isVisible || showFilterBar();
+        showQueryBar = !dashboardStateManager.getFullScreenMode() && isVisible;
+        updateNavBar();
       });
     });
 
@@ -949,9 +966,17 @@ export class DashboardAppController {
         navActions,
         dashboardConfig.getHideWriteControls()
       );
+      updateNavBar();
+    });
+
+    $scope.$watch('indexPatterns', () => {
+      updateNavBar();
     });
 
     $scope.$on('$destroy', () => {
+      // we have to unmount nav bar manually to make sure all internal subscriptions are unsubscribed
+      unmountNavBar();
+
       updateSubscription.unsubscribe();
       stopSyncingQueryServiceStateWithUrl();
       stopSyncingAppFilters();

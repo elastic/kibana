@@ -4,44 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
+import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import * as Rx from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
-import { ManagementSetup } from 'src/plugins/management/public';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import {
+  CoreSetup,
+  CoreStart,
+  NotificationsSetup,
+  Plugin,
+  PluginInitializerContext,
+} from 'src/core/public';
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
-
-import { ReportListing } from './components/report_listing';
-import { getGeneralErrorToast } from './components';
-
-import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
-import { ReportingAPIClient } from './lib/reporting_api_client';
-import { GetCsvReportPanelAction } from './panel_actions/get_csv_panel_action';
-import { csvReportingProvider } from './share_context_menu/register_csv_reporting';
-import { reportingPDFPNGProvider } from './share_context_menu/register_pdf_png_reporting';
-
-import { LicensingPluginSetup } from '../../licensing/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
-import { SharePluginSetup } from '../../../../src/plugins/share/public';
-
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
+import { ManagementSectionId, ManagementSetup } from '../../../../src/plugins/management/public';
+import { SharePluginSetup } from '../../../../src/plugins/share/public';
+import { LicensingPluginSetup } from '../../licensing/public';
+import { ConfigType, JobId, JobStatusBuckets } from '../common/types';
+import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../constants';
+import { getGeneralErrorToast } from './components';
+import { ReportListing } from './components/report_listing';
+import { ReportingAPIClient } from './lib/reporting_api_client';
+import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
+import { GetCsvReportPanelAction } from './panel_actions/get_csv_panel_action';
+import { csvReportingProvider } from './share_context_menu/register_csv_reporting';
+import { reportingPDFPNGProvider } from './share_context_menu/register_pdf_png_reporting';
 
-import {
-  JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG,
-  JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY,
-} from '../constants';
-
-import { JobId, JobStatusBuckets, NotificationsService } from '..';
-
-const {
-  jobCompletionNotifier: { interval: JOBS_REFRESH_INTERVAL },
-} = JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG;
+export interface ClientConfigType {
+  poll: ConfigType['poll'];
+}
 
 function getStored(): JobId[] {
   const sessionValue = sessionStorage.getItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
@@ -49,7 +46,7 @@ function getStored(): JobId[] {
 }
 
 function handleError(
-  notifications: NotificationsService,
+  notifications: NotificationsSetup,
   err: Error
 ): Rx.Observable<JobStatusBuckets> {
   notifications.toasts.addDanger(
@@ -64,18 +61,19 @@ function handleError(
   return Rx.of({ completed: [], failed: [] });
 }
 
-export class ReportingPublicPlugin implements Plugin<any, any> {
+export class ReportingPublicPlugin implements Plugin<void, void> {
+  private config: ClientConfigType;
   private readonly stop$ = new Rx.ReplaySubject(1);
-
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
   });
-
   private readonly breadcrumbText = i18n.translate('xpack.reporting.breadcrumb', {
     defaultMessage: 'Reporting',
   });
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<ClientConfigType>();
+  }
 
   public setup(
     core: CoreSetup,
@@ -118,11 +116,11 @@ export class ReportingPublicPlugin implements Plugin<any, any> {
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    management.sections.getSection('kibana')!.registerApp({
+    management.sections.getSection(ManagementSectionId.InsightsAndAlerting).registerApp({
       id: 'reporting',
       title: this.title,
-      order: 15,
-      mount: async params => {
+      order: 1,
+      mount: async (params) => {
         const [start] = await getStartServices();
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         ReactDOM.render(
@@ -130,6 +128,7 @@ export class ReportingPublicPlugin implements Plugin<any, any> {
             <ReportListing
               toasts={toasts}
               license$={license$}
+              pollConfig={this.config.poll}
               redirect={start.application.navigateToApp}
               apiClient={apiClient}
             />
@@ -143,8 +142,7 @@ export class ReportingPublicPlugin implements Plugin<any, any> {
       },
     });
 
-    uiActions.registerAction(action);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, action);
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, action);
 
     share.register(csvReportingProvider({ apiClient, toasts, license$ }));
     share.register(
@@ -163,15 +161,16 @@ export class ReportingPublicPlugin implements Plugin<any, any> {
     const { http, notifications } = core;
     const apiClient = new ReportingAPIClient(http);
     const streamHandler = new StreamHandler(notifications, apiClient);
+    const { interval } = this.config.poll.jobsRefresh;
 
-    Rx.timer(0, JOBS_REFRESH_INTERVAL)
+    Rx.timer(0, interval)
       .pipe(
         takeUntil(this.stop$), // stop the interval when stop method is called
         map(() => getStored()), // read all pending job IDs from session storage
-        filter(storedJobs => storedJobs.length > 0), // stop the pipeline here if there are none pending
-        mergeMap(storedJobs => streamHandler.findChangedStatusJobs(storedJobs)), // look up the latest status of all pending jobs on the server
+        filter((storedJobs) => storedJobs.length > 0), // stop the pipeline here if there are none pending
+        mergeMap((storedJobs) => streamHandler.findChangedStatusJobs(storedJobs)), // look up the latest status of all pending jobs on the server
         mergeMap(({ completed, failed }) => streamHandler.showNotifications({ completed, failed })),
-        catchError(err => handleError(notifications, err))
+        catchError((err) => handleError(notifications, err))
       )
       .subscribe();
   }

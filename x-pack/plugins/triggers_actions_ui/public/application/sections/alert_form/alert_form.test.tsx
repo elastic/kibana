@@ -15,6 +15,10 @@ import { AlertsContextProvider } from '../../context/alerts_context';
 import { coreMock } from 'src/core/public/mocks';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
+jest.mock('../../lib/alert_api', () => ({
+  loadAlertTypes: jest.fn(),
+}));
+
 describe('alert_form', () => {
   let deps: any;
   const alertType = {
@@ -25,6 +29,7 @@ describe('alert_form', () => {
       return { errors: {} };
     },
     alertParamsExpression: () => <Fragment />,
+    requiresAppContext: false,
   };
 
   const actionType = {
@@ -42,20 +47,37 @@ describe('alert_form', () => {
     actionParamsFields: null,
   };
 
+  const alertTypeNonEditable = {
+    id: 'non-edit-alert-type',
+    iconClass: 'test',
+    name: 'non edit alert',
+    validate: (): ValidationResult => {
+      return { errors: {} };
+    },
+    alertParamsExpression: () => <Fragment />,
+    requiresAppContext: true,
+  };
+
   describe('alert_form create alert', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
-      const mockes = coreMock.createSetup();
+      const mocks = coreMock.createSetup();
+      const [
+        {
+          application: { capabilities },
+        },
+      ] = await mocks.getStartServices();
       deps = {
-        toastNotifications: mockes.notifications.toasts,
-        http: mockes.http,
-        uiSettings: mockes.uiSettings,
+        toastNotifications: mocks.notifications.toasts,
+        http: mocks.http,
+        uiSettings: mocks.uiSettings,
         actionTypeRegistry: actionTypeRegistry as any,
         alertTypeRegistry: alertTypeRegistry as any,
         docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+        capabilities,
       };
-      alertTypeRegistry.list.mockReturnValue([alertType]);
+      alertTypeRegistry.list.mockReturnValue([alertType, alertTypeNonEditable]);
       alertTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
@@ -86,6 +108,7 @@ describe('alert_form', () => {
             alertTypeRegistry: deps!.alertTypeRegistry,
             toastNotifications: deps!.toastNotifications,
             uiSettings: deps!.uiSettings,
+            capabilities: deps!.capabilities,
           }}
         >
           <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [], interval: [] }} />
@@ -111,10 +134,146 @@ describe('alert_form', () => {
       expect(alertTypeSelectOptions.exists()).toBeTruthy();
     });
 
+    it('does not render registered alert type which non editable', async () => {
+      await setup();
+      const alertTypeSelectOptions = wrapper.find(
+        '[data-test-subj="non-edit-alert-type-SelectOption"]'
+      );
+      expect(alertTypeSelectOptions.exists()).toBeFalsy();
+    });
+
     it('renders registered action types', async () => {
       await setup();
       const alertTypeSelectOptions = wrapper.find(
         '[data-test-subj=".server-log-ActionTypeSelectOption"]'
+      );
+      expect(alertTypeSelectOptions.exists()).toBeFalsy();
+    });
+  });
+
+  describe('alert_form create alert non alerting consumer and producer', () => {
+    let wrapper: ReactWrapper<any>;
+
+    async function setup() {
+      const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
+      loadAlertTypes.mockResolvedValue([
+        {
+          id: 'other-consumer-producer-alert-type',
+          name: 'Test',
+          actionGroups: [
+            {
+              id: 'testActionGroup',
+              name: 'Test Action Group',
+            },
+          ],
+          defaultActionGroupId: 'testActionGroup',
+          producer: 'alerting',
+        },
+        {
+          id: 'same-consumer-producer-alert-type',
+          name: 'Test',
+          actionGroups: [
+            {
+              id: 'testActionGroup',
+              name: 'Test Action Group',
+            },
+          ],
+          defaultActionGroupId: 'testActionGroup',
+          producer: 'test',
+        },
+      ]);
+      const mocks = coreMock.createSetup();
+      const [
+        {
+          application: { capabilities },
+        },
+      ] = await mocks.getStartServices();
+      deps = {
+        toastNotifications: mocks.notifications.toasts,
+        http: mocks.http,
+        uiSettings: mocks.uiSettings,
+        actionTypeRegistry: actionTypeRegistry as any,
+        alertTypeRegistry: alertTypeRegistry as any,
+        docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+        capabilities,
+      };
+      alertTypeRegistry.list.mockReturnValue([
+        {
+          id: 'same-consumer-producer-alert-type',
+          iconClass: 'test',
+          name: 'test-alert',
+          validate: (): ValidationResult => {
+            return { errors: {} };
+          },
+          alertParamsExpression: () => <Fragment />,
+          requiresAppContext: true,
+        },
+        {
+          id: 'other-consumer-producer-alert-type',
+          iconClass: 'test',
+          name: 'test-alert',
+          validate: (): ValidationResult => {
+            return { errors: {} };
+          },
+          alertParamsExpression: () => <Fragment />,
+          requiresAppContext: false,
+        },
+      ]);
+      alertTypeRegistry.has.mockReturnValue(true);
+
+      const initialAlert = ({
+        name: 'non alerting consumer test',
+        params: {},
+        consumer: 'test',
+        schedule: {
+          interval: '1m',
+        },
+        actions: [],
+        tags: [],
+        muteAll: false,
+        enabled: false,
+        mutedInstanceIds: [],
+      } as unknown) as Alert;
+
+      wrapper = mountWithIntl(
+        <AlertsContextProvider
+          value={{
+            reloadAlerts: () => {
+              return new Promise<void>(() => {});
+            },
+            http: deps!.http,
+            docLinks: deps.docLinks,
+            actionTypeRegistry: deps!.actionTypeRegistry,
+            alertTypeRegistry: deps!.alertTypeRegistry,
+            toastNotifications: deps!.toastNotifications,
+            uiSettings: deps!.uiSettings,
+            capabilities: deps!.capabilities,
+          }}
+        >
+          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [], interval: [] }} />
+        </AlertsContextProvider>
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(loadAlertTypes).toHaveBeenCalled();
+    }
+
+    it('renders alert type options which producer correspond to the alert consumer', async () => {
+      await setup();
+      const alertTypeSelectOptions = wrapper.find(
+        '[data-test-subj="same-consumer-producer-alert-type-SelectOption"]'
+      );
+      expect(alertTypeSelectOptions.exists()).toBeTruthy();
+    });
+
+    it('does not render alert type options which producer does not correspond to the alert consumer', async () => {
+      await setup();
+      const alertTypeSelectOptions = wrapper.find(
+        '[data-test-subj="other-consumer-producer-alert-type-SelectOption"]'
       );
       expect(alertTypeSelectOptions.exists()).toBeFalsy();
     });
@@ -166,6 +325,7 @@ describe('alert_form', () => {
             alertTypeRegistry: deps!.alertTypeRegistry,
             toastNotifications: deps!.toastNotifications,
             uiSettings: deps!.uiSettings,
+            capabilities: deps!.capabilities,
           }}
         >
           <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [], interval: [] }} />
@@ -189,6 +349,26 @@ describe('alert_form', () => {
       await setup();
       const alertTypeSelectOptions = wrapper.find('[data-test-subj="selectedAlertTypeTitle"]');
       expect(alertTypeSelectOptions.exists()).toBeTruthy();
+    });
+
+    it('should update throttle value', async () => {
+      const newThrottle = 17;
+      await setup();
+      const throttleField = wrapper.find('[data-test-subj="throttleInput"]');
+      expect(throttleField.exists()).toBeTruthy();
+      throttleField.at(1).simulate('change', { target: { value: newThrottle.toString() } });
+      const throttleFieldAfterUpdate = wrapper.find('[data-test-subj="throttleInput"]');
+      expect(throttleFieldAfterUpdate.at(1).prop('value')).toEqual(newThrottle);
+    });
+
+    it('should unset throttle value', async () => {
+      const newThrottle = '';
+      await setup();
+      const throttleField = wrapper.find('[data-test-subj="throttleInput"]');
+      expect(throttleField.exists()).toBeTruthy();
+      throttleField.at(1).simulate('change', { target: { value: newThrottle } });
+      const throttleFieldAfterUpdate = wrapper.find('[data-test-subj="throttleInput"]');
+      expect(throttleFieldAfterUpdate.at(1).prop('value')).toEqual(newThrottle);
     });
   });
 });

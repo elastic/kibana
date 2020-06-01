@@ -17,58 +17,65 @@
  * under the License.
  */
 
-import Joi from 'joi';
-const stringOptionalNullable = Joi.string()
-  .allow('', null)
-  .optional();
-const stringRequired = Joi.string()
-  .allow('')
-  .required();
-const arrayNullable = Joi.array().allow(null);
-const numberIntegerOptional = Joi.number()
-  .integer()
-  .optional();
-const numberIntegerRequired = Joi.number()
-  .integer()
-  .required();
-const numberOptional = Joi.number().optional();
-const queryObject = Joi.object({
-  language: Joi.string().allow(''),
-  query: Joi.string().allow(''),
-});
-const numberOptionalOrEmptyString = Joi.alternatives(numberOptional, Joi.string().valid(''));
+import { schema } from '@kbn/config-schema';
+import { TypeOptions } from '@kbn/config-schema/target/types/types';
 
-const annotationsItems = Joi.object({
+const stringOptionalNullable = schema.maybe(schema.nullable(schema.string()));
+
+const stringRequired = schema.string();
+
+const arrayNullable = schema.arrayOf(schema.nullable(schema.any()));
+
+const validateInteger: TypeOptions<number>['validate'] = (value) => {
+  if (!Number.isInteger(value)) {
+    return `${value} is not an integer`;
+  }
+};
+const numberIntegerOptional = schema.maybe(schema.number({ validate: validateInteger }));
+const numberIntegerRequired = schema.number({ validate: validateInteger });
+
+const numberOptional = schema.maybe(schema.number());
+
+const queryObject = schema.object({
+  language: schema.string(),
+  query: schema.string(),
+});
+const stringOrNumberOptionalNullable = schema.nullable(
+  schema.oneOf([stringOptionalNullable, numberOptional])
+);
+const numberOptionalOrEmptyString = schema.maybe(
+  schema.oneOf([numberOptional, schema.literal('')])
+);
+
+const annotationsItems = schema.object({
   color: stringOptionalNullable,
   fields: stringOptionalNullable,
-  hidden: Joi.boolean().optional(),
+  hidden: schema.maybe(schema.boolean()),
   icon: stringOptionalNullable,
   id: stringOptionalNullable,
   ignore_global_filters: numberIntegerOptional,
   ignore_panel_filters: numberIntegerOptional,
   index_pattern: stringOptionalNullable,
-  query_string: queryObject.optional(),
+  query_string: schema.maybe(queryObject),
   template: stringOptionalNullable,
   time_field: stringOptionalNullable,
 });
 
-const backgroundColorRulesItems = Joi.object({
-  value: Joi.number()
-    .allow(null)
-    .optional(),
+const backgroundColorRulesItems = schema.object({
+  value: schema.maybe(schema.nullable(schema.number())),
   id: stringOptionalNullable,
   background_color: stringOptionalNullable,
   color: stringOptionalNullable,
 });
 
-const gaugeColorRulesItems = Joi.object({
+const gaugeColorRulesItems = schema.object({
   gauge: stringOptionalNullable,
   text: stringOptionalNullable,
   id: stringOptionalNullable,
   operator: stringOptionalNullable,
-  value: Joi.number(),
+  value: schema.number(),
 });
-const metricsItems = Joi.object({
+const metricsItems = schema.object({
   field: stringOptionalNullable,
   id: stringRequired,
   metric_agg: stringOptionalNullable,
@@ -78,87 +85,88 @@ const metricsItems = Joi.object({
   unit: stringOptionalNullable,
   model_type: stringOptionalNullable,
   mode: stringOptionalNullable,
-  lag: numberOptional,
+  lag: numberOptionalOrEmptyString,
   alpha: numberOptional,
   beta: numberOptional,
   gamma: numberOptional,
   period: numberOptional,
-  multiplicative: Joi.boolean(),
+  multiplicative: schema.maybe(schema.boolean()),
   window: numberOptional,
   function: stringOptionalNullable,
   script: stringOptionalNullable,
-  variables: Joi.array()
-    .items(
-      Joi.object({
+  variables: schema.maybe(
+    schema.arrayOf(
+      schema.object({
         field: stringOptionalNullable,
         id: stringRequired,
         name: stringOptionalNullable,
       })
     )
-    .optional(),
-  percentiles: Joi.array()
-    .items(
-      Joi.object({
+  ),
+  percentiles: schema.maybe(
+    schema.arrayOf(
+      schema.object({
         id: stringRequired,
         field: stringOptionalNullable,
-        mode: Joi.string().allow('line', 'band'),
-        shade: Joi.alternatives(numberOptional, stringOptionalNullable),
-        value: Joi.alternatives(numberOptional, stringOptionalNullable),
+        mode: schema.oneOf([schema.literal('line'), schema.literal('band')]),
+        shade: schema.oneOf([numberOptional, stringOptionalNullable]),
+        value: schema.oneOf([numberOptional, stringOptionalNullable]),
         percentile: stringOptionalNullable,
       })
     )
-    .optional(),
+  ),
   type: stringRequired,
   value: stringOptionalNullable,
-  values: Joi.array()
-    .items(Joi.string().allow('', null))
-    .allow(null)
-    .optional(),
+  values: schema.maybe(schema.nullable(schema.arrayOf(schema.nullable(schema.string())))),
 });
 
-const splitFiltersItems = Joi.object({
+const splitFiltersItems = schema.object({
   id: stringOptionalNullable,
   color: stringOptionalNullable,
-  filter: Joi.object({
-    language: Joi.string().allow(''),
-    query: Joi.string().allow(''),
-  }).optional(),
+  filter: schema.maybe(
+    schema.object({
+      language: schema.string(),
+      query: schema.string(),
+    })
+  ),
   label: stringOptionalNullable,
 });
 
-const seriesItems = Joi.object({
+const seriesItems = schema.object({
   aggregate_by: stringOptionalNullable,
   aggregate_function: stringOptionalNullable,
   axis_position: stringRequired,
-  axis_max: stringOptionalNullable,
-  axis_min: stringOptionalNullable,
+  axis_max: stringOrNumberOptionalNullable,
+  axis_min: stringOrNumberOptionalNullable,
   chart_type: stringRequired,
   color: stringRequired,
-  color_rules: Joi.array()
-    .items(
-      Joi.object({
+  color_rules: schema.maybe(
+    schema.arrayOf(
+      schema.object({
         value: numberOptional,
         id: stringRequired,
         text: stringOptionalNullable,
         operator: stringOptionalNullable,
       })
     )
-    .optional(),
+  ),
   fill: numberOptionalOrEmptyString,
-  filter: Joi.alternatives(
-    Joi.object({
-      query: stringRequired,
-      language: stringOptionalNullable,
-    }).optional(),
-    Joi.string().valid('')
+  filter: schema.maybe(
+    schema.oneOf([
+      schema.object({
+        query: stringRequired,
+        language: stringOptionalNullable,
+      }),
+      schema.literal(''),
+    ])
   ),
   formatter: stringRequired,
   hide_in_legend: numberIntegerOptional,
-  hidden: Joi.boolean().optional(),
+  hidden: schema.maybe(schema.boolean()),
   id: stringRequired,
   label: stringOptionalNullable,
   line_width: numberOptionalOrEmptyString,
-  metrics: Joi.array().items(metricsItems),
+  metrics: schema.arrayOf(metricsItems),
   offset_time: stringOptionalNullable,
   override_index_pattern: numberOptional,
   point_size: numberOptionalOrEmptyString,
@@ -169,9 +177,7 @@ const seriesItems = Joi.object({
   series_interval: stringOptionalNullable,
   series_drop_last_bucket: numberIntegerOptional,
   split_color_mode: stringOptionalNullable,
-  split_filters: Joi.array()
-    .items(splitFiltersItems)
-    .optional(),
+  split_filters: schema.maybe(schema.arrayOf(splitFiltersItems)),
   split_mode: stringRequired,
   stacked: stringRequired,
   steps: numberIntegerOptional,
@@ -188,48 +194,44 @@ const seriesItems = Joi.object({
   var_name: stringOptionalNullable,
 });
 
-export const visPayloadSchema = Joi.object({
+export const visPayloadSchema = schema.object({
   filters: arrayNullable,
-  panels: Joi.array().items(
-    Joi.object({
-      annotations: Joi.array()
-        .items(annotationsItems)
-        .optional(),
+  panels: schema.arrayOf(
+    schema.object({
+      annotations: schema.maybe(schema.arrayOf(annotationsItems)),
       axis_formatter: stringRequired,
       axis_position: stringRequired,
       axis_scale: stringRequired,
-      axis_min: stringOptionalNullable,
-      axis_max: stringOptionalNullable,
-      bar_color_rules: arrayNullable.optional(),
+      axis_min: stringOrNumberOptionalNullable,
+      axis_max: stringOrNumberOptionalNullable,
+      bar_color_rules: schema.maybe(arrayNullable),
       background_color: stringOptionalNullable,
-      background_color_rules: Joi.array()
-        .items(backgroundColorRulesItems)
-        .optional(),
+      background_color_rules: schema.maybe(schema.arrayOf(backgroundColorRulesItems)),
       default_index_pattern: stringOptionalNullable,
       default_timefield: stringOptionalNullable,
       drilldown_url: stringOptionalNullable,
       drop_last_bucket: numberIntegerOptional,
-      filter: Joi.alternatives(
-        stringOptionalNullable,
-        Joi.object({
-          language: stringOptionalNullable,
-          query: stringOptionalNullable,
-        })
+      filter: schema.nullable(
+        schema.oneOf([
+          stringOptionalNullable,
+          schema.object({
+            language: stringOptionalNullable,
+            query: stringOptionalNullable,
+          }),
+        ])
       ),
-      gauge_color_rules: Joi.array()
-        .items(gaugeColorRulesItems)
-        .optional(),
-      gauge_width: [stringOptionalNullable, numberOptional],
+      gauge_color_rules: schema.maybe(schema.arrayOf(gaugeColorRulesItems)),
+      gauge_width: schema.nullable(schema.oneOf([stringOptionalNullable, numberOptional])),
       gauge_inner_color: stringOptionalNullable,
-      gauge_inner_width: Joi.alternatives(stringOptionalNullable, numberIntegerOptional),
+      gauge_inner_width: stringOrNumberOptionalNullable,
       gauge_style: stringOptionalNullable,
-      gauge_max: stringOptionalNullable,
+      gauge_max: stringOrNumberOptionalNullable,
       id: stringRequired,
       ignore_global_filters: numberOptional,
       ignore_global_filter: numberOptional,
       index_pattern: stringRequired,
       interval: stringRequired,
-      isModelInvalid: Joi.boolean().optional(),
+      isModelInvalid: schema.maybe(schema.boolean()),
       legend_position: stringOptionalNullable,
       markdown: stringOptionalNullable,
       markdown_scrollbars: numberIntegerOptional,
@@ -241,9 +243,7 @@ export const visPayloadSchema = Joi.object({
       pivot_label: stringOptionalNullable,
       pivot_type: stringOptionalNullable,
       pivot_rows: stringOptionalNullable,
-      series: Joi.array()
-        .items(seriesItems)
-        .required(),
+      series: schema.arrayOf(seriesItems),
       show_grid: numberIntegerRequired,
       show_legend: numberIntegerRequired,
       time_field: stringOptionalNullable,
@@ -252,22 +252,19 @@ export const visPayloadSchema = Joi.object({
     })
   ),
   // general
-  query: Joi.array()
-    .items(queryObject)
-    .allow(null)
-    .required(),
-  state: Joi.object({
-    sort: Joi.object({
-      column: stringRequired,
-      order: Joi.string()
-        .valid(['asc', 'desc'])
-        .required(),
-    }).optional(),
-  }).required(),
-  savedObjectId: Joi.string().optional(),
-  timerange: Joi.object({
+  query: schema.nullable(schema.arrayOf(queryObject)),
+  state: schema.object({
+    sort: schema.maybe(
+      schema.object({
+        column: stringRequired,
+        order: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+      })
+    ),
+  }),
+  savedObjectId: schema.maybe(schema.string()),
+  timerange: schema.object({
     timezone: stringRequired,
     min: stringRequired,
     max: stringRequired,
-  }).required(),
+  }),
 });

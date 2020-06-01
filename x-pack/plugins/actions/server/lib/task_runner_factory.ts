@@ -6,9 +6,9 @@
 
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
-import { Logger, CoreStart } from '../../../../../src/core/server';
+import { Logger, CoreStart, KibanaRequest } from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
-import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
+import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { ActionTypeDisabledError } from './errors';
 import {
   ActionTaskParams,
@@ -21,7 +21,7 @@ import {
 export interface TaskRunnerContext {
   logger: Logger;
   actionTypeRegistry: ActionTypeRegistryContract;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
   getScopedSavedObjectsClient: CoreStart['savedObjects']['getScopedClient'];
@@ -52,7 +52,7 @@ export class TaskRunnerFactory {
     const { actionExecutor } = this;
     const {
       logger,
-      encryptedSavedObjectsPlugin,
+      encryptedSavedObjectsClient,
       spaceIdToNamespace,
       getBasePath,
       getScopedSavedObjectsClient,
@@ -60,12 +60,12 @@ export class TaskRunnerFactory {
 
     return {
       async run() {
-        const { spaceId, actionTaskParamsId } = taskInstance.params;
+        const { spaceId, actionTaskParamsId } = taskInstance.params as Record<string, string>;
         const namespace = spaceIdToNamespace(spaceId);
 
         const {
           attributes: { actionId, params, apiKey },
-        } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<ActionTaskParams>(
+        } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
           'action_task_params',
           actionTaskParamsId,
           { namespace }
@@ -78,7 +78,7 @@ export class TaskRunnerFactory {
 
         // Since we're using API keys and accessing elasticsearch can only be done
         // via a request, we're faking one with the proper authorization headers.
-        const fakeRequest: any = {
+        const fakeRequest = ({
           headers: requestHeaders,
           getBasePath: () => getBasePath(spaceId),
           path: '/',
@@ -91,7 +91,7 @@ export class TaskRunnerFactory {
               url: '/',
             },
           },
-        };
+        } as unknown) as KibanaRequest;
 
         let executorResult: ActionTypeExecutorResult;
         try {

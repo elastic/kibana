@@ -37,11 +37,11 @@ const expectStreamToContainObjects = async (
 ) => {
   const objectsToResolve: unknown[] = await new Promise((resolve, reject) => {
     const objects: SetupOpts['objects'] = [];
-    stream.on('data', chunk => {
+    stream.on('data', (chunk) => {
       objects.push(chunk);
     });
     stream.on('end', () => resolve(objects));
-    stream.on('error', err => reject(err));
+    stream.on('error', (err) => reject(err));
   });
 
   // Ensure the Readable stream passed to `resolveImportErrors` contains all of the expected objects.
@@ -57,26 +57,26 @@ describe('copySavedObjectsToSpaces', () => {
     typeRegistry.getAllTypes.mockReturnValue([
       {
         name: 'dashboard',
-        namespaceAgnostic: false,
+        namespaceType: 'single',
         hidden: false,
         mappings: { properties: {} },
       },
       {
         name: 'visualization',
-        namespaceAgnostic: false,
+        namespaceType: 'single',
         hidden: false,
         mappings: { properties: {} },
       },
       {
         name: 'globaltype',
-        namespaceAgnostic: true,
+        namespaceType: 'agnostic',
         hidden: false,
         mappings: { properties: {} },
       },
     ]);
 
     typeRegistry.isNamespaceAgnostic.mockImplementation((type: string) =>
-      typeRegistry.getAllTypes().some(t => t.name === type && t.namespaceAgnostic)
+      typeRegistry.getAllTypes().some((t) => t.name === type && t.namespaceType === 'agnostic')
     );
 
     coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
@@ -88,7 +88,7 @@ describe('copySavedObjectsToSpaces', () => {
           new Readable({
             objectMode: true,
             read() {
-              setupOpts.objects.forEach(o => this.push(o));
+              setupOpts.objects.forEach((o) => this.push(o));
 
               this.push(null);
             },
@@ -362,7 +362,7 @@ describe('copySavedObjectsToSpaces', () => {
 
     const { savedObjects } = setup({
       objects,
-      importSavedObjectsFromStreamImpl: async opts => {
+      importSavedObjectsFromStreamImpl: async (opts) => {
         if (opts.namespace === 'failure-space') {
           throw new Error(`Some error occurred!`);
         }
@@ -439,7 +439,7 @@ describe('copySavedObjectsToSpaces', () => {
           attributes: {},
         },
       ],
-      exportSavedObjectsToStreamImpl: opts => {
+      exportSavedObjectsToStreamImpl: (opts) => {
         return Promise.resolve(
           new Readable({
             objectMode: true,

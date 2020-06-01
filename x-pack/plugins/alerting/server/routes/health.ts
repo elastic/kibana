@@ -37,11 +37,11 @@ export function healthRoute(
       path: '/api/alert/_health',
       validate: false,
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
-      req: KibanaRequest<any, any, any, any>,
+      req: KibanaRequest<unknown, unknown, unknown>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
       try {
         const {
@@ -49,7 +49,7 @@ export function healthRoute(
             enabled: isSecurityEnabled = false,
             ssl: { http: { enabled: isTLSEnabled = false } = {} } = {},
           } = {},
-        }: XPackUsageSecurity = await context.core.elasticsearch.adminClient
+        }: XPackUsageSecurity = await context.core.elasticsearch.legacy.client
           // `transport.request` is potentially unsafe when combined with untrusted user input.
           // Do not augment with such input.
           .callAsInternalUser('transport.request', {

@@ -39,7 +39,7 @@ import {
   Start as InspectorStart,
 } from '../../../../plugins/inspector/public';
 import { ChartsPluginSetup, ChartsPluginStart } from '../../../../plugins/charts/public';
-import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
+import { DevToolsSetup } from '../../../../plugins/dev_tools/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
 import { HomePublicPluginSetup } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
@@ -59,7 +59,6 @@ import {
   NavigationPublicPluginSetup,
   NavigationPublicPluginStart,
 } from '../../../../plugins/navigation/public';
-import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
 import { DiscoverSetup, DiscoverStart } from '../../../../plugins/discover/public';
 import {
   SavedObjectsManagementPluginSetup,
@@ -69,6 +68,7 @@ import {
   VisualizationsSetup,
   VisualizationsStart,
 } from '../../../../plugins/visualizations/public';
+import { VisTypeTimelionPluginStart } from '../../../../plugins/vis_type_timelion/public';
 import { MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
 
 export interface PluginsSetup {
@@ -87,7 +87,6 @@ export interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   advancedSettings: AdvancedSettingsSetup;
   management: ManagementSetup;
-  visTypeVega: VisTypeVegaSetup;
   discover: DiscoverSetup;
   visualizations: VisualizationsSetup;
   telemetry?: TelemetryPluginSetup;
@@ -106,7 +105,6 @@ export interface PluginsStart {
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   navigation: NavigationPublicPluginStart;
-  devTools: DevToolsStart;
   kibanaLegacy: KibanaLegacyStart;
   share: SharePluginStart;
   management: ManagementStart;
@@ -116,6 +114,7 @@ export interface PluginsStart {
   telemetry?: TelemetryPluginStart;
   dashboard: DashboardStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  visTypeTimelion: VisTypeTimelionPluginStart;
   indexPatternManagement: IndexPatternManagementStart;
 }
 
@@ -176,7 +175,8 @@ export const legacyAppRegister = (app: App<any>) => {
   legacyAppRegistered = true;
 
   require('ui/chrome').setRootController(app.id, ($scope: IScope, $element: JQLite) => {
-    const element = $element[0];
+    const element = document.createElement('div');
+    $element[0].appendChild(element);
 
     // Root controller cannot return a Promise so use an internal async function and call it immediately
     (async () => {

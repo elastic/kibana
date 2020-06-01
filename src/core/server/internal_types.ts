@@ -31,6 +31,8 @@ import {
 import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
 import { UuidServiceSetup } from './uuid';
 import { InternalMetricsServiceSetup } from './metrics';
+import { InternalRenderingServiceSetup } from './rendering';
+import { InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
 
 /** @internal */
@@ -44,6 +46,8 @@ export interface InternalCoreSetup {
   status: InternalStatusServiceSetup;
   uiSettings: InternalUiSettingsServiceSetup;
   uuid: UuidServiceSetup;
+  rendering: InternalRenderingServiceSetup;
+  httpResources: InternalHttpResourcesSetup;
 }
 
 /**

@@ -1,0 +1,53 @@
+{
+  "description": "This rule detects events that use common ports for Internet Relay Chat (IRC) to the Internet. IRC is a common protocol that can be used for chat and file transfers. This protocol is also a good candidate for remote control of malware and data transfers to and from a network.",
+  "false_positives": [
+    "IRC activity may be normal behavior for developers and engineers but is unusual for non-engineering end users. IRC activity involving an unusual source or destination may be more suspicious. IRC activity involving a production server is often suspicious. Because these ports are in the ephemeral range, this rule may false under certain conditions, such as when a NAT-ed web server replies to a client which has used a port in the range by coincidence. In this case, these servers can be excluded. Some legacy applications may use these ports, but this is very uncommon and usually only appears in local traffic using private IPs, which does not match this rule's conditions."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "name": "IRC (Internet Relay Chat) Protocol Activity to the Internet",
+  "query": "network.transport:tcp and destination.port:(6667 or 6697) and source.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and not destination.ip:(10.0.0.0/8 or 127.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 or \"::1\")",
+  "risk_score": 47,
+  "rule_id": "c6474c34-4953-447a-903e-9fcb7b6661aa",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Network"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1043",
+          "name": "Commonly Used Port",
+          "reference": "https://attack.mitre.org/techniques/T1043/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0010",
+        "name": "Exfiltration",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1048",
+          "name": "Exfiltration Over Alternative Protocol",
+          "reference": "https://attack.mitre.org/techniques/T1048/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 3
+}

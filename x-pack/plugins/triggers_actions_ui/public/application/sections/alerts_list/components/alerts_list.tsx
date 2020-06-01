@@ -9,6 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState, Fragment } from 'react';
 import {
   EuiBasicTable,
+  EuiBadge,
   EuiButton,
   EuiFieldText,
   EuiFlexGroup,
@@ -24,7 +25,7 @@ import { isEmpty } from 'lodash';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
-import { AlertAdd, AlertEdit } from '../../alert_form';
+import { AlertAdd } from '../../alert_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { AlertQuickEditButtonsWithApi as AlertQuickEditButtons } from '../../common/components/alert_quick_edit_buttons';
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
@@ -85,8 +86,6 @@ export const AlertsList: React.FunctionComponent = () => {
     data: [],
     totalItemCount: 0,
   });
-  const [editedAlertItem, setEditedAlertItem] = useState<AlertTableItem | undefined>(undefined);
-  const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [alertsToDelete, setAlertsToDelete] = useState<string[]>([]);
 
   useEffect(() => {
@@ -121,7 +120,7 @@ export const AlertsList: React.FunctionComponent = () => {
     (async () => {
       try {
         const result = await loadActionTypes({ http });
-        setActionTypes(result.filter(actionType => actionTypeRegistry.has(actionType.id)));
+        setActionTypes(result.filter((actionType) => actionTypeRegistry.has(actionType.id)));
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
@@ -162,11 +161,6 @@ export const AlertsList: React.FunctionComponent = () => {
     }
   }
 
-  async function editItem(alertTableItem: AlertTableItem) {
-    setEditedAlertItem(alertTableItem);
-    setEditFlyoutVisibility(true);
-  }
-
   const alertsTableColumns = [
     {
       field: 'name',
@@ -200,6 +194,22 @@ export const AlertsList: React.FunctionComponent = () => {
       'data-test-subj': 'alertsTableCell-tagsText',
     },
     {
+      field: 'actionsText',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsText',
+        { defaultMessage: 'Actions' }
+      ),
+      render: (count: number, item: AlertTableItem) => {
+        return (
+          <EuiBadge color="hollow" key={item.id}>
+            {count}
+          </EuiBadge>
+        );
+      },
+      sortable: false,
+      'data-test-subj': 'alertsTableCell-actionsText',
+    },
+    {
       field: 'alertType',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.alertTypeTitle',
@@ -218,27 +228,6 @@ export const AlertsList: React.FunctionComponent = () => {
       sortable: false,
       truncateText: false,
       'data-test-subj': 'alertsTableCell-interval',
-    },
-    {
-      name: '',
-      width: '50px',
-      render(item: AlertTableItem) {
-        if (!canSave || !alertTypeRegistry.has(item.alertTypeId)) {
-          return;
-        }
-        return (
-          <EuiLink
-            data-test-subj="alertsTableCell-editLink"
-            color="primary"
-            onClick={() => editItem(item)}
-          >
-            <FormattedMessage
-              defaultMessage="Edit"
-              id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editLinkTitle"
-            />
-          </EuiLink>
-        );
-      },
     },
     {
       name: '',
@@ -261,7 +250,7 @@ export const AlertsList: React.FunctionComponent = () => {
       key="type-filter"
       onChange={(types: string[]) => setTypesFilter(types)}
       options={Object.values(alertTypesState.data)
-        .map(alertType => ({
+        .map((alertType) => ({
           value: alertType.id,
           name: alertType.name,
         }))
@@ -280,8 +269,6 @@ export const AlertsList: React.FunctionComponent = () => {
         key="create-alert"
         data-test-subj="createAlertButton"
         fill
-        iconType="plusInCircle"
-        iconSide="left"
         onClick={() => setAlertFlyoutVisibility(true)}
       >
         <FormattedMessage
@@ -318,8 +305,8 @@ export const AlertsList: React.FunctionComponent = () => {
             fullWidth
             data-test-subj="alertSearchField"
             prepend={<EuiIcon type="search" />}
-            onChange={e => setInputText(e.target.value)}
-            onKeyUp={e => {
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyUp={(e) => {
               if (e.keyCode === ENTER_KEY) {
                 setSearchText(inputText);
               }
@@ -371,7 +358,7 @@ export const AlertsList: React.FunctionComponent = () => {
           canDelete
             ? {
                 onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
-                  setSelectedIds(updatedSelectedItemsList.map(item => item.id));
+                  setSelectedIds(updatedSelectedItemsList.map((item) => item.id));
                 },
               }
             : undefined
@@ -397,7 +384,7 @@ export const AlertsList: React.FunctionComponent = () => {
         onDeleted={(deleted: string[]) => {
           if (selectedIds.length === 0 || selectedIds.length === deleted.length) {
             const updatedAlerts = alertsState.data.filter(
-              alert => alert.id && !alertsToDelete.includes(alert.id)
+              (alert) => alert.id && !alertsToDelete.includes(alert.id)
             );
             setAlertsState({
               isLoading: false,
@@ -448,6 +435,7 @@ export const AlertsList: React.FunctionComponent = () => {
           docLinks,
           charts,
           dataFieldsFormats: dataPlugin.fieldFormats,
+          capabilities,
         }}
       >
         <AlertAdd
@@ -455,26 +443,19 @@ export const AlertsList: React.FunctionComponent = () => {
           addFlyoutVisible={alertFlyoutVisible}
           setAddFlyoutVisibility={setAlertFlyoutVisibility}
         />
-        {editFlyoutVisible && editedAlertItem ? (
-          <AlertEdit
-            key={editedAlertItem.id}
-            initialAlert={editedAlertItem}
-            editFlyoutVisible={editFlyoutVisible}
-            setEditFlyoutVisibility={setEditFlyoutVisibility}
-          />
-        ) : null}
       </AlertsContextProvider>
     </section>
   );
 };
 
 function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
-  return alerts.filter(alert => ids.includes(alert.id));
+  return alerts.filter((alert) => ids.includes(alert.id));
 }
 
 function convertAlertsToTableItems(alerts: Alert[], alertTypesIndex: AlertTypeIndex) {
-  return alerts.map(alert => ({
+  return alerts.map((alert) => ({
     ...alert,
+    actionsText: alert.actions.length,
     tagsText: alert.tags.join(', '),
     alertType: alertTypesIndex[alert.alertTypeId]?.name ?? alert.alertTypeId,
   }));

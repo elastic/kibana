@@ -7,16 +7,16 @@
 import { Page } from 'puppeteer';
 import * as Rx from 'rxjs';
 import * as contexts from '../export_types/common/lib/screenshots/constants';
-import { ElementsPositionAndAttribute } from '../export_types/common/lib/screenshots/types';
 import { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../server/browsers';
 import { createDriverFactory } from '../server/browsers/chromium';
-import { CaptureConfig } from '../server/types';
-import { Logger } from '../types';
+import { LevelLogger } from '../server/lib';
+import { CaptureConfig, ElementsPositionAndAttribute } from '../server/types';
 
 interface CreateMockBrowserDriverFactoryOpts {
   evaluate: jest.Mock<Promise<any>, any[]>;
   waitForSelector: jest.Mock<Promise<any>, any[]>;
   screenshot: jest.Mock<Promise<any>, any[]>;
+  open: jest.Mock<Promise<any>, any[]>;
   getCreatePage: (driver: HeadlessChromiumDriver) => jest.Mock<any, any>;
 }
 
@@ -34,7 +34,7 @@ const getMockElementsPositionAndAttributes = (
 ): ElementsPositionAndAttribute[] => [
   {
     position: {
-      boundingClientRect: { top: 0, left: 0, width: 10, height: 11 },
+      boundingClientRect: { top: 0, left: 0, width: 800, height: 600 },
       scroll: { x: 0, y: 0 },
     },
     attributes: { title, description },
@@ -78,7 +78,7 @@ mockBrowserEvaluate.mockImplementation(() => {
 });
 const mockScreenshot = jest.fn();
 mockScreenshot.mockImplementation((item: ElementsPositionAndAttribute) => {
-  return Promise.resolve(`allyourBase64 of ${Object.keys(item)}`);
+  return Promise.resolve(`allyourBase64`);
 });
 const getCreatePage = (driver: HeadlessChromiumDriver) =>
   jest.fn().mockImplementation(() => Rx.of({ driver, exit$: Rx.never() }));
@@ -87,38 +87,31 @@ const defaultOpts: CreateMockBrowserDriverFactoryOpts = {
   evaluate: mockBrowserEvaluate,
   waitForSelector: mockWaitForSelector,
   screenshot: mockScreenshot,
+  open: jest.fn(),
   getCreatePage,
 };
 
 export const createMockBrowserDriverFactory = async (
-  logger: Logger,
+  logger: LevelLogger,
   opts: Partial<CreateMockBrowserDriverFactoryOpts> = {}
 ): Promise<HeadlessChromiumDriverFactory> => {
-  const captureConfig = {
+  const captureConfig: CaptureConfig = {
     timeouts: { openUrl: 30000, waitForElements: 30000, renderComplete: 30000 },
     browser: {
       type: 'chromium',
       chromium: {
         inspect: false,
         disableSandbox: false,
-        userDataDir: '/usr/data/dir',
-        viewport: { width: 12, height: 12 },
         proxy: { enabled: false, server: undefined, bypass: undefined },
       },
       autoDownload: false,
-      inspect: true,
-      userDataDir: '/usr/data/dir',
-      viewport: { width: 12, height: 12 },
-      disableSandbox: false,
-      proxy: { enabled: false, server: undefined, bypass: undefined },
-      maxScreenshotDimension: undefined,
     },
     networkPolicy: { enabled: true, rules: [] },
     viewport: { width: 800, height: 600 },
     loadDelay: 2000,
-    zoom: 1,
+    zoom: 2,
     maxAttempts: 1,
-  } as CaptureConfig;
+  };
 
   const binaryPath = '/usr/local/share/common/secure/';
   const mockBrowserDriverFactory = await createDriverFactory(binaryPath, logger, captureConfig);
@@ -132,6 +125,7 @@ export const createMockBrowserDriverFactory = async (
   mockBrowserDriver.waitForSelector = opts.waitForSelector ? opts.waitForSelector : defaultOpts.waitForSelector; // prettier-ignore
   mockBrowserDriver.evaluate = opts.evaluate ? opts.evaluate : defaultOpts.evaluate;
   mockBrowserDriver.screenshot = opts.screenshot ? opts.screenshot : defaultOpts.screenshot;
+  mockBrowserDriver.open = opts.open ? opts.open : defaultOpts.open;
 
   mockBrowserDriverFactory.createPage = opts.getCreatePage
     ? opts.getCreatePage(mockBrowserDriver)

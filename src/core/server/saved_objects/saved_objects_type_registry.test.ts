@@ -44,7 +44,7 @@ describe('SavedObjectTypeRegistry', () => {
     expect(
       registry
         .getAllTypes()
-        .map(type => type.name)
+        .map((type) => type.name)
         .sort()
     ).toEqual(['typeA', 'typeB', 'typeC']);
   });
@@ -183,14 +183,6 @@ describe('SavedObjectTypeRegistry', () => {
       expectResult(false, { namespaceType: 'single' });
       expectResult(false, { namespaceType: undefined });
     });
-
-    // deprecated test cases
-    it(`returns true when namespaceAgnostic is true`, () => {
-      expectResult(true, { namespaceAgnostic: true, namespaceType: 'agnostic' });
-      expectResult(true, { namespaceAgnostic: true, namespaceType: 'multiple' });
-      expectResult(true, { namespaceAgnostic: true, namespaceType: 'single' });
-      expectResult(true, { namespaceAgnostic: true, namespaceType: undefined });
-    });
   });
 
   describe('#isSingleNamespace', () => {
@@ -213,14 +205,6 @@ describe('SavedObjectTypeRegistry', () => {
       expectResult(false, { namespaceType: 'agnostic' });
       expectResult(false, { namespaceType: 'multiple' });
     });
-
-    // deprecated test cases
-    it(`returns false when namespaceAgnostic is true`, () => {
-      expectResult(false, { namespaceAgnostic: true, namespaceType: 'agnostic' });
-      expectResult(false, { namespaceAgnostic: true, namespaceType: 'multiple' });
-      expectResult(false, { namespaceAgnostic: true, namespaceType: 'single' });
-      expectResult(false, { namespaceAgnostic: true, namespaceType: undefined });
-    });
   });
 
   describe('#isMultiNamespace', () => {
@@ -242,14 +226,6 @@ describe('SavedObjectTypeRegistry', () => {
       expectResult(false, { namespaceType: 'agnostic' });
       expectResult(false, { namespaceType: 'single' });
       expectResult(false, { namespaceType: undefined });
-    });
-
-    // deprecated test cases
-    it(`returns false when namespaceAgnostic is true`, () => {
-      expectResult(false, { namespaceAgnostic: true, namespaceType: 'agnostic' });
-      expectResult(false, { namespaceAgnostic: true, namespaceType: 'multiple' });
-      expectResult(false, { namespaceAgnostic: true, namespaceType: 'single' });
-      expectResult(false, { namespaceAgnostic: true, namespaceType: undefined });
     });
   });
 
@@ -324,7 +300,7 @@ describe('SavedObjectTypeRegistry', () => {
 
       const types = registry.getImportableAndExportableTypes();
       expect(types.length).toEqual(2);
-      expect(types.map(t => t.name)).toEqual(['typeA', 'typeD']);
+      expect(types.map((t) => t.name)).toEqual(['typeA', 'typeD']);
     });
   });
 });

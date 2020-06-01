@@ -17,12 +17,19 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  ApplicationStart,
+} from '../../../core/public';
 import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
   setUISettings,
   setTypes,
   setI18n,
+  setApplication,
   setCapabilities,
   setHttp,
   setIndexPatterns,
@@ -37,28 +44,35 @@ import {
   setAggs,
   setChrome,
   setOverlays,
+  setSavedSearchLoader,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
   VisualizeEmbeddableFactory,
   createVisEmbeddableFromObject,
 } from './embeddable';
-import { ExpressionsSetup, ExpressionsStart } from '../../../plugins/expressions/public';
-import { EmbeddableSetup } from '../../../plugins/embeddable/public';
+import { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
+import { EmbeddableSetup } from '../../embeddable/public';
 import { visualization as visualizationFunction } from './expressions/visualization_function';
 import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
 import { range as rangeExpressionFunction } from './expression_functions/range';
 import { visDimension as visDimensionExpressionFunction } from './expression_functions/vis_dimension';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
-import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
+import {
+  Setup as InspectorSetup,
+  Start as InspectorStart,
+} from '../../../plugins/inspector/public';
+import { UsageCollectionSetup } from '../../usage_collection/public';
+import { createStartServicesGetter, StartServicesGetter } from '../../kibana_utils/public';
 import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
 import { SerializedVis, Vis } from './vis';
 import { showNewVisModal } from './wizard';
-import { UiActionsStart } from '../../../plugins/ui_actions/public';
+import { UiActionsStart } from '../../ui_actions/public';
 import {
   convertFromSerializedVis,
   convertToSerializedVis,
 } from './saved_visualizations/_saved_vis';
+import { createSavedSearchesLoader } from '../../discover/public';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -70,24 +84,27 @@ export type VisualizationsSetup = TypesSetup;
 
 export interface VisualizationsStart extends TypesStart {
   savedVisualizationsLoader: SavedVisualizationsLoader;
-  createVis: (visType: string, visState?: SerializedVis) => Vis;
+  createVis: (visType: string, visState: SerializedVis) => Promise<Vis>;
   convertToSerializedVis: typeof convertToSerializedVis;
   convertFromSerializedVis: typeof convertFromSerializedVis;
   showNewVisModal: typeof showNewVisModal;
-  __LEGACY: { createVisEmbeddableFromObject: typeof createVisEmbeddableFromObject };
+  __LEGACY: { createVisEmbeddableFromObject: ReturnType<typeof createVisEmbeddableFromObject> };
 }
 
 export interface VisualizationsSetupDeps {
-  expressions: ExpressionsSetup;
-  embeddable: EmbeddableSetup;
-  usageCollection: UsageCollectionSetup;
   data: DataPublicPluginSetup;
+  embeddable: EmbeddableSetup;
+  expressions: ExpressionsSetup;
+  inspector: InspectorSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export interface VisualizationsStartDeps {
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
+  inspector: InspectorStart;
   uiActions: UiActionsStart;
+  application: ApplicationStart;
 }
 
 /**
@@ -107,13 +124,16 @@ export class VisualizationsPlugin
       VisualizationsStartDeps
     > {
   private readonly types: TypesService = new TypesService();
+  private getStartServicesOrDie?: StartServicesGetter<VisualizationsStartDeps, VisualizationsStart>;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<VisualizationsStartDeps, VisualizationsStart>,
     { expressions, embeddable, usageCollection, data }: VisualizationsSetupDeps
   ): VisualizationsSetup {
+    const start = (this.getStartServicesOrDie = createStartServicesGetter(core.getStartServices));
+
     setUISettings(core.uiSettings);
     setUsageCollector(usageCollection);
 
@@ -121,8 +141,7 @@ export class VisualizationsPlugin
     expressions.registerRenderer(visualizationRenderer);
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
-
-    const embeddableFactory = new VisualizeEmbeddableFactory();
+    const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
     return {
@@ -137,6 +156,7 @@ export class VisualizationsPlugin
     const types = this.types.start();
     setI18n(core.i18n);
     setTypes(types);
+    setApplication(core.application);
     setCapabilities(core.application.capabilities);
     setHttp(core.http);
     setSavedObjects(core.savedObjects);
@@ -158,7 +178,14 @@ export class VisualizationsPlugin
       visualizationTypes: types,
     });
     setSavedVisualizationsLoader(savedVisualizationsLoader);
-
+    const savedSearchLoader = createSavedSearchesLoader({
+      savedObjectsClient: core.savedObjects.client,
+      indexPatterns: data.indexPatterns,
+      search: data.search,
+      chrome: core.chrome,
+      overlays: core.overlays,
+    });
+    setSavedSearchLoader(savedSearchLoader);
     return {
       ...types,
       showNewVisModal,
@@ -167,11 +194,19 @@ export class VisualizationsPlugin
        * @param {IIndexPattern} indexPattern - index pattern to use
        * @param {VisState} visState - visualization configuration
        */
-      createVis: (visType: string, visState?: SerializedVis) => new Vis(visType, visState),
+      createVis: async (visType: string, visState: SerializedVis) => {
+        const vis = new Vis(visType);
+        await vis.setState(visState);
+        return vis;
+      },
       convertToSerializedVis,
       convertFromSerializedVis,
       savedVisualizationsLoader,
-      __LEGACY: { createVisEmbeddableFromObject },
+      __LEGACY: {
+        createVisEmbeddableFromObject: createVisEmbeddableFromObject({
+          start: this.getStartServicesOrDie!,
+        }),
+      },
     };
   }
 

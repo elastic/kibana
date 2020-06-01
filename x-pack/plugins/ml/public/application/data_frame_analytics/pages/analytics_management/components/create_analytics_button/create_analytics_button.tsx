@@ -7,10 +7,10 @@
 import React, { FC } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { createPermissionFailureMessage } from '../../../../../privilege/check_privilege';
+import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 
-export const CreateAnalyticsButton: FC<CreateAnalyticsFormProps> = props => {
+export const CreateAnalyticsButton: FC<CreateAnalyticsFormProps> = (props) => {
   const { disabled } = props.state;
   const { openModal } = props.actions;
 

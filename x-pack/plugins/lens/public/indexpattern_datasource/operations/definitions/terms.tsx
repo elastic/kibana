@@ -53,6 +53,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   displayName: i18n.translate('xpack.lens.indexPattern.terms', {
     defaultMessage: 'Top values',
   }),
+  priority: 3, // Higher than any metric
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       supportedTypes.has(type) &&
@@ -63,7 +64,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     }
   },
   isTransferable: (column, newIndexPattern) => {
-    const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+    const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
 
     return Boolean(
       newField &&

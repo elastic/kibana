@@ -17,29 +17,39 @@
  * under the License.
  */
 
-import React from 'react';
+import { EuiHorizontalRule, EuiNavDrawer, EuiNavDrawerGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { EuiNavDrawer, EuiHorizontalRule, EuiNavDrawerGroup } from '@elastic/eui';
-import { OnIsLockedUpdate } from './';
-import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../../..';
+import React from 'react';
+import { useObservable } from 'react-use';
+import { Observable } from 'rxjs';
+import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
+import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { NavLink } from './nav_link';
+import { OnIsLockedUpdate } from './';
+import { createEuiListItem, createRecentNavLink } from './nav_link';
 import { RecentLinks } from './recent_links';
 
 export interface Props {
-  isLocked?: boolean;
-  onIsLockedUpdate?: OnIsLockedUpdate;
-  navLinks: NavLink[];
-  chromeNavLinks: ChromeNavLink[];
-  recentlyAccessedItems: ChromeRecentlyAccessedHistoryItem[];
+  appId$: InternalApplicationStart['currentAppId$'];
   basePath: HttpStart['basePath'];
+  isLocked?: boolean;
+  legacyMode: boolean;
+  navLinks$: Observable<ChromeNavLink[]>;
+  recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
+  navigateToApp: CoreStart['application']['navigateToApp'];
+  onIsLockedUpdate?: OnIsLockedUpdate;
 }
 
-function navDrawerRenderer(
-  { isLocked, onIsLockedUpdate, navLinks, chromeNavLinks, recentlyAccessedItems, basePath }: Props,
-  ref: React.Ref<HTMLElement>
+function NavDrawerRenderer(
+  { isLocked, onIsLockedUpdate, basePath, legacyMode, navigateToApp, ...observables }: Props,
+  ref: React.Ref<EuiNavDrawer>
 ) {
+  const appId = useObservable(observables.appId$, '');
+  const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
+  const recentNavLinks = useObservable(observables.recentlyAccessed$, []).map((link) =>
+    createRecentNavLink(link, navLinks, basePath)
+  );
+
   return (
     <EuiNavDrawer
       ref={ref}
@@ -50,15 +60,20 @@ function navDrawerRenderer(
         defaultMessage: 'Primary',
       })}
     >
-      {RecentLinks({
-        recentlyAccessedItems,
-        navLinks: chromeNavLinks,
-        basePath,
-      })}
+      {RecentLinks({ recentNavLinks })}
       <EuiHorizontalRule margin="none" />
       <EuiNavDrawerGroup
         data-test-subj="navDrawerAppsMenu"
-        listItems={navLinks}
+        listItems={navLinks.map((link) =>
+          createEuiListItem({
+            link,
+            legacyMode,
+            appId,
+            basePath,
+            navigateToApp,
+            dataTestSubj: 'navDrawerAppsMenuLink',
+          })
+        )}
         aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
           defaultMessage: 'Primary navigation links',
         })}
@@ -67,4 +82,4 @@ function navDrawerRenderer(
   );
 }
 
-export const NavDrawer = React.forwardRef(navDrawerRenderer);
+export const NavDrawer = React.forwardRef(NavDrawerRenderer);

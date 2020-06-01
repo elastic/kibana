@@ -22,7 +22,7 @@ import { SavedObjectsType } from 'kibana/server';
 export const todoSavedObject: SavedObjectsType = {
   name: 'todo',
   hidden: false,
-  namespaceAgnostic: true,
+  namespaceType: 'agnostic',
   mappings: {
     properties: {
       title: {

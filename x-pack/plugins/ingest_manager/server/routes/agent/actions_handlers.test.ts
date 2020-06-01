@@ -10,8 +10,7 @@ import {
   RequestHandlerContext,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
-import { httpServerMock } from '../../../../../../src/core/server/http/http_server.mocks';
+import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
 import { ActionsService } from '../../services/agents';
 import { AgentAction } from '../../../common/types/models';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';

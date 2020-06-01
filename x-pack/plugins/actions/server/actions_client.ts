@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import Boom from 'boom';
 import {
   IScopedClusterClient,
   SavedObjectsClientContract,
@@ -102,7 +102,7 @@ export class ActionsClient {
    */
   public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
     if (
-      this.preconfiguredActions.find(preconfiguredAction => preconfiguredAction.id === id) !==
+      this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
       undefined
     ) {
       throw new PreconfiguredActionDisabledModificationError(
@@ -135,7 +135,7 @@ export class ActionsClient {
       id,
       actionTypeId: result.attributes.actionTypeId as string,
       name: result.attributes.name as string,
-      config: result.attributes.config as Record<string, any>,
+      config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
     };
   }
@@ -145,14 +145,13 @@ export class ActionsClient {
    */
   public async get({ id }: { id: string }): Promise<ActionResult> {
     const preconfiguredActionsList = this.preconfiguredActions.find(
-      preconfiguredAction => preconfiguredAction.id === id
+      (preconfiguredAction) => preconfiguredAction.id === id
     );
     if (preconfiguredActionsList !== undefined) {
       return {
         id,
         actionTypeId: preconfiguredActionsList.actionTypeId,
         name: preconfiguredActionsList.name,
-        config: preconfiguredActionsList.config,
         isPreconfigured: true,
       };
     }
@@ -180,11 +179,10 @@ export class ActionsClient {
 
     const mergedResult = [
       ...savedObjectsActions,
-      ...this.preconfiguredActions.map(preconfiguredAction => ({
+      ...this.preconfiguredActions.map((preconfiguredAction) => ({
         id: preconfiguredAction.id,
         actionTypeId: preconfiguredAction.actionTypeId,
         name: preconfiguredAction.name,
-        config: preconfiguredAction.config,
         isPreconfigured: true,
       })),
     ].sort((a, b) => a.name.localeCompare(b.name));
@@ -196,11 +194,49 @@ export class ActionsClient {
   }
 
   /**
+   * Get bulk actions with preconfigured list
+   */
+  public async getBulk(ids: string[]): Promise<ActionResult[]> {
+    const actionResults = new Array<ActionResult>();
+    for (const actionId of ids) {
+      const action = this.preconfiguredActions.find(
+        (preconfiguredAction) => preconfiguredAction.id === actionId
+      );
+      if (action !== undefined) {
+        actionResults.push(action);
+      }
+    }
+
+    // Fetch action objects in bulk
+    // Excluding preconfigured actions to avoid an not found error, which is already added
+    const actionSavedObjectsIds = [
+      ...new Set(
+        ids.filter(
+          (actionId) => !actionResults.find((actionResult) => actionResult.id === actionId)
+        )
+      ),
+    ];
+
+    const bulkGetOpts = actionSavedObjectsIds.map((id) => ({ id, type: 'action' }));
+    const bulkGetResult = await this.savedObjectsClient.bulkGet<RawAction>(bulkGetOpts);
+
+    for (const action of bulkGetResult.saved_objects) {
+      if (action.error) {
+        throw Boom.badRequest(
+          `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
+        );
+      }
+      actionResults.push(actionFromSavedObject(action));
+    }
+    return actionResults;
+  }
+
+  /**
    * Delete action
    */
   public async delete({ id }: { id: string }) {
     if (
-      this.preconfiguredActions.find(preconfiguredAction => preconfiguredAction.id === id) !==
+      this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
       undefined
     ) {
       throw new PreconfiguredActionDisabledModificationError(
@@ -230,7 +266,7 @@ async function injectExtraFindData(
   scopedClusterClient: IScopedClusterClient,
   actionResults: ActionResult[]
 ): Promise<FindActionResult[]> {
-  const aggs: Record<string, any> = {};
+  const aggs: Record<string, unknown> = {};
   for (const actionResult of actionResults) {
     aggs[actionResult.id] = {
       filter: {
@@ -274,7 +310,7 @@ async function injectExtraFindData(
       },
     },
   });
-  return actionResults.map(actionResult => ({
+  return actionResults.map((actionResult) => ({
     ...actionResult,
     referencedByCount: aggregationResult.aggregations[actionResult.id].doc_count,
   }));

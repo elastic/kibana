@@ -7,6 +7,7 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { NewOutput, Output } from '../types';
 import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import { appContextService } from './app_context';
+import { decodeCloudId } from '../../common';
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
@@ -14,13 +15,19 @@ class OutputService {
   public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
     const outputs = await soClient.find<Output>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
-      filter: 'outputs.attributes.is_default:true',
+      filter: `${OUTPUT_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
     });
+    const cloud = appContextService.getCloud();
+    const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
+    const cloudUrl = cloudId && decodeCloudId(cloudId)?.elasticsearchUrl;
+    const flagsUrl = appContextService.getConfig()!.fleet.elasticsearch.host;
+    const defaultUrl = 'http://localhost:9200';
+    const defaultOutputUrl = cloudUrl || flagsUrl || defaultUrl;
 
     if (!outputs.saved_objects.length) {
       const newDefaultOutput = {
         ...DEFAULT_OUTPUT,
-        hosts: [appContextService.getConfig()!.fleet.elasticsearch.host],
+        hosts: [defaultOutputUrl],
         ca_sha256: appContextService.getConfig()!.fleet.elasticsearch.ca_sha256,
       } as NewOutput;
 
@@ -44,11 +51,11 @@ class OutputService {
   public async getDefaultOutputId(soClient: SavedObjectsClientContract) {
     const outputs = await soClient.find({
       type: OUTPUT_SAVED_OBJECT_TYPE,
-      filter: 'outputs.attributes.is_default:true',
+      filter: `${OUTPUT_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
     });
 
     if (!outputs.saved_objects.length) {
-      throw new Error('No default output');
+      return null;
     }
 
     return outputs.saved_objects[0].id;
@@ -56,6 +63,9 @@ class OutputService {
 
   public async getAdminUser(soClient: SavedObjectsClientContract) {
     const defaultOutputId = await this.getDefaultOutputId(soClient);
+    if (!defaultOutputId) {
+      return null;
+    }
     const so = await appContextService
       .getEncryptedSavedObjects()
       ?.getDecryptedAsInternalUser<Output>(OUTPUT_SAVED_OBJECT_TYPE, defaultOutputId);
@@ -93,6 +103,34 @@ class OutputService {
     return {
       id: outputSO.id,
       ...outputSO.attributes,
+    };
+  }
+
+  public async update(soClient: SavedObjectsClientContract, id: string, data: Partial<Output>) {
+    const outputSO = await soClient.update<Output>(SAVED_OBJECT_TYPE, id, data);
+
+    if (outputSO.error) {
+      throw new Error(outputSO.error.message);
+    }
+  }
+
+  public async list(soClient: SavedObjectsClientContract) {
+    const outputs = await soClient.find<Output>({
+      type: SAVED_OBJECT_TYPE,
+      page: 1,
+      perPage: 1000,
+    });
+
+    return {
+      items: outputs.saved_objects.map<Output>((outputSO) => {
+        return {
+          id: outputSO.id,
+          ...outputSO.attributes,
+        };
+      }),
+      total: outputs.total,
+      page: 1,
+      perPage: 1000,
     };
   }
 }

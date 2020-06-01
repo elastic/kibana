@@ -27,7 +27,7 @@ const defaultSavedObjectTypes: SavedObjectsType[] = [
   {
     name: 'testtype',
     hidden: false,
-    namespaceAgnostic: false,
+    namespaceType: 'single',
     mappings: {
       properties: {
         name: { type: 'keyword' },
@@ -65,7 +65,7 @@ const createMigrator = (
   };
 
   mockMigrator.getActiveMappings.mockReturnValue(buildActiveMappings(mergeTypes(types)));
-  mockMigrator.migrateDocument.mockImplementation(doc => doc);
+  mockMigrator.migrateDocument.mockImplementation((doc) => doc);
   return mockMigrator;
 };
 

@@ -79,7 +79,7 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
   ]);
 });
 
-test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async done => {
+test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async (done) => {
   const container = new HelloWorldContainer(
     { id: 'hello', panels: {} },
     {
@@ -88,6 +88,7 @@ test('Explicit embeddable input mapped to undefined with no inherited value will
       getEmbeddableFactory: start.getEmbeddableFactory,
       notifications: coreStart.notifications,
       overlays: coreStart.overlays,
+      application: coreStart.application,
       inspector: {} as any,
       SavedObjectFinder: () => null,
     }
@@ -136,6 +137,7 @@ test('Explicit input tests in async situations', (done: () => void) => {
       getEmbeddableFactory: start.getEmbeddableFactory,
       notifications: coreStart.notifications,
       overlays: coreStart.overlays,
+      application: coreStart.application,
       inspector: {} as any,
       SavedObjectFinder: () => null,
     }

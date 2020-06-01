@@ -25,6 +25,7 @@ import { EditorController } from './application';
 // @ts-ignore
 import { PANEL_TYPES } from '../common/panel_types';
 import { defaultFeedbackMessage } from '../../kibana_utils/public';
+import { VisEditor } from './application/components/vis_editor_lazy';
 
 export const metricsVisDefinition = {
   name: 'metrics',
@@ -43,6 +44,7 @@ export const metricsVisDefinition = {
           id: '61ca57f1-469d-11e7-af02-69e470af7417',
           color: '#68BC00',
           split_mode: 'everything',
+          split_color_mode: 'kibana',
           metrics: [
             {
               id: '61ca57f2-469d-11e7-af02-69e470af7417',
@@ -68,7 +70,7 @@ export const metricsVisDefinition = {
       show_legend: 1,
       show_grid: 1,
     },
-    component: require('./application/components/vis_editor').VisEditor,
+    component: VisEditor,
   },
   editor: EditorController,
   options: {

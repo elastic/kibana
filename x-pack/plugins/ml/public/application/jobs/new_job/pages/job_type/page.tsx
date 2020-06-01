@@ -106,15 +106,15 @@ export const Page: FC = () => {
       icon: {
         type: 'createMultiMetricJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricAriaLabel', {
-          defaultMessage: 'Multi metric job',
+          defaultMessage: 'Multi-metric job',
         }),
       },
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricTitle', {
-        defaultMessage: 'Multi metric',
+        defaultMessage: 'Multi-metric',
       }),
       description: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricDescription', {
         defaultMessage:
-          'Detect anomalies in multiple metrics by splitting a time series by a categorical field.',
+          'Detect anomalies with one or more metrics and optionally split the analysis.',
       }),
       id: 'mlJobTypeLinkMultiMetricJob',
     },
@@ -208,7 +208,7 @@ export const Page: FC = () => {
             <h2>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationTitle"
-                defaultMessage="Use a supplied configuration"
+                defaultMessage="Use preconfigured jobs"
               />
             </h2>
           </EuiTitle>
@@ -217,8 +217,8 @@ export const Page: FC = () => {
             <p>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationDescription"
-                defaultMessage="The fields in your data have been recognized as matching known configurations.
-                Select to create a set of machine learning jobs and associated dashboards."
+                defaultMessage="The fields in your data match known configurations.
+                Create a set of preconfigured jobs."
               />
             </p>
           </EuiText>
@@ -244,16 +244,6 @@ export const Page: FC = () => {
             />
           </h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.ml.newJob.wizard.jobType.useWizardDescription"
-              defaultMessage="Use one of the wizards to create a machine learning job to find anomalies in your data."
-            />
-          </p>
-        </EuiText>
-
         <EuiSpacer size="m" />
 
         <EuiFlexGrid gutterSize="l" columns={4}>

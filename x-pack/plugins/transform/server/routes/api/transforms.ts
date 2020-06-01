@@ -136,7 +136,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
           transformId,
         })
         .then(() => response.transformsCreated.push({ transform: transformId }))
-        .catch(e =>
+        .catch((e) =>
           response.errors.push({
             id: transformId,
             error: wrapEsError(e),
@@ -144,6 +144,29 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
         );
 
       return res.ok({ body: response });
+    })
+  );
+  router.post(
+    {
+      path: addBasePath('transforms/{transformId}/_update'),
+      validate: {
+        ...schemaTransformId,
+        body: schema.maybe(schema.any()),
+      },
+    },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { transformId } = req.params as SchemaTransformId;
+
+      try {
+        return res.ok({
+          body: await ctx.transform!.dataClient.callAsCurrentUser('transform.updateTransform', {
+            body: req.body,
+            transformId,
+          }),
+        });
+      } catch (e) {
+        return res.customError(wrapError(e));
+      }
     })
   );
   router.post(

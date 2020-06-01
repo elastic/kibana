@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { KibanaTelemetryAdapter } from '../../lib/adapters/telemetry';
 import { UMRestApiRouteFactory } from '../types';
 import { PageViewParams } from '../../lib/adapters/telemetry/types';
-import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants';
+import { API_URLS } from '../../../common/constants';
 
 export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
   method: 'POST',

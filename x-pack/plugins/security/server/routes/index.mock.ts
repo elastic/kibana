@@ -8,6 +8,7 @@ import {
   elasticsearchServiceMock,
   httpServiceMock,
   loggingServiceMock,
+  httpResourcesMock,
 } from '../../../../../src/core/server/mocks';
 import { authenticationMock } from '../authentication/index.mock';
 import { authorizationMock } from '../authorization/index.mock';
@@ -27,5 +28,6 @@ export const routeDefinitionParamsMock = {
     authc: authenticationMock.create(),
     authz: authorizationMock.create(),
     license: licenseMock.create(),
+    httpResources: httpResourcesMock.createRegistrar(),
   }),
 };
