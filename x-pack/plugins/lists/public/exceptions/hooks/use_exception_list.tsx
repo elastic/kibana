@@ -14,7 +14,12 @@ export type ReturnExceptionListAndItems = [boolean, ExceptionListAndItems | null
 /**
  * Hook for using to get an ExceptionList and it's ExceptionListItems
  *
+ * @param http Kibana http service
  * @param id desired ExceptionList ID (not list_id)
+ * @param namespaceType list namespaceType determines list space
+ * @param onError error callback
+ * @param filterOptions optional - filter by fields or tags
+ * @param pagination optional
  *
  */
 export const useExceptionList = ({

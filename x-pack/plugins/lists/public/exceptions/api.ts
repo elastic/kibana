@@ -26,6 +26,7 @@ import {
 /**
  * Add provided ExceptionList
  *
+ * @param http Kibana http service
  * @param list exception list to add
  * @param signal to cancel request
  *
@@ -48,6 +49,7 @@ export const addExceptionList = async ({
 /**
  * Add provided ExceptionListItem
  *
+ * @param http Kibana http service
  * @param listItem exception list item to add
  * @param signal to cancel request
  *
@@ -70,7 +72,9 @@ export const addExceptionListItem = async ({
 /**
  * Fetch an ExceptionList by providing a ExceptionList ID
  *
+ * @param http Kibana http service
  * @param id ExceptionList ID (not list_id)
+ * @param namespaceType ExceptionList namespace_type
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
@@ -90,7 +94,11 @@ export const fetchExceptionListById = async ({
 /**
  * Fetch an ExceptionList's ExceptionItems by providing a ExceptionList list_id
  *
- * @param id ExceptionList list_id (not ID)
+ * @param http Kibana http service
+ * @param listId ExceptionList list_id (not ID)
+ * @param namespaceType ExceptionList namespace_type
+ * @param filterOptions optional - filter by field or tags
+ * @param pagination optional
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
@@ -137,7 +145,9 @@ export const fetchExceptionListItemsByListId = async ({
 /**
  * Fetch an ExceptionListItem by providing a ExceptionListItem ID
  *
+ * @param http Kibana http service
  * @param id ExceptionListItem ID (not item_id)
+ * @param namespaceType ExceptionList namespace_type
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
@@ -157,7 +167,9 @@ export const fetchExceptionListItemById = async ({
 /**
  * Delete an ExceptionList by providing a ExceptionList ID
  *
+ * @param http Kibana http service
  * @param id ExceptionList ID (not list_id)
+ * @param namespaceType ExceptionList namespace_type
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
@@ -177,7 +189,9 @@ export const deleteExceptionListById = async ({
 /**
  * Delete an ExceptionListItem by providing a ExceptionListItem ID
  *
+ * @param http Kibana http service
  * @param id ExceptionListItem ID (not item_id)
+ * @param namespaceType ExceptionList namespace_type
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
