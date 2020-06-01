@@ -28,6 +28,7 @@ export interface CustomRule {
   falsePositivesExamples: string[];
   mitre: Mitre[];
   note: string;
+  timelineId: string;
 }
 
 export interface MachineLearningRule {
@@ -56,7 +57,7 @@ const mitre2: Mitre = {
 };
 
 export const newRule: CustomRule = {
-  customQuery: 'hosts.name: *',
+  customQuery: 'host.name: *',
   name: 'New Rule Test',
   description: 'The new rule description.',
   severity: 'High',
@@ -66,6 +67,7 @@ export const newRule: CustomRule = {
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
+  timelineId: '352c6110-9ffb-11ea-b3d8-857d6042d9bd',
 };
 
 export const machineLearningRule: MachineLearningRule = {
