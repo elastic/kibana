@@ -28,8 +28,7 @@ export async function loadIndexTemplates() {
 }
 
 export async function loadPolicies(withIndices) {
-  const query = withIndices ? '?withIndices=true' : '';
-  return await sendGet('policies', query);
+  return await sendGet('policies', { withIndices });
 }
 
 export async function savePolicy(policy) {

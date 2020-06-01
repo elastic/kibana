@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createKibanaCoreStartMock } from '../common/mocks/kibana_core';
+import { getExceptionListSchemaMock } from '../../common/schemas/response/exception_list_schema.mock';
+import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
 
-import {
-  mockExceptionItem,
-  mockExceptionList,
-  mockNewExceptionItem,
-  mockNewExceptionList,
-} from './mock';
+import { mockNewExceptionItem, mockNewExceptionList } from './mock';
 import {
   addExceptionList,
   addExceptionListItem,
@@ -43,7 +40,7 @@ describe('Exceptions Lists API', () => {
   describe('addExceptionList', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(mockExceptionList);
+      fetchMock.mockResolvedValue(getExceptionListSchemaMock());
     });
 
     test('check parameter url, body', async () => {
@@ -63,7 +60,7 @@ describe('Exceptions Lists API', () => {
     test('check parameter url, body when "list.id" exists', async () => {
       await addExceptionList({
         http: mockKibanaHttpService(),
-        list: mockExceptionList,
+        list: getExceptionListSchemaMock(),
         signal: abortCtrl.signal,
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
@@ -80,14 +77,14 @@ describe('Exceptions Lists API', () => {
         list: mockNewExceptionList,
         signal: abortCtrl.signal,
       });
-      expect(exceptionResponse).toEqual(mockExceptionList);
+      expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
     });
   });
 
   describe('addExceptionListItem', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(mockExceptionItem);
+      fetchMock.mockResolvedValue(getExceptionListItemSchemaMock());
     });
 
     test('check parameter url, body', async () => {
@@ -107,7 +104,7 @@ describe('Exceptions Lists API', () => {
     test('check parameter url, body when "listItem.id" exists', async () => {
       await addExceptionListItem({
         http: mockKibanaHttpService(),
-        listItem: mockExceptionItem,
+        listItem: getExceptionListItemSchemaMock(),
         signal: abortCtrl.signal,
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items', {
@@ -124,14 +121,14 @@ describe('Exceptions Lists API', () => {
         listItem: mockNewExceptionItem,
         signal: abortCtrl.signal,
       });
-      expect(exceptionResponse).toEqual(mockExceptionItem);
+      expect(exceptionResponse).toEqual(getExceptionListItemSchemaMock());
     });
   });
 
   describe('fetchExceptionListById', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(mockExceptionList);
+      fetchMock.mockResolvedValue(getExceptionListSchemaMock());
     });
 
     test('check parameter url, body', async () => {
@@ -155,7 +152,7 @@ describe('Exceptions Lists API', () => {
         id: '1',
         signal: abortCtrl.signal,
       });
-      expect(exceptionResponse).toEqual(mockExceptionList);
+      expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
     });
   });
 
@@ -224,7 +221,7 @@ describe('Exceptions Lists API', () => {
   describe('deleteExceptionListById', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(mockExceptionList);
+      fetchMock.mockResolvedValue(getExceptionListSchemaMock());
     });
 
     test('check parameter url, body when deleting exception item', async () => {
@@ -248,14 +245,14 @@ describe('Exceptions Lists API', () => {
         id: '1',
         signal: abortCtrl.signal,
       });
-      expect(exceptionResponse).toEqual(mockExceptionList);
+      expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
     });
   });
 
   describe('deleteExceptionListItemById', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(mockExceptionItem);
+      fetchMock.mockResolvedValue(getExceptionListItemSchemaMock());
     });
 
     test('check parameter url, body when deleting exception item', async () => {
@@ -279,7 +276,7 @@ describe('Exceptions Lists API', () => {
         id: '1',
         signal: abortCtrl.signal,
       });
-      expect(exceptionResponse).toEqual(mockExceptionItem);
+      expect(exceptionResponse).toEqual(getExceptionListItemSchemaMock());
     });
   });
 });
