@@ -202,8 +202,8 @@ export const importTimelinesRoute = (
                         newTimeline = await createTimelines({
                           frameworkRequest,
                           timeline: parsedTimelineObject,
-                          timelineSavedObjectId: savedObjectId,
-                          timelineVersion: version,
+                          timelineSavedObjectId: compareTimelinesStatus.timelineId,
+                          timelineVersion: compareTimelinesStatus.timelineVersion,
                           notes: globalNotes,
                           existingNoteIds: compareTimelinesStatus.timelineInput.data?.noteIds,
                         });

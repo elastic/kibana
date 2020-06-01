@@ -345,6 +345,7 @@ export enum TlsFields {
 export enum TimelineStatus {
   active = 'active',
   draft = 'draft',
+  immutiable = 'immutiable',
 }
 
 export enum TimelineType {
@@ -4342,6 +4343,8 @@ export namespace GetAllTimeline {
 
     title: Maybe<string>;
 
+    status: Maybe<TimelineStatus>;
+
     timelineType: Maybe<TimelineType>;
 
     templateTimelineId: Maybe<string>;
@@ -5404,6 +5407,8 @@ export namespace GetOneTimeline {
     pinnedEventIds: Maybe<string[]>;
 
     pinnedEventsSaveObject: Maybe<PinnedEventsSaveObject[]>;
+
+    status: Maybe<TimelineStatus>;
 
     title: Maybe<string>;
 

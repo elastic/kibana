@@ -10370,7 +10370,13 @@
         "interfaces": null,
         "enumValues": [
           { "name": "active", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "draft", "description": "", "isDeprecated": false, "deprecationReason": null }
+          { "name": "draft", "description": "", "isDeprecated": false, "deprecationReason": null },
+          {
+            "name": "immutiable",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
         ],
         "possibleTypes": null
       },

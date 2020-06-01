@@ -205,6 +205,18 @@ export class CompareTimelinesStatus {
     return false;
   }
 
+  public get timelineId() {
+    if (this.isHandlingTemplateTimeline) {
+      return this.templateTimelineInput.data?.savedObjectId ?? this.templateTimelineInput.getId;
+    }
+    return this.timelineInput.data?.savedObjectId ?? this.timelineInput.getId;
+  }
+
+  public get timelineVersion() {
+    const version = this.timelineInput.data?.version ?? this.timelineInput.getVersion;
+    return version != null ? version.toString() : null;
+  }
+
   public async init() {
     await this.getTimelines();
   }

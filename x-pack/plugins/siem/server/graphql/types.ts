@@ -347,6 +347,7 @@ export enum TlsFields {
 export enum TimelineStatus {
   active = 'active',
   draft = 'draft',
+  immutiable = 'immutiable',
 }
 
 export enum TimelineType {
