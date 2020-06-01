@@ -14,6 +14,10 @@ import { registerTelemetryUsageCollector, incrementUICounter } from './telemetry
 describe('App Search Telemetry Usage Collector', () => {
   const makeUsageCollectorStub = jest.fn();
   const registerStub = jest.fn();
+  const usageCollectionMock = {
+    makeUsageCollector: makeUsageCollectorStub,
+    registerCollector: registerStub,
+  };
 
   const savedObjectsRepoStub = {
     get: () => ({
@@ -29,14 +33,8 @@ describe('App Search Telemetry Usage Collector', () => {
     }),
     incrementCounter: jest.fn(),
   };
-  const dependencies = {
-    usageCollection: {
-      makeUsageCollector: makeUsageCollectorStub,
-      registerCollector: registerStub,
-    },
-    savedObjects: {
-      createInternalRepository: jest.fn(() => savedObjectsRepoStub),
-    },
+  const savedObjectsMock = {
+    createInternalRepository: jest.fn(() => savedObjectsRepoStub),
   };
 
   beforeEach(() => {
@@ -45,7 +43,7 @@ describe('App Search Telemetry Usage Collector', () => {
 
   describe('registerTelemetryUsageCollector', () => {
     it('should make and register the usage collector', () => {
-      registerTelemetryUsageCollector(dependencies);
+      registerTelemetryUsageCollector(usageCollectionMock, savedObjectsMock);
 
       expect(registerStub).toHaveBeenCalledTimes(1);
       expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
@@ -55,7 +53,7 @@ describe('App Search Telemetry Usage Collector', () => {
 
   describe('fetchTelemetryMetrics', () => {
     it('should return existing saved objects data', async () => {
-      registerTelemetryUsageCollector(dependencies);
+      registerTelemetryUsageCollector(usageCollectionMock, savedObjectsMock);
       const savedObjectsCounts = await makeUsageCollectorStub.mock.calls[0][0].fetch();
 
       expect(savedObjectsCounts).toEqual({
@@ -76,10 +74,9 @@ describe('App Search Telemetry Usage Collector', () => {
     });
 
     it('should not error & should return a default telemetry object if no saved data exists', async () => {
-      registerTelemetryUsageCollector({
-        ...dependencies,
-        savedObjects: { createInternalRepository: () => ({}) },
-      });
+      const emptySavedObjectsMock = { createInternalRepository: () => ({}) };
+
+      registerTelemetryUsageCollector(usageCollectionMock, emptySavedObjectsMock);
       const savedObjectsCounts = await makeUsageCollectorStub.mock.calls[0][0].fetch();
 
       expect(savedObjectsCounts).toEqual({
@@ -102,10 +99,8 @@ describe('App Search Telemetry Usage Collector', () => {
 
   describe('incrementUICounter', () => {
     it('should increment the saved objects internal repository', async () => {
-      const { savedObjects } = dependencies;
-
       const response = await incrementUICounter({
-        savedObjects,
+        savedObjects: savedObjectsMock,
         uiAction: 'ui_clicked',
         metric: 'button',
       });

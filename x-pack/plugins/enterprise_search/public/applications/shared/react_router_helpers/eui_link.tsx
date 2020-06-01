@@ -25,7 +25,7 @@ interface IEuiReactRouterProps {
 export const EuiReactRouterLink: React.FC<IEuiReactRouterProps> = ({ to, isButton, ...rest }) => {
   const history = useHistory();
 
-  const onClick = event => {
+  const onClick = (event) => {
     if (letBrowserHandleEvent(event)) return;
 
     // Prevent regular link behavior, which causes a browser refresh.
@@ -42,6 +42,6 @@ export const EuiReactRouterLink: React.FC<IEuiReactRouterProps> = ({ to, isButto
   return isButton ? <EuiButton {...props} /> : <EuiLink {...props} />;
 };
 
-export const EuiReactRouterButton: React.FC<IEuiReactRouterProps> = props => (
+export const EuiReactRouterButton: React.FC<IEuiReactRouterProps> = (props) => (
   <EuiReactRouterLink {...props} isButton />
 );
