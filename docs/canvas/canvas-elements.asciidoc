@@ -33,22 +33,22 @@ Each element can display a different data source. Pages and workpads often conta
 [[canvas-add-object]]
 ==== Add a saved object
 
-Add <<managing-saved-objects,saved objects>> to your workpad, such as maps, Lens visualizations, and basic visualizations.
+Add <<managing-saved-objects,saved objects>> to your workpad, such as maps and visualizations.
 
 . Click *Add element > Add from Visualize Library*.
 
-. Select the visualization you want to add.
+. Select the saved object you want to add.
 +
 [role="screenshot"]
 image::images/canvas-map-embed.gif[]
 
 . To use the customization options, click the panel menu, then select one of the following options:
 
-* *Edit map* &mdash; Opens <<maps,Maps>> or <<visualize,Visualize>> so that you can edit the original visualization.
+* *Edit map* &mdash; Opens <<maps,Maps>> or <<visualize,Visualize>> so that you can edit the original saved object.
 
-* *Edit panel title* &mdash; Adds a title to the visualization.
+* *Edit panel title* &mdash; Adds a title to the saved object.
 
-* *Customize time range* &mdash; Exposes a time filter dedicated to the visualization.
+* *Customize time range* &mdash; Exposes a time filter dedicated to the saved object.
 
 * *Inspect* &mdash; Allows you to drill down into the element data.
 

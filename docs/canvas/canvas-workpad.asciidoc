@@ -20,9 +20,7 @@ To create a workpad, choose one of the following options:
 
 To use the background colors, images, and data of your choice, start with a blank workpad.
 
-. Open *Canvas*.
-
-. On the *Canvas workpads* view, click *Create workpad*.
+. On the *Canvas workpads* page, click *Create workpad*.
 
 . Add a *Name* to your workpad.
 
@@ -43,9 +41,7 @@ image::images/canvas-background-color-picker.png[Canvas color picker]
 
 If you're unsure about where to start, you can use one of the preconfigured templates that come with Canvas.
 
-. Open *Canvas*.
-
-. On the *Canvas workpads* view, select *Templates*.
+. On the *Canvas workpads* page, select *Templates*.
 
 . Click the preconfigured template that you want to use.
 
@@ -57,9 +53,7 @@ If you're unsure about where to start, you can use one of the preconfigured temp
 
 When you want to use a workpad that someone else has already started, import the JSON file into Canvas.
 
-. Open *Canvas*.
-
-. On the *Canvas workpads* view, click and drag the file to the *Import workpad JSON file* field.
+To import a workpad, go to the *Canvas workpads* page, then click and drag the file to the *Import workpad JSON file* field.
 
 [float]
 [[sample-data-workpad]]
@@ -105,7 +99,7 @@ Change how often the data refreshes on your workpad.
 [role="screenshot"]
 image::images/canvas-refresh-interval.png[Element data refresh interval]
 +
-To manually refresh the data, click the *Refresh data* icon.
+To manually refresh the data, click image:canvas/images/canvas-refresh-data.png[].
 
 [float]
 [[zoom-in-out]]
