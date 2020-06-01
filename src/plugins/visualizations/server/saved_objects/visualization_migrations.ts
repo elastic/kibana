@@ -131,6 +131,50 @@ const migrateOperatorKeyTypo: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+/**
+ * Moving setting wether to do a row or column split to vis.params
+ *
+ * @see https://github.com/elastic/kibana/pull/58462/files#diff-ae69fe15b20a5099d038e9bbe2ed3849
+ **/
+const migrateSplitByChartRow: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get<string>(doc, 'attributes.visState');
+  let visState: any;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+
+    if (visState && visState.aggs && visState.params) {
+      let row: boolean | undefined;
+
+      visState.aggs.forEach((agg: any) => {
+        if (agg.type === 'terms' && agg.schema === 'split' && 'row' in agg.params) {
+          row = agg.params.row;
+
+          delete agg.params.row;
+        }
+      });
+
+      if (row !== undefined) {
+        visState.params.row = row;
+      }
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
+
+  return doc;
+};
+
 // Migrate date histogram aggregation (remove customInterval)
 const migrateDateHistogramAggregation: SavedObjectMigrationFn<any, any> = (doc) => {
   const visStateJSON = get<string>(doc, 'attributes.visState');
@@ -673,6 +717,6 @@ export const visualizationSavedObjectTypeMigrations = {
   ),
   '7.3.1': flow<SavedObjectMigrationFn<any, any>>(migrateFiltersAggQueryStringQueries),
   '7.4.2': flow<SavedObjectMigrationFn<any, any>>(transformSplitFiltersStringToQueryObject),
-  '7.7.0': flow<SavedObjectMigrationFn<any, any>>(migrateOperatorKeyTypo),
+  '7.7.0': flow<SavedObjectMigrationFn<any, any>>(migrateOperatorKeyTypo, migrateSplitByChartRow),
   '7.8.0': flow<SavedObjectMigrationFn<any, any>>(migrateTsvbDefaultColorPalettes),
 };
