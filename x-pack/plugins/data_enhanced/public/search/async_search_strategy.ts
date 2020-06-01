@@ -15,13 +15,13 @@ import {
   ISyncSearchRequest,
   SYNC_SEARCH_STRATEGY,
 } from '../../../../../src/plugins/data/public';
-import { IAsyncSearchOptions, IAsyncSearchResponse } from './types';
+import { IAsyncSearchOptions, IAsyncSearchResponse, IAsyncSearchRequest } from './types';
 
 export const ASYNC_SEARCH_STRATEGY = 'ASYNC_SEARCH_STRATEGY';
 
 declare module '../../../../../src/plugins/data/public' {
   export interface IRequestTypesMap {
-    [ASYNC_SEARCH_STRATEGY]: ISyncSearchRequest;
+    [ASYNC_SEARCH_STRATEGY]: IAsyncSearchRequest;
   }
 }
 
