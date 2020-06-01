@@ -45,6 +45,7 @@ import { navTabsHostDetails } from './nav_tabs';
 import { HostDetailsProps } from './types';
 import { type } from './utils';
 import { getHostDetailsPageFilters } from './helpers';
+import { EndpointOverview } from '../../../overview/components/endpoint_overview';
 
 const HostOverviewManage = manageQuery(HostOverview);
 const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
@@ -126,26 +127,30 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                         skip={isInitializing}
                       >
                         {({ isLoadingAnomaliesData, anomaliesData }) => (
-                          <HostOverviewManage
-                            id={id}
-                            inspect={inspect}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            data={hostOverview}
-                            anomaliesData={anomaliesData}
-                            isLoadingAnomaliesData={isLoadingAnomaliesData}
-                            loading={loading}
-                            startDate={from}
-                            endDate={to}
-                            narrowDateRange={(score, interval) => {
-                              const fromTo = scoreIntervalToDateTime(score, interval);
-                              setAbsoluteRangeDatePicker({
-                                id: 'global',
-                                from: fromTo.from,
-                                to: fromTo.to,
-                              });
-                            }}
-                          />
+                          <>
+                            <HostOverviewManage
+                              id={id}
+                              inspect={inspect}
+                              refetch={refetch}
+                              setQuery={setQuery}
+                              data={hostOverview}
+                              anomaliesData={anomaliesData}
+                              isLoadingAnomaliesData={isLoadingAnomaliesData}
+                              loading={loading}
+                              startDate={from}
+                              endDate={to}
+                              narrowDateRange={(score, interval) => {
+                                const fromTo = scoreIntervalToDateTime(score, interval);
+                                setAbsoluteRangeDatePicker({
+                                  id: 'global',
+                                  from: fromTo.from,
+                                  to: fromTo.to,
+                                });
+                              }}
+                            />
+                            <EuiHorizontalRule />
+                            <EndpointOverview data={hostOverview} id={id} loading={loading} />
+                          </>
                         )}
                       </AnomalyTableProvider>
                     )}
