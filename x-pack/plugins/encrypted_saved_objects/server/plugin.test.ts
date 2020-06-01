@@ -16,9 +16,6 @@ describe('EncryptedSavedObjects Plugin', () => {
       await expect(plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() }))
         .resolves.toMatchInlineSnapshot(`
               Object {
-                "__legacyCompat": Object {
-                  "registerLegacyAPI": [Function],
-                },
                 "registerType": [Function],
                 "usingEphemeralEncryptionKey": true,
               }
@@ -30,10 +27,18 @@ describe('EncryptedSavedObjects Plugin', () => {
     it('exposes proper contract', async () => {
       const plugin = new Plugin(coreMock.createPluginInitializerContext());
       await plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() });
-      await expect(plugin.start()).toMatchInlineSnapshot(`
+
+      const startContract = plugin.start();
+      await expect(startContract).toMatchInlineSnapshot(`
+              Object {
+                "getClient": [Function],
+                "isEncryptionError": [Function],
+              }
+            `);
+
+      expect(startContract.getClient()).toMatchInlineSnapshot(`
               Object {
                 "getDecryptedAsInternalUser": [Function],
-                "isEncryptionError": [Function],
               }
             `);
     });

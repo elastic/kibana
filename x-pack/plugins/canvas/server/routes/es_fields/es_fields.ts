@@ -28,7 +28,7 @@ export function initializeESFieldsRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      const { callAsCurrentUser } = context.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
       const { index, fields } = request.query;
 
       const config = {
@@ -36,8 +36,8 @@ export function initializeESFieldsRoute(deps: RouteInitializerDeps) {
         fields: fields || '*',
       };
 
-      const esFields = await callAsCurrentUser('fieldCaps', config).then(resp => {
-        return mapValues(resp.fields, types => {
+      const esFields = await callAsCurrentUser('fieldCaps', config).then((resp) => {
+        return mapValues(resp.fields, (types) => {
           if (keys(types).length > 1) {
             return 'conflict';
           }

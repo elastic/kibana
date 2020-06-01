@@ -6,10 +6,10 @@
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('Endpoint index pattern API', () => {
+  describe.skip('Endpoint index pattern API', () => {
     it('should retrieve the index pattern for events', async () => {
       const { body } = await supertest.get('/api/endpoint/index_pattern/events').expect(200);
       expect(body.indexPattern).to.eql('events-endpoint-*');

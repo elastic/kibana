@@ -8,7 +8,7 @@ import cytoscape from 'cytoscape';
 import { CSSProperties } from 'react';
 import {
   SERVICE_NAME,
-  SPAN_DESTINATION_SERVICE_RESOURCE
+  SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { severity } from '../../../../common/ml_job_constants';
 import { defaultIcon, iconForNode } from './icons';
@@ -78,7 +78,7 @@ const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 export const animationOptions: cytoscape.AnimationOptions = {
   duration: parseInt(theme.euiAnimSpeedNormal, 10),
   // @ts-ignore The cubic-bezier options here are not recognized by the cytoscape types
-  easing: theme.euiAnimSlightBounce
+  easing: theme.euiAnimSlightBounce,
 };
 const lineColor = '#C5CCD7';
 const zIndexNode = 200;
@@ -117,7 +117,7 @@ const style: cytoscape.Stylesheet[] = [
       // theme.euiFontFamily doesn't work here for some reason, so we're just
       // specifying a subset of the fonts for the label text.
       'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
-      'font-size': theme.euiFontSizeXS,
+      'font-size': theme.euiFontSizeS,
       ghost: 'yes',
       'ghost-offset-x': 0,
       'ghost-offset-y': 2,
@@ -127,7 +127,7 @@ const style: cytoscape.Stylesheet[] = [
         isService(el)
           ? el.data(SERVICE_NAME)
           : el.data(SPAN_DESTINATION_SERVICE_RESOURCE),
-      'min-zoomed-font-size': parseInt(theme.euiSizeL, 10),
+      'min-zoomed-font-size': parseInt(theme.euiSizeS, 10),
       'overlay-opacity': 0,
       shape: (el: cytoscape.NodeSingular) =>
         isService(el) ? (isIE11 ? 'rectangle' : 'ellipse') : 'diamond',
@@ -141,8 +141,8 @@ const style: cytoscape.Stylesheet[] = [
       'text-valign': 'bottom',
       'text-wrap': 'ellipsis',
       width: theme.avatarSizing.l.size,
-      'z-index': zIndexNode
-    }
+      'z-index': zIndexNode,
+    },
   },
   {
     selector: 'edge',
@@ -161,8 +161,8 @@ const style: cytoscape.Stylesheet[] = [
       'target-distance-from-node': isIE11 ? undefined : theme.paddingSizes.xs,
       width: 1,
       'source-arrow-shape': 'none',
-      'z-index': zIndexEdge
-    }
+      'z-index': zIndexEdge,
+    },
   },
   {
     selector: 'edge[bidirectional]',
@@ -176,14 +176,14 @@ const style: cytoscape.Stylesheet[] = [
         : parseInt(theme.paddingSizes.xs, 10),
       'target-distance-from-node': isIE11
         ? undefined
-        : parseInt(theme.paddingSizes.xs, 10)
-    }
+        : parseInt(theme.paddingSizes.xs, 10),
+    },
   },
   // @ts-ignore DefinitelyTyped says visibility is "none" but it's
   // actually "hidden"
   {
     selector: 'edge[isInverseEdge]',
-    style: { visibility: 'hidden' }
+    style: { visibility: 'hidden' },
   },
   {
     selector: 'edge.nodeHover',
@@ -193,14 +193,14 @@ const style: cytoscape.Stylesheet[] = [
       'z-index': zIndexEdgeHover,
       'line-color': theme.euiColorDarkShade,
       'source-arrow-color': theme.euiColorDarkShade,
-      'target-arrow-color': theme.euiColorDarkShade
-    }
+      'target-arrow-color': theme.euiColorDarkShade,
+    },
   },
   {
     selector: 'node.hover',
     style: {
-      'border-width': getBorderWidth
-    }
+      'border-width': getBorderWidth,
+    },
   },
   {
     selector: 'edge.highlight',
@@ -210,9 +210,9 @@ const style: cytoscape.Stylesheet[] = [
       'source-arrow-color': theme.euiColorPrimary,
       'target-arrow-color': theme.euiColorPrimary,
       // @ts-ignore
-      'z-index': zIndexEdgeHighlight
-    }
-  }
+      'z-index': zIndexEdgeHighlight,
+    },
+  },
 ];
 
 // The CSS styles for the div containing the cytoscape element. Makes a
@@ -234,7 +234,7 @@ center,
 ${theme.euiColorLightShade}`,
   backgroundSize: `${theme.euiSizeL} ${theme.euiSizeL}`,
   margin: `-${theme.gutterTypes.gutterLarge}`,
-  marginTop: 0
+  marginTop: 0,
 };
 
 export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
@@ -242,5 +242,5 @@ export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
   boxSelectionEnabled: false,
   maxZoom: 3,
   minZoom: 0.2,
-  style
+  style,
 };

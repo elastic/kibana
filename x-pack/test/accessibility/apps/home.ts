@@ -6,13 +6,14 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home']);
   const a11y = getService('a11y');
   const retry = getService('retry');
   const globalNav = getService('globalNav');
 
-  describe('Kibana Home', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/66976
+  describe.skip('Kibana Home', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('home');
     });

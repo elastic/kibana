@@ -22,13 +22,13 @@ import { ControlParams } from '../editor_utils';
 
 export function getLineageMap(controlParamsList: ControlParams[]) {
   function getControlParamsById(controlId: string) {
-    return controlParamsList.find(controlParams => {
+    return controlParamsList.find((controlParams) => {
       return controlParams.id === controlId;
     });
   }
 
   const lineageMap = new Map<string, string[]>();
-  controlParamsList.forEach(rootControlParams => {
+  controlParamsList.forEach((rootControlParams) => {
     const lineage = [rootControlParams.id];
     const getLineage = (controlParams: ControlParams) => {
       if (

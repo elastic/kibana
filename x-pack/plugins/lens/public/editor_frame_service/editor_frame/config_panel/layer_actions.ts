@@ -28,7 +28,7 @@ export function removeLayer(opts: RemoveLayerOptions): EditorFrameState {
   const { state, trackUiEvent: trackUiEvent, activeVisualization, layerId, datasourceMap } = opts;
   const isOnlyLayer = activeVisualization
     .getLayerIds(state.visualization.state)
-    .every(id => id === opts.layerId);
+    .every((id) => id === opts.layerId);
 
   trackUiEvent(isOnlyLayer ? 'layer_cleared' : 'layer_removed');
 

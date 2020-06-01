@@ -265,11 +265,13 @@ const withSuggestionsHidden = (state: AutocompleteFieldState) => ({
   selectedIndex: null,
 });
 
-const FixedEuiFieldSearch: React.FC<React.InputHTMLAttributes<HTMLInputElement> &
-  EuiFieldSearchProps & {
-    inputRef?: (element: HTMLInputElement | null) => void;
-    onSearch: (value: string) => void;
-  }> = EuiFieldSearch as any;
+const FixedEuiFieldSearch: React.FC<
+  React.InputHTMLAttributes<HTMLInputElement> &
+    EuiFieldSearchProps & {
+      inputRef?: (element: HTMLInputElement | null) => void;
+      onSearch: (value: string) => void;
+    }
+> = EuiFieldSearch as any;
 
 const AutocompleteContainer = styled.div`
   position: relative;

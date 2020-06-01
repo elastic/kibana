@@ -79,10 +79,7 @@ describe('Tls Table Component', () => {
         field: '_id',
       });
 
-      wrapper
-        .find('.euiTable thead tr th button')
-        .first()
-        .simulate('click');
+      wrapper.find('.euiTable thead tr th button').first().simulate('click');
 
       wrapper.update();
 
@@ -91,12 +88,9 @@ describe('Tls Table Component', () => {
         field: '_id',
       });
 
-      expect(
-        wrapper
-          .find('.euiTable thead tr th button')
-          .first()
-          .text()
-      ).toEqual('SHA1 fingerprintClick to sort in descending order');
+      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual(
+        'SHA1 fingerprintClick to sort in descending order'
+      );
     });
   });
 });

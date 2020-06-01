@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { performance } from 'perf_hooks';
+/* eslint-disable complexity */
+
 import { Logger, KibanaRequest } from 'src/core/server';
 
 import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import { isJobStarted, isMlRule } from '../../../../common/machine_learning/helpers';
 import { SetupPlugins } from '../../../plugin';
 
-import { buildEventsSearchQuery } from './build_events_query';
+import { ListClient } from '../../../../../lists/server';
+
 import { getInputIndex } from './get_input_output_index';
 import {
   searchAfterAndBulkCreate,
@@ -19,7 +21,7 @@ import {
 } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
-import { getGapBetweenRuns, makeFloatString, parseScheduleDates } from './utils';
+import { getGapBetweenRuns, parseScheduleDates } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
@@ -32,15 +34,18 @@ import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
+import { hasListsFeature } from '../feature_flags';
 
 export const signalRulesAlertType = ({
   logger,
   version,
   ml,
+  lists,
 }: {
   logger: Logger;
   version: string;
   ml: SetupPlugins['ml'];
+  lists: SetupPlugins['lists'] | undefined;
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
@@ -51,7 +56,14 @@ export const signalRulesAlertType = ({
       params: signalParamsSchema(),
     },
     producer: 'siem',
-    async executor({ previousStartedAt, alertId, services, params }) {
+    async executor({
+      previousStartedAt,
+      alertId,
+      services,
+      params,
+      spaceId,
+      updatedBy: updatedByUser,
+    }) {
       const {
         anomalyThreshold,
         from,
@@ -67,7 +79,7 @@ export const signalRulesAlertType = ({
         query,
         to,
         type,
-        exceptions_list,
+        exceptions_list: exceptionsList,
       } = params;
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
@@ -123,7 +135,6 @@ export const signalRulesAlertType = ({
         hasError = true;
         await ruleStatusService.error(gapMessage, { gap: gapString });
       }
-
       try {
         if (isMlRule(type)) {
           if (ml == null) {
@@ -143,7 +154,7 @@ export const signalRulesAlertType = ({
           const summaryJobs = await ml
             .jobServiceProvider(scopedMlCallCluster)
             .jobsSummary([machineLearningJobId]);
-          const jobSummary = summaryJobs.find(job => job.id === machineLearningJobId);
+          const jobSummary = summaryJobs.find((job) => job.id === machineLearningJobId);
 
           if (jobSummary == null || !isJobStarted(jobSummary.jobState, jobSummary.datafeedState)) {
             const errorMessage = buildRuleMessage(
@@ -161,7 +172,7 @@ export const signalRulesAlertType = ({
             ml,
             callCluster: scopedMlCallCluster,
             // This is needed to satisfy the ML Services API, but can be empty as it is
-            // currently unused by the mlSearch function.
+            // currently unused by the mlAnomalySearch function.
             request: ({} as unknown) as KibanaRequest,
             jobId: machineLearningJobId,
             anomalyThreshold,
@@ -199,6 +210,18 @@ export const signalRulesAlertType = ({
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
         } else {
+          let listClient: ListClient | undefined;
+          if (hasListsFeature()) {
+            if (lists == null) {
+              throw new Error('lists plugin unavailable during rule execution');
+            }
+            listClient = await lists.getListClient(
+              services.callCluster,
+              spaceId,
+              updatedByUser ?? 'elastic'
+            );
+          }
+
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,
@@ -208,34 +231,13 @@ export const signalRulesAlertType = ({
             savedId,
             services,
             index: inputIndex,
-            lists: exceptions_list,
+            // temporary filter out list type
+            lists: exceptionsList?.filter((item) => item.values_type !== 'list'),
           });
-
-          const noReIndex = buildEventsSearchQuery({
-            index: inputIndex,
-            from,
-            to,
-            filter: esFilter,
-            size: searchAfterSize,
-            searchAfterSortId: undefined,
-          });
-
-          logger.debug(buildRuleMessage('[+] Initial search call'));
-          const start = performance.now();
-          const noReIndexResult = await services.callCluster('search', noReIndex);
-          const end = performance.now();
-
-          const signalCount = noReIndexResult.hits.total.value;
-          if (signalCount !== 0) {
-            logger.info(
-              buildRuleMessage(
-                `Found ${signalCount} signals from the indexes of "[${inputIndex.join(', ')}]"`
-              )
-            );
-          }
 
           result = await searchAfterAndBulkCreate({
-            someResult: noReIndexResult,
+            listClient,
+            exceptionsList,
             ruleParams: params,
             services,
             logger,
@@ -256,7 +258,6 @@ export const signalRulesAlertType = ({
             tags,
             throttle,
           });
-          result.searchAfterTimes.push(makeFloatString(end - start));
         }
 
         if (result.success) {
@@ -293,6 +294,11 @@ export const signalRulesAlertType = ({
           }
 
           logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
+          logger.debug(
+            buildRuleMessage(
+              `[+] Finished indexing ${result.createdSignalsCount} signals into ${outputIndex}`
+            )
+          );
           if (!hasError) {
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,

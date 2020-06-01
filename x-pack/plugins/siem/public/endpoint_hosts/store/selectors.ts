@@ -48,7 +48,7 @@ export const policyResponseConfigurations: (
   state: Immutable<HostState>
 ) => undefined | Immutable<HostPolicyResponseConfiguration> = createSelector(
   detailsPolicyAppliedResponse,
-  applied => {
+  (applied) => {
     return applied?.response?.configurations;
   }
 );
@@ -58,13 +58,13 @@ export const policyResponseConfigurations: (
  */
 export const policyResponseFailedOrWarningActionCount: (
   state: Immutable<HostState>
-) => Map<string, number> = createSelector(detailsPolicyAppliedResponse, applied => {
+) => Map<string, number> = createSelector(detailsPolicyAppliedResponse, (applied) => {
   const failureOrWarningByConfigType = new Map<string, number>();
   if (applied?.response?.configurations !== undefined && applied?.actions !== undefined) {
     Object.entries(applied.response.configurations).map(([key, val]) => {
       let count = 0;
       for (const action of val.concerned_actions) {
-        const actionStatus = applied.actions.find(policyActions => policyActions.name === action)
+        const actionStatus = applied.actions.find((policyActions) => policyActions.name === action)
           ?.status;
         if (
           actionStatus === HostPolicyResponseActionStatus.failure ||
@@ -86,7 +86,7 @@ export const policyResponseActions: (
   state: Immutable<HostState>
 ) => undefined | Immutable<HostPolicyResponseAppliedAction[]> = createSelector(
   detailsPolicyAppliedResponse,
-  applied => {
+  (applied) => {
     return applied?.actions;
   }
 );
@@ -150,7 +150,7 @@ export const hasSelectedHost: (state: Immutable<HostState>) => boolean = createS
 /** What policy details panel view to show */
 export const showView: (state: HostState) => 'policy_response' | 'details' = createSelector(
   uiQueryParams,
-  searchParams => {
+  (searchParams) => {
     return searchParams.show === 'policy_response' ? 'policy_response' : 'details';
   }
 );
@@ -159,8 +159,8 @@ export const showView: (state: HostState) => 'policy_response' | 'details' = cre
  * Returns the Policy Response overall status
  */
 export const policyResponseStatus: (state: Immutable<HostState>) => string = createSelector(
-  state => state.policyResponse,
-  policyResponse => {
+  (state) => state.policyResponse,
+  (policyResponse) => {
     return (policyResponse && policyResponse?.endpoint?.policy?.applied?.status) || '';
   }
 );

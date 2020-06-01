@@ -50,7 +50,7 @@ const CaseCallOutComponent = ({ title, message, messages }: CaseCallOutProps) =>
 
   return showCallOut ? (
     <>
-      {(Object.keys(groupedErrorMessages) as Array<keyof ErrorMessage['errorType']>).map(key => (
+      {(Object.keys(groupedErrorMessages) as Array<keyof ErrorMessage['errorType']>).map((key) => (
         <React.Fragment key={key}>
           <EuiCallOut
             title={title}
@@ -66,7 +66,7 @@ const CaseCallOutComponent = ({ title, message, messages }: CaseCallOutProps) =>
             )}
             <EuiButton
               data-test-subj={`callout-dismiss-${key}`}
-              color="primary"
+              color={key === 'success' ? 'secondary' : key}
               onClick={handleCallOut}
             >
               {i18n.DISMISS_CALLOUT}

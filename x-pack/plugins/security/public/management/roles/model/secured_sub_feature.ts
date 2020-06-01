@@ -24,7 +24,7 @@ export class SecuredSubFeature extends SubFeature {
   }
 
   public getPrivilegeGroups() {
-    return this.privilegeGroups.map(pg => new SubFeaturePrivilegeGroup(pg, this.actionMapping));
+    return this.privilegeGroups.map((pg) => new SubFeaturePrivilegeGroup(pg, this.actionMapping));
   }
 
   public *privilegeIterator({
@@ -34,8 +34,8 @@ export class SecuredSubFeature extends SubFeature {
   } = {}): IterableIterator<SubFeaturePrivilege> {
     for (const group of this.privilegeGroups) {
       yield* group.privileges
-        .map(gp => new SubFeaturePrivilege(gp, this.actionMapping[gp.id]))
-        .filter(privilege => predicate(privilege, this));
+        .map((gp) => new SubFeaturePrivilege(gp, this.actionMapping[gp.id]))
+        .filter((privilege) => predicate(privilege, this));
     }
   }
 }
