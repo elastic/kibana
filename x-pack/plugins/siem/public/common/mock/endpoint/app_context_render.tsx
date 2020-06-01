@@ -15,11 +15,10 @@ import { depsStartMock } from './dependencies_start_mock';
 import { MiddlewareActionSpyHelper, createSpyMiddleware } from '../../store/test_utils';
 import { apolloClientObservable } from '../test_providers';
 import { createStore, State, substateMiddlewareFactory } from '../../store';
-import { hostMiddlewareFactory } from '../../../endpoint_hosts/store/middleware';
-import { policyListMiddlewareFactory } from '../../../endpoint_policy/store/policy_list/middleware';
-import { policyDetailsMiddlewareFactory } from '../../../endpoint_policy/store/policy_details/middleware';
+import { hostMiddlewareFactory } from '../../../endpoint_hosts/store';
 import { alertMiddlewareFactory } from '../../../endpoint_alerts/store/middleware';
 import { AppRootProvider } from './app_root_provider';
+import { managementMiddlewareFactory } from '../../../management/store';
 import { SUB_PLUGINS_REDUCER, mockGlobalState } from '..';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
@@ -64,17 +63,10 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
       hostMiddlewareFactory(coreStart, depsStart)
     ),
     substateMiddlewareFactory(
-      (globalState) => globalState.policyList,
-      policyListMiddlewareFactory(coreStart, depsStart)
-    ),
-    substateMiddlewareFactory(
-      (globalState) => globalState.policyDetails,
-      policyDetailsMiddlewareFactory(coreStart, depsStart)
-    ),
-    substateMiddlewareFactory(
       (globalState) => globalState.alertList,
       alertMiddlewareFactory(coreStart, depsStart)
     ),
+    ...managementMiddlewareFactory(coreStart, depsStart),
     middlewareSpy.actionSpyMiddleware,
   ]);
 

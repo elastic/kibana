@@ -27,6 +27,7 @@ import {
 } from './redirect_to_case';
 import { DetectionEngineTab } from '../../../alerts/pages/detection_engine/types';
 import { TimelineType } from '../../../../common/types/timeline';
+import { RedirectToManagementPage } from './redirect_to_management';
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;
@@ -119,6 +120,10 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
     <Route
       component={RedirectToTimelinesPage}
       path={`${match.url}/:pageName(${SiemPageName.timelines})/:tabName(${TimelineType.default}|${TimelineType.template})`}
+    />
+    <Route
+      component={RedirectToManagementPage}
+      path={`${match.url}/:pageName(${SiemPageName.management})`}
     />
     <Redirect to="/" />
   </Switch>
