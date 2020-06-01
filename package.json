@@ -124,7 +124,7 @@
     "@babel/plugin-transform-modules-commonjs": "^7.9.0",
     "@babel/register": "^7.9.0",
     "@elastic/apm-rum": "^5.1.1",
-    "@elastic/charts": "19.2.0",
+    "@elastic/charts": "19.4.1",
     "@elastic/datemath": "5.0.3",
     "@elastic/ems-client": "7.8.0",
     "@elastic/eui": "23.3.1",
