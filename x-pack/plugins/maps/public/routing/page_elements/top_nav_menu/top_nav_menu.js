@@ -16,7 +16,6 @@ import {
   getData,
   getUiSettings,
 } from '../../../kibana_services';
-import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 import {
   SavedObjectSaveModal,
   showSaveModal,
@@ -49,6 +48,7 @@ export function MapsTopNavMenu(props) {
     enableFullScreen,
     openMapSettings,
     syncSavedMap,
+    inspectorAdapters,
   } = props;
   const { filterManager } = getData().query;
   const showSaveQuery = getMapsCapabilities().saveQuery;
@@ -80,7 +80,8 @@ export function MapsTopNavMenu(props) {
         closeFlyout,
         enableFullScreen,
         openMapSettings,
-        syncSavedMap
+        syncSavedMap,
+        inspectorAdapters
       )}
       indexPatterns={indexPatterns || []}
       filters={filterManager.getFilters()}
@@ -121,7 +122,6 @@ export function MapsTopNavMenu(props) {
 }
 
 function topNavConfig(
-  store,
   savedMap,
   initialLayerListConfig,
   isOpenSettingsDisabled,
@@ -130,7 +130,8 @@ function topNavConfig(
   closeFlyout,
   enableFullScreen,
   openMapSettings,
-  syncSavedMap
+  syncSavedMap,
+  inspectorAdapters
 ) {
   return [
     {
@@ -157,7 +158,6 @@ function topNavConfig(
       }),
       testId: 'openInspectorButton',
       run() {
-        const inspectorAdapters = getInspectorAdapters(store.getState());
         getInspector().open(inspectorAdapters, {});
       },
     },

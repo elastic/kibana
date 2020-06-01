@@ -16,9 +16,12 @@ import {
 } from '../../../actions';
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { getStore } from '../../store_operations';
+import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 
-function mapStateToProps(/* state = {} */) {
-  return {};
+function mapStateToProps(state = {}) {
+  return {
+    inspectorAdapters: getInspectorAdapters(state),
+  };
 }
 
 function mapDispatchToProps(dispatch) {
