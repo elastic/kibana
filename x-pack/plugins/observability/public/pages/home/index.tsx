@@ -59,8 +59,7 @@ const tryItOutItemsSection: ISection[] = [
     id: 'demo',
     title: 'Demo Playground',
     icon: 'play',
-    description:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet magna at neque dictum.',
+    description: '',
     href: 'https://demo.elastic.co/',
     target: '_blank',
   },
@@ -68,42 +67,27 @@ const tryItOutItemsSection: ISection[] = [
     id: 'sampleData',
     title: 'Add sample data',
     icon: 'documents',
-    description:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet magna at neque dictum.',
+    description: '',
     href: '/app/home#/tutorial_directory/sampleData',
   },
 ];
 
-const FixedContainer = styled.div`
-  position: fixed;
-  width: 100%;
-  top: 49px;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
+const Container = styled.div`
+  min-height: calc(100vh - 48px);
+  background: #fff;
 `;
 
-const OverflowContainer = styled.div`
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  background-color: #fff;
-`;
-
-const CentralizedContainer = styled.div`
-  width: 1200px;
-  margin: 0 auto;
-`;
-
-const TitleContainer = styled.div`
-  height: 124px;
-  display: flex;
-  align-items: center;
+const Title = styled.div`
   background-color: #fafbfd;
+  border-bottom: 1px solid #d3dae6;
 `;
 
-const BodyContainer = styled.div`
-  border-top: 1px solid #d3dae6;
+const Page = styled.div`
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow-y: hidden;
+}
 `;
 
 export const Home = () => {
@@ -129,131 +113,127 @@ export const Home = () => {
   );
 
   return (
-    <FixedContainer>
-      <OverflowContainer>
-        <TitleContainer>
-          <CentralizedContainer>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="logoObservability" size="xxl" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="m">
-                  <h1>
-                    {i18n.translate('observability.home.title', {
-                      defaultMessage: 'Observability',
-                    })}
-                  </h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </CentralizedContainer>
-        </TitleContainer>
-        <BodyContainer>
-          <CentralizedContainer>
-            <EuiSpacer size="xl" />
-            <EuiFlexGroup direction="column">
-              {/* title and description */}
-              <EuiFlexItem style={{ maxWidth: 567 }}>
-                <EuiTitle size="s">
-                  <h2>
-                    {i18n.translate('observability.home.sectionTitle', {
-                      defaultMessage:
-                        'Observability built on the Elastic Stack',
-                    })}
-                  </h2>
-                </EuiTitle>
-                <EuiSpacer size="m" />
-                <EuiText size="s" color="subdued">
-                  {i18n.translate('observability.home.sectionsubtitle', {
-                    defaultMessage:
-                      'Bring your logs, metrics, and APM traces together at scale in a single stack so you can monitor and react to events happening anywhere in your environment.',
+    <Container>
+      <Title>
+        <Page>
+          <EuiSpacer size="xxl" />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="logoObservability" size="xxl" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="m">
+                <h1>
+                  {i18n.translate('observability.home.title', {
+                    defaultMessage: 'Observability',
                   })}
-                </EuiText>
-              </EuiFlexItem>
+                </h1>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="xxl" />
+        </Page>
+      </Title>
+      <Page>
+        <EuiSpacer size="xxl" />
+        <EuiFlexGroup direction="column">
+          {/* title and description */}
+          <EuiFlexItem style={{ maxWidth: 567 }}>
+            <EuiTitle size="s">
+              <h2>
+                {i18n.translate('observability.home.sectionTitle', {
+                  defaultMessage: 'Observability built on the Elastic Stack',
+                })}
+              </h2>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiText size="s" color="subdued">
+              {i18n.translate('observability.home.sectionsubtitle', {
+                defaultMessage:
+                  'Bring your logs, metrics, and APM traces together at scale in a single stack so you can monitor and react to events happening anywhere in your environment.',
+              })}
+            </EuiText>
+          </EuiFlexItem>
 
-              {/* Apps sections */}
+          {/* Apps sections */}
+          <EuiFlexItem>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiSpacer size="s" />
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiFlexGrid columns={2}>
-                      {appsSection.map((app) => (
-                        <Section section={app} key={app.id} />
-                      ))}
-                    </EuiFlexGrid>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiImage
-                      size="xl"
-                      alt="observability overview image"
-                      url={core.http.basePath.prepend(
-                        '/plugins/observability/assets/observability-overview.png'
-                      )}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-
-              {/* Get started button */}
-              <EuiFlexItem>
-                <EuiFlexGroup justifyContent="center" gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      fill
-                      iconType="sortRight"
-                      iconSide="right"
-                      style={{ width: 175 }}
-                      href={core.http.basePath.prepend(
-                        '/app/home#/tutorial_directory/logging'
-                      )}
-                    >
-                      {i18n.translate('observability.home.getStatedButton', {
-                        defaultMessage: 'Get started',
-                      })}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-
-              <EuiHorizontalRule margin="xl" />
-
-              {/* Try it out */}
-              <EuiFlexItem>
-                <EuiFlexGroup justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="s">
-                      <h3>
-                        {i18n.translate('observability.home.tryItOut', {
-                          defaultMessage: 'Try it out',
-                        })}
-                      </h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-
-              {/* Try it out sections */}
-              <EuiFlexItem>
-                <EuiFlexGroup justifyContent="center">
-                  {tryItOutItemsSection.map((item) => (
-                    <EuiFlexItem
-                      grow={false}
-                      key={item.id}
-                      style={{ width: 260 }}
-                    >
-                      <EuiPanel hasShadow paddingSize="s">
-                        <Section section={item} />
-                      </EuiPanel>
-                    </EuiFlexItem>
+                <EuiFlexGrid columns={2}>
+                  {appsSection.map((app) => (
+                    <Section section={app} key={app.id} />
                   ))}
-                </EuiFlexGroup>
-                <EuiSpacer />
+                </EuiFlexGrid>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiImage
+                  size="xl"
+                  alt="observability overview image"
+                  url={core.http.basePath.prepend(
+                    '/plugins/observability/assets/observability-overview.png'
+                  )}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </CentralizedContainer>
-        </BodyContainer>
-      </OverflowContainer>
-    </FixedContainer>
+          </EuiFlexItem>
+
+          {/* Get started button */}
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="center" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  iconType="sortRight"
+                  iconSide="right"
+                  style={{ width: 175 }}
+                  href={core.http.basePath.prepend('/app/home#/tutorial_directory/logging')}
+                >
+                  {i18n.translate('observability.home.getStatedButton', {
+                    defaultMessage: 'Get started',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiHorizontalRule margin="xl" />
+
+          {/* Try it out */}
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h3>
+                    {i18n.translate('observability.home.tryItOut', {
+                      defaultMessage: 'Try it out',
+                    })}
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
+          {/* Try it out sections */}
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="center">
+              {tryItOutItemsSection.map((item) => (
+                <EuiFlexItem grow={false} key={item.id} style={{ width: 260 }}>
+                  <EuiPanel
+                    hasShadow
+                    paddingSize="s"
+                    // adds hover style to panel
+                    onClick={() => {}}
+                  >
+                    <Section section={item} />
+                  </EuiPanel>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+            <EuiSpacer />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Page>
+    </Container>
   );
 };
