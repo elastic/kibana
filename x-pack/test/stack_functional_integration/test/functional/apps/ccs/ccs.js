@@ -106,7 +106,7 @@ export default ({ getService, getPageObjects }) => {
     it('create local admin makelogs index pattern', async () => {
       log.debug('create local admin makelogs工程 index pattern');
       // note that a trailing * is added to the index pattern name in this case
-      await PageObjects.settings.createIndexPattern('local:makelogs工程');
+      await PageObjects.settings.createIndexPattern('local:makelogs工程*');
       const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('local:makelogs工程*');
     });
@@ -114,7 +114,7 @@ export default ({ getService, getPageObjects }) => {
     it('create remote data makelogs index pattern', async () => {
       log.debug('create remote data makelogs工程 index pattern');
       // note that a trailing * is added to the index pattern name in this case
-      await PageObjects.settings.createIndexPattern('data:makelogs工程');
+      await PageObjects.settings.createIndexPattern('data:makelogs工程*');
       const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('data:makelogs工程*');
     });
@@ -124,7 +124,7 @@ export default ({ getService, getPageObjects }) => {
         'create comma separated index patterns for data and local makelogs工程 index pattern'
       );
       // note that a trailing * is added to the index pattern name in this case
-      await PageObjects.settings.createIndexPattern('data:makelogs工程-*,local:makelogs工程-');
+      await PageObjects.settings.createIndexPattern('data:makelogs工程-*,local:makelogs工程-*');
       const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('data:makelogs工程-*,local:makelogs工程-*');
     });
