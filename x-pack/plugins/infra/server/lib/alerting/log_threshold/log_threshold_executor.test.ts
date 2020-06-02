@@ -11,12 +11,12 @@ import {
   LogDocumentCountAlertParams,
   Criterion,
 } from '../../../../common/alerting/logs/types';
-import { AlertExecutorOptions } from '../../../../../alerting/server';
+import { AlertExecutorOptions } from '../../../../../alerts/server';
 import {
   alertsMock,
   AlertInstanceMock,
   AlertServicesMock,
-} from '../../../../../alerting/server/mocks';
+} from '../../../../../alerts/server/mocks';
 import { libsMock } from './mocks';
 
 interface AlertTestInstance {

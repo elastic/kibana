@@ -17,7 +17,7 @@ import {
   DOCUMENT_COUNT_I18N,
   stateToAlertMessage,
 } from './messages';
-import { AlertServices, AlertExecutorOptions } from '../../../../../alerting/server';
+import { AlertServices, AlertExecutorOptions } from '../../../../../alerts/server';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { getDateHistogramOffset } from '../../snapshot/query_helpers';
 import { InfraBackendLibs } from '../../infra_types';
