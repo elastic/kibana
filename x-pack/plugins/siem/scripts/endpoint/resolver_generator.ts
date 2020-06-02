@@ -74,7 +74,7 @@ async function main() {
     metadataIndex: {
       alias: 'mi',
       describe: 'index to store host metadata in',
-      default: 'metrics-endpoint-default-1',
+      default: 'metrics-endpoint.metadata-default-1',
       type: 'string',
     },
     policyIndex: {

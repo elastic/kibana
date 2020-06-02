@@ -934,10 +934,6 @@ export class EndpointDocGenerator {
               },
             ],
             id: this.commonInfo.endpoint.policy.id,
-            policy: {
-              id: this.commonInfo.endpoint.policy.id,
-              version: policyVersion,
-            },
             response: {
               configurations: {
                 events: {

@@ -2,7 +2,7 @@
   "type": "index",
   "value": {
     "aliases": {},
-    "index": "metrics-endpoint-default-1",
+    "index": "metrics-endpoint.metadata-default-1",
     "mappings": {
       "_meta": {
         "version": "1.5.0-dev"
