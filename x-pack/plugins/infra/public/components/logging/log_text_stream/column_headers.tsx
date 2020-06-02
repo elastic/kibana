@@ -77,8 +77,8 @@ const LogColumnHeader: React.FunctionComponent<{
   </LogColumnHeaderWrapper>
 );
 
-const LogColumnHeadersWrapper = euiStyled.div.attrs(() => ({
-  role: 'row',
+const LogColumnHeadersWrapper = euiStyled.div.attrs((props) => ({
+  role: props.role ?? 'row',
 }))`
   align-items: stretch;
   display: flex;
@@ -93,8 +93,8 @@ const LogColumnHeadersWrapper = euiStyled.div.attrs(() => ({
   z-index: 1;
 `;
 
-const LogColumnHeaderWrapper = euiStyled(LogEntryColumn).attrs(() => ({
-  role: 'columnheader',
+const LogColumnHeaderWrapper = euiStyled(LogEntryColumn).attrs((props) => ({
+  role: props.role ?? 'columnheader',
 }))`
   align-items: center;
   display: flex;
