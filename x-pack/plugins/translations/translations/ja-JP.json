@@ -16745,7 +16745,6 @@
     "xpack.uptime.locationMap.locations.missing.message": "重要な位置情報構成がありません。{codeBlock}フィールドを使用して、アップタイムチェック用に一意の地域を作成できます。",
     "xpack.uptime.locationMap.locations.missing.message1": "詳細については、ドキュメンテーションを参照してください。",
     "xpack.uptime.locationMap.locations.missing.title": "地理情報の欠測",
-    "xpack.uptime.locationMap.locations.tags.others": "{otherLoc}その他 ...",
     "xpack.uptime.locationName.helpLinkAnnotation": "場所を追加",
     "xpack.uptime.ml.durationChart.exploreInMlApp": "ML アプリで探索",
     "xpack.uptime.ml.enableAnomalyDetectionPanel.anomalyDetectionTitle": "異常検知",

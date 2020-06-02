@@ -16751,7 +16751,6 @@
     "xpack.uptime.locationMap.locations.missing.message": "重要的地理位置配置缺失。您可以使用 {codeBlock} 字段为您的运行时间检查创建独特的地理区域。",
     "xpack.uptime.locationMap.locations.missing.message1": "在我们的文档中获取更多的信息。",
     "xpack.uptime.locationMap.locations.missing.title": "地理信息缺失",
-    "xpack.uptime.locationMap.locations.tags.others": "{otherLoc} 其他......",
     "xpack.uptime.locationName.helpLinkAnnotation": "添加位置",
     "xpack.uptime.ml.durationChart.exploreInMlApp": "在 ML 应用中浏览",
     "xpack.uptime.ml.enableAnomalyDetectionPanel.anomalyDetectionTitle": "异常检测",
