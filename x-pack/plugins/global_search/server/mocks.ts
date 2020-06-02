@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GlobalSearchPluginSetup, GlobalSearchPluginStart } from './types';
+import { of } from 'rxjs';
+import {
+  GlobalSearchPluginSetup,
+  GlobalSearchPluginStart,
+  RouteHandlerGlobalSearchContext,
+} from './types';
 import { searchServiceMock } from './services/search_service.mock';
 
 const createSetupMock = (): jest.Mocked<GlobalSearchPluginSetup> => {
@@ -23,7 +28,18 @@ const createStartMock = (): jest.Mocked<GlobalSearchPluginStart> => {
   };
 };
 
+const createRouteHandlerContextMock = (): jest.Mocked<RouteHandlerGlobalSearchContext> => {
+  const contextMock = {
+    find: jest.fn(),
+  };
+
+  contextMock.find.mockReturnValue(of([]));
+
+  return contextMock;
+};
+
 export const globalSearchPluginMock = {
   createSetupContract: createSetupMock,
   createStartContract: createStartMock,
+  createRouteHandlerContext: createRouteHandlerContextMock,
 };
