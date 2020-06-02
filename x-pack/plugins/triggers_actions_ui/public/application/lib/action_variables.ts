@@ -23,7 +23,7 @@ function prefixKeys(actionVariables: ActionVariable[], prefix: string): ActionVa
 }
 
 // this list should be the same as in:
-//   x-pack/plugins/alerting/server/task_runner/transform_action_params.ts
+//   x-pack/plugins/alerts/server/task_runner/transform_action_params.ts
 function getAlwaysProvidedActionVariables(): ActionVariable[] {
   const result: ActionVariable[] = [];
 
