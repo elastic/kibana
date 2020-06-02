@@ -264,13 +264,13 @@ export function XYChart({
 
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
 
-  const xDomain = isTimeViz
-    ? {
-        min: data.dateRange?.fromDate.getTime(),
-        max: data.dateRange?.toDate.getTime(),
-        minInterval: calculateMinInterval(),
-      }
-    : undefined;
+  // const xDomain = isTimeViz
+  //   ? {
+  //       min: data.dateRange?.fromDate.getTime(),
+  //       max: data.dateRange?.toDate.getTime(),
+  //       minInterval: calculateMinInterval(),
+  //     }
+  //   : undefined;
 
   return (
     <Chart>
@@ -280,7 +280,7 @@ export function XYChart({
         showLegendExtra={false}
         theme={chartTheme}
         rotation={shouldRotate ? 90 : 0}
-        xDomain={xDomain}
+        // xDomain={xDomain}
         onBrushEnd={({ x }) => {
           if (!x) {
             return;
@@ -344,7 +344,7 @@ export function XYChart({
 
           const xAxisFieldName = table.columns.find((el) => el.id === layer.xAccessor)?.meta
             ?.aggConfigParams?.field;
-          const timeFieldName = xDomain && xAxisFieldName;
+          const timeFieldName = xAxisFieldName;
 
           const context: LensFilterEvent['data'] = {
             data: points.map((point) => ({

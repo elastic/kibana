@@ -24,6 +24,7 @@ import {
 import { EditorFrame } from './editor_frame';
 import { mergeTables } from './merge_tables';
 import { formatColumn } from './format_column';
+import { shiftTimeRange, join } from './pipeline_functions';
 import { EmbeddableFactory } from './embeddable/embeddable_factory';
 import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
@@ -65,6 +66,8 @@ export class EditorFrameService {
   ): EditorFrameSetup {
     plugins.expressions.registerFunction(() => mergeTables);
     plugins.expressions.registerFunction(() => formatColumn);
+    plugins.expressions.registerFunction(() => shiftTimeRange);
+    plugins.expressions.registerFunction(() => join);
 
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();

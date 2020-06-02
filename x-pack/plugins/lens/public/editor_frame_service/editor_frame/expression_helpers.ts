@@ -7,6 +7,7 @@
 import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { Visualization, Datasource, FramePublicAPI } from '../../types';
 import { Filter, TimeRange, Query } from '../../../../../../src/plugins/data/public';
+import { EditorFrameState } from './state_management';
 
 export function prependDatasourceExpression(
   visualizationExpression: Ast | string | null,
@@ -17,7 +18,8 @@ export function prependDatasourceExpression(
       isLoading: boolean;
       state: unknown;
     }
-  >
+  >,
+  frameState: EditorFrameState
 ): Ast | null {
   const datasourceExpressions: Array<[string, Ast | string]> = [];
 
@@ -27,8 +29,31 @@ export function prependDatasourceExpression(
 
     layers.forEach((layerId) => {
       const result = datasource.toExpression(state, layerId);
-      if (result) {
-        datasourceExpressions.push([layerId, result]);
+      const resultAst = typeof result === 'string' ? fromExpression(result) : result;
+
+      const hasTimeShift = frameState.pipeline.timeRangeOverrides[layerId];
+
+      if (resultAst) {
+        if (hasTimeShift) {
+          datasourceExpressions.push([
+            layerId,
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_shift_time',
+                  arguments: {
+                    type: [hasTimeShift],
+                  },
+                },
+                ...resultAst.chain,
+              ],
+            },
+          ]);
+        } else {
+          datasourceExpressions.push([layerId, resultAst]);
+        }
       }
     });
   });
@@ -103,6 +128,7 @@ export function buildExpression({
   datasourceStates,
   framePublicAPI,
   removeDateRange,
+  state,
 }: {
   visualization: Visualization | null;
   visualizationState: unknown;
@@ -116,6 +142,7 @@ export function buildExpression({
   >;
   framePublicAPI: FramePublicAPI;
   removeDateRange?: boolean;
+  state: EditorFrameState;
 }): Ast | null {
   if (visualization === null) {
     return null;
@@ -136,7 +163,8 @@ export function buildExpression({
   const completeExpression = prependDatasourceExpression(
     visualizationExpression,
     datasourceMap,
-    datasourceStates
+    datasourceStates,
+    state
   );
 
   if (completeExpression) {

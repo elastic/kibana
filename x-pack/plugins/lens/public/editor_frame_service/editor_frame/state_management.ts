@@ -15,11 +15,33 @@ export interface PreviewState {
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>;
 }
 
+export type TimeRangeOverride = 'default' | 'none' | 'allBefore' | 'previous';
+export type JoinType = 'full' | 'left_outer' | 'right_outer' | 'inner' | 'repeat';
+
+export interface JoinState {
+  joinType: JoinType;
+  leftLayerId: string;
+  rightLayerId: string;
+  leftColumnId?: string;
+  rightColumnId?: string;
+}
+
+export interface PipelineState {
+  /** Operations are per Layer ID: Sequence of operation  */
+  prejoin: Record<string, unknown[]>;
+  join?: JoinState;
+  postjoin: unknown[];
+  /** Allows each layer to use a different time range  */
+  timeRangeOverrides: Record<string, TimeRangeOverride>;
+}
+
 export interface EditorFrameState extends PreviewState {
   persistedId?: string;
   title: string;
   stagedPreview?: PreviewState;
   activeDatasourceId: string | null;
+  pipelineIsOpen: boolean;
+  pipeline: PipelineState;
 }
 
 export type Action =
@@ -88,6 +110,16 @@ export type Action =
   | {
       type: 'SWITCH_DATASOURCE';
       newDatasourceId: string;
+    }
+  | {
+      type: 'OPEN_PIPELINE';
+    }
+  | {
+      type: 'CLOSE_PIPELINE';
+    }
+  | {
+      type: 'SET_PIPELINE';
+      newState: PipelineState;
     };
 
 export function getActiveDatasourceIdFromDoc(doc?: Document) {
@@ -126,6 +158,12 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
     visualization: {
       state: null,
       activeId: props.initialVisualizationId,
+    },
+    pipelineIsOpen: false,
+    pipeline: {
+      prejoin: {},
+      postjoin: [],
+      timeRangeOverrides: {},
     },
   };
 };
@@ -272,6 +310,21 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
           state: action.newState,
         },
         stagedPreview: action.clearStagedPreview ? undefined : state.stagedPreview,
+      };
+    case 'OPEN_PIPELINE':
+      return {
+        ...state,
+        pipelineIsOpen: true,
+      };
+    case 'CLOSE_PIPELINE':
+      return {
+        ...state,
+        pipelineIsOpen: false,
+      };
+    case 'SET_PIPELINE':
+      return {
+        ...state,
+        pipeline: action.newState,
       };
     default:
       return state;

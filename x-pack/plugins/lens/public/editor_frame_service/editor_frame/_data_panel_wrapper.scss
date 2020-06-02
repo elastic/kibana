@@ -1,5 +1,12 @@
+.lnsDataPanel {
+  display: flex;
+  flex-direction: column;
+  flex-basis: 100%;
+}
+
 .lnsDataPanelWrapper {
-  flex: 1 0 100%;
+  // flex: 1 0 100%;
+  flex-grow: 1;
   overflow: hidden;
 }
 
@@ -7,4 +14,18 @@
   position: absolute;
   right: $euiSize + $euiSizeXS;
   top: $euiSize + $euiSizeXS;
+}
+
+.lnsDataPanel__pipeline {
+  flex-grow: 0;
+}
+
+.lnsDataPanel__modal {
+  min-width: 50vw;
+  height: 80vh;
+  padding: $euiSize;
+}
+
+.lnsDataPanel__dimensionModal {
+  padding: $euiSize;
 }

@@ -6,7 +6,17 @@
 
 import React, { useMemo, memo, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiPanel,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiLink,
+  EuiIcon,
+  EuiOverlayMask,
+  EuiModal,
+} from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
 import { DragContext } from '../../drag_drop';
@@ -51,7 +61,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);
 
   return (
-    <>
+    <div className="lnsDataPanel">
       {Object.keys(props.datasourceMap).length > 1 && (
         <EuiPopover
           id="datasource-switch"
@@ -104,6 +114,18 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
           nativeProps={datasourceProps}
         />
       )}
-    </>
+
+      {props.activeDatasource && !props.datasourceIsLoading && (
+        <EuiPanel className="lnsDataPanel__pipeline">
+          <EuiLink
+            onClick={() => {
+              props.dispatch({ type: 'OPEN_PIPELINE' });
+            }}
+          >
+            <EuiIcon type="gear" /> Edit pipeline
+          </EuiLink>
+        </EuiPanel>
+      )}
+    </div>
   );
 });

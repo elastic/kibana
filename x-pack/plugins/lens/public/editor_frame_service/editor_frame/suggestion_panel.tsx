@@ -21,7 +21,7 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { Action, PreviewState } from './state_management';
+import { Action, PreviewState, EditorFrameState } from './state_management';
 import { Datasource, Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
@@ -52,6 +52,7 @@ export interface SuggestionPanelProps {
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
   stagedPreview?: PreviewState;
+  state: EditorFrameState;
 }
 
 const PreviewRenderer = ({
@@ -154,6 +155,7 @@ export function SuggestionPanel({
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
   stagedPreview,
+  state,
 }: SuggestionPanelProps) {
   const currentDatasourceStates = stagedPreview ? stagedPreview.datasourceStates : datasourceStates;
   const currentVisualizationState = stagedPreview
@@ -178,7 +180,8 @@ export function SuggestionPanel({
           visualizationMap[suggestion.visualizationId],
           datasourceMap,
           currentDatasourceStates,
-          frame
+          frame,
+          state
         ),
       }))
       .filter((suggestion) => !suggestion.hide)
@@ -191,7 +194,8 @@ export function SuggestionPanel({
             visualizationMap[currentVisualizationId],
             datasourceMap,
             currentDatasourceStates,
-            frame
+            frame,
+            state
           )
         : undefined;
 
@@ -390,7 +394,8 @@ function preparePreviewExpression(
   visualization: Visualization,
   datasourceMap: Record<string, Datasource<unknown, unknown>>,
   datasourceStates: Record<string, { isLoading: boolean; state: unknown }>,
-  framePublicAPI: FramePublicAPI
+  framePublicAPI: FramePublicAPI,
+  frameState: EditorFrameState
 ) {
   const suggestionDatasourceId = visualizableState.datasourceId;
   const suggestionDatasourceState = visualizableState.datasourceState;
@@ -417,7 +422,8 @@ function preparePreviewExpression(
             state: suggestionDatasourceState,
           },
         }
-      : datasourceStates
+      : datasourceStates,
+    frameState
   );
 
   return expressionWithDatasource;

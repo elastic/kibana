@@ -11,6 +11,7 @@ import {
   Datasource,
   DatasourceDimensionEditorProps,
 } from '../../../types';
+import { EditorFrameState } from '../state_management';
 
 export interface ConfigPanelWrapperProps {
   activeDatasourceId: string;
@@ -27,6 +28,7 @@ export interface ConfigPanelWrapperProps {
       state: unknown;
     }
   >;
+  frameState: EditorFrameState;
   core: DatasourceDimensionEditorProps['core'];
 }
 
@@ -34,5 +36,5 @@ export interface DimensionPopoverState {
   isOpen: boolean;
   openId: string | null;
   addingToGroupId: string | null;
-  tabId: 'datasource' | 'visualization' | null;
+  tabId: 'datasource' | 'visualization' | 'calculation' | null;
 }

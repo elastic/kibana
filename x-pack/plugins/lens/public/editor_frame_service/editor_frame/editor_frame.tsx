@@ -270,6 +270,7 @@ export function EditorFrame(props: EditorFrameProps) {
               visualizationState={state.visualization.state}
               framePublicAPI={framePublicAPI}
               core={props.core}
+              frameState={state}
             />
           )
         }
@@ -284,6 +285,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 framePublicAPI={framePublicAPI}
                 visualizationState={state.visualization.state}
                 visualizationMap={props.visualizationMap}
+                state={state}
                 dispatch={dispatch}
                 ExpressionRenderer={props.ExpressionRenderer}
                 core={props.core}
@@ -305,6 +307,7 @@ export function EditorFrame(props: EditorFrameProps) {
               dispatch={dispatch}
               ExpressionRenderer={props.ExpressionRenderer}
               stagedPreview={state.stagedPreview}
+              state={state}
             />
           )
         }

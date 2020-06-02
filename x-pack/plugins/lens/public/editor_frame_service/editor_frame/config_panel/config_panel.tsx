@@ -5,7 +5,17 @@
  */
 
 import React, { useMemo, memo } from 'react';
-import { EuiFlexItem, EuiToolTip, EuiButton, EuiForm } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiToolTip,
+  EuiButton,
+  EuiForm,
+  EuiOverlayMask,
+  EuiModal,
+  EuiText,
+  EuiPanel,
+  EuiLink,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Visualization } from '../../../types';
 import { ChartSwitch } from './chart_switch';
@@ -14,6 +24,7 @@ import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
 import { removeLayer, appendLayer } from './layer_actions';
 import { ConfigPanelWrapperProps } from './types';
+import { PipelineModal } from './pipeline_modal';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const activeVisualization = props.visualizationMap[props.activeVisualizationId || ''];
@@ -50,6 +61,7 @@ function LayerPanels(
     dispatch,
     activeDatasourceId,
     datasourceMap,
+    frameState,
   } = props;
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
@@ -102,73 +114,87 @@ function LayerPanels(
   const layerIds = activeVisualization.getLayerIds(visualizationState);
 
   return (
-    <EuiForm className="lnsConfigPanel">
-      {layerIds.map((layerId) => (
-        <LayerPanel
-          {...props}
-          key={layerId}
-          layerId={layerId}
-          visualizationState={visualizationState}
-          updateVisualization={setVisualizationState}
-          updateDatasource={updateDatasource}
-          updateAll={updateAll}
-          isOnlyLayer={layerIds.length === 1}
-          onRemoveLayer={() => {
-            dispatch({
-              type: 'UPDATE_STATE',
-              subType: 'REMOVE_OR_CLEAR_LAYER',
-              updater: (state) =>
-                removeLayer({
-                  activeVisualization,
-                  layerId,
-                  trackUiEvent,
-                  datasourceMap,
-                  state,
-                }),
-            });
-          }}
-        />
-      ))}
-      {activeVisualization.appendLayer && visualizationState && (
-        <EuiFlexItem grow={true}>
-          <EuiToolTip
-            className="eui-fullWidth"
-            content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
-              defaultMessage:
-                'Use multiple layers to combine chart types or visualize different index patterns.',
-            })}
-            position="bottom"
+    <>
+      <EuiForm className="lnsConfigPanel">
+        {layerIds.map((layerId) => (
+          <LayerPanel
+            {...props}
+            key={layerId}
+            layerId={layerId}
+            visualizationState={visualizationState}
+            updateVisualization={setVisualizationState}
+            updateDatasource={updateDatasource}
+            updateAll={updateAll}
+            isOnlyLayer={layerIds.length === 1}
+            onRemoveLayer={() => {
+              dispatch({
+                type: 'UPDATE_STATE',
+                subType: 'REMOVE_OR_CLEAR_LAYER',
+                updater: (state) =>
+                  removeLayer({
+                    activeVisualization,
+                    layerId,
+                    trackUiEvent,
+                    datasourceMap,
+                    state,
+                  }),
+              });
+            }}
+          />
+        ))}
+        {activeVisualization.appendLayer && visualizationState && (
+          <EuiFlexItem grow={true}>
+            <EuiToolTip
+              className="eui-fullWidth"
+              content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
+                defaultMessage:
+                  'Use multiple layers to combine chart types or visualize different index patterns.',
+              })}
+              position="bottom"
+            >
+              <EuiButton
+                className="lnsConfigPanel__addLayerBtn"
+                fullWidth
+                size="s"
+                data-test-subj="lnsXY_layer_add"
+                aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
+                  defaultMessage: 'Add layer',
+                })}
+                title={i18n.translate('xpack.lens.xyChart.addLayerButton', {
+                  defaultMessage: 'Add layer',
+                })}
+                onClick={() => {
+                  dispatch({
+                    type: 'UPDATE_STATE',
+                    subType: 'ADD_LAYER',
+                    updater: (state) =>
+                      appendLayer({
+                        activeVisualization,
+                        generateId,
+                        trackUiEvent,
+                        activeDatasource: datasourceMap[activeDatasourceId],
+                        state,
+                      }),
+                  });
+                }}
+                iconType="plusInCircleFilled"
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+      </EuiForm>
+
+      {frameState.pipelineIsOpen ? (
+        <EuiOverlayMask>
+          <EuiModal
+            onClose={() => {
+              dispatch({ type: 'CLOSE_PIPELINE' });
+            }}
           >
-            <EuiButton
-              className="lnsConfigPanel__addLayerBtn"
-              fullWidth
-              size="s"
-              data-test-subj="lnsXY_layer_add"
-              aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-                defaultMessage: 'Add layer',
-              })}
-              title={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-                defaultMessage: 'Add layer',
-              })}
-              onClick={() => {
-                dispatch({
-                  type: 'UPDATE_STATE',
-                  subType: 'ADD_LAYER',
-                  updater: (state) =>
-                    appendLayer({
-                      activeVisualization,
-                      generateId,
-                      trackUiEvent,
-                      activeDatasource: datasourceMap[activeDatasourceId],
-                      state,
-                    }),
-                });
-              }}
-              iconType="plusInCircleFilled"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
-    </EuiForm>
+            <PipelineModal {...props} />
+          </EuiModal>
+        </EuiOverlayMask>
+      ) : null}
+    </>
   );
 }
