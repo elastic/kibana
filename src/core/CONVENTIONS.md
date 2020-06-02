@@ -332,7 +332,7 @@ import { SavedObjectsType } from 'src/core/server';
 export const myType: SavedObjectsType = {
   name: 'my-type',
   hidden: false,
-  namespaceAgnostic: true,
+  namespaceType: 'agnostic',
   mappings: {
     properties: {
       someField: {
