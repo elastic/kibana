@@ -9,7 +9,7 @@ import set from 'set-value';
 import { SearchResponse } from 'elasticsearch';
 
 import { Logger } from '../../../../../../../src/core/server';
-import { AlertServices } from '../../../../../alerting/server';
+import { AlertServices } from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';

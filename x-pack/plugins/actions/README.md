@@ -26,7 +26,7 @@ Table of Contents
     - [Executor](#executor)
     - [Example](#example)
   - [RESTful API](#restful-api)
-    - [`POST /api/action`: Create action](#post-apiaction-create-action)
+    - [`POST /api/actions/action`: Create action](#post-apiaction-create-action)
     - [`DELETE /api/actions/action/{id}`: Delete action](#delete-apiactionid-delete-action)
     - [`GET /api/actions`: Get all actions](#get-apiactiongetall-get-all-actions)
     - [`GET /api/actions/action/{id}`: Get action](#get-apiactionid-get-action)
@@ -163,7 +163,7 @@ The built-in email action type provides a good example of creating an action typ
 
 Using an action type requires an action to be created that will contain and encrypt configuration for a given action type. See below for CRUD operations using the API.
 
-### `POST /api/action`: Create action
+### `POST /api/actions/action`: Create action
 
 Payload:
 

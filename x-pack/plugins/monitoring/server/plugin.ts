@@ -47,7 +47,7 @@ import { MonitoringLicenseService } from './types';
 import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
-} from '../../alerting/server';
+} from '../../alerts/server';
 import { getLicenseExpiration } from './alerts/license_expiration';
 import { getClusterState } from './alerts/cluster_state';
 import { InfraPluginSetup } from '../../infra/server';
@@ -61,12 +61,12 @@ interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetupContract;
-  alerting: AlertingPluginSetupContract;
+  alerts: AlertingPluginSetupContract;
   infra: InfraPluginSetup;
 }
 
 interface PluginsStart {
-  alerting: AlertingPluginStartContract;
+  alerts: AlertingPluginStartContract;
 }
 
 interface MonitoringCoreConfig {
@@ -156,7 +156,7 @@ export class Plugin {
     await this.licenseService.refresh();
 
     if (KIBANA_ALERTING_ENABLED) {
-      plugins.alerting.registerType(
+      plugins.alerts.registerType(
         getLicenseExpiration(
           async () => {
             const coreStart = (await core.getStartServices())[0];
@@ -167,7 +167,7 @@ export class Plugin {
           config.ui.ccs.enabled
         )
       );
-      plugins.alerting.registerType(
+      plugins.alerts.registerType(
         getClusterState(
           async () => {
             const coreStart = (await core.getStartServices())[0];
@@ -357,7 +357,7 @@ export class Plugin {
             payload: req.body,
             getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
             getUiSettingsService: () => context.core.uiSettings.client,
-            getAlertsClient: () => plugins.alerting.getAlertsClientWithRequest(req),
+            getAlertsClient: () => plugins.alerts.getAlertsClientWithRequest(req),
             server: {
               config: legacyConfigWrapper,
               newPlatform: {

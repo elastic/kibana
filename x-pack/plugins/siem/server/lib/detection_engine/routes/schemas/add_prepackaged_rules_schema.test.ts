@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertAction } from '../../../../../../alerting/common';
+import { AlertAction } from '../../../../../../alerts/common';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { ThreatParams, PrepackagedRules } from '../../types';
 import { addPrepackagedRulesSchema } from './add_prepackaged_rules_schema';
