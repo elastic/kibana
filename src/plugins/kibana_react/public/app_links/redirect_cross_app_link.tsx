@@ -67,7 +67,7 @@ export const RedirectCrossAppLinks: FunctionComponent<RedirectCrossAppLinksProps
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <div
       ref={containerRef}
-      className={classNames(className)}
+      className={classNames(className, 'kbnRedirectCrossAppLinks')}
       onClick={clickHandler}
       {...otherProps}
     >
