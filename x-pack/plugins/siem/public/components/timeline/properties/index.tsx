@@ -6,6 +6,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 
+import { TimelineStatus } from '../../../../common/types/timeline';
 import { useThrottledResizeObserver } from '../../utils';
 import { Note } from '../../../lib/note';
 import { InputsModelId } from '../../../store/inputs/constants';
@@ -31,6 +32,7 @@ interface Props {
   isFavorite: boolean;
   noteIds: string[];
   timelineId: string;
+  status: TimelineStatus;
   title: string;
   toggleLock: ToggleLock;
   updateDescription: UpdateDescription;
@@ -62,6 +64,7 @@ export const Properties = React.memo<Props>(
     isDatepickerLocked,
     isFavorite,
     noteIds,
+    status,
     timelineId,
     title,
     toggleLock,
@@ -140,6 +143,7 @@ export const Properties = React.memo<Props>(
           showNotesFromWidth={width < showNotesThreshold}
           showTimelineModal={showTimelineModal}
           showUsersView={title.length > 0}
+          status={status}
           timelineId={timelineId}
           title={title}
           updateDescription={updateDescription}
