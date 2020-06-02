@@ -21,7 +21,6 @@ import { ReportingSetupDeps, ReportingStartDeps } from '../types';
 
 const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => {
   return {
-    elasticsearch: setupMock.elasticsearch,
     security: setupMock.security,
     licensing: {
       license$: of({ isAvailable: true, isActive: true, type: 'basic' }),

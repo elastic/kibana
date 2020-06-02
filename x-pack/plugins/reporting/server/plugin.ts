@@ -31,10 +31,11 @@ export class ReportingPlugin
   }
 
   public async setup(core: CoreSetup, plugins: ReportingSetupDeps) {
-    const { elasticsearch, licensing, security } = plugins;
+    const { elasticsearch, http } = core;
+    const { licensing, security } = plugins;
     const { initializerContext: initContext } = this;
-    const router = core.http.createRouter();
-    const basePath = core.http.basePath.get;
+    const router = http.createRouter();
+    const basePath = http.basePath.get;
 
     const coreConfig = await createConfig$(core, this.config$, this.logger)
       .pipe(first())

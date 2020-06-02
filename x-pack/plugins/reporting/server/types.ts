@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchServiceSetup } from 'kibana/server';
 import * as Rx from 'rxjs';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -158,7 +157,6 @@ export type ScreenshotsObservableFn = ({
  */
 
 export interface ReportingSetupDeps {
-  elasticsearch: ElasticsearchServiceSetup;
   licensing: LicensingPluginSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
