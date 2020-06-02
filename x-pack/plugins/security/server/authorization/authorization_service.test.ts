@@ -29,7 +29,8 @@ import {
 } from '../../../../../src/core/server/mocks';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
-import { SecurityLicenseFeatures } from '../../common/licensing';
+import { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
+import { nextTick } from 'test_utils/enzyme_helpers';
 
 const kibanaIndexName = '.a-kibana-index';
 const application = `kibana-${kibanaIndexName}`;
@@ -113,65 +114,110 @@ it(`#setup returns exposed services`, () => {
   expect(mockCoreSetup.capabilities.registerSwitcher).toHaveBeenCalledWith(expect.any(Function));
 });
 
-it('#start register cluster privileges', () => {
-  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+describe('#start', () => {
+  let statusSubject: BehaviorSubject<CoreStatus>;
+  let licenseSubject: BehaviorSubject<SecurityLicenseFeatures>;
+  let mockLicense: jest.Mocked<SecurityLicense>;
+  beforeEach(() => {
+    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
 
-  const licenseSubject = new BehaviorSubject(({} as unknown) as SecurityLicenseFeatures);
-  const mockLicense = licenseMock.create();
-  mockLicense.isEnabled.mockReturnValue(false);
-  mockLicense.features$ = licenseSubject;
+    licenseSubject = new BehaviorSubject(({} as unknown) as SecurityLicenseFeatures);
+    mockLicense = licenseMock.create();
+    mockLicense.isEnabled.mockReturnValue(false);
+    mockLicense.features$ = licenseSubject;
 
-  const statusSubject = new BehaviorSubject<CoreStatus>({
-    elasticsearch: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
-    savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
+    statusSubject = new BehaviorSubject<CoreStatus>({
+      elasticsearch: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
+      savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
+    });
+    const mockCoreSetup = coreMock.createSetup();
+    mockCoreSetup.status.core$ = statusSubject;
+
+    const authorizationService = new AuthorizationService();
+    authorizationService.setup({
+      http: mockCoreSetup.http,
+      capabilities: mockCoreSetup.capabilities,
+      status: mockCoreSetup.status,
+      clusterClient: mockClusterClient,
+      license: mockLicense,
+      loggers: loggingServiceMock.create(),
+      kibanaIndexName,
+      packageVersion: 'some-version',
+      features: featuresPluginMock.createSetup(),
+      getSpacesService: jest
+        .fn()
+        .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() }),
+    });
+
+    const featuresStart = featuresPluginMock.createStart();
+    featuresStart.getFeatures.mockReturnValue([]);
+
+    authorizationService.start({ clusterClient: mockClusterClient, features: featuresStart });
+
+    // ES and license aren't available yet.
+    expect(mockRegisterPrivilegesWithCluster).not.toHaveBeenCalled();
   });
-  const mockCoreSetup = coreMock.createSetup();
-  mockCoreSetup.status.core$ = statusSubject;
 
-  const authorizationService = new AuthorizationService();
-  const authzSetup = authorizationService.setup({
-    http: mockCoreSetup.http,
-    capabilities: mockCoreSetup.capabilities,
-    status: mockCoreSetup.status,
-    clusterClient: mockClusterClient,
-    license: mockLicense,
-    loggers: loggingServiceMock.create(),
-    kibanaIndexName,
-    packageVersion: 'some-version',
-    features: featuresPluginMock.createSetup(),
-    getSpacesService: jest
-      .fn()
-      .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() }),
+  it('registers cluster privileges', async () => {
+    // ES is available now, but not license.
+    statusSubject.next({
+      elasticsearch: { level: ServiceStatusLevels.available, summary: 'Service is working' },
+      savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
+    });
+    expect(mockRegisterPrivilegesWithCluster).not.toHaveBeenCalled();
+
+    // Both ES and license are available now.
+    mockLicense.isEnabled.mockReturnValue(true);
+    licenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
+    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(1);
+
+    await nextTick();
+
+    // New changes don't trigger privileges registration.
+    licenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
+    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(1);
   });
 
-  const featuresStart = featuresPluginMock.createStart();
-  featuresStart.getFeatures.mockReturnValue([]);
-  authorizationService.start({ clusterClient: mockClusterClient, features: featuresStart });
+  it('schedules retries if fails to register cluster privileges', async () => {
+    jest.useFakeTimers();
 
-  // ES and license aren't available yet.
-  expect(mockRegisterPrivilegesWithCluster).not.toHaveBeenCalled();
+    mockRegisterPrivilegesWithCluster.mockRejectedValue(new Error('Some error'));
 
-  // ES is available now, but not license.
-  statusSubject.next({
-    elasticsearch: { level: ServiceStatusLevels.available, summary: 'Service is working' },
-    savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
+    // Both ES and license are available.
+    mockLicense.isEnabled.mockReturnValue(true);
+    statusSubject.next({
+      elasticsearch: { level: ServiceStatusLevels.available, summary: 'Service is working' },
+      savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
+    });
+    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(1);
+
+    // Next retry isn't performed immediately, retry happens only after a timeout.
+    await nextTick();
+    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(1);
+    jest.advanceTimersByTime(100);
+    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(2);
+
+    // Delay between consequent retries is increasing.
+    await nextTick();
+    jest.advanceTimersByTime(100);
+    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(2);
+    await nextTick();
+    jest.advanceTimersByTime(100);
+    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(3);
+
+    // When call finally succeeds retries aren't scheduled anymore.
+    mockRegisterPrivilegesWithCluster.mockResolvedValue(undefined);
+    await nextTick();
+    jest.runAllTimers();
+    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(4);
+    await nextTick();
+    jest.runAllTimers();
+    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(4);
+
+    // New changes don't trigger privileges registration.
+    licenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
+    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(4);
   });
-  expect(mockRegisterPrivilegesWithCluster).not.toHaveBeenCalled();
-
-  // Both ES and license are available now.
-  mockLicense.isEnabled.mockReturnValue(true);
-  licenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
-  expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(1);
-  expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledWith(
-    expect.anything(),
-    authzSetup.privileges,
-    application,
-    mockClusterClient
-  );
-
-  // New changes don't trigger privileges registration.
-  licenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
-  expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(1);
 });
 
 it('#stop unsubscribes from license and ES updates.', () => {

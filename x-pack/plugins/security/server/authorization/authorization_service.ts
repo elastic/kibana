@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { combineLatest, BehaviorSubject, Subscription } from 'rxjs';
+import { filter, takeWhile } from 'rxjs/operators';
 import { UICapabilities } from 'ui/capabilities';
-import { combineLatest, Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
 import {
   LoggerFactory,
   KibanaRequest,
@@ -159,26 +159,11 @@ export class AuthorizationService {
   }
 
   start({ clusterClient, features }: AuthorizationServiceStartParams) {
-    // Register cluster privileges once Elasticsearch is available and Security plugin is enabled.
-    this.statusSubscription = combineLatest([this.status.core$, this.license.features$])
-      .pipe(
-        first(
-          ([status]) =>
-            this.license.isEnabled() && status.elasticsearch.level === ServiceStatusLevels.available
-        )
-      )
-      .subscribe(async () => {
-        const allFeatures = features.getFeatures();
-        validateFeaturePrivileges(allFeatures);
-        validateReservedPrivileges(allFeatures);
+    const allFeatures = features.getFeatures();
+    validateFeaturePrivileges(allFeatures);
+    validateReservedPrivileges(allFeatures);
 
-        await registerPrivilegesWithCluster(
-          this.logger,
-          this.privileges,
-          this.applicationName,
-          clusterClient
-        );
-      });
+    this.registerPrivileges(clusterClient);
   }
 
   stop() {
@@ -186,5 +171,48 @@ export class AuthorizationService {
       this.statusSubscription.unsubscribe();
       this.statusSubscription = undefined;
     }
+  }
+
+  private registerPrivileges(clusterClient: IClusterClient) {
+    const RETRY_SCALE_DURATION = 100;
+    const RETRY_TIMEOUT_MAX = 10000;
+    const retries$ = new BehaviorSubject(0);
+    let retryTimeout: NodeJS.Timeout;
+
+    // Register cluster privileges once Elasticsearch is available and Security plugin is enabled.
+    this.statusSubscription = combineLatest([
+      this.status.core$,
+      this.license.features$,
+      retries$.asObservable(),
+    ])
+      .pipe(
+        takeWhile(() => !retries$.isStopped),
+        filter(
+          ([status]) =>
+            this.license.isEnabled() && status.elasticsearch.level === ServiceStatusLevels.available
+        )
+      )
+      .subscribe(async () => {
+        // If status or license change occurred before retry timeout we should cancel it.
+        if (retryTimeout) {
+          clearTimeout(retryTimeout);
+        }
+
+        try {
+          await registerPrivilegesWithCluster(
+            this.logger,
+            this.privileges,
+            this.applicationName,
+            clusterClient
+          );
+          retries$.complete();
+        } catch (err) {
+          const retriesElapsed = retries$.getValue() + 1;
+          retryTimeout = setTimeout(
+            () => retries$.next(retriesElapsed),
+            Math.min(retriesElapsed * RETRY_SCALE_DURATION, RETRY_TIMEOUT_MAX)
+          );
+        }
+      });
   }
 }
