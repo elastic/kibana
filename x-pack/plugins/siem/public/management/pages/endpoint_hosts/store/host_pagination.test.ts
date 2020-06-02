@@ -24,7 +24,6 @@ import {
   MiddlewareActionSpyHelper,
   createSpyMiddleware,
 } from '../../../../common/store/test_utils';
-import { urlFromQueryParams } from '../view/url_from_query_params';
 import { getManagementUrl } from '../../..';
 
 describe('host list pagination: ', () => {

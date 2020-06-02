@@ -15,7 +15,6 @@ import { depsStartMock } from './dependencies_start_mock';
 import { MiddlewareActionSpyHelper, createSpyMiddleware } from '../../store/test_utils';
 import { apolloClientObservable } from '../test_providers';
 import { createStore, State, substateMiddlewareFactory } from '../../store';
-import { hostMiddlewareFactory } from '../../../management/pages/endpoint_hosts/store';
 import { alertMiddlewareFactory } from '../../../endpoint_alerts/store/middleware';
 import { AppRootProvider } from './app_root_provider';
 import { managementMiddlewareFactory } from '../../../management/store';
@@ -58,10 +57,6 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const middlewareSpy = createSpyMiddleware();
   const state: State = mockGlobalState;
   const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, [
-    substateMiddlewareFactory(
-      (globalState) => globalState.hostList,
-      hostMiddlewareFactory(coreStart, depsStart)
-    ),
     substateMiddlewareFactory(
       (globalState) => globalState.alertList,
       alertMiddlewareFactory(coreStart, depsStart)

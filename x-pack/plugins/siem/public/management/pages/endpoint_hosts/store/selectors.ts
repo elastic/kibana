@@ -125,11 +125,21 @@ export const uiQueryParams: (
       ];
 
       for (const key of keys) {
-        const value = query[key];
-        if (typeof value === 'string') {
-          data[key] = value;
-        } else if (Array.isArray(value)) {
-          data[key] = value[value.length - 1];
+        const value: string | undefined =
+          typeof query[key] === 'string'
+            ? (query[key] as string)
+            : Array.isArray(query[key])
+            ? (query[key][query[key].length - 1] as string)
+            : undefined;
+
+        if (value !== undefined) {
+          if (key === 'show') {
+            if (value === 'policy_response' || value === 'details') {
+              data[key] = value;
+            }
+          } else {
+            data[key] = value;
+          }
         }
       }
 

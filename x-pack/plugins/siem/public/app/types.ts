@@ -13,7 +13,6 @@ import { ImmutableReducer, State } from '../common/store';
 import { Immutable } from '../../common/endpoint/types';
 import { AlertListState } from '../../common/endpoint_alerts/types';
 import { AppAction } from '../common/store/actions';
-import { HostState } from '../management/pages/endpoint_hosts/types';
 import { ManagementState } from '../management/store/types';
 
 export enum SiemPageName {
@@ -66,7 +65,6 @@ export interface SecuritySubPlugins extends SecuritySubPlugin {
       network: NetworkState;
       timeline: TimelineState;
       alertList: Immutable<AlertListState>;
-      hostList: Immutable<HostState>;
       management: ManagementState;
     };
     reducer: {
@@ -74,7 +72,6 @@ export interface SecuritySubPlugins extends SecuritySubPlugin {
       network: Reducer<NetworkState, AnyAction>;
       timeline: Reducer<TimelineState, AnyAction>;
       alertList: ImmutableReducer<AlertListState, AppAction>;
-      hostList: ImmutableReducer<HostState, AppAction>;
       management: ImmutableReducer<ManagementState, AppAction>;
     };
     middlewares: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;

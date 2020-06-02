@@ -17,10 +17,6 @@ import {
   EndpointAlertsPluginState,
   EndpointAlertsPluginReducer,
 } from '../../endpoint_alerts/store';
-import {
-  EndpointHostsPluginState,
-  EndpointHostsPluginReducer,
-} from '../../management/pages/endpoint_hosts/store';
 
 import { ManagementPluginReducer, ManagementPluginState } from '../../management/store/types';
 
@@ -29,7 +25,6 @@ export interface State
     NetworkPluginState,
     TimelinePluginState,
     EndpointAlertsPluginState,
-    EndpointHostsPluginState,
     ManagementPluginState {
   app: AppState;
   dragAndDrop: DragAndDropState;
@@ -46,14 +41,12 @@ type SubPluginsInitState = HostsPluginState &
   NetworkPluginState &
   TimelinePluginState &
   EndpointAlertsPluginState &
-  EndpointHostsPluginState &
   ManagementPluginState;
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   NetworkPluginReducer &
   TimelinePluginReducer &
   EndpointAlertsPluginReducer &
-  EndpointHostsPluginReducer &
   ManagementPluginReducer;
 
 export const createInitialState = (pluginsInitState: SubPluginsInitState): State => ({
