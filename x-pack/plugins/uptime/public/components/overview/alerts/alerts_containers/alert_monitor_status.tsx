@@ -13,7 +13,7 @@ import {
   overviewFiltersSelector,
 } from '../../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../index';
-import { setOverviewFilters, fetchOverviewFilters } from '../../../../state/actions';
+import { setOverviewFilters, fetchOverviewFilters, setSearchText } from '../../../../state/actions';
 
 interface Props {
   autocomplete: DataPublicPluginSetup['autocomplete'];
@@ -42,10 +42,10 @@ export const AlertMonitorStatus: React.FC<Props> = ({
           alertParams?.timerangeUnit ?? 'd'
         }`,
         dateRangeEnd: 'now',
-        locations: alertParams?.filters['observer.geo.name'] ?? [],
-        ports: alertParams?.filters['url.port'] ?? [],
-        tags: alertParams?.filters.tags ?? [],
-        schemes: alertParams?.filters['monitor.type'] ?? [],
+        locations: alertParams.filters?.['observer.geo.name'] ?? [],
+        ports: alertParams.filters?.['url.port'] ?? [],
+        tags: alertParams.filters?.tags ?? [],
+        schemes: alertParams.filters?.['monitor.type'] ?? [],
       })
     );
   }, [alertParams, dispatch]);
@@ -61,8 +61,10 @@ export const AlertMonitorStatus: React.FC<Props> = ({
   const { filters, locations } = useSelector(selectMonitorStatusAlert);
   const searchText = useSelector(selectSearchText);
   useEffect(() => {
-    setAlertParams('search', searchText);
-  }, [setAlertParams, searchText]);
+    if (alertParams.search) {
+      dispatch(setSearchText(alertParams.search));
+    }
+  }, [alertParams, dispatch]);
 
   return (
     <AlertMonitorStatusComponent

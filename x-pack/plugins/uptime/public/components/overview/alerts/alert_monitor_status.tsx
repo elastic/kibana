@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import * as labels from './translations';
@@ -44,6 +44,9 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
       <KueryBar
         aria-label={labels.ALERT_KUERY_BAR_ARIA}
         autocomplete={props.autocomplete}
+        defaultKuery={alertParams.search}
+        shouldUpdateUrl={false}
+        updateDefaultKuery={(value: string) => setAlertParams('search', value)}
         data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
       />
 

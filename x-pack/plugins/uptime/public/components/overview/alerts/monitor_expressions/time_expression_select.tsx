@@ -18,6 +18,8 @@ interface Props {
   setAlertParams: (key: string, value: any) => void;
 }
 
+const DEFAULT_TIMERANGE_UNIT = 'm';
+
 const TimeRangeOptions = [
   {
     'aria-label': labels.SECONDS_TIME_RANGE,
@@ -54,7 +56,7 @@ export const TimeExpressionSelect: React.FC<Props> = ({
 
   const [timerangeUnitOptions, setTimerangeUnitOptions] = useState<any[]>(
     TimeRangeOptions.map((opt) =>
-      opt.key === defaultTimerangeUnit ?? 'm' ? { ...opt, checked: 'on' } : opt
+      opt.key === (defaultTimerangeUnit ?? DEFAULT_TIMERANGE_UNIT) ? { ...opt, checked: 'on' } : opt
     )
   );
 

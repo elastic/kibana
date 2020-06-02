@@ -30,19 +30,28 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
     filters: { tags, ports, schemes, locations },
   } = useSelector(overviewFiltersSelector);
 
-  const selectedPorts = alertParams?.filters['url.port'] ?? [];
-  const selectedLocations = alertParams?.filters['observer.geo.name'] ?? [];
-  const selectedSchemes = alertParams?.filters['monitor.type'] ?? [];
+  const selectedPorts = alertParams?.filters?.['url.port'] ?? [];
+  const selectedLocations = alertParams?.filters?.['observer.geo.name'] ?? [];
+  const selectedSchemes = alertParams?.filters?.['monitor.type'] ?? [];
   const selectedTags = alertParams?.filters?.tags ?? [];
 
   const onFilterFieldChange = (fieldName: string, values: string[]) => {
-    setFilters({
-      ...filters,
-      [fieldName]: values,
-    });
-
     if (alertParams.filters) {
       setAlertParams('filters', { ...alertParams.filters, [fieldName]: values });
+    } else {
+      setAlertParams(
+        'filters',
+        Object.assign(
+          {},
+          {
+            tags: [],
+            'url.port': [],
+            'observer.geo.name': [],
+            'monitor.type': [],
+          },
+          { [fieldName]: values }
+        )
+      );
     }
   };
 
