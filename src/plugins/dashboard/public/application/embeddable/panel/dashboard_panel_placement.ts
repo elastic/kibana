@@ -108,6 +108,12 @@ interface IplacementDirection {
   fits: boolean;
 }
 
+/**
+ * Compare grid data by an ending y coordinate. Grid data with a smaller ending y coordinate
+ * comes first.
+ * @param a
+ * @param b
+ */
 function comparePanels(a: GridData, b: GridData): number {
   if (a.y + a.h < b.y + b.h) {
     return -1;
@@ -169,10 +175,11 @@ export function placePanelBeside({
   // if we get here that means there is no blank space around the panel we are placing beside. This means it's time to mess up the dashboard's groove. Fun!
   /**
    * 1. sort the panels in the grid
-   * 2. find the best placement for the cloned panel
+   * 2. place the cloned panel to the bottom
    * 3. reposition the panels after the cloned panel in the grid
    */
   const grid = otherPanels.sort(comparePanels);
+
   let position = 0;
   for (position; position < grid.length; position++) {
     if (beside.i === grid[position].i) {
