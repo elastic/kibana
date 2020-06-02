@@ -25,7 +25,7 @@ export class ReportingPlugin
   private config$: Observable<ReportingConfigType>;
 
   constructor(context: PluginInitializerContext<ReportingConfigType>) {
-    this.logger = new LevelLogger(context.logger.get('reporting'));
+    this.logger = new LevelLogger(context.logger.get());
     this.initializerContext = context;
     this.config$ = context.config.create<ReportingConfigType>();
   }

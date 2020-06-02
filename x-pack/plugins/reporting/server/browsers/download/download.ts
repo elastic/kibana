@@ -42,7 +42,10 @@ export async function download(url: string, path: string, logger: LevelLogger) {
           logger.error(err);
           reject(err);
         })
-        .on('end', resolve);
+        .on('end', () => {
+          logger.info(`Downloaded ${url}`);
+          resolve();
+        });
     });
   } finally {
     closeSync(handle);
