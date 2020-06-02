@@ -91,13 +91,13 @@ export class DiscoverUrlGenerator
     } = {};
 
     if (query) appState.query = query;
-    if (filters) appState.filters = filters?.filter(f => !esFilters.isFilterPinned(f));
+    if (filters) appState.filters = filters?.filter((f) => !esFilters.isFilterPinned(f));
     if (indexPatternId) appState.index = indexPatternId;
 
     const queryState: QueryState = {};
 
     if (timeRange) queryState.time = timeRange;
-    if (refreshInterval) queryState.filters = filters?.filter(f => esFilters.isFilterPinned(f));
+    if (refreshInterval) queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
     let url = `${this.params.appBasePath}#/discover`;

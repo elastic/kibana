@@ -145,7 +145,7 @@ export class DiscoverPlugin
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     if (plugins.share) {
       const urlGenerator = new DiscoverUrlGenerator({
-        appBasePath: 'kibana',
+        appBasePath: '/app/discover',
         useHash: core.uiSettings.get('state:storeInSessionStorage'),
       });
       plugins.share.urlGenerators.registerUrlGenerator(urlGenerator);
