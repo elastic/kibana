@@ -94,7 +94,6 @@ export class IndexTable extends Component {
     super(props);
 
     this.state = {
-      includeHiddenIndices: false,
       selectedIndicesMap: {},
     };
   }
@@ -117,25 +116,17 @@ export class IndexTable extends Component {
         this.setState({ filterError: e });
       }
     }
-
-    this.syncFromUrlParams();
   }
   componentWillUnmount() {
     clearInterval(this.interval);
   }
 
-  componentDidUpdate() {
-    this.syncFromUrlParams();
-  }
-
-  syncFromUrlParams() {
+  readURLParams() {
     const { location } = this.props;
     const { includeHiddenIndices } = qs.parse((location && location.search) || '');
-
-    const nextValue = includeHiddenIndices === 'true';
-    if (this.state.includeHiddenIndices !== nextValue) {
-      this.setState({ includeHiddenIndices: nextValue });
-    }
+    return {
+      includeHiddenIndices: includeHiddenIndices === 'true',
+    };
   }
 
   setIncludeHiddenParam(hidden) {
@@ -446,6 +437,8 @@ export class IndexTable extends Component {
       pager,
     } = this.props;
 
+    const { includeHiddenIndices } = this.readURLParams();
+
     let emptyState;
 
     if (indicesLoading) {
@@ -497,7 +490,7 @@ export class IndexTable extends Component {
                         <EuiSwitch
                           id="checkboxShowHiddenIndices"
                           data-test-subj="indexTableIncludeHiddenIndicesToggle"
-                          checked={this.state.includeHiddenIndices}
+                          checked={includeHiddenIndices}
                           onChange={(event) => this.setIncludeHiddenParam(event.target.checked)}
                           label={
                             <FormattedMessage
