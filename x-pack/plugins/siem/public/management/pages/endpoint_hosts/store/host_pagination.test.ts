@@ -56,7 +56,9 @@ describe('host list pagination: ', () => {
     queryParams = () => uiQueryParams(store.getState());
 
     historyPush = (nextQueryParams: HostIndexUIQueryParams): void => {
-      return history.push(getManagementUrl({ name: 'endpointList', ...nextQueryParams }));
+      return history.push(
+        getManagementUrl({ name: 'endpointList', excludePrefix: true, ...nextQueryParams })
+      );
     };
   });
 
@@ -70,7 +72,7 @@ describe('host list pagination: ', () => {
         type: 'userChangedUrl',
         payload: {
           ...history.location,
-          pathname: '/endpoint-hosts',
+          pathname: getManagementUrl({ name: 'endpointList', excludePrefix: true }),
         },
       });
       await waitForAction('serverReturnedHostList');
