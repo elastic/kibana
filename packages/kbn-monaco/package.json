@@ -9,6 +9,7 @@
     "kbn:bootstrap": "yarn build --dev"
   },
   "dependencies": {
+    "regenerator-runtime": "^0.13.3",
     "monaco-editor": "~0.17.0"
   },
   "devDependencies": {
