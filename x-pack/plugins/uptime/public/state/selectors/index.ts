@@ -85,4 +85,4 @@ export const overviewFiltersSelector = ({ overviewFilters }: AppState) => overvi
 
 export const esKuerySelector = ({ ui: { esKuery } }: AppState) => esKuery;
 
-export const selectSearchText = ({ ui: { searchText } }: AppState) => searchText;
+export const searchTextSelector = ({ ui: { searchText } }: AppState) => searchText;

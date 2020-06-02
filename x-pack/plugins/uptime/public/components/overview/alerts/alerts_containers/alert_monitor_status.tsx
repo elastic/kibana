@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
-import { selectMonitorStatusAlert, selectSearchText } from '../../../../state/selectors';
+import { selectMonitorStatusAlert, searchTextSelector } from '../../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../index';
 
 interface Props {
@@ -29,7 +29,7 @@ export const AlertMonitorStatus: React.FC<Props> = ({
   timerange,
 }) => {
   const { filters, locations } = useSelector(selectMonitorStatusAlert);
-  const searchText = useSelector(selectSearchText);
+  const searchText = useSelector(searchTextSelector);
 
   useEffect(() => {
     setAlertParams('search', searchText);

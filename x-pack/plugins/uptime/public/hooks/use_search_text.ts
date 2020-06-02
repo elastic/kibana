@@ -6,15 +6,15 @@
 
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setSearchText } from '../state/actions';
-import { selectSearchText } from '../state/selectors';
+import { setSearchTextAction } from '../state/actions';
+import { searchTextSelector } from '../state/selectors';
 
 export const useSearchText = () => {
   const dispatch = useDispatch();
-  const searchText = useSelector(selectSearchText);
+  const searchText = useSelector(searchTextSelector);
 
   const updateSearchText = useCallback(
-    (nextSearchText: string) => dispatch(setSearchText(nextSearchText)),
+    (nextSearchText: string) => dispatch(setSearchTextAction(nextSearchText)),
     [dispatch]
   );
 
