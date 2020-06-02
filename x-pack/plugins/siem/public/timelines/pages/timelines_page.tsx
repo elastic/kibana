@@ -56,7 +56,6 @@ export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => 
                   iconType="indexOpen"
                   onClick={onImportTimelineBtnClick}
                   data-test-subj="open-import-data-modal-btn"
-                  fill
                 >
                   {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
                 </EuiButton>
