@@ -34,9 +34,7 @@ export const CreateTimelineBtnComponent: React.FC<OwnProps> = ({
   const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
   const dispatch = useDispatch();
   const showTimeline = useCallback(
-    ({ id, show }) => {
-      return dispatch(timelineActions.showTimeline({ id, show }));
-    },
+    ({ id, show }) => dispatch(timelineActions.showTimeline({ id, show })),
     [dispatch]
   );
   const createTimeline = useCallback(
