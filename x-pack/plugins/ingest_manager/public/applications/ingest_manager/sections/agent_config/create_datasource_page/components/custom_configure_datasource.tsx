@@ -16,6 +16,10 @@ export interface CustomConfigureDatasourceProps {
   datasource: NewDatasource | (NewDatasource & { id: string });
 }
 
+/**
+ * Allows external plugins to create custom content for the Ingest
+ * Datasource configuration.
+ */
 export type CustomConfigureDatasourceContent = React.FC<CustomConfigureDatasourceProps>;
 
 const ConfigureDatasourceMapping: { [key: string]: CustomConfigureDatasourceContent } = {

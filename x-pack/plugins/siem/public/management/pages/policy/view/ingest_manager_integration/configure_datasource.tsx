@@ -17,6 +17,10 @@ import { getManagementUrl } from '../../../..';
 
 type DatasourceWithId = NewDatasource & { id: string };
 
+/**
+ * Exports Endpoint-specific datasource configuration instructions
+ * for use in the Ingest app create / edit datasource config
+ */
 export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent>(
   ({ from, datasource }: { from: string; datasource: NewDatasource | DatasourceWithId }) => {
     const { services } = useKibana();
