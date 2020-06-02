@@ -35,6 +35,8 @@
  * @packageDocumentation
  */
 
+import './index.scss';
+
 import {
   ChromeBadge,
   ChromeBrand,
@@ -364,3 +366,5 @@ export {
   UiSettingsState,
   NavType,
 };
+
+export { __kbnBootstrap__ } from './kbn_bootstrap';
