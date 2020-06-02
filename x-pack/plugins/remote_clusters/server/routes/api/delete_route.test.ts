@@ -30,7 +30,7 @@ describe('DELETE remote clusters', () => {
     { licenseCheckResult = { valid: true }, apiResponses = [], asserts, params }: TestOptions
   ) => {
     test(description, async () => {
-      const { adminClient: elasticsearchMock } = elasticsearchServiceMock.createSetup();
+      const elasticsearchMock = elasticsearchServiceMock.createClusterClient();
 
       const mockRouteDependencies = {
         router: httpServiceMock.createRouter(),
