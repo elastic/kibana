@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type PromiseReturnType<Func> = Func extends (
-  ...args: any[]
-) => Promise<infer Value>
+export type PromiseReturnType<Func> = Func extends (...args: any[]) => Promise<infer Value>
   ? Value
   : Func;

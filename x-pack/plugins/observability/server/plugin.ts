@@ -26,10 +26,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     this.initContext = initContext;
   }
 
-  public async setup(
-    core: CoreSetup,
-    plugins: {}
-  ): Promise<ObservabilityPluginSetup> {
+  public async setup(core: CoreSetup, plugins: {}): Promise<ObservabilityPluginSetup> {
     const config$ = this.initContext.config.create<ObservabilityConfig>();
 
     const config = await config$.pipe(take(1)).toPromise();

@@ -57,8 +57,7 @@ export async function createOrUpdateIndex({
             });
 
         if (!result.acknowledged) {
-          const resultError =
-            result && result.error && JSON.stringify(result.error);
+          const resultError = result && result.error && JSON.stringify(result.error);
           throw new Error(resultError);
         }
       },
