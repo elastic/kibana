@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from 'kibana/public';
+import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
 import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerts/public';
 import { ChartsPluginStart } from '../../../src/plugins/charts/public';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../x-pack/plugins/triggers_actions_ui/public';

@@ -92,7 +92,9 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp }: Props) {
                   </EuiLink>
                   <EuiButtonIcon
                     iconType="popout"
-                    onClick={() => window.open(getUrlForApp(def.appId), '_blank')}
+                    onClick={() =>
+                      window.open(getUrlForApp(def.appId), '_blank', 'noopener, noreferrer')
+                    }
                   >
                     Open in new tab
                   </EuiButtonIcon>
