@@ -51,6 +51,7 @@ exports.externals = {
    */
   rxjs: '__kbnSharedDeps__.Rxjs',
   'rxjs/operators': '__kbnSharedDeps__.RxjsOperators',
+  '@elastic/numeral': '__kbnSharedDeps__.ElasticNumeral',
   '@elastic/charts': '__kbnSharedDeps__.ElasticCharts',
   '@elastic/eui': '__kbnSharedDeps__.ElasticEui',
   '@elastic/eui/lib/services': '__kbnSharedDeps__.ElasticEuiLibServices',
