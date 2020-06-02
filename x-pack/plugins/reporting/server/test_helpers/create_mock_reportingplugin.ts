@@ -34,8 +34,22 @@ export const createMockStartDeps = (startMock?: any): ReportingStartDeps => ({
 });
 
 const createMockReportingPlugin = async (config: ReportingConfig): Promise<ReportingPlugin> => {
-  config = config || {};
-  const plugin = new ReportingPlugin(coreMock.createPluginInitializerContext(config));
+  const mockConfig = {
+    index: '.reporting',
+    kibanaServer: {
+      hostname: 'localhost',
+      port: '80',
+    },
+    capture: {
+      browser: {
+        chromium: {
+          disableSandbox: true,
+        },
+      },
+    },
+    ...config,
+  };
+  const plugin = new ReportingPlugin(coreMock.createPluginInitializerContext(mockConfig));
   const setupMock = coreMock.createSetup();
   const coreStartMock = coreMock.createStart();
   const startMock = {

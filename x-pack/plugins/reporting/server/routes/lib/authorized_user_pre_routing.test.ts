@@ -5,20 +5,23 @@
  */
 
 import { KibanaRequest, RequestHandlerContext, KibanaResponseFactory } from 'kibana/server';
-import sinon from 'sinon';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
-import { ReportingConfig, ReportingCore } from '../../';
+import { ReportingCore } from '../../';
 import { createMockReportingCore } from '../../test_helpers';
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
 import { ReportingInternalSetup } from '../../core';
 
-let mockConfig: ReportingConfig;
 let mockCore: ReportingCore;
-
-const getMockConfig = (mockConfigGet: sinon.SinonStub) => ({
-  get: mockConfigGet,
-  kbnConfig: { get: mockConfigGet },
-});
+const kbnConfig = {
+  'server.basePath': '/sbp',
+};
+const reportingConfig = {
+  'roles.allow': ['reporting_user'],
+};
+const mockReportingConfig = {
+  get: (...keys: string[]) => (reportingConfig as any)[keys.join('.')] || 'whoah!',
+  kbnConfig: { get: (...keys: string[]) => (kbnConfig as any)[keys.join('.')] },
+};
 
 const getMockContext = () =>
   (({
@@ -38,13 +41,11 @@ const getMockResponseFactory = () =>
     unauthorized: (obj: unknown) => obj,
   } as unknown) as KibanaResponseFactory);
 
-beforeEach(async () => {
-  const mockConfigGet = sinon.stub().withArgs('roles', 'allow').returns(['reporting_user']);
-  mockConfig = getMockConfig(mockConfigGet);
-  mockCore = await createMockReportingCore(mockConfig);
-});
-
 describe('authorized_user_pre_routing', function () {
+  beforeEach(async () => {
+    mockCore = await createMockReportingCore(mockReportingConfig);
+  });
+
   it('should return from handler with null user when security is disabled', async function () {
     mockCore.getPluginSetupDeps = () =>
       (({
@@ -106,7 +107,7 @@ describe('authorized_user_pre_routing', function () {
     ).toMatchObject({ body: `Sorry, you don't have access to Reporting` });
   });
 
-  it('should return from handler when security is enabled and user has explicitly allowed role', async function () {
+  it('should return from handler when security is enabled and user has explicitly allowed role', async function (done) {
     mockCore.getPluginSetupDeps = () =>
       (({
         // @ts-ignore
@@ -117,17 +118,16 @@ describe('authorized_user_pre_routing', function () {
           },
         },
       } as unknown) as ReportingInternalSetup);
+    // @ts-ignore overloading config getter
+    mockCore.config = mockReportingConfig;
     const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockCore);
     const mockResponseFactory = getMockResponseFactory();
 
-    let handlerCalled = false;
-    authorizedUserPreRouting((user: unknown) => {
+    authorizedUserPreRouting((user) => {
       expect(user).toMatchObject({ roles: ['reporting_user'], username: 'friendlyuser' });
-      handlerCalled = true;
+      done();
       return Promise.resolve({ status: 200, options: {} });
     })(getMockContext(), getMockRequest(), mockResponseFactory);
-
-    expect(handlerCalled).toBe(true);
   });
 
   it('should return from handler when security is enabled and user has superuser role', async function () {});

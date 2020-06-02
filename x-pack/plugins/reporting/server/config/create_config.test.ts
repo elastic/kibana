@@ -38,7 +38,6 @@ const makeMockCoreSetup = (serverInfo: KibanaServer): CoreSetup =>
 describe('Reporting server createConfig$', () => {
   let mockCoreSetup: CoreSetup;
   let mockInitContext: PluginInitializerContext;
-  let mockConfig$: any;
   let mockLogger: LevelLogger;
 
   beforeEach(() => {
@@ -46,7 +45,6 @@ describe('Reporting server createConfig$', () => {
     mockInitContext = makeMockInitContext({
       kibanaServer: {},
     });
-    mockConfig$ = mockInitContext.config.create();
     mockLogger = ({ warn: jest.fn(), debug: jest.fn() } as unknown) as LevelLogger;
   });
 
@@ -55,6 +53,7 @@ describe('Reporting server createConfig$', () => {
   });
 
   it('creates random encryption key and default config using host, protocol, and port from server info', async () => {
+    const mockConfig$: any = mockInitContext.config.create();
     const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
 
     expect(result.encryptionKey).toMatch(/\S{32,}/); // random 32 characters
@@ -76,8 +75,8 @@ describe('Reporting server createConfig$', () => {
       encryptionKey: 'iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii',
       kibanaServer: {},
     });
+    const mockConfig$: any = mockInitContext.config.create();
     const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
-
     expect(result.encryptionKey).toMatch('iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii');
     expect((mockLogger.warn as any).mock.calls.length).toBe(0);
   });
@@ -91,6 +90,7 @@ describe('Reporting server createConfig$', () => {
         protocol: 'httpsa',
       },
     });
+    const mockConfig$: any = mockInitContext.config.create();
     const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
 
     expect(result).toMatchInlineSnapshot(`
@@ -118,6 +118,7 @@ describe('Reporting server createConfig$', () => {
       encryptionKey: 'aaaaaaaaaaaaabbbbbbbbbbbbaaaaaaaaa',
       kibanaServer: { hostname: '0' },
     });
+    const mockConfig$: any = mockInitContext.config.create();
     const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
 
     expect(result.kibanaServer).toMatchInlineSnapshot(`
@@ -139,6 +140,7 @@ describe('Reporting server createConfig$', () => {
       encryptionKey: '888888888888888888888888888888888',
       capture: { browser: { chromium: { disableSandbox: false } } },
     } as ReportingConfigType);
+    const mockConfig$: any = mockInitContext.config.create();
     const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
 
     expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: false });
@@ -150,6 +152,7 @@ describe('Reporting server createConfig$', () => {
       encryptionKey: '888888888888888888888888888888888',
       capture: { browser: { chromium: { disableSandbox: true } } },
     } as ReportingConfigType);
+    const mockConfig$: any = mockInitContext.config.create();
     const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
 
     expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: true });
@@ -160,6 +163,7 @@ describe('Reporting server createConfig$', () => {
     mockInitContext = makeMockInitContext({
       encryptionKey: '888888888888888888888888888888888',
     } as ReportingConfigType);
+    const mockConfig$: any = mockInitContext.config.create();
     const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
 
     expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: expect.any(Boolean) });
