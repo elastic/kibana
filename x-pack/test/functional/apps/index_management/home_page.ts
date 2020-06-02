@@ -24,11 +24,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const headingText = await pageObjects.indexManagement.sectionHeadingText();
       expect(headingText).to.be('Index Management');
 
-      const indicesList = await testSubjects.exists('indicesList');
-      expect(indicesList).to.be(true);
+      const dataStreamList = await testSubjects.exists('dataStreamList');
+      expect(dataStreamList).to.be(true);
+    });
 
-      const reloadIndicesButton = await pageObjects.indexManagement.reloadIndicesButton();
-      expect(await reloadIndicesButton.isDisplayed()).to.be(true);
+    describe('Indices', () => {
+      it('renders the indices tab', async () => {
+        // Navigate to the index templates tab
+        await pageObjects.indexManagement.changeTabs('indicesTab');
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify url
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain(`/indices`);
+
+        // Verify content
+        const indicesList = await testSubjects.exists('indicesList');
+        expect(indicesList).to.be(true);
+
+        const reloadIndicesButton = await pageObjects.indexManagement.reloadIndicesButton();
+        expect(await reloadIndicesButton.isDisplayed()).to.be(true);
+      });
     });
 
     describe('Index templates', () => {
