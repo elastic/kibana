@@ -30,6 +30,7 @@ export const TELEMETRY_TYPE = 'maps-telemetry';
 export const MAP_APP_PATH = `app/${APP_ID}`;
 export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
+export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
 
 export const MAP_BASE_URL = `/${MAP_APP_PATH}#/${MAP_SAVED_OBJECT_TYPE}`;
 
