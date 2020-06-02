@@ -43,7 +43,12 @@ const ExceptionDetailsComponent = ({
     const { comments } = exceptionItem;
     if (comments !== null && comments && comments.length > 0) {
       return (
-        <EuiButtonEmpty onClick={onCommentsClick} flush="left" size="xs">
+        <EuiButtonEmpty
+          onClick={onCommentsClick}
+          flush="left"
+          size="xs"
+          data-test-subj="exceptionsViewerItemCommentsBtn"
+        >
           {!showComments
             ? i18n.COMMENTS_SHOW(comments.length)
             : i18n.COMMENTS_HIDE(comments.length)}
@@ -64,6 +69,7 @@ const ExceptionDetailsComponent = ({
             listItems={descriptionList}
             titleProps={{ className: 'listTitle--width' }}
             descriptionProps={{ className: 'listDescription--width' }}
+            data-test-subj="exceptionsViewerItemDetails"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{commentsSection}</EuiFlexItem>

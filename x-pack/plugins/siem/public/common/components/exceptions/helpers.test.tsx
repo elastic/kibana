@@ -437,7 +437,7 @@ describe('Exception helpers', () => {
         },
         {
           description: 'April 22nd 2020 @ 20:19:13',
-          title: 'Date Created',
+          title: 'Date created',
         },
         {
           description: 'user_name',
@@ -456,7 +456,7 @@ describe('Exception helpers', () => {
       const expected: DescriptionListItem[] = [
         {
           description: 'April 22nd 2020 @ 20:19:13',
-          title: 'Date Created',
+          title: 'Date created',
         },
         {
           description: 'user_name',
@@ -479,7 +479,7 @@ describe('Exception helpers', () => {
       const expected: DescriptionListItem[] = [
         {
           description: 'April 22nd 2020 @ 20:19:13',
-          title: 'Date Created',
+          title: 'Date created',
         },
         {
           description: 'user_name',
