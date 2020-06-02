@@ -16,7 +16,7 @@ import { CreateDatasourceFrom } from './types';
 export const StepConfigureDatasource: React.FunctionComponent<{
   from?: CreateDatasourceFrom;
   packageInfo: PackageInfo;
-  datasource: NewDatasource;
+  datasource: NewDatasource | (NewDatasource & { id: string });
   updateDatasource: (fields: Partial<NewDatasource>) => void;
   validationResults: DatasourceValidationResults;
   submitAttempted: boolean;

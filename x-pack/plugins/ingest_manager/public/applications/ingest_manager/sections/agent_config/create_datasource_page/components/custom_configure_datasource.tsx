@@ -13,7 +13,7 @@ import { CreateDatasourceFrom } from '../types';
 export interface CustomConfigureDatasourceProps {
   packageName: string;
   from: CreateDatasourceFrom;
-  datasource: NewDatasource;
+  datasource: NewDatasource | (NewDatasource & { id: string });
 }
 
 export type CustomConfigureDatasourceContent = React.FC<CustomConfigureDatasourceProps>;

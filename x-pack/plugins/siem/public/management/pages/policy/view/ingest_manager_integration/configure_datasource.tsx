@@ -5,20 +5,28 @@
  */
 
 import React, { memo } from 'react';
-import { useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
-import { CustomConfigureDatasourceContent } from '../../../../../../../ingest_manager/public';
+import {
+  CustomConfigureDatasourceContent,
+  NewDatasource,
+} from '../../../../../../../ingest_manager/public';
 import { getManagementUrl } from '../../../..';
 
+type DatasourceWithId = NewDatasource & { id: string };
+
 export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent>(
-  ({ from }: { from: string }) => {
+  ({ from, datasource }: { from: string; datasource: NewDatasource | DatasourceWithId }) => {
     const { services } = useKibana();
-    const pathname = useLocation().pathname.split('/');
-    const policyId = pathname[pathname.length - 1];
-    const policyUrl = getManagementUrl({ name: 'policyDetails', policyId });
+    let policyUrl = '';
+    if (from === 'edit') {
+      policyUrl = getManagementUrl({
+        name: 'policyDetails',
+        policyId: (datasource as DatasourceWithId).id,
+      });
+    }
 
     return (
       <EuiEmptyPrompt

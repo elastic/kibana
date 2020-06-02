@@ -12,4 +12,13 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IngestManagerPlugin(initializerContext);
 };
 
+/**
+ * Allows external plugins to create custom content for the Ingest
+ * Datasource configuration.
+ */
 export { CustomConfigureDatasourceContent } from './applications/ingest_manager/sections/agent_config/create_datasource_page/components/custom_configure_datasource';
+
+/**
+ * Type of `datasource` prop in CustomConfigureDatasourceContent
+ */
+export { NewDatasource } from './applications/ingest_manager/types';
