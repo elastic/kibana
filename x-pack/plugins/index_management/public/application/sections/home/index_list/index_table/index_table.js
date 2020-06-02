@@ -95,7 +95,6 @@ export class IndexTable extends Component {
 
     this.state = {
       includeHiddenIndices: false,
-      dataStreamFilter: undefined,
       selectedIndicesMap: {},
     };
   }
@@ -106,10 +105,10 @@ export class IndexTable extends Component {
       () => this.props.reloadIndices(this.props.indices.map((i) => i.name)),
       REFRESH_RATE_INDEX_LIST
     );
-    const { filterChanged, filterFromURI } = this.props;
-
-    if (filterFromURI) {
-      const decodedFilter = decodeURIComponent(filterFromURI);
+    const { location, filterChanged } = this.props;
+    const { filter } = qs.parse((location && location.search) || '');
+    if (filter) {
+      const decodedFilter = decodeURIComponent(filter);
 
       try {
         const filter = EuiSearchBar.Query.parse(decodedFilter);
@@ -118,19 +117,21 @@ export class IndexTable extends Component {
         this.setState({ filterError: e });
       }
     }
-    this.syncUrlParams();
+
+    this.syncFromUrlParams();
   }
   componentWillUnmount() {
     clearInterval(this.interval);
   }
 
   componentDidUpdate() {
-    this.syncUrlParams();
+    this.syncFromUrlParams();
   }
 
-  syncUrlParams() {
+  syncFromUrlParams() {
     const { location } = this.props;
     const { includeHiddenIndices } = qs.parse((location && location.search) || '');
+
     const nextValue = includeHiddenIndices === 'true';
     if (this.state.includeHiddenIndices !== nextValue) {
       this.setState({ includeHiddenIndices: nextValue });
