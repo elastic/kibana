@@ -38,6 +38,10 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
 }) => {
   const tabs = [
     {
+      id: 'indices' as Section,
+      name: <FormattedMessage id="xpack.idxMgmt.home.indicesTabTitle" defaultMessage="Indices" />,
+    },
+    {
       id: 'data_streams' as Section,
       name: (
         <FormattedMessage
@@ -45,10 +49,6 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           defaultMessage="Data Streams"
         />
       ),
-    },
-    {
-      id: 'indices' as Section,
-      name: <FormattedMessage id="xpack.idxMgmt.home.indicesTabTitle" defaultMessage="Indices" />,
     },
     {
       id: 'templates' as Section,

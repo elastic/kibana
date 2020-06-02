@@ -32,7 +32,7 @@ export const AppWithoutRouter = () => (
     <Route exact path="/create_template" component={TemplateCreate} />
     <Route exact path="/clone_template/:name*" component={TemplateClone} />
     <Route exact path="/edit_template/:name*" component={TemplateEdit} />
-    <Route path="/:section(data_streams|indices|templates)" component={IndexManagementHome} />
-    <Redirect from="/" to={`/data_streams`} />
+    <Route path="/:section(indices|data_streams|templates)" component={IndexManagementHome} />
+    <Redirect from="/" to={`/indices`} />
   </Switch>
 );

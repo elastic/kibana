@@ -18,33 +18,38 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('indexManagement');
     });
 
-    it('Loads the app', async () => {
+    it('Loads the app and renders the indices tab by default', async () => {
       await log.debug('Checking for section heading to say Index Management.');
 
       const headingText = await pageObjects.indexManagement.sectionHeadingText();
       expect(headingText).to.be('Index Management');
 
-      const dataStreamList = await testSubjects.exists('dataStreamList');
-      expect(dataStreamList).to.be(true);
+      // Verify url
+      const url = await browser.getCurrentUrl();
+      expect(url).to.contain(`/indices`);
+
+      // Verify content
+      const indicesList = await testSubjects.exists('indicesList');
+      expect(indicesList).to.be(true);
+
+      const reloadIndicesButton = await pageObjects.indexManagement.reloadIndicesButton();
+      expect(await reloadIndicesButton.isDisplayed()).to.be(true);
     });
 
-    describe('Indices', () => {
-      it('renders the indices tab', async () => {
-        // Navigate to the index templates tab
-        await pageObjects.indexManagement.changeTabs('indicesTab');
+    describe('Data streams', () => {
+      it('renders the data streams tab', async () => {
+        // Navigate to the data streams tab
+        await pageObjects.indexManagement.changeTabs('data_streamsTab');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Verify url
         const url = await browser.getCurrentUrl();
-        expect(url).to.contain(`/indices`);
+        expect(url).to.contain(`/data_streams`);
 
         // Verify content
-        const indicesList = await testSubjects.exists('indicesList');
-        expect(indicesList).to.be(true);
-
-        const reloadIndicesButton = await pageObjects.indexManagement.reloadIndicesButton();
-        expect(await reloadIndicesButton.isDisplayed()).to.be(true);
+        const dataStreamList = await testSubjects.exists('dataStreamList');
+        expect(dataStreamList).to.be(true);
       });
     });
 
