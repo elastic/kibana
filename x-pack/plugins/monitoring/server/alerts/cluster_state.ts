@@ -8,7 +8,7 @@ import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { Logger, ICustomClusterClient, UiSettingsServiceStart } from 'src/core/server';
 import { ALERT_TYPE_CLUSTER_STATE } from '../../common/constants';
-import { AlertType } from '../../../alerting/server';
+import { AlertType } from '../../../alerts/server';
 import { executeActions, getUiMessage } from '../lib/alerts/cluster_state.lib';
 import {
   AlertCommonExecutorOptions,
