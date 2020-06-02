@@ -33,7 +33,7 @@ type GenericMetricsRequest = Overwrite<
           date_histogram: AggregationOptionsByType['date_histogram'];
           aggs: Record<string, Unionize<MetricsAggregationMap>>;
         };
-      } & Record<string, Partial<MetricsAggregationMap>>;
+      } & Record<string, Unionize<MetricsAggregationMap>>;
     };
   }
 >;
