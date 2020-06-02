@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 const COLOR_RANGE_RESOLUTION = 10;
 
 interface ColorRangeLegendProps {
-  colorRange: (d: number) => number;
+  colorRange: (d: number) => string;
   justifyTicks?: boolean;
   showTicks?: boolean;
   title?: string;
