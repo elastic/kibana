@@ -65,15 +65,15 @@ const fullyMatchingIds = async (
     let matched = false;
     for (const locBucket of monBucket.location.buckets) {
       const location = locBucket.key;
-      const topSource = locBucket.top.hits.hits[0]._source;
-      const stillMatchingTopSource = locBucket.still_matching.top.hits.hits[0]._source;
+      const latestSource = locBucket.latest.hits.hits[0]._source;
+      const latestStillMatchingSource = locBucket.latest_matching.top.hits.hits[0]._source;
       // If the most recent document still matches the most recent document matching the current filters
       // we can include this in the result
-      if (stillMatchingTopSource['@timestamp'] >= topSource['@timestamp']) {
+      if (latestStillMatchingSource['@timestamp'] >= latestSource['@timestamp']) {
         matched = true;
       }
-      const checkGroup = topSource.monitor.check_group;
-      const status = topSource.summary.down > 0 ? 'down' : 'up';
+      const checkGroup = latestSource.monitor.check_group;
+      const status = latestSource.summary.down > 0 ? 'down' : 'up';
 
       // This monitor doesn't match, so just skip ahead and don't add it to the output
       // Only skip in case of up statusFilter, for a monitor to be up, all checks should be up
@@ -86,7 +86,7 @@ const fullyMatchingIds = async (
         location,
         checkGroup,
         status,
-        summaryTimestamp: topSource['@timestamp'],
+        summaryTimestamp: latestSource['@timestamp'],
       });
     }
 
@@ -124,7 +124,7 @@ export const mostRecentCheckGroups = async (
             location: {
               terms: { field: 'observer.geo.name', missing: 'N/A', size: 100 },
               aggs: {
-                top: {
+                latest: {
                   top_hits: {
                     sort: [{ '@timestamp': 'desc' }],
                     _source: {
@@ -133,19 +133,14 @@ export const mostRecentCheckGroups = async (
                     size: 1,
                   },
                 },
-                still_matching: {
+                latest_matching: {
                   filter: queryContext.filterClause || { match_all: {} },
                   aggs: {
                     top: {
                       top_hits: {
                         sort: [{ '@timestamp': 'desc' }],
                         _source: {
-                          includes: [
-                            'monitor.check_group',
-                            '@timestamp',
-                            'summary.up',
-                            'summary.down',
-                          ],
+                          includes: ['monitor.check_group', '@timestamp'],
                         },
                         size: 1,
                       },
