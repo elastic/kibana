@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiButtonIcon, EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FilterPopover } from '../../filter_group/filter_popover';
 import { overviewFiltersSelector } from '../../../../state/selectors';
-import { useFilterUpdate } from '../../../../hooks/use_filter_update';
 import { filterLabels } from '../../filter_group/translations';
 import { alertFilterLabels } from './translations';
-import { StatusCheckFilters } from '../../../../../common/runtime_types';
 
 interface Props {
   newFilters: string[];
@@ -24,38 +22,28 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
   setAlertParams,
   newFilters,
   onRemoveFilter,
+  filters,
+  setFilters,
+  alertParams,
 }) => {
   const {
     filters: { tags, ports, schemes, locations },
   } = useSelector(overviewFiltersSelector);
 
-  const [updatedFieldValues, setUpdatedFieldValues] = useState<{
-    fieldName: string;
-    values: string[];
-  }>({ fieldName: '', values: [] });
-
-  const { selectedLocations, selectedPorts, selectedSchemes, selectedTags } = useFilterUpdate(
-    updatedFieldValues.fieldName,
-    updatedFieldValues.values
-  );
-
-  const [filters, setFilters] = useState<StatusCheckFilters>({
-    'observer.geo.name': selectedLocations,
-    'url.port': selectedPorts,
-    tags: selectedTags,
-    'monitor.type': selectedSchemes,
-  });
-
-  useEffect(() => {
-    setAlertParams('filters', filters);
-  }, [filters, setAlertParams]);
+  const selectedPorts = alertParams?.filters['url.port'] ?? [];
+  const selectedLocations = alertParams?.filters['observer.geo.name'] ?? [];
+  const selectedSchemes = alertParams?.filters['monitor.type'] ?? [];
+  const selectedTags = alertParams?.filters?.tags ?? [];
 
   const onFilterFieldChange = (fieldName: string, values: string[]) => {
     setFilters({
       ...filters,
       [fieldName]: values,
     });
-    setUpdatedFieldValues({ fieldName, values });
+
+    if (alertParams.filters) {
+      setAlertParams('filters', { ...alertParams.filters, [fieldName]: values });
+    }
   };
 
   const monitorFilters = [

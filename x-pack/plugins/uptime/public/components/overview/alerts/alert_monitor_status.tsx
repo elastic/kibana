@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import * as labels from './translations';
@@ -31,9 +31,12 @@ interface AlertMonitorStatusProps {
 }
 
 export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (props) => {
-  const { filters, setAlertParams } = props;
+  const { alertParams, filters, setFilters, setAlertParams } = props;
 
-  const [newFilters, setNewFilters] = useState<string[]>([]);
+  const alertFilters = alertParams?.filters ?? {};
+  const [newFilters, setNewFilters] = useState<string[]>(
+    Object.keys(alertFilters).filter((f) => alertFilters[f].length)
+  );
 
   return (
     <>
@@ -56,6 +59,9 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
       <FiltersExpressionsSelect
         setAlertParams={setAlertParams}
+        setFilters={setFilters}
+        filters={filters}
+        alertParams={alertParams}
         newFilters={newFilters}
         onRemoveFilter={(removeFiler) => {
           if (newFilters.includes(removeFiler)) {
