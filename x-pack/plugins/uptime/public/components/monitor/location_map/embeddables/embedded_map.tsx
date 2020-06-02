@@ -19,8 +19,8 @@ import {
   ErrorEmbeddable,
 } from '../../../../../../../../src/plugins/embeddable/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/public';
-import { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { MapToolTipComponent } from './map_tool_tip';
+import { RenderTooltipContentParams } from '../../../../../../../legacy/plugins/maps/public';
 
 export interface EmbeddedMapProps {
   upPoints: LocationPoint[];
@@ -102,7 +102,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
       loadFeatureGeometry,
     };
     const relevantFeatures = features.filter(
-      (item) => item.layerId === 'up_points' || item.layerId === 'down_points'
+      (item: any) => item.layerId === 'up_points' || item.layerId === 'down_points'
     );
     if (relevantFeatures.length > 0) {
       return <OutPortal {...props} node={portalNode} features={relevantFeatures} />;

@@ -6,15 +6,19 @@
 
 import * as t from 'io-ts';
 
-export const LocationType = t.partial({
+export const LocationType = t.type({
   lat: t.string,
   lon: t.string,
 });
 
-export const CheckGeoType = t.partial({
-  name: t.string,
-  location: LocationType,
-});
+export const CheckGeoType = t.intersection([
+  t.type({
+    name: t.string,
+  }),
+  t.partial({
+    location: LocationType,
+  }),
+]);
 
 export const SummaryType = t.partial({
   up: t.number,

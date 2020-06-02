@@ -19,12 +19,14 @@ describe('StatusByLocation component', () => {
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
         ups: 4,
         downs: 0,
+        timestamp: '2020-01-13T22:50:06.536Z',
       },
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
         ups: 4,
         downs: 0,
+        timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];
     const component = shallowWithIntl(<StatusByLocations locations={monitorLocations} />);
@@ -38,12 +40,14 @@ describe('StatusByLocation component', () => {
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
         ups: 4,
         downs: 0,
+        timestamp: '2020-01-13T22:50:06.536Z',
       },
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
         ups: 4,
         downs: 0,
+        timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];
     const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
@@ -57,6 +61,7 @@ describe('StatusByLocation component', () => {
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
         ups: 4,
         downs: 0,
+        timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];
     const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
@@ -70,6 +75,7 @@ describe('StatusByLocation component', () => {
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
         ups: 4,
         downs: 0,
+        timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];
     const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
@@ -83,12 +89,14 @@ describe('StatusByLocation component', () => {
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
         ups: 4,
         downs: 0,
+        timestamp: '2020-01-13T22:50:06.536Z',
       },
       {
         summary: { up: 0, down: 4 },
         geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
         ups: 4,
         downs: 0,
+        timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];
     const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
@@ -102,12 +110,14 @@ describe('StatusByLocation component', () => {
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
         ups: 4,
         downs: 0,
+        timestamp: '2020-01-13T22:50:06.536Z',
       },
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
         ups: 4,
         downs: 0,
+        timestamp: '2020-01-13T22:50:06.536Z',
       },
     ];
     const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);

@@ -14,6 +14,7 @@ exports[`LocationMap component doesnt shows warning if geo is provided 1`] = `
         idToSelectedMap={
           Object {
             "listBtn": true,
+            "mapBtn": false,
           }
         }
         isIconOnly={true}
@@ -92,7 +93,7 @@ exports[`LocationMap component doesnt shows warning if geo is provided 1`] = `
               },
             ]
           }
-          ups={0}
+          ups={8}
         />
       </Styled(EuiFlexItem)>
     </EuiShowFor>
@@ -109,45 +110,6 @@ exports[`LocationMap component doesnt shows warning if geo is provided 1`] = `
         <styled.div>
           <EmbeddedMap
             downPoints={Array []}
-            monitorLocations={
-              Object {
-                "locations": Array [
-                  Object {
-                    "downs": 0,
-                    "geo": Object {
-                      "location": Object {
-                        "lat": "40.730610",
-                        "lon": " -73.935242",
-                      },
-                      "name": "New York",
-                    },
-                    "summary": Object {
-                      "down": 0,
-                      "up": 4,
-                    },
-                    "timestamp": "2020-01-13T22:50:06.536Z",
-                    "ups": 4,
-                  },
-                  Object {
-                    "downs": 0,
-                    "geo": Object {
-                      "location": Object {
-                        "lat": "52.487448",
-                        "lon": " 13.394798",
-                      },
-                      "name": "Tokyo",
-                    },
-                    "summary": Object {
-                      "down": 0,
-                      "up": 4,
-                    },
-                    "timestamp": "2020-01-13T22:50:04.354Z",
-                    "ups": 4,
-                  },
-                ],
-                "monitorId": "wapo",
-              }
-            }
             upPoints={
               Array [
                 Object {
@@ -188,6 +150,7 @@ exports[`LocationMap component renders correctly against snapshot 1`] = `
         idToSelectedMap={
           Object {
             "listBtn": true,
+            "mapBtn": false,
           }
         }
         isIconOnly={true}
@@ -249,6 +212,7 @@ exports[`LocationMap component renders correctly against snapshot 1`] = `
                 "ups": 4,
               },
               Object {
+                "downs": 0,
                 "geo": Object {
                   "location": Object {
                     "lat": "52.487448",
@@ -261,6 +225,7 @@ exports[`LocationMap component renders correctly against snapshot 1`] = `
                   "up": 4,
                 },
                 "timestamp": "2020-01-13T22:50:04.354Z",
+                "ups": 4,
               },
               Object {
                 "downs": 0,
@@ -276,7 +241,7 @@ exports[`LocationMap component renders correctly against snapshot 1`] = `
               },
             ]
           }
-          ups={0}
+          ups={12}
         />
       </Styled(EuiFlexItem)>
     </EuiShowFor>
@@ -294,55 +259,6 @@ exports[`LocationMap component renders correctly against snapshot 1`] = `
         <styled.div>
           <EmbeddedMap
             downPoints={Array []}
-            monitorLocations={
-              Object {
-                "locations": Array [
-                  Object {
-                    "downs": 0,
-                    "geo": Object {
-                      "location": Object {
-                        "lat": "40.730610",
-                        "lon": " -73.935242",
-                      },
-                      "name": "New York",
-                    },
-                    "summary": Object {
-                      "down": 0,
-                      "up": 4,
-                    },
-                    "timestamp": "2020-01-13T22:50:06.536Z",
-                    "ups": 4,
-                  },
-                  Object {
-                    "geo": Object {
-                      "location": Object {
-                        "lat": "52.487448",
-                        "lon": " 13.394798",
-                      },
-                      "name": "Tokyo",
-                    },
-                    "summary": Object {
-                      "down": 0,
-                      "up": 4,
-                    },
-                    "timestamp": "2020-01-13T22:50:04.354Z",
-                  },
-                  Object {
-                    "downs": 0,
-                    "geo": Object {
-                      "name": "Unnamed-location",
-                    },
-                    "summary": Object {
-                      "down": 0,
-                      "up": 4,
-                    },
-                    "timestamp": "2020-01-13T22:50:02.753Z",
-                    "ups": 4,
-                  },
-                ],
-                "monitorId": "wapo",
-              }
-            }
             upPoints={
               Array [
                 Object {
@@ -383,6 +299,7 @@ exports[`LocationMap component renders named locations that have missing geo dat
         idToSelectedMap={
           Object {
             "listBtn": true,
+            "mapBtn": false,
           }
         }
         isIconOnly={true}
@@ -442,7 +359,7 @@ exports[`LocationMap component renders named locations that have missing geo dat
               },
             ]
           }
-          ups={0}
+          ups={4}
         />
       </Styled(EuiFlexItem)>
     </EuiShowFor>
@@ -460,26 +377,6 @@ exports[`LocationMap component renders named locations that have missing geo dat
         <styled.div>
           <EmbeddedMap
             downPoints={Array []}
-            monitorLocations={
-              Object {
-                "locations": Array [
-                  Object {
-                    "downs": 0,
-                    "geo": Object {
-                      "location": undefined,
-                      "name": "New York",
-                    },
-                    "summary": Object {
-                      "down": 0,
-                      "up": 4,
-                    },
-                    "timestamp": "2020-01-13T22:50:06.536Z",
-                    "ups": 4,
-                  },
-                ],
-                "monitorId": "wapo",
-              }
-            }
             upPoints={Array []}
           />
         </styled.div>
@@ -503,6 +400,7 @@ exports[`LocationMap component shows warning if geo information is missing 1`] =
         idToSelectedMap={
           Object {
             "listBtn": true,
+            "mapBtn": false,
           }
         }
         isIconOnly={true}
@@ -577,7 +475,7 @@ exports[`LocationMap component shows warning if geo information is missing 1`] =
               },
             ]
           }
-          ups={0}
+          ups={8}
         />
       </Styled(EuiFlexItem)>
     </EuiShowFor>
@@ -595,41 +493,6 @@ exports[`LocationMap component shows warning if geo information is missing 1`] =
         <styled.div>
           <EmbeddedMap
             downPoints={Array []}
-            monitorLocations={
-              Object {
-                "locations": Array [
-                  Object {
-                    "downs": 0,
-                    "geo": Object {
-                      "location": Object {
-                        "lat": "52.487448",
-                        "lon": " 13.394798",
-                      },
-                      "name": "Tokyo",
-                    },
-                    "summary": Object {
-                      "down": 0,
-                      "up": 4,
-                    },
-                    "timestamp": "2020-01-13T22:50:04.354Z",
-                    "ups": 4,
-                  },
-                  Object {
-                    "downs": 0,
-                    "geo": Object {
-                      "name": "Unnamed-location",
-                    },
-                    "summary": Object {
-                      "down": 0,
-                      "up": 4,
-                    },
-                    "timestamp": "2020-01-13T22:50:02.753Z",
-                    "ups": 4,
-                  },
-                ],
-                "monitorId": "wapo",
-              }
-            }
             upPoints={
               Array [
                 Object {

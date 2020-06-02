@@ -8,15 +8,7 @@ import React from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { Link } from 'react-router-dom';
-import {
-  EuiSpacer,
-  EuiText,
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
-} from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Tls } from '../../../../../common/runtime_types';
 import { useCertStatus } from '../../../../hooks';

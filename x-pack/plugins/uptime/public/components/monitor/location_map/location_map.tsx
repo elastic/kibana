@@ -69,9 +69,9 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
         isGeoInfoMissing = true;
       } else if (!!geo.location.lat && !!geo.location.lon) {
         if (summary?.down === 0) {
-          upPoints.push(geo);
+          upPoints.push(geo as LocationPoint);
         } else {
-          downPoints.push(geo);
+          downPoints.push(geo as LocationPoint);
         }
       }
     });
@@ -92,9 +92,12 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
     },
   ];
 
-  const [selectedView, setSelectedView] = useState({ listBtn: true });
+  const [selectedView, setSelectedView] = useState<{ [x: string]: boolean }>({
+    listBtn: true,
+    mapBtn: false,
+  });
 
-  const onChangeView = (optionId) => {
+  const onChangeView = (optionId: string) => {
     setSelectedView({
       [optionId]: !selectedView[optionId],
     });
@@ -129,11 +132,7 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
           <EuiFlexItem grow={false}>
             {isGeoInfoMissing && <LocationMissingWarning />}
             <MapPanel>
-              <EmbeddedMap
-                upPoints={upPoints}
-                downPoints={downPoints}
-                monitorLocations={monitorLocations}
-              />
+              <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
             </MapPanel>
           </EuiFlexItem>
         </EuiShowFor>

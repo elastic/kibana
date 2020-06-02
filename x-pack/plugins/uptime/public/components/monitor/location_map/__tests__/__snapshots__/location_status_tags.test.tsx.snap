@@ -67,6 +67,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
   <div
     class="euiSpacer euiSpacer--s"
   />
+  // @ts-ignore weird TS issue
   <div
     class="euiBasicTable"
   >
@@ -189,7 +190,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 <span
                   class=""
                 >
-                  NaN%
+                  100.00%
                 </span>
               </div>
             </td>
@@ -270,7 +271,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 <span
                   class=""
                 >
-                  NaN%
+                  100.00%
                 </span>
               </div>
             </td>
@@ -335,6 +336,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
   <div
     class="euiSpacer euiSpacer--s"
   />
+  // @ts-ignore weird TS issue
   <div
     class="euiBasicTable"
   >
@@ -457,7 +459,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 <span
                   class=""
                 >
-                  NaN%
+                  100.00%
                 </span>
               </div>
             </td>
@@ -538,7 +540,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 <span
                   class=""
                 >
-                  NaN%
+                  100.00%
                 </span>
               </div>
             </td>
@@ -603,6 +605,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
   <div
     class="euiSpacer euiSpacer--s"
   />
+  // @ts-ignore weird TS issue
   <div
     class="euiBasicTable"
   >

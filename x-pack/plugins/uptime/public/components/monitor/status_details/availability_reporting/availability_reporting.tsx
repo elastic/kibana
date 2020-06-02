@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 import { EuiBasicTable, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { Pagination } from '@elastic/eui/src/components/basic_table/pagination_bar';
 import { StatusTag } from './location_status_tags';
 import { TagLabel } from './tag_label';
 
@@ -25,15 +26,15 @@ export const AvailabilityReporting: React.FC<Props> = ({ ups, downs, allLocation
       field: 'label',
       name: 'Location',
       truncateText: true,
-      render: (val: string, item: any) => {
-        return <TagLabel item={item} />;
+      render: (val: string, item: StatusTag) => {
+        return <TagLabel color={item.color} label={item.label} />;
       },
     },
     {
       field: 'availability',
       name: 'Availability',
       width: '80px',
-      render: (val: string) => {
+      render: (val: number) => {
         return <span>{val.toFixed(2)}%</span>;
       },
     },
@@ -44,14 +45,17 @@ export const AvailabilityReporting: React.FC<Props> = ({ ups, downs, allLocation
     },
   ];
 
-  const pagination = {
-    pageIndex,
-    pageSize: 3,
-    totalItemCount: allLocations.length,
-    hidePerPageOptions: true,
-  };
+  const pagination: Pagination | undefined =
+    allLocations.length > 3
+      ? {
+          pageIndex,
+          pageSize: 3,
+          totalItemCount: allLocations.length,
+          hidePerPageOptions: true,
+        }
+      : undefined;
 
-  const onTableChange = ({ page = {} }) => {
+  const onTableChange = ({ page }: any) => {
     setPageIndex(page.index);
   };
 
@@ -61,11 +65,12 @@ export const AvailabilityReporting: React.FC<Props> = ({ ups, downs, allLocation
         <h3>{availability.toFixed(2)}% Availability</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
+      // @ts-ignore weird TS issue
       <EuiBasicTable
         responsive={false}
         columns={cols}
         items={allLocations.slice(pageIndex * 3, pageIndex * 3 + 3)}
-        pagination={allLocations.length > 3 ? pagination : null}
+        pagination={pagination}
         onChange={onTableChange}
       />
     </>

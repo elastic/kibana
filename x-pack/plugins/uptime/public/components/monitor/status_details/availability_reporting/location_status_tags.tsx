@@ -7,8 +7,6 @@
 import React, { useContext } from 'react';
 import moment from 'moment';
 import styled from 'styled-components';
-import { EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { UptimeThemeContext } from '../../../../contexts';
 import { MonitorLocation } from '../../../../../common/runtime_types';
 import { SHORT_TIMESPAN_LOCALE, SHORT_TS_LOCALE } from '../../../../../common/constants';
@@ -64,7 +62,7 @@ export const LocationStatusTags = ({ locations, ups, downs }: Props) => {
     return a.label > b.label ? 1 : b.label > a.label ? -1 : 0;
   });
 
-  if (!locations?.length > 0) {
+  if (allLocations.length === 0) {
     return null;
   }
 

@@ -114,11 +114,15 @@ describe('LocationStatusTags component', () => {
         summary: { up: 4, down: 0 },
         geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment().subtract('5', 's').toISOString(),
+        ups: 4,
+        downs: 0,
       },
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment().subtract('5', 'd').toISOString(),
+        ups: 4,
+        downs: 0,
       },
     ];
     const component = renderWithIntl(
@@ -133,11 +137,15 @@ describe('LocationStatusTags component', () => {
         summary: { up: 0, down: 2 },
         geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment().subtract('5', 's').toISOString(),
+        ups: 4,
+        downs: 0,
       },
       {
         summary: { up: 0, down: 2 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment().subtract('5', 'm').toISOString(),
+        ups: 4,
+        downs: 0,
       },
     ];
     const component = renderWithIntl(

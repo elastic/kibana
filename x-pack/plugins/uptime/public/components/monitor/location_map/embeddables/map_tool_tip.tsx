@@ -11,10 +11,11 @@ import { useSelector } from 'react-redux';
 import { EuiOutsideClickDetector, EuiPopoverTitle, EuiStat, EuiText } from '@elastic/eui';
 import { TagLabel } from '../../status_details/availability_reporting';
 import { UptimeThemeContext } from '../../../../contexts';
-import { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { AppState } from '../../../../state';
 import { monitorLocationsSelector } from '../../../../state/selectors';
 import { useMonitorId } from '../../../../hooks';
+import { MonitorLocation } from '../../../../../common/runtime_types/monitor';
+import { RenderTooltipContentParams } from '../../../../../../../legacy/plugins/maps/public';
 
 type MapToolTipProps = Partial<RenderTooltipContentParams>;
 
@@ -24,12 +25,9 @@ const TimestampText = styled(EuiText)`
   margin-left: 5px;
 `;
 
-export const MapToolTipComponent = ({
-  closeTooltip,
-  setFeatureIndex,
-  features = [],
-}: MapToolTipProps) => {
-  const { id: locationName, layerId } = features[0] ?? {};
+export const MapToolTipComponent = ({ closeTooltip, features = [] }: MapToolTipProps) => {
+  const { id: featureId, layerId } = features[0] ?? {};
+  const locationName = featureId?.toString();
   const {
     colors: { gray, danger },
   } = useContext(UptimeThemeContext);
@@ -39,12 +37,12 @@ export const MapToolTipComponent = ({
   const monitorLocations = useSelector((state: AppState) =>
     monitorLocationsSelector(state, monitorId)
   );
-  if (!locationName || !monitorLocations) {
+  if (!locationName || !monitorLocations?.locations) {
     return null;
   }
-  const { timestamp, ups, downs } = monitorLocations.locations.find(
-    ({ geo }) => geo.name === locationName
-  );
+  const { timestamp, ups, downs }: MonitorLocation = monitorLocations.locations!.find(
+    ({ geo }: MonitorLocation) => geo.name === locationName
+  )!;
 
   const availability = (ups / (ups + downs)) * 100;
 
@@ -53,16 +51,15 @@ export const MapToolTipComponent = ({
       onOutsideClick={() => {
         if (closeTooltip != null) {
           closeTooltip();
-          setFeatureIndex(0);
         }
       }}
     >
       <>
         <EuiPopoverTitle>
           {layerId === 'up_points' ? (
-            <TagLabel item={{ label: locationName, color: gray }} />
+            <TagLabel label={locationName} color={gray} />
           ) : (
-            <TagLabel item={{ label: locationName, color: danger }} />
+            <TagLabel label={locationName} color={danger} />
           )}
           <TimestampText color="subdued" size="s">
             {moment(timestamp).fromNow()}
