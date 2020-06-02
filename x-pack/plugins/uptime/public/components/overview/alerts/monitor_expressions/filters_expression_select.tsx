@@ -13,6 +13,7 @@ import { filterLabels } from '../../filter_group/translations';
 import { alertFilterLabels } from './translations';
 
 interface Props {
+  alertParams: { [key: string]: any };
   newFilters: string[];
   onRemoveFilter: (val: string) => void;
   setAlertParams: (key: string, value: any) => void;
@@ -22,8 +23,6 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
   setAlertParams,
   newFilters,
   onRemoveFilter,
-  filters,
-  setFilters,
   alertParams,
 }) => {
   const {

@@ -98,7 +98,6 @@ describe('monitor status alert type', () => {
   describe('initMonitorStatusAlertType', () => {
     expect(
       initMonitorStatusAlertType({
-        autocomplete: {},
         store: {
           dispatch: jest.fn(),
           getState: jest.fn(),
@@ -106,6 +105,11 @@ describe('monitor status alert type', () => {
           subscribe: jest.fn(),
           [Symbol.observable]: jest.fn(),
         },
+        // @ts-ignore we don't need to test this functionality here because
+        // it's not used by the code this file tests
+        core: {},
+        // @ts-ignore
+        plugins: {},
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -128,7 +132,7 @@ describe('monitor status alert type', () => {
         >
           <MonitorStatusTitle />
         </Provider>,
-        "requiresAppContext": true,
+        "requiresAppContext": false,
         "validate": [Function],
       }
     `);

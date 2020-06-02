@@ -36,11 +36,6 @@ export const getKibanaFrameworkAdapter = (
     i18n,
   } = core;
 
-  let breadcrumbs: ChromeBreadcrumb[] = [];
-  core.chrome.getBreadcrumbs$().subscribe((nextBreadcrumbs?: ChromeBreadcrumb[]) => {
-    breadcrumbs = nextBreadcrumbs || [];
-  });
-
   const { apm, infrastructure, logs } = getIntegratedAppAvailability(
     capabilities,
     INTEGRATED_SOLUTIONS

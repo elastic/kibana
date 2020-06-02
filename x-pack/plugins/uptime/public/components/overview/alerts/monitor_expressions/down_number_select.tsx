@@ -11,13 +11,13 @@ import { AlertFieldNumber } from '../alert_field_number';
 
 interface Props {
   setAlertParams: (key: string, value: any) => void;
-  filters: string;
+  hasFilters: boolean;
   defaultNumTimes?: number;
 }
 
 export const DownNoExpressionSelect: React.FC<Props> = ({
   defaultNumTimes,
-  filters,
+  hasFilters,
   setAlertParams,
 }) => {
   const [numTimes, setNumTimes] = useState<number>(defaultNumTimes ?? 5);
@@ -39,7 +39,7 @@ export const DownNoExpressionSelect: React.FC<Props> = ({
         />
       }
       data-test-subj="xpack.uptime.alerts.monitorStatus.numTimesExpression"
-      description={filters ? labels.MATCHING_MONITORS_DOWN : labels.ANY_MONITOR_DOWN}
+      description={hasFilters ? labels.MATCHING_MONITORS_DOWN : labels.ANY_MONITOR_DOWN}
       id="ping-count"
       value={`${numTimes} times`}
     />

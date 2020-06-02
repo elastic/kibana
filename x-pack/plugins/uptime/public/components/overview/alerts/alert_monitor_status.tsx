@@ -18,9 +18,10 @@ import { AddFilterButton } from './add_filter_btn';
 import { KueryBar } from '..';
 
 interface AlertMonitorStatusProps {
+  alertParams: { [key: string]: any };
   autocomplete: DataPublicPluginSetup['autocomplete'];
   enabled: boolean;
-  filters: string;
+  hasFilters: boolean;
   locations: string[];
   numTimes: number;
   setAlertParams: (key: string, value: any) => void;
@@ -31,7 +32,7 @@ interface AlertMonitorStatusProps {
 }
 
 export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (props) => {
-  const { alertParams, filters, setFilters, setAlertParams } = props;
+  const { alertParams, hasFilters, setAlertParams } = props;
 
   const alertFilters = alertParams?.filters ?? {};
   const [newFilters, setNewFilters] = useState<string[]>(
@@ -54,7 +55,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
       <DownNoExpressionSelect
         defaultNumTimes={alertParams.numTimes}
-        filters={filters}
+        hasFilters={hasFilters}
         setAlertParams={setAlertParams}
       />
 
@@ -70,8 +71,6 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
       <FiltersExpressionsSelect
         setAlertParams={setAlertParams}
-        setFilters={setFilters}
-        filters={filters}
         alertParams={alertParams}
         newFilters={newFilters}
         onRemoveFilter={(removeFiler) => {

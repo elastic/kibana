@@ -10,11 +10,12 @@ import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants';
 import { TlsTranslations } from './translations';
 import { AlertTypeInitializer } from '.';
-import { AlertTls } from '../../components/overview/alerts/alerts_containers/alert_tls';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 const { name, defaultActionMessage } = TlsTranslations;
-
+const TlsAlertExpression = React.lazy(() =>
+  import('../../components/overview/alerts/alerts_containers/alert_tls')
+);
 export const initTlsAlertType: AlertTypeInitializer = ({
   store,
   core,
@@ -22,8 +23,12 @@ export const initTlsAlertType: AlertTypeInitializer = ({
 }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.TLS,
   iconClass: 'uptimeApp',
-  alertParamsExpression: React.lazy(() =>
-    import('../../components/overview/alerts/alerts_containers/alert_tls')
+  alertParamsExpression: (_params: any) => (
+    <ReduxProvider store={store}>
+      <KibanaContextProvider services={{ ...core, ...plugins }}>
+        <TlsAlertExpression />
+      </KibanaContextProvider>
+    </ReduxProvider>
   ),
   name,
   validate: () => ({ errors: {} }),

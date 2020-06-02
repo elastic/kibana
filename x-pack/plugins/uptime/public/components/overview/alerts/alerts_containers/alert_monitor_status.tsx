@@ -4,18 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
-import {
-  selectMonitorStatusAlert,
-  selectSearchText,
-  overviewFiltersSelector,
-} from '../../../../state/selectors';
+import { selectMonitorStatusAlert, overviewFiltersSelector } from '../../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../index';
-import { setOverviewFilters, fetchOverviewFilters, setSearchText } from '../../../../state/actions';
+import { fetchOverviewFilters, setSearchText } from '../../../../state/actions';
 
 interface Props {
+  alertParams: { [key: string]: any };
   autocomplete: DataPublicPluginSetup['autocomplete'];
   enabled: boolean;
   numTimes: number;
@@ -50,16 +47,8 @@ export const AlertMonitorStatus: React.FC<Props> = ({
     );
   }, [alertParams, dispatch]);
 
-  const setFilters = useCallback(
-    (filters: any) => {
-      dispatch(setOverviewFilters(filters));
-    },
-    [dispatch]
-  );
-
   const overviewFilters = useSelector(overviewFiltersSelector);
-  const { filters, locations } = useSelector(selectMonitorStatusAlert);
-  const searchText = useSelector(selectSearchText);
+  const { locations } = useSelector(selectMonitorStatusAlert);
   useEffect(() => {
     if (alertParams.search) {
       dispatch(setSearchText(alertParams.search));
@@ -70,9 +59,8 @@ export const AlertMonitorStatus: React.FC<Props> = ({
     <AlertMonitorStatusComponent
       autocomplete={autocomplete}
       enabled={enabled}
-      filters={overviewFilters.filters}
+      hasFilters={!!overviewFilters?.filters}
       alertParams={alertParams}
-      setFilters={setFilters}
       locations={locations}
       numTimes={numTimes}
       setAlertParams={setAlertParams}
