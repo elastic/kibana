@@ -29,10 +29,7 @@ export function registerAnnotationAPIs({
 }) {
   function wrapRouteHandler<TType extends t.Type<any>>(
     types: TType,
-    handler: (params: {
-      data: t.TypeOf<TType>;
-      client: ScopedAnnotationsClient;
-    }) => Promise<any>
+    handler: (params: { data: t.TypeOf<TType>; client: ScopedAnnotationsClient }) => Promise<any>
   ): RequestHandler {
     return async (...args: Parameters<RequestHandler>) => {
       const [context, request, response] = args;
@@ -75,9 +72,7 @@ export function registerAnnotationAPIs({
         return response.custom({
           statusCode: err.output?.statusCode ?? 500,
           body: {
-            message:
-              err.output?.payload?.message ??
-              'An internal server error occured',
+            message: err.output?.payload?.message ?? 'An internal server error occured',
           },
         });
       }
@@ -93,12 +88,9 @@ export function registerAnnotationAPIs({
         body: unknowns,
       },
     },
-    wrapRouteHandler(
-      t.type({ body: createAnnotationRt }),
-      ({ data, client }) => {
-        return client.create(data.body);
-      }
-    )
+    wrapRouteHandler(t.type({ body: createAnnotationRt }), ({ data, client }) => {
+      return client.create(data.body);
+    })
   );
 
   router.delete(
@@ -108,12 +100,9 @@ export function registerAnnotationAPIs({
         params: unknowns,
       },
     },
-    wrapRouteHandler(
-      t.type({ params: deleteAnnotationRt }),
-      ({ data, client }) => {
-        return client.delete(data.params);
-      }
-    )
+    wrapRouteHandler(t.type({ params: deleteAnnotationRt }), ({ data, client }) => {
+      return client.delete(data.params);
+    })
   );
 
   router.get(
@@ -123,11 +112,8 @@ export function registerAnnotationAPIs({
         params: unknowns,
       },
     },
-    wrapRouteHandler(
-      t.type({ params: getAnnotationByIdRt }),
-      ({ data, client }) => {
-        return client.getById(data.params);
-      }
-    )
+    wrapRouteHandler(t.type({ params: getAnnotationByIdRt }), ({ data, client }) => {
+      return client.getById(data.params);
+    })
   );
 }
