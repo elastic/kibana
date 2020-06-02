@@ -95,12 +95,11 @@ class PersistableStatePlugin {
   start(core, plugins) {
     return {
       // get will always return. If requested persistable state is not defined it will return default set of functions.
-      get: (id: string) => ({
-        // takes the state, extracts the references and returns them + version string
-        beforeSave: (state: PersistableState) => [PersistableState, SavedObjectReference[], string],
-        // takes the state, references and version and returns latest state version with references injected
-        afterLoad: (state: PersistableState, references: SavedObjectReference[], version: string) => PersistableState,
-      })
+      get: (id: string) => PersistableStateDefinition,
+      // takes the state, extracts the references and returns them + version string
+      beforeSave: (id: string, state: PersistableState) => [PersistableState, SavedObjectReference[], string],
+      // takes the state, references and version and returns latest state version with references injected
+      afterLoad: (id: string, state: PersistableState, references: SavedObjectReference[], version: string) => PersistableState,
     }
   }
 }
@@ -112,7 +111,7 @@ class PersistableStatePlugin {
 When plugin A wants to store some state that it does not own it should check with persistableStateRegistry for a registered persistable state definition and execute `beforeSave` function.
 
 ```ts
-  const expressionReadyForSaving = persistableStatePlugin.get('expression').beforeSave(expressionString);
+  const expressionReadyForSaving = persistableStatePlugin.beforeSave('expression', expressionString);
 
 ``` 
 
