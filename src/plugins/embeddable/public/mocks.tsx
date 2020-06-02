@@ -22,7 +22,6 @@ import {
   EmbeddableSetup,
   EmbeddableSetupDependencies,
   EmbeddableStartDependencies,
-  EmbeddableStateTransfer,
   IEmbeddable,
   EmbeddablePanel,
 } from '.';
@@ -49,7 +48,6 @@ interface CreateEmbeddablePanelMockArgs {
   application: CoreStart['application'];
   inspector: InspectorStart;
   SavedObjectFinder: React.ComponentType<any>;
-  stateTransfer: EmbeddableStart['stateTransfer'];
 }
 
 export const createEmbeddablePanelMock = ({
@@ -61,7 +59,6 @@ export const createEmbeddablePanelMock = ({
   application,
   inspector,
   SavedObjectFinder,
-  stateTransfer,
 }: Partial<CreateEmbeddablePanelMockArgs>) => {
   return ({ embeddable }: { embeddable: IEmbeddable }) => (
     <EmbeddablePanel
@@ -74,20 +71,8 @@ export const createEmbeddablePanelMock = ({
       overlays={overlays || ({} as any)}
       inspector={inspector || ({} as any)}
       SavedObjectFinder={SavedObjectFinder || (() => null)}
-      stateTransfer={stateTransfer || ({} as any)}
     />
   );
-};
-
-export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTransfer> => {
-  return {
-    incomingOriginatingApp: jest.fn(),
-    incomingEmbeddablePackage: jest.fn(),
-    incoming: jest.fn(),
-    outgoingOriginatingApp: jest.fn(),
-    outgoingEmbeddablePackage: jest.fn(),
-    outgoing: jest.fn(),
-  };
 };
 
 const createSetupContract = (): Setup => {
@@ -103,7 +88,6 @@ const createStartContract = (): Start => {
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
     EmbeddablePanel: jest.fn(),
-    stateTransfer: createEmbeddableStateTransferMock() as EmbeddableStateTransfer,
   };
   return startContract;
 };

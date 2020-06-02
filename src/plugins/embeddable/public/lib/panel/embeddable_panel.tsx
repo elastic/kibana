@@ -61,7 +61,6 @@ interface Props {
   application: CoreStart['application'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
-  stateTransfer?: EmbeddableStart['stateTransfer'];
   hideHeader?: boolean;
 }
 
@@ -280,11 +279,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       ),
       new InspectPanelAction(this.props.inspector),
       new RemovePanelAction(),
-      new EditPanelAction(
-        this.props.getEmbeddableFactory,
-        this.props.application,
-        this.props.stateTransfer
-      ),
+      new EditPanelAction(this.props.getEmbeddableFactory, this.props.application),
     ];
 
     const sortedActions = [...regularActions, ...extraActions].sort(sortByOrderField);
