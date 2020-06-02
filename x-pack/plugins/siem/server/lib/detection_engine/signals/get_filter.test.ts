@@ -6,7 +6,7 @@
 
 import { getQueryFilter, getFilter } from './get_filter';
 import { PartialFilter } from '../types';
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 
 describe('get_filter', () => {
   let servicesMock: AlertServicesMock;

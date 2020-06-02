@@ -18,6 +18,7 @@ jest.mock('react-router-dom', () => ({
     state: '',
   }),
   withRouter: () => jest.fn(),
+  generatePath: jest.fn(),
 }));
 
 // Test will fail because we will to need to mock some core services to make the test work

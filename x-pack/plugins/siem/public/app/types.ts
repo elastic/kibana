@@ -5,7 +5,6 @@
  */
 
 import { Reducer, AnyAction, Middleware, Dispatch } from 'redux';
-
 import { NavTab } from '../common/components/navigation/types';
 import { HostsState } from '../hosts/store';
 import { NetworkState } from '../network/store';
@@ -15,7 +14,7 @@ import { Immutable } from '../../common/endpoint/types';
 import { AlertListState } from '../../common/endpoint_alerts/types';
 import { AppAction } from '../common/store/actions';
 import { HostState } from '../endpoint_hosts/types';
-import { PolicyDetailsState, PolicyListState } from '../endpoint_policy/types';
+import { ManagementState } from '../management/store/types';
 
 export enum SiemPageName {
   overview = 'overview',
@@ -24,6 +23,7 @@ export enum SiemPageName {
   detections = 'detections',
   timelines = 'timelines',
   case = 'case',
+  management = 'management',
 }
 
 export type SiemNavTabKey =
@@ -32,14 +32,15 @@ export type SiemNavTabKey =
   | SiemPageName.network
   | SiemPageName.detections
   | SiemPageName.timelines
-  | SiemPageName.case;
+  | SiemPageName.case
+  | SiemPageName.management;
 
 export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
 
 export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> {
   initialState: Record<K, T>;
   reducer: Record<K, Reducer<T, AnyAction>>;
-  middleware?: Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>;
+  middleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;
 }
 
 export interface SecuritySubPlugin {
@@ -52,8 +53,7 @@ type SecuritySubPluginKeyStore =
   | 'timeline'
   | 'hostList'
   | 'alertList'
-  | 'policyDetails'
-  | 'policyList';
+  | 'management';
 export interface SecuritySubPluginWithStore<K extends SecuritySubPluginKeyStore, T>
   extends SecuritySubPlugin {
   store: SecuritySubPluginStore<K, T>;
@@ -67,8 +67,7 @@ export interface SecuritySubPlugins extends SecuritySubPlugin {
       timeline: TimelineState;
       alertList: Immutable<AlertListState>;
       hostList: Immutable<HostState>;
-      policyDetails: Immutable<PolicyDetailsState>;
-      policyList: Immutable<PolicyListState>;
+      management: ManagementState;
     };
     reducer: {
       hosts: Reducer<HostsState, AnyAction>;
@@ -76,8 +75,7 @@ export interface SecuritySubPlugins extends SecuritySubPlugin {
       timeline: Reducer<TimelineState, AnyAction>;
       alertList: ImmutableReducer<AlertListState, AppAction>;
       hostList: ImmutableReducer<HostState, AppAction>;
-      policyDetails: ImmutableReducer<PolicyDetailsState, AppAction>;
-      policyList: ImmutableReducer<PolicyListState, AppAction>;
+      management: ImmutableReducer<ManagementState, AppAction>;
     };
     middlewares: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;
   };

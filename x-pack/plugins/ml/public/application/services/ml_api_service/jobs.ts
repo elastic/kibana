@@ -95,7 +95,6 @@ export const jobs = {
       body,
     });
   },
-
   closeJobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
     return http<any>({
