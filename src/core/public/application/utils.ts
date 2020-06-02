@@ -18,7 +18,7 @@
  */
 
 import { IBasePath } from '../http';
-import { App, LegacyApp } from './types';
+import { App, LegacyApp, PublicAppInfo, PublicLegacyAppInfo } from './types';
 
 export interface AppUrlInfo {
   app: string;
@@ -119,3 +119,19 @@ const removeBasePath = (url: string, basePath: IBasePath, origin: string): strin
   }
   return basePath.remove(url);
 };
+
+export function getAppInfo(app: App<unknown> | LegacyApp): PublicAppInfo | PublicLegacyAppInfo {
+  if (isLegacyApp(app)) {
+    const { updater$, ...infos } = app;
+    return {
+      ...infos,
+      legacy: true,
+    };
+  } else {
+    const { updater$, mount, ...infos } = app;
+    return {
+      ...infos,
+      legacy: false,
+    };
+  }
+}
