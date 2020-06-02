@@ -5,6 +5,10 @@
  */
 
 import { getAggConfigFromEsAgg } from './pivot_aggs';
+import {
+  FilterAggForm,
+  FilterTermForm,
+} from '../sections/create_transform/components/step_define/common/filter_agg/components';
 
 describe('getAggConfigFromEsAgg', () => {
   test('should throw an error for unsupported agg', () => {
@@ -12,16 +16,31 @@ describe('getAggConfigFromEsAgg', () => {
   });
 
   test('should return a common config if the agg does not have a custom config defined', () => {
-    expect(getAggConfigFromEsAgg({ avg: {} }, 'test')).toEqual({});
+    expect(getAggConfigFromEsAgg({ avg: { field: 'region' } }, 'test_1')).toEqual({
+      agg: 'avg',
+      aggName: 'test_1',
+      dropDownName: 'test_1',
+      field: 'region',
+    });
   });
 
-  test('should return a config with populated values', () => {
-    expect(getAggConfigFromEsAgg({ filter: { term: { region: 'sa-west-1' } } }, 'test')).toEqual({
+  test('should return a custom config for recognized aggregation type', () => {
+    expect(
+      getAggConfigFromEsAgg({ filter: { term: { region: 'sa-west-1' } } }, 'test_2')
+    ).toMatchObject({
       agg: 'filter',
-      aggName: 'test',
+      aggName: 'test_2',
+      dropDownName: 'test_2',
       field: 'region',
+      AggFormComponent: FilterAggForm,
       aggConfig: {
-        value: 'sa-west',
+        filterAgg: 'term',
+        aggTypeConfig: {
+          FilterAggFormComponent: FilterTermForm,
+          filterAggConfig: {
+            value: 'sa-west-1',
+          },
+        },
       },
     });
   });
