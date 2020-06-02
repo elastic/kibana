@@ -5,12 +5,12 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import * as fixtures from '../../test/fixtures';
-import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
-import { IdxMgmtHomeTestBed } from './helpers/home.helpers';
-import { API_BASE_PATH } from '../../common/constants';
 
-const { setup } = pageHelpers.home;
+import * as fixtures from '../../../test/fixtures';
+import { API_BASE_PATH } from '../../../common/constants';
+import { setupEnvironment, nextTick, getRandomString } from '../helpers';
+
+import { IdxMgmtHomeTestBed, setup } from './home.helpers';
 
 const removeWhiteSpaceOnArrayValues = (array: any[]) =>
   array.map((value) => {

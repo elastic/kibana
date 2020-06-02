@@ -6,6 +6,7 @@
 
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
+
 import {
   registerTestBed,
   TestBed,
@@ -17,7 +18,7 @@ import { IndexManagementHome } from '../../../public/application/sections/home';
 import { BASE_PATH } from '../../../common/constants';
 import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { TemplateDeserialized } from '../../../common';
-import { WithAppDependencies, services } from './setup_environment';
+import { WithAppDependencies, services } from '../helpers';
 
 const testBedConfig: TestBedConfig = {
   store: () => indexManagementStore(services as any),

@@ -5,11 +5,11 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
-import { IdxMgmtHomeTestBed } from './helpers/home.helpers';
-import { API_BASE_PATH } from '../../common/constants';
 
-const { setup } = pageHelpers.home;
+import { API_BASE_PATH } from '../../../common/constants';
+import { setupEnvironment, nextTick } from '../helpers';
+
+import { IdxMgmtHomeTestBed, setup } from './home.helpers';
 
 describe('<IndexManagementHome />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();

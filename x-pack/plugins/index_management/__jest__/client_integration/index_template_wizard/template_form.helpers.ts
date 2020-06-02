@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { TestBed, SetupFunc, UnwrapPromise } from '../../../../../test_utils';
 import { TemplateDeserialized } from '../../../common';
-import { nextTick } from './index';
+import { nextTick } from '../helpers';
 
 interface MappingField {
   name: string;

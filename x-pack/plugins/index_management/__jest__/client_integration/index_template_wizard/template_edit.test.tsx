@@ -3,13 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
-import { TemplateFormTestBed } from './helpers/template_form.helpers';
-import * as fixtures from '../../test/fixtures';
-import { TEMPLATE_NAME, SETTINGS, ALIASES, MAPPINGS as DEFAULT_MAPPING } from './helpers/constants';
+import * as fixtures from '../../../test/fixtures';
+import { setupEnvironment, nextTick } from '../helpers';
+
+import { TEMPLATE_NAME, SETTINGS, ALIASES, MAPPINGS as DEFAULT_MAPPING } from './constants';
+import { setup } from './template_edit.helpers';
+import { TemplateFormTestBed } from './template_form.helpers';
 
 const UPDATED_INDEX_PATTERN = ['updatedIndexPattern'];
 const UPDATED_MAPPING_TEXT_FIELD_NAME = 'updated_text_datatype';
@@ -21,8 +24,6 @@ const MAPPING = {
     },
   },
 };
-
-const { setup } = pageHelpers.templateEdit;
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
