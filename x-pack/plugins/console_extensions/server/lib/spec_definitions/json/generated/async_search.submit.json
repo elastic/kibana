@@ -1,8 +1,8 @@
 {
   "async_search.submit": {
     "url_params": {
-      "wait_for_completion": "",
-      "clean_on_completion": "__flag__",
+      "wait_for_completion_timeout": "",
+      "keep_on_completion": "__flag__",
       "keep_alive": "",
       "batched_reduce_size": "",
       "request_cache": "__flag__",
@@ -23,6 +23,7 @@
       "expand_wildcards": [
         "open",
         "closed",
+        "hidden",
         "none",
         "all"
       ],

@@ -5,7 +5,8 @@
       "timeout": "",
       "dry_run": "__flag__",
       "master_timeout": "",
-      "wait_for_active_shards": ""
+      "wait_for_active_shards": "",
+      "prefer_v2_templates": "__flag__"
     },
     "methods": [
       "POST"
