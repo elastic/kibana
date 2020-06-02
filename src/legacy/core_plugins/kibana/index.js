@@ -61,7 +61,7 @@ export default function (kibana) {
           title: i18n.translate('kbn.discoverTitle', {
             defaultMessage: 'Discover',
           }),
-          order: 2000,
+          order: 1000,
           url: `${kbnBaseUrl}#/discover`,
           euiIconType: 'discoverApp',
           disableSubUrlTracking: true,
@@ -83,7 +83,7 @@ export default function (kibana) {
           title: i18n.translate('kbn.dashboardTitle', {
             defaultMessage: 'Dashboard',
           }),
-          order: 1000,
+          order: 2000,
           url: `${kbnBaseUrl}#/dashboards`,
           euiIconType: 'dashboardApp',
           disableSubUrlTracking: true,
