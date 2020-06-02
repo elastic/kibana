@@ -51,7 +51,8 @@ interface StartServices {
   openModal: OverlayStart['openModal'];
 }
 
-export class TodoEmbeddableFactoryDefinition extends BindEmbeddableFactoryDefinitionOutputType<TodoOutput>
+export class TodoEmbeddableFactoryDefinition
+  extends BindEmbeddableFactoryDefinitionOutputType<TodoOutput>
   implements EmbeddableFactoryDefinition<TodoInput, TodoOutput, TodoEmbeddable> {
   public readonly type = TODO_EMBEDDABLE;
 

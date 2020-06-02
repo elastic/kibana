@@ -48,7 +48,10 @@ const factory = new SlowContactCardEmbeddableFactory({
   execAction: uiActions.executeTriggerActions,
 });
 setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, factory);
-setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE, new HelloWorldEmbeddableFactoryDefinition());
+setup.registerEmbeddableFactory(
+  HELLO_WORLD_EMBEDDABLE,
+  new HelloWorldEmbeddableFactoryDefinition()
+);
 
 const start = doStart();
 
