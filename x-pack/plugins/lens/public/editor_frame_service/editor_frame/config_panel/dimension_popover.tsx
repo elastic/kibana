@@ -36,7 +36,7 @@ export function DimensionPopover({
         (popoverState.openId === accessor || (noMatch && popoverState.addingToGroupId === groupId))
       }
       closePopover={() => {
-        setPopoverState({ isOpen: false, openId: null, addingToGroupId: null });
+        setPopoverState({ isOpen: false, openId: null, addingToGroupId: null, tabId: null });
       }}
       button={trigger}
       anchorPosition="leftUp"
