@@ -32,7 +32,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     };
 
     const { body: createdAction } = await supertest
-      .post('/api/action')
+      .post('/api/actions/action')
       .set('kbn-xsrf', 'test')
       .send({
         name: 'A generic Webhook action',
@@ -60,7 +60,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     it('webhook can be executed without username and password', async () => {
       const webhookActionId = await createWebhookAction(webhookSimulatorURL);
       const { body: result } = await supertest
-        .post(`/api/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/action/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {

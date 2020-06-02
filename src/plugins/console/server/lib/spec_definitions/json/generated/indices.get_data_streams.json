@@ -1,0 +1,12 @@
+{
+  "indices.get_data_streams": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_data_streams",
+      "_data_streams/{name}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams.html"
+  }
+}

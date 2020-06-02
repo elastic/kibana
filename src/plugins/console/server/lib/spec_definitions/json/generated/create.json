@@ -15,7 +15,8 @@
         "external",
         "external_gte"
       ],
-      "pipeline": ""
+      "pipeline": "",
+      "prefer_v2_templates": "__flag__"
     },
     "methods": [
       "PUT",

@@ -170,10 +170,10 @@ export enum LAYER_STYLE_TYPE {
   TILE = 'TILE',
 }
 
-export const COLOR_MAP_TYPE = {
-  CATEGORICAL: 'CATEGORICAL',
-  ORDINAL: 'ORDINAL',
-};
+export enum COLOR_MAP_TYPE {
+  CATEGORICAL = 'CATEGORICAL',
+  ORDINAL = 'ORDINAL',
+}
 
 export const CATEGORICAL_DATA_TYPES = ['string', 'ip', 'boolean'];
 export const ORDINAL_DATA_TYPES = ['number', 'date'];

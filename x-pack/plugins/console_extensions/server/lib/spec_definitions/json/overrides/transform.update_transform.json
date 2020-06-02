@@ -4,17 +4,37 @@
       "description": "",
       "dest": {
         "__template": {
-          "index": ""
+          "index": "DESTINATION_INDEX_NAME"
         },
-        "index": "",
+        "index": "DESTINATION_INDEX_NAME",
         "pipeline": ""
       },
       "frequency": "1m",
+      "pivot": {
+        "group_by": {
+          "__template": {
+            "NAME": {}
+          },
+          "__scope_link": "GLOBAL.groupByAggs"
+        },
+        "aggregations": {
+          "__template": {
+            "NAME": {}
+          },
+          "__scope_link": "GLOBAL.aggregations"
+        }
+      },
+      "settings": {
+        "__template": {
+          "docs_per_second": null,
+          "max_page_search_size": 500
+        }
+      },
       "source": {
         "__template": {
-          "index": ""
+          "index": "SOURCE_INDEX_NAME"
         },
-        "index": "",
+        "index": "SOURCE_INDEX_NAME",
         "query": {
           "__scope_link": "GLOBAL.query"
         }

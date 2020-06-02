@@ -187,7 +187,7 @@ export class AlertUtils {
     const alertBody = getDefaultAlwaysFiringAlertData(reference, actionId);
     const response = await request.send({ ...alertBody, ...overwrites });
     if (response.statusCode === 200) {
-      objRemover.add(this.space.id, response.body.id, 'alert');
+      objRemover.add(this.space.id, response.body.id, 'alert', undefined);
     }
     return response;
   }
@@ -257,7 +257,7 @@ export class AlertUtils {
       ...overwrites,
     });
     if (response.statusCode === 200) {
-      objRemover.add(this.space.id, response.body.id, 'alert');
+      objRemover.add(this.space.id, response.body.id, 'alert', undefined);
     }
     return response;
   }

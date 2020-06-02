@@ -31,7 +31,7 @@ export default function createMuteTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: false }))
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', undefined);
 
       await alertUtils.muteAll(createdAlert.id);
 

@@ -32,6 +32,12 @@ View index settings, mappings, and statistics and perform operations, such as re
 flushing, and clearing the cache. Practicing good index management ensures
 that your data is stored cost effectively.
 
+a| <<ingest-node-pipelines, *Ingest Node Pipelines*>>
+
+Create and manage {es}
+pipelines that enable you to perform common transformations and
+enrichments on your data.
+
 | <<managing-licenses, *License Management*>>
 
 View the status of your license, start a trial, or install a new license. For
@@ -85,7 +91,7 @@ set the timespan for notification messages, and much more.
 
 | <<managing-alerts-and-actions, *Alerts and Actions*>>
 
-Centrally manage your alerts across {kib}. Create and manage reusable 
+Centrally manage your alerts across {kib}. Create and manage reusable
 connectors for triggering actions.
 
 | <<managing-fields, *Index Patterns*>>
@@ -139,6 +145,8 @@ include::{kib-repo-dir}/management/index-lifecycle-policies/add-policy-to-index.
 include::{kib-repo-dir}/management/index-lifecycle-policies/example-index-lifecycle-policy.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-indices.asciidoc[]
+
+include::{kib-repo-dir}/management/ingest-pipelines/ingest-pipelines.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-fields.asciidoc[]
 

@@ -19,7 +19,7 @@ export interface RouteDependencies {
   router: IRouter;
   license: License;
   config: {
-    isSecurityEnabled: boolean;
+    isSecurityEnabled: () => boolean;
   };
   lib: {
     isEsError: typeof isEsError;

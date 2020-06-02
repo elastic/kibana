@@ -30,7 +30,6 @@ describe('DataProviders', () => {
           onDataProviderRemoved={jest.fn()}
           onToggleDataProviderEnabled={jest.fn()}
           onToggleDataProviderExcluded={jest.fn()}
-          show={true}
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -49,7 +48,6 @@ describe('DataProviders', () => {
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
-            show={true}
           />
         </TestProviders>
       );
@@ -68,7 +66,6 @@ describe('DataProviders', () => {
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
-            show={true}
           />
         </TestProviders>
       );

@@ -27,7 +27,7 @@ const paramSchema = schema.object({
 export const deleteActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.delete(
     {
-      path: `${BASE_ACTION_API_PATH}/{id}`,
+      path: `${BASE_ACTION_API_PATH}/action/{id}`,
       validate: {
         params: paramSchema,
       },

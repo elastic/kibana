@@ -938,7 +938,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span>
-                  -
+                  --
                 </span>
               </div>
             </td>
@@ -1114,7 +1114,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span>
-                  -
+                  --
                 </span>
               </div>
             </td>

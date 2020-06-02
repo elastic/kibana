@@ -36,9 +36,9 @@ export const MonitorType = t.intersection([
     check_group: t.string,
     ip: t.string,
     name: t.string,
-    timespan: t.partial({
+    timespan: t.type({
       gte: t.string,
-      lte: t.string,
+      lt: t.string,
     }),
   }),
 ]);
@@ -55,13 +55,13 @@ export const PingType = t.intersection([
     agent: t.intersection([
       t.type({
         ephemeral_id: t.string,
-        hostname: t.string,
         id: t.string,
         type: t.string,
         version: t.string,
       }),
       t.partial({
         name: t.string,
+        hostname: t.string,
       }),
     ]),
     container: t.partial({

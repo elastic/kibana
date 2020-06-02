@@ -68,7 +68,6 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         onDataProviderRemoved={onDataProviderRemoved}
         onToggleDataProviderEnabled={onToggleDataProviderEnabled}
         onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-        show={show}
       />
     )}
 

@@ -61,7 +61,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
     it('should return 403 when creating a servicenow action', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A servicenow action',

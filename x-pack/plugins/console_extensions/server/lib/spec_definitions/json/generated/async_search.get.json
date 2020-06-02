@@ -1,7 +1,7 @@
 {
   "async_search.get": {
     "url_params": {
-      "wait_for_completion": "",
+      "wait_for_completion_timeout": "",
       "keep_alive": "",
       "typed_keys": "__flag__"
     },

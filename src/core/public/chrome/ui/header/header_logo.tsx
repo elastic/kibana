@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import Url from 'url';
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiHeaderLogo } from '@elastic/eui';
-import { NavLink } from './nav_link';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { useObservable } from 'react-use';
+import { Observable } from 'rxjs';
+import Url from 'url';
+import { ChromeNavLink } from '../..';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
   let current = element;
@@ -41,7 +43,8 @@ function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
 function onClick(
   event: React.MouseEvent<HTMLAnchorElement>,
   forceNavigation: boolean,
-  navLinks: NavLink[]
+  navLinks: ChromeNavLink[],
+  navigateToApp: (appId: string) => void
 ) {
   const anchor = findClosestAnchor((event as any).nativeEvent.target);
   if (!anchor) {
@@ -49,7 +52,7 @@ function onClick(
   }
 
   const navLink = navLinks.find((item) => item.href === anchor.href);
-  if (navLink && navLink.isDisabled) {
+  if (navLink && navLink.disabled) {
     event.preventDefault();
     return;
   }
@@ -85,16 +88,20 @@ function onClick(
 
 interface Props {
   href: string;
-  navLinks: NavLink[];
-  forceNavigation: boolean;
+  navLinks$: Observable<ChromeNavLink[]>;
+  forceNavigation$: Observable<boolean>;
+  navigateToApp: (appId: string) => void;
 }
 
-export function HeaderLogo({ href, forceNavigation, navLinks }: Props) {
+export function HeaderLogo({ href, navigateToApp, ...observables }: Props) {
+  const forceNavigation = useObservable(observables.forceNavigation$, false);
+  const navLinks = useObservable(observables.navLinks$, []);
+
   return (
     <EuiHeaderLogo
       data-test-subj="logo"
       iconType="logoKibana"
-      onClick={(e) => onClick(e, forceNavigation, navLinks)}
+      onClick={(e) => onClick(e, forceNavigation, navLinks, navigateToApp)}
       href={href}
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
         defaultMessage: 'Go to home page',

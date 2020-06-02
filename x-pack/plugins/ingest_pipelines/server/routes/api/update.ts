@@ -7,13 +7,9 @@ import { schema } from '@kbn/config-schema';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
+import { pipelineSchema } from './pipeline_schema';
 
-const bodySchema = schema.object({
-  description: schema.string(),
-  processors: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
-  version: schema.maybe(schema.number()),
-  on_failure: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
-});
+const bodySchema = schema.object(pipelineSchema);
 
 const paramsSchema = schema.object({
   name: schema.string(),
