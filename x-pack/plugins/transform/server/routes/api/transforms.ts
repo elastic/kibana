@@ -435,7 +435,7 @@ async function deleteTransformsWithDestIndex(
         if (userCanDeleteDestIndex) {
           try {
             await ctx.transform!.dataClient.callAsCurrentUser('indices.delete', {
-              index: 'blah_dne',
+              index: destinationIndex,
             });
             destIndexDeleted.success = true;
           } catch (deleteIndexError) {

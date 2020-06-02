@@ -238,7 +238,9 @@ export const useDeleteTransforms = () => {
                   'An error occurred deleting the data frame analytics job {transformId}',
                 values: { transformId },
               }),
-              text: toMountPoint(<ToastNotificationText overlays={overlays} text={error} />),
+              text: toMountPoint(
+                <ToastNotificationText previewTextLength={50} overlays={overlays} text={error} />
+              ),
             });
           }
 
@@ -252,7 +254,9 @@ export const useDeleteTransforms = () => {
                   values: { destinationIndex },
                 }
               ),
-              text: toMountPoint(<ToastNotificationText overlays={overlays} text={error} />),
+              text: toMountPoint(
+                <ToastNotificationText previewTextLength={50} overlays={overlays} text={error} />
+              ),
             });
           }
 
@@ -266,7 +270,9 @@ export const useDeleteTransforms = () => {
                   values: { destinationIndex },
                 }
               ),
-              text: toMountPoint(<ToastNotificationText overlays={overlays} text={error} />),
+              text: toMountPoint(
+                <ToastNotificationText previewTextLength={50} overlays={overlays} text={error} />
+              ),
             });
           }
         }
@@ -309,7 +315,13 @@ export const useDeleteTransforms = () => {
         title: i18n.translate('xpack.transform.transformList.deleteTransformGenericErrorMessage', {
           defaultMessage: 'An error occurred calling the API endpoint to delete transforms.',
         }),
-        text: toMountPoint(<ToastNotificationText overlays={overlays} text={getErrorMessage(e)} />),
+        text: toMountPoint(
+          <ToastNotificationText
+            previewTextLength={50}
+            overlays={overlays}
+            text={getErrorMessage(e)}
+          />
+        ),
       });
     }
   };
