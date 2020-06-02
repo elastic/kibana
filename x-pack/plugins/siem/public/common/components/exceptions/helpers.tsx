@@ -9,6 +9,7 @@ import { EuiText, EuiCommentProps, EuiAvatar } from '@elastic/eui';
 import { flatten, capitalize } from 'lodash';
 import moment from 'moment';
 
+import * as i18n from './translations';
 import {
   FormattedEntry,
   OperatorType,
@@ -156,19 +157,19 @@ export const getDescriptionListContent = (
 ): DescriptionListItem[] => {
   const details = [
     {
-      title: 'OS',
+      title: i18n.OPERATING_SYSTEM,
       value: getOperatingSystems(exceptionItem._tags),
     },
     {
-      title: 'Date Created',
+      title: i18n.DATE_CREATED,
       value: moment(exceptionItem.created_at).format('MMMM Do YYYY @ HH:mm:ss'),
     },
     {
-      title: 'Created by',
+      title: i18n.CREATED_BY,
       value: exceptionItem.created_by,
     },
     {
-      title: 'Comment',
+      title: i18n.COMMENT,
       value: exceptionItem.description,
     },
   ];
@@ -191,7 +192,7 @@ export const getFormattedComments = (comments: Comment[]): EuiCommentProps[] =>
   comments.map((comment) => ({
     username: comment.user,
     timestamp: moment(comment.timestamp).format('on MMM Do YYYY @ HH:mm:ss'),
-    event: 'added a comment',
+    event: i18n.COMMENT_EVENT,
     timelineIcon: <EuiAvatar size="l" name={comment.user.toUpperCase()} />,
     children: <EuiText size="s">{comment.comment}</EuiText>,
   }));

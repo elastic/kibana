@@ -24,3 +24,19 @@ export const COMMENTS_HIDE = (comments: number) =>
     values: { comments },
     defaultMessage: 'Hide ({comments}) {comments, plural, =1 {Comment} other {Comments}}',
   });
+
+export const DATE_CREATED = i18n.translate('xpack.siem.exceptions.dateCreatedLabel', {
+  defaultMessage: 'Date created',
+});
+
+export const CREATED_BY = i18n.translate('xpack.siem.exceptions.createdByLabel', {
+  defaultMessage: 'Created by',
+});
+
+export const COMMENT = i18n.translate('xpack.siem.exceptions.commentLabel', {
+  defaultMessage: 'Comment',
+});
+
+export const OPERATING_SYSTEM = i18n.translate('xpack.siem.exceptions.operatingSystemLabel', {
+  defaultMessage: 'OS',
+});
