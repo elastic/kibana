@@ -35,7 +35,7 @@ import { DETECTIONS } from '../urls/navigation';
 
 import { totalNumberOfPrebuiltRules } from '../objects/rule';
 
-describe('Alert detection rules, prebuilt rules', () => {
+describe('Detection rules, prebuilt rules', () => {
   before(() => {
     esArchiverLoadEmptyKibana();
   });

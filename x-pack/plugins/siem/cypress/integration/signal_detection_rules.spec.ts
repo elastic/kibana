@@ -28,7 +28,7 @@ import {
 
 import { DETECTIONS } from '../urls/navigation';
 
-describe('Alert detection rules', () => {
+describe('Detection rules', () => {
   before(() => {
     esArchiverLoad('prebuilt_rules_loaded');
   });

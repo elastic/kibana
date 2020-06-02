@@ -60,7 +60,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
 
-describe('Alert detection rules, machine learning', () => {
+describe('Detection rules, machine learning', () => {
   before(() => {
     esArchiverLoad('prebuilt_rules_loaded');
   });

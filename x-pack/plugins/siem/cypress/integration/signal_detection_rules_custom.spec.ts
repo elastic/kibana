@@ -64,7 +64,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
 
-describe('Alert detection rules, custom', () => {
+describe('Detection rules, custom', () => {
   before(() => {
     esArchiverLoad('custom_rule_with_timeline');
   });

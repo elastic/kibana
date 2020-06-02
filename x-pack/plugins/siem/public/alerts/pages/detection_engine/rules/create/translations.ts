@@ -13,7 +13,7 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.createRule.
 export const BACK_TO_RULES = i18n.translate(
   'xpack.siem.detectionEngine.createRule.backToRulesDescription',
   {
-    defaultMessage: 'Back to alert detection rules',
+    defaultMessage: 'Back to detection rules',
   }
 );
 

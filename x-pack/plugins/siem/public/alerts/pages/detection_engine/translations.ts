@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.detectionsPageTitle', {
-  defaultMessage: 'Detections',
+  defaultMessage: 'Alerts',
 });
 
 export const LAST_ALERT = i18n.translate('xpack.siem.detectionEngine.lastAlertTitle', {
@@ -23,7 +23,7 @@ export const ALERT = i18n.translate('xpack.siem.detectionEngine.alertTitle', {
 });
 
 export const BUTTON_MANAGE_RULES = i18n.translate('xpack.siem.detectionEngine.buttonManageRules', {
-  defaultMessage: 'Manage alert detection rules',
+  defaultMessage: 'Manage detection rules',
 });
 
 export const PANEL_SUBTITLE_SHOWING = i18n.translate(

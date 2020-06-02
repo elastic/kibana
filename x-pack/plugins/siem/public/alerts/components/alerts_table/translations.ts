@@ -11,7 +11,7 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.pageTitle',
 });
 
 export const ALERTS_TABLE_TITLE = i18n.translate('xpack.siem.detectionEngine.alerts.tableTitle', {
-  defaultMessage: 'Alerts',
+  defaultMessage: 'Alert list',
 });
 
 export const ALERTS_DOCUMENT_TYPE = i18n.translate(
