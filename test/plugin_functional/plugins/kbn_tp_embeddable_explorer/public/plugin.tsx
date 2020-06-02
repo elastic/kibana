@@ -32,7 +32,7 @@ import {
   CONTEXT_MENU_TRIGGER,
   CONTACT_CARD_EMBEDDABLE,
   HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddableFactory,
+  HelloWorldEmbeddableFactoryDefinition,
   ContactCardEmbeddableFactory,
   SayHelloAction,
   createSendMessageAction,
@@ -73,7 +73,7 @@ export class EmbeddableExplorerPublicPlugin
 
     setupDeps.embeddable.registerEmbeddableFactory(
       HELLO_WORLD_EMBEDDABLE,
-      new HelloWorldEmbeddableFactory()
+      new HelloWorldEmbeddableFactoryDefinition()
     );
 
     setupDeps.embeddable.registerEmbeddableFactory(

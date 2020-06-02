@@ -23,17 +23,20 @@ import {
   EmbeddableStart,
 } from '../../../src/plugins/embeddable/public';
 import { CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
-import { HELLO_WORLD_EMBEDDABLE, HelloWorldEmbeddableFactory } from './hello_world';
-import { TODO_EMBEDDABLE, TodoEmbeddableFactory } from './todo';
-import { MULTI_TASK_TODO_EMBEDDABLE, MultiTaskTodoEmbeddableFactory } from './multi_task_todo';
+import { HELLO_WORLD_EMBEDDABLE, HelloWorldEmbeddableFactoryDefinition } from './hello_world';
+import { TODO_EMBEDDABLE, TodoEmbeddableFactoryDefinition } from './todo';
+import {
+  MULTI_TASK_TODO_EMBEDDABLE,
+  MultiTaskTodoEmbeddableFactoryDefinition,
+} from './multi_task_todo';
 import {
   SEARCHABLE_LIST_CONTAINER,
-  SearchableListContainerFactory,
+  SearchableListContainerFactoryDefinition,
 } from './searchable_list_container';
-import { LIST_CONTAINER, ListContainerFactory } from './list_container';
+import { LIST_CONTAINER, ListContainerFactoryDefinition } from './list_container';
 import { createSampleData } from './create_sample_data';
 import { TODO_REF_EMBEDDABLE } from './todo/todo_ref_embeddable';
-import { TodoRefEmbeddableFactory } from './todo/todo_ref_embeddable_factory';
+import { TodoRefEmbeddableFactoryDefinition } from './todo/todo_ref_embeddable_factory';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -43,18 +46,37 @@ export interface EmbeddableExamplesStartDependencies {
   embeddable: EmbeddableStart;
 }
 
+export type HelloWorldEmbeddableFactory = EmbeddableFactoryTypeFromDefinitionType<
+  HelloWorldEmbeddableFactoryDefinition
+>;
+export type MultiTaskTodoEmbeddableFactory = EmbeddableFactoryTypeFromDefinitionType<
+  MultiTaskTodoEmbeddableFactoryDefinition
+>;
+export type SearchableListContainerFactory = EmbeddableFactoryTypeFromDefinitionType<
+  SearchableListContainerFactoryDefinition
+>;
+export type ListContainerFactory = EmbeddableFactoryTypeFromDefinitionType<
+  ListContainerFactoryDefinition
+>;
+export type TodoEmbeddableFactory = EmbeddableFactoryTypeFromDefinitionType<
+  TodoEmbeddableFactoryDefinition
+>;
+export type TodoRefEmbeddableFactory = EmbeddableFactoryTypeFromDefinitionType<
+  TodoRefEmbeddableFactoryDefinition
+>;
+
+interface ExampleEmbeddableFactories {
+  getHelloWorldEmbeddableFactory: () => HelloWorldEmbeddableFactory;
+  getMultiTaskTodoEmbeddableFactory: () => MultiTaskTodoEmbeddableFactory;
+  getSearchableListContainerEmbeddableFactory: () => SearchableListContainerFactory;
+  getListContainerEmbeddableFactory: () => ListContainerFactory;
+  getTodoEmbeddableFactory: () => TodoEmbeddableFactory;
+  getTodoRefEmbeddableFactory: () => TodoRefEmbeddableFactory;
+}
+
 export interface EmbeddableExamplesStart {
   createSampleData: () => Promise<void>;
-  helloWorldEmbeddableFactory: EmbeddableFactoryTypeFromDefinitionType<HelloWorldEmbeddableFactory>;
-  multiTaskTodoEmbeddableFactory: EmbeddableFactoryTypeFromDefinitionType<
-    MultiTaskTodoEmbeddableFactory
-  >;
-  searchableListContainerEmbeddableFactory: EmbeddableFactoryTypeFromDefinitionType<
-    SearchableListContainerFactory
-  >;
-  listContainerEmbeddableFactory: EmbeddableFactoryTypeFromDefinitionType<ListContainerFactory>;
-  todoEmbeddableFactory: EmbeddableFactoryTypeFromDefinitionType<TodoEmbeddableFactory>;
-  todoRefEmbeddableFactory: EmbeddableFactoryTypeFromDefinitionType<TodoRefEmbeddableFactory>;
+  factories: ExampleEmbeddableFactories;
 }
 
 export class EmbeddableExamplesPlugin
@@ -65,44 +87,46 @@ export class EmbeddableExamplesPlugin
       EmbeddableExamplesSetupDependencies,
       EmbeddableExamplesStartDependencies
     > {
+  private exampleEmbeddableFactories: Partial<ExampleEmbeddableFactories> = {};
+
   public setup(
     core: CoreSetup<EmbeddableExamplesStartDependencies>,
     deps: EmbeddableExamplesSetupDependencies
   ) {
-    deps.embeddable.registerEmbeddableFactory(
+    this.exampleEmbeddableFactories.getHelloWorldEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
       HELLO_WORLD_EMBEDDABLE,
-      new HelloWorldEmbeddableFactory()
+      new HelloWorldEmbeddableFactoryDefinition()
     );
 
-    deps.embeddable.registerEmbeddableFactory(
+    this.exampleEmbeddableFactories.getMultiTaskTodoEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
       MULTI_TASK_TODO_EMBEDDABLE,
-      new MultiTaskTodoEmbeddableFactory()
+      new MultiTaskTodoEmbeddableFactoryDefinition()
     );
 
-    deps.embeddable.registerEmbeddableFactory(
+    this.exampleEmbeddableFactories.getSearchableListContainerEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
       SEARCHABLE_LIST_CONTAINER,
-      new SearchableListContainerFactory(async () => ({
+      new SearchableListContainerFactoryDefinition(async () => ({
         embeddableServices: (await core.getStartServices())[1].embeddable,
       }))
     );
 
-    deps.embeddable.registerEmbeddableFactory(
+    this.exampleEmbeddableFactories.getListContainerEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
       LIST_CONTAINER,
-      new ListContainerFactory(async () => ({
+      new ListContainerFactoryDefinition(async () => ({
         embeddableServices: (await core.getStartServices())[1].embeddable,
       }))
     );
 
-    deps.embeddable.registerEmbeddableFactory(
+    this.exampleEmbeddableFactories.getTodoEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
       TODO_EMBEDDABLE,
-      new TodoEmbeddableFactory(async () => ({
+      new TodoEmbeddableFactoryDefinition(async () => ({
         openModal: (await core.getStartServices())[0].overlays.openModal,
       }))
     );
 
-    deps.embeddable.registerEmbeddableFactory(
+    this.exampleEmbeddableFactories.getTodoRefEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
       TODO_REF_EMBEDDABLE,
-      new TodoRefEmbeddableFactory(async () => ({
+      new TodoRefEmbeddableFactoryDefinition(async () => ({
         savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
         getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
       }))
@@ -115,24 +139,7 @@ export class EmbeddableExamplesPlugin
   ): EmbeddableExamplesStart {
     return {
       createSampleData: () => createSampleData(core.savedObjects.client),
-      helloWorldEmbeddableFactory: deps.embeddable.getEmbeddableFactory(
-        HELLO_WORLD_EMBEDDABLE
-      ) as EmbeddableFactoryTypeFromDefinitionType<HelloWorldEmbeddableFactory>,
-      searchableListContainerEmbeddableFactory: deps.embeddable.getEmbeddableFactory(
-        SEARCHABLE_LIST_CONTAINER
-      ) as EmbeddableFactoryTypeFromDefinitionType<SearchableListContainerFactory>,
-      multiTaskTodoEmbeddableFactory: deps.embeddable.getEmbeddableFactory(
-        MULTI_TASK_TODO_EMBEDDABLE
-      ) as EmbeddableFactoryTypeFromDefinitionType<MultiTaskTodoEmbeddableFactory>,
-      todoEmbeddableFactory: deps.embeddable.getEmbeddableFactory(
-        TODO_EMBEDDABLE
-      ) as EmbeddableFactoryTypeFromDefinitionType<TodoEmbeddableFactory>,
-      todoRefEmbeddableFactory: deps.embeddable.getEmbeddableFactory(
-        TODO_REF_EMBEDDABLE
-      ) as EmbeddableFactoryTypeFromDefinitionType<TodoRefEmbeddableFactory>,
-      listContainerEmbeddableFactory: deps.embeddable.getEmbeddableFactory(
-        LIST_CONTAINER
-      ) as EmbeddableFactoryTypeFromDefinitionType<ListContainerFactory>,
+      factories: this.exampleEmbeddableFactories as ExampleEmbeddableFactories,
     };
   }
 

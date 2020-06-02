@@ -38,7 +38,7 @@ interface StartServices {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
-export class TodoRefEmbeddableFactory
+export class TodoRefEmbeddableFactoryDefinition
   extends BindEmbeddableFactoryDefinitionOutputType<TodoRefOutput>
   implements
     EmbeddableFactoryDefinition<

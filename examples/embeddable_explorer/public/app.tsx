@@ -89,12 +89,6 @@ const EmbeddableExplorerApp = ({
   basename,
   navigateToApp,
   embeddableApi,
-  inspector,
-  uiSettingsClient,
-  savedObject,
-  overlays,
-  uiActionsApi,
-  notifications,
   embeddableExamples,
 }: Props) => {
   const pages: PageDef[] = [
@@ -103,7 +97,7 @@ const EmbeddableExplorerApp = ({
       id: 'helloWorldEmbeddableSection',
       component: (
         <HelloWorldEmbeddableExample
-          helloWorldEmbeddableFactory={embeddableExamples.helloWorldEmbeddableFactory}
+          helloWorldEmbeddableFactory={embeddableExamples.factories.getHelloWorldEmbeddableFactory()}
         />
       ),
     },
@@ -111,7 +105,9 @@ const EmbeddableExplorerApp = ({
       title: 'Todo embeddable',
       id: 'todoEmbeddableSection',
       component: (
-        <TodoEmbeddableExample todoEmbeddableFactory={embeddableExamples.todoEmbeddableFactory} />
+        <TodoEmbeddableExample
+          todoEmbeddableFactory={embeddableExamples.factories.getTodoEmbeddableFactory()}
+        />
       ),
     },
     {
@@ -119,17 +115,20 @@ const EmbeddableExplorerApp = ({
       id: 'listContainerSection',
       component: (
         <ListContainerExample
-          listContainerEmbeddableFactory={embeddableExamples.listContainerEmbeddableFactory}
-          searchableListContainerEmbeddableFactory={
-            embeddableExamples.searchableListContainerEmbeddableFactory
-          }
+          listContainerEmbeddableFactory={embeddableExamples.factories.getListContainerEmbeddableFactory()}
+          searchableListContainerEmbeddableFactory={embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
         />
       ),
     },
     {
       title: 'Dynamically adding children to a container',
-      id: 'embeddablePanelExamplae',
-      component: <EmbeddablePanelExample embeddableServices={embeddableApi} />,
+      id: 'embeddablePanelExample',
+      component: (
+        <EmbeddablePanelExample
+          embeddableServices={embeddableApi}
+          searchListContainerFactory={embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
+        />
+      ),
     },
   ];
 

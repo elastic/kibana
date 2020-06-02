@@ -29,7 +29,6 @@ import {
   EuiSideNav,
 } from '@elastic/eui';
 import 'brace/mode/json';
-import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { AppMountParameters } from '../../../src/core/public';
 import { DashboardEmbeddableByValue } from './by_value/embeddable';
 import { DashboardStart } from '../../../src/plugins/dashboard/public';
@@ -68,7 +67,6 @@ const Nav = withRouter(({ history, pages }: NavProps) => {
 interface Props {
   basename: string;
   DashboardEmbeddableByValueRenderer: DashboardStart['DashboardEmbeddableByValueRenderer'];
-  embeddableApi: EmbeddableStart;
 }
 
 const DashboardEmbeddableExplorerApp = ({

@@ -32,7 +32,7 @@ interface StartServices {
   embeddableServices: EmbeddableStart;
 }
 
-export class SearchableListContainerFactory implements EmbeddableFactoryDefinition {
+export class SearchableListContainerFactoryDefinition implements EmbeddableFactoryDefinition {
   public readonly type = SEARCHABLE_LIST_CONTAINER;
   public readonly isContainerType = true;
 

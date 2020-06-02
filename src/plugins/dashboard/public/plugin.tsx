@@ -129,7 +129,10 @@ export interface DashboardStart {
     embeddableType: string;
   }) => void | undefined;
   dashboardUrlGenerator?: DashboardUrlGenerator;
-  DashboardEmbeddableByValueRenderer: React.FC<{ input: DashboardContainerInput }>;
+  DashboardEmbeddableByValueRenderer: React.FC<{
+    input: DashboardContainerInput;
+    onInputUpdated?: (newInput: DashboardContainerInput) => void;
+  }>;
 }
 
 declare module '../../../plugins/ui_actions/public' {
@@ -394,8 +397,17 @@ export class DashboardPlugin
       getSavedDashboardLoader: () => savedDashboardLoader,
       addEmbeddableToDashboard: this.addEmbeddableToDashboard.bind(this, core),
       dashboardUrlGenerator: this.dashboardUrlGenerator,
-      DashboardEmbeddableByValueRenderer: (props: { input: DashboardContainerInput }) => {
-        return <EmbeddableRenderer input={props.input} factory={dashboardContainerFactory} />;
+      DashboardEmbeddableByValueRenderer: (props: {
+        input: DashboardContainerInput;
+        onInputUpdated?: (newInput: DashboardContainerInput) => void;
+      }) => {
+        return (
+          <EmbeddableRenderer
+            input={props.input}
+            onInputUpdated={props.onInputUpdated}
+            factory={dashboardContainerFactory}
+          />
+        );
       },
     };
   }

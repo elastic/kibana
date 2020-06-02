@@ -32,19 +32,19 @@ import {
 import {
   EmbeddableInput,
   EmbeddableRenderer,
-  EmbeddableStart,
   ViewMode,
 } from '../../../src/plugins/embeddable/public';
 import {
   HELLO_WORLD_EMBEDDABLE,
   MULTI_TASK_TODO_EMBEDDABLE,
   TODO_EMBEDDABLE,
+  ListContainerFactory,
+  SearchableListContainerFactory,
 } from '../../embeddable_examples/public';
-import { EmbeddableExamplesStart } from '../../embeddable_examples/public/plugin';
 
 interface Props {
-  listContainerEmbeddableFactory: EmbeddableExamplesStart['listContainerEmbeddableFactory'];
-  searchableListContainerEmbeddableFactory: EmbeddableExamplesStart['searchableListContainerEmbeddableFactory'];
+  listContainerEmbeddableFactory: ListContainerFactory;
+  searchableListContainerEmbeddableFactory: SearchableListContainerFactory;
 }
 
 export function ListContainerExample({

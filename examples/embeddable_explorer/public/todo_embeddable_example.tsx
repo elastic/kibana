@@ -35,11 +35,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { TodoInput } from '../../../examples/embeddable_examples/public/todo';
+import { TodoEmbeddableFactory } from '../../../examples/embeddable_examples/public';
 import { EmbeddableRenderer } from '../../../src/plugins/embeddable/public';
-import { EmbeddableExamplesStart } from '../../embeddable_examples/public/plugin';
 
 interface Props {
-  todoEmbeddableFactory: EmbeddableExamplesStart['todoEmbeddableFactory'];
+  todoEmbeddableFactory: TodoEmbeddableFactory;
 }
 
 interface State {

@@ -29,11 +29,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { EmbeddableRenderer } from '../../../src/plugins/embeddable/public';
-import { HelloWorldEmbeddable } from '../../embeddable_examples/public';
-import { EmbeddableExamplesStart } from '../../embeddable_examples/public/plugin';
+import {
+  HelloWorldEmbeddable,
+  HelloWorldEmbeddableFactory,
+} from '../../embeddable_examples/public';
 
 interface Props {
-  helloWorldEmbeddableFactory: EmbeddableExamplesStart['helloWorldEmbeddableFactory'];
+  helloWorldEmbeddableFactory: HelloWorldEmbeddableFactory;
 }
 
 export function HelloWorldEmbeddableExample({ helloWorldEmbeddableFactory }: Props) {

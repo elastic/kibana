@@ -60,8 +60,8 @@ export const DashboardEmbeddableByValue = ({
 
   return (
     <>
-      <InputEditor initialValue={initialInput} onSubmit={setInput} />
-      <DashboardEmbeddableByValueRenderer input={input} />
+      <InputEditor input={input} onSubmit={setInput} />
+      <DashboardEmbeddableByValueRenderer input={input} onInputUpdated={setInput} />
     </>
   );
 };

@@ -29,7 +29,7 @@ interface StartServices {
   embeddableServices: EmbeddableStart;
 }
 
-export class ListContainerFactory implements EmbeddableFactoryDefinition {
+export class ListContainerFactoryDefinition implements EmbeddableFactoryDefinition {
   public readonly type = LIST_CONTAINER;
   public readonly isContainerType = true;
 

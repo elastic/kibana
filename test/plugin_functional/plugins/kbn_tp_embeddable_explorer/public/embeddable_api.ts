@@ -21,5 +21,5 @@ export * from '../../../../../src/plugins/embeddable/public';
 export * from '../../../../../src/plugins/embeddable/public/lib/test_samples';
 export {
   HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddableFactory,
+  HelloWorldEmbeddableFactoryDefinition,
 } from '../../../../../examples/embeddable_examples/public';

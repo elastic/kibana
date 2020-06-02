@@ -22,8 +22,9 @@ import { EuiButton, EuiCodeEditor } from '@elastic/eui';
 
 // @ts-ignore
 const TextMode = window.ace.acequire('ace/mode/json').Mode;
-export const InputEditor = <T,>(props: { initialValue: T; onSubmit: (value: T) => void }) => {
-  const [value, setValue] = React.useState(JSON.stringify(props.initialValue, null, 4));
+export const InputEditor = <T,>(props: { input: T; onSubmit: (value: T) => void }) => {
+  const input = JSON.stringify(props.input, null, 4);
+  const [value, setValue] = React.useState(input);
   const isValid = (() => {
     try {
       JSON.parse(value);
@@ -32,6 +33,9 @@ export const InputEditor = <T,>(props: { initialValue: T; onSubmit: (value: T) =
       return false;
     }
   })();
+  React.useEffect(() => {
+    setValue(input);
+  }, [input]);
   return (
     <>
       <EuiCodeEditor

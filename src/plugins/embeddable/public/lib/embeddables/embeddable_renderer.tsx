@@ -24,17 +24,18 @@ import { EmbeddableFactory } from './embeddable_factory';
 import { ErrorEmbeddable } from './error_embeddable';
 
 /**
- * This type is needed for strict public api
+ * This type is needed for strict, one of, public api
  */
 export type EmeddableRendererProps<I extends EmbeddableInput> =
-  | { input: I; factory: EmbeddableFactory<I> }
-  | { input: I; embeddable: IEmbeddable<I> };
+  | { input: I; onInputUpdated?: (newInput: I) => void; factory: EmbeddableFactory<I> }
+  | { input: I; onInputUpdated?: (newInput: I) => void; embeddable: IEmbeddable<I> };
 
 /**
  * This one is for internal implementation
  */
 interface InnerProps {
   input: EmbeddableInput;
+  onInputUpdated?: (newInput: EmbeddableInput) => void;
   factory?: EmbeddableFactory;
   embeddable?: IEmbeddable;
 }
@@ -91,6 +92,20 @@ export const EmbeddableRenderer = <I extends EmbeddableInput>(
       }
     };
   }, [props.factory, props.embeddable]);
+
+  const { onInputUpdated } = props;
+  useEffect(() => {
+    const sub = embeddable?.getInput$().subscribe((input) => {
+      if (onInputUpdated) {
+        onInputUpdated(input);
+      }
+    });
+    return () => {
+      if (sub) {
+        sub.unsubscribe();
+      }
+    };
+  }, [embeddable, onInputUpdated]);
 
   return (
     <EmbeddableRoot embeddable={embeddable} loading={loading} error={error} input={props.input} />

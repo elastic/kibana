@@ -30,7 +30,7 @@ import {
   MultiTaskTodoOutput,
 } from './multi_task_todo_embeddable';
 
-export class MultiTaskTodoEmbeddableFactory
+export class MultiTaskTodoEmbeddableFactoryDefinition
   extends BindEmbeddableFactoryDefinitionOutputType<MultiTaskTodoOutput>
   implements EmbeddableFactoryDefinition<MultiTaskTodoInput, MultiTaskTodoOutput> {
   public readonly type = MULTI_TASK_TODO_EMBEDDABLE;
