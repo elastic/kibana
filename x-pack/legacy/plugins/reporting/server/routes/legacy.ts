@@ -4,63 +4,64 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
+import { schema } from '@kbn/config-schema';
 import querystring from 'querystring';
+import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 import { API_BASE_URL } from '../../common/constants';
-import { ReportingSetupDeps, ServerFacade } from '../types';
-import {
-  getRouteConfigFactoryReportingPre,
-  GetRouteConfigFactoryFn,
-} from './lib/route_config_factories';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 import { ReportingCore } from '../core';
 import { LevelLogger } from '../lib';
-
-const getStaticFeatureConfig = (getRouteConfig: GetRouteConfigFactoryFn, featureId: string) =>
-  getRouteConfig(() => featureId);
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerLegacy(
   reporting: ReportingCore,
-  server: ServerFacade,
-  plugins: ReportingSetupDeps,
   handler: HandlerFunction,
   handleError: HandlerErrorFunction,
   logger: LevelLogger
 ) {
-  const config = reporting.getConfig();
-  const getRouteConfig = getRouteConfigFactoryReportingPre(config, plugins, logger);
+  const { router } = reporting.getPluginSetupDeps();
+  const userHandler = authorizedUserPreRoutingFactory(reporting);
 
   function createLegacyPdfRoute({ path, objectType }: { path: string; objectType: string }) {
     const exportTypeId = 'printablePdf';
-    server.route({
-      path,
-      method: 'POST',
-      options: getStaticFeatureConfig(getRouteConfig, exportTypeId),
-      handler: async (request: Legacy.Request, h: Legacy.ResponseToolkit) => {
-        const message = `The following URL is deprecated and will stop working in the next major version: ${request.url.path}`;
+
+    router.post(
+      {
+        path,
+        validate: {
+          params: schema.object({
+            savedObjectId: schema.string({ minLength: 3 }),
+          }),
+          query: schema.any(),
+        },
+      },
+
+      userHandler(async (user, context, req, res) => {
+        const message = `The following URL is deprecated and will stop working in the next major version: ${req.url.path}`;
         logger.warn(message, ['deprecation']);
 
         try {
-          const savedObjectId = request.params.savedId;
-          const queryString = querystring.stringify(request.query);
+          const { savedObjectId }: { savedObjectId: string } = req.params as any;
+          const queryString = querystring.stringify(req.query as any);
 
           return await handler(
+            user,
             exportTypeId,
             {
               objectType,
               savedObjectId,
               queryString,
             },
-            request,
-            h
+            context,
+            req,
+            res
           );
         } catch (err) {
-          throw handleError(exportTypeId, err);
+          throw handleError(res, err);
         }
-      },
-    });
+      })
+    );
   }
 
   createLegacyPdfRoute({

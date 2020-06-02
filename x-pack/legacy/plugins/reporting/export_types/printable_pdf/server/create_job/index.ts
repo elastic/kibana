@@ -4,44 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { validateUrls } from '../../../../common/validate_urls';
 import { cryptoFactory } from '../../../../server/lib';
-import {
-  ConditionalHeaders,
-  CreateJobFactory,
-  ESQueueCreateJobFn,
-  RequestFacade,
-} from '../../../../server/types';
+import { CreateJobFactory, ESQueueCreateJobFn } from '../../../../server/types';
 import { JobParamsPDF } from '../../types';
-// @ts-ignore untyped module
+// @ts-ignore no module def (deprecated module)
 import { compatibilityShimFactory } from './compatibility_shim';
-
-interface CreateJobFnOpts {
-  objectType: any;
-  title: string;
-  relativeUrls: string[];
-  browserTimezone: string;
-  layout: any;
-}
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPDF
 >> = function createJobFactoryFn(reporting, logger) {
   const config = reporting.getConfig();
+  const setupDeps = reporting.getPluginSetupDeps();
   const crypto = cryptoFactory(config.get('encryptionKey'));
-  const compatibilityShim = compatibilityShimFactory(reporting, logger);
+  const compatibilityShim = compatibilityShimFactory(logger);
 
   return compatibilityShim(async function createJobFn(
-    { objectType, title, relativeUrls, browserTimezone, layout }: CreateJobFnOpts,
-    headers: ConditionalHeaders['headers'],
-    request: RequestFacade
+    { title, relativeUrls, browserTimezone, layout, objectType }: JobParamsPDF,
+    context: RequestHandlerContext,
+    req: KibanaRequest
   ) {
-    const serializedEncryptedHeaders = await crypto.encrypt(headers);
+    const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
 
     validateUrls(relativeUrls);
 
     return {
-      basePath: request.getBasePath(),
+      basePath: setupDeps.basePath(req),
       browserTimezone,
       forceNow: new Date().toISOString(),
       headers: serializedEncryptedHeaders,
