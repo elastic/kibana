@@ -37,9 +37,14 @@ export interface SearchServiceStart {
 
 interface SetupDeps {
   basePath: IBasePath;
-  licenseChecker: ILicenseChecker;
+
   config: GlobalSearchConfigType;
   maxProviderResults?: number;
+}
+
+interface StartDeps {
+  core: CoreStart;
+  licenseChecker: ILicenseChecker;
 }
 
 const defaultMaxProviderResults = 20;
@@ -56,12 +61,10 @@ export class SearchService {
   setup({
     basePath,
     config,
-    licenseChecker,
     maxProviderResults = defaultMaxProviderResults,
   }: SetupDeps): SearchServiceSetup {
     this.basePath = basePath;
     this.config = config;
-    this.licenseChecker = licenseChecker;
     this.maxProviderResults = maxProviderResults;
 
     return {
@@ -74,8 +77,9 @@ export class SearchService {
     };
   }
 
-  start(coreStart: CoreStart): SearchServiceStart {
-    this.contextFactory = getContextFactory(coreStart);
+  start({ core, licenseChecker }: StartDeps): SearchServiceStart {
+    this.licenseChecker = licenseChecker;
+    this.contextFactory = getContextFactory(core);
     return {
       find: (term, options, request) => this.performFind(term, options, request),
     };

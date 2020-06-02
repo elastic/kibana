@@ -5,19 +5,26 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { LicensingPluginSetup } from '../../licensing/public';
+import { LicensingPluginStart } from '../../licensing/public';
 import { LicenseChecker, ILicenseChecker } from '../common/license_checker';
 import { GlobalSearchPluginSetup, GlobalSearchPluginStart } from './types';
 import { GlobalSearchClientConfigType } from './config';
 import { SearchService } from './services';
 
-export interface GlobalSearchPluginSetupDeps {
-  licensing: LicensingPluginSetup;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GlobalSearchPluginSetupDeps {}
+export interface GlobalSearchPluginStartDeps {
+  licensing: LicensingPluginStart;
 }
 
 export class GlobalSearchPlugin
   implements
-    Plugin<GlobalSearchPluginSetup, GlobalSearchPluginStart, GlobalSearchPluginSetupDeps, {}> {
+    Plugin<
+      GlobalSearchPluginSetup,
+      GlobalSearchPluginStart,
+      GlobalSearchPluginSetupDeps,
+      GlobalSearchPluginStartDeps
+    > {
   private readonly config: GlobalSearchClientConfigType;
   private licenseChecker?: ILicenseChecker;
   private readonly searchService = new SearchService();
@@ -26,12 +33,9 @@ export class GlobalSearchPlugin
     this.config = context.config.get<GlobalSearchClientConfigType>();
   }
 
-  setup(core: CoreSetup<{}, GlobalSearchPluginStart>, { licensing }: GlobalSearchPluginSetupDeps) {
-    this.licenseChecker = new LicenseChecker(licensing.license$);
-
+  setup(core: CoreSetup<{}, GlobalSearchPluginStart>) {
     const { registerResultProvider } = this.searchService.setup({
       config: this.config,
-      licenseChecker: this.licenseChecker,
     });
 
     return {
@@ -39,8 +43,13 @@ export class GlobalSearchPlugin
     };
   }
 
-  start({ http, application }: CoreStart) {
-    const { find } = this.searchService.start({ http, application });
+  start({ http, application }: CoreStart, { licensing }: GlobalSearchPluginStartDeps) {
+    this.licenseChecker = new LicenseChecker(licensing.license$);
+    const { find } = this.searchService.start({
+      http,
+      application,
+      licenseChecker: this.licenseChecker,
+    });
 
     return {
       find,

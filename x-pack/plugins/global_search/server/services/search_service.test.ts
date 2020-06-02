@@ -73,7 +73,6 @@ describe('SearchService', () => {
       it('throws when trying to register the same provider twice', () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
-          licenseChecker,
           basePath,
         });
 
@@ -91,14 +90,13 @@ describe('SearchService', () => {
       it('calls the provider with the correct parameters', () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
-          licenseChecker,
           basePath,
         });
 
         const provider = createProvider('A');
         registerResultProvider(provider);
 
-        const { find } = service.start(coreStart);
+        const { find } = service.start({ core: coreStart, licenseChecker });
         find('foobar', { preference: 'pref' }, request);
 
         expect(provider.find).toHaveBeenCalledTimes(1);
@@ -112,7 +110,6 @@ describe('SearchService', () => {
       it('return the results from the provider', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
-          licenseChecker,
           basePath,
         });
 
@@ -123,7 +120,7 @@ describe('SearchService', () => {
           });
           registerResultProvider(createProvider('A', providerResults));
 
-          const { find } = service.start(coreStart);
+          const { find } = service.start({ core: coreStart, licenseChecker });
           const results = find('foo', {}, request);
 
           expectObservable(results).toBe('a-b-|', {
@@ -136,7 +133,6 @@ describe('SearchService', () => {
       it('handles multiple providers', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
-          licenseChecker,
           basePath,
         });
 
@@ -160,7 +156,7 @@ describe('SearchService', () => {
             )
           );
 
-          const { find } = service.start(coreStart);
+          const { find } = service.start({ core: coreStart, licenseChecker });
           const results = find('foo', {}, request);
 
           expectObservable(results).toBe('ab-cd-|', {
@@ -175,7 +171,6 @@ describe('SearchService', () => {
       it('handles the `aborted$` option', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
-          licenseChecker,
           basePath,
         });
 
@@ -188,7 +183,7 @@ describe('SearchService', () => {
 
           const aborted$ = hot('----a--|', { a: undefined });
 
-          const { find } = service.start(coreStart);
+          const { find } = service.start({ core: coreStart, licenseChecker });
           const results = find('foo', { aborted$ }, request);
 
           expectObservable(results).toBe('--a-|', {
@@ -200,7 +195,6 @@ describe('SearchService', () => {
       it('respects the timeout duration', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(100),
-          licenseChecker,
           basePath,
         });
 
@@ -212,7 +206,7 @@ describe('SearchService', () => {
           });
           registerResultProvider(createProvider('A', providerResults));
 
-          const { find } = service.start(coreStart);
+          const { find } = service.start({ core: coreStart, licenseChecker });
           const results = find('foo', {}, request);
 
           expectObservable(results).toBe('a 24ms b 74ms |', {
@@ -225,7 +219,6 @@ describe('SearchService', () => {
       it('only returns a given maximum number of results per provider', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(100),
-          licenseChecker,
           basePath,
           maxProviderResults: 2,
         });
@@ -250,7 +243,7 @@ describe('SearchService', () => {
             )
           );
 
-          const { find } = service.start(coreStart);
+          const { find } = service.start({ core: coreStart, licenseChecker });
           const results = find('foo', {}, request);
 
           expectObservable(results).toBe('ab-(c|)', {
@@ -264,7 +257,6 @@ describe('SearchService', () => {
       it('process the results before returning them', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
-          licenseChecker,
           basePath,
         });
 
@@ -285,7 +277,7 @@ describe('SearchService', () => {
         const provider = createProvider('A', of([resultA, resultB]));
         registerResultProvider(provider);
 
-        const { find } = service.start(coreStart);
+        const { find } = service.start({ core: coreStart, licenseChecker });
         const batch = await find('foo', {}, request).pipe(take(1)).toPromise();
 
         expect(batch.results).toHaveLength(2);
@@ -304,7 +296,6 @@ describe('SearchService', () => {
 
         const { registerResultProvider } = service.setup({
           config: createConfig(),
-          licenseChecker,
           basePath,
         });
 
@@ -315,7 +306,7 @@ describe('SearchService', () => {
           });
           registerResultProvider(createProvider('A', providerResults));
 
-          const { find } = service.start(coreStart);
+          const { find } = service.start({ core: coreStart, licenseChecker });
           const results = find('foo', {}, request);
 
           expectObservable(results).toBe(

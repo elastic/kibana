@@ -7,7 +7,7 @@
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { LicensingPluginStart } from '../../licensing/server';
 import { LicenseChecker, ILicenseChecker } from '../common/license_checker';
 import { SearchService, SearchServiceStart } from './services';
 import { registerRoutes } from './routes';
@@ -24,13 +24,20 @@ declare module 'src/core/server' {
   }
 }
 
-export interface GlobalSearchPluginSetupDeps {
-  licensing: LicensingPluginSetup;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GlobalSearchPluginSetupDeps {}
+export interface GlobalSearchPluginStartDeps {
+  licensing: LicensingPluginStart;
 }
 
 export class GlobalSearchPlugin
   implements
-    Plugin<GlobalSearchPluginSetup, GlobalSearchPluginStart, GlobalSearchPluginSetupDeps, {}> {
+    Plugin<
+      GlobalSearchPluginSetup,
+      GlobalSearchPluginStart,
+      GlobalSearchPluginSetupDeps,
+      GlobalSearchPluginStartDeps
+    > {
   private readonly config$: Observable<GlobalSearchConfigType>;
   private readonly searchService = new SearchService();
   private searchServiceStart?: SearchServiceStart;
@@ -40,16 +47,10 @@ export class GlobalSearchPlugin
     this.config$ = context.config.create<GlobalSearchConfigType>();
   }
 
-  public async setup(
-    core: CoreSetup<{}, GlobalSearchPluginStart>,
-    { licensing }: GlobalSearchPluginSetupDeps
-  ) {
-    this.licenseChecker = new LicenseChecker(licensing.license$);
-
+  public async setup(core: CoreSetup<{}, GlobalSearchPluginStart>) {
     const config = await this.config$.pipe(take(1)).toPromise();
     const { registerResultProvider } = this.searchService.setup({
       basePath: core.http.basePath,
-      licenseChecker: this.licenseChecker,
       config,
     });
 
@@ -66,8 +67,12 @@ export class GlobalSearchPlugin
     };
   }
 
-  public start(core: CoreStart) {
-    this.searchServiceStart = this.searchService.start(core);
+  public start(core: CoreStart, { licensing }: GlobalSearchPluginStartDeps) {
+    this.licenseChecker = new LicenseChecker(licensing.license$);
+    this.searchServiceStart = this.searchService.start({
+      core,
+      licenseChecker: this.licenseChecker,
+    });
     return {
       find: this.searchServiceStart.find,
     };

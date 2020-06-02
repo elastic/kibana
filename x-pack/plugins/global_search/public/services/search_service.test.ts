@@ -38,6 +38,7 @@ describe('SearchService', () => {
   const startDeps = () => ({
     application: applicationStart,
     http: httpStart,
+    licenseChecker,
   });
 
   const createProvider = (
@@ -96,7 +97,6 @@ describe('SearchService', () => {
       it('throws when trying to register the same provider twice', () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
-          licenseChecker,
         });
 
         const provider = createProvider('A');
@@ -113,7 +113,6 @@ describe('SearchService', () => {
       it('calls the provider with the correct parameters', () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
-          licenseChecker,
         });
 
         const provider = createProvider('A');
@@ -130,7 +129,7 @@ describe('SearchService', () => {
       });
 
       it('calls `fetchServerResults` with the correct parameters', () => {
-        service.setup({ config: createConfig(), licenseChecker });
+        service.setup({ config: createConfig() });
 
         const { find } = service.start(startDeps());
         find('foobar', { preference: 'pref' });
@@ -146,7 +145,6 @@ describe('SearchService', () => {
       it('calls `getDefaultPreference` when `preference` is not specified', () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
-          licenseChecker,
         });
 
         const provider = createProvider('A');
@@ -181,7 +179,6 @@ describe('SearchService', () => {
       it('return the results from the provider', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
-          licenseChecker,
         });
 
         getTestScheduler().run(({ expectObservable, hot }) => {
@@ -202,7 +199,7 @@ describe('SearchService', () => {
       });
 
       it('return the results from the server', async () => {
-        service.setup({ config: createConfig(), licenseChecker });
+        service.setup({ config: createConfig() });
 
         getTestScheduler().run(({ expectObservable, hot }) => {
           const serverResults = hot('a-b-|', {
@@ -225,7 +222,6 @@ describe('SearchService', () => {
       it('handles multiple providers', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
-          licenseChecker,
         });
 
         getTestScheduler().run(({ expectObservable, hot }) => {
@@ -263,7 +259,6 @@ describe('SearchService', () => {
       it('return mixed server/client providers results', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
-          licenseChecker,
         });
 
         getTestScheduler().run(({ expectObservable, hot }) => {
@@ -297,7 +292,6 @@ describe('SearchService', () => {
       it('handles the `aborted$` option', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
-          licenseChecker,
         });
 
         getTestScheduler().run(({ expectObservable, hot }) => {
@@ -321,7 +315,6 @@ describe('SearchService', () => {
       it('respects the timeout duration', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(100),
-          licenseChecker,
         });
 
         getTestScheduler().run(({ expectObservable, hot }) => {
@@ -345,7 +338,6 @@ describe('SearchService', () => {
       it('only returns a given maximum number of results per provider', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(100),
-          licenseChecker,
           maxProviderResults: 2,
         });
 
@@ -383,7 +375,6 @@ describe('SearchService', () => {
       it('process the results before returning them', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
-          licenseChecker,
         });
 
         const resultA = providerResult('A', {
@@ -424,7 +415,6 @@ describe('SearchService', () => {
 
         const { registerResultProvider } = service.setup({
           config: createConfig(),
-          licenseChecker,
         });
 
         getTestScheduler().run(({ expectObservable, hot }) => {

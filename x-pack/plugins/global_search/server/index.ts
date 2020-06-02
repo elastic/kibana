@@ -5,14 +5,18 @@
  */
 
 import { PluginInitializer } from 'src/core/server';
-import { GlobalSearchPlugin, GlobalSearchPluginSetupDeps } from './plugin';
+import {
+  GlobalSearchPlugin,
+  GlobalSearchPluginSetupDeps,
+  GlobalSearchPluginStartDeps,
+} from './plugin';
 import { GlobalSearchPluginSetup, GlobalSearchPluginStart } from './types';
 
 export const plugin: PluginInitializer<
   GlobalSearchPluginSetup,
   GlobalSearchPluginStart,
   GlobalSearchPluginSetupDeps,
-  {}
+  GlobalSearchPluginStartDeps
 > = (context) => new GlobalSearchPlugin(context);
 
 export { config } from './config';

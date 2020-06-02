@@ -32,12 +32,12 @@ export interface SearchServiceStart {
 interface SetupDeps {
   config: GlobalSearchClientConfigType;
   maxProviderResults?: number;
-  licenseChecker: ILicenseChecker;
 }
 
 interface StartDeps {
   http: HttpStart;
   application: ApplicationStart;
+  licenseChecker: ILicenseChecker;
 }
 
 const defaultMaxProviderResults = 20;
@@ -51,13 +51,9 @@ export class SearchService {
   private maxProviderResults = defaultMaxProviderResults;
   private licenseChecker?: ILicenseChecker;
 
-  setup({
-    config,
-    licenseChecker,
-    maxProviderResults = defaultMaxProviderResults,
-  }: SetupDeps): SearchServiceSetup {
+  setup({ config, maxProviderResults = defaultMaxProviderResults }: SetupDeps): SearchServiceSetup {
     this.config = config;
-    this.licenseChecker = licenseChecker;
+
     this.maxProviderResults = maxProviderResults;
 
     return {
@@ -70,9 +66,10 @@ export class SearchService {
     };
   }
 
-  start({ http, application }: StartDeps): SearchServiceStart {
+  start({ http, application, licenseChecker }: StartDeps): SearchServiceStart {
     this.http = http;
     this.application = application;
+    this.licenseChecker = licenseChecker;
 
     return {
       find: (term, options) => this.performFind(term, options),
