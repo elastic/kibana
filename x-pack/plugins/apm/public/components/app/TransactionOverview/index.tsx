@@ -13,6 +13,7 @@ import {
   EuiHorizontalRule,
   EuiCallOut,
   EuiLink,
+  EuiCode,
 } from '@elastic/eui';
 import { Location } from 'history';
 import { first } from 'lodash';
@@ -157,15 +158,16 @@ export function TransactionOverview() {
             </EuiTitle>
             <EuiSpacer size="s" />
             <EuiCallOut
-              title="Too many unique transaction names."
+              title="This view shows a subset of reported transactions."
               color="danger"
               iconType="alert"
             >
               <p>
-                We have detected a lot of unique transaction names among your
-                transactions. This could be a sign of incorrect setup in your
-                agent.{' '}
-                <EuiLink href="#">Learn more in the documentation</EuiLink>.
+                The number of unique transaction names exceeds the configured
+                value of 200. Try reconfiguring your agents to group similar
+                transactions or increase the value of
+                <EuiCode>xpack.apm.ui.transactionGroupBucketSize</EuiCode>.{' '}
+                <EuiLink href="#">Learn more in the docs.</EuiLink>.
               </p>
             </EuiCallOut>
             <EuiSpacer size="s" />
