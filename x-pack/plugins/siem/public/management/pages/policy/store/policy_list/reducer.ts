@@ -4,23 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PolicyListState } from '../../types';
 import { isOnPolicyListPage } from './selectors';
 import { ImmutableReducer } from '../../../../../common/store';
 import { AppAction } from '../../../../../common/store/actions';
 import { Immutable } from '../../../../../../common/endpoint/types';
+import { PolicyListState } from '../../types';
 
-export const initialPolicyListState = (): PolicyListState => {
-  return {
-    policyItems: [],
-    isLoading: false,
-    apiError: undefined,
-    pageIndex: 0,
-    pageSize: 10,
-    total: 0,
-    location: undefined,
-  };
-};
+/**
+ * Return the initial state.
+ * In case `state` was mutated, we return a fresh initial state object.
+ */
+export const initialPolicyListState: () => Immutable<PolicyListState> = () => ({
+  policyItems: [],
+  isLoading: false,
+  apiError: undefined,
+  pageIndex: 0,
+  pageSize: 10,
+  total: 0,
+  location: undefined,
+});
 
 export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
   state = initialPolicyListState(),
