@@ -61,6 +61,11 @@ export function getFilterAggConfig(
         (this.aggConfig.aggTypeConfig?.isValid ? this.aggConfig.aggTypeConfig.isValid() : true)
       );
     },
+    getAggName() {
+      return this.aggConfig?.aggTypeConfig?.getAggName
+        ? this.aggConfig.aggTypeConfig.getAggName()
+        : undefined;
+    },
   };
 }
 
@@ -90,6 +95,9 @@ export function getFilterAggTypeConfig(
         },
         isValid() {
           return this.filterAggConfig?.value !== undefined;
+        },
+        getAggName() {
+          return this.filterAggConfig?.value ? this.filterAggConfig.value : undefined;
         },
       } as FilterAggConfigTerm['aggTypeConfig'];
     case FILTERS.RANGE:

@@ -27,6 +27,8 @@ interface FilterAggTypeConfig<U> {
   /** Converts UI agg config form to ES agg request object */
   getEsAggConfig: (field?: string) => { [key: string]: any };
   isValid?: () => boolean;
+  /** Provides aggregation name generated based on the configuration */
+  getAggName?: () => string | undefined;
 }
 
 /** Filter agg type definition */

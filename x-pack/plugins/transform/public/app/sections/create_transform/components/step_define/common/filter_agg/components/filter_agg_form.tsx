@@ -50,12 +50,11 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
 
   useUpdateEffect(() => {
     // reset filter agg on field change
-    onChange({
-      filterAgg: undefined,
-    });
+    onChange({});
   }, [selectedField]);
 
   const filterAggTypeConfig = aggConfig?.aggTypeConfig;
+  const filterAgg = aggConfig?.filterAgg ?? '';
 
   return (
     <>
@@ -71,19 +70,19 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
           options={[{ text: '', value: '' }].concat(
             filterAggsOptions.map((v) => ({ text: v, value: v }))
           )}
-          value={aggConfig.filterAgg}
+          value={filterAgg}
           onChange={(e) => {
             // have to reset aggTypeConfig of filterAgg change
-            const filterAgg = e.target.value as FilterAggType;
+            const filterAggUpdate = e.target.value as FilterAggType;
             onChange({
-              filterAgg,
-              aggTypeConfig: getFilterAggTypeConfig(filterAgg),
+              filterAgg: filterAggUpdate,
+              aggTypeConfig: getFilterAggTypeConfig(filterAggUpdate),
             });
           }}
           data-test-subj="filterAggTypeSelector"
         />
       </EuiFormRow>
-      {filterAggTypeConfig?.FilterAggFormComponent && (
+      {filterAgg !== '' && filterAggTypeConfig?.FilterAggFormComponent && (
         <filterAggTypeConfig.FilterAggFormComponent
           config={filterAggTypeConfig?.filterAggConfig}
           onChange={(update: any) => {

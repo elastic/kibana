@@ -138,6 +138,8 @@ export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
   getEsAggConfig: () => { [key: string]: any } | null;
   /** Indicates if the configuration is valid */
   isValid: () => boolean;
+  /** Provides aggregation name generated based on the configuration */
+  getAggName?: () => string | undefined;
 }
 
 interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {

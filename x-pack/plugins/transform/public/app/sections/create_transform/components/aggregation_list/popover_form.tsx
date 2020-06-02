@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { cloneDeep } from 'lodash';
+import { useUpdateEffect } from 'react-use';
 import { dictionaryToArray } from '../../../../../../common/types/common';
 
 import {
@@ -94,6 +95,16 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     setAggConfigDef(config);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agg]);
+
+  useUpdateEffect(() => {
+    if (isPivotAggsWithExtendedForm(aggConfigDef)) {
+      const name = aggConfigDef.getAggName ? aggConfigDef.getAggName() : undefined;
+      if (name !== undefined) {
+        setAggName(name);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aggConfigDef]);
 
   const availableFields: EuiSelectOption[] = [];
   const availableAggs: EuiSelectOption[] = [];
@@ -197,7 +208,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
         })}
       >
         <EuiFieldText
-          defaultValue={aggName}
+          value={aggName}
           isInvalid={!validAggName}
           onChange={(e) => setAggName(e.target.value)}
           data-test-subj="transformAggName"
