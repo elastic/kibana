@@ -14,6 +14,7 @@ import {
   CUSTOM_QUERY_INPUT,
   DEFINE_CONTINUE_BUTTON,
   FALSE_POSITIVES_INPUT,
+  IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INVESTIGATION_NOTES_TEXTAREA,
   MACHINE_LEARNING_DROPDOWN,
   MACHINE_LEARNING_LIST,
@@ -30,6 +31,7 @@ import {
   SEVERITY_DROPDOWN,
   TAGS_INPUT,
 } from '../screens/create_new_rule';
+import { TIMELINE } from '../screens/timeline';
 
 export const createAndActivateRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
@@ -80,6 +82,15 @@ export const fillAboutRuleAndContinue = (rule: CustomRule | MachineLearningRule)
 
 export const fillDefineCustomRuleAndContinue = (rule: CustomRule) => {
   cy.get(CUSTOM_QUERY_INPUT).type(rule.customQuery);
+  cy.get(CUSTOM_QUERY_INPUT).should('have.attr', 'value', rule.customQuery);
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+
+  cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
+};
+
+export const fillDefineCustomRuleWithImportedQueryAndContinue = (rule: CustomRule) => {
+  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
+  cy.get(TIMELINE(rule.timelineId)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.attr', 'value', rule.customQuery);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 

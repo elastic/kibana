@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { deleteNotifications } from './delete_notifications';
 import { readNotifications } from './read_notifications';
 jest.mock('./read_notifications');
