@@ -7,24 +7,25 @@
 import React, { ChangeEvent, Component } from 'react';
 import { EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getSecurityIndexPatterns, IndexPatternMeta } from './security_index_pattern_utils';
+import { IndexPattern } from 'src/plugins/data/public';
+import { getSecurityIndexPatterns } from './security_index_pattern_utils';
 
 interface Props {
-  value: string | null;
-  onChange: (indexPatternId: string) => void;
+  value: string;
+  onChange: (indexPattern: IndexPattern | null) => void;
 }
 
 interface State {
-  options: EuiSelectOption[];
-  hasLoadedOptions: boolean;
+  hasLoaded: boolean;
+  indexPatterns: IndexPattern[];
 }
 
 export class IndexPatternSelect extends Component<Props, State> {
   private _isMounted: boolean = false;
 
   state = {
-    hasLoadedOptions: false,
-    options: [],
+    hasLoaded: false,
+    indexPatterns: [],
   };
 
   componentWillUnmount() {
@@ -33,36 +34,39 @@ export class IndexPatternSelect extends Component<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadOptions();
+    this._loadIndexPatterns();
   }
 
-  async _loadOptions() {
-    const securityIndexPatterns = await getSecurityIndexPatterns();
+  async _loadIndexPatterns() {
+    const indexPatterns = await getSecurityIndexPatterns();
     if (!this._isMounted) {
       return;
     }
 
-    const options = securityIndexPatterns.map(({ id, title }: IndexPatternMeta) => {
-      return {
-        value: id,
-        text: title,
-      };
-    });
-
     this.setState({
-      hasLoadedOptions: true,
-      options: [{ value: '', text: '' }, ...options],
+      hasLoaded: true,
+      indexPatterns,
     });
   }
 
   _onChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    this.props.onChange(event.target.value);
+    const targetIndexPattern = this.state.indexPatterns.find((indexPattern: IndexPattern) => {
+      return (event.target.value = indexPattern.id);
+    });
+    this.props.onChange(targetIndexPattern);
   };
 
   render() {
-    if (!this.state.hasLoadedOptions) {
+    if (!this.state.hasLoaded) {
       return null;
     }
+
+    const options = this.state.indexPatterns.map((indexPattern: IndexPattern) => {
+      return {
+        value: indexPattern.id,
+        text: indexPattern.title,
+      };
+    });
 
     return (
       <EuiFormRow
@@ -71,7 +75,7 @@ export class IndexPatternSelect extends Component<Props, State> {
         })}
       >
         <EuiSelect
-          options={this.state.options}
+          options={[{ value: '', text: '' }, ...options]}
           value={this.props.value ? this.props.value : ''}
           onChange={this._onChange}
         />

@@ -5,31 +5,33 @@
  */
 
 import React, { Component, Fragment } from 'react';
+import { IndexPattern } from 'src/plugins/data/public';
 import { RenderWizardArguments } from '../../layer_wizard_registry';
 import { IndexPatternSelect } from './index_pattern_select';
+import { createLayerDescriptors } from './create_layer_descriptors';
 
 interface State {
-  indexPatternId: string | null;
+  indexPattern: IndexPattern | undefined;
 }
 
 export class SecurityLayerTemplate extends Component<RenderWizardArguments, State> {
   state = {
-    indexPatternId: null,
+    indexPattern: undefined,
   };
 
-  _onIndexPatternChange = (indexPatternId: string) => {
-    this.setState({ indexPatternId }, this._previewLayer);
+  _onIndexPatternChange = (indexPattern: IndexPattern | undefined) => {
+    this.setState({ indexPattern }, this._previewLayer);
   };
 
   _previewLayer() {
-    this.props.previewLayers([]);
+    this.props.previewLayers(createLayerDescriptors(this.state.indexPattern));
   }
 
   render() {
     return (
       <Fragment>
         <IndexPatternSelect
-          value={this.state.indexPatternId}
+          value={this.state.indexPattern ? this.state.indexPattern.id : ''}
           onChange={this._onIndexPatternChange}
         />
       </Fragment>
