@@ -82,7 +82,7 @@ const filterByToggles = (indices, toggleNameToVisibleMap) => {
   });
 };
 
-const getFilteredIndices = createSelector(
+export const getFilteredIndices = createSelector(
   getIndices,
   getAllIds,
   getTableState,
@@ -95,7 +95,7 @@ const getFilteredIndices = createSelector(
     );
     const includeHidden = includeHiddenParam === 'true';
     const dataStreamsFilter = dataStreamsParam ? dataStreamsParam.split(',') : undefined;
-    const shouldFilterDataStreams = dataStreamsFilter && dataStreamsFilter.length;
+    const shouldFilterDataStreams = Boolean(dataStreamsFilter && dataStreamsFilter.length);
     const filteredIndices = indexArray.filter((index) => {
       let include = true;
       if (!includeHidden) {
@@ -151,18 +151,6 @@ export const getPageOfIndices = createSelector(
     });
   }
 );
-
-export const getHasNextPage = createSelector(getPager, (pager) => {
-  return pager.hasNextPage;
-});
-
-export const getHasPreviousPage = createSelector(getPager, (pager) => {
-  return pager.hasPreviousPage;
-});
-
-export const getCurrentPage = createSelector(getPager, (pager) => {
-  return pager.currentPage;
-});
 
 export const getFilter = createSelector(getTableState, ({ filter }) => filter);
 

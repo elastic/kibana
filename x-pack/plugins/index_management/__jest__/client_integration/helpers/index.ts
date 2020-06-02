@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import './mocks';
 import { setup as homeSetup } from './home.helpers';
 import { setup as templateCreateSetup } from './template_create.helpers';
 import { setup as templateCloneSetup } from './template_clone.helpers';

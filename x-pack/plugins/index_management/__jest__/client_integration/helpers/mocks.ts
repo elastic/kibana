@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExtensionsService } from '../../../services';
 
-export declare function setExtensionsService(extensionsService: ExtensionsService): any;
-
-export const getFilteredIndices: (state: any, props: any) => any;
+(window as any).Worker = class Worker {
+  onmessage() {}
+  postMessage() {}
+};
