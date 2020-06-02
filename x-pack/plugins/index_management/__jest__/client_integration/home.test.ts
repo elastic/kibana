@@ -5,8 +5,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import * as fixtures from '../../test/fixtures';
-import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
+import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { IdxMgmtHomeTestBed } from './helpers/home.helpers';
 import { API_BASE_PATH } from '../../common/constants';
 
