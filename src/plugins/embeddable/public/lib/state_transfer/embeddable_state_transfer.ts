@@ -18,7 +18,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { CoreStart, ScopedHistory } from '../../../../../core/public';
+import { ScopedHistory, ApplicationStart } from '../../../../../core/public';
 import {
   EmbeddableOriginatingAppState,
   isEmbeddableOriginatingAppState,
@@ -27,31 +27,45 @@ import {
 } from './types';
 
 export class EmbeddableStateTransfer {
-  constructor(private coreStart: CoreStart) {}
+  constructor(private navigateToApp: ApplicationStart['navigateToApp']) {}
 
-  public incomingOriginatingApp(
+  public getIncomingOriginatingApp(
     history: ScopedHistory,
     removeAfterFetch: boolean = false
   ): EmbeddableOriginatingAppState | undefined {
-    return this.incoming<EmbeddableOriginatingAppState>(
+    return this.getIncomingState<EmbeddableOriginatingAppState>(
       history,
       isEmbeddableOriginatingAppState,
       removeAfterFetch
     );
   }
 
-  public incomingEmbeddablePackage(
+  public getIncomingEmbeddablePackage(
     history: ScopedHistory,
     removeAfterFetch: boolean = false
   ): EmbeddablePackageState | undefined {
-    return this.incoming<EmbeddablePackageState>(
+    return this.getIncomingState<EmbeddablePackageState>(
       history,
       isEmbeddablePackageState,
       removeAfterFetch
     );
   }
 
-  public incoming<IncomingStateType>(
+  public async navigateToWithOriginatingApp(
+    appId: string,
+    options: { path?: string; state: EmbeddableOriginatingAppState }
+  ): Promise<void> {
+    await this.navigateToWithState<EmbeddableOriginatingAppState>(appId, options);
+  }
+
+  public async navigateToWithEmbeddablePackage(
+    appId: string,
+    options: { path?: string; state: EmbeddablePackageState }
+  ): Promise<void> {
+    await this.navigateToWithState<EmbeddablePackageState>(appId, options);
+  }
+
+  private getIncomingState<IncomingStateType>(
     history: ScopedHistory,
     guard: (state: unknown) => state is IncomingStateType,
     removeAfterFetch: boolean = false
@@ -67,24 +81,10 @@ export class EmbeddableStateTransfer {
     return castState;
   }
 
-  public async outgoingOriginatingApp(
-    appId: string,
-    options: { path?: string; state: EmbeddableOriginatingAppState }
-  ): Promise<void> {
-    await this.outgoing<EmbeddableOriginatingAppState>(appId, options);
-  }
-
-  public async outgoingEmbeddablePackage(
-    appId: string,
-    options: { path?: string; state: EmbeddablePackageState }
-  ): Promise<void> {
-    await this.outgoing<EmbeddablePackageState>(appId, options);
-  }
-
-  public async outgoing<OutgoingStateType = unknown>(
+  private async navigateToWithState<OutgoingStateType = unknown>(
     appId: string,
     options: { path?: string; state?: OutgoingStateType }
   ): Promise<void> {
-    await this.coreStart.application.navigateToApp(appId, options);
+    await this.navigateToApp(appId, options);
   }
 }

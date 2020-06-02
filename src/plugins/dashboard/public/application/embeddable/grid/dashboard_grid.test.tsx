@@ -80,7 +80,6 @@ function prepare(props?: Partial<DashboardGridProps>) {
   dashboardContainer = new DashboardContainer(initialInput, options);
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
-    PanelComponent: () => <div />,
     kibana: null as any,
     intl: null as any,
   };

@@ -31,7 +31,8 @@ import {
   FilterableEmbeddableInput,
 } from '../lib/test_samples';
 // eslint-disable-next-line
-import { esFilters } from '../../../data/public';
+import { inspectorPluginMock } from '../../../../plugins/inspector/public/mocks';
+import { esFilters } from '../../../../plugins/data/public';
 
 test('ApplyFilterAction applies the filter to the root of the container tree', async () => {
   const { doStart, setup } = testPlugin();
@@ -94,16 +95,27 @@ test('ApplyFilterAction applies the filter to the root of the container tree', a
 });
 
 test('ApplyFilterAction is incompatible if the root container does not accept a filter as input', async () => {
-  const { doStart, setup } = testPlugin();
+  const { doStart, coreStart, setup } = testPlugin();
+  const inspector = inspectorPluginMock.createStartContract();
 
   const factory = new FilterableEmbeddableFactory();
   setup.registerEmbeddableFactory(factory.type, factory);
   const api = doStart();
   const applyFilterAction = createFilterAction();
 
-  const parent = new HelloWorldContainer({ id: 'root', panels: {} }, {
-    getEmbeddableFactory: api.getEmbeddableFactory,
-  } as any);
+  const parent = new HelloWorldContainer(
+    { id: 'root', panels: {} },
+    {
+      getActions: () => Promise.resolve([]),
+      getEmbeddableFactory: api.getEmbeddableFactory,
+      getAllEmbeddableFactories: api.getEmbeddableFactories,
+      overlays: coreStart.overlays,
+      notifications: coreStart.notifications,
+      application: coreStart.application,
+      inspector,
+      SavedObjectFinder: () => null,
+    }
+  );
   const embeddable = await parent.addNewEmbeddable<
     FilterableContainerInput,
     EmbeddableOutput,
@@ -119,7 +131,8 @@ test('ApplyFilterAction is incompatible if the root container does not accept a 
 });
 
 test('trying to execute on incompatible context throws an error ', async () => {
-  const { doStart, setup } = testPlugin();
+  const { doStart, coreStart, setup } = testPlugin();
+  const inspector = inspectorPluginMock.createStartContract();
 
   const factory = new FilterableEmbeddableFactory();
   setup.registerEmbeddableFactory(factory.type, factory);
@@ -127,9 +140,19 @@ test('trying to execute on incompatible context throws an error ', async () => {
   const api = doStart();
   const applyFilterAction = createFilterAction();
 
-  const parent = new HelloWorldContainer({ id: 'root', panels: {} }, {
-    getEmbeddableFactory: api.getEmbeddableFactory,
-  } as any);
+  const parent = new HelloWorldContainer(
+    { id: 'root', panels: {} },
+    {
+      getActions: () => Promise.resolve([]),
+      getEmbeddableFactory: api.getEmbeddableFactory,
+      getAllEmbeddableFactories: api.getEmbeddableFactories,
+      overlays: coreStart.overlays,
+      notifications: coreStart.notifications,
+      application: coreStart.application,
+      inspector,
+      SavedObjectFinder: () => null,
+    }
+  );
 
   const embeddable = await parent.addNewEmbeddable<
     FilterableContainerInput,

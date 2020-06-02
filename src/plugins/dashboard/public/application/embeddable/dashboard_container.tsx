@@ -189,7 +189,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
           <DashboardViewport
             renderEmpty={this.renderEmpty}
             container={this}
-            PanelComponent={this.options.embeddable.EmbeddablePanel}
+            stateTransfer={this.options.embeddable.stateTransfer}
           />
         </KibanaContextProvider>
       </I18nProvider>,

@@ -88,7 +88,7 @@ export class EditPanelAction implements Action<ActionContext> {
     const appTarget = this.getAppTarget(context);
     if (appTarget) {
       if (this.stateTransfer && appTarget.state) {
-        await this.stateTransfer.outgoingOriginatingApp(appTarget.app, {
+        await this.stateTransfer.navigateToWithOriginatingApp(appTarget.app, {
           path: appTarget.path,
           state: appTarget.state,
         });

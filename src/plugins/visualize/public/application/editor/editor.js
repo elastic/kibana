@@ -111,7 +111,8 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
   };
 
-  const { originatingApp } = embeddable.stateTransfer.incomingOriginatingApp(scopedHistory()) || {};
+  const { originatingApp } =
+    embeddable.stateTransfer.getIncomingOriginatingApp(scopedHistory()) || {};
   $scope.getOriginatingApp = () => originatingApp;
 
   const visStateToEditorState = () => {
@@ -673,9 +674,12 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
               history.replace(appPath);
               setActiveUrl(appPath);
               if (newlyCreated && embeddable) {
-                embeddable.stateTransfer.outgoingEmbeddablePackage($scope.getOriginatingApp(), {
-                  state: { id: savedVis.id, type: VISUALIZE_EMBEDDABLE_TYPE },
-                });
+                embeddable.stateTransfer.navigateToWithEmbeddablePackage(
+                  $scope.getOriginatingApp(),
+                  {
+                    state: { id: savedVis.id, type: VISUALIZE_EMBEDDABLE_TYPE },
+                  }
+                );
               } else {
                 application.navigateToApp($scope.getOriginatingApp());
               }

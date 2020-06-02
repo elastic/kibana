@@ -27,7 +27,7 @@ import { context } from '../../../../../kibana_react/public';
 export interface DashboardViewportProps {
   container: DashboardContainer;
   renderEmpty?: () => React.ReactNode;
-  PanelComponent: EmbeddableStart['EmbeddablePanel'];
+  stateTransfer?: EmbeddableStart['stateTransfer'];
 }
 
 interface State {
@@ -115,7 +115,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   }
 
   private renderContainerScreen() {
-    const { container, PanelComponent } = this.props;
+    const { container } = this.props;
     const { isFullScreenMode, panels, title, description, useMargins } = this.state;
     return (
       <div
@@ -130,7 +130,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
             onExitFullScreenMode={this.onExitFullScreenMode}
           />
         )}
-        <DashboardGrid container={container} PanelComponent={PanelComponent} />
+        <DashboardGrid container={container} stateTransfer={this.props.stateTransfer} />
       </div>
     );
   }

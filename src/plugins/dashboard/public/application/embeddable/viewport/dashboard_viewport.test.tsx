@@ -87,7 +87,6 @@ function getProps(
   dashboardContainer = new DashboardContainer(input, options);
   const defaultTestProps: DashboardViewportProps = {
     container: dashboardContainer,
-    PanelComponent: () => <div />,
   };
 
   return {

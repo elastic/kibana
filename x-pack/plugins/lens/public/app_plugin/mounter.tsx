@@ -36,7 +36,8 @@ export async function mountApp(
     i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
   );
 
-  const { originatingApp } = embeddable?.stateTransfer.incomingOriginatingApp(params.history) || {};
+  const { originatingApp } =
+    embeddable?.stateTransfer.getIncomingOriginatingApp(params.history) || {};
 
   const instance = await createEditorFrame();
 
@@ -60,7 +61,7 @@ export async function mountApp(
       routeProps.history.push(`/edit/${id}`);
 
       if (newlyCreated && embeddable) {
-        embeddable.stateTransfer.outgoingEmbeddablePackage(originatingApp, {
+        embeddable.stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
           state: { id, type: LENS_EMBEDDABLE_TYPE },
         });
       } else {

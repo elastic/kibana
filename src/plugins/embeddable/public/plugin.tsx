@@ -103,7 +103,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
           : defaultEmbeddableFactoryProvider(def)
       );
     });
-    this.stateTransfer = new EmbeddableStateTransfer(core);
+    this.stateTransfer = new EmbeddableStateTransfer(core.application.navigateToApp);
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,

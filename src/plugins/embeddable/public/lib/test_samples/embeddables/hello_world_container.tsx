@@ -19,6 +19,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
+import { CoreStart } from 'src/core/public';
+import { UiActionsService } from 'src/plugins/ui_actions/public';
+import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { Container, ViewMode, ContainerInput } from '../..';
 import { HelloWorldContainerComponent } from './hello_world_container_component';
 import { EmbeddableStart } from '../../../plugin';
@@ -42,8 +45,14 @@ interface HelloWorldContainerInput extends ContainerInput {
 }
 
 interface HelloWorldContainerOptions {
+  getActions: UiActionsService['getTriggerCompatibleActions'];
   getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
-  panelComponent: EmbeddableStart['EmbeddablePanel'];
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
+  overlays: CoreStart['overlays'];
+  application: CoreStart['application'];
+  notifications: CoreStart['notifications'];
+  inspector: InspectorStartContract;
+  SavedObjectFinder: React.ComponentType<any>;
 }
 
 export class HelloWorldContainer extends Container<InheritedInput, HelloWorldContainerInput> {
@@ -69,7 +78,14 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
       <I18nProvider>
         <HelloWorldContainerComponent
           container={this}
-          panelComponent={this.options.panelComponent}
+          getActions={this.options.getActions}
+          getAllEmbeddableFactories={this.options.getAllEmbeddableFactories}
+          getEmbeddableFactory={this.options.getEmbeddableFactory}
+          overlays={this.options.overlays}
+          application={this.options.application}
+          notifications={this.options.notifications}
+          inspector={this.options.inspector}
+          SavedObjectFinder={this.options.SavedObjectFinder}
         />
       </I18nProvider>,
       node

@@ -11,10 +11,12 @@ import { StartDeps } from '../../plugin';
 import {
   IEmbeddable,
   EmbeddableFactory,
+  EmbeddablePanel,
   EmbeddableFactoryNotFoundError,
 } from '../../../../../../src/plugins/embeddable/public';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
+import { getSavedObjectFinder } from '../../../../../../src/plugins/saved_objects/public';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { EmbeddableInput } from '../../expression_types';
 import { RendererHandlers } from '../../../types';
@@ -36,7 +38,18 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
         style={{ width: domNode.offsetWidth, height: domNode.offsetHeight, cursor: 'auto' }}
       >
         <I18nContext>
-          <plugins.embeddable.EmbeddablePanel embeddable={embeddableObject} />
+          <EmbeddablePanel
+            embeddable={embeddableObject}
+            getActions={plugins.uiActions.getTriggerCompatibleActions}
+            getEmbeddableFactory={plugins.embeddable.getEmbeddableFactory}
+            getAllEmbeddableFactories={plugins.embeddable.getEmbeddableFactories}
+            notifications={core.notifications}
+            application={core.application}
+            overlays={core.overlays}
+            inspector={plugins.inspector}
+            SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
+            stateTransfer={plugins.embeddable.stateTransfer}
+          />
         </I18nContext>
       </div>
     );

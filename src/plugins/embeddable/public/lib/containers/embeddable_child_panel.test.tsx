@@ -31,7 +31,7 @@ import {
 // eslint-disable-next-line
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { mount } from 'enzyme';
-import { embeddablePluginMock, createEmbeddablePanelMock } from '../../mocks';
+import { embeddablePluginMock } from '../../mocks';
 
 test('EmbeddableChildPanel renders an embeddable when it is done loading', async () => {
   const inspector = inspectorPluginMock.createStartContract();
@@ -58,17 +58,18 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
 
   expect(newEmbeddable.id).toBeDefined();
 
-  const testPanel = createEmbeddablePanelMock({
-    getAllEmbeddableFactories: start.getEmbeddableFactories,
-    getEmbeddableFactory,
-    inspector,
-  });
-
   const component = mount(
     <EmbeddableChildPanel
       container={container}
       embeddableId={newEmbeddable.id}
-      PanelComponent={testPanel}
+      getActions={() => Promise.resolve([])}
+      getAllEmbeddableFactories={start.getEmbeddableFactories}
+      getEmbeddableFactory={getEmbeddableFactory}
+      notifications={{} as any}
+      application={{} as any}
+      overlays={{} as any}
+      inspector={inspector}
+      SavedObjectFinder={() => null}
     />
   );
 
@@ -96,9 +97,19 @@ test(`EmbeddableChildPanel renders an error message if the factory doesn't exist
     { getEmbeddableFactory } as any
   );
 
-  const testPanel = createEmbeddablePanelMock({ inspector });
   const component = mount(
-    <EmbeddableChildPanel container={container} embeddableId={'1'} PanelComponent={testPanel} />
+    <EmbeddableChildPanel
+      container={container}
+      embeddableId={'1'}
+      getActions={() => Promise.resolve([])}
+      getAllEmbeddableFactories={(() => []) as any}
+      getEmbeddableFactory={(() => undefined) as any}
+      notifications={{} as any}
+      overlays={{} as any}
+      application={{} as any}
+      inspector={inspector}
+      SavedObjectFinder={() => null}
+    />
   );
 
   await nextTick();

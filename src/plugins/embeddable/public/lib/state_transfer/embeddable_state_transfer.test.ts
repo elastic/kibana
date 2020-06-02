@@ -53,18 +53,18 @@ describe('embeddable state transfer', () => {
   beforeEach(() => {
     const core = coreMock.createStart();
     application = core.application;
-    stateTransfer = new EmbeddableStateTransfer(core);
+    stateTransfer = new EmbeddableStateTransfer(application.navigateToApp);
   });
 
   it('can send an outgoing originating app state', async () => {
-    await stateTransfer.outgoingOriginatingApp(destinationApp, { state: { originatingApp } });
+    await stateTransfer.navigateToWithOriginatingApp(destinationApp, { state: { originatingApp } });
     expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
       state: { originatingApp: 'superUltraTestDashboard' },
     });
   });
 
   it('can send an outgoing embeddable package state', async () => {
-    await stateTransfer.outgoingEmbeddablePackage(destinationApp, {
+    await stateTransfer.navigateToWithEmbeddablePackage(destinationApp, {
       state: { type: 'coolestType', id: '150' },
     });
     expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
@@ -73,7 +73,8 @@ describe('embeddable state transfer', () => {
   });
 
   it('can send an outgoing custom state', () => {
-    stateTransfer.outgoing<SuperCoolCustomState>(destinationApp, {
+    // @ts-ignore
+    stateTransfer.navigateToWithState<SuperCoolCustomState>(destinationApp, {
       state: { isCool: false, coolValue: 0 },
     });
     expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
@@ -83,31 +84,32 @@ describe('embeddable state transfer', () => {
 
   it('can fetch an incoming originating app state', async () => {
     const historyMock = mockHistoryState({ originatingApp: 'extremeSportsKibana' });
-    const fetchedState = stateTransfer.incomingOriginatingApp(historyMock as ScopedHistory);
+    const fetchedState = stateTransfer.getIncomingOriginatingApp(historyMock as ScopedHistory);
     expect(fetchedState).toEqual({ originatingApp: 'extremeSportsKibana' });
   });
 
   it('returns undefined with originating app state is not in the right shape', async () => {
     const historyMock = mockHistoryState({ kibanaIsNowForSports: 'extremeSportsKibana' });
-    const fetchedState = stateTransfer.incomingOriginatingApp(historyMock as ScopedHistory);
+    const fetchedState = stateTransfer.getIncomingOriginatingApp(historyMock as ScopedHistory);
     expect(fetchedState).toBeUndefined();
   });
 
   it('can fetch an incoming embeddable package state', async () => {
     const historyMock = mockHistoryState({ type: 'skisEmbeddable', id: '123' });
-    const fetchedState = stateTransfer.incomingEmbeddablePackage(historyMock as ScopedHistory);
+    const fetchedState = stateTransfer.getIncomingEmbeddablePackage(historyMock as ScopedHistory);
     expect(fetchedState).toEqual({ type: 'skisEmbeddable', id: '123' });
   });
 
   it('returns undefined when embeddable package is not in the right shape', async () => {
     const historyMock = mockHistoryState({ kibanaIsNowForSports: 'extremeSportsKibana' });
-    const fetchedState = stateTransfer.incomingEmbeddablePackage(historyMock as ScopedHistory);
+    const fetchedState = stateTransfer.getIncomingEmbeddablePackage(historyMock as ScopedHistory);
     expect(fetchedState).toBeUndefined();
   });
 
   it('can fetch a custom state', async () => {
     const historyMock = mockHistoryState({ isCool: true, coolValue: 123 });
-    const fetchedState = stateTransfer.incoming<SuperCoolCustomState>(
+    // @ts-ignore
+    const fetchedState = stateTransfer.getIncomingState<SuperCoolCustomState>(
       historyMock as ScopedHistory,
       isSuperCoolState
     );
@@ -116,7 +118,8 @@ describe('embeddable state transfer', () => {
 
   it('incoming embeddable package fetches undefined when not given state in the right shape', async () => {
     const historyMock = mockHistoryState({ isUncool: false, coolValue: 123 });
-    const fetchedState = stateTransfer.incoming<SuperCoolCustomState>(
+    // @ts-ignore
+    const fetchedState = stateTransfer.getIncomingState<SuperCoolCustomState>(
       historyMock as ScopedHistory,
       isSuperCoolState
     );
@@ -125,7 +128,8 @@ describe('embeddable state transfer', () => {
 
   it('removes state after fetching if removeAfterFetching is true', async () => {
     const historyMock = mockHistoryState({ isCool: false, coolValue: 123 });
-    stateTransfer.incoming<SuperCoolCustomState>(
+    // @ts-ignore
+    stateTransfer.getIncomingState<SuperCoolCustomState>(
       historyMock as ScopedHistory,
       isSuperCoolState,
       true
@@ -136,7 +140,11 @@ describe('embeddable state transfer', () => {
 
   it('leaves state as is if removeAfterFetching is false', async () => {
     const historyMock = mockHistoryState({ isCool: false, coolValue: 123 });
-    stateTransfer.incoming<SuperCoolCustomState>(historyMock as ScopedHistory, isSuperCoolState);
+    // @ts-ignore
+    stateTransfer.getIncomingState<SuperCoolCustomState>(
+      historyMock as ScopedHistory,
+      isSuperCoolState
+    );
     expect((historyMock.location.state as { [key: string]: unknown }).isCool).toBeDefined();
     expect((historyMock.location.state as { [key: string]: unknown }).coolValue).toBeDefined();
   });

@@ -164,7 +164,7 @@ describe('NewVisModal', () => {
       );
       const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
       visButton.simulate('click');
-      expect(stateTransfer.outgoingOriginatingApp).toBeCalledWith('otherApp', {
+      expect(stateTransfer.navigateToWithOriginatingApp).toBeCalledWith('otherApp', {
         path: '#/aliasUrl',
         state: { originatingApp: 'coolJestTestApp' },
       });

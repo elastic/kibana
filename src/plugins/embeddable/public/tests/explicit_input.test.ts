@@ -36,7 +36,6 @@ import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world
 // eslint-disable-next-line
 import { coreMock } from '../../../../core/public/mocks';
 import { esFilters, Filter } from '../../../../plugins/data/public';
-import { createEmbeddablePanelMock } from '../mocks';
 
 const { setup, doStart, coreStart, uiActions } = testPlugin(
   coreMock.createSetup(),
@@ -81,19 +80,17 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
 });
 
 test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async (done) => {
-  const testPanel = createEmbeddablePanelMock({
-    getActions: uiActions.getTriggerCompatibleActions,
-    getEmbeddableFactory: start.getEmbeddableFactory,
-    getAllEmbeddableFactories: start.getEmbeddableFactories,
-    overlays: coreStart.overlays,
-    notifications: coreStart.notifications,
-    application: coreStart.application,
-  });
   const container = new HelloWorldContainer(
     { id: 'hello', panels: {} },
     {
+      getActions: uiActions.getTriggerCompatibleActions,
+      getAllEmbeddableFactories: start.getEmbeddableFactories,
       getEmbeddableFactory: start.getEmbeddableFactory,
-      panelComponent: testPanel,
+      notifications: coreStart.notifications,
+      overlays: coreStart.overlays,
+      application: coreStart.application,
+      inspector: {} as any,
+      SavedObjectFinder: () => null,
     }
   );
 
@@ -124,14 +121,6 @@ test('Explicit embeddable input mapped to undefined with no inherited value will
 // but before the embeddable factory returns the embeddable, that the `inheritedChildInput` and
 // embeddable input comparisons won't cause explicit input to be set when it shouldn't.
 test('Explicit input tests in async situations', (done: () => void) => {
-  const testPanel = createEmbeddablePanelMock({
-    getActions: uiActions.getTriggerCompatibleActions,
-    getEmbeddableFactory: start.getEmbeddableFactory,
-    getAllEmbeddableFactories: start.getEmbeddableFactories,
-    overlays: coreStart.overlays,
-    notifications: coreStart.notifications,
-    application: coreStart.application,
-  });
   const container = new HelloWorldContainer(
     {
       id: 'hello',
@@ -143,8 +132,14 @@ test('Explicit input tests in async situations', (done: () => void) => {
       },
     },
     {
+      getActions: uiActions.getTriggerCompatibleActions,
+      getAllEmbeddableFactories: start.getEmbeddableFactories,
       getEmbeddableFactory: start.getEmbeddableFactory,
-      panelComponent: testPanel,
+      notifications: coreStart.notifications,
+      overlays: coreStart.overlays,
+      application: coreStart.application,
+      inspector: {} as any,
+      SavedObjectFinder: () => null,
     }
   );
 
