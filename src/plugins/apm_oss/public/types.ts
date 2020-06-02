@@ -17,28 +17,11 @@
  * under the License.
  */
 
-import { of } from 'rxjs';
-import { APMOSSConfig } from '.';
-import { APMOSSPluginSetup } from './plugin';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ApmOssPluginSetup {}
 
-const apmStar = 'apm-*';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ApmOssPluginStart {}
 
-const defaultConfig = {
-  enabled: true,
-  errorIndices: apmStar,
-  indexPattern: apmStar,
-  metricsIndices: apmStar,
-  onboardingIndices: apmStar,
-  sourcemapIndices: apmStar,
-  spanIndices: apmStar,
-  transactionIndices: apmStar,
-};
-
-export const apmOSSPluginSetupMock = {
-  create(config: Partial<APMOSSConfig> = {}): APMOSSPluginSetup {
-    return {
-      config$: of({ ...defaultConfig, ...config }),
-      getRegisteredTutorialProvider: jest.fn(),
-    };
-  },
-};
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface AppPluginStartDependencies {}
