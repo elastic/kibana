@@ -34,7 +34,7 @@ export const getClosestLink = (
   container?: HTMLElement
 ): HTMLAnchorElement | undefined => {
   let current = element;
-  while (current) {
+  while (true) {
     if (current.tagName.toLowerCase() === 'a') {
       return current as HTMLAnchorElement;
     }

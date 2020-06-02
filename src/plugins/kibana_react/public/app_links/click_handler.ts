@@ -48,7 +48,7 @@ export const createCrossAppClickHandler = ({
 
     if (
       link.href && // ignore links with empty hrefs
-      (link.target === '' || link.target === 'self') && // ignore links having a target
+      (link.target === '' || link.target === '_self') && // ignore links having a target
       e.button === 0 && // ignore everything but left clicks
       !e.defaultPrevented && // ignore default prevented events
       !hasActiveModifierKey(e) // ignore clicks with modifier keys

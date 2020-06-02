@@ -157,7 +157,7 @@ describe('createCrossAppClickHandler', () => {
     expect(navigateToApp).not.toHaveBeenCalled();
 
     event = createEvent({
-      target: createLink({ target: 'self' }),
+      target: createLink({ target: '_self' }),
     });
     handler(event);
 
