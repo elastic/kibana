@@ -129,6 +129,7 @@ describe('signals default_config', () => {
           setEventsLoading,
           setEventsDeleted,
           onAlertStatusUpdateSuccess,
+          onAlertStatusUpdateFailure,
         });
       });
 
@@ -186,6 +187,7 @@ describe('signals default_config', () => {
           setEventsLoading,
           setEventsDeleted,
           onAlertStatusUpdateSuccess,
+          onAlertStatusUpdateFailure,
         });
       });
 
