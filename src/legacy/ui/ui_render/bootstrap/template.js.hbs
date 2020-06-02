@@ -77,6 +77,15 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
         '{{this}}',
       {{/each}}
     ], function () {
+      {{#unless legacyBundlePath}}
+        if (!__kbnBundles__ || !__kbnBundles__['entry/core'] || typeof __kbnBundles__['entry/core'].__kbnBootstrap__ !== 'function') {
+          console.error('entry/core bundle did not load correctly');
+          failure();
+        } else {
+          __kbnBundles__['entry/core'].__kbnBootstrap__()
+        }
+      {{/unless}}
+
       load([
         {{#if legacyBundlePath}}
           '{{legacyBundlePath}}',
@@ -84,16 +93,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
         {{#each styleSheetPaths}}
           '{{this}}',
         {{/each}}
-      ], function () {
-        {{#unless legacyBundlePath}}
-          if (!__kbnBundles__ || !__kbnBundles__['entry/core'] || typeof __kbnBundles__['entry/core'].__kbnBootstrap__ !== 'function') {
-            console.error('entry/core bundle did not load correctly');
-            failure();
-          } else {
-            __kbnBundles__['entry/core'].__kbnBootstrap__()
-          }
-        {{/unless}}
-      });
+      ]);
     });
   }
 }
