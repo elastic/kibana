@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 
 import { disableTemplate } from '../../../../../common/constants';
-import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
 
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -84,6 +84,7 @@ export interface PropertiesRightComponentProps {
   onCloseTimelineModal: () => void;
   onOpenTimelineModal: () => void;
   showTimelineModal: boolean;
+  status: TimelineStatus;
   title: string;
   updateNote: UpdateNote;
 }
@@ -107,6 +108,7 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
   onToggleShowNotes,
   updateNote,
   showTimelineModal,
+  status,
   onCloseTimelineModal,
   onOpenTimelineModal,
   title,
@@ -167,6 +169,7 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
                   onClosePopover={onClosePopover}
                   timelineId={timelineId}
                   timelineTitle={title}
+                  timelineStatus={status}
                 />
               </EuiFlexItem>
 

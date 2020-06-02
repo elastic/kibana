@@ -22,18 +22,25 @@ import uuid from 'uuid';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-
 import { noop } from 'lodash/fp';
-import { Note } from '../../../../common/lib/note';
-import { Notes } from '../../notes';
-import { AssociateNote, UpdateNote } from '../../notes/helpers';
-import { NOTES_PANEL_WIDTH } from './notes_size';
-import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
-import * as i18n from './translations';
+
 import { SiemPageName } from '../../../../app/types';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { State } from '../../../../common/store';
-import { TimelineTypeLiteral, TimelineType } from '../../../../../common/types/timeline';
+import {
+  TimelineTypeLiteral,
+  TimelineType,
+  TimelineStatus,
+} from '../../../../../common/types/timeline';
+
+import { Note } from '../../../../common/lib/note';
+
+import { Notes } from '../../notes';
+import { AssociateNote, UpdateNote } from '../../notes/helpers';
+import { NOTES_PANEL_WIDTH } from './notes_size';
+
+import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
+import * as i18n from './translations';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
@@ -129,40 +136,44 @@ Name.displayName = 'Name';
 interface NewCaseProps {
   onClosePopover: () => void;
   timelineId: string;
+  timelineStatus: TimelineStatus;
   timelineTitle: string;
 }
 
-export const NewCase = React.memo<NewCaseProps>(({ onClosePopover, timelineId, timelineTitle }) => {
-  const history = useHistory();
-  const { savedObjectId } = useSelector((state: State) =>
-    timelineSelectors.selectTimeline(state, timelineId)
-  );
-  const handleClick = useCallback(() => {
-    onClosePopover();
-    history.push({
-      pathname: `/${SiemPageName.case}/create`,
-      state: {
-        insertTimeline: {
-          timelineId,
-          timelineSavedObjectId: savedObjectId,
-          timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
+export const NewCase = React.memo<NewCaseProps>(
+  ({ onClosePopover, timelineId, timelineStatus, timelineTitle }) => {
+    const history = useHistory();
+    const { savedObjectId } = useSelector((state: State) =>
+      timelineSelectors.selectTimeline(state, timelineId)
+    );
+    const handleClick = useCallback(() => {
+      onClosePopover();
+      history.push({
+        pathname: `/${SiemPageName.case}/create`,
+        state: {
+          insertTimeline: {
+            timelineId,
+            timelineSavedObjectId: savedObjectId,
+            timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
+          },
         },
-      },
-    });
-  }, [onClosePopover, history, timelineId, timelineTitle]);
+      });
+    }, [onClosePopover, history, timelineId, timelineTitle]);
 
-  return (
-    <EuiButtonEmpty
-      data-test-subj="attach-timeline-case"
-      color="text"
-      iconSide="left"
-      iconType="paperClip"
-      onClick={handleClick}
-    >
-      {i18n.ATTACH_TIMELINE_TO_NEW_CASE}
-    </EuiButtonEmpty>
-  );
-});
+    return (
+      <EuiButtonEmpty
+        data-test-subj="attach-timeline-case"
+        color="text"
+        iconSide="left"
+        iconType="paperClip"
+        disabled={timelineStatus === TimelineStatus.draft}
+        onClick={handleClick}
+      >
+        {i18n.ATTACH_TIMELINE_TO_NEW_CASE}
+      </EuiButtonEmpty>
+    );
+  }
+);
 NewCase.displayName = 'NewCase';
 
 export interface NewTimelineProps {
