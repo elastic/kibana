@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
-import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerting/public';
+import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from 'kibana/public';
+import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerts/public';
 import { ChartsPluginStart } from '../../../src/plugins/charts/public';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../x-pack/plugins/triggers_actions_ui/public';
 import { DataPublicPluginStart } from '../../../src/plugins/data/public';
@@ -31,13 +31,13 @@ export type Setup = void;
 export type Start = void;
 
 export interface AlertingExamplePublicSetupDeps {
-  alerting: AlertingSetup;
+  alerts: AlertingSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
   developerExamples: DeveloperExamplesSetup;
 }
 
 export interface AlertingExamplePublicStartDeps {
-  alerting: AlertingSetup;
+  alerts: AlertingSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
@@ -46,7 +46,7 @@ export interface AlertingExamplePublicStartDeps {
 export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
   public setup(
     core: CoreSetup<AlertingExamplePublicStartDeps, Start>,
-    { alerting, triggers_actions_ui, developerExamples }: AlertingExamplePublicSetupDeps
+    { alerts, triggers_actions_ui, developerExamples }: AlertingExamplePublicSetupDeps
   ) {
     core.application.register({
       id: 'AlertingExample',
@@ -62,7 +62,7 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamp
     triggers_actions_ui.alertTypeRegistry.register(getAlwaysFiringAlertType());
     triggers_actions_ui.alertTypeRegistry.register(getPeopleInSpaceAlertType());
 
-    registerNavigation(alerting);
+    registerNavigation(alerts);
 
     developerExamples.register({
       appId: 'AlertingExample',

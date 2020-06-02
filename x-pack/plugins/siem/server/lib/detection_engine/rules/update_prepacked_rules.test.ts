@@ -5,7 +5,7 @@
  */
 
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import {
   mockPrepackagedRule,
   getFindResultWithSingleHit,
