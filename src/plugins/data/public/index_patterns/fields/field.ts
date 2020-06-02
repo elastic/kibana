@@ -56,6 +56,7 @@ export class Field implements IFieldType {
   subType?: IFieldSubType;
   displayName?: string;
   indexPattern?: IndexPattern;
+  readFromDocValues?: boolean;
   format: any;
   $$spec: FieldSpec;
   conflictDescriptions?: Record<string, string[]>;

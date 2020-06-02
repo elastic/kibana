@@ -6,10 +6,14 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 
-import { ExceptionListItemSchema, IdOrUndefined, ItemIdOrUndefined } from '../../../common/schemas';
+import {
+  ExceptionListItemSchema,
+  IdOrUndefined,
+  ItemIdOrUndefined,
+  NamespaceType,
+} from '../../../common/schemas';
 
 import { getSavedObjectType } from './utils';
-import { NamespaceType } from './types';
 import { getExceptionListItem } from './get_exception_list_item';
 
 interface DeleteExceptionListItemOptions {

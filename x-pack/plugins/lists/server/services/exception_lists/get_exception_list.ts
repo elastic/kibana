@@ -13,10 +13,10 @@ import {
   ExceptionListSoSchema,
   IdOrUndefined,
   ListIdOrUndefined,
+  NamespaceType,
 } from '../../../common/schemas';
 
 import { getSavedObjectType, transformSavedObjectToExceptionList } from './utils';
-import { NamespaceType } from './types';
 
 interface GetExceptionListOptions {
   id: IdOrUndefined;
@@ -35,7 +35,7 @@ export const getExceptionList = async ({
   if (id != null) {
     try {
       const savedObject = await savedObjectsClient.get<ExceptionListSoSchema>(savedObjectType, id);
-      return transformSavedObjectToExceptionList({ savedObject });
+      return transformSavedObjectToExceptionList({ namespaceType, savedObject });
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         return null;
@@ -54,7 +54,10 @@ export const getExceptionList = async ({
       type: savedObjectType,
     });
     if (savedObject.saved_objects[0] != null) {
-      return transformSavedObjectToExceptionList({ savedObject: savedObject.saved_objects[0] });
+      return transformSavedObjectToExceptionList({
+        namespaceType,
+        savedObject: savedObject.saved_objects[0],
+      });
     } else {
       return null;
     }

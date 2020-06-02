@@ -247,9 +247,10 @@ export function uiRenderMixin(kbnServer, server, config) {
       rendering,
       legacy,
       savedObjectsClientProvider: savedObjects,
-      uiSettings: { asScopedToClient },
     } = kbnServer.newPlatform.__internals;
-    const uiSettings = asScopedToClient(savedObjects.getClient(h.request));
+    const uiSettings = kbnServer.newPlatform.start.core.uiSettings.asScopedToClient(
+      savedObjects.getClient(h.request)
+    );
     const vars = await legacy.getVars(app.getId(), h.request, {
       apmConfig: getApmConfig(app),
       ...overrides,

@@ -70,7 +70,7 @@ async function main() {
     metadataIndex: {
       alias: 'mi',
       describe: 'index to store host metadata in',
-      default: 'metrics-endpoint-default-1',
+      default: 'metrics-endpoint.metadata-default-1',
       type: 'string',
     },
     policyIndex: {
@@ -118,6 +118,13 @@ async function main() {
       describe: 'percent of process events to add termination event for',
       type: 'number',
       default: 30,
+    },
+    maxChildrenPerNode: {
+      alias: 'maxCh',
+      describe:
+        'always generate the max number of children per node instead of it being random up to the max children',
+      type: 'boolean',
+      default: false,
     },
     numHosts: {
       alias: 'ne',
@@ -241,7 +248,8 @@ async function main() {
         argv.children,
         argv.relatedEvents,
         argv.percentWithRelated,
-        argv.percentTerminated
+        argv.percentTerminated,
+        argv.maxChildrenPerNode
       );
       let result = resolverDocGenerator.next();
       while (!result.done) {

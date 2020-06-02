@@ -10,7 +10,7 @@ import {
   sampleDocSearchResultsWithSortId,
 } from './__mocks__/es_results';
 import { singleSearchAfter } from './single_search_after';
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 
 describe('singleSearchAfter', () => {
   const mockService: AlertServicesMock = alertsMock.createAlertServices();
@@ -22,18 +22,17 @@ describe('singleSearchAfter', () => {
   test('if singleSearchAfter works without a given sort id', async () => {
     let searchAfterSortId;
     mockService.callCluster.mockResolvedValue(sampleDocSearchResultsNoSortId);
-    await expect(
-      singleSearchAfter({
-        searchAfterSortId,
-        index: [],
-        from: 'now-360s',
-        to: 'now',
-        services: mockService,
-        logger: mockLogger,
-        pageSize: 1,
-        filter: undefined,
-      })
-    ).rejects.toThrow('Attempted to search after with empty sort id');
+    const { searchResult } = await singleSearchAfter({
+      searchAfterSortId,
+      index: [],
+      from: 'now-360s',
+      to: 'now',
+      services: mockService,
+      logger: mockLogger,
+      pageSize: 1,
+      filter: undefined,
+    });
+    expect(searchResult).toEqual(sampleDocSearchResultsNoSortId);
   });
   test('if singleSearchAfter works with a given sort id', async () => {
     const searchAfterSortId = '1234567891111';

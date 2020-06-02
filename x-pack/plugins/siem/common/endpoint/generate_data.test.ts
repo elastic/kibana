@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EndpointDocGenerator, Event } from './generate_data';
+import { EndpointDocGenerator, Event, Tree, TreeNode } from './generate_data';
 
 interface Node {
   events: Event[];
@@ -93,11 +93,105 @@ describe('data generator', () => {
     expect(processEvent.process.name).not.toBeNull();
   });
 
+  describe('creates a resolver tree structure', () => {
+    let tree: Tree;
+    const ancestors = 3;
+    const childrenPerNode = 3;
+    const generations = 3;
+    beforeEach(() => {
+      tree = generator.generateTree({
+        alwaysGenMaxChildrenPerNode: true,
+        ancestors,
+        children: childrenPerNode,
+        generations,
+        percentTerminated: 100,
+        percentWithRelated: 100,
+        relatedEvents: 4,
+      });
+    });
+
+    const eventInNode = (event: Event, node: TreeNode) => {
+      const inLifecycle = node.lifecycle.includes(event);
+      const inRelated = node.relatedEvents.includes(event);
+
+      return (inRelated || inLifecycle) && event.process.entity_id === node.id;
+    };
+
+    it('has the right number of ancestors', () => {
+      expect(tree.ancestry.size).toEqual(ancestors);
+    });
+
+    it('has the right number of total children', () => {
+      // the total number of children (not including the origin) = ((childrenPerNode^(generations + 1) - 1) / (childrenPerNode - 1)) - 1
+      // https://stackoverflow.com/questions/7842397/what-is-the-total-number-of-nodes-in-a-full-k-ary-tree-in-terms-of-the-number-o
+      const leaves = Math.pow(childrenPerNode, generations);
+      // last -1 is for the origin since it's not in the children map
+      const nodes = (childrenPerNode * leaves - 1) / (childrenPerNode - 1) - 1;
+      expect(tree.children.size).toEqual(nodes);
+    });
+
+    it('has 2 lifecycle events for ancestors, children, and the origin', () => {
+      for (const node of tree.ancestry.values()) {
+        expect(node.lifecycle.length).toEqual(2);
+      }
+
+      for (const node of tree.children.values()) {
+        expect(node.lifecycle.length).toEqual(2);
+      }
+
+      expect(tree.origin.lifecycle.length).toEqual(2);
+    });
+
+    it('has all events in one of the tree fields', () => {
+      expect(tree.allEvents.length).toBeGreaterThan(0);
+
+      tree.allEvents.forEach((event) => {
+        if (event.event.kind === 'alert') {
+          expect(event).toEqual(tree.alertEvent);
+        } else {
+          const ancestor = tree.ancestry.get(event.process.entity_id);
+          if (ancestor) {
+            expect(eventInNode(event, ancestor)).toBeTruthy();
+            return;
+          }
+
+          const children = tree.children.get(event.process.entity_id);
+          if (children) {
+            expect(eventInNode(event, children)).toBeTruthy();
+            return;
+          }
+
+          expect(eventInNode(event, tree.origin)).toBeTruthy();
+        }
+      });
+    });
+
+    const nodeEventCount = (node: TreeNode) => {
+      return node.lifecycle.length + node.relatedEvents.length;
+    };
+
+    it('has the correct number of total events', () => {
+      // starts at 1 because the alert is in the allEvents array
+      let total = 1;
+      for (const node of tree.ancestry.values()) {
+        total += nodeEventCount(node);
+      }
+
+      for (const node of tree.children.values()) {
+        total += nodeEventCount(node);
+      }
+
+      total += nodeEventCount(tree.origin);
+
+      expect(tree.allEvents.length).toEqual(total);
+    });
+  });
+
   describe('creates alert ancestor tree', () => {
     let events: Event[];
 
     beforeEach(() => {
-      events = generator.createAlertEventAncestry(3);
+      events = generator.createAlertEventAncestry(3, 0, 0, 0);
     });
 
     it('with n-1 process events', () => {
