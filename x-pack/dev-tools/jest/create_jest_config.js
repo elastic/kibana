@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
+export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirectory }) {
   const fileMockPath = `${kibanaDirectory}/src/dev/jest/mocks/file_mock.js`;
   return {
-    rootDir: xPackKibanaDirectory,
+    rootDir,
     roots: ['<rootDir>/plugins', '<rootDir>/legacy/plugins', '<rootDir>/legacy/server'],
     moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
     moduleNameMapper: {
@@ -30,15 +30,29 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       '^test_utils/stub_web_worker': `${xPackKibanaDirectory}/test_utils/stub_web_worker.ts`,
       '^(!!)?file-loader!': fileMockPath,
     },
-    coverageDirectory: '<rootDir>/../target/kibana-coverage/jest',
+    coverageDirectory: `${kibanaDirectory}/target/kibana-coverage/jest`,
     coverageReporters: ['html'],
+    collectCoverageFrom: [
+      'legacy/plugins/**/*.{js,jsx,ts,tsx}',
+      'legacy/server/**/*.{js,jsx,ts,tsx}',
+      'plugins/**/*.{js,jsx,ts,tsx}',
+      '!**/{__test__,__snapshots__,__examples__,integration_tests,tests}/**',
+      '!**/*.test.{js,ts,tsx}',
+      '!**/flot-charts/**',
+      '!**/test/**',
+      '!**/build/**',
+      '!**/scripts/**',
+      '!**/mocks/**',
+      '!**/plugins/apm/e2e/**',
+    ],
+    coveragePathIgnorePatterns: ['.*\\.d\\.ts'],
     setupFiles: [
       `${kibanaDirectory}/src/dev/jest/setup/babel_polyfill.js`,
-      `<rootDir>/dev-tools/jest/setup/polyfills.js`,
-      `<rootDir>/dev-tools/jest/setup/enzyme.js`,
+      `${xPackKibanaDirectory}/dev-tools/jest/setup/polyfills.js`,
+      `${xPackKibanaDirectory}/dev-tools/jest/setup/enzyme.js`,
     ],
     setupFilesAfterEnv: [
-      `<rootDir>/dev-tools/jest/setup/setup_test.js`,
+      `${xPackKibanaDirectory}/dev-tools/jest/setup/setup_test.js`,
       `${kibanaDirectory}/src/dev/jest/setup/mocks.js`,
       `${kibanaDirectory}/src/dev/jest/setup/react_testing_library.js`,
     ],
