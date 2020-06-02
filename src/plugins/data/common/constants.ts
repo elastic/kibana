@@ -18,3 +18,5 @@
  */
 
 export const DEFAULT_QUERY_LANGUAGE = 'kuery';
+export const META_FIELDS_SETTING = 'metaFields';
+export const DOC_HIGHLIGHT_SETTING = 'doc_table:highlight';

@@ -61,18 +61,12 @@ describe('UserActionTree ', () => {
     );
     expect(wrapper.find(`[data-test-subj="user-actions-loading"]`).exists()).toBeTruthy();
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="user-action-avatar"]`)
-        .first()
-        .prop('name')
-    ).toEqual(defaultProps.data.createdBy.fullName);
-    expect(
-      wrapper
-        .find(`[data-test-subj="user-action-title"] strong`)
-        .first()
-        .text()
-    ).toEqual(defaultProps.data.createdBy.username);
+    expect(wrapper.find(`[data-test-subj="user-action-avatar"]`).first().prop('name')).toEqual(
+      defaultProps.data.createdBy.fullName
+    );
+    expect(wrapper.find(`[data-test-subj="user-action-title"] strong`).first().text()).toEqual(
+      defaultProps.data.createdBy.username
+    );
   });
   it('Renders service now update line with top and bottom when push is required', () => {
     const ourActions = [
@@ -142,20 +136,14 @@ describe('UserActionTree ', () => {
       </TestProviders>
     );
     expect(
-      wrapper
-        .find(`[data-test-subj="comment-create-action"]`)
-        .first()
-        .prop('idToOutline')
+      wrapper.find(`[data-test-subj="comment-create-action"]`).first().prop('idToOutline')
     ).toEqual('');
     wrapper
       .find(`[data-test-subj="comment-update-action"] [data-test-subj="move-to-link"]`)
       .first()
       .simulate('click');
     expect(
-      wrapper
-        .find(`[data-test-subj="comment-create-action"]`)
-        .first()
-        .prop('idToOutline')
+      wrapper.find(`[data-test-subj="comment-create-action"]`).first().prop('idToOutline')
     ).toEqual(ourActions[0].commentId);
   });
 
@@ -334,10 +322,7 @@ describe('UserActionTree ', () => {
       </TestProviders>
     );
     expect(
-      wrapper
-        .find(`[data-test-subj="comment-create-action"]`)
-        .first()
-        .prop('idToOutline')
+      wrapper.find(`[data-test-subj="comment-create-action"]`).first().prop('idToOutline')
     ).toEqual(commentId);
   });
 });

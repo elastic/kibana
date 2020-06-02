@@ -23,7 +23,7 @@ import {
 } from '../link_to';
 import { FlowTarget, FlowTargetSourceDest } from '../../../graphql/types';
 import { useUiSetting$ } from '../../lib/kibana';
-import { isUrlInvalid } from '../../../alerts/components/rules/step_about_rule/helpers';
+import { isUrlInvalid } from '../../utils/validators';
 import { ExternalLinkIcon } from '../external_link_icon';
 import { navTabs } from '../../../app/home/home_navigations';
 import { useGetUrlSearch } from '../navigation/use_get_url_search';
@@ -60,7 +60,7 @@ export const ExternalLink = React.memo<{
     const lastVisibleItemIndex = overflowIndexStart - 1;
     const lastItemIndex = allItemsLimit - 1;
     const lastIndexToShow = Math.max(0, Math.min(lastVisibleItemIndex, lastItemIndex));
-    const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
+    const inWhitelist = whitelistUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
     return url && inWhitelist && !isUrlInvalid(url) && children ? (
       <EuiToolTip content={url} position="top" data-test-subj="externalLinkTooltip">
         <EuiLink href={url} target="_blank" rel="noopener" data-test-subj="externalLink">
@@ -275,7 +275,7 @@ const ReputationLinkComponent: React.FC<{
           <DefaultFieldRendererOverflow
             rowItems={ipReputationLinks}
             idPrefix="moreReputationLink"
-            render={rowItem => {
+            render={(rowItem) => {
               return (
                 isReputationLink(rowItem) && (
                   <ExternalLink

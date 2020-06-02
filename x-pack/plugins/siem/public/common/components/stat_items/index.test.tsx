@@ -90,7 +90,7 @@ describe('Stat Items Component', () => {
         </ThemeProvider>
       ),
     ],
-  ])('disable charts', wrapper => {
+  ])('disable charts', (wrapper) => {
     test('it renders the default widget', () => {
       expect(wrapper).toMatchSnapshot();
     });
@@ -255,7 +255,7 @@ describe('useKpiMatrixStatus', () => {
 
     return (
       <div>
-        {statItemsProps.map(mappedStatItemProps => {
+        {statItemsProps.map((mappedStatItemProps) => {
           return <MockChildComponent {...mappedStatItemProps} />;
         })}
       </div>

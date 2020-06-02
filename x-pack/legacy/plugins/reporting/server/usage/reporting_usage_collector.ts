@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { first, map } from 'rxjs/operators';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
+import { ReportingCore } from '../';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
-import { ReportingConfig, ReportingCore, ReportingSetupDeps } from '../../server/types';
-import { ESCallCluster, ExportTypesRegistry } from '../../types';
+import { ReportingConfig } from '../../server';
+import { ExportTypesRegistry } from '../lib/export_types_registry';
+import { ReportingSetupDeps } from '../types';
+import { GetLicense } from './';
 import { getReportingUsage } from './get_reporting_usage';
 import { RangeStats } from './types';
-
-type XPackInfo = XPackMainPlugin['info'];
 
 // places the reporting data as kibana stats
 const METATYPE = 'kibana_stats';
@@ -23,14 +25,14 @@ const METATYPE = 'kibana_stats';
 export function getReportingUsageCollector(
   config: ReportingConfig,
   usageCollection: UsageCollectionSetup,
-  xpackMainInfo: XPackInfo,
+  getLicense: GetLicense,
   exportTypesRegistry: ExportTypesRegistry,
   isReady: () => Promise<boolean>
 ) {
   return usageCollection.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
-    fetch: (callCluster: ESCallCluster) =>
-      getReportingUsage(config, xpackMainInfo, callCluster, exportTypesRegistry),
+    fetch: (callCluster: CallCluster) =>
+      getReportingUsage(config, getLicense, callCluster, exportTypesRegistry),
     isReady,
 
     /*
@@ -55,23 +57,35 @@ export function getReportingUsageCollector(
 
 export function registerReportingUsageCollector(
   reporting: ReportingCore,
-  plugins: ReportingSetupDeps
+  { licensing, usageCollection }: ReportingSetupDeps
 ) {
-  if (!plugins.usageCollection) {
+  if (!usageCollection) {
     return;
   }
-  const xpackMainInfo = plugins.__LEGACY.plugins.xpack_main.info;
 
-  const exportTypesRegistry = reporting.getExportTypesRegistry();
-  const collectionIsReady = reporting.pluginHasStarted.bind(reporting);
   const config = reporting.getConfig();
+  const exportTypesRegistry = reporting.getExportTypesRegistry();
+  const getLicense = async () => {
+    return await licensing.license$
+      .pipe(
+        map(({ isAvailable, type }) => ({
+          isAvailable: () => isAvailable,
+          license: {
+            getType: () => type,
+          },
+        })),
+        first()
+      )
+      .toPromise();
+  };
+  const collectionIsReady = reporting.pluginHasStarted.bind(reporting);
 
   const collector = getReportingUsageCollector(
     config,
-    plugins.usageCollection,
-    xpackMainInfo,
+    usageCollection,
+    getLicense,
     exportTypesRegistry,
     collectionIsReady
   );
-  plugins.usageCollection.registerCollector(collector);
+  usageCollection.registerCollector(collector);
 }

@@ -49,7 +49,7 @@ export const ManageGlobalToaster = ({ children }: ManageGlobalToasterProps) => {
       case 'addToaster':
         return { ...state, toasts: [...state.toasts, action.toast] };
       case 'deleteToaster':
-        return { ...state, toasts: state.toasts.filter(msg => msg.id !== action.id) };
+        return { ...state, toasts: state.toasts.filter((msg) => msg.id !== action.id) };
       default:
         return state;
     }

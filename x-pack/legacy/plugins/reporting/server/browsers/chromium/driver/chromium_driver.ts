@@ -7,18 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import { map, trunc } from 'lodash';
 import open from 'opn';
-import { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle, Response } from 'puppeteer';
+import { ElementHandle, EvaluateFn, Page, Response, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
 import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
-import { LevelLogger } from '../../../../server/lib';
-import {
-  ConditionalHeaders,
-  ConditionalHeadersConditions,
-  ElementPosition,
-  InterceptedRequest,
-  NetworkPolicy,
-} from '../../../../types';
-import { allowRequest } from '../../network_policy';
+import { LevelLogger } from '../../../lib';
+import { ConditionalHeaders, ElementPosition } from '../../../types';
+import { allowRequest, NetworkPolicy } from '../../network_policy';
 
 export interface ChromiumDriverOptions {
   inspect: boolean;
@@ -36,6 +30,23 @@ interface EvaluateOpts {
 
 interface EvaluateMetaOpts {
   context: string;
+}
+
+type ConditionalHeadersConditions = ConditionalHeaders['conditions'];
+
+interface InterceptedRequest {
+  requestId: string;
+  request: {
+    url: string;
+    method: string;
+    headers: {
+      [key: string]: string;
+    };
+    initialPriority: string;
+    referrerPolicy: string;
+  };
+  frameId: string;
+  resourceType: string;
 }
 
 const WAIT_FOR_DELAY_MS: number = 100;
@@ -167,7 +178,7 @@ export class HeadlessChromiumDriver {
           `Timed out waiting for the items selected to equal ${toEqual}. Found: ${result}. Context: ${context.context}`
         );
       }
-      await new Promise(r => setTimeout(r, WAIT_FOR_DELAY_MS));
+      await new Promise((r) => setTimeout(r, WAIT_FOR_DELAY_MS));
     }
   }
 

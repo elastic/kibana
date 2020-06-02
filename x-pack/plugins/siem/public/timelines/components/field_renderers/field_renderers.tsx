@@ -39,7 +39,7 @@ export const IpOverviewId = 'ip-overview';
 export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 
 export const locationRenderer = (fieldNames: string[], data: IpOverviewData): React.ReactElement =>
-  fieldNames.length > 0 && fieldNames.every(fieldName => getOr(null, fieldName, data)) ? (
+  fieldNames.length > 0 && fieldNames.every((fieldName) => getOr(null, fieldName, data)) ? (
     <EuiFlexGroup alignItems="center" gutterSize="none" data-test-subj="location-field">
       {fieldNames.map((fieldName, index) => {
         const locationValue = getOr('', fieldName, data);

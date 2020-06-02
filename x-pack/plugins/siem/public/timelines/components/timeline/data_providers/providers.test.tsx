@@ -58,7 +58,7 @@ describe('Providers', () => {
         </TestProviders>
       );
 
-      mockDataProviders.forEach(dataProvider =>
+      mockDataProviders.forEach((dataProvider) =>
         expect(wrapper.text()).toContain(
           dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value
         )
@@ -136,10 +136,7 @@ describe('Providers', () => {
           </DroppableWrapper>
         </TestProviders>
       );
-      wrapper
-        .find('button[data-test-subj="providerBadge"]')
-        .first()
-        .simulate('click');
+      wrapper.find('button[data-test-subj="providerBadge"]').first().simulate('click');
 
       wrapper.update();
 
@@ -169,10 +166,7 @@ describe('Providers', () => {
           </TimelineContext.Provider>
         </TestProviders>
       );
-      wrapper
-        .find('button[data-test-subj="providerBadge"]')
-        .first()
-        .simulate('click');
+      wrapper.find('button[data-test-subj="providerBadge"]').first().simulate('click');
 
       wrapper.update();
 
@@ -204,10 +198,7 @@ describe('Providers', () => {
         </TestProviders>
       );
 
-      wrapper
-        .find('button[data-test-subj="providerBadge"]')
-        .first()
-        .simulate('click');
+      wrapper.find('button[data-test-subj="providerBadge"]').first().simulate('click');
       wrapper.update();
 
       wrapper
@@ -240,10 +231,7 @@ describe('Providers', () => {
         </TestProviders>
       );
 
-      wrapper
-        .find('button[data-test-subj="providerBadge"]')
-        .first()
-        .simulate('click');
+      wrapper.find('button[data-test-subj="providerBadge"]').first().simulate('click');
       wrapper.update();
 
       wrapper
@@ -275,10 +263,7 @@ describe('Providers', () => {
         </TestProviders>
       );
 
-      wrapper
-        .find('button[data-test-subj="providerBadge"]')
-        .first()
-        .simulate('click');
+      wrapper.find('button[data-test-subj="providerBadge"]').first().simulate('click');
 
       wrapper.update();
 
@@ -314,10 +299,7 @@ describe('Providers', () => {
         </TestProviders>
       );
 
-      wrapper
-        .find('button[data-test-subj="providerBadge"]')
-        .first()
-        .simulate('click');
+      wrapper.find('button[data-test-subj="providerBadge"]').first().simulate('click');
 
       wrapper.update();
 
@@ -354,7 +336,7 @@ describe('Providers', () => {
       const andProviderBadges = wrapper.find(
         '[data-test-subj="providerBadge"] .euiBadge__content span.field-value'
       );
-      const andProviderBadgesText = andProviderBadges.map(node => node.text()).join(' ');
+      const andProviderBadgesText = andProviderBadges.map((node) => node.text()).join(' ');
       expect(andProviderBadges.length).toEqual(6);
       expect(andProviderBadgesText).toEqual(
         'name:  "Provider 1" name:  "Provider 2" name:  "Provider 3"'

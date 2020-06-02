@@ -63,10 +63,10 @@ export class EditPolicy extends Component {
     };
   }
 
-  selectPolicy = policyName => {
+  selectPolicy = (policyName) => {
     const { setSelectedPolicy, policies } = this.props;
 
-    const selectedPolicy = policies.find(policy => {
+    const selectedPolicy = policies.find((policy) => {
       return policy.name === policyName;
     });
 
@@ -125,7 +125,7 @@ export class EditPolicy extends Component {
     }
   };
 
-  showNodeDetailsFlyout = selectedNodeAttrsForDetails => {
+  showNodeDetailsFlyout = (selectedNodeAttrsForDetails) => {
     this.setState({ isShowingNodeDetailsFlyout: true, selectedNodeAttrsForDetails });
   };
 
@@ -222,7 +222,7 @@ export class EditPolicy extends Component {
                         data-test-subj="saveAsNewSwitch"
                         style={{ maxWidth: '100%' }}
                         checked={saveAsNewPolicy}
-                        onChange={async e => {
+                        onChange={async (e) => {
                           await setSaveAsNewPolicy(e.target.checked);
                         }}
                         label={
@@ -271,7 +271,7 @@ export class EditPolicy extends Component {
                       <EuiFieldText
                         data-test-subj="policyNameField"
                         value={selectedPolicyName}
-                        onChange={async e => {
+                        onChange={async (e) => {
                           await setSelectedPolicyName(e.target.value);
                         }}
                       />

@@ -26,7 +26,7 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
       {
         spaceId: SPACES.SPACE_1.spaceId,
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       getAllTest(`can access all spaces from ${scenario.spaceId}`, {
         spaceId: scenario.spaceId,
         tests: {

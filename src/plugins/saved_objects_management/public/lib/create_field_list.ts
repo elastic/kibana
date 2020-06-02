@@ -29,12 +29,15 @@ export function createFieldList(
   object: SimpleSavedObject,
   service?: SavedObjectLoader
 ): ObjectField[] {
-  const fields = Object.entries(object.attributes as Record<string, any>).reduce(
+  let fields = Object.entries(object.attributes as Record<string, any>).reduce(
     (objFields, [key, value]) => {
-      return [...objFields, ...recursiveCreateFields(key, value)];
+      return [...objFields, ...createFields(key, value)];
     },
     [] as ObjectField[]
   );
+  // Special handling for references which isn't within "attributes"
+  fields = [...fields, ...createFields('references', object.references)];
+
   if (service && (service as any).Class) {
     addFieldsFromClass((service as any).Class, fields);
   }
@@ -53,7 +56,7 @@ export function createFieldList(
  * @param {array} parents The parent keys to the field
  * @returns {array}
  */
-const recursiveCreateFields = (key: string, value: any, parents: string[] = []): ObjectField[] => {
+const createFields = (key: string, value: any, parents: string[] = []): ObjectField[] => {
   const path = [...parents, key];
   if (path.length > maxRecursiveIterations) {
     return [];
@@ -78,7 +81,7 @@ const recursiveCreateFields = (key: string, value: any, parents: string[] = []):
   } else if (isPlainObject(field.value)) {
     let fields: ObjectField[] = [];
     forOwn(field.value, (childValue, childKey) => {
-      fields = [...fields, ...recursiveCreateFields(childKey as string, childValue, path)];
+      fields = [...fields, ...createFields(childKey as string, childValue, path)];
     });
     return fields;
   }
@@ -86,7 +89,7 @@ const recursiveCreateFields = (key: string, value: any, parents: string[] = []):
   return [field];
 };
 
-const addFieldsFromClass = function(
+const addFieldsFromClass = function (
   Class: { mapping: Record<string, string>; searchSource: any },
   fields: ObjectField[]
 ) {

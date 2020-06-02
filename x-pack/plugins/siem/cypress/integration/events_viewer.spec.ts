@@ -17,6 +17,7 @@ import {
   LOAD_MORE,
   LOCAL_EVENTS_COUNT,
 } from '../screens/hosts/events';
+import { HEADERS_GROUP } from '../screens/timeline';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from '../tasks/fields_browser';
 import { loginAndWaitForPage } from '../tasks/login';
@@ -25,6 +26,7 @@ import {
   addsHostGeoCityNameToHeader,
   addsHostGeoCountryNameToHeader,
   closeModal,
+  dragAndDropColumn,
   openEventsViewerFieldsBrowser,
   opensInspectQueryModal,
   resetFields,
@@ -61,13 +63,11 @@ describe('Events Viewer', () => {
     });
 
     it('displays the `default ECS` category (by default)', () => {
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE)
-        .invoke('text')
-        .should('eq', 'default ECS');
+      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE).invoke('text').should('eq', 'default ECS');
     });
 
     it('displays a checked checkbox for all of the default events viewer columns that are also in the default ECS category', () => {
-      defaultHeadersInDefaultEcsCategory.forEach(header =>
+      defaultHeadersInDefaultEcsCategory.forEach((header) =>
         cy.get(FIELDS_BROWSER_CHECKBOX(header.id)).should('be.checked')
       );
     });
@@ -137,25 +137,43 @@ describe('Events Viewer', () => {
       const filterInput = 'aa7ca589f1b8220002f2fc61c64cfbf1'; // this will never match real data
       cy.get(HEADER_SUBTITLE)
         .invoke('text')
-        .then(initialNumberOfEvents => {
+        .then((initialNumberOfEvents) => {
           kqlSearch(`${filterInput}{enter}`);
-          cy.get(HEADER_SUBTITLE)
-            .invoke('text')
-            .should('not.equal', initialNumberOfEvents);
+          cy.get(HEADER_SUBTITLE).invoke('text').should('not.equal', initialNumberOfEvents);
         });
     });
 
     it('loads more events when the load more button is clicked', () => {
       const defaultNumberOfLoadedEvents = '25';
-      cy.get(LOCAL_EVENTS_COUNT)
-        .invoke('text')
-        .should('equal', defaultNumberOfLoadedEvents);
+      cy.get(LOCAL_EVENTS_COUNT).invoke('text').should('equal', defaultNumberOfLoadedEvents);
 
       cy.get(LOAD_MORE).click({ force: true });
 
-      cy.get(LOCAL_EVENTS_COUNT)
-        .invoke('text')
-        .should('not.equal', defaultNumberOfLoadedEvents);
+      cy.get(LOCAL_EVENTS_COUNT).invoke('text').should('not.equal', defaultNumberOfLoadedEvents);
+    });
+  });
+
+  context.skip('Events columns', () => {
+    before(() => {
+      loginAndWaitForPage(HOSTS_PAGE);
+      openEvents();
+      waitsForEventsToBeLoaded();
+    });
+
+    afterEach(() => {
+      openEventsViewerFieldsBrowser();
+      resetFields();
+    });
+
+    it('re-orders columns via drag and drop', () => {
+      const originalColumnOrder =
+        '@timestampmessagehost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
+      const expectedOrderAfterDragAndDrop =
+        'message@timestamphost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
+
+      cy.get(HEADERS_GROUP).invoke('text').should('equal', originalColumnOrder);
+      dragAndDropColumn({ column: 0, newPosition: 1 });
+      cy.get(HEADERS_GROUP).invoke('text').should('equal', expectedOrderAfterDragAndDrop);
     });
   });
 });

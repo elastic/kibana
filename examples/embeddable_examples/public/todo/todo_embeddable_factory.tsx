@@ -34,7 +34,7 @@ function TaskInput({ onSave }: { onSave: (task: string) => void }) {
         data-test-subj="taskInputField"
         value={task}
         placeholder="Enter task here"
-        onChange={e => setTask(e.target.value)}
+        onChange={(e) => setTask(e.target.value)}
       />
       <EuiButton data-test-subj="createTodoEmbeddable" onClick={() => onSave(task)}>
         Save
@@ -69,7 +69,7 @@ export class TodoEmbeddableFactory
    */
   public getExplicitInput = async () => {
     const { openModal } = await this.getStartServices();
-    return new Promise<{ task: string }>(resolve => {
+    return new Promise<{ task: string }>((resolve) => {
       const onSave = (task: string) => resolve({ task });
       const overlay = openModal(
         toMountPoint(

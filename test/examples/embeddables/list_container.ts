@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: PluginFunctionalProviderContext) {
+export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 

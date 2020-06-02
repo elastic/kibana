@@ -607,7 +607,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const STATS_ROW_NAME_INDEX = 0;
       const STATS_ROW_VALUE_INDEX = 1;
 
-      const statsRow = stats.find(statsRow => {
+      const statsRow = stats.find((statsRow) => {
         return statsRow[STATS_ROW_NAME_INDEX] === rowName;
       });
       if (!statsRow) {

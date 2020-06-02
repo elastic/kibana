@@ -98,7 +98,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
       <Fragment>
         <EuiSpacer size="s" />
         <EuiTabs>
-          {tabOptions.map(tab => (
+          {tabOptions.map((tab) => (
             <EuiTab
               onClick={() => {
                 uiMetricService.trackUiMetric(panelTypeToUiMetricMap[tab.id]);
@@ -181,7 +181,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
                 <SnapshotDeleteProvider>
-                  {deleteSnapshotPrompt => {
+                  {(deleteSnapshotPrompt) => {
                     return (
                       <EuiButtonEmpty
                         color="danger"

@@ -38,7 +38,7 @@ function DashboardDrilldownCollectConfig(props: CollectConfigProps<DashboardDril
           hasNoInitialSelection={true}
           options={dashboards.map(({ id, title }) => ({ value: id, text: title }))}
           value={config.dashboardId}
-          onChange={e => {
+          onChange={(e) => {
             props.onConfig({ ...config, dashboardId: e.target.value });
           }}
         />
@@ -122,7 +122,7 @@ function UrlDrilldownCollectConfig(props: CollectConfigProps<UrlDrilldownConfig>
           placeholder="Enter URL"
           name="url"
           value={config.url}
-          onChange={event => props.onConfig({ ...config, url: event.target.value })}
+          onChange={(event) => props.onConfig({ ...config, url: event.target.value })}
         />
       </EuiFormRow>
       <EuiFormRow hasChildLabel={false}>
@@ -184,13 +184,13 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
       <ActionWizard
         actionFactories={actionFactories}
         config={state.config}
-        onConfigChange={newConfig => {
+        onConfigChange={(newConfig) => {
           setState({
             ...state,
             config: newConfig,
           });
         }}
-        onActionFactoryChange={newActionFactory => {
+        onActionFactoryChange={(newActionFactory) => {
           changeActionFactory(newActionFactory);
         }}
         currentActionFactory={state.currentActionFactory}

@@ -58,7 +58,7 @@ export interface ChartSeriesData {
 }
 
 const WrappedByAutoSizerComponent = styled.div<{ height?: string }>`
-  ${style =>
+  ${(style) =>
     `
     height: ${style.height != null ? style.height : defaultChartHeight};
   `}
@@ -128,6 +128,6 @@ export const getChartWidth = (customWidth?: number, autoSizerWidth?: number): st
 
 export const checkIfAllValuesAreZero = (data: ChartSeriesData[] | null | undefined): boolean =>
   Array.isArray(data) &&
-  data.every(series => {
+  data.every((series) => {
     return Array.isArray(series.value) && (series.value as ChartData[]).every(({ y }) => y === 0);
   });

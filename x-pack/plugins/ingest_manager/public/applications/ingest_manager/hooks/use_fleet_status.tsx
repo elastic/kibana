@@ -31,20 +31,20 @@ export const FleetStatusProvider: React.FC = ({ children }) => {
   });
   async function sendGetStatus() {
     try {
-      setState(s => ({ ...s, isLoading: true }));
+      setState((s) => ({ ...s, isLoading: true }));
       const res = await sendGetFleetStatus();
       if (res.error) {
         throw res.error;
       }
 
-      setState(s => ({
+      setState((s) => ({
         ...s,
         isLoading: false,
         isReady: res.data?.isReady ?? false,
         missingRequirements: res.data?.missing_requirements,
       }));
     } catch (error) {
-      setState(s => ({ ...s, isLoading: true }));
+      setState((s) => ({ ...s, isLoading: true }));
     }
   }
   useEffect(() => {

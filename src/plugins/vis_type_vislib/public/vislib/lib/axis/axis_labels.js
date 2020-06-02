@@ -33,12 +33,12 @@ export class AxisLabels {
 
   rotateAxisLabels() {
     const config = this.axisConfig;
-    return function(selection) {
+    return function (selection) {
       const text = selection.selectAll('.tick text');
 
       if (config.get('labels.rotate')) {
         text
-          .style('text-anchor', function() {
+          .style('text-anchor', function () {
             const currentValue = $(this).css('text-anchor');
             const rotateDeg = config.get('labels.rotate');
             if (!rotateDeg) return currentValue;
@@ -55,7 +55,7 @@ export class AxisLabels {
               }
             }
           })
-          .attr('dy', function() {
+          .attr('dy', function () {
             return config.isHorizontal() ? '0.3em' : '0';
           })
           .attr('transform', function rotate(d, j) {
@@ -80,10 +80,10 @@ export class AxisLabels {
 
   truncateLabels() {
     const config = this.axisConfig;
-    return function(selection) {
+    return function (selection) {
       if (!config.get('labels.truncate')) return;
 
-      selection.selectAll('.tick text').text(function() {
+      selection.selectAll('.tick text').text(function () {
         return truncateLabel(this, config.get('labels.truncate'));
       });
     };
@@ -96,7 +96,7 @@ export class AxisLabels {
     let lastTickStartEdge = Number.POSITIVE_INFINITY;
     let lastTickEndEdge = Number.NEGATIVE_INFINITY;
 
-    return function(selection) {
+    return function (selection) {
       if (!config.get('labels.filter')) return;
 
       const el = $(config.get('rootEl')).find(config.get('elSelector'));
@@ -106,7 +106,7 @@ export class AxisLabels {
       const scaleWidth = Math.abs(scaleRange[scaleRange.length - 1] - scaleRange[0]);
       const scaleStartPad = 0.5 * (upperBound - scaleWidth);
 
-      selection.selectAll('.tick text').text(function(d) {
+      selection.selectAll('.tick text').text(function (d) {
         const parentNode = d3.select(this.parentNode).node();
         const currentTickCenter = config.isHorizontal()
           ? scaleStartPad + self.axisScale.scale(d)
@@ -138,9 +138,9 @@ export class AxisLabels {
     const self = this;
     const config = this.axisConfig;
 
-    return function(selection) {
-      selection.each(function() {
-        selection.selectAll('text').attr('style', function() {
+    return function (selection) {
+      selection.each(function () {
+        selection.selectAll('text').attr('style', function () {
           const currentStyle = d3.select(this).attr('style');
           return `${currentStyle} font-size: ${config.get('labels.fontSize')};`;
         });

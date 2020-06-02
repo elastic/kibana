@@ -9,7 +9,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AppMountParameters } from '../../../../../src/core/public';
-import { StartServices } from '../plugin';
+import { StartServices } from '../types';
 import { SiemApp } from './app';
 import { SecuritySubPlugins } from './types';
 

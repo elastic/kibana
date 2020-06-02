@@ -29,7 +29,7 @@ describe('unknown_column_renderer', () => {
       columnName: '@timestamp',
       eventId: _id,
       values: getValues('@timestamp', mockDatum),
-      field: defaultHeaders.find(h => h.id === '@timestamp')!,
+      field: defaultHeaders.find((h) => h.id === '@timestamp')!,
       timelineId: 'test',
     });
     const wrapper = shallow(<span>{emptyColumn}</span>);
@@ -45,7 +45,7 @@ describe('unknown_column_renderer', () => {
       columnName: 'a made up column name',
       eventId: _id,
       values: getValues('a made up column name', mockDatum),
-      field: defaultHeaders.find(h => h.id === 'a made up column name')!,
+      field: defaultHeaders.find((h) => h.id === 'a made up column name')!,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -61,7 +61,7 @@ describe('unknown_column_renderer', () => {
       columnName: '@timestamp',
       eventId: _id,
       values: getValues('@timestamp', mockDatum),
-      field: defaultHeaders.find(h => h.id === '@timestamp')!,
+      field: defaultHeaders.find((h) => h.id === '@timestamp')!,
       timelineId: 'test',
     });
     const wrapper = mount(

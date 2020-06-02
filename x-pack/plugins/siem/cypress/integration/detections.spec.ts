@@ -41,7 +41,7 @@ describe('Detections', () => {
 
       cy.get(NUMBER_OF_SIGNALS)
         .invoke('text')
-        .then(numberOfSignals => {
+        .then((numberOfSignals) => {
           cy.get(SHOWING_SIGNALS).should('have.text', `Showing ${numberOfSignals} signals`);
 
           const numberOfSignalsToBeClosed = 3;
@@ -127,7 +127,7 @@ describe('Detections', () => {
 
       cy.get(NUMBER_OF_SIGNALS)
         .invoke('text')
-        .then(numberOfSignals => {
+        .then((numberOfSignals) => {
           const numberOfSignalsToBeClosed = 1;
           const numberOfSignalsToBeSelected = 3;
 
@@ -141,9 +141,7 @@ describe('Detections', () => {
           waitForSignals();
 
           const expectedNumberOfSignals = +numberOfSignals - numberOfSignalsToBeClosed;
-          cy.get(NUMBER_OF_SIGNALS)
-            .invoke('text')
-            .should('eq', expectedNumberOfSignals.toString());
+          cy.get(NUMBER_OF_SIGNALS).invoke('text').should('eq', expectedNumberOfSignals.toString());
           cy.get(SHOWING_SIGNALS)
             .invoke('text')
             .should('eql', `Showing ${expectedNumberOfSignals.toString()} signals`);
@@ -174,7 +172,7 @@ describe('Detections', () => {
 
       cy.get(NUMBER_OF_SIGNALS)
         .invoke('text')
-        .then(numberOfSignals => {
+        .then((numberOfSignals) => {
           const numberOfSignalsToBeOpened = 1;
           const numberOfSignalsToBeSelected = 3;
 
@@ -189,9 +187,7 @@ describe('Detections', () => {
           waitForSignals();
 
           const expectedNumberOfSignals = +numberOfSignals - numberOfSignalsToBeOpened;
-          cy.get(NUMBER_OF_SIGNALS)
-            .invoke('text')
-            .should('eq', expectedNumberOfSignals.toString());
+          cy.get(NUMBER_OF_SIGNALS).invoke('text').should('eq', expectedNumberOfSignals.toString());
           cy.get(SHOWING_SIGNALS)
             .invoke('text')
             .should('eql', `Showing ${expectedNumberOfSignals.toString()} signals`);

@@ -87,10 +87,7 @@ describe('Users Table Component', () => {
         field: 'name',
       });
 
-      wrapper
-        .find('.euiTable thead tr th button')
-        .first()
-        .simulate('click');
+      wrapper.find('.euiTable thead tr th button').first().simulate('click');
 
       wrapper.update();
 
@@ -98,12 +95,9 @@ describe('Users Table Component', () => {
         direction: 'desc',
         field: 'name',
       });
-      expect(
-        wrapper
-          .find('.euiTable thead tr th button')
-          .first()
-          .text()
-      ).toEqual('UserClick to sort in ascending order');
+      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual(
+        'UserClick to sort in ascending order'
+      );
     });
   });
 });

@@ -7,16 +7,8 @@
 import React, { useCallback, useEffect, useState, Dispatch, SetStateAction } from 'react';
 import styled, { css } from 'styled-components';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiCallOut,
-  EuiBottomBar,
-  EuiButtonEmpty,
-  EuiText,
-} from '@elastic/eui';
-import { difference } from 'lodash/fp';
+import { EuiCallOut } from '@elastic/eui';
+
 import { useKibana } from '../../../common/lib/kibana';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
@@ -27,16 +19,15 @@ import {
   ConnectorEditFlyout,
 } from '../../../../../triggers_actions_ui/public';
 
+import { ClosureType } from '../../containers/configure/types';
+
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionConnectorTableItem } from '../../../../../triggers_actions_ui/public/types';
-import { getCaseUrl } from '../../../common/components/link_to';
-import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 import { connectorsConfiguration } from '../../../common/lib/connectors/config';
 
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 import { SectionWrapper } from '../wrappers';
-import { navTabs } from '../../../app/home/home_navigations';
 import * as i18n from './translations';
 
 const FormWrapper = styled.div`
@@ -61,7 +52,6 @@ interface ConfigureCasesComponentProps {
 }
 
 const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userCanCrud }) => {
-  const search = useGetUrlSearch(navTabs.case);
   const { http, triggers_actions_ui, notifications, application, docLinks } = useKibana().services;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
@@ -71,15 +61,13 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     null
   );
 
-  const [actionBarVisible, setActionBarVisible] = useState(false);
-  const [totalConfigurationChanges, setTotalConfigurationChanges] = useState(0);
-
   const {
     connectorId,
     closureType,
     currentConfiguration,
     loading: loadingCaseConfigure,
     persistLoading,
+    version,
     persistCaseConfigure,
     setConnector,
     setClosureType,
@@ -93,45 +81,12 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
   const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connectorId === 'none';
 
-  const handleSubmit = useCallback(
-    // TO DO give a warning/error to user when field are not mapped so they have chance to do it
-    () => {
-      setActionBarVisible(false);
-      persistCaseConfigure({
-        connectorId,
-        connectorName: connectors.find(c => c.id === connectorId)?.name ?? '',
-        closureType,
-      });
-    },
-    [connectorId, connectors, closureType]
-  );
-
-  const onClickAddConnector = useCallback(() => {
-    setActionBarVisible(false);
-    setAddFlyoutVisibility(true);
-  }, []);
-
   const onClickUpdateConnector = useCallback(() => {
-    setActionBarVisible(false);
     setEditFlyoutVisibility(true);
   }, []);
 
-  const handleActionBar = useCallback(() => {
-    const currentConfigurationMinusName = {
-      connectorId: currentConfiguration.connectorId,
-      closureType: currentConfiguration.closureType,
-    };
-    const unsavedChanges = difference(Object.values(currentConfigurationMinusName), [
-      connectorId,
-      closureType,
-    ]).length;
-    setActionBarVisible(!(unsavedChanges === 0));
-    setTotalConfigurationChanges(unsavedChanges);
-  }, [currentConfiguration, connectorId, closureType]);
-
   const handleSetAddFlyoutVisibility = useCallback(
     (isVisible: boolean) => {
-      handleActionBar();
       setAddFlyoutVisibility(isVisible);
     },
     [currentConfiguration, connectorId, closureType]
@@ -139,22 +94,50 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
 
   const handleSetEditFlyoutVisibility = useCallback(
     (isVisible: boolean) => {
-      handleActionBar();
       setEditFlyoutVisibility(isVisible);
     },
     [currentConfiguration, connectorId, closureType]
+  );
+
+  const onChangeConnector = useCallback(
+    (id: string) => {
+      if (id === 'add-connector') {
+        setAddFlyoutVisibility(true);
+        return;
+      }
+
+      setConnector(id);
+      persistCaseConfigure({
+        connectorId: id,
+        connectorName: connectors.find((c) => c.id === id)?.name ?? '',
+        closureType,
+      });
+    },
+    [connectorId, closureType, version]
+  );
+
+  const onChangeClosureType = useCallback(
+    (type: ClosureType) => {
+      setClosureType(type);
+      persistCaseConfigure({
+        connectorId,
+        connectorName: connectors.find((c) => c.id === connectorId)?.name ?? '',
+        closureType: type,
+      });
+    },
+    [connectorId, closureType, version]
   );
 
   useEffect(() => {
     if (
       !isLoadingConnectors &&
       connectorId !== 'none' &&
-      !connectors.some(c => c.id === connectorId)
+      !connectors.some((c) => c.id === connectorId)
     ) {
       setConnectorIsValid(false);
     } else if (
       !isLoadingConnectors &&
-      (connectorId === 'none' || connectors.some(c => c.id === connectorId))
+      (connectorId === 'none' || connectors.some((c) => c.id === connectorId))
     ) {
       setConnectorIsValid(true);
     }
@@ -163,20 +146,10 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   useEffect(() => {
     if (!isLoadingConnectors && connectorId !== 'none') {
       setEditedConnectorItem(
-        connectors.find(c => c.id === connectorId) as ActionConnectorTableItem
+        connectors.find((c) => c.id === connectorId) as ActionConnectorTableItem
       );
     }
   }, [connectors, connectorId]);
-
-  useEffect(() => {
-    handleActionBar();
-  }, [
-    connectors,
-    connectorId,
-    closureType,
-    currentConfiguration.connectorId,
-    currentConfiguration.closureType,
-  ]);
 
   return (
     <FormWrapper>
@@ -195,8 +168,8 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
       <SectionWrapper>
         <ClosureOptions
           closureTypeSelected={closureType}
-          disabled={persistLoading || isLoadingConnectors || connectorId === 'none' || !userCanCrud}
-          onChangeClosureType={setClosureType}
+          disabled={persistLoading || isLoadingConnectors || !userCanCrud}
+          onChangeClosureType={onChangeClosureType}
         />
       </SectionWrapper>
       <SectionWrapper>
@@ -204,57 +177,12 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           connectors={connectors ?? []}
           disabled={persistLoading || isLoadingConnectors || !userCanCrud}
           isLoading={isLoadingConnectors}
-          onChangeConnector={setConnector}
+          onChangeConnector={onChangeConnector}
           updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
-          handleShowAddFlyout={onClickAddConnector}
           handleShowEditFlyout={onClickUpdateConnector}
           selectedConnector={connectorId}
         />
       </SectionWrapper>
-      {actionBarVisible && (
-        <EuiBottomBar data-test-subj="case-configure-action-bottom-bar">
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s">
-                <EuiText data-test-subj="case-configure-action-bottom-bar-total-changes">
-                  {i18n.UNSAVED_CHANGES(totalConfigurationChanges)}
-                </EuiText>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    color="ghost"
-                    iconType="cross"
-                    isDisabled={isLoadingAny}
-                    isLoading={persistLoading}
-                    aria-label={i18n.CANCEL}
-                    href={getCaseUrl(search)}
-                    data-test-subj="case-configure-action-bottom-bar-cancel-button"
-                  >
-                    {i18n.CANCEL}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    color="secondary"
-                    iconType="save"
-                    aria-label={i18n.SAVE_CHANGES}
-                    isDisabled={isLoadingAny}
-                    isLoading={persistLoading}
-                    onClick={handleSubmit}
-                    data-test-subj="case-configure-action-bottom-bar-save-button"
-                  >
-                    {i18n.SAVE_CHANGES}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiBottomBar>
-      )}
       <ActionsConnectorsContextProvider
         value={{
           http,

@@ -70,7 +70,7 @@ const SavedObjectsTablePage = ({
       notifications={coreStart.notifications}
       applications={coreStart.application}
       perPageConfig={itemsPerPage}
-      goInspectObject={savedObject => {
+      goInspectObject={(savedObject) => {
         const { editUrl } = savedObject.meta;
         if (editUrl) {
           // previously, kbnUrl.change(object.meta.editUrl); was used.
@@ -80,7 +80,7 @@ const SavedObjectsTablePage = ({
           window.location.hash = editUrl;
         }
       }}
-      canGoInApp={savedObject => {
+      canGoInApp={(savedObject) => {
         const { inAppUrl } = savedObject.meta;
         return inAppUrl ? get(capabilities, inAppUrl.uiCapabilitiesPath) : false;
       }}

@@ -14,7 +14,7 @@ describe('size_limited_chunking', () => {
     // Confirm valid geometry
     const chunkLimit = 100;
     const chunkedArr = sizeLimitedChunking(testArr, chunkLimit);
-    chunkedArr.forEach(sizeLimitedArr => {
+    chunkedArr.forEach((sizeLimitedArr) => {
       const arrByteSize = new Blob(sizeLimitedArr, { type: 'application/json' }).size;
 
       // Chunk size should be less than chunk limit

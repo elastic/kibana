@@ -29,7 +29,7 @@ describe('Index Pattern Utils', () => {
     });
 
     it('should not allow illegal characters', () => {
-      ILLEGAL_CHARACTERS_VISIBLE.forEach(char => {
+      ILLEGAL_CHARACTERS_VISIBLE.forEach((char) => {
         const errors = validateIndexPattern(`pattern${char}`);
         expect(errors[ILLEGAL_CHARACTERS_KEY]).toEqual([char]);
       });

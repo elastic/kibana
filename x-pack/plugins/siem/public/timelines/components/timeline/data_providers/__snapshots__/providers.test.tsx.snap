@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Providers rendering renders correctly against snapshot 1`] = `
-<Fragment>
+<div>
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
@@ -530,5 +530,5 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
       </styled.span>
     </EuiFlexItem>
   </EuiFlexGroup>
-</Fragment>
+</div>
 `;

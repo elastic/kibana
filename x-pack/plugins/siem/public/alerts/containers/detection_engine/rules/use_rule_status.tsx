@@ -94,7 +94,7 @@ export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
 
         if (isSubscribed) {
           setRuleStatuses(
-            rules.map(rule => ({
+            rules.map((rule) => ({
               id: rule.id,
               activate: rule.enabled,
               name: rule.name,
@@ -113,7 +113,7 @@ export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
       }
     };
     if (rules != null && rules.length > 0) {
-      fetchData(rules.map(r => r.id));
+      fetchData(rules.map((r) => r.id));
     }
     return () => {
       isSubscribed = false;

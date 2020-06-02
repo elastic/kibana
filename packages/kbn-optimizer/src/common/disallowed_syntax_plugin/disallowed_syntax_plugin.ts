@@ -26,8 +26,8 @@ import { parseFilePath } from '../parse_path';
 
 export class DisallowedSyntaxPlugin {
   apply(compiler: webpack.Compiler) {
-    compiler.hooks.normalModuleFactory.tap(DisallowedSyntaxPlugin.name, factory => {
-      factory.hooks.parser.for('javascript/auto').tap(DisallowedSyntaxPlugin.name, parser => {
+    compiler.hooks.normalModuleFactory.tap(DisallowedSyntaxPlugin.name, (factory) => {
+      factory.hooks.parser.for('javascript/auto').tap(DisallowedSyntaxPlugin.name, (parser) => {
         parser.hooks.program.tap(DisallowedSyntaxPlugin.name, (program: acorn.Node) => {
           const module = parser.state?.current;
           if (!module || !module.resource) {
@@ -43,7 +43,7 @@ export class DisallowedSyntaxPlugin {
 
           const failedChecks = new Set<DisallowedSyntaxCheck>();
 
-          AcornWalk.full(program, node => {
+          AcornWalk.full(program, (node) => {
             const checks = checksByNodeType.get(node.type as any);
             if (!checks) {
               return;
@@ -63,7 +63,7 @@ export class DisallowedSyntaxPlugin {
           // throw an error to trigger a parse failure, causing this module to be reported as invalid
           throw new Error(
             `disallowed syntax found in file ${resource}:\n  - ${Array.from(failedChecks)
-              .map(c => c.name)
+              .map((c) => c.name)
               .join('\n  - ')}`
           );
         });

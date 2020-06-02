@@ -78,7 +78,7 @@ export const NoteCards = React.memo<Props>(
       <NoteCardsComp>
         {noteIds.length ? (
           <NotesContainer data-test-subj="notes" direction="column" gutterSize="none">
-            {getNotesByIds(noteIds).map(note => (
+            {getNotesByIds(noteIds).map((note) => (
               <NoteContainer data-test-subj="note-container" key={note.id}>
                 <NoteCard created={note.created} rawNote={note.note} user={note.user} />
               </NoteContainer>

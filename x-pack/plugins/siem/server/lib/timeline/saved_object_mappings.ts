@@ -263,6 +263,9 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
         },
       },
     },
+    status: {
+      type: 'keyword',
+    },
     created: {
       type: 'date',
     },

@@ -9,7 +9,7 @@ import { ipOverviewQuery } from '../../../../plugins/siem/public/network/contain
 import { GetIpOverviewQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('IP Overview', () => {
@@ -28,7 +28,7 @@ export default function({ getService }: FtrProviderContext) {
               inspect: false,
             },
           })
-          .then(resp => {
+          .then((resp) => {
             const ipOverview = resp.data.source.IpOverview;
             expect(ipOverview!.source!.geo!.continent_name).to.be('North America');
             expect(ipOverview!.source!.geo!.location!.lat!).to.be(37.751);
@@ -55,7 +55,7 @@ export default function({ getService }: FtrProviderContext) {
               inspect: false,
             },
           })
-          .then(resp => {
+          .then((resp) => {
             const ipOverview = resp.data.source.IpOverview;
             expect(ipOverview!.host.id!).to.be('2ce8b1e7d69e4a1d9c6bcddc473da9d9');
             expect(ipOverview!.host.name!).to.be('zeek-sensor-amsterdam');

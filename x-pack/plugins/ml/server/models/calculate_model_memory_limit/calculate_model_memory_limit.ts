@@ -77,8 +77,8 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
         }
       ) => {
         [byFieldName, partitionFieldName, overFieldName]
-          .filter(field => field !== undefined && field !== '' && !excludedKeywords.has(field))
-          .forEach(key => {
+          .filter((field) => field !== undefined && field !== '' && !excludedKeywords.has(field))
+          .forEach((key) => {
             acc.add(key as string);
           });
         return acc;
@@ -87,7 +87,7 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
     );
 
     const maxBucketFieldCardinalities: string[] = influencers.filter(
-      influencerField =>
+      (influencerField) =>
         !!influencerField &&
         !excludedKeywords.has(influencerField) &&
         !overallCardinalityFields.has(influencerField)

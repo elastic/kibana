@@ -22,6 +22,7 @@ import { InspectButton, InspectButtonContainer } from '../../../../common/compon
 import * as i18n from './translations';
 import { AssociateNote } from '../../notes/helpers';
 import { Note } from '../../../../common/lib/note';
+import { TimelineStatus } from '../../../../../common/types/timeline';
 
 export const PropertiesRightStyle = styled(EuiFlexGroup)`
   margin-right: 5px;
@@ -79,6 +80,7 @@ interface Props {
   onCloseTimelineModal: () => void;
   onOpenTimelineModal: () => void;
   showTimelineModal: boolean;
+  status: TimelineStatus;
   title: string;
   updateNote: UpdateNote;
 }
@@ -106,6 +108,7 @@ const PropertiesRightComponent: React.FC<Props> = ({
   onCloseTimelineModal,
   onOpenTimelineModal,
   title,
+  status,
 }) => (
   <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
     <EuiFlexItem grow={false}>
@@ -142,6 +145,7 @@ const PropertiesRightComponent: React.FC<Props> = ({
                 onClosePopover={onClosePopover}
                 timelineId={timelineId}
                 timelineTitle={title}
+                timelineStatus={status}
               />
             </EuiFlexItem>
 
@@ -190,7 +194,7 @@ const PropertiesRightComponent: React.FC<Props> = ({
     </EuiFlexItem>
 
     {showUsersView
-      ? usersViewing.map(user => (
+      ? usersViewing.map((user) => (
           // Hide the hard-coded elastic user avatar as the 7.2 release does not implement
           // support for multi-user-collaboration as proposed in elastic/ingest-dev#395
           <HiddenFlexItem key={user}>

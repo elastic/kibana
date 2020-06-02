@@ -49,7 +49,7 @@ const JiraConnectorForm: React.FC<ConnectorFlyoutFormProps<JiraActionConnector>>
               name="connector-jira-project-key"
               value={projectKey || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="connector-jira-project-key-form-input"
-              onChange={evt => onChangeConfig('projectKey', evt.target.value)}
+              onChange={(evt) => onChangeConfig('projectKey', evt.target.value)}
               onBlur={() => onBlurConfig('projectKey')}
             />
           </EuiFormRow>
@@ -71,7 +71,7 @@ const JiraConnectorForm: React.FC<ConnectorFlyoutFormProps<JiraActionConnector>>
               name="connector-jira-email"
               value={email || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="connector-jira-email-form-input"
-              onChange={evt => onChangeSecret('email', evt.target.value)}
+              onChange={(evt) => onChangeSecret('email', evt.target.value)}
               onBlur={() => onBlurSecret('email')}
             />
           </EuiFormRow>
@@ -93,7 +93,7 @@ const JiraConnectorForm: React.FC<ConnectorFlyoutFormProps<JiraActionConnector>>
               name="connector-jira-apiToken"
               value={apiToken || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="connector-jira-apiToken-form-input"
-              onChange={evt => onChangeSecret('apiToken', evt.target.value)}
+              onChange={(evt) => onChangeSecret('apiToken', evt.target.value)}
               onBlur={() => onBlurSecret('apiToken')}
             />
           </EuiFormRow>

@@ -129,7 +129,7 @@ export const Providers = React.memo<Props>(
     );
 
     return (
-      <>
+      <div>
         {dataProviderGroups.map((group, groupIndex) => (
           <EuiFlexGroup alignItems="center" gutterSize="none" key={`droppable-${groupIndex}`}>
             <OrFlexItem grow={false}>
@@ -145,7 +145,7 @@ export const Providers = React.memo<Props>(
                 droppableId={getTimelineProviderDroppableId({ groupIndex, timelineId: id })}
                 direction="horizontal"
               >
-                {droppableProvided => (
+                {(droppableProvided) => (
                   <DroppableContainer
                     className={
                       groupIndex === dataProviderGroups.length - 1
@@ -259,7 +259,7 @@ export const Providers = React.memo<Props>(
             </EuiFlexItem>
           </EuiFlexGroup>
         ))}
-      </>
+      </div>
     );
   }
 );

@@ -104,9 +104,7 @@ export function parseApiKeyFromHeaders(headers: KibanaRequest['headers']) {
 }
 
 export function parseApiKey(apiKey: string) {
-  const apiKeyId = Buffer.from(apiKey, 'base64')
-    .toString('utf8')
-    .split(':')[0];
+  const apiKeyId = Buffer.from(apiKey, 'base64').toString('utf8').split(':')[0];
 
   return {
     apiKey,

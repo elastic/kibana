@@ -93,7 +93,7 @@ class TutorialDirectoryUi extends React.Component {
     let openTab = ALL_TAB_ID;
     if (
       props.openTab &&
-      this.tabs.some(tab => {
+      this.tabs.some((tab) => {
         return tab.id === props.openTab;
       })
     ) {
@@ -126,7 +126,7 @@ class TutorialDirectoryUi extends React.Component {
       return;
     }
 
-    let tutorialCards = tutorialConfigs.map(tutorialConfig => {
+    let tutorialCards = tutorialConfigs.map((tutorialConfig) => {
       // add base path to SVG based icons
       let icon = tutorialConfig.euiIconType;
       if (icon && icon.includes('/')) {
@@ -161,7 +161,7 @@ class TutorialDirectoryUi extends React.Component {
     });
 
     if (this.props.isCloudEnabled) {
-      tutorialCards = tutorialCards.filter(tutorial => {
+      tutorialCards = tutorialCards.filter((tutorial) => {
         return _.has(tutorial, 'elasticCloud');
       });
     }
@@ -176,7 +176,7 @@ class TutorialDirectoryUi extends React.Component {
     });
   }
 
-  onSelectedTabChanged = id => {
+  onSelectedTabChanged = (id) => {
     this.setState({
       selectedTabId: id,
     });
@@ -202,13 +202,13 @@ class TutorialDirectoryUi extends React.Component {
     return (
       <EuiFlexGrid columns={4}>
         {this.state.tutorialCards
-          .filter(tutorial => {
+          .filter((tutorial) => {
             return (
               this.state.selectedTabId === ALL_TAB_ID ||
               this.state.selectedTabId === tutorial.category
             );
           })
-          .map(tutorial => {
+          .map((tutorial) => {
             return (
               <EuiFlexItem key={tutorial.name}>
                 <Synopsis

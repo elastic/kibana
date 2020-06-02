@@ -18,21 +18,25 @@
  */
 
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
-import { DocLinksService, DocLinksStart } from './doc_links_service';
+import { DocLinksService, DocLinksSetup, DocLinksStart } from './doc_links_service';
 
-const createStartContractMock = (): DocLinksStart => {
+const createSetupContractMock = (): DocLinksSetup => {
   // This service is so simple that we actually use the real implementation
   const injectedMetadata = injectedMetadataServiceMock.createStartContract();
   injectedMetadata.getKibanaBranch.mockReturnValue('mocked-test-branch');
-  return new DocLinksService().start({ injectedMetadata });
+  return new DocLinksService().setup({ injectedMetadata });
 };
+
+const createStartContractMock: () => DocLinksStart = createSetupContractMock;
 
 type DocLinksServiceContract = PublicMethodsOf<DocLinksService>;
 const createMock = (): jest.Mocked<DocLinksServiceContract> => ({
+  setup: jest.fn().mockReturnValue(createSetupContractMock()),
   start: jest.fn().mockReturnValue(createStartContractMock()),
 });
 
 export const docLinksServiceMock = {
   create: createMock,
+  createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
 };

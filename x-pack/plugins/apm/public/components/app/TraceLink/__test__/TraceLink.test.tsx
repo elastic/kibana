@@ -17,13 +17,13 @@ jest.mock('../../Main/route_config', () => ({
   routes: [
     {
       path: '/services/:serviceName/transactions/view',
-      name: 'transaction_name'
+      name: 'transaction_name',
     },
     {
       path: '/traces',
-      name: 'traces'
-    }
-  ]
+      name: 'traces',
+    },
+  ],
 }));
 
 describe('TraceLink', () => {
@@ -40,12 +40,12 @@ describe('TraceLink', () => {
       urlParams: {
         traceIdLink: '123',
         rangeFrom: 'now-24h',
-        rangeTo: 'now'
-      }
+        rangeTo: 'now',
+      },
     });
     spyOn(hooks, 'useFetcher').and.returnValue({
       data: { transaction: undefined },
-      status: 'success'
+      status: 'success',
     });
 
     const component = shallow(<TraceLink />);
@@ -60,8 +60,8 @@ describe('TraceLink', () => {
         urlParams: {
           traceIdLink: '123',
           rangeFrom: 'now-24h',
-          rangeTo: 'now'
-        }
+          rangeTo: 'now',
+        },
       });
     });
     it('renders with date range params', () => {
@@ -70,13 +70,13 @@ describe('TraceLink', () => {
         transaction: {
           id: '456',
           name: 'bar',
-          type: 'GET'
+          type: 'GET',
         },
-        trace: { id: 123 }
+        trace: { id: 123 },
       };
       spyOn(hooks, 'useFetcher').and.returnValue({
         data: { transaction },
-        status: 'success'
+        status: 'success',
       });
       const component = shallow(<TraceLink />);
       expect(component.prop('to')).toEqual(

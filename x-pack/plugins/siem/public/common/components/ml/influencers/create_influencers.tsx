@@ -20,8 +20,8 @@ export const createKeyAndValue = (influencer: Record<string, string>): string =>
 
 export const createInfluencers = (influencers: Array<Record<string, string>> = []): JSX.Element[] =>
   influencers
-    .filter(influencer => !isEmpty(influencer))
-    .map(influencer => {
+    .filter((influencer) => !isEmpty(influencer))
+    .map((influencer) => {
       const keyAndValue = createKeyAndValue(influencer);
       return (
         <EuiFlexItem key={keyAndValue} grow={false}>

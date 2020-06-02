@@ -28,7 +28,7 @@ import {
 
 import { defaultRiskScoreBySeverity, severityOptions, SeverityValue } from './data';
 import { stepAboutDefaultValue } from './default_value';
-import { isUrlInvalid } from './helpers';
+import { isUrlInvalid } from '../../../../common/utils/validators';
 import { schema } from './schema';
 import * as I18n from './translations';
 import { StepContentWrapper } from '../step_content_wrapper';

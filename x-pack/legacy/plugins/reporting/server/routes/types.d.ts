@@ -4,17 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
-import { JobDocPayload, ReportingResponseToolkit } from '../../types';
+import { KibanaResponseFactory, KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { AuthenticatedUser } from '../../../../../plugins/security/common/model/authenticated_user';
+import { JobDocPayload } from '../types';
 
 export type HandlerFunction = (
+  user: AuthenticatedUser | null,
   exportType: string,
   jobParams: object,
-  request: Legacy.Request,
-  h: ReportingResponseToolkit
+  context: RequestHandlerContext,
+  req: KibanaRequest,
+  res: KibanaResponseFactory
 ) => any;
 
-export type HandlerErrorFunction = (exportType: string, err: Error) => any;
+export type HandlerErrorFunction = (res: KibanaResponseFactory, err: Error) => any;
 
 export interface QueuedJobPayload<JobParamsType> {
   error?: boolean;

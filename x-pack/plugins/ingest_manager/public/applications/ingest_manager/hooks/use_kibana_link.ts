@@ -6,9 +6,9 @@
 
 import { useCore } from './';
 
-const BASE_PATH = '/app/kibana';
+const KIBANA_BASE_PATH = '/app/kibana';
 
 export function useKibanaLink(path: string = '/') {
   const core = useCore();
-  return core.http.basePath.prepend(`${BASE_PATH}#${path}`);
+  return core.http.basePath.prepend(`${KIBANA_BASE_PATH}#${path}`);
 }

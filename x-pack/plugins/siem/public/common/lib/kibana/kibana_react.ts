@@ -12,7 +12,7 @@ import {
   useUiSetting$,
   withKibana,
 } from '../../../../../../../src/plugins/kibana_react/public';
-import { StartServices } from '../../../plugin';
+import { StartServices } from '../../../types';
 
 export type KibanaContext = KibanaReactContextValue<StartServices>;
 export interface WithKibanaProps {

@@ -117,13 +117,13 @@ const StatefulTimelineComponent = React.memo<Props>(
     );
 
     const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
-      itemsChangedPerPage => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
+      (itemsChangedPerPage) => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
       [id]
     );
 
     const toggleColumn = useCallback(
       (column: ColumnHeaderOptions) => {
-        const exists = columns.findIndex(c => c.id === column.id) !== -1;
+        const exists = columns.findIndex((c) => c.id === column.id) !== -1;
 
         if (!exists && upsertColumn != null) {
           upsertColumn({

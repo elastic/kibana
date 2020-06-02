@@ -6,9 +6,9 @@
 
 import { SetStateAction, Dispatch } from 'react';
 import { AllTimelinesVariables } from '../../containers/all';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
+import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../../graphql/types';
-import { TimelineType, TimelineTypeLiteral } from '../../../../common/types/timeline';
+import { TimelineTypeLiteral } from '../../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -48,7 +48,7 @@ export interface OpenTimelineResult {
   savedObjectId?: string | null;
   title?: string | null;
   templateTimelineId?: string | null;
-  type?: TimelineType.template | TimelineType.default;
+  type?: TimelineTypeLiteral;
   updated?: number | null;
   updatedBy?: string | null;
 }
@@ -161,7 +161,7 @@ export interface OpenTimelineProps {
   /** the requested field to sort on */
   sortField: string;
   /** timeline / template timeline */
-  tabs: JSX.Element;
+  tabs?: JSX.Element;
   /** The title of the Open Timeline component  */
   title: string;
   /** The total (server-side) count of the search results */

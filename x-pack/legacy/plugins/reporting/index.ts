@@ -9,7 +9,8 @@ import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { legacyInit } from './server/legacy';
-import { ReportingPluginSpecOptions } from './types';
+
+export type ReportingPluginSpecOptions = Legacy.PluginSpecOptions;
 
 const kbToBase64Length = (kb: number) => Math.floor((kb * 1024 * 8) / 6);
 

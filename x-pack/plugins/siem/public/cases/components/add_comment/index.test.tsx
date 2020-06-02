@@ -83,10 +83,7 @@ describe('AddComment ', () => {
     expect(wrapper.find(`[data-test-subj="add-comment"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="loading-spinner"]`).exists()).toBeFalsy();
 
-    wrapper
-      .find(`[data-test-subj="submit-comment"]`)
-      .first()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="submit-comment"]`).first().simulate('click');
     await wait();
     expect(onCommentSaving).toBeCalled();
     expect(postComment).toBeCalledWith(sampleData, onCommentPosted);
@@ -104,10 +101,7 @@ describe('AddComment ', () => {
     );
     expect(wrapper.find(`[data-test-subj="loading-spinner"]`).exists()).toBeTruthy();
     expect(
-      wrapper
-        .find(`[data-test-subj="submit-comment"]`)
-        .first()
-        .prop('isDisabled')
+      wrapper.find(`[data-test-subj="submit-comment"]`).first().prop('isDisabled')
     ).toBeTruthy();
   });
 
@@ -121,10 +115,7 @@ describe('AddComment ', () => {
       </TestProviders>
     );
     expect(
-      wrapper
-        .find(`[data-test-subj="submit-comment"]`)
-        .first()
-        .prop('isDisabled')
+      wrapper.find(`[data-test-subj="submit-comment"]`).first().prop('isDisabled')
     ).toBeTruthy();
   });
 

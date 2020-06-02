@@ -12,10 +12,10 @@ import { createLocation } from 'history';
 import { stringify } from 'query-string';
 import { APPS, BASE_PATH, BASE_PATH_REMOTE_CLUSTERS } from '../../../common/constants';
 
-const isModifiedEvent = event =>
+const isModifiedEvent = (event) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
-const isLeftClickEvent = event => event.button === 0;
+const isLeftClickEvent = (event) => event.button === 0;
 
 const queryParamsFromObject = (params, encodeParams = false) => {
   if (!params) {
@@ -48,7 +48,7 @@ class Routing {
         : to;
     const href = this._reactRouter.history.createHref(location);
 
-    const onClick = event => {
+    const onClick = (event) => {
       if (event.defaultPrevented) {
         return;
       }

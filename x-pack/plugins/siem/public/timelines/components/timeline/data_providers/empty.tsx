@@ -33,13 +33,13 @@ const BadgeHighlighted = (styled(EuiBadge)`
 BadgeHighlighted.displayName = 'BadgeHighlighted';
 
 const HighlightedBackground = styled.span`
-  background-color: ${props => props.theme.eui.euiColorLightShade};
+  background-color: ${(props) => props.theme.eui.euiColorLightShade};
 `;
 
 HighlightedBackground.displayName = 'HighlightedBackground';
 
 const EmptyContainer = styled.div<{ showSmallMsg: boolean }>`
-  width: ${props => (props.showSmallMsg ? '60px' : 'auto')};
+  width: ${(props) => (props.showSmallMsg ? '60px' : 'auto')};
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -47,7 +47,7 @@ const EmptyContainer = styled.div<{ showSmallMsg: boolean }>`
   justify-content: center;
   user-select: none;
   align-content: center;
-  ${props =>
+  ${(props) =>
     props.showSmallMsg
       ? `
       border-right: 1px solid ${props.theme.eui.euiColorMediumShade};

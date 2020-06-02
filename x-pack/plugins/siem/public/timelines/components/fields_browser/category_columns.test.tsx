@@ -18,7 +18,7 @@ const timelineId = 'test';
 const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
 describe('getCategoryColumns', () => {
-  Object.keys(mockBrowserFields).forEach(categoryId => {
+  Object.keys(mockBrowserFields).forEach((categoryId) => {
     test(`it renders the ${categoryId} category name (from filteredBrowserFields)`, () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
@@ -35,15 +35,12 @@ describe('getCategoryColumns', () => {
       );
 
       expect(
-        wrapper
-          .find(`.field-browser-category-pane-${categoryId}-${timelineId}`)
-          .first()
-          .text()
+        wrapper.find(`.field-browser-category-pane-${categoryId}-${timelineId}`).first().text()
       ).toEqual(categoryId);
     });
   });
 
-  Object.keys(mockBrowserFields).forEach(categoryId => {
+  Object.keys(mockBrowserFields).forEach((categoryId) => {
     test(`it renders the correct field count for the ${categoryId} category (from filteredBrowserFields)`, () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
@@ -60,10 +57,7 @@ describe('getCategoryColumns', () => {
       );
 
       expect(
-        wrapper
-          .find(`[data-test-subj="${categoryId}-category-count"]`)
-          .first()
-          .text()
+        wrapper.find(`[data-test-subj="${categoryId}-category-count"]`).first().text()
       ).toEqual(`${getFieldCount(mockBrowserFields[categoryId])}`);
     });
   });
@@ -86,7 +80,7 @@ describe('getCategoryColumns', () => {
     );
 
     expect(
-      wrapper.find(`.field-browser-category-pane-${selectedCategoryId}-${timelineId}`).first()
+      wrapper.find(`.field-browser-category-pane-${selectedCategoryId}-${timelineId}`).at(1)
     ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
   });
 
@@ -109,7 +103,7 @@ describe('getCategoryColumns', () => {
     );
 
     expect(
-      wrapper.find(`.field-browser-category-pane-${notTheSelectedCategoryId}-${timelineId}`).first()
+      wrapper.find(`.field-browser-category-pane-${notTheSelectedCategoryId}-${timelineId}`).at(1)
     ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
   });
 

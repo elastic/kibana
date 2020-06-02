@@ -124,15 +124,15 @@ export const formatScheduleStepData = (scheduleData: ScheduleStepRule): Schedule
 export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson => {
   const { falsePositives, references, riskScore, threat, isNew, note, ...rest } = aboutStepData;
   return {
-    false_positives: falsePositives.filter(item => !isEmpty(item)),
-    references: references.filter(item => !isEmpty(item)),
+    false_positives: falsePositives.filter((item) => !isEmpty(item)),
+    references: references.filter((item) => !isEmpty(item)),
     risk_score: riskScore,
     threat: threat
-      .filter(singleThreat => singleThreat.tactic.name !== 'none')
-      .map(singleThreat => ({
+      .filter((singleThreat) => singleThreat.tactic.name !== 'none')
+      .map((singleThreat) => ({
         ...singleThreat,
         framework: 'MITRE ATT&CK',
-        technique: singleThreat.technique.map(technique => {
+        technique: singleThreat.technique.map((technique) => {
           const { id, name, reference } = technique;
           return { id, name, reference };
         }),

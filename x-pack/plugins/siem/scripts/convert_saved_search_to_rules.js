@@ -47,7 +47,7 @@ const ENABLED = false;
 // const INDEX = ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
 // const OUTPUT_INDEX = '.siem-signals-some-other-index';
 
-const walk = dir => {
+const walk = (dir) => {
   const list = fs.readdirSync(dir);
   return list.reduce((accum, file) => {
     const fileWithDir = `${dir}/${file}`;
@@ -61,7 +61,7 @@ const walk = dir => {
 };
 
 //clean up the file system characters
-const cleanupFileName = file => {
+const cleanupFileName = (file) => {
   const fileWithoutSpecialChars = file
     .trim()
     .replace(/\./g, '')
@@ -94,7 +94,7 @@ async function main() {
   const files = process.argv[2];
   const outputDir = process.argv[3];
 
-  const savedSearchesJson = walk(files).filter(file => {
+  const savedSearchesJson = walk(files).filter((file) => {
     return !path.basename(file).startsWith('.') && file.endsWith('.ndjson');
   });
 
@@ -137,7 +137,7 @@ async function main() {
       const fileToWrite = cleanupFileName(_file);
 
       // remove meta value from the filter
-      const filterWithoutMeta = filter.map(filterValue => {
+      const filterWithoutMeta = filter.map((filterValue) => {
         filterValue.$state;
         return filterValue;
       });

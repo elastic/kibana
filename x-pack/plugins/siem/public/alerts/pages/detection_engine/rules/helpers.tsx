@@ -208,7 +208,7 @@ export const setFieldValue = (
   schema: FormSchema<FormData>,
   defaultValues: unknown
 ) =>
-  Object.keys(schema).forEach(key => {
+  Object.keys(schema).forEach((key) => {
     const val = get(key, defaultValues);
     if (val != null) {
       form.setFieldValue(key, val);
@@ -264,7 +264,7 @@ export const getActionMessageParams = memoizeOne((ruleType: RuleType | undefined
   return [
     'state.signals_count',
     '{context.results_link}',
-    ...actionMessageRuleParams.map(param => `context.rule.${param}`),
+    ...actionMessageRuleParams.map((param) => `context.rule.${param}`),
   ];
 });
 

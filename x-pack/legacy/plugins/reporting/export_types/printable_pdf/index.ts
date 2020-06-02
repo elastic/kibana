@@ -5,18 +5,22 @@
  */
 
 import {
-  PDF_JOB_TYPE as jobType,
-  LICENSE_TYPE_TRIAL,
-  LICENSE_TYPE_STANDARD,
+  LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_ENTERPRISE,
+  LICENSE_TYPE_STANDARD,
+  LICENSE_TYPE_TRIAL,
+  PDF_JOB_TYPE as jobType,
 } from '../../common/constants';
-import { ExportTypeDefinition, ESQueueCreateJobFn, ESQueueWorkerExecuteFn } from '../../types';
+import {
+  ESQueueCreateJobFn,
+  ESQueueWorkerExecuteFn,
+  ExportTypeDefinition,
+} from '../../server/types';
+import { metadata } from './metadata';
 import { createJobFactory } from './server/create_job';
 import { executeJobFactory } from './server/execute_job';
-import { metadata } from './metadata';
-import { JobParamsPDF, JobDocPayloadPDF } from './types';
+import { JobDocPayloadPDF, JobParamsPDF } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
   JobParamsPDF,

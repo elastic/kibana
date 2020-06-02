@@ -77,7 +77,7 @@ class DatasourceService {
     ids: string[]
   ): Promise<Datasource[] | null> {
     const datasourceSO = await soClient.bulkGet<Datasource>(
-      ids.map(id => ({
+      ids.map((id) => ({
         id,
         type: SAVED_OBJECT_TYPE,
       }))
@@ -86,7 +86,7 @@ class DatasourceService {
       return null;
     }
 
-    return datasourceSO.saved_objects.map(so => ({
+    return datasourceSO.saved_objects.map((so) => ({
       id: so.id,
       ...so.attributes,
     }));
@@ -112,7 +112,7 @@ class DatasourceService {
     });
 
     return {
-      items: datasources.saved_objects.map<Datasource>(datasourceSO => {
+      items: datasources.saved_objects.map<Datasource>((datasourceSO) => {
         return {
           id: datasourceSO.id,
           ...datasourceSO.attributes,
@@ -215,14 +215,14 @@ class DatasourceService {
     pkgInfo: PackageInfo,
     inputs: DatasourceInput[]
   ): Promise<DatasourceInput[]> {
-    const inputsPromises = inputs.map(input => _assignPackageStreamToInput(pkgInfo, input));
+    const inputsPromises = inputs.map((input) => _assignPackageStreamToInput(pkgInfo, input));
 
     return Promise.all(inputsPromises);
   }
 }
 
 async function _assignPackageStreamToInput(pkgInfo: PackageInfo, input: DatasourceInput) {
-  const streamsPromises = input.streams.map(stream =>
+  const streamsPromises = input.streams.map((stream) =>
     _assignPackageStreamToStream(pkgInfo, input, stream)
   );
 
@@ -244,13 +244,13 @@ async function _assignPackageStreamToStream(
     throw new Error('Stream template not found, no datasource');
   }
 
-  const inputFromPkg = datasource.inputs.find(pkgInput => pkgInput.type === input.type);
+  const inputFromPkg = datasource.inputs.find((pkgInput) => pkgInput.type === input.type);
   if (!inputFromPkg) {
     throw new Error(`Stream template not found, unable to found input ${input.type}`);
   }
 
   const streamFromPkg = inputFromPkg.streams.find(
-    pkgStream => pkgStream.dataset === stream.dataset
+    (pkgStream) => pkgStream.dataset === stream.dataset
   );
   if (!streamFromPkg) {
     throw new Error(`Stream template not found, unable to found stream ${stream.dataset}`);

@@ -314,18 +314,18 @@ describe('Ingest Manager - validateDatasource()', () => {
   });
 
   it('returns no errors for disabled inputs', () => {
-    const disabledInputs = invalidDatasource.inputs.map(input => ({ ...input, enabled: false }));
+    const disabledInputs = invalidDatasource.inputs.map((input) => ({ ...input, enabled: false }));
     expect(validateDatasource({ ...validDatasource, inputs: disabledInputs }, mockPackage)).toEqual(
       noErrorsValidationResults
     );
   });
 
   it('returns only datasource and input-level errors for disabled streams', () => {
-    const inputsWithDisabledStreams = invalidDatasource.inputs.map(input =>
+    const inputsWithDisabledStreams = invalidDatasource.inputs.map((input) =>
       input.streams
         ? {
             ...input,
-            streams: input.streams.map(stream => ({ ...stream, enabled: false })),
+            streams: input.streams.map((stream) => ({ ...stream, enabled: false })),
           }
         : input
     );

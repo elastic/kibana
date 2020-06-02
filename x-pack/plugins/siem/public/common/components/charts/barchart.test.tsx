@@ -198,39 +198,23 @@ describe('BarChartBaseComponent', () => {
     });
 
     it('should render BarSeries with given xScaleType', () => {
-      expect(
-        shallowWrapper
-          .find(BarSeries)
-          .first()
-          .prop('xScaleType')
-      ).toEqual(configs.series.xScaleType);
+      expect(shallowWrapper.find(BarSeries).first().prop('xScaleType')).toEqual(
+        configs.series.xScaleType
+      );
     });
 
     it('should render BarSeries with given yScaleType', () => {
-      expect(
-        shallowWrapper
-          .find(BarSeries)
-          .first()
-          .prop('yScaleType')
-      ).toEqual(configs.series.yScaleType);
+      expect(shallowWrapper.find(BarSeries).first().prop('yScaleType')).toEqual(
+        configs.series.yScaleType
+      );
     });
 
     it('should render xAxis with given tick formatter', () => {
-      expect(
-        shallowWrapper
-          .find(Axis)
-          .first()
-          .prop('tickFormat')
-      ).toBeUndefined();
+      expect(shallowWrapper.find(Axis).first().prop('tickFormat')).toBeUndefined();
     });
 
     it('should render yAxis with given tick formatter', () => {
-      expect(
-        shallowWrapper
-          .find(Axis)
-          .last()
-          .prop('tickFormat')
-      ).toEqual(mockNumberFormatter);
+      expect(shallowWrapper.find(Axis).last().prop('tickFormat')).toEqual(mockNumberFormatter);
     });
   });
 
@@ -247,39 +231,19 @@ describe('BarChartBaseComponent', () => {
     });
 
     it('should render BarSeries with default xScaleType: Linear', () => {
-      expect(
-        shallowWrapper
-          .find(BarSeries)
-          .first()
-          .prop('xScaleType')
-      ).toEqual(ScaleType.Linear);
+      expect(shallowWrapper.find(BarSeries).first().prop('xScaleType')).toEqual(ScaleType.Linear);
     });
 
     it('should render BarSeries with default yScaleType: Linear', () => {
-      expect(
-        shallowWrapper
-          .find(BarSeries)
-          .first()
-          .prop('yScaleType')
-      ).toEqual(ScaleType.Linear);
+      expect(shallowWrapper.find(BarSeries).first().prop('yScaleType')).toEqual(ScaleType.Linear);
     });
 
     it('should not format xTicks value', () => {
-      expect(
-        shallowWrapper
-          .find(Axis)
-          .last()
-          .prop('tickFormat')
-      ).toBeUndefined();
+      expect(shallowWrapper.find(Axis).last().prop('tickFormat')).toBeUndefined();
     });
 
     it('should not format yTicks value', () => {
-      expect(
-        shallowWrapper
-          .find(Axis)
-          .last()
-          .prop('tickFormat')
-      ).toBeUndefined();
+      expect(shallowWrapper.find(Axis).last().prop('tickFormat')).toBeUndefined();
     });
   });
 
@@ -296,7 +260,7 @@ describe('BarChartBaseComponent', () => {
   });
 });
 
-describe.each(chartDataSets)('BarChart with valid data [%o]', data => {
+describe.each(chartDataSets)('BarChart with valid data [%o]', (data) => {
   let shallowWrapper: ShallowWrapper;
 
   beforeAll(() => {
@@ -378,23 +342,20 @@ describe.each(chartDataSets)('BarChart with stackByField', () => {
     });
   });
 
-  data.forEach(datum => {
+  data.forEach((datum) => {
     test(`it renders the expected draggable legend text for datum ${datum.key}`, () => {
       const dataProviderId = `draggableId.content.draggable-legend-item-uuid_v4()-${escapeDataProviderId(
         stackByField
       )}-${escapeDataProviderId(datum.key)}`;
 
       expect(
-        wrapper
-          .find(`div [data-rbd-draggable-id="${dataProviderId}"]`)
-          .first()
-          .text()
+        wrapper.find(`div [data-rbd-draggable-id="${dataProviderId}"]`).first().text()
       ).toEqual(datum.key);
     });
   });
 });
 
-describe.each(chartHolderDataSets)('BarChart with invalid data [%o]', data => {
+describe.each(chartHolderDataSets)('BarChart with invalid data [%o]', (data) => {
   let shallowWrapper: ShallowWrapper;
 
   beforeAll(() => {

@@ -16,7 +16,7 @@ const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 // typical values that have to change after an update from "scripts/es_archiver"
 const TOTAL_COUNT = 3;
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 

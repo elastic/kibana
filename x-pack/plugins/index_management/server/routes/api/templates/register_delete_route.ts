@@ -41,7 +41,7 @@ export function registerDeleteRoute({ router, license }: RouteDependencies) {
               return res.badRequest({ body: 'Only index template version 1 can be deleted.' });
             }
 
-            await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.deleteTemplate', {
+            await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('indices.deleteTemplate', {
               name,
             });
 

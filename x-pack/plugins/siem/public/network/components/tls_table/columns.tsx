@@ -61,7 +61,7 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: sha1 =>
+    render: (sha1) =>
       getRowItemDraggable({
         rowItem: sha1,
         attrName: 'tls.server_certificate.fingerprint.sha1',
@@ -92,7 +92,7 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
         rowItems: notAfter,
         attrName: 'tls.server_certificate.not_after',
         idPrefix: `${tableId}-${_id}-table-notAfter`,
-        render: validUntil => (
+        render: (validUntil) => (
           <LocalizedDateTooltip date={moment(new Date(validUntil)).toDate()}>
             <PreferenceFormattedDate value={new Date(validUntil)} />
           </LocalizedDateTooltip>

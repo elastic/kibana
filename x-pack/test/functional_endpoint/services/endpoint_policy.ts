@@ -9,8 +9,8 @@ import {
   CreateAgentConfigResponse,
   CreateDatasourceResponse,
 } from '../../../plugins/ingest_manager/common';
-import { Immutable } from '../../../plugins/endpoint/common/types';
-import { factory as policyConfigFactory } from '../../../plugins/endpoint/common/models/policy_config';
+import { Immutable } from '../../../plugins/siem/common/endpoint/types';
+import { factory as policyConfigFactory } from '../../../plugins/siem/common/endpoint/models/policy_config';
 
 const INGEST_API_ROOT = '/api/ingest_manager';
 const INGEST_API_AGENT_CONFIGS = `${INGEST_API_ROOT}/agent_configs`;

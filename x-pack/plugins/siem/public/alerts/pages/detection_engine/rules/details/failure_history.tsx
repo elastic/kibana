@@ -68,7 +68,7 @@ const FailureHistoryComponent: React.FC<FailureHistoryProps> = ({ id }) => {
         columns={columns}
         loading={loading}
         items={
-          ruleStatus != null ? ruleStatus?.failures.filter(rs => rs.last_failure_at != null) : []
+          ruleStatus != null ? ruleStatus?.failures.filter((rs) => rs.last_failure_at != null) : []
         }
         sorting={{ sort: { field: 'status_date', direction: 'desc' } }}
       />

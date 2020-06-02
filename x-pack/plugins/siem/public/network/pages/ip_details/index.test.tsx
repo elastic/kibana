@@ -148,7 +148,7 @@ describe('Ip Details', () => {
       </TestProviders>
     );
     // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await new Promise(resolve => setTimeout(resolve));
+    await new Promise((resolve) => setTimeout(resolve));
     wrapper.update();
     expect(
       wrapper

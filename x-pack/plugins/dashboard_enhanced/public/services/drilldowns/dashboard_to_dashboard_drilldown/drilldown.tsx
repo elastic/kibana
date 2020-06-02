@@ -38,7 +38,7 @@ export class DashboardToDashboardDrilldown
 
   public readonly euiIcon = 'dashboardApp';
 
-  private readonly ReactCollectConfig: React.FC<CollectConfigContainer['props']> = props => (
+  private readonly ReactCollectConfig: React.FC<CollectConfigContainer['props']> = (props) => (
     <CollectConfigContainer {...props} params={this.params} />
   );
 
@@ -93,7 +93,7 @@ export class DashboardToDashboardDrilldown
     const existingFilters =
       (config.useCurrentFilters
         ? currentFilters
-        : currentFilters?.filter(f => esFilters.isFilterPinned(f))) ?? [];
+        : currentFilters?.filter((f) => esFilters.isFilterPinned(f))) ?? [];
 
     // if useCurrentDashboardDataRange is enabled, then preserve current time range
     // if undefined is passed, then destination dashboard will figure out time range itself
@@ -127,9 +127,9 @@ export class DashboardToDashboardDrilldown
       }
     })();
 
-    if (context.timeFieldName) {
+    if (context.data.timeFieldName) {
       const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
-        context.timeFieldName,
+        context.data.timeFieldName,
         filtersFromEvent
       );
       filtersFromEvent = restOfFilters;

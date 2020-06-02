@@ -96,10 +96,7 @@ describe('Create case', () => {
         </Router>
       </TestProviders>
     );
-    wrapper
-      .find(`[data-test-subj="create-case-submit"]`)
-      .first()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
     await wait();
     expect(postCase).toBeCalledWith(sampleData);
   });
@@ -112,10 +109,7 @@ describe('Create case', () => {
         </Router>
       </TestProviders>
     );
-    wrapper
-      .find(`[data-test-subj="create-case-cancel"]`)
-      .first()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
     expect(mockHistory.replace.mock.calls[0][0].pathname).toEqual(`/${SiemPageName.case}`);
   });
   it('should redirect to new case when caseData is there', () => {
@@ -153,10 +147,7 @@ describe('Create case', () => {
       </TestProviders>
     );
     expect(
-      wrapper
-        .find(`[data-test-subj="caseTags"] [data-test-subj="input"]`)
-        .first()
-        .prop('options')
+      wrapper.find(`[data-test-subj="caseTags"] [data-test-subj="input"]`).first().prop('options')
     ).toEqual([{ label: 'coke' }, { label: 'pepsi' }, { label: 'rad' }, { label: 'dude' }]);
   });
 });

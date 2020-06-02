@@ -11,12 +11,13 @@ import {
   EuiLoadingSpinner,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
-import { FeatureGeometry, FeatureProperty, MapToolTipProps } from '../types';
+import { FeatureGeometry, MapToolTipProps } from '../types';
 import { ToolTipFooter } from './tooltip_footer';
 import { LineToolTipContent } from './line_tool_tip_content';
 import { PointToolTipContent } from './point_tool_tip_content';
 import { Loader } from '../../../../common/components/loader';
 import * as i18n from '../translations';
+import { ITooltipProperty } from '../../../../../../maps/public';
 
 export const MapToolTipComponent = ({
   addFilters,
@@ -31,7 +32,7 @@ export const MapToolTipComponent = ({
   const [isLoadingNextFeature, setIsLoadingNextFeature] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const [featureIndex, setFeatureIndex] = useState<number>(0);
-  const [featureProps, setFeatureProps] = useState<FeatureProperty[]>([]);
+  const [featureProps, setFeatureProps] = useState<ITooltipProperty[]>([]);
   const [featureGeometry, setFeatureGeometry] = useState<FeatureGeometry | null>(null);
   const [, setLayerName] = useState<string>('');
 
@@ -64,7 +65,7 @@ export const MapToolTipComponent = ({
             getLayerName(layerId),
           ]);
 
-          setFeatureProps((featureProperties as unknown) as FeatureProperty[]);
+          setFeatureProps(featureProperties);
           setFeatureGeometry(featureGeo);
           setLayerName(layerNameString);
         } catch (e) {
@@ -80,7 +81,7 @@ export const MapToolTipComponent = ({
   }, [
     featureIndex,
     features
-      .map(f => `${f.id}-${f.layerId}`)
+      .map((f) => `${f.id}-${f.layerId}`)
       .sort()
       .join(),
   ]);

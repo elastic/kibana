@@ -30,7 +30,6 @@ describe('DataProviders', () => {
           onDataProviderRemoved={jest.fn()}
           onToggleDataProviderEnabled={jest.fn()}
           onToggleDataProviderExcluded={jest.fn()}
-          show={true}
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -49,12 +48,11 @@ describe('DataProviders', () => {
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
-            show={true}
           />
         </TestProviders>
       );
 
-      dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
+      dropMessage.forEach((word) => expect(wrapper.text()).toContain(word));
     });
 
     test('it renders the data providers', () => {
@@ -68,12 +66,11 @@ describe('DataProviders', () => {
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
-            show={true}
           />
         </TestProviders>
       );
 
-      mockDataProviders.forEach(dataProvider =>
+      mockDataProviders.forEach((dataProvider) =>
         expect(wrapper.text()).toContain(
           dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value
         )

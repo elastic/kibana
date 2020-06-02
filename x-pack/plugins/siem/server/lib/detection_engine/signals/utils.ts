@@ -7,7 +7,7 @@ import { createHash } from 'crypto';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 
-import { parseDuration } from '../../../../../alerting/server';
+import { parseDuration } from '../../../../../alerts/server';
 import { BulkResponse, BulkResponseErrorAggregation } from './types';
 
 export const generateId = (
@@ -15,10 +15,7 @@ export const generateId = (
   docId: string,
   version: string,
   ruleId: string
-): string =>
-  createHash('sha256')
-    .update(docIndex.concat(docId, version, ruleId))
-    .digest('hex');
+): string => createHash('sha256').update(docIndex.concat(docId, version, ruleId)).digest('hex');
 
 export const parseInterval = (intervalString: string): moment.Duration | null => {
   try {

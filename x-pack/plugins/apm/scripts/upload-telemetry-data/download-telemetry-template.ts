@@ -14,8 +14,8 @@ export async function downloadTelemetryTemplate(octokit: Octokit) {
     path: 'config/templates/xpack-phone-home.json',
     // @ts-ignore
     mediaType: {
-      format: 'application/vnd.github.VERSION.raw'
-    }
+      format: 'application/vnd.github.VERSION.raw',
+    },
   });
 
   if (Array.isArray(file.data)) {

@@ -15,7 +15,7 @@ describe('RangePicker', () => {
     test('it renders the ranges', () => {
       const wrapper = mount(<RangePicker selected={'1 Week'} onRangeSelected={jest.fn()} />);
 
-      Ranges.forEach(range => {
+      Ranges.forEach((range) => {
         expect(wrapper.text()).toContain(range);
       });
     });

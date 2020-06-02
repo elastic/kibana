@@ -37,20 +37,20 @@ const getShortcuts = (
 
   // handle shift modifier
   if (modifiers.includes('shift')) {
-    macShortcuts = macShortcuts.map(shortcut => `shift+${shortcut}`);
-    shortcuts = shortcuts.map(shortcut => `shift+${shortcut}`);
+    macShortcuts = macShortcuts.map((shortcut) => `shift+${shortcut}`);
+    shortcuts = shortcuts.map((shortcut) => `shift+${shortcut}`);
   }
 
   // handle alt modifier
   if (modifiers.includes('alt') || modifiers.includes('option')) {
-    macShortcuts = macShortcuts.map(shortcut => `option+${shortcut}`);
-    shortcuts = shortcuts.map(shortcut => `alt+${shortcut}`);
+    macShortcuts = macShortcuts.map((shortcut) => `option+${shortcut}`);
+    shortcuts = shortcuts.map((shortcut) => `alt+${shortcut}`);
   }
 
   // handle ctrl modifier
   if (modifiers.includes('ctrl') || modifiers.includes('command')) {
-    macShortcuts = macShortcuts.map(shortcut => `command+${shortcut}`);
-    shortcuts = shortcuts.map(shortcut => `ctrl+${shortcut}`);
+    macShortcuts = macShortcuts.map((shortcut) => `command+${shortcut}`);
+    shortcuts = shortcuts.map((shortcut) => `ctrl+${shortcut}`);
   }
 
   return {

@@ -52,7 +52,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickKibanaIndexPatterns() {
       log.debug('clickKibanaIndexPatterns link');
-      await testSubjects.click('index_patterns');
+      await testSubjects.click('indexPatterns');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -220,21 +220,21 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getFieldNames() {
       const fieldNameCells = await testSubjects.findAll('editIndexPattern > indexedFieldName');
-      return await mapAsync(fieldNameCells, async cell => {
+      return await mapAsync(fieldNameCells, async (cell) => {
         return (await cell.getVisibleText()).trim();
       });
     }
 
     async getFieldTypes() {
       const fieldNameCells = await testSubjects.findAll('editIndexPattern > indexedFieldType');
-      return await mapAsync(fieldNameCells, async cell => {
+      return await mapAsync(fieldNameCells, async (cell) => {
         return (await cell.getVisibleText()).trim();
       });
     }
 
     async getScriptedFieldLangs() {
       const fieldNameCells = await testSubjects.findAll('editIndexPattern > scriptedFieldLang');
-      return await mapAsync(fieldNameCells, async cell => {
+      return await mapAsync(fieldNameCells, async (cell) => {
         return (await cell.getVisibleText()).trim();
       });
     }
@@ -345,7 +345,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await retry.try(async () => {
         const currentUrl = await browser.getCurrentUrl();
         log.info('currentUrl', currentUrl);
-        if (!currentUrl.match(/index_patterns\/.+\?/)) {
+        if (!currentUrl.match(/indexPatterns\/.+\?/)) {
           throw new Error('Index pattern not created');
         } else {
           log.debug('Index pattern created: ' + currentUrl);
@@ -699,7 +699,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getSavedObjectElementsInTable() {
       const rows = await testSubjects.findAll('~savedObjectsTableRow');
-      return mapAsync(rows, async row => {
+      return mapAsync(rows, async (row) => {
         const checkbox = await row.findByCssSelector('[data-test-subj*="checkboxSelectRow"]');
         // return the object type aria-label="index patterns"
         const objectType = await row.findByTestSubject('objectType');
@@ -740,7 +740,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getRelationshipFlyout() {
       const rows = await testSubjects.findAll('relationshipsTableRow');
-      return mapAsync(rows, async row => {
+      return mapAsync(rows, async (row) => {
         const objectType = await row.findByTestSubject('relationshipsObjectType');
         const relationship = await row.findByTestSubject('directRelationship');
         const titleElement = await row.findByTestSubject('relationshipsTitle');

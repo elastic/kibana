@@ -63,12 +63,7 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="search-row"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="search-row"]').first().exists()).toBe(true);
   });
 
   test('it renders the timelines table', () => {
@@ -79,12 +74,7 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="timelines-table"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="timelines-table"]').first().exists()).toBe(true);
   });
 
   test('it shows the delete action columns when onDeleteSelected and deleteTimelines are specified', () => {
@@ -174,12 +164,7 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="selectable-query-text"]')
-        .first()
-        .text()
-    ).toEqual('');
+    expect(wrapper.find('[data-test-subj="selectable-query-text"]').first().text()).toEqual('');
   });
 
   test('it renders the expected message when the query just has spaces', () => {
@@ -193,12 +178,7 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="selectable-query-text"]')
-        .first()
-        .text()
-    ).toEqual('');
+    expect(wrapper.find('[data-test-subj="selectable-query-text"]').first().text()).toEqual('');
   });
 
   test('it echos the query when the query has non-whitespace characters', () => {
@@ -212,12 +192,9 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="selectable-query-text"]')
-        .first()
-        .text()
-    ).toContain('Would you like to go to Denver?');
+    expect(wrapper.find('[data-test-subj="selectable-query-text"]').first().text()).toContain(
+      'Would you like to go to Denver?'
+    );
   });
 
   test('trims whitespace from the ends of the query', () => {
@@ -231,12 +208,9 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="selectable-query-text"]')
-        .first()
-        .text()
-    ).toContain('Is it starting to feel cramped in here?');
+    expect(wrapper.find('[data-test-subj="selectable-query-text"]').first().text()).toContain(
+      'Is it starting to feel cramped in here?'
+    );
   });
 
   test('it renders the expected message when the query is an empty string', () => {
@@ -250,12 +224,9 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="query-message"]')
-        .first()
-        .text()
-    ).toContain(`Showing: ${mockResults.length} timelines `);
+    expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
+      `Showing: ${mockResults.length} timelines `
+    );
   });
 
   test('it renders the expected message when the query just has whitespace', () => {
@@ -269,12 +240,9 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="query-message"]')
-        .first()
-        .text()
-    ).toContain(`Showing: ${mockResults.length} timelines `);
+    expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
+      `Showing: ${mockResults.length} timelines `
+    );
   });
 
   test('it includes the word "with" when the query has non-whitespace characters', () => {
@@ -288,11 +256,8 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="query-message"]')
-        .first()
-        .text()
-    ).toContain(`Showing: ${mockResults.length} timelines with "How was your day?"`);
+    expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
+      `Showing: ${mockResults.length} timelines with "How was your day?"`
+    );
   });
 });

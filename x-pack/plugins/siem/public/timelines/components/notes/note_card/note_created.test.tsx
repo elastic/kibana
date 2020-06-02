@@ -24,11 +24,6 @@ describe('NoteCreated', () => {
   test('it renders a humanized date when the note was created', () => {
     const wrapper = mountWithIntl(<NoteCreated created={date.toDate()} />);
 
-    expect(
-      wrapper
-        .find('[data-test-subj="note-created"]')
-        .first()
-        .exists()
-    ).toEqual(true);
+    expect(wrapper.find('[data-test-subj="note-created"]').first().exists()).toEqual(true);
   });
 });

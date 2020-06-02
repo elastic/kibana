@@ -73,7 +73,7 @@ describe('useRule', () => {
   test('fetch a new rule', async () => {
     const spyOnfetchRuleById = jest.spyOn(api, 'fetchRuleById');
     await act(async () => {
-      const { rerender, waitForNextUpdate } = renderHook<string, ReturnRule>(id => useRule(id), {
+      const { rerender, waitForNextUpdate } = renderHook<string, ReturnRule>((id) => useRule(id), {
         initialProps: 'myOwnRuleID',
       });
       await waitForNextUpdate();

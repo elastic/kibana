@@ -50,12 +50,9 @@ describe('Table Helpers', () => {
         displayCount: 0,
       });
       const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
-      expect(
-        wrapper
-          .find('[data-test-subj="draggable-content-attrName"]')
-          .first()
-          .text()
-      ).toBe('(Empty String)');
+      expect(wrapper.find('[data-test-subj="draggable-content-attrName"]').first().text()).toBe(
+        '(Empty String)'
+      );
     });
 
     test('it returns empty value when rowItem is null', () => {
@@ -79,12 +76,9 @@ describe('Table Helpers', () => {
         render: renderer,
       });
       const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
-      expect(
-        wrapper
-          .find('[data-test-subj="draggable-content-attrName"]')
-          .first()
-          .text()
-      ).toBe('Hi item1 renderer');
+      expect(wrapper.find('[data-test-subj="draggable-content-attrName"]').first().text()).toBe(
+        'Hi item1 renderer'
+      );
     });
   });
 
@@ -117,12 +111,9 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
       });
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(
-        wrapper
-          .find('[data-test-subj="draggable-content-attrName"]')
-          .first()
-          .text()
-      ).toBe('(Empty String)');
+      expect(wrapper.find('[data-test-subj="draggable-content-attrName"]').first().text()).toBe(
+        '(Empty String)'
+      );
     });
 
     test('it returns empty value when rowItems is null', () => {
@@ -179,12 +170,9 @@ describe('Table Helpers', () => {
         render: renderer,
       });
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(
-        wrapper
-          .find('[data-test-subj="draggable-content-attrName"]')
-          .first()
-          .text()
-      ).toBe('Hi item1 renderer');
+      expect(wrapper.find('[data-test-subj="draggable-content-attrName"]').first().text()).toBe(
+        'Hi item1 renderer'
+      );
     });
   });
 

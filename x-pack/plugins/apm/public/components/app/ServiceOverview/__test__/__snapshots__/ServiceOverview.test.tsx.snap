@@ -79,7 +79,7 @@ NodeList [
                    
                   <a
                     class="euiLink euiLink--primary"
-                    href="/basepath/app/kibana#/management/elasticsearch/upgrade_assistant"
+                    href="/basepath/app/kibana#/management/stack/upgrade_assistant"
                     rel="noreferrer"
                   >
                     Learn more by visiting the Kibana Upgrade Assistant

@@ -751,7 +751,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         indexPatterns: {
           1: {
             ...state.indexPatterns['1'],
-            fields: state.indexPatterns['1'].fields.filter(field => field.name !== 'memory'),
+            fields: state.indexPatterns['1'].fields.filter((field) => field.name !== 'memory'),
           },
         },
       };
@@ -865,7 +865,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       expect(options![0]['data-test-subj']).not.toContain('Incompatible');
 
-      options![1].options!.map(operation =>
+      options![1].options!.map((operation) =>
         expect(operation['data-test-subj']).toContain('Incompatible')
       );
     });
@@ -950,10 +950,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
       );
 
       act(() => {
-        wrapper
-          .find('[data-test-subj="lns-indexPatternDimension-min"]')
-          .first()
-          .prop('onClick')!({} as React.MouseEvent<{}, MouseEvent>);
+        wrapper.find('[data-test-subj="lns-indexPatternDimension-min"]').first().prop('onClick')!(
+          {} as React.MouseEvent<{}, MouseEvent>
+        );
       });
 
       expect(changeColumn).toHaveBeenCalledWith({

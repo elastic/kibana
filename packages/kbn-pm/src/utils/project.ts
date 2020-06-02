@@ -229,10 +229,10 @@ export class Project {
     // check for any cross-project dependency
     for (const name of Object.keys(workspacesInfo)) {
       const workspace = workspacesInfo[name];
-      workspace.workspaceDependencies.forEach(w => unusedWorkspaces.delete(w));
+      workspace.workspaceDependencies.forEach((w) => unusedWorkspaces.delete(w));
     }
 
-    unusedWorkspaces.forEach(name => {
+    unusedWorkspaces.forEach((name) => {
       const { dependencies, devDependencies } = this.json;
       const nodeModulesPath = Path.resolve(this.nodeModulesLocation, name);
       const isDependency = dependencies && dependencies.hasOwnProperty(name);

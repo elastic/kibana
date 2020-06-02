@@ -30,10 +30,7 @@ export const LocalizedDateTooltip = React.memo<{
           />
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="with-day-of-week" grow={false}>
-          {moment
-            .utc(date)
-            .local()
-            .format('llll')}
+          {moment.utc(date).local().format('llll')}
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="with-time-zone-offset-in-hours" grow={false}>
           {moment(date).format()}

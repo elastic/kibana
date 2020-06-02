@@ -7,35 +7,24 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { LineToolTipContentComponent } from './line_tool_tip_content';
-import { FeatureProperty } from '../types';
 import {
   SUM_OF_CLIENT_BYTES,
   SUM_OF_DESTINATION_BYTES,
   SUM_OF_SERVER_BYTES,
   SUM_OF_SOURCE_BYTES,
 } from '../map_config';
+import { ITooltipProperty } from '../../../../../../maps/public';
+import { TooltipProperty } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
 
 describe('LineToolTipContent', () => {
-  const mockFeatureProps: FeatureProperty[] = [
-    {
-      _propertyKey: SUM_OF_DESTINATION_BYTES,
-      _rawValue: 'testPropValue',
-    },
-    {
-      _propertyKey: SUM_OF_SOURCE_BYTES,
-      _rawValue: 'testPropValue',
-    },
+  const mockFeatureProps: ITooltipProperty[] = [
+    new TooltipProperty(SUM_OF_DESTINATION_BYTES, SUM_OF_DESTINATION_BYTES, 'testPropValue'),
+    new TooltipProperty(SUM_OF_SOURCE_BYTES, SUM_OF_SOURCE_BYTES, 'testPropValue'),
   ];
 
-  const mockClientServerFeatureProps: FeatureProperty[] = [
-    {
-      _propertyKey: SUM_OF_SERVER_BYTES,
-      _rawValue: 'testPropValue',
-    },
-    {
-      _propertyKey: SUM_OF_CLIENT_BYTES,
-      _rawValue: 'testPropValue',
-    },
+  const mockClientServerFeatureProps: ITooltipProperty[] = [
+    new TooltipProperty(SUM_OF_SERVER_BYTES, SUM_OF_SERVER_BYTES, 'testPropValue'),
+    new TooltipProperty(SUM_OF_CLIENT_BYTES, SUM_OF_CLIENT_BYTES, 'testPropValue'),
   ];
 
   test('renders correctly against snapshot', () => {

@@ -58,7 +58,7 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
   {
     field: `node.${NetworkHttpFields.path}`,
     name: i18n.PATH,
-    render: path =>
+    render: (path) =>
       path != null
         ? getRowItemDraggable({
             attrName: 'url.path',
@@ -107,7 +107,7 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
     field: `node.${NetworkHttpFields.requestCount}`,
     name: i18n.REQUESTS,
     sortable: true,
-    render: requestCount => {
+    render: (requestCount) => {
       if (requestCount != null) {
         return numeral(requestCount).format('0,000');
       } else {

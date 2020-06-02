@@ -40,7 +40,7 @@ export const useGetActionLicense = (): ActionLicenseState => {
         const response = await getActionLicense(abortCtrl.signal);
         if (!didCancel) {
           setActionLicensesState({
-            actionLicense: response.find(l => l.id === '.servicenow') ?? null,
+            actionLicense: response.find((l) => l.id === '.servicenow') ?? null,
             isLoading: false,
             isError: false,
           });

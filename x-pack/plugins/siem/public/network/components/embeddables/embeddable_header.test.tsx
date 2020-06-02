@@ -24,12 +24,7 @@ describe('EmbeddableHeader', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-embeddable-title"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="header-embeddable-title"]').first().exists()).toBe(true);
   });
 
   test('it renders supplements when children provided', () => {
@@ -41,12 +36,9 @@ describe('EmbeddableHeader', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-embeddable-supplements"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="header-embeddable-supplements"]').first().exists()).toBe(
+      true
+    );
   });
 
   test('it DOES NOT render supplements when children not provided', () => {
@@ -56,11 +48,8 @@ describe('EmbeddableHeader', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-embeddable-supplements"]')
-        .first()
-        .exists()
-    ).toBe(false);
+    expect(wrapper.find('[data-test-subj="header-embeddable-supplements"]').first().exists()).toBe(
+      false
+    );
   });
 });

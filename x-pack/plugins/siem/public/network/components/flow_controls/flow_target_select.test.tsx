@@ -34,10 +34,7 @@ describe('FlowTargetSelect Component', () => {
   test('selecting destination from the type drop down', () => {
     const wrapper = mount(<FlowTargetSelect {...mockProps} />);
 
-    wrapper
-      .find('button')
-      .first()
-      .simulate('click');
+    wrapper.find('button').first().simulate('click');
 
     wrapper.update();
 
@@ -54,10 +51,7 @@ describe('FlowTargetSelect Component', () => {
   test('when selectedDirection=unidirectional only source/destination are options', () => {
     const wrapper = mount(<FlowTargetSelect {...mockProps} />);
 
-    wrapper
-      .find('button')
-      .first()
-      .simulate('click');
+    wrapper.find('button').first().simulate('click');
 
     wrapper.update();
 
@@ -81,10 +75,7 @@ describe('FlowTargetSelect Component', () => {
 
     const wrapper = mount(<FlowTargetSelect {...bidirectionalMock} />);
 
-    wrapper
-      .find('button')
-      .first()
-      .simulate('click');
+    wrapper.find('button').first().simulate('click');
 
     wrapper.update();
 

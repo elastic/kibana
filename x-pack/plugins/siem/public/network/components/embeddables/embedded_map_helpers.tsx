@@ -109,6 +109,7 @@ export const createEmbeddable = async (
 
   if (!isErrorEmbeddable(embeddableObject)) {
     embeddableObject.setRenderTooltipContent(renderTooltipContent);
+    // @ts-ignore
     await embeddableObject.setLayerList(getLayerList(indexPatterns));
   }
 
@@ -137,8 +138,8 @@ export const findMatchingIndexPatterns = ({
   siemDefaultIndices: string[];
 }): IndexPatternSavedObject[] => {
   try {
-    return kibanaIndexPatterns.filter(kip =>
-      siemDefaultIndices.some(sdi => minimatch(sdi, kip.attributes.title))
+    return kibanaIndexPatterns.filter((kip) =>
+      siemDefaultIndices.some((sdi) => minimatch(sdi, kip.attributes.title))
     );
   } catch {
     return [];

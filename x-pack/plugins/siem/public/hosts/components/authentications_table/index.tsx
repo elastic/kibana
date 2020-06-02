@@ -84,7 +84,7 @@ const AuthenticationTableComponent = React.memo<AuthenticationTableProps>(
     updateTableLimit,
   }) => {
     const updateLimitPagination = useCallback(
-      newLimit =>
+      (newLimit) =>
         updateTableLimit({
           hostsType: type,
           limit: newLimit,
@@ -94,7 +94,7 @@ const AuthenticationTableComponent = React.memo<AuthenticationTableProps>(
     );
 
     const updateActivePage = useCallback(
-      newPage =>
+      (newPage) =>
         updateTableActivePage({
           activePage: newPage,
           hostsType: type,
@@ -262,7 +262,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
             : null,
         attrName: 'source.ip',
         idPrefix: `authentications-table-${node._id}-lastSuccessSource`,
-        render: item => <IPDetailsLink ip={item} />,
+        render: (item) => <IPDetailsLink ip={item} />,
       }),
   },
   {
@@ -279,7 +279,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
             : null,
         attrName: 'host.name',
         idPrefix: `authentications-table-${node._id}-lastSuccessfulDestination`,
-        render: item => <HostDetailsLink hostName={item} />,
+        render: (item) => <HostDetailsLink hostName={item} />,
       }),
   },
   {
@@ -307,7 +307,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
             : null,
         attrName: 'source.ip',
         idPrefix: `authentications-table-${node._id}-lastFailureSource`,
-        render: item => <IPDetailsLink ip={item} />,
+        render: (item) => <IPDetailsLink ip={item} />,
       }),
   },
   {
@@ -324,7 +324,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
             : null,
         attrName: 'host.name',
         idPrefix: `authentications-table-${node._id}-lastFailureDestination`,
-        render: item => <HostDetailsLink hostName={item} />,
+        render: (item) => <HostDetailsLink hostName={item} />,
       }),
   },
 ];
@@ -338,7 +338,7 @@ export const getAuthenticationColumnsCurated = (
   if (pageType === hostsModel.HostsType.details) {
     return [i18n.LAST_FAILED_DESTINATION, i18n.LAST_SUCCESSFUL_DESTINATION].reduce((acc, name) => {
       acc.splice(
-        acc.findIndex(column => column.name === name),
+        acc.findIndex((column) => column.name === name),
         1
       );
       return acc;

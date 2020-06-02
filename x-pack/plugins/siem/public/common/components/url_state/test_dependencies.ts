@@ -54,7 +54,7 @@ const defaultLocation = {
 };
 
 const mockDispatch = jest.fn();
-mockDispatch.mockImplementation(fn => fn);
+mockDispatch.mockImplementation((fn) => fn);
 
 export const mockHistory = {
   action: pop,

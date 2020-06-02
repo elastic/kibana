@@ -32,7 +32,7 @@ interface ValidationResults {
 
 const StyledEuiAccordion = styled(EuiAccordion)`
   .ingest-active-button {
-    color: ${props => props.theme.eui.euiColorPrimary};
+    color: ${(props) => props.theme.eui.euiColorPrimary};
   }
 `;
 
@@ -143,7 +143,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
         <EuiFieldText
           fullWidth
           value={agentConfig[name]}
-          onChange={e => updateAgentConfig({ [name]: e.target.value })}
+          onChange={(e) => updateAgentConfig({ [name]: e.target.value })}
           isInvalid={Boolean(touchedFields[name] && validation[name])}
           onBlur={() => setTouchedFields({ ...touchedFields, [name]: true })}
           placeholder={placeholder}
@@ -202,7 +202,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
                 onCreateOption={(value: string) => {
                   updateAgentConfig({ namespace: value });
                 }}
-                onChange={selectedOptions => {
+                onChange={(selectedOptions) => {
                   updateAgentConfig({
                     namespace: (selectedOptions.length ? selectedOptions[0] : '') as string,
                   });
@@ -254,7 +254,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
             },
             { logs: false, metrics: false }
           )}
-          onChange={id => {
+          onChange={(id) => {
             if (id !== 'logs' && id !== 'metrics') {
               return;
             }
@@ -265,7 +265,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
             const previousValues = agentConfig.monitoring_enabled || [];
             updateAgentConfig({
               monitoring_enabled: hasLogs
-                ? previousValues.filter(type => type !== id)
+                ? previousValues.filter((type) => type !== id)
                 : [...previousValues, id],
             });
           }}
@@ -289,7 +289,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
               />
               <EuiSpacer size="s" />
               <AgentConfigDeleteProvider>
-                {deleteAgentConfigPrompt => {
+                {(deleteAgentConfigPrompt) => {
                   return (
                     <EuiButton
                       color="danger"

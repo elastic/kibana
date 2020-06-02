@@ -16,3 +16,17 @@ export const chromium = {
   paths: chromiumDefinition.paths,
   createDriverFactory: chromiumDefinition.createDriverFactory,
 };
+
+export interface BrowserDownload {
+  paths: {
+    archivesPath: string;
+    baseUrl: string;
+    packages: Array<{
+      archiveChecksum: string;
+      archiveFilename: string;
+      binaryChecksum: string;
+      binaryRelativePath: string;
+      platforms: string[];
+    }>;
+  };
+}

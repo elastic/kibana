@@ -7,18 +7,18 @@
 import { i18n } from '@kbn/i18n';
 import Hapi from 'hapi';
 import { IUiSettingsClient, KibanaRequest } from '../../../../../../../src/core/server';
-import { CSV_JOB_TYPE, CSV_BOM_CHARS } from '../../../common/constants';
-import { ReportingCore } from '../../../server/core';
-import { cryptoFactory } from '../../../server/lib';
+import { CSV_BOM_CHARS, CSV_JOB_TYPE } from '../../../common/constants';
+import { ReportingCore } from '../../../server';
+import { cryptoFactory, LevelLogger } from '../../../server/lib';
 import { getFieldFormats } from '../../../server/services';
-import { ESQueueWorkerExecuteFn, ExecuteJobFactory, Logger } from '../../../types';
+import { ESQueueWorkerExecuteFn, ExecuteJobFactory } from '../../../server/types';
 import { JobDocPayloadDiscoverCsv } from '../types';
 import { fieldFormatMapFactory } from './lib/field_format_map';
 import { createGenerateCsv } from './lib/generate_csv';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadDiscoverCsv
->> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
+>> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: LevelLogger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job']);
@@ -81,7 +81,7 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
       raw: { req: { url: '/' } },
     } as Hapi.Request);
 
-    const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(fakeRequest);
+    const { callAsCurrentUser } = elasticsearch.legacy.client.asScoped(fakeRequest);
     const callEndpoint = (endpoint: string, clientParams = {}, options = {}) =>
       callAsCurrentUser(endpoint, clientParams, options);
 

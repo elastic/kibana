@@ -74,7 +74,7 @@ export const BarChartBaseComponent = ({
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
       <Settings {...settings} showLegend={settings.showLegend && !forceHiddenLegend} />
-      {data.map(series => {
+      {data.map((series) => {
         const barSeriesKey = series.key;
         return checkIfAllTheDataInTheSeriesAreValid(series) ? (
           <BarSeries

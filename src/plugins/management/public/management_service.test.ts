@@ -18,6 +18,7 @@
  */
 
 import { ManagementService } from './management_service';
+import { ManagementSectionId } from './types';
 import { coreMock } from '../../../core/public/mocks';
 import { npSetup } from '../../../legacy/ui/public/new_platform/__mocks__';
 
@@ -29,27 +30,11 @@ test('Provides default sections', () => {
     () => {},
     coreMock.createSetup().getStartServices
   );
-  expect(service.getAllSections().length).toEqual(2);
-  expect(service.getSection('kibana')).not.toBeUndefined();
-  expect(service.getSection('elasticsearch')).not.toBeUndefined();
-});
-
-test('Register section, enable and disable', () => {
-  const service = new ManagementService().setup(
-    npSetup.plugins.kibanaLegacy,
-    () => {},
-    coreMock.createSetup().getStartServices
-  );
-  const testSection = service.register({ id: 'test-section', title: 'Test Section' });
-  expect(service.getSection('test-section')).not.toBeUndefined();
-
-  const testApp = testSection.registerApp({
-    id: 'test-app',
-    title: 'Test App',
-    mount: () => () => {},
-  });
-  expect(testSection.getApp('test-app')).not.toBeUndefined();
-  expect(service.getSectionsEnabled().length).toEqual(1);
-  testApp.disable();
-  expect(service.getSectionsEnabled().length).toEqual(0);
+  expect(service.getAllSections().length).toEqual(6);
+  expect(service.getSection(ManagementSectionId.Ingest)).toBeDefined();
+  expect(service.getSection(ManagementSectionId.Data)).toBeDefined();
+  expect(service.getSection(ManagementSectionId.InsightsAndAlerting)).toBeDefined();
+  expect(service.getSection(ManagementSectionId.Security)).toBeDefined();
+  expect(service.getSection(ManagementSectionId.Kibana)).toBeDefined();
+  expect(service.getSection(ManagementSectionId.Stack)).toBeDefined();
 });

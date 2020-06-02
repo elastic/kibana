@@ -85,7 +85,7 @@ export const useDeleteCases = (): UseDeleteCase => {
     const deleteData = async () => {
       try {
         dispatch({ type: 'FETCH_INIT' });
-        const caseIds = cases.map(theCase => theCase.id);
+        const caseIds = cases.map((theCase) => theCase.id);
         await deleteCases(caseIds, abortCtrl.signal);
         if (!cancel) {
           dispatch({ type: 'FETCH_SUCCESS', payload: true });

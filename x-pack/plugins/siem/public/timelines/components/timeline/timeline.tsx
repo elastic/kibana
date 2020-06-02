@@ -155,7 +155,7 @@ export const TimelineComponent: React.FC<Props> = ({
     end,
   });
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-  const timelineQueryFields = useMemo(() => columnsHeader.map(c => c.id), [columnsHeader]);
+  const timelineQueryFields = useMemo(() => columnsHeader.map((c) => c.id), [columnsHeader]);
   const timelineQuerySortField = useMemo(
     () => ({
       sortFieldId: sort.columnId,

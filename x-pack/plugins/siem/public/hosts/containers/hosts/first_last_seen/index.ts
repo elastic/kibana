@@ -59,13 +59,13 @@ export function useFirstLastSeenHostQuery<TCache = object>(
         },
       })
       .then(
-        result => {
+        (result) => {
           updateLoading(false);
           updateFirstSeen(get('data.source.HostFirstLastSeen.firstSeen', result));
           updateLastSeen(get('data.source.HostFirstLastSeen.lastSeen', result));
           updateErrorMessage(null);
         },
-        error => {
+        (error) => {
           updateLoading(false);
           updateFirstSeen(null);
           updateLastSeen(null);

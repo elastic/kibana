@@ -13,7 +13,7 @@ import {
 } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('Network DNS', () => {
@@ -48,11 +48,11 @@ export default function({ getService }: FtrProviderContext) {
               },
             },
           })
-          .then(resp => {
+          .then((resp) => {
             const networkDns = resp.data.source.NetworkDns;
             expect(networkDns.edges.length).to.be(10);
             expect(networkDns.totalCount).to.be(44);
-            expect(networkDns.edges.map(i => i.node.dnsName).join(',')).to.be(
+            expect(networkDns.edges.map((i) => i.node.dnsName).join(',')).to.be(
               'aaplimg.com,adgrx.com,akadns.net,akamaiedge.net,amazonaws.com,cbsistatic.com,cdn-apple.com,connman.net,crowbird.com,d1oxlq5h9kq8q5.cloudfront.net'
             );
             expect(networkDns.pageInfo.fakeTotalCount).to.equal(30);
@@ -84,11 +84,11 @@ export default function({ getService }: FtrProviderContext) {
               },
             },
           })
-          .then(resp => {
+          .then((resp) => {
             const networkDns = resp.data.source.NetworkDns;
             expect(networkDns.edges.length).to.be(10);
             expect(networkDns.totalCount).to.be(44);
-            expect(networkDns.edges.map(i => i.node.dnsName).join(',')).to.be(
+            expect(networkDns.edges.map((i) => i.node.dnsName).join(',')).to.be(
               'nflxvideo.net,apple.com,netflix.com,samsungcloudsolution.com,samsungqbe.com,samsungelectronics.com,internetat.tv,samsungcloudsolution.net,samsungosp.com,cbsnews.com'
             );
             expect(networkDns.pageInfo.fakeTotalCount).to.equal(30);

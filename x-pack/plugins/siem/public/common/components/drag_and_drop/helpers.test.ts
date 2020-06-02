@@ -5,8 +5,12 @@
  */
 
 import { omit } from 'lodash/fp';
+import { DropResult } from 'react-beautiful-dnd';
+
+import { IdToDataProvider } from '../../store/drag_and_drop/model';
 
 import {
+  addProviderToTimeline,
   allowTopN,
   destinationIsTimelineButton,
   destinationIsTimelineColumns,
@@ -28,10 +32,15 @@ import {
   getDroppableId,
   getFieldIdFromDraggable,
   getProviderIdFromDraggable,
+  getTimelineIdFromColumnDroppableId,
+  getTimelineProviderDraggableId,
+  getTimelineProviderDroppableId,
   providerWasDroppedOnTimeline,
   reasonIsDrop,
+  sourceAndDestinationAreSameTimelineProviders,
   sourceIsContent,
   unEscapeFieldId,
+  userIsReArrangingProviders,
 } from './helpers';
 
 const DROPPABLE_ID_TIMELINE_PROVIDERS = `${droppableTimelineProvidersPrefix}timeline`;
@@ -715,6 +724,277 @@ describe('helpers', () => {
           fieldName: 'non-whitelisted',
         })
       ).toBe(false);
+    });
+  });
+
+  describe('getTimelineProviderDroppableId', () => {
+    test('it returns the expected id', () => {
+      expect(
+        getTimelineProviderDroppableId({
+          groupIndex: 1234,
+          timelineId: 'i-hope-you-had-the-time-of-your-life',
+        })
+      ).toEqual('droppableId.timelineProviders.i-hope-you-had-the-time-of-your-life.group.1234');
+    });
+  });
+
+  describe('getTimelineProviderDraggableId', () => {
+    test('it returns the expected id', () => {
+      const dataProviderId =
+        'port-default-draggable-netflow-renderer-timeline-1-Ib4zD3IBbNV0npT21btr-Ib4zD3IBbNV0npT21btr-source_port-57828';
+
+      expect(
+        getTimelineProviderDraggableId({
+          dataProviderId,
+          groupIndex: 1234,
+          timelineId: 'time-to-make-the-doughnuts',
+        })
+      ).toEqual(
+        `draggableId.timelineProviders.time-to-make-the-doughnuts.group.1234.${dataProviderId}`
+      );
+    });
+  });
+
+  describe('sourceAndDestinationAreSameTimelineProviders', () => {
+    test('it returns true when the source and destination droppable IDs exactly match', () => {
+      const result: DropResult = {
+        destination: { droppableId: 'droppableId.timelineProviders.timeline-1.group.0', index: 1 },
+        draggableId:
+          'draggableId.timelineProviders.timeline-1.group.0.port-default-draggable-netflow-renderer-timeline-1-Ib4zD3IBbNV0npT21btr-Ib4zD3IBbNV0npT21btr-source_port-57828',
+        mode: 'FLUID',
+        reason: 'DROP',
+        source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.0' },
+        type: 'DEFAULT',
+      };
+
+      expect(sourceAndDestinationAreSameTimelineProviders(result)).toBe(true);
+    });
+
+    test('it returns true when the source and destination droppable IDs are the same timeline, but different groups', () => {
+      const result: DropResult = {
+        destination: { droppableId: 'droppableId.timelineProviders.timeline-1.group.0', index: 1 },
+        draggableId:
+          'draggableId.timelineProviders.timeline-1.group.0.port-default-draggable-netflow-renderer-timeline-1-Ib4zD3IBbNV0npT21btr-Ib4zD3IBbNV0npT21btr-source_port-57828',
+        mode: 'FLUID',
+        reason: 'DROP',
+        source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.1' },
+        type: 'DEFAULT',
+      };
+
+      expect(sourceAndDestinationAreSameTimelineProviders(result)).toBe(true);
+    });
+
+    test('it returns false when destination is undefined', () => {
+      const result: DropResult = {
+        draggableId:
+          'draggableId.timelineProviders.timeline-1.group.0.port-default-draggable-netflow-renderer-timeline-1-Ib4zD3IBbNV0npT21btr-Ib4zD3IBbNV0npT21btr-source_port-57828',
+        mode: 'FLUID',
+        reason: 'DROP',
+        source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.1' },
+        type: 'DEFAULT',
+      };
+
+      expect(sourceAndDestinationAreSameTimelineProviders(result)).toBe(false);
+    });
+
+    test('it returns false when the source and destination droppable IDs are for different timelines', () => {
+      const result: DropResult = {
+        destination: { droppableId: 'droppableId.timelineProviders.timeline-1.group.0', index: 1 },
+        draggableId:
+          'draggableId.timelineProviders.timeline-1.group.0.port-default-draggable-netflow-renderer-timeline-1-Ib4zD3IBbNV0npT21btr-Ib4zD3IBbNV0npT21btr-source_port-57828',
+        mode: 'FLUID',
+        reason: 'DROP',
+        source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-2.group.0' },
+        type: 'DEFAULT',
+      };
+
+      expect(sourceAndDestinationAreSameTimelineProviders(result)).toBe(false);
+    });
+
+    test('it returns false when the destination is NOT timeline providers', () => {
+      const result: DropResult = {
+        destination: { droppableId: 'droppableId.otherProviders.timeline-1.group.0', index: 1 },
+        draggableId:
+          'draggableId.timelineProviders.timeline-1.group.0.port-default-draggable-netflow-renderer-timeline-1-Ib4zD3IBbNV0npT21btr-Ib4zD3IBbNV0npT21btr-source_port-57828',
+        mode: 'FLUID',
+        reason: 'DROP',
+        source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.0' },
+        type: 'DEFAULT',
+      };
+
+      expect(sourceAndDestinationAreSameTimelineProviders(result)).toBe(false);
+    });
+
+    test('it returns false when the source is NOT timeline providers', () => {
+      const result: DropResult = {
+        destination: { droppableId: 'droppableId.timelineProviders.timeline-1.group.0', index: 1 },
+        draggableId:
+          'draggableId.timelineProviders.timeline-1.group.0.port-default-draggable-netflow-renderer-timeline-1-Ib4zD3IBbNV0npT21btr-Ib4zD3IBbNV0npT21btr-source_port-57828',
+        mode: 'FLUID',
+        reason: 'DROP',
+        source: { index: 0, droppableId: 'droppableId.otherProviders.timeline-1.group.0' },
+        type: 'DEFAULT',
+      };
+
+      expect(sourceAndDestinationAreSameTimelineProviders(result)).toBe(false);
+    });
+  });
+
+  describe('userIsReArrangingProviders', () => {
+    test('it returns true when reason IS DROP and source + destination are the SAME timeline providers', () => {
+      const result: DropResult = {
+        destination: { droppableId: 'droppableId.timelineProviders.timeline-1.group.0', index: 1 },
+        draggableId:
+          'draggableId.timelineProviders.timeline-1.group.0.port-default-draggable-netflow-renderer-timeline-1-Ib4zD3IBbNV0npT21btr-Ib4zD3IBbNV0npT21btr-source_port-57828',
+        mode: 'FLUID',
+        reason: 'DROP',
+        source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.0' },
+        type: 'DEFAULT',
+      };
+
+      expect(userIsReArrangingProviders(result)).toBe(true);
+    });
+
+    test('it returns false when reason IS DROP, but source + destination are NOT the same timeline providers', () => {
+      const result: DropResult = {
+        destination: { droppableId: 'droppableId.otherProviders.timeline-1.group.0', index: 1 },
+        draggableId:
+          'draggableId.timelineProviders.timeline-1.group.0.port-default-draggable-netflow-renderer-timeline-1-Ib4zD3IBbNV0npT21btr-Ib4zD3IBbNV0npT21btr-source_port-57828',
+        mode: 'FLUID',
+        reason: 'DROP',
+        source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.0' },
+        type: 'DEFAULT',
+      };
+
+      expect(userIsReArrangingProviders(result)).toBe(false);
+    });
+
+    test('it returns false when the reason is NOT DROP and source + destination are the SAME timeline providers', () => {
+      const result: DropResult = {
+        destination: { droppableId: 'droppableId.timelineProviders.timeline-1.group.0', index: 1 },
+        draggableId:
+          'draggableId.timelineProviders.timeline-1.group.0.port-default-draggable-netflow-renderer-timeline-1-Ib4zD3IBbNV0npT21btr-Ib4zD3IBbNV0npT21btr-source_port-57828',
+        mode: 'FLUID',
+        reason: 'CANCEL',
+        source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.0' },
+        type: 'DEFAULT',
+      };
+
+      expect(userIsReArrangingProviders(result)).toBe(false);
+    });
+
+    test('it returns false when the reason is NOT DROP and source + destination are NOT the same timeline providers', () => {
+      const result: DropResult = {
+        destination: { droppableId: 'droppableId.otherProviders.timeline-1.group.0', index: 1 },
+        draggableId:
+          'draggableId.timelineProviders.timeline-1.group.0.port-default-draggable-netflow-renderer-timeline-1-Ib4zD3IBbNV0npT21btr-Ib4zD3IBbNV0npT21btr-source_port-57828',
+        mode: 'FLUID',
+        reason: 'CANCEL',
+        source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.0' },
+        type: 'DEFAULT',
+      };
+
+      expect(userIsReArrangingProviders(result)).toBe(false);
+    });
+
+    test('it returns false when reason IS DROP, but destination is undefined', () => {
+      const result: DropResult = {
+        draggableId:
+          'draggableId.timelineProviders.timeline-1.group.0.port-default-draggable-netflow-renderer-timeline-1-Ib4zD3IBbNV0npT21btr-Ib4zD3IBbNV0npT21btr-source_port-57828',
+        mode: 'FLUID',
+        reason: 'DROP',
+        source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.1' },
+        type: 'DEFAULT',
+      };
+
+      expect(userIsReArrangingProviders(result)).toBe(false);
+    });
+  });
+
+  describe('addProviderToTimeline', () => {
+    const result: DropResult = {
+      destination: { droppableId: 'droppableId.timelineProviders.timeline-1', index: 0 },
+      draggableId: 'draggableId.content.hosts-table-hostName-ENDPOINT-W-0-01',
+      mode: 'FLUID',
+      reason: 'DROP',
+      source: { index: 0, droppableId: 'droppableId.content.hosts-table-hostName-ENDPOINT-W-0-01' },
+      type: 'DEFAULT',
+    };
+
+    test('it dispatches the expected UPDATE_PROVIDERS action when the provider to add exists in the `dataProviders` collection of `id -> `DataProvider`', () => {
+      const dispatch = jest.fn();
+      const onAddedToTimeline = jest.fn();
+      const dataProviders: IdToDataProvider = {
+        'hosts-table-hostName-ENDPOINT-W-0-01': {
+          and: [],
+          enabled: true,
+          excluded: false,
+          id: 'hosts-table-hostName-ENDPOINT-W-0-01',
+          kqlQuery: '',
+          name: 'ENDPOINT-W-0-01',
+          queryMatch: { field: 'host.name', value: 'ENDPOINT-W-0-01', operator: ':' },
+        },
+      };
+
+      addProviderToTimeline({
+        activeTimelineDataProviders: [],
+        dataProviders,
+        dispatch,
+        result,
+        timelineId: 'timeline-1',
+        onAddedToTimeline,
+      });
+
+      expect(dispatch).toBeCalledWith({
+        payload: {
+          id: 'timeline-1',
+          providers: [
+            {
+              and: [],
+              enabled: true,
+              excluded: false,
+              id: 'hosts-table-hostName-ENDPOINT-W-0-01',
+              kqlQuery: '',
+              name: 'ENDPOINT-W-0-01',
+              queryMatch: { field: 'host.name', operator: ':', value: 'ENDPOINT-W-0-01' },
+            },
+          ],
+        },
+        type: 'x-pack/siem/local/timeline/UPDATE_PROVIDERS',
+      });
+    });
+
+    test('it dispatches the expected NO_PROVIDER_FOUND action when the provider to add does NOT exist in the `dataProviders` collection of `id -> `DataProvider`', () => {
+      const dispatch = jest.fn();
+      const onAddedToTimeline = jest.fn();
+
+      addProviderToTimeline({
+        activeTimelineDataProviders: [],
+        dataProviders: {}, // <-- the specified data provider ID does not exist in this empty collection
+        dispatch,
+        result,
+        timelineId: 'timeline-1',
+        onAddedToTimeline,
+      });
+
+      expect(dispatch).toBeCalledWith({
+        payload: {
+          id: 'hosts-table-hostName-ENDPOINT-W-0-01',
+        },
+        type: 'x-pack/siem/local/drag_and_drop/NO_PROVIDER_FOUND',
+      });
+    });
+  });
+
+  describe('getTimelineIdFromColumnDroppableId', () => {
+    test('it returns the expected timelineId from a column droppableId', () => {
+      expect(getTimelineIdFromColumnDroppableId(DROPPABLE_ID_TIMELINE_COLUMNS)).toEqual(
+        'timeline-1'
+      );
+    });
+
+    test('it returns an empty string when the droppableId is an empty string', () => {
+      expect(getTimelineIdFromColumnDroppableId('')).toEqual('');
     });
   });
 });

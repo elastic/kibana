@@ -40,12 +40,7 @@ describe('JobsTableComponent', () => {
         onJobStateChange={onJobStateChangeMock}
       />
     );
-    expect(
-      wrapper
-        .find('[data-test-subj="jobs-table-link"]')
-        .first()
-        .props().href
-    ).toEqual(
+    expect(wrapper.find('[data-test-subj="jobs-table-link"]').first().props().href).toEqual(
       '/test/base/path/app/ml#/jobs?mlManagement=(jobId:linux_anomalous_network_activity_ecs)'
     );
   });
@@ -59,12 +54,9 @@ describe('JobsTableComponent', () => {
         onJobStateChange={onJobStateChangeMock}
       />
     );
-    expect(
-      wrapper
-        .find('[data-test-subj="jobs-table-link"]')
-        .first()
-        .props().href
-    ).toEqual('/test/base/path/app/ml#/jobs?mlManagement=(jobId:job%20id%20with%20spaces)');
+    expect(wrapper.find('[data-test-subj="jobs-table-link"]').first().props().href).toEqual(
+      '/test/base/path/app/ml#/jobs?mlManagement=(jobId:job%20id%20with%20spaces)'
+    );
   });
 
   test('should call onJobStateChange when the switch is clicked to be true/open', () => {

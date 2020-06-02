@@ -5,9 +5,9 @@
  */
 
 import sinon from 'sinon';
+import { ReportingConfig, ReportingCore } from '../../../server';
+import { JobDocPayload } from '../../../server/types';
 import { createMockReportingCore } from '../../../test_helpers';
-import { ReportingConfig, ReportingCore } from '../../../server/types';
-import { JobDocPayload } from '../../../types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 import { getConditionalHeaders, getCustomLogo } from './index';
 
@@ -134,10 +134,7 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
 
 describe('config formatting', () => {
   test(`lowercases server.host`, async () => {
-    const mockConfigGet = sinon
-      .stub()
-      .withArgs('server', 'host')
-      .returns('COOL-HOSTNAME');
+    const mockConfigGet = sinon.stub().withArgs('server', 'host').returns('COOL-HOSTNAME');
     mockConfig = getMockConfig(mockConfigGet);
 
     const conditionalHeaders = await getConditionalHeaders({

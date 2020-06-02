@@ -13,7 +13,7 @@ import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_SUBTYPE,
-  SPAN_TYPE
+  SPAN_TYPE,
 } from './elasticsearch_fieldnames';
 
 export interface ServiceConnectionNode extends cytoscape.NodeDataDefinition {
@@ -50,6 +50,6 @@ export const invalidLicenseMessage = i18n.translate(
   'xpack.apm.serviceMap.invalidLicenseMessage',
   {
     defaultMessage:
-      "In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."
+      "In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data.",
   }
 );

@@ -184,12 +184,12 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
     (caseIds: string[]) => {
       handleToggleModal();
       if (caseIds.length === 1) {
-        const singleCase = selectedCases.find(theCase => theCase.id === caseIds[0]);
+        const singleCase = selectedCases.find((theCase) => theCase.id === caseIds[0]);
         if (singleCase) {
           return setDeleteThisCase({ id: singleCase.id, title: singleCase.title });
         }
       }
-      const convertToDeleteCases: DeleteCase[] = caseIds.map(id => ({ id }));
+      const convertToDeleteCases: DeleteCase[] = caseIds.map((id) => ({ id }));
       setDeleteBulk(convertToDeleteCases);
     },
     [selectedCases]

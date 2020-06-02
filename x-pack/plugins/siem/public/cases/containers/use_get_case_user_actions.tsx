@@ -63,7 +63,7 @@ export const getPushedInfo = (
 } => {
   const hasDataToPushForConnector = (connectorId: string) => {
     const userActionsForPushLessServiceUpdates = caseUserActions.filter(
-      mua =>
+      (mua) =>
         (mua.action !== 'push-to-service' &&
           !(mua.action === 'update' && mua.actionField[0] === 'connector_id')) ||
         (mua.action === 'push-to-service' &&
@@ -131,7 +131,7 @@ export const getPushedInfo = (
           (bacc, currentComment) =>
             currentComment.commentIndex > caseServices[key].lastPushIndex
               ? bacc.indexOf(currentComment.commentId) > -1
-                ? [...bacc.filter(e => e !== currentComment.commentId), currentComment.commentId]
+                ? [...bacc.filter((e) => e !== currentComment.commentId), currentComment.commentId]
                 : [...bacc, currentComment.commentId]
               : bacc,
           []
@@ -174,7 +174,7 @@ export const useGetCaseUserActions = (
             // We are removing the first item because it will always be the creation of the case
             // and we do not want it to simplify our life
             const participants = !isEmpty(response)
-              ? uniqBy('actionBy.username', response).map(cau => cau.actionBy)
+              ? uniqBy('actionBy.username', response).map((cau) => cau.actionBy)
               : [];
 
             const caseUserActions = !isEmpty(response) ? response.slice(1) : [];

@@ -23,7 +23,7 @@ export function TableVisController($scope) {
   assign($scope.visParams.sort, uiStateSort);
 
   $scope.sort = $scope.visParams.sort;
-  $scope.$watchCollection('sort', function(newSort) {
+  $scope.$watchCollection('sort', function (newSort) {
     $scope.uiState.set('vis.params.sort', newSort);
   });
 
@@ -32,7 +32,7 @@ export function TableVisController($scope) {
    * - the underlying data changes (esResponse)
    * - one of the view options changes (vis.params)
    */
-  $scope.$watch('renderComplete', function() {
+  $scope.$watch('renderComplete', function () {
     let tableGroups = ($scope.tableGroups = null);
     let hasSomeRows = ($scope.hasSomeRows = null);
 

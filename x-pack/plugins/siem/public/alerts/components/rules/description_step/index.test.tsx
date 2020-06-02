@@ -72,10 +72,7 @@ describe('description_step', () => {
       expect(wrapper).toMatchSnapshot();
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(1);
       expect(
-        wrapper
-          .find('[data-test-subj="singleSplitStepRuleDescriptionList"]')
-          .at(0)
-          .prop('type')
+        wrapper.find('[data-test-subj="singleSplitStepRuleDescriptionList"]').at(0).prop('type')
       ).toEqual('column');
     });
   });

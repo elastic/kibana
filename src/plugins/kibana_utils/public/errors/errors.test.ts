@@ -23,7 +23,7 @@ import { DuplicateField, SavedObjectNotFound, KbnError } from './errors';
 describe('errors', () => {
   const errors = [new DuplicateField('dupfield'), new SavedObjectNotFound('dashboard', '123')];
 
-  errors.forEach(error => {
+  errors.forEach((error) => {
     const className = error.constructor.name;
     it(`${className} has a message`, () => {
       expect(error.message).to.not.be.empty();

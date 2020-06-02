@@ -115,7 +115,7 @@ export const useUpdateCases = (): UseUpdateCases => {
   }, []);
 
   const updateBulkStatus = useCallback((cases: Case[], status: string) => {
-    const updateCasesStatus: BulkUpdateStatus[] = cases.map(theCase => ({
+    const updateCasesStatus: BulkUpdateStatus[] = cases.map((theCase) => ({
       status,
       id: theCase.id,
       version: theCase.version,

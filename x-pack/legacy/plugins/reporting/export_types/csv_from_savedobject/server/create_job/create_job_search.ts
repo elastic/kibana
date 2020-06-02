@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TimeRangeParams } from '../../../../server/types';
 import {
   SavedObjectMeta,
   SavedObjectReference,
   SavedSearchObjectAttributes,
   SearchPanel,
-  TimeRangeParams,
 } from '../../types';
 
 interface SearchPanelData {

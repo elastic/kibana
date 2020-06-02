@@ -56,8 +56,8 @@ export const createOptions = (
     sortField: args.sortField!,
     filterQuery: parseFilterQuery(args.filterQuery || ''),
     fields: fields
-      .filter(field => !field.includes('__typename'))
-      .map(field => field.replace(fieldReplacement, '')),
+      .filter((field) => !field.includes('__typename'))
+      .map((field) => field.replace(fieldReplacement, '')),
   };
 };
 
@@ -76,7 +76,7 @@ export const createOptionsPaginated = (
     sortField: args.sortField!,
     filterQuery: parseFilterQuery(args.filterQuery || ''),
     fields: fields
-      .filter(field => !field.includes('__typename'))
-      .map(field => field.replace(fieldReplacement, '')),
+      .filter((field) => !field.includes('__typename'))
+      .map((field) => field.replace(fieldReplacement, '')),
   };
 };

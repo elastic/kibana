@@ -27,7 +27,7 @@ interface RefreshInterval {
 }
 
 function getRecentlyUsedRangesFactory(timeHistory: TimeHistoryContract) {
-  return function(): Duration[] {
+  return function (): Duration[] {
     return (
       timeHistory.get()?.map(({ from, to }: TimeRange) => {
         return {

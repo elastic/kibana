@@ -10,7 +10,7 @@ import { coreMock, savedObjectsTypeRegistryMock } from '../../../../../../../src
 export const createMockSavedObjectsService = (spaces: any[] = []) => {
   const mockSavedObjectsClientContract = ({
     get: jest.fn((type, id) => {
-      const result = spaces.filter(s => s.id === id);
+      const result = spaces.filter((s) => s.id === id);
       if (!result.length) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
@@ -23,13 +23,13 @@ export const createMockSavedObjectsService = (spaces: any[] = []) => {
       };
     }),
     create: jest.fn((type, attributes, { id }) => {
-      if (spaces.find(s => s.id === id)) {
+      if (spaces.find((s) => s.id === id)) {
         throw SavedObjectsErrorHelpers.decorateConflictError(new Error(), 'space conflict');
       }
       return {};
     }),
     update: jest.fn((type, id) => {
-      if (!spaces.find(s => s.id === id)) {
+      if (!spaces.find((s) => s.id === id)) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
       return {};
@@ -76,7 +76,7 @@ export const createMockSavedObjectsService = (spaces: any[] = []) => {
     },
   ]);
   typeRegistry.isNamespaceAgnostic.mockImplementation((type: string) =>
-    typeRegistry.getAllTypes().some(t => t.name === type && t.namespaceType === 'agnostic')
+    typeRegistry.getAllTypes().some((t) => t.name === type && t.namespaceType === 'agnostic')
   );
   savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
 

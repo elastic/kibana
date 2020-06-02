@@ -30,12 +30,7 @@ describe('LinkIcon', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('button')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('button').first().exists()).toBe(true);
   });
 
   test('it renders an action link when href is provided', () => {
@@ -47,12 +42,7 @@ describe('LinkIcon', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('a')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('a').first().exists()).toBe(true);
   });
 
   test('it renders an icon', () => {
@@ -62,12 +52,7 @@ describe('LinkIcon', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-euiicon-type]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-euiicon-type]').first().exists()).toBe(true);
   });
 
   test('it positions the icon to the right when iconSide is right', () => {
@@ -79,7 +64,7 @@ describe('LinkIcon', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemLinkIcon').first()).toHaveStyleRule('flex-direction', 'row-reverse');
+    expect(wrapper.find('.siemLinkIcon').at(1)).toHaveStyleRule('flex-direction', 'row-reverse');
   });
 
   test('it positions the icon to the left when iconSide is left (or not provided)', () => {
@@ -91,7 +76,7 @@ describe('LinkIcon', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemLinkIcon').first()).not.toHaveStyleRule(
+    expect(wrapper.find('.siemLinkIcon').at(1)).not.toHaveStyleRule(
       'flex-direction',
       'row-reverse'
     );
@@ -104,11 +89,6 @@ describe('LinkIcon', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('.siemLinkIcon__label')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('.siemLinkIcon__label').first().exists()).toBe(true);
   });
 });

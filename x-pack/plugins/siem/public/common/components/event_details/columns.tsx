@@ -76,7 +76,7 @@ export const getColumns = ({
     render: (field: string) => (
       <EuiToolTip content={i18n.TOGGLE_COLUMN_TOOLTIP}>
         <EuiCheckbox
-          checked={columnHeaders.findIndex(c => c.id === field) !== -1}
+          checked={columnHeaders.findIndex((c) => c.id === field) !== -1}
           data-test-subj={`toggle-field-${field}`}
           id={field}
           onChange={() =>
@@ -113,7 +113,7 @@ export const getColumns = ({
             )}
             isDropDisabled={true}
             type={DRAG_TYPE_FIELD}
-            renderClone={provided => (
+            renderClone={(provided) => (
               <div
                 {...provided.draggableProps}
                 {...provided.dragHandleProps}
@@ -132,7 +132,7 @@ export const getColumns = ({
               })}
               index={0}
             >
-              {provided => (
+              {(provided) => (
                 <div
                   {...provided.draggableProps}
                   {...provided.dragHandleProps}

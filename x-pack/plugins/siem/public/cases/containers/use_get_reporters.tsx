@@ -46,8 +46,10 @@ export const useGetReporters = (): UseGetReporters => {
       try {
         const response = await getReporters(abortCtrl.signal);
         const myReporters = response
-          .map(r => (r.full_name == null || isEmpty(r.full_name) ? r.username ?? '' : r.full_name))
-          .filter(u => !isEmpty(u));
+          .map((r) =>
+            r.full_name == null || isEmpty(r.full_name) ? r.username ?? '' : r.full_name
+          )
+          .filter((u) => !isEmpty(u));
         if (!didCancel) {
           setReporterState({
             reporters: myReporters,

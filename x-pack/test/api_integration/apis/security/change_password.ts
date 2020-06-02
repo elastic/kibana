@@ -7,7 +7,7 @@
 import { Cookie, cookie } from 'request';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const security = getService('security');
 

@@ -13,9 +13,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
 
   // FLAKY: https://github.com/elastic/kibana/issues/63621
-  describe.skip('host list', function() {
+  describe.skip('host list', function () {
     this.tags('ciGroup7');
-    const sleep = (ms = 100) => new Promise(resolve => setTimeout(resolve, ms));
+    const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
     before(async () => {
       await esArchiver.load('endpoint/metadata/api_feature');
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/hosts');

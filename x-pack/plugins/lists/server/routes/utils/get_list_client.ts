@@ -6,7 +6,7 @@
 
 import { RequestHandlerContext } from 'kibana/server';
 
-import { ListClient } from '../../services/lists/client';
+import { ListClient } from '../../services/lists/list_client';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 
 export const getListClient = (context: RequestHandlerContext): ListClient => {

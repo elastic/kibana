@@ -12,13 +12,13 @@ import { routing } from '../../../app/services/routing';
 const testBedConfig = {
   store: ccrStore,
   memoryRouter: {
-    onRouter: router => (routing.reactRouter = router),
+    onRouter: (router) => (routing.reactRouter = router),
   },
 };
 
 const initTestBed = registerTestBed(FollowerIndicesList, testBedConfig);
 
-export const setup = props => {
+export const setup = (props) => {
   const testBed = initTestBed(props);
   const EUI_TABLE = 'followerIndexListTable';
 
@@ -39,10 +39,7 @@ export const setup = props => {
 
   const clickContextMenuButtonAt = (index = 0) => {
     const contextMenu = testBed.find('contextMenu');
-    contextMenu
-      .find('button')
-      .at(index)
-      .simulate('click');
+    contextMenu.find('button').at(index).simulate('click');
   };
 
   const openTableRowContextMenuAt = (index = 0) => {
@@ -64,6 +61,10 @@ export const setup = props => {
     followerIndexLink.simulate('click');
   };
 
+  const clickPaginationNextButton = () => {
+    testBed.find('followerIndexListTable.pagination-button-next').simulate('click');
+  };
+
   return {
     ...testBed,
     actions: {
@@ -72,6 +73,7 @@ export const setup = props => {
       clickContextMenuButtonAt,
       openTableRowContextMenuAt,
       clickFollowerIndexAt,
+      clickPaginationNextButton,
     },
   };
 };

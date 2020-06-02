@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isObject, isNull, isUndefined } from 'lodash';
-import { RawValue } from './types';
+import { isNull, isObject, isUndefined } from 'lodash';
+import { RawValue } from '../../types';
 
 export function createFormatCsvValues(
   escapeValue: (value: RawValue, index: number, array: RawValue[]) => string,
@@ -15,7 +15,7 @@ export function createFormatCsvValues(
 ) {
   return function formatCsvValues(values: Record<string, RawValue>) {
     return fields
-      .map(field => {
+      .map((field) => {
         let value;
         if (field === '_source') {
           value = values;
@@ -34,8 +34,8 @@ export function createFormatCsvValues(
 
         return formattedValue;
       })
-      .map(value => (isObject(value) ? JSON.stringify(value) : value))
-      .map(value => (value ? value.toString() : value))
+      .map((value) => (isObject(value) ? JSON.stringify(value) : value))
+      .map((value) => (value ? value.toString() : value))
       .map(escapeValue)
       .join(separator);
   };

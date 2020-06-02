@@ -26,8 +26,8 @@ export function getFailurePropsForSummary(
 ): Array<{ key: string; value: string }> {
   const failureDetailProps: Array<keyof ShardFailure> = ['shard', 'index', 'node'];
   return failureDetailProps
-    .filter(key => typeof failure[key] === 'number' || typeof failure[key] === 'string')
-    .map(key => ({ key, value: String(failure[key]) }));
+    .filter((key) => typeof failure[key] === 'number' || typeof failure[key] === 'string')
+    .map((key) => ({ key, value: String(failure[key]) }));
 }
 
 export function getFailureSummaryText(failure: ShardFailure, failureDetails?: string): string {
@@ -49,7 +49,7 @@ export function getFailureSummaryDetailsText(failure: ShardFailure): string {
 }
 
 export function ShardFailureDescriptionHeader(props: ShardFailure) {
-  const failureDetails = getFailurePropsForSummary(props).map(kv => (
+  const failureDetails = getFailurePropsForSummary(props).map((kv) => (
     <span className="shardFailureModal__keyValueTitle" key={kv.key}>
       <EuiCode>{kv.key}</EuiCode> {kv.value}
     </span>

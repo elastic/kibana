@@ -64,22 +64,22 @@ describe('Authentication Table Component', () => {
 
     test('on host details page, we should have Last Failed Destination column', () => {
       const columns = getAuthenticationColumnsCurated(hostsModel.HostsType.page);
-      expect(columns.some(col => col.name === i18n.LAST_FAILED_DESTINATION)).toEqual(true);
+      expect(columns.some((col) => col.name === i18n.LAST_FAILED_DESTINATION)).toEqual(true);
     });
 
     test('on host details page, we should not have Last Failed Destination column', () => {
       const columns = getAuthenticationColumnsCurated(hostsModel.HostsType.details);
-      expect(columns.some(col => col.name === i18n.LAST_FAILED_DESTINATION)).toEqual(false);
+      expect(columns.some((col) => col.name === i18n.LAST_FAILED_DESTINATION)).toEqual(false);
     });
 
     test('on host page, we should have Last Successful Destination column', () => {
       const columns = getAuthenticationColumnsCurated(hostsModel.HostsType.page);
-      expect(columns.some(col => col.name === i18n.LAST_SUCCESSFUL_DESTINATION)).toEqual(true);
+      expect(columns.some((col) => col.name === i18n.LAST_SUCCESSFUL_DESTINATION)).toEqual(true);
     });
 
     test('on host details page, we should not have Last Successful Destination column', () => {
       const columns = getAuthenticationColumnsCurated(hostsModel.HostsType.details);
-      expect(columns.some(col => col.name === i18n.LAST_SUCCESSFUL_DESTINATION)).toEqual(false);
+      expect(columns.some((col) => col.name === i18n.LAST_SUCCESSFUL_DESTINATION)).toEqual(false);
     });
   });
 });

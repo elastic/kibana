@@ -24,7 +24,7 @@ import { DEFAULT_DARK_MODE } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { compose } from '../common/lib/compose/kibana_compose';
 import { AppFrontendLibs, AppApolloClient } from '../common/lib/lib';
-import { StartServices } from '../plugin';
+import { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { createStore, createInitialState } from '../common/store';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
@@ -80,7 +80,8 @@ const StartAppComponent: FC<StartAppComponent> = ({ subPlugins, ...libs }) => {
   const store = createStore(
     createInitialState(subPluginsStore.initialState),
     subPluginsStore.reducer,
-    libs$.pipe(pluck('apolloClient'))
+    libs$.pipe(pluck('apolloClient')),
+    subPluginsStore.middlewares
   );
 
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);

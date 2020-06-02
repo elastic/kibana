@@ -20,9 +20,9 @@ export const getAnomaliesFilterQuery = (
   ip?: string
 ): string => {
   const siemJobIds = siemJobs
-    .filter(job => job.isInstalled)
-    .map(job => job.id)
-    .map(jobId => ({
+    .filter((job) => job.isInstalled)
+    .map((job) => job.id)
+    .map((jobId) => ({
       match_phrase: {
         job_id: jobId,
       },

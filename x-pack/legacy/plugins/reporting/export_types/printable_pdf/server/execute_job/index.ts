@@ -9,7 +9,8 @@ import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PDF_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
-import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput, Logger } from '../../../../types';
+import { LevelLogger } from '../../../../server/lib';
+import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput } from '../../../../server/types';
 import {
   decryptJobHeaders,
   getConditionalHeaders,
@@ -24,7 +25,7 @@ type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocP
 
 export const executeJobFactory: QueuedPdfExecutorFactory = async function executeJobFactoryFn(
   reporting: ReportingCore,
-  parentLogger: Logger
+  parentLogger: LevelLogger
 ) {
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
@@ -41,9 +42,11 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
-      map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
-      map(filteredHeaders => getConditionalHeaders({ config, job, filteredHeaders })),
-      mergeMap(conditionalHeaders => getCustomLogo({ reporting, config, job, conditionalHeaders })),
+      map((decryptedHeaders) => omitBlacklistedHeaders({ job, decryptedHeaders })),
+      map((filteredHeaders) => getConditionalHeaders({ config, job, filteredHeaders })),
+      mergeMap((conditionalHeaders) =>
+        getCustomLogo({ reporting, config, job, conditionalHeaders })
+      ),
       mergeMap(({ logo, conditionalHeaders }) => {
         const urls = getFullUrls({ config, job });
 
@@ -75,7 +78,7 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
           warnings,
         };
       }),
-      catchError(err => {
+      catchError((err) => {
         jobLogger.error(err);
         return Rx.throwError(err);
       })

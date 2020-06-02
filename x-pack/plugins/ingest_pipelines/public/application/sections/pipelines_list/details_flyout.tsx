@@ -89,7 +89,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
           defaultMessage: 'Manage pipeline',
         }
       )}
-      onClick={() => setShowPopover(previousBool => !previousBool)}
+      onClick={() => setShowPopover((previousBool) => !previousBool)}
       iconType="arrowUp"
       iconSide="right"
       fill

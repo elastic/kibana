@@ -10,7 +10,6 @@ import {
   toggleIntegrationsPopover,
   setBasePath,
   setEsKueryString,
-  triggerAppRefresh,
   UiPayload,
   setAlertFlyoutType,
   setAlertFlyoutVisible,
@@ -22,7 +21,6 @@ export interface UiState {
   basePath: string;
   esKuery: string;
   integrationsPopoverOpen: PopoverState | null;
-  lastRefresh: number;
 }
 
 const initialState: UiState = {
@@ -30,7 +28,6 @@ const initialState: UiState = {
   basePath: '',
   esKuery: '',
   integrationsPopoverOpen: null,
-  lastRefresh: Date.now(),
 };
 
 export const uiReducer = handleActions<UiState, UiPayload>(
@@ -48,11 +45,6 @@ export const uiReducer = handleActions<UiState, UiPayload>(
     [String(setBasePath)]: (state, action: Action<string>) => ({
       ...state,
       basePath: action.payload as string,
-    }),
-
-    [String(triggerAppRefresh)]: (state, action: Action<number>) => ({
-      ...state,
-      lastRefresh: action.payload as number,
     }),
 
     [String(setEsKueryString)]: (state, action: Action<string>) => ({

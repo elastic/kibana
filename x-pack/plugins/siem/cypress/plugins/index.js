@@ -20,7 +20,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const wp = require('@cypress/webpack-preprocessor');
 
-module.exports = on => {
+module.exports = (on) => {
   const options = {
     webpackOptions: {
       resolve: {

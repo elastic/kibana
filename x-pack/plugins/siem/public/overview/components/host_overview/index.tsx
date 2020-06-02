@@ -134,7 +134,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
               rowItems={getOr([], 'host.ip', data)}
               attrName={'host.ip'}
               idPrefix="host-overview"
-              render={ip => (ip != null ? <IPDetailsLink ip={ip} /> : getEmptyTagValue())}
+              render={(ip) => (ip != null ? <IPDetailsLink ip={ip} /> : getEmptyTagValue())}
             />
           ),
         },

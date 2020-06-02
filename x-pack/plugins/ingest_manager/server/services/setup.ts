@@ -81,7 +81,7 @@ export async function setupIngestManager(
   }
   for (const installedPackage of installedPackages) {
     const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
-      packageName => installedPackage.name === packageName
+      (packageName) => installedPackage.name === packageName
     );
     if (!packageShouldBeInstalled) {
       continue;
@@ -99,11 +99,12 @@ export async function setupIngestManager(
 
 export async function setupFleet(
   soClient: SavedObjectsClientContract,
-  callCluster: CallESAsCurrentUser
+  callCluster: CallESAsCurrentUser,
+  options?: { forceRecreate?: boolean }
 ) {
   // Create fleet_enroll role
   // This should be done directly in ES at some point
-  await callCluster('transport.request', {
+  const res = await callCluster('transport.request', {
     method: 'PUT',
     path: `/_security/role/${FLEET_ENROLL_ROLE}`,
     body: {
@@ -116,6 +117,10 @@ export async function setupFleet(
       ],
     },
   });
+  // If the role is already created skip the rest unless you have forceRecreate set to true
+  if (options?.forceRecreate !== true && res.role.created === false) {
+    return;
+  }
   const password = generateRandomPassword();
   // Create fleet enroll user
   await callCluster('transport.request', {
@@ -124,6 +129,9 @@ export async function setupFleet(
     body: {
       password,
       roles: [FLEET_ENROLL_ROLE],
+      metadata: {
+        updated_at: new Date().toISOString(),
+      },
     },
   });
 

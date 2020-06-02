@@ -28,7 +28,7 @@ const errorMessages = {
       defaultMessage="You need at least one remote cluster to create a follower index."
     />
   ),
-  remoteClusterNotConnectedEditable: name => ({
+  remoteClusterNotConnectedEditable: (name) => ({
     title: (
       <FormattedMessage
         id="xpack.crossClusterReplication.remoteClustersFormField.currentRemoteClusterNotConnectedCallOutTitle"
@@ -60,7 +60,7 @@ export class RemoteClustersFormField extends PureComponent {
 
   validateRemoteCluster(clusterName) {
     const { remoteClusters } = this.props;
-    const remoteCluster = remoteClusters.find(c => c.name === clusterName);
+    const remoteCluster = remoteClusters.find((c) => c.name === clusterName);
 
     return remoteCluster && remoteCluster.isConnected
       ? { error: null }
@@ -76,7 +76,7 @@ export class RemoteClustersFormField extends PureComponent {
         };
   }
 
-  onRemoteClusterChange = cluster => {
+  onRemoteClusterChange = (cluster) => {
     const { onChange, onError } = this.props;
     const { error } = this.validateRemoteCluster(cluster);
     onChange(cluster);
@@ -137,7 +137,7 @@ export class RemoteClustersFormField extends PureComponent {
           fullWidth
           options={remoteClustersOptions}
           value={hasClusters ? selected : ''}
-          onChange={e => {
+          onChange={(e) => {
             this.onRemoteClusterChange(e.target.value);
           }}
           hasNoInitialSelection={!hasClusters}
@@ -252,7 +252,7 @@ export class RemoteClustersFormField extends PureComponent {
     );
   };
 
-  renderRemoteClusterDoesNotExist = name => {
+  renderRemoteClusterDoesNotExist = (name) => {
     const { currentUrl } = this.props;
     const title = i18n.translate(
       'xpack.crossClusterReplication.remoteClustersFormField.remoteClusterNotFoundTitle',
@@ -287,7 +287,7 @@ export class RemoteClustersFormField extends PureComponent {
 
   renderErrorMessage = () => {
     const { selected, remoteClusters, isEditable } = this.props;
-    const remoteCluster = remoteClusters.find(c => c.name === selected);
+    const remoteCluster = remoteClusters.find((c) => c.name === selected);
     const isSelectedRemoteClusterConnected = remoteCluster && remoteCluster.isConnected;
     let error;
 
@@ -319,7 +319,7 @@ export class RemoteClustersFormField extends PureComponent {
 
   render() {
     const { remoteClusters, selected, isEditable, areErrorsVisible } = this.props;
-    const remoteCluster = remoteClusters.find(c => c.name === selected);
+    const remoteCluster = remoteClusters.find((c) => c.name === selected);
     const hasClusters = Boolean(remoteClusters.length);
     const isSelectedRemoteClusterConnected = remoteCluster && remoteCluster.isConnected;
     const isInvalid = areErrorsVisible && (!hasClusters || !isSelectedRemoteClusterConnected);

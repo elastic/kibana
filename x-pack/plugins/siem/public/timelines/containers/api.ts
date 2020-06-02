@@ -9,11 +9,17 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { throwErrors } from '../../../../case/common/api';
 import {
-  SavedTimeline,
   TimelineResponse,
   TimelineResponseType,
+  TimelineStatus,
 } from '../../../common/types/timeline';
-import { TIMELINE_URL, TIMELINE_IMPORT_URL, TIMELINE_EXPORT_URL } from '../../../common/constants';
+import { TimelineInput, TimelineType } from '../../graphql/types';
+import {
+  TIMELINE_URL,
+  TIMELINE_DRAFT_URL,
+  TIMELINE_IMPORT_URL,
+  TIMELINE_EXPORT_URL,
+} from '../../../common/constants';
 
 import { KibanaServices } from '../../common/lib/kibana';
 import { ExportSelectedData } from '../../common/components/generic_downloader';
@@ -25,7 +31,7 @@ import {
 } from '../../alerts/containers/detection_engine/rules';
 
 interface RequestPostTimeline {
-  timeline: SavedTimeline;
+  timeline: TimelineInput;
   signal?: AbortSignal;
 }
 
@@ -69,9 +75,19 @@ export const persistTimeline = async ({
   timeline,
   version,
 }: RequestPersistTimeline): Promise<TimelineResponse> => {
+  if (timelineId == null && timeline.status === TimelineStatus.draft) {
+    const draftTimeline = await cleanDraftTimeline({ timelineType: timeline.timelineType! });
+    return patchTimeline({
+      timelineId: draftTimeline.data.persistTimeline.timeline.savedObjectId,
+      timeline,
+      version: draftTimeline.data.persistTimeline.timeline.version ?? '',
+    });
+  }
+
   if (timelineId == null) {
     return postTimeline({ timeline });
   }
+
   return patchTimeline({
     timelineId,
     timeline,
@@ -115,4 +131,32 @@ export const exportSelectedTimeline: ExportSelectedData = async ({
   });
 
   return response.body!;
+};
+
+export const getDraftTimeline = async ({
+  timelineType,
+}: {
+  timelineType: TimelineType;
+}): Promise<TimelineResponse> => {
+  const response = await KibanaServices.get().http.get<TimelineResponse>(TIMELINE_DRAFT_URL, {
+    query: {
+      timelineType,
+    },
+  });
+
+  return decodeTimelineResponse(response);
+};
+
+export const cleanDraftTimeline = async ({
+  timelineType,
+}: {
+  timelineType: TimelineType;
+}): Promise<TimelineResponse> => {
+  const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_DRAFT_URL, {
+    body: JSON.stringify({
+      timelineType,
+    }),
+  });
+
+  return decodeTimelineResponse(response);
 };

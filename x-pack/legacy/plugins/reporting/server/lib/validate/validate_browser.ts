@@ -6,8 +6,8 @@
 
 import { Browser } from 'puppeteer';
 import { BROWSER_TYPE } from '../../../common/constants';
-import { Logger } from '../../../types';
 import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_factory';
+import { LevelLogger } from '../';
 
 /*
  * Validate the Reporting headless browser can launch, and that it can connect
@@ -15,7 +15,7 @@ import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_fa
  */
 export const validateBrowser = async (
   browserFactory: HeadlessChromiumDriverFactory,
-  logger: Logger
+  logger: LevelLogger
 ) => {
   if (browserFactory.type === BROWSER_TYPE) {
     return browserFactory.test(logger).then((browser: Browser | null) => {

@@ -8,7 +8,7 @@ import { getRouter, getUserHasLeftApp } from '../../services';
 import { CLONE_JOB_START } from '../action_types';
 import { CRUD_APP_BASE_PATH } from '../../constants';
 
-export const cloneJob = () => next => action => {
+export const cloneJob = () => (next) => (action) => {
   const { type } = action;
 
   if (type === CLONE_JOB_START) {

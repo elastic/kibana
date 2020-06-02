@@ -58,7 +58,7 @@ export class MapListing extends React.Component {
     addHelpMenuToAppChrome();
   }
 
-  debouncedFetch = _.debounce(async filter => {
+  debouncedFetch = _.debounce(async (filter) => {
     const response = await this.props.find(filter);
 
     if (!this._isMounted) {
@@ -282,7 +282,7 @@ export class MapListing extends React.Component {
             })}
             fullWidth
             value={this.state.filter}
-            onChange={e => {
+            onChange={(e) => {
               this.setState(
                 {
                   filter: e.target.value,
@@ -333,9 +333,9 @@ export class MapListing extends React.Component {
     let selection = false;
     if (!this.props.readOnly) {
       selection = {
-        onSelectionChange: selection => {
+        onSelectionChange: (selection) => {
           this.setState({
-            selectedIds: selection.map(item => {
+            selectedIds: selection.map((item) => {
               return item.id;
             }),
           });

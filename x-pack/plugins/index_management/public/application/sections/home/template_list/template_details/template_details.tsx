@@ -166,7 +166,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
         {managedTemplateCallout}
 
         <EuiTabs>
-          {TABS.map(tab => (
+          {TABS.map((tab) => (
             <EuiTab
               onClick={() => {
                 uiMetricService.trackMetric('click', tabToUiMetricMap[tab.id]);
@@ -192,7 +192,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
     <Fragment>
       {templateToDelete && templateToDelete.length > 0 ? (
         <TemplateDeleteModal
-          callback={data => {
+          callback={(data) => {
             if (data && data.hasDeletedTemplates) {
               reload();
             } else {
@@ -247,7 +247,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
                       data-test-subj="manageTemplateButton"
                       iconType="arrowDown"
                       iconSide="right"
-                      onClick={() => setIsPopOverOpen(prev => !prev)}
+                      onClick={() => setIsPopOverOpen((prev) => !prev)}
                     >
                       <FormattedMessage
                         id="xpack.idxMgmt.templateDetails.manageButtonLabel"

@@ -14,7 +14,7 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 
-import { isUrlInvalid } from '../../../../../alerts/components/rules/step_about_rule/helpers';
+import { isUrlInvalid } from '../../../../../common/utils/validators';
 import endPointSvg from '../../../../../common/utils/logo_endpoint/64_color.svg';
 
 import * as i18n from './translations';

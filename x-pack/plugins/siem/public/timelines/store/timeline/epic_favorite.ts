@@ -104,10 +104,10 @@ export const epicPersistTimelineFavorite = (
     )
   );
 
-export const createTimelineFavoriteEpic = <State>(): Epic<Action, Action, State> => action$ => {
+export const createTimelineFavoriteEpic = <State>(): Epic<Action, Action, State> => (action$) => {
   return action$.pipe(
-    filter(action => timelineFavoriteActionsType.includes(action.type)),
-    mergeMap(action => {
+    filter((action) => timelineFavoriteActionsType.includes(action.type)),
+    mergeMap((action) => {
       dispatcherTimelinePersistQueue.next({ action });
       return empty();
     })

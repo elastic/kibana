@@ -5,8 +5,8 @@
  */
 
 import { CaptureConfig } from '../../../server/types';
-import { LayoutTypes } from '../constants';
-import { Layout, LayoutParams } from './layout';
+import { LayoutParams, LayoutTypes } from './';
+import { Layout } from './layout';
 import { PreserveLayout } from './preserve_layout';
 import { PrintLayout } from './print_layout';
 

@@ -40,16 +40,6 @@ export interface MapFeature {
   layerId: string;
 }
 
-export interface LoadFeatureProps {
-  layerId: string;
-  featureId: number;
-}
-
-export interface FeatureProperty {
-  _propertyKey: string;
-  _rawValue: string | string[];
-}
-
 export interface FeatureGeometry {
   coordinates: [number];
   type: string;

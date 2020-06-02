@@ -80,16 +80,6 @@ describe('ConfigureCases', () => {
         wrapper.find('[data-test-subj="configure-cases-warning-callout"]').exists()
       ).toBeFalsy();
     });
-
-    test('it does NOT render the EuiBottomBar', () => {
-      expect(
-        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-      ).toBeFalsy();
-    });
-
-    test('it disables correctly ClosureOptions when the connector is set to none', () => {
-      expect(wrapper.find(ClosureOptions).prop('disabled')).toBe(true);
-    });
   });
 
   describe('Unhappy path', () => {
@@ -182,12 +172,6 @@ describe('ConfigureCases', () => {
       expect(wrapper.find(ConnectorEditFlyout).prop('initialConnector')).toEqual(connectors[0]);
     });
 
-    test('it does not shows the action bar when there is no change', () => {
-      expect(
-        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-      ).toBeFalsy();
-    });
-
     test('it disables correctly when the user cannot crud', () => {
       const newWrapper = mount(<ConfigureCases userCanCrud={false} />, {
         wrappingComponent: TestProviders,
@@ -196,12 +180,6 @@ describe('ConfigureCases', () => {
       expect(newWrapper.find('button[data-test-subj="dropdown-connectors"]').prop('disabled')).toBe(
         true
       );
-
-      expect(
-        newWrapper
-          .find('button[data-test-subj="case-configure-add-connector-button"]')
-          .prop('disabled')
-      ).toBe(true);
 
       expect(
         newWrapper
@@ -275,26 +253,6 @@ describe('ConfigureCases', () => {
           .prop('disabled')
       ).toBe(true);
     });
-
-    test('it disables the buttons of action bar when loading connectors', () => {
-      const newWrapper = mount(<ConfigureCases userCanCrud />, {
-        wrappingComponent: TestProviders,
-      });
-
-      expect(
-        newWrapper
-          .find('button[data-test-subj="case-configure-action-bottom-bar-cancel-button"]')
-          .first()
-          .prop('disabled')
-      ).toBe(true);
-
-      expect(
-        newWrapper
-          .find('button[data-test-subj="case-configure-action-bottom-bar-save-button"]')
-          .first()
-          .prop('disabled')
-      ).toBe(true);
-    });
   });
 
   describe('saving configuration', () => {
@@ -327,10 +285,7 @@ describe('ConfigureCases', () => {
       ).toBe(true);
 
       expect(
-        wrapper
-          .find('[data-test-subj="closure-options-radio-group"] input')
-          .at(1)
-          .prop('disabled')
+        wrapper.find('[data-test-subj="closure-options-radio-group"] input').at(1).prop('disabled')
       ).toBe(true);
     });
 
@@ -339,74 +294,6 @@ describe('ConfigureCases', () => {
         wrapper
           .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
           .prop('disabled')
-      ).toBe(true);
-    });
-
-    test('it disables the buttons of action bar when saving configuration', () => {
-      useCaseConfigureMock.mockImplementation(() => ({
-        ...useCaseConfigureResponse,
-        mapping: connectors[1].config.casesConfiguration.mapping,
-        closureType: 'close-by-user',
-        connectorId: 'servicenow-2',
-        connectorName: 'unchanged',
-        currentConfiguration: {
-          connectorName: 'unchanged',
-          connectorId: 'servicenow-1',
-          closureType: 'close-by-user',
-        },
-        persistLoading: true,
-      }));
-
-      const newWrapper = mount(<ConfigureCases userCanCrud />, {
-        wrappingComponent: TestProviders,
-      });
-
-      expect(
-        newWrapper
-          .find('[data-test-subj="case-configure-action-bottom-bar-cancel-button"]')
-          .first()
-          .prop('isDisabled')
-      ).toBe(true);
-
-      expect(
-        newWrapper
-          .find('[data-test-subj="case-configure-action-bottom-bar-save-button"]')
-          .first()
-          .prop('isDisabled')
-      ).toBe(true);
-    });
-
-    test('it shows the loading spinner when saving configuration', () => {
-      useCaseConfigureMock.mockImplementation(() => ({
-        ...useCaseConfigureResponse,
-        mapping: connectors[1].config.casesConfiguration.mapping,
-        closureType: 'close-by-user',
-        connectorId: 'servicenow-2',
-        connectorName: 'unchanged',
-        currentConfiguration: {
-          connectorName: 'unchanged',
-          connectorId: 'servicenow-1',
-          closureType: 'close-by-user',
-        },
-        persistLoading: true,
-      }));
-
-      const newWrapper = mount(<ConfigureCases userCanCrud />, {
-        wrappingComponent: TestProviders,
-      });
-
-      expect(
-        newWrapper
-          .find('[data-test-subj="case-configure-action-bottom-bar-cancel-button"]')
-          .first()
-          .prop('isLoading')
-      ).toBe(true);
-
-      expect(
-        newWrapper
-          .find('[data-test-subj="case-configure-action-bottom-bar-save-button"]')
-          .first()
-          .prop('isLoading')
       ).toBe(true);
     });
   });
@@ -437,7 +324,7 @@ describe('ConfigureCases', () => {
     });
   });
 
-  describe('update connector', () => {
+  describe('connectors', () => {
     let wrapper: ReactWrapper;
     const persistCaseConfigure = jest.fn();
 
@@ -445,13 +332,13 @@ describe('ConfigureCases', () => {
       jest.resetAllMocks();
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping: connectors[1].config.casesConfiguration.mapping,
+        mapping: connectors[0].config.casesConfiguration.mapping,
         closureType: 'close-by-user',
-        connectorId: 'servicenow-2',
-        connectorName: 'unchanged',
+        connectorId: 'servicenow-1',
+        connectorName: 'My connector',
         currentConfiguration: {
-          connectorName: 'unchanged',
-          connectorId: 'servicenow-1',
+          connectorName: 'My connector',
+          connectorId: 'My connector',
           closureType: 'close-by-user',
         },
         persistCaseConfigure,
@@ -463,12 +350,10 @@ describe('ConfigureCases', () => {
       wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
     });
 
-    test('it submits the configuration correctly', () => {
-      wrapper
-        .find('[data-test-subj="case-configure-action-bottom-bar-save-button"]')
-        .first()
-        .simulate('click');
-
+    test('it submits the configuration correctly when changing connector', () => {
+      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.update();
+      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
       wrapper.update();
 
       expect(persistCaseConfigure).toHaveBeenCalled();
@@ -477,359 +362,6 @@ describe('ConfigureCases', () => {
         connectorName: 'My Connector 2',
         closureType: 'close-by-user',
       });
-    });
-
-    test('it has the correct url on cancel button', () => {
-      expect(
-        wrapper
-          .find('[data-test-subj="case-configure-action-bottom-bar-cancel-button"]')
-          .first()
-          .prop('href')
-      ).toBe(`#/link-to/case${searchURL}`);
-    });
-
-    test('it disables the buttons of action bar when loading configuration', () => {
-      useCaseConfigureMock.mockImplementation(() => ({
-        ...useCaseConfigureResponse,
-        mapping: connectors[1].config.casesConfiguration.mapping,
-        closureType: 'close-by-user',
-        connectorId: 'servicenow-2',
-        connectorName: 'unchanged',
-        currentConfiguration: {
-          connectorName: 'unchanged',
-          connectorId: 'servicenow-1',
-          closureType: 'close-by-user',
-        },
-        loading: true,
-      }));
-      const newWrapper = mount(<ConfigureCases userCanCrud />, {
-        wrappingComponent: TestProviders,
-      });
-
-      expect(
-        newWrapper
-          .find('[data-test-subj="case-configure-action-bottom-bar-cancel-button"]')
-          .first()
-          .prop('isDisabled')
-      ).toBe(true);
-
-      expect(
-        newWrapper
-          .find('[data-test-subj="case-configure-action-bottom-bar-save-button"]')
-          .first()
-          .prop('isDisabled')
-      ).toBe(true);
-    });
-  });
-
-  describe('user interactions', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-      useCaseConfigureMock.mockImplementation(() => ({
-        ...useCaseConfigureResponse,
-        mapping: connectors[1].config.casesConfiguration.mapping,
-        closureType: 'close-by-user',
-        connectorId: 'servicenow-2',
-        connectorName: 'unchanged',
-        currentConfiguration: {
-          connectorName: 'unchanged',
-          connectorId: 'servicenow-2',
-          closureType: 'close-by-user',
-        },
-      }));
-      useConnectorsMock.mockImplementation(() => useConnectorsResponse);
-      useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
-      useGetUrlSearchMock.mockImplementation(() => searchURL);
-    });
-
-    test('it show the add flyout when pressing the add connector button', () => {
-      const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-      wrapper
-        .find('button[data-test-subj="case-configure-add-connector-button"]')
-        .simulate('click');
-      wrapper.update();
-
-      expect(wrapper.find(ConnectorAddFlyout).prop('addFlyoutVisible')).toBe(true);
-      expect(
-        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-      ).toBeFalsy();
-    });
-
-    test('it show the edit flyout when pressing the update connector button', () => {
-      const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-      wrapper
-        .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
-        .simulate('click');
-      wrapper.update();
-
-      expect(wrapper.find(ConnectorEditFlyout).prop('editFlyoutVisible')).toBe(true);
-      expect(
-        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-      ).toBeFalsy();
-    });
-
-    test('it tracks the changes successfully', () => {
-      useCaseConfigureMock.mockImplementation(() => ({
-        ...useCaseConfigureResponse,
-        mapping: connectors[1].config.casesConfiguration.mapping,
-        closureType: 'close-by-user',
-        connectorId: 'servicenow-2',
-        connectorName: 'unchanged',
-        currentConfiguration: {
-          connectorName: 'unchanged',
-          connectorId: 'servicenow-1',
-          closureType: 'close-by-pushing',
-        },
-      }));
-      const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
-      wrapper.update();
-      wrapper.find('input[id="close-by-pushing"]').simulate('change');
-      wrapper.update();
-
-      expect(
-        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-      ).toBeTruthy();
-      expect(
-        wrapper
-          .find('[data-test-subj="case-configure-action-bottom-bar-total-changes"]')
-          .first()
-          .text()
-      ).toBe('2 unsaved changes');
-    });
-
-    test('it tracks the changes successfully when name changes', () => {
-      useCaseConfigureMock.mockImplementation(() => ({
-        ...useCaseConfigureResponse,
-        mapping: connectors[1].config.casesConfiguration.mapping,
-        closureType: 'close-by-user',
-        connectorId: 'servicenow-2',
-        connectorName: 'nameChange',
-        currentConfiguration: {
-          connectorId: 'servicenow-1',
-          closureType: 'close-by-pushing',
-          connectorName: 'before',
-        },
-      }));
-
-      const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
-      wrapper.update();
-      wrapper.find('input[id="close-by-pushing"]').simulate('change');
-      wrapper.update();
-
-      expect(
-        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-      ).toBeTruthy();
-      expect(
-        wrapper
-          .find('[data-test-subj="case-configure-action-bottom-bar-total-changes"]')
-          .first()
-          .text()
-      ).toBe('2 unsaved changes');
-    });
-
-    test('it tracks and reverts the changes successfully ', () => {
-      const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-      // change settings
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
-      wrapper.update();
-      wrapper.find('input[id="close-by-pushing"]').simulate('change');
-      wrapper.update();
-
-      // revert back to initial settings
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-1"]').simulate('click');
-      wrapper.update();
-      wrapper.find('input[id="close-by-user"]').simulate('change');
-      wrapper.update();
-
-      expect(
-        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-      ).toBeFalsy();
-    });
-
-    test('it close and restores the action bar when the add connector button is pressed', () => {
-      useCaseConfigureMock
-        .mockImplementationOnce(() => ({
-          ...useCaseConfigureResponse,
-          mapping: connectors[1].config.casesConfiguration.mapping,
-          closureType: 'close-by-user',
-          connectorId: 'servicenow-2',
-          currentConfiguration: { connectorId: 'servicenow-2', closureType: 'close-by-user' },
-        }))
-        .mockImplementation(() => ({
-          ...useCaseConfigureResponse,
-          mapping: connectors[1].config.casesConfiguration.mapping,
-          closureType: 'close-by-pushing',
-          connectorId: 'servicenow-2',
-          currentConfiguration: { connectorId: 'servicenow-2', closureType: 'close-by-user' },
-        }));
-      const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-      // Change closure type
-      wrapper.find('input[id="close-by-pushing"]').simulate('change');
-      wrapper.update();
-
-      expect(
-        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-      ).toBeTruthy();
-
-      // Press add connector button
-      wrapper
-        .find('button[data-test-subj="case-configure-add-connector-button"]')
-        .simulate('click');
-      wrapper.update();
-
-      expect(
-        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-      ).toBeFalsy();
-
-      expect(wrapper.find(ConnectorAddFlyout).prop('addFlyoutVisible')).toBe(true);
-
-      // Close the add flyout
-      wrapper.find('button[data-test-subj="euiFlyoutCloseButton"]').simulate('click');
-      wrapper.update();
-
-      expect(
-        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-      ).toBeTruthy();
-
-      expect(wrapper.find(ConnectorAddFlyout).prop('addFlyoutVisible')).toBe(false);
-
-      expect(
-        wrapper
-          .find('[data-test-subj="case-configure-action-bottom-bar-total-changes"]')
-          .first()
-          .text()
-      ).toBe('1 unsaved changes');
-    });
-
-    test('it close and restores the action bar when the update connector button is pressed', () => {
-      useCaseConfigureMock
-        .mockImplementationOnce(() => ({
-          ...useCaseConfigureResponse,
-          mapping: connectors[1].config.casesConfiguration.mapping,
-          closureType: 'close-by-user',
-          connectorId: 'servicenow-2',
-          currentConfiguration: { connectorId: 'servicenow-2', closureType: 'close-by-user' },
-        }))
-        .mockImplementation(() => ({
-          ...useCaseConfigureResponse,
-          mapping: connectors[1].config.casesConfiguration.mapping,
-          closureType: 'close-by-pushing',
-          connectorId: 'servicenow-2',
-          currentConfiguration: { connectorId: 'servicenow-2', closureType: 'close-by-user' },
-        }));
-      const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
-      // Change closure type
-      wrapper.find('input[id="close-by-pushing"]').simulate('change');
-      wrapper.update();
-
-      // Press update connector button
-      wrapper
-        .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
-        .simulate('click');
-      wrapper.update();
-
-      expect(
-        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-      ).toBeFalsy();
-
-      expect(wrapper.find(ConnectorEditFlyout).prop('editFlyoutVisible')).toBe(true);
-
-      // Close the edit flyout
-      wrapper.find('button[data-test-subj="euiFlyoutCloseButton"]').simulate('click');
-      wrapper.update();
-
-      expect(
-        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-      ).toBeTruthy();
-
-      expect(wrapper.find(ConnectorEditFlyout).prop('editFlyoutVisible')).toBe(false);
-
-      expect(
-        wrapper
-          .find('[data-test-subj="case-configure-action-bottom-bar-total-changes"]')
-          .first()
-          .text()
-      ).toBe('1 unsaved changes');
-    });
-
-    test('it shows the action bar when the connector is changed', () => {
-      useCaseConfigureMock
-        .mockImplementationOnce(() => ({
-          ...useCaseConfigureResponse,
-          mapping: connectors[0].config.casesConfiguration.mapping,
-          closureType: 'close-by-user',
-          connectorId: 'servicenow-1',
-          currentConfiguration: { connectorId: 'servicenow-1', closureType: 'close-by-user' },
-        }))
-        .mockImplementation(() => ({
-          ...useCaseConfigureResponse,
-          mapping: connectors[1].config.casesConfiguration.mapping,
-          closureType: 'close-by-user',
-          connectorId: 'servicenow-2',
-          currentConfiguration: { connectorId: 'servicenow-1', closureType: 'close-by-user' },
-        }));
-      const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
-      wrapper.update();
-
-      expect(
-        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-      ).toBeTruthy();
-      expect(
-        wrapper
-          .find('[data-test-subj="case-configure-action-bottom-bar-total-changes"]')
-          .first()
-          .text()
-      ).toBe('1 unsaved changes');
-    });
-
-    test('it closes the action bar when pressing save', () => {
-      useCaseConfigureMock
-        .mockImplementationOnce(() => ({
-          ...useCaseConfigureResponse,
-          mapping: connectors[1].config.casesConfiguration.mapping,
-          closureType: 'close-by-user',
-          connectorId: 'servicenow-2',
-          currentConfiguration: { connectorId: 'servicenow-2', closureType: 'close-by-user' },
-        }))
-        .mockImplementation(() => ({
-          ...useCaseConfigureResponse,
-          mapping: connectors[1].config.casesConfiguration.mapping,
-          closureType: 'close-by-pushing',
-          connectorId: 'servicenow-2',
-          currentConfiguration: { connectorId: 'servicenow-2', closureType: 'close-by-user' },
-        }));
-      const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-      wrapper.find('input[id="close-by-pushing"]').simulate('change');
-      wrapper.update();
-
-      expect(
-        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-      ).toBeTruthy();
-
-      wrapper
-        .find('[data-test-subj="case-configure-action-bottom-bar-save-button"]')
-        .first()
-        .simulate('click');
-
-      wrapper.update();
-
-      expect(
-        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-      ).toBeFalsy();
     });
 
     test('the text of the update button is changed successfully', () => {
@@ -843,7 +375,7 @@ describe('ConfigureCases', () => {
           connectorId: 'servicenow-2',
         }));
 
-      const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+      wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.update();
@@ -856,5 +388,88 @@ describe('ConfigureCases', () => {
           .text()
       ).toBe('Update My Connector 2');
     });
+  });
+});
+
+describe('closure options', () => {
+  let wrapper: ReactWrapper;
+  const persistCaseConfigure = jest.fn();
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    useCaseConfigureMock.mockImplementation(() => ({
+      ...useCaseConfigureResponse,
+      mapping: connectors[0].config.casesConfiguration.mapping,
+      closureType: 'close-by-user',
+      connectorId: 'servicenow-1',
+      connectorName: 'My connector',
+      currentConfiguration: {
+        connectorName: 'My connector',
+        connectorId: 'My connector',
+        closureType: 'close-by-user',
+      },
+      persistCaseConfigure,
+    }));
+    useConnectorsMock.mockImplementation(() => useConnectorsResponse);
+    useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
+    useGetUrlSearchMock.mockImplementation(() => searchURL);
+
+    wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+  });
+
+  test('it submits the configuration correctly when changing closure type', () => {
+    wrapper.find('input[id="close-by-pushing"]').simulate('change');
+    wrapper.update();
+
+    expect(persistCaseConfigure).toHaveBeenCalled();
+    expect(persistCaseConfigure).toHaveBeenCalledWith({
+      connectorId: 'servicenow-1',
+      connectorName: 'My Connector',
+      closureType: 'close-by-pushing',
+    });
+  });
+});
+
+describe('user interactions', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    useCaseConfigureMock.mockImplementation(() => ({
+      ...useCaseConfigureResponse,
+      mapping: connectors[1].config.casesConfiguration.mapping,
+      closureType: 'close-by-user',
+      connectorId: 'servicenow-2',
+      connectorName: 'unchanged',
+      currentConfiguration: {
+        connectorName: 'unchanged',
+        connectorId: 'servicenow-2',
+        closureType: 'close-by-user',
+      },
+    }));
+    useConnectorsMock.mockImplementation(() => useConnectorsResponse);
+    useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
+    useGetUrlSearchMock.mockImplementation(() => searchURL);
+  });
+
+  test('it show the add flyout when pressing the add connector button', () => {
+    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.update();
+    wrapper.find('button[data-test-subj="dropdown-connector-add-connector"]').simulate('click');
+    wrapper.update();
+
+    expect(wrapper.find(ConnectorAddFlyout).prop('addFlyoutVisible')).toBe(true);
+  });
+
+  test('it show the edit flyout when pressing the update connector button', () => {
+    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    wrapper
+      .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+      .simulate('click');
+    wrapper.update();
+
+    expect(wrapper.find(ConnectorEditFlyout).prop('editFlyoutVisible')).toBe(true);
+    expect(
+      wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
+    ).toBeFalsy();
   });
 });

@@ -79,7 +79,7 @@ export const getActionsColumns = ({
         actionTimelineToShow.includes('delete') && deleteTimelines != null
           ? deleteTimelineColumn
           : null,
-      ].filter(action => action != null),
+      ].filter((action) => action != null),
     },
   ];
 };

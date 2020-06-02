@@ -48,7 +48,7 @@ function asOperationOptions(operationTypes: OperationType[], compatibleWithCurre
         operationPanels[opType2].displayName
       );
     })
-    .map(operationType => ({
+    .map((operationType) => ({
       operationType,
       compatibleWithCurrentField,
     }));
@@ -76,7 +76,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
 
   const fieldMap: Record<string, IndexPatternField> = useMemo(() => {
     const fields: Record<string, IndexPatternField> = {};
-    currentIndexPattern.fields.forEach(field => {
+    currentIndexPattern.fields.forEach((field) => {
       fields[field.name] = field;
     });
     return fields;
@@ -205,7 +205,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 })
               );
             }}
-            onChoose={choice => {
+            onChoose={(choice) => {
               let column: IndexPatternColumn;
               if (
                 !incompatibleSelectedOperationType &&
@@ -313,7 +313,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     compressed
                     data-test-subj="indexPattern-label-edit"
                     value={selectedColumn.label}
-                    onChange={e => {
+                    onChange={(e) => {
                       setState(
                         changeColumn({
                           state,
@@ -334,7 +334,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 <BucketNestingEditor
                   layer={state.layers[props.layerId]}
                   columnId={props.columnId}
-                  setColumns={columnOrder => {
+                  setColumns={(columnOrder) => {
                     setState({
                       ...state,
                       layers: {
@@ -352,7 +352,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
               {selectedColumn && selectedColumn.dataType === 'number' ? (
                 <FormatSelector
                   selectedColumn={selectedColumn}
-                  onChange={newFormat => {
+                  onChange={(newFormat) => {
                     setState(
                       updateColumnParam({
                         state,

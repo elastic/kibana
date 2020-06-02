@@ -189,9 +189,7 @@ export class APIKeysGridPage extends Component<Props, State> {
         id="xpack.security.management.apiKeys.table.apiKeysTableLoadingMessage"
         defaultMessage="Loading API keys…"
       />
-    ) : (
-      undefined
-    );
+    ) : undefined;
 
     const sorting = {
       sort: {
@@ -220,7 +218,7 @@ export class APIKeysGridPage extends Component<Props, State> {
           notifications={this.props.notifications}
           apiKeysAPIClient={this.props.apiKeysAPIClient}
         >
-          {invalidateApiKeyPrompt => {
+          {(invalidateApiKeyPrompt) => {
             return (
               <EuiButton
                 onClick={() =>
@@ -243,9 +241,7 @@ export class APIKeysGridPage extends Component<Props, State> {
             );
           }}
         </InvalidateProvider>
-      ) : (
-        undefined
-      ),
+      ) : undefined,
       toolsRight: (
         <EuiButton
           color="secondary"
@@ -276,7 +272,7 @@ export class APIKeysGridPage extends Component<Props, State> {
                   apiKeysMap[apiKey.username] = true;
                   return apiKeysMap;
                 }, {})
-              ).map(username => {
+              ).map((username) => {
                 return {
                   value: username,
                   view: username,
@@ -295,7 +291,7 @@ export class APIKeysGridPage extends Component<Props, State> {
                   apiKeysMap[apiKey.realm] = true;
                   return apiKeysMap;
                 }, {})
-              ).map(realm => {
+              ).map((realm) => {
                 return {
                   value: realm,
                   view: realm,
@@ -325,9 +321,7 @@ export class APIKeysGridPage extends Component<Props, State> {
 
             <EuiSpacer size="m" />
           </>
-        ) : (
-          undefined
-        )}
+        ) : undefined}
 
         {
           <EuiInMemoryTable
@@ -447,7 +441,7 @@ export class APIKeysGridPage extends Component<Props, State> {
                       notifications={this.props.notifications}
                       apiKeysAPIClient={this.props.apiKeysAPIClient}
                     >
-                      {invalidateApiKeyPrompt => {
+                      {(invalidateApiKeyPrompt) => {
                         return (
                           <EuiToolTip
                             content={i18n.translate(

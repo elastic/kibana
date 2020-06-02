@@ -13,8 +13,8 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
-import { Alert, SanitizedAlert } from '../../../../../alerting/common';
+import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
+import { Alert, SanitizedAlert } from '../../../../../alerts/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 
@@ -166,7 +166,7 @@ export interface ReadRuleParams {
 }
 
 export const isAlertTypes = (partialAlert: PartialAlert[]): partialAlert is RuleAlertType[] => {
-  return partialAlert.every(rule => isAlertType(rule));
+  return partialAlert.every((rule) => isAlertType(rule));
 };
 
 export const isAlertType = (partialAlert: PartialAlert): partialAlert is RuleAlertType => {
@@ -188,5 +188,5 @@ export const isRuleStatusFindType = (
 export const isRuleStatusFindTypes = (
   obj: unknown[] | undefined
 ): obj is Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>> => {
-  return obj ? obj.every(ruleStatus => isRuleStatusFindType(ruleStatus)) : false;
+  return obj ? obj.every((ruleStatus) => isRuleStatusFindType(ruleStatus)) : false;
 };

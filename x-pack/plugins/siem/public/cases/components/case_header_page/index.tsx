@@ -9,7 +9,7 @@ import React from 'react';
 import { HeaderPage, HeaderPageProps } from '../../../common/components/header_page';
 import * as i18n from './translations';
 
-const CaseHeaderPageComponent: React.FC<HeaderPageProps> = props => <HeaderPage {...props} />;
+const CaseHeaderPageComponent: React.FC<HeaderPageProps> = (props) => <HeaderPage {...props} />;
 
 CaseHeaderPageComponent.defaultProps = {
   badgeOptions: {

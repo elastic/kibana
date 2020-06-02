@@ -69,7 +69,7 @@ export const App = (deps: AppDeps) => {
         iconType="help"
       >
         {message}{' '}
-        <EuiLink href="#/management/elasticsearch/license_management/home">
+        <EuiLink href="#/management/stack/license_management/home">
           <FormattedMessage
             id="xpack.watcher.app.licenseErrorLinkText"
             defaultMessage="Manage your license."

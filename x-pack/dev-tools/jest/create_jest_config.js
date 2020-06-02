@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
+export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirectory }) {
   const fileMockPath = `${kibanaDirectory}/src/dev/jest/mocks/file_mock.js`;
   return {
-    rootDir: xPackKibanaDirectory,
+    rootDir,
     roots: ['<rootDir>/plugins', '<rootDir>/legacy/plugins', '<rootDir>/legacy/server'],
     moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
     moduleNameMapper: {
@@ -18,6 +18,7 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       'uiExports/(.*)': fileMockPath,
       '^src/core/(.*)': `${kibanaDirectory}/src/core/$1`,
       '^src/legacy/(.*)': `${kibanaDirectory}/src/legacy/$1`,
+      '^src/plugins/(.*)': `${kibanaDirectory}/src/plugins/$1`,
       '^plugins/([^/.]*)(.*)': `${kibanaDirectory}/src/legacy/core_plugins/$1/public$2`,
       '^legacy/plugins/xpack_main/(.*);': `${xPackKibanaDirectory}/legacy/plugins/xpack_main/public/$1`,
       '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': fileMockPath,
@@ -43,15 +44,15 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       '!**/plugins/apm/e2e/**',
     ],
     coveragePathIgnorePatterns: ['.*\\.d\\.ts'],
-    coverageDirectory: '<rootDir>/../target/kibana-coverage/jest',
+    coverageDirectory: `${kibanaDirectory}/target/kibana-coverage/jest`,
     coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html'],
     setupFiles: [
       `${kibanaDirectory}/src/dev/jest/setup/babel_polyfill.js`,
-      `<rootDir>/dev-tools/jest/setup/polyfills.js`,
-      `<rootDir>/dev-tools/jest/setup/enzyme.js`,
+      `${xPackKibanaDirectory}/dev-tools/jest/setup/polyfills.js`,
+      `${xPackKibanaDirectory}/dev-tools/jest/setup/enzyme.js`,
     ],
     setupFilesAfterEnv: [
-      `<rootDir>/dev-tools/jest/setup/setup_test.js`,
+      `${xPackKibanaDirectory}/dev-tools/jest/setup/setup_test.js`,
       `${kibanaDirectory}/src/dev/jest/setup/mocks.js`,
       `${kibanaDirectory}/src/dev/jest/setup/react_testing_library.js`,
     ],

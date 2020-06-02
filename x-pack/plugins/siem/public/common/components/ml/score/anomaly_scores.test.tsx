@@ -131,10 +131,7 @@ describe('anomaly_scores', () => {
         />
       </TestProviders>
     );
-    wrapper
-      .find('[data-test-subj="anomaly-score-popover"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="anomaly-score-popover"]').first().simulate('click');
     wrapper.update();
     expect(wrapper.find('[data-test-subj="anomaly-description-list"]').exists()).toEqual(true);
   });

@@ -68,7 +68,7 @@ export const UserActionTree = React.memo(
         if (!manageMarkdownEditIds.includes(id)) {
           setManangeMardownEditIds([...manageMarkdownEditIds, id]);
         } else {
-          setManangeMardownEditIds(manageMarkdownEditIds.filter(myId => id !== myId));
+          setManangeMardownEditIds(manageMarkdownEditIds.filter((myId) => id !== myId));
         }
       },
       [manageMarkdownEditIds]
@@ -187,7 +187,7 @@ export const UserActionTree = React.memo(
 
         {caseUserActions.map((action, index) => {
           if (action.commentId != null && action.action === 'create') {
-            const comment = caseData.comments.find(c => c.id === action.commentId);
+            const comment = caseData.comments.find((c) => c.id === action.commentId);
             if (comment != null) {
               return (
                 <UserActionItem

@@ -31,7 +31,7 @@ export const getHostsColumns = (): HostsTableColumns => [
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: hostName => {
+    render: (hostName) => {
       if (hostName != null && hostName.length > 0) {
         const id = escapeDataProviderId(`hosts-table-hostName-${hostName[0]}`);
         return (
@@ -75,7 +75,7 @@ export const getHostsColumns = (): HostsTableColumns => [
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: lastSeen => {
+    render: (lastSeen) => {
       if (lastSeen != null) {
         return <FormattedRelativePreferenceDate value={lastSeen} />;
       }
@@ -88,7 +88,7 @@ export const getHostsColumns = (): HostsTableColumns => [
     truncateText: false,
     hideForMobile: false,
     sortable: false,
-    render: hostOsName => {
+    render: (hostOsName) => {
       if (hostOsName != null) {
         return (
           <AddFilterToGlobalSearchBar filter={createFilter('host.os.name', hostOsName)}>
@@ -105,7 +105,7 @@ export const getHostsColumns = (): HostsTableColumns => [
     truncateText: false,
     hideForMobile: false,
     sortable: false,
-    render: hostOsVersion => {
+    render: (hostOsVersion) => {
       if (hostOsVersion != null) {
         return (
           <AddFilterToGlobalSearchBar filter={createFilter('host.os.version', hostOsVersion)}>

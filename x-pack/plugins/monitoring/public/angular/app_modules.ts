@@ -102,7 +102,7 @@ function createMonitoringAppConfigConstants(keys: MonitoringPluginDependencies['
 function createLocalStateModule(query: any) {
   angular
     .module('monitoring/State', ['monitoring/Private'])
-    .service('globalState', function(
+    .service('globalState', function (
       Private: IPrivate,
       $rootScope: ng.IRootScopeService,
       $location: ng.ILocationService
@@ -129,7 +129,7 @@ function createLocalStateModule(query: any) {
 function createLocalKbnUrlModule() {
   angular
     .module('monitoring/KbnUrl', ['monitoring/Private', 'ngRoute'])
-    .service('kbnUrl', function(Private: IPrivate) {
+    .service('kbnUrl', function (Private: IPrivate) {
       return Private(KbnUrlProvider);
     });
 }
@@ -137,22 +137,22 @@ function createLocalKbnUrlModule() {
 function createMonitoringAppServices() {
   angular
     .module('monitoring/services', ['monitoring/Private'])
-    .service('breadcrumbs', function(Private: IPrivate) {
+    .service('breadcrumbs', function (Private: IPrivate) {
       return Private(breadcrumbsProvider);
     })
-    .service('monitoringClusters', function(Private: IPrivate) {
+    .service('monitoringClusters', function (Private: IPrivate) {
       return Private(monitoringClustersProvider);
     })
-    .service('$executor', function(Private: IPrivate) {
+    .service('$executor', function (Private: IPrivate) {
       return Private(executorProvider);
     })
-    .service('features', function(Private: IPrivate) {
+    .service('features', function (Private: IPrivate) {
       return Private(featuresProvider);
     })
-    .service('license', function(Private: IPrivate) {
+    .service('license', function (Private: IPrivate) {
       return Private(licenseProvider);
     })
-    .service('title', function(Private: IPrivate) {
+    .service('title', function (Private: IPrivate) {
       return Private(titleProvider);
     });
 }
@@ -169,24 +169,24 @@ function createMonitoringAppDirectives() {
 function createMonitoringAppFilters() {
   angular
     .module('monitoring/filters', [])
-    .filter('capitalize', function() {
-      return function(input: string) {
+    .filter('capitalize', function () {
+      return function (input: string) {
         return capitalize(input?.toLowerCase());
       };
     })
-    .filter('formatNumber', function() {
+    .filter('formatNumber', function () {
       return formatNumber;
     })
-    .filter('formatMetric', function() {
+    .filter('formatMetric', function () {
       return formatMetric;
     })
-    .filter('extractIp', function() {
+    .filter('extractIp', function () {
       return extractIp;
     });
 }
 
 function createLocalConfigModule(core: MonitoringPluginDependencies['core']) {
-  angular.module('monitoring/Config', []).provider('config', function() {
+  angular.module('monitoring/Config', []).provider('config', function () {
     return {
       $get: () => ({
         get: (key: string) => core.uiSettings?.get(key),
@@ -198,13 +198,13 @@ function createLocalConfigModule(core: MonitoringPluginDependencies['core']) {
 function createLocalStorage() {
   angular
     .module('monitoring/Storage', [])
-    .service('localStorage', function($window: IWindowService) {
+    .service('localStorage', function ($window: IWindowService) {
       return new Storage($window.localStorage);
     })
-    .service('sessionStorage', function($window: IWindowService) {
+    .service('sessionStorage', function ($window: IWindowService) {
       return new Storage($window.sessionStorage);
     })
-    .service('sessionTimeout', function() {
+    .service('sessionTimeout', function () {
       return {};
     });
 }
@@ -230,12 +230,12 @@ function createLocalI18nModule() {
 
 function createHrefModule(core: AppMountContext['core']) {
   const name: string = 'kbnHref';
-  angular.module('monitoring/href', []).directive(name, function() {
+  angular.module('monitoring/href', []).directive(name, function () {
     return {
       restrict: 'A',
       link: {
         pre: (_$scope, _$el, $attr) => {
-          $attr.$observe(name, val => {
+          $attr.$observe(name, (val) => {
             if (val) {
               const url = getSafeForExternalLink(val as string);
               $attr.$set('href', core.http.basePath.prepend(url));

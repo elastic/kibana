@@ -50,10 +50,7 @@ describe('Flyout', () => {
       );
 
       expect(
-        wrapper
-          .find('[data-test-subj="flyout-button-not-ready-to-drop"]')
-          .first()
-          .text()
+        wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').first().text()
       ).toContain('Timeline');
     });
 
@@ -115,12 +112,7 @@ describe('Flyout', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="badge"]')
-          .first()
-          .text()
-      ).toContain('10');
+      expect(wrapper.find('[data-test-subj="badge"]').first().text()).toContain('10');
     });
 
     test('it hides the data providers badge when the timeline does NOT have data providers', () => {
@@ -130,12 +122,9 @@ describe('Flyout', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="badge"]')
-          .first()
-          .props().style!.visibility
-      ).toEqual('hidden');
+      expect(wrapper.find('[data-test-subj="badge"]').first().props().style!.visibility).toEqual(
+        'hidden'
+      );
     });
 
     test('it does NOT hide the data providers badge when the timeline has data providers', () => {
@@ -156,12 +145,9 @@ describe('Flyout', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="badge"]')
-          .first()
-          .props().style!.visibility
-      ).toEqual('inherit');
+      expect(wrapper.find('[data-test-subj="badge"]').first().props().style!.visibility).toEqual(
+        'inherit'
+      );
     });
 
     test('should call the onOpen when the mouse is clicked for rendering', () => {
@@ -180,10 +166,7 @@ describe('Flyout', () => {
         </TestProviders>
       );
 
-      wrapper
-        .find('[data-test-subj="flyoutOverlay"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="flyoutOverlay"]').first().simulate('click');
 
       expect(showTimeline).toBeCalled();
     });
@@ -237,10 +220,7 @@ describe('Flyout', () => {
         </TestProviders>
       );
       expect(
-        wrapper
-          .find('[data-test-subj="flyout-button-not-ready-to-drop"]')
-          .first()
-          .text()
+        wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').first().text()
       ).toContain('Timeline');
     });
 
@@ -256,10 +236,7 @@ describe('Flyout', () => {
           />
         </TestProviders>
       );
-      wrapper
-        .find('[data-test-subj="flyoutOverlay"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="flyoutOverlay"]').first().simulate('click');
 
       expect(openMock).toBeCalled();
     });

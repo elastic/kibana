@@ -10,7 +10,7 @@ import { mockIndexPattern } from '../../mock/index_pattern';
 import { useUpdateKql } from './use_update_kql';
 
 const mockDispatch = jest.fn();
-mockDispatch.mockImplementation(fn => fn);
+mockDispatch.mockImplementation((fn) => fn);
 
 const applyTimelineKqlMock: jest.Mock = (dispatchApplyTimelineFilterQuery as unknown) as jest.Mock;
 

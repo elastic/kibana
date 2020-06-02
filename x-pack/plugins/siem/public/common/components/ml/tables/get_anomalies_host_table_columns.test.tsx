@@ -52,7 +52,7 @@ describe('get_anomalies_host_table_columns', () => {
       interval,
       narrowDateRange
     );
-    expect(columns.some(col => col.name === i18n.HOST_NAME)).toEqual(true);
+    expect(columns.some((col) => col.name === i18n.HOST_NAME)).toEqual(true);
   });
 
   test('on host details page, we should not have Host Name', () => {
@@ -63,7 +63,7 @@ describe('get_anomalies_host_table_columns', () => {
       interval,
       narrowDateRange
     );
-    expect(columns.some(col => col.name === i18n.HOST_NAME)).toEqual(false);
+    expect(columns.some((col) => col.name === i18n.HOST_NAME)).toEqual(false);
   });
 
   test('on host page, we should escape the draggable id', () => {
@@ -74,7 +74,10 @@ describe('get_anomalies_host_table_columns', () => {
       interval,
       narrowDateRange
     );
-    const column = columns.find(col => col.name === i18n.SCORE) as Columns<string, AnomaliesByHost>;
+    const column = columns.find((col) => col.name === i18n.SCORE) as Columns<
+      string,
+      AnomaliesByHost
+    >;
     const anomaly: AnomaliesByHost = {
       hostName: 'host.name',
       anomaly: {
@@ -132,7 +135,7 @@ describe('get_anomalies_host_table_columns', () => {
       interval,
       narrowDateRange
     );
-    const column = columns.find(col => col.name === i18n.INFLUENCED_BY) as Columns<
+    const column = columns.find((col) => col.name === i18n.INFLUENCED_BY) as Columns<
       Anomaly['influencers'],
       AnomaliesByHost
     >;

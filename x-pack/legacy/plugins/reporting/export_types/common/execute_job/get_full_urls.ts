@@ -12,7 +12,7 @@ import {
 } from 'url';
 import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
 import { validateUrls } from '../../../common/validate_urls';
-import { ReportingConfig } from '../../../server/types';
+import { ReportingConfig } from '../../../server';
 import { JobDocPayloadPNG } from '../../png/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
@@ -58,7 +58,7 @@ export function getFullUrls<JobDocPayloadType>({
 
   validateUrls(relativeUrls);
 
-  const urls = relativeUrls.map(relativeUrl => {
+  const urls = relativeUrls.map((relativeUrl) => {
     const parsedRelative: UrlWithStringQuery = urlParse(relativeUrl);
     const jobUrl = getAbsoluteUrl({
       basePath: job.basePath,

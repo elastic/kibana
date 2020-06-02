@@ -65,7 +65,7 @@ const FormattedFieldValueComponent: React.FC<{
         <FormattedDate fieldName={fieldName} value={value} />
       </DefaultDraggable>
     );
-  } else if (PORT_NAMES.some(portName => fieldName === portName)) {
+  } else if (PORT_NAMES.some((portName) => fieldName === portName)) {
     return (
       <Port contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
     );

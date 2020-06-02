@@ -110,7 +110,7 @@ export const ruleStatusServiceFactory = async ({
 
       // drop oldest failures
       const oldStatuses = [newStatus, ...ruleStatuses].slice(MAX_RULE_STATUSES);
-      await Promise.all(oldStatuses.map(status => ruleStatusClient.delete(status.id)));
+      await Promise.all(oldStatuses.map((status) => ruleStatusClient.delete(status.id)));
     },
   };
 };

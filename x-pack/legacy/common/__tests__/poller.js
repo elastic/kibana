@@ -36,12 +36,12 @@ describe('Poller', () => {
     await Promise.resolve();
   };
 
-  const allowPoll = async interval => {
+  const allowPoll = async (interval) => {
     await queueNextPoll();
     clock.tick(interval);
   };
 
-  const allowDelayPoll = async interval => {
+  const allowDelayPoll = async (interval) => {
     clock.tick(interval);
     await queueNextPoll();
   };

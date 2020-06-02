@@ -4,42 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HeadlessChromiumDriver } from '../../../server/browsers/chromium/driver';
-import { LevelLogger } from '../../../server/lib';
+import { PageSizeParams, PdfImageSize, Size } from './';
 
 export interface ViewZoomWidthHeight {
   zoom: number;
   width: number;
   height: number;
 }
-
-export interface PageSizeParams {
-  pageMarginTop: number;
-  pageMarginBottom: number;
-  pageMarginWidth: number;
-  tableBorderWidth: number;
-  headingHeight: number;
-  subheadingHeight: number;
-}
-
-export interface LayoutSelectorDictionary {
-  screenshot: string;
-  renderComplete: string;
-  itemsCountAttribute: string;
-  timefilterDurationAttribute: string;
-}
-
-export interface PdfImageSize {
-  width: number;
-  height?: number;
-}
-
-export const getDefaultLayoutSelectors = (): LayoutSelectorDictionary => ({
-  screenshot: '[data-shared-items-container]',
-  renderComplete: '[data-shared-item]',
-  itemsCountAttribute: 'data-shared-items-count',
-  timefilterDurationAttribute: 'data-shared-timefilter-duration',
-});
 
 export abstract class Layout {
   public id: string = '';
@@ -62,22 +33,3 @@ export abstract class Layout {
 
   public abstract getCssOverridesPath(): string;
 }
-
-export interface Size {
-  width: number;
-  height: number;
-}
-
-export interface LayoutParams {
-  id: string;
-  dimensions: Size;
-}
-
-interface LayoutSelectors {
-  // Fields that are not part of Layout: the instances
-  // independently implement these fields on their own
-  selectors: LayoutSelectorDictionary;
-  positionElements?: (browser: HeadlessChromiumDriver, logger: LevelLogger) => Promise<void>;
-}
-
-export type LayoutInstance = Layout & LayoutSelectors & Size;

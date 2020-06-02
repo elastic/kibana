@@ -19,4 +19,10 @@ export const createMockConfig = () => ({
   maxRuleImportPayloadBytes: 10485760,
   maxTimelineImportExportSize: 10000,
   maxTimelineImportPayloadBytes: 10485760,
+  endpointResultListDefaultFirstPageIndex: 0,
+  endpointResultListDefaultPageSize: 10,
+  alertResultListDefaultDateRange: {
+    from: 'now-15m',
+    to: 'now',
+  },
 });

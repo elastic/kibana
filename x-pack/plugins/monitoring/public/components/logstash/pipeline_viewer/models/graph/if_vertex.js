@@ -29,19 +29,19 @@ export class IfVertex extends Vertex {
   }
 
   get trueEdge() {
-    return this.outgoingEdges.find(e => e.when === true);
+    return this.outgoingEdges.find((e) => e.when === true);
   }
 
   get trueEdges() {
-    return this.outgoingEdges.filter(e => e.when === true);
+    return this.outgoingEdges.filter((e) => e.when === true);
   }
 
   get falseEdge() {
-    return this.outgoingEdges.find(e => e.when === false);
+    return this.outgoingEdges.find((e) => e.when === false);
   }
 
   get falseEdges() {
-    return this.outgoingEdges.filter(e => e.when === false);
+    return this.outgoingEdges.filter((e) => e.when === false);
   }
 
   get trueOutgoingVertex() {
@@ -49,7 +49,7 @@ export class IfVertex extends Vertex {
   }
 
   get trueOutgoingVertices() {
-    return this.trueEdges.map(e => e.to);
+    return this.trueEdges.map((e) => e.to);
   }
 
   get falseOutgoingVertex() {
@@ -57,7 +57,7 @@ export class IfVertex extends Vertex {
   }
 
   get falseOutgoingVertices() {
-    return this.falseEdges.map(e => e.to);
+    return this.falseEdges.map((e) => e.to);
   }
 
   get next() {

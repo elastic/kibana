@@ -27,12 +27,7 @@ describe('ConnectorsDropdown', () => {
   });
 
   test('it renders', () => {
-    expect(
-      wrapper
-        .find('[data-test-subj="dropdown-connectors"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="dropdown-connectors"]').first().exists()).toBe(true);
   });
 
   test('it formats the connectors correctly', () => {
@@ -62,10 +57,7 @@ describe('ConnectorsDropdown', () => {
     });
 
     expect(
-      newWrapper
-        .find('[data-test-subj="dropdown-connectors"]')
-        .first()
-        .prop('disabled')
+      newWrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('disabled')
     ).toEqual(true);
   });
 
@@ -75,10 +67,7 @@ describe('ConnectorsDropdown', () => {
     });
 
     expect(
-      newWrapper
-        .find('[data-test-subj="dropdown-connectors"]')
-        .first()
-        .prop('isLoading')
+      newWrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('isLoading')
     ).toEqual(true);
   });
 

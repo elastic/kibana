@@ -51,3 +51,11 @@ export const MARKDOWN_HINT_STRIKETHROUGH = i18n.translate(
 export const MARKDOWN_HINT_IMAGE_URL = i18n.translate('xpack.siem.markdown.hint.imageUrlLabel', {
   defaultMessage: '![image](url)',
 });
+
+export const TIMELINE_ID = (timelineId: string) =>
+  i18n.translate('xpack.siem.markdown.toolTip.timelineId', {
+    defaultMessage: 'Timeline id: { timelineId }',
+    values: {
+      timelineId,
+    },
+  });

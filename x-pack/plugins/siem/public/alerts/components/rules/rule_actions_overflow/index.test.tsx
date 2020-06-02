@@ -55,10 +55,7 @@ describe('RuleActionsOverflow', () => {
       wrapper.find('[data-test-subj="rules-details-popover-button-icon"] button').simulate('click');
       wrapper.update();
       expect(
-        wrapper
-          .find('[data-test-subj="rules-details-menu-panel"]')
-          .first()
-          .prop('items')
+        wrapper.find('[data-test-subj="rules-details-menu-panel"]').first().prop('items')
       ).toEqual([]);
     });
 
@@ -67,10 +64,7 @@ describe('RuleActionsOverflow', () => {
       wrapper.find('[data-test-subj="rules-details-popover-button-icon"] button').simulate('click');
       wrapper.update();
       expect(
-        wrapper
-          .find('[data-test-subj="rules-details-menu-panel"]')
-          .first()
-          .prop('items')
+        wrapper.find('[data-test-subj="rules-details-menu-panel"]').first().prop('items')
       ).toEqual([]);
     });
 
@@ -81,10 +75,7 @@ describe('RuleActionsOverflow', () => {
       wrapper.find('[data-test-subj="rules-details-popover-button-icon"] button').simulate('click');
       wrapper.update();
       expect(
-        wrapper
-          .find('[data-test-subj="rules-details-popover"]')
-          .first()
-          .prop('isOpen')
+        wrapper.find('[data-test-subj="rules-details-popover"]').first().prop('isOpen')
       ).toEqual(true);
     });
   });
@@ -97,10 +88,7 @@ describe('RuleActionsOverflow', () => {
       wrapper.find('[data-test-subj="rules-details-popover-button-icon"] button').simulate('click');
       wrapper.update();
       expect(
-        wrapper
-          .find('[data-test-subj="rules-details-popover"]')
-          .first()
-          .prop('isOpen')
+        wrapper.find('[data-test-subj="rules-details-popover"]').first().prop('isOpen')
       ).toEqual(false);
     });
   });
@@ -123,10 +111,7 @@ describe('RuleActionsOverflow', () => {
       wrapper.find('[data-test-subj="rules-details-popover-button-icon"] button').simulate('click');
       wrapper.update();
       expect(
-        wrapper
-          .find('[data-test-subj="rules-details-popover"]')
-          .first()
-          .prop('isOpen')
+        wrapper.find('[data-test-subj="rules-details-popover"]').first().prop('isOpen')
       ).toEqual(true);
     });
 
@@ -139,10 +124,7 @@ describe('RuleActionsOverflow', () => {
       wrapper.find('[data-test-subj="rules-details-duplicate-rule"] button').simulate('click');
       wrapper.update();
       expect(
-        wrapper
-          .find('[data-test-subj="rules-details-popover"]')
-          .first()
-          .prop('isOpen')
+        wrapper.find('[data-test-subj="rules-details-popover"]').first().prop('isOpen')
       ).toEqual(false);
     });
 
@@ -193,10 +175,7 @@ describe('RuleActionsOverflow', () => {
       wrapper.find('[data-test-subj="rules-details-export-rule"] button').simulate('click');
       wrapper.update();
       expect(
-        wrapper
-          .find('[data-test-subj="rules-details-popover"]')
-          .first()
-          .prop('isOpen')
+        wrapper.find('[data-test-subj="rules-details-popover"]').first().prop('isOpen')
       ).toEqual(false);
     });
 
@@ -221,10 +200,7 @@ describe('RuleActionsOverflow', () => {
       wrapper.find('[data-test-subj="rules-details-export-rule"] button').simulate('click');
       wrapper.update();
       expect(
-        wrapper
-          .find('[data-test-subj="rules-details-popover"]')
-          .first()
-          .prop('isOpen')
+        wrapper.find('[data-test-subj="rules-details-popover"]').first().prop('isOpen')
       ).toEqual(true);
     });
 
@@ -262,10 +238,7 @@ describe('RuleActionsOverflow', () => {
       wrapper.find('[data-test-subj="rules-details-delete-rule"] button').simulate('click');
       wrapper.update();
       expect(
-        wrapper
-          .find('[data-test-subj="rules-details-popover"]')
-          .first()
-          .prop('isOpen')
+        wrapper.find('[data-test-subj="rules-details-popover"]').first().prop('isOpen')
       ).toEqual(false);
     });
 

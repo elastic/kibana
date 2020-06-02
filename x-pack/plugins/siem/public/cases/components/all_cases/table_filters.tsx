@@ -45,7 +45,7 @@ const CasesTableFiltersComponent = ({
   setFilterRefetch,
 }: CasesTableFiltersProps) => {
   const [selectedReporters, setSelectedReporters] = useState(
-    initial.reporters.map(r => r.full_name ?? r.username ?? '')
+    initial.reporters.map((r) => r.full_name ?? r.username ?? '')
   );
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
@@ -63,23 +63,23 @@ const CasesTableFiltersComponent = ({
   }, [refetch, setFilterRefetch]);
   useEffect(() => {
     if (selectedReporters.length) {
-      const newReporters = selectedReporters.filter(r => reporters.includes(r));
+      const newReporters = selectedReporters.filter((r) => reporters.includes(r));
       handleSelectedReporters(newReporters);
     }
   }, [reporters]);
   useEffect(() => {
     if (selectedTags.length) {
-      const newTags = selectedTags.filter(t => tags.includes(t));
+      const newTags = selectedTags.filter((t) => tags.includes(t));
       handleSelectedTags(newTags);
     }
   }, [tags]);
 
   const handleSelectedReporters = useCallback(
-    newReporters => {
+    (newReporters) => {
       if (!isEqual(newReporters, selectedReporters)) {
         setSelectedReporters(newReporters);
         const reportersObj = respReporters.filter(
-          r => newReporters.includes(r.username) || newReporters.includes(r.full_name)
+          (r) => newReporters.includes(r.username) || newReporters.includes(r.full_name)
         );
         onFilterChanged({ reporters: reportersObj });
       }
@@ -88,7 +88,7 @@ const CasesTableFiltersComponent = ({
   );
 
   const handleSelectedTags = useCallback(
-    newTags => {
+    (newTags) => {
       if (!isEqual(newTags, selectedTags)) {
         setSelectedTags(newTags);
         onFilterChanged({ tags: newTags });
@@ -97,7 +97,7 @@ const CasesTableFiltersComponent = ({
     [selectedTags]
   );
   const handleOnSearch = useCallback(
-    newSearch => {
+    (newSearch) => {
       const trimSearch = newSearch.trim();
       if (!isEqual(trimSearch, search)) {
         setSearch(trimSearch);
@@ -107,7 +107,7 @@ const CasesTableFiltersComponent = ({
     [search]
   );
   const handleToggleFilter = useCallback(
-    showOpen => {
+    (showOpen) => {
       if (showOpen !== showOpenCases) {
         setShowOpenCases(showOpen);
         onFilterChanged({ status: showOpen ? 'open' : 'closed' });

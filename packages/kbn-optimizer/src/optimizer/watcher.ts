@@ -43,7 +43,7 @@ export class Watcher {
   static using<T>(fn: (watcher: Watcher) => Rx.Observable<T>) {
     return Rx.using(
       () => new Watcher(),
-      resource => fn(resource as Watcher)
+      (resource) => fn(resource as Watcher)
     );
   }
 
@@ -69,14 +69,14 @@ export class Watcher {
       // debounce and bufffer change events for 1 second to create
       // final change notification
       this.change$.pipe(
-        map(event => event[0]),
+        map((event) => event[0]),
         debounceTimeBuffer(1000),
         map(
           (changes): Changes => ({
             type: 'changes',
-            bundles: bundles.filter(bundle => {
+            bundles: bundles.filter((bundle) => {
               const referencedFiles = bundle.cache.getReferencedFiles();
-              return changes.some(change => referencedFiles?.includes(change));
+              return changes.some((change) => referencedFiles?.includes(change));
             }),
           })
         ),

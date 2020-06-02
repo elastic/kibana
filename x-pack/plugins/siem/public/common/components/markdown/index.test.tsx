@@ -19,23 +19,14 @@ describe('Markdown', () => {
     const raw = 'this has no special markdown formatting';
     const wrapper = mount(<Markdown raw={raw} />);
 
-    expect(
-      wrapper
-        .find('[data-test-subj="markdown-root"]')
-        .first()
-        .text()
-    ).toEqual(raw);
+    expect(wrapper.find('[data-test-subj="markdown-root"]').first().text()).toEqual(raw);
   });
 
   test('it applies the EUI text style to all markdown content', () => {
     const wrapper = mount(<Markdown raw={'#markdown'} />);
 
     expect(
-      wrapper
-        .find('[data-test-subj="markdown-root"]')
-        .first()
-        .childAt(0)
-        .hasClass('euiText')
+      wrapper.find('[data-test-subj="markdown-root"]').first().childAt(0).hasClass('euiText')
     ).toBe(true);
   });
 
@@ -48,25 +39,16 @@ describe('Markdown', () => {
     test('it applies EUI table styling to tables', () => {
       const wrapper = mount(<Markdown raw={rawTable} />);
 
-      expect(
-        wrapper
-          .find('table')
-          .first()
-          .childAt(0)
-          .hasClass('euiTable')
-      ).toBe(true);
+      expect(wrapper.find('table').first().childAt(0).hasClass('euiTable')).toBe(true);
     });
 
-    headerColumns.forEach(headerText => {
+    headerColumns.forEach((headerText) => {
       test(`it renders the "${headerText}" table header`, () => {
         const wrapper = mount(<Markdown raw={rawTable} />);
 
-        expect(
-          wrapper
-            .find('[data-test-subj="markdown-table-header"]')
-            .first()
-            .text()
-        ).toContain(headerText);
+        expect(wrapper.find('[data-test-subj="markdown-table-header"]').first().text()).toContain(
+          headerText
+        );
       });
     });
 
@@ -107,62 +89,76 @@ describe('Markdown', () => {
     test('it renders the expected link text', () => {
       const wrapper = mount(<Markdown raw={markdownWithLink} />);
 
-      expect(
-        wrapper
-          .find('[data-test-subj="markdown-link"]')
-          .first()
-          .text()
-      ).toEqual('External Site');
+      expect(wrapper.find('[data-test-subj="markdown-link"]').first().text()).toEqual(
+        'External Site'
+      );
     });
 
     test('it renders the expected href', () => {
       const wrapper = mount(<Markdown raw={markdownWithLink} />);
 
-      expect(
-        wrapper
-          .find('[data-test-subj="markdown-link"]')
-          .first()
-          .getDOMNode()
-      ).toHaveProperty('href', 'https://google.com/');
+      expect(wrapper.find('[data-test-subj="markdown-link"]').first().getDOMNode()).toHaveProperty(
+        'href',
+        'https://google.com/'
+      );
     });
 
     test('it does NOT render the href if links are disabled', () => {
       const wrapper = mount(<Markdown disableLinks={true} raw={markdownWithLink} />);
 
       expect(
-        wrapper
-          .find('[data-test-subj="markdown-link"]')
-          .first()
-          .getDOMNode()
+        wrapper.find('[data-test-subj="markdown-link"]').first().getDOMNode()
       ).not.toHaveProperty('href');
     });
 
     test('it opens links in a new tab via target="_blank"', () => {
       const wrapper = mount(<Markdown raw={markdownWithLink} />);
 
-      expect(
-        wrapper
-          .find('[data-test-subj="markdown-link"]')
-          .first()
-          .getDOMNode()
-      ).toHaveProperty('target', '_blank');
+      expect(wrapper.find('[data-test-subj="markdown-link"]').first().getDOMNode()).toHaveProperty(
+        'target',
+        '_blank'
+      );
     });
 
     test('it sets the link `rel` attribute to `noopener` to prevent the new page from accessing `window.opener`, `nofollow` to note the link is not endorsed by us, and noreferrer to prevent the browser from sending the current address', () => {
       const wrapper = mount(<Markdown raw={markdownWithLink} />);
 
-      expect(
-        wrapper
-          .find('[data-test-subj="markdown-link"]')
-          .first()
-          .getDOMNode()
-      ).toHaveProperty('rel', 'nofollow noopener noreferrer');
+      expect(wrapper.find('[data-test-subj="markdown-link"]').first().getDOMNode()).toHaveProperty(
+        'rel',
+        'nofollow noopener noreferrer'
+      );
     });
 
     test('it renders the expected content containing a link', () => {
       const wrapper = shallow(<Markdown raw={markdownWithLink} />);
 
       expect(wrapper).toMatchSnapshot();
+    });
+
+    describe('markdown timeline links', () => {
+      const timelineId = '1e10f150-949b-11ea-b63c-2bc51864784c';
+      const markdownWithTimelineLink = `A link to a timeline [timeline](http://localhost:5601/app/siem#/timelines?timeline=(id:'${timelineId}',isOpen:!t))`;
+      const onClickTimeline = jest.fn();
+      beforeEach(() => {
+        jest.resetAllMocks();
+      });
+      test('it renders a timeline link without href when provided the onClickTimeline argument', () => {
+        const wrapper = mount(
+          <Markdown raw={markdownWithTimelineLink} onClickTimeline={onClickTimeline} />
+        );
+
+        expect(
+          wrapper.find('[data-test-subj="markdown-timeline-link"]').first().getDOMNode()
+        ).not.toHaveProperty('href');
+      });
+      test('timeline link onClick calls onClickTimeline with timelineId', () => {
+        const wrapper = mount(
+          <Markdown raw={markdownWithTimelineLink} onClickTimeline={onClickTimeline} />
+        );
+        wrapper.find('[data-test-subj="markdown-timeline-link"]').first().simulate('click');
+
+        expect(onClickTimeline).toHaveBeenCalledWith(timelineId);
+      });
     });
   });
 });

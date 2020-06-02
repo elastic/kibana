@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { CreateSection, RegisterManagementAppArgs } from './types';
+import { ReactElement } from 'react';
+
+import { CreateSection, RegisterManagementAppArgs, ManagementSectionId } from './types';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 import { StartServicesAccessor } from '../../../core/public';
 // @ts-ignore
@@ -25,8 +27,8 @@ import { LegacyManagementSection } from './legacy';
 import { ManagementApp } from './management_app';
 
 export class ManagementSection {
-  public readonly id: string = '';
-  public readonly title: string = '';
+  public readonly id: ManagementSectionId;
+  public readonly title: string | ReactElement = '';
   public readonly apps: ManagementApp[] = [];
   public readonly order: number;
   public readonly euiIconType?: string;
@@ -70,9 +72,9 @@ export class ManagementSection {
     return app;
   }
   getApp(id: ManagementApp['id']) {
-    return this.apps.find(app => app.id === id);
+    return this.apps.find((app) => app.id === id);
   }
   getAppsEnabled() {
-    return this.apps.filter(app => app.enabled).sort((a, b) => a.order - b.order);
+    return this.apps.filter((app) => app.enabled).sort((a, b) => a.order - b.order);
   }
 }

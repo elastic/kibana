@@ -95,14 +95,14 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
 
   const hasExpressionErrors = !!Object.keys(errors).find(
-    errorKey =>
+    (errorKey) =>
       expressionFieldsWithValidation.includes(errorKey) &&
       errors[errorKey].length >= 1 &&
       (alertParams as { [key: string]: any })[errorKey] !== undefined
   );
 
   const canShowVizualization = !!Object.keys(errors).find(
-    errorKey => expressionFieldsWithValidation.includes(errorKey) && errors[errorKey].length >= 1
+    (errorKey) => expressionFieldsWithValidation.includes(errorKey) && errors[errorKey].length >= 1
   );
 
   const expressionErrorMessage = i18n.translate(
@@ -192,9 +192,9 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
               onChange={async (selected: EuiComboBoxOptionOption[]) => {
                 setAlertParams(
                   'index',
-                  selected.map(aSelected => aSelected.value)
+                  selected.map((aSelected) => aSelected.value)
                 );
-                const indices = selected.map(s => s.value as string);
+                const indices = selected.map((s) => s.value as string);
 
                 // reset time field and expression fields if indices are deleted
                 if (indices.length === 0) {
@@ -219,7 +219,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
                 setEsFields(currentEsFields);
                 setTimeFieldOptions([firstFieldOption, ...timeFields]);
               }}
-              onSearchChange={async search => {
+              onSearchChange={async (search) => {
                 setIsIndiciesLoading(true);
                 setIndexOptions(await getIndexOptions(http, search, indexPatterns));
                 setIsIndiciesLoading(false);
@@ -252,7 +252,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
               name="thresholdTimeField"
               data-test-subj="thresholdAlertTimeFieldSelect"
               value={timeField}
-              onChange={e => {
+              onChange={(e) => {
                 setAlertParams('timeField', e.target.value);
               }}
               onBlur={() => {
@@ -367,13 +367,13 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
                 termSize={termSize}
                 errors={errors}
                 fields={esFields}
-                onChangeSelectedGroupBy={selectedGroupBy =>
+                onChangeSelectedGroupBy={(selectedGroupBy) =>
                   setAlertParams('groupBy', selectedGroupBy)
                 }
-                onChangeSelectedTermField={selectedTermField =>
+                onChangeSelectedTermField={(selectedTermField) =>
                   setAlertParams('termField', selectedTermField)
                 }
-                onChangeSelectedTermSize={selectedTermSize =>
+                onChangeSelectedTermSize={(selectedTermSize) =>
                   setAlertParams('termSize', selectedTermSize)
                 }
               />
@@ -395,10 +395,10 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
                 threshold={threshold}
                 errors={errors}
                 popupPosition={'upLeft'}
-                onChangeSelectedThreshold={selectedThresholds =>
+                onChangeSelectedThreshold={(selectedThresholds) =>
                   setAlertParams('threshold', selectedThresholds)
                 }
-                onChangeSelectedThresholdComparator={selectedThresholdComparator =>
+                onChangeSelectedThresholdComparator={(selectedThresholdComparator) =>
                   setAlertParams('thresholdComparator', selectedThresholdComparator)
                 }
               />

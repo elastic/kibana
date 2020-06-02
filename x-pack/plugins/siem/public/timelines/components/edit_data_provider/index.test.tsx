@@ -39,12 +39,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="field"]')
-        .first()
-        .text()
-    ).toEqual(field);
+    expect(wrapper.find('[data-test-subj="field"]').first().text()).toEqual(field);
   });
 
   test('it renders the expected placeholder for the current field when field is empty', () => {
@@ -64,12 +59,9 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="field"]')
-        .first()
-        .props().placeholder
-    ).toEqual('Select a field');
+    expect(wrapper.find('[data-test-subj="field"]').first().props().placeholder).toEqual(
+      'Select a field'
+    );
   });
 
   test('it renders the "is" operator in a humanized format', () => {
@@ -89,12 +81,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="operator"]')
-        .first()
-        .text()
-    ).toEqual('is');
+    expect(wrapper.find('[data-test-subj="operator"]').first().text()).toEqual('is');
   });
 
   test('it renders the negated "is" operator in a humanized format when isExcluded is true', () => {
@@ -114,12 +101,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="operator"]')
-        .first()
-        .text()
-    ).toEqual('is not');
+    expect(wrapper.find('[data-test-subj="operator"]').first().text()).toEqual('is not');
   });
 
   test('it renders the "exists" operator in human-readable format', () => {
@@ -139,12 +121,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="operator"]')
-        .first()
-        .text()
-    ).toEqual('exists');
+    expect(wrapper.find('[data-test-subj="operator"]').first().text()).toEqual('exists');
   });
 
   test('it renders the negated "exists" operator in a humanized format when isExcluded is true', () => {
@@ -164,12 +141,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="operator"]')
-        .first()
-        .text()
-    ).toEqual('does not exist');
+    expect(wrapper.find('[data-test-subj="operator"]').first().text()).toEqual('does not exist');
   });
 
   test('it renders the current value when the operator is "is"', () => {
@@ -189,12 +161,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="value"]')
-        .first()
-        .props().value
-    ).toEqual(value);
+    expect(wrapper.find('[data-test-subj="value"]').first().props().value).toEqual(value);
   });
 
   test('it renders the current value when the type of value is an array', () => {
@@ -216,12 +183,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="value"]')
-        .first()
-        .props().value
-    ).toEqual(value);
+    expect(wrapper.find('[data-test-subj="value"]').first().props().value).toEqual(value);
   });
 
   test('it does NOT render the current value when the operator is "is not" (isExcluded is true)', () => {
@@ -241,12 +203,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="value"]')
-        .first()
-        .props().value
-    ).toEqual(value);
+    expect(wrapper.find('[data-test-subj="value"]').first().props().value).toEqual(value);
   });
 
   test('it renders the expected placeholder when value is empty', () => {
@@ -266,12 +223,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="value"]')
-        .first()
-        .props().placeholder
-    ).toEqual('value');
+    expect(wrapper.find('[data-test-subj="value"]').first().props().placeholder).toEqual('value');
   });
 
   test('it does NOT render value when the operator is "exists"', () => {
@@ -331,10 +283,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    const props = wrapper
-      .find('[data-test-subj="save"]')
-      .first()
-      .props() as HasIsDisabled;
+    const props = wrapper.find('[data-test-subj="save"]').first().props() as HasIsDisabled;
 
     expect(props.isDisabled).toBe(false);
   });
@@ -356,10 +305,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    const props = wrapper
-      .find('[data-test-subj="save"]')
-      .first()
-      .props() as HasIsDisabled;
+    const props = wrapper.find('[data-test-subj="save"]').first().props() as HasIsDisabled;
 
     expect(props.isDisabled).toBe(true);
   });
@@ -381,10 +327,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    const props = wrapper
-      .find('[data-test-subj="save"]')
-      .first()
-      .props() as HasIsDisabled;
+    const props = wrapper.find('[data-test-subj="save"]').first().props() as HasIsDisabled;
 
     expect(props.isDisabled).toBe(true);
   });
@@ -408,10 +351,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    wrapper
-      .find('[data-test-subj="save"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="save"]').first().simulate('click');
 
     wrapper.update();
 

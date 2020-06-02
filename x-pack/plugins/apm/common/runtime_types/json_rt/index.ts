@@ -10,12 +10,12 @@ export const jsonRt = new t.Type<any, string, unknown>(
   'JSON',
   t.any.is,
   (input, context) =>
-    either.chain(t.string.validate(input, context), str => {
+    either.chain(t.string.validate(input, context), (str) => {
       try {
         return t.success(JSON.parse(str));
       } catch (e) {
         return t.failure(input, context);
       }
     }),
-  a => JSON.stringify(a)
+  (a) => JSON.stringify(a)
 );

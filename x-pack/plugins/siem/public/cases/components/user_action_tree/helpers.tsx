@@ -26,7 +26,7 @@ export const getLabelTitle = ({ action, connectors, field, firstPush }: LabelTit
       action.newValue
     }"`;
   } else if (field === 'connector_id' && action.action === 'update') {
-    const newConnector = connectors.find(c => c.id === action.newValue);
+    const newConnector = connectors.find((c) => c.id === action.newValue);
     return action.newValue != null && action.newValue !== 'none' && newConnector != null
       ? i18n.SELECTED_THIRD_PARTY(newConnector.name)
       : i18n.REMOVED_THIRD_PARTY;
@@ -51,7 +51,7 @@ const getTagsLabelTitle = (action: CaseUserActions) => (
       {action.action === 'delete' && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
     </EuiFlexItem>
     {action.newValue != null &&
-      action.newValue.split(',').map(tag => (
+      action.newValue.split(',').map((tag) => (
         <EuiFlexItem grow={false} key={tag}>
           <EuiBadge data-test-subj={`ua-tag`} color="default">
             {tag}

@@ -113,15 +113,15 @@ export const barchartConfigs = (config?: { onElementClick?: ElementClickListener
 export const addValueToFields = (
   fields: StatItem[],
   data: KpiHostsData | KpiNetworkData
-): StatItem[] => fields.map(field => ({ ...field, value: get(field.key, data) }));
+): StatItem[] => fields.map((field) => ({ ...field, value: get(field.key, data) }));
 
 export const addValueToAreaChart = (
   fields: StatItem[],
   data: KpiHostsData | KpiNetworkData
 ): ChartSeriesData[] =>
   fields
-    .filter(field => get(`${field.key}Histogram`, data) != null)
-    .map(field => ({
+    .filter((field) => get(`${field.key}Histogram`, data) != null)
+    .map((field) => ({
       ...field,
       value: get(`${field.key}Histogram`, data),
       key: `${field.key}Histogram`,
@@ -168,7 +168,7 @@ export const useKpiMatrixStatus = (
 
   useEffect(() => {
     setStatItemsProps(
-      mappings.map(stat => {
+      mappings.map((stat) => {
         return {
           ...stat,
           areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
@@ -207,11 +207,11 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     const isBarChartDataAvailable =
       barChart &&
       barChart.length &&
-      barChart.every(item => item.value != null && item.value.length > 0);
+      barChart.every((item) => item.value != null && item.value.length > 0);
     const isAreaChartDataAvailable =
       areaChart &&
       areaChart.length &&
-      areaChart.every(item => item.value != null && item.value.length > 0);
+      areaChart.every((item) => item.value != null && item.value.length > 0);
 
     return (
       <FlexItem grow={grow} data-test-subj={`stat-${statKey}`}>
@@ -229,7 +229,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
             </EuiFlexGroup>
 
             <EuiFlexGroup>
-              {fields.map(field => (
+              {fields.map((field) => (
                 <FlexItem key={`stat-items-field-${field.key}`}>
                   <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                     {(isAreaChartDataAvailable || isBarChartDataAvailable) && field.icon && (

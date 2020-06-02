@@ -21,7 +21,7 @@ interface Props {
 
 export const TruncateHeightSection: React.FC<Props> = ({
   children,
-  previewHeight
+  previewHeight,
 }) => {
   const contentContainerEl = useRef<HTMLDivElement>(null);
 
@@ -42,7 +42,7 @@ export const TruncateHeightSection: React.FC<Props> = ({
         ref={contentContainerEl}
         style={{
           overflow: 'hidden',
-          maxHeight: isOpen ? 'initial' : px(previewHeight)
+          maxHeight: isOpen ? 'initial' : px(previewHeight),
         }}
       >
         {children}
@@ -57,16 +57,16 @@ export const TruncateHeightSection: React.FC<Props> = ({
             <EuiIcon
               style={{
                 transition: 'transform 0.1s',
-                transform: `rotate(${isOpen ? 90 : 0}deg)`
+                transform: `rotate(${isOpen ? 90 : 0}deg)`,
               }}
               type="arrowRight"
             />{' '}
             {isOpen
               ? i18n.translate('xpack.apm.toggleHeight.showLessButtonLabel', {
-                  defaultMessage: 'Show fewer lines'
+                  defaultMessage: 'Show fewer lines',
                 })
               : i18n.translate('xpack.apm.toggleHeight.showMoreButtonLabel', {
-                  defaultMessage: 'Show more lines'
+                  defaultMessage: 'Show more lines',
                 })}
           </EuiLink>
         </ToggleButtonContainer>

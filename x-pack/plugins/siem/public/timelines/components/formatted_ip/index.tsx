@@ -105,7 +105,7 @@ const AddressLinksComponent: React.FC<{
   truncate?: boolean;
 }> = ({ addresses, contextId, eventId, fieldName, truncate }) => (
   <>
-    {uniq(addresses).map(address => (
+    {uniq(addresses).map((address) => (
       <DraggableWrapper
         dataProvider={getDataProvider({ contextId, eventId, fieldName, address })}
         key={`address-links-draggable-wrapper-${getUniqueId({

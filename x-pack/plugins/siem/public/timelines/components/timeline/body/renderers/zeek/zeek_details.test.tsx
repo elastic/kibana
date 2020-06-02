@@ -126,12 +126,7 @@ describe('ZeekDetails', () => {
           />
         </TestProviders>
       );
-      expect(
-        wrapper
-          .find('ZeekDetails')
-          .children()
-          .exists()
-      ).toBeFalsy();
+      expect(wrapper.find('ZeekDetails').children().exists()).toBeFalsy();
     });
   });
 });

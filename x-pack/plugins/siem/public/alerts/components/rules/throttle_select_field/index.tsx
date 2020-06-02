@@ -24,9 +24,9 @@ export const DEFAULT_THROTTLE_OPTION = THROTTLE_OPTIONS[0];
 
 type ThrottleSelectField = typeof SelectField;
 
-export const ThrottleSelectField: ThrottleSelectField = props => {
+export const ThrottleSelectField: ThrottleSelectField = (props) => {
   const onChange = useCallback(
-    e => {
+    (e) => {
       const throttle = e.target.value;
       props.field.setValue(throttle);
       props.handleChange(throttle);

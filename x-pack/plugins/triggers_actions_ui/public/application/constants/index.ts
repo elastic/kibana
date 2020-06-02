@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { BASE_ALERT_API_PATH } from '../../../../alerting/common';
+export { BASE_ALERT_API_PATH } from '../../../../alerts/common';
 export { BASE_ACTION_API_PATH } from '../../../../actions/common';
 
-export const BASE_PATH = '/management/kibana/triggersActions';
+export const BASE_PATH = '/management/insightsAndAlerting/triggersActions';
 
 export type Section = 'connectors' | 'alerts';
 

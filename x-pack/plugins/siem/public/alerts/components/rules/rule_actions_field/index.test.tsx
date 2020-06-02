@@ -13,7 +13,7 @@ import { useFormFieldMock } from '../../../../common/mock';
 jest.mock('../../../../common/lib/kibana');
 
 describe('RuleActionsField', () => {
-  it('should not render ActionForm is no actions are supported', () => {
+  it('should not render ActionForm if no actions are supported', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         triggers_actions_ui: {

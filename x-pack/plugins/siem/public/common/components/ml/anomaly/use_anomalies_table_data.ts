@@ -66,7 +66,7 @@ export const useAnomaliesTableData = ({
   const timeZone = useTimeZone();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
-  const siemJobIds = siemJobs.filter(job => job.isInstalled).map(job => job.id);
+  const siemJobIds = siemJobs.filter((job) => job.isInstalled).map((job) => job.id);
 
   useEffect(() => {
     let isSubscribed = true;

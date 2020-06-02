@@ -8,4 +8,4 @@ import { startsWith } from 'lodash';
 import { CSV_FORMULA_CHARS } from '../../../../common/constants';
 
 export const cellHasFormulas = (val: string) =>
-  CSV_FORMULA_CHARS.some(formulaChar => startsWith(val, formulaChar));
+  CSV_FORMULA_CHARS.some((formulaChar) => startsWith(val, formulaChar));

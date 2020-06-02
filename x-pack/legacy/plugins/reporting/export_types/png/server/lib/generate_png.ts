@@ -9,10 +9,9 @@ import * as Rx from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ReportingCore } from '../../../../server';
 import { LevelLogger } from '../../../../server/lib';
-import { ConditionalHeaders } from '../../../../types';
-import { LayoutParams } from '../../../common/layouts/layout';
+import { ConditionalHeaders, ScreenshotResults } from '../../../../server/types';
+import { LayoutParams } from '../../../common/layouts';
 import { PreserveLayout } from '../../../common/layouts/preserve_layout';
-import { ScreenshotResults } from '../../../common/lib/screenshots/types';
 
 export async function generatePngObservableFactory(reporting: ReportingCore) {
   const getScreenshots = await reporting.getScreenshotsObservable();

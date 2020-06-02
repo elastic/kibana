@@ -9,7 +9,7 @@ import { licensingMock } from '../../../licensing/public/mocks';
 import { SpacesLicenseService } from './license_service';
 import { LICENSE_TYPE, LicenseType } from '../../../licensing/common/types';
 
-describe('license#isEnabled', function() {
+describe('license#isEnabled', function () {
   it('should indicate that Spaces is disabled when there is no license information', () => {
     const serviceSetup = new SpacesLicenseService().setup({
       license$: of(undefined as any),

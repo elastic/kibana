@@ -41,10 +41,7 @@ describe('CaseView actions', () => {
 
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
 
-    wrapper
-      .find('button[data-test-subj="property-actions-ellipses"]')
-      .first()
-      .simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-ellipses"]').first().simulate('click');
     wrapper.find('button[data-test-subj="property-actions-trash"]').simulate('click');
     expect(handleToggleModal).toHaveBeenCalled();
   });
@@ -83,15 +80,9 @@ describe('CaseView actions', () => {
 
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
 
-    wrapper
-      .find('button[data-test-subj="property-actions-ellipses"]')
-      .first()
-      .simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-ellipses"]').first().simulate('click');
     expect(
-      wrapper
-        .find('[data-test-subj="property-actions-popout"]')
-        .first()
-        .prop('aria-label')
+      wrapper.find('[data-test-subj="property-actions-popout"]').first().prop('aria-label')
     ).toEqual(i18n.VIEW_INCIDENT(basicPush.externalTitle));
   });
 });

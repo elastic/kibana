@@ -5,12 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
+import { HeadlessChromiumDriver } from '../../../../server/browsers';
 import { LevelLogger, startTrace } from '../../../../server/lib';
-import { Screenshot, ElementsPositionAndAttribute } from './types';
+import { ElementsPositionAndAttribute, Screenshot } from '../../../../server/types';
 
 export const getScreenshots = async (
-  browser: HeadlessBrowser,
+  browser: HeadlessChromiumDriver,
   elementsPositionAndAttributes: ElementsPositionAndAttribute[],
   logger: LevelLogger
 ): Promise<Screenshot[]> => {

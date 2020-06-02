@@ -13,12 +13,12 @@ import { FollowerIndicesTable as FollowerIndicesTableComponent } from './followe
 
 const scope = SECTIONS.FOLLOWER_INDEX;
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   apiStatusDelete: getApiStatus(`${scope}-delete`)(state),
 });
-//
-const mapDispatchToProps = dispatch => ({
-  selectFollowerIndex: name => dispatch(selectDetailFollowerIndex(name)),
+
+const mapDispatchToProps = (dispatch) => ({
+  selectFollowerIndex: (name) => dispatch(selectDetailFollowerIndex(name)),
 });
 
 export const FollowerIndicesTable = connect(

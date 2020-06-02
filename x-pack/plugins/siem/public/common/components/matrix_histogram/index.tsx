@@ -75,8 +75,9 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
   ${({ height }) => (height != null ? `height: ${height}px;` : '')}
 `;
 
-export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
-  MatrixHistogramQueryProps> = ({
+export const MatrixHistogramComponent: React.FC<
+  MatrixHistogramProps & MatrixHistogramQueryProps
+> = ({
   chartHeight,
   defaultStackByOption,
   endDate,
@@ -141,7 +142,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   const setSelectedChartOptionCallback = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedStackByOption(
-        stackByOptions.find(co => co.value === event.target.value) ?? defaultStackByOption
+        stackByOptions.find((co) => co.value === event.target.value) ?? defaultStackByOption
       );
     },
     []

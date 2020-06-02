@@ -11,6 +11,7 @@ import { Route, Router, Switch } from 'react-router-dom';
 import { NotFoundPage } from './404';
 import { HomePage } from './home';
 import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
+import { RouteCapture } from '../common/components/endpoint/route_capture';
 
 interface RouterProps {
   history: History;
@@ -20,14 +21,16 @@ interface RouterProps {
 const PageRouterComponent: FC<RouterProps> = ({ history, subPluginRoutes }) => (
   <ManageRoutesSpy>
     <Router history={history}>
-      <Switch>
-        <Route path="/">
-          <HomePage subPlugins={subPluginRoutes} />
-        </Route>
-        <Route>
-          <NotFoundPage />
-        </Route>
-      </Switch>
+      <RouteCapture>
+        <Switch>
+          <Route path="/">
+            <HomePage subPlugins={subPluginRoutes} />
+          </Route>
+          <Route>
+            <NotFoundPage />
+          </Route>
+        </Switch>
+      </RouteCapture>
     </Router>
   </ManageRoutesSpy>
 );

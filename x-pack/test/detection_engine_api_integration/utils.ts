@@ -221,11 +221,7 @@ export const deleteAllRulesStatuses = async (es: Client): Promise<void> => {
 export const createSignalsIndex = async (
   supertest: SuperTest<supertestAsPromised.Test>
 ): Promise<void> => {
-  await supertest
-    .post(DETECTION_ENGINE_INDEX_URL)
-    .set('kbn-xsrf', 'true')
-    .send()
-    .expect(200);
+  await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
 };
 
 /**
@@ -235,11 +231,7 @@ export const createSignalsIndex = async (
 export const deleteSignalsIndex = async (
   supertest: SuperTest<supertestAsPromised.Test>
 ): Promise<void> => {
-  await supertest
-    .delete(DETECTION_ENGINE_INDEX_URL)
-    .set('kbn-xsrf', 'true')
-    .send()
-    .expect(200);
+  await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
 };
 
 /**
@@ -248,7 +240,7 @@ export const deleteSignalsIndex = async (
  * @param ruleIds Array of strings of rule_ids
  */
 export const getSimpleRuleAsNdjson = (ruleIds: string[]): Buffer => {
-  const stringOfRules = ruleIds.map(ruleId => {
+  const stringOfRules = ruleIds.map((ruleId) => {
     const simpleRule = getSimpleRule(ruleId);
     return JSON.stringify(simpleRule);
   });

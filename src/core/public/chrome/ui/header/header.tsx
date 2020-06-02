@@ -23,15 +23,16 @@ import {
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
   EuiIcon,
-  // @ts-ignore
   EuiNavDrawer,
   EuiShowFor,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Component, createRef } from 'react';
 import classnames from 'classnames';
-import * as Rx from 'rxjs';
+import React, { createRef, useState } from 'react';
+import { useObservable } from 'react-use';
+import { Observable } from 'rxjs';
+import { LoadingIndicator } from '../';
 import {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -42,192 +43,101 @@ import {
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
-import { HeaderBadge } from './header_badge';
 import { NavType, OnIsLockedUpdate } from './';
+import { CollapsibleNav } from './collapsible_nav';
+import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
-import { HeaderNavControls } from './header_nav_controls';
-import { createNavLink, createRecentNavLink } from './nav_link';
 import { HeaderLogo } from './header_logo';
+import { HeaderNavControls } from './header_nav_controls';
 import { NavDrawer } from './nav_drawer';
-import { CollapsibleNav } from './collapsible_nav';
 
 export interface HeaderProps {
   kibanaVersion: string;
   application: InternalApplicationStart;
-  appTitle$: Rx.Observable<string>;
-  badge$: Rx.Observable<ChromeBadge | undefined>;
-  breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
+  appTitle$: Observable<string>;
+  badge$: Observable<ChromeBadge | undefined>;
+  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   homeHref: string;
-  isVisible$: Rx.Observable<boolean>;
+  isVisible$: Observable<boolean>;
   kibanaDocLink: string;
-  navLinks$: Rx.Observable<ChromeNavLink[]>;
-  recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
-  forceAppSwitcherNavigation$: Rx.Observable<boolean>;
-  helpExtension$: Rx.Observable<ChromeHelpExtension | undefined>;
-  helpSupportUrl$: Rx.Observable<string>;
+  navLinks$: Observable<ChromeNavLink[]>;
+  recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
+  forceAppSwitcherNavigation$: Observable<boolean>;
+  helpExtension$: Observable<ChromeHelpExtension | undefined>;
+  helpSupportUrl$: Observable<string>;
   legacyMode: boolean;
-  navControlsLeft$: Rx.Observable<readonly ChromeNavControl[]>;
-  navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
+  navControlsLeft$: Observable<readonly ChromeNavControl[]>;
+  navControlsRight$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
-  isLocked$: Rx.Observable<boolean>;
-  navType$: Rx.Observable<NavType>;
+  isLocked$: Observable<boolean>;
+  navType$: Observable<NavType>;
+  loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
 }
 
-interface State {
-  appTitle: string;
-  isVisible: boolean;
-  navLinks: ChromeNavLink[];
-  recentlyAccessed: ChromeRecentlyAccessedHistoryItem[];
-  forceNavigation: boolean;
-  navControlsLeft: readonly ChromeNavControl[];
-  navControlsRight: readonly ChromeNavControl[];
-  currentAppId: string | undefined;
-  isLocked: boolean;
-  navType: NavType;
-  isOpen: boolean;
+function renderMenuTrigger(toggleOpen: () => void) {
+  return (
+    <EuiHeaderSectionItemButton
+      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.toggleSideNavAriaLabel', {
+        defaultMessage: 'Toggle side navigation',
+      })}
+      onClick={toggleOpen}
+    >
+      <EuiIcon type="apps" size="m" />
+    </EuiHeaderSectionItemButton>
+  );
 }
 
-export class Header extends Component<HeaderProps, State> {
-  private subscription?: Rx.Subscription;
-  private navDrawerRef = createRef<EuiNavDrawer>();
-  private toggleCollapsibleNavRef = createRef<HTMLButtonElement>();
+export function Header({
+  kibanaVersion,
+  kibanaDocLink,
+  legacyMode,
+  application,
+  basePath,
+  onIsLockedUpdate,
+  homeHref,
+  ...observables
+}: HeaderProps) {
+  const isVisible = useObservable(observables.isVisible$, true);
+  const navType = useObservable(observables.navType$, 'modern');
+  const isLocked = useObservable(observables.isLocked$, false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  constructor(props: HeaderProps) {
-    super(props);
-
-    let isLocked = false;
-    props.isLocked$.subscribe(initialIsLocked => (isLocked = initialIsLocked));
-
-    this.state = {
-      appTitle: 'Kibana',
-      isVisible: true,
-      navLinks: [],
-      recentlyAccessed: [],
-      forceNavigation: false,
-      navControlsLeft: [],
-      navControlsRight: [],
-      currentAppId: '',
-      isLocked,
-      navType: 'modern',
-      isOpen: false,
-    };
+  if (!isVisible) {
+    return <LoadingIndicator loadingCount$={observables.loadingCount$} />;
   }
 
-  public componentDidMount() {
-    this.subscription = Rx.combineLatest(
-      this.props.appTitle$,
-      this.props.isVisible$,
-      this.props.forceAppSwitcherNavigation$,
-      this.props.navLinks$,
-      this.props.recentlyAccessed$,
-      // Types for combineLatest only handle up to 6 inferred types so we combine these separately.
-      Rx.combineLatest(
-        this.props.navControlsLeft$,
-        this.props.navControlsRight$,
-        this.props.application.currentAppId$,
-        this.props.isLocked$,
-        this.props.navType$
-      )
-    ).subscribe({
-      next: ([
-        appTitle,
-        isVisible,
-        forceNavigation,
-        navLinks,
-        recentlyAccessed,
-        [navControlsLeft, navControlsRight, currentAppId, isLocked, navType],
-      ]) => {
-        this.setState({
-          appTitle,
-          isVisible,
-          forceNavigation,
-          navLinks: navLinks.filter(navLink => !navLink.hidden),
-          recentlyAccessed,
-          navControlsLeft,
-          navControlsRight,
-          currentAppId,
-          isLocked,
-          navType,
-        });
-      },
-    });
-  }
-
-  public componentWillUnmount() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
+  const navDrawerRef = createRef<EuiNavDrawer>();
+  const toggleCollapsibleNavRef = createRef<HTMLButtonElement>();
+  const navId = htmlIdGenerator()();
+  const className = classnames(
+    'chrHeaderWrapper', // TODO #64541 - delete this
+    'hide-for-sharing',
+    {
+      'chrHeaderWrapper--navIsLocked': isLocked,
+      headerWrapper: navType === 'modern',
     }
-  }
+  );
 
-  public renderMenuTrigger() {
-    return (
-      <EuiHeaderSectionItemButton
-        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.toggleSideNavAriaLabel', {
-          defaultMessage: 'Toggle side navigation',
-        })}
-        onClick={() => this.navDrawerRef.current.toggleOpen()}
-      >
-        <EuiIcon type="apps" size="m" />
-      </EuiHeaderSectionItemButton>
-    );
-  }
-
-  public render() {
-    const { appTitle, isVisible, navControlsLeft, navControlsRight } = this.state;
-    const {
-      badge$,
-      breadcrumbs$,
-      helpExtension$,
-      helpSupportUrl$,
-      kibanaDocLink,
-      kibanaVersion,
-    } = this.props;
-    const navLinks = this.state.navLinks.map(link =>
-      createNavLink(
-        link,
-        this.props.legacyMode,
-        this.state.currentAppId,
-        this.props.basePath,
-        this.props.application.navigateToApp
-      )
-    );
-    const recentNavLinks = this.state.recentlyAccessed.map(link =>
-      createRecentNavLink(link, this.state.navLinks, this.props.basePath)
-    );
-
-    if (!isVisible) {
-      return null;
-    }
-
-    const className = classnames(
-      'chrHeaderWrapper', // TODO #64541 - delete this
-      'hide-for-sharing',
-      {
-        'chrHeaderWrapper--navIsLocked': this.state.isLocked,
-        headerWrapper: this.state.navType === 'modern',
-      }
-    );
-    const navId = htmlIdGenerator()();
-    return (
+  return (
+    <>
+      <LoadingIndicator loadingCount$={observables.loadingCount$} />
       <header className={className} data-test-subj="headerGlobalNav">
         <EuiHeader position="fixed">
           <EuiHeaderSection grow={false}>
-            {this.state.navType === 'modern' ? (
+            {navType === 'modern' ? (
               <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
                 <EuiHeaderSectionItemButton
                   data-test-subj="toggleNavButton"
                   aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
                     defaultMessage: 'Toggle primary navigation',
                   })}
-                  onClick={() => {
-                    this.setState({ isOpen: !this.state.isOpen });
-                  }}
-                  aria-expanded={this.state.isOpen}
-                  aria-pressed={this.state.isOpen}
+                  onClick={() => setIsOpen(!isOpen)}
+                  aria-expanded={isOpen}
+                  aria-pressed={isOpen}
                   aria-controls={navId}
-                  ref={this.toggleCollapsibleNavRef}
+                  ref={toggleCollapsibleNavRef}
                 >
                   <EuiIcon type="menu" size="m" />
                 </EuiHeaderSectionItemButton>
@@ -237,71 +147,79 @@ export class Header extends Component<HeaderProps, State> {
               // Delete this block
               <EuiShowFor sizes={['xs', 's']}>
                 <EuiHeaderSectionItem border="right">
-                  {this.renderMenuTrigger()}
+                  {renderMenuTrigger(() => navDrawerRef.current?.toggleOpen())}
                 </EuiHeaderSectionItem>
               </EuiShowFor>
             )}
 
             <EuiHeaderSectionItem border="right">
               <HeaderLogo
-                href={this.props.homeHref}
-                forceNavigation={this.state.forceNavigation}
-                navLinks={navLinks}
-                navigateToApp={this.props.application.navigateToApp}
+                href={homeHref}
+                forceNavigation$={observables.forceAppSwitcherNavigation$}
+                navLinks$={observables.navLinks$}
+                navigateToApp={application.navigateToApp}
               />
             </EuiHeaderSectionItem>
 
-            <HeaderNavControls side="left" navControls={navControlsLeft} />
+            <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
           </EuiHeaderSection>
 
-          <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs$={breadcrumbs$} />
+          <HeaderBreadcrumbs
+            appTitle$={observables.appTitle$}
+            breadcrumbs$={observables.breadcrumbs$}
+          />
 
-          <HeaderBadge badge$={badge$} />
+          <HeaderBadge badge$={observables.badge$} />
 
           <EuiHeaderSection side="right">
             <EuiHeaderSectionItem>
               <HeaderHelpMenu
-                {...{
-                  helpExtension$,
-                  helpSupportUrl$,
-                  kibanaDocLink,
-                  kibanaVersion,
-                }}
+                helpExtension$={observables.helpExtension$}
+                helpSupportUrl$={observables.helpSupportUrl$}
+                kibanaDocLink={kibanaDocLink}
+                kibanaVersion={kibanaVersion}
               />
             </EuiHeaderSectionItem>
 
-            <HeaderNavControls side="right" navControls={navControlsRight} />
+            <HeaderNavControls side="right" navControls$={observables.navControlsRight$} />
           </EuiHeaderSection>
         </EuiHeader>
-        {this.state.navType === 'modern' ? (
+        {navType === 'modern' ? (
           <CollapsibleNav
+            appId$={application.currentAppId$}
             id={navId}
-            isLocked={this.state.isLocked}
-            onIsLockedUpdate={this.props.onIsLockedUpdate}
-            navLinks={navLinks}
-            recentNavLinks={recentNavLinks}
-            isOpen={this.state.isOpen}
-            homeHref={this.props.homeHref}
-            onIsOpenUpdate={(isOpen = !this.state.isOpen) => {
-              this.setState({ isOpen });
-              if (this.toggleCollapsibleNavRef.current) {
-                this.toggleCollapsibleNavRef.current.focus();
+            isLocked={isLocked}
+            navLinks$={observables.navLinks$}
+            recentlyAccessed$={observables.recentlyAccessed$}
+            isOpen={isOpen}
+            homeHref={homeHref}
+            basePath={basePath}
+            legacyMode={legacyMode}
+            navigateToApp={application.navigateToApp}
+            onIsLockedUpdate={onIsLockedUpdate}
+            closeNav={() => {
+              setIsOpen(false);
+              if (toggleCollapsibleNavRef.current) {
+                toggleCollapsibleNavRef.current.focus();
               }
             }}
-            navigateToApp={this.props.application.navigateToApp}
           />
         ) : (
           // TODO #64541
           // Delete this block
           <NavDrawer
-            isLocked={this.state.isLocked}
-            onIsLockedUpdate={this.props.onIsLockedUpdate}
-            navLinks={navLinks}
-            recentNavLinks={recentNavLinks}
-            ref={this.navDrawerRef}
+            isLocked={isLocked}
+            onIsLockedUpdate={onIsLockedUpdate}
+            navLinks$={observables.navLinks$}
+            recentlyAccessed$={observables.recentlyAccessed$}
+            basePath={basePath}
+            appId$={application.currentAppId$}
+            navigateToApp={application.navigateToApp}
+            ref={navDrawerRef}
+            legacyMode={legacyMode}
           />
         )}
       </header>
-    );
-  }
+    </>
+  );
 }

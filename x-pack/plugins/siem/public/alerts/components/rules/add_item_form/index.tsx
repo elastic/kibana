@@ -158,7 +158,7 @@ export const AddItem = ({
                 <EuiFlexItem grow>
                   <EuiFieldText
                     onBlur={() => setShowValidation(true)}
-                    onChange={e => updateItem(e, index)}
+                    onChange={(e) => updateItem(e, index)}
                     fullWidth
                     {...euiFieldProps}
                   />

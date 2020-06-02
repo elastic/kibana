@@ -194,13 +194,13 @@ describe('helpers', () => {
     describe('valid values', () => {
       const validValues = ['file_create_event', 'created', 'file_delete_event', 'deleted'];
 
-      validValues.forEach(eventAction => {
+      validValues.forEach((eventAction) => {
         test(`${eventAction} returns true`, () => {
           expect(showVia(eventAction)).toBe(true);
         });
       });
 
-      validValues.forEach(value => {
+      validValues.forEach((value) => {
         const upperCaseValue = value.toUpperCase();
 
         test(`${upperCaseValue} (upper case) returns true`, () => {
@@ -266,13 +266,13 @@ describe('helpers', () => {
     describe('valid values', () => {
       const validValues = ['process_stopped', 'termination_event'];
 
-      validValues.forEach(value => {
+      validValues.forEach((value) => {
         test(`returns true when eventAction is ${value}`, () => {
           expect(isProcessStoppedOrTerminationEvent(value)).toBe(true);
         });
       });
 
-      validValues.forEach(value => {
+      validValues.forEach((value) => {
         const upperCaseValue = value.toUpperCase();
 
         test(`returns true when eventAction is (upper case) ${upperCaseValue}`, () => {

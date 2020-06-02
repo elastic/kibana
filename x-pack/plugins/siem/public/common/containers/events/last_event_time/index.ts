@@ -64,13 +64,13 @@ export function useLastEventTimeQuery<TCache = object>(
           },
         })
         .then(
-          result => {
+          (result) => {
             updateLoading(false);
             updateLastSeen(get('data.source.LastEventTime.lastSeen', result));
             updateErrorMessage(null);
             updateCurrentIndexKey(currentIndexKey);
           },
-          error => {
+          (error) => {
             updateLoading(false);
             updateLastSeen(null);
             updateErrorMessage(error.message);

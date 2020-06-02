@@ -80,7 +80,7 @@ export const fetchRules = async ({
     ...(filterOptions.showElasticRules
       ? [`alert.attributes.tags: "__internal_immutable:true"`]
       : []),
-    ...(filterOptions.tags?.map(t => `alert.attributes.tags: ${t}`) ?? []),
+    ...(filterOptions.tags?.map((t) => `alert.attributes.tags: ${t}`) ?? []),
   ];
 
   const query = {
@@ -127,7 +127,7 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
 export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<BulkRuleResponse> =>
   KibanaServices.get().http.fetch<BulkRuleResponse>(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`, {
     method: 'PATCH',
-    body: JSON.stringify(ids.map(id => ({ id, enabled }))),
+    body: JSON.stringify(ids.map((id) => ({ id, enabled }))),
   });
 
 /**
@@ -140,7 +140,7 @@ export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<B
 export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<BulkRuleResponse> =>
   KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`, {
     method: 'DELETE',
-    body: JSON.stringify(ids.map(id => ({ id }))),
+    body: JSON.stringify(ids.map((id) => ({ id }))),
   });
 
 /**
@@ -154,7 +154,7 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
   KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`, {
     method: 'POST',
     body: JSON.stringify(
-      rules.map(rule => ({
+      rules.map((rule) => ({
         ...rule,
         name: `${rule.name} [${i18n.DUPLICATE}]`,
         created_at: undefined,
@@ -237,7 +237,9 @@ export const exportRules = async ({
   signal,
 }: ExportDocumentsProps): Promise<Blob> => {
   const body =
-    ids.length > 0 ? JSON.stringify({ objects: ids.map(rule => ({ rule_id: rule })) }) : undefined;
+    ids.length > 0
+      ? JSON.stringify({ objects: ids.map((rule) => ({ rule_id: rule })) })
+      : undefined;
 
   return KibanaServices.get().http.fetch<Blob>(`${DETECTION_ENGINE_RULES_URL}/_export`, {
     method: 'POST',

@@ -15,7 +15,7 @@ import { FormattedFieldValue } from './formatted_field';
 import { parseValue } from './parse_value';
 
 export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
-  data.findIndex(item => item.field === columnName) !== -1;
+  data.findIndex((item) => item.field === columnName) !== -1;
 
 export const plainColumnRenderer: ColumnRenderer = {
   isInstance: (columnName: string, data: TimelineNonEcsData[]) =>
@@ -39,7 +39,7 @@ export const plainColumnRenderer: ColumnRenderer = {
     linkValues?: string[] | null | undefined;
   }) =>
     values != null
-      ? values.map(value => (
+      ? values.map((value) => (
           <FormattedFieldValue
             key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}`}
             contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}

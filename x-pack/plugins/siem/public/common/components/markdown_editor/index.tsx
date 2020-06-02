@@ -74,6 +74,7 @@ export const MarkdownEditor = React.memo<{
   content: string;
   isDisabled?: boolean;
   onChange: (description: string) => void;
+  onClickTimeline?: (timelineId: string) => void;
   onCursorPositionUpdate?: (cursorPosition: CursorPosition) => void;
   placeholder?: string;
 }>(
@@ -83,6 +84,7 @@ export const MarkdownEditor = React.memo<{
     content,
     isDisabled = false,
     onChange,
+    onClickTimeline,
     placeholder,
     onCursorPositionUpdate,
   }) => {
@@ -125,9 +127,10 @@ export const MarkdownEditor = React.memo<{
         {
           id: 'preview',
           name: i18n.PREVIEW,
+          'data-test-subj': 'preview-tab',
           content: (
             <MarkdownContainer data-test-subj="markdown-container" paddingSize="s">
-              <Markdown raw={content} />
+              <Markdown raw={content} onClickTimeline={onClickTimeline} />
             </MarkdownContainer>
           ),
         },

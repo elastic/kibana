@@ -12,10 +12,11 @@ export function IndexList({
   match: {
     params: { filter },
   },
+  location,
 }) {
   return (
     <div className="im-snapshotTestSubject" data-test-subj="indicesList">
-      <IndexTable filterFromURI={filter} />
+      <IndexTable filterFromURI={filter} location={location} />
       <DetailPanel />
     </div>
   );

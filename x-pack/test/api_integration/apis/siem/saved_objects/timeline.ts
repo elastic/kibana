@@ -20,7 +20,7 @@ import { persistTimelineFavoriteMutation } from '../../../../../plugins/siem/pub
 import { persistTimelineMutation } from '../../../../../plugins/siem/public/timelines/containers/persist.gql_query';
 import { TimelineResult } from '../../../../../plugins/siem/public/graphql/types';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -162,7 +162,7 @@ export default function({ getService }: FtrProviderContext) {
         } = response.data && omitTypenameInTimeline(response.data.persistTimeline.timeline);
 
         expect(columns.map((col: { id: string }) => col.id)).to.eql(
-          timelineObject.columns.map(col => col.id)
+          timelineObject.columns.map((col) => col.id)
         );
         expect(dataProviders).to.eql(timelineObject.dataProviders);
         expect(dateRange).to.eql(timelineObject.dateRange);

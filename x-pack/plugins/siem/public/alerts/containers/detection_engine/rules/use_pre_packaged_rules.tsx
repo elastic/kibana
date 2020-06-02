@@ -113,7 +113,7 @@ export const usePrePackagedRules = ({
     };
 
     const createElasticRules = async (): Promise<boolean> => {
-      return new Promise(async resolve => {
+      return new Promise(async (resolve) => {
         try {
           if (
             canUserCRUD &&
