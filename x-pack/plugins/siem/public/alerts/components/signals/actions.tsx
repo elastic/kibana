@@ -23,8 +23,6 @@ import {
   replaceTemplateFieldFromMatchFilters,
   replaceTemplateFieldFromDataProviders,
 } from './helpers';
-import { displaySuccessToast, displayErrorToast } from '../../../common/components/toasters';
-import * as i18n from './translations';
 
 export const getUpdateSignalsQuery = (eventIds: Readonly<string[]>) => {
   return {
@@ -58,29 +56,21 @@ export const updateSignalStatusAction = async ({
   status,
   setEventsLoading,
   setEventsDeleted,
-  dispatchToaster,
+  onAlertStatusUpdateSuccess,
+  onAlertStatusUpdateFailure,
 }: UpdateSignalStatusActionProps) => {
   try {
     setEventsLoading({ eventIds: signalIds, isLoading: true });
 
     const queryObject = query ? { query: JSON.parse(query) } : getUpdateSignalsQuery(signalIds);
 
-    await updateSignalStatus({ query: queryObject, status });
+    const response = await updateSignalStatus({ query: queryObject, status });
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: signalIds, isDeleted: true });
 
-    const successTitle =
-      status === 'closed'
-        ? i18n.CLOSED_ALERT_SUCCESS_TOAST(signalIds.length)
-        : i18n.OPENED_ALERT_SUCCESS_TOAST(signalIds.length);
-
-    displaySuccessToast(successTitle, dispatchToaster);
-  } catch (e) {
-    const errorTitle =
-      status === 'closed'
-        ? i18n.CLOSED_ALERT_FAILED_TOAST(signalIds.length)
-        : i18n.OPENED_ALERT_FAILED_TOAST(signalIds.length);
-    displayErrorToast(errorTitle, [e.message], dispatchToaster);
+    onAlertStatusUpdateSuccess(response.updated, status);
+  } catch (error) {
+    onAlertStatusUpdateFailure(status, error);
   } finally {
     setEventsLoading({ eventIds: signalIds, isLoading: false });
   }

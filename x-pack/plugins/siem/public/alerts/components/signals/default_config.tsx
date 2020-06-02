@@ -32,7 +32,6 @@ import {
   SetEventsLoadingProps,
   UpdateTimelineLoading,
 } from './types';
-import { ActionToaster } from '../../../common/components/toasters';
 
 export const signalsOpenFilters: Filter[] = [
   {
@@ -199,7 +198,8 @@ export const getSignalsActions = ({
   createTimeline,
   status,
   updateTimelineIsLoading,
-  dispatchToaster,
+  onAlertStatusUpdateSuccess,
+  onAlertStatusUpdateFailure,
 }: {
   apolloClient?: ApolloClient<{}>;
   canUserCRUD: boolean;
@@ -209,7 +209,8 @@ export const getSignalsActions = ({
   createTimeline: CreateTimeline;
   status: 'open' | 'closed';
   updateTimelineIsLoading: UpdateTimelineLoading;
-  dispatchToaster: React.Dispatch<ActionToaster>;
+  onAlertStatusUpdateSuccess: (count: number, status: string) => void;
+  onAlertStatusUpdateFailure: (status: string, error: Error) => void;
 }): TimelineAction[] => [
   {
     getAction: ({ ecsData }: TimelineActionProps): JSX.Element => (
@@ -249,7 +250,8 @@ export const getSignalsActions = ({
               status,
               setEventsLoading,
               setEventsDeleted,
-              dispatchToaster,
+              onAlertStatusUpdateSuccess,
+              onAlertStatusUpdateFailure,
             })
           }
           isDisabled={!canUserCRUD || !hasIndexWrite}

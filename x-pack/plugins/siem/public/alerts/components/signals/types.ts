@@ -9,7 +9,6 @@ import ApolloClient from 'apollo-client';
 import { Ecs } from '../../../graphql/types';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { inputsModel } from '../../../common/store';
-import { ActionToaster } from '../../../common/components/toasters';
 
 export interface SetEventsLoadingProps {
   eventIds: string[];
@@ -38,7 +37,8 @@ export interface UpdateSignalStatusActionProps {
   status: 'open' | 'closed';
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
-  dispatchToaster: React.Dispatch<ActionToaster>;
+  onAlertStatusUpdateSuccess: (count: number, status: string) => void;
+  onAlertStatusUpdateFailure: (status: string, error: Error) => void;
 }
 
 export type SendSignalsToTimeline = () => void;

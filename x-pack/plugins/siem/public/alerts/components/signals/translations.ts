@@ -116,16 +116,16 @@ export const OPENED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
       'Successfully opened {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
   });
 
-export const CLOSED_ALERT_FAILED_TOAST = (totalAlerts: number) =>
-  i18n.translate('xpack.siem.detectionEngine.signals.closedAlertFailedToastMessage', {
-    values: { totalAlerts },
-    defaultMessage:
-      'Failed to close {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
-  });
+export const CLOSED_ALERT_FAILED_TOAST = i18n.translate(
+  'xpack.siem.detectionEngine.signals.closedAlertFailedToastMessage',
+  {
+    defaultMessage: 'Failed to close alert(s).',
+  }
+);
 
-export const OPENED_ALERT_FAILED_TOAST = (totalAlerts: number) =>
-  i18n.translate('xpack.siem.detectionEngine.signals.openedAlertFailedToastMessage', {
-    values: { totalAlerts },
-    defaultMessage:
-      'Failed to open {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
-  });
+export const OPENED_ALERT_FAILED_TOAST = i18n.translate(
+  'xpack.siem.detectionEngine.signals.openedAlertFailedToastMessage',
+  {
+    defaultMessage: 'Failed to open alert(s)',
+  }
+);

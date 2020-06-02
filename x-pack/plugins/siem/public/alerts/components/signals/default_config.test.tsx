@@ -19,7 +19,6 @@ import {
 import { mockEcsDataWithSignal } from '../../../common/mock/mock_ecs';
 import { sendSignalToTimelineAction, updateSignalStatusAction } from './actions';
 import * as i18n from './translations';
-import { ActionToaster } from '../../../common/components/toasters';
 
 jest.mock('./actions');
 
@@ -54,14 +53,17 @@ describe('signals default_config', () => {
     let setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
     let createTimeline: CreateTimeline;
     let updateTimelineIsLoading: UpdateTimelineLoading;
-    let dispatchToaster: React.Dispatch<ActionToaster>;
+
+    let onAlertStatusUpdateSuccess: (count: number, status: string) => void;
+    let onAlertStatusUpdateFailure: (status: string, error: Error) => void;
 
     beforeEach(() => {
       setEventsLoading = jest.fn();
       setEventsDeleted = jest.fn();
       createTimeline = jest.fn();
       updateTimelineIsLoading = jest.fn();
-      dispatchToaster = jest.fn();
+      onAlertStatusUpdateSuccess = jest.fn();
+      onAlertStatusUpdateFailure = jest.fn();
     });
 
     describe('timeline tooltip', () => {
@@ -74,7 +76,8 @@ describe('signals default_config', () => {
           createTimeline,
           status: 'open',
           updateTimelineIsLoading,
-          dispatchToaster,
+          onAlertStatusUpdateSuccess,
+          onAlertStatusUpdateFailure,
         });
         const timelineAction = signalsActions[0].getAction({
           eventId: 'even-id',
@@ -101,7 +104,8 @@ describe('signals default_config', () => {
           createTimeline,
           status: 'open',
           updateTimelineIsLoading,
-          dispatchToaster,
+          onAlertStatusUpdateSuccess,
+          onAlertStatusUpdateFailure,
         });
 
         signalOpenAction = signalsActions[1].getAction({
@@ -124,7 +128,7 @@ describe('signals default_config', () => {
           status: 'open',
           setEventsLoading,
           setEventsDeleted,
-          dispatchToaster,
+          onAlertStatusUpdateSuccess,
         });
       });
 
@@ -157,7 +161,8 @@ describe('signals default_config', () => {
           createTimeline,
           status: 'closed',
           updateTimelineIsLoading,
-          dispatchToaster,
+          onAlertStatusUpdateSuccess,
+          onAlertStatusUpdateFailure,
         });
 
         signalCloseAction = signalsActions[1].getAction({
@@ -180,7 +185,7 @@ describe('signals default_config', () => {
           status: 'closed',
           setEventsLoading,
           setEventsDeleted,
-          dispatchToaster,
+          onAlertStatusUpdateSuccess,
         });
       });
 
