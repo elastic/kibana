@@ -6,8 +6,7 @@
 
 import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setupServer } from 'src/core/server/saved_objects/routes/integration_tests/test_utils';
+import { setupServer } from 'src/core/server/test_utils';
 import { registerJobInfoRoutes } from './jobs';
 import { createMockReportingCore } from '../../test_helpers';
 import { ReportingCore } from '..';
