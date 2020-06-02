@@ -90,24 +90,13 @@ export const getFilteredIndices = createSelector(
   (indices, allIds, tableState, tableLocation) => {
     let indexArray = allIds.map((indexName) => indices[indexName]);
     indexArray = filterByToggles(indexArray, tableState.toggleNameToVisibleMap);
-    const { includeHiddenIndices: includeHiddenParam, dataStreams: dataStreamsParam } = qs.parse(
-      tableLocation.search
-    );
+    const { includeHiddenIndices: includeHiddenParam } = qs.parse(tableLocation.search);
     const includeHidden = includeHiddenParam === 'true';
-    const dataStreamsFilter = dataStreamsParam ? dataStreamsParam.split(',') : undefined;
-    const shouldFilterDataStreams = Boolean(dataStreamsFilter && dataStreamsFilter.length);
-    const filteredIndices = indexArray.filter((index) => {
-      let include = true;
-      if (!includeHidden) {
-        include = !(index.name + '').startsWith('.') && !index.hidden;
-      }
-
-      if (include && shouldFilterDataStreams) {
-        return dataStreamsFilter.includes(index.dataStream);
-      }
-
-      return include;
-    });
+    const filteredIndices = includeHidden
+      ? indexArray
+      : indexArray.filter((index) => {
+          return !(index.name + '').startsWith('.') && !index.hidden;
+        });
     const filter = tableState.filter || EuiSearchBar.Query.MATCH_ALL;
     return EuiSearchBar.Query.execute(filter, filteredIndices, {
       defaultFields: defaultFilterFields,

@@ -20,9 +20,9 @@ describe('getFilteredIndices selector', () => {
     tableState: { ...defaultTableState },
     indices: {
       byId: {
-        test: { name: 'index1', hidden: true, dataStream: '123' },
+        test: { name: 'index1', hidden: true },
         anotherTest: { name: 'index2', hidden: false },
-        aTest: { name: 'index3', dataStream: 'abc' },
+        aTest: { name: 'index3' },
         aFinalTest: { name: '.index4' },
       },
       allIds: ['test', 'anotherTest', 'aTest', 'aFinalTest'],
@@ -32,7 +32,7 @@ describe('getFilteredIndices selector', () => {
   it('filters out hidden indices', () => {
     expect(getFilteredIndices(state, { location: { search: '' } })).toEqual([
       { name: 'index2', hidden: false },
-      { name: 'index3', dataStream: 'abc' },
+      { name: 'index3' },
     ]);
   });
 
@@ -40,29 +40,10 @@ describe('getFilteredIndices selector', () => {
     expect(
       getFilteredIndices(state, { location: { search: '?includeHiddenIndices=true' } })
     ).toEqual([
-      { name: 'index1', hidden: true, dataStream: '123' },
+      { name: 'index1', hidden: true },
       { name: 'index2', hidden: false },
-      { name: 'index3', dataStream: 'abc' },
+      { name: 'index3' },
       { name: '.index4' },
-    ]);
-  });
-
-  it('filters based on data stream', () => {
-    expect(getFilteredIndices(state, { location: { search: '?dataStreams=abc' } })).toEqual([
-      // We don't expect to see a case like this in the wild because data stream backing indicies
-      // are always hidden, but our logic can handle it
-      { name: 'index3', dataStream: 'abc' },
-    ]);
-  });
-
-  it('filters based on data stream and includes hidden indices', () => {
-    expect(
-      getFilteredIndices(state, {
-        location: { search: '?includeHiddenIndices=true&dataStreams=123,abc,does-not-exist' },
-      })
-    ).toEqual([
-      { name: 'index1', hidden: true, dataStream: '123' },
-      { name: 'index3', dataStream: 'abc' },
     ]);
   });
 });
