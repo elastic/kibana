@@ -28,6 +28,13 @@ const conditionsActionVariableDescription = i18n.translate(
   }
 );
 
+const groupByActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.groupByActionVariableDescription',
+  {
+    defaultMessage: 'The name of the group reporting data for the alert',
+  }
+);
+
 const countSchema = schema.object({
   value: schema.number(),
   comparator: schema.oneOf([
@@ -84,6 +91,7 @@ export async function registerLogThresholdAlertType(
       context: [
         { name: 'matchingDocuments', description: documentCountActionVariableDescription },
         { name: 'conditions', description: conditionsActionVariableDescription },
+        { name: 'group', description: groupByActionVariableDescription },
       ],
     },
     producer: 'logs',

@@ -90,6 +90,17 @@ export interface LogDocumentCountAlertParams {
   criteria: Criterion[];
   timeUnit: 's' | 'm' | 'h' | 'd';
   timeSize: number;
+  groupBy?: string[];
 }
 
 export type TimeUnit = 's' | 'm' | 'h' | 'd';
+
+export interface Aggregations {
+  [key: string]: Record<string, object[]>;
+  interval_buckets: {
+    buckets: Array<{
+      key: Record<string, string>;
+      doc_count: number;
+    }>;
+  };
+}

@@ -22,7 +22,7 @@ export function getAlertType(): AlertTypeModel {
     defaultActionMessage: i18n.translate(
       'xpack.infra.logs.alerting.threshold.defaultActionMessage',
       {
-        defaultMessage: `\\{\\{context.matchingDocuments\\}\\} log entries have matched the following conditions: \\{\\{context.conditions\\}\\}`,
+        defaultMessage: `\\{\\{context.group\\}\\} - \\{\\{context.matchingDocuments\\}\\} log entries have matched the following conditions: \\{\\{context.conditions\\}\\}`,
       }
     ),
     requiresAppContext: false,

@@ -11,10 +11,25 @@ import {
   Comparator,
   LogDocumentCountAlertParams,
   Criterion,
+  Aggregations,
 } from '../../../../common/alerting/logs/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { InfraSource } from '../../../../common/http_api/source_api';
+import { createAfterKeyHandler } from '../../../utils/create_afterkey_handler';
+import { getAllCompositeData } from '../../../utils/get_all_composite_data';
+import { InfraDatabaseSearchResponse } from '../../adapters/framework/adapter_types';
+
+const GROUP_BY_KEY = 'groups';
+
+const UNGROUPED_NAME = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.alerting.ungroupedGroupName',
+  {
+    defaultMessage: 'Ungrouped (*)',
+  }
+);
+
+const UNGROUPED_FACTORY_KEY = '*';
 
 const checkValueAgainstComparatorMap: {
   [key: string]: (a: number, b: number) => boolean;
@@ -25,37 +40,33 @@ const checkValueAgainstComparatorMap: {
   [Comparator.LT_OR_EQ]: (a: number, b: number) => a <= b,
 };
 
-export const createLogThresholdExecutor = (alertUUID: string, libs: InfraBackendLibs) =>
-  async function ({ services, params }: AlertExecutorOptions) {
-    const { count, criteria } = params as LogDocumentCountAlertParams;
+export const createLogThresholdExecutor = (alertId: string, libs: InfraBackendLibs) =>
+  async function ({
+    services,
+    params,
+  }: AlertExecutorOptions & { params: LogDocumentCountAlertParams }) {
     const { alertInstanceFactory, savedObjectsClient, callCluster } = services;
     const { sources } = libs;
+    const groupBy = ['host.name', 'host.architecture'];
 
     const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
     const indexPattern = sourceConfiguration.configuration.logAlias;
-
-    const alertInstance = alertInstanceFactory(alertUUID);
+    const alertInstance = alertInstanceFactory(alertId);
 
     try {
       const query = getESQuery(
         params as LogDocumentCountAlertParams,
         sourceConfiguration.configuration
       );
-      const result = await getResults(query, indexPattern, callCluster);
 
-      if (checkValueAgainstComparatorMap[count.comparator](result.count, count.value)) {
-        alertInstance.scheduleActions(FIRED_ACTIONS.id, {
-          matchingDocuments: result.count,
-          conditions: createConditionsMessage(criteria),
-        });
+      const results = groupBy
+        ? await getGroupedResults(query, indexPattern, callCluster, GROUP_BY_KEY)
+        : await getUngroupedResults(query, indexPattern, callCluster);
 
-        alertInstance.replaceState({
-          alertState: AlertStates.ALERT,
-        });
+      if (groupBy) {
+        processGroupByResults({ results, params, alertInstanceFactory, alertId });
       } else {
-        alertInstance.replaceState({
-          alertState: AlertStates.OK,
-        });
+        processUngroupedResults({ results, params, alertInstanceFactory, alertId });
       }
     } catch (e) {
       alertInstance.replaceState({
@@ -66,27 +77,97 @@ export const createLogThresholdExecutor = (alertUUID: string, libs: InfraBackend
     }
   };
 
+interface ProcessingParams<Results> {
+  results: Results;
+  params: LogDocumentCountAlertParams;
+  alertInstanceFactory: AlertExecutorOptions['services']['alertInstanceFactory'];
+  alertId: string;
+}
+
+interface GroupBucket {
+  key: Record<string, string>;
+  doc_count: number;
+}
+
+interface ReducedGroupBucket {
+  name: string;
+  documentCount: number;
+}
+
+const processUngroupedResults = ({
+  results,
+  params,
+  alertInstanceFactory,
+  alertId,
+}: ProcessingParams<InfraDatabaseSearchResponse<{}, Aggregations>>) => {
+  const { count, criteria } = params;
+
+  const alertInstance = alertInstanceFactory(`${alertId}-${UNGROUPED_FACTORY_KEY}`);
+  const documentCount = results.hits.total.value;
+
+  if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
+    alertInstance.scheduleActions(FIRED_ACTIONS.id, {
+      matchingDocuments: documentCount,
+      conditions: createConditionsMessage(criteria),
+      group: UNGROUPED_NAME,
+    });
+
+    alertInstance.replaceState({
+      alertState: AlertStates.ALERT,
+    });
+  } else {
+    alertInstance.replaceState({
+      alertState: AlertStates.OK,
+    });
+  }
+};
+
+const processGroupByResults = ({
+  results,
+  params,
+  alertInstanceFactory,
+  alertId,
+}: ProcessingParams<GroupBucket[]>) => {
+  const { count, criteria } = params;
+
+  const groupResults: ReducedGroupBucket[] = results.reduce((acc, groupBucket) => {
+    const groupName = Object.values(groupBucket.key).join(', ');
+    const groupResult = { name: groupName, documentCount: groupBucket.doc_count };
+    return [...acc, groupResult];
+  }, [] as ReducedGroupBucket[]);
+
+  groupResults.forEach((group) => {
+    const alertInstance = alertInstanceFactory(`${alertId}-${group.name}`);
+    const documentCount = group.documentCount;
+
+    if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
+      alertInstance.scheduleActions(FIRED_ACTIONS.id, {
+        matchingDocuments: documentCount,
+        conditions: createConditionsMessage(criteria),
+        group: group.name,
+      });
+
+      alertInstance.replaceState({
+        alertState: AlertStates.ALERT,
+      });
+    } else {
+      alertInstance.replaceState({
+        alertState: AlertStates.OK,
+      });
+    }
+  });
+};
+
 const getESQuery = (
   params: LogDocumentCountAlertParams,
   sourceConfiguration: InfraSource['configuration']
 ): object => {
   const { timeSize, timeUnit, criteria } = params;
+  const groupBy = ['host.name', 'host.architecture'];
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const to = Date.now();
   const from = to - intervalAsSeconds * 1000;
-
-  const rangeFilters = [
-    {
-      range: {
-        [sourceConfiguration.fields.timestamp]: {
-          gte: from,
-          lte: to,
-          format: 'epoch_millis',
-        },
-      },
-    },
-  ];
 
   const positiveComparators = getPositiveComparators();
   const negativeComparators = getNegativeComparators();
@@ -101,6 +182,44 @@ const getESQuery = (
   // Negative assertions (things that "must not" match)
   const mustNotFilters = buildFiltersForCriteria(negativeCriteria);
 
+  const rangeFilters = [
+    {
+      range: {
+        [sourceConfiguration.fields.timestamp]: {
+          gte: from,
+          lte: to,
+          format: 'epoch_millis',
+        },
+      },
+    },
+  ];
+
+  const sharedSubLevelAggregations = {
+    interval_buckets: {
+      date_histogram: {
+        field: sourceConfiguration.fields.timestamp,
+        fixed_interval: interval,
+      },
+    },
+  };
+
+  const aggregations =
+    groupBy && groupBy.length > 0
+      ? {
+          groups: {
+            composite: {
+              size: 20,
+              sources: groupBy.map((field, index) => ({
+                [`group-${index}-${field}`]: {
+                  terms: { field },
+                },
+              })),
+            },
+            aggs: sharedSubLevelAggregations,
+          },
+        }
+      : sharedSubLevelAggregations;
+
   const query = {
     query: {
       bool: {
@@ -109,6 +228,8 @@ const getESQuery = (
         ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
       },
     },
+    aggs: aggregations,
+    size: 0,
   };
 
   return query;
@@ -221,15 +342,44 @@ const getQueryMappingForComparator = (comparator: Comparator) => {
   return queryMappings[comparator];
 };
 
-const getResults = async (
+const getUngroupedResults = async (
   query: object,
   index: string,
   callCluster: AlertServices['callCluster']
 ) => {
-  return await callCluster('count', {
+  return await callCluster('search', {
     body: query,
     index,
   });
+};
+
+const getGroupedResults = async (
+  query: object,
+  index: string,
+  callCluster: AlertServices['callCluster'],
+  groupingsKey: string
+) => {
+  const bucketSelector = (response: InfraDatabaseSearchResponse<{}, Aggregations>) => {
+    const aggs = response.aggregations;
+    return aggs ? aggs[groupingsKey]?.buckets : [];
+  };
+
+  const afterKeyHandler = createAfterKeyHandler(
+    `aggs.${groupingsKey}.composite.after`,
+    (response) => {
+      const aggs = response.aggregations;
+      return aggs[groupingsKey]?.after_key;
+    }
+  );
+
+  const compositeBuckets = (await getAllCompositeData(
+    (body) => callCluster('search', { body: query, index }),
+    query,
+    bucketSelector,
+    afterKeyHandler
+  )) as Aggregations[];
+
+  return compositeBuckets;
 };
 
 const createConditionsMessage = (criteria: LogDocumentCountAlertParams['criteria']) => {
