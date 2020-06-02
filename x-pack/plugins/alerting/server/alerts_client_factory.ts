@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PreConfiguredAction } from '../../actions/server';
+import { PluginStartContract as ActionsPluginStartContract } from '../../actions/server';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { KibanaRequest, Logger, SavedObjectsClientContract } from '../../../../src/core/server';
@@ -20,7 +20,7 @@ export interface AlertsClientFactoryOpts {
   getSpaceId: (request: KibanaRequest) => string | undefined;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
-  preconfiguredActions: PreConfiguredAction[];
+  actions: ActionsPluginStartContract;
 }
 
 export class AlertsClientFactory {
@@ -32,7 +32,7 @@ export class AlertsClientFactory {
   private getSpaceId!: (request: KibanaRequest) => string | undefined;
   private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
   private encryptedSavedObjectsClient!: EncryptedSavedObjectsClient;
-  private preconfiguredActions!: PreConfiguredAction[];
+  private actions!: ActionsPluginStartContract;
 
   public initialize(options: AlertsClientFactoryOpts) {
     if (this.isInitialized) {
@@ -46,14 +46,14 @@ export class AlertsClientFactory {
     this.securityPluginSetup = options.securityPluginSetup;
     this.spaceIdToNamespace = options.spaceIdToNamespace;
     this.encryptedSavedObjectsClient = options.encryptedSavedObjectsClient;
-    this.preconfiguredActions = options.preconfiguredActions;
+    this.actions = options.actions;
   }
 
   public create(
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract
   ): AlertsClient {
-    const { securityPluginSetup } = this;
+    const { securityPluginSetup, actions } = this;
     const spaceId = this.getSpaceId(request);
     return new AlertsClient({
       spaceId,
@@ -104,7 +104,9 @@ export class AlertsClientFactory {
           result: invalidateAPIKeyResult,
         };
       },
-      preconfiguredActions: this.preconfiguredActions,
+      async getActionsClient() {
+        return actions.getActionsClientWithRequest(request);
+      },
     });
   }
 }

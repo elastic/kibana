@@ -4,44 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { once } from 'lodash';
 import { compatibilityShimFactory } from './compatibility_shim';
 
-const createMockServer = () => {
-  return {
-    expose: jest.fn(), //fool once_per_server
-    log: jest.fn(),
-  };
-};
-
 const createMockLogger = () => ({
-  warning: jest.fn(),
+  warn: jest.fn(),
   error: jest.fn(),
 });
 
-const createMockRequest = () => {
+const createMockContext = () => {
   return {
-    getSavedObjectsClient: once(function () {
-      return {
-        get: jest.fn(),
-      };
-    }),
+    core: {
+      savedObjects: {
+        client: {
+          get: jest.fn(),
+        },
+      },
+    },
   };
 };
 
 test(`passes title through if provided`, async () => {
   const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
+  const compatibilityShim = compatibilityShimFactory(mockLogger);
   const title = 'test title';
 
   const createJobMock = jest.fn();
   await compatibilityShim(createJobMock)(
     { title, relativeUrls: ['/something'] },
-    null,
-    createMockRequest()
+    createMockContext(),
+    null
   );
 
-  expect(mockLogger.warning.mock.calls.length).toBe(0);
+  expect(mockLogger.warn.mock.calls.length).toBe(0);
   expect(mockLogger.error.mock.calls.length).toBe(0);
 
   expect(createJobMock.mock.calls.length).toBe(1);
@@ -50,12 +44,12 @@ test(`passes title through if provided`, async () => {
 
 test(`gets the title from the savedObject`, async () => {
   const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
+  const compatibilityShim = compatibilityShimFactory(mockLogger);
 
   const createJobMock = jest.fn();
-  const mockRequest = createMockRequest();
+  const context = createMockContext();
   const title = 'savedTitle';
-  mockRequest.getSavedObjectsClient().get.mockReturnValue({
+  context.core.savedObjects.client.get.mockReturnValue({
     attributes: {
       title,
     },
@@ -63,12 +57,12 @@ test(`gets the title from the savedObject`, async () => {
 
   await compatibilityShim(createJobMock)(
     { objectType: 'search', savedObjectId: 'abc' },
-    null,
-    mockRequest
+    context,
+    null
   );
 
-  expect(mockLogger.warning.mock.calls.length).toBe(2);
-  expect(mockLogger.warning.mock.calls[0][0]).toEqual(
+  expect(mockLogger.warn.mock.calls.length).toBe(2);
+  expect(mockLogger.warn.mock.calls[0][0]).toEqual(
     'The relativeUrls have been derived from saved object parameters. This functionality will be removed with the next major version.'
   );
   expect(mockLogger.error.mock.calls.length).toBe(0);
@@ -79,11 +73,11 @@ test(`gets the title from the savedObject`, async () => {
 
 test(`passes the objectType and savedObjectId to the savedObjectsClient`, async () => {
   const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
+  const compatibilityShim = compatibilityShimFactory(mockLogger);
 
   const createJobMock = jest.fn();
-  const mockRequest = createMockRequest();
-  mockRequest.getSavedObjectsClient().get.mockReturnValue({
+  const context = createMockContext();
+  context.core.savedObjects.client.get.mockReturnValue({
     attributes: {
       title: '',
     },
@@ -91,18 +85,18 @@ test(`passes the objectType and savedObjectId to the savedObjectsClient`, async 
 
   const objectType = 'search';
   const savedObjectId = 'abc';
-  await compatibilityShim(createJobMock)({ objectType, savedObjectId }, null, mockRequest);
+  await compatibilityShim(createJobMock)({ objectType, savedObjectId }, context, null);
 
-  expect(mockLogger.warning.mock.calls.length).toBe(2);
-  expect(mockLogger.warning.mock.calls[0][0]).toEqual(
+  expect(mockLogger.warn.mock.calls.length).toBe(2);
+  expect(mockLogger.warn.mock.calls[0][0]).toEqual(
     'The relativeUrls have been derived from saved object parameters. This functionality will be removed with the next major version.'
   );
-  expect(mockLogger.warning.mock.calls[1][0]).toEqual(
+  expect(mockLogger.warn.mock.calls[1][0]).toEqual(
     'The title has been derived from saved object parameters. This functionality will be removed with the next major version.'
   );
   expect(mockLogger.error.mock.calls.length).toBe(0);
 
-  const getMock = mockRequest.getSavedObjectsClient().get.mock;
+  const getMock = context.core.savedObjects.client.get.mock;
   expect(getMock.calls.length).toBe(1);
   expect(getMock.calls[0][0]).toBe(objectType);
   expect(getMock.calls[0][1]).toBe(savedObjectId);
@@ -110,31 +104,31 @@ test(`passes the objectType and savedObjectId to the savedObjectsClient`, async 
 
 test(`logs no warnings when title and relativeUrls is passed`, async () => {
   const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
+  const compatibilityShim = compatibilityShimFactory(mockLogger);
 
   const createJobMock = jest.fn();
-  const mockRequest = createMockRequest();
+  const context = createMockContext();
 
   await compatibilityShim(createJobMock)(
     { title: 'Phenomenal Dashboard', relativeUrls: ['/abc', '/def'] },
-    null,
-    mockRequest
+    context,
+    null
   );
 
-  expect(mockLogger.warning.mock.calls.length).toBe(0);
+  expect(mockLogger.warn.mock.calls.length).toBe(0);
   expect(mockLogger.error.mock.calls.length).toBe(0);
 });
 
 test(`logs warning if title can not be provided`, async () => {
   const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
+  const compatibilityShim = compatibilityShimFactory(mockLogger);
 
   const createJobMock = jest.fn();
-  const mockRequest = createMockRequest();
-  await compatibilityShim(createJobMock)({ relativeUrls: ['/abc'] }, null, mockRequest);
+  const context = createMockContext();
+  await compatibilityShim(createJobMock)({ relativeUrls: ['/abc'] }, context, null);
 
-  expect(mockLogger.warning.mock.calls.length).toBe(1);
-  expect(mockLogger.warning.mock.calls[0][0]).toEqual(
+  expect(mockLogger.warn.mock.calls.length).toBe(1);
+  expect(mockLogger.warn.mock.calls[0][0]).toEqual(
     `A title parameter should be provided with the job generation request. Please ` +
       `use Kibana to regenerate your POST URL to have a title included in the PDF.`
   );
@@ -142,11 +136,11 @@ test(`logs warning if title can not be provided`, async () => {
 
 test(`logs deprecations when generating the title/relativeUrl using the savedObject`, async () => {
   const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
+  const compatibilityShim = compatibilityShimFactory(mockLogger);
 
   const createJobMock = jest.fn();
-  const mockRequest = createMockRequest();
-  mockRequest.getSavedObjectsClient().get.mockReturnValue({
+  const context = createMockContext();
+  context.core.savedObjects.client.get.mockReturnValue({
     attributes: {
       title: '',
     },
@@ -154,34 +148,34 @@ test(`logs deprecations when generating the title/relativeUrl using the savedObj
 
   await compatibilityShim(createJobMock)(
     { objectType: 'search', savedObjectId: 'abc' },
-    null,
-    mockRequest
+    context,
+    null
   );
 
-  expect(mockLogger.warning.mock.calls.length).toBe(2);
-  expect(mockLogger.warning.mock.calls[0][0]).toEqual(
+  expect(mockLogger.warn.mock.calls.length).toBe(2);
+  expect(mockLogger.warn.mock.calls[0][0]).toEqual(
     'The relativeUrls have been derived from saved object parameters. This functionality will be removed with the next major version.'
   );
-  expect(mockLogger.warning.mock.calls[1][0]).toEqual(
+  expect(mockLogger.warn.mock.calls[1][0]).toEqual(
     'The title has been derived from saved object parameters. This functionality will be removed with the next major version.'
   );
 });
 
 test(`passes objectType through`, async () => {
   const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
+  const compatibilityShim = compatibilityShimFactory(mockLogger);
 
   const createJobMock = jest.fn();
-  const mockRequest = createMockRequest();
+  const context = createMockContext();
 
   const objectType = 'foo';
   await compatibilityShim(createJobMock)(
     { title: 'test', relativeUrls: ['/something'], objectType },
-    null,
-    mockRequest
+    context,
+    null
   );
 
-  expect(mockLogger.warning.mock.calls.length).toBe(0);
+  expect(mockLogger.warn.mock.calls.length).toBe(0);
   expect(mockLogger.error.mock.calls.length).toBe(0);
 
   expect(createJobMock.mock.calls.length).toBe(1);
@@ -190,14 +184,14 @@ test(`passes objectType through`, async () => {
 
 test(`passes the relativeUrls through`, async () => {
   const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
+  const compatibilityShim = compatibilityShimFactory(mockLogger);
 
   const createJobMock = jest.fn();
 
   const relativeUrls = ['/app/kibana#something', '/app/kibana#something-else'];
   await compatibilityShim(createJobMock)({ title: 'test', relativeUrls }, null, null);
 
-  expect(mockLogger.warning.mock.calls.length).toBe(0);
+  expect(mockLogger.warn.mock.calls.length).toBe(0);
   expect(mockLogger.error.mock.calls.length).toBe(0);
 
   expect(createJobMock.mock.calls.length).toBe(1);
@@ -207,7 +201,7 @@ test(`passes the relativeUrls through`, async () => {
 const testSavedObjectRelativeUrl = (objectType, expectedUrl) => {
   test(`generates the saved object relativeUrl for ${objectType}`, async () => {
     const mockLogger = createMockLogger();
-    const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
+    const compatibilityShim = compatibilityShimFactory(mockLogger);
     const createJobMock = jest.fn();
 
     await compatibilityShim(createJobMock)(
@@ -216,8 +210,8 @@ const testSavedObjectRelativeUrl = (objectType, expectedUrl) => {
       null
     );
 
-    expect(mockLogger.warning.mock.calls.length).toBe(1);
-    expect(mockLogger.warning.mock.calls[0][0]).toEqual(
+    expect(mockLogger.warn.mock.calls.length).toBe(1);
+    expect(mockLogger.warn.mock.calls[0][0]).toEqual(
       'The relativeUrls have been derived from saved object parameters. This functionality will be removed with the next major version.'
     );
     expect(mockLogger.error.mock.calls.length).toBe(0);
@@ -233,7 +227,7 @@ testSavedObjectRelativeUrl('dashboard', '/app/kibana#/dashboard/abc?');
 
 test(`appends the queryString to the relativeUrl when generating from the savedObject`, async () => {
   const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
+  const compatibilityShim = compatibilityShimFactory(mockLogger);
   const createJobMock = jest.fn();
 
   await compatibilityShim(createJobMock)(
@@ -242,8 +236,8 @@ test(`appends the queryString to the relativeUrl when generating from the savedO
     null
   );
 
-  expect(mockLogger.warning.mock.calls.length).toBe(1);
-  expect(mockLogger.warning.mock.calls[0][0]).toEqual(
+  expect(mockLogger.warn.mock.calls.length).toBe(1);
+  expect(mockLogger.warn.mock.calls[0][0]).toEqual(
     'The relativeUrls have been derived from saved object parameters. This functionality will be removed with the next major version.'
   );
   expect(mockLogger.error.mock.calls.length).toBe(0);
@@ -256,7 +250,7 @@ test(`appends the queryString to the relativeUrl when generating from the savedO
 
 test(`throw an Error if the objectType, savedObjectId and relativeUrls are provided`, async () => {
   const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
+  const compatibilityShim = compatibilityShimFactory(mockLogger);
   const createJobMock = jest.fn();
 
   const promise = compatibilityShim(createJobMock)(
@@ -275,23 +269,23 @@ test(`throw an Error if the objectType, savedObjectId and relativeUrls are provi
 
 test(`passes headers and request through`, async () => {
   const mockLogger = createMockLogger();
-  const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
+  const compatibilityShim = compatibilityShimFactory(mockLogger);
 
   const createJobMock = jest.fn();
 
-  const headers = {};
-  const request = createMockRequest();
+  const req = {};
+  const context = createMockContext();
 
   await compatibilityShim(createJobMock)(
     { title: 'test', relativeUrls: ['/something'] },
-    headers,
-    request
+    context,
+    req
   );
 
-  expect(mockLogger.warning.mock.calls.length).toBe(0);
+  expect(mockLogger.warn.mock.calls.length).toBe(0);
   expect(mockLogger.error.mock.calls.length).toBe(0);
 
   expect(createJobMock.mock.calls.length).toBe(1);
-  expect(createJobMock.mock.calls[0][1]).toBe(headers);
-  expect(createJobMock.mock.calls[0][2]).toBe(request);
+  expect(createJobMock.mock.calls[0][1]).toBe(context);
+  expect(createJobMock.mock.calls[0][2]).toBe(req);
 });

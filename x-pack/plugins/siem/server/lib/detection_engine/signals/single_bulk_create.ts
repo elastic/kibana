@@ -15,7 +15,7 @@ import { buildBulkBody } from './build_bulk_body';
 import { Logger } from '../../../../../../../src/core/server';
 
 interface SingleBulkCreateParams {
-  someResult: SignalSearchResponse;
+  filteredEvents: SignalSearchResponse;
   ruleParams: RuleTypeParams;
   services: AlertServices;
   logger: Logger;
@@ -64,7 +64,7 @@ export interface SingleBulkCreateResponse {
 
 // Bulk Index documents.
 export const singleBulkCreate = async ({
-  someResult,
+  filteredEvents,
   ruleParams,
   services,
   logger,
@@ -82,8 +82,8 @@ export const singleBulkCreate = async ({
   tags,
   throttle,
 }: SingleBulkCreateParams): Promise<SingleBulkCreateResponse> => {
-  someResult.hits.hits = filterDuplicateRules(id, someResult);
-  if (someResult.hits.hits.length === 0) {
+  filteredEvents.hits.hits = filterDuplicateRules(id, filteredEvents);
+  if (filteredEvents.hits.hits.length === 0) {
     return { success: true, createdItemsCount: 0 };
   }
   // index documents after creating an ID based on the
@@ -95,7 +95,7 @@ export const singleBulkCreate = async ({
   // while preventing duplicates from being added to the
   // signals index if rules are re-run over the same time
   // span. Also allow for versioning.
-  const bulkBody = someResult.hits.hits.flatMap((doc) => [
+  const bulkBody = filteredEvents.hits.hits.flatMap((doc) => [
     {
       create: {
         _index: signalsIndex,

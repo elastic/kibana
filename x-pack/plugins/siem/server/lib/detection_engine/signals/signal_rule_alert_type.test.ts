@@ -17,6 +17,7 @@ import { scheduleNotificationActions } from '../notifications/schedule_notificat
 import { RuleAlertType } from '../rules/types';
 import { findMlSignals } from './find_ml_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
+import { listMock } from '../../../../../lists/server/mocks';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');
@@ -110,6 +111,7 @@ describe('rules_notification_alert_type', () => {
       logger,
       version,
       ml: mlMock,
+      lists: listMock.createSetup(),
     });
   });
 
@@ -199,6 +201,7 @@ describe('rules_notification_alert_type', () => {
           logger,
           version,
           ml: undefined,
+          lists: undefined,
         });
         await alert.executor(payload);
         expect(logger.error).toHaveBeenCalled();
@@ -358,7 +361,7 @@ describe('rules_notification_alert_type', () => {
     });
 
     it('when error was thrown', async () => {
-      (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue({});
+      (searchAfterAndBulkCreate as jest.Mock).mockRejectedValue({});
       await alert.executor(payload);
       expect(logger.error).toHaveBeenCalled();
       expect(logger.error.mock.calls[0][0]).toContain('An error occurred during rule execution');
