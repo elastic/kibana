@@ -12,8 +12,4 @@ export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(
 
 export { Plugin, PluginSetup, PluginStart };
 
-/**
- * Exports Endpoint-specific datasource configuration instructions
- * for use in the Ingest app create / edit datasource config
- */
 export { ConfigureEndpointDatasource } from './management/pages/policy/view/ingest_manager_integration/configure_datasource';

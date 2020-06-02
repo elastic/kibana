@@ -11,6 +11,7 @@ import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/p
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
 import {
   CustomConfigureDatasourceContent,
+  CustomConfigureDatasourceProps,
   NewDatasource,
 } from '../../../../../../../ingest_manager/public';
 import { getManagementUrl } from '../../../..';
@@ -22,7 +23,13 @@ type DatasourceWithId = NewDatasource & { id: string };
  * for use in the Ingest app create / edit datasource config
  */
 export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent>(
-  ({ from, datasource }: { from: string; datasource: NewDatasource | DatasourceWithId }) => {
+  ({
+    from,
+    datasource,
+  }: {
+    from: string;
+    datasource: CustomConfigureDatasourceProps['datasource'];
+  }) => {
     const { services } = useKibana();
     let policyUrl = '';
     if (from === 'edit') {

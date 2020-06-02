@@ -43,9 +43,6 @@ export interface DatasourceInput extends Omit<NewDatasourceInput, 'streams'> {
   streams: DatasourceInputStream[];
 }
 
-/**
- * Type of `datasource` prop in CustomConfigureDatasourceContent
- */
 export interface NewDatasource {
   name: string;
   description?: string;
