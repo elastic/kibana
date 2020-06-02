@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import Fs from 'fs';
 import Path from 'path';
 
 import normalizePath from 'normalize-path';
@@ -86,12 +87,17 @@ function dynamicExternals(bundle: Bundle, context: string, request: string) {
 }
 
 export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
+  const extensions = ['.js', '.ts', '.tsx', '.json'];
+  const entryExtension = extensions.find((ext) =>
+    Fs.existsSync(Path.resolve(bundle.contextDir, bundle.entry) + ext)
+  );
+
   const commonConfig: webpack.Configuration = {
     node: { fs: 'empty' },
     context: bundle.contextDir,
     cache: true,
     entry: {
-      [bundle.id]: bundle.entry,
+      [bundle.id]: `${bundle.entry}${entryExtension}`,
     },
 
     devtool: worker.dist ? false : '#cheap-source-map',
@@ -144,7 +150,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
 
       rules: [
         {
-          include: Path.join(bundle.contextDir, bundle.entry),
+          include: [`${Path.resolve(bundle.contextDir, bundle.entry)}${entryExtension}`],
           loader: UiSharedDeps.publicPathLoader,
           options: {
             key: bundle.id,
@@ -292,7 +298,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
     },
 
     resolve: {
-      extensions: ['.js', '.ts', '.tsx', '.json'],
+      extensions,
       mainFields: ['browser', 'main'],
       alias: {
         tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),
