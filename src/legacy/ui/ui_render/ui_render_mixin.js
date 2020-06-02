@@ -164,6 +164,7 @@ export function uiRenderMixin(kbnServer, server, config) {
                 `${regularBundlePath}/commons.bundle.js`,
               ]),
 
+          `${regularBundlePath}/core/core.entry.js`,
           ...kpPluginIds.map(
             (pluginId) => `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`
           ),
@@ -189,9 +190,7 @@ export function uiRenderMixin(kbnServer, server, config) {
             jsDependencyPaths,
             styleSheetPaths,
             publicPathMap,
-            entryBundlePath: isCore
-              ? `${regularBundlePath}/core/core.entry.js`
-              : `${regularBundlePath}/${app.getId()}.bundle.js`,
+            legacyBundlePath: isCore ? undefined : `${regularBundlePath}/${app.getId()}.bundle.js`,
           },
         });
 
