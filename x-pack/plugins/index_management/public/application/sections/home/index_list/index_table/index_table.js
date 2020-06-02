@@ -8,7 +8,7 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
-import { parse } from 'query-string';
+import * as qs from 'query-string';
 
 import {
   EuiButton,
@@ -66,6 +66,9 @@ const HEADERS = {
   size: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
     defaultMessage: 'Storage size',
   }),
+  dataStream: i18n.translate('xpack.idxMgmt.indexTable.headers.dataStreamHeader', {
+    defaultMessage: 'Data stream',
+  }),
 };
 
 export class IndexTable extends Component {
@@ -91,20 +94,19 @@ export class IndexTable extends Component {
     super(props);
 
     this.state = {
+      showHiddenIndices: false,
+      dataStreamFilter: undefined,
       selectedIndicesMap: {},
     };
   }
 
   componentDidMount() {
     this.props.loadIndices();
-    this.interval = setInterval(this.props.reloadIndices, REFRESH_RATE_INDEX_LIST);
-    const {
-      filterChanged,
-      filterFromURI,
-      showHiddenIndicesChanged,
-      showHiddenIndices,
-      location,
-    } = this.props;
+    this.interval = setInterval(
+      () => this.props.reloadIndices(this.props.indices.map((i) => i.name)),
+      REFRESH_RATE_INDEX_LIST
+    );
+    const { filterChanged, filterFromURI } = this.props;
 
     if (filterFromURI) {
       const decodedFilter = decodeURIComponent(filterFromURI);
@@ -116,17 +118,37 @@ export class IndexTable extends Component {
         this.setState({ filterError: e });
       }
     }
-
-    // Check if the we have the includeHidden query param
-    const { includeHidden } = parse((location && location.search) || '');
-    const nextValue = includeHidden === 'true';
-    if (nextValue !== showHiddenIndices) {
-      showHiddenIndicesChanged(nextValue);
-    }
+    this.syncUrlParams();
   }
   componentWillUnmount() {
     clearInterval(this.interval);
   }
+
+  componentDidUpdate() {
+    this.syncUrlParams();
+  }
+
+  syncUrlParams() {
+    const { location } = this.props;
+    // Check if the we have the includeHidden query param
+    const { includeHidden } = qs.parse((location && location.search) || '');
+    const nextValue = includeHidden === 'true';
+    if (this.state.includeHidden !== nextValue) {
+      this.setState({ includeHidden: nextValue });
+    }
+  }
+
+  setIncludeHiddenParam(hidden) {
+    const { pathname, search } = this.props.location;
+    const params = qs.parse(search);
+    if (hidden) {
+      params.includeHidden = 'true';
+    } else {
+      delete params.includeHidden;
+    }
+    this.props.history.push(pathname + '?' + qs.stringify(params));
+  }
+
   onSort = (column) => {
     const { sortField, isSortAscending, sortChanged } = this.props;
 
@@ -416,8 +438,6 @@ export class IndexTable extends Component {
   render() {
     const {
       filter,
-      showHiddenIndices,
-      showHiddenIndicesChanged,
       indices,
       loadIndices,
       indicesLoading,
@@ -477,8 +497,8 @@ export class IndexTable extends Component {
                         <EuiSwitch
                           id="checkboxShowHiddenIndices"
                           data-test-subj="indexTableIncludeHiddenIndicesToggle"
-                          checked={showHiddenIndices}
-                          onChange={(event) => showHiddenIndicesChanged(event.target.checked)}
+                          checked={this.state.includeHidden}
+                          onChange={(event) => this.setIncludeHiddenParam(event.target.checked)}
                           label={
                             <FormattedMessage
                               id="xpack.idxMgmt.indexTable.hiddenIndicesSwitchLabel"

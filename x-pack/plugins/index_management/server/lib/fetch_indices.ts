@@ -87,6 +87,7 @@ async function fetchIndicesCall(
       isFrozen: hit.sth === 'true', // sth value coming back as a string from ES
       aliases: aliases.length ? aliases : 'none',
       hidden: index.settings.index.hidden === 'true',
+      dataStream: index.data_stream,
     };
   });
 }
