@@ -38,6 +38,10 @@ const Link = styled(EuiButtonEmpty)`
   }
 `;
 
+const Icon = styled(EuiIcon)`
+  color: ${(props) => props.theme.eui.euiIconColors.text};
+`;
+
 export const Section = ({ section }: { section: ISection }) => {
   const { core } = usePluginContext();
   const { id, icon, title, description, href } = section;
@@ -45,7 +49,7 @@ export const Section = ({ section }: { section: ISection }) => {
   const sectionContent = (
     <EuiFlexGroup gutterSize="m">
       <EuiFlexItem grow={false}>
-        <EuiIcon type={icon} size="l" color="black" />
+        <Icon type={icon} size="l" />
       </EuiFlexItem>
       <EuiFlexItem style={{ textAlign: 'left' }}>
         <EuiTitle size="xs" className="title">

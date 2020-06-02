@@ -74,12 +74,12 @@ const tryItOutItemsSection: ISection[] = [
 
 const Container = styled.div`
   min-height: calc(100vh - 48px);
-  background: #fff;
+  background: ${(props) => props.theme.eui.euiColorEmptyShade};
 `;
 
 const Title = styled.div`
-  background-color: #fafbfd;
-  border-bottom: 1px solid #d3dae6;
+  background-color: ${(props) => props.theme.eui.euiPageBackgroundColor};
+  border-bottom: ${(props) => props.theme.eui.euiBorderThin};
 `;
 
 const Page = styled.div`
