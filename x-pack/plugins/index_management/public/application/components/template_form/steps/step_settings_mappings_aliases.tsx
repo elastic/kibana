@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 // import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -23,7 +23,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { documentationService } from '../../../services/documentation';
 import { ComponentTemplatesContainer, ComponentTemplates } from '../../../components';
 import { ConfigureSection, SimulateTemplate } from '../components';
-import { StepProps } from '../types';
+import { StepSettings } from './step_settings';
+import { StepProps, DataGetterFunc } from '../types';
 // import { useJsonStep } from './use_json_step';
 
 export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = ({
@@ -44,6 +45,46 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
     composedOf: [],
     template: {},
   });
+
+  const cacheTemplate = useRef(template);
+
+  const validation = useRef<{
+    settings: boolean | undefined;
+    mappings: boolean | undefined;
+    aliases: boolean | undefined;
+  }>({
+    settings: true,
+    mappings: true,
+    aliases: true,
+  });
+
+  const setSettingsDataGetter = useCallback(async (stepDataGetter: DataGetterFunc) => {
+    const allSectionsValid = Object.values(validation.current).every((isValid) => isValid);
+
+    if (allSectionsValid) {
+      const { data } = await stepDataGetter();
+      let nextState;
+      setCurrentTemplate((prev) => {
+        nextState = {
+          ...prev,
+          template: {
+            ...prev.template,
+            ...data,
+          },
+        };
+        return nextState;
+      });
+
+      cacheTemplate.current = nextState as any;
+    }
+  }, []);
+
+  const onSettingsValidityChange = useCallback((isValid: boolean | undefined) => {
+    validation.current = {
+      ...validation.current,
+      settings: isValid,
+    };
+  }, []);
 
   useEffect(() => {
     setDataGetter(async () => ({
@@ -125,12 +166,11 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
                 return (
                   <ComponentTemplates
                     isLoading={isLoading}
-                    components={[]}
+                    components={components ?? []}
                     emptyPrompt={{
                       showCreateButton: false,
                     }}
                   />
-                  // <ComponentTemplates isLoading={isLoading} components={components ?? []} />
                 );
               }}
             </ComponentTemplatesContainer>
@@ -210,7 +250,11 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
             {isSettingsVisible && (
               <div>
                 <EuiSpacer />
-                Index settings configuration
+                <StepSettings
+                  template={cacheTemplate.current as any}
+                  setDataGetter={setSettingsDataGetter}
+                  onStepValidityChange={onSettingsValidityChange}
+                />
               </div>
             )}
           </div>

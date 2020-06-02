@@ -38,17 +38,6 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
     <div data-test-subj="stepSettings">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2 data-test-subj="stepTitle">
-              <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepSettings.stepTitle"
-                defaultMessage="Index settings (optional)"
-              />
-            </h2>
-          </EuiTitle>
-
-          <EuiSpacer size="s" />
-
           <EuiText>
             <p>
               <FormattedMessage
@@ -79,12 +68,12 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
 
       {/* Settings code editor */}
       <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.idxMgmt.templateForm.stepSettings.fieldIndexSettingsLabel"
-            defaultMessage="Index settings"
-          />
-        }
+        // label={
+        //   <FormattedMessage
+        //     id="xpack.idxMgmt.templateForm.stepSettings.fieldIndexSettingsLabel"
+        //     defaultMessage="Index settings"
+        //   />
+        // }
         helpText={
           <FormattedMessage
             id="xpack.idxMgmt.templateForm.stepSettings.settingsEditorHelpText"
@@ -102,7 +91,7 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
           mode="json"
           theme="textmate"
           width="100%"
-          height="500px"
+          height="250px"
           setOptions={{
             showLineNumbers: false,
             tabSize: 2,
