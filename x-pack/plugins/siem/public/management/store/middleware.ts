@@ -11,7 +11,6 @@ import {
 } from '../../common/store';
 import { policyListMiddlewareFactory } from '../pages/policy/store/policy_list';
 import { policyDetailsMiddlewareFactory } from '../pages/policy/store/policy_details';
-import { PolicyListState, PolicyDetailsState } from '../pages/policy/types';
 
 export const managementMiddlewareFactory: SecuritySubPluginMiddlewareFactory = (
   coreStart,
@@ -21,13 +20,7 @@ export const managementMiddlewareFactory: SecuritySubPluginMiddlewareFactory = (
   const detailSelector = (state: State) => state.management.policyDetails;
 
   return [
-    substateMiddlewareFactory<PolicyListState>(
-      listSelector,
-      policyListMiddlewareFactory(coreStart, depsStart)
-    ),
-    substateMiddlewareFactory<PolicyDetailsState>(
-      detailSelector,
-      policyDetailsMiddlewareFactory(coreStart, depsStart)
-    ),
+    substateMiddlewareFactory(listSelector, policyListMiddlewareFactory(coreStart, depsStart)),
+    substateMiddlewareFactory(detailSelector, policyDetailsMiddlewareFactory(coreStart, depsStart)),
   ];
 };

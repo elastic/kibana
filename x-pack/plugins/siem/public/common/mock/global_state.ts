@@ -232,6 +232,10 @@ export const mockGlobalState: State = {
       },
     },
   },
+  /**
+   * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
+   * they are cast to mutable versions here.
+   */
   alertList: initialAlertListState as AlertListState,
   hostList: initialHostListState as HostState,
   management: initialManagementState as ManagementState,

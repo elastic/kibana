@@ -40,7 +40,7 @@ export class EndpointHosts {
   ): SecuritySubPluginWithStore<'hostList', HostState> {
     const { data, ingestManager } = plugins;
     const middleware = [
-      substateMiddlewareFactory<HostState>(
+      substateMiddlewareFactory(
         (globalState) => globalState.hostList,
         hostMiddlewareFactory(core, { data, ingestManager })
       ),
@@ -49,6 +49,10 @@ export class EndpointHosts {
       routes: endpointHostsRoutes(),
       store: {
         initialState: { hostList: undefined },
+        /**
+         * Cast the ImmutableReducer to a regular reducer for compatibility with
+         * the subplugin architecture (which expects plain redux reducers.)
+         */
         reducer: { hostList: hostListReducer } as EndpointHostsPluginReducer,
         middleware,
       },

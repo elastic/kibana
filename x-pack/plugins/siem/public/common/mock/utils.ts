@@ -26,7 +26,10 @@ export const SUB_PLUGINS_REDUCER: SubPluginsInitReducer = {
   hosts: hostsReducer,
   network: networkReducer,
   timeline: timelineReducer,
-  // Cast back from 'Immutable' type
+  /**
+   * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
+   * they are cast to mutable versions here.
+   */
   hostList: hostListReducer as EndpointHostsPluginReducer['hostList'],
   alertList: alertListReducer as EndpointAlertsPluginReducer['alertList'],
   management: managementReducer as ManagementPluginReducer['management'],

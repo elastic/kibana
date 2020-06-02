@@ -59,11 +59,11 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
   const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, apolloClientObservable, [
-    substateMiddlewareFactory<HostState>(
+    substateMiddlewareFactory(
       (globalState) => globalState.hostList,
       hostMiddlewareFactory(coreStart, depsStart)
     ),
-    substateMiddlewareFactory<AlertListState>(
+    substateMiddlewareFactory(
       (globalState) => globalState.alertList,
       alertMiddlewareFactory(coreStart, depsStart)
     ),

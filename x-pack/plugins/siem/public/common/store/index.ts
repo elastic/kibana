@@ -28,15 +28,27 @@ export { createStore, getStore };
  *
  * Returns a regular middleware, meant to be used with `applyMiddleware`.
  */
-export const substateMiddlewareFactory = <Substate>(
+export const substateMiddlewareFactory = <Substate = never>(
   selector: (state: State) => Substate | Immutable<Substate>,
   middleware: ImmutableMiddleware<Substate, AppAction>
 ): Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>> => {
   return (api) => {
     const substateAPI = {
       ...api,
-      // Return just the substate instead of global state.
+      // Return the substate instead of global state.
       getState(): Immutable<Substate> {
+        /**
+         * The selector can return a mutable or immutable version of state, because state
+         * itself can be mutable or immutable (as the reducer can return a mutable or immutable version of state.)
+         *
+         * Casting to Immutable here means that when the middleware receives state,
+         * it will receive the immutable version (and so won't be allowed to directly mutate it.)
+         *
+         * Immutable enforces nothing structural about a type so casting
+         * a value as `Immutable` is safe as long as nothing else is going to mutate.
+         * Since the state came from the return value of a reducer, the reducer will (hopefully)
+         * not be mutating it.
+         */
         return selector(api.getState()) as Immutable<Substate>;
       },
     };

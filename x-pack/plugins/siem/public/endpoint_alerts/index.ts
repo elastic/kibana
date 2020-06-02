@@ -40,7 +40,7 @@ export class EndpointAlerts {
   ): SecuritySubPluginWithStore<'alertList', AlertListState> {
     const { data, ingestManager } = plugins;
     const middleware = [
-      substateMiddlewareFactory<AlertListState>(
+      substateMiddlewareFactory(
         (globalState) => globalState.alertList,
         alertMiddlewareFactory(core, { data, ingestManager })
       ),
@@ -50,6 +50,10 @@ export class EndpointAlerts {
       routes: endpointAlertsRoutes(),
       store: {
         initialState: { alertList: undefined },
+        /**
+         * Cast the ImmutableReducer to a regular reducer for compatibility with
+         * the subplugin architecture (which expects plain redux reducers.)
+         */
         reducer: { alertList: alertListReducer } as EndpointAlertsPluginReducer,
         middleware,
       },

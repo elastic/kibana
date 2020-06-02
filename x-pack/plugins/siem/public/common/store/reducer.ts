@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { combineReducers, PreloadedState } from 'redux';
+import { combineReducers, PreloadedState, AnyAction, Reducer } from 'redux';
 
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
@@ -19,6 +19,7 @@ import { ManagementPluginReducer } from '../../management';
 import { EndpointAlertsPluginReducer } from '../../endpoint_alerts';
 import { EndpointHostsPluginReducer } from '../../endpoint_hosts';
 import { State } from './types';
+import { AppAction } from './actions';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   NetworkPluginReducer &
@@ -45,7 +46,9 @@ export const createInitialState = (
 /**
  * Factory for the Security app's redux reducer.
  */
-export const createReducer = (pluginsReducer: SubPluginsInitReducer) =>
+export const createReducer: (
+  pluginsReducer: SubPluginsInitReducer
+) => Reducer<State, AppAction | AnyAction> = (pluginsReducer: SubPluginsInitReducer) =>
   combineReducers({
     app: appReducer,
     dragAndDrop: dragAndDropReducer,
