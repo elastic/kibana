@@ -7,13 +7,13 @@
 jest.mock('../lib/generate_pdf', () => ({ generatePdfObservableFactory: jest.fn() }));
 
 import * as Rx from 'rxjs';
-import { CancellationToken } from '../../../../../../../plugins/reporting/common';
-import { ReportingCore } from '../../../../../server';
-import { cryptoFactory, LevelLogger } from '../../../../../server/lib';
+import { ReportingCore } from '../../../../';
+import { CancellationToken } from '../../../../../common';
+import { cryptoFactory, LevelLogger } from '../../../../lib';
 import { createMockReportingCore } from '../../../../test_helpers';
 import { JobDocPayloadPDF } from '../../types';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { executeJobFactory } from './index';
+import { executeJobFactory } from './';
 
 let mockReporting: ReportingCore;
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../../../../server/browsers/chromium/puppeteer', () => ({
+jest.mock('../../../../browsers/chromium/puppeteer', () => ({
   puppeteerLaunch: () => ({
     // Fixme needs event emitters
     newPage: () => ({
@@ -18,12 +18,12 @@ jest.mock('../../../../../server/browsers/chromium/puppeteer', () => ({
 import * as Rx from 'rxjs';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { loggingServiceMock } from '../../../../../../../../src/core/server/mocks';
+import { HeadlessChromiumDriver } from '../../../../browsers';
+import { LevelLogger } from '../../../../lib';
 import { createMockBrowserDriverFactory, createMockLayoutInstance } from '../../../../test_helpers';
+import { CaptureConfig, ConditionalHeaders, ElementsPositionAndAttribute } from '../../../../types';
 import * as contexts from './constants';
 import { screenshotsObservableFactory } from './observable';
-import { LevelLogger } from '../../../../lib';
-import { CaptureConfig, ConditionalHeaders, ElementsPositionAndAttribute } from '../../../../types';
-import { HeadlessChromiumDriver } from '../../../../browsers';
 
 /*
  * Mocks

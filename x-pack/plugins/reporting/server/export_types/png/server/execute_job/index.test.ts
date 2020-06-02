@@ -5,13 +5,13 @@
  */
 
 import * as Rx from 'rxjs';
-import { CancellationToken } from '../../../../../../../plugins/reporting/common';
-import { ReportingCore } from '../../../../../server';
-import { cryptoFactory, LevelLogger } from '../../../../../server/lib';
+import { ReportingCore } from '../../../../';
+import { CancellationToken } from '../../../../../common';
+import { cryptoFactory, LevelLogger } from '../../../../lib';
 import { createMockReportingCore } from '../../../../test_helpers';
 import { JobDocPayloadPNG } from '../../types';
 import { generatePngObservableFactory } from '../lib/generate_png';
-import { executeJobFactory } from './index';
+import { executeJobFactory } from './';
 
 jest.mock('../lib/generate_png', () => ({ generatePngObservableFactory: jest.fn() }));
 

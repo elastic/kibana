@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { SearchParams, SearchResponse } from 'elasticsearch';
-import { CancellationToken } from '../../../../../../../plugins/reporting/common';
+import { CancellationToken } from '../../../../../common';
 import { LevelLogger } from '../../../../lib';
 import { ScrollConfig } from '../../../../types';
 

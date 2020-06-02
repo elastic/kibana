@@ -17,7 +17,7 @@ import {
   IIndexPattern,
   Query,
 } from '../../../../../../../../src/plugins/data/server';
-import { CancellationToken } from '../../../../../../../plugins/reporting/common';
+import { CancellationToken } from '../../../../../common';
 import { LevelLogger } from '../../../../lib';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import {

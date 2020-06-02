@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CancellationToken } from '../../../../../plugins/reporting/common';
+import { CancellationToken } from '../../../common';
 import { JobParamPostPayload, JobDocPayload, ScrollConfig } from '../../types';
 
 export type RawValue = string | object | null | undefined;

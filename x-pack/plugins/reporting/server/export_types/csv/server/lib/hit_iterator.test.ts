@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { CancellationToken } from '../../../../../../../plugins/reporting/common';
+import { CancellationToken } from '../../../../../common';
 import { LevelLogger } from '../../../../lib';
 import { ScrollConfig } from '../../../../types';
 import { createHitIterator } from './hit_iterator';
