@@ -8,6 +8,7 @@ import { Observable, timer, merge, throwError } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { KibanaRequest, CoreStart, IBasePath } from 'src/core/server';
 import { GlobalSearchProviderResult } from '../../common/types';
+import { GlobalSearchFindError } from '../../common/errors';
 import { takeInArray } from '../../common/operators';
 import { ILicenseChecker } from '../../common/license_checker';
 
@@ -84,7 +85,9 @@ export class SearchService {
     const licenseState = this.licenseChecker!.getState();
     if (!licenseState.valid) {
       return throwError(
-        `GlobalSearch API is disabled because of invalid license state: ${licenseState.message}`
+        GlobalSearchFindError.invalidLicense(
+          `GlobalSearch API is disabled because of invalid license state: ${licenseState.message}`
+        )
       );
     }
 

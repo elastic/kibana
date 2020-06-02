@@ -7,6 +7,7 @@
 import { reduce, map } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
+import { GlobalSearchFindError } from '../../common/errors';
 
 export const registerInternalFindRoute = (router: IRouter) => {
   router.post(
@@ -39,7 +40,10 @@ export const registerInternalFindRoute = (router: IRouter) => {
           },
         });
       } catch (e) {
-        return res.forbidden({ body: e });
+        if (e instanceof GlobalSearchFindError && e.type === 'invalid-license') {
+          return res.forbidden({ body: e.message });
+        }
+        throw e;
       }
     }
   );

@@ -9,6 +9,7 @@ import { map, takeUntil } from 'rxjs/operators';
 import { duration } from 'moment';
 import { HttpStart, ApplicationStart } from 'src/core/public';
 import { GlobalSearchProviderResult } from '../../common/types';
+import { GlobalSearchFindError } from '../../common/errors';
 import { takeInArray } from '../../common/operators';
 import { processProviderResult } from '../../common/process_result';
 import { ILicenseChecker } from '../../common/license_checker';
@@ -82,7 +83,9 @@ export class SearchService {
     const licenseState = this.licenseChecker!.getState();
     if (!licenseState.valid) {
       return throwError(
-        `GlobalSearch API is disabled because of invalid license state: ${licenseState.message}`
+        GlobalSearchFindError.invalidLicense(
+          `GlobalSearch API is disabled because of invalid license state: ${licenseState.message}`
+        )
       );
     }
 
