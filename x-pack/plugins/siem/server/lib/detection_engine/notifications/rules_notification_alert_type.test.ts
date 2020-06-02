@@ -8,7 +8,7 @@ import { loggingServiceMock } from 'src/core/server/mocks';
 import { getResult } from '../routes/__mocks__/request_responses';
 import { rulesNotificationAlertType } from './rules_notification_alert_type';
 import { buildSignalsSearchQuery } from './build_signals_query';
-import { alertsMock, AlertServicesMock } from '../../../../../../plugins/alerting/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { NotificationExecutorOptions } from './types';
 jest.mock('./build_signals_query');
 

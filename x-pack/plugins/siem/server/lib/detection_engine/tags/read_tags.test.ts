@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { getResult, getFindResultWithMultiHits } from '../routes/__mocks__/request_responses';
 import { INTERNAL_RULE_ID_KEY, INTERNAL_IDENTIFIER } from '../../../../common/constants';
 import { readRawTags, readTags, convertTagsToSet, convertToTags, isTags } from './read_tags';

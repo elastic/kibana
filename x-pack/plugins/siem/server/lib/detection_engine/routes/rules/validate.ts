@@ -16,7 +16,7 @@ import {
 } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { formatErrors } from '../../../../../common/format_errors';
 import { exactCheck } from '../../../../../common/exact_check';
-import { PartialAlert, FindResult } from '../../../../../../alerting/server';
+import { PartialAlert, FindResult } from '../../../../../../alerts/server';
 import {
   isAlertType,
   IRuleSavedAttributesSavedObjectAttributes,

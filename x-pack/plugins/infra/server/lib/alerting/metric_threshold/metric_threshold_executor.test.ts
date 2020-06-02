@@ -6,12 +6,12 @@
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { Comparator, AlertStates } from './types';
 import * as mocks from './test_mocks';
-import { AlertExecutorOptions } from '../../../../../alerting/server';
+import { AlertExecutorOptions } from '../../../../../alerts/server';
 import {
   alertsMock,
   AlertServicesMock,
   AlertInstanceMock,
-} from '../../../../../alerting/server/mocks';
+} from '../../../../../alerts/server/mocks';
 import { InfraSources } from '../../sources';
 
 interface AlertTestInstance {
