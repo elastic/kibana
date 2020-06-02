@@ -32,6 +32,11 @@ export const DISCOVER_APP_URL_GENERATOR = 'DISCOVER_APP_URL_GENERATOR';
 
 export interface DiscoverUrlGeneratorState {
   /**
+   * Optionally set saved search ID.
+   */
+  savedSearchId?: string;
+
+  /**
    * Optionally set index pattern ID.
    */
   indexPatternId?: string;
@@ -81,6 +86,7 @@ export class DiscoverUrlGenerator
     indexPatternId,
     query,
     refreshInterval,
+    savedSearchId,
     timeRange,
     useHash = this.params.useHash,
   }: DiscoverUrlGeneratorState): Promise<string> => {
@@ -100,9 +106,10 @@ export class DiscoverUrlGenerator
     if (refreshInterval) queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
-    let url = `${this.params.appBasePath}#/discover`;
-    url = setStateToKbnUrl('_a', appState, { useHash }, url);
+    const savedSearchPath = savedSearchId ? encodeURIComponent(savedSearchId) : '';
+    let url = `${this.params.appBasePath}#/${savedSearchPath}`;
     url = setStateToKbnUrl<QueryState>('_g', queryState, { useHash }, url);
+    url = setStateToKbnUrl('_a', appState, { useHash }, url);
 
     return url;
   };
