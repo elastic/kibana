@@ -141,7 +141,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   ) => {
     await waitForMapDependencies();
     const savedMap = await this._fetchSavedMap(savedObjectId);
-    const layerList = getInitialLayers(savedMap.layerListJSON);
+    const layerList = JSON.parse(savedMap.layerListJSON);
     const indexPatterns = await this._getIndexPatterns(layerList);
 
     let settings;
