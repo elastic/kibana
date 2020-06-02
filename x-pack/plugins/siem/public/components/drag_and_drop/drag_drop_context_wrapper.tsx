@@ -26,6 +26,7 @@ import {
   addFieldToTimelineColumns,
   addProviderToTimeline,
   fieldWasDroppedOnTimelineColumns,
+  getTimelineIdFromColumnDroppableId,
   IS_DRAGGING_CLASS_NAME,
   IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
   providerWasDroppedOnTimeline,
@@ -81,7 +82,7 @@ const onDragEndHandler = ({
       browserFields,
       dispatch,
       result,
-      timelineId: ACTIVE_TIMELINE_REDUX_ID,
+      timelineId: getTimelineIdFromColumnDroppableId(result.destination?.droppableId ?? ''),
     });
   }
 };
