@@ -15,177 +15,177 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const userMenu = getService('userMenu');
-  const PageObjects = getPageObjects(['common', 'header', 'settings', 'home', 'error']);
+  const PageObjects = getPageObjects(['common', 'header', 'settings', 'home', 'error', 'login']);
 
-  interface LoginOptions {
-    expectSpaceSelector?: boolean;
-    expectSuccess?: boolean;
-    expectForbidden?: boolean;
-  }
+  // interface LoginOptions {
+  //   expectSpaceSelector?: boolean;
+  //   expectSuccess?: boolean;
+  //   expectForbidden?: boolean;
+  // }
 
-  type LoginExpectedResult = 'spaceSelector' | 'error' | 'chrome';
+  // type LoginExpectedResult = 'spaceSelector' | 'error' | 'chrome';
 
-  async function waitForLoginPage() {
-    log.debug('Waiting for Login Page to appear.');
-    await retry.waitForWithTimeout('login page', config.get('timeouts.waitFor') * 5, async () => {
-      // As a part of the cleanup flow tests usually try to log users out, but there are cases when
-      // browser/Kibana would like users to confirm that they want to navigate away from the current
-      // page and lose the state (e.g. unsaved changes) via native alert dialog.
-      const alert = await browser.getAlert();
-      if (alert && alert.accept) {
-        await alert.accept();
-      }
-      return await find.existsByDisplayedByCssSelector('.login-form');
-    });
-  }
+  // async function waitForLoginPage() {
+  //   log.debug('Waiting for Login Page to appear.');
+  //   await retry.waitForWithTimeout('login page', config.get('timeouts.waitFor') * 5, async () => {
+  //     // As a part of the cleanup flow tests usually try to log users out, but there are cases when
+  //     // browser/Kibana would like users to confirm that they want to navigate away from the current
+  //     // page and lose the state (e.g. unsaved changes) via native alert dialog.
+  //     const alert = await browser.getAlert();
+  //     if (alert && alert.accept) {
+  //       await alert.accept();
+  //     }
+  //     return await find.existsByDisplayedByCssSelector('.login-form');
+  //   });
+  // }
 
-  async function waitForLoginForm() {
-    log.debug('Waiting for Login Form to appear.');
-    await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => {
-      return await testSubjects.exists('loginForm');
-    });
-  }
+  // async function waitForLoginForm() {
+  //   log.debug('Waiting for Login Form to appear.');
+  //   await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => {
+  //     return await testSubjects.exists('loginForm');
+  //   });
+  // }
 
-  async function waitForLoginSelector() {
-    log.debug('Waiting for Login Selector to appear.');
-    await retry.waitForWithTimeout(
-      'login selector',
-      config.get('timeouts.waitFor') * 5,
-      async () => {
-        return await testSubjects.exists('loginSelector');
-      }
-    );
-  }
+  // async function waitForLoginSelector() {
+  //   log.debug('Waiting for Login Selector to appear.');
+  //   await retry.waitForWithTimeout(
+  //     'login selector',
+  //     config.get('timeouts.waitFor') * 5,
+  //     async () => {
+  //       return await testSubjects.exists('loginSelector');
+  //     }
+  //   );
+  // }
 
-  async function waitForLoginHelp(helpText: string) {
-    log.debug(`Waiting for Login Help to appear with text: ${helpText}.`);
-    await retry.waitForWithTimeout('login help', config.get('timeouts.waitFor') * 5, async () => {
-      return (await testSubjects.getVisibleText('loginHelp')) === helpText;
-    });
-  }
+  // async function waitForLoginHelp(helpText: string) {
+  //   log.debug(`Waiting for Login Help to appear with text: ${helpText}.`);
+  //   await retry.waitForWithTimeout('login help', config.get('timeouts.waitFor') * 5, async () => {
+  //     return (await testSubjects.getVisibleText('loginHelp')) === helpText;
+  //   });
+  // }
 
-  async function waitForLoginResult(expectedResult?: LoginExpectedResult) {
-    log.debug(`Waiting for login result, expected: ${expectedResult}.`);
+  // async function waitForLoginResult(expectedResult?: LoginExpectedResult) {
+  //   log.debug(`Waiting for login result, expected: ${expectedResult}.`);
 
-    // wait for either space selector, kibanaChrome or loginErrorMessage
-    if (expectedResult === 'spaceSelector') {
-      await retry.try(() => testSubjects.find('kibanaSpaceSelector'));
-      log.debug(
-        `Finished login process, landed on space selector. currentUrl = ${await browser.getCurrentUrl()}`
-      );
-      return;
-    }
+  //   // wait for either space selector, kibanaChrome or loginErrorMessage
+  //   if (expectedResult === 'spaceSelector') {
+  //     await retry.try(() => testSubjects.find('kibanaSpaceSelector'));
+  //     log.debug(
+  //       `Finished login process, landed on space selector. currentUrl = ${await browser.getCurrentUrl()}`
+  //     );
+  //     return;
+  //   }
 
-    if (expectedResult === 'error') {
-      const rawDataTabLocator = 'a[id=rawdata-tab]';
-      if (await find.existsByCssSelector(rawDataTabLocator)) {
-        // Firefox has 3 tabs and requires navigation to see Raw output
-        await find.clickByCssSelector(rawDataTabLocator);
-      }
-      await retry.try(async () => {
-        if (await find.existsByCssSelector(rawDataTabLocator)) {
-          await find.clickByCssSelector(rawDataTabLocator);
-        }
-        await PageObjects.error.expectForbidden();
-      });
-      log.debug(
-        `Finished login process, found forbidden message. currentUrl = ${await browser.getCurrentUrl()}`
-      );
-      return;
-    }
+  //   if (expectedResult === 'error') {
+  //     const rawDataTabLocator = 'a[id=rawdata-tab]';
+  //     if (await find.existsByCssSelector(rawDataTabLocator)) {
+  //       // Firefox has 3 tabs and requires navigation to see Raw output
+  //       await find.clickByCssSelector(rawDataTabLocator);
+  //     }
+  //     await retry.try(async () => {
+  //       if (await find.existsByCssSelector(rawDataTabLocator)) {
+  //         await find.clickByCssSelector(rawDataTabLocator);
+  //       }
+  //       await PageObjects.error.expectForbidden();
+  //     });
+  //     log.debug(
+  //       `Finished login process, found forbidden message. currentUrl = ${await browser.getCurrentUrl()}`
+  //     );
+  //     return;
+  //   }
 
-    if (expectedResult === 'chrome') {
-      await find.byCssSelector(
-        '[data-test-subj="kibanaChrome"] .app-wrapper:not(.hidden-chrome)',
-        20000
-      );
-      log.debug(`Finished login process currentUrl = ${await browser.getCurrentUrl()}`);
-    }
-  }
+  //   if (expectedResult === 'chrome') {
+  //     await find.byCssSelector(
+  //       '[data-test-subj="kibanaChrome"] .app-wrapper:not(.hidden-chrome)',
+  //       20000
+  //     );
+  //     log.debug(`Finished login process currentUrl = ${await browser.getCurrentUrl()}`);
+  //   }
+  // }
 
-  const loginPage = Object.freeze({
-    async login(username?: string, password?: string, options: LoginOptions = {}) {
-      await PageObjects.common.navigateToApp('login');
+  // const loginPage = Object.freeze({
+  //   async login(username?: string, password?: string, options: LoginOptions = {}) {
+  //     await PageObjects.common.navigateToApp('login');
 
-      // ensure welcome screen won't be shown. This is relevant for environments which don't allow
-      // to use the yml setting, e.g. cloud
-      await browser.setLocalStorageItem('home:welcome:show', 'false');
-      await waitForLoginForm();
+  //     // ensure welcome screen won't be shown. This is relevant for environments which don't allow
+  //     // to use the yml setting, e.g. cloud
+  //     await browser.setLocalStorageItem('home:welcome:show', 'false');
+  //     await waitForLoginForm();
 
-      const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
-      await testSubjects.setValue('loginUsername', username || superUsername);
-      await testSubjects.setValue('loginPassword', password || superPassword);
-      await testSubjects.click('loginSubmit');
+  //     const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
+  //     await testSubjects.setValue('loginUsername', username || superUsername);
+  //     await testSubjects.setValue('loginPassword', password || superPassword);
+  //     await testSubjects.click('loginSubmit');
 
-      await waitForLoginResult(
-        options.expectSpaceSelector
-          ? 'spaceSelector'
-          : options.expectForbidden
-          ? 'error'
-          : options.expectSuccess
-          ? 'chrome'
-          : undefined
-      );
-    },
+  //     await waitForLoginResult(
+  //       options.expectSpaceSelector
+  //         ? 'spaceSelector'
+  //         : options.expectForbidden
+  //         ? 'error'
+  //         : options.expectSuccess
+  //         ? 'chrome'
+  //         : undefined
+  //     );
+  //   },
 
-    async getErrorMessage() {
-      return await retry.try(async () => {
-        const errorMessageContainer = await retry.try(() => testSubjects.find('loginErrorMessage'));
-        const errorMessageText = await errorMessageContainer.getVisibleText();
+  //   async getErrorMessage() {
+  //     return await retry.try(async () => {
+  //       const errorMessageContainer = await retry.try(() => testSubjects.find('loginErrorMessage'));
+  //       const errorMessageText = await errorMessageContainer.getVisibleText();
 
-        if (!errorMessageText) {
-          throw new Error('Login Error Message not present yet');
-        }
+  //       if (!errorMessageText) {
+  //         throw new Error('Login Error Message not present yet');
+  //       }
 
-        return errorMessageText;
-      });
-    },
-  });
+  //       return errorMessageText;
+  //     });
+  //   },
+  // });
 
-  const loginSelector = Object.freeze({
-    async login(providerType: string, providerName: string, options?: Record<string, any>) {
-      log.debug(`Starting login flow for ${providerType}/${providerName}`);
+  // const loginSelector = Object.freeze({
+  //   async login(providerType: string, providerName: string, options?: Record<string, any>) {
+  //     log.debug(`Starting login flow for ${providerType}/${providerName}`);
 
-      await this.verifyLoginSelectorIsVisible();
-      await this.selectLoginMethod(providerType, providerName);
+  //     await this.verifyLoginSelectorIsVisible();
+  //     await this.selectLoginMethod(providerType, providerName);
 
-      if (providerType === 'basic' || providerType === 'token') {
-        await waitForLoginForm();
+  //     if (providerType === 'basic' || providerType === 'token') {
+  //       await waitForLoginForm();
 
-        const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
-        await testSubjects.setValue('loginUsername', options?.username ?? superUsername);
-        await testSubjects.setValue('loginPassword', options?.password ?? superPassword);
-        await testSubjects.click('loginSubmit');
-      }
+  //       const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
+  //       await testSubjects.setValue('loginUsername', options?.username ?? superUsername);
+  //       await testSubjects.setValue('loginPassword', options?.password ?? superPassword);
+  //       await testSubjects.click('loginSubmit');
+  //     }
 
-      await waitForLoginResult('chrome');
+  //     await waitForLoginResult('chrome');
 
-      log.debug(`Finished login process currentUrl = ${await browser.getCurrentUrl()}`);
-    },
+  //     log.debug(`Finished login process currentUrl = ${await browser.getCurrentUrl()}`);
+  //   },
 
-    async selectLoginMethod(providerType: string, providerName: string) {
-      // Ensure welcome screen won't be shown. This is relevant for environments which don't allow
-      // to use the yml setting, e.g. cloud.
-      await browser.setLocalStorageItem('home:welcome:show', 'false');
-      await testSubjects.click(`loginCard-${providerType}/${providerName}`);
-    },
+  //   async selectLoginMethod(providerType: string, providerName: string) {
+  //     // Ensure welcome screen won't be shown. This is relevant for environments which don't allow
+  //     // to use the yml setting, e.g. cloud.
+  //     await browser.setLocalStorageItem('home:welcome:show', 'false');
+  //     await testSubjects.click(`loginCard-${providerType}/${providerName}`);
+  //   },
 
-    async verifyLoginFormIsVisible() {
-      await waitForLoginForm();
-    },
+  //   async verifyLoginFormIsVisible() {
+  //     await waitForLoginForm();
+  //   },
 
-    async verifyLoginSelectorIsVisible() {
-      await waitForLoginSelector();
-    },
+  //   async verifyLoginSelectorIsVisible() {
+  //     await waitForLoginSelector();
+  //   },
 
-    async verifyLoginHelpIsVisible(helpText: string) {
-      await waitForLoginHelp(helpText);
-    },
-  });
+  //   async verifyLoginHelpIsVisible(helpText: string) {
+  //     await waitForLoginHelp(helpText);
+  //   },
+  // });
 
   class SecurityPage {
-    public loginPage = loginPage;
-    public loginSelector = loginSelector;
+    public loginPage = PageObjects.login;
+    // public loginSelector = loginSelector;
 
     async login(username?: string, password?: string, options: LoginOptions = {}) {
       await this.loginPage.login(username, password, options);
