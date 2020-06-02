@@ -50,6 +50,15 @@ export const agentConfigFormValidation = (
     ];
   }
 
+  if (!agentConfig.namespace?.trim()) {
+    errors.namespace = [
+      <FormattedMessage
+        id="xpack.ingestManager.agentConfigForm.namespaceRequiredErrorMessage"
+        defaultMessage="A namespace is required"
+      />,
+    ];
+  }
+
   return errors;
 };
 
@@ -173,12 +182,6 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
           fullWidth
           error={touchedFields.namespace && validation.namespace ? validation.namespace : null}
           isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
-          helpText={
-            <FormattedMessage
-              id="xpack.ingestManager.agentConfigForm.namespaceFieldHelpText"
-              defaultMessage="Leave empty if you do not want a namespace."
-            />
-          }
         >
           <EuiComboBox
             fullWidth
