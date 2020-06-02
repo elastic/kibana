@@ -94,7 +94,7 @@ export class IndexTable extends Component {
     super(props);
 
     this.state = {
-      showHiddenIndices: false,
+      includeHiddenIndices: false,
       dataStreamFilter: undefined,
       selectedIndicesMap: {},
     };
@@ -130,11 +130,10 @@ export class IndexTable extends Component {
 
   syncUrlParams() {
     const { location } = this.props;
-    // Check if the we have the includeHidden query param
-    const { includeHidden } = qs.parse((location && location.search) || '');
-    const nextValue = includeHidden === 'true';
-    if (this.state.includeHidden !== nextValue) {
-      this.setState({ includeHidden: nextValue });
+    const { includeHiddenIndices } = qs.parse((location && location.search) || '');
+    const nextValue = includeHiddenIndices === 'true';
+    if (this.state.includeHiddenIndices !== nextValue) {
+      this.setState({ includeHiddenIndices: nextValue });
     }
   }
 
@@ -142,9 +141,9 @@ export class IndexTable extends Component {
     const { pathname, search } = this.props.location;
     const params = qs.parse(search);
     if (hidden) {
-      params.includeHidden = 'true';
+      params.includeHiddenIndices = 'true';
     } else {
-      delete params.includeHidden;
+      delete params.includeHiddenIndices;
     }
     this.props.history.push(pathname + '?' + qs.stringify(params));
   }
@@ -497,7 +496,7 @@ export class IndexTable extends Component {
                         <EuiSwitch
                           id="checkboxShowHiddenIndices"
                           data-test-subj="indexTableIncludeHiddenIndicesToggle"
-                          checked={this.state.includeHidden}
+                          checked={this.state.includeHiddenIndices}
                           onChange={(event) => this.setIncludeHiddenParam(event.target.checked)}
                           label={
                             <FormattedMessage

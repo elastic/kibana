@@ -37,7 +37,9 @@ describe('getFilteredIndices selector', () => {
   });
 
   it('includes hidden indices', () => {
-    expect(getFilteredIndices(state, { location: { search: '?includeHidden=true' } })).toEqual([
+    expect(
+      getFilteredIndices(state, { location: { search: '?includeHiddenIndices=true' } })
+    ).toEqual([
       { name: 'index1', hidden: true, dataStream: '123' },
       { name: 'index2', hidden: false },
       { name: 'index3', dataStream: 'abc' },
@@ -56,7 +58,7 @@ describe('getFilteredIndices selector', () => {
   it('filters based on data stream and includes hidden indices', () => {
     expect(
       getFilteredIndices(state, {
-        location: { search: '?includeHidden=true&dataStreams=123,abc,does-not-exist' },
+        location: { search: '?includeHiddenIndices=true&dataStreams=123,abc,does-not-exist' },
       })
     ).toEqual([
       { name: 'index1', hidden: true, dataStream: '123' },

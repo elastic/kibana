@@ -90,7 +90,7 @@ export const getFilteredIndices = createSelector(
   (indices, allIds, tableState, tableLocation) => {
     let indexArray = allIds.map((indexName) => indices[indexName]);
     indexArray = filterByToggles(indexArray, tableState.toggleNameToVisibleMap);
-    const { includeHidden: includeHiddenParam, dataStreams: dataStreamsParam } = qs.parse(
+    const { includeHiddenIndices: includeHiddenParam, dataStreams: dataStreamsParam } = qs.parse(
       tableLocation.search
     );
     const includeHidden = includeHiddenParam === 'true';
