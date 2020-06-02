@@ -7,6 +7,7 @@
 import { APICaller } from 'kibana/server';
 
 import { Filter, SortFieldOrUndefined, SortOrderOrUndefined } from '../../../common/schemas';
+import { Scroll } from '../lists/types';
 
 import { getQueryFilter } from './get_query_filter';
 import { getSortWithTieBreaker } from './get_sort_with_tie_breaker';

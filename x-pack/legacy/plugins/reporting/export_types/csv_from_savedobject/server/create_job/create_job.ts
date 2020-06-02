@@ -6,10 +6,11 @@
 
 import { notFound, notImplemented } from 'boom';
 import { get } from 'lodash';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
 import { cryptoFactory, LevelLogger } from '../../../../server/lib';
-import { CreateJobFactory, RequestFacade, TimeRangeParams } from '../../../../server/types';
+import { CreateJobFactory, TimeRangeParams } from '../../../../server/types';
 import {
   JobDocPayloadPanelCsv,
   JobParamsPanelCsv,
@@ -23,8 +24,9 @@ import { createJobSearch } from './create_job_search';
 
 export type ImmediateCreateJobFn<JobParamsType> = (
   jobParams: JobParamsType,
-  headers: Record<string, string>,
-  req: RequestFacade
+  headers: KibanaRequest['headers'],
+  context: RequestHandlerContext,
+  req: KibanaRequest
 ) => Promise<{
   type: string | null;
   title: string;
@@ -46,21 +48,21 @@ export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
 
   return async function createJob(
     jobParams: JobParamsPanelCsv,
-    headers: any,
-    req: RequestFacade
+    headers: KibanaRequest['headers'],
+    context: RequestHandlerContext,
+    req: KibanaRequest
   ): Promise<JobDocPayloadPanelCsv> {
     const { savedObjectType, savedObjectId } = jobParams;
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
-    const client = req.getSavedObjectsClient();
 
     const { panel, title, visType }: VisData = await Promise.resolve()
-      .then(() => client.get(savedObjectType, savedObjectId))
+      .then(() => context.core.savedObjects.client.get(savedObjectType, savedObjectId))
       .then(async (savedObject: SavedObject) => {
         const { attributes, references } = savedObject;
         const {
           kibanaSavedObjectMeta: kibanaSavedObjectMetaJSON,
         } = attributes as SavedSearchObjectAttributesJSON;
-        const { timerange } = req.payload as { timerange: TimeRangeParams };
+        const { timerange } = req.body as { timerange: TimeRangeParams };
 
         if (!kibanaSavedObjectMetaJSON) {
           throw new Error('Could not parse saved object data!');

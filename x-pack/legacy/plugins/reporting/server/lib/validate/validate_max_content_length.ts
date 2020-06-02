@@ -18,7 +18,7 @@ export async function validateMaxContentLength(
   elasticsearch: ElasticsearchServiceSetup,
   logger: LevelLogger
 ) {
-  const { callAsInternalUser } = elasticsearch.dataClient;
+  const { callAsInternalUser } = elasticsearch.legacy.client;
 
   const elasticClusterSettingsResponse = await callAsInternalUser('cluster.getSettings', {
     includeDefaults: true,
