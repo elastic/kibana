@@ -7,6 +7,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { argv } from 'yargs';
 import pLimit from 'p-limit';
+import pRetry from 'p-retry';
 import { parse, format } from 'url';
 import { unique, without, set, merge, flatten } from 'lodash';
 import * as histogram from 'hdr-histogram-js';
@@ -48,6 +49,14 @@ export async function aggregateLatencyMetrics() {
   }
 
   const limit = pLimit(concurrency);
+  const retry = (fn: (...args: any[]) => any) => {
+    return () =>
+      pRetry(fn, {
+        factor: 1,
+        retries: 3,
+        minTimeout: 2500,
+      });
+  };
 
   const tasks: Array<Promise<void>> = [];
 
@@ -155,219 +164,221 @@ export async function aggregateLatencyMetrics() {
     const start = Math.max(from, at - interval * 60 * 1000);
 
     tasks.push(
-      limit(async () => {
-        const filter = [
-          {
-            term: {
-              [PROCESSOR_EVENT]: 'transaction',
-            },
-          },
-          {
-            range: {
-              '@timestamp': {
-                gte: start,
-                lt: end,
+      limit(
+        retry(async () => {
+          const filter = [
+            {
+              term: {
+                [PROCESSOR_EVENT]: 'transaction',
               },
             },
-          },
-        ];
-
-        async function paginateThroughBuckets(
-          buckets: Array<{
-            doc_count: number;
-            key: any;
-            recorded_values?: { value: number[] };
-          }>,
-          after?: any
-        ): Promise<
-          Array<{
-            doc_count: number;
-            key: any;
-            recorded_values?: { value: number[] };
-          }>
-        > {
-          const params = {
-            index: sourceOptions.index,
-            body: {
-              query: {
-                bool: {
-                  filter,
+            {
+              range: {
+                '@timestamp': {
+                  gte: start,
+                  lt: end,
                 },
               },
-              aggs: {
-                transactionGroups: {
-                  composite: {
-                    ...(after ? { after } : {}),
-                    size: 10000,
-                    sources: fields.map((field) => ({
-                      [field]: {
-                        terms: {
-                          field,
-                          missing_bucket: true,
-                        },
-                      },
-                    })),
+            },
+          ];
+
+          async function paginateThroughBuckets(
+            buckets: Array<{
+              doc_count: number;
+              key: any;
+              recorded_values?: { value: number[] };
+            }>,
+            after?: any
+          ): Promise<
+            Array<{
+              doc_count: number;
+              key: any;
+              recorded_values?: { value: number[] };
+            }>
+          > {
+            const params = {
+              index: sourceOptions.index,
+              body: {
+                query: {
+                  bool: {
+                    filter,
                   },
-                  ...(dest
-                    ? {
-                        aggs: {
-                          recorded_values: {
-                            scripted_metric: {
-                              init_script: 'state.values = new ArrayList()',
-                              map_script: `
+                },
+                aggs: {
+                  transactionGroups: {
+                    composite: {
+                      ...(after ? { after } : {}),
+                      size: 10000,
+                      sources: fields.map((field) => ({
+                        [field]: {
+                          terms: {
+                            field,
+                            missing_bucket: true,
+                          },
+                        },
+                      })),
+                    },
+                    ...(dest
+                      ? {
+                          aggs: {
+                            recorded_values: {
+                              scripted_metric: {
+                                init_script: 'state.values = new ArrayList()',
+                                map_script: `
                             if (!doc['transaction.duration.us'].empty) {
                               state.values.add(doc['transaction.duration.us'].value);
                             }
                           `,
-                              combine_script: 'return state.values',
-                              reduce_script: `
+                                combine_script: 'return state.values',
+                                reduce_script: `
                             return states.stream().flatMap(l -> l.stream()).collect(Collectors.toList())
                           `,
+                              },
                             },
                           },
-                        },
-                      }
-                    : {}),
+                        }
+                      : {}),
+                  },
                 },
               },
-            },
-          };
+            };
 
-          const response = (await sourceClient.search(params))
-            .body as ESSearchResponse<unknown, typeof params>;
+            const response = (await sourceClient.search(params))
+              .body as ESSearchResponse<unknown, typeof params>;
 
-          const { aggregations } = response;
+            const { aggregations } = response;
 
-          if (!aggregations) {
-            return buckets;
-          }
+            if (!aggregations) {
+              return buckets;
+            }
 
-          const { transactionGroups } = aggregations;
+            const { transactionGroups } = aggregations;
 
-          const nextBuckets = buckets.concat(transactionGroups.buckets);
+            const nextBuckets = buckets.concat(transactionGroups.buckets);
 
-          if (!transactionGroups.after_key) {
-            return nextBuckets;
-          }
+            if (!transactionGroups.after_key) {
+              return nextBuckets;
+            }
 
-          return nextBuckets.concat(
-            await paginateThroughBuckets(buckets, transactionGroups.after_key)
-          );
-        }
-
-        async function getNumberOfTransactionDocuments() {
-          const params = {
-            index: sourceOptions.index,
-            body: {
-              query: {
-                bool: {
-                  filter,
-                },
-              },
-              track_total_hits: true,
-            },
-          };
-
-          const response = (await sourceClient.search(params))
-            .body as ESSearchResponse<unknown, typeof params>;
-
-          return response.hits.total.value;
-        }
-
-        const [buckets, numberOfTransactionDocuments] = await Promise.all([
-          paginateThroughBuckets([]),
-          getNumberOfTransactionDocuments(),
-        ]);
-
-        const rangeLabel = `${new Date(start).toISOString()}-${new Date(
-          end
-        ).toISOString()}`;
-
-        // eslint-disable-next-line no-console
-        console.log(
-          `${rangeLabel}: Compression: ${
-            buckets.length
-          }/${numberOfTransactionDocuments} (${Math.round(
-            (buckets.length / numberOfTransactionDocuments) * 100
-          )}%)`
-        );
-
-        const docs: Array<Record<string, any>> = [];
-
-        if (uploadMetrics) {
-          buckets.forEach((bucket) => {
-            const values = (bucket.recorded_values?.value ?? []) as number[];
-            const h = histogram.build();
-            values.forEach((value) => {
-              h.recordValue(value);
-            });
-
-            const counts: number[] = (h as any).counts;
-
-            const distribution = Object.keys(counts).reduce(
-              (prev, key) => {
-                const value = Number(key);
-                const count = Number(counts[value]);
-                if (count > 0) {
-                  prev.values.push(value);
-                  prev.counts.push(count);
-                }
-                return prev;
-              },
-              { values: [] as number[], counts: [] as number[] }
-            );
-
-            const structured = Object.keys(bucket.key).reduce((prev, key) => {
-              set(prev, key, bucket.key[key]);
-              return prev;
-            }, {});
-
-            const doc = merge({}, structured, {
-              '@timestamp': new Date(start).toISOString(),
-              timestamp: {
-                us: start * 1000,
-              },
-              processor: {
-                name: 'metric',
-                event: 'metric',
-              },
-              transaction: {
-                duration: {
-                  histogram: distribution,
-                },
-              },
-            });
-
-            docs.push(doc);
-          });
-
-          if (!docs.length) {
-            // eslint-disable-next-line no-console
-            console.log(`${rangeLabel}: No docs to upload`);
-            return;
-          }
-
-          const response = await destClient?.bulk({
-            refresh: 'wait_for',
-            body: flatten(
-              docs.map((doc) => [
-                { index: { _index: destOptions?.index } },
-                doc,
-              ])
-            ),
-          });
-
-          if (response?.body.errors) {
-            throw new Error(
-              `${rangeLabel}: Could not upload all metric documents`
+            return nextBuckets.concat(
+              await paginateThroughBuckets(buckets, transactionGroups.after_key)
             );
           }
+
+          async function getNumberOfTransactionDocuments() {
+            const params = {
+              index: sourceOptions.index,
+              body: {
+                query: {
+                  bool: {
+                    filter,
+                  },
+                },
+                track_total_hits: true,
+              },
+            };
+
+            const response = (await sourceClient.search(params))
+              .body as ESSearchResponse<unknown, typeof params>;
+
+            return response.hits.total.value;
+          }
+
+          const [buckets, numberOfTransactionDocuments] = await Promise.all([
+            paginateThroughBuckets([]),
+            getNumberOfTransactionDocuments(),
+          ]);
+
+          const rangeLabel = `${new Date(start).toISOString()}-${new Date(
+            end
+          ).toISOString()}`;
+
           // eslint-disable-next-line no-console
           console.log(
-            `${rangeLabel}: Uploaded ${docs.length} metric documents`
+            `${rangeLabel}: Compression: ${
+              buckets.length
+            }/${numberOfTransactionDocuments} (${Math.round(
+              (buckets.length / numberOfTransactionDocuments) * 100
+            )}%)`
           );
-        }
-      })
+
+          const docs: Array<Record<string, any>> = [];
+
+          if (uploadMetrics) {
+            buckets.forEach((bucket) => {
+              const values = (bucket.recorded_values?.value ?? []) as number[];
+              const h = histogram.build();
+              values.forEach((value) => {
+                h.recordValue(value);
+              });
+
+              const counts: number[] = (h as any).counts;
+
+              const distribution = Object.keys(counts).reduce(
+                (prev, key) => {
+                  const value = Number(key);
+                  const count = Number(counts[value]);
+                  if (count > 0) {
+                    prev.values.push(value);
+                    prev.counts.push(count);
+                  }
+                  return prev;
+                },
+                { values: [] as number[], counts: [] as number[] }
+              );
+
+              const structured = Object.keys(bucket.key).reduce((prev, key) => {
+                set(prev, key, bucket.key[key]);
+                return prev;
+              }, {});
+
+              const doc = merge({}, structured, {
+                '@timestamp': new Date(start).toISOString(),
+                timestamp: {
+                  us: start * 1000,
+                },
+                processor: {
+                  name: 'metric',
+                  event: 'metric',
+                },
+                transaction: {
+                  duration: {
+                    histogram: distribution,
+                  },
+                },
+              });
+
+              docs.push(doc);
+            });
+
+            if (!docs.length) {
+              // eslint-disable-next-line no-console
+              console.log(`${rangeLabel}: No docs to upload`);
+              return;
+            }
+
+            const response = await destClient?.bulk({
+              refresh: 'wait_for',
+              body: flatten(
+                docs.map((doc) => [
+                  { index: { _index: destOptions?.index } },
+                  doc,
+                ])
+              ),
+            });
+
+            if (response?.body.errors) {
+              throw new Error(
+                `${rangeLabel}: Could not upload all metric documents`
+              );
+            }
+            // eslint-disable-next-line no-console
+            console.log(
+              `${rangeLabel}: Uploaded ${docs.length} metric documents`
+            );
+          }
+        })
+      )
     );
     at = start;
   }

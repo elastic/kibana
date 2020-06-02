@@ -30,12 +30,31 @@ export async function createOrUpdateIndex({
     }
   }
 
-  await client.indices.putTemplate({
-    name: indexName,
-    body: template,
-  });
+  const indexExists = (
+    await client.indices.exists({
+      index: indexName,
+    })
+  ).body as boolean;
 
-  await client.indices.create({
-    index: indexName,
-  });
+  if (!indexExists) {
+    await client.indices.create({
+      index: indexName,
+      body: template,
+    });
+  } else {
+    await Promise.all([
+      template.mappings
+        ? client.indices.putMapping({
+            index: indexName,
+            body: template.mappings,
+          })
+        : Promise.resolve(undefined as any),
+      template.settings
+        ? client.indices.putSettings({
+            index: indexName,
+            body: template.settings,
+          })
+        : Promise.resolve(undefined as any),
+    ]);
+  }
 }

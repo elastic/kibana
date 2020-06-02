@@ -21,6 +21,10 @@ const {
 } = require('./aggregate-latency-metrics/index.ts');
 
 aggregateLatencyMetrics().catch((err) => {
-  console.error(err);
+  if (err.meta) {
+    console.error(err.meta.body.error);
+  } else {
+    console.error(err);
+  }
   process.exit(1);
 });
