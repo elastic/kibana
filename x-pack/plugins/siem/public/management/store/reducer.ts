@@ -23,9 +23,9 @@ import { ManagementState } from '../types';
 
 const immutableCombineReducers: ImmutableCombineReducers = combineReducers;
 
-export const initialManagementState: Immutable<ManagementState> = {
-  policyList: initialPolicyListState,
-  policyDetails: initialPolicyDetailsState,
+export const mockManagementState: Immutable<ManagementState> = {
+  policyList: initialPolicyListState(),
+  policyDetails: initialPolicyDetailsState(),
 };
 
 /**

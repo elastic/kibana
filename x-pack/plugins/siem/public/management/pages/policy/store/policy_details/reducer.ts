@@ -9,7 +9,10 @@ import { ImmutableReducer } from '../../../../../common/store';
 import { AppAction } from '../../../../../common/store/actions';
 import { PolicyDetailsState } from '../../types';
 
-export const initialPolicyDetailsState: Immutable<PolicyDetailsState> = {
+/**
+ * Return a fresh copy of initial state, since we mutate state in the reducer.
+ */
+export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = () => ({
   policyItem: undefined,
   isLoading: false,
   agentStatusSummary: {
@@ -19,10 +22,10 @@ export const initialPolicyDetailsState: Immutable<PolicyDetailsState> = {
     online: 0,
     total: 0,
   },
-};
+});
 
 export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppAction> = (
-  state = initialPolicyDetailsState,
+  state = initialPolicyDetailsState(),
   action
 ) => {
   if (
@@ -83,7 +86,7 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
       };
     }
     return {
-      ...initialPolicyDetailsState,
+      ...initialPolicyDetailsState(),
       location: action.payload,
     };
   }

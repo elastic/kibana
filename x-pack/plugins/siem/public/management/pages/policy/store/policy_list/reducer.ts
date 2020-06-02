@@ -10,7 +10,11 @@ import { AppAction } from '../../../../../common/store/actions';
 import { Immutable } from '../../../../../../common/endpoint/types';
 import { PolicyListState } from '../../types';
 
-export const initialPolicyListState: Immutable<PolicyListState> = {
+/**
+ * Return the initial state.
+ * In case `state` was mutated, we return a fresh initial state object.
+ */
+export const initialPolicyListState: () => Immutable<PolicyListState> = () => ({
   policyItems: [],
   isLoading: false,
   apiError: undefined,
@@ -18,10 +22,10 @@ export const initialPolicyListState: Immutable<PolicyListState> = {
   pageSize: 10,
   total: 0,
   location: undefined,
-};
+});
 
 export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
-  state = initialPolicyListState,
+  state = initialPolicyListState(),
   action
 ) => {
   if (action.type === 'serverReturnedPolicyListData') {
@@ -60,7 +64,7 @@ export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
       }
       return newState;
     }
-    return initialPolicyListState;
+    return initialPolicyListState();
   }
 
   return state;

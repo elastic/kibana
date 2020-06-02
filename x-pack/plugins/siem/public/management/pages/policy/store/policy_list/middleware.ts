@@ -41,10 +41,10 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
       dispatch({
         type: 'serverReturnedPolicyListData',
         payload: {
-          policyItems: response ? response.items : initialPolicyListState.policyItems,
+          policyItems: response ? response.items : initialPolicyListState().policyItems,
           pageIndex,
           pageSize,
-          total: response ? response.total : initialPolicyListState.total,
+          total: response ? response.total : initialPolicyListState().total,
         },
       });
     }
