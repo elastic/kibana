@@ -16,7 +16,6 @@ import { AvailabilityReporting } from '../index';
 const TagContainer = styled.div`
   max-height: 246px;
   overflow: hidden;
-  margin-top: auto;
 `;
 
 interface Props {

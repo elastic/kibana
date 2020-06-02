@@ -65,7 +65,7 @@ export const AvailabilityReporting: React.FC<Props> = ({ ups, downs, allLocation
         <h3>{availability.toFixed(2)}% Availability</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      // @ts-ignore weird TS issue
+      {/* @ts-ignore weird TS issue*/}
       <EuiBasicTable
         responsive={false}
         columns={cols}

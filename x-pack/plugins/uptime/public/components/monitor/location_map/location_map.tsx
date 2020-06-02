@@ -38,7 +38,7 @@ const MapPanel = styled.div`
 const EuiFlexItemTags = styled(EuiFlexItem)`
   padding-top: 5px;
   width: 350px;
-  margin-top: auto;
+  margin-top: 10px;
   @media (max-width: 1042px) {
     width: 100%;
   }

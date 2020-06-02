@@ -30,7 +30,7 @@ export const TagLabel: React.FC<Props> = ({ color, label }) => {
   return (
     <BadgeItem>
       <EuiBadge color={color}>
-        <EuiText size="m">
+        <EuiText size="s">
           <TextStyle>{label}</TextStyle>
         </EuiText>
       </EuiBadge>
