@@ -15,7 +15,7 @@ import { ValidationResult } from '../../../../types';
 import { AppContextProvider } from '../../../app_context';
 import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { alertingPluginMock } from '../../../../../../alerting/public/mocks';
+import { alertingPluginMock } from '../../../../../../alerts/public/mocks';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),

@@ -152,7 +152,7 @@ logging.events:
 ```
 
 See these two README.md's pages for more references on the alerting and actions API:
-https://github.com/elastic/kibana/blob/master/x-pack/plugins/alerting/README.md
+https://github.com/elastic/kibana/blob/master/x-pack/plugins/alerts/README.md
 https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions
 
 ### Signals API
@@ -165,3 +165,12 @@ go about doing so.
 `./signals/set_status_with_id.sh open` will update the status of the sample signal to open
 `./signals/set_status_with_query.sh closed` will update the status of the signals in the result of the query to closed.
 `./signals/set_status_with_query.sh open` will update the status of the signals in the result of the query to open.
+
+### Large List Exceptions
+
+To test out the functionality of large lists with rules, the user will need to import a list and post a rule with a reference to that exception list. The following outlines an example using the sample json rule provided in the repo.
+
+* First, set the appropriate env var in order to enable exceptions features`export ELASTIC_XPACK_SIEM_LISTS_FEATURE=true` and `export ELASTIC_XPACK_SIEM_EXCEPTIONS_LISTS=true` and start kibana
+* Second, import a list of ips from a file called `ci-badguys.txt`. The command should look like this: 
+`cd $HOME/kibana/x-pack/plugins/lists/server/scripts && ./import_list_items_by_filename.sh ip ~/ci-badguys.txt`
+* Then, from the detection engine scripts folder (`cd kibana/x-pack/plugins/siem/server/lib/detection_engine/scripts`) run `./post_rule.sh rules/queries/lists/query_with_list_plugin.json`

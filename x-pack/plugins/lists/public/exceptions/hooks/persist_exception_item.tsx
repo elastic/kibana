@@ -19,6 +19,13 @@ export type ReturnPersistExceptionItem = [
   Dispatch<AddExceptionListItem | null>
 ];
 
+/**
+ * Hook for creating or updating ExceptionListItem
+ *
+ * @param http Kibana http service
+ * @param onError error callback
+ *
+ */
 export const usePersistExceptionItem = ({
   http,
   onError,

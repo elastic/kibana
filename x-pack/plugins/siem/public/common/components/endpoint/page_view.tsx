@@ -14,10 +14,13 @@ import {
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiPageProps,
+  EuiTab,
+  EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
-import React, { memo, ReactNode } from 'react';
+import React, { memo, MouseEventHandler, ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
+import { EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 
 const StyledEuiPage = styled(EuiPage)`
   &.endpoint--isListView {
@@ -38,6 +41,9 @@ const StyledEuiPage = styled(EuiPage)`
       border: none;
       background: none;
     }
+  }
+  .endpoint-navTabs {
+    margin-left: ${(props) => props.theme.eui.euiSizeL};
   }
 `;
 
@@ -74,69 +80,94 @@ export const PageViewBodyHeaderTitle = memo<{ children: ReactNode }>(
 );
 PageViewBodyHeaderTitle.displayName = 'PageViewBodyHeaderTitle';
 
+export type PageViewProps = EuiPageProps & {
+  /**
+   * The type of view
+   */
+  viewType: 'list' | 'details';
+  /**
+   * content to be placed on the left side of the header. If a `string` is used, then it will
+   * be wrapped with `<EuiTitle><h1></h1></EuiTitle>`, else it will just be used as is.
+   */
+  headerLeft?: ReactNode;
+  /** Content for the right side of the header */
+  headerRight?: ReactNode;
+  /**
+   *  body (sub-)header section. If a `string` is used, then it will be wrapped with
+   *  `<EuiTitle><h2></h2></EuiTitle>`
+   */
+  bodyHeader?: ReactNode;
+  /**
+   * The list of tab navigation items
+   */
+  tabs?: Array<
+    EuiTabProps & {
+      name: ReactNode;
+      id: string;
+      href?: string;
+      onClick?: MouseEventHandler<HTMLAnchorElement | HTMLButtonElement>;
+    }
+  >;
+  children?: ReactNode;
+};
+
 /**
  * Page View layout for use in Endpoint
  */
-export const PageView = memo<
-  EuiPageProps & {
-    /**
-     * The type of view
-     */
-    viewType: 'list' | 'details';
-    /**
-     * content to be placed on the left side of the header. If a `string` is used, then it will
-     * be wrapped with `<EuiTitle><h1></h1></EuiTitle>`, else it will just be used as is.
-     */
-    headerLeft?: ReactNode;
-    /** Content for the right side of the header */
-    headerRight?: ReactNode;
-    /**
-     *  body (sub-)header section. If a `string` is used, then it will be wrapped with
-     *  `<EuiTitle><h2></h2></EuiTitle>`
-     */
-    bodyHeader?: ReactNode;
-    children?: ReactNode;
-  }
->(({ viewType, children, headerLeft, headerRight, bodyHeader, ...otherProps }) => {
-  return (
-    <StyledEuiPage
-      className={(viewType === 'list' && 'endpoint--isListView') || 'endpoint--isDetailsView'}
-      {...otherProps}
-    >
-      <EuiPageBody>
-        {(headerLeft || headerRight) && (
-          <EuiPageHeader className="endpoint-header">
-            <EuiPageHeaderSection data-test-subj="pageViewHeaderLeft">
-              {isStringOrNumber.test(typeof headerLeft) ? (
-                <PageViewHeaderTitle>{headerLeft}</PageViewHeaderTitle>
-              ) : (
-                headerLeft
-              )}
-            </EuiPageHeaderSection>
-            {headerRight && (
-              <EuiPageHeaderSection data-test-subj="pageViewHeaderRight">
-                {headerRight}
-              </EuiPageHeaderSection>
-            )}
-          </EuiPageHeader>
-        )}
-        <EuiPageContent className="endpoint-page-content">
-          {bodyHeader && (
-            <EuiPageContentHeader>
-              <EuiPageContentHeaderSection data-test-subj="pageViewBodyTitleArea">
-                {isStringOrNumber.test(typeof bodyHeader) ? (
-                  <PageViewBodyHeaderTitle>{bodyHeader}</PageViewBodyHeaderTitle>
+export const PageView = memo<PageViewProps>(
+  ({ viewType, children, headerLeft, headerRight, bodyHeader, tabs, ...otherProps }) => {
+    const tabComponents = useMemo(() => {
+      if (!tabs) {
+        return [];
+      }
+      return tabs.map(({ name, id, ...otherEuiTabProps }) => (
+        <EuiTab {...otherEuiTabProps} key={id}>
+          {name}
+        </EuiTab>
+      ));
+    }, [tabs]);
+
+    return (
+      <StyledEuiPage
+        className={(viewType === 'list' && 'endpoint--isListView') || 'endpoint--isDetailsView'}
+        {...otherProps}
+      >
+        <EuiPageBody>
+          {(headerLeft || headerRight) && (
+            <EuiPageHeader className="endpoint-header">
+              <EuiPageHeaderSection data-test-subj="pageViewHeaderLeft">
+                {isStringOrNumber.test(typeof headerLeft) ? (
+                  <PageViewHeaderTitle>{headerLeft}</PageViewHeaderTitle>
                 ) : (
-                  bodyHeader
+                  headerLeft
                 )}
-              </EuiPageContentHeaderSection>
-            </EuiPageContentHeader>
+              </EuiPageHeaderSection>
+              {headerRight && (
+                <EuiPageHeaderSection data-test-subj="pageViewHeaderRight">
+                  {headerRight}
+                </EuiPageHeaderSection>
+              )}
+            </EuiPageHeader>
           )}
-          <EuiPageContentBody data-test-subj="pageViewBodyContent">{children}</EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </StyledEuiPage>
-  );
-});
+          {tabs && <EuiTabs className="endpoint-navTabs">{tabComponents}</EuiTabs>}
+          <EuiPageContent className="endpoint-page-content">
+            {bodyHeader && (
+              <EuiPageContentHeader>
+                <EuiPageContentHeaderSection data-test-subj="pageViewBodyTitleArea">
+                  {isStringOrNumber.test(typeof bodyHeader) ? (
+                    <PageViewBodyHeaderTitle>{bodyHeader}</PageViewBodyHeaderTitle>
+                  ) : (
+                    bodyHeader
+                  )}
+                </EuiPageContentHeaderSection>
+              </EuiPageContentHeader>
+            )}
+            <EuiPageContentBody data-test-subj="pageViewBodyContent">{children}</EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
+      </StyledEuiPage>
+    );
+  }
+);
 
 PageView.displayName = 'PageView';

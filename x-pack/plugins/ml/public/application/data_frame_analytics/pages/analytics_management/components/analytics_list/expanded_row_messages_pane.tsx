@@ -22,7 +22,6 @@ export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId }) => {
 
   const getMessagesFactory = () => {
     let concurrentLoads = 0;
-
     return async function getMessages() {
       try {
         concurrentLoads++;
@@ -52,8 +51,14 @@ export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId }) => {
       }
     };
   };
-
   useRefreshAnalyticsList({ onRefresh: getMessagesFactory() });
 
-  return <JobMessages messages={messages} loading={isLoading} error={errorMessage} />;
+  return (
+    <JobMessages
+      messages={messages}
+      loading={isLoading}
+      error={errorMessage}
+      refreshMessage={getMessagesFactory()}
+    />
+  );
 };
