@@ -99,6 +99,12 @@ describe('when on the alerting page', () => {
       it('should no longer show the flyout', () => {
         expect(render().queryByTestId('alertDetailFlyout')).toBeNull();
       });
+      it('should no longer track flyout state in url', () => {
+        const unexpectedTabString = 'active_details_tab';
+        const unexpectedAlertString = 'selected_alert';
+        expect(history.location.search).toEqual(expect.not.stringContaining(unexpectedTabString));
+        expect(history.location.search).toEqual(expect.not.stringContaining(unexpectedAlertString));
+      });
     });
   });
   describe('when the url has page_size=1 and a page_index=1', () => {

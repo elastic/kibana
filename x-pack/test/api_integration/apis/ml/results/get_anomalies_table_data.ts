@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { USER } from '../../../../functional/services/machine_learning/security_common';
+import { USER } from '../../../../functional/services/ml/security_common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Datafeed, Job } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/machine_learning/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

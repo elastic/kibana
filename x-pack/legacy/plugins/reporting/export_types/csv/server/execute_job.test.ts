@@ -50,8 +50,10 @@ describe('CSV Execute Job', function () {
   let cancellationToken: any;
 
   const mockElasticsearch = {
-    dataClient: {
-      asScoped: () => clusterStub,
+    legacy: {
+      client: {
+        asScoped: () => clusterStub,
+      },
     },
   };
   const mockUiSettingsClient = {
