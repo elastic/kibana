@@ -29,6 +29,7 @@ import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { ManagementPageView } from '../../../components/management_page_view';
 import { getManagementUrl } from '../../..';
+import { FormattedDate } from '../../../../common/components/formatted_date';
 
 const HostLink = memo<{
   name: string;
@@ -93,10 +94,14 @@ export const HostList = () => {
   );
 
   const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
+    const lastActiveColumnName = i18n.translate('xpack.siem.endpointList.lastActive', {
+      defaultMessage: 'Last Active',
+    });
+
     return [
       {
         field: 'metadata.host',
-        name: i18n.translate('xpack.siem.endpoint.host.list.hostname', {
+        name: i18n.translate('xpack.siem.endpointList.hostname', {
           defaultMessage: 'Hostname',
         }),
         render: ({ hostname, id }: HostInfo['metadata']['host']) => {
@@ -116,7 +121,7 @@ export const HostList = () => {
       },
       {
         field: 'host_status',
-        name: i18n.translate('xpack.siem.endpoint.host.list.hostStatus', {
+        name: i18n.translate('xpack.siem.endpointList.hostStatus', {
           defaultMessage: 'Host Status',
         }),
         // eslint-disable-next-line react/display-name
@@ -128,7 +133,7 @@ export const HostList = () => {
               className="eui-textTruncate"
             >
               <FormattedMessage
-                id="xpack.siem.endpoint.host.list.hostStatusValue"
+                id="xpack.siem.endpointList.hostStatusValue"
                 defaultMessage="{hostStatus, select, online {Online} error {Error} other {Offline}}"
                 values={{ hostStatus }}
               />
@@ -138,7 +143,7 @@ export const HostList = () => {
       },
       {
         field: '',
-        name: i18n.translate('xpack.siem.endpoint.host.list.policy', {
+        name: i18n.translate('xpack.siem.endpointList.policy', {
           defaultMessage: 'Policy',
         }),
         truncateText: true,
@@ -149,7 +154,7 @@ export const HostList = () => {
       },
       {
         field: '',
-        name: i18n.translate('xpack.siem.endpoint.host.list.policyStatus', {
+        name: i18n.translate('xpack.siem.endpointList.policyStatus', {
           defaultMessage: 'Policy Status',
         }),
         // eslint-disable-next-line react/display-name
@@ -157,7 +162,7 @@ export const HostList = () => {
           return (
             <EuiHealth color="success" className="eui-textTruncate">
               <FormattedMessage
-                id="xpack.siem.endpoint.host.list.policyStatus"
+                id="xpack.siem.endpointList.policyStatus"
                 defaultMessage="Policy Status"
               />
             </EuiHealth>
@@ -166,7 +171,7 @@ export const HostList = () => {
       },
       {
         field: '',
-        name: i18n.translate('xpack.siem.endpoint.host.list.alerts', {
+        name: i18n.translate('xpack.siem.endpointList.alerts', {
           defaultMessage: 'Alerts',
         }),
         dataType: 'number',
@@ -176,14 +181,14 @@ export const HostList = () => {
       },
       {
         field: 'metadata.host.os.name',
-        name: i18n.translate('xpack.siem.endpoint.host.list.os', {
+        name: i18n.translate('xpack.siem.endpointList.os', {
           defaultMessage: 'Operating System',
         }),
         truncateText: true,
       },
       {
         field: 'metadata.host.ip',
-        name: i18n.translate('xpack.siem.endpoint.host.list.ip', {
+        name: i18n.translate('xpack.siem.endpointList.ip', {
           defaultMessage: 'IP Address',
         }),
         // eslint-disable-next-line react/display-name
@@ -201,18 +206,21 @@ export const HostList = () => {
       },
       {
         field: 'metadata.agent.version',
-        name: i18n.translate('xpack.siem.endpoint.host.list.endpointVersion', {
+        name: i18n.translate('xpack.siem.endpointList.endpointVersion', {
           defaultMessage: 'Version',
         }),
       },
       {
-        field: '',
-        name: i18n.translate('xpack.siem.endpoint.host.list.lastActive', {
-          defaultMessage: 'Last Active',
-        }),
-        dataType: 'date',
-        render: () => {
-          return 'xxxx';
+        field: 'metadata.@timestamp',
+        name: lastActiveColumnName,
+        render(dateValue: HostInfo['metadata']['@timestamp']) {
+          return (
+            <FormattedDate
+              fieldName={lastActiveColumnName}
+              value={dateValue}
+              className="eui-textTruncate"
+            />
+          );
         },
       },
     ];
@@ -222,12 +230,14 @@ export const HostList = () => {
     <ManagementPageView
       viewType="list"
       data-test-subj="hostPage"
-      headerLeft={i18n.translate('xpack.siem.endpoint.host.hosts', { defaultMessage: 'Hosts' })}
+      headerLeft={i18n.translate('xpack.siem.endpointLis.pageTitle', {
+        defaultMessage: 'Endpoints',
+      })}
     >
       {hasSelectedHost && <HostDetailsFlyout />}
       <EuiText color="subdued" size="xs" data-test-subj="hostListTableTotal">
         <FormattedMessage
-          id="xpack.siem.endpoint.host.list.totalCount"
+          id="xpack.siem.endpointList.totalCount"
           defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
           values={{ totalItemCount }}
         />

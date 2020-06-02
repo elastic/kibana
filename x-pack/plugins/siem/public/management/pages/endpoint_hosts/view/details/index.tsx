@@ -124,7 +124,7 @@ const PolicyResponseFlyoutPanel = memo<{
         selected_host: hostMeta.host.id,
       }),
       getManagementUrl({
-        name: 'endpontList',
+        name: 'endpointList',
         excludePrefix: true,
         ...queryParams,
         selected_host: hostMeta.host.id,

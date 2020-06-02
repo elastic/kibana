@@ -62,19 +62,18 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   }, [details]);
 
   const [policyResponseUri, policyResponseRoutePath] = useMemo(() => {
+    const { selected_host, show, ...currentUrlParams } = queryParams;
     return [
       getManagementUrl({
         name: 'endpointPolicyResponse',
-        ...queryParams,
+        ...currentUrlParams,
         selected_host: details.host.id,
-        show: 'policy_response',
       }),
       getManagementUrl({
         name: 'endpointPolicyResponse',
         excludePrefix: true,
-        ...queryParams,
+        ...currentUrlParams,
         selected_host: details.host.id,
-        show: 'policy_response',
       }),
     ];
   }, [details.host.id, queryParams]);

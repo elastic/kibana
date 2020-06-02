@@ -53,5 +53,5 @@ export interface HostIndexUIQueryParams {
   /** Which page to show */
   page_index?: string;
   /** show the policy response or host details */
-  show?: string;
+  show?: 'policy_response' | 'details';
 }
