@@ -131,7 +131,7 @@ export class Plugin {
     this.legacyShimDependencies = {
       router: core.http.createRouter(),
       instanceUuid: core.uuid.getInstanceUuid(),
-      esDataClient: core.elasticsearch.dataClient,
+      esDataClient: core.elasticsearch.legacy.client,
       kibanaStatsCollector: plugins.usageCollection?.getCollectorByType(
         KIBANA_STATS_TYPE_MONITORING
       ),
@@ -142,7 +142,7 @@ export class Plugin {
     const cluster = (this.cluster = instantiateClient(
       config.ui.elasticsearch,
       this.log,
-      core.elasticsearch.createClient
+      core.elasticsearch.legacy.createClient
     ));
 
     // Start our license service which will ensure

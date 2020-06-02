@@ -100,6 +100,7 @@ export interface GetResponse {
   _source: SearchTypes;
 }
 
+export type EventSearchResponse = SearchResponse<EventSource>;
 export type SignalSearchResponse = SearchResponse<SignalSource>;
 export type SignalSourceHit = SignalSearchResponse['hits']['hits'][number];
 

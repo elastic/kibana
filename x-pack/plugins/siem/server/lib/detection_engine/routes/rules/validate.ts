@@ -9,6 +9,11 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
 
+import { findRulesSchema } from '../../../../../common/detection_engine/schemas/response/find_rules_schema';
+import {
+  RulesSchema,
+  rulesSchema,
+} from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { formatErrors } from '../../../../../common/format_errors';
 import { exactCheck } from '../../../../../common/exact_check';
 import { PartialAlert, FindResult } from '../../../../../../alerting/server';
@@ -19,9 +24,7 @@ import {
 } from '../../rules/types';
 import { OutputRuleAlertRest } from '../../types';
 import { createBulkErrorObject, BulkError } from '../utils';
-import { rulesSchema, RulesSchema } from '../schemas/response/rules_schema';
 import { transformFindAlerts, transform, transformAlertToRule } from './utils';
-import { findRulesSchema } from '../schemas/response/find_rules_schema';
 import { RuleActions } from '../../rule_actions/types';
 
 export const transformValidateFindAlerts = (

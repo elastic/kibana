@@ -86,5 +86,5 @@ export const bulkCreateMlSignals = async (
   const anomalyResults = params.someResult;
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
 
-  return singleBulkCreate({ ...params, someResult: ecsResults });
+  return singleBulkCreate({ ...params, filteredEvents: ecsResults });
 };
