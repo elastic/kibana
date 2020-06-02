@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TransformId, TransformEndpointRequest, TransformEndpointResult } from '../../../common';
+import {
+  TransformId,
+  TransformEndpointRequest,
+  TransformEndpointResult,
+  DeleteTransformEndpointResult,
+} from '../../../common';
 import { API_BASE_PATH } from '../../../common/constants';
 
 import { useAppDependencies } from '../app_dependencies';
@@ -37,9 +42,13 @@ export const useApi = () => {
         body: JSON.stringify(transformConfig),
       });
     },
-    deleteTransforms(transformsInfo: TransformEndpointRequest[]): Promise<TransformEndpointResult> {
+    deleteTransforms(
+      transformsInfo: TransformEndpointRequest[],
+      deleteDestIndex: boolean | undefined,
+      deleteDestIndexPattern: boolean | undefined
+    ): Promise<DeleteTransformEndpointResult> {
       return http.post(`${API_BASE_PATH}delete_transforms`, {
-        body: JSON.stringify(transformsInfo),
+        body: JSON.stringify({ transformsInfo, deleteDestIndex, deleteDestIndexPattern }),
       });
     },
     getTransformsPreview(obj: PreviewRequestBody): Promise<GetTransformsResponse> {
