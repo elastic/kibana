@@ -23,6 +23,7 @@ interface Hit {
 interface IndexInfo {
   aliases: { [aliasName: string]: unknown };
   mappings: unknown;
+  data_stream?: string;
   settings: {
     index: {
       hidden: 'true' | 'false';
