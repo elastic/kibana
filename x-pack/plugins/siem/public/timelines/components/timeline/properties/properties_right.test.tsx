@@ -9,6 +9,7 @@ import React from 'react';
 
 import { PropertiesRight } from './properties_right';
 import { useKibana } from '../../../../common/lib/kibana';
+import { TimelineStatus } from '../../../../../common/types/timeline';
 
 jest.mock('../../../../common/lib/kibana', () => {
   return {
@@ -62,6 +63,7 @@ describe('Properties Right', () => {
     onToggleShowNotes: jest.fn(),
     onCloseTimelineModal: jest.fn(),
     onOpenTimelineModal: jest.fn(),
+    status: TimelineStatus.active,
     showTimelineModal: false,
     title: 'title',
     updateNote: jest.fn(),
