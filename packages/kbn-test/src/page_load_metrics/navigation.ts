@@ -115,23 +115,23 @@ export async function navigateToApps(log: ToolingLog, options: NavigationOptions
         waitUntil: 'networkidle0',
       });
 
-      let readyAttempt = 0
-      let selectorFound = false
+      let readyAttempt = 0;
+      let selectorFound = false;
       while (!selectorFound) {
-        readyAttempt += 1
+        readyAttempt += 1;
         try {
           await page.waitForSelector(app.locator, { timeout: 5000 });
           selectorFound = true
         } catch (error) {
           log.error(`Page '${app.path}' was not loaded properly, unable to find '${app.locator}', url: ${page.url()}`);
-          
+
           if (readyAttempt < 6) {
             continue;
           }
-          
+
           throw err;
         }
-      });
+      }
 
       await page.close();
     })
