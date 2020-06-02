@@ -17,23 +17,6 @@
  * under the License.
  */
 
-export {
-  SavedObjectsManagementActionService,
-  SavedObjectsManagementActionServiceStart,
-  SavedObjectsManagementActionServiceSetup,
-} from './action_service';
-export {
-  SavedObjectsManagementColumnService,
-  SavedObjectsManagementColumnServiceStart,
-  SavedObjectsManagementColumnServiceSetup,
-} from './column_service';
-export {
-  SavedObjectsManagementServiceRegistry,
-  ISavedObjectsManagementServiceRegistry,
-  SavedObjectsManagementServiceRegistryEntry,
-} from './service_registry';
-export {
-  SavedObjectsManagementAction,
-  SavedObjectsManagementColumn,
-  SavedObjectsManagementRecord,
-} from './types';
+export { SavedObjectsManagementAction } from './action';
+export { SavedObjectsManagementColumn } from './column';
+export { SavedObjectsManagementRecord } from './record';

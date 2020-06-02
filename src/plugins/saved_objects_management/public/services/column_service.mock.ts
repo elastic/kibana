@@ -17,24 +17,41 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { SavedObjectsManagementPlugin } from './plugin';
-
-export { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './plugin';
-export {
-  SavedObjectsManagementActionServiceSetup,
-  SavedObjectsManagementActionServiceStart,
-  SavedObjectsManagementAction,
+import {
+  SavedObjectsManagementColumnService,
   SavedObjectsManagementColumnServiceSetup,
   SavedObjectsManagementColumnServiceStart,
-  SavedObjectsManagementColumn,
-  SavedObjectsManagementRecord,
-  ISavedObjectsManagementServiceRegistry,
-  SavedObjectsManagementServiceRegistryEntry,
-} from './services';
-export { ProcessedImportResponse, processImportResponse } from './lib';
-export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
+} from './column_service';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new SavedObjectsManagementPlugin();
-}
+const createSetupMock = (): jest.Mocked<SavedObjectsManagementColumnServiceSetup> => {
+  const mock = {
+    register: jest.fn(),
+  };
+  return mock;
+};
+
+const createStartMock = (): jest.Mocked<SavedObjectsManagementColumnServiceStart> => {
+  const mock = {
+    has: jest.fn(),
+    getAll: jest.fn(),
+  };
+
+  mock.has.mockReturnValue(true);
+  mock.getAll.mockReturnValue([]);
+
+  return mock;
+};
+
+const createServiceMock = (): jest.Mocked<PublicMethodsOf<SavedObjectsManagementColumnService>> => {
+  const mock = {
+    setup: jest.fn().mockReturnValue(createSetupMock()),
+    start: jest.fn().mockReturnValue(createStartMock()),
+  };
+  return mock;
+};
+
+export const columnServiceMock = {
+  create: createServiceMock,
+  createSetup: createSetupMock,
+  createStart: createStartMock,
+};

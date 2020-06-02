@@ -17,23 +17,15 @@
  * under the License.
  */
 
-export {
-  SavedObjectsManagementActionService,
-  SavedObjectsManagementActionServiceStart,
-  SavedObjectsManagementActionServiceSetup,
-} from './action_service';
-export {
-  SavedObjectsManagementColumnService,
-  SavedObjectsManagementColumnServiceStart,
-  SavedObjectsManagementColumnServiceSetup,
-} from './column_service';
-export {
-  SavedObjectsManagementServiceRegistry,
-  ISavedObjectsManagementServiceRegistry,
-  SavedObjectsManagementServiceRegistryEntry,
-} from './service_registry';
-export {
-  SavedObjectsManagementAction,
-  SavedObjectsManagementColumn,
-  SavedObjectsManagementRecord,
-} from './types';
+import { SavedObjectReference } from 'src/core/public';
+
+export interface SavedObjectsManagementRecord {
+  type: string;
+  id: string;
+  meta: {
+    icon: string;
+    title: string;
+  };
+  references: SavedObjectReference[];
+  namespaces?: string[];
+}

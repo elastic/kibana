@@ -23,11 +23,13 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { keys } from '@elastic/eui';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
 import { actionServiceMock } from '../../../services/action_service.mock';
+import { columnServiceMock } from '../../../services/column_service.mock';
 import { Table, TableProps } from './table';
 
 const defaultProps: TableProps = {
   basePath: httpServiceMock.createSetupContract().basePath,
   actionRegistry: actionServiceMock.createStart(),
+  columnRegistry: columnServiceMock.createStart(),
   selectedSavedObjects: [
     {
       id: '1',

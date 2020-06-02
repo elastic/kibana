@@ -73,6 +73,7 @@ import { SavedObjectWithMetadata } from '../../types';
 import {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
+  SavedObjectsManagementColumnServiceStart,
 } from '../../services';
 import { Header, Table, Flyout, Relationships } from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
@@ -86,6 +87,7 @@ export interface SavedObjectsTableProps {
   allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
+  columnRegistry: SavedObjectsManagementColumnServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   http: HttpStart;
@@ -778,6 +780,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             basePath={http.basePath}
             itemId={'id'}
             actionRegistry={this.props.actionRegistry}
+            columnRegistry={this.props.columnRegistry}
             selectionConfig={selectionConfig}
             selectedSavedObjects={selectedSavedObjects}
             onQueryChange={this.onQueryChange}

@@ -5,6 +5,7 @@
  */
 
 import { ShareToSpaceSavedObjectsManagementAction } from './share_saved_objects_to_space_action';
+import { ShareToSpaceSavedObjectsManagementColumn } from './share_saved_objects_to_space_column';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { ShareSavedObjectsToSpaceService } from '.';
 import { notificationServiceMock } from 'src/core/public/mocks';
@@ -12,7 +13,7 @@ import { savedObjectsManagementPluginMock } from '../../../../../src/plugins/sav
 
 describe('ShareSavedObjectsToSpaceService', () => {
   describe('#setup', () => {
-    it('registers the ShareToSpaceSavedObjectsManagementAction', () => {
+    it('registers the ShareToSpaceSavedObjectsManagement Action and Column', () => {
       const deps = {
         spacesManager: spacesManagerMock.create(),
         notificationsSetup: notificationServiceMock.createSetupContract(),
@@ -25,6 +26,11 @@ describe('ShareSavedObjectsToSpaceService', () => {
       expect(deps.savedObjectsManagementSetup.actions.register).toHaveBeenCalledTimes(1);
       expect(deps.savedObjectsManagementSetup.actions.register).toHaveBeenCalledWith(
         expect.any(ShareToSpaceSavedObjectsManagementAction)
+      );
+
+      expect(deps.savedObjectsManagementSetup.columns.register).toHaveBeenCalledTimes(1);
+      expect(deps.savedObjectsManagementSetup.columns.register).toHaveBeenCalledWith(
+        expect.any(ShareToSpaceSavedObjectsManagementColumn)
       );
     });
   });
