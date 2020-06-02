@@ -11,7 +11,7 @@ import {
   FindHit,
 } from '../routes/__mocks__/request_responses';
 import * as readRules from './read_rules';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../feature_flags';
 
 describe('get_export_by_object_ids', () => {

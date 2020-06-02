@@ -22,7 +22,7 @@ export function getFilters(
   let timezone: string | null;
 
   if (indexPatternTimeField) {
-    if (!timerange) {
+    if (!timerange || !timerange.min || !timerange.max) {
       throw badRequest(
         `Time range params are required for index pattern [${indexPatternId}], using time field [${indexPatternTimeField}]`
       );
