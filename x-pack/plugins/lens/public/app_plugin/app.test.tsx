@@ -105,7 +105,12 @@ describe('Lens App', () => {
     storage: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
-    redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+    redirectTo: (
+      id?: string,
+      returnToOrigin?: boolean,
+      originatingApp?: string | undefined,
+      newlyCreated?: boolean
+    ) => void;
     originatingApp: string | undefined;
     onAppLeave: AppMountParameters['onAppLeave'];
   }> {
@@ -142,7 +147,14 @@ describe('Lens App', () => {
         load: jest.fn(),
         save: jest.fn(),
       },
-      redirectTo: jest.fn((id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => {}),
+      redirectTo: jest.fn(
+        (
+          id?: string,
+          returnToOrigin?: boolean,
+          originatingApp?: string | undefined,
+          newlyCreated?: boolean
+        ) => {}
+      ),
       onAppLeave: jest.fn(),
     } as unknown) as jest.Mocked<{
       navigation: typeof navigationStartMock;
@@ -152,7 +164,12 @@ describe('Lens App', () => {
       storage: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
-      redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+      redirectTo: (
+        id?: string,
+        returnToOrigin?: boolean,
+        originatingApp?: string | undefined,
+        newlyCreated?: boolean
+      ) => void;
       originatingApp: string | undefined;
       onAppLeave: AppMountParameters['onAppLeave'];
     }>;
@@ -491,7 +508,7 @@ describe('Lens App', () => {
           expression: 'kibana 3',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, true);
 
         inst.setProps({ docId: 'aaa' });
 
@@ -511,7 +528,7 @@ describe('Lens App', () => {
           expression: 'kibana 3',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, true);
 
         inst.setProps({ docId: 'aaa' });
 
@@ -579,7 +596,7 @@ describe('Lens App', () => {
           title: 'hello there',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', true, true);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', true, undefined, true);
       });
 
       it('saves app filters and does not save pinned filters', async () => {
