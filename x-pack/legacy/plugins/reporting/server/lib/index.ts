@@ -5,7 +5,7 @@
  */
 
 export { LevelLogger } from './level_logger';
-export { checkLicenseFactory } from './check_license';
+export { checkLicense } from './check_license';
 export { createQueueFactory } from './create_queue';
 export { cryptoFactory } from './crypto';
 export { enqueueJobFactory } from './enqueue_job';
