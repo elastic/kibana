@@ -7,7 +7,6 @@
 import { of, throwError } from 'rxjs';
 import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setupServer } from '../../../../../../src/core/server/test_utils';
 import { GlobalSearchResult } from '../../../common/types';
 import { GlobalSearchFindError } from '../../../common/errors';
