@@ -7,6 +7,10 @@
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 
+import {
+  ImportRulesSchema,
+  importRulesSchema,
+} from '../../../../../common/detection_engine/schemas/response/import_rules_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
@@ -31,7 +35,6 @@ import {
 import { ImportRuleAlertRest } from '../../types';
 import { patchRules } from '../../rules/patch_rules';
 import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
-import { ImportRulesSchema, importRulesSchema } from '../schemas/response/import_rules_schema';
 import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
 import { validate } from './validate';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';

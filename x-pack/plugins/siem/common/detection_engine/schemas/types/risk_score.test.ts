@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PositiveInteger } from './positive_integer';
+import { RiskScore } from './risk_score';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { foldLeftRight, getPaths } from '../../../../../../common/test_utils';
+import { foldLeftRight, getPaths } from '../../../test_utils';
 
-describe('positive_integer_greater_than_zero', () => {
+describe('risk_score', () => {
   test('it should validate a positive number', () => {
     const payload = 1;
-    const decoded = PositiveInteger.decode(payload);
+    const decoded = RiskScore.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -21,7 +21,7 @@ describe('positive_integer_greater_than_zero', () => {
 
   test('it should validate a zero', () => {
     const payload = 0;
-    const decoded = PositiveInteger.decode(payload);
+    const decoded = RiskScore.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -30,7 +30,7 @@ describe('positive_integer_greater_than_zero', () => {
 
   test('it should NOT validate a negative number', () => {
     const payload = -1;
-    const decoded = PositiveInteger.decode(payload);
+    const decoded = RiskScore.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to ""']);
@@ -39,10 +39,19 @@ describe('positive_integer_greater_than_zero', () => {
 
   test('it should NOT validate a string', () => {
     const payload = 'some string';
-    const decoded = PositiveInteger.decode(payload);
+    const decoded = RiskScore.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "some string" supplied to ""']);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should NOT validate a risk score greater than 100', () => {
+    const payload = 101;
+    const decoded = RiskScore.decode(payload);
+    const message = pipe(decoded, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "101" supplied to ""']);
     expect(message.schema).toEqual({});
   });
 });

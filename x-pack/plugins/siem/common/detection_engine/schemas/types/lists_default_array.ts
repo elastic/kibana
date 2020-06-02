@@ -11,7 +11,7 @@ import {
   list_and as listAnd,
   list_values as listValues,
   list_values_operator as listOperator,
-} from '../response/schemas';
+} from '../common/schemas';
 
 export type ListsDefaultArrayC = t.Type<List[], List[], unknown>;
 export type List = t.TypeOf<typeof listAnd>;

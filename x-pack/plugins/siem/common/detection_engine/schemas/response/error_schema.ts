@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 
 /* eslint-disable @typescript-eslint/camelcase */
-import { rule_id, status_code, message } from './schemas';
+import { rule_id, status_code, message } from '../common/schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
 // We use id: t.string intentionally and _never_ the id from global schemas as
