@@ -27,6 +27,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiBadgeGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
@@ -125,15 +126,19 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
           }>;
         }
       ) => (
-        <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
-          {name}
-          {index.tags &&
-            index.tags.map(({ key: tagKey, name: tagName }) => (
-              <EuiBadge className="indexPatternList__badge" key={tagKey}>
-                {tagName}
-              </EuiBadge>
-            ))}
-        </EuiButtonEmpty>
+        <>
+          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
+            {name}
+          </EuiButtonEmpty>
+          <EuiBadgeGroup gutterSize="s">
+            {index.tags &&
+              index.tags.map(({ key: tagKey, name: tagName }) => (
+                <EuiBadge className="indexPatternList__badge" key={tagKey}>
+                  {tagName}
+                </EuiBadge>
+              ))}
+          </EuiBadgeGroup>
+        </>
       ),
       dataType: 'string' as const,
       sortable: ({ sort }: { sort: string }) => sort,
