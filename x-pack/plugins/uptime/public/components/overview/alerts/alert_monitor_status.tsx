@@ -49,7 +49,11 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
       <EuiSpacer size="s" />
 
-      <DownNoExpressionSelect filters={filters} setAlertParams={setAlertParams} />
+      <DownNoExpressionSelect
+        defaultNumTimes={alertParams.numTimes}
+        filters={filters}
+        setAlertParams={setAlertParams}
+      />
 
       <EuiSpacer size="xs" />
 
