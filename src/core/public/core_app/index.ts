@@ -17,5 +17,4 @@
  * under the License.
  */
 
-import './error_url_overflow';
-export { UrlOverflowService } from '../../../../plugins/kibana_legacy/public';
+export { CoreApp } from './core_app';

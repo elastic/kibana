@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { History } from 'history';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
@@ -60,6 +61,26 @@ const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
 const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart> => {
   const currentAppId$ = new Subject<string | undefined>();
 
+  const historyMock: jest.Mocked<History> = {
+    block: jest.fn(),
+    createHref: jest.fn(),
+    go: jest.fn(),
+    goBack: jest.fn(),
+    goForward: jest.fn(),
+    listen: jest.fn(),
+    push: jest.fn(),
+    replace: jest.fn(),
+    action: 'PUSH',
+    length: 1,
+    location: {
+      pathname: '/',
+      search: '',
+      hash: '',
+      key: '',
+      state: undefined,
+    },
+  };
+
   return {
     applications$: new BehaviorSubject<Map<string, PublicAppInfo | PublicLegacyAppInfo>>(new Map()),
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
@@ -69,6 +90,7 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
     navigateToApp: jest.fn().mockImplementation((appId) => currentAppId$.next(appId)),
     navigateToUrl: jest.fn(),
     registerMountContext: jest.fn(),
+    history: historyMock,
   };
 };
 
