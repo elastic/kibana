@@ -23,7 +23,7 @@ import { ActionTypeModel, AlertTypeModel } from '../types';
 import { TypeRegistry } from './type_registry';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { PluginStartContract as AlertingStart } from '../../../alerting/public';
+import { PluginStartContract as AlertingStart } from '../../../alerts/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
 const TriggersActionsUIHome = lazy(async () => import('./home'));
@@ -35,7 +35,7 @@ export interface AppDeps {
   dataPlugin: DataPublicPluginStart;
   charts: ChartsPluginStart;
   chrome: ChromeStart;
-  alerting?: AlertingStart;
+  alerts?: AlertingStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   docLinks: DocLinksStart;
   toastNotifications: ToastsSetup;

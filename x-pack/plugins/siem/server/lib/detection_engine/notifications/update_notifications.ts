@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PartialAlert } from '../../../../../alerting/server';
+import { PartialAlert } from '../../../../../alerts/server';
 import { readNotifications } from './read_notifications';
 import { UpdateNotificationParams } from './types';
 import { addTags } from './add_tags';

@@ -18,7 +18,7 @@ import {
 } from './__mocks__/es_results';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { singleBulkCreate, filterDuplicateRules } from './single_bulk_create';
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 
 describe('singleBulkCreate', () => {
   const mockService: AlertServicesMock = alertsMock.createAlertServices();
