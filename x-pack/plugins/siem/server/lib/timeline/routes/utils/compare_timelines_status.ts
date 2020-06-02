@@ -18,6 +18,7 @@ import {
   checkIsCreateFailureCases,
   checkIsUpdateFailureCases,
   checkIsCreateViaImportFailureCases,
+  checkIsUpdateViaImportFailureCases,
   commonFailureChecker,
 } from './failure_cases';
 
@@ -72,6 +73,7 @@ export class CompareTimelinesStatus {
   public get isCreatable() {
     return (
       this.isTitleExists &&
+      !this.isSavedObjectVersionConflict &&
       ((this.timelineObject.isCreatable && !this.isHandlingTemplateTimeline) ||
         (this.templateTimelineObject.isCreatable &&
           this.timelineObject.isCreatable &&
@@ -80,12 +82,16 @@ export class CompareTimelinesStatus {
   }
 
   public get isCreatableViaImport() {
-    return this.isCreatable;
+    return (
+      (this.isCreatable && !this.isHandlingTemplateTimeline) ||
+      (this.isCreatable && this.isHandlingTemplateTimeline && !this.isTemplateVersionConflict)
+    );
   }
 
   public get isUpdatable() {
     return (
       !this.isUpdatingImmutiableTimeline &&
+      !this.isSavedObjectVersionConflict &&
       ((this.timelineObject.isUpdatable && !this.isHandlingTemplateTimeline) ||
         (this.templateTimelineObject.isUpdatable && this.isHandlingTemplateTimeline))
     );
@@ -94,8 +100,11 @@ export class CompareTimelinesStatus {
   public get isUpdatableViaImport() {
     return (
       !this.isUpdatingImmutiableTimeline &&
+      !this.isSavedObjectVersionConflict &&
       ((this.timelineObject.isUpdatableViaImport && !this.isHandlingTemplateTimeline) ||
-        (this.templateTimelineObject.isUpdatableViaImport && this.isHandlingTemplateTimeline))
+        (this.templateTimelineObject.isUpdatableViaImport &&
+          !this.isTemplateVersionConflict &&
+          this.isHandlingTemplateTimeline))
     );
   }
 
@@ -108,8 +117,10 @@ export class CompareTimelinesStatus {
       return checkIsCreateFailureCases;
     } else if (action === TimelineStatusActions.createViaImport) {
       return checkIsCreateViaImportFailureCases;
-    } else {
+    } else if (action === TimelineStatusActions.update) {
       return checkIsUpdateFailureCases;
+    } else {
+      return checkIsUpdateViaImportFailureCases;
     }
   }
 
@@ -165,6 +176,33 @@ export class CompareTimelinesStatus {
         this.status !== TimelineStatus.active &&
         this.status != null)
     );
+  }
+
+  private get isSavedObjectVersionConflict() {
+    const version = this.timelineObject?.getVersion;
+    const existingVersion = this.timelineObject?.data?.version;
+    if (version != null && this.timelineObject.isExists) {
+      return version !== existingVersion;
+    } else if (this.timelineObject.isExists && version == null) {
+      return true;
+    }
+    return false;
+  }
+
+  private get isTemplateVersionConflict() {
+    const version = this.templateTimelineObject?.getVersion;
+    const existingTemplateTimelineVersion = this.templateTimelineObject?.data
+      ?.templateTimelineVersion;
+    if (
+      version != null &&
+      this.templateTimelineObject.isExists &&
+      existingTemplateTimelineVersion != null
+    ) {
+      return version <= existingTemplateTimelineVersion;
+    } else if (this.templateTimelineObject.isExists && version == null) {
+      return true;
+    }
+    return false;
   }
 
   public async init() {

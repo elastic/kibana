@@ -158,7 +158,7 @@ export const mockGetTemplateTimelineValue = {
 };
 
 export const mockUniqueParsedTemplateTimelineObjects = [
-  { ...mockUniqueParsedObjects[0], ...mockGetTemplateTimelineValue },
+  { ...mockUniqueParsedObjects[0], ...mockGetTemplateTimelineValue, templateTimelineVersion: 2 },
 ];
 
 export const mockParsedTemplateTimelineObjects = [

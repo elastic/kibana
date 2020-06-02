@@ -65,7 +65,7 @@ export class TimelineObject {
   }
 
   public get isUpdatable() {
-    return this.isExists && !this.isVersionConflict() && !this.isImmutiable;
+    return this.isExists && !this.isImmutiable;
   }
 
   public get isCreatable() {
@@ -86,17 +86,5 @@ export class TimelineObject {
 
   public get getId() {
     return this.id;
-  }
-
-  private isVersionConflict() {
-    const version = this.version;
-    const existingVersion =
-      this.type === TimelineType.template ? this.data?.templateTimelineVersion : this.data?.version;
-    if (this.isExists && version != null) {
-      return !(version === existingVersion);
-    } else if (this.isExists && version == null) {
-      return true;
-    }
-    return false;
   }
 }

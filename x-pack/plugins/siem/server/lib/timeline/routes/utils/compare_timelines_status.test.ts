@@ -18,6 +18,10 @@ import {
   EMPTY_TITLE_ERROR_MESSAGE,
   UPDATE_STATUS_ERROR_MESSAGE,
   CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE,
+  UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
+  TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
+  CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
+  getImportExistingTimelineError,
 } from './failure_cases';
 import { TimelineStatusActions } from './common';
 
@@ -306,16 +310,34 @@ describe('CompareTimelinesStatus', () => {
         expect(timelineObj.isCreatable).toEqual(true);
       });
 
+      test('should throw no error on creatable', () => {
+        expect(timelineObj.checkIsFailureCases(TimelineStatusActions.create)).toBeNull();
+      });
+
       test('should be CreatableViaImport', () => {
         expect(timelineObj.isCreatableViaImport).toEqual(true);
       });
 
-      test('should be Updatable', () => {
+      test('should throw no error on CreatableViaImport', () => {
+        expect(timelineObj.checkIsFailureCases(TimelineStatusActions.createViaImport)).toBeNull();
+      });
+
+      test('should not be Updatable', () => {
         expect(timelineObj.isUpdatable).toEqual(false);
       });
 
-      test('should be UpdatableViaImport', () => {
+      test('should throw error when updat', () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.update);
+        expect(error?.body).toEqual(UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE);
+      });
+
+      test('should not be UpdatableViaImport', () => {
         expect(timelineObj.isUpdatableViaImport).toEqual(false);
+      });
+
+      test('should throw error when UpdatableViaImport', () => {
+        const error = timelineObj.checkIsFailureCases(TimelineStatusActions.updateViaImport);
+        expect(error?.body).toEqual(UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE);
       });
 
       test('should indicate we are handling a template timeline', () => {
@@ -591,7 +613,7 @@ describe('CompareTimelinesStatus', () => {
             version: mockUniqueParsedObjects[0].version,
           },
           status: TimelineStatus.immutiable,
-          timelineType: TimelineType.default,
+          timelineType: TimelineType.template,
           title: 'mock title',
           templateTimelineInput: {
             id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
@@ -683,6 +705,90 @@ describe('CompareTimelinesStatus', () => {
     test(`throw error when CreatableViaImport`, () => {
       const error = timelineObj.checkIsFailureCases(TimelineStatusActions.createViaImport);
       expect(error?.body).toEqual(CREATE_TEMPLATE_TIMELINE_WITHOUT_ID_ERROR_MESSAGE);
+    });
+  });
+
+  describe('Throw error if template timeline version is conflict when update via import', () => {
+    const mockGetTimeline: jest.Mock = jest.fn();
+    const mockGetTemplateTimeline: jest.Mock = jest.fn();
+
+    let timelineObj: TimelinesStatusType;
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    afterAll(() => {
+      jest.resetModules();
+    });
+
+    beforeAll(() => {
+      jest.resetModules();
+    });
+
+    beforeEach(async () => {
+      jest.doMock('../../saved_object', () => ({
+        getTimeline: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
+        getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
+          timeline: [mockGetTemplateTimelineValue],
+        }),
+      }));
+
+      const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
+        .CompareTimelinesStatus;
+
+      timelineObj = new CompareTimelinesStatus({
+        timelineInput: {
+          id: mockUniqueParsedObjects[0].savedObjectId,
+          version: mockUniqueParsedObjects[0].version,
+        },
+        timelineType: TimelineType.template,
+        title: mockUniqueParsedObjects[0].title,
+        templateTimelineInput: {
+          id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
+          version: mockGetTemplateTimelineValue.templateTimelineVersion,
+        },
+        frameworkRequest: {} as FrameworkRequest,
+      });
+      await timelineObj.init();
+    });
+
+    test('should not be creatable', () => {
+      expect(timelineObj.isCreatable).toEqual(false);
+    });
+
+    test(`throw error when create`, () => {
+      const error = timelineObj.checkIsFailureCases(TimelineStatusActions.create);
+      expect(error?.body).toEqual(CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE);
+    });
+
+    test('should not be Creatable via import', () => {
+      expect(timelineObj.isCreatableViaImport).toEqual(false);
+    });
+
+    test(`throw error when CreatableViaImport`, () => {
+      const error = timelineObj.checkIsFailureCases(TimelineStatusActions.createViaImport);
+      expect(error?.body).toEqual(
+        getImportExistingTimelineError(mockUniqueParsedObjects[0].savedObjectId)
+      );
+    });
+
+    test('should be updatable', () => {
+      expect(timelineObj.isUpdatable).toEqual(true);
+    });
+
+    test(`throw no error when update`, () => {
+      const error = timelineObj.checkIsFailureCases(TimelineStatusActions.update);
+      expect(error).toBeNull();
+    });
+
+    test('should not be updatable via import', () => {
+      expect(timelineObj.isUpdatableViaImport).toEqual(false);
+    });
+
+    test(`throw error when UpdatableViaImport`, () => {
+      const error = timelineObj.checkIsFailureCases(TimelineStatusActions.updateViaImport);
+      expect(error?.body).toEqual(TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE);
     });
   });
 });

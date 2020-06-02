@@ -9,7 +9,7 @@ import { TimelineSavedObject, TimelineStatus } from '../../../../../common/types
 export const UPDATE_TIMELINE_ERROR_MESSAGE =
   'CREATE timeline with PATCH is not allowed, please use POST instead';
 export const UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
-  'CREATE template timeline with PATCH is not allowed, please use POST instead';
+  "CREATE template timeline with PATCH is not allowed, please use POST instead (Given template timeline doesn't exist)";
 export const NO_MATCH_VERSION_ERROR_MESSAGE =
   'TimelineVersion conflict: The given version doesn not match with existing timeline';
 export const NO_MATCH_ID_ERROR_MESSAGE =
@@ -42,8 +42,8 @@ const isGivenTitleExists = (title: string | null | undefined) => {
   return title == null ? EMPTY_TITLE_ERROR_MESSAGE : null;
 };
 
-const getImportExistingTimelineError = (id: string, timelineType: string) =>
-  `${timelineType}_id: "${id}" already exists`;
+export const getImportExistingTimelineError = (id: string) =>
+  `savedObjectId: "${id}" already exists`;
 
 export const commonFailureChecker = (title: string | null | undefined) => {
   const error = [isGivenTitleExists(title)].filter((msg) => msg != null).join(',');
@@ -53,6 +53,41 @@ export const commonFailureChecker = (title: string | null | undefined) => {
         statusCode: 405,
       }
     : null;
+};
+
+export const checkIsUpdateViaImportFailureCases = (
+  isHandlingTemplateTimeline: boolean,
+  status: TimelineStatus | null | undefined,
+  version: string | null,
+  templateTimelineVersion: number | null,
+  templateTimelineId: string | null | undefined,
+  existTimeline: TimelineSavedObject | null,
+  existTemplateTimeline: TimelineSavedObject | null
+) => {
+  const error = checkIsUpdateFailureCases(
+    isHandlingTemplateTimeline,
+    status,
+    version,
+    templateTimelineVersion,
+    templateTimelineId,
+    existTimeline,
+    existTemplateTimeline
+  );
+  if (error) {
+    return error;
+  }
+  if (
+    templateTimelineVersion != null &&
+    existTemplateTimeline != null &&
+    existTemplateTimeline.templateTimelineVersion != null &&
+    existTemplateTimeline.templateTimelineVersion >= templateTimelineVersion
+  ) {
+    // Throw error you can not update a template timeline version with an old version
+    return {
+      body: TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
+      statusCode: 409,
+    };
+  }
 };
 
 export const checkIsUpdateFailureCases = (
@@ -78,7 +113,7 @@ export const checkIsUpdateFailureCases = (
   }
 
   if (isHandlingTemplateTimeline) {
-    if (existTemplateTimeline == null) {
+    if (existTemplateTimeline == null && templateTimelineVersion != null) {
       // template timeline !exists
       // Throw error to create template timeline in patch
       return {
@@ -107,19 +142,6 @@ export const checkIsUpdateFailureCases = (
       // throw error 409 conflict timeline
       return {
         body: NO_MATCH_VERSION_ERROR_MESSAGE,
-        statusCode: 409,
-      };
-    }
-
-    if (
-      templateTimelineVersion != null &&
-      existTemplateTimeline != null &&
-      existTemplateTimeline.templateTimelineVersion != null &&
-      existTemplateTimeline.templateTimelineVersion !== templateTimelineVersion
-    ) {
-      // Throw error you can not update a template timeline version with an old version
-      return {
-        body: TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
         statusCode: 409,
       };
     }
@@ -185,16 +207,15 @@ export const checkIsCreateViaImportFailureCases = (
   existTimeline: TimelineSavedObject | null,
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
-  const timelineType = isHandlingTemplateTimeline ? 'template_timeline' : 'timeline';
   if (!isHandlingTemplateTimeline && existTimeline != null) {
     return {
-      body: getImportExistingTimelineError(existTimeline.savedObjectId, timelineType),
+      body: getImportExistingTimelineError(existTimeline.savedObjectId),
       statusCode: 405,
     };
   } else if (isHandlingTemplateTimeline && existTemplateTimeline != null) {
     // Throw error to create template timeline in patch
     return {
-      body: getImportExistingTimelineError(existTemplateTimeline.savedObjectId, timelineType),
+      body: getImportExistingTimelineError(existTemplateTimeline.savedObjectId),
       statusCode: 405,
     };
   } else if (isHandlingTemplateTimeline && templateTimelineId == null) {

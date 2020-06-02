@@ -275,7 +275,7 @@ describe('import timelines', () => {
             id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
             error: {
               status_code: 409,
-              message: `timeline_id: "79deb4c0-6bc1-11ea-a90b-f5341fb7a189" already exists`,
+              message: `savedObjectId: "79deb4c0-6bc1-11ea-a90b-f5341fb7a189" already exists`,
             },
           },
         ],
