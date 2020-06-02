@@ -5,7 +5,7 @@
  */
 
 import { performance } from 'perf_hooks';
-import { AlertServices } from '../../../../../alerting/server';
+import { AlertServices } from '../../../../../alerts/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
 import { buildEventsSearchQuery } from './build_events_query';
