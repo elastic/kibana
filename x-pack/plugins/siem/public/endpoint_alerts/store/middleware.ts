@@ -20,9 +20,8 @@ import {
   uiQueryParams,
   isAlertPageTabChange,
 } from './selectors';
-import { Immutable } from '../../../common/endpoint/types';
 
-export const alertMiddlewareFactory: ImmutableMiddlewareFactory<Immutable<AlertListState>> = (
+export const alertMiddlewareFactory: ImmutableMiddlewareFactory<AlertListState> = (
   coreStart,
   depsStart
 ) => {
