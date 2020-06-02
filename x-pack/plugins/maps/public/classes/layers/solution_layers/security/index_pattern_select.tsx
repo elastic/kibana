@@ -51,7 +51,7 @@ export class IndexPatternSelect extends Component<Props, State> {
 
   _onChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const targetIndexPattern = this.state.indexPatterns.find((indexPattern: IndexPattern) => {
-      return (event.target.value = indexPattern.id);
+      return event.target.value === indexPattern.id;
     });
     this.props.onChange(targetIndexPattern);
   };
