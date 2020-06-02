@@ -237,7 +237,7 @@ export default function ({ getService, getPageObjects }) {
     describe('empty query', function () {
       it('should update the histogram timerange when the query is resubmitted', async function () {
         await kibanaServer.uiSettings.update({
-          'timepicker:timeDefaults': '{  "from": "Sep 18, 2015 @ 19:37:13.000",  "to": "now"}',
+          'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
         });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
