@@ -13,6 +13,8 @@ import { AlertFieldNumber } from '../alert_field_number';
 import { timeExpLabels } from './translations';
 
 interface Props {
+  defaultTimerangeCount?: number;
+  defaultTimerangeUnit?: string;
   setAlertParams: (key: string, value: any) => void;
 }
 
@@ -26,7 +28,6 @@ const TimeRangeOptions = [
   {
     'aria-label': labels.MINUTES_TIME_RANGE,
     'data-test-subj': 'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.minutesOption',
-    checked: 'on',
     key: 'm',
     label: labels.MINUTES,
   },
@@ -44,10 +45,18 @@ const TimeRangeOptions = [
   },
 ];
 
-export const TimeExpressionSelect: React.FC<Props> = ({ setAlertParams }) => {
-  const [numUnits, setNumUnits] = useState<number>(15);
+export const TimeExpressionSelect: React.FC<Props> = ({
+  defaultTimerangeCount,
+  defaultTimerangeUnit,
+  setAlertParams,
+}) => {
+  const [numUnits, setNumUnits] = useState<number>(defaultTimerangeCount ?? 15);
 
-  const [timerangeUnitOptions, setTimerangeUnitOptions] = useState<any[]>(TimeRangeOptions);
+  const [timerangeUnitOptions, setTimerangeUnitOptions] = useState<any[]>(
+    TimeRangeOptions.map((opt) =>
+      opt.key === defaultTimerangeUnit ?? 'm' ? { ...opt, checked: 'on' } : opt
+    )
+  );
 
   useEffect(() => {
     const timerangeUnit = timerangeUnitOptions.find(({ checked }) => checked === 'on')?.key ?? 'm';

@@ -57,7 +57,11 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
       <EuiSpacer size="xs" />
 
-      <TimeExpressionSelect setAlertParams={setAlertParams} />
+      <TimeExpressionSelect
+        defaultTimerangeUnit={alertParams.timerangeUnit}
+        defaultTimerangeCount={alertParams.timerangeCount}
+        setAlertParams={setAlertParams}
+      />
 
       <EuiSpacer size="xs" />
 
