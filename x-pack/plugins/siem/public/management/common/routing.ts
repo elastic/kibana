@@ -30,7 +30,7 @@ const querystringStringify: <ExpectedType extends object, ArgType>(
   params: Exact<ExpectedType, ArgType>
 ) => string = querystring.stringify;
 
-/** Make `selected_host` required ++ only valid value for `show` is `undefined` or `details` */
+/** Make `selected_host` required */
 type EndpointDetailsUrlProps = Omit<HostIndexUIQueryParams, 'selected_host'> &
   Required<Pick<HostIndexUIQueryParams, 'selected_host'>>;
 
