@@ -5,11 +5,11 @@
  */
 
 import { createHash } from 'crypto';
-import { resolve as resolvePath } from 'path';
-import { readFileSync } from 'fs';
-import { Readable } from 'stream';
-
 import del from 'del';
+import { readFileSync } from 'fs';
+import { resolve as resolvePath } from 'path';
+import { Readable } from 'stream';
+import { LevelLogger } from '../../lib';
 import { download } from './download';
 
 const TEMP_DIR = resolvePath(__dirname, '__tmp__');
@@ -29,6 +29,12 @@ class ReadableOf extends Readable {
 jest.mock('axios');
 const request: jest.Mock = jest.requireMock('axios').request;
 
+const mockLogger = ({
+  error: jest.fn(),
+  warn: jest.fn(),
+  info: jest.fn(),
+} as unknown) as LevelLogger;
+
 test('downloads the url to the path', async () => {
   const BODY = 'abdcefg';
   request.mockImplementationOnce(async () => {
@@ -37,7 +43,7 @@ test('downloads the url to the path', async () => {
     };
   });
 
-  await download('url', TEMP_FILE);
+  await download('url', TEMP_FILE, mockLogger);
   expect(readFileSync(TEMP_FILE, 'utf8')).toEqual(BODY);
 });
 
@@ -50,7 +56,7 @@ test('returns the md5 hex hash of the http body', async () => {
     };
   });
 
-  const returned = await download('url', TEMP_FILE);
+  const returned = await download('url', TEMP_FILE, mockLogger);
   expect(returned).toEqual(HASH);
 });
 
@@ -59,7 +65,7 @@ test('throws if request emits an error', async () => {
     throw new Error('foo');
   });
 
-  return expect(download('url', TEMP_FILE)).rejects.toThrow('foo');
+  return expect(download('url', TEMP_FILE, mockLogger)).rejects.toThrow('foo');
 });
 
 afterEach(async () => await del(TEMP_DIR));
