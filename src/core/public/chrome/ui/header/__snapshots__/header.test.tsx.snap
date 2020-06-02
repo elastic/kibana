@@ -44,6 +44,7 @@ exports[`Header renders 1`] = `
       "getUrlForApp": [MockFunction],
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
+      "parseAppUrl": [MockFunction],
       "registerMountContext": [MockFunction],
     }
   }
@@ -659,6 +660,7 @@ exports[`Header renders 2`] = `
       "getUrlForApp": [MockFunction],
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
+      "parseAppUrl": [MockFunction],
       "registerMountContext": [MockFunction],
     }
   }
@@ -4743,6 +4745,7 @@ exports[`Header renders 3`] = `
       "getUrlForApp": [MockFunction],
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
+      "parseAppUrl": [MockFunction],
       "registerMountContext": [MockFunction],
     }
   }
@@ -9899,6 +9902,7 @@ exports[`Header renders 4`] = `
       "getUrlForApp": [MockFunction],
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
+      "parseAppUrl": [MockFunction],
       "registerMountContext": [MockFunction],
     }
   }
