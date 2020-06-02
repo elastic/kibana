@@ -18,12 +18,12 @@ When plugin A (persister) stores some state that belongs to another plugin B a f
 
 const MY_STATE_ID = 'MyState';
 
-interface MyStateV77 extends Serializable {
+interface MyStateV77 extends PersistableState {
   objectId: string,
   val: number,
 }
 
-interface MyState extends Serializable {
+interface MyState extends PersistableState {
   objectId: string,
   value: number,
 }
@@ -68,7 +68,120 @@ We also need to make sure that all the persited state containing references to s
 
 # Detailed design
 
-...
+```ts
+interface PersistableState extends Serializable {}
+
+interface PersistableStateDefinition {
+  id: string,
+  // migrate function receives state and version string and should return latest state version
+  // default is identity function
+  migrate: (state: PersistableState, version: string) => PersistableState,
+  // inject function receives state and a list of references and should return state with references injected
+  // default is identity function
+  inject: (state: PersistableState, references: SavedObjectReference[]) => PersistableState,
+  // extract function receives state and should return state with references extracted and array of references
+  // default returns same state with empty reference array
+  extract: (state: PersistableState) => [PersistableState, SavedObjectReference[]]
+}
+
+class PersistableStatePlugin {
+  setup(core, plugins) {
+    return {
+      // if one of the functions is not provided default is used 
+      // so we can always assume that all of the functions are available for every persistable state 
+      register: (id: string, definition: Partial<PersistableStateDefinition>) => void
+    }
+  }
+  start(core, plugins) {
+    return {
+      // get will always return. If requested persistable state is not defined it will return default set of functions.
+      get: (id: string) => ({
+        // takes the state, extracts the references and returns them + version string
+        beforeSave: (state: PersistableState) => [PersistableState, SavedObjectReference[], string],
+        // takes the state, references and version and returns latest state version with references injected
+        afterLoad: (state: PersistableState, references: SavedObjectReference[], version: string) => PersistableState,
+      })
+    }
+  }
+}
+```
+
+
+# Consuming and edge cases
+
+When plugin A wants to store some state that it does not own it should check with persistableStateRegistry for a registered persistable state definition and execute `beforeSave` function.
+
+```ts
+  const expressionReadyForSaving = persistableStatePlugin.get('expression').beforeSave(expressionString);
+
+``` 
+
+## EnhacedDrilldownEmbeddableInput
+
+Drilldown  plugin adds to the state of embeddable:
+
+```ts
+interface EnhancedDrilldownEmbeddableInput extends EmbeddableInput {
+  enhancements: {
+    drillDowns: { events?: Events[];  }
+  }
+}
+```
+Embeddable is aware that it has an enhancements property on its state, where every key represents state of another plugin.
+
+```ts
+const inject = (state, references) => {
+  Object.getKeys(state.enhancements).forEach(key => {
+    State.enhancements[key] = persistableStatePlugin.get(key).inject(state.enhancements[key], references);
+  }
+}
+```
+
+And drilldown plugin registers its state with persistableStateService.
+
+## We have to avoid shared persistable state
+
+So we have to do two things:
+
+- Always call a migration function for nested state.
+- Maintain state boundaries along plugin boundaries. Do not allow VisualizeEmbeddableInput to migrate data on EmbeddableInput. Don't even give it access to this state at all.
+As long as state ownership is isolated, we can do something like this:
+
+```ts
+const embeddableMigrator: PersistableStateMigrationFn (state: { type: string; input: unknown }, version: string): State {
+  return {
+    ...migrateInputToLatest(state.input),
+    enhancements: {
+       ...state.input.enhancements.map(enhancement => 
+          persistableStateMigrations.get(enhancement).migrate(state.input.enhancements[extension], version)),
+    },
+    specializedState: persistableStateMigrations.get(state.type).migrate(state.input.specializedState, version)),
+  }
+}
+```
+
+The key here is that we have to separate out the state owned by VisualizeEmbeddableInput and that owned by EmbeddableInput. If we allow them both access to the full input (VisualizeEmbeddableInput extends EmbeddableInput), there is the possibility for key clashes. For instance:
+
+```ts
+// We start out with the base class having an attribute of `title`. 
+interface EmbeddableInputV1 {
+  title: string;
+}
+
+// `Title` is taken by the base class, so Visualize plugin adds `defaultTitle`.
+interface VisualizeEmbeddableInputV1 implements EmbeddableInputV1 {
+  defaultTitle: string;
+}
+
+// In a future version, EmbeddableInput author decides to rename `title` => `defaultTitle`.
+// They don't know about `VisualizeEmbeddableInput` so don't realize there is going to be
+// a key collision.
+interface EmbeddableInputV2 {
+  defaultTitle: string;
+}
+```
+
+It's probably a rare occurrence, but it's also very risky. EmbeddableInput thinks it owns defaultTitle. Let's say it decides to change the name yet again, so in V3 changes it to customPanelTitle and removes defaultTitle. Let's also say VisualizeEmbeddable author doesn't add a migration for V2 or V3. A user migrates to V3, VisualizeEmbeddable just had its defaultTitle state wiped out unknowingly (types will still say it's a required parameters). This has the potential to permanently break saved objects with no way to undo the migration.
 
 # Drawbacks
 
