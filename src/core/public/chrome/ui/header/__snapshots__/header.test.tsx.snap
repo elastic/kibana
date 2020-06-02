@@ -82,6 +82,22 @@ exports[`Header renders 1`] = `
       "thrownError": null,
     }
   }
+  customNavLink$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Object {
+        "baseUrl": "",
+        "id": "cloud-deployment-link",
+        "legacy": false,
+        "title": "Manage cloud deployment",
+      },
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   forceAppSwitcherNavigation$={
     BehaviorSubject {
       "_isScalar": false,
@@ -728,6 +744,60 @@ exports[`Header renders 2`] = `
           "text": "test",
         },
       ],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  customNavLink$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Object {
+        "baseUrl": "",
+        "id": "cloud-deployment-link",
+        "legacy": false,
+        "title": "Manage cloud deployment",
+      },
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -4454,6 +4524,60 @@ exports[`Header renders 2`] = `
         }
       }
       closeNav={[Function]}
+      customNavLink$={
+        BehaviorSubject {
+          "_isScalar": false,
+          "_value": Object {
+            "baseUrl": "",
+            "id": "cloud-deployment-link",
+            "legacy": false,
+            "title": "Manage cloud deployment",
+          },
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [
+            Subscriber {
+              "_parentOrParents": null,
+              "_subscriptions": Array [
+                SubjectSubscription {
+                  "_parentOrParents": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "subject": [Circular],
+                  "subscriber": [Circular],
+                },
+              ],
+              "closed": false,
+              "destination": SafeSubscriber {
+                "_complete": undefined,
+                "_context": [Circular],
+                "_error": undefined,
+                "_next": [Function],
+                "_parentOrParents": null,
+                "_parentSubscriber": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "destination": Object {
+                  "closed": true,
+                  "complete": [Function],
+                  "error": [Function],
+                  "next": [Function],
+                },
+                "isStopped": false,
+                "syncErrorThrowable": false,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
+              "isStopped": false,
+              "syncErrorThrowable": true,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+          ],
+          "thrownError": null,
+        }
+      }
       homeHref="/"
       id="mockId"
       isLocked={false}
@@ -4812,6 +4936,60 @@ exports[`Header renders 3`] = `
           "text": "test",
         },
       ],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  customNavLink$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Object {
+        "baseUrl": "",
+        "id": "cloud-deployment-link",
+        "legacy": false,
+        "title": "Manage cloud deployment",
+      },
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -8538,6 +8716,60 @@ exports[`Header renders 3`] = `
         }
       }
       closeNav={[Function]}
+      customNavLink$={
+        BehaviorSubject {
+          "_isScalar": false,
+          "_value": Object {
+            "baseUrl": "",
+            "id": "cloud-deployment-link",
+            "legacy": false,
+            "title": "Manage cloud deployment",
+          },
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [
+            Subscriber {
+              "_parentOrParents": null,
+              "_subscriptions": Array [
+                SubjectSubscription {
+                  "_parentOrParents": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "subject": [Circular],
+                  "subscriber": [Circular],
+                },
+              ],
+              "closed": false,
+              "destination": SafeSubscriber {
+                "_complete": undefined,
+                "_context": [Circular],
+                "_error": undefined,
+                "_next": [Function],
+                "_parentOrParents": null,
+                "_parentSubscriber": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "destination": Object {
+                  "closed": true,
+                  "complete": [Function],
+                  "error": [Function],
+                  "next": [Function],
+                },
+                "isStopped": false,
+                "syncErrorThrowable": false,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
+              "isStopped": false,
+              "syncErrorThrowable": true,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+          ],
+          "thrownError": null,
+        }
+      }
       homeHref="/"
       id="mockId"
       isLocked={true}
@@ -8802,6 +9034,45 @@ exports[`Header renders 3`] = `
                                   class="euiCollapsibleNavGroup__children"
                                 >
                                   <ul
+                                    aria-label="Manage cloud deployment"
+                                    class="euiListGroup"
+                                    style="max-width: none;"
+                                  >
+                                    <li
+                                      class="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
+                                    >
+                                      <button
+                                        class="euiListGroupItem__button"
+                                        data-test-subj="collapsibleNavCustomNavLink"
+                                        type="button"
+                                      >
+                                        <span
+                                          class="euiListGroupItem__label"
+                                          title="Manage cloud deployment"
+                                        >
+                                          Manage cloud deployment
+                                        </span>
+                                      </button>
+                                    </li>
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
+                            <hr
+                              class="euiHorizontalRule euiHorizontalRule--full"
+                            />
+                            <div
+                              class="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <div
+                                class="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
+                                id="mockId"
+                                style="max-height: 40vh;"
+                              >
+                                <div
+                                  class="euiCollapsibleNavGroup__children"
+                                >
+                                  <ul
                                     aria-label="Pinned links"
                                     class="euiListGroup"
                                     style="max-width: none;"
@@ -9038,6 +9309,45 @@ exports[`Header renders 3`] = `
                                     class="euiCollapsibleNavGroup__children"
                                   >
                                     <ul
+                                      aria-label="Manage cloud deployment"
+                                      class="euiListGroup"
+                                      style="max-width: none;"
+                                    >
+                                      <li
+                                        class="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
+                                      >
+                                        <button
+                                          class="euiListGroupItem__button"
+                                          data-test-subj="collapsibleNavCustomNavLink"
+                                          type="button"
+                                        >
+                                          <span
+                                            class="euiListGroupItem__label"
+                                            title="Manage cloud deployment"
+                                          >
+                                            Manage cloud deployment
+                                          </span>
+                                        </button>
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </div>
+                              </div>
+                              <hr
+                                class="euiHorizontalRule euiHorizontalRule--full"
+                              />
+                              <div
+                                class="euiFlexItem euiFlexItem--flexGrowZero"
+                              >
+                                <div
+                                  class="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
+                                  id="mockId"
+                                  style="max-height: 40vh;"
+                                >
+                                  <div
+                                    class="euiCollapsibleNavGroup__children"
+                                  >
+                                    <ul
                                       aria-label="Pinned links"
                                       class="euiListGroup"
                                       style="max-width: none;"
@@ -9256,6 +9566,117 @@ exports[`Header renders 3`] = `
                       data-test-subj="collapsibleNav"
                       id="mockId"
                     >
+                      <EuiFlexItem
+                        grow={false}
+                        style={
+                          Object {
+                            "flexShrink": 0,
+                          }
+                        }
+                      >
+                        <div
+                          className="euiFlexItem euiFlexItem--flexGrowZero"
+                          style={
+                            Object {
+                              "flexShrink": 0,
+                            }
+                          }
+                        >
+                          <EuiCollapsibleNavGroup
+                            background="light"
+                            className="eui-yScroll"
+                            style={
+                              Object {
+                                "maxHeight": "40vh",
+                              }
+                            }
+                          >
+                            <div
+                              className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
+                              id="mockId"
+                              style={
+                                Object {
+                                  "maxHeight": "40vh",
+                                }
+                              }
+                            >
+                              <div
+                                className="euiCollapsibleNavGroup__children"
+                              >
+                                <EuiListGroup
+                                  aria-label="Manage cloud deployment"
+                                  color="text"
+                                  gutterSize="none"
+                                  listItems={
+                                    Array [
+                                      Object {
+                                        "data-test-subj": "collapsibleNavCustomNavLink",
+                                        "href": undefined,
+                                        "icon": undefined,
+                                        "iconType": undefined,
+                                        "isActive": false,
+                                        "isDisabled": undefined,
+                                        "label": "Manage cloud deployment",
+                                        "onClick": [Function],
+                                      },
+                                    ]
+                                  }
+                                  maxWidth="none"
+                                  size="s"
+                                >
+                                  <ul
+                                    aria-label="Manage cloud deployment"
+                                    className="euiListGroup"
+                                    style={
+                                      Object {
+                                        "maxWidth": "none",
+                                      }
+                                    }
+                                  >
+                                    <EuiListGroupItem
+                                      color="text"
+                                      data-test-subj="collapsibleNavCustomNavLink"
+                                      isActive={false}
+                                      key="title-0"
+                                      label="Manage cloud deployment"
+                                      onClick={[Function]}
+                                      showToolTip={false}
+                                      size="s"
+                                      wrapText={false}
+                                    >
+                                      <li
+                                        className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
+                                      >
+                                        <button
+                                          className="euiListGroupItem__button"
+                                          data-test-subj="collapsibleNavCustomNavLink"
+                                          disabled={false}
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <span
+                                            className="euiListGroupItem__label"
+                                            title="Manage cloud deployment"
+                                          >
+                                            Manage cloud deployment
+                                          </span>
+                                        </button>
+                                      </li>
+                                    </EuiListGroupItem>
+                                  </ul>
+                                </EuiListGroup>
+                              </div>
+                            </div>
+                          </EuiCollapsibleNavGroup>
+                        </div>
+                      </EuiFlexItem>
+                      <EuiHorizontalRule
+                        margin="none"
+                      >
+                        <hr
+                          className="euiHorizontalRule euiHorizontalRule--full"
+                        />
+                      </EuiHorizontalRule>
                       <EuiFlexItem
                         grow={false}
                         style={
@@ -10010,6 +10431,22 @@ exports[`Header renders 4`] = `
           "syncErrorValue": null,
         },
       ],
+      "thrownError": null,
+    }
+  }
+  customNavLink$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Object {
+        "baseUrl": "",
+        "id": "cloud-deployment-link",
+        "legacy": false,
+        "title": "Manage cloud deployment",
+      },
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
       "thrownError": null,
     }
   }

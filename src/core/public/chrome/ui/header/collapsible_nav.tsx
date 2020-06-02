@@ -88,7 +88,7 @@ interface Props {
   onIsLockedUpdate: OnIsLockedUpdate;
   closeNav: () => void;
   navigateToApp: InternalApplicationStart['navigateToApp'];
-  customLink$: Rx.Observable<ChromeNavLink | undefined>;
+  customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
 }
 
 export function CollapsibleNav({
@@ -106,7 +106,7 @@ export function CollapsibleNav({
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
-  const customLink = useObservable(observables.customLink$, undefined);
+  const customNavLink = useObservable(observables.customNavLink$, undefined);
   const appId = useObservable(observables.appId$, '');
   const lockRef = useRef<HTMLButtonElement>(null);
   const groupedNavLinks = groupBy(navLinks, (link) => link?.category?.id);
@@ -136,7 +136,7 @@ export function CollapsibleNav({
       isDocked={isLocked}
       onClose={closeNav}
     >
-      {customLink && (
+      {customNavLink && (
         <Fragment>
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
             <EuiCollapsibleNavGroup
@@ -145,14 +145,14 @@ export function CollapsibleNav({
               style={{ maxHeight: '40vh' }}
             >
               <EuiListGroup
-                aria-label={customLink.title}
+                aria-label={customNavLink.title}
                 listItems={[
                   createEuiListItem({
-                    link: customLink,
+                    link: customNavLink,
                     legacyMode,
                     basePath,
                     navigateToApp,
-                    dataTestSubj: 'collapsibleNavCustomLink',
+                    dataTestSubj: 'collapsibleNavCustomNavLink',
                     onClick: closeNav,
                     externalLink: true,
                   }),

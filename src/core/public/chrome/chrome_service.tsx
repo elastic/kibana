@@ -148,7 +148,7 @@ export class ChromeService {
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
-    const customLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
+    const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
 
@@ -222,7 +222,7 @@ export class ChromeService {
           badge$={badge$.pipe(takeUntil(this.stop$))}
           basePath={http.basePath}
           breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
-          customLink$={customLink$.pipe(takeUntil(this.stop$))}
+          customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
           kibanaDocLink={docLinks.links.kibana}
           forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
           helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
@@ -300,10 +300,10 @@ export class ChromeService {
 
       getNavType$: () => getNavType$,
 
-      getCustomLink$: () => customLink$.pipe(takeUntil(this.stop$)),
+      getCustomNavLink$: () => customNavLink$.pipe(takeUntil(this.stop$)),
 
-      setCustomLink: (customLink?: ChromeNavLink) => {
-        customLink$.next(customLink);
+      setCustomNavLink: (customNavLink?: ChromeNavLink) => {
+        customNavLink$.next(customNavLink);
       },
     };
   }
@@ -434,12 +434,12 @@ export interface ChromeStart {
   /**
    * Get an observable of the current custom nav link
    */
-  getCustomLink$(): Observable<Partial<ChromeNavLink> | undefined>;
+  getCustomNavLink$(): Observable<Partial<ChromeNavLink> | undefined>;
 
   /**
    * Override the current set of custom nav link
    */
-  setCustomLink(newCustomLink?: Partial<ChromeNavLink>): void;
+  setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
 
   /**
    * Get an observable of the current custom help conttent

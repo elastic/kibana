@@ -49,7 +49,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const { deploymentUrl } = this.initializerContext.config.get<CloudConfigType>();
     coreStart.chrome.setHelpSupportUrl(ELASTIC_SUPPORT_LINK);
     if (deploymentUrl) {
-      coreStart.chrome.setCustomLink({
+      coreStart.chrome.setCustomNavLink({
         title: i18n.translate('xpack.cloud.deploymentLinkLabel', {
           defaultMessage: 'Manage this deployment',
         }),

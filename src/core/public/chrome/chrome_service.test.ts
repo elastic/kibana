@@ -362,6 +362,27 @@ describe('start', () => {
     });
   });
 
+  describe('custom nav link', () => {
+    it('updates/emits the current custom nav link', async () => {
+      const { chrome, service } = await start();
+      const promise = chrome.getCustomNavLink$().pipe(toArray()).toPromise();
+
+      chrome.setCustomNavLink({ title: 'Manage cloud deployment' });
+      chrome.setCustomNavLink(undefined);
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+              Array [
+                undefined,
+                Object {
+                  "title": "Manage cloud deployment",
+                },
+                undefined,
+              ]
+            `);
+    });
+  });
+
   describe('help extension', () => {
     it('updates/emits the current help extension', async () => {
       const { chrome, service } = await start();

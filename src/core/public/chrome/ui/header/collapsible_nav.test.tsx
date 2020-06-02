@@ -69,7 +69,7 @@ function mockProps() {
     onIsLockedUpdate: () => {},
     closeNav: () => {},
     navigateToApp: () => Promise.resolve(),
-    customLink$: new BehaviorSubject(undefined),
+    customNavLink$: new BehaviorSubject(undefined),
   };
 }
 
@@ -183,5 +183,29 @@ describe('CollapsibleNav', () => {
     component.find('[data-test-subj="collapsibleNavGroup-noCategory"] a').simulate('click');
     expect(onClose.callCount).toEqual(3);
     expectNavIsClosed(component);
+  });
+
+  it('renders custom link above other nav links', () => {
+    const onClose = sinon.spy();
+    const navLinks = [mockLink({ category: kibana }), mockLink({ title: 'categoryless' })];
+    const recentNavLinks = [mockRecentNavLink({})];
+    const customNavLink = mockLink({ title: 'Custom link' });
+    const component = mount(
+      <CollapsibleNav
+        {...mockProps()}
+        isOpen={true}
+        navLinks$={new BehaviorSubject(navLinks)}
+        recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
+        customNavLink$={new BehaviorSubject(customNavLink)}
+      />
+    );
+    component.setProps({
+      closeNav: () => {
+        component.setProps({ isOpen: false });
+        onClose();
+      },
+    });
+
+    expect(component).toMatchSnapshot();
   });
 });
