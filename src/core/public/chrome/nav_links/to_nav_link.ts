@@ -24,7 +24,12 @@ import { appendAppPath } from '../../application/utils';
 
 export function toNavLink(app: App | LegacyApp, basePath: IBasePath): NavLinkWrapper {
   const useAppStatus = app.navLinkStatus === AppNavLinkStatus.default;
-  const baseUrl = isLegacyApp(app) ? basePath.prepend(app.appUrl) : basePath.prepend(app.appRoute!);
+  const relativeBaseUrl = isLegacyApp(app)
+    ? basePath.prepend(app.appUrl)
+    : basePath.prepend(app.appRoute!);
+  const url = relativeToAbsolute(appendAppPath(relativeBaseUrl, app.defaultPath));
+  const baseUrl = relativeToAbsolute(relativeBaseUrl);
+
   return new NavLinkWrapper({
     ...app,
     hidden: useAppStatus
@@ -32,17 +37,27 @@ export function toNavLink(app: App | LegacyApp, basePath: IBasePath): NavLinkWra
       : app.navLinkStatus === AppNavLinkStatus.hidden,
     disabled: useAppStatus ? false : app.navLinkStatus === AppNavLinkStatus.disabled,
     legacy: isLegacyApp(app),
-    baseUrl: relativeToAbsolute(baseUrl),
+    baseUrl,
     ...(isLegacyApp(app)
-      ? {}
+      ? {
+          href: url && !url.startsWith(app.subUrlBase!) ? url : baseUrl,
+        }
       : {
-          url: relativeToAbsolute(appendAppPath(baseUrl, app.defaultPath)),
+          href: url,
+          url,
         }),
   });
 }
 
-function relativeToAbsolute(url: string) {
-  // convert all link urls to absolute urls
+/**
+ * @param {string} url - a relative or root relative url.  If a relative path is given then the
+ * absolute url returned will depend on the current page where this function is called from. For example
+ * if you are on page "http://www.mysite.com/shopping/kids" and you pass this function "adults", you would get
+ * back "http://www.mysite.com/shopping/adults".  If you passed this function a root relative path, or one that
+ * starts with a "/", for example "/account/cart", you would get back "http://www.mysite.com/account/cart".
+ * @return {string} the relative url transformed into an absolute url
+ */
+export function relativeToAbsolute(url: string) {
   const a = document.createElement('a');
   a.setAttribute('href', url);
   return a.href;

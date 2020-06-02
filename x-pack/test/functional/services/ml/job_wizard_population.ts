@@ -20,7 +20,10 @@ export function MachineLearningJobWizardPopulationProvider({ getService }: FtrPr
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlPopulationSplitFieldSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected population field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
     },
 
     async selectPopulationField(identifier: string) {
@@ -41,7 +44,10 @@ export function MachineLearningJobWizardPopulationProvider({ getService }: FtrPr
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         `mlDetector ${detectorPosition} > mlByFieldSelect  > comboBoxInput`
       );
-      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected detector split field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
     },
 
     async selectDetectorSplitField(detectorPosition: number, identifier: string) {
@@ -59,23 +65,30 @@ export function MachineLearningJobWizardPopulationProvider({ getService }: FtrPr
       );
     },
 
-    async assertDetectorSplitFrontCardTitle(detectorPosition: number, frontCardTitle: string) {
-      expect(
-        await testSubjects.getVisibleText(
-          `mlDetector ${detectorPosition} > mlDataSplit > mlSplitCard front > mlSplitCardTitle`
-        )
-      ).to.eql(frontCardTitle);
+    async assertDetectorSplitFrontCardTitle(
+      detectorPosition: number,
+      expectedFrontCardTitle: string
+    ) {
+      const actualSplitFrontCardTitle = await testSubjects.getVisibleText(
+        `mlDetector ${detectorPosition} > mlDataSplit > mlSplitCard front > mlSplitCardTitle`
+      );
+      expect(actualSplitFrontCardTitle).to.eql(
+        expectedFrontCardTitle,
+        `Expected front card title for detector position '${detectorPosition}' to be '${expectedFrontCardTitle}' (got '${actualSplitFrontCardTitle}')`
+      );
     },
 
     async assertDetectorSplitNumberOfBackCards(
       detectorPosition: number,
-      numberOfBackCards: number
+      expectedNumberOfBackCards: number
     ) {
-      expect(
-        await testSubjects.findAll(
-          `mlDetector ${detectorPosition} > mlDataSplit > mlSplitCard back`
-        )
-      ).to.have.length(numberOfBackCards);
+      const allBackCards = await testSubjects.findAll(
+        `mlDetector ${detectorPosition} > mlDataSplit > mlSplitCard back`
+      );
+      expect(allBackCards).to.have.length(
+        expectedNumberOfBackCards,
+        `Expected number of back cards for detector position '${detectorPosition}' to be '${expectedNumberOfBackCards}' (got '${allBackCards.length}')`
+      );
     },
   };
 }

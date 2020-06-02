@@ -9,7 +9,7 @@ import { ReactElement } from 'react';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 
 export type RenderWizardArguments = {
-  previewLayer: (layerDescriptor: LayerDescriptor | null, isIndexingSource?: boolean) => void;
+  previewLayers: (layerDescriptors: LayerDescriptor[], isIndexingSource?: boolean) => void;
   mapColors: string[];
   // upload arguments
   isIndexingTriggered: boolean;

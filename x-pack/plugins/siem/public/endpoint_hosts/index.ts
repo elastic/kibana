@@ -22,10 +22,12 @@ export class EndpointHosts {
     plugins: StartPlugins
   ): SecuritySubPluginWithStore<'hostList', Immutable<HostState>> {
     const { data, ingestManager } = plugins;
-    const middleware = substateMiddlewareFactory(
-      (globalState) => globalState.hostList,
-      hostMiddlewareFactory(core, { data, ingestManager })
-    );
+    const middleware = [
+      substateMiddlewareFactory(
+        (globalState) => globalState.hostList,
+        hostMiddlewareFactory(core, { data, ingestManager })
+      ),
+    ];
     return {
       routes: getEndpointHostsRoutes(),
       store: {

@@ -40,7 +40,10 @@ const verboseArgs = [
   '--path',
 ];
 
-describe('Ingesting coverage', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/67554
+// FLAKY: https://github.com/elastic/kibana/issues/67555
+// FLAKY: https://github.com/elastic/kibana/issues/67556
+describe.skip('Ingesting coverage', () => {
   const summaryPath = 'jest-combined/coverage-summary-manual-mix.json';
   const resolved = resolve(MOCKS_DIR, summaryPath);
   const siteUrlRegex = /"staticSiteUrl": (".+",)/;

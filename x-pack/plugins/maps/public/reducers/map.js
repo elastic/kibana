@@ -6,7 +6,6 @@
 
 import {
   SET_SELECTED_LAYER,
-  SET_TRANSIENT_LAYER,
   UPDATE_LAYER_ORDER,
   LAYER_DATA_LOAD_STARTED,
   LAYER_DATA_LOAD_ENDED,
@@ -54,7 +53,7 @@ import {
 
 import { getDefaultMapSettings } from './default_map_settings';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
-import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import { SOURCE_DATA_REQUEST_ID } from '../../common/constants';
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
 
@@ -126,7 +125,6 @@ export const DEFAULT_MAP_STATE = {
     hideViewControl: false,
   },
   selectedLayerId: null,
-  __transientLayerId: null,
   layerList: [],
   waitingForMapReadyLayerList: [],
   settings: getDefaultMapSettings(),
@@ -285,9 +283,6 @@ export function map(state = DEFAULT_MAP_STATE, action) {
     case SET_SELECTED_LAYER:
       const selectedMatch = state.layerList.find((layer) => layer.id === action.selectedLayerId);
       return { ...state, selectedLayerId: selectedMatch ? action.selectedLayerId : null };
-    case SET_TRANSIENT_LAYER:
-      const transientMatch = state.layerList.find((layer) => layer.id === action.transientLayerId);
-      return { ...state, __transientLayerId: transientMatch ? action.transientLayerId : null };
     case UPDATE_LAYER_ORDER:
       return {
         ...state,
@@ -448,7 +443,7 @@ function updateSourceDataRequest(state, action) {
     return state;
   }
   const dataRequest = layerDescriptor.__dataRequests.find((dataRequest) => {
-    return dataRequest.dataId === SOURCE_DATA_ID_ORIGIN;
+    return dataRequest.dataId === SOURCE_DATA_REQUEST_ID;
   });
   if (!dataRequest) {
     return state;
