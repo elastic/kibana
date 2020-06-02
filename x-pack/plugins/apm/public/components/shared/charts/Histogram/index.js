@@ -45,32 +45,12 @@ const ChartsWrapper = styled.div`
   left: 0;
 `;
 
-function findBucket(buckets, xAxisValue) {
-  return buckets.find((bucket) => bucket.x === xAxisValue);
-}
-
 export class HistogramInner extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       hoveredBucket: {},
     };
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.hoverX !== this.props.hoverX) {
-      const bucketFound = findBucket(this.props.buckets, this.props.hoverX);
-      if (bucketFound) {
-        this.setState({
-          hoveredBucket: {
-            ...bucketFound,
-            xCenter: (bucketFound.x0 + bucketFound.x) / 2,
-          },
-        });
-      } else {
-        this.setState({ hoveredBucket: {} });
-      }
-    }
   }
 
   onClick = (bucket) => {
@@ -80,17 +60,10 @@ export class HistogramInner extends PureComponent {
   };
 
   onHover = (bucket) => {
-    if (this.props.onHover) {
-      this.props.onHover(bucket.x);
-    } else {
-      this.setState({ hoveredBucket: bucket });
-    }
+    this.setState({ hoveredBucket: bucket });
   };
 
   onBlur = () => {
-    if (this.props.onMouseLeave) {
-      this.props.onMouseLeave();
-    }
     this.setState({ hoveredBucket: {} });
   };
 
@@ -127,7 +100,7 @@ export class HistogramInner extends PureComponent {
       verticalLineHover,
       width: XY_WIDTH,
     } = this.props;
-    const { hoveredBucket = {} } = this.state;
+    const { hoveredBucket } = this.state;
     if (isEmpty(buckets) || XY_WIDTH === 0) {
       return null;
     }

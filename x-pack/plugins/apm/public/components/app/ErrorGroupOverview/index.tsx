@@ -99,7 +99,7 @@ const ErrorGroupOverview: React.FC = () => {
           <LocalUIFilters {...localUIFiltersConfig} />
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
-          <EuiFlexGroup>
+          <EuiFlexGroup gutterSize="s">
             <ChartsSyncContextProvider>
               <EuiFlexItem>
                 <EuiPanel>
