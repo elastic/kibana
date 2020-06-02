@@ -82,19 +82,25 @@ interface EventInfo {
   creationType: string;
 }
 
+/**
+ * The valid ecs categories.
+ */
 export enum ECSCategory {
   Driver = 'driver',
   File = 'file',
   Network = 'network',
+  /**
+   * Registry has not been added to ecs yet.
+   */
   Registry = 'registry',
   Authentication = 'authentication',
   Session = 'session',
 }
 
 /**
- * Endpoint event categories
+ * High level categories for related events. These specify the type of related events that should be generated.
  */
-export enum EventCategory {
+export enum RelatedEventCategory {
   /**
    * The Random category allows the related event categories to be chosen randomly
    */
@@ -103,24 +109,63 @@ export enum EventCategory {
   File = 'file',
   Network = 'network',
   Registry = 'registry',
+  /**
+   * Security isn't an actual category but defines a type of related event to be created.
+   */
   Security = 'security',
 }
 
+/**
+ * This map defines the relationship between a higher level event type defined by the RelatedEventCategory enums and
+ * the ECS categories that is should map to. This should only be used for tests that need to determine the exact
+ * ecs categories that were created based on the related event information passed to the generator.
+ */
+export const categoryMapping: Record<RelatedEventCategory, ECSCategory | ECSCategory[] | ''> = {
+  [RelatedEventCategory.Security]: [ECSCategory.Authentication, ECSCategory.Session],
+  [RelatedEventCategory.Driver]: ECSCategory.Driver,
+  [RelatedEventCategory.File]: ECSCategory.File,
+  [RelatedEventCategory.Network]: ECSCategory.Network,
+  [RelatedEventCategory.Registry]: ECSCategory.Registry,
+  /**
+   * Random is only used by the generator to indicate that it should randomly choose the event information when generating
+   * related events. It does not map to a specific ecs category.
+   */
+  [RelatedEventCategory.Random]: '',
+};
+
+/**
+ * The related event category and number of events that should be generated.
+ */
 export interface RelatedEventInfo {
-  category: EventCategory;
+  category: RelatedEventCategory;
   count: number;
 }
 
 // These are from the v1 schemas and aren't all valid ECS event categories, still in flux
-const OTHER_EVENT_CATEGORIES: Record<Exclude<EventCategory, EventCategory.Random>, EventInfo> = {
-  [EventCategory.Security]: {
-    category: [ECSCategory.Authentication, ECSCategory.Session],
+const OTHER_EVENT_CATEGORIES: Record<
+  Exclude<RelatedEventCategory, RelatedEventCategory.Random>,
+  EventInfo
+> = {
+  [RelatedEventCategory.Security]: {
+    category: categoryMapping[RelatedEventCategory.Security],
     creationType: 'start',
   },
-  [EventCategory.Driver]: { category: ECSCategory.Driver, creationType: 'start' },
-  [EventCategory.File]: { category: ECSCategory.File, creationType: 'creation' },
-  [EventCategory.Network]: { category: ECSCategory.Network, creationType: 'start' },
-  [EventCategory.Registry]: { category: ECSCategory.Registry, creationType: 'creation' },
+  [RelatedEventCategory.Driver]: {
+    category: categoryMapping[RelatedEventCategory.Driver],
+    creationType: 'start',
+  },
+  [RelatedEventCategory.File]: {
+    category: categoryMapping[RelatedEventCategory.File],
+    creationType: 'creation',
+  },
+  [RelatedEventCategory.Network]: {
+    category: categoryMapping[RelatedEventCategory.Network],
+    creationType: 'start',
+  },
+  [RelatedEventCategory.Registry]: {
+    category: categoryMapping[RelatedEventCategory.Registry],
+    creationType: 'creation',
+  },
 };
 
 interface HostInfo {
@@ -528,7 +573,9 @@ export class EndpointDocGenerator {
    */
   public createAlertEventAncestry(
     alertAncestors = 3,
-    relatedEventsPerNode: RelatedEventInfo[] = [{ category: EventCategory.Random, count: 5 }],
+    relatedEventsPerNode: RelatedEventInfo[] = [
+      { category: RelatedEventCategory.Random, count: 5 },
+    ],
     pctWithRelated = 30,
     pctWithTerminated = 100
   ): Event[] {
@@ -617,7 +664,9 @@ export class EndpointDocGenerator {
     root: Event,
     generations = 2,
     maxChildrenPerNode = 2,
-    relatedEventsPerNode: RelatedEventInfo[] = [{ category: EventCategory.Random, count: 3 }],
+    relatedEventsPerNode: RelatedEventInfo[] = [
+      { category: RelatedEventCategory.Random, count: 3 },
+    ],
     percentNodesWithRelated = 100,
     percentChildrenTerminated = 100,
     alwaysGenMaxChildrenPerNode = false
@@ -688,14 +737,14 @@ export class EndpointDocGenerator {
    */
   public *relatedEventsGenerator(
     node: Event,
-    relatedEvents: RelatedEventInfo[] = [{ category: EventCategory.Random, count: 10 }],
+    relatedEvents: RelatedEventInfo[] = [{ category: RelatedEventCategory.Random, count: 10 }],
     processDuration: number = 6 * 3600
   ) {
     for (const event of relatedEvents) {
       let eventInfo: EventInfo;
 
       for (let i = 0; i < event.count; i++) {
-        if (event.category === EventCategory.Random) {
+        if (event.category === RelatedEventCategory.Random) {
           eventInfo = this.randomChoice(Object.values(OTHER_EVENT_CATEGORIES));
         } else {
           eventInfo = OTHER_EVENT_CATEGORIES[event.category];

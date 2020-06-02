@@ -395,6 +395,7 @@ export interface LegacyEndpointEvent {
   event?: {
     action?: string;
     type?: string;
+    category?: string | string[];
   };
 }
 

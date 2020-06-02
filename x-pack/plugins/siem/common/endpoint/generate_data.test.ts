@@ -8,7 +8,7 @@ import {
   Event,
   Tree,
   TreeNode,
-  EventCategory,
+  RelatedEventCategory,
   ECSCategory,
 } from './generate_data';
 
@@ -114,9 +114,9 @@ describe('data generator', () => {
         percentTerminated: 100,
         percentWithRelated: 100,
         relatedEvents: [
-          { category: EventCategory.Driver, count: 1 },
-          { category: EventCategory.File, count: 2 },
-          { category: EventCategory.Network, count: 1 },
+          { category: RelatedEventCategory.Driver, count: 1 },
+          { category: RelatedEventCategory.File, count: 2 },
+          { category: RelatedEventCategory.Network, count: 1 },
         ],
       });
     });

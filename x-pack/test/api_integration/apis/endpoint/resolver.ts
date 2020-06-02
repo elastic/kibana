@@ -14,6 +14,7 @@ import {
   ResolverChildren,
   ResolverTree,
   LegacyEndpointEvent,
+  ResolverNodeStats,
 } from '../../../../plugins/siem/common/endpoint/types';
 import { parentEntityId } from '../../../../plugins/siem/common/endpoint/models/event';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -21,7 +22,9 @@ import {
   Event,
   Tree,
   TreeNode,
-  EventCategory,
+  RelatedEventCategory,
+  RelatedEventInfo,
+  categoryMapping,
 } from '../../../../plugins/siem/common/endpoint/generate_data';
 import { Options, GeneratedTrees } from '../../services/resolver';
 
@@ -142,16 +145,60 @@ const compareArrays = (
   });
 };
 
+/**
+ * Verifies that the stats received from ES for a node reflect the categories of events that the generator created.
+ *
+ * @param relatedEvents the related events received for a particular node
+ * @param categories the related event info used when generating the resolver tree
+ */
+const verifyStats = (stats: ResolverNodeStats | undefined, categories: RelatedEventInfo[]) => {
+  expect(stats).to.not.be(undefined);
+  let totalExpEvents = 0;
+  for (const cat of categories) {
+    const ecsCategories = categoryMapping[cat.category];
+    if (Array.isArray(ecsCategories)) {
+      // if there are multiple ecs categories used to define a related event, the count for all of them should be the same
+      // and they should equal what is defined in the categories used to generate the related events
+      for (const ecsCat of ecsCategories) {
+        expect(stats?.events.categories[ecsCat]).to.be(cat.count);
+      }
+    } else {
+      expect(stats?.events.categories[ecsCategories]).to.be(cat.count);
+    }
+
+    totalExpEvents += cat.count;
+  }
+  expect(stats?.events.total).to.be(totalExpEvents);
+};
+
+/**
+ * A helper function for verifying the stats information an array of nodes.
+ *
+ * @param nodes an array of lifecycle nodes that should have a stats field defined
+ * @param categories the related event info used when generating the resolver tree
+ */
+const verifyLifecycleStats = (nodes: LifecycleNode[], categories: RelatedEventInfo[]) => {
+  for (const node of nodes) {
+    verifyStats(node.stats, categories);
+  }
+};
+
 export default function resolverAPIIntegrationTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const resolver = getService('resolverGenerator');
 
+  const relatedEventsToGen = [
+    { category: RelatedEventCategory.Driver, count: 2 },
+    { category: RelatedEventCategory.File, count: 1 },
+    { category: RelatedEventCategory.Registry, count: 1 },
+  ];
+
   let resolverTrees: GeneratedTrees;
   let tree: Tree;
   const treeOptions: Options = {
     ancestors: 5,
-    relatedEvents: [{ category: EventCategory.Random, count: 4 }],
+    relatedEvents: relatedEventsToGen,
     children: 3,
     generations: 2,
     percentTerminated: 100,
@@ -564,14 +611,17 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           expect(body.children.nextChild).to.equal(null);
           expect(body.children.childNodes.length).to.equal(12);
           verifyChildren(body.children.childNodes, tree, 4, 3);
+          verifyLifecycleStats(body.children.childNodes, relatedEventsToGen);
 
           expect(body.ancestry.nextAncestor).to.equal(null);
           verifyAncestry(body.ancestry.ancestors, tree, true);
+          verifyLifecycleStats(body.ancestry.ancestors, relatedEventsToGen);
 
           expect(body.relatedEvents.nextEvent).to.equal(null);
           compareArrays(tree.origin.relatedEvents, body.relatedEvents.events, true);
 
           compareArrays(tree.origin.lifecycle, body.lifecycle, true);
+          verifyStats(body.stats, relatedEventsToGen);
         });
       });
     });
