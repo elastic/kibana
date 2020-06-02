@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import del from 'del';
 import { readdirSync } from 'fs';
 import { resolve as resolvePath } from 'path';
-
-import del from 'del';
-
-import { log, asyncMap } from './util';
+import { LevelLogger } from '../../lib';
+import { asyncMap } from './util';
 
 /**
  * Delete any file in the `dir` that is not in the expectedPaths
  */
-export async function clean(dir: string, expectedPaths: string[]) {
+export async function clean(dir: string, expectedPaths: string[], logger: LevelLogger) {
   let filenames: string[];
   try {
     filenames = await readdirSync(dir);
@@ -30,7 +29,7 @@ export async function clean(dir: string, expectedPaths: string[]) {
   await asyncMap(filenames, async (filename) => {
     const path = resolvePath(dir, filename);
     if (!expectedPaths.includes(path)) {
-      log(`Deleting unexpected file ${path}`);
+      logger.warn(`Deleting unexpected file ${path}`);
       await del(path, { force: true });
     }
   });

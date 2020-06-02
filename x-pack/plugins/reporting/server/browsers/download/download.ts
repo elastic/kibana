@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { openSync, writeSync, closeSync, mkdirSync } from 'fs';
-import { createHash } from 'crypto';
-import { dirname } from 'path';
-
 import Axios from 'axios';
-
-import { log } from './util';
+import { createHash } from 'crypto';
+import { closeSync, mkdirSync, openSync, writeSync } from 'fs';
+import { dirname } from 'path';
+import { LevelLogger } from '../../lib';
 
 /**
  * Download a url and calculate it's checksum
@@ -18,8 +16,8 @@ import { log } from './util';
  * @param  {String} path
  * @return {Promise<String>} checksum of the downloaded file
  */
-export async function download(url: string, path: string) {
-  log(`Downloading ${url}`);
+export async function download(url: string, path: string, logger: LevelLogger) {
+  logger.info(`Downloading ${url} to ${path}`);
 
   const hash = createHash('md5');
 
@@ -39,7 +37,12 @@ export async function download(url: string, path: string) {
     });
 
     await new Promise((resolve, reject) => {
-      resp.data.on('error', reject).on('end', resolve);
+      resp.data
+        .on('error', (err: Error) => {
+          logger.error(err);
+          reject(err);
+        })
+        .on('end', resolve);
     });
   } finally {
     closeSync(handle);

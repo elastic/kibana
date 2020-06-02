@@ -26,7 +26,7 @@ export async function createBrowserDriverFactory(
     logger.warning(`Enabling the Chromium sandbox provides an additional layer of protection.`);
   }
   if (browserAutoDownload) {
-    await ensureBrowserDownloaded(browserType);
+    await ensureBrowserDownloaded(browserType, logger);
   }
 
   try {

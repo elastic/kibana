@@ -5,7 +5,21 @@
  */
 
 import { ensureAllBrowsersDownloaded } from '../plugins/reporting/server/browsers';
+import { LevelLogger } from '../plugins/reporting/server/lib';
 
 export const prepareTask = async () => {
-  await ensureAllBrowsersDownloaded();
+  // eslint-disable-next-line no-console
+  const consoleLogger = (tag: string) => (message: unknown) => console.log(tag, message);
+  const innerLogger = {
+    get: () => innerLogger,
+    debug: consoleLogger('debug'),
+    info: consoleLogger('info'),
+    warn: consoleLogger('warn'),
+    trace: consoleLogger('trace'),
+    error: consoleLogger('error'),
+    fatal: consoleLogger('fatal'),
+    log: consoleLogger('log'),
+  };
+  const levelLogger = new LevelLogger(innerLogger);
+  await ensureAllBrowsersDownloaded(levelLogger);
 };

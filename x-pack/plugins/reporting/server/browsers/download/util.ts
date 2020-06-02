@@ -7,17 +7,6 @@
 import { Readable } from 'stream';
 
 /**
- * Log a message if the DEBUG environment variable is set
- */
-export function log(...args: any[]) {
-  if (process.env.DEBUG) {
-    // allow console log since this is off by default and only for debugging
-    // eslint-disable-next-line no-console
-    console.log(...args);
-  }
-}
-
-/**
  * Iterate an array asynchronously and in parallel
  */
 export function asyncMap<T, T2>(array: T[], asyncFn: (x: T) => T2): Promise<T2[]> {
