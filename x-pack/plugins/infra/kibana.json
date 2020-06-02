@@ -10,7 +10,7 @@
     "data",
     "dataEnhanced",
     "visTypeTimeseries",
-    "alerting",
+    "alerts",
     "triggers_actions_ui"
   ],
   "server": true,
