@@ -68,6 +68,8 @@ beforeEach(async () => {
   const mockGetElasticsearch = jest.fn();
   mockGetElasticsearch.mockImplementation(() => Promise.resolve(mockElasticsearch));
   mockReporting.getElasticsearchService = mockGetElasticsearch;
+  // @ts-ignore over-riding config method
+  mockReporting.config = mockReportingConfig;
 
   (generatePngObservableFactory as jest.Mock).mockReturnValue(jest.fn());
 });

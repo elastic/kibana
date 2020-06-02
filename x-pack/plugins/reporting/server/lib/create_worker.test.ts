@@ -42,6 +42,8 @@ describe('Create Worker', () => {
     mockConfig = { get: configGetStub, kbnConfig: { get: configGetStub } };
     mockReporting = await createMockReportingCore(mockConfig);
     mockReporting.getExportTypesRegistry = () => getMockExportTypesRegistry();
+    // @ts-ignore over-riding config manually
+    mockReporting.config = mockConfig;
     client = new ClientMock();
     queue = new Esqueue('reporting-queue', { client });
     executeJobFactoryStub.reset();

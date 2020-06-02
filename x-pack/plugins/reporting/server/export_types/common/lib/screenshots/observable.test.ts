@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../../../server/browsers/chromium/puppeteer', () => ({
+jest.mock('../../../../../server/browsers/chromium/puppeteer', () => ({
   puppeteerLaunch: () => ({
     // Fixme needs event emitters
     newPage: () => ({
