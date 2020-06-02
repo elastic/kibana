@@ -18,6 +18,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import apmIndexPattern from './tutorial/index_pattern.json';
 import { PluginInitializerContext } from '../../../core/server';
 import { APMOSSPlugin } from './plugin';
 
@@ -41,3 +42,17 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export type APMOSSConfig = TypeOf<typeof config.schema>;
 
 export { APMOSSPluginSetup } from './plugin';
+
+export { apmIndexPattern };
+
+export {
+  createNodeAgentInstructions,
+  createDjangoAgentInstructions,
+  createFlaskAgentInstructions,
+  createRailsAgentInstructions,
+  createRackAgentInstructions,
+  createJsAgentInstructions,
+  createGoAgentInstructions,
+  createJavaAgentInstructions,
+  createDotNetAgentInstructions,
+} from './tutorial/instructions/apm_agent_instructions';

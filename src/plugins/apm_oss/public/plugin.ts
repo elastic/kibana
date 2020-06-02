@@ -17,28 +17,17 @@
  * under the License.
  */
 
-import { of } from 'rxjs';
-import { APMOSSConfig } from '.';
-import { APMOSSPluginSetup } from './plugin';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { ApmOssPluginSetup, ApmOssPluginStart } from './types';
 
-const apmStar = 'apm-*';
+export class ApmOssPlugin implements Plugin<ApmOssPluginSetup, ApmOssPluginStart> {
+  public setup(core: CoreSetup): ApmOssPluginSetup {
+    return {};
+  }
 
-const defaultConfig = {
-  enabled: true,
-  errorIndices: apmStar,
-  indexPattern: apmStar,
-  metricsIndices: apmStar,
-  onboardingIndices: apmStar,
-  sourcemapIndices: apmStar,
-  spanIndices: apmStar,
-  transactionIndices: apmStar,
-};
+  public start(core: CoreStart): ApmOssPluginStart {
+    return {};
+  }
 
-export const apmOSSPluginSetupMock = {
-  create(config: Partial<APMOSSConfig> = {}): APMOSSPluginSetup {
-    return {
-      config$: of({ ...defaultConfig, ...config }),
-      getRegisteredTutorialProvider: jest.fn(),
-    };
-  },
-};
+  public stop() {}
+}
