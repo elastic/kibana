@@ -24,6 +24,9 @@ export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
 export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
 
+export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
+  '[data-test-subj="importQueryFromSavedTimeline"]';
+
 export const INVESTIGATION_NOTES_TEXTAREA =
   '[data-test-subj="detectionEngineStepAboutRuleNote"] textarea';
 

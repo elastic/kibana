@@ -15,7 +15,7 @@ import {
   formatQuery,
   getLanguageBooleanOperator,
 } from './build_exceptions_query';
-import { List } from '../routes/schemas/types/lists_default_array';
+import { List } from '../../../../common/detection_engine/schemas/types/lists_default_array';
 
 describe('build_exceptions_query', () => {
   describe('getLanguageBooleanOperator', () => {
