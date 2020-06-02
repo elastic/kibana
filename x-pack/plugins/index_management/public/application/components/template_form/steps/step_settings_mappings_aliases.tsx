@@ -31,7 +31,7 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
   setDataGetter,
   onStepValidityChange,
 }) => {
-  const { _kbnMeta, ...rest } = template;
+  const { name, _kbnMeta, ...rest } = template;
   const [isCreateComponentFromTemplateVisible, setIsCreateComponentFromTemplateVisible] = useState(
     false
   );

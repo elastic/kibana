@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyout,
@@ -21,20 +21,42 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 
+import { serializers } from '../../../../shared_imports';
+import { serializeV2Template } from '../../../../../common/lib/template_serialization';
+import { simulateIndexTemplate } from '../../../services';
+
+const { stripEmptyFields } = serializers;
+
 interface Props {
   onClose(): void;
   template: { [key: string]: any };
 }
 
 export const SimulateTemplate = ({ onClose, template }: Props) => {
-  const json = JSON.stringify(template, null, 2);
   const [heightCodeBlock, setHeightCodeBlock] = useState(0);
+  const [templatePreview, setTemplatePreview] = useState('{}');
+  const [count, setCount] = useState(1);
+  const refCount = useRef(0);
 
   useEffect(() => {
     setHeightCodeBlock(
       document.getElementsByClassName('euiFlyoutBody__overflow')[0].clientHeight - 96
     );
   }, []);
+
+  const updatePreview = useCallback(async () => {
+    if (count > refCount.current) {
+      refCount.current = count;
+      const { data, error } = await simulateIndexTemplate(
+        serializeV2Template(stripEmptyFields(template) as any)
+      );
+      setTemplatePreview(JSON.stringify(data ?? error, null, 2));
+    }
+  }, [count, template]);
+
+  useEffect(() => {
+    updatePreview();
+  }, [updatePreview]);
 
   return (
     <EuiFlyout
@@ -63,7 +85,7 @@ export const SimulateTemplate = ({ onClose, template }: Props) => {
 
       <EuiFlyoutBody data-test-subj="content">
         <EuiCodeBlock style={{ minHeight: `${heightCodeBlock}px` }} lang="json">
-          {json}
+          {templatePreview}
         </EuiCodeBlock>
       </EuiFlyoutBody>
 
@@ -86,7 +108,7 @@ export const SimulateTemplate = ({ onClose, template }: Props) => {
           <EuiFlexItem grow={false}>
             <EuiButton
               iconType="refresh"
-              onClick={() => alert('simulating...')}
+              onClick={() => setCount((prev) => ++prev)}
               data-test-subj="updateSimulationButton"
               fill
             >

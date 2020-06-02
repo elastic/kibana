@@ -275,3 +275,11 @@ export async function updateTemplate(template: TemplateDeserialized) {
 
   return result;
 }
+
+export function simulateIndexTemplate(template: { [key: string]: any }) {
+  return sendRequest({
+    path: `${API_BASE_PATH}/simulate-template`,
+    method: 'post',
+    body: JSON.stringify(template),
+  });
+}
