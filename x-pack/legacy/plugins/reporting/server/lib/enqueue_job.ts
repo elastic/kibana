@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
-import {
-  ConditionalHeaders,
-  EnqueueJobFn,
-  ESQueueCreateJobFn,
-  Job,
-  Logger,
-  RequestFacade,
-} from '../../types';
+import { EventEmitter } from 'events';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { AuthenticatedUser } from '../../../../../plugins/security/server';
+import { ESQueueCreateJobFn } from '../../server/types';
 import { ReportingCore } from '../core';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
+import { LevelLogger } from './level_logger';
 
 interface ConfirmedJob {
   id: string;
@@ -24,23 +20,40 @@ interface ConfirmedJob {
   _primary_term: number;
 }
 
-export function enqueueJobFactory(reporting: ReportingCore, parentLogger: Logger): EnqueueJobFn {
+export type Job = EventEmitter & {
+  id: string;
+  toJSON: () => {
+    id: string;
+  };
+};
+
+export type EnqueueJobFn = <JobParamsType>(
+  exportTypeId: string,
+  jobParams: JobParamsType,
+  user: AuthenticatedUser | null,
+  context: RequestHandlerContext,
+  request: KibanaRequest
+) => Promise<Job>;
+
+export function enqueueJobFactory(
+  reporting: ReportingCore,
+  parentLogger: LevelLogger
+): EnqueueJobFn {
   const config = reporting.getConfig();
   const queueTimeout = config.get('queue', 'timeout');
   const browserType = config.get('capture', 'browser', 'type');
   const maxAttempts = config.get('capture', 'maxAttempts');
-
   const logger = parentLogger.clone(['queue-job']);
 
   return async function enqueueJob<JobParamsType>(
     exportTypeId: string,
     jobParams: JobParamsType,
-    user: string,
-    headers: ConditionalHeaders['headers'],
-    request: RequestFacade
+    user: AuthenticatedUser | null,
+    context: RequestHandlerContext,
+    request: KibanaRequest
   ): Promise<Job> {
     type CreateJobFn = ESQueueCreateJobFn<JobParamsType>;
-
+    const username = user ? user.username : false;
     const esqueue = await reporting.getEsqueue();
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
 
@@ -49,11 +62,11 @@ export function enqueueJobFactory(reporting: ReportingCore, parentLogger: Logger
     }
 
     const createJob = exportType.createJobFactory(reporting, logger) as CreateJobFn;
-    const payload = await createJob(jobParams, headers, request);
+    const payload = await createJob(jobParams, context, request);
 
     const options = {
       timeout: queueTimeout,
-      created_by: get(user, 'username', false),
+      created_by: username,
       browser_type: browserType,
       max_attempts: maxAttempts,
     };

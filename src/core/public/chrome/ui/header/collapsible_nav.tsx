@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import './collapsible_nav.scss';
 import {
   EuiCollapsibleNav,
   EuiCollapsibleNavGroup,
@@ -30,11 +31,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
 import React, { useRef } from 'react';
+import { useObservable } from 'react-use';
+import * as Rx from 'rxjs';
+import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
 import { AppCategory } from '../../../../types';
+import { InternalApplicationStart } from '../../../application/types';
+import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
-import { NavLink, RecentNavLink } from './nav_link';
+import { createEuiListItem, createRecentNavLink } from './nav_link';
 
-function getAllCategories(allCategorizedLinks: Record<string, NavLink[]>) {
+function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
 
   for (const [key, value] of Object.entries(allCategorizedLinks)) {
@@ -45,12 +51,12 @@ function getAllCategories(allCategorizedLinks: Record<string, NavLink[]>) {
 }
 
 function getOrderedCategories(
-  mainCategories: Record<string, NavLink[]>,
+  mainCategories: Record<string, ChromeNavLink[]>,
   categoryDictionary: ReturnType<typeof getAllCategories>
 ) {
   return sortBy(
     Object.keys(mainCategories),
-    categoryName => categoryDictionary[categoryName]?.order
+    (categoryName) => categoryDictionary[categoryName]?.order
   );
 }
 
@@ -69,33 +75,53 @@ function setIsCategoryOpen(id: string, isOpen: boolean, storage: Storage) {
 }
 
 interface Props {
+  appId$: InternalApplicationStart['currentAppId$'];
+  basePath: HttpStart['basePath'];
+  id: string;
   isLocked: boolean;
   isOpen: boolean;
-  navLinks: NavLink[];
-  recentNavLinks: RecentNavLink[];
   homeHref: string;
-  id: string;
+  legacyMode: boolean;
+  navLinks$: Rx.Observable<ChromeNavLink[]>;
+  recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   storage?: Storage;
   onIsLockedUpdate: OnIsLockedUpdate;
-  onIsOpenUpdate: (isOpen?: boolean) => void;
+  closeNav: () => void;
+  navigateToApp: InternalApplicationStart['navigateToApp'];
 }
 
 export function CollapsibleNav({
+  basePath,
+  id,
   isLocked,
   isOpen,
-  navLinks,
-  recentNavLinks,
-  onIsLockedUpdate,
-  onIsOpenUpdate,
   homeHref,
-  id,
+  legacyMode,
   storage = window.localStorage,
+  onIsLockedUpdate,
+  closeNav,
+  navigateToApp,
+  ...observables
 }: Props) {
+  const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
+  const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
+  const appId = useObservable(observables.appId$, '');
   const lockRef = useRef<HTMLButtonElement>(null);
-  const groupedNavLinks = groupBy(navLinks, link => link?.category?.id);
+  const groupedNavLinks = groupBy(navLinks, (link) => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
   const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
+  const readyForEUI = (link: ChromeNavLink, needsIcon: boolean = false) => {
+    return createEuiListItem({
+      link,
+      legacyMode,
+      appId,
+      dataTestSubj: 'collapsibleNavAppLink',
+      navigateToApp,
+      onClick: closeNav,
+      ...(needsIcon && { basePath }),
+    });
+  };
 
   return (
     <EuiCollapsibleNav
@@ -106,7 +132,7 @@ export function CollapsibleNav({
       })}
       isOpen={isOpen}
       isDocked={isLocked}
-      onClose={onIsOpenUpdate}
+      onClose={closeNav}
     >
       {/* Pinned items */}
       <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
@@ -124,7 +150,19 @@ export function CollapsibleNav({
                 label: 'Home',
                 iconType: 'home',
                 href: homeHref,
-                onClick: () => onIsOpenUpdate(false),
+                onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+                  closeNav();
+                  if (
+                    event.isDefaultPrevented() ||
+                    event.altKey ||
+                    event.metaKey ||
+                    event.ctrlKey
+                  ) {
+                    return;
+                  }
+                  event.preventDefault();
+                  navigateToApp('home');
+                },
               },
             ]}
             maxWidth="none"
@@ -135,60 +173,55 @@ export function CollapsibleNav({
         </EuiCollapsibleNavGroup>
       </EuiFlexItem>
 
+      {/* Recently viewed */}
+      <EuiCollapsibleNavGroup
+        key="recentlyViewed"
+        background="light"
+        title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
+        isCollapsible={true}
+        initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
+        onToggle={(isCategoryOpen) => setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)}
+        data-test-subj="collapsibleNavGroup-recentlyViewed"
+      >
+        {recentlyAccessed.length > 0 ? (
+          <EuiListGroup
+            aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
+              defaultMessage: 'Recently viewed links',
+            })}
+            listItems={recentlyAccessed.map((link) => {
+              // TODO #64541
+              // Can remove icon from recent links completely
+              const { iconType, ...hydratedLink } = createRecentNavLink(link, navLinks, basePath);
+
+              return {
+                ...hydratedLink,
+                'data-test-subj': 'collapsibleNavAppLink--recent',
+                onClick: closeNav,
+              };
+            })}
+            maxWidth="none"
+            color="subdued"
+            gutterSize="none"
+            size="s"
+            className="kbnCollapsibleNav__recentsListGroup"
+          />
+        ) : (
+          <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
+            <p>
+              {i18n.translate('core.ui.EmptyRecentlyViewed', {
+                defaultMessage: 'No recently viewed items',
+              })}
+            </p>
+          </EuiText>
+        )}
+      </EuiCollapsibleNavGroup>
+
       <EuiHorizontalRule margin="none" />
 
       <EuiFlexItem className="eui-yScroll">
-        {/* Recently viewed */}
-        <EuiCollapsibleNavGroup
-          key="recentlyViewed"
-          title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
-          isCollapsible={true}
-          initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
-          onToggle={isCategoryOpen => setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)}
-        >
-          {recentNavLinks.length > 0 ? (
-            <EuiListGroup
-              aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
-                defaultMessage: 'Recently viewed links',
-              })}
-              listItems={recentNavLinks.map(link => {
-                // TODO #64541
-                // Can remove icon from recent links completely
-                const { iconType, ...linkWithoutIcon } = link;
-                return linkWithoutIcon;
-              })}
-              maxWidth="none"
-              color="subdued"
-              gutterSize="none"
-              size="s"
-            />
-          ) : (
-            <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-              <p>
-                {i18n.translate('core.ui.EmptyRecentlyViewed', {
-                  defaultMessage: 'No recently viewed items',
-                })}
-              </p>
-            </EuiText>
-          )}
-        </EuiCollapsibleNavGroup>
-
         {/* Kibana, Observability, Security, and Management sections */}
-        {orderedCategories.map((categoryName, i) => {
+        {orderedCategories.map((categoryName) => {
           const category = categoryDictionary[categoryName]!;
-          const links = allCategorizedLinks[categoryName].map(
-            ({ label, href, isActive, isDisabled, onClick }: NavLink) => ({
-              label,
-              href,
-              isActive,
-              isDisabled,
-              'data-test-subj': 'collapsibleNavAppLink',
-              onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                onIsOpenUpdate(false);
-                onClick(e);
-              },
-            })
-          );
 
           return (
             <EuiCollapsibleNavGroup
@@ -197,7 +230,7 @@ export function CollapsibleNav({
               title={category.label}
               isCollapsible={true}
               initialIsOpen={getIsCategoryOpen(category.id, storage)}
-              onToggle={isCategoryOpen => setIsCategoryOpen(category.id, isCategoryOpen, storage)}
+              onToggle={(isCategoryOpen) => setIsCategoryOpen(category.id, isCategoryOpen, storage)}
               data-test-subj={`collapsibleNavGroup-${category.id}`}
             >
               <EuiListGroup
@@ -205,7 +238,7 @@ export function CollapsibleNav({
                   defaultMessage: 'Primary navigation links, {category}',
                   values: { category: category.label },
                 })}
-                listItems={links}
+                listItems={allCategorizedLinks[categoryName].map((link) => readyForEUI(link))}
                 maxWidth="none"
                 color="subdued"
                 gutterSize="none"
@@ -216,23 +249,10 @@ export function CollapsibleNav({
         })}
 
         {/* Things with no category (largely for custom plugins) */}
-        {unknowns.map(({ label, href, icon, isActive, isDisabled, onClick }, i) => (
-          <EuiCollapsibleNavGroup key={i}>
+        {unknowns.map((link, i) => (
+          <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
             <EuiListGroup flush>
-              <EuiListGroupItem
-                color="text"
-                size="s"
-                label={label}
-                href={href}
-                icon={icon}
-                isActive={isActive}
-                isDisabled={isDisabled}
-                data-test-subj="collapsibleNavAppLink"
-                onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                  onIsOpenUpdate(false);
-                  onClick(e);
-                }}
-              />
+              <EuiListGroupItem color="text" size="s" {...readyForEUI(link, true)} />
             </EuiListGroup>
           </EuiCollapsibleNavGroup>
         ))}

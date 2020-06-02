@@ -33,9 +33,7 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    savedSearches: {
-      createLoader: jest.fn(),
-    },
+    savedSearchLoader: {} as any,
   };
   return startContract;
 };

@@ -46,7 +46,7 @@ export const ShareMenu = compose<ComponentProps, {}>(
   withKibana,
   withProps(
     ({ workpad, pageCount, kibana }: Props & WithKibanaProps): ComponentProps => ({
-      getExportUrl: type => {
+      getExportUrl: (type) => {
         if (type === 'pdf') {
           const pdfUrl = getPdfUrl(workpad, { pageCount }, kibana.services.http.basePath);
           return getAbsoluteUrl(pdfUrl);
@@ -54,7 +54,7 @@ export const ShareMenu = compose<ComponentProps, {}>(
 
         throw new Error(strings.getUnknownExportErrorMessage(type));
       },
-      onCopy: type => {
+      onCopy: (type) => {
         switch (type) {
           case 'pdf':
             kibana.services.canvas.notify.info(strings.getCopyPDFMessage());
@@ -66,7 +66,7 @@ export const ShareMenu = compose<ComponentProps, {}>(
             throw new Error(strings.getUnknownExportErrorMessage(type));
         }
       },
-      onExport: type => {
+      onExport: (type) => {
         switch (type) {
           case 'pdf':
             return createPdf(workpad, { pageCount }, kibana.services.http.basePath)

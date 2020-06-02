@@ -34,17 +34,14 @@ import {
   useGetAgents,
   useUrlParams,
   useLink,
+  useBreadcrumbs,
 } from '../../../hooks';
-import { ConnectedLink, AgentReassignConfigFlyout } from '../components';
+import { AgentReassignConfigFlyout } from '../components';
 import { SearchBar } from '../../../components/search_bar';
 import { AgentHealth } from '../components/agent_health';
 import { AgentUnenrollProvider } from '../components/agent_unenroll_provider';
 import { AgentStatusKueryHelper } from '../../../services';
-import {
-  FLEET_AGENT_DETAIL_PATH,
-  AGENT_CONFIG_DETAILS_PATH,
-  AGENT_SAVED_OBJECT_TYPE,
-} from '../../../constants';
+import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
@@ -77,8 +74,8 @@ const statusFilters = [
 
 const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refresh: () => void }>(
   ({ agent, refresh, onReassignClick }) => {
+    const { getHref } = useLink();
     const hasWriteCapabilites = useCapabilities().write;
-    const DETAILS_URI = useLink(FLEET_AGENT_DETAIL_PATH);
     const [isOpen, setIsOpen] = useState(false);
     const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
     const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
@@ -101,7 +98,11 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
       >
         <EuiContextMenuPanel
           items={[
-            <EuiContextMenuItem icon="inspect" href={`${DETAILS_URI}${agent.id}`} key="viewConfig">
+            <EuiContextMenuItem
+              icon="inspect"
+              href={getHref('fleet_agent_details', { agentId: agent.id })}
+              key="viewConfig"
+            >
               <FormattedMessage
                 id="xpack.ingestManager.agentList.viewActionText"
                 defaultMessage="View agent"
@@ -122,7 +123,7 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
             </EuiContextMenuItem>,
 
             <AgentUnenrollProvider>
-              {unenrollAgentsPrompt => (
+              {(unenrollAgentsPrompt) => (
                 <EuiContextMenuItem
                   disabled={!hasWriteCapabilites}
                   icon="cross"
@@ -154,8 +155,11 @@ function safeMetadata(val: any) {
 }
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
+  useBreadcrumbs('fleet_agent_list');
+  const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasWriteCapabilites = useCapabilities().write;
+
   // Agent data states
   const [showInactive, setShowInactive] = useState<boolean>(false);
 
@@ -177,7 +181,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   // Remove a config id from current search
   const removeConfigFilter = (configId: string) => {
-    setSelectedConfigs(selectedConfigs.filter(config => config !== configId));
+    setSelectedConfigs(selectedConfigs.filter((config) => config !== configId));
   };
 
   // Agent enrollment flyout state
@@ -192,7 +196,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       kuery = `(${kuery}) and`;
     }
     kuery = `${kuery} ${AGENT_SAVED_OBJECT_TYPE}.config_id : (${selectedConfigs
-      .map(config => `"${config}"`)
+      .map((config) => `"${config}"`)
       .join(' or ')})`;
   }
 
@@ -202,7 +206,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     }
 
     kuery = selectedStatus
-      .map(status => {
+      .map((status) => {
         switch (status) {
           case 'online':
             return AgentStatusKueryHelper.buildKueryForOnlineAgents();
@@ -241,8 +245,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
   const { isLoading: isAgentConfigsLoading } = agentConfigsRequest;
 
-  const CONFIG_DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
-
   const columns = [
     {
       field: 'local_metadata.host.hostname',
@@ -250,9 +252,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Host',
       }),
       render: (host: string, agent: Agent) => (
-        <ConnectedLink color="primary" path={`${FLEET_AGENT_DETAIL_PATH}${agent.id}`}>
+        <EuiLink href={getHref('fleet_agent_details', { agentId: agent.id })}>
           {safeMetadata(host)}
-        </ConnectedLink>
+        </EuiLink>
       ),
     },
     {
@@ -269,12 +271,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Configuration',
       }),
       render: (configId: string, agent: Agent) => {
-        const configName = agentConfigs.find(p => p.id === configId)?.name;
+        const configName = agentConfigs.find((p) => p.id === configId)?.name;
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
             <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
               <EuiLink
-                href={`${CONFIG_DETAILS_URI}${configId}`}
+                href={getHref('configuration_details', { configId })}
                 style={NO_WRAP_TRUNCATE_STYLE}
                 title={configName || configId}
               >
@@ -374,7 +376,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     />
   );
 
-  const agentToReassign = agentToReassignId && agents.find(a => a.id === agentToReassignId);
+  const agentToReassign = agentToReassignId && agents.find((a) => a.id === agentToReassignId);
 
   return (
     <>
@@ -399,7 +401,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             <EuiFlexItem grow={6}>
               <SearchBar
                 value={search}
-                onChange={newSearch => {
+                onChange={(newSearch) => {
                   setPagination({
                     ...pagination,
                     currentPage: 1,
@@ -439,7 +441,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                         checked={selectedStatus.includes(status) ? 'on' : undefined}
                         onClick={() => {
                           if (selectedStatus.includes(status)) {
-                            setSelectedStatus([...selectedStatus.filter(s => s !== status)]);
+                            setSelectedStatus([...selectedStatus.filter((s) => s !== status)]);
                           } else {
                             setSelectedStatus([...selectedStatus, status]);
                           }

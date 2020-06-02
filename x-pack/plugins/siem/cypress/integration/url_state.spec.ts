@@ -197,10 +197,7 @@ describe('url state', () => {
       'href',
       "#/link-to/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
     );
-    cy.get(HOSTS_NAMES)
-      .first()
-      .invoke('text')
-      .should('eq', 'siem-kibana');
+    cy.get(HOSTS_NAMES).first().invoke('text').should('eq', 'siem-kibana');
 
     openFirstHostDetails();
     clearSearchBar();
@@ -241,7 +238,7 @@ describe('url state', () => {
 
     cy.get(SERVER_SIDE_EVENT_COUNT)
       .invoke('text')
-      .then(strCount => {
+      .then((strCount) => {
         const intCount = +strCount;
         cy.wrap(intCount).should('be.above', 0);
       });
@@ -252,7 +249,7 @@ describe('url state', () => {
     cy.wait(5000);
 
     cy.url({ timeout: 30000 }).should('match', /\w*-\w*-\w*-\w*-\w*/);
-    cy.url().then(url => {
+    cy.url().then((url) => {
       const matched = url.match(/\w*-\w*-\w*-\w*-\w*/);
       const newTimelineId = matched && matched.length > 0 ? matched[0] : 'null';
       expect(matched).to.have.lengthOf(1);
@@ -260,9 +257,7 @@ describe('url state', () => {
       cy.visit('/app/kibana');
       cy.visit(`/app/siem#/overview?timeline\=(id:'${newTimelineId}',isOpen:!t)`);
       cy.contains('a', 'SIEM');
-      cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE)
-        .invoke('text')
-        .should('not.equal', 'Updating');
+      cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).invoke('text').should('not.equal', 'Updating');
       cy.get(TIMELINE_TITLE).should('have.attr', 'value', timelineName);
     });
   });

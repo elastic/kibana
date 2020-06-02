@@ -143,7 +143,7 @@ export const MappingsState = React.memo(({ children, onChange, value }: Props) =
       validate: async () => {
         const configurationFormValidator =
           state.configuration.submitForm !== undefined
-            ? new Promise(async resolve => {
+            ? new Promise(async (resolve) => {
                 const { isValid } = await state.configuration.submitForm!();
                 resolve(isValid);
               })
@@ -151,7 +151,7 @@ export const MappingsState = React.memo(({ children, onChange, value }: Props) =
 
         const templatesFormValidator =
           state.templates.submitForm !== undefined
-            ? new Promise(async resolve => {
+            ? new Promise(async (resolve) => {
                 const { isValid } = await state.templates.submitForm!();
                 resolve(isValid);
               })
@@ -164,7 +164,7 @@ export const MappingsState = React.memo(({ children, onChange, value }: Props) =
         }
 
         return Promise.all(promisesToValidate).then(
-          validationArray => validationArray.every(Boolean) && state.fieldsJsonEditor.isValid
+          (validationArray) => validationArray.every(Boolean) && state.fieldsJsonEditor.isValid
         );
       },
       isValid: state.isValid,

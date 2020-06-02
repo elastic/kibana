@@ -34,7 +34,7 @@ import {
  * expression functions.
  */
 export const functionWrapper = <T extends AnyExpressionFunctionDefinition>(spec: T) => {
-  const defaultArgs = mapValues(spec.args, argSpec => argSpec.default);
+  const defaultArgs = mapValues(spec.args, (argSpec) => argSpec.default);
   return (
     args: T extends ExpressionFunctionDefinition<
       infer Name,

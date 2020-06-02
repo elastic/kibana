@@ -7,6 +7,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { WaffleSortControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_sort_controls';
 import { ToolbarProps } from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WaffleMetricControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/metric_control';
@@ -27,7 +28,7 @@ interface Props extends ToolbarProps {
 export const MetricsAndGroupByToolbarItems = (props: Props) => {
   const metricOptions = useMemo(
     () =>
-      props.metricTypes.map(toMetricOpt).filter(v => v) as Array<{ text: string; value: string }>,
+      props.metricTypes.map(toMetricOpt).filter((v) => v) as Array<{ text: string; value: string }>,
     [props.metricTypes]
   );
 
@@ -58,6 +59,11 @@ export const MetricsAndGroupByToolbarItems = (props: Props) => {
           customOptions={props.customOptions}
         />
       </EuiFlexItem>
+      {props.view === 'map' && (
+        <EuiFlexItem grow={false}>
+          <WaffleSortControls sort={props.sort} onChange={props.changeSort} />
+        </EuiFlexItem>
+      )}
     </>
   );
 };

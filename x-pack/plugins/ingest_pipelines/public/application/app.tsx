@@ -50,7 +50,7 @@ export const App: FunctionComponent = () => {
 
   return (
     <WithPrivileges
-      privileges={APP_CLUSTER_REQUIRED_PRIVILEGES.map(privilege => `cluster.${privilege}`)}
+      privileges={APP_CLUSTER_REQUIRED_PRIVILEGES.map((privilege) => `cluster.${privilege}`)}
     >
       {({ isLoading, hasPrivileges, privilegesMissing }) => {
         if (isLoading) {

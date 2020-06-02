@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Logger } from '../../../../types';
+import { LevelLogger } from '../../../../server/lib';
 import { GenerateCsvParams, SavedSearchGeneratorResult } from '../../types';
 import { createFlattenHit } from './flatten_hit';
 import { createFormatCsvValues } from './format_csv_values';
@@ -14,7 +14,7 @@ import { createHitIterator } from './hit_iterator';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 import { checkIfRowsHaveFormulas } from './check_cells_for_formulas';
 
-export function createGenerateCsv(logger: Logger) {
+export function createGenerateCsv(logger: LevelLogger) {
   const hitIterator = createHitIterator(logger);
 
   return async function generateCsv({

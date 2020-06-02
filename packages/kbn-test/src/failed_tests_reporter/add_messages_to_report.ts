@@ -49,7 +49,7 @@ export async function addMessagesToReport(options: {
   for (const testCase of makeFailedTestCaseIter(report)) {
     const { classname, name } = testCase.$;
     const messageList = messages
-      .filter(u => u.classname === classname && u.name === name)
+      .filter((u) => u.classname === classname && u.name === name)
       .reduce((acc, u) => `${acc}\n  - ${u.message}`, '');
 
     if (!messageList) {
@@ -76,7 +76,7 @@ export async function addMessagesToReport(options: {
   const xml = builder
     .buildObject(report)
     .split('\n')
-    .map(line => (line.trim() === '' ? '' : line))
+    .map((line) => (line.trim() === '' ? '' : line))
     .join('\n');
 
   if (dryRun) {

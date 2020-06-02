@@ -13,7 +13,6 @@ export default {
     '<rootDir>/legacy/server',
     '<rootDir>/legacy/common',
     '<rootDir>/test_utils/jest/integration_tests',
-    '<rootDir>/test_utils/jest/contract_tests',
   ],
   collectCoverageFrom: ['legacy/plugins/**/*.js', 'legacy/common/**/*.js', 'legacy/server/**/*.js'],
   moduleNameMapper: {

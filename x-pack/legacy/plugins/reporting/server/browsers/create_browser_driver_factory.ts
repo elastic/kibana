@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from '../../types';
-import { ReportingConfig } from '../types';
+import { ReportingConfig } from '../';
+import { LevelLogger } from '../lib';
 import { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
 import { ensureBrowserDownloaded } from './download';
 import { chromium } from './index';
@@ -13,7 +13,7 @@ import { installBrowser } from './install';
 
 export async function createBrowserDriverFactory(
   config: ReportingConfig,
-  logger: Logger
+  logger: LevelLogger
 ): Promise<HeadlessChromiumDriverFactory> {
   const captureConfig = config.get('capture');
   const browserConfig = captureConfig.browser.chromium;

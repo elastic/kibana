@@ -70,7 +70,7 @@ describe('spacesManagementApp', () => {
       Object {
         "id": "spaces",
         "mount": [Function],
-        "order": 10,
+        "order": 2,
         "title": "Spaces",
       }
     `);

@@ -126,7 +126,7 @@ export class EmbeddableEnhancedPlugin
       uiActions: this.uiActions!,
     });
 
-    dynamicActions.start().catch(error => {
+    dynamicActions.start().catch((error) => {
       /* eslint-disable */	
       console.log('Failed to start embeddable dynamic actions', embeddable);	
       console.error(error);	
@@ -134,7 +134,7 @@ export class EmbeddableEnhancedPlugin
     });
 
     const stop = () => {
-      dynamicActions.stop().catch(error => {
+      dynamicActions.stop().catch((error) => {
         /* eslint-disable */	
         console.log('Failed to stop embeddable dynamic actions', embeddable);	
         console.error(error);	

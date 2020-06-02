@@ -33,7 +33,7 @@ export function defineInvalidateApiKeysRoutes({ router, clusterClient }: RouteDe
         // Invalidate all API keys in parallel.
         const invalidationResult = (
           await Promise.all(
-            request.body.apiKeys.map(async key => {
+            request.body.apiKeys.map(async (key) => {
               try {
                 const body: { id: string; owner?: boolean } = { id: key.id };
                 if (!request.body.isAdmin) {

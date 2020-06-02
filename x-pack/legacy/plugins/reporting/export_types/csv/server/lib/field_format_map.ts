@@ -9,7 +9,15 @@ import {
   FieldFormatConfig,
   IFieldFormatsRegistry,
 } from '../../../../../../../../src/plugins/data/server';
-import { IndexPatternSavedObject } from '../../../../types';
+
+interface IndexPatternSavedObject {
+  attributes: {
+    fieldFormatMap: string;
+  };
+  id: string;
+  type: string;
+  version: string;
+}
 
 /**
  *  Create a map of FieldFormat instances for index pattern fields
@@ -27,7 +35,7 @@ export function fieldFormatMapFactory(
   // Add FieldFormat instances for fields with custom formatters
   if (_.has(indexPatternSavedObject, 'attributes.fieldFormatMap')) {
     const fieldFormatMap = JSON.parse(indexPatternSavedObject.attributes.fieldFormatMap);
-    Object.keys(fieldFormatMap).forEach(fieldName => {
+    Object.keys(fieldFormatMap).forEach((fieldName) => {
       const formatConfig: FieldFormatConfig = fieldFormatMap[fieldName];
 
       if (!_.isEmpty(formatConfig)) {

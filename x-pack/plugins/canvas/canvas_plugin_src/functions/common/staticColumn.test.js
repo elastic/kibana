@@ -16,8 +16,8 @@ describe('staticColumn', () => {
 
     expect(result.type).toBe('datatable');
     expect(result.columns).toEqual([...testTable.columns, { name: 'foo', type: 'string' }]);
-    expect(result.rows.every(row => typeof row.foo === 'string')).toBe(true);
-    expect(result.rows.every(row => row.foo === 'bar')).toBe(true);
+    expect(result.rows.every((row) => typeof row.foo === 'string')).toBe(true);
+    expect(result.rows.every((row) => row.foo === 'bar')).toBe(true);
   });
 
   it('overwrites an existing column if provided an existing column name', () => {
@@ -25,8 +25,8 @@ describe('staticColumn', () => {
 
     expect(result.type).toBe('datatable');
     expect(result.columns).toEqual(testTable.columns);
-    expect(result.rows.every(row => typeof row.name === 'string')).toBe(true);
-    expect(result.rows.every(row => row.name === 'John')).toBe(true);
+    expect(result.rows.every((row) => typeof row.name === 'string')).toBe(true);
+    expect(result.rows.every((row) => row.name === 'John')).toBe(true);
   });
 
   it('adds a column with null values', () => {
@@ -34,7 +34,7 @@ describe('staticColumn', () => {
 
     expect(result.type).toBe('datatable');
     expect(result.columns).toEqual([...testTable.columns, { name: 'empty', type: 'null' }]);
-    expect(result.rows.every(row => row.empty === null)).toBe(true);
+    expect(result.rows.every((row) => row.empty === null)).toBe(true);
   });
 
   it('adds a column to empty tables', () => {

@@ -9,14 +9,15 @@ import thunk from 'redux-thunk';
 import { defaultTableState } from './reducers/table_state';
 
 import { getReducer } from './reducers/';
+import { syncUrlHashQueryParam } from './middlewares';
 
 export function indexManagementStore(services) {
   const toggleNameToVisibleMap = {};
-  services.extensionsService.toggles.forEach(toggleExtension => {
+  services.extensionsService.toggles.forEach((toggleExtension) => {
     toggleNameToVisibleMap[toggleExtension.name] = false;
   });
   const initialState = { tableState: { ...defaultTableState, toggleNameToVisibleMap } };
-  const enhancers = [applyMiddleware(thunk)];
+  const enhancers = [applyMiddleware(thunk, syncUrlHashQueryParam)];
 
   window.__REDUX_DEVTOOLS_EXTENSION__ && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
   return createStore(getReducer(services), initialState, compose(...enhancers));

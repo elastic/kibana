@@ -15,7 +15,7 @@ import { withElementsLoadedTelemetry } from './workpad_telemetry';
 
 export { WORKPAD_CONTAINER_ID } from './workpad_app';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const appReady = getAppReady(state);
 
   return {
@@ -25,7 +25,7 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   deselectElement(ev) {
     ev && ev.stopPropagation();
     dispatch(selectToplevelNodes([]));

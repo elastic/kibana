@@ -98,7 +98,7 @@ const loginViaConfig = () => {
   );
 
   // read the login details from `kibana.dev.yaml`
-  cy.readFile(KIBANA_DEV_YML_PATH).then(kibanaDevYml => {
+  cy.readFile(KIBANA_DEV_YML_PATH).then((kibanaDevYml) => {
     const config = yaml.safeLoad(kibanaDevYml);
 
     // programmatically authenticate without interacting with the Kibana login page

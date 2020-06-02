@@ -29,7 +29,7 @@ interface SnapshotRequest {
   timerange: InfraTimerangeInput;
 }
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const fetchSnapshot = async (
@@ -61,7 +61,7 @@ export default function({ getService }: FtrProviderContext) {
           nodeType: 'container' as InfraNodeType,
           groupBy: [],
         });
-        return resp.then(data => {
+        return resp.then((data) => {
           if (!resp) {
             return;
           }
@@ -107,7 +107,7 @@ export default function({ getService }: FtrProviderContext) {
           nodeType: 'pod' as InfraNodeType,
           groupBy: [],
         });
-        return resp.then(data => {
+        return resp.then((data) => {
           const snapshot = data;
           expect(snapshot).to.have.property('nodes');
           if (snapshot) {
@@ -139,7 +139,7 @@ export default function({ getService }: FtrProviderContext) {
           nodeType: 'container' as InfraNodeType,
           groupBy: [],
         });
-        return resp.then(data => {
+        return resp.then((data) => {
           const snapshot = data;
           expect(snapshot).to.have.property('nodes');
           if (snapshot) {
@@ -178,7 +178,7 @@ export default function({ getService }: FtrProviderContext) {
           nodeType: 'host' as InfraNodeType,
           groupBy: [],
         });
-        return resp.then(data => {
+        return resp.then((data) => {
           const snapshot = data;
           expect(snapshot).to.have.property('nodes');
           if (snapshot) {
@@ -250,7 +250,7 @@ export default function({ getService }: FtrProviderContext) {
           nodeType: 'host' as InfraNodeType,
           groupBy: [{ field: 'cloud.availability_zone' }],
         });
-        return resp.then(data => {
+        return resp.then((data) => {
           const snapshot = data;
           expect(snapshot).to.have.property('nodes');
           if (snapshot) {
@@ -278,7 +278,7 @@ export default function({ getService }: FtrProviderContext) {
           groupBy: [{ field: 'cloud.provider' }, { field: 'cloud.availability_zone' }],
         });
 
-        return resp.then(data => {
+        return resp.then((data) => {
           const snapshot = data;
           expect(snapshot).to.have.property('nodes');
           if (snapshot) {
@@ -306,7 +306,7 @@ export default function({ getService }: FtrProviderContext) {
           nodeType: 'host' as InfraNodeType,
           groupBy: [{ field: 'service.type' }],
         });
-        return resp.then(data => {
+        return resp.then((data) => {
           const snapshot = data;
           expect(snapshot).to.have.property('nodes');
           if (snapshot) {

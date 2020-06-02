@@ -35,7 +35,7 @@ import textHtml from './text.html';
 import subTextHtml from './sub_text.html';
 import subduedHtml from './subdued_type.html';
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Title"

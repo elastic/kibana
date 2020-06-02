@@ -64,5 +64,5 @@ export const isRuleActionsFindType = (
 export const isRuleActionsFindTypes = (
   obj: unknown[] | undefined
 ): obj is Array<SavedObjectsFindResponse<IRuleActionsAttributesSavedObjectAttributes>> => {
-  return obj ? obj.every(ruleStatus => isRuleActionsFindType(ruleStatus)) : false;
+  return obj ? obj.every((ruleStatus) => isRuleActionsFindType(ruleStatus)) : false;
 };

@@ -42,7 +42,7 @@ export async function fetchSoon(
  * @return Promise<any> A promise that resolves with the result of executing the function
  */
 function delay(fn: Function, ms: number) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => resolve(fn()), ms);
   });
 }

@@ -26,21 +26,21 @@ import Test from 'mocha/lib/test';
 import { filterSuitesByTags } from './filter_suites_by_tags';
 
 function setup({ include, exclude }) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const history = [];
 
     const mocha = new Mocha({
       reporter: class {
         constructor(runner) {
-          runner.on('hook', hook => {
+          runner.on('hook', (hook) => {
             history.push(`hook:  ${hook.fullTitle()}`);
           });
 
-          runner.on('pass', test => {
+          runner.on('pass', (test) => {
             history.push(`test:  ${test.fullTitle()}`);
           });
 
-          runner.on('suite', suite => {
+          runner.on('suite', (suite) => {
             history.push(`suite: ${suite.fullTitle()}`);
           });
         }

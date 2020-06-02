@@ -29,7 +29,7 @@ describe('useFetcher', () => {
         data: undefined,
         error: undefined,
         refetch: expect.any(Function),
-        status: 'loading'
+        status: 'loading',
       });
     });
 
@@ -40,7 +40,7 @@ describe('useFetcher', () => {
         data: undefined,
         error: undefined,
         refetch: expect.any(Function),
-        status: 'loading'
+        status: 'loading',
       });
     });
 
@@ -52,7 +52,7 @@ describe('useFetcher', () => {
         data: 'response from hook',
         error: undefined,
         refetch: expect.any(Function),
-        status: 'success'
+        status: 'success',
       });
     });
   });
@@ -73,7 +73,7 @@ describe('useFetcher', () => {
         data: undefined,
         error: undefined,
         refetch: expect.any(Function),
-        status: 'loading'
+        status: 'loading',
       });
     });
 
@@ -84,7 +84,7 @@ describe('useFetcher', () => {
         data: undefined,
         error: undefined,
         refetch: expect.any(Function),
-        status: 'loading'
+        status: 'loading',
       });
     });
 
@@ -96,7 +96,7 @@ describe('useFetcher', () => {
         data: undefined,
         error: expect.any(Error),
         refetch: expect.any(Function),
-        status: 'failure'
+        status: 'failure',
       });
     });
   });
@@ -110,16 +110,16 @@ describe('useFetcher', () => {
         {
           initialProps: {
             callback: async () => 'first response',
-            args: ['a']
+            args: ['a'],
           },
-          wrapper
+          wrapper,
         }
       );
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
         refetch: expect.any(Function),
-        status: 'loading'
+        status: 'loading',
       });
 
       await hook.waitForNextUpdate();
@@ -129,7 +129,7 @@ describe('useFetcher', () => {
         data: 'first response',
         error: undefined,
         refetch: expect.any(Function),
-        status: 'success'
+        status: 'success',
       });
 
       // act: re-render hook with async callback
@@ -138,7 +138,7 @@ describe('useFetcher', () => {
           await delay(500);
           return 'second response';
         },
-        args: ['b']
+        args: ['b'],
       });
 
       jest.advanceTimersByTime(100);
@@ -148,7 +148,7 @@ describe('useFetcher', () => {
         data: 'first response',
         error: undefined,
         refetch: expect.any(Function),
-        status: 'loading'
+        status: 'loading',
       });
 
       jest.advanceTimersByTime(500);
@@ -159,7 +159,7 @@ describe('useFetcher', () => {
         data: 'second response',
         error: undefined,
         refetch: expect.any(Function),
-        status: 'success'
+        status: 'success',
       });
     });
 
@@ -169,9 +169,9 @@ describe('useFetcher', () => {
         {
           initialProps: {
             callback: async () => 'data response',
-            args: ['a']
+            args: ['a'],
           },
-          wrapper
+          wrapper,
         }
       );
       await hook.waitForNextUpdate();
@@ -186,7 +186,7 @@ describe('useFetcher', () => {
         callback: async () => {
           return 'second response';
         },
-        args: ['b']
+        args: ['b'],
       });
       await hook.waitForNextUpdate();
       const thirdResult = hook.result.current;

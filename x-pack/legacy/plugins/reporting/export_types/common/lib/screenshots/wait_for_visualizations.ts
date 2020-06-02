@@ -5,10 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger, startTrace } from '../../../../server/lib';
+import { HeadlessChromiumDriver } from '../../../../server/browsers';
 import { CaptureConfig } from '../../../../server/types';
-import { LayoutInstance } from '../../layouts/layout';
+import { LayoutInstance } from '../../layouts';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
 
 type SelectorArgs = Record<string, string>;
@@ -24,7 +24,7 @@ const getCompletedItemsCount = ({ renderCompleteSelector }: SelectorArgs) => {
  */
 export const waitForVisualizations = async (
   captureConfig: CaptureConfig,
-  browser: HeadlessBrowser,
+  browser: HeadlessChromiumDriver,
   itemsCount: number,
   layout: LayoutInstance,
   logger: LevelLogger

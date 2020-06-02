@@ -20,20 +20,16 @@ describe('Overview Page', () => {
   it('Host stats render with correct values', () => {
     expandHostStats();
 
-    HOST_STATS.forEach(stat => {
-      cy.get(stat.domId)
-        .invoke('text')
-        .should('eq', stat.value);
+    HOST_STATS.forEach((stat) => {
+      cy.get(stat.domId).invoke('text').should('eq', stat.value);
     });
   });
 
   it('Network stats render with correct values', () => {
     expandNetworkStats();
 
-    NETWORK_STATS.forEach(stat => {
-      cy.get(stat.domId)
-        .invoke('text')
-        .should('eq', stat.value);
+    NETWORK_STATS.forEach((stat) => {
+      cy.get(stat.domId).invoke('text').should('eq', stat.value);
     });
   });
 });

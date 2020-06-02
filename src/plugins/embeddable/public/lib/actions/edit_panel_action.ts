@@ -94,8 +94,11 @@ export class EditPanelAction implements Action<ActionContext> {
 
   public getAppTarget({ embeddable }: ActionContext): { app: string; path: string } | undefined {
     const app = embeddable ? embeddable.getOutput().editApp : undefined;
-    const path = embeddable ? embeddable.getOutput().editPath : undefined;
+    let path = embeddable ? embeddable.getOutput().editPath : undefined;
     if (app && path) {
+      if (this.currentAppId) {
+        path += `?${EMBEDDABLE_ORIGINATING_APP_PARAM}=${this.currentAppId}`;
+      }
       return { app, path };
     }
   }
@@ -104,11 +107,6 @@ export class EditPanelAction implements Action<ActionContext> {
     let editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
     if (editUrl && this.currentAppId) {
       editUrl += `?${EMBEDDABLE_ORIGINATING_APP_PARAM}=${this.currentAppId}`;
-
-      // TODO: Remove this after https://github.com/elastic/kibana/pull/63443
-      if (this.currentAppId === 'kibana') {
-        editUrl += `:${window.location.hash.split(/[\/\?]/)[1]}`;
-      }
     }
     return editUrl ? editUrl : '';
   }

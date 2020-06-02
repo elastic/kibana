@@ -11,7 +11,7 @@ import { TransactionLineChart } from './TransactionLineChart';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
-  getResponseTimeTooltipFormatter
+  getResponseTimeTooltipFormatter,
 } from '.';
 import { getDurationFormatter } from '../../../../utils/formatters';
 import { useAvgDurationByBrowser } from '../../../../hooks/useAvgDurationByBrowser';
@@ -30,7 +30,7 @@ export function BrowserLineChart() {
           {i18n.translate(
             'xpack.apm.metrics.pageLoadCharts.avgPageLoadByBrowser',
             {
-              defaultMessage: 'Avg. page load duration distribution by browser'
+              defaultMessage: 'Avg. page load duration distribution by browser',
             }
           )}
         </span>

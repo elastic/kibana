@@ -76,7 +76,7 @@ export const validateDatasource = (
   }, {} as Record<string, RegistryInput>);
 
   // Validate each datasource input with either its own config fields or streams
-  datasource.inputs.forEach(input => {
+  datasource.inputs.forEach((input) => {
     if (!input.vars && !input.streams) {
       return;
     }
@@ -109,7 +109,7 @@ export const validateDatasource = (
 
     // Validate each input stream with config fields
     if (input.streams.length) {
-      input.streams.forEach(stream => {
+      input.streams.forEach((stream) => {
         if (!stream.vars) {
           return;
         }
@@ -121,7 +121,7 @@ export const validateDatasource = (
         const streamVarsByName = (
           (
             registryInputsByType[input.type].streams.find(
-              registryStream => registryStream.dataset === stream.dataset
+              (registryStream) => registryStream.dataset === stream.dataset
             ) || {}
           ).vars || []
         ).reduce((vars, registryVar) => {

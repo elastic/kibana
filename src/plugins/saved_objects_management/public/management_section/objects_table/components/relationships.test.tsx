@@ -45,7 +45,7 @@ describe('Relationships', () => {
             editUrl: '/management/kibana/objects/savedSearches/1',
             icon: 'search',
             inAppUrl: {
-              path: '/app/kibana#/discover/1',
+              path: '/app/discover#//1',
               uiCapabilitiesPath: 'discover.show',
             },
             title: 'My Search Title',
@@ -59,7 +59,7 @@ describe('Relationships', () => {
             editUrl: '/management/kibana/objects/savedVisualizations/2',
             icon: 'visualizeApp',
             inAppUrl: {
-              path: '/app/kibana#/visualize/edit/2',
+              path: '/app/visualize#/edit/2',
               uiCapabilitiesPath: 'visualize.show',
             },
             title: 'My Visualization Title',
@@ -74,9 +74,9 @@ describe('Relationships', () => {
         meta: {
           title: 'MyIndexPattern*',
           icon: 'indexPatternApp',
-          editUrl: '#/management/kibana/index_patterns/1',
+          editUrl: '#/management/kibana/indexPatterns/patterns/1',
           inAppUrl: {
-            path: '/management/kibana/index_patterns/1',
+            path: '/management/kibana/indexPatterns/patterns/1',
             uiCapabilitiesPath: 'management.kibana.index_patterns',
           },
         },
@@ -90,7 +90,7 @@ describe('Relationships', () => {
     expect(component.find('EuiLoadingKibana').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -109,10 +109,10 @@ describe('Relationships', () => {
           id: '1',
           relationship: 'child',
           meta: {
-            editUrl: '/management/kibana/index_patterns/1',
+            editUrl: '/management/kibana/indexPatterns/patterns/1',
             icon: 'indexPatternApp',
             inAppUrl: {
-              path: '/app/kibana#/management/kibana/index_patterns/1',
+              path: '/app/kibana#/management/kibana/indexPatterns/patterns/1',
               uiCapabilitiesPath: 'management.kibana.index_patterns',
             },
             title: 'My Index Pattern',
@@ -126,7 +126,7 @@ describe('Relationships', () => {
             editUrl: '/management/kibana/objects/savedVisualizations/2',
             icon: 'visualizeApp',
             inAppUrl: {
-              path: '/app/kibana#/visualize/edit/2',
+              path: '/app/visualize#/edit/2',
               uiCapabilitiesPath: 'visualize.show',
             },
             title: 'My Visualization Title',
@@ -157,7 +157,7 @@ describe('Relationships', () => {
     expect(component.find('EuiLoadingKibana').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -210,7 +210,7 @@ describe('Relationships', () => {
           icon: 'visualizeApp',
           editUrl: '#/management/kibana/objects/savedVisualizations/1',
           inAppUrl: {
-            path: '/visualize/edit/1',
+            path: '/edit/1',
             uiCapabilitiesPath: 'visualize.show',
           },
         },
@@ -224,7 +224,7 @@ describe('Relationships', () => {
     expect(component.find('EuiLoadingKibana').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -246,7 +246,7 @@ describe('Relationships', () => {
             editUrl: '/management/kibana/objects/savedVisualizations/1',
             icon: 'visualizeApp',
             inAppUrl: {
-              path: '/app/kibana#/visualize/edit/1',
+              path: '/app/visualize#/edit/1',
               uiCapabilitiesPath: 'visualize.show',
             },
             title: 'My Visualization Title 1',
@@ -260,7 +260,7 @@ describe('Relationships', () => {
             editUrl: '/management/kibana/objects/savedVisualizations/2',
             icon: 'visualizeApp',
             inAppUrl: {
-              path: '/app/kibana#/visualize/edit/2',
+              path: '/app/visualize#/edit/2',
               uiCapabilitiesPath: 'visualize.show',
             },
             title: 'My Visualization Title 2',
@@ -291,7 +291,7 @@ describe('Relationships', () => {
     expect(component.find('EuiLoadingKibana').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -328,7 +328,7 @@ describe('Relationships', () => {
     const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 

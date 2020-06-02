@@ -958,11 +958,11 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
                               <EuiButtonEmpty
-                                href="#/management/elasticsearch/license_management/home"
+                                href="#/management/stack/license_management/home"
                               >
                                 <a
                                   className="euiButtonEmpty euiButtonEmpty--primary"
-                                  href="#/management/elasticsearch/license_management/home"
+                                  href="#/management/stack/license_management/home"
                                   rel="noreferrer"
                                 >
                                   <span
@@ -1424,11 +1424,11 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
                               <EuiButtonEmpty
-                                href="#/management/elasticsearch/license_management/home"
+                                href="#/management/stack/license_management/home"
                               >
                                 <a
                                   className="euiButtonEmpty euiButtonEmpty--primary"
-                                  href="#/management/elasticsearch/license_management/home"
+                                  href="#/management/stack/license_management/home"
                                   rel="noreferrer"
                                 >
                                   <span
@@ -1890,11 +1890,11 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
                               <EuiButtonEmpty
-                                href="#/management/elasticsearch/license_management/home"
+                                href="#/management/stack/license_management/home"
                               >
                                 <a
                                   className="euiButtonEmpty euiButtonEmpty--primary"
-                                  href="#/management/elasticsearch/license_management/home"
+                                  href="#/management/stack/license_management/home"
                                   rel="noreferrer"
                                 >
                                   <span
@@ -2356,11 +2356,11 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
                               <EuiButtonEmpty
-                                href="#/management/elasticsearch/license_management/home"
+                                href="#/management/stack/license_management/home"
                               >
                                 <a
                                   className="euiButtonEmpty euiButtonEmpty--primary"
-                                  href="#/management/elasticsearch/license_management/home"
+                                  href="#/management/stack/license_management/home"
                                   rel="noreferrer"
                                 >
                                   <span
@@ -2822,11 +2822,11 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
                               <EuiButtonEmpty
-                                href="#/management/elasticsearch/license_management/home"
+                                href="#/management/stack/license_management/home"
                               >
                                 <a
                                   className="euiButtonEmpty euiButtonEmpty--primary"
-                                  href="#/management/elasticsearch/license_management/home"
+                                  href="#/management/stack/license_management/home"
                                   rel="noreferrer"
                                 >
                                   <span

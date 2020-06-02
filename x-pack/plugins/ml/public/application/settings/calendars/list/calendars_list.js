@@ -75,7 +75,7 @@ export class CalendarsListUI extends Component {
     this.setState({ isDestroyModalVisible: true });
   };
 
-  setSelectedCalendarList = selectedCalendars => {
+  setSelectedCalendarList = (selectedCalendars) => {
     this.setState({ selectedForDeletion: selectedCalendars });
   };
 
@@ -137,7 +137,7 @@ export class CalendarsListUI extends Component {
                 defaultMessage="Delete {calendarsCount, plural, one {this calendar} other {these calendars}}? {calendarsList}"
                 values={{
                   calendarsCount: selectedForDeletion.length,
-                  calendarsList: selectedForDeletion.map(c => c.calendar_id).join(', '),
+                  calendarsList: selectedForDeletion.map((c) => c.calendar_id).join(', '),
                 }}
               />
             </p>

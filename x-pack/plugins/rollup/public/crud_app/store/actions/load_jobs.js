@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { loadJobs as sendLoadJobsRequest, deserializeJobs, showApiError } from '../../services';
 import { LOAD_JOBS_START, LOAD_JOBS_SUCCESS, LOAD_JOBS_FAILURE } from '../action_types';
 
-export const loadJobs = () => async dispatch => {
+export const loadJobs = () => async (dispatch) => {
   dispatch({
     type: LOAD_JOBS_START,
   });

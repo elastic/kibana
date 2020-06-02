@@ -199,7 +199,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   }
 
   public buildLayoutFromPanels = (): GridData[] => {
-    return _.map(this.state.panels, panel => {
+    return _.map(this.state.panels, (panel) => {
       return panel.gridData;
     });
   };
@@ -250,7 +250,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       }
     });
 
-    return _.map(panelsInOrder, panel => {
+    return _.map(panelsInOrder, (panel) => {
       const expandPanel =
         expandedPanelId !== undefined && expandedPanelId === panel.explicitInput.id;
       const hidePanel = expandedPanelId !== undefined && expandedPanelId !== panel.explicitInput.id;
@@ -264,7 +264,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           className={classes}
           key={panel.explicitInput.id}
           data-test-subj="dashboardPanel"
-          ref={reactGridItem => {
+          ref={(reactGridItem) => {
             this.gridItems[panel.explicitInput.id] = reactGridItem;
           }}
         >

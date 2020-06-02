@@ -32,7 +32,7 @@ interface Props {
 const toMilliseconds = (time: number) =>
   convertTo({
     unit: 'milliseconds',
-    microseconds: time
+    microseconds: time,
   }).formatted;
 
 export function TransactionList({ items, isLoading }: Props) {
@@ -41,7 +41,7 @@ export function TransactionList({ items, isLoading }: Props) {
       {
         field: 'name',
         name: i18n.translate('xpack.apm.transactionsTable.nameColumnLabel', {
-          defaultMessage: 'Name'
+          defaultMessage: 'Name',
         }),
         width: '50%',
         sortable: true,
@@ -62,38 +62,38 @@ export function TransactionList({ items, isLoading }: Props) {
               </TransactionNameLink>
             </EuiToolTip>
           );
-        }
+        },
       },
       {
         field: 'averageResponseTime',
         name: i18n.translate(
           'xpack.apm.transactionsTable.avgDurationColumnLabel',
           {
-            defaultMessage: 'Avg. duration'
+            defaultMessage: 'Avg. duration',
           }
         ),
         sortable: true,
         dataType: 'number',
-        render: (time: number) => toMilliseconds(time)
+        render: (time: number) => toMilliseconds(time),
       },
       {
         field: 'p95',
         name: i18n.translate(
           'xpack.apm.transactionsTable.95thPercentileColumnLabel',
           {
-            defaultMessage: '95th percentile'
+            defaultMessage: '95th percentile',
           }
         ),
         sortable: true,
         dataType: 'number',
-        render: (time: number) => toMilliseconds(time)
+        render: (time: number) => toMilliseconds(time),
       },
       {
         field: 'transactionsPerMinute',
         name: i18n.translate(
           'xpack.apm.transactionsTable.transactionsPerMinuteColumnLabel',
           {
-            defaultMessage: 'Trans. per minute'
+            defaultMessage: 'Trans. per minute',
           }
         ),
         sortable: true,
@@ -102,29 +102,29 @@ export function TransactionList({ items, isLoading }: Props) {
           `${asDecimal(value)} ${i18n.translate(
             'xpack.apm.transactionsTable.transactionsPerMinuteUnitLabel',
             {
-              defaultMessage: 'tpm'
+              defaultMessage: 'tpm',
             }
-          )}`
+          )}`,
       },
       {
         field: 'impact',
         name: (
           <>
             {i18n.translate('xpack.apm.transactionsTable.impactColumnLabel', {
-              defaultMessage: 'Impact'
+              defaultMessage: 'Impact',
             })}{' '}
             <EuiIconTip
               size="s"
               type="questionInCircle"
               color="subdued"
               iconProps={{
-                className: 'eui-alignTop'
+                className: 'eui-alignTop',
               }}
               content={i18n.translate(
                 'xpack.apm.transactionsTable.impactColumnDescription',
                 {
                   defaultMessage:
-                    "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute."
+                    "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute.",
                 }
               )}
             />
@@ -132,8 +132,8 @@ export function TransactionList({ items, isLoading }: Props) {
         ),
         sortable: true,
         dataType: 'number',
-        render: (value: number) => <ImpactBar value={value} />
-      }
+        render: (value: number) => <ImpactBar value={value} />,
+      },
     ],
     []
   );
@@ -141,7 +141,7 @@ export function TransactionList({ items, isLoading }: Props) {
   const noItemsMessage = (
     <EmptyMessage
       heading={i18n.translate('xpack.apm.transactionsTable.notFoundLabel', {
-        defaultMessage: 'No transactions were found.'
+        defaultMessage: 'No transactions were found.',
       })}
     />
   );

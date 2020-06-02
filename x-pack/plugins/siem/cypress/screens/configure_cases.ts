@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ADD_NEW_CONNECTOR_OPTION_LINK =
-  '[data-test-subj="case-configure-add-connector-button"]';
+export const ADD_NEW_CONNECTOR_DROPDOWN_BUTTON =
+  '[data-test-subj="dropdown-connector-add-connector"]';
 
 export const CONNECTOR = (id: string) => {
   return `[data-test-subj='dropdown-connector-${id}']`;

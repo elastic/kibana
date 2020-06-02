@@ -31,14 +31,16 @@ export function setupSavedObjects({
   const getKibanaRequest = (request: KibanaRequest | LegacyRequest) =>
     request instanceof KibanaRequest ? request : KibanaRequest.from(request);
 
-  savedObjects.setClientFactoryProvider(repositoryFactory => ({ request }) => {
-    const kibanaRequest = getKibanaRequest(request);
-    return new SavedObjectsClient(
-      authz.mode.useRbacForRequest(kibanaRequest)
-        ? repositoryFactory.createInternalRepository()
-        : repositoryFactory.createScopedRepository(kibanaRequest)
-    );
-  });
+  savedObjects.setClientFactoryProvider(
+    (repositoryFactory) => ({ request, includedHiddenTypes }) => {
+      const kibanaRequest = getKibanaRequest(request);
+      return new SavedObjectsClient(
+        authz.mode.useRbacForRequest(kibanaRequest)
+          ? repositoryFactory.createInternalRepository(includedHiddenTypes)
+          : repositoryFactory.createScopedRepository(kibanaRequest, includedHiddenTypes)
+      );
+    }
+  );
 
   savedObjects.addClientWrapper(Number.MAX_SAFE_INTEGER - 1, 'security', ({ client, request }) => {
     const kibanaRequest = getKibanaRequest(request);

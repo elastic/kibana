@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as Rx from 'rxjs';
 import sinon from 'sinon';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { ReportingConfig } from '../';
 import { createMockReportingCore } from '../../test_helpers';
 import { getExportTypesRegistry } from '../lib/export_types_registry';
+import { ReportingSetupDeps } from '../types';
+import { FeaturesAvailability } from './';
 import {
-  registerReportingUsageCollector,
   getReportingUsageCollector,
+  registerReportingUsageCollector,
 } from './reporting_usage_collector';
-import { ReportingConfig } from '../types';
-import { SearchResponse, ReportingUsageType } from './types';
+import { ReportingUsageType, SearchResponse } from './types';
 
 const exportTypesRegistry = getExportTypesRegistry();
 
@@ -32,30 +36,22 @@ function getMockUsageCollection() {
   };
 }
 
+const getLicenseMock = (licenseType = 'platinum') => () => {
+  return Promise.resolve({
+    isAvailable: () => true,
+    license: { getType: () => licenseType },
+  } as FeaturesAvailability);
+};
+
 function getPluginsMock(
   { license, usageCollection = getMockUsageCollection() } = { license: 'platinum' }
 ) {
-  const mockXpackMain = {
-    info: {
-      isAvailable: sinon.stub().returns(true),
-      feature: () => ({
-        getLicenseCheckResults: sinon.stub(),
-      }),
-      license: {
-        isOneOf: sinon.stub().returns(false),
-        getType: sinon.stub().returns(license),
-      },
-      toJSON: () => ({ b: 1 }),
-    },
-  };
-  return {
+  return ({
+    licensing: { license$: Rx.of(getLicenseMock(license)) },
     usageCollection,
-    __LEGACY: {
-      plugins: {
-        xpack_main: mockXpackMain,
-      },
-    },
-  } as any;
+    elasticsearch: {},
+    security: {},
+  } as unknown) as ReportingSetupDeps & { usageCollection: UsageCollectionSetup };
 }
 
 const getMockReportingConfig = () => ({
@@ -78,7 +74,7 @@ describe('license checks', () => {
       const { fetch } = getReportingUsageCollector(
         mockConfig,
         plugins.usageCollection,
-        plugins.__LEGACY.plugins.xpack_main.info,
+        getLicenseMock('basic'),
         exportTypesRegistry,
         function isReady() {
           return Promise.resolve(true);
@@ -108,7 +104,7 @@ describe('license checks', () => {
       const { fetch } = getReportingUsageCollector(
         mockConfig,
         plugins.usageCollection,
-        plugins.__LEGACY.plugins.xpack_main.info,
+        getLicenseMock('none'),
         exportTypesRegistry,
         function isReady() {
           return Promise.resolve(true);
@@ -138,7 +134,7 @@ describe('license checks', () => {
       const { fetch } = getReportingUsageCollector(
         mockConfig,
         plugins.usageCollection,
-        plugins.__LEGACY.plugins.xpack_main.info,
+        getLicenseMock('platinum'),
         exportTypesRegistry,
         function isReady() {
           return Promise.resolve(true);
@@ -168,7 +164,7 @@ describe('license checks', () => {
       const { fetch } = getReportingUsageCollector(
         mockConfig,
         plugins.usageCollection,
-        plugins.__LEGACY.plugins.xpack_main.info,
+        getLicenseMock('basic'),
         exportTypesRegistry,
         function isReady() {
           return Promise.resolve(true);
@@ -194,7 +190,7 @@ describe('data modeling', () => {
     const { fetch } = getReportingUsageCollector(
       mockConfig,
       plugins.usageCollection,
-      plugins.__LEGACY.plugins.xpack_main.info,
+      getLicenseMock(),
       exportTypesRegistry,
       function isReady() {
         return Promise.resolve(true);
@@ -247,7 +243,7 @@ describe('data modeling', () => {
     const { fetch } = getReportingUsageCollector(
       mockConfig,
       plugins.usageCollection,
-      plugins.__LEGACY.plugins.xpack_main.info,
+      getLicenseMock(),
       exportTypesRegistry,
       function isReady() {
         return Promise.resolve(true);
@@ -300,7 +296,7 @@ describe('data modeling', () => {
     const { fetch } = getReportingUsageCollector(
       mockConfig,
       plugins.usageCollection,
-      plugins.__LEGACY.plugins.xpack_main.info,
+      getLicenseMock(),
       exportTypesRegistry,
       function isReady() {
         return Promise.resolve(true);
@@ -461,7 +457,7 @@ describe('Ready for collection observable', () => {
     const makeCollectorSpy = sinon.spy();
     usageCollection.makeUsageCollector = makeCollectorSpy;
 
-    const plugins = getPluginsMock({ usageCollection } as any);
+    const plugins = getPluginsMock({ usageCollection, license: 'platinum' });
     registerReportingUsageCollector(mockReporting, plugins);
 
     const [args] = makeCollectorSpy.firstCall.args;

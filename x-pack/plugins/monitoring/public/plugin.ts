@@ -81,7 +81,7 @@ export class MonitoringPlugin
         this.overrideAlertingEmailDefaults(deps);
 
         const monitoringApp = new AngularApp(deps);
-        const removeHistoryListener = params.history.listen(location => {
+        const removeHistoryListener = params.history.listen((location) => {
           if (location.pathname === '' && location.hash === '') {
             monitoringApp.applyScope();
           }

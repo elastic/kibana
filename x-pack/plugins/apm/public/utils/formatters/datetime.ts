@@ -83,20 +83,20 @@ function getFormatsAccordingToDateDifference(
   if (getDateDifference(start, end, 'hours') >= 5) {
     return {
       dateFormat: dateFormatWithDays,
-      timeFormat: getTimeFormat('minutes')
+      timeFormat: getTimeFormat('minutes'),
     };
   }
 
   if (getDateDifference(start, end, 'minutes') >= 5) {
     return {
       dateFormat: dateFormatWithDays,
-      timeFormat: getTimeFormat('seconds')
+      timeFormat: getTimeFormat('seconds'),
     };
   }
 
   return {
     dateFormat: dateFormatWithDays,
-    timeFormat: getTimeFormat('milliseconds')
+    timeFormat: getTimeFormat('milliseconds'),
   };
 }
 

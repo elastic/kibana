@@ -55,9 +55,9 @@ export const defaultState: State = {
 };
 
 export const transitions: Transitions = {
-  startFetching: state => () => ({ ...state, isFetchingEvents: true }),
+  startFetching: (state) => () => ({ ...state, isFetchingEvents: true }),
 
-  finishFetching: state => events => ({
+  finishFetching: (state) => (events) => ({
     ...state,
     isFetchingEvents: false,
     fetchCount: state.fetchCount + 1,
@@ -65,24 +65,24 @@ export const transitions: Transitions = {
     events,
   }),
 
-  failFetching: state => ({ message }) => ({
+  failFetching: (state) => ({ message }) => ({
     ...state,
     isFetchingEvents: false,
     fetchCount: state.fetchCount + 1,
     fetchError: { message },
   }),
 
-  addEvent: state => (event: SerializedEvent) => ({
+  addEvent: (state) => (event: SerializedEvent) => ({
     ...state,
     events: [...state.events, event],
   }),
 
-  removeEvent: state => (eventId: string) => ({
+  removeEvent: (state) => (eventId: string) => ({
     ...state,
-    events: state.events ? state.events.filter(event => event.eventId !== eventId) : state.events,
+    events: state.events ? state.events.filter((event) => event.eventId !== eventId) : state.events,
   }),
 
-  replaceEvent: state => event => {
+  replaceEvent: (state) => (event) => {
     const index = state.events.findIndex(({ eventId }) => eventId === event.eventId);
     if (index === -1) return state;
 
@@ -94,5 +94,5 @@ export const transitions: Transitions = {
 };
 
 export const selectors: Selectors = {
-  getEvent: state => eventId => state.events.find(event => event.eventId === eventId) || null,
+  getEvent: (state) => (eventId) => state.events.find((event) => event.eventId === eventId) || null,
 };

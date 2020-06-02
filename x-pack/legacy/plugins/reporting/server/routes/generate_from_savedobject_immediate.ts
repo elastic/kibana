@@ -4,21 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
+import { schema } from '@kbn/config-schema';
+import { ReportingCore } from '../';
+import { HandlerErrorFunction } from './types';
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
-import {
-  JobDocOutput,
-  Logger,
-  ReportingResponseToolkit,
-  ResponseFacade,
-  ServerFacade,
-} from '../../types';
-import { ReportingCore, ReportingSetupDeps } from '../types';
-import { makeRequestFacade } from './lib/make_request_facade';
-import { getRouteOptionsCsv } from './lib/route_config_factories';
+import { LevelLogger as Logger } from '../lib';
+import { JobDocOutput } from '../types';
+import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 
 /*
  * This function registers API Endpoints for immediate Reporting jobs. The API inputs are:
@@ -31,61 +26,77 @@ import { getRouteOptionsCsv } from './lib/route_config_factories';
  */
 export function registerGenerateCsvFromSavedObjectImmediate(
   reporting: ReportingCore,
-  server: ServerFacade,
-  plugins: ReportingSetupDeps,
+  handleError: HandlerErrorFunction,
   parentLogger: Logger
 ) {
-  const config = reporting.getConfig();
-  const routeOptions = getRouteOptionsCsv(config, plugins, parentLogger);
+  const setupDeps = reporting.getPluginSetupDeps();
+  const userHandler = authorizedUserPreRoutingFactory(reporting);
+  const { router } = setupDeps;
 
   /*
    * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:
    *  - re-use the createJob function to build up es query config
    *  - re-use the executeJob function to run the scan and scroll queries and capture the entire CSV in a result object.
    */
-  server.route({
-    path: `${API_BASE_GENERATE_V1}/immediate/csv/saved-object/{savedObjectType}:{savedObjectId}`,
-    method: 'POST',
-    options: routeOptions,
-    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
-      const request = makeRequestFacade(legacyRequest);
+  router.post(
+    {
+      path: `${API_BASE_GENERATE_V1}/immediate/csv/saved-object/{savedObjectType}:{savedObjectId}`,
+      validate: {
+        params: schema.object({
+          savedObjectType: schema.string({ minLength: 5 }),
+          savedObjectId: schema.string({ minLength: 5 }),
+        }),
+        body: schema.object({
+          state: schema.object({}, { unknowns: 'allow' }),
+          timerange: schema.object({
+            timezone: schema.string({ defaultValue: 'UTC' }),
+            min: schema.nullable(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
+            max: schema.nullable(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
+          }),
+        }),
+      },
+    },
+    userHandler(async (user, context, req, res) => {
       const logger = parentLogger.clone(['savedobject-csv']);
-      const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
+      const jobParams = getJobParamsFromRequest(req, { isImmediate: true });
       const createJobFn = createJobFactory(reporting, logger);
       const executeJobFn = await executeJobFactory(reporting, logger); // FIXME: does not "need" to be async
-      const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
-        jobParams,
-        request.headers,
-        request
-      );
-      const {
-        content_type: jobOutputContentType,
-        content: jobOutputContent,
-        size: jobOutputSize,
-      }: JobDocOutput = await executeJobFn(null, jobDocPayload, request);
 
-      logger.info(`Job output size: ${jobOutputSize} bytes`);
+      try {
+        const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
+          jobParams,
+          req.headers,
+          context,
+          req
+        );
+        const {
+          content_type: jobOutputContentType,
+          content: jobOutputContent,
+          size: jobOutputSize,
+        }: JobDocOutput = await executeJobFn(null, jobDocPayload, context, req);
 
-      /*
-       * ESQueue worker function defaults `content` to null, even if the
-       * executeJob returned undefined.
-       *
-       * This converts null to undefined so the value can be sent to h.response()
-       */
-      if (jobOutputContent === null) {
-        logger.warn('CSV Job Execution created empty content result');
+        logger.info(`Job output size: ${jobOutputSize} bytes`);
+
+        /*
+         * ESQueue worker function defaults `content` to null, even if the
+         * executeJob returned undefined.
+         *
+         * This converts null to undefined so the value can be sent to h.response()
+         */
+        if (jobOutputContent === null) {
+          logger.warn('CSV Job Execution created empty content result');
+        }
+
+        return res.ok({
+          body: jobOutputContent || '',
+          headers: {
+            'content-type': jobOutputContentType,
+            'accept-ranges': 'none',
+          },
+        });
+      } catch (err) {
+        return handleError(res, err);
       }
-      const response = h
-        .response(jobOutputContent ? jobOutputContent : undefined)
-        .type(jobOutputContentType);
-
-      // Set header for buffer download, not streaming
-      const { isBoom } = response as ResponseFacade;
-      if (isBoom == null) {
-        response.header('accept-ranges', 'none');
-      }
-
-      return response;
-    },
-  });
+    })
+  );
 }

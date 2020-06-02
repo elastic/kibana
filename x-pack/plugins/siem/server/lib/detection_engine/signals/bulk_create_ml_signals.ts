@@ -9,7 +9,7 @@ import set from 'set-value';
 import { SearchResponse } from 'elasticsearch';
 
 import { Logger } from '../../../../../../../src/core/server';
-import { AlertServices } from '../../../../../alerting/server';
+import { AlertServices } from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
@@ -46,7 +46,7 @@ export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
     influencers,
     timestamp,
   } = anomaly;
-  let errantFields = (influencers ?? []).map(influencer => ({
+  let errantFields = (influencers ?? []).map((influencer) => ({
     name: influencer.influencer_field_name,
     value: influencer.influencer_field_values,
   }));
@@ -55,8 +55,8 @@ export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
     errantFields = [...errantFields, { name: entityName, value: [entityValue] }];
   }
 
-  const omitDottedFields = omit(errantFields.map(field => field.name));
-  const setNestedFields = errantFields.map(field => (_anomaly: Anomaly) =>
+  const omitDottedFields = omit(errantFields.map((field) => field.name));
+  const setNestedFields = errantFields.map((field) => (_anomaly: Anomaly) =>
     set(_anomaly, field.name, field.value)
   );
   const setTimestamp = (_anomaly: Anomaly) =>
@@ -86,5 +86,5 @@ export const bulkCreateMlSignals = async (
   const anomalyResults = params.someResult;
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
 
-  return singleBulkCreate({ ...params, someResult: ecsResults });
+  return singleBulkCreate({ ...params, filteredEvents: ecsResults });
 };

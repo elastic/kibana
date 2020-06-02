@@ -7,6 +7,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, CoreStart } from 'kibana/public';
 import { first, map, skip } from 'rxjs/operators';
 
+import { ManagementSectionId } from '../../../../src/plugins/management/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 
 import { LicenseStatus } from '../common/types/license_status';
@@ -28,14 +29,15 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
     { notifications, http, uiSettings, getStartServices }: CoreSetup,
     { licensing, management, data, home, charts }: Dependencies
   ) {
-    const esSection = management.sections.getSection('elasticsearch');
+    const esSection = management.sections.getSection(ManagementSectionId.InsightsAndAlerting);
 
-    const watcherESApp = esSection!.registerApp({
+    const watcherESApp = esSection.registerApp({
       id: 'watcher',
       title: i18n.translate(
         'xpack.watcher.sections.watchList.managementSection.watcherDisplayName',
         { defaultMessage: 'Watcher' }
       ),
+      order: 3,
       mount: async ({ element, setBreadcrumbs }) => {
         const [core] = await getStartServices();
         const { i18n: i18nDep, docLinks, savedObjects } = core;
@@ -74,7 +76,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
         defaultMessage: 'Detect changes in your data by creating, managing, and monitoring alerts.',
       }),
       icon: 'watchesApp',
-      path: '/app/kibana#/management/elasticsearch/watcher/watches',
+      path: '/app/kibana#/management/insightsAndAlerting/watcher/watches',
       showOnHomePage: false,
     };
 

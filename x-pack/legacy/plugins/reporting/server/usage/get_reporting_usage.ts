@@ -5,25 +5,24 @@
  */
 
 import { get } from 'lodash';
-import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
-import { ESCallCluster, ExportTypesRegistry } from '../../types';
-import { ReportingConfig } from '../types';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { ReportingConfig } from '../';
+import { ExportTypesRegistry } from '../lib/export_types_registry';
+import { GetLicense } from './';
 import { decorateRangeStats } from './decorate_range_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
 import {
   AggregationResultBuckets,
+  AppCounts,
   FeatureAvailabilityMap,
   JobTypes,
   KeyCountBucket,
+  LayoutCounts,
   RangeStats,
   ReportingUsageType,
   SearchResponse,
   StatusByAppBucket,
-  AppCounts,
-  LayoutCounts,
 } from './types';
-
-type XPackInfo = XPackMainPlugin['info'];
 
 const JOB_TYPES_KEY = 'jobTypes';
 const JOB_TYPES_FIELD = 'jobtype';
@@ -122,10 +121,10 @@ async function handleResponse(response: SearchResponse): Promise<Partial<RangeSt
 
 export async function getReportingUsage(
   config: ReportingConfig,
-  xpackMainInfo: XPackInfo,
-  callCluster: ESCallCluster,
+  getLicense: GetLicense,
+  callCluster: CallCluster,
   exportTypesRegistry: ExportTypesRegistry
-) {
+): Promise<ReportingUsageType> {
   const reportingIndex = config.get('index');
 
   const params = {
@@ -169,6 +168,7 @@ export async function getReportingUsage(
     },
   };
 
+  const featureAvailability = await getLicense();
   return callCluster('search', params)
     .then((response: SearchResponse) => handleResponse(response))
     .then(
@@ -179,7 +179,7 @@ export async function getReportingUsage(
 
         const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
         const availability = exportTypesHandler.getAvailability(
-          xpackMainInfo
+          featureAvailability
         ) as FeatureAvailabilityMap;
 
         const { last7Days, ...all } = usage;

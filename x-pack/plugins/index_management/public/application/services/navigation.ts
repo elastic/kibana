@@ -19,8 +19,6 @@ export const getIndexListUri = (filter: any) => {
 
 export const getILMPolicyPath = (policyName: string) => {
   return encodeURI(
-    `#/management/elasticsearch/index_lifecycle_management/policies/edit/${encodeURIComponent(
-      policyName
-    )}`
+    `#/management/data/index_lifecycle_management/policies/edit/${encodeURIComponent(policyName)}`
   );
 };

@@ -25,5 +25,6 @@ export function getAlertType(): AlertTypeModel {
         defaultMessage: `\\{\\{context.matchingDocuments\\}\\} log entries have matched the following conditions: \\{\\{context.conditions\\}\\}`,
       }
     ),
+    requiresAppContext: false,
   };
 }

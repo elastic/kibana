@@ -19,11 +19,13 @@
 
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import sinon from 'sinon';
-import { CollapsibleNav } from './collapsible_nav';
-import { AppCategory } from '../../../../types';
-import { DEFAULT_APP_CATEGORIES } from '../../..';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { ChromeNavLink, DEFAULT_APP_CATEGORIES } from '../../..';
+import { httpServiceMock } from '../../../http/http_service.mock';
+import { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed';
+import { CollapsibleNav } from './collapsible_nav';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -31,39 +33,57 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 
 const { kibana, observability, security, management } = DEFAULT_APP_CATEGORIES;
 
-function mockLink(label: string, category?: AppCategory) {
+function mockLink({ title = 'discover', category }: Partial<ChromeNavLink>) {
   return {
-    key: label,
-    label,
-    href: label,
-    isActive: true,
-    onClick: () => {},
+    title,
     category,
-    'data-test-subj': label,
+    id: title,
+    href: title,
+    baseUrl: '/',
+    legacy: false,
+    isActive: true,
+    'data-test-subj': title,
   };
 }
 
-function mockRecentNavLink(label: string) {
+function mockRecentNavLink({ label = 'recent' }: Partial<ChromeRecentlyAccessedHistoryItem>) {
   return {
-    href: label,
     label,
-    title: label,
-    'aria-label': label,
+    link: label,
+    id: label,
   };
 }
 
 function mockProps() {
   return {
-    id: 'collapsible-nav',
-    homeHref: '/',
+    appId$: new BehaviorSubject('test'),
+    basePath: httpServiceMock.createSetupContract({ basePath: '/test' }).basePath,
+    id: 'collapsibe-nav',
     isLocked: false,
     isOpen: false,
-    navLinks: [],
-    recentNavLinks: [],
+    homeHref: '/',
+    legacyMode: false,
+    navLinks$: new BehaviorSubject([]),
+    recentlyAccessed$: new BehaviorSubject([]),
     storage: new StubBrowserStorage(),
-    onIsOpenUpdate: () => {},
     onIsLockedUpdate: () => {},
+    closeNav: () => {},
+    navigateToApp: () => Promise.resolve(),
   };
+}
+
+function expectShownNavLinksCount(component: ReactWrapper, count: number) {
+  expect(
+    component.find('.euiAccordion-isOpen a[data-test-subj^="collapsibleNavAppLink"]').length
+  ).toEqual(count);
+}
+
+function expectNavIsClosed(component: ReactWrapper) {
+  expectShownNavLinksCount(component, 0);
+}
+
+function clickGroup(component: ReactWrapper, group: string) {
+  component.find(`[data-test-subj="collapsibleNavGroup-${group}"] button`).simulate('click');
 }
 
 describe('CollapsibleNav', () => {
@@ -87,50 +107,80 @@ describe('CollapsibleNav', () => {
   it('renders links grouped by category', () => {
     // just a test of category functionality, categories are not accurate
     const navLinks = [
-      mockLink('discover', kibana),
-      mockLink('siem', security),
-      mockLink('metrics', observability),
-      mockLink('monitoring', management),
-      mockLink('visualize', kibana),
-      mockLink('dashboard', kibana),
-      mockLink('canvas'), // links should be able to be rendered top level as well
-      mockLink('logs', observability),
+      mockLink({ title: 'discover', category: kibana }),
+      mockLink({ title: 'siem', category: security }),
+      mockLink({ title: 'metrics', category: observability }),
+      mockLink({ title: 'monitoring', category: management }),
+      mockLink({ title: 'visualize', category: kibana }),
+      mockLink({ title: 'dashboard', category: kibana }),
+      mockLink({ title: 'canvas' }), // links should be able to be rendered top level as well
+      mockLink({ title: 'logs', category: observability }),
     ];
-    const recentNavLinks = [mockRecentNavLink('recent 1'), mockRecentNavLink('recent 2')];
+    const recentNavLinks = [
+      mockRecentNavLink({ label: 'recent 1' }),
+      mockRecentNavLink({ label: 'recent 2' }),
+    ];
     const component = mount(
       <CollapsibleNav
         {...mockProps()}
         isOpen={true}
-        navLinks={navLinks}
-        recentNavLinks={recentNavLinks}
+        navLinks$={new BehaviorSubject(navLinks)}
+        recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
       />
     );
     expect(component).toMatchSnapshot();
   });
 
   it('remembers collapsible section state', () => {
-    function expectNavLinksCount(component: ReactWrapper, count: number) {
-      expect(
-        component.find('.euiAccordion-isOpen a[data-test-subj="collapsibleNavAppLink"]').length
-      ).toEqual(count);
-    }
-
-    const navLinks = [
-      mockLink('discover', kibana),
-      mockLink('siem', security),
-      mockLink('metrics', observability),
-      mockLink('monitoring', management),
-      mockLink('visualize', kibana),
-      mockLink('dashboard', kibana),
-      mockLink('logs', observability),
-    ];
-    const component = mount(<CollapsibleNav {...mockProps()} isOpen={true} navLinks={navLinks} />);
-    expectNavLinksCount(component, 7);
-    component.find('[data-test-subj="collapsibleNavGroup-kibana"] button').simulate('click');
-    expectNavLinksCount(component, 4);
+    const navLinks = [mockLink({ category: kibana }), mockLink({ category: observability })];
+    const recentNavLinks = [mockRecentNavLink({})];
+    const component = mount(
+      <CollapsibleNav
+        {...mockProps()}
+        isOpen={true}
+        navLinks$={new BehaviorSubject(navLinks)}
+        recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
+      />
+    );
+    expectShownNavLinksCount(component, 3);
+    clickGroup(component, 'kibana');
+    clickGroup(component, 'recentlyViewed');
+    expectShownNavLinksCount(component, 1);
     component.setProps({ isOpen: false });
-    expectNavLinksCount(component, 0); // double check the nav closed
+    expectNavIsClosed(component);
     component.setProps({ isOpen: true });
-    expectNavLinksCount(component, 4);
+    expectShownNavLinksCount(component, 1);
+  });
+
+  it('closes the nav after clicking a link', () => {
+    const onClose = sinon.spy();
+    const navLinks = [mockLink({ category: kibana }), mockLink({ title: 'categoryless' })];
+    const recentNavLinks = [mockRecentNavLink({})];
+    const component = mount(
+      <CollapsibleNav
+        {...mockProps()}
+        isOpen={true}
+        navLinks$={new BehaviorSubject(navLinks)}
+        recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
+      />
+    );
+    component.setProps({
+      closeNav: () => {
+        component.setProps({ isOpen: false });
+        onClose();
+      },
+    });
+
+    component.find('[data-test-subj="collapsibleNavGroup-recentlyViewed"] a').simulate('click');
+    expect(onClose.callCount).toEqual(1);
+    expectNavIsClosed(component);
+    component.setProps({ isOpen: true });
+    component.find('[data-test-subj="collapsibleNavGroup-kibana"] a').simulate('click');
+    expect(onClose.callCount).toEqual(2);
+    expectNavIsClosed(component);
+    component.setProps({ isOpen: true });
+    component.find('[data-test-subj="collapsibleNavGroup-noCategory"] a').simulate('click');
+    expect(onClose.callCount).toEqual(3);
+    expectNavIsClosed(component);
   });
 });

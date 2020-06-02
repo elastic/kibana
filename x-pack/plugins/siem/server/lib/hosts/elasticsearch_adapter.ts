@@ -47,7 +47,7 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.host_count.value', response);
     const buckets: HostAggEsItem[] = getOr([], 'aggregations.host_data.buckets', response);
-    const hostsEdges = buckets.map(bucket => formatHostEdgesData(options.fields, bucket));
+    const hostsEdges = buckets.map((bucket) => formatHostEdgesData(options.fields, bucket));
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const edges = hostsEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
@@ -157,7 +157,7 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
     has(aggField, bucket)
   ) {
     const data: HostBuckets = get(aggField, bucket);
-    return data.buckets.map(obj => obj.key);
+    return data.buckets.map((obj) => obj.key);
   } else if (has(`${aggField}.buckets`, bucket)) {
     return getFirstItem(get(`${aggField}`, bucket));
   } else if (has(aggField, bucket)) {

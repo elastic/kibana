@@ -10,7 +10,7 @@ import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, Alert, AlertAction } from '../../../types';
-import { ActionForm } from './action_form';
+import ActionForm from './action_form';
 jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
@@ -26,6 +26,7 @@ describe('action_form', () => {
       return { errors: {} };
     },
     alertParamsExpression: () => <Fragment />,
+    requiresAppContext: false,
   };
 
   const actionType = {
@@ -159,7 +160,7 @@ describe('action_form', () => {
       const initialAlert = ({
         name: 'test',
         params: {},
-        consumer: 'alerting',
+        consumer: 'alerts',
         alertTypeId: alertType.id,
         schedule: {
           interval: '1m',

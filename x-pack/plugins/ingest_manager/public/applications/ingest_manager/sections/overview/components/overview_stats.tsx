@@ -7,13 +7,13 @@
 import styled from 'styled-components';
 import { EuiDescriptionList } from '@elastic/eui';
 
-export const OverviewStats = styled(EuiDescriptionList).attrs(props => ({
+export const OverviewStats = styled(EuiDescriptionList).attrs((props) => ({
   compressed: true,
   textStyle: 'reverse',
   type: 'column',
 }))`
   & > * {
-    margin-top: ${props => props.theme.eui.paddingSizes.s} !important;
+    margin-top: ${(props) => props.theme.eui.paddingSizes.s} !important;
 
     &:first-child,
     &:nth-child(2) {

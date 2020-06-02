@@ -60,7 +60,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
               />
             </EuiContextMenuItem>,
             <AgentUnenrollProvider key="unenrollAgent">
-              {unenrollAgentsPrompt => (
+              {(unenrollAgentsPrompt) => (
                 <EuiContextMenuItem
                   icon="cross"
                   disabled={!hasWriteCapabilites || !agent.active}

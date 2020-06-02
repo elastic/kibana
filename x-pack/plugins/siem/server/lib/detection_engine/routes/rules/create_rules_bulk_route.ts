@@ -6,6 +6,7 @@
 
 import uuid from 'uuid';
 
+import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -24,7 +25,6 @@ import {
   buildSiemResponse,
 } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
-import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 
 export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
@@ -41,7 +41,7 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const alertsClient = context.alerting?.getAlertsClient();
-      const clusterClient = context.core.elasticsearch.dataClient;
+      const clusterClient = context.core.elasticsearch.legacy.client;
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.siem?.getSiemClient();
 
@@ -56,8 +56,8 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
 
       const rules = await Promise.all(
         ruleDefinitions
-          .filter(rule => rule.rule_id == null || !dupes.includes(rule.rule_id))
-          .map(async payloadRule => {
+          .filter((rule) => rule.rule_id == null || !dupes.includes(rule.rule_id))
+          .map(async (payloadRule) => {
             const {
               actions,
               anomaly_threshold: anomalyThreshold,
@@ -167,7 +167,7 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
       );
       const rulesBulk = [
         ...rules,
-        ...dupes.map(ruleId =>
+        ...dupes.map((ruleId) =>
           createBulkErrorObject({
             ruleId,
             statusCode: 409,

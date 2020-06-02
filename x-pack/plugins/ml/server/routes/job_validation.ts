@@ -66,7 +66,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
         let errorResp;
         const resp = await estimateBucketSpanFactory(
           context.ml!.mlClient.callAsCurrentUser,
-          context.core.elasticsearch.adminClient.callAsInternalUser,
+          context.ml!.mlClient.callAsInternalUser,
           mlLicense.isSecurityEnabled() === false
         )(request.body)
           // this catch gets triggered when the estimation code runs without error
@@ -187,7 +187,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
           context.ml!.mlClient.callAsCurrentUser,
           request.body,
           version,
-          context.core.elasticsearch.adminClient.callAsInternalUser,
+          context.ml!.mlClient.callAsInternalUser,
           mlLicense.isSecurityEnabled() === false
         );
 

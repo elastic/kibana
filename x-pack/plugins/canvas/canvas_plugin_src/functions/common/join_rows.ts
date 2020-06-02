@@ -56,7 +56,7 @@ export function joinRows(): ExpressionFunctionDefinition<'joinRows', Datatable, 
       },
     },
     fn: (input, { column, separator, quote, distinct }) => {
-      const columnMatch = input.columns.find(col => col.name === column);
+      const columnMatch = input.columns.find((col) => col.name === column);
 
       if (!columnMatch) {
         throw errors.columnNotFound(column);

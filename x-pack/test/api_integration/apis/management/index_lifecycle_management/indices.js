@@ -11,7 +11,7 @@ import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
 import { initElasticsearchHelpers, getRandomString } from './lib';
 import { getPolicyPayload } from './fixtures';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 

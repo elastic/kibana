@@ -95,7 +95,7 @@ export function IndexPatternDataPanel({
 
   const onToggleEmptyFields = useCallback(
     (showEmptyFields?: boolean) => {
-      setState(prevState => ({
+      setState((prevState) => ({
         ...prevState,
         showEmptyFields:
           showEmptyFields === undefined ? !prevState.showEmptyFields : showEmptyFields,
@@ -106,12 +106,12 @@ export function IndexPatternDataPanel({
 
   const indexPatternList = uniq(
     Object.values(state.layers)
-      .map(l => l.indexPatternId)
+      .map((l) => l.indexPatternId)
       .concat(currentIndexPatternId)
   )
     .sort((a, b) => a.localeCompare(b))
-    .filter(id => !!indexPatterns[id])
-    .map(id => ({
+    .filter((id) => !!indexPatterns[id])
+    .map((id) => ({
       id,
       title: indexPatterns[id].title,
       timeFieldName: indexPatterns[id].timeFieldName,
@@ -141,7 +141,7 @@ export function IndexPatternDataPanel({
           filters,
           dateRange.fromDate,
           dateRange.toDate,
-          indexPatternList.map(x => `${x.title}:${x.timeFieldName}`).join(','),
+          indexPatternList.map((x) => `${x.title}:${x.timeFieldName}`).join(','),
         ]}
       />
 
@@ -232,7 +232,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
   const allFields = currentIndexPattern.fields;
   const fieldByName = indexBy(allFields, 'name');
-  const clearLocalState = () => setLocalState(s => ({ ...s, nameFilter: '', typeFilter: [] }));
+  const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
 
   const lazyScroll = () => {
     if (scrollContainer) {
@@ -255,10 +255,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   }, [localState.nameFilter, localState.typeFilter, currentIndexPatternId, showEmptyFields]);
 
   const availableFieldTypes = uniq(allFields.map(({ type }) => type)).filter(
-    type => type in fieldTypeNames
+    (type) => type in fieldTypeNames
   );
 
-  const displayedFields = allFields.filter(field => {
+  const displayedFields = allFields.filter((field) => {
     if (!supportedFieldTypes.has(field.type)) {
       return false;
     }
@@ -289,9 +289,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     return true;
   });
 
-  const specialFields = displayedFields.filter(f => f.type === 'document');
+  const specialFields = displayedFields.filter((f) => f.type === 'document');
   const paginatedFields = displayedFields
-    .filter(f => f.type !== 'document')
+    .filter((f) => f.type !== 'document')
     .sort(sortFields)
     .slice(0, pageSize);
   const hilight = localState.nameFilter.toLowerCase();
@@ -354,7 +354,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     'Search the list of fields in the index pattern for the provided text',
                 })}
                 value={localState.nameFilter}
-                onChange={e => {
+                onChange={(e) => {
                   setLocalState({ ...localState, nameFilter: e.target.value });
                 }}
                 aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameAriaLabel', {
@@ -380,7 +380,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   icon={<EuiIcon type="filter" />}
                   isSelected={localState.typeFilter.length ? true : false}
                   onClick={() => {
-                    setLocalState(s => ({
+                    setLocalState((s) => ({
                       ...s,
                       isTypeFilterOpen: !localState.isTypeFilterOpen,
                     }));
@@ -394,7 +394,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               <FixedEuiContextMenuPanel
                 watchedItemProps={['icon', 'disabled']}
                 data-test-subj="lnsIndexPatternTypeFilterOptions"
-                items={(availableFieldTypes as DataType[]).map(type => (
+                items={(availableFieldTypes as DataType[]).map((type) => (
                   <EuiContextMenuItem
                     className="lnsInnerIndexPatternDataPanel__filterType"
                     key={type}
@@ -402,10 +402,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     data-test-subj={`typeFilter-${type}`}
                     onClick={() => {
                       trackUiEvent('indexpattern_type_filter_toggled');
-                      setLocalState(s => ({
+                      setLocalState((s) => ({
                         ...s,
                         typeFilter: localState.typeFilter.includes(type)
-                          ? localState.typeFilter.filter(t => t !== type)
+                          ? localState.typeFilter.filter((t) => t !== type)
                           : [...localState.typeFilter, type],
                       }));
                     }}
@@ -434,7 +434,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
           </div>
           <div
             className="lnsInnerIndexPatternDataPanel__listWrapper"
-            ref={el => {
+            ref={(el) => {
               if (el && !el.dataset.dynamicScroll) {
                 el.dataset.dynamicScroll = 'true';
                 setScrollContainer(el);
@@ -443,7 +443,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             onScroll={lazyScroll}
           >
             <div className="lnsInnerIndexPatternDataPanel__list">
-              {specialFields.map(field => (
+              {specialFields.map((field) => (
                 <FieldItem
                   core={core}
                   data={data}
@@ -469,7 +469,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   <EuiSpacer size="s" />
                 </>
               )}
-              {paginatedFields.map(field => {
+              {paginatedFields.map((field) => {
                 const overallField = fieldByName[field.name];
                 return (
                   <FieldItem

@@ -5,8 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { cryptoFactory } from '../../../server/lib/crypto';
-import { Logger } from '../../../types';
+import { cryptoFactory, LevelLogger } from '../../../server/lib';
 
 interface HasEncryptedHeaders {
   headers?: string;
@@ -23,7 +22,7 @@ export const decryptJobHeaders = async <
 }: {
   encryptionKey?: string;
   job: JobDocPayloadType;
-  logger: Logger;
+  logger: LevelLogger;
 }): Promise<Record<string, string>> => {
   try {
     if (typeof job.headers !== 'string') {

@@ -5,9 +5,9 @@
  */
 import { set } from 'lodash/fp';
 
+import { RequestHandlerContext } from 'src/core/server';
 import { SetupPlugins } from '../../../../plugin';
 import { KibanaRequest } from '../../../../../../../../src/core/server';
-import { RequestHandlerContext } from '../../../../../../../../target/types/core/server';
 import { FrameworkRequest } from '../../../framework';
 
 export const buildFrameworkRequest = async (

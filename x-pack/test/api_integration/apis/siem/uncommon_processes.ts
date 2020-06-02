@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { uncommonProcessesQuery } from '../../../../plugins/siem/public/containers/uncommon_processes/index.gql_query';
+import { uncommonProcessesQuery } from '../../../../plugins/siem/public/hosts/containers/uncommon_processes/index.gql_query';
 import { GetUncommonProcessesQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -16,7 +16,7 @@ const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 // typical values that have to change after an update from "scripts/es_archiver"
 const TOTAL_COUNT = 3;
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 

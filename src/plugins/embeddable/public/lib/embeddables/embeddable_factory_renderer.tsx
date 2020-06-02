@@ -62,7 +62,7 @@ export class EmbeddableFactoryRenderer extends React.Component<Props, State> {
       return;
     }
 
-    factory.create(this.props.input).then(embeddable => {
+    factory.create(this.props.input).then((embeddable) => {
       this.embeddable = embeddable;
       this.setState({ loading: false });
     });

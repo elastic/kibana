@@ -51,7 +51,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
     // Find all folders in ./plugins since we treat all them as plugin folder
     const allFiles = fs.readdirSync(path.resolve(__dirname, 'fixtures', 'plugins'));
-    const plugins = allFiles.filter(file =>
+    const plugins = allFiles.filter((file) =>
       fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
     );
 
@@ -69,8 +69,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ssl,
         serverArgs: [
           `xpack.license.self_generated.type=${license}`,
-          `xpack.security.enabled=${!disabledPlugins.includes('security') &&
-            ['trial', 'basic'].includes(license)}`,
+          `xpack.security.enabled=${
+            !disabledPlugins.includes('security') && ['trial', 'basic'].includes(license)
+          }`,
         ],
       },
       kbnTestServer: {
@@ -124,9 +125,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
               },
             },
           })}`,
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
           ...plugins.map(
-            pluginDir =>
+            (pluginDir) =>
               `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
           ),
           `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,

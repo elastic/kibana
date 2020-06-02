@@ -37,22 +37,22 @@ function sortByDirection(data, direction, fn) {
 function sortSeries(visData, model) {
   const series = get(visData, `${model.id}.series`, []);
   return model.series.reduce((acc, item) => {
-    const itemSeries = series.filter(s => {
+    const itemSeries = series.filter((s) => {
       const id = first(s.id.split(/:/));
       return id === item.id;
     });
     const direction = item.terms_direction || 'desc';
     if (item.terms_order_by === '_key') return acc.concat(itemSeries);
-    return acc.concat(sortByDirection(itemSeries, direction, s => getLastValue(s.data)));
+    return acc.concat(sortByDirection(itemSeries, direction, (s) => getLastValue(s.data)));
   }, []);
 }
 
 export function TopNVisualization(props) {
   const { backgroundColor, model, visData } = props;
 
-  const series = sortSeries(visData, model).map(item => {
+  const series = sortSeries(visData, model).map((item) => {
     const id = first(item.id.split(/:/));
-    const seriesConfig = model.series.find(s => s.id === id);
+    const seriesConfig = model.series.find((s) => s.id === id);
     if (seriesConfig) {
       const tickFormatter = createTickFormatter(
         seriesConfig.formatter,
@@ -62,7 +62,7 @@ export function TopNVisualization(props) {
       const value = getLastValue(item.data);
       let color = item.color || seriesConfig.color;
       if (model.bar_color_rules) {
-        model.bar_color_rules.forEach(rule => {
+        model.bar_color_rules.forEach((rule) => {
           if (rule.operator && rule.value != null && rule.bar_color) {
             if (OPERATORS[rule.operator](value, rule.value)) {
               color = rule.bar_color;
@@ -88,7 +88,7 @@ export function TopNVisualization(props) {
   };
 
   if (model.drilldown_url) {
-    params.onClick = item => {
+    params.onClick = (item) => {
       window.location = replaceVars(model.drilldown_url, {}, { key: item.label });
     };
   }

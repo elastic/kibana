@@ -29,7 +29,7 @@ const getXAxisTickValues = (
   const lowerBound = topTraceDuration - padding;
   const upperBound = topTraceDuration + padding;
 
-  return tickValues.filter(value => {
+  return tickValues.filter((value) => {
     const isInRange = inRange(value, lowerBound, upperBound);
     return !isInRange && value !== topTraceDuration;
   });
@@ -45,7 +45,7 @@ interface TimelineAxisProps {
 export function TimelineAxis({
   plotValues,
   marks = [],
-  topTraceDuration
+  topTraceDuration,
 }: TimelineAxisProps) {
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
   const tickFormatter = getDurationFormatter(xMax);
@@ -63,7 +63,7 @@ export function TimelineAxis({
               height: px(margins.top),
               zIndex: 2,
               width: '100%',
-              ...style
+              ...style,
             }}
           >
             <XYPlot
@@ -73,7 +73,7 @@ export function TimelineAxis({
               margin={{
                 top: margins.top,
                 left: margins.left,
-                right: margins.right
+                right: margins.right,
               }}
               xDomain={xDomain}
             >
@@ -85,7 +85,7 @@ export function TimelineAxis({
                 tickFormat={(time?: number) => tickFormatter(time).formatted}
                 tickPadding={20}
                 style={{
-                  text: { fill: theme.euiColorDarkShade }
+                  text: { fill: theme.euiColorDarkShade },
                 }}
               />
 
@@ -97,7 +97,7 @@ export function TimelineAxis({
                 />
               )}
 
-              {marks.map(mark => (
+              {marks.map((mark) => (
                 <Marker key={mark.id} mark={mark} x={xScale(mark.offset)} />
               ))}
             </XYPlot>

@@ -65,7 +65,7 @@ function createJobStats(jobsSummaryList) {
   const mlNodes = {};
   let failedJobs = 0;
 
-  jobsSummaryList.forEach(job => {
+  jobsSummaryList.forEach((job) => {
     if (job.jobState === JOB_STATE.OPENED) {
       jobStats.open.value++;
     } else if (job.jobState === JOB_STATE.CLOSED) {

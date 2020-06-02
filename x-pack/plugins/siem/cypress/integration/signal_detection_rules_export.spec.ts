@@ -37,8 +37,8 @@ describe('Export rules', () => {
     waitForSignalsIndexToBeCreated();
     goToManageSignalDetectionRules();
     exportFirstRule();
-    cy.wait('@export').then(xhr => {
-      cy.readFile(EXPECTED_EXPORTED_RULE_FILE_PATH).then($expectedExportedJson => {
+    cy.wait('@export').then((xhr) => {
+      cy.readFile(EXPECTED_EXPORTED_RULE_FILE_PATH).then(($expectedExportedJson) => {
         cy.wrap(xhr.responseBody).should('eql', $expectedExportedJson);
       });
     });

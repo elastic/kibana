@@ -50,7 +50,7 @@ export const getBucketAvgMetricAgg = ({
     {
       name: METRIC_TYPES.AVG_BUCKET,
       title: averageBucketTitle,
-      makeLabel: agg => makeNestedLabel(agg, overallAverageLabel),
+      makeLabel: (agg) => makeNestedLabel(agg, overallAverageLabel),
       subtype: siblingPipelineAggHelper.subtype,
       params: [...siblingPipelineAggHelper.params()],
       getFormat: siblingPipelineAggHelper.getFormat,

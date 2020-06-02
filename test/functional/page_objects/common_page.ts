@@ -34,7 +34,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
   const find = getService('find');
   const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['shield']);
+  const PageObjects = getPageObjects(['login']);
 
   const defaultTryTimeout = config.get('timeouts.try');
   const defaultFindTimeout = config.get('timeouts.find');
@@ -73,15 +73,20 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
+      // Disable the welcome screen. This is relevant for environments
+      // which don't allow to use the yml setting, e.g. cloud production.
+      // It is done here so it applies to logins but also to a login re-use.
+      await browser.setLocalStorageItem('home:welcome:show', 'false');
+
       if (loginPage && !wantedLoginPage) {
         log.debug('Found login page');
         if (config.get('security.disableTestUser')) {
-          await PageObjects.shield.login(
+          await PageObjects.login.login(
             config.get('servers.kibana.username'),
             config.get('servers.kibana.password')
           );
         } else {
-          await PageObjects.shield.login('test_user', 'changeme');
+          await PageObjects.login.login('test_user', 'changeme');
         }
 
         await find.byCssSelector(
@@ -130,7 +135,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     /**
      * Navigates browser using the pathname from the appConfig and subUrl as the hash
      * @param appName As defined in the apps config, e.g. 'home'
-     * @param subUrl The route after the hash (#), e.g. 'tutorial_directory/sampleData'
+     * @param subUrl The route after the hash (#), e.g. '/tutorial_directory/sampleData'
      * @param args additional arguments
      */
     public async navigateToUrl(
@@ -162,7 +167,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
      * Navigates browser using the pathname from the appConfig and subUrl as the extended path.
      * This was added to be able to test an application that uses browser history over hash history.
      * @param appName As defined in the apps config, e.g. 'home'
-     * @param subUrl The route after the appUrl, e.g. 'tutorial_directory/sampleData'
+     * @param subUrl The route after the appUrl, e.g. '/tutorial_directory/sampleData'
      * @param args additional arguments
      */
     public async navigateToUrlWithBrowserHistory(

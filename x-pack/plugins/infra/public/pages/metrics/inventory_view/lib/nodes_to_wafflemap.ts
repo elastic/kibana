@@ -16,7 +16,7 @@ import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from './type_gu
 import { SnapshotNodePath, SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 
 export function createId(path: SnapshotNodePath[]) {
-  return path.map(p => p.value).join('/');
+  return path.map((p) => p.value).join('/');
 }
 
 function findOrCreateGroupWithNodes(
@@ -31,16 +31,16 @@ function findOrCreateGroupWithNodes(
    */
   if (path.length === 2) {
     const parentId = first(path).value;
-    const existingParentGroup = groups.find(g => g.id === parentId);
+    const existingParentGroup = groups.find((g) => g.id === parentId);
     if (isWaffleMapGroupWithGroups(existingParentGroup)) {
-      const existingSubGroup = existingParentGroup.groups.find(g => g.id === id);
+      const existingSubGroup = existingParentGroup.groups.find((g) => g.id === id);
       if (isWaffleMapGroupWithNodes(existingSubGroup)) {
         return existingSubGroup;
       }
     }
   }
   const lastPath = last(path);
-  const existingGroup = groups.find(g => g.id === id);
+  const existingGroup = groups.find((g) => g.id === id);
   if (isWaffleMapGroupWithNodes(existingGroup)) {
     return existingGroup;
   }
@@ -65,7 +65,7 @@ function findOrCreateGroupWithGroups(
 ): InfraWaffleMapGroupOfGroups {
   const id = path.length === 0 ? '__all__' : createId(path);
   const lastPath = last(path);
-  const existingGroup = groups.find(g => g.id === id);
+  const existingGroup = groups.find((g) => g.id === id);
   if (isWaffleMapGroupWithGroups(existingGroup)) {
     return existingGroup;
   }
@@ -90,7 +90,7 @@ export function createWaffleMapNode(node: SnapshotNode): InfraWaffleMapNode {
     throw new Error('There must be at least one node path item');
   }
   return {
-    pathId: node.path.map(p => p.value).join('/'),
+    pathId: node.path.map((p) => p.value).join('/'),
     path: node.path,
     id: nodePathItem.value,
     ip: nodePathItem.ip,

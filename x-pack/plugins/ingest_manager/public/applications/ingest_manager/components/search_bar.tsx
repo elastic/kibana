@@ -67,7 +67,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
       }
       onInputChange={onChangeSearch}
       onItemClick={onAutocompleteClick}
-      suggestions={suggestions.map(suggestion => {
+      suggestions={suggestions.map((suggestion) => {
         return {
           ...suggestion,
           // For type
@@ -124,7 +124,7 @@ function useSuggestions(fieldPrefix: string, search: string) {
           selectionEnd: query.length,
         })
       )
-        .filter(suggestion => {
+        .filter((suggestion) => {
           if (suggestion.type === 'conjunction') {
             return true;
           }

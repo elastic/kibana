@@ -301,9 +301,7 @@ describe('queryEventsBySavedObject', () => {
       },
     });
 
-    const start = moment()
-      .subtract(1, 'days')
-      .toISOString();
+    const start = moment().subtract(1, 'days').toISOString();
 
     await clusterClientAdapter.queryEventsBySavedObject(
       'index-name',
@@ -374,12 +372,8 @@ describe('queryEventsBySavedObject', () => {
       },
     });
 
-    const start = moment()
-      .subtract(1, 'days')
-      .toISOString();
-    const end = moment()
-      .add(1, 'days')
-      .toISOString();
+    const start = moment().subtract(1, 'days').toISOString();
+    const end = moment().add(1, 'days').toISOString();
 
     await clusterClientAdapter.queryEventsBySavedObject(
       'index-name',

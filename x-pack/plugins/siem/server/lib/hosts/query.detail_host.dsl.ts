@@ -39,7 +39,7 @@ export const buildHostOverviewQuery = ({
     ignoreUnavailable: true,
     body: {
       aggregations: {
-        ...buildFieldsTermAggregation(esFields.filter(field => !['@timestamp'].includes(field))),
+        ...buildFieldsTermAggregation(esFields.filter((field) => !['@timestamp'].includes(field))),
       },
       query: { bool: { filter } },
       size: 0,

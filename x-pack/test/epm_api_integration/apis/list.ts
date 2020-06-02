@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import ServerMock from 'mock-http-server';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   describe('list', () => {
     const server = new ServerMock({ host: 'localhost', port: 6666 });
     beforeEach(() => {

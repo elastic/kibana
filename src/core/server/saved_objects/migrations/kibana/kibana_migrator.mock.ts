@@ -65,7 +65,7 @@ const createMigrator = (
   };
 
   mockMigrator.getActiveMappings.mockReturnValue(buildActiveMappings(mergeTypes(types)));
-  mockMigrator.migrateDocument.mockImplementation(doc => doc);
+  mockMigrator.migrateDocument.mockImplementation((doc) => doc);
   return mockMigrator;
 };
 

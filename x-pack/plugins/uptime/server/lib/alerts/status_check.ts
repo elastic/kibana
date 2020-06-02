@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { isRight } from 'fp-ts/lib/Either';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { i18n } from '@kbn/i18n';
-import { AlertExecutorOptions } from '../../../../alerting/server';
+import { AlertExecutorOptions } from '../../../../alerts/server';
 import { UptimeAlertTypeFactory } from './types';
 import { GetMonitorStatusResult } from '../requests';
 import { StatusCheckExecutorParamsType } from '../../../common/runtime_types';
@@ -171,6 +171,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
     ],
     state: [...commonStateTranslations],
   },
+  producer: 'uptime',
   async executor(options: AlertExecutorOptions) {
     const { params: rawParams } = options;
     const decoded = StatusCheckExecutorParamsType.decode(rawParams);

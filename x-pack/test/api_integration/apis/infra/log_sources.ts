@@ -13,7 +13,7 @@ import {
 import { decodeOrThrow } from '../../../../plugins/infra/common/runtime_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const logSourceConfiguration = getService('infraLogSourceConfiguration');
 

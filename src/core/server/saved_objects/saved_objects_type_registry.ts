@@ -64,7 +64,7 @@ export class SavedObjectTypeRegistry {
    * Return all {@link SavedObjectsType | types} currently registered that are importable/exportable.
    */
   public getImportableAndExportableTypes() {
-    return this.getAllTypes().filter(type => this.isImportableAndExportable(type.name));
+    return this.getAllTypes().filter((type) => this.isImportableAndExportable(type.name));
   }
 
   /**

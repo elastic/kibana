@@ -5,33 +5,28 @@
  */
 
 import { validateUrls } from '../../../../common/validate_urls';
-import { ReportingCore } from '../../../../server';
-import { cryptoFactory } from '../../../../server/lib/crypto';
-import {
-  ConditionalHeaders,
-  CreateJobFactory,
-  ESQueueCreateJobFn,
-  RequestFacade,
-} from '../../../../types';
+import { cryptoFactory } from '../../../../server/lib';
+import { CreateJobFactory, ESQueueCreateJobFn } from '../../../../server/types';
 import { JobParamsPDF } from '../../types';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPDF
->> = function createJobFactoryFn(reporting: ReportingCore) {
+>> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();
+  const setupDeps = reporting.getPluginSetupDeps();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
   return async function createJobFn(
     { title, relativeUrls, browserTimezone, layout, objectType }: JobParamsPDF,
-    headers: ConditionalHeaders['headers'],
-    request: RequestFacade
+    context,
+    req
   ) {
-    const serializedEncryptedHeaders = await crypto.encrypt(headers);
+    const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
 
     validateUrls(relativeUrls);
 
     return {
-      basePath: request.getBasePath(),
+      basePath: setupDeps.basePath(req),
       browserTimezone,
       forceNow: new Date().toISOString(),
       headers: serializedEncryptedHeaders,

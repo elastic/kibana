@@ -11,7 +11,6 @@ import { isRight } from 'fp-ts/lib/Either';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { AlertTypeInitializer } from '.';
 import { StatusCheckExecutorParamsType } from '../../../common/runtime_types';
-import { AlertMonitorStatus } from '../../components/overview/alerts/alerts_containers';
 import { MonitorStatusTitle } from './monitor_status_title';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants';
 import { MonitorStatusTranslations } from './translations';
@@ -57,13 +56,20 @@ export const validate = (alertParams: any) => {
 
 const { defaultActionMessage } = MonitorStatusTranslations;
 
+const AlertMonitorStatus = React.lazy(() =>
+  import('../../components/overview/alerts/alerts_containers/alert_monitor_status')
+);
+
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   autocomplete,
 }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   name: <MonitorStatusTitle />,
   iconClass: 'uptimeApp',
-  alertParamsExpression: params => <AlertMonitorStatus {...params} autocomplete={autocomplete} />,
+  alertParamsExpression: (params: any) => (
+    <AlertMonitorStatus {...params} autocomplete={autocomplete} />
+  ),
   validate,
   defaultActionMessage,
+  requiresAppContext: true,
 });

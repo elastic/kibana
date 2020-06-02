@@ -106,7 +106,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
           <EuiSpacer />
           <MappingInfoPanel
             roleMapping={this.state.roleMapping!}
-            onChange={roleMapping => this.setState({ roleMapping })}
+            onChange={(roleMapping) => this.setState({ roleMapping })}
             mode={this.editingExistingRoleMapping() ? 'edit' : 'create'}
             validateForm={this.state.validateForm}
             canUseInlineScripts={this.state.canUseInlineScripts}
@@ -119,7 +119,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
             rawRules={this.state.roleMapping!.rules}
             validateForm={this.state.validateForm}
             onValidityChange={this.onRuleValidityChange}
-            onChange={rules =>
+            onChange={(rules) =>
               this.setState({
                 roleMapping: {
                   ...this.state.roleMapping!,
@@ -218,7 +218,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
               roleMappingsAPI={this.props.roleMappingsAPI}
               notifications={this.props.notifications}
             >
-              {deleteRoleMappingsPrompt => {
+              {(deleteRoleMappingsPrompt) => {
                 return (
                   <EuiButtonEmpty
                     onClick={() =>
@@ -279,7 +279,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
         });
         this.backToRoleMappingsList();
       })
-      .catch(e => {
+      .catch((e) => {
         this.props.notifications.toasts.addError(e, {
           title: i18n.translate('xpack.security.management.editRoleMapping.saveError', {
             defaultMessage: `Error saving role mapping`,

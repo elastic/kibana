@@ -39,13 +39,13 @@ import { useApi } from './use_api';
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
   return (a: string, b: string) => {
     // make sure groupBy fields are always most left columns
-    if (groupByArr.some(d => d.aggName === a) && groupByArr.some(d => d.aggName === b)) {
+    if (groupByArr.some((d) => d.aggName === a) && groupByArr.some((d) => d.aggName === b)) {
       return a.localeCompare(b);
     }
-    if (groupByArr.some(d => d.aggName === a)) {
+    if (groupByArr.some((d) => d.aggName === a)) {
       return -1;
     }
-    if (groupByArr.some(d => d.aggName === b)) {
+    if (groupByArr.some((d) => d.aggName === b)) {
       return 1;
     }
     return a.localeCompare(b);
@@ -66,12 +66,12 @@ export const usePivotData = (
 
   // Filters mapping properties of type `object`, which get returned for nested field parents.
   const columnKeys = Object.keys(previewMappings.properties).filter(
-    key => previewMappings.properties[key].type !== 'object'
+    (key) => previewMappings.properties[key].type !== 'object'
   );
   columnKeys.sort(sortColumns(groupByArr));
 
   // EuiDataGrid State
-  const columns = columnKeys.map(id => {
+  const columns = columnKeys.map((id) => {
     const field = previewMappings.properties[id];
 
     // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']

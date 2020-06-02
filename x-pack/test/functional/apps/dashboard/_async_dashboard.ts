@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
@@ -29,7 +29,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   describe('sample data dashboard', function describeIndexTests() {
     before(async () => {
       await PageObjects.common.sleep(5000);
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.home.addSampleDataSet('flights');
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
@@ -100,14 +102,16 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await appMenu.clickLink('Discover');
       await PageObjects.discover.selectIndexPattern('kibana_sample_data_flights');
       await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
-      await retry.try(async function() {
+      await retry.try(async function () {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
     });
 
     after(async () => {
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.home.removeSampleDataSet('flights');
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
@@ -127,7 +131,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await pieChart.expectPieSliceCount(4);
 
       await appMenu.clickLink('Discover');
-      await retry.try(async function() {
+      await retry.try(async function () {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
@@ -140,7 +144,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('toggle from Discover to Dashboard attempt 1', async () => {
       await appMenu.clickLink('Discover');
-      await retry.try(async function() {
+      await retry.try(async function () {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
@@ -153,7 +157,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('toggle from Discover to Dashboard attempt 2', async () => {
       await appMenu.clickLink('Discover');
-      await retry.try(async function() {
+      await retry.try(async function () {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });

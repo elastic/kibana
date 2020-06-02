@@ -26,9 +26,9 @@ export const plugin = () => {
   return new MapsPlugin();
 };
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export {
   RenderTooltipContentParams,
   ITooltipProperty,
-} from '../../../../plugins/maps/public/layers/tooltips/tooltip_property';
+} from '../../../../plugins/maps/public/classes/tooltips/tooltip_property'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { MapEmbeddable, MapEmbeddableInput } from '../../../../plugins/maps/public/embeddable';

@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { usersQuery } from '../../../../plugins/siem/public/containers/users/index.gql_query';
+import { usersQuery } from '../../../../plugins/siem/public/network/containers/users/index.gql_query';
 import {
   Direction,
   UsersFields,
@@ -18,7 +18,7 @@ const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
 const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 const IP = '0.0.0.0';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('Users', () => {
@@ -50,7 +50,7 @@ export default function({ getService }: FtrProviderContext) {
               inspect: false,
             },
           })
-          .then(resp => {
+          .then((resp) => {
             const users = resp.data.source.Users;
             expect(users.edges.length).to.be(1);
             expect(users.totalCount).to.be(1);

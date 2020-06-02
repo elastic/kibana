@@ -29,7 +29,7 @@ export const parseNdjsonStrings = (): Transform => {
 
 export const filterExportedCounts = (): Transform => {
   return createFilterStream<ImportRuleAlertRest | RulesObjectsExportResultDetails>(
-    obj => obj != null && !has('exported_count', obj)
+    (obj) => obj != null && !has('exported_count', obj)
   );
 };
 
@@ -65,7 +65,7 @@ export const createLimitStream = (limit: number): Transform => {
 
 export const transformDataToNdjson = (data: unknown[]): string => {
   if (data.length !== 0) {
-    const dataString = data.map(rule => JSON.stringify(rule)).join('\n');
+    const dataString = data.map((rule) => JSON.stringify(rule)).join('\n');
     return `${dataString}\n`;
   } else {
     return '';

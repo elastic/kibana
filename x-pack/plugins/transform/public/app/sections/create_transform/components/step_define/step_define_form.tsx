@@ -60,7 +60,7 @@ export interface StepDefineFormProps {
   searchItems: SearchItems;
 }
 
-export const StepDefineForm: FC<StepDefineFormProps> = React.memo(props => {
+export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { searchItems } = props;
   const { indexPattern } = searchItems;
 
@@ -133,7 +133,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo(props => {
 
     const newGroupByList: PivotGroupByConfigDict = {};
     if (pivot !== undefined && pivot.group_by !== undefined) {
-      Object.entries(pivot.group_by).forEach(d => {
+      Object.entries(pivot.group_by).forEach((d) => {
         const aggName = d[0];
         const aggConfig = d[1] as PivotGroupByDict;
         const aggConfigKeys = Object.keys(aggConfig);
@@ -150,7 +150,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo(props => {
 
     const newAggList: PivotAggsConfigDict = {};
     if (pivot !== undefined && pivot.aggregations !== undefined) {
-      Object.entries(pivot.aggregations).forEach(d => {
+      Object.entries(pivot.aggregations).forEach((d) => {
         const aggName = d[0];
         const aggConfig = d[1] as PivotAggDict;
         const aggConfigKeys = Object.keys(aggConfig);

@@ -23,19 +23,26 @@ const TEST_COLUMN_NAMES = ['@message'];
 const TEST_FILTER_COLUMN_NAMES = [
   ['extension', 'jpg'],
   ['geo.src', 'IN'],
+  [
+    'agent',
+    'Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24',
+  ],
 ];
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const docTable = getService('docTable');
   const PageObjects = getPageObjects(['common', 'context', 'discover', 'timePicker']);
 
-  describe('context link in discover', function contextSize() {
-    before(async function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/62866
+  describe.skip('context link in discover', function contextSize() {
+    before(async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await Promise.all(
-        TEST_COLUMN_NAMES.map(columnName => PageObjects.discover.clickFieldListItemAdd(columnName))
+        TEST_COLUMN_NAMES.map((columnName) =>
+          PageObjects.discover.clickFieldListItemAdd(columnName)
+        )
       );
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItem(columnName);
@@ -43,7 +50,7 @@ export default function({ getService, getPageObjects }) {
       }
     });
 
-    it('should go back after loading', async function() {
+    it('should go back after loading', async function () {
       // navigate to the context view
       await docTable.clickRowToggle({ rowIndex: 0 });
       await (await docTable.getRowActions({ rowIndex: 0 }))[0].click();
@@ -55,7 +62,7 @@ export default function({ getService, getPageObjects }) {
       await browser.goBack();
       await PageObjects.discover.waitForDocTableLoadingComplete();
       const hitCount = await PageObjects.discover.getHitCount();
-      expect(hitCount).to.be('1,556');
+      expect(hitCount).to.be('522');
     });
   });
 }

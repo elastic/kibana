@@ -6,7 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { take, share, mapTo, delay, tap } from 'rxjs/operators';
-import { Logger } from '../../types';
+import { LevelLogger } from '../lib';
 
 interface IChild {
   kill: (signal: string) => Promise<any>;
@@ -15,7 +15,7 @@ interface IChild {
 // Our process can get sent various signals, and when these occur we wish to
 // kill the subprocess and then kill our process as long as the observer isn't cancelled
 export function safeChildProcess(
-  logger: Logger,
+  logger: LevelLogger,
   childProcess: IChild
 ): { terminate$: Rx.Observable<string> } {
   const ownTerminateSignal$ = Rx.merge(
@@ -25,7 +25,7 @@ export function safeChildProcess(
   ).pipe(take(1), share());
 
   const ownTerminateMapToKill$ = ownTerminateSignal$.pipe(
-    tap(signal => {
+    tap((signal) => {
       logger.debug(`Kibana process received terminate signal: ${signal}`);
     }),
     mapTo('SIGKILL')
@@ -33,7 +33,7 @@ export function safeChildProcess(
 
   const kibanaForceExit$ = Rx.fromEvent(process as NodeJS.EventEmitter, 'exit').pipe(
     take(1),
-    tap(signal => {
+    tap((signal) => {
       logger.debug(`Kibana process forcefully exited with signal: ${signal}`);
     }),
     mapTo('SIGKILL')
@@ -52,7 +52,7 @@ export function safeChildProcess(
 
     ownTerminateSignal$.pipe(
       delay(1),
-      tap(signal => {
+      tap((signal) => {
         logger.debug(`Kibana process terminate signal was: ${signal}. Closing the browser...`);
         return process.kill(process.pid, signal);
       })

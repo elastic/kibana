@@ -100,7 +100,9 @@ async function processEventsForCheckin(
 
     if (isErrorOrState(event)) {
       // Remove any global or specific to a stream event
-      const existingEventIndex = updatedErrorEvents.findIndex(e => e.stream_id === event.stream_id);
+      const existingEventIndex = updatedErrorEvents.findIndex(
+        (e) => e.stream_id === event.stream_id
+      );
       if (existingEventIndex >= 0) {
         updatedErrorEvents.splice(existingEventIndex, 1);
       }
@@ -126,7 +128,7 @@ async function createEventsForAgent(
   events: NewAgentEvent[]
 ) {
   const objects: Array<SavedObjectsBulkCreateObject<AgentEventSOAttributes>> = events.map(
-    eventData => {
+    (eventData) => {
       return {
         attributes: {
           ...eventData,
@@ -172,7 +174,7 @@ export function shouldCreateConfigAction(agent: Agent, actions: AgentAction[]): 
     return false;
   }
 
-  const isActionAlreadyGenerated = !!actions.find(action => {
+  const isActionAlreadyGenerated = !!actions.find((action) => {
     if (!action.data || action.type !== 'CONFIG_CHANGE') {
       return false;
     }

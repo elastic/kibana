@@ -7,8 +7,8 @@
 import { PluginInitializerContext } from 'src/core/server';
 import { ReportingPlugin } from './plugin';
 
-export { config, ConfigSchema } from './config';
-export { ConfigType, PluginsSetup } from './plugin';
+export { config, ConfigSchema, ConfigType } from './config';
+export { PluginsSetup } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new ReportingPlugin(initializerContext);

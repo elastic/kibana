@@ -175,6 +175,7 @@ describe('monitor status alert type', () => {
         "iconClass": "uptimeApp",
         "id": "xpack.uptime.alerts.monitorStatus",
         "name": <MonitorStatusTitle />,
+        "requiresAppContext": true,
         "validate": [Function],
       }
     `);

@@ -249,9 +249,9 @@ describe('TaskManager', () => {
   test('allows middleware registration before starting', () => {
     const client = new TaskManager(taskManagerOpts);
     const middleware: Middleware = {
-      beforeSave: jest.fn(async saveOpts => saveOpts),
-      beforeRun: jest.fn(async runOpts => runOpts),
-      beforeMarkRunning: jest.fn(async runOpts => runOpts),
+      beforeSave: jest.fn(async (saveOpts) => saveOpts),
+      beforeRun: jest.fn(async (runOpts) => runOpts),
+      beforeMarkRunning: jest.fn(async (runOpts) => runOpts),
     };
     expect(() => client.addMiddleware(middleware)).not.toThrow();
   });
@@ -259,9 +259,9 @@ describe('TaskManager', () => {
   test('disallows middleware registration after starting', async () => {
     const client = new TaskManager(taskManagerOpts);
     const middleware: Middleware = {
-      beforeSave: jest.fn(async saveOpts => saveOpts),
-      beforeRun: jest.fn(async runOpts => runOpts),
-      beforeMarkRunning: jest.fn(async runOpts => runOpts),
+      beforeSave: jest.fn(async (saveOpts) => saveOpts),
+      beforeRun: jest.fn(async (runOpts) => runOpts),
+      beforeMarkRunning: jest.fn(async (runOpts) => runOpts),
     };
 
     client.start();

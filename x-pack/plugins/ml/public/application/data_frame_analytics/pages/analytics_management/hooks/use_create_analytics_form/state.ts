@@ -220,7 +220,7 @@ export const getJobConfigFromFormState = (
       // the into an array of indices to be in the correct format for
       // the data frame analytics API.
       index: formState.sourceIndex.includes(',')
-        ? formState.sourceIndex.split(',').map(d => d.trim())
+        ? formState.sourceIndex.split(',').map((d) => d.trim())
         : formState.sourceIndex,
     },
     dest: {

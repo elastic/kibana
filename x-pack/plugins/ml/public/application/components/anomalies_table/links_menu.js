@@ -51,7 +51,7 @@ class LinksMenuUI extends Component {
     };
   }
 
-  openCustomUrl = customUrl => {
+  openCustomUrl = (customUrl) => {
     const { anomaly, interval, isAggregatedData } = this.props;
 
     console.log('Anomalies Table - open customUrl for record:', anomaly);
@@ -107,10 +107,10 @@ class LinksMenuUI extends Component {
 
       ml.results
         .getCategoryDefinition(jobId, categoryId)
-        .then(resp => {
+        .then((resp) => {
           // Prefix each of the terms with '+' so that the Elasticsearch Query String query
           // run in a drilldown Kibana dashboard has to match on all terms.
-          const termsArray = resp.terms.split(' ').map(term => `+${term}`);
+          const termsArray = resp.terms.split(' ').map((term) => `+${term}`);
           record.mlcategoryterms = termsArray.join(' ');
           record.mlcategoryregex = resp.regex;
 
@@ -119,7 +119,7 @@ class LinksMenuUI extends Component {
           const urlPath = replaceStringTokens(customUrl.url_value, record, true);
           openCustomUrlWindow(urlPath, customUrl);
         })
-        .catch(resp => {
+        .catch((resp) => {
           console.log('openCustomUrl(): error loading categoryDefinition:', resp);
           const { toasts } = this.props.kibana.services.notifications;
           toasts.addDanger(
@@ -267,7 +267,7 @@ class LinksMenuUI extends Component {
       // categorization field is of mapping type text (preferred) or keyword.
       ml.results
         .getCategoryDefinition(record.job_id, categoryId)
-        .then(resp => {
+        .then((resp) => {
           let query = null;
           // Build query using categorization regex (if keyword type) or terms (if text type).
           // Check for terms or regex in case categoryId represents an anomaly from the absence of the
@@ -322,12 +322,12 @@ class LinksMenuUI extends Component {
           // Need to encode the _a parameter as it will contain characters such as '+' if using the regex.
           const { basePath } = this.props.kibana.services.http;
           let path = basePath.get();
-          path += '/app/kibana#/discover';
+          path += '/app/discover#/';
           path += '?_g=' + _g;
           path += '&_a=' + encodeURIComponent(_a);
           window.open(path, '_blank');
         })
-        .catch(resp => {
+        .catch((resp) => {
           console.log('viewExamples(): error loading categoryDefinition:', resp);
           const { toasts } = this.props.kibana.services.notifications;
           toasts.addDanger(
@@ -344,7 +344,7 @@ class LinksMenuUI extends Component {
 
     function findFieldType(index) {
       getFieldTypeFromMapping(index, categorizationFieldName)
-        .then(resp => {
+        .then((resp) => {
           if (resp !== '') {
             createAndOpenUrl(index, resp);
           } else {
@@ -363,7 +363,7 @@ class LinksMenuUI extends Component {
   };
 
   onButtonClick = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };

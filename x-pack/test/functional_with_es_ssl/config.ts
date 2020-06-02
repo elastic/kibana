@@ -26,7 +26,7 @@ const enabledActionTypes = [
 ];
 
 // eslint-disable-next-line import/no-default-export
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
   const servers = {
@@ -51,7 +51,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('apps'),
       triggersActions: {
         pathname: '/app/kibana',
-        hash: '/management/kibana/triggersActions',
+        hash: '/management/insightsAndAlerting/triggersActions',
       },
     },
     esTestCluster: {

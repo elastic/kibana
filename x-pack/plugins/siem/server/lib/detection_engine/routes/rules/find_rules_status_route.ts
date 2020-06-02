@@ -69,7 +69,7 @@ export const findRulesStatusesRoute = (router: IRouter) => {
             );
             const failures = lastFiveErrorsForId.saved_objects
               .slice(1)
-              .map(errorItem => convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes));
+              .map((errorItem) => convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes));
             return {
               ...accumulated,
               [id]: {

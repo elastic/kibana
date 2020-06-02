@@ -34,35 +34,35 @@ const columns = [
       defaultMessage: 'Total Time',
     }),
     field: null,
-    render: shard => <TotalTime {...shard} />,
+    render: (shard) => <TotalTime {...shard} />,
   },
   {
     name: i18n.translate('xpack.monitoring.kibana.shardActivity.sourceDestinationTitle', {
       defaultMessage: 'Source / Destination',
     }),
     field: null,
-    render: shard => <SourceDestination {...shard} />,
+    render: (shard) => <SourceDestination {...shard} />,
   },
   {
     name: i18n.translate('xpack.monitoring.kibana.shardActivity.filesTitle', {
       defaultMessage: 'Files',
     }),
     field: null,
-    render: shard => <FilesProgress {...shard} />,
+    render: (shard) => <FilesProgress {...shard} />,
   },
   {
     name: i18n.translate('xpack.monitoring.kibana.shardActivity.bytesTitle', {
       defaultMessage: 'Bytes',
     }),
     field: null,
-    render: shard => <BytesProgress {...shard} />,
+    render: (shard) => <BytesProgress {...shard} />,
   },
   {
     name: i18n.translate('xpack.monitoring.kibana.shardActivity.translogTitle', {
       defaultMessage: 'Translog',
     }),
     field: null,
-    render: shard => <TranslogProgress {...shard} />,
+    render: (shard) => <TranslogProgress {...shard} />,
   },
 ];
 

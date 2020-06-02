@@ -12,6 +12,6 @@ export const getRulesToInstall = (
   installedRules: RuleAlertType[]
 ): PrepackagedRules[] => {
   return rulesFromFileSystem.filter(
-    rule => !installedRules.some(installedRule => installedRule.params.ruleId === rule.rule_id)
+    (rule) => !installedRules.some((installedRule) => installedRule.params.ruleId === rule.rule_id)
   );
 };

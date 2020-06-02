@@ -63,7 +63,7 @@ export async function runElasticsearch({ config, options }) {
 
 function getRelativeCertificateAuthorityPath(esConfig = []) {
   const caConfig = esConfig.find(
-    config => config.indexOf('--elasticsearch.ssl.certificateAuthorities') === 0
+    (config) => config.indexOf('--elasticsearch.ssl.certificateAuthorities') === 0
   );
   return caConfig ? caConfig.split('=')[1] : undefined;
 }

@@ -60,7 +60,7 @@ export class Welcome extends React.Component<Props> {
   };
 
   private redirecToSampleData() {
-    const path = this.services.addBasePath('#/home/tutorial_directory/sampleData');
+    const path = this.services.addBasePath('#/tutorial_directory/sampleData');
     window.location.href = path;
   }
 

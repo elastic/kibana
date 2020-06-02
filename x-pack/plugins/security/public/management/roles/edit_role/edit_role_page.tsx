@@ -91,8 +91,8 @@ function useRunAsUsers(
   const [userNames, setUserNames] = useState<string[] | null>(null);
   useEffect(() => {
     userAPIClient.getUsers().then(
-      users => setUserNames(users.map(user => user.username)),
-      err => fatalErrors.add(err)
+      (users) => setUserNames(users.map((user) => user.username)),
+      (err) => fatalErrors.add(err)
     );
   }, [fatalErrors, userAPIClient]);
 
@@ -143,7 +143,7 @@ function usePrivileges(
     ]).then(
       ([kibanaPrivileges, builtInESPrivileges]) =>
         setPrivileges([kibanaPrivileges, builtInESPrivileges]),
-      err => fatalErrors.add(err)
+      (err) => fatalErrors.add(err)
     );
   }, [privilegesAPIClient, fatalErrors]);
 
@@ -170,7 +170,7 @@ function useRole(
         } as Role);
 
     rolePromise
-      .then(fetchedRole => {
+      .then((fetchedRole) => {
         if (action === 'clone' && checkIfRoleReserved(fetchedRole)) {
           backToRoleList();
           return;
@@ -225,8 +225,8 @@ function useSpaces(http: HttpStart, fatalErrors: FatalErrorsSetup, spacesEnabled
   const [spaces, setSpaces] = useState<Space[] | null>(null);
   useEffect(() => {
     (spacesEnabled ? http.get('/api/spaces/space') : Promise.resolve([])).then(
-      fetchedSpaces => setSpaces(fetchedSpaces),
-      err => fatalErrors.add(err)
+      (fetchedSpaces) => setSpaces(fetchedSpaces),
+      (err) => fatalErrors.add(err)
     );
   }, [http, fatalErrors, spacesEnabled]);
 
@@ -255,7 +255,7 @@ function useFeatures(
 
         fatalErrors.add(err);
       })
-      .then(retrievedFeatures => {
+      .then((retrievedFeatures) => {
         setFeatures(retrievedFeatures);
       });
   }, [fatalErrors, getFeatures]);
@@ -380,9 +380,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
                 id="xpack.security.management.editRole.roleNameFormRowHelpText"
                 defaultMessage="A role's name cannot be changed once it has been created."
               />
-            ) : (
-              undefined
-            )
+            ) : undefined
           }
           {...validator.validateRoleName(role)}
         >

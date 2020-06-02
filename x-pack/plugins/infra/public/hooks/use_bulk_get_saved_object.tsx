@@ -24,7 +24,7 @@ export const useBulkGetSavedObject = (type: string) => {
           if (!savedObjectsClient) {
             throw new Error('Saved objects client is unavailable');
           }
-          const d = await savedObjectsClient.bulkGet(ids.map(i => ({ type, id: i })));
+          const d = await savedObjectsClient.bulkGet(ids.map((i) => ({ type, id: i })));
           setError(null);
           setLoading(false);
           setData(d);

@@ -10,14 +10,14 @@ import {
   SearchParams,
   IndicesCreateParams,
   DeleteDocumentResponse,
-  DeleteDocumentParams
+  DeleteDocumentParams,
 } from 'elasticsearch';
 import { cloneDeep, isString, merge } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import chalk from 'chalk';
 import {
   ESSearchRequest,
-  ESSearchResponse
+  ESSearchResponse,
 } from '../../../typings/elasticsearch';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 import { pickKeys } from '../../../common/utils/pick_keys';
@@ -47,7 +47,7 @@ export function isApmIndex(
     return apmIndices.includes(indexParam);
   } else if (Array.isArray(indexParam)) {
     // return false if at least one of the indices is not an APM index
-    return indexParam.every(index => apmIndices.includes(index));
+    return indexParam.every((index) => apmIndices.includes(index));
   }
   return false;
 }
@@ -67,17 +67,17 @@ function addFilterForLegacyData(
       body: {
         query: {
           bool: {
-            filter: []
-          }
-        }
-      }
+            filter: [],
+          },
+        },
+      },
     },
     cloneDeep(params)
   );
 
   // add filter for omitting pre-7.x data
   nextParams.body.query.bool.filter.push({
-    range: { [OBSERVER_VERSION_MAJOR]: { gte: 7 } }
+    range: { [OBSERVER_VERSION_MAJOR]: { gte: 7 } },
   });
 
   return nextParams;
@@ -93,9 +93,9 @@ async function getParamsForSearchRequest(
   const [indices, includeFrozen] = await Promise.all([
     getApmIndices({
       savedObjectsClient: context.core.savedObjects.client,
-      config: context.config
+      config: context.config,
     }),
-    uiSettings.client.get('search:includeFrozen')
+    uiSettings.client.get('search:includeFrozen'),
   ]);
 
   // Get indices for legacy data filter (only those which apply)
@@ -112,7 +112,7 @@ async function getParamsForSearchRequest(
   );
   return {
     ...addFilterForLegacyData(apmIndices, params, apmOptions), // filter out pre-7.0 data
-    ignore_throttled: !includeFrozen // whether to query frozen indices or not
+    ignore_throttled: !includeFrozen, // whether to query frozen indices or not
   };
 }
 
@@ -137,8 +137,8 @@ export function getESClient(
 ) {
   const {
     callAsCurrentUser,
-    callAsInternalUser
-  } = context.core.elasticsearch.dataClient;
+    callAsInternalUser,
+  } = context.core.elasticsearch.legacy.client;
 
   async function callEs(operationName: string, params: Record<string, any>) {
     const startTime = process.hrtime();
@@ -218,8 +218,8 @@ export function getESClient(
       return callEs('transport.request', {
         method: 'POST',
         path: '/_security/user/_has_privileges',
-        body: params
+        body: params,
       });
-    }
+    },
   };
 }

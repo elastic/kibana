@@ -16,7 +16,7 @@ export class WhereExpression extends Component {
   };
 
   _togglePopover = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };

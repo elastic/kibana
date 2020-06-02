@@ -184,7 +184,7 @@ export const DatavisualizerSelector: FC = () => {
                     footer={
                       <EuiButton
                         target="_blank"
-                        href="kibana#/management/elasticsearch/license_management/home"
+                        href="kibana#/management/stack/license_management/home"
                       >
                         <FormattedMessage
                           id="xpack.ml.datavisualizer.selector.startTrialButtonLabel"

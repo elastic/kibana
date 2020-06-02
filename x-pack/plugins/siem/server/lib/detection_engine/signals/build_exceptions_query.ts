@@ -3,8 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import {
+  ListOperator,
+  ListValues,
+  List,
+} from '../../../../common/detection_engine/schemas/types/lists_default_array';
 import { Query } from '../../../../../../../src/plugins/data/server';
-import { List, ListOperator, ListValues } from '../routes/schemas/types/lists_default_array';
 import { RuleAlertParams, Language } from '../types';
 
 type Operators = 'and' | 'or' | 'not';
@@ -116,7 +120,7 @@ export const buildMatchAll = ({
     default:
       const or = getLanguageBooleanOperator({ language, value: 'or' });
       const exceptionOperator = operatorBuilder({ operator, language });
-      const matchAllValues = values.map(value => {
+      const matchAllValues = values.map((value) => {
         return value.name;
       });
 
@@ -149,7 +153,7 @@ export const formatQuery = ({
 }): string => {
   if (exceptions.length > 0) {
     const or = getLanguageBooleanOperator({ language, value: 'or' });
-    const formattedExceptions = exceptions.map(exception => {
+    const formattedExceptions = exceptions.map((exception) => {
       return `(${query}${exception})`;
     });
 

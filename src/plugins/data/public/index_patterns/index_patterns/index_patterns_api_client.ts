@@ -54,13 +54,7 @@ export class IndexPatternsApiClient {
   }
 
   _getUrl(path: string[]) {
-    return (
-      API_BASE_URL +
-      path
-        .filter(Boolean)
-        .map(encodeURIComponent)
-        .join('/')
-    );
+    return API_BASE_URL + path.filter(Boolean).map(encodeURIComponent).join('/');
   }
 
   getFieldsForTimePattern(options: GetFieldsOptions = {}) {

@@ -15,9 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const monitor = () => uptime.monitor;
 
   describe('Observer location', () => {
-    const start = moment()
-      .subtract('15', 'm')
-      .toISOString();
+    const start = moment().subtract('15', 'm').toISOString();
     const end = moment().toISOString();
 
     const MONITOR_ID = 'location-testing-id';

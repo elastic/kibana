@@ -10,29 +10,29 @@ import { createIndex } from '../../helpers/create_index';
 import { ClientMock } from '../fixtures/legacy_elasticsearch';
 import { constants } from '../../constants';
 
-describe('Create Index', function() {
-  describe('Does not exist', function() {
+describe('Create Index', function () {
+  describe('Does not exist', function () {
     let client;
     let createSpy;
 
-    beforeEach(function() {
+    beforeEach(function () {
       client = new ClientMock();
       createSpy = sinon.spy(client, 'callAsInternalUser').withArgs('indices.create');
     });
 
-    it('should return true', function() {
+    it('should return true', function () {
       const indexName = 'test-index';
       const result = createIndex(client, indexName);
 
-      return result.then(exists => expect(exists).to.be(true));
+      return result.then((exists) => expect(exists).to.be(true));
     });
 
-    it('should create the index with mappings and default settings', function() {
+    it('should create the index with mappings and default settings', function () {
       const indexName = 'test-index';
       const settings = constants.DEFAULT_SETTING_INDEX_SETTINGS;
       const result = createIndex(client, indexName);
 
-      return result.then(function() {
+      return result.then(function () {
         const payload = createSpy.getCall(0).args[1];
         sinon.assert.callCount(createSpy, 1);
         expect(payload).to.have.property('index', indexName);
@@ -44,7 +44,7 @@ describe('Create Index', function() {
       });
     });
 
-    it('should create the index with custom settings', function() {
+    it('should create the index with custom settings', function () {
       const indexName = 'test-index';
       const settings = {
         ...constants.DEFAULT_SETTING_INDEX_SETTINGS,
@@ -55,7 +55,7 @@ describe('Create Index', function() {
       };
       const result = createIndex(client, indexName, settings);
 
-      return result.then(function() {
+      return result.then(function () {
         const payload = createSpy.getCall(0).args[1];
         sinon.assert.callCount(createSpy, 1);
         expect(payload).to.have.property('index', indexName);
@@ -68,11 +68,11 @@ describe('Create Index', function() {
     });
   });
 
-  describe('Does exist', function() {
+  describe('Does exist', function () {
     let client;
     let createSpy;
 
-    beforeEach(function() {
+    beforeEach(function () {
       client = new ClientMock();
       sinon
         .stub(client, 'callAsInternalUser')
@@ -81,18 +81,18 @@ describe('Create Index', function() {
       createSpy = client.callAsInternalUser.withArgs('indices.create');
     });
 
-    it('should return true', function() {
+    it('should return true', function () {
       const indexName = 'test-index';
       const result = createIndex(client, indexName);
 
-      return result.then(exists => expect(exists).to.be(true));
+      return result.then((exists) => expect(exists).to.be(true));
     });
 
-    it('should not create the index', function() {
+    it('should not create the index', function () {
       const indexName = 'test-index';
       const result = createIndex(client, indexName);
 
-      return result.then(function() {
+      return result.then(function () {
         sinon.assert.callCount(createSpy, 0);
       });
     });

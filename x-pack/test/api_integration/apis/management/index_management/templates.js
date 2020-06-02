@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { initElasticsearchHelpers, getRandomString } from './lib';
 import { registerHelpers } from './templates.helpers';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
@@ -38,7 +38,7 @@ export default function({ getService }) {
       it('should list all the index templates with the expected parameters', async () => {
         const { body: templates } = await getAllTemplates().expect(200);
 
-        const createdTemplate = templates.find(template => template.name === payload.name);
+        const createdTemplate = templates.find((template) => template.name === payload.name);
         const expectedKeys = [
           'name',
           'indexPatterns',
@@ -150,9 +150,9 @@ export default function({ getService }) {
 
         let catTemplateResponse = await catTemplate(templateName);
 
-        expect(catTemplateResponse.find(template => template.name === payload.name).name).to.equal(
-          templateName
-        );
+        expect(
+          catTemplateResponse.find((template) => template.name === payload.name).name
+        ).to.equal(templateName);
 
         const { body } = await deleteTemplates([
           { name: templateName, formatVersion: payload._kbnMeta.formatVersion },
@@ -163,7 +163,7 @@ export default function({ getService }) {
 
         catTemplateResponse = await catTemplate(templateName);
 
-        expect(catTemplateResponse.find(template => template.name === payload.name)).to.equal(
+        expect(catTemplateResponse.find((template) => template.name === payload.name)).to.equal(
           undefined
         );
       });

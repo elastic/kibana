@@ -34,10 +34,7 @@ describe('ColorPicker', () => {
     const wrapper = mount(<ColorPicker {...defaultProps} />);
 
     const stateBefore = wrapper.state();
-    wrapper
-      .find('button')
-      .at(0)
-      .simulate('click');
+    wrapper.find('button').at(0).simulate('click');
     const stateAfter = wrapper.state();
 
     expect(stateBefore.displayPicker).toBe(!stateAfter.displayPicker);

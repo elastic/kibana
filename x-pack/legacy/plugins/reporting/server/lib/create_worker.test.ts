@@ -5,7 +5,7 @@
  */
 
 import * as sinon from 'sinon';
-import { ReportingConfig, ReportingCore } from '../../server/types';
+import { ReportingConfig, ReportingCore } from '../../server';
 import { createMockReportingCore } from '../../test_helpers';
 import { createWorkerFactory } from './create_worker';
 // @ts-ignore

@@ -55,7 +55,7 @@ export function vSphereMetricsSpecProvider(context: TutorialContext): TutorialSc
         label: i18n.translate('home.tutorials.vsphereMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

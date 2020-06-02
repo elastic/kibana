@@ -155,7 +155,7 @@ const createColumns = (
   {
     actions: [
       {
-        render: category => (
+        render: (category) => (
           <DatasetActionsList
             categorizationJobId={categorizationJobId}
             categoryId={category.categoryId}

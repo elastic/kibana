@@ -20,7 +20,6 @@ import { AgentConfig, Datasource } from '../../../../../types';
 import { TableRowActions } from '../../../components/table_row_actions';
 import { DangerEuiContextMenuItem } from '../../../components/danger_eui_context_menu_item';
 import { useCapabilities, useLink } from '../../../../../hooks';
-import { useAgentConfigLink } from '../../hooks/use_details_uri';
 import { DatasourceDeleteProvider } from '../../../components/datasource_delete_provider';
 import { useConfigRefresh } from '../../hooks/use_config';
 import { PackageIcon } from '../../../../../components/package_icon';
@@ -54,9 +53,8 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
   config,
   ...rest
 }) => {
+  const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
-  const addDatasourceLink = useAgentConfigLink('add-datasource', { configId: config.id });
-  const editDatasourceLink = useLink(`/configs/${config.id}/edit-datasource`);
   const refreshConfig = useConfigRefresh();
 
   // With the datasources provided on input, generate the list of datasources
@@ -69,7 +67,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
   ] => {
     const namespacesValues: string[] = [];
     const inputTypesValues: string[] = [];
-    const mappedDatasources = originalDatasources.map<InMemoryDatasource>(datasource => {
+    const mappedDatasources = originalDatasources.map<InMemoryDatasource>((datasource) => {
       if (datasource.namespace && !namespacesValues.includes(datasource.namespace)) {
         namespacesValues.push(datasource.namespace);
       }
@@ -86,7 +84,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
 
           streamSummary.total += input.streams.length;
           streamSummary.enabled += input.enabled
-            ? input.streams.filter(stream => stream.enabled).length
+            ? input.streams.filter((stream) => stream.enabled).length
             : 0;
 
           return streamSummary;
@@ -216,7 +214,10 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
                   <EuiContextMenuItem
                     disabled={!hasWriteCapabilities}
                     icon="pencil"
-                    href={`${editDatasourceLink}/${datasource.id}`}
+                    href={getHref('edit_datasource', {
+                      configId: config.id,
+                      datasourceId: datasource.id,
+                    })}
                     key="datasourceEdit"
                   >
                     <FormattedMessage
@@ -232,7 +233,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
                   //   />
                   // </EuiContextMenuItem>,
                   <DatasourceDeleteProvider agentConfig={config} key="datasourceDelete">
-                    {deleteDatasourcePrompt => {
+                    {(deleteDatasourcePrompt) => {
                       return (
                         <DangerEuiContextMenuItem
                           disabled={!hasWriteCapabilities}
@@ -256,7 +257,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
         ],
       },
     ],
-    [config, editDatasourceLink, hasWriteCapabilities, refreshConfig]
+    [config, getHref, hasWriteCapabilities, refreshConfig]
   );
 
   return (
@@ -274,9 +275,10 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
       search={{
         toolsRight: [
           <EuiButton
+            key="addDatasourceButton"
             isDisabled={!hasWriteCapabilities}
             iconType="plusInCircle"
-            href={addDatasourceLink}
+            href={getHref('add_datasource_from_configuration', { configId: config.id })}
           >
             <FormattedMessage
               id="xpack.ingestManager.configDetails.addDatasourceButtonText"

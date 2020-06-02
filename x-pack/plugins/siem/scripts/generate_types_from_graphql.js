@@ -11,7 +11,7 @@ const { join, resolve } = require('path');
 const { generate } = require('graphql-code-generator');
 
 const GRAPHQL_GLOBS = [
-  join('public', 'containers', '**', '*.gql_query.ts{,x}'),
+  join('public', '**', '*.gql_query.ts{,x}'),
   join('common', 'graphql', '**', '*.gql_query.ts{,x}'),
 ];
 const OUTPUT_INTROSPECTION_PATH = resolve('public', 'graphql', 'introspection.json');

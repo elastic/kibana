@@ -10,7 +10,7 @@ import {
   getSelectedLayer,
   getSelectedLayerJoinDescriptors,
 } from '../../../selectors/map_selectors';
-import { setJoinsForLayer } from '../../../actions/map_actions';
+import { setJoinsForLayer } from '../../../actions';
 
 function mapDispatchToProps(dispatch) {
   return {

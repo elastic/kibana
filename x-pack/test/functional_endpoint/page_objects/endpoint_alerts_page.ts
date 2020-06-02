@@ -27,11 +27,7 @@ export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
           .split(':')[0]
           .trim()
           .replace(/-./g, (c: any) => c.substr(1).toUpperCase()),
-        style
-          .split(':')
-          .slice(1)
-          .join(':')
-          .trim(),
+        style.split(':').slice(1).join(':').trim(),
       ])
       .reduce(
         (styleObj: any, style: any) => ({
@@ -68,11 +64,11 @@ export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
       const $ = await hostTable.parseDomContent();
       return $(element)
         .toArray()
-        .map(row =>
+        .map((row) =>
           $(row)
             .find('.euiTableCellContent')
             .toArray()
-            .map(cell =>
+            .map((cell) =>
               $(cell)
                 .text()
                 .replace(/&nbsp;/g, '')

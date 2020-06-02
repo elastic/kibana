@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
-import { createMockReportingCore } from '../../../../test_helpers';
-import { cryptoFactory } from '../../../../server/lib/crypto';
-import { LevelLogger } from '../../../../server/lib';
-import { CancellationToken } from '../../../../types';
-import { ReportingCore } from '../../../../server';
-import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { JobDocPayloadPDF } from '../../types';
-import { executeJobFactory } from './index';
-
 jest.mock('../lib/generate_pdf', () => ({ generatePdfObservableFactory: jest.fn() }));
+
+import * as Rx from 'rxjs';
+import { CancellationToken } from '../../../../../../../plugins/reporting/common';
+import { ReportingCore } from '../../../../server';
+import { cryptoFactory, LevelLogger } from '../../../../server/lib';
+import { createMockReportingCore } from '../../../../test_helpers';
+import { JobDocPayloadPDF } from '../../types';
+import { generatePdfObservableFactory } from '../lib/generate_pdf';
+import { executeJobFactory } from './index';
 
 let mockReporting: ReportingCore;
 
@@ -44,6 +43,7 @@ beforeEach(async () => {
     'server.basePath': '/sbp',
   };
   const reportingConfig = {
+    index: '.reports-test',
     encryptionKey: mockEncryptionKey,
     'kibanaServer.hostname': 'localhost',
     'kibanaServer.port': 5601,
@@ -57,8 +57,10 @@ beforeEach(async () => {
   mockReporting = await createMockReportingCore(mockReportingConfig);
 
   const mockElasticsearch = {
-    dataClient: {
-      asScoped: () => ({ callAsCurrentUser: jest.fn() }),
+    legacy: {
+      client: {
+        asScoped: () => ({ callAsCurrentUser: jest.fn() }),
+      },
     },
   };
   const mockGetElasticsearch = jest.fn();

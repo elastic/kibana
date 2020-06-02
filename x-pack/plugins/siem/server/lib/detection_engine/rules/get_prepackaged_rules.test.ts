@@ -16,7 +16,7 @@ describe('get_existing_prepackaged_rules', () => {
   test('no rule should have the same rule_id as another rule_id', () => {
     const prePacakgedRules = getPrepackagedRules();
     let existingRuleIds: PrepackagedRules[] = [];
-    prePacakgedRules.forEach(rule => {
+    prePacakgedRules.forEach((rule) => {
       const foundDuplicate = existingRuleIds.reduce((accum, existingRule) => {
         if (existingRule.rule_id === rule.rule_id) {
           return `Found duplicate rule_id of ${rule.rule_id} between these two rule names of "${rule.name}" and "${existingRule.name}"`;

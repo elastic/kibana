@@ -39,7 +39,7 @@ export const PageViewLogInContext: React.FC = () => {
 
   const streamItems = useMemo(
     () =>
-      entries.map(entry => ({
+      entries.map((entry) => ({
         kind: 'logEntry' as const,
         logEntry: entry,
         highlights: [],

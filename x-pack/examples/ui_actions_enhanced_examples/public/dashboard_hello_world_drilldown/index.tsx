@@ -39,7 +39,7 @@ export class DashboardHelloWorldDrilldown implements Drilldown<Config, ActionCon
       <EuiFieldText
         fullWidth
         value={config.name}
-        onChange={event => onConfig({ ...config, name: event.target.value })}
+        onChange={(event) => onConfig({ ...config, name: event.target.value })}
       />
     </EuiFormRow>
   );

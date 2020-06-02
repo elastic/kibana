@@ -144,7 +144,7 @@ export const validateAdvancedEditor = (state: State): State => {
       sourceIndexNameValid = !sourceIndex.includes(',');
     }
     if (Array.isArray(sourceIndex)) {
-      sourceIndexNameValid = !sourceIndex.some(d => d?.includes(','));
+      sourceIndexNameValid = !sourceIndex.some((d) => d?.includes(','));
     }
   }
 
@@ -479,7 +479,7 @@ export function reducer(state: State, action: Action): State {
       // update state attributes which are derived from other state attributes.
       if (action.payload.destinationIndex !== undefined) {
         newFormState.destinationIndexNameExists = state.indexNames.some(
-          name => newFormState.destinationIndex === name
+          (name) => newFormState.destinationIndex === name
         );
         newFormState.destinationIndexNameEmpty = newFormState.destinationIndex === '';
         newFormState.destinationIndexNameValid = isValidIndexName(newFormState.destinationIndex);
@@ -488,7 +488,7 @@ export function reducer(state: State, action: Action): State {
       }
 
       if (action.payload.jobId !== undefined) {
-        newFormState.jobIdExists = state.jobIds.some(id => newFormState.jobId === id);
+        newFormState.jobIdExists = state.jobIds.some((id) => newFormState.jobId === id);
         newFormState.jobIdEmpty = newFormState.jobId === '';
         newFormState.jobIdValid = isJobIdValid(newFormState.jobId);
         newFormState.jobIdInvalidMaxLength = !!maxLengthValidator(JOB_ID_MAX_LENGTH)(
@@ -515,7 +515,7 @@ export function reducer(state: State, action: Action): State {
     case ACTION.SET_INDEX_NAMES: {
       const newState = { ...state, indexNames: action.indexNames };
       newState.form.destinationIndexNameExists = newState.indexNames.some(
-        name => newState.form.destinationIndex === name
+        (name) => newState.form.destinationIndex === name
       );
       return newState;
     }
@@ -547,7 +547,7 @@ export function reducer(state: State, action: Action): State {
 
     case ACTION.SET_JOB_IDS: {
       const newState = { ...state, jobIds: action.jobIds };
-      newState.form.jobIdExists = newState.jobIds.some(id => newState.form.jobId === id);
+      newState.form.jobIdExists = newState.jobIds.some((id) => newState.form.jobId === id);
       return newState;
     }
 

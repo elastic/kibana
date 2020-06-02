@@ -40,7 +40,7 @@ const totalMap = new Map<string, number>();
 
 export const asyncDemoSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_DEMO_SEARCH_STRATEGY> = () => {
   return {
-    search: async request => {
+    search: async (request) => {
       const id = request.id ?? generateId();
 
       const loaded = (loadedMap.get(id) ?? 0) + 1;
@@ -52,7 +52,7 @@ export const asyncDemoSearchStrategyProvider: TSearchStrategyProvider<typeof ASY
       const fibonacciSequence = getFibonacciSequence(loaded);
       return { id, total, loaded, fibonacciSequence };
     },
-    cancel: async id => {
+    cancel: async (id) => {
       loadedMap.delete(id);
       totalMap.delete(id);
     },

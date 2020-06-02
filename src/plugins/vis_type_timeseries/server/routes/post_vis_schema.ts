@@ -26,7 +26,7 @@ const stringRequired = schema.string();
 
 const arrayNullable = schema.arrayOf(schema.nullable(schema.any()));
 
-const validateInteger: TypeOptions<number>['validate'] = value => {
+const validateInteger: TypeOptions<number>['validate'] = (value) => {
   if (!Number.isInteger(value)) {
     return `${value} is not an integer`;
   }

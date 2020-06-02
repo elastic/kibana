@@ -27,9 +27,7 @@ import {
 } from '../screens/signal_detection_rules';
 
 export const activateRule = (rulePosition: number) => {
-  cy.get(RULE_SWITCH)
-    .eq(rulePosition)
-    .click({ force: true });
+  cy.get(RULE_SWITCH).eq(rulePosition).click({ force: true });
 };
 
 export const changeToThreeHundredRowsPerPage = () => {
@@ -38,9 +36,7 @@ export const changeToThreeHundredRowsPerPage = () => {
 };
 
 export const deleteFirstRule = () => {
-  cy.get(COLLAPSED_ACTION_BTN)
-    .first()
-    .click({ force: true });
+  cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
   cy.get(DELETE_RULE_ACTION_BTN).click();
 };
 
@@ -50,9 +46,7 @@ export const deleteSelectedRules = () => {
 };
 
 export const exportFirstRule = () => {
-  cy.get(COLLAPSED_ACTION_BTN)
-    .first()
-    .click({ force: true });
+  cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
   cy.get(EXPORT_ACTION_BTN).click();
   cy.get(EXPORT_ACTION_BTN).should('not.exist');
 };
@@ -72,9 +66,7 @@ export const goToRuleDetails = () => {
 };
 
 export const loadPrebuiltDetectionRules = () => {
-  cy.get(LOAD_PREBUILT_RULES_BTN)
-    .should('exist')
-    .click({ force: true });
+  cy.get(LOAD_PREBUILT_RULES_BTN).should('exist').click({ force: true });
 };
 
 export const reloadDeletedRules = () => {
@@ -83,9 +75,7 @@ export const reloadDeletedRules = () => {
 
 export const selectNumberOfRules = (numberOfRules: number) => {
   for (let i = 0; i < numberOfRules; i++) {
-    cy.get(RULE_CHECKBOX)
-      .eq(i)
-      .click({ force: true });
+    cy.get(RULE_CHECKBOX).eq(i).click({ force: true });
   }
 };
 

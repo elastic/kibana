@@ -18,7 +18,7 @@ const introspectionQuery = gql`
   }
 `;
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
   const supertest = getService('supertestWithoutAuth');
   const security = getService('security');

@@ -6,7 +6,7 @@
 
 import { has } from 'lodash/fp';
 import { INTERNAL_IDENTIFIER } from '../../../../common/constants';
-import { AlertsClient } from '../../../../../alerting/server';
+import { AlertsClient } from '../../../../../alerts/server';
 import { findRules } from '../rules/find_rules';
 
 export interface TagType {
@@ -44,7 +44,7 @@ export const readTags = async ({
   alertsClient: AlertsClient;
 }): Promise<string[]> => {
   const tags = await readRawTags({ alertsClient });
-  return tags.filter(tag => !tag.startsWith(INTERNAL_IDENTIFIER));
+  return tags.filter((tag) => !tag.startsWith(INTERNAL_IDENTIFIER));
 };
 
 export const readRawTags = async ({

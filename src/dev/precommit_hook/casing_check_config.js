@@ -42,6 +42,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
   'src/core/server/core_app/assets/fonts/**/*',
+  'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/**/*',
   'packages/kbn-utility-types/test-d/**/*',
   '**/Jenkinsfile*',
   'Dockerfile*',
@@ -63,6 +64,8 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/apm/public/**/*',
   'x-pack/plugins/apm/scripts/**/*',
   'x-pack/plugins/apm/e2e/**/*',
+
+  'x-pack/plugins/maps/server/fonts/**/*',
 ];
 
 /**

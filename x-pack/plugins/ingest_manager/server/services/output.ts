@@ -122,7 +122,7 @@ class OutputService {
     });
 
     return {
-      items: outputs.saved_objects.map<Output>(outputSO => {
+      items: outputs.saved_objects.map<Output>((outputSO) => {
         return {
           id: outputSO.id,
           ...outputSO.attributes,
