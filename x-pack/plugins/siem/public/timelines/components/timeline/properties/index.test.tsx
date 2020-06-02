@@ -26,6 +26,24 @@ jest.mock('../../../../common/components/utils');
   width: mockedWidth,
 }));
 
+jest.mock('react-redux', () => {
+  const originalModule = jest.requireActual('react-redux');
+
+  return {
+    ...originalModule,
+    useSelector: jest.fn().mockReturnValue({ savedObjectId: '1' }),
+  };
+});
+
+jest.mock('react-router-dom', () => {
+  const originalModule = jest.requireActual('react-router-dom');
+
+  return {
+    ...originalModule,
+    useHistory: jest.fn(),
+  };
+});
+
 describe('Properties', () => {
   const usersViewing = ['elastic'];
 
@@ -62,7 +80,45 @@ describe('Properties', () => {
         />
       </ReduxStoreProvider>
     );
+
+    wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
+
     expect(wrapper.find('[data-test-subj="timeline-properties"]').exists()).toEqual(true);
+    expect(wrapper.find('button[data-test-subj="attach-timeline-case"]').prop('disabled')).toEqual(
+      false
+    );
+  });
+
+  test('renders correctly draft timeline', () => {
+    const wrapper = mount(
+      <ReduxStoreProvider store={store}>
+        <Properties
+          associateNote={jest.fn()}
+          createTimeline={jest.fn()}
+          isDataInTimeline={false}
+          isDatepickerLocked={false}
+          isFavorite={false}
+          title=""
+          description=""
+          getNotesByIds={jest.fn()}
+          noteIds={[]}
+          status={TimelineStatus.draft}
+          timelineId="abc"
+          toggleLock={jest.fn()}
+          updateDescription={jest.fn()}
+          updateIsFavorite={jest.fn()}
+          updateTitle={jest.fn()}
+          updateNote={jest.fn()}
+          usersViewing={usersViewing}
+        />
+      </ReduxStoreProvider>
+    );
+
+    wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
+
+    expect(wrapper.find('button[data-test-subj="attach-timeline-case"]').prop('disabled')).toEqual(
+      true
+    );
   });
 
   test('it renders an empty star icon when it is NOT a favorite', () => {
