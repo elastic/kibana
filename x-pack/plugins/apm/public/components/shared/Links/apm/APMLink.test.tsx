@@ -13,7 +13,7 @@ test('APMLink should produce the correct URL', async () => {
   const href = await getRenderedHref(
     () => <APMLink path="/some/path" query={{ transactionId: 'blah' }} />,
     {
-      search: '?rangeFrom=now-5h&rangeTo=now-2h'
+      search: '?rangeFrom=now-5h&rangeTo=now-2h',
     } as Location
   );
 
@@ -26,7 +26,7 @@ test('APMLink should retain current kuery value if it exists', async () => {
   const href = await getRenderedHref(
     () => <APMLink path="/some/path" query={{ transactionId: 'blah' }} />,
     {
-      search: '?kuery=host.hostname~20~3A~20~22fakehostname~22'
+      search: '?kuery=host.hostname~20~3A~20~22fakehostname~22',
     } as Location
   );
 
@@ -44,7 +44,7 @@ test('APMLink should overwrite current kuery value if new kuery value is provide
       />
     ),
     {
-      search: '?kuery=host.hostname~20~3A~20~22fakehostname~22'
+      search: '?kuery=host.hostname~20~3A~20~22fakehostname~22',
     } as Location
   );
 

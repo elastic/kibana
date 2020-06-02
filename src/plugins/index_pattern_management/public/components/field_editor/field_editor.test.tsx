@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import React from 'react';
-
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import {
   IndexPattern,
   IndexPatternField,
@@ -27,12 +24,12 @@ import {
   FieldFormatInstanceType,
 } from 'src/plugins/data/public';
 
-import { coreMock } from '../../../../../core/public/mocks';
-
 jest.mock('brace/mode/groovy', () => ({}));
 
-import { FieldEdiorProps, FieldEditor } from './field_editor';
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { FieldEditor } from './field_editor';
+
+import { mockManagementPlugin } from '../../mocks';
+import { createComponentWithContext } from '../test_utils';
 
 jest.mock('@elastic/eui', () => ({
   EuiBasicTable: 'eui-basic-table',
@@ -82,7 +79,7 @@ const fields: IndexPatternField[] = [
 
 // @ts-ignore
 fields.getByName = (name: string) => {
-  return fields.find(field => field.name === name);
+  return fields.find((field) => field.name === name);
 };
 
 class Format {
@@ -99,53 +96,38 @@ const field = {
 };
 
 describe('FieldEditor', () => {
-  const dataStartServices = dataPluginMock.createStartContract();
-  const coreStartServices = coreMock.createStart();
-
   let indexPattern: IndexPattern;
 
-  const services: FieldEdiorProps['services'] = ({
-    Field: () => {},
-    getConfig: () => {},
-    fieldFormatEditors: [],
-    redirectAway: () => {},
-    docLinksScriptedFields: {},
-    fieldFormats: dataStartServices.fieldFormats,
-    toasts: coreStartServices.notifications.toasts,
-    http: {},
-    uiSettings: {},
-    SearchBar: dataStartServices.ui.SearchBar,
-    indexPatterns: dataStartServices.indexPatterns,
-  } as unknown) as FieldEdiorProps['services'];
+  const mockContext = mockManagementPlugin.createIndexPatternManagmentContext();
+  mockContext.data.fieldFormats.getDefaultType = jest.fn(
+    () => (({} as unknown) as FieldFormatInstanceType)
+  );
+  mockContext.data.fieldFormats.getByFieldType = jest.fn((fieldType) => {
+    if (fieldType === 'number') {
+      return [({} as unknown) as FieldFormatInstanceType];
+    } else {
+      return [];
+    }
+  });
 
   beforeEach(() => {
     indexPattern = ({
       fields: fields as IIndexPatternFieldList,
     } as unknown) as IndexPattern;
-
-    services.fieldFormats.getDefaultType = jest.fn(
-      () => (({} as unknown) as FieldFormatInstanceType)
-    );
-
-    services.fieldFormats.getByFieldType = jest.fn(fieldType => {
-      if (fieldType === 'number') {
-        return [({} as unknown) as FieldFormatInstanceType];
-      } else {
-        return [];
-      }
-    });
   });
 
   it('should render create new scripted field correctly', async () => {
-    const component = shallowWithI18nProvider(
-      <FieldEditor
-        indexPattern={indexPattern}
-        field={(field as unknown) as IndexPatternField}
-        services={services}
-      />
+    const component = createComponentWithContext(
+      FieldEditor,
+      {
+        indexPattern,
+        field: (field as unknown) as IndexPatternField,
+        services: { redirectAway: () => {} },
+      },
+      mockContext
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     component.update();
     expect(component).toMatchSnapshot();
   });
@@ -157,22 +139,24 @@ describe('FieldEditor', () => {
       script: 'doc.test.value',
     };
     indexPattern.fields.push(testField as IndexPatternField);
-    indexPattern.fields.getByName = name => {
+    indexPattern.fields.getByName = (name) => {
       const flds = {
         [testField.name]: testField,
       };
       return flds[name] as IndexPatternField;
     };
 
-    const component = shallowWithI18nProvider(
-      <FieldEditor
-        indexPattern={indexPattern}
-        field={(testField as unknown) as IndexPatternField}
-        services={services}
-      />
+    const component = createComponentWithContext(
+      FieldEditor,
+      {
+        indexPattern,
+        field: (testField as unknown) as IndexPatternField,
+        services: { redirectAway: () => {} },
+      },
+      mockContext
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     component.update();
     expect(component).toMatchSnapshot();
   });
@@ -185,37 +169,41 @@ describe('FieldEditor', () => {
       lang: 'testlang',
     };
     indexPattern.fields.push((testField as unknown) as IndexPatternField);
-    indexPattern.fields.getByName = name => {
+    indexPattern.fields.getByName = (name) => {
       const flds = {
         [testField.name]: testField,
       };
       return flds[name] as IndexPatternField;
     };
 
-    const component = shallowWithI18nProvider(
-      <FieldEditor
-        indexPattern={indexPattern}
-        field={(testField as unknown) as IndexPatternField}
-        services={services}
-      />
+    const component = createComponentWithContext(
+      FieldEditor,
+      {
+        indexPattern,
+        field: (testField as unknown) as IndexPatternField,
+        services: { redirectAway: () => {} },
+      },
+      mockContext
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     component.update();
     expect(component).toMatchSnapshot();
   });
 
   it('should show conflict field warning', async () => {
     const testField = { ...field };
-    const component = shallowWithI18nProvider(
-      <FieldEditor
-        indexPattern={indexPattern}
-        field={(testField as unknown) as IndexPatternField}
-        services={services}
-      />
+    const component = createComponentWithContext(
+      FieldEditor,
+      {
+        indexPattern,
+        field: (testField as unknown) as IndexPatternField,
+        services: { redirectAway: () => {} },
+      },
+      mockContext
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     (component.instance() as FieldEditor).onFieldChange('name', 'foobar');
     component.update();
     expect(component).toMatchSnapshot();
@@ -230,15 +218,17 @@ describe('FieldEditor', () => {
         text: ['index_name_3'],
       },
     };
-    const component = shallowWithI18nProvider(
-      <FieldEditor
-        indexPattern={indexPattern}
-        field={(testField as unknown) as IndexPatternField}
-        services={services}
-      />
+    const component = createComponentWithContext(
+      FieldEditor,
+      {
+        indexPattern,
+        field: (testField as unknown) as IndexPatternField,
+        services: { redirectAway: () => {} },
+      },
+      mockContext
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     (component.instance() as FieldEditor).onFieldChange('name', 'foobar');
     component.update();
     expect(component).toMatchSnapshot();

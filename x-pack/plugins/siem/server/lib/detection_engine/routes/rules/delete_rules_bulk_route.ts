@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import { IRouter, RouteConfig, RequestHandler } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { queryRulesBulkSchema } from '../schemas/query_rules_bulk_schema';
-import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError, validate } from './validate';
 import { transformBulkError, buildRouteValidation, buildSiemResponse } from '../utils';
@@ -43,7 +43,7 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
     const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
 
     const rules = await Promise.all(
-      request.body.map(async payloadRule => {
+      request.body.map(async (payloadRule) => {
         const { id, rule_id: ruleId } = payloadRule;
         const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
         try {
@@ -63,7 +63,7 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
               search: rule.id,
               searchFields: ['alertId'],
             });
-            ruleStatuses.saved_objects.forEach(async obj => ruleStatusClient.delete(obj.id));
+            ruleStatuses.saved_objects.forEach(async (obj) => ruleStatusClient.delete(obj.id));
             return transformValidateBulkError(idOrRuleIdOrUnknown, rule, undefined, ruleStatuses);
           } else {
             return getIdBulkError({ id, ruleId });

@@ -11,7 +11,7 @@ export const useVisibilityState = (initialState: boolean) => {
 
   const hide = useCallback(() => setIsVisible(false), []);
   const show = useCallback(() => setIsVisible(true), []);
-  const toggle = useCallback(() => setIsVisible(state => !state), []);
+  const toggle = useCallback(() => setIsVisible((state) => !state), []);
 
   return useMemo(
     () => ({

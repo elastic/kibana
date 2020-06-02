@@ -13,26 +13,44 @@ A high level overview of our contributing guidelines.
   - ["My issue isn't getting enough attention"](#my-issue-isnt-getting-enough-attention)
   - ["I want to help!"](#i-want-to-help)
 - [How We Use Git and GitHub](#how-we-use-git-and-github)
+  - [Forking](#forking)
   - [Branching](#branching)
   - [Commits and Merging](#commits-and-merging)
+    - [Rebasing and fixing merge conflicts](#rebasing-and-fixing-merge-conflicts)
   - [What Goes Into a Pull Request](#what-goes-into-a-pull-request)
 - [Contributing Code](#contributing-code)
   - [Setting Up Your Development Environment](#setting-up-your-development-environment)
+    - [Increase node.js heap size](#increase-nodejs-heap-size)
+  - [Running Elasticsearch Locally](#running-elasticsearch-locally)
+    - [Nightly snapshot (recommended)](#nightly-snapshot-recommended)
+      - [Keeping data between snapshots](#keeping-data-between-snapshots)
+    - [Source](#source)
+    - [Archive](#archive)
+      - [Sample Data](#sample-data)
+  - [Running Elasticsearch Remotely](#running-elasticsearch-remotely)
+  - [Running remote clusters](#running-remote-clusters)
+  - [Running Kibana](#running-kibana)
+    - [Running Kibana in Open-Source mode](#running-kibana-in-open-source-mode)
+    - [Unsupported URL Type](#unsupported-url-type)
     - [Customizing `config/kibana.dev.yml`](#customizing-configkibanadevyml)
+    - [Potential Optimization Pitfalls](#potential-optimization-pitfalls)
     - [Setting Up SSL](#setting-up-ssl)
   - [Linting](#linting)
+    - [Setup Guide for VS Code Users](#setup-guide-for-vs-code-users)
   - [Internationalization](#internationalization)
   - [Localization](#localization)
+  - [Styling with SASS](#styling-with-sass)
   - [Testing and Building](#testing-and-building)
     - [Debugging server code](#debugging-server-code)
     - [Instrumenting with Elastic APM](#instrumenting-with-elastic-apm)
-  - [Debugging Unit Tests](#debugging-unit-tests)
-  - [Unit Testing Plugins](#unit-testing-plugins)
-  - [Automated Accessibility Testing](#automated-accessibility-testing)
-  - [Cross-browser compatibility](#cross-browser-compatibility)
-    - [Testing compatibility locally](#testing-compatibility-locally)
-    - [Running Browser Automation Tests](#running-browser-automation-tests)
-      - [Browser Automation Notes](#browser-automation-notes)
+    - [Unit testing frameworks](#unit-testing-frameworks)
+    - [Running specific Kibana tests](#running-specific-kibana-tests)
+    - [Debugging Unit Tests](#debugging-unit-tests)
+    - [Unit Testing Plugins](#unit-testing-plugins)
+    - [Automated Accessibility Testing](#automated-accessibility-testing)
+    - [Cross-browser compatibility](#cross-browser-compatibility)
+      - [Testing compatibility locally](#testing-compatibility-locally)
+      - [Running Browser Automation Tests](#running-browser-automation-tests)
   - [Building OS packages](#building-os-packages)
   - [Writing documentation](#writing-documentation)
   - [Release Notes Process](#release-notes-process)
@@ -414,7 +432,7 @@ extract them to a `JSON` file or integrate translations back to Kibana. To know 
 We cannot support accepting contributions to the translations from any source other than the translators we have engaged to do the work.
 We are still to develop a proper process to accept any contributed translations. We certainly appreciate that people care enough about the localization effort to want to help improve the quality. We aim to build out a more comprehensive localization process for the future and will notify you once contributions can be supported, but for the time being, we are not able to incorporate suggestions.
 
-### Syling with SASS
+### Styling with SASS
 
 When writing a new component, create a sibling SASS file of the same name and import directly into the JS/TS component file. Doing so ensures the styles are never separated or lost on import and allows for better modularization (smaller individual plugin asset footprint).
 
@@ -467,10 +485,10 @@ macOS users on a machine with a discrete graphics card may see significant speed
 - Uncheck the "Prefer integrated to discrete GPU" option
 - Restart iTerm
 
-### Debugging Server Code
+#### Debugging Server Code
 `yarn debug` will start the server with Node's inspect flag. Kibana's development mode will start three processes on ports `9229`, `9230`, and `9231`. Chrome's developer tools need to be configured to connect to all three connections. Add `localhost:<port>` for each Kibana process in Chrome's developer tools connection tab.
 
-### Instrumenting with Elastic APM
+#### Instrumenting with Elastic APM
 Kibana ships with the [Elastic APM Node.js Agent](https://github.com/elastic/apm-agent-nodejs) built-in for debugging purposes.
 
 Its default configuration is meant to be used by core Kibana developers only, but it can easily be re-configured to your needs.
@@ -490,16 +508,24 @@ module.exports = {
 };
 ```
 
+APM [Real User Monitoring agent](https://www.elastic.co/guide/en/apm/agent/rum-js/current/index.html) is not available in the Kibana distributables,
+however the agent can be enabled by setting `ELASTIC_APM_ACTIVE` to `true`.
+flags
+```
+ELASTIC_APM_ACTIVE=true yarn start
+// activates both Node.js and RUM agent
+```
+
 Once the agent is active, it will trace all incoming HTTP requests to Kibana, monitor for errors, and collect process-level metrics.
 The collected data will be sent to the APM Server and is viewable in the APM UI in Kibana.
 
-### Unit testing frameworks
+#### Unit testing frameworks
 Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still
 exist in Mocha but all new unit tests should be written in Jest. Mocha tests
 are contained in `__tests__` directories. Whereas Jest tests are stored in
 the same directory as source code files with the `.test.js` suffix.
 
-### Running specific Kibana tests
+#### Running specific Kibana tests
 
 The following table outlines possible test file locations and how to invoke them:
 
@@ -532,7 +558,7 @@ Test runner arguments:
     yarn test:ftr:runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'
     ```
 
-### Debugging Unit Tests
+#### Debugging Unit Tests
 
 The standard `yarn test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specialized tasks provide alternate methods for running the tests.
 
@@ -559,7 +585,7 @@ In the screenshot below, you'll notice the URL is `localhost:9876/debug.html`. Y
 
 ![Browser test debugging](http://i.imgur.com/DwHxgfq.png)
 
-### Unit Testing Plugins
+#### Unit Testing Plugins
 
 This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/kibana/tree/master/packages/kbn-plugin-generator). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
 
@@ -570,7 +596,7 @@ yarn test:mocha
 yarn test:karma:debug # remove the debug flag to run them once and close
 ```
 
-### Automated Accessibility Testing
+#### Automated Accessibility Testing
 
 To run the tests locally:
 
@@ -587,11 +613,11 @@ can be run locally using their browser plugins:
 - [Chrome](https://chrome.google.com/webstore/detail/axe-web-accessibility-tes/lhdoppojpmngadmnindnejefpokejbdd?hl=en-US)
 - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/axe-devtools/)
 
-### Cross-browser Compatibility
+#### Cross-browser Compatibility
 
-#### Testing Compatibility Locally
+##### Testing Compatibility Locally
 
-##### Testing IE on OS X
+###### Testing IE on OS X
 
 * [Download VMWare Fusion](http://www.vmware.com/products/fusion/fusion-evaluation.html).
 * [Download IE virtual machines](https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/#downloads) for VMWare.
@@ -602,7 +628,7 @@ can be run locally using their browser plugins:
 * Now you can run your VM, open the browser, and navigate to `http://computer.local:5601` to test Kibana.
 * Alternatively you can use browserstack
 
-#### Running Browser Automation Tests
+##### Running Browser Automation Tests
 
 [Read about the `FunctionalTestRunner`](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html) to learn more about how you can run and develop functional tests for Kibana core and plugins.
 

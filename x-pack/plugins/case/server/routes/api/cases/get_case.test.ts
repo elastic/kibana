@@ -45,7 +45,7 @@ describe('GET case', () => {
     );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
-    const savedObject = (mockCases.find(s => s.id === 'mock-id-1') as unknown) as SavedObject<
+    const savedObject = (mockCases.find((s) => s.id === 'mock-id-1') as unknown) as SavedObject<
       CaseAttributes
     >;
     expect(response.status).toEqual(200);

@@ -33,7 +33,7 @@ import { getThresholdAlertVisualizationData } from '../../../../common/lib/index
 import { AggregationType, Comparator } from '../../../../common/types';
 import { AlertsContextValue } from '../../../context/alerts_context';
 import { IndexThresholdAlertParams } from './types';
-import { parseDuration } from '../../../../../../alerting/common/parse_duration';
+import { parseDuration } from '../../../../../../alerts/common/parse_duration';
 
 const customTheme = () => {
   return {
@@ -241,7 +241,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     const actualThreshold = getThreshold();
     let maxY = actualThreshold[actualThreshold.length - 1] as any;
 
-    (Object.values(visualizationData) as number[][][]).forEach(data => {
+    (Object.values(visualizationData) as number[][][]).forEach((data) => {
       data.forEach(([, y]) => {
         if (y > maxY) {
           maxY = y;
@@ -333,7 +333,7 @@ async function getVisualizationData(model: any, visualizeOptions: any, http: Htt
   const result: Record<string, Array<[number, number]>> = {};
 
   for (const groupMetrics of vizData.results) {
-    result[groupMetrics.group] = groupMetrics.metrics.map(metricResult => [
+    result[groupMetrics.group] = groupMetrics.metrics.map((metricResult) => [
       Date.parse(metricResult[0]),
       metricResult[1],
     ]);

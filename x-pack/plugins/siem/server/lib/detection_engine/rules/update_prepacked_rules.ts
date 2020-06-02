@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { AlertsClient } from '../../../../../alerting/server';
+import { AlertsClient } from '../../../../../alerts/server';
 import { patchRules } from './patch_rules';
 import { PrepackagedRules } from '../types';
 import { readRules } from './read_rules';
@@ -17,7 +17,7 @@ export const updatePrepackagedRules = async (
   outputIndex: string
 ): Promise<void> => {
   await Promise.all(
-    rules.map(async rule => {
+    rules.map(async (rule) => {
       const {
         description,
         false_positives: falsePositives,

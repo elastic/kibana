@@ -18,7 +18,7 @@ import {
   ActionType,
   loadActionTypes,
 } from '../../../../../../triggers_actions_ui/public';
-import { AlertAction } from '../../../../../../alerting/common';
+import { AlertAction } from '../../../../../../alerts/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
 
@@ -75,9 +75,9 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
   );
 
   useEffect(() => {
-    (async function() {
+    (async function () {
       const actionTypes = await loadActionTypes({ http });
-      const supportedTypes = actionTypes.filter(actionType =>
+      const supportedTypes = actionTypes.filter((actionType) =>
         NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.includes(actionType.id)
       );
       setSupportedActionTypes(supportedTypes);

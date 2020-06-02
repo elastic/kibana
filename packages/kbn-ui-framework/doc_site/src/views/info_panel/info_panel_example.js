@@ -26,7 +26,7 @@ import successHtml from './info_panel_success.html';
 import warningHtml from './info_panel_warning.html';
 import errorHtml from './info_panel_error.html';
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Info"

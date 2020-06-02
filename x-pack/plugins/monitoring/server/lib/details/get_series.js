@@ -196,7 +196,7 @@ function findLastUsableBucketIndex(buckets, max, firstUsableBucketIndex, bucketS
   return -1;
 }
 
-const formatBucketSize = bucketSizeInSeconds => {
+const formatBucketSize = (bucketSizeInSeconds) => {
   const now = moment();
   const timestamp = moment(now).add(bucketSizeInSeconds, 'seconds'); // clone the `now` object
 
@@ -260,7 +260,7 @@ function handleSeries(metric, groupBy, min, max, bucketSizeInSeconds, timezone, 
 
       data = buckets
         .slice(firstUsableBucketIndex, lastUsableBucketIndex + 1) // take only the buckets we know are usable
-        .map(bucket => [
+        .map((bucket) => [
           formatUTCTimestampForTimezone(bucket.key, timezone),
           calculation(bucket, key, metric, bucketSizeInSeconds),
         ]); // map buckets to X/Y coords for Flot charting
@@ -278,7 +278,7 @@ function handleSeries(metric, groupBy, min, max, bucketSizeInSeconds, timezone, 
   }
 
   if (groupBy) {
-    return get(response, 'aggregations.groupBy.buckets', []).map(bucket => {
+    return get(response, 'aggregations.groupBy.buckets', []).map((bucket) => {
       return {
         groupedBy: bucket.key,
         ...getAggregatedData(get(bucket, 'check.buckets', [])),

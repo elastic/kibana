@@ -21,7 +21,7 @@ import { flow, get } from 'lodash';
 import { SavedObjectMigrationFn } from 'kibana/server';
 import { DEFAULT_QUERY_LANGUAGE } from '../../common';
 
-const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = doc => {
+const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get<string>(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
 
   if (searchSourceJSON) {
@@ -55,7 +55,7 @@ const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = doc => {
   return doc;
 };
 
-const migrateIndexPattern: SavedObjectMigrationFn<any, any> = doc => {
+const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {
     return doc;
@@ -103,7 +103,7 @@ const setNewReferences: SavedObjectMigrationFn<any, any> = (doc, context) => {
   return migrateIndexPattern(doc, context);
 };
 
-const migrateSearchSortToNestedArray: SavedObjectMigrationFn<any, any> = doc => {
+const migrateSearchSortToNestedArray: SavedObjectMigrationFn<any, any> = (doc) => {
   const sort = get(doc, 'attributes.sort');
   if (!sort) return doc;
 

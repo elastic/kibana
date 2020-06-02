@@ -7,6 +7,10 @@
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 
+import {
+  ImportRulesSchema,
+  importRulesSchema,
+} from '../../../../../common/detection_engine/schemas/response/import_rules_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
@@ -31,7 +35,6 @@ import {
 import { ImportRuleAlertRest } from '../../types';
 import { patchRules } from '../../rules/patch_rules';
 import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
-import { ImportRulesSchema, importRulesSchema } from '../schemas/response/import_rules_schema';
 import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
 import { validate } from './validate';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
@@ -61,7 +64,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
 
       try {
         const alertsClient = context.alerting?.getAlertsClient();
-        const clusterClient = context.core.elasticsearch.dataClient;
+        const clusterClient = context.core.elasticsearch.legacy.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.siem?.getSiemClient();
 
@@ -106,7 +109,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
           const batchParseObjects = chunkParseObjects.shift() ?? [];
           const newImportRuleResponse = await Promise.all(
             batchParseObjects.reduce<Array<Promise<ImportRuleResponse>>>((accum, parsedRule) => {
-              const importsWorkerPromise = new Promise<ImportRuleResponse>(async resolve => {
+              const importsWorkerPromise = new Promise<ImportRuleResponse>(async (resolve) => {
                 if (parsedRule instanceof Error) {
                   // If the JSON object had a validation or parse error then we return
                   // early with the error and an (unknown) for the ruleId
@@ -256,8 +259,8 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
           ];
         }
 
-        const errorsResp = importRuleResponse.filter(resp => isBulkError(resp)) as BulkError[];
-        const successes = importRuleResponse.filter(resp => {
+        const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
+        const successes = importRuleResponse.filter((resp) => {
           if (isImportRegular(resp)) {
             return resp.status_code === 200;
           } else {

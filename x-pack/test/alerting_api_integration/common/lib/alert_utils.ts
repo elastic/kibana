@@ -62,7 +62,7 @@ export class AlertUtils {
 
   public getEnableRequest(alertId: string) {
     const request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_enable`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerts/alert/${alertId}/_enable`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
@@ -72,7 +72,7 @@ export class AlertUtils {
 
   public getDisableRequest(alertId: string) {
     const request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_disable`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerts/alert/${alertId}/_disable`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
@@ -82,7 +82,7 @@ export class AlertUtils {
 
   public getMuteAllRequest(alertId: string) {
     const request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_mute_all`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerts/alert/${alertId}/_mute_all`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
@@ -92,7 +92,7 @@ export class AlertUtils {
 
   public getUnmuteAllRequest(alertId: string) {
     const request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_unmute_all`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerts/alert/${alertId}/_unmute_all`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
@@ -103,7 +103,9 @@ export class AlertUtils {
   public getMuteInstanceRequest(alertId: string, instanceId: string) {
     const request = this.supertestWithoutAuth
       .post(
-        `${getUrlPrefix(this.space.id)}/api/alert/${alertId}/alert_instance/${instanceId}/_mute`
+        `${getUrlPrefix(
+          this.space.id
+        )}/api/alerts/alert/${alertId}/alert_instance/${instanceId}/_mute`
       )
       .set('kbn-xsrf', 'foo');
     if (this.user) {
@@ -115,7 +117,9 @@ export class AlertUtils {
   public getUnmuteInstanceRequest(alertId: string, instanceId: string) {
     const request = this.supertestWithoutAuth
       .post(
-        `${getUrlPrefix(this.space.id)}/api/alert/${alertId}/alert_instance/${instanceId}/_unmute`
+        `${getUrlPrefix(
+          this.space.id
+        )}/api/alerts/alert/${alertId}/alert_instance/${instanceId}/_unmute`
       )
       .set('kbn-xsrf', 'foo');
     if (this.user) {
@@ -126,7 +130,7 @@ export class AlertUtils {
 
   public getUpdateApiKeyRequest(alertId: string) {
     const request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_update_api_key`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerts/alert/${alertId}/_update_api_key`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
@@ -179,7 +183,7 @@ export class AlertUtils {
     }
 
     let request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alert`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerts/alert`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       request = request.auth(this.user.username, this.user.password);
@@ -187,7 +191,7 @@ export class AlertUtils {
     const alertBody = getDefaultAlwaysFiringAlertData(reference, actionId);
     const response = await request.send({ ...alertBody, ...overwrites });
     if (response.statusCode === 200) {
-      objRemover.add(this.space.id, response.body.id, 'alert');
+      objRemover.add(this.space.id, response.body.id, 'alert', 'alerts');
     }
     return response;
   }
@@ -206,7 +210,7 @@ export class AlertUtils {
     }
 
     const request = this.supertestWithoutAuth
-      .put(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}`)
+      .put(`${getUrlPrefix(this.space.id)}/api/alerts/alert/${alertId}`)
       .set('kbn-xsrf', 'foo')
       .auth(user.username, user.password);
 
@@ -236,7 +240,7 @@ export class AlertUtils {
     }
 
     let request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alert`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerts/alert`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       request = request.auth(this.user.username, this.user.password);
@@ -257,7 +261,7 @@ export class AlertUtils {
       ...overwrites,
     });
     if (response.statusCode === 200) {
-      objRemover.add(this.space.id, response.body.id, 'alert');
+      objRemover.add(this.space.id, response.body.id, 'alert', 'alerts');
     }
     return response;
   }

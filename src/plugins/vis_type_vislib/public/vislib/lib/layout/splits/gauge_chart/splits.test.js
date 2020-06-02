@@ -23,8 +23,8 @@ import $ from 'jquery';
 import { chartSplit } from './chart_split';
 import { chartTitleSplit } from './chart_title_split';
 
-describe('Vislib Gauge Split Function Test Suite', function() {
-  describe('Column Chart', function() {
+describe('Vislib Gauge Split Function Test Suite', function () {
+  describe('Column Chart', function () {
     let el;
     const data = {
       rows: [
@@ -147,42 +147,38 @@ describe('Vislib Gauge Split Function Test Suite', function() {
       ],
     };
 
-    beforeEach(function() {
-      el = d3
-        .select('body')
-        .append('div')
-        .attr('class', 'visualization')
-        .datum(data);
+    beforeEach(function () {
+      el = d3.select('body').append('div').attr('class', 'visualization').datum(data);
     });
 
-    afterEach(function() {
+    afterEach(function () {
       el.remove();
     });
 
-    describe('chart split function', function() {
+    describe('chart split function', function () {
       let fixture;
 
-      beforeEach(function() {
+      beforeEach(function () {
         fixture = d3.select('.visualization').call(chartSplit);
       });
 
-      afterEach(function() {
+      afterEach(function () {
         fixture.remove();
       });
 
-      it('should append the correct number of divs', function() {
+      it('should append the correct number of divs', function () {
         expect($('.chart').length).toBe(2);
       });
 
-      it('should add the correct class name', function() {
+      it('should add the correct class name', function () {
         expect(!!$('.visWrapper__splitCharts--row').length).toBe(true);
       });
     });
 
-    describe('chart title split function', function() {
+    describe('chart title split function', function () {
       let visEl;
 
-      beforeEach(function() {
+      beforeEach(function () {
         visEl = el.append('div').attr('class', 'visWrapper');
         visEl.append('div').attr('class', 'visAxis__splitTitles--x');
         visEl.append('div').attr('class', 'visAxis__splitTitles--y');
@@ -190,11 +186,11 @@ describe('Vislib Gauge Split Function Test Suite', function() {
         visEl.select('.visAxis__splitTitles--y').call(chartTitleSplit);
       });
 
-      afterEach(function() {
+      afterEach(function () {
         visEl.remove();
       });
 
-      it('should append the correct number of divs', function() {
+      it('should append the correct number of divs', function () {
         expect($('.visAxis__splitTitles--x .chart-title').length).toBe(2);
         expect($('.visAxis__splitTitles--y .chart-title').length).toBe(2);
       });

@@ -8,7 +8,7 @@ import { pickBy, countBy } from 'lodash/fp';
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import uuid from 'uuid';
 
-import { PartialAlert, FindResult } from '../../../../../../alerting/server';
+import { PartialAlert, FindResult } from '../../../../../../alerts/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
@@ -94,7 +94,7 @@ export const getIdBulkError = ({
 };
 
 export const transformTags = (tags: string[]): string[] => {
-  return tags.filter(tag => !tag.startsWith(INTERNAL_IDENTIFIER));
+  return tags.filter((tag) => !tag.startsWith(INTERNAL_IDENTIFIER));
 };
 
 // Transforms the data but will remove any null or undefined it encounters and not include
@@ -155,7 +155,7 @@ export const transformAlertToRule = (
 export const transformAlertsToRules = (
   alerts: RuleAlertType[]
 ): Array<Partial<OutputRuleAlertRest>> => {
-  return alerts.map(alert => transformAlertToRule(alert));
+  return alerts.map((alert) => transformAlertToRule(alert));
 };
 
 export const transformFindAlerts = (
@@ -246,11 +246,11 @@ export const transformOrImportError = (
 export const getDuplicates = (ruleDefinitions: RuleAlertParamsRest[], by: 'rule_id'): string[] => {
   const mappedDuplicates = countBy(
     by,
-    ruleDefinitions.filter(r => r[by] != null)
+    ruleDefinitions.filter((r) => r[by] != null)
   );
-  const hasDuplicates = Object.values(mappedDuplicates).some(i => i > 1);
+  const hasDuplicates = Object.values(mappedDuplicates).some((i) => i > 1);
   if (hasDuplicates) {
-    return Object.keys(mappedDuplicates).filter(key => mappedDuplicates[key] > 1);
+    return Object.keys(mappedDuplicates).filter((key) => mappedDuplicates[key] > 1);
   }
   return [];
 };

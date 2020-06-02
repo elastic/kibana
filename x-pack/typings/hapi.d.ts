@@ -8,7 +8,7 @@ import 'hapi';
 
 import { XPackMainPlugin } from '../legacy/plugins/xpack_main/server/xpack_main';
 import { ActionsPlugin, ActionsClient } from '../plugins/actions/server';
-import { AlertingPlugin, AlertsClient } from '../plugins/alerting/server';
+import { AlertingPlugin, AlertsClient } from '../plugins/alerts/server';
 import { TaskManager } from '../plugins/task_manager/server';
 
 declare module 'hapi' {
@@ -19,7 +19,7 @@ declare module 'hapi' {
   interface PluginProperties {
     xpack_main: XPackMainPlugin;
     actions?: ActionsPlugin;
-    alerting?: AlertingPlugin;
+    alerts?: AlertingPlugin;
     task_manager?: TaskManager;
   }
 }

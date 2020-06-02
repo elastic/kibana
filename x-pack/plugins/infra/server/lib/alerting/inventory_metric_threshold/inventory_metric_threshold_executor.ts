@@ -11,7 +11,7 @@ import {
   CallWithRequestParams,
 } from '../../adapters/framework/adapter_types';
 import { Comparator, AlertStates, InventoryMetricConditions } from './types';
-import { AlertServices, AlertExecutorOptions } from '../../../../../alerting/server';
+import { AlertServices, AlertExecutorOptions } from '../../../../../alerts/server';
 import { InfraSnapshot } from '../../snapshot';
 import { parseFilterQuery } from '../../../utils/serialized_query';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
@@ -41,29 +41,29 @@ export const createInventoryMetricThresholdExecutor = (
   );
 
   const results = await Promise.all(
-    criteria.map(c => evaluateCondtion(c, nodeType, source.configuration, services, filterQuery))
+    criteria.map((c) => evaluateCondtion(c, nodeType, source.configuration, services, filterQuery))
   );
 
   const invenotryItems = Object.keys(results[0]);
   for (const item of invenotryItems) {
     const alertInstance = services.alertInstanceFactory(`${alertId}-${item}`);
     // AND logic; all criteria must be across the threshold
-    const shouldAlertFire = results.every(result => result[item].shouldFire);
+    const shouldAlertFire = results.every((result) => result[item].shouldFire);
 
     // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
     // whole alert is in a No Data/Error state
-    const isNoData = results.some(result => result[item].isNoData);
-    const isError = results.some(result => result[item].isError);
+    const isNoData = results.some((result) => result[item].isNoData);
+    const isError = results.some((result) => result[item].isError);
 
     if (shouldAlertFire) {
       alertInstance.scheduleActions(FIRED_ACTIONS.id, {
         group: item,
         item,
-        valueOf: mapToConditionsLookup(results, result =>
+        valueOf: mapToConditionsLookup(results, (result) =>
           formatMetric(result[item].metric, result[item].currentValue)
         ),
-        thresholdOf: mapToConditionsLookup(criteria, c => c.threshold),
-        metricOf: mapToConditionsLookup(criteria, c => c.metric),
+        thresholdOf: mapToConditionsLookup(criteria, (c) => c.threshold),
+        metricOf: mapToConditionsLookup(criteria, (c) => c.metric),
       });
     }
 
@@ -102,21 +102,18 @@ const evaluateCondtion = async (
     metric,
     {
       to: Date.now(),
-      from: moment()
-        .subtract(condition.timeSize, condition.timeUnit)
-        .toDate()
-        .getTime(),
+      from: moment().subtract(condition.timeSize, condition.timeUnit).toDate().getTime(),
       interval: condition.timeUnit,
     },
     sourceConfiguration,
     filterQuery
   );
 
-  threshold = threshold.map(n => convertMetricValue(metric, n));
+  threshold = threshold.map((n) => convertMetricValue(metric, n));
 
   const comparisonFunction = comparatorMap[comparator];
 
-  return mapValues(currentValues, value => ({
+  return mapValues(currentValues, (value) => ({
     shouldFire: value !== undefined && value !== null && comparisonFunction(value, threshold),
     metric,
     currentValue: value,
@@ -196,8 +193,8 @@ const convertMetricValue = (metric: SnapshotMetricType, value: number) => {
   }
 };
 const converters: Record<string, (n: number) => number> = {
-  cpu: n => Number(n) / 100,
-  memory: n => Number(n) / 100,
+  cpu: (n) => Number(n) / 100,
+  memory: (n) => Number(n) / 100,
 };
 
 const formatMetric = (metric: SnapshotMetricType, value: number) => {

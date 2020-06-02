@@ -9,7 +9,7 @@ import { GetPolicyResponseSchema } from '../../../../common/endpoint/schema/poli
 import { EndpointAppContext } from '../../types';
 import { getPolicyResponseByHostId } from './service';
 
-export const getHostPolicyResponseHandler = function(
+export const getHostPolicyResponseHandler = function (
   endpointAppContext: EndpointAppContext
 ): RequestHandler<undefined, TypeOf<typeof GetPolicyResponseSchema.query>, undefined> {
   return async (context, request, response) => {
@@ -21,7 +21,7 @@ export const getHostPolicyResponseHandler = function(
       const doc = await getPolicyResponseByHostId(
         index,
         request.query.hostId,
-        context.core.elasticsearch.dataClient
+        context.core.elasticsearch.legacy.client
       );
 
       if (doc) {

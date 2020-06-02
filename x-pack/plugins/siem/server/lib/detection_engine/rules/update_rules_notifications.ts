@@ -5,7 +5,7 @@
  */
 
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { AlertsClient, AlertServices } from '../../../../../alerting/server';
+import { AlertsClient, AlertServices } from '../../../../../alerts/server';
 import { updateOrCreateRuleActionsSavedObject } from '../rule_actions/update_or_create_rule_actions_saved_object';
 import { updateNotifications } from '../notifications/update_notifications';
 import { RuleActions } from '../rule_actions/types';
@@ -44,6 +44,9 @@ export const updateRulesNotifications = async ({
     actions: ruleActions.actions,
     interval: ruleActions.alertThrottle,
   });
+
+  // TODO: Workaround for https://github.com/elastic/kibana/issues/67290
+  await alertsClient.updateApiKey({ id: ruleAlertId });
 
   return ruleActions;
 };

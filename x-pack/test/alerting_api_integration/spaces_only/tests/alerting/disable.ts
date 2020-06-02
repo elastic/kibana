@@ -35,11 +35,11 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
 
     it('should handle disable alert request appropriately', async () => {
       const { body: createdAlert } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: true }))
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
 
       await alertUtils.disable(createdAlert.id);
 
@@ -61,11 +61,11 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
 
     it(`shouldn't disable alert from another space`, async () => {
       const { body: createdAlert } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.other.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.other.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: true }))
         .expect(200);
-      objectRemover.add(Spaces.other.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.other.id, createdAlert.id, 'alert', 'alerts');
 
       await alertUtils.getDisableRequest(createdAlert.id).expect(404, {
         statusCode: 404,

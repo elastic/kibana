@@ -21,14 +21,14 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
 
     it('should handle getAlertState request appropriately', async () => {
       const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
 
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/state`
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/state`
       );
 
       expect(response.status).to.eql(200);
@@ -37,7 +37,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
 
     it('should fetch updated state', async () => {
       const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send({
           enabled: true,
@@ -51,12 +51,12 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
           params: {},
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
 
       // wait for alert to actually execute
       await retry.try(async () => {
         const response = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/state`
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/state`
         );
 
         expect(response.status).to.eql(200);
@@ -65,7 +65,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
       });
 
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/state`
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/state`
       );
 
       expect(response.body.alertTypeState.runCount).to.greaterThan(0);
@@ -79,11 +79,13 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
     });
 
     it(`should handle getAlertState request appropriately when alert doesn't exist`, async () => {
-      await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/1/state`).expect(404, {
-        statusCode: 404,
-        error: 'Not Found',
-        message: 'Saved object [alert/1] not found',
-      });
+      await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/1/state`)
+        .expect(404, {
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Saved object [alert/1] not found',
+        });
     });
   });
 }

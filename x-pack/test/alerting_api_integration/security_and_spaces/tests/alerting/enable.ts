@@ -40,11 +40,11 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
       describe(scenario.id, () => {
         it('should handle enable alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await alertUtils.getEnableRequest(createdAlert.id);
 
@@ -64,7 +64,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
@@ -91,14 +91,16 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
 
         it('should still be able to enable alert when AAD is broken', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           await supertest
-            .put(`${getUrlPrefix(space.id)}/api/saved_objects/alert/${createdAlert.id}`)
+            .put(
+              `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
+            )
             .set('kbn-xsrf', 'foo')
             .send({
               attributes: {
@@ -125,7 +127,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
@@ -152,11 +154,11 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
 
         it(`shouldn't enable alert from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix('other')}/api/alert`)
+            .post(`${getUrlPrefix('other')}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add('other', createdAlert.id, 'alert');
+          objectRemover.add('other', createdAlert.id, 'alert', 'alerts');
 
           const response = await alertUtils.getEnableRequest(createdAlert.id);
 

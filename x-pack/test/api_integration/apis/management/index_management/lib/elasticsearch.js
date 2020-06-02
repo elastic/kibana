@@ -10,7 +10,7 @@ import { getRandomString } from './random';
  * during our tests.
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
-export const initElasticsearchHelpers = es => {
+export const initElasticsearchHelpers = (es) => {
   let indicesCreated = [];
 
   const createIndex = (index = getRandomString(), body) => {
@@ -18,8 +18,8 @@ export const initElasticsearchHelpers = es => {
     return es.indices.create({ index, body }).then(() => index);
   };
 
-  const deleteIndex = index => {
-    indicesCreated = indicesCreated.filter(i => i !== index);
+  const deleteIndex = (index) => {
+    indicesCreated = indicesCreated.filter((i) => i !== index);
     return es.indices.delete({ index, ignoreUnavailable: true });
   };
 
@@ -32,7 +32,15 @@ export const initElasticsearchHelpers = es => {
 
   const cleanUp = () => deleteAllIndices();
 
-  const catTemplate = name => es.cat.templates({ name, format: 'json' });
+  const catTemplate = (name) => es.cat.templates({ name, format: 'json' });
+
+  const createComponentTemplate = (componentTemplate) => {
+    return es.dataManagement.saveComponentTemplate(componentTemplate);
+  };
+
+  const deleteComponentTemplate = (componentTemplateName) => {
+    return es.dataManagement.deleteComponentTemplate({ name: componentTemplateName });
+  };
 
   return {
     createIndex,
@@ -42,5 +50,7 @@ export const initElasticsearchHelpers = es => {
     indexStats,
     cleanUp,
     catTemplate,
+    createComponentTemplate,
+    deleteComponentTemplate,
   };
 };

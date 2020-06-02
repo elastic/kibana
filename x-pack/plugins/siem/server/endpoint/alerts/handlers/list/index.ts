@@ -9,7 +9,7 @@ import { searchESForAlerts } from '../lib';
 import { getRequestData, mapToAlertResultList } from './lib';
 import { AlertingIndexGetQueryResult } from '../../../../../common/endpoint_alerts/types';
 
-export const alertListHandlerWrapper = function(
+export const alertListHandlerWrapper = function (
   endpointAppContext: EndpointAppContext
 ): RequestHandler<unknown, AlertingIndexGetQueryResult, unknown> {
   const alertListHandler: RequestHandler<unknown, AlertingIndexGetQueryResult, unknown> = async (
@@ -23,7 +23,7 @@ export const alertListHandlerWrapper = function(
         .getEventIndexPattern(ctx);
       const reqData = await getRequestData(req, endpointAppContext);
       const response = await searchESForAlerts(
-        ctx.core.elasticsearch.dataClient,
+        ctx.core.elasticsearch.legacy.client,
         reqData,
         indexPattern
       );

@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "include": [
+    "mocks.ts",
     "typings/**/*",
     "legacy/common/**/*",
     "legacy/server/**/*",

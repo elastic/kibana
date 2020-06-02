@@ -37,7 +37,7 @@ export const useNavigateToAppEventHandler = (
   const { services } = useKibana();
   const { path, state, onClick } = options || {};
   return useCallback(
-    ev => {
+    (ev) => {
       try {
         if (onClick) {
           onClick(ev);

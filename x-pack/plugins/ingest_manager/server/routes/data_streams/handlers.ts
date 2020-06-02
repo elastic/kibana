@@ -11,7 +11,7 @@ import { getPackageSavedObjects, getKibanaSavedObject } from '../../services/epm
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*';
 
 export const getListHandler: RequestHandler = async (context, request, response) => {
-  const callCluster = context.core.elasticsearch.dataClient.callAsCurrentUser;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
 
   try {
     // Get stats (size on disk) of all potentially matching indices
@@ -98,7 +98,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
     const packageSavedObjects = await getPackageSavedObjects(context.core.savedObjects.client);
     const packageMetadata: any = {};
 
-    const dataStreamsPromises = (indexResults as any[]).map(async result => {
+    const dataStreamsPromises = (indexResults as any[]).map(async (result) => {
       const {
         key: indexName,
         dataset: { buckets: datasetBuckets },
@@ -113,7 +113,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       const pkg = datasetBuckets.length
         ? datasetBuckets[0].key.split('.')[0]
         : indexName.split('-')[1].split('.')[0];
-      const pkgSavedObject = packageSavedObjects.saved_objects.filter(p => p.id === pkg);
+      const pkgSavedObject = packageSavedObjects.saved_objects.filter((p) => p.id === pkg);
 
       // if
       // - the datastream is associated with a package
@@ -123,7 +123,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
         // then pick the dashboards from the package saved object
         const dashboards =
           pkgSavedObject[0].attributes?.installed?.filter(
-            o => o.type === KibanaAssetType.dashboard
+            (o) => o.type === KibanaAssetType.dashboard
           ) || [];
         // and then pick the human-readable titles from the dashboard saved objects
         const enhancedDashboards = await getEnhancedDashboards(
@@ -169,7 +169,7 @@ const getEnhancedDashboards = async (
   savedObjectsClient: SavedObjectsClientContract,
   dashboards: any[]
 ) => {
-  const dashboardsPromises = dashboards.map(async db => {
+  const dashboardsPromises = dashboards.map(async (db) => {
     const dbSavedObject: any = await getKibanaSavedObject(
       savedObjectsClient,
       KibanaAssetType.dashboard,

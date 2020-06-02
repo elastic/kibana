@@ -82,7 +82,7 @@ export class TelemetryPlugin implements Plugin {
     const config$ = this.config$;
     const isDev = this.isDev;
 
-    registerCollection(telemetryCollectionManager, elasticsearch.dataClient);
+    registerCollection(telemetryCollectionManager, elasticsearch.legacy.client);
     const router = http.createRouter();
 
     registerRoutes({
@@ -93,7 +93,7 @@ export class TelemetryPlugin implements Plugin {
       telemetryCollectionManager,
     });
 
-    this.registerMappings(opts => savedObjects.registerType(opts));
+    this.registerMappings((opts) => savedObjects.registerType(opts));
     this.registerUsageCollectors(usageCollection);
   }
 

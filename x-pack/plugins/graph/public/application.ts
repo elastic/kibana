@@ -77,7 +77,7 @@ export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) 
     true
   );
 
-  const licenseSubscription = deps.licensing.license$.subscribe(license => {
+  const licenseSubscription = deps.licensing.license$.subscribe((license) => {
     const info = checkLicense(license);
     const licenseAllowsToShowThisPage = info.showAppLink && info.enableAppLink;
 

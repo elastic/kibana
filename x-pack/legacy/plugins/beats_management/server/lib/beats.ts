@@ -43,7 +43,7 @@ export class CMBeatsDomain {
 
   public async getByIds(user: FrameworkUser, beatIds: string[]): Promise<CMBeat[]> {
     const beats = await this.adapter.getWithIds(user, beatIds);
-    return beats.filter(beat => beat.active);
+    return beats.filter((beat) => beat.active);
   }
 
   public async getAll(user: FrameworkUser, ESQuery?: any) {
@@ -131,8 +131,8 @@ export class CMBeatsDomain {
     user: FrameworkUser,
     removals: BeatsTagAssignment[]
   ): Promise<BeatsRemovalReturn> {
-    const beatIds = uniq(removals.map(removal => removal.beatId));
-    const tagIds = uniq(removals.map(removal => removal.tag));
+    const beatIds = uniq(removals.map((removal) => removal.beatId));
+    const tagIds = uniq(removals.map((removal) => removal.tag));
 
     const response = {
       removals: removals.map(() => ({ status: null })),
@@ -173,8 +173,8 @@ export class CMBeatsDomain {
     user: FrameworkUser,
     assignments: BeatsTagAssignment[]
   ): Promise<CMAssignmentReturn> {
-    const beatIds = uniq(assignments.map(assignment => assignment.beatId));
-    const tagIds = uniq(assignments.map(assignment => assignment.tag));
+    const beatIds = uniq(assignments.map((assignment) => assignment.beatId));
+    const tagIds = uniq(assignments.map((assignment) => assignment.tag));
 
     const response = {
       assignments: assignments.map(() => ({ status: null })),

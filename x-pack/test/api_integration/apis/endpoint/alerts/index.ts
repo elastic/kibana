@@ -55,7 +55,7 @@ const ES_QUERY_MISSING = {
   },
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const es = getService('legacyEs');
@@ -70,7 +70,7 @@ export default function({ getService }: FtrProviderContext) {
 
   let nullableEventId = '';
 
-  describe('Endpoint alert API', () => {
+  describe.skip('Endpoint alert API', () => {
     describe('when data is in elasticsearch', () => {
       before(async () => {
         await esArchiver.load('endpoint/alerts/api_feature');
@@ -88,11 +88,7 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('should not support POST requests', async () => {
-        await supertest
-          .post('/api/endpoint/alerts')
-          .send({})
-          .set('kbn-xsrf', 'xxx')
-          .expect(404);
+        await supertest.post('/api/endpoint/alerts').send({}).set('kbn-xsrf', 'xxx').expect(404);
       });
 
       it('should return one entry for each alert with default paging', async () => {
@@ -228,7 +224,7 @@ export default function({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .expect(200);
         let valid: boolean = true;
-        (body.alerts as AlertData[]).forEach(alert => {
+        (body.alerts as AlertData[]).forEach((alert) => {
           if (alert.process?.name > 'malware writer') {
             valid = false;
           }

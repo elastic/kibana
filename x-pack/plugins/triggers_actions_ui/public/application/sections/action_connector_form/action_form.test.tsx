@@ -160,7 +160,7 @@ describe('action_form', () => {
       const initialAlert = ({
         name: 'test',
         params: {},
-        consumer: 'alerting',
+        consumer: 'alerts',
         alertTypeId: alertType.id,
         schedule: {
           interval: '1m',

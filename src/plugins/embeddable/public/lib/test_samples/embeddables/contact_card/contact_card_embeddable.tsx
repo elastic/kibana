@@ -42,7 +42,7 @@ export interface ContactCardEmbeddableOptions {
 
 function getFullName(input: ContactCardEmbeddableInput) {
   const { nameTitle, firstName, lastName } = input;
-  const nameParts = [nameTitle, firstName, lastName].filter(name => name !== undefined);
+  const nameParts = [nameTitle, firstName, lastName].filter((name) => name !== undefined);
   return nameParts.join(' ');
 }
 

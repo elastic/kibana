@@ -13,15 +13,17 @@ import { ViewInApp } from './view_in_app';
 import { useAppDependencies } from '../../../app_context';
 
 jest.mock('../../../app_context', () => {
-  const alerting = {
-    getNavigation: jest.fn(async id => (id === 'alert-with-nav' ? { path: '/alert' } : undefined)),
+  const alerts = {
+    getNavigation: jest.fn(async (id) =>
+      id === 'alert-with-nav' ? { path: '/alert' } : undefined
+    ),
   };
   const navigateToApp = jest.fn();
   return {
     useAppDependencies: jest.fn(() => ({
       http: jest.fn(),
       navigateToApp,
-      alerting,
+      alerts,
       legacy: {
         capabilities: {
           get: jest.fn(() => ({})),
@@ -39,7 +41,7 @@ describe('view in app', () => {
   describe('link to the app that created the alert', () => {
     it('is disabled when there is no navigation', async () => {
       const alert = mockAlert();
-      const { alerting } = useAppDependencies();
+      const { alerts } = useAppDependencies();
 
       let component: ReactWrapper;
       await act(async () => {
@@ -51,7 +53,7 @@ describe('view in app', () => {
         expect(component!.find('button').prop('disabled')).toBe(true);
         expect(component!.text()).toBe('View in app');
 
-        expect(alerting!.getNavigation).toBeCalledWith(alert.id);
+        expect(alerts!.getNavigation).toBeCalledWith(alert.id);
       });
     });
 
@@ -79,7 +81,7 @@ describe('view in app', () => {
 });
 
 function waitForUseEffect() {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(resolve, 0);
   });
 }

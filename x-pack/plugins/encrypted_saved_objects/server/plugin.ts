@@ -14,7 +14,7 @@ import {
   EncryptionError,
 } from './crypto';
 import { EncryptedSavedObjectsAuditLogger } from './audit';
-import { SavedObjectsSetup, setupSavedObjects } from './saved_objects';
+import { setupSavedObjects, ClientInstanciator } from './saved_objects';
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
@@ -22,23 +22,12 @@ export interface PluginsSetup {
 
 export interface EncryptedSavedObjectsPluginSetup {
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
-  __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => void };
   usingEphemeralEncryptionKey: boolean;
 }
 
 export interface EncryptedSavedObjectsPluginStart {
   isEncryptionError: (error: Error) => boolean;
-  getClient: SavedObjectsSetup;
-}
-
-/**
- * Describes a set of APIs that is available in the legacy platform only and required by this plugin
- * to function properly.
- */
-export interface LegacyAPI {
-  auditLogger: {
-    log: (eventType: string, message: string, data?: Record<string, unknown>) => void;
-  };
+  getClient: ClientInstanciator;
 }
 
 /**
@@ -46,15 +35,7 @@ export interface LegacyAPI {
  */
 export class Plugin {
   private readonly logger: Logger;
-  private savedObjectsSetup!: SavedObjectsSetup;
-
-  private legacyAPI?: LegacyAPI;
-  private readonly getLegacyAPI = () => {
-    if (!this.legacyAPI) {
-      throw new Error('Legacy API is not registered!');
-    }
-    return this.legacyAPI;
-  };
+  private savedObjectsSetup!: ClientInstanciator;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -72,7 +53,9 @@ export class Plugin {
       new EncryptedSavedObjectsService(
         config.encryptionKey,
         this.logger,
-        new EncryptedSavedObjectsAuditLogger(() => this.getLegacyAPI().auditLogger)
+        new EncryptedSavedObjectsAuditLogger(
+          deps.security?.audit.getLogger('encryptedSavedObjects')
+        )
       )
     );
 
@@ -86,7 +69,6 @@ export class Plugin {
     return {
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
         service.registerType(typeRegistration),
-      __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI) },
       usingEphemeralEncryptionKey,
     };
   }
@@ -95,7 +77,7 @@ export class Plugin {
     this.logger.debug('Starting plugin');
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
-      getClient: (includedHiddenTypes?: string[]) => this.savedObjectsSetup(includedHiddenTypes),
+      getClient: (options = {}) => this.savedObjectsSetup(options),
     };
   }
 

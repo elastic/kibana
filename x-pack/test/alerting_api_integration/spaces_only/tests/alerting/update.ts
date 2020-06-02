@@ -20,11 +20,11 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
     it('should handle update alert request appropriately', async () => {
       const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
 
       const updatedData = {
         name: 'bcd',
@@ -37,7 +37,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         throttle: '1m',
       };
       const response = await supertest
-        .put(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`)
+        .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .send(updatedData)
         .expect(200);
@@ -75,14 +75,14 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
     it(`shouldn't update alert from another space`, async () => {
       const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
 
       await supertest
-        .put(`${getUrlPrefix(Spaces.other.id)}/api/alert/${createdAlert.id}`)
+        .put(`${getUrlPrefix(Spaces.other.id)}/api/alerts/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'bcd',

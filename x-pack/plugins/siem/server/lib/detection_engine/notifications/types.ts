@@ -10,8 +10,8 @@ import {
   AlertType,
   State,
   AlertExecutorOptions,
-} from '../../../../../alerting/server';
-import { Alert } from '../../../../../alerting/common';
+} from '../../../../../alerts/server';
+import { Alert } from '../../../../../alerts/common';
 import { NOTIFICATIONS_ID } from '../../../../common/constants';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 
@@ -78,7 +78,7 @@ export interface ReadNotificationParams {
 export const isAlertTypes = (
   partialAlert: PartialAlert[]
 ): partialAlert is RuleNotificationAlertType[] => {
-  return partialAlert.every(rule => isAlertType(rule));
+  return partialAlert.every((rule) => isAlertType(rule));
 };
 
 export const isAlertType = (

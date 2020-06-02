@@ -18,7 +18,7 @@ export const DatasetActionsList: React.FunctionComponent<{
   timeRange: TimeRange;
 }> = ({ categorizationJobId, categoryId, datasets, timeRange }) => (
   <ul>
-    {datasets.map(dataset => {
+    {datasets.map((dataset) => {
       const datasetLabel = getFriendlyNameForPartitionId(dataset.name);
       return (
         <li key={datasetLabel}>

@@ -7,6 +7,7 @@
 import { extname } from 'path';
 import { chunk, omit } from 'lodash/fp';
 
+import { importRulesSchema } from '../../../../common/detection_engine/schemas/response/import_rules_schema';
 import { createPromiseFromStreams } from '../../../../../../../src/legacy/utils';
 import { IRouter } from '../../../../../../../src/core/server';
 
@@ -16,7 +17,6 @@ import { SetupPlugins } from '../../../plugin';
 import { ConfigType } from '../../../config';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 
-import { importRulesSchema } from '../../detection_engine/routes/schemas/response/import_rules_schema';
 import { validate } from '../../detection_engine/routes/rules/validate';
 import {
   buildSiemResponse,
@@ -236,8 +236,10 @@ export const importTimelinesRoute = (
           ];
         }
 
-        const errorsResp = importTimelineResponse.filter(resp => isBulkError(resp)) as BulkError[];
-        const successes = importTimelineResponse.filter(resp => {
+        const errorsResp = importTimelineResponse.filter((resp) =>
+          isBulkError(resp)
+        ) as BulkError[];
+        const successes = importTimelineResponse.filter((resp) => {
           if (isImportRegular(resp)) {
             return resp.status_code === 200;
           } else {

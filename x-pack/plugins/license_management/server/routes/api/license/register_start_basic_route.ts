@@ -16,7 +16,7 @@ export function registerStartBasicRoute({ router, plugins: { licensing } }: Rout
       validate: { query: schema.object({ acknowledge: schema.string() }) },
     },
     async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.adminClient;
+      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       try {
         return res.ok({
           body: await startBasic({

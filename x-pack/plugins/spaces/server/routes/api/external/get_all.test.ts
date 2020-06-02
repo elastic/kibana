@@ -26,7 +26,7 @@ import { securityMock } from '../../../../../security/server/mocks';
 
 describe('GET /spaces/space', () => {
   const spacesSavedObjects = createSpaces();
-  const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
+  const spaces = spacesSavedObjects.map((s) => ({ id: s.id, ...s.attributes }));
 
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
@@ -43,7 +43,7 @@ describe('GET /spaces/space', () => {
       http: (httpService as unknown) as CoreSetup['http'],
       getStartServices: async () => [coreStart, {}, {}],
       authorization: securityMock.createSetup().authz,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
+      auditLogger: {} as SpacesAuditLogger,
       config$: Rx.of(spacesConfig),
     });
 

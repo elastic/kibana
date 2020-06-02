@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -15,7 +16,6 @@ import { transformValidateBulkError, validate } from './validate';
 import { buildRouteValidation, transformBulkError, buildSiemResponse } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
 import { updateRules } from '../../rules/update_rules';
-import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
@@ -44,7 +44,7 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
       const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
-        request.body.map(async payloadRule => {
+        request.body.map(async (payloadRule) => {
           const {
             actions,
             anomaly_threshold: anomalyThreshold,

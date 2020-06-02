@@ -9,7 +9,7 @@ import { ReactElement } from 'react';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 
 export type RenderWizardArguments = {
-  previewLayer: (layerDescriptor: LayerDescriptor | null, isIndexingSource?: boolean) => void;
+  previewLayers: (layerDescriptors: LayerDescriptor[], isIndexingSource?: boolean) => void;
   mapColors: string[];
   // upload arguments
   isIndexingTriggered: boolean;
@@ -40,7 +40,7 @@ export function registerLayerWizard(layerWizard: LayerWizard) {
 }
 
 export async function getLayerWizards(): Promise<LayerWizard[]> {
-  const promises = registry.map(async layerWizard => {
+  const promises = registry.map(async (layerWizard) => {
     return {
       ...layerWizard,
       // @ts-ignore

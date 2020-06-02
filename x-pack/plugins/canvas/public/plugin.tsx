@@ -28,7 +28,6 @@ import { Start as InspectorStart } from '../../../../src/plugins/inspector/publi
 import { argTypeSpecs } from './expression_types/arg_types';
 import { transitions } from './transitions';
 import { getPluginApi, CanvasApi } from './plugin_api';
-import { initFunctions } from './functions';
 import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
 export { CoreStart, CoreSetup };
 
@@ -74,10 +73,12 @@ export class CanvasPlugin
     this.srcPlugin.setup(core, { canvas: canvasApi });
 
     // Set the nav link to the last saved url if we have one in storage
-    const lastUrl = getSessionStorage().get(SESSIONSTORAGE_LASTPATH);
-    if (lastUrl) {
+    const lastPath = getSessionStorage().get(
+      `${SESSIONSTORAGE_LASTPATH}:${core.http.basePath.get()}`
+    );
+    if (lastPath) {
       this.appUpdater.next(() => ({
-        defaultPath: `#${lastUrl}`,
+        defaultPath: `#${lastPath}`,
       }));
     }
 
@@ -115,14 +116,6 @@ export class CanvasPlugin
 
     plugins.home.featureCatalogue.register(featureCatalogueEntry);
 
-    // Register core canvas stuff
-    canvasApi.addFunctions(
-      initFunctions({
-        timefilter: plugins.data.query.timefilter.timefilter,
-        prependBasePath: core.http.basePath.prepend,
-        typesRegistry: plugins.expressions.__LEGACY.types,
-      })
-    );
     canvasApi.addArgumentUIs(argTypeSpecs);
     canvasApi.addTransitions(transitions);
 
