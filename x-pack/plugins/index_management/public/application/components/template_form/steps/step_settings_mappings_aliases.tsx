@@ -21,7 +21,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { documentationService } from '../../../services/documentation';
-import { ComponentTemplatesContainer } from '../../../components';
+import { ComponentTemplatesContainer, ComponentTemplates } from '../../../components';
+import { ConfigureSection } from '../components';
 import { StepProps } from '../types';
 // import { useJsonStep } from './use_json_step';
 
@@ -133,6 +134,9 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
 }) => {
   const [isFromComponentsVisible] = useState(true);
   const [isAddManualVisible] = useState(true);
+  const [isCreateComponentFromTemplateVisible, setIsCreateComponentFromTemplateVisible] = useState(
+    false
+  );
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
   const [isMappingsVisible, setIsMappingsVisible] = useState(false);
   const [isAliasesVisible, setIsAliasesVisible] = useState(false);
@@ -190,158 +194,171 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
       <EuiSpacer />
 
       {/* Inherit from components */}
-      <div>
-        <EuiFlexGroup>
-          {/* <EuiFlexItem grow={false}>
-            <EuiSwitch
-              data-test-subj="enablePhaseSwitch-warm"
-              label=""
-              id="toggle-use-components"
-              checked={isFromComponentsVisible}
-              onChange={(e) => {
-                setIsFromComponentsVisible(e.target.checked);
-              }}
-              aria-controls="warmPhaseContent"
-            />
-          </EuiFlexItem> */}
-          <EuiFlexItem>
-            <EuiTitle size="s">
-              <h2 className="eui-displayInlineBlock eui-alignMiddle">
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseLabel"
-                  defaultMessage="Inherit from components"
-                />
-              </h2>
-            </EuiTitle>
-            <EuiTextColor color="subdued">
-              <EuiText size="xs">
-                <p>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescriptionMessage"
-                    defaultMessage="Inherit index settings, mappings and aliases from your components."
+      <ConfigureSection
+        title={
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseLabel"
+            defaultMessage="Inherit from components"
+          />
+        }
+        subTitle={
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescriptionMessage"
+            defaultMessage="Inherit index settings, mappings and aliases from component templates."
+          />
+        }
+      >
+        <EuiFlexGroup style={{ minHeight: '160px', maxHeight: '320px', height: '320px' }}>
+          <EuiFlexItem
+            style={{
+              padding: '16px',
+              backgroundColor: '#fafbfc',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#69707D',
+              overflowY: 'auto',
+            }}
+          >
+            <div>No component template selected.</div>
+          </EuiFlexItem>
+
+          <EuiFlexItem style={{ overflowY: 'auto' }}>
+            <ComponentTemplatesContainer>
+              {({ isLoading, components }) => {
+                return (
+                  <ComponentTemplates
+                    isLoading={isLoading}
+                    components={[]}
+                    emptyPrompt={{
+                      showCreateButton: false,
+                    }}
                   />
-                </p>
-              </EuiText>
-            </EuiTextColor>
+                  // <ComponentTemplates isLoading={isLoading} components={components ?? []} />
+                );
+              }}
+            </ComponentTemplatesContainer>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {isFromComponentsVisible ? (
-          <>
-            <EuiSpacer />
-            <EuiFlexGroup style={{ minHeight: '160px', maxHeight: '320px' }}>
-              <EuiFlexItem
-                style={{
-                  padding: '16px',
-                  backgroundColor: '#fafbfc',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#69707D',
-                }}
-              >
-                <div>Select a component template</div>
-              </EuiFlexItem>
-              <EuiFlexItem style={{ overflowY: 'auto' }}>
-                <ComponentTemplatesContainer />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        ) : null}
-      </div>
+      </ConfigureSection>
 
       <EuiSpacer size="l" />
 
-      <div>
+      {/* Inherit from index templates */}
+      <ConfigureSection
+        title={
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseLabel"
+            defaultMessage="Inherit from index templates"
+          />
+        }
+        subTitle={
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescriptionMessage"
+            defaultMessage="Inherit index settings, mappings and aliases from index templates."
+          />
+        }
+      >
         <EuiFlexGroup>
-          {/* <EuiFlexItem grow={false}>
+          <EuiFlexItem>
             <EuiSwitch
-              data-test-subj="enablePhaseSwitch-warm"
-              label=""
-              id="toggle-manual-add"
-              checked={isAddManualVisible}
+              label="Create component from index template"
+              id="toggle-inherit-index-templates"
+              checked={isCreateComponentFromTemplateVisible}
               onChange={(e) => {
-                setIsAddManualVisible(e.target.checked);
+                setIsCreateComponentFromTemplateVisible(e.target.checked);
               }}
             />
-          </EuiFlexItem> */}
-          <EuiFlexItem>
-            <EuiTitle size="s">
-              <h2 className="eui-displayInlineBlock eui-alignMiddle">
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseLabel"
-                  defaultMessage="Additional configuration"
-                />
-              </h2>
-            </EuiTitle>
+            <EuiSpacer size="s" />
             <EuiTextColor color="subdued">
-              <EuiText size="xs">
+              <EuiText size="s">
                 <p>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescriptionMessage"
-                    defaultMessage="Add additional index settings, mappings or aliases. This additional configuration will have priority over the component templates"
-                  />
+                  Composable templates do not support anymore inheritance from other index templates
+                  like the legacy index templates did. If you want to inherit settings from other
+                  index template you need to first create a component template.
                 </p>
               </EuiText>
             </EuiTextColor>
-
-            <EuiSpacer />
-
-            {isAddManualVisible ? (
-              <>
-                <div>
-                  <EuiSwitch
-                    label="Index settings"
-                    id="toggle-use-components"
-                    checked={isSettingsVisible}
-                    onChange={(e) => {
-                      setIsSettingsVisible(e.target.checked);
-                    }}
-                  />
-                  {isSettingsVisible && (
-                    <div>
-                      <EuiSpacer />
-                      Index settings configuration
-                    </div>
-                  )}
-                </div>
-                <EuiSpacer size="l" />
-                <div>
-                  <EuiSwitch
-                    label="Mappings"
-                    id="toggle-use-components"
-                    checked={isMappingsVisible}
-                    onChange={(e) => {
-                      setIsMappingsVisible(e.target.checked);
-                    }}
-                  />
-                  {isMappingsVisible && (
-                    <div>
-                      <EuiSpacer />
-                      Mappings configuration
-                    </div>
-                  )}
-                </div>
-                <EuiSpacer size="l" />
-                <div>
-                  <EuiSwitch
-                    label="Aliases"
-                    id="toggle-use-components"
-                    checked={isAliasesVisible}
-                    onChange={(e) => {
-                      setIsAliasesVisible(e.target.checked);
-                    }}
-                  />
-                  {isAliasesVisible && (
-                    <div>
-                      <EuiSpacer />
-                      Aliases configuration
-                    </div>
-                  )}
-                </div>
-              </>
-            ) : null}
           </EuiFlexItem>
+          <EuiFlexItem>{isCreateComponentFromTemplateVisible && <div>TODO</div>}</EuiFlexItem>
         </EuiFlexGroup>
-      </div>
+      </ConfigureSection>
+
+      <EuiSpacer size="l" />
+
+      <ConfigureSection
+        title={
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseLabel"
+            defaultMessage="Additional settings"
+          />
+        }
+        subTitle={
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescriptionMessage"
+            defaultMessage="Add additional index settings, mappings or aliases. This configuration will have priority over the component templates"
+          />
+        }
+      >
+        <>
+          {/* Index settings */}
+          <div>
+            <EuiSwitch
+              label="Index settings"
+              id="toggle-use-components"
+              checked={isSettingsVisible}
+              onChange={(e) => {
+                setIsSettingsVisible(e.target.checked);
+              }}
+            />
+            {isSettingsVisible && (
+              <div>
+                <EuiSpacer />
+                Index settings configuration
+              </div>
+            )}
+          </div>
+
+          <EuiSpacer size="l" />
+
+          {/* Mappings */}
+          <div>
+            <EuiSwitch
+              label="Mappings"
+              id="toggle-use-components"
+              checked={isMappingsVisible}
+              onChange={(e) => {
+                setIsMappingsVisible(e.target.checked);
+              }}
+            />
+            {isMappingsVisible && (
+              <div>
+                <EuiSpacer />
+                Mappings configuration
+              </div>
+            )}
+          </div>
+
+          <EuiSpacer size="l" />
+
+          {/* Aliases */}
+          <div>
+            <EuiSwitch
+              label="Aliases"
+              id="toggle-use-components"
+              checked={isAliasesVisible}
+              onChange={(e) => {
+                setIsAliasesVisible(e.target.checked);
+              }}
+            />
+            {isAliasesVisible && (
+              <div>
+                <EuiSpacer />
+                Aliases configuration
+              </div>
+            )}
+          </div>
+        </>
+      </ConfigureSection>
     </>
   );
 };

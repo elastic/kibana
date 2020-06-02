@@ -27,3 +27,33 @@
 .indDetail__codeBlock {
   background: transparent;
 }
+
+.indexTemplateCreation_configureSection {
+  padding: 16px;
+  border-radius: 4px;
+  margin-top: 20px;
+  border: 1px solid #01bfb361;
+
+  &__titleWrapper {
+    margin-top: -44px;
+  }
+
+  &__title {
+    background-color: white;
+    display: inline-block !important;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  &__subTitle {
+    display: block;
+  }
+
+  &__toggleMinimizeWindow {
+    padding: 4px;
+    border: 1px solid #01bfb361;
+    background-color: white;
+  }
+}

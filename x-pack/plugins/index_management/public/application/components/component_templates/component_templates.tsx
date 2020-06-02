@@ -21,6 +21,10 @@ import { ComponentTemplatesList } from './component_templates_list';
 interface Props {
   isLoading: boolean;
   components: ComponentTemplateDeserialized[];
+  emptyPrompt?: {
+    text?: string | JSX.Element;
+    showCreateButton?: boolean;
+  };
 }
 
 function fuzzyMatch(pattern: string, text: string) {
@@ -29,7 +33,11 @@ function fuzzyMatch(pattern: string, text: string) {
   return re.test(text);
 }
 
-export const ComponentTemplates = ({ isLoading, components }: Props) => {
+export const ComponentTemplates = ({
+  isLoading,
+  components,
+  emptyPrompt: { text, showCreateButton } = {},
+}: Props) => {
   const [searchValue, setSearchValue] = useState('');
 
   const filteredComponents = useMemo<ComponentTemplateDeserialized[]>(() => {
@@ -48,19 +56,24 @@ export const ComponentTemplates = ({ isLoading, components }: Props) => {
   const renderEmptyPrompt = () => {
     const emptyPromptBody = (
       <EuiText color="subdued">
-        <p>
-          <FormattedMessage
-            id="xpackidxMgmt.componentTemplatesFlyout.subhead"
-            defaultMessage="Create components to save your index template settings, mappings and aliases so you can reuse them in other templates."
-          />
-          <br />
-          <EuiLink href="https://elastic.co" target="_blank">
+        {text ?? (
+          <p>
             <FormattedMessage
-              id="xpackidxMgmt.componentTemplatesFlyout.emptyPromptLearnMoreLinkText"
-              defaultMessage="Learn more."
+              id="xpackidxMgmt.componentTemplatesFlyout.subhead"
+              defaultMessage="Components templates let you save index settings, mappings and aliases and inherit from them in index templates."
             />
-          </EuiLink>
-        </p>
+            <br />
+            <EuiLink
+              href="https://www.elastic.co/guide/en/elasticsearch/reference/master//indices-component-template.html"
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpackidxMgmt.componentTemplatesFlyout.emptyPromptLearnMoreLinkText"
+                defaultMessage="Learn more."
+              />
+            </EuiLink>
+          </p>
+        )}
       </EuiText>
     );
     return (
@@ -75,7 +88,7 @@ export const ComponentTemplates = ({ isLoading, components }: Props) => {
           </h2>
         }
         body={emptyPromptBody}
-        actions={<CreateButtonPopOver anchorPosition="downCenter" />}
+        actions={showCreateButton ? <CreateButtonPopOver anchorPosition="downCenter" /> : undefined}
         data-test-subj="emptyPrompt"
       />
     );
@@ -95,7 +108,6 @@ export const ComponentTemplates = ({ isLoading, components }: Props) => {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFieldSearch
-              style={{ minWidth: '350px' }}
               placeholder="Search components"
               value={searchValue}
               onChange={(e) => {
@@ -108,7 +120,9 @@ export const ComponentTemplates = ({ isLoading, components }: Props) => {
           <EuiFlexItem>View</EuiFlexItem>
         </EuiFlexGroup>
       </div>
-      <ComponentTemplatesList components={filteredComponents} />
+      <div>
+        <ComponentTemplatesList components={filteredComponents} />
+      </div>
     </>
   );
 };

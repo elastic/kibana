@@ -10,4 +10,8 @@ export { ComponentTemplatesFlyout } from './component_templates_flyout';
 
 export { ComponentTemplatesContainer } from './component_templates_container';
 
+export { ComponentTemplates } from './component_templates';
+
+export { ComponentTemplatesList } from './component_templates_list';
+
 export * from './types';

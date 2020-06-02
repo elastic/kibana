@@ -3,17 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { ComponentTemplateDeserialized } from './types';
 import { useApi } from './component_templates_context';
-import { ComponentTemplates } from './component_templates';
 
 interface Props {
   onComponents?(components: ComponentTemplateDeserialized[]): void;
+  children: (arg: {
+    isLoading: boolean;
+    components: ComponentTemplateDeserialized[] | null | undefined;
+  }) => JSX.Element;
 }
 
-export const ComponentTemplatesContainer = React.memo(({ onComponents }: Props) => {
+export const ComponentTemplatesContainer = ({ onComponents, children }: Props) => {
   const { data, isLoading } = useApi().useComponentTemplates();
 
   useEffect(() => {
@@ -22,5 +25,5 @@ export const ComponentTemplatesContainer = React.memo(({ onComponents }: Props) 
     }
   }, [data, onComponents]);
 
-  return <ComponentTemplates isLoading={isLoading} components={data ?? []} />;
-});
+  return children({ isLoading, components: data });
+};
