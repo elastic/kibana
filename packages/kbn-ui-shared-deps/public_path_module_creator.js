@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import './legacy/styles.scss';
-import './index.scss';
-import { fooLibFn } from '../../foo/public/index';
-export * from './lib';
-export { fooLibFn };
+module.exports = function ({ key }) {
+  return {
+    code: `__webpack_public_path__ = window.__kbnPublicPath__['${key}']`,
+  };
+};
