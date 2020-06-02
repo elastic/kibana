@@ -6,11 +6,11 @@
 
 import { Page } from 'puppeteer';
 import * as Rx from 'rxjs';
+import { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../browsers';
+import { createDriverFactory } from '../browsers/chromium';
 import * as contexts from '../export_types/common/lib/screenshots/constants';
-import { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../../server/browsers';
-import { createDriverFactory } from '../../server/browsers/chromium';
-import { LevelLogger } from '../../server/lib';
-import { CaptureConfig, ElementsPositionAndAttribute } from '../../server/types';
+import { LevelLogger } from '../lib';
+import { CaptureConfig, ElementsPositionAndAttribute } from '../types';
 
 interface CreateMockBrowserDriverFactoryOpts {
   evaluate: jest.Mock<Promise<any>, any[]>;

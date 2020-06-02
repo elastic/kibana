@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CaptureConfig } from '../../server/types';
 import { createLayout, LayoutInstance, LayoutTypes } from '../export_types/common/layouts';
+import { CaptureConfig } from '../types';
 
 export const createMockLayoutInstance = (captureConfig: CaptureConfig) => {
   const mockLayout = createLayout(captureConfig, {

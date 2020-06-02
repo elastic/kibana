@@ -6,9 +6,9 @@
 
 import * as Rx from 'rxjs';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { ReportingConfigType } from './schema';
-import { createConfig$ } from './create_config';
 import { LevelLogger } from '../lib';
+import { createConfig$ } from './create_config';
+import { ReportingConfigType } from './schema';
 
 interface KibanaServer {
   host?: string;

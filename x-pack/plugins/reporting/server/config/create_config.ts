@@ -15,7 +15,7 @@ import { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_di
 import { ReportingConfigType } from './schema';
 
 /*
- * Set up computed config defaults
+ * Set up dynamic config defaults
  * - xpack.capture.browser.chromium.disableSandbox
  * - xpack.kibanaServer
  * - xpack.reporting.encryptionKey

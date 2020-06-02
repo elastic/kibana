@@ -21,7 +21,7 @@ export class ReportingPlugin
   implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
   private readonly initializerContext: PluginInitializerContext<ReportingConfigType>;
   private logger: LevelLogger;
-  private reportingCore: ReportingCore | null = null;
+  private reportingCore?: ReportingCore;
   private config$: Observable<ReportingConfigType>;
 
   constructor(context: PluginInitializerContext<ReportingConfigType>) {
