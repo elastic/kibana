@@ -12,6 +12,7 @@ export enum CONSTANTS {
   filters = 'filters',
   hostsDetails = 'hosts.details',
   hostsPage = 'hosts.page',
+  management = 'management',
   networkDetails = 'network.details',
   networkPage = 'network.page',
   overviewPage = 'overview.page',
@@ -22,4 +23,11 @@ export enum CONSTANTS {
   unknown = 'unknown',
 }
 
-export type UrlStateType = 'case' | 'detections' | 'host' | 'network' | 'overview' | 'timeline';
+export type UrlStateType =
+  | 'case'
+  | 'detections'
+  | 'host'
+  | 'network'
+  | 'overview'
+  | 'timeline'
+  | 'management';

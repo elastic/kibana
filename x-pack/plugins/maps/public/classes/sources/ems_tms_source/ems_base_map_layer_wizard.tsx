@@ -22,12 +22,12 @@ export const emsBaseMapLayerWizardConfig: LayerWizard = {
     defaultMessage: 'Tile map service from Elastic Maps Service',
   }),
   icon: 'emsApp',
-  renderWizard: ({ previewLayer }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: unknown) => {
       const layerDescriptor = VectorTileLayer.createDescriptor({
         sourceDescriptor: EMSTMSSource.createDescriptor(sourceConfig),
       });
-      previewLayer(layerDescriptor);
+      previewLayers([layerDescriptor]);
     };
 
     return <TileServiceSelect onTileSelect={onSourceConfigChange} />;

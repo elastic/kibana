@@ -23,8 +23,8 @@ import { ImportRuleAlertRest, RuleAlertParamsRest, RuleTypeParams } from '../../
 import { BulkError, ImportSuccessError } from '../utils';
 import { getSimpleRule, getOutputRuleAlertForRest } from '../__mocks__/utils';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
-import { PartialAlert } from '../../../../../../alerting/server';
-import { SanitizedAlert } from '../../../../../../alerting/server/types';
+import { PartialAlert } from '../../../../../../alerts/server';
+import { SanitizedAlert } from '../../../../../../alerts/server/types';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';

@@ -8,7 +8,7 @@ import moment from 'moment';
 import { loggingServiceMock } from 'src/core/server/mocks';
 import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
 import { signalRulesAlertType } from './signal_rule_alert_type';
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { ruleStatusServiceFactory } from './rule_status_service';
 import { getGapBetweenRuns } from './utils';
 import { RuleExecutorOptions } from './types';
@@ -17,7 +17,7 @@ import { scheduleNotificationActions } from '../notifications/schedule_notificat
 import { RuleAlertType } from '../rules/types';
 import { findMlSignals } from './find_ml_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
-import { ListPluginSetup } from '../../../../../lists/server/types';
+import { listMock } from '../../../../../lists/server/mocks';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');
@@ -69,11 +69,6 @@ describe('rules_notification_alert_type', () => {
     modulesProvider: jest.fn(),
     resultsServiceProvider: jest.fn(),
   };
-  const listMock = {
-    getListClient: () => ({
-      getListItemByValues: () => [],
-    }),
-  };
   let payload: jest.Mocked<RuleExecutorOptions>;
   let alert: ReturnType<typeof signalRulesAlertType>;
   let logger: ReturnType<typeof loggingServiceMock.createLogger>;
@@ -116,7 +111,7 @@ describe('rules_notification_alert_type', () => {
       logger,
       version,
       ml: mlMock,
-      lists: (listMock as unknown) as ListPluginSetup,
+      lists: listMock.createSetup(),
     });
   });
 

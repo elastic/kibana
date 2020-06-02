@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { times } from 'lodash';
-import { parseDuration } from '../../../../../alerting/server';
+import { parseDuration } from '../../../../../alerts/server';
 import { MAX_INTERVALS } from '../index';
 
 // dates as numbers are epoch millis
