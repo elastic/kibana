@@ -7,42 +7,42 @@
 import { i18n } from '@kbn/i18n';
 
 export const SOURCE = i18n.translate(
-  'xpack.siem.components.flowControls.selectFlowTarget.sourceDropDownOptionLabel',
+  'xpack.securitySolution.components.flowControls.selectFlowTarget.sourceDropDownOptionLabel',
   {
     defaultMessage: 'Source',
   }
 );
 
 export const DESTINATION = i18n.translate(
-  'xpack.siem.components.flowControls.selectFlowTarget.destinationDropDownOptionLabel',
+  'xpack.securitySolution.components.flowControls.selectFlowTarget.destinationDropDownOptionLabel',
   {
     defaultMessage: 'Destination',
   }
 );
 
 export const CLIENT = i18n.translate(
-  'xpack.siem.components.flowControls.selectFlowTarget.clientDropDownOptionLabel',
+  'xpack.securitySolution.components.flowControls.selectFlowTarget.clientDropDownOptionLabel',
   {
     defaultMessage: 'CLIENT',
   }
 );
 
 export const SERVER = i18n.translate(
-  'xpack.siem.components.flowControls.selectFlowTarget.serverDropDownOptionLabel',
+  'xpack.securitySolution.components.flowControls.selectFlowTarget.serverDropDownOptionLabel',
   {
     defaultMessage: 'SERVER',
   }
 );
 
 export const UNIDIRECTIONAL = i18n.translate(
-  'xpack.siem.components.flowControls.selectFlowDirection.unidirectionalButtonLabel',
+  'xpack.securitySolution.components.flowControls.selectFlowDirection.unidirectionalButtonLabel',
   {
     defaultMessage: 'Unidirectional',
   }
 );
 
 export const BIDIRECTIONAL = i18n.translate(
-  'xpack.siem.components.flowControls.selectFlowDirection.bidirectionalButtonLabel',
+  'xpack.securitySolution.components.flowControls.selectFlowDirection.bidirectionalButtonLabel',
   {
     defaultMessage: 'Bidirectional',
   }

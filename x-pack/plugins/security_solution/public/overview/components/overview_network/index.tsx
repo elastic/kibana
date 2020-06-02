@@ -56,7 +56,10 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   const networkPageButton = useMemo(
     () => (
       <EuiButton href={getNetworkUrl(urlSearch)}>
-        <FormattedMessage id="xpack.siem.overview.networkAction" defaultMessage="View network" />
+        <FormattedMessage
+          id="xpack.securitySolution.overview.networkAction"
+          defaultMessage="View network"
+        />
       </EuiButton>
     ),
     [urlSearch]
@@ -89,7 +92,7 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
                       !isEmpty(overviewNetwork) ? (
                         <FormattedMessage
                           defaultMessage="Showing: {formattedNetworkEventsCount} {networkEventsCount, plural, one {event} other {events}}"
-                          id="xpack.siem.overview.overviewNetwork.networkSubtitle"
+                          id="xpack.securitySolution.overview.overviewNetwork.networkSubtitle"
                           values={{
                             formattedNetworkEventsCount,
                             networkEventsCount,
@@ -101,7 +104,7 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
                     }
                     title={
                       <FormattedMessage
-                        id="xpack.siem.overview.networkTitle"
+                        id="xpack.securitySolution.overview.networkTitle"
                         defaultMessage="Network events"
                       />
                     }

@@ -8,21 +8,21 @@ import { i18n } from '@kbn/i18n';
 import { startCase } from 'lodash/fp';
 
 export const COMPLETE_WITHOUT_ACTIVATING = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.stepScheduleRule.completeWithoutActivatingTitle',
+  'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.completeWithoutActivatingTitle',
   {
     defaultMessage: 'Create rule without activating it',
   }
 );
 
 export const COMPLETE_WITH_ACTIVATING = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.stepScheduleRule.completeWithActivatingTitle',
+  'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.completeWithActivatingTitle',
   {
     defaultMessage: 'Create & activate rule',
   }
 );
 
 export const NO_CONNECTOR_SELECTED = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.stepRuleActions.noConnectorSelectedErrorMessage',
+  'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.noConnectorSelectedErrorMessage',
   {
     defaultMessage: 'No connector selected',
   }
@@ -30,7 +30,7 @@ export const NO_CONNECTOR_SELECTED = i18n.translate(
 
 export const INVALID_MUSTACHE_TEMPLATE = (paramKey: string) =>
   i18n.translate(
-    'xpack.siem.detectionEngine.createRule.stepRuleActions.invalidMustacheTemplateErrorMessage',
+    'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.invalidMustacheTemplateErrorMessage',
     {
       defaultMessage: '{key} is not valid mustache template',
       values: {

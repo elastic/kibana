@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const MACHINE_LEARNING_PERMISSIONS_FAILURE = i18n.translate(
-  'xpack.siem.components.ml.permissions.errors.machineLearningPermissionsFailureTitle',
+  'xpack.securitySolution.components.ml.permissions.errors.machineLearningPermissionsFailureTitle',
   {
     defaultMessage: 'Machine learning permissions failure',
   }

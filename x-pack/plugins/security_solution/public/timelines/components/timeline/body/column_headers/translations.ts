@@ -6,24 +6,24 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CATEGORY = i18n.translate('xpack.siem.timeline.categoryTooltip', {
+export const CATEGORY = i18n.translate('xpack.securitySolution.timeline.categoryTooltip', {
   defaultMessage: 'Category',
 });
 
-export const DESCRIPTION = i18n.translate('xpack.siem.timeline.descriptionTooltip', {
+export const DESCRIPTION = i18n.translate('xpack.securitySolution.timeline.descriptionTooltip', {
   defaultMessage: 'Description',
 });
 
-export const FIELD = i18n.translate('xpack.siem.timeline.fieldTooltip', {
+export const FIELD = i18n.translate('xpack.securitySolution.timeline.fieldTooltip', {
   defaultMessage: 'Field',
 });
 
-export const TYPE = i18n.translate('xpack.siem.timeline.typeTooltip', {
+export const TYPE = i18n.translate('xpack.securitySolution.timeline.typeTooltip', {
   defaultMessage: 'Type',
 });
 
 export const REMOVE_COLUMN = i18n.translate(
-  'xpack.siem.timeline.flyout.pane.removeColumnButtonLabel',
+  'xpack.securitySolution.timeline.flyout.pane.removeColumnButtonLabel',
   {
     defaultMessage: 'Remove column',
   }

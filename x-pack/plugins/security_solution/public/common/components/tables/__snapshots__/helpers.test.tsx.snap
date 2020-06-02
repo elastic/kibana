@@ -91,7 +91,7 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
     key="idPrefix-attrName-item3-2"
     render={[Function]}
   />
-   
+
 </DragDropContext>
 `;
 
@@ -118,10 +118,10 @@ exports[`Table Helpers #getRowItemOverflow it returns correctly against snapshot
           color="subdued"
         >
           1
-           
+
           <FormattedMessage
             defaultMessage="more not shown"
-            id="xpack.siem.tables.rowItemHelper.moreDescription"
+            id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
             values={Object {}}
           />
         </EuiTextColor>

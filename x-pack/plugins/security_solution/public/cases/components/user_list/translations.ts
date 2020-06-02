@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const SEND_EMAIL_ARIA = (user: string) =>
-  i18n.translate('xpack.siem.case.caseView.sendEmalLinkAria', {
+  i18n.translate('xpack.securitySolution.case.caseView.sendEmalLinkAria', {
     values: { user },
     defaultMessage: 'click to send an email to {user}',
   });

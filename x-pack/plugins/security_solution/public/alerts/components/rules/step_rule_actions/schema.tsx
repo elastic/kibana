@@ -73,13 +73,13 @@ export const getSchema = ({
   kibanaSiemAppUrl: {},
   throttle: {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepRuleActions.fieldThrottleLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.fieldThrottleLabel',
       {
         defaultMessage: 'Actions frequency',
       }
     ),
     helpText: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepRuleActions.fieldThrottleHelpText',
+      'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.fieldThrottleHelpText',
       {
         defaultMessage:
           'Select when automated actions should be performed if a rule evaluates as true.',

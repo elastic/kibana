@@ -7,14 +7,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const READ_ONLY_SAVED_OBJECT_TITLE = i18n.translate(
-  'xpack.siem.case.readOnlySavedObjectTitle',
+  'xpack.securitySolution.case.readOnlySavedObjectTitle',
   {
     defaultMessage: 'You have read-only feature privileges',
   }
 );
 
 export const READ_ONLY_SAVED_OBJECT_MSG = i18n.translate(
-  'xpack.siem.case.readOnlySavedObjectDescription',
+  'xpack.securitySolution.case.readOnlySavedObjectDescription',
   {
     defaultMessage:
       'You are only allowed to view cases. If you need to open and update cases, contact your Kibana administrator',
@@ -22,7 +22,7 @@ export const READ_ONLY_SAVED_OBJECT_MSG = i18n.translate(
 );
 
 export const DISMISS_CALLOUT = i18n.translate(
-  'xpack.siem.case.dismissErrorsPushServiceCallOutTitle',
+  'xpack.securitySolution.case.dismissErrorsPushServiceCallOutTitle',
   {
     defaultMessage: 'Dismiss',
   }

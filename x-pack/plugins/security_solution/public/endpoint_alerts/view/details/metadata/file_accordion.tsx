@@ -13,32 +13,44 @@ export const FileAccordion = memo(({ alertData }: { alertData: Immutable<AlertDa
   const columns = useMemo(() => {
     return [
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.fileName', {
-          defaultMessage: 'File Name',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.fileName',
+          {
+            defaultMessage: 'File Name',
+          }
+        ),
         description: alertData.file.name,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.filePath', {
-          defaultMessage: 'File Path',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.filePath',
+          {
+            defaultMessage: 'File Path',
+          }
+        ),
         description: alertData.file.path,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.fileSize', {
-          defaultMessage: 'File Size',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.fileSize',
+          {
+            defaultMessage: 'File Size',
+          }
+        ),
         description: alertData.file.size,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.fileCreated', {
-          defaultMessage: 'File Created',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.fileCreated',
+          {
+            defaultMessage: 'File Created',
+          }
+        ),
         description: <FormattedDate timestamp={alertData.file.created} />,
       },
       {
         title: i18n.translate(
-          'xpack.siem.endpoint.application.endpoint.alertDetails.fileModified',
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.fileModified',
           {
             defaultMessage: 'File Modified',
           }
@@ -47,7 +59,7 @@ export const FileAccordion = memo(({ alertData }: { alertData: Immutable<AlertDa
       },
       {
         title: i18n.translate(
-          'xpack.siem.endpoint.application.endpoint.alertDetails.fileAccessed',
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.fileAccessed',
           {
             defaultMessage: 'File Accessed',
           }
@@ -55,15 +67,21 @@ export const FileAccordion = memo(({ alertData }: { alertData: Immutable<AlertDa
         description: <FormattedDate timestamp={alertData.file.accessed} />,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.signer', {
-          defaultMessage: 'Signer',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.signer',
+          {
+            defaultMessage: 'Signer',
+          }
+        ),
         description: alertData.file.code_signature.subject_name,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.owner', {
-          defaultMessage: 'Owner',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.owner',
+          {
+            defaultMessage: 'Owner',
+          }
+        ),
         description: alertData.file.owner,
       },
     ];
@@ -73,7 +91,7 @@ export const FileAccordion = memo(({ alertData }: { alertData: Immutable<AlertDa
     <EuiAccordion
       id="alertDetailsFileAccordion"
       buttonContent={i18n.translate(
-        'xpack.siem.endpoint.application.endpoint.alertDetails.accordionTitles.file',
+        'xpack.securitySolution.endpoint.application.endpoint.alertDetails.accordionTitles.file',
         {
           defaultMessage: 'File',
         }

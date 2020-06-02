@@ -7,56 +7,69 @@
 import { i18n } from '@kbn/i18n';
 
 export const ERROR_RETRIEVING_USER_DETAILS = i18n.translate(
-  'xpack.siem.recentTimelines.errorRetrievingUserDetailsMessage',
+  'xpack.securitySolution.recentTimelines.errorRetrievingUserDetailsMessage',
   {
     defaultMessage: 'Recent Timelines: An error occurred while retrieving user details',
   }
 );
 
-export const FAVORITES = i18n.translate('xpack.siem.recentTimelines.favoritesButtonLabel', {
-  defaultMessage: 'Favorites',
-});
+export const FAVORITES = i18n.translate(
+  'xpack.securitySolution.recentTimelines.favoritesButtonLabel',
+  {
+    defaultMessage: 'Favorites',
+  }
+);
 
 export const NO_FAVORITE_TIMELINES = i18n.translate(
-  'xpack.siem.recentTimelines.noFavoriteTimelinesMessage',
+  'xpack.securitySolution.recentTimelines.noFavoriteTimelinesMessage',
   {
     defaultMessage:
       "You haven't favorited any timelines yet. Get out there and start threat hunting!",
   }
 );
 
-export const LAST_UPDATED = i18n.translate('xpack.siem.recentTimelines.lastUpdatedButtonLabel', {
-  defaultMessage: 'Last updated',
-});
+export const LAST_UPDATED = i18n.translate(
+  'xpack.securitySolution.recentTimelines.lastUpdatedButtonLabel',
+  {
+    defaultMessage: 'Last updated',
+  }
+);
 
-export const NO_TIMELINES = i18n.translate('xpack.siem.recentTimelines.noTimelinesMessage', {
-  defaultMessage: "You haven't created any timelines yet. Get out there and start threat hunting!",
-});
+export const NO_TIMELINES = i18n.translate(
+  'xpack.securitySolution.recentTimelines.noTimelinesMessage',
+  {
+    defaultMessage:
+      "You haven't created any timelines yet. Get out there and start threat hunting!",
+  }
+);
 
-export const NOTES = i18n.translate('xpack.siem.recentTimelines.notesTooltip', {
+export const NOTES = i18n.translate('xpack.securitySolution.recentTimelines.notesTooltip', {
   defaultMessage: 'Notes',
 });
 
 export const OPEN_AS_DUPLICATE = i18n.translate(
-  'xpack.siem.recentTimelines.openAsDuplicateTooltip',
+  'xpack.securitySolution.recentTimelines.openAsDuplicateTooltip',
   {
     defaultMessage: 'Open as a duplicate timeline',
   }
 );
 
-export const PINNED_EVENTS = i18n.translate('xpack.siem.recentTimelines.pinnedEventsTooltip', {
-  defaultMessage: 'Pinned events',
-});
+export const PINNED_EVENTS = i18n.translate(
+  'xpack.securitySolution.recentTimelines.pinnedEventsTooltip',
+  {
+    defaultMessage: 'Pinned events',
+  }
+);
 
 export const UNTITLED_TIMELINE = i18n.translate(
-  'xpack.siem.recentTimelines.untitledTimelineLabel',
+  'xpack.securitySolution.recentTimelines.untitledTimelineLabel',
   {
     defaultMessage: 'Untitled timeline',
   }
 );
 
 export const VIEW_ALL_TIMELINES = i18n.translate(
-  'xpack.siem.recentTimelines.viewAllTimelinesLink',
+  'xpack.securitySolution.recentTimelines.viewAllTimelinesLink',
   {
     defaultMessage: 'View all timelines',
   }

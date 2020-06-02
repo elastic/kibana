@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const SIEM_JOB_FETCH_FAILURE = i18n.translate(
-  'xpack.siem.components.mlPopup.hooks.errors.siemJobFetchFailureTitle',
+  'xpack.securitySolution.components.mlPopup.hooks.errors.siemJobFetchFailureTitle',
   {
     defaultMessage: 'SIEM job fetch failure',
   }

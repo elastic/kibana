@@ -20,7 +20,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
           <EuiText>
             <FormattedMessage
               defaultMessage="Auditbeat"
-              id="xpack.siem.overview.networkStatGroupAuditbeat"
+              id="xpack.securitySolution.overview.networkStatGroupAuditbeat"
               values={Object {}}
             />
           </EuiText>
@@ -57,7 +57,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             <styled.div>
               <FormattedMessage
                 defaultMessage="Socket"
-                id="xpack.siem.overview.auditBeatSocketTitle"
+                id="xpack.securitySolution.overview.auditBeatSocketTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -93,7 +93,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
           <EuiText>
             <FormattedMessage
               defaultMessage="Filebeat"
-              id="xpack.siem.overview.networkStatGroupFilebeat"
+              id="xpack.securitySolution.overview.networkStatGroupFilebeat"
               values={Object {}}
             />
           </EuiText>
@@ -130,7 +130,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             <styled.div>
               <FormattedMessage
                 defaultMessage="Cisco"
-                id="xpack.siem.overview.filebeatCiscoTitle"
+                id="xpack.securitySolution.overview.filebeatCiscoTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -162,7 +162,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             <styled.div>
               <FormattedMessage
                 defaultMessage="Netflow"
-                id="xpack.siem.overview.filebeatNetflowTitle"
+                id="xpack.securitySolution.overview.filebeatNetflowTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -194,7 +194,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             <styled.div>
               <FormattedMessage
                 defaultMessage="Palo Alto Networks"
-                id="xpack.siem.overview.filebeatPanwTitle"
+                id="xpack.securitySolution.overview.filebeatPanwTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -226,7 +226,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             <styled.div>
               <FormattedMessage
                 defaultMessage="Suricata"
-                id="xpack.siem.overview.fileBeatSuricataTitle"
+                id="xpack.securitySolution.overview.fileBeatSuricataTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -258,7 +258,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             <styled.div>
               <FormattedMessage
                 defaultMessage="Zeek"
-                id="xpack.siem.overview.fileBeatZeekTitle"
+                id="xpack.securitySolution.overview.fileBeatZeekTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -294,7 +294,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
           <EuiText>
             <FormattedMessage
               defaultMessage="Packetbeat"
-              id="xpack.siem.overview.networkStatGroupPacketbeat"
+              id="xpack.securitySolution.overview.networkStatGroupPacketbeat"
               values={Object {}}
             />
           </EuiText>
@@ -331,7 +331,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             <styled.div>
               <FormattedMessage
                 defaultMessage="DNS"
-                id="xpack.siem.overview.packetBeatDnsTitle"
+                id="xpack.securitySolution.overview.packetBeatDnsTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -363,7 +363,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             <styled.div>
               <FormattedMessage
                 defaultMessage="Flow"
-                id="xpack.siem.overview.packetBeatFlowTitle"
+                id="xpack.securitySolution.overview.packetBeatFlowTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -395,7 +395,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             <styled.div>
               <FormattedMessage
                 defaultMessage="TLS"
-                id="xpack.siem.overview.packetbeatTLSTitle"
+                id="xpack.securitySolution.overview.packetbeatTLSTitle"
                 values={Object {}}
               />
             </styled.div>

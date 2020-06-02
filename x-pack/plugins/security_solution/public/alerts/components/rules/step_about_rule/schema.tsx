@@ -24,14 +24,17 @@ const { emptyField } = fieldValidators;
 export const schema: FormSchema = {
   name: {
     type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.siem.detectionEngine.createRule.stepAboutRule.fieldNameLabel', {
-      defaultMessage: 'Name',
-    }),
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldNameLabel',
+      {
+        defaultMessage: 'Name',
+      }
+    ),
     validations: [
       {
         validator: emptyField(
           i18n.translate(
-            'xpack.siem.detectionEngine.createRule.stepAboutRule.nameFieldRequiredError',
+            'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.nameFieldRequiredError',
             {
               defaultMessage: 'A name is required.',
             }
@@ -43,7 +46,7 @@ export const schema: FormSchema = {
   description: {
     type: FIELD_TYPES.TEXTAREA,
     label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldDescriptionLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldDescriptionLabel',
       {
         defaultMessage: 'Description',
       }
@@ -52,7 +55,7 @@ export const schema: FormSchema = {
       {
         validator: emptyField(
           i18n.translate(
-            'xpack.siem.detectionEngine.createRule.stepAboutRule.descriptionFieldRequiredError',
+            'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.descriptionFieldRequiredError',
             {
               defaultMessage: 'A description is required.',
             }
@@ -64,7 +67,7 @@ export const schema: FormSchema = {
   severity: {
     type: FIELD_TYPES.SUPER_SELECT,
     label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldSeverityLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldSeverityLabel',
       {
         defaultMessage: 'Severity',
       }
@@ -73,7 +76,7 @@ export const schema: FormSchema = {
       {
         validator: emptyField(
           i18n.translate(
-            'xpack.siem.detectionEngine.createRule.stepAboutRule.severityFieldRequiredError',
+            'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.severityFieldRequiredError',
             {
               defaultMessage: 'A severity is required.',
             }
@@ -85,7 +88,7 @@ export const schema: FormSchema = {
   riskScore: {
     type: FIELD_TYPES.RANGE,
     label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldRiskScoreLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRiskScoreLabel',
       {
         defaultMessage: 'Risk score',
       }
@@ -93,7 +96,7 @@ export const schema: FormSchema = {
   },
   references: {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldReferenceUrlsLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldReferenceUrlsLabel',
       {
         defaultMessage: 'Reference URLs',
       }
@@ -124,7 +127,7 @@ export const schema: FormSchema = {
   },
   falsePositives: {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldFalsePositiveLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldFalsePositiveLabel',
       {
         defaultMessage: 'False positive examples',
       }
@@ -133,7 +136,7 @@ export const schema: FormSchema = {
   },
   threat: {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldMitreThreatLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldMitreThreatLabel',
       {
         defaultMessage: 'MITRE ATT&CK\\u2122',
       }
@@ -164,11 +167,14 @@ export const schema: FormSchema = {
   },
   tags: {
     type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.translate('xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTagsLabel', {
-      defaultMessage: 'Tags',
-    }),
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTagsLabel',
+      {
+        defaultMessage: 'Tags',
+      }
+    ),
     helpText: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTagsHelpText',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTagsHelpText',
       {
         defaultMessage:
           'Type one or more custom identifying tags for this rule. Press enter after each tag to begin a new one.',
@@ -178,13 +184,19 @@ export const schema: FormSchema = {
   },
   note: {
     type: FIELD_TYPES.TEXTAREA,
-    label: i18n.translate('xpack.siem.detectionEngine.createRule.stepAboutRule.guideLabel', {
-      defaultMessage: 'Investigation guide',
-    }),
-    helpText: i18n.translate('xpack.siem.detectionEngine.createRule.stepAboutRule.guideHelpText', {
-      defaultMessage:
-        'Provide helpful information for analysts that are performing a signal investigation. This guide will appear on both the rule details page and in timelines created from signals generated by this rule.',
-    }),
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.guideLabel',
+      {
+        defaultMessage: 'Investigation guide',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.guideHelpText',
+      {
+        defaultMessage:
+          'Provide helpful information for analysts that are performing a signal investigation. This guide will appear on both the rule details page and in timelines created from signals generated by this rule.',
+      }
+    ),
     labelAppend: OptionalFieldLabel,
   },
 };

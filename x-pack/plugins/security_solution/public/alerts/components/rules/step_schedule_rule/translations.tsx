@@ -7,14 +7,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const COMPLETE_WITHOUT_ACTIVATING = i18n.translate(
-  'xpack.siem.detectionEngine.createRule. stepScheduleRule.completeWithoutActivatingTitle',
+  'xpack.securitySolution.detectionEngine.createRule. stepScheduleRule.completeWithoutActivatingTitle',
   {
     defaultMessage: 'Create rule without activating it',
   }
 );
 
 export const COMPLETE_WITH_ACTIVATING = i18n.translate(
-  'xpack.siem.detectionEngine.createRule. stepScheduleRule.completeWithActivatingTitle',
+  'xpack.securitySolution.detectionEngine.createRule. stepScheduleRule.completeWithActivatingTitle',
   {
     defaultMessage: 'Create & activate rule',
   }

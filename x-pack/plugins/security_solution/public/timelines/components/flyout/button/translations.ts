@@ -6,10 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TIMELINE = i18n.translate('xpack.siem.flyout.button.timeline', {
+export const TIMELINE = i18n.translate('xpack.securitySolution.flyout.button.timeline', {
   defaultMessage: 'timeline',
 });
 
-export const FLYOUT_BUTTON = i18n.translate('xpack.siem.flyout.button.text', {
+export const FLYOUT_BUTTON = i18n.translate('xpack.securitySolution.flyout.button.text', {
   defaultMessage: 'Timeline',
 });

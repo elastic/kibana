@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const IMPORT_TIMELINE_MODAL = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.stepDefineRule.importTimelineModalTitle',
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.importTimelineModalTitle',
   {
     defaultMessage: 'Import query from saved timeline',
   }

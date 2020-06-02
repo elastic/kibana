@@ -33,10 +33,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     plugins.home.featureCatalogue.register({
       id: APP_ID,
-      title: i18n.translate('xpack.siem.featureCatalogue.title', {
-        defaultMessage: 'SIEM',
+      title: i18n.translate('xpack.securitySolution.featureCatalogue.title', {
+        defaultMessage: 'Security',
       }),
-      description: i18n.translate('xpack.siem.featureCatalogue.description', {
+      description: i18n.translate('xpack.securitySolution.featureCatalogue.description', {
         defaultMessage: 'Explore security metrics and logs for events and alerts',
       }),
       icon: APP_ICON,

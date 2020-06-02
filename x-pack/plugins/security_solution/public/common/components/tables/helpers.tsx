@@ -164,7 +164,7 @@ export const getRowItemOverflow = (
                 <EuiTextColor color="subdued">
                   {rowItems.length - overflowIndexStart - maxOverflowItems}{' '}
                   <FormattedMessage
-                    id="xpack.siem.tables.rowItemHelper.moreDescription"
+                    id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
                     defaultMessage="more not shown"
                   />
                 </EuiTextColor>

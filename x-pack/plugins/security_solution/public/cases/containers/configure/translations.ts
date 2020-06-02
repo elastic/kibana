@@ -8,6 +8,9 @@ import { i18n } from '@kbn/i18n';
 
 export * from '../translations';
 
-export const SUCCESS_CONFIGURE = i18n.translate('xpack.siem.case.configure.successSaveToast', {
-  defaultMessage: 'Saved external connection settings',
-});
+export const SUCCESS_CONFIGURE = i18n.translate(
+  'xpack.securitySolution.case.configure.successSaveToast',
+  {
+    defaultMessage: 'Saved external connection settings',
+  }
+);

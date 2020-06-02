@@ -54,7 +54,10 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   const hostPageButton = useMemo(
     () => (
       <EuiButton href={getHostsUrl(urlSearch)}>
-        <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View hosts" />
+        <FormattedMessage
+          id="xpack.securitySolution.overview.hostsAction"
+          defaultMessage="View hosts"
+        />
       </EuiButton>
     ),
     [urlSearch]
@@ -85,7 +88,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
                       !isEmpty(overviewHost) ? (
                         <FormattedMessage
                           defaultMessage="Showing: {formattedHostEventsCount} {hostEventsCount, plural, one {event} other {events}}"
-                          id="xpack.siem.overview.overviewHost.hostsSubtitle"
+                          id="xpack.securitySolution.overview.overviewHost.hostsSubtitle"
                           values={{
                             formattedHostEventsCount,
                             hostEventsCount,
@@ -97,7 +100,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
                     }
                     title={
                       <FormattedMessage
-                        id="xpack.siem.overview.hostsTitle"
+                        id="xpack.securitySolution.overview.hostsTitle"
                         defaultMessage="Host events"
                       />
                     }

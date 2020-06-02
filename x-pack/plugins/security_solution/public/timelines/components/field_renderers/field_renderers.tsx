@@ -266,7 +266,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
                 <EuiButtonEmpty size="xs" onClick={() => setIsOpen(!isOpen)}>
                   {`+${rowItems.length - overflowIndexStart} `}
                   <FormattedMessage
-                    id="xpack.siem.fieldRenderers.moreLabel"
+                    id="xpack.securitySolution.fieldRenderers.moreLabel"
                     defaultMessage="More"
                   />
                 </EuiButtonEmpty>

@@ -16,7 +16,7 @@ export const getLicenseError = () => ({
   description: (
     <FormattedMessage
       defaultMessage="To open cases in external systems, you must update your license to Platinum, start a free 30-day trial, or spin up a {link} on AWS, GCP, or Azure."
-      id="xpack.siem.case.caseView.pushToServiceDisableByLicenseDescription"
+      id="xpack.securitySolution.case.caseView.pushToServiceDisableByLicenseDescription"
       values={{
         link: (
           <EuiLink href="https://www.elastic.co/cloud/" target="_blank">
@@ -33,7 +33,7 @@ export const getKibanaConfigError = () => ({
   description: (
     <FormattedMessage
       defaultMessage="The kibana.yml file is configured to only allow specific connectors. To enable opening a case in external systems, add .[actionTypeId] (ex: .servicenow | .jira)  to the xpack.actions.enabledActiontypes setting. For more information, see {link}."
-      id="xpack.siem.case.caseView.pushToServiceDisableByConfigDescription"
+      id="xpack.securitySolution.case.caseView.pushToServiceDisableByConfigDescription"
       values={{
         link: (
           <EuiLink href="#" target="_blank">

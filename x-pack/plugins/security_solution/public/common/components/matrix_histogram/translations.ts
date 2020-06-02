@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const STACK_BY = i18n.translate(
-  'xpack.siem.components.histogram.stackByOptions.stackByLabel',
+  'xpack.securitySolution.components.histogram.stackByOptions.stackByLabel',
   {
     defaultMessage: 'Stack by',
   }

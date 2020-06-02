@@ -6,30 +6,36 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TACTIC = i18n.translate('xpack.siem.detectionEngine.mitreAttack.tacticsDescription', {
-  defaultMessage: 'tactic',
-});
+export const TACTIC = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mitreAttack.tacticsDescription',
+  {
+    defaultMessage: 'tactic',
+  }
+);
 
 export const TECHNIQUE = i18n.translate(
-  'xpack.siem.detectionEngine.mitreAttack.techniquesDescription',
+  'xpack.securitySolution.detectionEngine.mitreAttack.techniquesDescription',
   {
     defaultMessage: 'techniques',
   }
 );
 
-export const ADD_MITRE_ATTACK = i18n.translate('xpack.siem.detectionEngine.mitreAttack.addTitle', {
-  defaultMessage: 'Add MITRE ATT&CK\\u2122 threat',
-});
+export const ADD_MITRE_ATTACK = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mitreAttack.addTitle',
+  {
+    defaultMessage: 'Add MITRE ATT&CK\\u2122 threat',
+  }
+);
 
 export const TECHNIQUES_PLACEHOLDER = i18n.translate(
-  'xpack.siem.detectionEngine.mitreAttack.techniquesPlaceHolderDescription',
+  'xpack.securitySolution.detectionEngine.mitreAttack.techniquesPlaceHolderDescription',
   {
     defaultMessage: 'Select techniques ...',
   }
 );
 
 export const TACTIC_PLACEHOLDER = i18n.translate(
-  'xpack.siem.detectionEngine.mitreAttack.tacticPlaceHolderDescription',
+  'xpack.securitySolution.detectionEngine.mitreAttack.tacticPlaceHolderDescription',
   {
     defaultMessage: 'Select tactic ...',
   }

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const EXPORT_FAILURE = i18n.translate(
-  'xpack.siem.detectionEngine.rules.components.ruleDownloader.exportFailureTitle',
+  'xpack.securitySolution.detectionEngine.rules.components.ruleDownloader.exportFailureTitle',
   {
     defaultMessage: 'Failed to export rules…',
   }

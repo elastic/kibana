@@ -7,28 +7,28 @@
 import { i18n } from '@kbn/i18n';
 
 export const QUERY_TYPE_TITLE = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.stepDefineRule.ruleTypeField.queryTypeTitle',
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.queryTypeTitle',
   {
     defaultMessage: 'Custom query',
   }
 );
 
 export const QUERY_TYPE_DESCRIPTION = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.stepDefineRule.ruleTypeField.queryTypeDescription',
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.queryTypeDescription',
   {
     defaultMessage: 'Use KQL or Lucene to detect issues across indices.',
   }
 );
 
 export const ML_TYPE_TITLE = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlTypeTitle',
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlTypeTitle',
   {
     defaultMessage: 'Machine Learning',
   }
 );
 
 export const ML_TYPE_DESCRIPTION = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlTypeDescription',
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlTypeDescription',
   {
     defaultMessage: 'Select ML job to detect anomalous activity.',
   }

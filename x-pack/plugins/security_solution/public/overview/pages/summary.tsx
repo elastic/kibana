@@ -18,20 +18,20 @@ export const Summary = React.memo(() => {
       <EuiText>
         <h2>
           <FormattedMessage
-            id="xpack.siem.overview.startedTitle"
+            id="xpack.securitySolution.overview.startedTitle"
             defaultMessage="Getting started"
           />
         </h2>
 
         <p>
           <FormattedMessage
-            id="xpack.siem.overview.startedText"
+            id="xpack.securitySolution.overview.startedText"
             defaultMessage="Welcome to Security Information &amp; Event Management (SIEM). Get started by reviewing our {docs} or {data}. For information about upcoming features and tutorials, be sure to check out our {siemSolution} page."
             values={{
               docs: (
                 <EuiLink href={docLinks.links.siem.guide} target="blank">
                   <FormattedMessage
-                    id="xpack.siem.overview.startedText.docsLinkText"
+                    id="xpack.securitySolution.overview.startedText.docsLinkText"
                     defaultMessage="documentation"
                   />
                 </EuiLink>
@@ -39,7 +39,7 @@ export const Summary = React.memo(() => {
               data: (
                 <EuiLink href="kibana#home/tutorial_directory/siem">
                   <FormattedMessage
-                    id="xpack.siem.overview.startedText.dataLinkText"
+                    id="xpack.securitySolution.overview.startedText.dataLinkText"
                     defaultMessage="ingesting data"
                   />
                 </EuiLink>
@@ -47,7 +47,7 @@ export const Summary = React.memo(() => {
               siemSolution: (
                 <EuiLink href="https://www.elastic.co/solutions/siem" target="blank">
                   <FormattedMessage
-                    id="xpack.siem.overview.startedText.siemSolutionLinkText"
+                    id="xpack.securitySolution.overview.startedText.siemSolutionLinkText"
                     defaultMessage="SIEM solution"
                   />
                 </EuiLink>
@@ -57,18 +57,21 @@ export const Summary = React.memo(() => {
         </p>
 
         <h2>
-          <FormattedMessage id="xpack.siem.overview.feedbackTitle" defaultMessage="Feedback" />
+          <FormattedMessage
+            id="xpack.securitySolution.overview.feedbackTitle"
+            defaultMessage="Feedback"
+          />
         </h2>
 
         <p>
           <FormattedMessage
-            id="xpack.siem.overview.feedbackText"
+            id="xpack.securitySolution.overview.feedbackText"
             defaultMessage="If you have input or suggestions regarding your experience with Elastic SIEM, please feel free to {feedback}."
             values={{
               feedback: (
                 <EuiLink href="https://discuss.elastic.co/c/siem" target="blank">
                   <FormattedMessage
-                    id="xpack.siem.overview.feedbackText.feedbackLinkText"
+                    id="xpack.securitySolution.overview.feedbackText.feedbackLinkText"
                     defaultMessage="submit feedback online"
                   />
                 </EuiLink>

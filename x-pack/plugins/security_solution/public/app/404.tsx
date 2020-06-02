@@ -12,7 +12,7 @@ import { WrapperPage } from '../common/components/wrapper_page';
 export const NotFoundPage = React.memo(() => (
   <WrapperPage>
     <FormattedMessage
-      id="xpack.siem.pages.fourohfour.noContentFoundDescription"
+      id="xpack.securitySolution.pages.fourohfour.noContentFoundDescription"
       defaultMessage="No content found"
     />
   </WrapperPage>

@@ -6,48 +6,60 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ALERTS_GRAPH_TITLE = i18n.translate('xpack.siem.overview.alertsGraphTitle', {
-  defaultMessage: 'External alert count',
-});
+export const ALERTS_GRAPH_TITLE = i18n.translate(
+  'xpack.securitySolution.overview.alertsGraphTitle',
+  {
+    defaultMessage: 'External alert count',
+  }
+);
 
-export const EVENTS = i18n.translate('xpack.siem.overview.eventsTitle', {
+export const EVENTS = i18n.translate('xpack.securitySolution.overview.eventsTitle', {
   defaultMessage: 'Event count',
 });
 
-export const NEWS_FEED_TITLE = i18n.translate('xpack.siem.overview.newsFeedSidebarTitle', {
-  defaultMessage: 'Security news',
-});
+export const NEWS_FEED_TITLE = i18n.translate(
+  'xpack.securitySolution.overview.newsFeedSidebarTitle',
+  {
+    defaultMessage: 'Security news',
+  }
+);
 
-export const PAGE_TITLE = i18n.translate('xpack.siem.overview.pageTitle', {
+export const PAGE_TITLE = i18n.translate('xpack.securitySolution.overview.pageTitle', {
   defaultMessage: 'SIEM',
 });
 
-export const PAGE_SUBTITLE = i18n.translate('xpack.siem.overview.pageSubtitle', {
+export const PAGE_SUBTITLE = i18n.translate('xpack.securitySolution.overview.pageSubtitle', {
   defaultMessage: 'Security Information & Event Management with the Elastic Stack',
 });
 
-export const RECENT_CASES = i18n.translate('xpack.siem.overview.recentCasesSidebarTitle', {
-  defaultMessage: 'Recent cases',
-});
+export const RECENT_CASES = i18n.translate(
+  'xpack.securitySolution.overview.recentCasesSidebarTitle',
+  {
+    defaultMessage: 'Recent cases',
+  }
+);
 
-export const RECENT_TIMELINES = i18n.translate('xpack.siem.overview.recentTimelinesSidebarTitle', {
-  defaultMessage: 'Recent timelines',
-});
+export const RECENT_TIMELINES = i18n.translate(
+  'xpack.securitySolution.overview.recentTimelinesSidebarTitle',
+  {
+    defaultMessage: 'Recent timelines',
+  }
+);
 
-export const SIGNAL_COUNT = i18n.translate('xpack.siem.overview.signalCountTitle', {
+export const SIGNAL_COUNT = i18n.translate('xpack.securitySolution.overview.signalCountTitle', {
   defaultMessage: 'Signal count',
 });
 
 export const TOP = (fieldName: string) =>
-  i18n.translate('xpack.siem.overview.topNLabel', {
+  i18n.translate('xpack.securitySolution.overview.topNLabel', {
     values: { fieldName },
     defaultMessage: `Top {fieldName}`,
   });
 
-export const VIEW_ALERTS = i18n.translate('xpack.siem.overview.viewAlertsButtonLabel', {
+export const VIEW_ALERTS = i18n.translate('xpack.securitySolution.overview.viewAlertsButtonLabel', {
   defaultMessage: 'View alerts',
 });
 
-export const VIEW_EVENTS = i18n.translate('xpack.siem.overview.viewEventsButtonLabel', {
+export const VIEW_EVENTS = i18n.translate('xpack.securitySolution.overview.viewEventsButtonLabel', {
   defaultMessage: 'View events',
 });

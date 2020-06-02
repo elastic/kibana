@@ -99,16 +99,19 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
     () => [
       {
         field: 'name',
-        name: i18n.translate('xpack.siem.endpoint.resolver.panel.tabel.row.processNameTitle', {
-          defaultMessage: 'Process Name',
-        }),
+        name: i18n.translate(
+          'xpack.securitySolution.endpoint.resolver.panel.tabel.row.processNameTitle',
+          {
+            defaultMessage: 'Process Name',
+          }
+        ),
         sortable: true,
         truncateText: true,
         render(name: string) {
           return name === '' ? (
             <EuiBadge color="warning">
               {i18n.translate(
-                'xpack.siem.endpoint.resolver.panel.table.row.valueMissingDescription',
+                'xpack.securitySolution.endpoint.resolver.panel.table.row.valueMissingDescription',
                 {
                   defaultMessage: 'Value is missing',
                 }
@@ -121,9 +124,12 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
       },
       {
         field: 'timestamp',
-        name: i18n.translate('xpack.siem.endpoint.resolver.panel.tabel.row.timestampTitle', {
-          defaultMessage: 'Timestamp',
-        }),
+        name: i18n.translate(
+          'xpack.securitySolution.endpoint.resolver.panel.tabel.row.timestampTitle',
+          {
+            defaultMessage: 'Timestamp',
+          }
+        ),
         dataType: 'date',
         sortable: true,
         render(eventDate?: Date) {
@@ -132,7 +138,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
           ) : (
             <EuiBadge color="warning">
               {i18n.translate(
-                'xpack.siem.endpoint.resolver.panel.tabel.row.timestampInvalidLabel',
+                'xpack.securitySolution.endpoint.resolver.panel.tabel.row.timestampInvalidLabel',
                 {
                   defaultMessage: 'invalid',
                 }
@@ -142,19 +148,22 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
         },
       },
       {
-        name: i18n.translate('xpack.siem.endpoint.resolver.panel.tabel.row.actionsTitle', {
-          defaultMessage: 'Actions',
-        }),
+        name: i18n.translate(
+          'xpack.securitySolution.endpoint.resolver.panel.tabel.row.actionsTitle',
+          {
+            defaultMessage: 'Actions',
+          }
+        ),
         actions: [
           {
             name: i18n.translate(
-              'xpack.siem.endpoint.resolver.panel.tabel.row.actions.bringIntoViewButtonLabel',
+              'xpack.securitySolution.endpoint.resolver.panel.tabel.row.actions.bringIntoViewButtonLabel',
               {
                 defaultMessage: 'Bring into view',
               }
             ),
             description: i18n.translate(
-              'xpack.siem.endpoint.resolver.panel.tabel.row.bringIntoViewLabel',
+              'xpack.securitySolution.endpoint.resolver.panel.tabel.row.bringIntoViewLabel',
               {
                 defaultMessage: 'Bring the process into view on the map.',
               }
@@ -172,7 +181,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
     <EuiPanel className={className}>
       <EuiTitle size="xs">
         <h4>
-          {i18n.translate('xpack.siem.endpoint.resolver.panel.title', {
+          {i18n.translate('xpack.securitySolution.endpoint.resolver.panel.title', {
             defaultMessage: 'Processes',
           })}
         </h4>

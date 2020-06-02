@@ -22,19 +22,30 @@ export const getOverviewNetworkStats = (data: OverviewNetworkData): FormattedSta
   {
     count: data.auditbeatSocket ?? 0,
     title: (
-      <FormattedMessage id="xpack.siem.overview.auditBeatSocketTitle" defaultMessage="Socket" />
+      <FormattedMessage
+        id="xpack.securitySolution.overview.auditBeatSocketTitle"
+        defaultMessage="Socket"
+      />
     ),
     id: 'auditbeatSocket',
   },
   {
     count: data.filebeatCisco ?? 0,
-    title: <FormattedMessage id="xpack.siem.overview.filebeatCiscoTitle" defaultMessage="Cisco" />,
+    title: (
+      <FormattedMessage
+        id="xpack.securitySolution.overview.filebeatCiscoTitle"
+        defaultMessage="Cisco"
+      />
+    ),
     id: 'filebeatCisco',
   },
   {
     count: data.filebeatNetflow ?? 0,
     title: (
-      <FormattedMessage id="xpack.siem.overview.filebeatNetflowTitle" defaultMessage="Netflow" />
+      <FormattedMessage
+        id="xpack.securitySolution.overview.filebeatNetflowTitle"
+        defaultMessage="Netflow"
+      />
     ),
     id: 'filebeatNetflow',
   },
@@ -42,7 +53,7 @@ export const getOverviewNetworkStats = (data: OverviewNetworkData): FormattedSta
     count: data.filebeatPanw ?? 0,
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.filebeatPanwTitle"
+        id="xpack.securitySolution.overview.filebeatPanwTitle"
         defaultMessage="Palo Alto Networks"
       />
     ),
@@ -51,28 +62,51 @@ export const getOverviewNetworkStats = (data: OverviewNetworkData): FormattedSta
   {
     count: data.filebeatSuricata ?? 0,
     title: (
-      <FormattedMessage id="xpack.siem.overview.fileBeatSuricataTitle" defaultMessage="Suricata" />
+      <FormattedMessage
+        id="xpack.securitySolution.overview.fileBeatSuricataTitle"
+        defaultMessage="Suricata"
+      />
     ),
     id: 'filebeatSuricata',
   },
   {
     count: data.filebeatZeek ?? 0,
-    title: <FormattedMessage id="xpack.siem.overview.fileBeatZeekTitle" defaultMessage="Zeek" />,
+    title: (
+      <FormattedMessage
+        id="xpack.securitySolution.overview.fileBeatZeekTitle"
+        defaultMessage="Zeek"
+      />
+    ),
     id: 'filebeatZeek',
   },
   {
     count: data.packetbeatDNS ?? 0,
-    title: <FormattedMessage id="xpack.siem.overview.packetBeatDnsTitle" defaultMessage="DNS" />,
+    title: (
+      <FormattedMessage
+        id="xpack.securitySolution.overview.packetBeatDnsTitle"
+        defaultMessage="DNS"
+      />
+    ),
     id: 'packetbeatDNS',
   },
   {
     count: data.packetbeatFlow ?? 0,
-    title: <FormattedMessage id="xpack.siem.overview.packetBeatFlowTitle" defaultMessage="Flow" />,
+    title: (
+      <FormattedMessage
+        id="xpack.securitySolution.overview.packetBeatFlowTitle"
+        defaultMessage="Flow"
+      />
+    ),
     id: 'packetbeatFlow',
   },
   {
     count: data.packetbeatTLS ?? 0,
-    title: <FormattedMessage id="xpack.siem.overview.packetbeatTLSTitle" defaultMessage="TLS" />,
+    title: (
+      <FormattedMessage
+        id="xpack.securitySolution.overview.packetbeatTLSTitle"
+        defaultMessage="TLS"
+      />
+    ),
     id: 'packetbeatTLS',
   },
 ];
@@ -82,7 +116,7 @@ const networkStatGroups: StatGroup[] = [
     groupId: 'auditbeat',
     name: (
       <FormattedMessage
-        id="xpack.siem.overview.networkStatGroupAuditbeat"
+        id="xpack.securitySolution.overview.networkStatGroupAuditbeat"
         defaultMessage="Auditbeat"
       />
     ),
@@ -92,7 +126,7 @@ const networkStatGroups: StatGroup[] = [
     groupId: 'filebeat',
     name: (
       <FormattedMessage
-        id="xpack.siem.overview.networkStatGroupFilebeat"
+        id="xpack.securitySolution.overview.networkStatGroupFilebeat"
         defaultMessage="Filebeat"
       />
     ),
@@ -108,7 +142,7 @@ const networkStatGroups: StatGroup[] = [
     groupId: 'packetbeat',
     name: (
       <FormattedMessage
-        id="xpack.siem.overview.networkStatGroupPacketbeat"
+        id="xpack.securitySolution.overview.networkStatGroupPacketbeat"
         defaultMessage="Packetbeat"
       />
     ),

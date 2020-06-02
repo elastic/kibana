@@ -48,7 +48,7 @@ export const LastEventTime = memo<LastEventTimeProps>(({ hostName, indexKey, ip 
         : !loading &&
           lastSeen != null && (
             <FormattedMessage
-              id="xpack.siem.headerPage.pageSubtitle"
+              id="xpack.securitySolution.headerPage.pageSubtitle"
               defaultMessage="Last event: {beat}"
               values={{
                 beat: <FormattedRelativePreferenceDate value={lastSeen} />,

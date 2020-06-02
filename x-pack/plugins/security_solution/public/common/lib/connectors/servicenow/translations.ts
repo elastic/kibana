@@ -9,21 +9,21 @@ import { i18n } from '@kbn/i18n';
 export * from '../translations';
 
 export const SERVICENOW_DESC = i18n.translate(
-  'xpack.siem.case.connectors.servicenow.selectMessageText',
+  'xpack.securitySolution.case.connectors.servicenow.selectMessageText',
   {
     defaultMessage: 'Push or update SIEM case data to a new incident in ServiceNow',
   }
 );
 
 export const SERVICENOW_TITLE = i18n.translate(
-  'xpack.siem.case.connectors.servicenow.actionTypeTitle',
+  'xpack.securitySolution.case.connectors.servicenow.actionTypeTitle',
   {
     defaultMessage: 'ServiceNow',
   }
 );
 
 export const MAPPING_FIELD_SHORT_DESC = i18n.translate(
-  'xpack.siem.case.configureCases.mappingFieldShortDescription',
+  'xpack.securitySolution.case.configureCases.mappingFieldShortDescription',
   {
     defaultMessage: 'Short Description',
   }

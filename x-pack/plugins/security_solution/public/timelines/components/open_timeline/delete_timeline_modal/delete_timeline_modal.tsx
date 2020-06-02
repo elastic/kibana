@@ -28,7 +28,7 @@ export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDel
     const titleResult = !isEmpty(trimmedTitle) ? trimmedTitle : i18n.UNTITLED_TIMELINE;
     return (
       <FormattedMessage
-        id="xpack.siem.open.timeline.deleteTimelineModalTitle"
+        id="xpack.securitySolution.open.timeline.deleteTimelineModalTitle"
         defaultMessage='Delete "{title}"?'
         data-test-subj="title"
         values={{

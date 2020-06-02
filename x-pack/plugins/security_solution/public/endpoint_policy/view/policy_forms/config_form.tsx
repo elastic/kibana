@@ -52,7 +52,10 @@ export const ConfigForm: React.FC<{
           <EuiFlexItem className="policyDetailTitleFlexItem">
             <EuiTitle size="xxxs">
               <h6>
-                <FormattedMessage id="xpack.siem.endpoint.policyDetailType" defaultMessage="Type" />
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policyDetailType"
+                  defaultMessage="Type"
+                />
               </h6>
             </EuiTitle>
           </EuiFlexItem>
@@ -65,7 +68,7 @@ export const ConfigForm: React.FC<{
             <EuiTitle size="xxxs">
               <h6>
                 <FormattedMessage
-                  id="xpack.siem.endpoint.policyDetailOS"
+                  id="xpack.securitySolution.endpoint.policyDetailOS"
                   defaultMessage="Operating System"
                 />
               </h6>

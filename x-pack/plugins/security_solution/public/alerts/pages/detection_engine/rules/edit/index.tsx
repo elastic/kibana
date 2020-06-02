@@ -365,7 +365,7 @@ const EditRulePageComponent: FC = () => {
         {tabHasError.length > 0 && (
           <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="alert">
             <FormattedMessage
-              id="xpack.siem.detectionEngine.rule.editRule.errorMsgDescription"
+              id="xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription"
               defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}"
               values={{
                 countError: tabHasError.length,

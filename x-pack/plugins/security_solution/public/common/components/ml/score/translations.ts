@@ -5,36 +5,42 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const INFLUENCED_BY = i18n.translate('xpack.siem.ml.score.influencedByTitle', {
+export const INFLUENCED_BY = i18n.translate('xpack.securitySolution.ml.score.influencedByTitle', {
   defaultMessage: 'Influenced By',
 });
 
-export const MAX_ANOMALY_SCORE = i18n.translate('xpack.siem.ml.score.maxAnomalyScoreTitle', {
-  defaultMessage: 'Max Anomaly Score',
-});
+export const MAX_ANOMALY_SCORE = i18n.translate(
+  'xpack.securitySolution.ml.score.maxAnomalyScoreTitle',
+  {
+    defaultMessage: 'Max Anomaly Score',
+  }
+);
 
-export const ANOMALY_JOB = i18n.translate('xpack.siem.ml.score.anomalyJobTitle', {
+export const ANOMALY_JOB = i18n.translate('xpack.securitySolution.ml.score.anomalyJobTitle', {
   defaultMessage: 'Job',
 });
 
 export const VIEW_IN_MACHINE_LEARNING = i18n.translate(
-  'xpack.siem.ml.score.viewInMachineLearningLink',
+  'xpack.securitySolution.ml.score.viewInMachineLearningLink',
   {
     defaultMessage: 'View in Machine Learning',
   }
 );
 
-export const DETECTED = i18n.translate('xpack.siem.ml.score.detectedTitle', {
+export const DETECTED = i18n.translate('xpack.securitySolution.ml.score.detectedTitle', {
   defaultMessage: 'Detected',
 });
 
 export const NARROW_TO_THIS_DATE_RANGE = i18n.translate(
-  'xpack.siem.ml.score.narrowToThisDateRangeLink',
+  'xpack.securitySolution.ml.score.narrowToThisDateRangeLink',
   {
     defaultMessage: 'Narrow to this date range',
   }
 );
 
-export const ANOMALOUS_ENTITY = i18n.translate('xpack.siem.ml.score.anomalousEntityTitle', {
-  defaultMessage: 'Anomalous Entity',
-});
+export const ANOMALOUS_ENTITY = i18n.translate(
+  'xpack.securitySolution.ml.score.anomalousEntityTitle',
+  {
+    defaultMessage: 'Anomalous Entity',
+  }
+);

@@ -47,7 +47,7 @@ export const alertingIndexGetQuerySchema = schema.object(
           try {
             decode(value);
           } catch (err) {
-            return i18n.translate('xpack.siem.endpoint.alerts.errors.bad_rison', {
+            return i18n.translate('xpack.securitySolution.endpoint.alerts.errors.bad_rison', {
               defaultMessage: 'must be a valid rison-encoded string',
             });
           }
@@ -62,7 +62,7 @@ export const alertingIndexGetQuerySchema = schema.object(
           try {
             decode(value);
           } catch (err) {
-            return i18n.translate('xpack.siem.endpoint.alerts.errors.bad_rison', {
+            return i18n.translate('xpack.securitySolution.endpoint.alerts.errors.bad_rison', {
               defaultMessage: 'must be a valid rison-encoded string',
             });
           }
@@ -77,7 +77,7 @@ export const alertingIndexGetQuerySchema = schema.object(
           try {
             decode(value);
           } catch (err) {
-            return i18n.translate('xpack.siem.endpoint.alerts.errors.bad_rison', {
+            return i18n.translate('xpack.securitySolution.endpoint.alerts.errors.bad_rison', {
               defaultMessage: 'must be a valid rison-encoded string',
             });
           }
@@ -89,7 +89,7 @@ export const alertingIndexGetQuerySchema = schema.object(
     validate(value) {
       if (value.after !== undefined && value.page_index !== undefined) {
         return i18n.translate(
-          'xpack.siem.endpoint.alerts.errors.page_index_cannot_be_used_with_after',
+          'xpack.securitySolution.endpoint.alerts.errors.page_index_cannot_be_used_with_after',
           {
             defaultMessage: '[page_index] cannot be used with [after]',
           }
@@ -97,7 +97,7 @@ export const alertingIndexGetQuerySchema = schema.object(
       }
       if (value.before !== undefined && value.page_index !== undefined) {
         return i18n.translate(
-          'xpack.siem.endpoint.alerts.errors.page_index_cannot_be_used_with_before',
+          'xpack.securitySolution.endpoint.alerts.errors.page_index_cannot_be_used_with_before',
           {
             defaultMessage: '[page_index] cannot be used with [before]',
           }
@@ -105,7 +105,7 @@ export const alertingIndexGetQuerySchema = schema.object(
       }
       if (value.before !== undefined && value.after !== undefined) {
         return i18n.translate(
-          'xpack.siem.endpoint.alerts.errors.before_cannot_be_used_with_after',
+          'xpack.securitySolution.endpoint.alerts.errors.before_cannot_be_used_with_after',
           {
             defaultMessage: '[before] cannot be used with [after]',
           }

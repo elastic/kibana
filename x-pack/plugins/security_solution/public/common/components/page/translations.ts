@@ -6,10 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LIVE = i18n.translate('xpack.siem.footer.live', {
+export const LIVE = i18n.translate('xpack.securitySolution.footer.live', {
   defaultMessage: 'Live',
 });
 
-export const DATA = i18n.translate('xpack.siem.footer.data', {
+export const DATA = i18n.translate('xpack.securitySolution.footer.data', {
   defaultMessage: 'data',
 });

@@ -7,14 +7,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const PAGE_BADGE_LABEL = i18n.translate(
-  'xpack.siem.detectionEngine.headerPage.pageBadgeLabel',
+  'xpack.securitySolution.detectionEngine.headerPage.pageBadgeLabel',
   {
     defaultMessage: 'Beta',
   }
 );
 
 export const PAGE_BADGE_TOOLTIP = i18n.translate(
-  'xpack.siem.detectionEngine.headerPage.pageBadgeTooltip',
+  'xpack.securitySolution.detectionEngine.headerPage.pageBadgeTooltip',
   {
     defaultMessage:
       'Detections is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',

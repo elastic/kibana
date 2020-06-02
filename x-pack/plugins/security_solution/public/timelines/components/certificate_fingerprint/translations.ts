@@ -6,10 +6,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CLIENT_CERT = i18n.translate('xpack.siem.certificate.fingerprint.clientCertLabel', {
-  defaultMessage: 'client cert',
-});
+export const CLIENT_CERT = i18n.translate(
+  'xpack.securitySolution.certificate.fingerprint.clientCertLabel',
+  {
+    defaultMessage: 'client cert',
+  }
+);
 
-export const SERVER_CERT = i18n.translate('xpack.siem.certificate.fingerprint.serverCertLabel', {
-  defaultMessage: 'server cert',
-});
+export const SERVER_CERT = i18n.translate(
+  'xpack.securitySolution.certificate.fingerprint.serverCertLabel',
+  {
+    defaultMessage: 'server cert',
+  }
+);

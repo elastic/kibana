@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const SIEM_TABLE_FETCH_FAILURE = i18n.translate(
-  'xpack.siem.components.ml.anomaly.errors.anomaliesTableFetchFailureTitle',
+  'xpack.securitySolution.components.ml.anomaly.errors.anomaliesTableFetchFailureTitle',
   {
     defaultMessage: 'Anomalies table fetch failure',
   }

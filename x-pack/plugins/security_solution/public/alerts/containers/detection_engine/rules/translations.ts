@@ -6,33 +6,36 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const RULE_FETCH_FAILURE = i18n.translate('xpack.siem.containers.detectionEngine.rules', {
-  defaultMessage: 'Failed to fetch Rules',
-});
+export const RULE_FETCH_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.rules',
+  {
+    defaultMessage: 'Failed to fetch Rules',
+  }
+);
 
 export const RULE_ADD_FAILURE = i18n.translate(
-  'xpack.siem.containers.detectionEngine.addRuleFailDescription',
+  'xpack.securitySolution.containers.detectionEngine.addRuleFailDescription',
   {
     defaultMessage: 'Failed to add Rule',
   }
 );
 
 export const RULE_PREPACKAGED_FAILURE = i18n.translate(
-  'xpack.siem.containers.detectionEngine.createPrePackagedRuleFailDescription',
+  'xpack.securitySolution.containers.detectionEngine.createPrePackagedRuleFailDescription',
   {
     defaultMessage: 'Failed to installed pre-packaged rules from elastic',
   }
 );
 
 export const RULE_PREPACKAGED_SUCCESS = i18n.translate(
-  'xpack.siem.containers.detectionEngine.createPrePackagedRuleSuccesDescription',
+  'xpack.securitySolution.containers.detectionEngine.createPrePackagedRuleSuccesDescription',
   {
     defaultMessage: 'Installed pre-packaged rules from elastic',
   }
 );
 
 export const TAG_FETCH_FAILURE = i18n.translate(
-  'xpack.siem.containers.detectionEngine.tagFetchFailDescription',
+  'xpack.securitySolution.containers.detectionEngine.tagFetchFailDescription',
   {
     defaultMessage: 'Failed to fetch Tags',
   }

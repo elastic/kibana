@@ -12,21 +12,30 @@ export const HashAccordion = memo(({ alertData }: { alertData: Immutable<AlertDa
   const columns = useMemo(() => {
     return [
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.md5', {
-          defaultMessage: 'MD5',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.md5',
+          {
+            defaultMessage: 'MD5',
+          }
+        ),
         description: alertData.file.hash.md5,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.sha1', {
-          defaultMessage: 'SHA1',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.sha1',
+          {
+            defaultMessage: 'SHA1',
+          }
+        ),
         description: alertData.file.hash.sha1,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.sha256', {
-          defaultMessage: 'SHA256',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.sha256',
+          {
+            defaultMessage: 'SHA256',
+          }
+        ),
         description: alertData.file.hash.sha256,
       },
     ];
@@ -36,7 +45,7 @@ export const HashAccordion = memo(({ alertData }: { alertData: Immutable<AlertDa
     <EuiAccordion
       id="alertDetailsHashAccordion"
       buttonContent={i18n.translate(
-        'xpack.siem.endpoint.application.endpoint.alertDetails.accordionTitles.hash',
+        'xpack.securitySolution.endpoint.application.endpoint.alertDetails.accordionTitles.hash',
         {
           defaultMessage: 'Hash',
         }

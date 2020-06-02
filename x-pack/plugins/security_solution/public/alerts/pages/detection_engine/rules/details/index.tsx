@@ -132,7 +132,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
       ) : (
         [
           <FormattedMessage
-            id="xpack.siem.detectionEngine.ruleDetails.ruleCreationDescription"
+            id="xpack.securitySolution.detectionEngine.ruleDetails.ruleCreationDescription"
             defaultMessage="Created by: {by} on {date}"
             values={{
               by: rule?.created_by ?? i18n.UNKNOWN,
@@ -146,7 +146,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
           />,
           rule?.updated_by != null ? (
             <FormattedMessage
-              id="xpack.siem.detectionEngine.ruleDetails.ruleUpdateDescription"
+              id="xpack.securitySolution.detectionEngine.ruleDetails.ruleUpdateDescription"
               defaultMessage="Updated by: {by} on {date}"
               values={{
                 by: rule?.updated_by ?? i18n.UNKNOWN,

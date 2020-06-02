@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const CLOSE_TIMELINE = i18n.translate(
-  'xpack.siem.timeline.flyout.header.closeTimelineButtonLabel',
+  'xpack.securitySolution.timeline.flyout.header.closeTimelineButtonLabel',
   {
     defaultMessage: 'Close timeline',
   }

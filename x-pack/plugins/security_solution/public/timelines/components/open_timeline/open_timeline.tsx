@@ -74,7 +74,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     const nTimelines = useMemo(
       () => (
         <FormattedMessage
-          id="xpack.siem.open.timeline.showingNTimelinesLabel"
+          id="xpack.securitySolution.open.timeline.showingNTimelinesLabel"
           defaultMessage="{totalSearchResultsCount} {totalSearchResultsCount, plural, one {timeline} other {timelines}} {with}"
           values={{
             totalSearchResultsCount,

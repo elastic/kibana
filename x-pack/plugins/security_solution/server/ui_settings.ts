@@ -29,17 +29,20 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
   uiSettings.register({
     [DEFAULT_APP_REFRESH_INTERVAL]: {
       type: 'json',
-      name: i18n.translate('xpack.siem.uiSettings.defaultRefreshIntervalLabel', {
+      name: i18n.translate('xpack.securitySolution.uiSettings.defaultRefreshIntervalLabel', {
         defaultMessage: 'Time filter refresh interval',
       }),
       value: `{
   "pause": ${DEFAULT_INTERVAL_PAUSE},
   "value": ${DEFAULT_INTERVAL_VALUE}
 }`,
-      description: i18n.translate('xpack.siem.uiSettings.defaultRefreshIntervalDescription', {
-        defaultMessage:
-          '<p>Default refresh interval for the SIEM time filter, in milliseconds.</p>',
-      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.defaultRefreshIntervalDescription',
+        {
+          defaultMessage:
+            '<p>Default refresh interval for the SIEM time filter, in milliseconds.</p>',
+        }
+      ),
       category: ['siem'],
       requiresPageReload: true,
       schema: schema.object({
@@ -49,14 +52,14 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
     },
     [DEFAULT_APP_TIME_RANGE]: {
       type: 'json',
-      name: i18n.translate('xpack.siem.uiSettings.defaultTimeRangeLabel', {
+      name: i18n.translate('xpack.securitySolution.uiSettings.defaultTimeRangeLabel', {
         defaultMessage: 'Time filter period',
       }),
       value: `{
   "from": "${DEFAULT_FROM}",
   "to": "${DEFAULT_TO}"
 }`,
-      description: i18n.translate('xpack.siem.uiSettings.defaultTimeRangeDescription', {
+      description: i18n.translate('xpack.securitySolution.uiSettings.defaultTimeRangeDescription', {
         defaultMessage: '<p>Default period of time in the SIEM time filter.</p>',
       }),
       category: ['siem'],
@@ -67,11 +70,11 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       }),
     },
     [DEFAULT_INDEX_KEY]: {
-      name: i18n.translate('xpack.siem.uiSettings.defaultIndexLabel', {
+      name: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexLabel', {
         defaultMessage: 'Elasticsearch indices',
       }),
       value: DEFAULT_INDEX_PATTERN,
-      description: i18n.translate('xpack.siem.uiSettings.defaultIndexDescription', {
+      description: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexDescription', {
         defaultMessage:
           '<p>Comma-delimited list of Elasticsearch indices from which the SIEM app collects events.</p>',
       }),
@@ -80,25 +83,28 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       schema: schema.arrayOf(schema.string()),
     },
     [DEFAULT_ANOMALY_SCORE]: {
-      name: i18n.translate('xpack.siem.uiSettings.defaultAnomalyScoreLabel', {
+      name: i18n.translate('xpack.securitySolution.uiSettings.defaultAnomalyScoreLabel', {
         defaultMessage: 'Anomaly threshold',
       }),
       value: 50,
       type: 'number',
-      description: i18n.translate('xpack.siem.uiSettings.defaultAnomalyScoreDescription', {
-        defaultMessage:
-          '<p>Value above which Machine Learning job anomalies are displayed in the SIEM app.</p><p>Valid values: 0 to 100.</p>',
-      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.defaultAnomalyScoreDescription',
+        {
+          defaultMessage:
+            '<p>Value above which Machine Learning job anomalies are displayed in the SIEM app.</p><p>Valid values: 0 to 100.</p>',
+        }
+      ),
       category: ['siem'],
       requiresPageReload: true,
       schema: schema.number(),
     },
     [ENABLE_NEWS_FEED_SETTING]: {
-      name: i18n.translate('xpack.siem.uiSettings.enableNewsFeedLabel', {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedLabel', {
         defaultMessage: 'News feed',
       }),
       value: true,
-      description: i18n.translate('xpack.siem.uiSettings.enableNewsFeedDescription', {
+      description: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedDescription', {
         defaultMessage: '<p>Enables the News feed</p>',
       }),
       type: 'boolean',
@@ -107,11 +113,11 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       schema: schema.boolean(),
     },
     [NEWS_FEED_URL_SETTING]: {
-      name: i18n.translate('xpack.siem.uiSettings.newsFeedUrl', {
+      name: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrl', {
         defaultMessage: 'News feed URL',
       }),
       value: NEWS_FEED_URL_SETTING_DEFAULT,
-      description: i18n.translate('xpack.siem.uiSettings.newsFeedUrlDescription', {
+      description: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrlDescription', {
         defaultMessage: '<p>News feed content will be retrieved from this URL</p>',
       }),
       category: ['siem'],
@@ -119,15 +125,18 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       schema: schema.string(),
     },
     [IP_REPUTATION_LINKS_SETTING]: {
-      name: i18n.translate('xpack.siem.uiSettings.ipReputationLinks', {
+      name: i18n.translate('xpack.securitySolution.uiSettings.ipReputationLinks', {
         defaultMessage: 'IP Reputation Links',
       }),
       value: IP_REPUTATION_LINKS_SETTING_DEFAULT,
       type: 'json',
-      description: i18n.translate('xpack.siem.uiSettings.ipReputationLinksDescription', {
-        defaultMessage:
-          'Array of URL templates to build the list of reputation URLs to be displayed on the IP Details page.',
-      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.ipReputationLinksDescription',
+        {
+          defaultMessage:
+            'Array of URL templates to build the list of reputation URLs to be displayed on the IP Details page.',
+        }
+      ),
       category: ['siem'],
       requiresPageReload: true,
       schema: schema.arrayOf(

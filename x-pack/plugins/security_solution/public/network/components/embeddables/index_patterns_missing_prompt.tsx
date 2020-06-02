@@ -25,7 +25,7 @@ export const IndexPatternsMissingPromptComponent = () => {
           <p>
             <FormattedMessage
               defaultMessage="To display map data, you must define SIEM indices ({defaultIndex}) and Kibana index patterns with matching glob patterns. When using {beats}, you can run the {setup} command on your hosts to automatically create the index patterns. For example: {example}."
-              id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription1"
+              id="xpack.securitySolution.components.embeddables.indexPatternsMissingPrompt.errorDescription1"
               values={{
                 defaultIndex: (
                   <a
@@ -54,7 +54,7 @@ export const IndexPatternsMissingPromptComponent = () => {
           <p>
             <FormattedMessage
               defaultMessage="You can also configure index patterns manually in Kibana."
-              id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription2"
+              id="xpack.securitySolution.components.embeddables.indexPatternsMissingPrompt.errorDescription2"
             />
           </p>
         </>

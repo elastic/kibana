@@ -6,10 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SIEM = i18n.translate('xpack.siem.headerGlobal.siem', {
+export const SIEM = i18n.translate('xpack.securitySolution.headerGlobal.siem', {
   defaultMessage: 'SIEM',
 });
 
-export const BUTTON_ADD_DATA = i18n.translate('xpack.siem.headerGlobal.buttonAddData', {
+export const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.headerGlobal.buttonAddData', {
   defaultMessage: 'Add data',
 });

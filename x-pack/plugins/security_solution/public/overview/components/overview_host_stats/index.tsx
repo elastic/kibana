@@ -21,14 +21,19 @@ interface OverviewHostProps {
 export const getOverviewHostStats = (data: OverviewHostData): FormattedStat[] => [
   {
     count: data.auditbeatAuditd ?? 0,
-    title: <FormattedMessage id="xpack.siem.overview.auditBeatAuditTitle" defaultMessage="Audit" />,
+    title: (
+      <FormattedMessage
+        id="xpack.securitySolution.overview.auditBeatAuditTitle"
+        defaultMessage="Audit"
+      />
+    ),
     id: 'auditbeatAuditd',
   },
   {
     count: data.auditbeatFIM ?? 0,
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.auditBeatFimTitle"
+        id="xpack.securitySolution.overview.auditBeatFimTitle"
         defaultMessage="File Integrity Module"
       />
     ),
@@ -36,43 +41,66 @@ export const getOverviewHostStats = (data: OverviewHostData): FormattedStat[] =>
   },
   {
     count: data.auditbeatLogin ?? 0,
-    title: <FormattedMessage id="xpack.siem.overview.auditBeatLoginTitle" defaultMessage="Login" />,
+    title: (
+      <FormattedMessage
+        id="xpack.securitySolution.overview.auditBeatLoginTitle"
+        defaultMessage="Login"
+      />
+    ),
     id: 'auditbeatLogin',
   },
   {
     count: data.auditbeatPackage ?? 0,
     title: (
-      <FormattedMessage id="xpack.siem.overview.auditBeatPackageTitle" defaultMessage="Package" />
+      <FormattedMessage
+        id="xpack.securitySolution.overview.auditBeatPackageTitle"
+        defaultMessage="Package"
+      />
     ),
     id: 'auditbeatPackage',
   },
   {
     count: data.auditbeatProcess ?? 0,
     title: (
-      <FormattedMessage id="xpack.siem.overview.auditBeatProcessTitle" defaultMessage="Process" />
+      <FormattedMessage
+        id="xpack.securitySolution.overview.auditBeatProcessTitle"
+        defaultMessage="Process"
+      />
     ),
     id: 'auditbeatProcess',
   },
   {
     count: data.auditbeatUser ?? 0,
-    title: <FormattedMessage id="xpack.siem.overview.auditBeatUserTitle" defaultMessage="User" />,
+    title: (
+      <FormattedMessage
+        id="xpack.securitySolution.overview.auditBeatUserTitle"
+        defaultMessage="User"
+      />
+    ),
     id: 'auditbeatUser',
   },
   {
     count: data.endgameDns ?? 0,
-    title: <FormattedMessage id="xpack.siem.overview.endgameDnsTitle" defaultMessage="DNS" />,
+    title: (
+      <FormattedMessage id="xpack.securitySolution.overview.endgameDnsTitle" defaultMessage="DNS" />
+    ),
     id: 'endgameDns',
   },
   {
     count: data.endgameFile ?? 0,
-    title: <FormattedMessage id="xpack.siem.overview.endgameFileTitle" defaultMessage="File" />,
+    title: (
+      <FormattedMessage
+        id="xpack.securitySolution.overview.endgameFileTitle"
+        defaultMessage="File"
+      />
+    ),
     id: 'endgameFile',
   },
   {
     count: data.endgameImageLoad ?? 0,
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.endgameImageLoadTitle"
+        id="xpack.securitySolution.overview.endgameImageLoadTitle"
         defaultMessage="Image Load"
       />
     ),
@@ -81,28 +109,40 @@ export const getOverviewHostStats = (data: OverviewHostData): FormattedStat[] =>
   {
     count: data.endgameNetwork ?? 0,
     title: (
-      <FormattedMessage id="xpack.siem.overview.endgameNetworkTitle" defaultMessage="Network" />
+      <FormattedMessage
+        id="xpack.securitySolution.overview.endgameNetworkTitle"
+        defaultMessage="Network"
+      />
     ),
     id: 'endgameNetwork',
   },
   {
     count: data.endgameProcess ?? 0,
     title: (
-      <FormattedMessage id="xpack.siem.overview.endgameProcessTitle" defaultMessage="Process" />
+      <FormattedMessage
+        id="xpack.securitySolution.overview.endgameProcessTitle"
+        defaultMessage="Process"
+      />
     ),
     id: 'endgameProcess',
   },
   {
     count: data.endgameRegistry ?? 0,
     title: (
-      <FormattedMessage id="xpack.siem.overview.endgameRegistryTitle" defaultMessage="Registry" />
+      <FormattedMessage
+        id="xpack.securitySolution.overview.endgameRegistryTitle"
+        defaultMessage="Registry"
+      />
     ),
     id: 'endgameRegistry',
   },
   {
     count: data.endgameSecurity ?? 0,
     title: (
-      <FormattedMessage id="xpack.siem.overview.endgameSecurityTitle" defaultMessage="Security" />
+      <FormattedMessage
+        id="xpack.securitySolution.overview.endgameSecurityTitle"
+        defaultMessage="Security"
+      />
     ),
     id: 'endgameSecurity',
   },
@@ -110,7 +150,7 @@ export const getOverviewHostStats = (data: OverviewHostData): FormattedStat[] =>
     count: data.filebeatSystemModule ?? 0,
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.filebeatSystemModuleTitle"
+        id="xpack.securitySolution.overview.filebeatSystemModuleTitle"
         defaultMessage="System Module"
       />
     ),
@@ -120,7 +160,7 @@ export const getOverviewHostStats = (data: OverviewHostData): FormattedStat[] =>
     count: data.winlogbeatSecurity ?? 0,
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.winlogbeatSecurityTitle"
+        id="xpack.securitySolution.overview.winlogbeatSecurityTitle"
         defaultMessage="Security"
       />
     ),
@@ -130,7 +170,7 @@ export const getOverviewHostStats = (data: OverviewHostData): FormattedStat[] =>
     count: data.winlogbeatMWSysmonOperational ?? 0,
     title: (
       <FormattedMessage
-        id="xpack.siem.overview.winlogbeatMWSysmonOperational"
+        id="xpack.securitySolution.overview.winlogbeatMWSysmonOperational"
         defaultMessage="Microsoft-Windows-Sysmon/Operational"
       />
     ),
@@ -149,7 +189,7 @@ const hostStatGroups: StatGroup[] = [
     groupId: 'auditbeat',
     name: (
       <FormattedMessage
-        id="xpack.siem.overview.hostStatGroupAuditbeat"
+        id="xpack.securitySolution.overview.hostStatGroupAuditbeat"
         defaultMessage="Auditbeat"
       />
     ),
@@ -166,7 +206,7 @@ const hostStatGroups: StatGroup[] = [
     groupId: 'endgame',
     name: (
       <FormattedMessage
-        id="xpack.siem.overview.hostStatGroupElasticEndpointSecurity"
+        id="xpack.securitySolution.overview.hostStatGroupElasticEndpointSecurity"
         defaultMessage="Elastic Endpoint Security"
       />
     ),
@@ -183,7 +223,10 @@ const hostStatGroups: StatGroup[] = [
   {
     groupId: 'filebeat',
     name: (
-      <FormattedMessage id="xpack.siem.overview.hostStatGroupFilebeat" defaultMessage="Filebeat" />
+      <FormattedMessage
+        id="xpack.securitySolution.overview.hostStatGroupFilebeat"
+        defaultMessage="Filebeat"
+      />
     ),
     statIds: ['filebeatSystemModule'],
   },
@@ -191,7 +234,7 @@ const hostStatGroups: StatGroup[] = [
     groupId: 'winlogbeat',
     name: (
       <FormattedMessage
-        id="xpack.siem.overview.hostStatGroupWinlogbeat"
+        id="xpack.securitySolution.overview.hostStatGroupWinlogbeat"
         defaultMessage="Winlogbeat"
       />
     ),

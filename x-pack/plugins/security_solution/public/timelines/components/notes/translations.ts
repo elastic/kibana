@@ -6,41 +6,47 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ADD_NOTE = i18n.translate('xpack.siem.notes.addNoteButtonLabel', {
+export const ADD_NOTE = i18n.translate('xpack.securitySolution.notes.addNoteButtonLabel', {
   defaultMessage: 'Add Note',
 });
 
-export const ADD_A_NOTE = i18n.translate('xpack.siem.notes.addANotePlaceholder', {
+export const ADD_A_NOTE = i18n.translate('xpack.securitySolution.notes.addANotePlaceholder', {
   defaultMessage: 'Add a Note',
 });
 
-export const ADDED_A_NOTE = i18n.translate('xpack.siem.notes.addedANoteLabel', {
+export const ADDED_A_NOTE = i18n.translate('xpack.securitySolution.notes.addedANoteLabel', {
   defaultMessage: 'Added a Note',
 });
 
-export const NOTE = i18n.translate('xpack.siem.notes.noteLabel', {
+export const NOTE = i18n.translate('xpack.securitySolution.notes.noteLabel', {
   defaultMessage: 'Note',
 });
 
-export const NOTES = i18n.translate('xpack.siem.notes.notesTitle', {
+export const NOTES = i18n.translate('xpack.securitySolution.notes.notesTitle', {
   defaultMessage: 'Notes',
 });
 
-export const PREVIEW_MARKDOWN = i18n.translate('xpack.siem.notes.previewMarkdownTitle', {
-  defaultMessage: 'Preview (Markdown)',
-});
+export const PREVIEW_MARKDOWN = i18n.translate(
+  'xpack.securitySolution.notes.previewMarkdownTitle',
+  {
+    defaultMessage: 'Preview (Markdown)',
+  }
+);
 
 export const SEARCH_PLACEHOLDER = i18n.translate(
-  'xpack.siem.notes.search.FilterByUserOrNotePlaceholder',
+  'xpack.securitySolution.notes.search.FilterByUserOrNotePlaceholder',
   {
     defaultMessage: 'Filter by User or Note',
   }
 );
 
-export const CANCEL = i18n.translate('xpack.siem.notes.cancelButtonLabel', {
+export const CANCEL = i18n.translate('xpack.securitySolution.notes.cancelButtonLabel', {
   defaultMessage: 'Cancel',
 });
 
-export const COPY_TO_CLIPBOARD = i18n.translate('xpack.siem.notes.copyToClipboardButtonLabel', {
-  defaultMessage: 'Copy to Clipboard',
-});
+export const COPY_TO_CLIPBOARD = i18n.translate(
+  'xpack.securitySolution.notes.copyToClipboardButtonLabel',
+  {
+    defaultMessage: 'Copy to Clipboard',
+  }
+);

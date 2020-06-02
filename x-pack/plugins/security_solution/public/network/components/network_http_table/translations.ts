@@ -6,52 +6,58 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const HTTP_REQUESTS = i18n.translate('xpack.siem.networkHttpTable.title', {
+export const HTTP_REQUESTS = i18n.translate('xpack.securitySolution.networkHttpTable.title', {
   defaultMessage: 'HTTP Requests',
 });
 
 export const UNIT = (totalCount: number) =>
-  i18n.translate('xpack.siem.networkHttpTable.unit', {
+  i18n.translate('xpack.securitySolution.networkHttpTable.unit', {
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {request} other {requests}}`,
   });
 
-export const METHOD = i18n.translate('xpack.siem.networkHttpTable.column.methodTitle', {
+export const METHOD = i18n.translate('xpack.securitySolution.networkHttpTable.column.methodTitle', {
   defaultMessage: 'Method',
 });
-export const DOMAIN = i18n.translate('xpack.siem.networkHttpTable.column.domainTitle', {
+export const DOMAIN = i18n.translate('xpack.securitySolution.networkHttpTable.column.domainTitle', {
   defaultMessage: 'Domain',
 });
 
-export const PATH = i18n.translate('xpack.siem.networkHttpTable.column.pathTitle', {
+export const PATH = i18n.translate('xpack.securitySolution.networkHttpTable.column.pathTitle', {
   defaultMessage: 'Path',
 });
 
-export const STATUS = i18n.translate('xpack.siem.networkHttpTable.column.statusTitle', {
+export const STATUS = i18n.translate('xpack.securitySolution.networkHttpTable.column.statusTitle', {
   defaultMessage: 'Status',
 });
 
-export const LAST_HOST = i18n.translate('xpack.siem.networkHttpTable.column.lastHostTitle', {
-  defaultMessage: 'Last host',
-});
+export const LAST_HOST = i18n.translate(
+  'xpack.securitySolution.networkHttpTable.column.lastHostTitle',
+  {
+    defaultMessage: 'Last host',
+  }
+);
 
 export const LAST_SOURCE_IP = i18n.translate(
-  'xpack.siem.networkHttpTable.column.lastSourceIpTitle',
+  'xpack.securitySolution.networkHttpTable.column.lastSourceIpTitle',
   {
     defaultMessage: 'Last source Ip',
   }
 );
 
-export const REQUESTS = i18n.translate('xpack.siem.networkHttpTable.column.requestsTitle', {
-  defaultMessage: 'Requests',
-});
+export const REQUESTS = i18n.translate(
+  'xpack.securitySolution.networkHttpTable.column.requestsTitle',
+  {
+    defaultMessage: 'Requests',
+  }
+);
 
-export const ROWS_5 = i18n.translate('xpack.siem.networkHttpTable.rows', {
+export const ROWS_5 = i18n.translate('xpack.securitySolution.networkHttpTable.rows', {
   values: { numRows: 5 },
   defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
 });
 
-export const ROWS_10 = i18n.translate('xpack.siem.networkHttpTable.rows', {
+export const ROWS_10 = i18n.translate('xpack.securitySolution.networkHttpTable.rows', {
   values: { numRows: 10 },
   defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
 });

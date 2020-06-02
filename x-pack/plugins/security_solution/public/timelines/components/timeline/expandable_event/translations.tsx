@@ -7,12 +7,15 @@
 import { i18n } from '@kbn/i18n';
 
 export const COPY_TO_CLIPBOARD = i18n.translate(
-  'xpack.siem.timeline.expandableEvent.copyToClipboardToolTip',
+  'xpack.securitySolution.timeline.expandableEvent.copyToClipboardToolTip',
   {
     defaultMessage: 'Copy to Clipboard',
   }
 );
 
-export const EVENT = i18n.translate('xpack.siem.timeline.expandableEvent.eventToolTipTitle', {
-  defaultMessage: 'Event',
-});
+export const EVENT = i18n.translate(
+  'xpack.securitySolution.timeline.expandableEvent.eventToolTipTitle',
+  {
+    defaultMessage: 'Event',
+  }
+);

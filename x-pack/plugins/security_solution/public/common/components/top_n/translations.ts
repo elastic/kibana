@@ -6,18 +6,18 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CLOSE = i18n.translate('xpack.siem.topN.closeButtonLabel', {
+export const CLOSE = i18n.translate('xpack.securitySolution.topN.closeButtonLabel', {
   defaultMessage: 'Close',
 });
 
-export const ALL_EVENTS = i18n.translate('xpack.siem.topN.allEventsSelectLabel', {
+export const ALL_EVENTS = i18n.translate('xpack.securitySolution.topN.allEventsSelectLabel', {
   defaultMessage: 'All events',
 });
 
-export const RAW_EVENTS = i18n.translate('xpack.siem.topN.rawEventsSelectLabel', {
+export const RAW_EVENTS = i18n.translate('xpack.securitySolution.topN.rawEventsSelectLabel', {
   defaultMessage: 'Raw events',
 });
 
-export const SIGNAL_EVENTS = i18n.translate('xpack.siem.topN.signalEventsSelectLabel', {
+export const SIGNAL_EVENTS = i18n.translate('xpack.securitySolution.topN.signalEventsSelectLabel', {
   defaultMessage: 'Signal events',
 });

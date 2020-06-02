@@ -9,8 +9,11 @@ import { i18n } from '@kbn/i18n';
 export const siemRuleActionGroups = [
   {
     id: 'default',
-    name: i18n.translate('xpack.siem.detectionEngine.signalRuleAlert.actionGroups.default', {
-      defaultMessage: 'Default',
-    }),
+    name: i18n.translate(
+      'xpack.securitySolution.detectionEngine.signalRuleAlert.actionGroups.default',
+      {
+        defaultMessage: 'Default',
+      }
+    ),
   },
 ];

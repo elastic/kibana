@@ -72,16 +72,16 @@ export const validateMlAuthz = async ({
   let message: string | undefined;
 
   if (ml == null) {
-    message = i18n.translate('xpack.siem.authz.mlUnavailable', {
+    message = i18n.translate('xpack.securitySolution.authz.mlUnavailable', {
       defaultMessage: 'The machine learning plugin is not available. Try enabling the plugin.',
     });
   } else if (!hasMlLicense(license)) {
-    message = i18n.translate('xpack.siem.licensing.unsupportedMachineLearningMessage', {
+    message = i18n.translate('xpack.securitySolution.licensing.unsupportedMachineLearningMessage', {
       defaultMessage:
         'Your license does not support machine learning. Please upgrade your license.',
     });
   } else if (!(await isMlAdmin({ ml, request }))) {
-    message = i18n.translate('xpack.siem.authz.userIsNotMlAdminMessage', {
+    message = i18n.translate('xpack.securitySolution.authz.userIsNotMlAdminMessage', {
       defaultMessage: 'The current user is not a machine learning administrator.',
     });
   }

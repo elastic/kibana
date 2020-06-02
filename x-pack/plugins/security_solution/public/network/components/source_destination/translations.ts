@@ -6,6 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PACKETS = i18n.translate('xpack.siem.source.destination.packetsLabel', {
+export const PACKETS = i18n.translate('xpack.securitySolution.source.destination.packetsLabel', {
   defaultMessage: 'pkts',
 });

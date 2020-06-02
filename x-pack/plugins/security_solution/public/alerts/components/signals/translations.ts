@@ -6,97 +6,103 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.pageTitle', {
+export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine.pageTitle', {
   defaultMessage: 'Detection engine',
 });
 
-export const SIGNALS_TABLE_TITLE = i18n.translate('xpack.siem.detectionEngine.signals.tableTitle', {
-  defaultMessage: 'Signals',
-});
-
-export const SIGNALS_DOCUMENT_TYPE = i18n.translate(
-  'xpack.siem.detectionEngine.signals.documentTypeTitle',
+export const SIGNALS_TABLE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.signals.tableTitle',
   {
     defaultMessage: 'Signals',
   }
 );
 
-export const OPEN_SIGNALS = i18n.translate('xpack.siem.detectionEngine.signals.openSignalsTitle', {
-  defaultMessage: 'Open signals',
-});
+export const SIGNALS_DOCUMENT_TYPE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.signals.documentTypeTitle',
+  {
+    defaultMessage: 'Signals',
+  }
+);
+
+export const OPEN_SIGNALS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.signals.openSignalsTitle',
+  {
+    defaultMessage: 'Open signals',
+  }
+);
 
 export const CLOSED_SIGNALS = i18n.translate(
-  'xpack.siem.detectionEngine.signals.closedSignalsTitle',
+  'xpack.securitySolution.detectionEngine.signals.closedSignalsTitle',
   {
     defaultMessage: 'Closed signals',
   }
 );
 
 export const LOADING_SIGNALS = i18n.translate(
-  'xpack.siem.detectionEngine.signals.loadingSignalsTitle',
+  'xpack.securitySolution.detectionEngine.signals.loadingSignalsTitle',
   {
     defaultMessage: 'Loading Signals',
   }
 );
 
 export const TOTAL_COUNT_OF_SIGNALS = i18n.translate(
-  'xpack.siem.detectionEngine.signals.totalCountOfSignalsTitle',
+  'xpack.securitySolution.detectionEngine.signals.totalCountOfSignalsTitle',
   {
     defaultMessage: 'signals match the search criteria',
   }
 );
 
 export const SIGNALS_HEADERS_RULE = i18n.translate(
-  'xpack.siem.eventsViewer.signals.defaultHeaders.ruleTitle',
+  'xpack.securitySolution.eventsViewer.signals.defaultHeaders.ruleTitle',
   {
     defaultMessage: 'Rule',
   }
 );
 
 export const SIGNALS_HEADERS_VERSION = i18n.translate(
-  'xpack.siem.eventsViewer.signals.defaultHeaders.versionTitle',
+  'xpack.securitySolution.eventsViewer.signals.defaultHeaders.versionTitle',
   {
     defaultMessage: 'Version',
   }
 );
 
 export const SIGNALS_HEADERS_METHOD = i18n.translate(
-  'xpack.siem.eventsViewer.signals.defaultHeaders.methodTitle',
+  'xpack.securitySolution.eventsViewer.signals.defaultHeaders.methodTitle',
   {
     defaultMessage: 'Method',
   }
 );
 
 export const SIGNALS_HEADERS_SEVERITY = i18n.translate(
-  'xpack.siem.eventsViewer.signals.defaultHeaders.severityTitle',
+  'xpack.securitySolution.eventsViewer.signals.defaultHeaders.severityTitle',
   {
     defaultMessage: 'Severity',
   }
 );
 
 export const SIGNALS_HEADERS_RISK_SCORE = i18n.translate(
-  'xpack.siem.eventsViewer.signals.defaultHeaders.riskScoreTitle',
+  'xpack.securitySolution.eventsViewer.signals.defaultHeaders.riskScoreTitle',
   {
     defaultMessage: 'Risk Score',
   }
 );
 
 export const ACTION_OPEN_SIGNAL = i18n.translate(
-  'xpack.siem.detectionEngine.signals.actions.openSignalTitle',
+  'xpack.securitySolution.detectionEngine.signals.actions.openSignalTitle',
   {
     defaultMessage: 'Open signal',
   }
 );
 
 export const ACTION_CLOSE_SIGNAL = i18n.translate(
-  'xpack.siem.detectionEngine.signals.actions.closeSignalTitle',
+  'xpack.securitySolution.detectionEngine.signals.actions.closeSignalTitle',
   {
     defaultMessage: 'Close signal',
   }
 );
 
 export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
-  'xpack.siem.detectionEngine.signals.actions.investigateInTimelineTitle',
+  'xpack.securitySolution.detectionEngine.signals.actions.investigateInTimelineTitle',
   {
     defaultMessage: 'Investigate in timeline',
   }

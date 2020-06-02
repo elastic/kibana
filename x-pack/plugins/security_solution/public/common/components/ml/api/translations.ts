@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const STATUS_CODE = i18n.translate(
-  'xpack.siem.components.ml.api.errors.statusCodeFailureTitle',
+  'xpack.securitySolution.components.ml.api.errors.statusCodeFailureTitle',
   {
     defaultMessage: 'Status Code:',
   }

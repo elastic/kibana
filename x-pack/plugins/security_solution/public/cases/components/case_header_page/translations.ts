@@ -6,11 +6,17 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PAGE_BADGE_LABEL = i18n.translate('xpack.siem.case.caseView.pageBadgeLabel', {
-  defaultMessage: 'Beta',
-});
+export const PAGE_BADGE_LABEL = i18n.translate(
+  'xpack.securitySolution.case.caseView.pageBadgeLabel',
+  {
+    defaultMessage: 'Beta',
+  }
+);
 
-export const PAGE_BADGE_TOOLTIP = i18n.translate('xpack.siem.case.caseView.pageBadgeTooltip', {
-  defaultMessage:
-    'Case Workflow is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',
-});
+export const PAGE_BADGE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.case.caseView.pageBadgeTooltip',
+  {
+    defaultMessage:
+      'Case Workflow is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',
+  }
+);

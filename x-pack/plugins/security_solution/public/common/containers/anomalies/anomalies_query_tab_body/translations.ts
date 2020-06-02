@@ -7,18 +7,18 @@
 import { i18n } from '@kbn/i18n';
 
 export const ANOMALIES_STACK_BY_JOB_ID = i18n.translate(
-  'xpack.siem.containers.anomalies.stackByJobId',
+  'xpack.securitySolution.containers.anomalies.stackByJobId',
   {
     defaultMessage: 'job',
   }
 );
 
-export const ANOMALIES_TITLE = i18n.translate('xpack.siem.containers.anomalies.title', {
+export const ANOMALIES_TITLE = i18n.translate('xpack.securitySolution.containers.anomalies.title', {
   defaultMessage: 'Anomalies',
 });
 
 export const ERROR_FETCHING_ANOMALIES_DATA = i18n.translate(
-  'xpack.siem.containers.anomalies.errorFetchingAnomaliesData',
+  'xpack.securitySolution.containers.anomalies.errorFetchingAnomaliesData',
   {
     defaultMessage: 'Failed to query anomalies data',
   }

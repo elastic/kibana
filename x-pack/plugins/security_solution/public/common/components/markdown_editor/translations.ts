@@ -6,13 +6,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const MARKDOWN_SYNTAX_HELP = i18n.translate('xpack.siem.markdownEditor.markdownInputHelp', {
-  defaultMessage: 'Markdown syntax help',
-});
+export const MARKDOWN_SYNTAX_HELP = i18n.translate(
+  'xpack.securitySolution.markdownEditor.markdownInputHelp',
+  {
+    defaultMessage: 'Markdown syntax help',
+  }
+);
 
-export const MARKDOWN = i18n.translate('xpack.siem.markdownEditor.markdown', {
+export const MARKDOWN = i18n.translate('xpack.securitySolution.markdownEditor.markdown', {
   defaultMessage: 'Markdown',
 });
-export const PREVIEW = i18n.translate('xpack.siem.markdownEditor.preview', {
+export const PREVIEW = i18n.translate('xpack.securitySolution.markdownEditor.preview', {
   defaultMessage: 'Preview',
 });

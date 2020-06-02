@@ -7,14 +7,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const FILTER_FOR_VALUE = i18n.translate(
-  'xpack.siem.add_filter_to_global_search_bar.filterForValueHoverAction',
+  'xpack.securitySolution.add_filter_to_global_search_bar.filterForValueHoverAction',
   {
     defaultMessage: 'Filter for value',
   }
 );
 
 export const FILTER_OUT_VALUE = i18n.translate(
-  'xpack.siem.add_filter_to_global_search_bar.filterOutValueHoverAction',
+  'xpack.securitySolution.add_filter_to_global_search_bar.filterOutValueHoverAction',
   {
     defaultMessage: 'Filter out value',
   }

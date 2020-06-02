@@ -75,7 +75,7 @@ export const Resolver = styled(
             <div>
               {' '}
               <FormattedMessage
-                id="xpack.siem.endpoint.resolver.loadingError"
+                id="xpack.securitySolution.endpoint.resolver.loadingError"
                 defaultMessage="Error loading data."
               />
             </div>

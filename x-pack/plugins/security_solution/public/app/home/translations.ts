@@ -6,26 +6,29 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const OVERVIEW = i18n.translate('xpack.siem.navigation.overview', {
+export const OVERVIEW = i18n.translate('xpack.securitySolution.navigation.overview', {
   defaultMessage: 'Overview',
 });
 
-export const HOSTS = i18n.translate('xpack.siem.navigation.hosts', {
+export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
 });
 
-export const NETWORK = i18n.translate('xpack.siem.navigation.network', {
+export const NETWORK = i18n.translate('xpack.securitySolution.navigation.network', {
   defaultMessage: 'Network',
 });
 
-export const DETECTION_ENGINE = i18n.translate('xpack.siem.navigation.detectionEngine', {
-  defaultMessage: 'Detections',
-});
+export const DETECTION_ENGINE = i18n.translate(
+  'xpack.securitySolution.navigation.detectionEngine',
+  {
+    defaultMessage: 'Detections',
+  }
+);
 
-export const TIMELINES = i18n.translate('xpack.siem.navigation.timelines', {
+export const TIMELINES = i18n.translate('xpack.securitySolution.navigation.timelines', {
   defaultMessage: 'Timelines',
 });
 
-export const CASE = i18n.translate('xpack.siem.navigation.case', {
+export const CASE = i18n.translate('xpack.securitySolution.navigation.case', {
   defaultMessage: 'Cases',
 });

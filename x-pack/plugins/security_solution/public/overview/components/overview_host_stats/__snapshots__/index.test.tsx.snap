@@ -20,7 +20,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           <EuiText>
             <FormattedMessage
               defaultMessage="Auditbeat"
-              id="xpack.siem.overview.hostStatGroupAuditbeat"
+              id="xpack.securitySolution.overview.hostStatGroupAuditbeat"
               values={Object {}}
             />
           </EuiText>
@@ -57,7 +57,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             <styled.div>
               <FormattedMessage
                 defaultMessage="Audit"
-                id="xpack.siem.overview.auditBeatAuditTitle"
+                id="xpack.securitySolution.overview.auditBeatAuditTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -89,7 +89,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             <styled.div>
               <FormattedMessage
                 defaultMessage="File Integrity Module"
-                id="xpack.siem.overview.auditBeatFimTitle"
+                id="xpack.securitySolution.overview.auditBeatFimTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -121,7 +121,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             <styled.div>
               <FormattedMessage
                 defaultMessage="Login"
-                id="xpack.siem.overview.auditBeatLoginTitle"
+                id="xpack.securitySolution.overview.auditBeatLoginTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -153,7 +153,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             <styled.div>
               <FormattedMessage
                 defaultMessage="Package"
-                id="xpack.siem.overview.auditBeatPackageTitle"
+                id="xpack.securitySolution.overview.auditBeatPackageTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -185,7 +185,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             <styled.div>
               <FormattedMessage
                 defaultMessage="Process"
-                id="xpack.siem.overview.auditBeatProcessTitle"
+                id="xpack.securitySolution.overview.auditBeatProcessTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -217,7 +217,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             <styled.div>
               <FormattedMessage
                 defaultMessage="User"
-                id="xpack.siem.overview.auditBeatUserTitle"
+                id="xpack.securitySolution.overview.auditBeatUserTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -253,7 +253,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           <EuiText>
             <FormattedMessage
               defaultMessage="Elastic Endpoint Security"
-              id="xpack.siem.overview.hostStatGroupElasticEndpointSecurity"
+              id="xpack.securitySolution.overview.hostStatGroupElasticEndpointSecurity"
               values={Object {}}
             />
           </EuiText>
@@ -290,7 +290,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             <styled.div>
               <FormattedMessage
                 defaultMessage="DNS"
-                id="xpack.siem.overview.endgameDnsTitle"
+                id="xpack.securitySolution.overview.endgameDnsTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -322,7 +322,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             <styled.div>
               <FormattedMessage
                 defaultMessage="File"
-                id="xpack.siem.overview.endgameFileTitle"
+                id="xpack.securitySolution.overview.endgameFileTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -354,7 +354,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             <styled.div>
               <FormattedMessage
                 defaultMessage="Image Load"
-                id="xpack.siem.overview.endgameImageLoadTitle"
+                id="xpack.securitySolution.overview.endgameImageLoadTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -386,7 +386,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             <styled.div>
               <FormattedMessage
                 defaultMessage="Network"
-                id="xpack.siem.overview.endgameNetworkTitle"
+                id="xpack.securitySolution.overview.endgameNetworkTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -418,7 +418,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             <styled.div>
               <FormattedMessage
                 defaultMessage="Process"
-                id="xpack.siem.overview.endgameProcessTitle"
+                id="xpack.securitySolution.overview.endgameProcessTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -450,7 +450,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             <styled.div>
               <FormattedMessage
                 defaultMessage="Registry"
-                id="xpack.siem.overview.endgameRegistryTitle"
+                id="xpack.securitySolution.overview.endgameRegistryTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -482,7 +482,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             <styled.div>
               <FormattedMessage
                 defaultMessage="Security"
-                id="xpack.siem.overview.endgameSecurityTitle"
+                id="xpack.securitySolution.overview.endgameSecurityTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -518,7 +518,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           <EuiText>
             <FormattedMessage
               defaultMessage="Filebeat"
-              id="xpack.siem.overview.hostStatGroupFilebeat"
+              id="xpack.securitySolution.overview.hostStatGroupFilebeat"
               values={Object {}}
             />
           </EuiText>
@@ -555,7 +555,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             <styled.div>
               <FormattedMessage
                 defaultMessage="System Module"
-                id="xpack.siem.overview.filebeatSystemModuleTitle"
+                id="xpack.securitySolution.overview.filebeatSystemModuleTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -591,7 +591,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           <EuiText>
             <FormattedMessage
               defaultMessage="Winlogbeat"
-              id="xpack.siem.overview.hostStatGroupWinlogbeat"
+              id="xpack.securitySolution.overview.hostStatGroupWinlogbeat"
               values={Object {}}
             />
           </EuiText>
@@ -628,7 +628,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             <styled.div>
               <FormattedMessage
                 defaultMessage="Security"
-                id="xpack.siem.overview.winlogbeatSecurityTitle"
+                id="xpack.securitySolution.overview.winlogbeatSecurityTitle"
                 values={Object {}}
               />
             </styled.div>
@@ -660,7 +660,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             <styled.div>
               <FormattedMessage
                 defaultMessage="Microsoft-Windows-Sysmon/Operational"
-                id="xpack.siem.overview.winlogbeatMWSysmonOperational"
+                id="xpack.securitySolution.overview.winlogbeatMWSysmonOperational"
                 values={Object {}}
               />
             </styled.div>

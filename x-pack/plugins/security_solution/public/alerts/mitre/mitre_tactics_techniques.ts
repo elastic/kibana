@@ -76,7 +76,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0009',
     name: 'Collection',
     reference: 'https://attack.mitre.org/tactics/TA0009',
-    text: i18n.translate('xpack.siem.detectionEngine.mitreAttackTactics.collectionDescription', {
+    text: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTactics.collectionDescription', {
       defaultMessage: 'Collection (TA0009)',
     }),
     value: 'collection',
@@ -86,7 +86,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     name: 'Command and Control',
     reference: 'https://attack.mitre.org/tactics/TA0011',
     text: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTactics.commandAndControlDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTactics.commandAndControlDescription',
       { defaultMessage: 'Command and Control (TA0011)' }
     ),
     value: 'commandAndControl',
@@ -96,7 +96,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     name: 'Credential Access',
     reference: 'https://attack.mitre.org/tactics/TA0006',
     text: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTactics.credentialAccessDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTactics.credentialAccessDescription',
       { defaultMessage: 'Credential Access (TA0006)' }
     ),
     value: 'credentialAccess',
@@ -106,7 +106,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     name: 'Defense Evasion',
     reference: 'https://attack.mitre.org/tactics/TA0005',
     text: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTactics.defenseEvasionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTactics.defenseEvasionDescription',
       { defaultMessage: 'Defense Evasion (TA0005)' }
     ),
     value: 'defenseEvasion',
@@ -115,7 +115,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0007',
     name: 'Discovery',
     reference: 'https://attack.mitre.org/tactics/TA0007',
-    text: i18n.translate('xpack.siem.detectionEngine.mitreAttackTactics.discoveryDescription', {
+    text: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTactics.discoveryDescription', {
       defaultMessage: 'Discovery (TA0007)',
     }),
     value: 'discovery',
@@ -124,7 +124,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0002',
     name: 'Execution',
     reference: 'https://attack.mitre.org/tactics/TA0002',
-    text: i18n.translate('xpack.siem.detectionEngine.mitreAttackTactics.executionDescription', {
+    text: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTactics.executionDescription', {
       defaultMessage: 'Execution (TA0002)',
     }),
     value: 'execution',
@@ -133,7 +133,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0010',
     name: 'Exfiltration',
     reference: 'https://attack.mitre.org/tactics/TA0010',
-    text: i18n.translate('xpack.siem.detectionEngine.mitreAttackTactics.exfiltrationDescription', {
+    text: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTactics.exfiltrationDescription', {
       defaultMessage: 'Exfiltration (TA0010)',
     }),
     value: 'exfiltration',
@@ -142,7 +142,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0040',
     name: 'Impact',
     reference: 'https://attack.mitre.org/tactics/TA0040',
-    text: i18n.translate('xpack.siem.detectionEngine.mitreAttackTactics.impactDescription', {
+    text: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTactics.impactDescription', {
       defaultMessage: 'Impact (TA0040)',
     }),
     value: 'impact',
@@ -151,7 +151,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0001',
     name: 'Initial Access',
     reference: 'https://attack.mitre.org/tactics/TA0001',
-    text: i18n.translate('xpack.siem.detectionEngine.mitreAttackTactics.initialAccessDescription', {
+    text: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTactics.initialAccessDescription', {
       defaultMessage: 'Initial Access (TA0001)',
     }),
     value: 'initialAccess',
@@ -161,7 +161,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     name: 'Lateral Movement',
     reference: 'https://attack.mitre.org/tactics/TA0008',
     text: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTactics.lateralMovementDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTactics.lateralMovementDescription',
       { defaultMessage: 'Lateral Movement (TA0008)' }
     ),
     value: 'lateralMovement',
@@ -170,7 +170,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0003',
     name: 'Persistence',
     reference: 'https://attack.mitre.org/tactics/TA0003',
-    text: i18n.translate('xpack.siem.detectionEngine.mitreAttackTactics.persistenceDescription', {
+    text: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTactics.persistenceDescription', {
       defaultMessage: 'Persistence (TA0003)',
     }),
     value: 'persistence',
@@ -180,7 +180,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     name: 'Privilege Escalation',
     reference: 'https://attack.mitre.org/tactics/TA0004',
     text: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTactics.privilegeEscalationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTactics.privilegeEscalationDescription',
       { defaultMessage: 'Privilege Escalation (TA0004)' }
     ),
     value: 'privilegeEscalation',
@@ -1789,7 +1789,7 @@ export const technique = [
 export const techniquesOptions: MitreTechniquesOptions[] = [
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.bashProfileAndBashrcDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.bashProfileAndBashrcDescription',
       { defaultMessage: '.bash_profile and .bashrc (T1156)' }
     ),
     id: 'T1156',
@@ -1800,7 +1800,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.accessTokenManipulationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.accessTokenManipulationDescription',
       { defaultMessage: 'Access Token Manipulation (T1134)' }
     ),
     id: 'T1134',
@@ -1811,7 +1811,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.accessibilityFeaturesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.accessibilityFeaturesDescription',
       { defaultMessage: 'Accessibility Features (T1015)' }
     ),
     id: 'T1015',
@@ -1822,7 +1822,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.accountAccessRemovalDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.accountAccessRemovalDescription',
       { defaultMessage: 'Account Access Removal (T1531)' }
     ),
     id: 'T1531',
@@ -1833,7 +1833,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.accountDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.accountDiscoveryDescription',
       { defaultMessage: 'Account Discovery (T1087)' }
     ),
     id: 'T1087',
@@ -1844,7 +1844,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.accountManipulationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.accountManipulationDescription',
       { defaultMessage: 'Account Manipulation (T1098)' }
     ),
     id: 'T1098',
@@ -1855,7 +1855,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.appCertDlLsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.appCertDlLsDescription',
       { defaultMessage: 'AppCert DLLs (T1182)' }
     ),
     id: 'T1182',
@@ -1866,7 +1866,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.appInitDlLsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.appInitDlLsDescription',
       { defaultMessage: 'AppInit DLLs (T1103)' }
     ),
     id: 'T1103',
@@ -1877,7 +1877,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.appleScriptDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.appleScriptDescription',
       { defaultMessage: 'AppleScript (T1155)' }
     ),
     id: 'T1155',
@@ -1888,7 +1888,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.applicationAccessTokenDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.applicationAccessTokenDescription',
       { defaultMessage: 'Application Access Token (T1527)' }
     ),
     id: 'T1527',
@@ -1899,7 +1899,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.applicationDeploymentSoftwareDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.applicationDeploymentSoftwareDescription',
       { defaultMessage: 'Application Deployment Software (T1017)' }
     ),
     id: 'T1017',
@@ -1910,7 +1910,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.applicationShimmingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.applicationShimmingDescription',
       { defaultMessage: 'Application Shimming (T1138)' }
     ),
     id: 'T1138',
@@ -1921,7 +1921,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.applicationWindowDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.applicationWindowDiscoveryDescription',
       { defaultMessage: 'Application Window Discovery (T1010)' }
     ),
     id: 'T1010',
@@ -1932,7 +1932,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.audioCaptureDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.audioCaptureDescription',
       { defaultMessage: 'Audio Capture (T1123)' }
     ),
     id: 'T1123',
@@ -1943,7 +1943,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.authenticationPackageDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.authenticationPackageDescription',
       { defaultMessage: 'Authentication Package (T1131)' }
     ),
     id: 'T1131',
@@ -1954,7 +1954,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.automatedCollectionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.automatedCollectionDescription',
       { defaultMessage: 'Automated Collection (T1119)' }
     ),
     id: 'T1119',
@@ -1965,7 +1965,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.automatedExfiltrationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.automatedExfiltrationDescription',
       { defaultMessage: 'Automated Exfiltration (T1020)' }
     ),
     id: 'T1020',
@@ -1975,7 +1975,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'automatedExfiltration',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.bitsJobsDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.bitsJobsDescription', {
       defaultMessage: 'BITS Jobs (T1197)',
     }),
     id: 'T1197',
@@ -1986,7 +1986,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.bashHistoryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.bashHistoryDescription',
       { defaultMessage: 'Bash History (T1139)' }
     ),
     id: 'T1139',
@@ -1997,7 +1997,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.binaryPaddingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.binaryPaddingDescription',
       { defaultMessage: 'Binary Padding (T1009)' }
     ),
     id: 'T1009',
@@ -2007,7 +2007,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'binaryPadding',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.bootkitDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.bootkitDescription', {
       defaultMessage: 'Bootkit (T1067)',
     }),
     id: 'T1067',
@@ -2018,7 +2018,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.browserBookmarkDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.browserBookmarkDiscoveryDescription',
       { defaultMessage: 'Browser Bookmark Discovery (T1217)' }
     ),
     id: 'T1217',
@@ -2029,7 +2029,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.browserExtensionsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.browserExtensionsDescription',
       { defaultMessage: 'Browser Extensions (T1176)' }
     ),
     id: 'T1176',
@@ -2040,7 +2040,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.bruteForceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.bruteForceDescription',
       { defaultMessage: 'Brute Force (T1110)' }
     ),
     id: 'T1110',
@@ -2051,7 +2051,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.bypassUserAccountControlDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.bypassUserAccountControlDescription',
       { defaultMessage: 'Bypass User Account Control (T1088)' }
     ),
     id: 'T1088',
@@ -2061,7 +2061,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'bypassUserAccountControl',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.cmstpDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.cmstpDescription', {
       defaultMessage: 'CMSTP (T1191)',
     }),
     id: 'T1191',
@@ -2072,7 +2072,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.changeDefaultFileAssociationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.changeDefaultFileAssociationDescription',
       { defaultMessage: 'Change Default File Association (T1042)' }
     ),
     id: 'T1042',
@@ -2083,7 +2083,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.clearCommandHistoryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.clearCommandHistoryDescription',
       { defaultMessage: 'Clear Command History (T1146)' }
     ),
     id: 'T1146',
@@ -2094,7 +2094,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.clipboardDataDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.clipboardDataDescription',
       { defaultMessage: 'Clipboard Data (T1115)' }
     ),
     id: 'T1115',
@@ -2105,7 +2105,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.cloudInstanceMetadataApiDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.cloudInstanceMetadataApiDescription',
       { defaultMessage: 'Cloud Instance Metadata API (T1522)' }
     ),
     id: 'T1522',
@@ -2116,7 +2116,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.cloudServiceDashboardDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.cloudServiceDashboardDescription',
       { defaultMessage: 'Cloud Service Dashboard (T1538)' }
     ),
     id: 'T1538',
@@ -2127,7 +2127,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.cloudServiceDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.cloudServiceDiscoveryDescription',
       { defaultMessage: 'Cloud Service Discovery (T1526)' }
     ),
     id: 'T1526',
@@ -2138,7 +2138,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.codeSigningDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.codeSigningDescription',
       { defaultMessage: 'Code Signing (T1116)' }
     ),
     id: 'T1116',
@@ -2149,7 +2149,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.commandLineInterfaceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.commandLineInterfaceDescription',
       { defaultMessage: 'Command-Line Interface (T1059)' }
     ),
     id: 'T1059',
@@ -2160,7 +2160,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.commonlyUsedPortDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.commonlyUsedPortDescription',
       { defaultMessage: 'Commonly Used Port (T1043)' }
     ),
     id: 'T1043',
@@ -2171,7 +2171,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.communicationThroughRemovableMediaDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.communicationThroughRemovableMediaDescription',
       { defaultMessage: 'Communication Through Removable Media (T1092)' }
     ),
     id: 'T1092',
@@ -2182,7 +2182,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.compileAfterDeliveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.compileAfterDeliveryDescription',
       { defaultMessage: 'Compile After Delivery (T1500)' }
     ),
     id: 'T1500',
@@ -2193,7 +2193,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.compiledHtmlFileDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.compiledHtmlFileDescription',
       { defaultMessage: 'Compiled HTML File (T1223)' }
     ),
     id: 'T1223',
@@ -2204,7 +2204,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.componentFirmwareDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.componentFirmwareDescription',
       { defaultMessage: 'Component Firmware (T1109)' }
     ),
     id: 'T1109',
@@ -2215,7 +2215,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.componentObjectModelHijackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.componentObjectModelHijackingDescription',
       { defaultMessage: 'Component Object Model Hijacking (T1122)' }
     ),
     id: 'T1122',
@@ -2226,7 +2226,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.componentObjectModelAndDistributedComDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.componentObjectModelAndDistributedComDescription',
       { defaultMessage: 'Component Object Model and Distributed COM (T1175)' }
     ),
     id: 'T1175',
@@ -2237,7 +2237,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.connectionProxyDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.connectionProxyDescription',
       { defaultMessage: 'Connection Proxy (T1090)' }
     ),
     id: 'T1090',
@@ -2248,7 +2248,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.controlPanelItemsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.controlPanelItemsDescription',
       { defaultMessage: 'Control Panel Items (T1196)' }
     ),
     id: 'T1196',
@@ -2259,7 +2259,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.createAccountDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.createAccountDescription',
       { defaultMessage: 'Create Account (T1136)' }
     ),
     id: 'T1136',
@@ -2270,7 +2270,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.credentialDumpingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.credentialDumpingDescription',
       { defaultMessage: 'Credential Dumping (T1003)' }
     ),
     id: 'T1003',
@@ -2281,7 +2281,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.credentialsFromWebBrowsersDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.credentialsFromWebBrowsersDescription',
       { defaultMessage: 'Credentials from Web Browsers (T1503)' }
     ),
     id: 'T1503',
@@ -2292,7 +2292,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.credentialsInFilesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.credentialsInFilesDescription',
       { defaultMessage: 'Credentials in Files (T1081)' }
     ),
     id: 'T1081',
@@ -2303,7 +2303,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.credentialsInRegistryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.credentialsInRegistryDescription',
       { defaultMessage: 'Credentials in Registry (T1214)' }
     ),
     id: 'T1214',
@@ -2314,7 +2314,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.customCommandAndControlProtocolDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.customCommandAndControlProtocolDescription',
       { defaultMessage: 'Custom Command and Control Protocol (T1094)' }
     ),
     id: 'T1094',
@@ -2325,7 +2325,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.customCryptographicProtocolDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.customCryptographicProtocolDescription',
       { defaultMessage: 'Custom Cryptographic Protocol (T1024)' }
     ),
     id: 'T1024',
@@ -2335,7 +2335,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'customCryptographicProtocol',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.dcShadowDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.dcShadowDescription', {
       defaultMessage: 'DCShadow (T1207)',
     }),
     id: 'T1207',
@@ -2346,7 +2346,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dllSearchOrderHijackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dllSearchOrderHijackingDescription',
       { defaultMessage: 'DLL Search Order Hijacking (T1038)' }
     ),
     id: 'T1038',
@@ -2357,7 +2357,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dllSideLoadingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dllSideLoadingDescription',
       { defaultMessage: 'DLL Side-Loading (T1073)' }
     ),
     id: 'T1073',
@@ -2368,7 +2368,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dataCompressedDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataCompressedDescription',
       { defaultMessage: 'Data Compressed (T1002)' }
     ),
     id: 'T1002',
@@ -2379,7 +2379,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dataDestructionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataDestructionDescription',
       { defaultMessage: 'Data Destruction (T1485)' }
     ),
     id: 'T1485',
@@ -2390,7 +2390,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dataEncodingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataEncodingDescription',
       { defaultMessage: 'Data Encoding (T1132)' }
     ),
     id: 'T1132',
@@ -2401,7 +2401,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dataEncryptedDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataEncryptedDescription',
       { defaultMessage: 'Data Encrypted (T1022)' }
     ),
     id: 'T1022',
@@ -2412,7 +2412,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dataEncryptedForImpactDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataEncryptedForImpactDescription',
       { defaultMessage: 'Data Encrypted for Impact (T1486)' }
     ),
     id: 'T1486',
@@ -2423,7 +2423,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dataObfuscationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataObfuscationDescription',
       { defaultMessage: 'Data Obfuscation (T1001)' }
     ),
     id: 'T1001',
@@ -2434,7 +2434,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dataStagedDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataStagedDescription',
       { defaultMessage: 'Data Staged (T1074)' }
     ),
     id: 'T1074',
@@ -2445,7 +2445,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dataTransferSizeLimitsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataTransferSizeLimitsDescription',
       { defaultMessage: 'Data Transfer Size Limits (T1030)' }
     ),
     id: 'T1030',
@@ -2456,7 +2456,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dataFromCloudStorageObjectDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataFromCloudStorageObjectDescription',
       { defaultMessage: 'Data from Cloud Storage Object (T1530)' }
     ),
     id: 'T1530',
@@ -2467,7 +2467,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dataFromInformationRepositoriesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataFromInformationRepositoriesDescription',
       { defaultMessage: 'Data from Information Repositories (T1213)' }
     ),
     id: 'T1213',
@@ -2478,7 +2478,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dataFromLocalSystemDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataFromLocalSystemDescription',
       { defaultMessage: 'Data from Local System (T1005)' }
     ),
     id: 'T1005',
@@ -2489,7 +2489,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dataFromNetworkSharedDriveDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataFromNetworkSharedDriveDescription',
       { defaultMessage: 'Data from Network Shared Drive (T1039)' }
     ),
     id: 'T1039',
@@ -2500,7 +2500,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dataFromRemovableMediaDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataFromRemovableMediaDescription',
       { defaultMessage: 'Data from Removable Media (T1025)' }
     ),
     id: 'T1025',
@@ -2511,7 +2511,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.defacementDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.defacementDescription',
       { defaultMessage: 'Defacement (T1491)' }
     ),
     id: 'T1491',
@@ -2522,7 +2522,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.deobfuscateDecodeFilesOrInformationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.deobfuscateDecodeFilesOrInformationDescription',
       { defaultMessage: 'Deobfuscate/Decode Files or Information (T1140)' }
     ),
     id: 'T1140',
@@ -2533,7 +2533,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.disablingSecurityToolsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.disablingSecurityToolsDescription',
       { defaultMessage: 'Disabling Security Tools (T1089)' }
     ),
     id: 'T1089',
@@ -2544,7 +2544,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.diskContentWipeDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.diskContentWipeDescription',
       { defaultMessage: 'Disk Content Wipe (T1488)' }
     ),
     id: 'T1488',
@@ -2555,7 +2555,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.diskStructureWipeDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.diskStructureWipeDescription',
       { defaultMessage: 'Disk Structure Wipe (T1487)' }
     ),
     id: 'T1487',
@@ -2566,7 +2566,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.domainFrontingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.domainFrontingDescription',
       { defaultMessage: 'Domain Fronting (T1172)' }
     ),
     id: 'T1172',
@@ -2577,7 +2577,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.domainGenerationAlgorithmsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.domainGenerationAlgorithmsDescription',
       { defaultMessage: 'Domain Generation Algorithms (T1483)' }
     ),
     id: 'T1483',
@@ -2588,7 +2588,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.domainTrustDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.domainTrustDiscoveryDescription',
       { defaultMessage: 'Domain Trust Discovery (T1482)' }
     ),
     id: 'T1482',
@@ -2599,7 +2599,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.driveByCompromiseDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.driveByCompromiseDescription',
       { defaultMessage: 'Drive-by Compromise (T1189)' }
     ),
     id: 'T1189',
@@ -2610,7 +2610,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dylibHijackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dylibHijackingDescription',
       { defaultMessage: 'Dylib Hijacking (T1157)' }
     ),
     id: 'T1157',
@@ -2621,7 +2621,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.dynamicDataExchangeDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dynamicDataExchangeDescription',
       { defaultMessage: 'Dynamic Data Exchange (T1173)' }
     ),
     id: 'T1173',
@@ -2632,7 +2632,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.elevatedExecutionWithPromptDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.elevatedExecutionWithPromptDescription',
       { defaultMessage: 'Elevated Execution with Prompt (T1514)' }
     ),
     id: 'T1514',
@@ -2643,7 +2643,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.emailCollectionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.emailCollectionDescription',
       { defaultMessage: 'Email Collection (T1114)' }
     ),
     id: 'T1114',
@@ -2653,7 +2653,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'emailCollection',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.emondDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.emondDescription', {
       defaultMessage: 'Emond (T1519)',
     }),
     id: 'T1519',
@@ -2664,7 +2664,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.endpointDenialOfServiceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.endpointDenialOfServiceDescription',
       { defaultMessage: 'Endpoint Denial of Service (T1499)' }
     ),
     id: 'T1499',
@@ -2675,7 +2675,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.executionGuardrailsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.executionGuardrailsDescription',
       { defaultMessage: 'Execution Guardrails (T1480)' }
     ),
     id: 'T1480',
@@ -2686,7 +2686,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.executionThroughApiDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.executionThroughApiDescription',
       { defaultMessage: 'Execution through API (T1106)' }
     ),
     id: 'T1106',
@@ -2697,7 +2697,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.executionThroughModuleLoadDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.executionThroughModuleLoadDescription',
       { defaultMessage: 'Execution through Module Load (T1129)' }
     ),
     id: 'T1129',
@@ -2708,7 +2708,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.exfiltrationOverAlternativeProtocolDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.exfiltrationOverAlternativeProtocolDescription',
       { defaultMessage: 'Exfiltration Over Alternative Protocol (T1048)' }
     ),
     id: 'T1048',
@@ -2719,7 +2719,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.exfiltrationOverCommandAndControlChannelDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.exfiltrationOverCommandAndControlChannelDescription',
       { defaultMessage: 'Exfiltration Over Command and Control Channel (T1041)' }
     ),
     id: 'T1041',
@@ -2730,7 +2730,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.exfiltrationOverOtherNetworkMediumDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.exfiltrationOverOtherNetworkMediumDescription',
       { defaultMessage: 'Exfiltration Over Other Network Medium (T1011)' }
     ),
     id: 'T1011',
@@ -2741,7 +2741,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.exfiltrationOverPhysicalMediumDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.exfiltrationOverPhysicalMediumDescription',
       { defaultMessage: 'Exfiltration Over Physical Medium (T1052)' }
     ),
     id: 'T1052',
@@ -2752,7 +2752,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.exploitPublicFacingApplicationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.exploitPublicFacingApplicationDescription',
       { defaultMessage: 'Exploit Public-Facing Application (T1190)' }
     ),
     id: 'T1190',
@@ -2763,7 +2763,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.exploitationForClientExecutionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.exploitationForClientExecutionDescription',
       { defaultMessage: 'Exploitation for Client Execution (T1203)' }
     ),
     id: 'T1203',
@@ -2774,7 +2774,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.exploitationForCredentialAccessDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.exploitationForCredentialAccessDescription',
       { defaultMessage: 'Exploitation for Credential Access (T1212)' }
     ),
     id: 'T1212',
@@ -2785,7 +2785,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.exploitationForDefenseEvasionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.exploitationForDefenseEvasionDescription',
       { defaultMessage: 'Exploitation for Defense Evasion (T1211)' }
     ),
     id: 'T1211',
@@ -2796,7 +2796,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.exploitationForPrivilegeEscalationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.exploitationForPrivilegeEscalationDescription',
       { defaultMessage: 'Exploitation for Privilege Escalation (T1068)' }
     ),
     id: 'T1068',
@@ -2807,7 +2807,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.exploitationOfRemoteServicesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.exploitationOfRemoteServicesDescription',
       { defaultMessage: 'Exploitation of Remote Services (T1210)' }
     ),
     id: 'T1210',
@@ -2818,7 +2818,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.externalRemoteServicesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.externalRemoteServicesDescription',
       { defaultMessage: 'External Remote Services (T1133)' }
     ),
     id: 'T1133',
@@ -2829,7 +2829,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.extraWindowMemoryInjectionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.extraWindowMemoryInjectionDescription',
       { defaultMessage: 'Extra Window Memory Injection (T1181)' }
     ),
     id: 'T1181',
@@ -2840,7 +2840,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.fallbackChannelsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.fallbackChannelsDescription',
       { defaultMessage: 'Fallback Channels (T1008)' }
     ),
     id: 'T1008',
@@ -2851,7 +2851,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.fileDeletionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.fileDeletionDescription',
       { defaultMessage: 'File Deletion (T1107)' }
     ),
     id: 'T1107',
@@ -2862,7 +2862,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.fileSystemLogicalOffsetsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.fileSystemLogicalOffsetsDescription',
       { defaultMessage: 'File System Logical Offsets (T1006)' }
     ),
     id: 'T1006',
@@ -2873,7 +2873,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.fileSystemPermissionsWeaknessDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.fileSystemPermissionsWeaknessDescription',
       { defaultMessage: 'File System Permissions Weakness (T1044)' }
     ),
     id: 'T1044',
@@ -2884,7 +2884,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.fileAndDirectoryDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.fileAndDirectoryDiscoveryDescription',
       { defaultMessage: 'File and Directory Discovery (T1083)' }
     ),
     id: 'T1083',
@@ -2895,7 +2895,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.fileAndDirectoryPermissionsModificationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.fileAndDirectoryPermissionsModificationDescription',
       { defaultMessage: 'File and Directory Permissions Modification (T1222)' }
     ),
     id: 'T1222',
@@ -2906,7 +2906,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.firmwareCorruptionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.firmwareCorruptionDescription',
       { defaultMessage: 'Firmware Corruption (T1495)' }
     ),
     id: 'T1495',
@@ -2917,7 +2917,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.forcedAuthenticationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.forcedAuthenticationDescription',
       { defaultMessage: 'Forced Authentication (T1187)' }
     ),
     id: 'T1187',
@@ -2928,7 +2928,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.gatekeeperBypassDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.gatekeeperBypassDescription',
       { defaultMessage: 'Gatekeeper Bypass (T1144)' }
     ),
     id: 'T1144',
@@ -2939,7 +2939,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.graphicalUserInterfaceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.graphicalUserInterfaceDescription',
       { defaultMessage: 'Graphical User Interface (T1061)' }
     ),
     id: 'T1061',
@@ -2950,7 +2950,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.groupPolicyModificationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.groupPolicyModificationDescription',
       { defaultMessage: 'Group Policy Modification (T1484)' }
     ),
     id: 'T1484',
@@ -2961,7 +2961,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.histcontrolDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.histcontrolDescription',
       { defaultMessage: 'HISTCONTROL (T1148)' }
     ),
     id: 'T1148',
@@ -2972,7 +2972,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.hardwareAdditionsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.hardwareAdditionsDescription',
       { defaultMessage: 'Hardware Additions (T1200)' }
     ),
     id: 'T1200',
@@ -2983,7 +2983,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.hiddenFilesAndDirectoriesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.hiddenFilesAndDirectoriesDescription',
       { defaultMessage: 'Hidden Files and Directories (T1158)' }
     ),
     id: 'T1158',
@@ -2994,7 +2994,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.hiddenUsersDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.hiddenUsersDescription',
       { defaultMessage: 'Hidden Users (T1147)' }
     ),
     id: 'T1147',
@@ -3005,7 +3005,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.hiddenWindowDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.hiddenWindowDescription',
       { defaultMessage: 'Hidden Window (T1143)' }
     ),
     id: 'T1143',
@@ -3015,7 +3015,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'hiddenWindow',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.hookingDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.hookingDescription', {
       defaultMessage: 'Hooking (T1179)',
     }),
     id: 'T1179',
@@ -3026,7 +3026,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.hypervisorDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.hypervisorDescription',
       { defaultMessage: 'Hypervisor (T1062)' }
     ),
     id: 'T1062',
@@ -3037,7 +3037,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.imageFileExecutionOptionsInjectionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.imageFileExecutionOptionsInjectionDescription',
       { defaultMessage: 'Image File Execution Options Injection (T1183)' }
     ),
     id: 'T1183',
@@ -3048,7 +3048,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.implantContainerImageDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.implantContainerImageDescription',
       { defaultMessage: 'Implant Container Image (T1525)' }
     ),
     id: 'T1525',
@@ -3059,7 +3059,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.indicatorBlockingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.indicatorBlockingDescription',
       { defaultMessage: 'Indicator Blocking (T1054)' }
     ),
     id: 'T1054',
@@ -3070,7 +3070,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.indicatorRemovalFromToolsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.indicatorRemovalFromToolsDescription',
       { defaultMessage: 'Indicator Removal from Tools (T1066)' }
     ),
     id: 'T1066',
@@ -3081,7 +3081,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.indicatorRemovalOnHostDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.indicatorRemovalOnHostDescription',
       { defaultMessage: 'Indicator Removal on Host (T1070)' }
     ),
     id: 'T1070',
@@ -3092,7 +3092,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.indirectCommandExecutionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.indirectCommandExecutionDescription',
       { defaultMessage: 'Indirect Command Execution (T1202)' }
     ),
     id: 'T1202',
@@ -3103,7 +3103,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.inhibitSystemRecoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.inhibitSystemRecoveryDescription',
       { defaultMessage: 'Inhibit System Recovery (T1490)' }
     ),
     id: 'T1490',
@@ -3114,7 +3114,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.inputCaptureDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.inputCaptureDescription',
       { defaultMessage: 'Input Capture (T1056)' }
     ),
     id: 'T1056',
@@ -3125,7 +3125,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.inputPromptDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.inputPromptDescription',
       { defaultMessage: 'Input Prompt (T1141)' }
     ),
     id: 'T1141',
@@ -3136,7 +3136,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.installRootCertificateDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.installRootCertificateDescription',
       { defaultMessage: 'Install Root Certificate (T1130)' }
     ),
     id: 'T1130',
@@ -3147,7 +3147,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.installUtilDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.installUtilDescription',
       { defaultMessage: 'InstallUtil (T1118)' }
     ),
     id: 'T1118',
@@ -3158,7 +3158,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.internalSpearphishingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.internalSpearphishingDescription',
       { defaultMessage: 'Internal Spearphishing (T1534)' }
     ),
     id: 'T1534',
@@ -3169,7 +3169,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.kerberoastingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.kerberoastingDescription',
       { defaultMessage: 'Kerberoasting (T1208)' }
     ),
     id: 'T1208',
@@ -3180,7 +3180,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.kernelModulesAndExtensionsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.kernelModulesAndExtensionsDescription',
       { defaultMessage: 'Kernel Modules and Extensions (T1215)' }
     ),
     id: 'T1215',
@@ -3190,7 +3190,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'kernelModulesAndExtensions',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.keychainDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.keychainDescription', {
       defaultMessage: 'Keychain (T1142)',
     }),
     id: 'T1142',
@@ -3201,7 +3201,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.lcLoadDylibAdditionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.lcLoadDylibAdditionDescription',
       { defaultMessage: 'LC_LOAD_DYLIB Addition (T1161)' }
     ),
     id: 'T1161',
@@ -3212,7 +3212,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.lcMainHijackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.lcMainHijackingDescription',
       { defaultMessage: 'LC_MAIN Hijacking (T1149)' }
     ),
     id: 'T1149',
@@ -3223,7 +3223,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.llmnrNbtNsPoisoningAndRelayDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.llmnrNbtNsPoisoningAndRelayDescription',
       { defaultMessage: 'LLMNR/NBT-NS Poisoning and Relay (T1171)' }
     ),
     id: 'T1171',
@@ -3234,7 +3234,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.lsassDriverDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.lsassDriverDescription',
       { defaultMessage: 'LSASS Driver (T1177)' }
     ),
     id: 'T1177',
@@ -3245,7 +3245,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.launchAgentDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.launchAgentDescription',
       { defaultMessage: 'Launch Agent (T1159)' }
     ),
     id: 'T1159',
@@ -3256,7 +3256,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.launchDaemonDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.launchDaemonDescription',
       { defaultMessage: 'Launch Daemon (T1160)' }
     ),
     id: 'T1160',
@@ -3266,7 +3266,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'launchDaemon',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.launchctlDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.launchctlDescription', {
       defaultMessage: 'Launchctl (T1152)',
     }),
     id: 'T1152',
@@ -3277,7 +3277,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.localJobSchedulingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.localJobSchedulingDescription',
       { defaultMessage: 'Local Job Scheduling (T1168)' }
     ),
     id: 'T1168',
@@ -3287,7 +3287,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'localJobScheduling',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.loginItemDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.loginItemDescription', {
       defaultMessage: 'Login Item (T1162)',
     }),
     id: 'T1162',
@@ -3298,7 +3298,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.logonScriptsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.logonScriptsDescription',
       { defaultMessage: 'Logon Scripts (T1037)' }
     ),
     id: 'T1037',
@@ -3309,7 +3309,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.manInTheBrowserDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.manInTheBrowserDescription',
       { defaultMessage: 'Man in the Browser (T1185)' }
     ),
     id: 'T1185',
@@ -3320,7 +3320,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.masqueradingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.masqueradingDescription',
       { defaultMessage: 'Masquerading (T1036)' }
     ),
     id: 'T1036',
@@ -3331,7 +3331,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.modifyExistingServiceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.modifyExistingServiceDescription',
       { defaultMessage: 'Modify Existing Service (T1031)' }
     ),
     id: 'T1031',
@@ -3342,7 +3342,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.modifyRegistryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.modifyRegistryDescription',
       { defaultMessage: 'Modify Registry (T1112)' }
     ),
     id: 'T1112',
@@ -3352,7 +3352,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'modifyRegistry',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.mshtaDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.mshtaDescription', {
       defaultMessage: 'Mshta (T1170)',
     }),
     id: 'T1170',
@@ -3363,7 +3363,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.multiStageChannelsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.multiStageChannelsDescription',
       { defaultMessage: 'Multi-Stage Channels (T1104)' }
     ),
     id: 'T1104',
@@ -3374,7 +3374,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.multiHopProxyDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.multiHopProxyDescription',
       { defaultMessage: 'Multi-hop Proxy (T1188)' }
     ),
     id: 'T1188',
@@ -3385,7 +3385,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.multibandCommunicationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.multibandCommunicationDescription',
       { defaultMessage: 'Multiband Communication (T1026)' }
     ),
     id: 'T1026',
@@ -3396,7 +3396,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.multilayerEncryptionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.multilayerEncryptionDescription',
       { defaultMessage: 'Multilayer Encryption (T1079)' }
     ),
     id: 'T1079',
@@ -3407,7 +3407,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.ntfsFileAttributesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.ntfsFileAttributesDescription',
       { defaultMessage: 'NTFS File Attributes (T1096)' }
     ),
     id: 'T1096',
@@ -3418,7 +3418,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.netshHelperDllDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.netshHelperDllDescription',
       { defaultMessage: 'Netsh Helper DLL (T1128)' }
     ),
     id: 'T1128',
@@ -3429,7 +3429,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.networkDenialOfServiceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.networkDenialOfServiceDescription',
       { defaultMessage: 'Network Denial of Service (T1498)' }
     ),
     id: 'T1498',
@@ -3440,7 +3440,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.networkServiceScanningDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.networkServiceScanningDescription',
       { defaultMessage: 'Network Service Scanning (T1046)' }
     ),
     id: 'T1046',
@@ -3451,7 +3451,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.networkShareConnectionRemovalDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.networkShareConnectionRemovalDescription',
       { defaultMessage: 'Network Share Connection Removal (T1126)' }
     ),
     id: 'T1126',
@@ -3462,7 +3462,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.networkShareDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.networkShareDiscoveryDescription',
       { defaultMessage: 'Network Share Discovery (T1135)' }
     ),
     id: 'T1135',
@@ -3473,7 +3473,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.networkSniffingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.networkSniffingDescription',
       { defaultMessage: 'Network Sniffing (T1040)' }
     ),
     id: 'T1040',
@@ -3484,7 +3484,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.newServiceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.newServiceDescription',
       { defaultMessage: 'New Service (T1050)' }
     ),
     id: 'T1050',
@@ -3495,7 +3495,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.obfuscatedFilesOrInformationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.obfuscatedFilesOrInformationDescription',
       { defaultMessage: 'Obfuscated Files or Information (T1027)' }
     ),
     id: 'T1027',
@@ -3506,7 +3506,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.officeApplicationStartupDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.officeApplicationStartupDescription',
       { defaultMessage: 'Office Application Startup (T1137)' }
     ),
     id: 'T1137',
@@ -3517,7 +3517,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.parentPidSpoofingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.parentPidSpoofingDescription',
       { defaultMessage: 'Parent PID Spoofing (T1502)' }
     ),
     id: 'T1502',
@@ -3528,7 +3528,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.passTheHashDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.passTheHashDescription',
       { defaultMessage: 'Pass the Hash (T1075)' }
     ),
     id: 'T1075',
@@ -3539,7 +3539,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.passTheTicketDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.passTheTicketDescription',
       { defaultMessage: 'Pass the Ticket (T1097)' }
     ),
     id: 'T1097',
@@ -3550,7 +3550,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.passwordFilterDllDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.passwordFilterDllDescription',
       { defaultMessage: 'Password Filter DLL (T1174)' }
     ),
     id: 'T1174',
@@ -3561,7 +3561,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.passwordPolicyDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.passwordPolicyDiscoveryDescription',
       { defaultMessage: 'Password Policy Discovery (T1201)' }
     ),
     id: 'T1201',
@@ -3572,7 +3572,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.pathInterceptionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.pathInterceptionDescription',
       { defaultMessage: 'Path Interception (T1034)' }
     ),
     id: 'T1034',
@@ -3583,7 +3583,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.peripheralDeviceDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.peripheralDeviceDiscoveryDescription',
       { defaultMessage: 'Peripheral Device Discovery (T1120)' }
     ),
     id: 'T1120',
@@ -3594,7 +3594,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.permissionGroupsDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.permissionGroupsDiscoveryDescription',
       { defaultMessage: 'Permission Groups Discovery (T1069)' }
     ),
     id: 'T1069',
@@ -3605,7 +3605,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.plistModificationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.plistModificationDescription',
       { defaultMessage: 'Plist Modification (T1150)' }
     ),
     id: 'T1150',
@@ -3616,7 +3616,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.portKnockingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.portKnockingDescription',
       { defaultMessage: 'Port Knocking (T1205)' }
     ),
     id: 'T1205',
@@ -3627,7 +3627,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.portMonitorsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.portMonitorsDescription',
       { defaultMessage: 'Port Monitors (T1013)' }
     ),
     id: 'T1013',
@@ -3638,7 +3638,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.powerShellDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.powerShellDescription',
       { defaultMessage: 'PowerShell (T1086)' }
     ),
     id: 'T1086',
@@ -3649,7 +3649,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.powerShellProfileDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.powerShellProfileDescription',
       { defaultMessage: 'PowerShell Profile (T1504)' }
     ),
     id: 'T1504',
@@ -3660,7 +3660,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.privateKeysDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.privateKeysDescription',
       { defaultMessage: 'Private Keys (T1145)' }
     ),
     id: 'T1145',
@@ -3671,7 +3671,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.processDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.processDiscoveryDescription',
       { defaultMessage: 'Process Discovery (T1057)' }
     ),
     id: 'T1057',
@@ -3682,7 +3682,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.processDoppelgangingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.processDoppelgangingDescription',
       { defaultMessage: 'Process Doppelgänging (T1186)' }
     ),
     id: 'T1186',
@@ -3693,7 +3693,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.processHollowingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.processHollowingDescription',
       { defaultMessage: 'Process Hollowing (T1093)' }
     ),
     id: 'T1093',
@@ -3704,7 +3704,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.processInjectionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.processInjectionDescription',
       { defaultMessage: 'Process Injection (T1055)' }
     ),
     id: 'T1055',
@@ -3715,7 +3715,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.queryRegistryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.queryRegistryDescription',
       { defaultMessage: 'Query Registry (T1012)' }
     ),
     id: 'T1012',
@@ -3725,7 +3725,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'queryRegistry',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.rcCommonDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.rcCommonDescription', {
       defaultMessage: 'Rc.common (T1163)',
     }),
     id: 'T1163',
@@ -3736,7 +3736,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.reOpenedApplicationsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.reOpenedApplicationsDescription',
       { defaultMessage: 'Re-opened Applications (T1164)' }
     ),
     id: 'T1164',
@@ -3747,7 +3747,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.redundantAccessDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.redundantAccessDescription',
       { defaultMessage: 'Redundant Access (T1108)' }
     ),
     id: 'T1108',
@@ -3758,7 +3758,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.registryRunKeysStartupFolderDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.registryRunKeysStartupFolderDescription',
       { defaultMessage: 'Registry Run Keys / Startup Folder (T1060)' }
     ),
     id: 'T1060',
@@ -3769,7 +3769,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.regsvcsRegasmDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.regsvcsRegasmDescription',
       { defaultMessage: 'Regsvcs/Regasm (T1121)' }
     ),
     id: 'T1121',
@@ -3779,7 +3779,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'regsvcsRegasm',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.regsvr32Description', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.regsvr32Description', {
       defaultMessage: 'Regsvr32 (T1117)',
     }),
     id: 'T1117',
@@ -3790,7 +3790,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.remoteAccessToolsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.remoteAccessToolsDescription',
       { defaultMessage: 'Remote Access Tools (T1219)' }
     ),
     id: 'T1219',
@@ -3801,7 +3801,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.remoteDesktopProtocolDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.remoteDesktopProtocolDescription',
       { defaultMessage: 'Remote Desktop Protocol (T1076)' }
     ),
     id: 'T1076',
@@ -3812,7 +3812,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.remoteFileCopyDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.remoteFileCopyDescription',
       { defaultMessage: 'Remote File Copy (T1105)' }
     ),
     id: 'T1105',
@@ -3823,7 +3823,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.remoteServicesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.remoteServicesDescription',
       { defaultMessage: 'Remote Services (T1021)' }
     ),
     id: 'T1021',
@@ -3834,7 +3834,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.remoteSystemDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.remoteSystemDiscoveryDescription',
       { defaultMessage: 'Remote System Discovery (T1018)' }
     ),
     id: 'T1018',
@@ -3845,7 +3845,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.replicationThroughRemovableMediaDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.replicationThroughRemovableMediaDescription',
       { defaultMessage: 'Replication Through Removable Media (T1091)' }
     ),
     id: 'T1091',
@@ -3856,7 +3856,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.resourceHijackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.resourceHijackingDescription',
       { defaultMessage: 'Resource Hijacking (T1496)' }
     ),
     id: 'T1496',
@@ -3867,7 +3867,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.revertCloudInstanceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.revertCloudInstanceDescription',
       { defaultMessage: 'Revert Cloud Instance (T1536)' }
     ),
     id: 'T1536',
@@ -3877,7 +3877,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'revertCloudInstance',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.rootkitDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.rootkitDescription', {
       defaultMessage: 'Rootkit (T1014)',
     }),
     id: 'T1014',
@@ -3887,7 +3887,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'rootkit',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.rundll32Description', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.rundll32Description', {
       defaultMessage: 'Rundll32 (T1085)',
     }),
     id: 'T1085',
@@ -3898,7 +3898,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.runtimeDataManipulationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.runtimeDataManipulationDescription',
       { defaultMessage: 'Runtime Data Manipulation (T1494)' }
     ),
     id: 'T1494',
@@ -3909,7 +3909,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.sidHistoryInjectionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.sidHistoryInjectionDescription',
       { defaultMessage: 'SID-History Injection (T1178)' }
     ),
     id: 'T1178',
@@ -3920,7 +3920,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.sipAndTrustProviderHijackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.sipAndTrustProviderHijackingDescription',
       { defaultMessage: 'SIP and Trust Provider Hijacking (T1198)' }
     ),
     id: 'T1198',
@@ -3931,7 +3931,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.sshHijackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.sshHijackingDescription',
       { defaultMessage: 'SSH Hijacking (T1184)' }
     ),
     id: 'T1184',
@@ -3942,7 +3942,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.scheduledTaskDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.scheduledTaskDescription',
       { defaultMessage: 'Scheduled Task (T1053)' }
     ),
     id: 'T1053',
@@ -3953,7 +3953,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.scheduledTransferDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.scheduledTransferDescription',
       { defaultMessage: 'Scheduled Transfer (T1029)' }
     ),
     id: 'T1029',
@@ -3964,7 +3964,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.screenCaptureDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.screenCaptureDescription',
       { defaultMessage: 'Screen Capture (T1113)' }
     ),
     id: 'T1113',
@@ -3975,7 +3975,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.screensaverDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.screensaverDescription',
       { defaultMessage: 'Screensaver (T1180)' }
     ),
     id: 'T1180',
@@ -3985,7 +3985,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'screensaver',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.scriptingDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.scriptingDescription', {
       defaultMessage: 'Scripting (T1064)',
     }),
     id: 'T1064',
@@ -3996,7 +3996,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.securitySoftwareDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.securitySoftwareDiscoveryDescription',
       { defaultMessage: 'Security Software Discovery (T1063)' }
     ),
     id: 'T1063',
@@ -4007,7 +4007,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.securitySupportProviderDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.securitySupportProviderDescription',
       { defaultMessage: 'Security Support Provider (T1101)' }
     ),
     id: 'T1101',
@@ -4018,7 +4018,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.securitydMemoryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.securitydMemoryDescription',
       { defaultMessage: 'Securityd Memory (T1167)' }
     ),
     id: 'T1167',
@@ -4029,7 +4029,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.serverSoftwareComponentDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.serverSoftwareComponentDescription',
       { defaultMessage: 'Server Software Component (T1505)' }
     ),
     id: 'T1505',
@@ -4040,7 +4040,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.serviceExecutionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.serviceExecutionDescription',
       { defaultMessage: 'Service Execution (T1035)' }
     ),
     id: 'T1035',
@@ -4051,7 +4051,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.serviceRegistryPermissionsWeaknessDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.serviceRegistryPermissionsWeaknessDescription',
       { defaultMessage: 'Service Registry Permissions Weakness (T1058)' }
     ),
     id: 'T1058',
@@ -4062,7 +4062,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.serviceStopDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.serviceStopDescription',
       { defaultMessage: 'Service Stop (T1489)' }
     ),
     id: 'T1489',
@@ -4073,7 +4073,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.setuidAndSetgidDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.setuidAndSetgidDescription',
       { defaultMessage: 'Setuid and Setgid (T1166)' }
     ),
     id: 'T1166',
@@ -4084,7 +4084,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.sharedWebrootDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.sharedWebrootDescription',
       { defaultMessage: 'Shared Webroot (T1051)' }
     ),
     id: 'T1051',
@@ -4095,7 +4095,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.shortcutModificationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.shortcutModificationDescription',
       { defaultMessage: 'Shortcut Modification (T1023)' }
     ),
     id: 'T1023',
@@ -4106,7 +4106,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.signedBinaryProxyExecutionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.signedBinaryProxyExecutionDescription',
       { defaultMessage: 'Signed Binary Proxy Execution (T1218)' }
     ),
     id: 'T1218',
@@ -4117,7 +4117,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.signedScriptProxyExecutionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.signedScriptProxyExecutionDescription',
       { defaultMessage: 'Signed Script Proxy Execution (T1216)' }
     ),
     id: 'T1216',
@@ -4128,7 +4128,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.softwareDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.softwareDiscoveryDescription',
       { defaultMessage: 'Software Discovery (T1518)' }
     ),
     id: 'T1518',
@@ -4139,7 +4139,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.softwarePackingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.softwarePackingDescription',
       { defaultMessage: 'Software Packing (T1045)' }
     ),
     id: 'T1045',
@@ -4149,7 +4149,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'softwarePacking',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.sourceDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.sourceDescription', {
       defaultMessage: 'Source (T1153)',
     }),
     id: 'T1153',
@@ -4160,7 +4160,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.spaceAfterFilenameDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.spaceAfterFilenameDescription',
       { defaultMessage: 'Space after Filename (T1151)' }
     ),
     id: 'T1151',
@@ -4171,7 +4171,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.spearphishingAttachmentDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.spearphishingAttachmentDescription',
       { defaultMessage: 'Spearphishing Attachment (T1193)' }
     ),
     id: 'T1193',
@@ -4182,7 +4182,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.spearphishingLinkDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.spearphishingLinkDescription',
       { defaultMessage: 'Spearphishing Link (T1192)' }
     ),
     id: 'T1192',
@@ -4193,7 +4193,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.spearphishingViaServiceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.spearphishingViaServiceDescription',
       { defaultMessage: 'Spearphishing via Service (T1194)' }
     ),
     id: 'T1194',
@@ -4204,7 +4204,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.standardApplicationLayerProtocolDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.standardApplicationLayerProtocolDescription',
       { defaultMessage: 'Standard Application Layer Protocol (T1071)' }
     ),
     id: 'T1071',
@@ -4215,7 +4215,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.standardCryptographicProtocolDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.standardCryptographicProtocolDescription',
       { defaultMessage: 'Standard Cryptographic Protocol (T1032)' }
     ),
     id: 'T1032',
@@ -4226,7 +4226,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.standardNonApplicationLayerProtocolDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.standardNonApplicationLayerProtocolDescription',
       { defaultMessage: 'Standard Non-Application Layer Protocol (T1095)' }
     ),
     id: 'T1095',
@@ -4237,7 +4237,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.startupItemsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.startupItemsDescription',
       { defaultMessage: 'Startup Items (T1165)' }
     ),
     id: 'T1165',
@@ -4248,7 +4248,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.stealApplicationAccessTokenDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.stealApplicationAccessTokenDescription',
       { defaultMessage: 'Steal Application Access Token (T1528)' }
     ),
     id: 'T1528',
@@ -4259,7 +4259,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.stealWebSessionCookieDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.stealWebSessionCookieDescription',
       { defaultMessage: 'Steal Web Session Cookie (T1539)' }
     ),
     id: 'T1539',
@@ -4270,7 +4270,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.storedDataManipulationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.storedDataManipulationDescription',
       { defaultMessage: 'Stored Data Manipulation (T1492)' }
     ),
     id: 'T1492',
@@ -4280,7 +4280,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'storedDataManipulation',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.sudoDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.sudoDescription', {
       defaultMessage: 'Sudo (T1169)',
     }),
     id: 'T1169',
@@ -4291,7 +4291,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.sudoCachingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.sudoCachingDescription',
       { defaultMessage: 'Sudo Caching (T1206)' }
     ),
     id: 'T1206',
@@ -4302,7 +4302,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.supplyChainCompromiseDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.supplyChainCompromiseDescription',
       { defaultMessage: 'Supply Chain Compromise (T1195)' }
     ),
     id: 'T1195',
@@ -4313,7 +4313,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.systemFirmwareDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.systemFirmwareDescription',
       { defaultMessage: 'System Firmware (T1019)' }
     ),
     id: 'T1019',
@@ -4324,7 +4324,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.systemInformationDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.systemInformationDiscoveryDescription',
       { defaultMessage: 'System Information Discovery (T1082)' }
     ),
     id: 'T1082',
@@ -4335,7 +4335,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.systemNetworkConfigurationDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.systemNetworkConfigurationDiscoveryDescription',
       { defaultMessage: 'System Network Configuration Discovery (T1016)' }
     ),
     id: 'T1016',
@@ -4346,7 +4346,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.systemNetworkConnectionsDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.systemNetworkConnectionsDiscoveryDescription',
       { defaultMessage: 'System Network Connections Discovery (T1049)' }
     ),
     id: 'T1049',
@@ -4357,7 +4357,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.systemOwnerUserDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.systemOwnerUserDiscoveryDescription',
       { defaultMessage: 'System Owner/User Discovery (T1033)' }
     ),
     id: 'T1033',
@@ -4368,7 +4368,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.systemServiceDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.systemServiceDiscoveryDescription',
       { defaultMessage: 'System Service Discovery (T1007)' }
     ),
     id: 'T1007',
@@ -4379,7 +4379,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.systemShutdownRebootDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.systemShutdownRebootDescription',
       { defaultMessage: 'System Shutdown/Reboot (T1529)' }
     ),
     id: 'T1529',
@@ -4390,7 +4390,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.systemTimeDiscoveryDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.systemTimeDiscoveryDescription',
       { defaultMessage: 'System Time Discovery (T1124)' }
     ),
     id: 'T1124',
@@ -4401,7 +4401,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.systemdServiceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.systemdServiceDescription',
       { defaultMessage: 'Systemd Service (T1501)' }
     ),
     id: 'T1501',
@@ -4412,7 +4412,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.taintSharedContentDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.taintSharedContentDescription',
       { defaultMessage: 'Taint Shared Content (T1080)' }
     ),
     id: 'T1080',
@@ -4423,7 +4423,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.templateInjectionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.templateInjectionDescription',
       { defaultMessage: 'Template Injection (T1221)' }
     ),
     id: 'T1221',
@@ -4434,7 +4434,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.thirdPartySoftwareDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.thirdPartySoftwareDescription',
       { defaultMessage: 'Third-party Software (T1072)' }
     ),
     id: 'T1072',
@@ -4445,7 +4445,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.timeProvidersDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.timeProvidersDescription',
       { defaultMessage: 'Time Providers (T1209)' }
     ),
     id: 'T1209',
@@ -4455,7 +4455,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'timeProviders',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.timestompDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.timestompDescription', {
       defaultMessage: 'Timestomp (T1099)',
     }),
     id: 'T1099',
@@ -4466,7 +4466,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.transferDataToCloudAccountDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.transferDataToCloudAccountDescription',
       { defaultMessage: 'Transfer Data to Cloud Account (T1537)' }
     ),
     id: 'T1537',
@@ -4477,7 +4477,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.transmittedDataManipulationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.transmittedDataManipulationDescription',
       { defaultMessage: 'Transmitted Data Manipulation (T1493)' }
     ),
     id: 'T1493',
@@ -4487,7 +4487,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'transmittedDataManipulation',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.trapDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.trapDescription', {
       defaultMessage: 'Trap (T1154)',
     }),
     id: 'T1154',
@@ -4498,7 +4498,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.trustedDeveloperUtilitiesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.trustedDeveloperUtilitiesDescription',
       { defaultMessage: 'Trusted Developer Utilities (T1127)' }
     ),
     id: 'T1127',
@@ -4509,7 +4509,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.trustedRelationshipDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.trustedRelationshipDescription',
       { defaultMessage: 'Trusted Relationship (T1199)' }
     ),
     id: 'T1199',
@@ -4520,7 +4520,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.twoFactorAuthenticationInterceptionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.twoFactorAuthenticationInterceptionDescription',
       { defaultMessage: 'Two-Factor Authentication Interception (T1111)' }
     ),
     id: 'T1111',
@@ -4531,7 +4531,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.uncommonlyUsedPortDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.uncommonlyUsedPortDescription',
       { defaultMessage: 'Uncommonly Used Port (T1065)' }
     ),
     id: 'T1065',
@@ -4542,7 +4542,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.unusedUnsupportedCloudRegionsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.unusedUnsupportedCloudRegionsDescription',
       { defaultMessage: 'Unused/Unsupported Cloud Regions (T1535)' }
     ),
     id: 'T1535',
@@ -4553,7 +4553,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.userExecutionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.userExecutionDescription',
       { defaultMessage: 'User Execution (T1204)' }
     ),
     id: 'T1204',
@@ -4564,7 +4564,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.validAccountsDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.validAccountsDescription',
       { defaultMessage: 'Valid Accounts (T1078)' }
     ),
     id: 'T1078',
@@ -4575,7 +4575,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.videoCaptureDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.videoCaptureDescription',
       { defaultMessage: 'Video Capture (T1125)' }
     ),
     id: 'T1125',
@@ -4586,7 +4586,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.virtualizationSandboxEvasionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.virtualizationSandboxEvasionDescription',
       { defaultMessage: 'Virtualization/Sandbox Evasion (T1497)' }
     ),
     id: 'T1497',
@@ -4597,7 +4597,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.webServiceDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.webServiceDescription',
       { defaultMessage: 'Web Service (T1102)' }
     ),
     id: 'T1102',
@@ -4608,7 +4608,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.webSessionCookieDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.webSessionCookieDescription',
       { defaultMessage: 'Web Session Cookie (T1506)' }
     ),
     id: 'T1506',
@@ -4618,7 +4618,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     value: 'webSessionCookie',
   },
   {
-    label: i18n.translate('xpack.siem.detectionEngine.mitreAttackTechniques.webShellDescription', {
+    label: i18n.translate('xpack.securitySolution.detectionEngine.mitreAttackTechniques.webShellDescription', {
       defaultMessage: 'Web Shell (T1100)',
     }),
     id: 'T1100',
@@ -4629,7 +4629,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.windowsAdminSharesDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.windowsAdminSharesDescription',
       { defaultMessage: 'Windows Admin Shares (T1077)' }
     ),
     id: 'T1077',
@@ -4640,7 +4640,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.windowsManagementInstrumentationDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.windowsManagementInstrumentationDescription',
       { defaultMessage: 'Windows Management Instrumentation (T1047)' }
     ),
     id: 'T1047',
@@ -4651,7 +4651,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.windowsManagementInstrumentationEventSubscriptionDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.windowsManagementInstrumentationEventSubscriptionDescription',
       { defaultMessage: 'Windows Management Instrumentation Event Subscription (T1084)' }
     ),
     id: 'T1084',
@@ -4662,7 +4662,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.windowsRemoteManagementDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.windowsRemoteManagementDescription',
       { defaultMessage: 'Windows Remote Management (T1028)' }
     ),
     id: 'T1028',
@@ -4673,7 +4673,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.winlogonHelperDllDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.winlogonHelperDllDescription',
       { defaultMessage: 'Winlogon Helper DLL (T1004)' }
     ),
     id: 'T1004',
@@ -4684,7 +4684,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
   },
   {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.mitreAttackTechniques.xslScriptProcessingDescription',
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.xslScriptProcessingDescription',
       { defaultMessage: 'XSL Script Processing (T1220)' }
     ),
     id: 'T1220',

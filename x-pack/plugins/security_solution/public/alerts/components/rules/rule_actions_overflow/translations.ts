@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const ALL_ACTIONS = i18n.translate(
-  'xpack.siem.detectionEngine.rules.components.ruleActionsOverflow.allActionsTitle',
+  'xpack.securitySolution.detectionEngine.rules.components.ruleActionsOverflow.allActionsTitle',
   {
     defaultMessage: 'All actions',
   }

@@ -15,7 +15,7 @@ export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDe
     return [
       {
         title: i18n.translate(
-          'xpack.siem.endpoint.application.endpoint.alertDetails.hostNameCurrent',
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.hostNameCurrent',
           {
             defaultMessage: 'Host Name (Current)',
           }
@@ -24,7 +24,7 @@ export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDe
       },
       {
         title: i18n.translate(
-          'xpack.siem.endpoint.application.endpoint.alertDetails.hostNameOriginal',
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.hostNameOriginal',
           {
             defaultMessage: 'Host Name (At time of alert)',
           }
@@ -33,7 +33,7 @@ export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDe
       },
       {
         title: i18n.translate(
-          'xpack.siem.endpoint.application.endpoint.alertDetails.hostIPCurrent',
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.hostIPCurrent',
           {
             defaultMessage: 'Host IP (Current)',
           }
@@ -42,7 +42,7 @@ export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDe
       },
       {
         title: i18n.translate(
-          'xpack.siem.endpoint.application.endpoint.alertDetails.hostIPOriginal',
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.hostIPOriginal',
           {
             defaultMessage: 'Host IP (At time of alert)',
           }
@@ -51,7 +51,7 @@ export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDe
       },
       {
         title: i18n.translate(
-          'xpack.siem.endpoint.application.endpoint.alertDetails.currentStatus',
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.currentStatus',
           {
             defaultMessage: 'Current Status',
           }
@@ -60,22 +60,28 @@ export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDe
           <EuiHealth color="success">
             {' '}
             <FormattedMessage
-              id="xpack.siem.endpoint.application.endpoint.alertDetails.endpoint.status.online"
+              id="xpack.securitySolution.endpoint.application.endpoint.alertDetails.endpoint.status.online"
               defaultMessage="Online"
             />
           </EuiHealth>
         ),
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.osCurrent', {
-          defaultMessage: 'OS (Current)',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.osCurrent',
+          {
+            defaultMessage: 'OS (Current)',
+          }
+        ),
         description: alertData.state.host_metadata.host.os.name,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.osOriginal', {
-          defaultMessage: 'OS (At time of alert)',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.osOriginal',
+          {
+            defaultMessage: 'OS (At time of alert)',
+          }
+        ),
         description: alertData.host.os.name,
       },
     ];
@@ -85,7 +91,7 @@ export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDe
     <EuiAccordion
       id="alertDetailsHostAccordion"
       buttonContent={i18n.translate(
-        'xpack.siem.endpoint.application.endpoint.alertDetails.accordionTitles.host',
+        'xpack.securitySolution.endpoint.application.endpoint.alertDetails.accordionTitles.host',
         {
           defaultMessage: 'Host',
         }

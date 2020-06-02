@@ -13,12 +13,12 @@ export const HelpMenu = React.memo(() => {
 
   useEffect(() => {
     chrome.setHelpExtension({
-      appName: i18n.translate('xpack.siem.chrome.help.appName', {
+      appName: i18n.translate('xpack.securitySolution.chrome.help.appName', {
         defaultMessage: 'SIEM',
       }),
       links: [
         {
-          content: i18n.translate('xpack.siem.chrome.helpMenu.documentation', {
+          content: i18n.translate('xpack.securitySolution.chrome.helpMenu.documentation', {
             defaultMessage: 'SIEM documentation',
           }),
           href: docLinks.links.siem.guide,
@@ -28,7 +28,7 @@ export const HelpMenu = React.memo(() => {
           rel: 'noopener',
         },
         {
-          content: i18n.translate('xpack.siem.chrome.helpMenu.documentation.ecs', {
+          content: i18n.translate('xpack.securitySolution.chrome.helpMenu.documentation.ecs', {
             defaultMessage: 'ECS documentation',
           }),
           href: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,

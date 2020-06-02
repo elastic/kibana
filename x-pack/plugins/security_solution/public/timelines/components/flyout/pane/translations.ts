@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const TIMELINE_DESCRIPTION = i18n.translate(
-  'xpack.siem.timeline.flyout.pane.timelinePropertiesAriaLabel',
+  'xpack.securitySolution.timeline.flyout.pane.timelinePropertiesAriaLabel',
   {
     defaultMessage: 'Timeline Properties',
   }

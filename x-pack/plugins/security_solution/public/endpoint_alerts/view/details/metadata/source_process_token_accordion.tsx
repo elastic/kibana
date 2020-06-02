@@ -13,14 +13,17 @@ export const SourceProcessTokenAccordion = memo(
     const columns = useMemo(() => {
       return [
         {
-          title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.sid', {
-            defaultMessage: 'SID',
-          }),
+          title: i18n.translate(
+            'xpack.securitySolution.endpoint.application.endpoint.alertDetails.sid',
+            {
+              defaultMessage: 'SID',
+            }
+          ),
           description: alertData.process.token.sid,
         },
         {
           title: i18n.translate(
-            'xpack.siem.endpoint.application.endpoint.alertDetails.integrityLevel',
+            'xpack.securitySolution.endpoint.application.endpoint.alertDetails.integrityLevel',
             {
               defaultMessage: 'Integrity Level',
             }
@@ -34,7 +37,7 @@ export const SourceProcessTokenAccordion = memo(
       <EuiAccordion
         id="alertDetailsSourceProcessTokenAccordion"
         buttonContent={i18n.translate(
-          'xpack.siem.endpoint.application.endpoint.alertDetails.accordionTitles.sourceProcessToken',
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.accordionTitles.sourceProcessToken',
           {
             defaultMessage: 'Source Process Token',
           }

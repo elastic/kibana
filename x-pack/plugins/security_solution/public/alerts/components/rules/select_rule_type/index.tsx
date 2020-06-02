@@ -34,13 +34,13 @@ const MlCardDescription = ({
       i18n.ML_TYPE_DESCRIPTION
     ) : (
       <FormattedMessage
-        id="xpack.siem.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlTypeDisabledDescription"
+        id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlTypeDisabledDescription"
         defaultMessage="Access to ML requires a {subscriptionsLink}."
         values={{
           subscriptionsLink: (
             <EuiLink href={subscriptionUrl} target="_blank">
               <FormattedMessage
-                id="xpack.siem.components.stepDefineRule.ruleTypeField.subscriptionsLink"
+                id="xpack.securitySolution.components.stepDefineRule.ruleTypeField.subscriptionsLink"
                 defaultMessage="Platinum subscription"
               />
             </EuiLink>

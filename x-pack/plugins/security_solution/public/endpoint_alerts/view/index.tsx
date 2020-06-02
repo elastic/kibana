@@ -40,51 +40,72 @@ export const AlertIndex = memo(() => {
     return [
       {
         id: 'alert_type',
-        display: i18n.translate('xpack.siem.endpoint.application.endpoint.alerts.alertType', {
-          defaultMessage: 'Alert Type',
-        }),
+        display: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alerts.alertType',
+          {
+            defaultMessage: 'Alert Type',
+          }
+        ),
       },
       {
         id: 'event_type',
-        display: i18n.translate('xpack.siem.endpoint.application.endpoint.alerts.eventType', {
-          defaultMessage: 'Event Type',
-        }),
+        display: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alerts.eventType',
+          {
+            defaultMessage: 'Event Type',
+          }
+        ),
       },
       {
         id: 'os',
-        display: i18n.translate('xpack.siem.endpoint.application.endpoint.alerts.os', {
+        display: i18n.translate('xpack.securitySolution.endpoint.application.endpoint.alerts.os', {
           defaultMessage: 'OS',
         }),
       },
       {
         id: 'ip_address',
-        display: i18n.translate('xpack.siem.endpoint.application.endpoint.alerts.ipAddress', {
-          defaultMessage: 'IP Address',
-        }),
+        display: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alerts.ipAddress',
+          {
+            defaultMessage: 'IP Address',
+          }
+        ),
       },
       {
         id: 'host_name',
-        display: i18n.translate('xpack.siem.endpoint.application.endpoint.alerts.hostName', {
-          defaultMessage: 'Host Name',
-        }),
+        display: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alerts.hostName',
+          {
+            defaultMessage: 'Host Name',
+          }
+        ),
       },
       {
         id: 'timestamp',
-        display: i18n.translate('xpack.siem.endpoint.application.endpoint.alerts.timestamp', {
-          defaultMessage: 'Timestamp',
-        }),
+        display: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alerts.timestamp',
+          {
+            defaultMessage: 'Timestamp',
+          }
+        ),
       },
       {
         id: 'archived',
-        display: i18n.translate('xpack.siem.endpoint.application.endpoint.alerts.archived', {
-          defaultMessage: 'Archived',
-        }),
+        display: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alerts.archived',
+          {
+            defaultMessage: 'Archived',
+          }
+        ),
       },
       {
         id: 'malware_score',
-        display: i18n.translate('xpack.siem.endpoint.application.endpoint.alerts.malwareScore', {
-          defaultMessage: 'Malware Score',
-        }),
+        display: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alerts.malwareScore',
+          {
+            defaultMessage: 'Malware Score',
+          }
+        ),
       },
     ];
   }, []);
@@ -148,7 +169,7 @@ export const AlertIndex = memo(() => {
             }
           >
             {i18n.translate(
-              'xpack.siem.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
+              'xpack.securitySolution.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
               {
                 defaultMessage: 'Malicious File',
               }
@@ -171,7 +192,7 @@ export const AlertIndex = memo(() => {
           return (
             <EuiBadge color="warning">
               {i18n.translate(
-                'xpack.siem.endpoint.application.endpoint.alerts.alertDate.timestampInvalidLabel',
+                'xpack.securitySolution.endpoint.application.endpoint.alerts.alertDate.timestampInvalidLabel',
                 {
                   defaultMessage: 'invalid',
                 }
@@ -216,9 +237,12 @@ export const AlertIndex = memo(() => {
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2>
-                {i18n.translate('xpack.siem.endpoint.application.endpoint.alerts.detailsTitle', {
-                  defaultMessage: 'Alert Details',
-                })}
+                {i18n.translate(
+                  'xpack.securitySolution.endpoint.application.endpoint.alerts.detailsTitle',
+                  {
+                    defaultMessage: 'Alert Details',
+                  }
+                )}
               </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
@@ -235,7 +259,7 @@ export const AlertIndex = memo(() => {
                 <EuiTitle size="l">
                   <h1 data-test-subj="alertsViewTitle">
                     <FormattedMessage
-                      id="xpack.siem.endpoint.alertList.viewTitle"
+                      id="xpack.securitySolution.endpoint.alertList.viewTitle"
                       defaultMessage="Alerts"
                     />
                   </h1>

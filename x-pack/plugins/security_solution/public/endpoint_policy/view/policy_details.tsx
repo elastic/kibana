@@ -58,12 +58,15 @@ export const PolicyDetails = React.memo(() => {
       if (policyUpdateStatus.success) {
         notifications.toasts.success({
           toastLifeTimeMs: 10000,
-          title: i18n.translate('xpack.siem.endpoint.policy.details.updateSuccessTitle', {
-            defaultMessage: 'Success!',
-          }),
+          title: i18n.translate(
+            'xpack.securitySolution.endpoint.policy.details.updateSuccessTitle',
+            {
+              defaultMessage: 'Success!',
+            }
+          ),
           body: (
             <FormattedMessage
-              id="xpack.siem.endpoint.policy.details.updateSuccessMessage"
+              id="xpack.securitySolution.endpoint.policy.details.updateSuccessMessage"
               defaultMessage="Policy {name} has been updated."
               values={{ name: policyName }}
             />
@@ -72,7 +75,7 @@ export const PolicyDetails = React.memo(() => {
       } else {
         notifications.toasts.danger({
           toastLifeTimeMs: 10000,
-          title: i18n.translate('xpack.siem.endpoint.policy.details.updateErrorTitle', {
+          title: i18n.translate('xpack.securitySolution.endpoint.policy.details.updateErrorTitle', {
             defaultMessage: 'Failed!',
           }),
           body: <>{policyUpdateStatus.error!.message}</>,
@@ -125,7 +128,7 @@ export const PolicyDetails = React.memo(() => {
         href={`${services.http.basePath.get()}/app/endpoint/policy`}
       >
         <FormattedMessage
-          id="xpack.siem.endpoint.policy.details.backToListTitle"
+          id="xpack.securitySolution.endpoint.policy.details.backToListTitle"
           defaultMessage="Back to policy list"
         />
       </EuiButtonEmpty>
@@ -152,7 +155,7 @@ export const PolicyDetails = React.memo(() => {
           data-test-subj="policyDetailsCancelButton"
         >
           <FormattedMessage
-            id="xpack.siem.endpoint.policy.details.cancel"
+            id="xpack.securitySolution.endpoint.policy.details.cancel"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
@@ -165,7 +168,10 @@ export const PolicyDetails = React.memo(() => {
           onClick={handleSaveOnClick}
           isLoading={isPolicyLoading}
         >
-          <FormattedMessage id="xpack.siem.endpoint.policy.details.save" defaultMessage="Save" />
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policy.details.save"
+            defaultMessage="Save"
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -189,7 +195,7 @@ export const PolicyDetails = React.memo(() => {
         <EuiText size="xs" color="subdued">
           <h4>
             <FormattedMessage
-              id="xpack.siem.endpoint.policy.details.protections"
+              id="xpack.securitySolution.endpoint.policy.details.protections"
               defaultMessage="Protections"
             />
           </h4>
@@ -200,7 +206,7 @@ export const PolicyDetails = React.memo(() => {
         <EuiText size="xs" color="subdued">
           <h4>
             <FormattedMessage
-              id="xpack.siem.endpoint.policy.details.settings"
+              id="xpack.securitySolution.endpoint.policy.details.settings"
               defaultMessage="Settings"
             />
           </h4>
@@ -227,19 +233,22 @@ const ConfirmUpdate = React.memo<{
     <EuiOverlayMask>
       <EuiConfirmModal
         data-test-subj="policyDetailsConfirmModal"
-        title={i18n.translate('xpack.siem.endpoint.policy.details.updateConfirm.title', {
-          defaultMessage: 'Save and deploy changes',
-        })}
+        title={i18n.translate(
+          'xpack.securitySolution.endpoint.policy.details.updateConfirm.title',
+          {
+            defaultMessage: 'Save and deploy changes',
+          }
+        )}
         onCancel={onCancel}
         onConfirm={onConfirm}
         confirmButtonText={i18n.translate(
-          'xpack.siem.endpoint.policy.details.updateConfirm.confirmButtonTitle',
+          'xpack.securitySolution.endpoint.policy.details.updateConfirm.confirmButtonTitle',
           {
             defaultMessage: 'Save and deploy changes',
           }
         )}
         cancelButtonText={i18n.translate(
-          'xpack.siem.endpoint.policy.details.updateConfirm.cancelButtonTitle',
+          'xpack.securitySolution.endpoint.policy.details.updateConfirm.cancelButtonTitle',
           {
             defaultMessage: 'Cancel',
           }
@@ -250,7 +259,7 @@ const ConfirmUpdate = React.memo<{
             <EuiCallOut
               data-test-subj="policyDetailsWarningCallout"
               title={i18n.translate(
-                'xpack.siem.endpoint.policy.details.updateConfirm.warningTitle',
+                'xpack.securitySolution.endpoint.policy.details.updateConfirm.warningTitle',
                 {
                   defaultMessage:
                     'This action will update {hostCount, plural, one {# host} other {# hosts}}',
@@ -259,7 +268,7 @@ const ConfirmUpdate = React.memo<{
               )}
             >
               <FormattedMessage
-                id="xpack.siem.endpoint.policy.details.updateConfirm.warningMessage"
+                id="xpack.securitySolution.endpoint.policy.details.updateConfirm.warningMessage"
                 defaultMessage="Saving these changes will apply the updates to all active endpoints assigned to this policy"
               />
             </EuiCallOut>
@@ -268,7 +277,7 @@ const ConfirmUpdate = React.memo<{
         )}
         <p>
           <FormattedMessage
-            id="xpack.siem.endpoint.policy.details.updateConfirm.message"
+            id="xpack.securitySolution.endpoint.policy.details.updateConfirm.message"
             defaultMessage="This action cannot be undone. Are you sure you wish to continue?"
           />
         </p>

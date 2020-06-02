@@ -6,21 +6,21 @@
 import { i18n } from '@kbn/i18n';
 
 export const ABOUT_PANEL_DETAILS_TAB = i18n.translate(
-  'xpack.siem.detectionEngine.details.stepAboutRule.detailsLabel',
+  'xpack.securitySolution.detectionEngine.details.stepAboutRule.detailsLabel',
   {
     defaultMessage: 'Details',
   }
 );
 
 export const ABOUT_TEXT = i18n.translate(
-  'xpack.siem.detectionEngine.details.stepAboutRule.aboutText',
+  'xpack.securitySolution.detectionEngine.details.stepAboutRule.aboutText',
   {
     defaultMessage: 'About',
   }
 );
 
 export const ABOUT_PANEL_NOTES_TAB = i18n.translate(
-  'xpack.siem.detectionEngine.details.stepAboutRule.investigationGuideLabel',
+  'xpack.securitySolution.detectionEngine.details.stepAboutRule.investigationGuideLabel',
   {
     defaultMessage: 'Investigation guide',
   }

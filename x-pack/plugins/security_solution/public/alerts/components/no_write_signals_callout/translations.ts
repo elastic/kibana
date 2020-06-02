@@ -7,14 +7,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const NO_WRITE_SIGNALS_CALLOUT_TITLE = i18n.translate(
-  'xpack.siem.detectionEngine.noWriteSignalsCallOutTitle',
+  'xpack.securitySolution.detectionEngine.noWriteSignalsCallOutTitle',
   {
     defaultMessage: 'Signals index permissions required',
   }
 );
 
 export const NO_WRITE_SIGNALS_CALLOUT_MSG = i18n.translate(
-  'xpack.siem.detectionEngine.noWriteSignalsCallOutMsg',
+  'xpack.securitySolution.detectionEngine.noWriteSignalsCallOutMsg',
   {
     defaultMessage:
       'You are currently missing the required permissions to update signals. Please contact your administrator for further assistance.',
@@ -22,7 +22,7 @@ export const NO_WRITE_SIGNALS_CALLOUT_MSG = i18n.translate(
 );
 
 export const DISMISS_CALLOUT = i18n.translate(
-  'xpack.siem.detectionEngine.dismissNoWriteSignalButton',
+  'xpack.securitySolution.detectionEngine.dismissNoWriteSignalButton',
   {
     defaultMessage: 'Dismiss',
   }

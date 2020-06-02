@@ -13,32 +13,44 @@ export const GeneralAccordion = memo(({ alertData }: { alertData: Immutable<Aler
   const columns = useMemo(() => {
     return [
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.alertType', {
-          defaultMessage: 'Alert Type',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.alertType',
+          {
+            defaultMessage: 'Alert Type',
+          }
+        ),
         description: alertData.event.category,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.eventType', {
-          defaultMessage: 'Event Type',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.eventType',
+          {
+            defaultMessage: 'Event Type',
+          }
+        ),
         description: alertData.event.kind,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.status', {
-          defaultMessage: 'Status',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.status',
+          {
+            defaultMessage: 'Status',
+          }
+        ),
         description: 'TODO',
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.dateCreated', {
-          defaultMessage: 'Date Created',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.dateCreated',
+          {
+            defaultMessage: 'Date Created',
+          }
+        ),
         description: <FormattedDate timestamp={alertData['@timestamp']} />,
       },
       {
         title: i18n.translate(
-          'xpack.siem.endpoint.application.endpoint.alertDetails.malwareScore',
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.malwareScore',
           {
             defaultMessage: 'MalwareScore',
           }
@@ -46,9 +58,12 @@ export const GeneralAccordion = memo(({ alertData }: { alertData: Immutable<Aler
         description: alertData.file.malware_classification.score,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.fileName', {
-          defaultMessage: 'File Name',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.fileName',
+          {
+            defaultMessage: 'File Name',
+          }
+        ),
         description: alertData.file.name,
       },
     ];
@@ -57,7 +72,7 @@ export const GeneralAccordion = memo(({ alertData }: { alertData: Immutable<Aler
     <EuiAccordion
       id="alertDetailsAlertAccordion"
       buttonContent={i18n.translate(
-        'xpack.siem.endpoint.application.endpoint.alertDetails.accordionTitles.alert',
+        'xpack.securitySolution.endpoint.application.endpoint.alertDetails.accordionTitles.alert',
         {
           defaultMessage: 'Alert',
         }

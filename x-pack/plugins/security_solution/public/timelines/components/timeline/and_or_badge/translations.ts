@@ -6,10 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const AND = i18n.translate('xpack.siem.andOrBadge.and', {
+export const AND = i18n.translate('xpack.securitySolution.andOrBadge.and', {
   defaultMessage: 'AND',
 });
 
-export const OR = i18n.translate('xpack.siem.andOrBadge.or', {
+export const OR = i18n.translate('xpack.securitySolution.andOrBadge.or', {
   defaultMessage: 'OR',
 });

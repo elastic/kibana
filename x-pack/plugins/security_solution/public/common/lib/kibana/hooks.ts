@@ -60,7 +60,7 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
           }
         } else {
           setUser({
-            username: i18n.translate('xpack.siem.getCurrentUser.unknownUser', {
+            username: i18n.translate('xpack.securitySolution.getCurrentUser.unknownUser', {
               defaultMessage: 'Unknown',
             }),
             email: '',
@@ -75,7 +75,7 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
       } catch (error) {
         if (!didCancel) {
           errorToToaster({
-            title: i18n.translate('xpack.siem.getCurrentUser.Error', {
+            title: i18n.translate('xpack.securitySolution.getCurrentUser.Error', {
               defaultMessage: 'Error getting user',
             }),
             error: error.body && error.body.message ? new Error(error.body.message) : error,

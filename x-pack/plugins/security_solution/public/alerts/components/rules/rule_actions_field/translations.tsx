@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const FORM_ERRORS_TITLE = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.ruleActionsField.ruleActionsFormErrorsTitle',
+  'xpack.securitySolution.detectionEngine.createRule.ruleActionsField.ruleActionsFormErrorsTitle',
   {
     defaultMessage: 'Please fix issues listed below',
   }

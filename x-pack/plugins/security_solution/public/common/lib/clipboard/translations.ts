@@ -6,18 +6,24 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const COPY = i18n.translate('xpack.siem.clipboard.copy', {
+export const COPY = i18n.translate('xpack.securitySolution.clipboard.copy', {
   defaultMessage: 'Copy',
 });
 
-export const COPIED = i18n.translate('xpack.siem.clipboard.copied', {
+export const COPIED = i18n.translate('xpack.securitySolution.clipboard.copied', {
   defaultMessage: 'Copied',
 });
 
-export const TO_THE_CLIPBOARD = i18n.translate('xpack.siem.clipboard.to.the.clipboard', {
-  defaultMessage: 'to the clipboard',
-});
+export const TO_THE_CLIPBOARD = i18n.translate(
+  'xpack.securitySolution.clipboard.to.the.clipboard',
+  {
+    defaultMessage: 'to the clipboard',
+  }
+);
 
-export const COPY_TO_THE_CLIPBOARD = i18n.translate('xpack.siem.clipboard.copy.to.the.clipboard', {
-  defaultMessage: 'Copy to the clipboard',
-});
+export const COPY_TO_THE_CLIPBOARD = i18n.translate(
+  'xpack.securitySolution.clipboard.copy.to.the.clipboard',
+  {
+    defaultMessage: 'Copy to the clipboard',
+  }
+);

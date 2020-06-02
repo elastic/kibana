@@ -24,7 +24,7 @@ export class ResolverEmbeddableFactory implements EmbeddableFactoryDefinition {
   }
 
   public getDisplayName() {
-    return i18n.translate('xpack.siem.endpoint.resolver.displayNameTitle', {
+    return i18n.translate('xpack.securitySolution.endpoint.resolver.displayNameTitle', {
       defaultMessage: 'Resolver',
     });
   }

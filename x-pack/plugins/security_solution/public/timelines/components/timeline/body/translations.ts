@@ -7,38 +7,47 @@
 import { i18n } from '@kbn/i18n';
 
 export const NOTES_TOOLTIP = i18n.translate(
-  'xpack.siem.timeline.body.notes.addOrViewNotesForThisEventTooltip',
+  'xpack.securitySolution.timeline.body.notes.addOrViewNotesForThisEventTooltip',
   {
     defaultMessage: 'Add or view notes for this event',
   }
 );
 
 export const COPY_TO_CLIPBOARD = i18n.translate(
-  'xpack.siem.timeline.body.copyToClipboardButtonLabel',
+  'xpack.securitySolution.timeline.body.copyToClipboardButtonLabel',
   {
     defaultMessage: 'Copy to Clipboard',
   }
 );
 
-export const UNPINNED = i18n.translate('xpack.siem.timeline.body.pinning.unpinnedTooltip', {
-  defaultMessage: 'Unpinned event',
-});
+export const UNPINNED = i18n.translate(
+  'xpack.securitySolution.timeline.body.pinning.unpinnedTooltip',
+  {
+    defaultMessage: 'Unpinned event',
+  }
+);
 
-export const PINNED = i18n.translate('xpack.siem.timeline.body.pinning.pinnedTooltip', {
+export const PINNED = i18n.translate('xpack.securitySolution.timeline.body.pinning.pinnedTooltip', {
   defaultMessage: 'Pinned event',
 });
 
 export const PINNED_WITH_NOTES = i18n.translate(
-  'xpack.siem.timeline.body.pinning.pinnnedWithNotesTooltip',
+  'xpack.securitySolution.timeline.body.pinning.pinnnedWithNotesTooltip',
   {
     defaultMessage: 'This event cannot be unpinned because it has notes',
   }
 );
 
-export const EXPAND = i18n.translate('xpack.siem.timeline.body.actions.expandAriaLabel', {
-  defaultMessage: 'Expand',
-});
+export const EXPAND = i18n.translate(
+  'xpack.securitySolution.timeline.body.actions.expandAriaLabel',
+  {
+    defaultMessage: 'Expand',
+  }
+);
 
-export const COLLAPSE = i18n.translate('xpack.siem.timeline.body.actions.collapseAriaLabel', {
-  defaultMessage: 'Collapse',
-});
+export const COLLAPSE = i18n.translate(
+  'xpack.securitySolution.timeline.body.actions.collapseAriaLabel',
+  {
+    defaultMessage: 'Collapse',
+  }
+);

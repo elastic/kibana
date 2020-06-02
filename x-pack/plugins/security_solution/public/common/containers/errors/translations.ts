@@ -7,12 +7,15 @@
 import { i18n } from '@kbn/i18n';
 
 export const DATA_FETCH_FAILURE = i18n.translate(
-  'xpack.siem.containers.errors.dataFetchFailureTitle',
+  'xpack.securitySolution.containers.errors.dataFetchFailureTitle',
   {
     defaultMessage: 'Data Fetch Failure',
   }
 );
 
-export const NETWORK_FAILURE = i18n.translate('xpack.siem.containers.errors.networkFailureTitle', {
-  defaultMessage: 'Network Failure',
-});
+export const NETWORK_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.errors.networkFailureTitle',
+  {
+    defaultMessage: 'Network Failure',
+  }
+);

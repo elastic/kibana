@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const JA3_FINGERPRINT_LABEL = i18n.translate(
-  'xpack.siem.ja3.fingerprint.ja3.fingerprintLabel',
+  'xpack.securitySolution.ja3.fingerprint.ja3.fingerprintLabel',
   {
     defaultMessage: 'ja3',
   }

@@ -27,23 +27,32 @@ export const MacEvents = React.memo(() => {
       protectionField: keyof UIPolicyConfig['mac']['events'];
     }> = [
       {
-        name: i18n.translate('xpack.siem.endpoint.policyDetailsConfig.mac.events.file', {
-          defaultMessage: 'File',
-        }),
+        name: i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.file',
+          {
+            defaultMessage: 'File',
+          }
+        ),
         os: OS.mac,
         protectionField: 'file',
       },
       {
-        name: i18n.translate('xpack.siem.endpoint.policyDetailsConfig.mac.events.process', {
-          defaultMessage: 'Process',
-        }),
+        name: i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.process',
+          {
+            defaultMessage: 'Process',
+          }
+        ),
         os: OS.mac,
         protectionField: 'process',
       },
       {
-        name: i18n.translate('xpack.siem.endpoint.policyDetailsConfig.mac.events.network', {
-          defaultMessage: 'Network',
-        }),
+        name: i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.network',
+          {
+            defaultMessage: 'Network',
+          }
+        ),
         os: OS.mac,
         protectionField: 'network',
       },
@@ -53,7 +62,7 @@ export const MacEvents = React.memo(() => {
         <EuiTitle size="xxs">
           <h5>
             <FormattedMessage
-              id="xpack.siem.endpoint.policyDetailsConfig.eventingEvents"
+              id="xpack.securitySolution.endpoint.policyDetailsConfig.eventingEvents"
               defaultMessage="Events"
             />
           </h5>
@@ -79,7 +88,7 @@ export const MacEvents = React.memo(() => {
     return (
       <EuiText size="s" color="subdued">
         <FormattedMessage
-          id="xpack.siem.endpoint.policy.details.eventCollectionsEnabled"
+          id="xpack.securitySolution.endpoint.policy.details.eventCollectionsEnabled"
           defaultMessage="{selected} / {total} event collections enabled"
           values={{ selected, total }}
         />
@@ -89,13 +98,16 @@ export const MacEvents = React.memo(() => {
 
   return (
     <ConfigForm
-      type={i18n.translate('xpack.siem.endpoint.policy.details.eventCollection', {
+      type={i18n.translate('xpack.securitySolution.endpoint.policy.details.eventCollection', {
         defaultMessage: 'Event Collection',
       })}
-      description={i18n.translate('xpack.siem.endpoint.policy.details.eventCollectionLabel', {
-        defaultMessage: 'Event Collection',
-      })}
-      supportedOss={i18n.translate('xpack.siem.endpoint.policy.details.mac', {
+      description={i18n.translate(
+        'xpack.securitySolution.endpoint.policy.details.eventCollectionLabel',
+        {
+          defaultMessage: 'Event Collection',
+        }
+      )}
+      supportedOss={i18n.translate('xpack.securitySolution.endpoint.policy.details.mac', {
         defaultMessage: 'Mac',
       })}
       dataTestSubj="macEventingForm"

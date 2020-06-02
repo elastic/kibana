@@ -25,7 +25,7 @@ export const schema: FormSchema = {
   index: {
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel',
       {
         defaultMessage: 'Index patterns',
       }
@@ -45,7 +45,7 @@ export const schema: FormSchema = {
 
           return fieldValidators.emptyField(
             i18n.translate(
-              'xpack.siem.detectionEngine.createRule.stepDefineRule.outputIndiceNameFieldRequiredError',
+              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.outputIndiceNameFieldRequiredError',
               {
                 defaultMessage: 'A minimum of one index pattern is required.',
               }
@@ -57,7 +57,7 @@ export const schema: FormSchema = {
   },
   queryBar: {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepDefineRule.fieldQuerBarLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldQuerBarLabel',
       {
         defaultMessage: 'Custom query',
       }
@@ -111,7 +111,7 @@ export const schema: FormSchema = {
   },
   ruleType: {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepDefineRule.fieldRuleTypeLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldRuleTypeLabel',
       {
         defaultMessage: 'Rule type',
       }
@@ -120,7 +120,7 @@ export const schema: FormSchema = {
   },
   anomalyThreshold: {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepDefineRule.fieldAnomalyThresholdLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldAnomalyThresholdLabel',
       {
         defaultMessage: 'Anomaly score threshold',
       }
@@ -129,7 +129,7 @@ export const schema: FormSchema = {
   },
   machineLearningJobId: {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepDefineRule.fieldMachineLearningJobIdLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldMachineLearningJobIdLabel',
       {
         defaultMessage: 'Machine Learning job',
       }
@@ -148,7 +148,7 @@ export const schema: FormSchema = {
 
           return fieldValidators.emptyField(
             i18n.translate(
-              'xpack.siem.detectionEngine.createRule.stepDefineRule.machineLearningJobIdRequired',
+              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningJobIdRequired',
               {
                 defaultMessage: 'A Machine Learning job is required.',
               }
@@ -160,13 +160,13 @@ export const schema: FormSchema = {
   },
   timeline: {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateLabel',
       {
         defaultMessage: 'Timeline template',
       }
     ),
     helpText: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateHelpText',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateHelpText',
       {
         defaultMessage: 'Select which timeline to use when investigating generated signals.',
       }

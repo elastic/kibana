@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const CANCEL_BUTTON = i18n.translate(
-  'xpack.siem.detectionEngine.components.importRuleModal.cancelTitle',
+  'xpack.securitySolution.detectionEngine.components.importRuleModal.cancelTitle',
   {
     defaultMessage: 'Cancel',
   }

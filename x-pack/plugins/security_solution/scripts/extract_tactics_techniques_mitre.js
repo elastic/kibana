@@ -23,7 +23,7 @@ const getTacticsOptions = (tactics) =>
   name: '${t.name}',
   reference: '${t.reference}',
   text: i18n.translate(
-    'xpack.siem.detectionEngine.mitreAttackTactics.${camelCase(t.name)}Description', {
+    'xpack.securitySolution.detectionEngine.mitreAttackTactics.${camelCase(t.name)}Description', {
       defaultMessage: '${t.name} (${t.id})'
   }),
   value: '${camelCase(t.name)}'
@@ -34,7 +34,9 @@ const getTechniquesOptions = (techniques) =>
   techniques.map((t) =>
     `{
   label: i18n.translate(
-    'xpack.siem.detectionEngine.mitreAttackTechniques.${camelCase(t.name)}Description', {
+    'xpack.securitySolution.detectionEngine.mitreAttackTechniques.${camelCase(
+      t.name
+    )}Description', {
       defaultMessage: '${t.name} (${t.id})'
   }),
   id: '${t.id}',

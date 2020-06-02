@@ -6,41 +6,50 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const FILTERS_LABEL = i18n.translate('xpack.siem.detectionEngine.createRule.filtersLabel', {
-  defaultMessage: 'Filters',
-});
+export const FILTERS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.filtersLabel',
+  {
+    defaultMessage: 'Filters',
+  }
+);
 
-export const QUERY_LABEL = i18n.translate('xpack.siem.detectionEngine.createRule.QueryLabel', {
-  defaultMessage: 'Custom query',
-});
+export const QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.QueryLabel',
+  {
+    defaultMessage: 'Custom query',
+  }
+);
 
-export const SAVED_ID_LABEL = i18n.translate('xpack.siem.detectionEngine.createRule.savedIdLabel', {
-  defaultMessage: 'Saved query name',
-});
+export const SAVED_ID_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.savedIdLabel',
+  {
+    defaultMessage: 'Saved query name',
+  }
+);
 
 export const ML_TYPE_DESCRIPTION = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.mlRuleTypeDescription',
+  'xpack.securitySolution.detectionEngine.createRule.mlRuleTypeDescription',
   {
     defaultMessage: 'Machine Learning',
   }
 );
 
 export const QUERY_TYPE_DESCRIPTION = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.queryRuleTypeDescription',
+  'xpack.securitySolution.detectionEngine.createRule.queryRuleTypeDescription',
   {
     defaultMessage: 'Query',
   }
 );
 
 export const ML_JOB_STARTED = i18n.translate(
-  'xpack.siem.detectionEngine.ruleDescription.mlJobStartedDescription',
+  'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStartedDescription',
   {
     defaultMessage: 'Started',
   }
 );
 
 export const ML_JOB_STOPPED = i18n.translate(
-  'xpack.siem.detectionEngine.ruleDescription.mlJobStoppedDescription',
+  'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStoppedDescription',
   {
     defaultMessage: 'Stopped',
   }

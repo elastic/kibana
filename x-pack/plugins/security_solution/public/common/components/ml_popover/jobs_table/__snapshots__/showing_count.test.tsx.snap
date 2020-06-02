@@ -11,7 +11,7 @@ exports[`ShowingCount renders correctly against snapshot 1`] = `
     <FormattedMessage
       data-test-subj="query-message"
       defaultMessage="Showing: {filterResultsLength} {filterResultsLength, plural, one {job} other {jobs}}"
-      id="xpack.siem.components.mlPopup.showingLabel"
+      id="xpack.securitySolution.components.mlPopup.showingLabel"
       values={
         Object {
           "filterResultsLength": 2,

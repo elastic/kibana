@@ -7,32 +7,32 @@
 import { i18n } from '@kbn/i18n';
 
 export const ASKED_FOR = i18n.translate(
-  'xpack.siem.timeline.body.renderers.dns.askedForDescription',
+  'xpack.securitySolution.timeline.body.renderers.dns.askedForDescription',
   {
     defaultMessage: 'asked for',
   }
 );
 
 export const RESPONSE_CODE = i18n.translate(
-  'xpack.siem.timeline.body.renderers.dns.responseCodeDescription',
+  'xpack.securitySolution.timeline.body.renderers.dns.responseCodeDescription',
   {
     defaultMessage: 'response code:',
   }
 );
 
-export const VIA = i18n.translate('xpack.siem.timeline.body.renderers.dns.viaDescription', {
+export const VIA = i18n.translate('xpack.securitySolution.timeline.body.renderers.dns.viaDescription', {
   defaultMessage: 'via',
 });
 
 export const WHICH_RESOLVED_TO = i18n.translate(
-  'xpack.siem.timeline.body.renderers.dns.whichResolvedToDescription',
+  'xpack.securitySolution.timeline.body.renderers.dns.whichResolvedToDescription',
   {
     defaultMessage: ', which resolved to',
   }
 );
 
 export const WITH_QUESTION_TYPE = i18n.translate(
-  'xpack.siem.timeline.body.renderers.dns.withQuestionTypeDescription',
+  'xpack.securitySolution.timeline.body.renderers.dns.withQuestionTypeDescription',
   {
     defaultMessage: 'with question type',
   }

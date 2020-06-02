@@ -8,27 +8,36 @@ import { i18n } from '@kbn/i18n';
 
 export * from '../translations';
 
-export const JIRA_DESC = i18n.translate('xpack.siem.case.connectors.jira.selectMessageText', {
-  defaultMessage: 'Push or update SIEM case data to a new issue in Jira',
-});
+export const JIRA_DESC = i18n.translate(
+  'xpack.securitySolution.case.connectors.jira.selectMessageText',
+  {
+    defaultMessage: 'Push or update SIEM case data to a new issue in Jira',
+  }
+);
 
-export const JIRA_TITLE = i18n.translate('xpack.siem.case.connectors.jira.actionTypeTitle', {
-  defaultMessage: 'Jira',
-});
+export const JIRA_TITLE = i18n.translate(
+  'xpack.securitySolution.case.connectors.jira.actionTypeTitle',
+  {
+    defaultMessage: 'Jira',
+  }
+);
 
-export const JIRA_PROJECT_KEY_LABEL = i18n.translate('xpack.siem.case.connectors.jira.projectKey', {
-  defaultMessage: 'Project key',
-});
+export const JIRA_PROJECT_KEY_LABEL = i18n.translate(
+  'xpack.securitySolution.case.connectors.jira.projectKey',
+  {
+    defaultMessage: 'Project key',
+  }
+);
 
 export const JIRA_PROJECT_KEY_REQUIRED = i18n.translate(
-  'xpack.siem.case.connectors.jira.requiredProjectKeyTextField',
+  'xpack.securitySolution.case.connectors.jira.requiredProjectKeyTextField',
   {
     defaultMessage: 'Project key is required',
   }
 );
 
 export const MAPPING_FIELD_SUMMARY = i18n.translate(
-  'xpack.siem.case.configureCases.mappingFieldSummary',
+  'xpack.securitySolution.case.configureCases.mappingFieldSummary',
   {
     defaultMessage: 'Summary',
   }

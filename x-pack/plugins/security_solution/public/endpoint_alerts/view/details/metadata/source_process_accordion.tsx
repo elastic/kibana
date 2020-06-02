@@ -12,44 +12,62 @@ export const SourceProcessAccordion = memo(({ alertData }: { alertData: Immutabl
   const columns = useMemo(() => {
     return [
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.processID', {
-          defaultMessage: 'Process ID',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.processID',
+          {
+            defaultMessage: 'Process ID',
+          }
+        ),
         description: alertData.process.pid,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.processName', {
-          defaultMessage: 'Process Name',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.processName',
+          {
+            defaultMessage: 'Process Name',
+          }
+        ),
         description: alertData.process.name,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.processPath', {
-          defaultMessage: 'Process Path',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.processPath',
+          {
+            defaultMessage: 'Process Path',
+          }
+        ),
         description: alertData.process.executable,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.md5', {
-          defaultMessage: 'MD5',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.md5',
+          {
+            defaultMessage: 'MD5',
+          }
+        ),
         description: alertData.process.hash.md5,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.sha1', {
-          defaultMessage: 'SHA1',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.sha1',
+          {
+            defaultMessage: 'SHA1',
+          }
+        ),
         description: alertData.process.hash.sha1,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.sha256', {
-          defaultMessage: 'SHA256',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.sha256',
+          {
+            defaultMessage: 'SHA256',
+          }
+        ),
         description: alertData.process.hash.sha256,
       },
       {
         title: i18n.translate(
-          'xpack.siem.endpoint.application.endpoint.alertDetails.malwareScore',
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.malwareScore',
           {
             defaultMessage: 'MalwareScore',
           }
@@ -58,7 +76,7 @@ export const SourceProcessAccordion = memo(({ alertData }: { alertData: Immutabl
       },
       {
         title: i18n.translate(
-          'xpack.siem.endpoint.application.endpoint.alertDetails.parentProcessID',
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.parentProcessID',
           {
             defaultMessage: 'Parent Process ID',
           }
@@ -66,21 +84,30 @@ export const SourceProcessAccordion = memo(({ alertData }: { alertData: Immutabl
         description: alertData.process.parent?.pid || '-',
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.signer', {
-          defaultMessage: 'Signer',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.signer',
+          {
+            defaultMessage: 'Signer',
+          }
+        ),
         description: alertData.process.code_signature.subject_name,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.username', {
-          defaultMessage: 'Username',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.username',
+          {
+            defaultMessage: 'Username',
+          }
+        ),
         description: alertData.process.token.user,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.domain', {
-          defaultMessage: 'Domain',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.application.endpoint.alertDetails.domain',
+          {
+            defaultMessage: 'Domain',
+          }
+        ),
         description: alertData.process.token.domain,
       },
     ];
@@ -90,7 +117,7 @@ export const SourceProcessAccordion = memo(({ alertData }: { alertData: Immutabl
     <EuiAccordion
       id="alertDetailsSourceProcessAccordion"
       buttonContent={i18n.translate(
-        'xpack.siem.endpoint.application.endpoint.alertDetails.accordionTitles.sourceProcess',
+        'xpack.securitySolution.endpoint.application.endpoint.alertDetails.accordionTitles.sourceProcess',
         {
           defaultMessage: 'Source Process',
         }

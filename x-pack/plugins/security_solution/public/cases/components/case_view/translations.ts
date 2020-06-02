@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export * from '../../translations';
 
 export const SHOWING_CASES = (actionDate: string, actionName: string, userName: string) =>
-  i18n.translate('xpack.siem.case.caseView.actionHeadline', {
+  i18n.translate('xpack.securitySolution.case.caseView.actionHeadline', {
     values: {
       actionDate,
       actionName,
@@ -18,16 +18,22 @@ export const SHOWING_CASES = (actionDate: string, actionName: string, userName: 
     defaultMessage: '{userName} {actionName} on {actionDate}',
   });
 
-export const ADDED_FIELD = i18n.translate('xpack.siem.case.caseView.actionLabel.addedField', {
-  defaultMessage: 'added',
-});
+export const ADDED_FIELD = i18n.translate(
+  'xpack.securitySolution.case.caseView.actionLabel.addedField',
+  {
+    defaultMessage: 'added',
+  }
+);
 
-export const CHANGED_FIELD = i18n.translate('xpack.siem.case.caseView.actionLabel.changededField', {
-  defaultMessage: 'changed',
-});
+export const CHANGED_FIELD = i18n.translate(
+  'xpack.securitySolution.case.caseView.actionLabel.changededField',
+  {
+    defaultMessage: 'changed',
+  }
+);
 
 export const SELECTED_THIRD_PARTY = (thirdParty: string) =>
-  i18n.translate('xpack.siem.case.caseView.actionLabel.selectedThirdParty', {
+  i18n.translate('xpack.securitySolution.case.caseView.actionLabel.selectedThirdParty', {
     values: {
       thirdParty,
     },
@@ -35,22 +41,28 @@ export const SELECTED_THIRD_PARTY = (thirdParty: string) =>
   });
 
 export const REMOVED_THIRD_PARTY = i18n.translate(
-  'xpack.siem.case.caseView.actionLabel.removedThirdParty',
+  'xpack.securitySolution.case.caseView.actionLabel.removedThirdParty',
   {
     defaultMessage: 'removed external incident management system',
   }
 );
 
-export const EDITED_FIELD = i18n.translate('xpack.siem.case.caseView.actionLabel.editedField', {
-  defaultMessage: 'edited',
-});
+export const EDITED_FIELD = i18n.translate(
+  'xpack.securitySolution.case.caseView.actionLabel.editedField',
+  {
+    defaultMessage: 'edited',
+  }
+);
 
-export const REMOVED_FIELD = i18n.translate('xpack.siem.case.caseView.actionLabel.removedField', {
-  defaultMessage: 'removed',
-});
+export const REMOVED_FIELD = i18n.translate(
+  'xpack.securitySolution.case.caseView.actionLabel.removedField',
+  {
+    defaultMessage: 'removed',
+  }
+);
 
 export const VIEW_INCIDENT = (incidentNumber: string) =>
-  i18n.translate('xpack.siem.case.caseView.actionLabel.viewIncident', {
+  i18n.translate('xpack.securitySolution.case.caseView.actionLabel.viewIncident', {
     defaultMessage: 'View {incidentNumber}',
     values: {
       incidentNumber,
@@ -58,81 +70,87 @@ export const VIEW_INCIDENT = (incidentNumber: string) =>
   });
 
 export const PUSHED_NEW_INCIDENT = i18n.translate(
-  'xpack.siem.case.caseView.actionLabel.pushedNewIncident',
+  'xpack.securitySolution.case.caseView.actionLabel.pushedNewIncident',
   {
     defaultMessage: 'pushed as new incident',
   }
 );
 
 export const UPDATE_INCIDENT = i18n.translate(
-  'xpack.siem.case.caseView.actionLabel.updateIncident',
+  'xpack.securitySolution.case.caseView.actionLabel.updateIncident',
   {
     defaultMessage: 'updated incident',
   }
 );
 
 export const ADDED_DESCRIPTION = i18n.translate(
-  'xpack.siem.case.caseView.actionLabel.addDescription',
+  'xpack.securitySolution.case.caseView.actionLabel.addDescription',
   {
     defaultMessage: 'added description',
   }
 );
 
-export const EDIT_DESCRIPTION = i18n.translate('xpack.siem.case.caseView.edit.description', {
-  defaultMessage: 'Edit description',
-});
+export const EDIT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.case.caseView.edit.description',
+  {
+    defaultMessage: 'Edit description',
+  }
+);
 
-export const QUOTE = i18n.translate('xpack.siem.case.caseView.edit.quote', {
+export const QUOTE = i18n.translate('xpack.securitySolution.case.caseView.edit.quote', {
   defaultMessage: 'Quote',
 });
 
-export const EDIT_COMMENT = i18n.translate('xpack.siem.case.caseView.edit.comment', {
+export const EDIT_COMMENT = i18n.translate('xpack.securitySolution.case.caseView.edit.comment', {
   defaultMessage: 'Edit comment',
 });
 
-export const ON = i18n.translate('xpack.siem.case.caseView.actionLabel.on', {
+export const ON = i18n.translate('xpack.securitySolution.case.caseView.actionLabel.on', {
   defaultMessage: 'on',
 });
 
-export const ADDED_COMMENT = i18n.translate('xpack.siem.case.caseView.actionLabel.addComment', {
-  defaultMessage: 'added comment',
-});
+export const ADDED_COMMENT = i18n.translate(
+  'xpack.securitySolution.case.caseView.actionLabel.addComment',
+  {
+    defaultMessage: 'added comment',
+  }
+);
 
-export const STATUS = i18n.translate('xpack.siem.case.caseView.statusLabel', {
+export const STATUS = i18n.translate('xpack.securitySolution.case.caseView.statusLabel', {
   defaultMessage: 'Status',
 });
 
-export const CASE = i18n.translate('xpack.siem.case.caseView.case', {
+export const CASE = i18n.translate('xpack.securitySolution.case.caseView.case', {
   defaultMessage: 'case',
 });
 
-export const COMMENT = i18n.translate('xpack.siem.case.caseView.comment', {
+export const COMMENT = i18n.translate('xpack.securitySolution.case.caseView.comment', {
   defaultMessage: 'comment',
 });
 
-export const CASE_OPENED = i18n.translate('xpack.siem.case.caseView.caseOpened', {
+export const CASE_OPENED = i18n.translate('xpack.securitySolution.case.caseView.caseOpened', {
   defaultMessage: 'Case opened',
 });
 
-export const CASE_CLOSED = i18n.translate('xpack.siem.case.caseView.caseClosed', {
+export const CASE_CLOSED = i18n.translate('xpack.securitySolution.case.caseView.caseClosed', {
   defaultMessage: 'Case closed',
 });
 
-export const CASE_REFRESH = i18n.translate('xpack.siem.case.caseView.caseRefresh', {
+export const CASE_REFRESH = i18n.translate('xpack.securitySolution.case.caseView.caseRefresh', {
   defaultMessage: 'Refresh case',
 });
 
 export const EMAIL_SUBJECT = (caseTitle: string) =>
-  i18n.translate('xpack.siem.case.caseView.emailSubject', {
+  i18n.translate('xpack.securitySolution.case.caseView.emailSubject', {
     values: { caseTitle },
     defaultMessage: 'SIEM Case - {caseTitle}',
   });
 
 export const EMAIL_BODY = (caseUrl: string) =>
-  i18n.translate('xpack.siem.case.caseView.emailBody', {
+  i18n.translate('xpack.securitySolution.case.caseView.emailBody', {
     values: { caseUrl },
     defaultMessage: 'Case reference: {caseUrl}',
   });
-export const UNKNOWN = i18n.translate('xpack.siem.case.caseView.unknown', {
+export const UNKNOWN = i18n.translate('xpack.securitySolution.case.caseView.unknown', {
   defaultMessage: 'Unknown',
 });

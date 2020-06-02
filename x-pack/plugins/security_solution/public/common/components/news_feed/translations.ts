@@ -6,13 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NO_NEWS_MESSAGE = i18n.translate('xpack.siem.newsFeed.noNewsMessage', {
+export const NO_NEWS_MESSAGE = i18n.translate('xpack.securitySolution.newsFeed.noNewsMessage', {
   defaultMessage:
     'Your current news feed URL returned no recent news. You may update the URL or disable security news via',
 });
 
 export const ADVANCED_SETTINGS_LINK_TITLE = i18n.translate(
-  'xpack.siem.newsFeed.advancedSettingsLinkTitle',
+  'xpack.securitySolution.newsFeed.advancedSettingsLinkTitle',
   {
     defaultMessage: 'SIEM advanced settings',
   }
