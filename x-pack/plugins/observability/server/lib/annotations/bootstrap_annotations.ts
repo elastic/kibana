@@ -23,9 +23,7 @@ export type ScopedAnnotationsClientFactory = PromiseReturnType<
   typeof bootstrapAnnotations
 >['getScopedAnnotationsClient'];
 
-export type ScopedAnnotationsClient = ReturnType<
-  ScopedAnnotationsClientFactory
->;
+export type ScopedAnnotationsClient = ReturnType<ScopedAnnotationsClientFactory>;
 export type AnnotationsAPI = PromiseReturnType<typeof bootstrapAnnotations>;
 
 export async function bootstrapAnnotations({ index, core, context }: Params) {
@@ -38,14 +36,10 @@ export async function bootstrapAnnotations({ index, core, context }: Params) {
   });
 
   return {
-    getScopedAnnotationsClient: (
-      requestContext: RequestHandlerContext,
-      request: KibanaRequest
-    ) => {
+    getScopedAnnotationsClient: (requestContext: RequestHandlerContext, request: KibanaRequest) => {
       return createAnnotationsClient({
         index,
-        apiCaller:
-          requestContext.core.elasticsearch.dataClient.callAsCurrentUser,
+        apiCaller: requestContext.core.elasticsearch.dataClient.callAsCurrentUser,
         logger,
         license: requestContext.licensing?.license,
       });
