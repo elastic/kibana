@@ -22,7 +22,7 @@ describe('useUserInfo', () => {
       services: {
         application: {
           capabilities: {
-            siem: {
+            securitySolution: {
               crud: true,
             },
           },

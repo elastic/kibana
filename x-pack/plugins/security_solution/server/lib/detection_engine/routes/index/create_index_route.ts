@@ -22,7 +22,7 @@ export const createIndexRoute = (router: IRouter) => {
       path: DETECTION_ENGINE_INDEX_URL,
       validate: false,
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
@@ -30,7 +30,7 @@ export const createIndexRoute = (router: IRouter) => {
 
       try {
         const clusterClient = context.core.elasticsearch.legacy.client;
-        const siemClient = context.siem?.getSiemClient();
+        const siemClient = context.securitySolution?.getAppClient();
         const callCluster = clusterClient.callAsCurrentUser;
 
         if (!siemClient) {

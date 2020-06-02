@@ -29,7 +29,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         body: buildRouteValidation<RuleAlertParamsRest>(createRulesSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
@@ -71,7 +71,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         const alertsClient = context.alerting?.getAlertsClient();
         const clusterClient = context.core.elasticsearch.legacy.client;
         const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.siem?.getSiemClient();
+        const siemClient = context.securitySolution?.getAppClient();
 
         if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });

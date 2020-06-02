@@ -64,7 +64,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
         path: routePath,
         validate: { body: configSchema.object({}, { unknowns: 'allow' }) },
         options: {
-          tags: ['access:siem'],
+          tags: ['access:securitySolution'],
         },
       },
       async (context, request, response) => {
@@ -97,7 +97,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
           path: `${routePath}/graphiql`,
           validate: false,
           options: {
-            tags: ['access:siem'],
+            tags: ['access:securitySolution'],
           },
         },
         async (context, request, response) => {

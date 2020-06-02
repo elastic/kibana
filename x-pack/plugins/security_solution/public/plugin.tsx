@@ -142,6 +142,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       order: 9000,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
+      appRoute: APP_PATH,
       async mount(params: AppMountParameters) {
         return mountSecurityApp(params);
       },

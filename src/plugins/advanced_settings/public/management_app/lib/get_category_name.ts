@@ -46,8 +46,8 @@ const names: Record<string, string> = {
   search: i18n.translate('advancedSettings.categoryNames.searchLabel', {
     defaultMessage: 'Search',
   }),
-  siem: i18n.translate('advancedSettings.categoryNames.siemLabel', {
-    defaultMessage: 'SIEM',
+  securitySolution: i18n.translate('advancedSettings.categoryNames.securitySolutionLabel', {
+    defaultMessage: 'Security solution',
   }),
 };
 

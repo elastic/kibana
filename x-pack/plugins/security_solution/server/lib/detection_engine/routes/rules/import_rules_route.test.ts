@@ -72,8 +72,8 @@ describe('import_rules_route', () => {
     });
 
     it('returns 404 if siem client is unavailable', async () => {
-      const { siem, ...contextWithoutSiem } = context;
-      const response = await server.inject(request, contextWithoutSiem);
+      const { securitySolution, ...contextWithoutSecuritySolution } = context;
+      const response = await server.inject(request, contextWithoutSecuritySolution);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
@@ -118,7 +118,7 @@ describe('import_rules_route', () => {
     });
 
     test('returns an error if the index does not exist', async () => {
-      clients.siemClient.getSignalsIndex.mockReturnValue('mockSignalsIndex');
+      clients.appClient.getSignalsIndex.mockReturnValue('mockSignalsIndex');
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
       const response = await server.inject(request, context);
       expect(response.status).toEqual(400);

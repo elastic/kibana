@@ -9,8 +9,8 @@ import moment from 'moment';
 import { isBoolean, isNumber, isString } from 'lodash/fp';
 
 import {
-  DEFAULT_SIEM_TIME_RANGE,
-  DEFAULT_SIEM_REFRESH_INTERVAL,
+  DEFAULT_APP_TIME_RANGE,
+  DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_FROM,
   DEFAULT_TO,
   DEFAULT_INTERVAL_TYPE,
@@ -44,7 +44,7 @@ const DEFAULT_TO_MOMENT = moment();
  */
 export const getTimeRangeSettings = (uiSettings = true) => {
   const timeRange = uiSettings
-    ? KibanaServices.get().uiSettings.get<DefaultTimeRangeSetting>(DEFAULT_SIEM_TIME_RANGE)
+    ? KibanaServices.get().uiSettings.get<DefaultTimeRangeSetting>(DEFAULT_APP_TIME_RANGE)
     : null;
 
   const fromStr = (isString(timeRange?.from) && timeRange?.from) || DEFAULT_FROM;
@@ -62,7 +62,7 @@ export const getTimeRangeSettings = (uiSettings = true) => {
  */
 export const getIntervalSettings = (uiSettings = true): Policy => {
   const interval = uiSettings
-    ? KibanaServices.get().uiSettings.get<DefaultIntervalSetting>(DEFAULT_SIEM_REFRESH_INTERVAL)
+    ? KibanaServices.get().uiSettings.get<DefaultIntervalSetting>(DEFAULT_APP_REFRESH_INTERVAL)
     : null;
 
   const duration = (isNumber(interval?.value) && interval?.value) || DEFAULT_INTERVAL_VALUE;

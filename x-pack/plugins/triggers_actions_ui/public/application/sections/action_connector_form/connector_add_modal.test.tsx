@@ -26,7 +26,7 @@ describe('connector_add_modal', () => {
       http: mocks.http,
       capabilities: {
         ...capabilities,
-        siem: {
+        securitySolution: {
           'actions:show': true,
           'actions:save': true,
           'actions:delete': true,

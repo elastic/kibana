@@ -6,7 +6,7 @@
 
 import { ConfigType } from '../config';
 
-export class SiemClient {
+export class AppClient {
   private readonly signalsIndex: string;
 
   constructor(private spaceId: string, private config: ConfigType) {

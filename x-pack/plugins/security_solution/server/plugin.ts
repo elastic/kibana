@@ -33,7 +33,7 @@ import { rulesNotificationAlertType } from './lib/detection_engine/notifications
 import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
 import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine/feature_flags';
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
-import { SiemClientFactory } from './client';
+import { AppClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
 import { APP_ID, APP_ICON } from '../common/constants';
@@ -69,14 +69,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private readonly logger: Logger;
   private readonly config$: Observable<ConfigType>;
   private context: PluginInitializerContext;
-  private siemClientFactory: SiemClientFactory;
+  private appClientFactory: AppClientFactory;
   private readonly endpointAppContextService = new EndpointAppContextService();
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
     this.logger = context.logger.get('plugins', APP_ID);
     this.config$ = createConfig$(context);
-    this.siemClientFactory = new SiemClientFactory();
+    this.appClientFactory = new AppClientFactory();
 
     this.logger.debug('plugin initialized');
   }
@@ -87,7 +87,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (hasListsFeature()) {
       // TODO: Remove this once we have the lists feature supported
       this.logger.error(
-        `You have activated the lists feature flag which is NOT currently supported for SIEM! You should turn this feature flag off immediately by un-setting the environment variable: ${listsEnvFeatureFlagName} and restarting Kibana`
+        `You have activated the lists feature flag which is NOT currently supported for Security Solution! You should turn this feature flag off immediately by un-setting the environment variable: ${listsEnvFeatureFlagName} and restarting Kibana`
       );
     }
 
@@ -103,10 +103,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const router = core.http.createRouter();
     core.http.registerRouteHandlerContext(APP_ID, (context, request, response) => ({
-      getSiemClient: () => this.siemClientFactory.create(request),
+      getAppClient: () => this.appClientFactory.create(request),
     }));
 
-    this.siemClientFactory.setup({
+    this.appClientFactory.setup({
       getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
       config,
     });
@@ -126,19 +126,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     plugins.features.registerFeature({
       id: APP_ID,
-      name: i18n.translate('xpack.siem.featureRegistry.linkSiemTitle', {
-        defaultMessage: 'SIEM',
+      name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {
+        defaultMessage: 'Security',
       }),
       order: 1100,
       icon: APP_ICON,
-      navLinkId: 'siem',
-      app: ['siem', 'kibana'],
-      catalogue: ['siem'],
+      navLinkId: 'securitySolution',
+      app: ['securitySolution', 'kibana'],
+      catalogue: ['securitySolution'],
       privileges: {
         all: {
-          app: ['siem', 'kibana'],
-          catalogue: ['siem'],
-          api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+          app: ['securitySolution', 'kibana'],
+          catalogue: ['securitySolution'],
+          api: ['securitySolution', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
           savedObject: {
             all: [
               'alert',
@@ -164,9 +164,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ],
         },
         read: {
-          app: ['siem', 'kibana'],
-          catalogue: ['siem'],
-          api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+          app: ['securitySolution', 'kibana'],
+          catalogue: ['securitySolution'],
+          api: ['securitySolution', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
           savedObject: {
             all: ['alert', 'action', 'action_task_params'],
             read: [

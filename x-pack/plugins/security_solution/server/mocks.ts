@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SiemClient } from './types';
+import { AppClient } from './types';
 
-type SiemClientMock = jest.Mocked<SiemClient>;
-const createSiemClientMock = (): SiemClientMock =>
+type AppClientMock = jest.Mocked<AppClient>;
+const createAppClientMock = (): AppClientMock =>
   (({
     getSignalsIndex: jest.fn(),
-  } as unknown) as SiemClientMock);
+  } as unknown) as AppClientMock);
 
 export const siemMock = {
-  createClient: createSiemClientMock,
+  createClient: createAppClientMock,
 };

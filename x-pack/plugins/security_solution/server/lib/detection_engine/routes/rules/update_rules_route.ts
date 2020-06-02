@@ -26,7 +26,7 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
         body: buildRouteValidation<UpdateRuleAlertParamsRest>(updateRulesSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
@@ -69,7 +69,7 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
       try {
         const alertsClient = context.alerting?.getAlertsClient();
         const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.siem?.getSiemClient();
+        const siemClient = context.securitySolution?.getAppClient();
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
 
         if (!siemClient || !alertsClient) {

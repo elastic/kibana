@@ -24,7 +24,7 @@ export const deleteRulesRoute = (router: IRouter) => {
         query: buildRouteValidation<DeleteRuleRequestParams>(queryRulesSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {

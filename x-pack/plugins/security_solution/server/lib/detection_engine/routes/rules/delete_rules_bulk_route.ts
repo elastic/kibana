@@ -27,7 +27,7 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
     },
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
     options: {
-      tags: ['access:siem'],
+      tags: ['access:securitySolution'],
     },
   };
   const handler: Handler = async (context, request, response) => {

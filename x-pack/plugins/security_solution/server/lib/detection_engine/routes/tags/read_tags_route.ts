@@ -15,7 +15,7 @@ export const readTagsRoute = (router: IRouter) => {
       path: DETECTION_ENGINE_TAGS_URL,
       validate: false,
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {

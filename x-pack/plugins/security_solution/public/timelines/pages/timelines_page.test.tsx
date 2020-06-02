@@ -28,7 +28,7 @@ describe('TimelinesPageComponent', () => {
         services: {
           application: {
             capabilities: {
-              siem: {
+              securitySolution: {
                 crud: true,
               },
             },
@@ -66,7 +66,7 @@ describe('TimelinesPageComponent', () => {
         services: {
           application: {
             capabilities: {
-              siem: {
+              securitySolution: {
                 crud: false,
               },
             },

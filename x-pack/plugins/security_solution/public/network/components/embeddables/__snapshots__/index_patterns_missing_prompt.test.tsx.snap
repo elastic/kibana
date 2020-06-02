@@ -32,7 +32,7 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                siem:defaultIndex
+                securitySolution:defaultIndex
               </a>,
               "example": <EuiCode>
                 ./packetbeat setup

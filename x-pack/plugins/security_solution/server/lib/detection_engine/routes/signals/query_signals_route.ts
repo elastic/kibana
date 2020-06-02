@@ -18,13 +18,13 @@ export const querySignalsRoute = (router: IRouter) => {
         body: buildRouteValidation<SignalsQueryRestParams>(querySignalsSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
       const { query, aggs, _source, track_total_hits, size } = request.body;
       const clusterClient = context.core.elasticsearch.legacy.client;
-      const siemClient = context.siem!.getSiemClient();
+      const siemClient = context.securitySolution!.getAppClient();
       const siemResponse = buildSiemResponse(response);
 
       try {

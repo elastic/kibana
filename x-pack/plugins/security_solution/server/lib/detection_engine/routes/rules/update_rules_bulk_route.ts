@@ -27,7 +27,7 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
         body: buildRouteValidation<UpdateRuleAlertParamsRest[]>(updateRulesBulkSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
@@ -35,7 +35,7 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
 
       const alertsClient = context.alerting?.getAlertsClient();
       const savedObjectsClient = context.core.savedObjects.client;
-      const siemClient = context.siem?.getSiemClient();
+      const siemClient = context.securitySolution?.getAppClient();
 
       if (!siemClient || !alertsClient) {
         return siemResponse.error({ statusCode: 404 });

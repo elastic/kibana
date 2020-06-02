@@ -18,13 +18,13 @@ export const setSignalsStatusRoute = (router: IRouter) => {
         body: buildRouteValidation<SignalsStatusRestParams>(setSignalsStatusSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
       const { signal_ids: signalIds, query, status } = request.body;
       const clusterClient = context.core.elasticsearch.legacy.client;
-      const siemClient = context.siem?.getSiemClient();
+      const siemClient = context.securitySolution?.getAppClient();
       const siemResponse = buildSiemResponse(response);
 
       if (!siemClient) {

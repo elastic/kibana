@@ -5,7 +5,7 @@
  */
 
 import { KibanaRequest } from '../../../../../src/core/server';
-import { SiemClient } from './client';
+import { AppClient } from './client';
 import { ConfigType } from '../config';
 
 interface SetupDependencies {
@@ -13,7 +13,7 @@ interface SetupDependencies {
   config: ConfigType;
 }
 
-export class SiemClientFactory {
+export class AppClientFactory {
   private getSpaceId?: SetupDependencies['getSpaceId'];
   private config?: SetupDependencies['config'];
 
@@ -22,14 +22,14 @@ export class SiemClientFactory {
     this.config = config;
   }
 
-  public create(request: KibanaRequest): SiemClient {
+  public create(request: KibanaRequest): AppClient {
     if (this.config == null) {
       throw new Error(
-        'Cannot create SiemClient as config is not present. Did you forget to call setup()?'
+        'Cannot create AppClient as config is not present. Did you forget to call setup()?'
       );
     }
 
     const spaceId = this.getSpaceId?.(request) ?? 'default';
-    return new SiemClient(spaceId, this.config);
+    return new AppClient(spaceId, this.config);
   }
 }

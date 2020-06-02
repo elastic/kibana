@@ -6,7 +6,7 @@
 
 import { SIGNALS_INDEX_KEY } from '../../common/constants';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
-import { SiemClient } from './client';
+import { AppClient } from './client';
 
 describe('SiemClient', () => {
   describe('#getSignalsIndex', () => {
@@ -16,7 +16,7 @@ describe('SiemClient', () => {
         [SIGNALS_INDEX_KEY]: 'mockSignalsIndex',
       };
       const spaceId = 'fooSpace';
-      const client = new SiemClient(spaceId, mockConfig);
+      const client = new AppClient(spaceId, mockConfig);
 
       expect(client.getSignalsIndex()).toEqual('mockSignalsIndex-fooSpace');
     });

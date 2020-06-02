@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SiemClient } from './client';
-export { SiemClientFactory } from './factory';
+export { AppClient } from './client';
+export { AppClientFactory } from './factory';

@@ -959,7 +959,7 @@ describe('helpers', () => {
             },
           ],
         },
-        type: 'x-pack/siem/local/timeline/UPDATE_PROVIDERS',
+        type: 'x-pack/security_solution/local/timeline/UPDATE_PROVIDERS',
       });
     });
 
@@ -980,7 +980,7 @@ describe('helpers', () => {
         payload: {
           id: 'hosts-table-hostName-ENDPOINT-W-0-01',
         },
-        type: 'x-pack/siem/local/drag_and_drop/NO_PROVIDER_FOUND',
+        type: 'x-pack/security_solution/local/drag_and_drop/NO_PROVIDER_FOUND',
       });
     });
   });

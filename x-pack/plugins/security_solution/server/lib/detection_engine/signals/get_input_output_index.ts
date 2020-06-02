@@ -16,7 +16,7 @@ export const getInputIndex = async (
     return inputIndex;
   } else {
     const configuration = await services.savedObjectsClient.get<{
-      'siem:defaultIndex': string[];
+      'securitySolution:defaultIndex': string[];
     }>('config', version);
     if (configuration.attributes != null && configuration.attributes[DEFAULT_INDEX_KEY] != null) {
       return configuration.attributes[DEFAULT_INDEX_KEY];

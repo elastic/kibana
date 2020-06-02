@@ -12,8 +12,8 @@ import {
   DEFAULT_INDEX_KEY,
   DEFAULT_INDEX_PATTERN,
   DEFAULT_ANOMALY_SCORE,
-  DEFAULT_SIEM_TIME_RANGE,
-  DEFAULT_SIEM_REFRESH_INTERVAL,
+  DEFAULT_APP_TIME_RANGE,
+  DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_FROM,
@@ -27,7 +27,7 @@ import {
 
 export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
   uiSettings.register({
-    [DEFAULT_SIEM_REFRESH_INTERVAL]: {
+    [DEFAULT_APP_REFRESH_INTERVAL]: {
       type: 'json',
       name: i18n.translate('xpack.siem.uiSettings.defaultRefreshIntervalLabel', {
         defaultMessage: 'Time filter refresh interval',
@@ -47,7 +47,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
         pause: schema.boolean(),
       }),
     },
-    [DEFAULT_SIEM_TIME_RANGE]: {
+    [DEFAULT_APP_TIME_RANGE]: {
       type: 'json',
       name: i18n.translate('xpack.siem.uiSettings.defaultTimeRangeLabel', {
         defaultMessage: 'Time filter period',

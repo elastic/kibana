@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SiemClient } from './client';
+import { AppClient } from './client';
 
-export { SiemClient };
+export { AppClient };
 
-export interface SiemRequestContext {
-  getSiemClient: () => SiemClient;
+export interface AppRequestContext {
+  getAppClient: () => AppClient;
 }
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    siem?: SiemRequestContext;
+    securitySolution?: AppRequestContext;
   }
 }

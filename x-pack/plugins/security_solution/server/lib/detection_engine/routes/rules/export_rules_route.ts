@@ -23,7 +23,7 @@ export const exportRulesRoute = (router: IRouter, config: ConfigType) => {
         body: buildRouteValidation<ExportRulesRequestParams['body']>(exportRulesSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {

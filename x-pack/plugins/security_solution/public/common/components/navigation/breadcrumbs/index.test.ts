@@ -112,7 +112,7 @@ describe('Navigation Breadcrumbs', () => {
       expect(breadcrumbs).toEqual([
         {
           href: '#/link-to/overview',
-          text: 'SIEM',
+          text: 'Security',
         },
         {
           href:
@@ -129,7 +129,7 @@ describe('Navigation Breadcrumbs', () => {
     test('should return Network breadcrumbs when supplied network pathname', () => {
       const breadcrumbs = getBreadcrumbsForRoute(getMockObject('network', '/network', undefined));
       expect(breadcrumbs).toEqual([
-        { text: 'SIEM', href: '#/link-to/overview' },
+        { text: 'Security', href: '#/link-to/overview' },
         {
           text: 'Network',
           href:
@@ -147,7 +147,7 @@ describe('Navigation Breadcrumbs', () => {
         getMockObject('timelines', '/timelines', undefined)
       );
       expect(breadcrumbs).toEqual([
-        { text: 'SIEM', href: '#/link-to/overview' },
+        { text: 'Security', href: '#/link-to/overview' },
         { text: 'Timelines', href: '#/link-to/timelines' },
       ]);
     });
@@ -155,7 +155,7 @@ describe('Navigation Breadcrumbs', () => {
     test('should return Host Details breadcrumbs when supplied a pathname with hostName', () => {
       const breadcrumbs = getBreadcrumbsForRoute(getMockObject('hosts', '/hosts', hostName));
       expect(breadcrumbs).toEqual([
-        { text: 'SIEM', href: '#/link-to/overview' },
+        { text: 'Security', href: '#/link-to/overview' },
         {
           text: 'Hosts',
           href:
@@ -173,7 +173,7 @@ describe('Navigation Breadcrumbs', () => {
     test('should return IP Details breadcrumbs when supplied pathname with ipv4', () => {
       const breadcrumbs = getBreadcrumbsForRoute(getMockObject('network', '/network', ipv4));
       expect(breadcrumbs).toEqual([
-        { text: 'SIEM', href: '#/link-to/overview' },
+        { text: 'Security', href: '#/link-to/overview' },
         {
           text: 'Network',
           href:
@@ -190,7 +190,7 @@ describe('Navigation Breadcrumbs', () => {
     test('should return IP Details breadcrumbs when supplied pathname with ipv6', () => {
       const breadcrumbs = getBreadcrumbsForRoute(getMockObject('network', '/network', ipv6Encoded));
       expect(breadcrumbs).toEqual([
-        { text: 'SIEM', href: '#/link-to/overview' },
+        { text: 'Security', href: '#/link-to/overview' },
         {
           text: 'Network',
           href:
@@ -209,7 +209,7 @@ describe('Navigation Breadcrumbs', () => {
     test('should call chrome breadcrumb service with correct breadcrumbs', () => {
       setBreadcrumbs(getMockObject('hosts', '/hosts', hostName), chromeMock);
       expect(setBreadcrumbsMock).toBeCalledWith([
-        { text: 'SIEM', href: '#/link-to/overview' },
+        { text: 'Security', href: '#/link-to/overview' },
         {
           text: 'Hosts',
           href:

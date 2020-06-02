@@ -10,8 +10,8 @@ import React from 'react';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 import {
-  DEFAULT_SIEM_TIME_RANGE,
-  DEFAULT_SIEM_REFRESH_INTERVAL,
+  DEFAULT_APP_TIME_RANGE,
+  DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_INDEX_KEY,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
@@ -31,11 +31,11 @@ import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from './kiban
 export const mockUiSettings: Record<string, any> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
   [DEFAULT_REFRESH_RATE_INTERVAL]: { pause: false, value: 0 },
-  [DEFAULT_SIEM_TIME_RANGE]: {
+  [DEFAULT_APP_TIME_RANGE]: {
     from: DEFAULT_FROM,
     to: DEFAULT_TO,
   },
-  [DEFAULT_SIEM_REFRESH_INTERVAL]: {
+  [DEFAULT_APP_REFRESH_INTERVAL]: {
     pause: DEFAULT_INTERVAL_PAUSE,
     value: DEFAULT_INTERVAL_VALUE,
   },

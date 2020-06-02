@@ -22,7 +22,7 @@ export const readPrivilegesRoute = (
       path: DETECTION_ENGINE_PRIVILEGES_URL,
       validate: false,
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
@@ -30,7 +30,7 @@ export const readPrivilegesRoute = (
 
       try {
         const clusterClient = context.core.elasticsearch.legacy.client;
-        const siemClient = context.siem?.getSiemClient();
+        const siemClient = context.securitySolution?.getAppClient();
 
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });

@@ -111,9 +111,13 @@ export const useGetUserSavedObjectPermissions = () => {
 
   useEffect(() => {
     const capabilitiesCanUserCRUD: boolean =
-      typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
+      typeof uiCapabilities.securitySolution.crud === 'boolean'
+        ? uiCapabilities.securitySolution.crud
+        : false;
     const capabilitiesCanUserRead: boolean =
-      typeof uiCapabilities.siem.show === 'boolean' ? uiCapabilities.siem.show : false;
+      typeof uiCapabilities.securitySolution.show === 'boolean'
+        ? uiCapabilities.securitySolution.show
+        : false;
     setSavedObjectsPermissions({
       crud: capabilitiesCanUserCRUD,
       read: capabilitiesCanUserRead,

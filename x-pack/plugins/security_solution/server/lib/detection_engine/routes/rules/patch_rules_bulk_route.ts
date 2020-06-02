@@ -28,7 +28,7 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
         body: buildRouteValidation<PatchRuleAlertParamsRest[]>(patchRulesBulkSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {

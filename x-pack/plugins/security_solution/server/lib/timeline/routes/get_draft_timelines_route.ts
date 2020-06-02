@@ -27,7 +27,7 @@ export const getDraftTimelinesRoute = (
         query: buildRouteValidation(getDraftTimelineSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {

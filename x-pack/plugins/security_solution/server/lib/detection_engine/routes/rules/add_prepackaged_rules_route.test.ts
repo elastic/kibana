@@ -98,8 +98,11 @@ describe('add_prepackaged_rules_route', () => {
     });
 
     it('returns 404 if siem client is unavailable', async () => {
-      const { siem, ...contextWithoutSiem } = context;
-      const response = await server.inject(addPrepackagedRulesRequest(), contextWithoutSiem);
+      const { securitySolution, ...contextWithoutSecuritySolution } = context;
+      const response = await server.inject(
+        addPrepackagedRulesRequest(),
+        contextWithoutSecuritySolution
+      );
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });

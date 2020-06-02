@@ -33,7 +33,7 @@ export const IndexPatternsMissingPromptComponent = () => {
                     rel="noopener noreferrer"
                     target="_blank"
                   >
-                    {'siem:defaultIndex'}
+                    {'securitySolution:defaultIndex'}
                   </a>
                 ),
                 beats: (

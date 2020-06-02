@@ -6,16 +6,16 @@
 
 import { httpServerMock } from '../../../../../src/core/server/mocks';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
-import { SiemClientFactory } from './factory';
-import { SiemClient } from './client';
+import { AppClientFactory } from './factory';
+import { AppClient } from './client';
 
 jest.mock('./client');
-const mockClient = SiemClient as jest.Mock;
+const mockClient = AppClient as jest.Mock;
 
-describe('SiemClientFactory', () => {
+describe('AppClientFactory', () => {
   describe('#create', () => {
     it('constructs a client with the current spaceId', () => {
-      const factory = new SiemClientFactory();
+      const factory = new AppClientFactory();
       const mockRequest = httpServerMock.createKibanaRequest();
       factory.setup({ getSpaceId: () => 'mockSpace', config: createMockConfig() });
       factory.create(mockRequest);
@@ -24,7 +24,7 @@ describe('SiemClientFactory', () => {
     });
 
     it('constructs a client with the default spaceId if spaces are disabled', () => {
-      const factory = new SiemClientFactory();
+      const factory = new AppClientFactory();
       const mockRequest = httpServerMock.createKibanaRequest();
       factory.setup({ getSpaceId: undefined, config: createMockConfig() });
       factory.create(mockRequest);
@@ -33,10 +33,10 @@ describe('SiemClientFactory', () => {
     });
 
     it('cannot call create without calling setup first', () => {
-      const factory = new SiemClientFactory();
+      const factory = new AppClientFactory();
       const mockRequest = httpServerMock.createKibanaRequest();
       expect(() => factory.create(mockRequest)).toThrow(
-        'Cannot create SiemClient as config is not present. Did you forget to call setup()?'
+        'Cannot create AppClient as config is not present. Did you forget to call setup()?'
       );
     });
   });

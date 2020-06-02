@@ -24,7 +24,7 @@ export const getPrepackagedRulesStatusRoute = (router: IRouter) => {
       path: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
       validate: false,
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {

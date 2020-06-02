@@ -35,7 +35,9 @@ export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => 
 
   const uiCapabilities = useKibana().services.application.capabilities;
   const capabilitiesCanUserCRUD: boolean =
-    typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
+    typeof uiCapabilities.securitySolution.crud === 'boolean'
+      ? uiCapabilities.securitySolution.crud
+      : false;
 
   return (
     <>

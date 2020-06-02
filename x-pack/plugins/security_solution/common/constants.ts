@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const APP_ID = 'siem';
-export const APP_NAME = 'SIEM';
+export const APP_ID = 'securitySolution';
+export const APP_NAME = 'Security';
 export const APP_ICON = 'securityAnalyticsApp';
-export const APP_PATH = `/app/${APP_ID}`;
+export const APP_PATH = `/app/security`;
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern';
 export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
 export const DEFAULT_DARK_MODE = 'theme:darkMode';
-export const DEFAULT_INDEX_KEY = 'siem:defaultIndex';
+export const DEFAULT_INDEX_KEY = 'securitySolution:defaultIndex';
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
 export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults';
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults';
-export const DEFAULT_SIEM_TIME_RANGE = 'siem:timeDefaults';
-export const DEFAULT_SIEM_REFRESH_INTERVAL = 'siem:refreshIntervalDefaults';
+export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults';
+export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults';
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
 export const DEFAULT_MAX_SIGNALS = 100;
 export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100;
-export const DEFAULT_ANOMALY_SCORE = 'siem:defaultAnomalyScore';
+export const DEFAULT_ANOMALY_SCORE = 'securitySolution:defaultAnomalyScore';
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
 export const DEFAULT_SCALE_DATE_FORMAT = 'dateFormat:scaled';
 export const DEFAULT_FROM = 'now-24h';
@@ -42,16 +42,16 @@ export const DEFAULT_INDEX_PATTERN = [
 ];
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
-export const ENABLE_NEWS_FEED_SETTING = 'siem:enableNewsFeed';
+export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed';
 
 /** This Kibana Advanced Setting specifies the URL of the News feed widget */
-export const NEWS_FEED_URL_SETTING = 'siem:newsFeedUrl';
+export const NEWS_FEED_URL_SETTING = 'securitySolution:newsFeedUrl';
 
 /** The default value for News feed widget */
 export const NEWS_FEED_URL_SETTING_DEFAULT = 'https://feeds.elastic.co/security-solution';
 
 /** This Kibana Advanced Setting specifies the URLs of `IP Reputation Links`*/
-export const IP_REPUTATION_LINKS_SETTING = 'siem:ipReputationLinks';
+export const IP_REPUTATION_LINKS_SETTING = 'securitySolution:ipReputationLinks';
 
 /** The default value for `IP Reputation Links` */
 export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
@@ -62,12 +62,12 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
 /**
  * Id for the signals alerting type
  */
-export const SIGNALS_ID = `${APP_ID}.signals`;
+export const SIGNALS_ID = `siem.signals`;
 
 /**
  * Id for the notifications alerting type
  */
-export const NOTIFICATIONS_ID = `${APP_ID}.notifications`;
+export const NOTIFICATIONS_ID = `siem.notifications`;
 
 /**
  * Special internal structure for tags for signals. This is used

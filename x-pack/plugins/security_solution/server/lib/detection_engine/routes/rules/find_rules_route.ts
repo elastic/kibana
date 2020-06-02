@@ -22,7 +22,7 @@ export const findRulesRoute = (router: IRouter) => {
         query: buildRouteValidation<FindRulesRequestParams>(findRulesSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access'],
       },
     },
     async (context, request, response) => {

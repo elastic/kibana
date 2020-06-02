@@ -26,7 +26,7 @@ export const addPrepackedRulesRoute = (router: IRouter) => {
       path: DETECTION_ENGINE_PREPACKAGED_URL,
       validate: false,
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
@@ -36,7 +36,7 @@ export const addPrepackedRulesRoute = (router: IRouter) => {
         const alertsClient = context.alerting?.getAlertsClient();
         const clusterClient = context.core.elasticsearch.legacy.client;
         const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.siem?.getSiemClient();
+        const siemClient = context.securitySolution?.getAppClient();
 
         if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });

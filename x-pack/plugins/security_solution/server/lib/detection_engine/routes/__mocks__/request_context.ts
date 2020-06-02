@@ -19,7 +19,7 @@ const createMockClients = () => ({
   clusterClient: elasticsearchServiceMock.createScopedClusterClient(),
   licensing: { license: licensingMock.createLicenseMock() },
   savedObjectsClient: savedObjectsClientMock.create(),
-  siemClient: siemMock.createClient(),
+  appClient: siemMock.createClient(),
 });
 
 const createRequestContextMock = (
@@ -36,7 +36,7 @@ const createRequestContextMock = (
       savedObjects: { client: clients.savedObjectsClient },
     },
     licensing: clients.licensing,
-    siem: { getSiemClient: jest.fn(() => clients.siemClient) },
+    securitySolution: { getAppClient: jest.fn(() => clients.appClient) },
   } as unknown) as RequestHandlerContext;
 };
 

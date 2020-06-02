@@ -49,7 +49,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
         body: buildRouteValidation<ImportRulesRequestParams['body']>(importRulesPayloadSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
         body: {
           maxBytes: config.maxRuleImportPayloadBytes,
           output: 'stream',
@@ -63,7 +63,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
         const alertsClient = context.alerting?.getAlertsClient();
         const clusterClient = context.core.elasticsearch.legacy.client;
         const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.siem?.getSiemClient();
+        const siemClient = context.securitySolution?.getAppClient();
 
         if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });

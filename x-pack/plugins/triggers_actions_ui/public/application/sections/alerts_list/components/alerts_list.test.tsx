@@ -95,7 +95,7 @@ describe('alerts_list component empty', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
+        securitySolution: {
           'alerting:show': true,
           'alerting:save': true,
           'alerting:delete': true,
@@ -213,7 +213,7 @@ describe('alerts_list component with items', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
+        securitySolution: {
           'alerting:show': true,
           'alerting:save': true,
           'alerting:delete': true,
@@ -294,7 +294,7 @@ describe('alerts_list component empty with show only capability', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
+        securitySolution: {
           'alerting:show': true,
           'alerting:save': false,
           'alerting:delete': false,
@@ -408,7 +408,7 @@ describe('alerts_list with show only capability', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
+        securitySolution: {
           'alerting:show': true,
           'alerting:save': false,
           'alerting:delete': false,

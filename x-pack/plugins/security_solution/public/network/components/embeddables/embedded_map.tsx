@@ -109,7 +109,7 @@ export const EmbeddedMapComponent = ({
   useEffect(() => {
     let isSubscribed = true;
     async function setupEmbeddable() {
-      // Ensure at least one `siem:defaultIndex` kibana index pattern exists before creating embeddable
+      // Ensure at least one `securitySolution:defaultIndex` kibana index pattern exists before creating embeddable
       const matchingIndexPatterns = findMatchingIndexPatterns({
         kibanaIndexPatterns,
         siemDefaultIndices,

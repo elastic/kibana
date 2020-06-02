@@ -15,9 +15,9 @@ import {
 } from './default_date_settings';
 import {
   DEFAULT_FROM,
-  DEFAULT_SIEM_TIME_RANGE,
+  DEFAULT_APP_TIME_RANGE,
   DEFAULT_TO,
-  DEFAULT_SIEM_REFRESH_INTERVAL,
+  DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_INTERVAL_TYPE,
@@ -36,8 +36,8 @@ jest.mock('../../../common/constants', () => ({
   DEFAULT_INTERVAL_PAUSE: true,
   DEFAULT_INTERVAL_TYPE: 'manual',
   DEFAULT_INTERVAL_VALUE: 300000,
-  DEFAULT_SIEM_REFRESH_INTERVAL: 'siem:refreshIntervalDefaults',
-  DEFAULT_SIEM_TIME_RANGE: 'siem:timeDefaults',
+  DEFAULT_APP_REFRESH_INTERVAL: 'securitySolution:refreshIntervalDefaults',
+  DEFAULT_APP_TIME_RANGE: 'securitySolution:timeDefaults',
 }));
 
 jest.mock('../lib/kibana');
@@ -60,9 +60,9 @@ const mockTimeRange = (
     uiSettings: {
       get: (key: string) => {
         switch (key) {
-          case DEFAULT_SIEM_TIME_RANGE:
+          case DEFAULT_APP_TIME_RANGE:
             return timeRange;
-          case DEFAULT_SIEM_REFRESH_INTERVAL:
+          case DEFAULT_APP_REFRESH_INTERVAL:
             return interval;
           default:
             throw new Error(`Unexpected config key: ${key}`);
