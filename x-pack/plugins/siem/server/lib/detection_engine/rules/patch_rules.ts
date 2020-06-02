@@ -5,7 +5,7 @@
  */
 
 import { defaults } from 'lodash/fp';
-import { PartialAlert } from '../../../../../alerting/server';
+import { PartialAlert } from '../../../../../alerts/server';
 import { PatchRuleParams } from './types';
 import { addTags } from './add_tags';
 import { calculateVersion, calculateName, calculateInterval } from './utils';

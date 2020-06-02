@@ -15,10 +15,11 @@ import {
   PluginInitializerContext,
   Logger,
 } from '../../../../src/core/server';
-import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
+import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
+import { ListPluginSetup } from '../../lists/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -45,13 +46,14 @@ import { EndpointAppContext } from './endpoint/types';
 import { IngestIndexPatternRetriever } from './endpoint/alerts/index_pattern';
 
 export interface SetupPlugins {
-  alerting: AlertingSetup;
+  alerts: AlertingSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
   licensing: LicensingPluginSetup;
   security?: SecuritySetup;
   spaces?: SpacesSetup;
   ml?: MlSetup;
+  lists?: ListPluginSetup;
 }
 
 export interface StartPlugins {
@@ -189,22 +191,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    if (plugins.alerting != null) {
+    if (plugins.alerts != null) {
       const signalRuleType = signalRulesAlertType({
         logger: this.logger,
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
+        lists: plugins.lists,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,
       });
 
       if (isAlertExecutor(signalRuleType)) {
-        plugins.alerting.registerType(signalRuleType);
+        plugins.alerts.registerType(signalRuleType);
       }
 
       if (isNotificationAlertExecutor(ruleNotificationType)) {
-        plugins.alerting.registerType(ruleNotificationType);
+        plugins.alerts.registerType(ruleNotificationType);
       }
     }
 

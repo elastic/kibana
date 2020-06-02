@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { updateNotifications } from './update_notifications';
 import { readNotifications } from './read_notifications';
 import { createNotifications } from './create_notifications';

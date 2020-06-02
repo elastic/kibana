@@ -11,7 +11,7 @@ import {
   IKibanaResponse,
   IRouter,
   CoreSetup,
-} from 'kibana/server';
+} from 'src/core/server';
 import { EventEmitter } from 'events';
 import { TaskManagerStartContract } from '../../../../../plugins/task_manager/server';
 
@@ -39,7 +39,7 @@ export function initRoutes(
   taskTestingEvents: EventEmitter
 ) {
   async function ensureIndexIsRefreshed() {
-    return await core.elasticsearch.adminClient.callAsInternalUser('indices.refresh', {
+    return await core.elasticsearch.legacy.client.callAsInternalUser('indices.refresh', {
       index: '.kibana_task_manager',
     });
   }

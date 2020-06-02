@@ -10,7 +10,7 @@ import { AnomalyRecordDoc as Anomaly } from '../../../../ml/server';
 
 export { Anomaly };
 export type AnomalyResults = SearchResponse<Anomaly>;
-type MlSearch = <T>(searchParams: SearchParams) => Promise<SearchResponse<T>>;
+type MlAnomalySearch = <T>(searchParams: SearchParams) => Promise<SearchResponse<T>>;
 
 export interface AnomaliesSearchParams {
   jobIds: string[];
@@ -22,11 +22,11 @@ export interface AnomaliesSearchParams {
 
 export const getAnomalies = async (
   params: AnomaliesSearchParams,
-  mlSearch: MlSearch
+  mlAnomalySearch: MlAnomalySearch
 ): Promise<AnomalyResults> => {
   const boolCriteria = buildCriteria(params);
 
-  return mlSearch({
+  return mlAnomalySearch({
     size: params.maxRecords || 100,
     body: {
       query: {
