@@ -254,6 +254,7 @@ export const Providers = React.memo<Props>(
                                     dataProvider.queryMatch.displayValue ??
                                     dataProvider.queryMatch.value
                                   }
+                                  type={dataProvider.type}
                                 />
                               </EuiFlexItem>
                               <EuiFlexItem grow={false}>

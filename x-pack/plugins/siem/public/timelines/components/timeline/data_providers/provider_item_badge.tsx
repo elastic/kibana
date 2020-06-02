@@ -13,7 +13,7 @@ import { BrowserFields } from '../../../../common/containers/source';
 import { OnDataProviderEdited } from '../events';
 import { ProviderBadge } from './provider_badge';
 import { ProviderItemActions } from './provider_item_actions';
-import { DataProvidersAnd, QueryOperator } from './data_provider';
+import { DataProvidersAnd, DataProviderType, QueryOperator } from './data_provider';
 import { dragAndDropActions } from '../../../../common/store/drag_and_drop';
 import { TimelineContext } from '../timeline_context';
 
@@ -34,6 +34,7 @@ interface ProviderItemBadgeProps {
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
   val: string | number;
+  type: DataProviderType;
 }
 
 export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
@@ -54,6 +55,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     toggleExcludedProvider,
     toggleTypeProvider,
     val,
+    type,
   }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -140,6 +142,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
             toggleExcludedProvider={onToggleExcludedProvider}
             toggleTypeProvider={onToggleTypeProvider}
             value={val}
+            type={type}
           />
         )}
       </TimelineContext.Consumer>

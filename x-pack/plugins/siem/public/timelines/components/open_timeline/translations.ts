@@ -88,6 +88,13 @@ export const ONLY_FAVORITES = i18n.translate('xpack.siem.open.timeline.onlyFavor
   defaultMessage: 'Only favorites',
 });
 
+export const CREATE_TEMPLATE_FROM_TIMELINE = i18n.translate(
+  'xpack.siem.open.timeline.createTemplateFromTimelineTooltip',
+  {
+    defaultMessage: 'Create template from timeline',
+  }
+);
+
 export const CREATE_TIMELINE_FROM_TEMPLATE = i18n.translate(
   'xpack.siem.open.timeline.createTimelineFromTemplateTooltip',
   {

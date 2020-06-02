@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable complexity */
+
 import ApolloClient from 'apollo-client';
 import { getOr, set, isEmpty } from 'lodash/fp';
 import { Action } from 'typescript-fsa';
@@ -85,9 +87,10 @@ const parseString = (params: string) => {
 
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
-  duplicate: boolean
-): TimelineModel => {
-  return Object.entries({
+  duplicate: boolean,
+  timelineType?: TimelineType
+): TimelineModel =>
+  Object.entries({
     ...timeline,
     columns:
       timeline.columns != null
@@ -172,32 +175,53 @@ export const defaultTimelineToTimelineModel = (
       : {},
     id: duplicate ? '' : timeline.savedObjectId,
     savedObjectId: duplicate ? null : timeline.savedObjectId,
+    status: duplicate ? TimelineStatus.draft : timeline.status,
     version: duplicate ? null : timeline.version,
     title: duplicate ? '' : timeline.title || '',
-    templateTimelineId: duplicate ? null : timeline.templateTimelineId,
+    templateTimelineId: getTemplateTimelineId(timeline, duplicate, timelineType),
     templateTimelineVersion: duplicate ? null : timeline.templateTimelineVersion,
+    timelineType: timelineType ?? timeline.timelineType,
   }).reduce((acc: TimelineModel, [key, value]) => (value != null ? set(key, value, acc) : acc), {
     ...timelineDefaults,
     id: '',
   });
+
+const getTemplateTimelineId = (
+  timeline: TimelineResult,
+  duplicate: boolean,
+  targetTimelineType?: TimelineType
+) => {
+  if (!duplicate) {
+    return timeline.templateTimelineId;
+  }
+
+  if (
+    targetTimelineType === TimelineType.default &&
+    timeline.timelineType === TimelineType.template
+  ) {
+    return timeline.templateTimelineId;
+  }
+
+  return null;
 };
 
 export const formatTimelineResultToModel = (
   timelineToOpen: TimelineResult,
-  duplicate: boolean = false
+  duplicate: boolean = false,
+  timelineType?: TimelineType
 ): { notes: NoteResult[] | null | undefined; timeline: TimelineModel } => {
   const { notes, ...timelineModel } = timelineToOpen;
   return {
     notes,
-    timeline: defaultTimelineToTimelineModel(timelineModel, duplicate),
+    timeline: defaultTimelineToTimelineModel(timelineModel, duplicate, timelineType),
   };
 };
 
 export interface QueryTimelineById<TCache> {
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   duplicate?: boolean;
-  timelineId?: string;
-  templateTimelineId?: string;
+  timelineId: string;
+  timelineType?: TimelineType;
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
   updateIsLoading: ({
@@ -214,7 +238,7 @@ export const queryTimelineById = <TCache>({
   apolloClient,
   duplicate = false,
   timelineId,
-  templateTimelineId,
+  timelineType,
   onOpenTimeline,
   openTimeline = true,
   updateIsLoading,
@@ -226,7 +250,7 @@ export const queryTimelineById = <TCache>({
       .query<GetOneTimeline.Query, GetOneTimeline.Variables>({
         query: oneTimelineQuery,
         fetchPolicy: 'no-cache',
-        variables: { id: (timelineId ?? templateTimelineId) as string },
+        variables: { id: timelineId },
       })
       // eslint-disable-next-line
       .then(result => {
@@ -234,11 +258,15 @@ export const queryTimelineById = <TCache>({
           getOr({}, 'data.getOneTimeline', result)
         );
 
-        const { timeline, notes } = formatTimelineResultToModel(timelineToOpen, duplicate);
+        const { timeline, notes } = formatTimelineResultToModel(
+          timelineToOpen,
+          duplicate,
+          timelineType
+        );
         if (onOpenTimeline != null) {
           onOpenTimeline(timeline);
         } else if (updateTimeline) {
-          console.error('updateTimeline', timeline, templateTimelineId);
+          console.error('updateTimeline', timeline, timelineType);
           const { from, to } = getTimeRangeSettings();
           updateTimeline({
             duplicate,
@@ -247,13 +275,6 @@ export const queryTimelineById = <TCache>({
             notes,
             timeline: {
               ...timeline,
-              ...(templateTimelineId
-                ? {
-                    templateTimelineId,
-                    timelineType: TimelineType.default,
-                    status: TimelineStatus.draft,
-                  }
-                : {}),
               show: openTimeline,
             },
             to: getOr(to, 'dateRange.end', timeline),

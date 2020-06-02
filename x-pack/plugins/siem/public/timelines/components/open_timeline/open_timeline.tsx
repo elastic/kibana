@@ -125,7 +125,11 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       }
 
       if (timelineType === TimelineType.template) {
-        timelineActions.unshift('createFromTemplate');
+        timelineActions.unshift('createTimelineFromTemplate');
+      }
+
+      if (timelineType !== TimelineType.template) {
+        timelineActions.unshift('createTemplateFromTimeline');
       }
 
       return timelineActions as ActionTimelineToShow[];

@@ -6,6 +6,7 @@
 
 /* eslint-disable react/display-name */
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import {
   ActionTimelineToShow,
   DeleteTimelines,
@@ -33,19 +34,36 @@ export const getActionsColumns = ({
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
 }): [TimelineActionsOverflowColumns] => {
-  const createFromTemplate = {
+  const createTimelineFromTemplate = {
     name: i18n.CREATE_TIMELINE_FROM_TEMPLATE,
     icon: 'timeline',
     onClick: ({ savedObjectId }: OpenTimelineResult) => {
       onOpenTimeline({
         duplicate: true,
-        templateTimelineId: savedObjectId!,
+        timelineType: TimelineType.default,
+        timelineId: savedObjectId!,
       });
     },
     type: 'icon',
     enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
     description: i18n.CREATE_TIMELINE_FROM_TEMPLATE,
     'data-test-subj': 'create-from-template',
+  };
+
+  const createTemplateFromTimeline = {
+    name: i18n.CREATE_TEMPLATE_FROM_TIMELINE,
+    icon: 'timeline',
+    onClick: ({ savedObjectId }: OpenTimelineResult) => {
+      onOpenTimeline({
+        duplicate: true,
+        timelineType: TimelineType.template,
+        timelineId: savedObjectId!,
+      });
+    },
+    type: 'icon',
+    enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
+    description: i18n.CREATE_TEMPLATE_FROM_TIMELINE,
+    'data-test-subj': 'create-template-from-timeline',
   };
 
   const openAsDuplicateColumn = {
@@ -89,7 +107,12 @@ export const getActionsColumns = ({
     {
       width: '40px',
       actions: [
-        actionTimelineToShow.includes('createFromTemplate') ? createFromTemplate : null,
+        actionTimelineToShow.includes('createTimelineFromTemplate')
+          ? createTimelineFromTemplate
+          : null,
+        actionTimelineToShow.includes('createTemplateFromTimeline')
+          ? createTemplateFromTimeline
+          : null,
         actionTimelineToShow.includes('duplicate') ? openAsDuplicateColumn : null,
         actionTimelineToShow.includes('export') ? exportTimelineAction : null,
         actionTimelineToShow.includes('delete') && deleteTimelines != null

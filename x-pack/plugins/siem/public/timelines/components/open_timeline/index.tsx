@@ -224,19 +224,19 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     }, []);
 
     const openTimeline: OnOpenTimeline = useCallback(
-      ({ duplicate, timelineId, templateTimelineId }) => {
+      ({ duplicate, timelineId, timelineType }) => {
         if (isModal && closeModalTimeline != null) {
           closeModalTimeline();
         }
 
-        console.error('aaa', timelineId, templateTimelineId);
+        console.error('aaa', timelineId, timelineType);
 
         queryTimelineById({
           apolloClient,
           duplicate,
           onOpenTimeline,
           timelineId,
-          templateTimelineId,
+          timelineType,
           updateIsLoading,
           updateTimeline,
         });

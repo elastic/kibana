@@ -14,7 +14,7 @@ import styled from 'styled-components';
 
 import { BrowserFields } from '../../../../common/containers/source';
 import { OnDataProviderEdited } from '../events';
-import { QueryOperator, EXISTS_OPERATOR } from './data_provider';
+import { DataProviderType, QueryOperator, EXISTS_OPERATOR } from './data_provider';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
 
 import * as i18n from './translations';
@@ -23,6 +23,7 @@ export const EDIT_CLASS_NAME = 'edit-data-provider';
 export const EXCLUDE_CLASS_NAME = 'exclude-data-provider';
 export const ENABLE_CLASS_NAME = 'enable-data-provider';
 export const FILTER_FOR_FIELD_PRESENT_CLASS_NAME = 'filter-for-field-present-data-provider';
+export const CONVERT_TO_FIELD_CLASS_NAME = 'convert-to-field-data-provider';
 export const DELETE_CLASS_NAME = 'delete-data-provider';
 
 interface OwnProps {
@@ -45,6 +46,7 @@ interface OwnProps {
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
   value: string | number;
+  type: DataProviderType;
 }
 
 const MyEuiPopover = styled((EuiPopover as unknown) as FunctionComponent)<
@@ -75,6 +77,7 @@ interface GetProviderActionsProps {
   toggleExcluded: () => void;
   toggleType: () => void;
   value: string | number;
+  type: DataProviderType;
 }
 
 export const getProviderActions = ({
@@ -93,6 +96,7 @@ export const getProviderActions = ({
   toggleEnabled,
   toggleExcluded,
   toggleType,
+  type,
   value,
 }: GetProviderActionsProps): EuiContextMenuPanelDescriptor[] => [
   {
@@ -127,10 +131,13 @@ export const getProviderActions = ({
         onClick: onFilterForFieldPresent,
       },
       {
-        className: FILTER_FOR_FIELD_PRESENT_CLASS_NAME,
+        className: CONVERT_TO_FIELD_CLASS_NAME,
         disabled: isLoading,
         icon: 'logstashFilter',
-        name: i18n.FILTER_FOR_FIELD_PRESENT,
+        name:
+          type === DataProviderType.template
+            ? i18n.CONVERT_TO_STATIC_FIELD
+            : i18n.CONVERT_TO_TEMPLATE_FIELD,
         onClick: toggleType,
       },
       {
@@ -183,6 +190,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
       toggleExcludedProvider,
       toggleTypeProvider,
       value,
+      type,
     } = this.props;
 
     const panelTree = getProviderActions({
@@ -202,6 +210,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
       toggleExcluded: toggleExcludedProvider,
       toggleType: toggleTypeProvider,
       value,
+      type,
     });
 
     return (

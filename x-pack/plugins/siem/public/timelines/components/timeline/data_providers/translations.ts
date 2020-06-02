@@ -63,6 +63,17 @@ export const FILTER_FOR_FIELD_PRESENT = i18n.translate(
   }
 );
 
+export const CONVERT_TO_FIELD = i18n.translate('xpack.siem.dataProviders.convertToFieldLabel', {
+  defaultMessage: 'Covert to field',
+});
+
+export const CONVERT_TO_TEMPLATE_FIELD = i18n.translate(
+  'xpack.siem.dataProviders.convertToTemplateFieldLabel',
+  {
+    defaultMessage: 'Covert to template field',
+  }
+);
+
 export const HIGHLIGHTED = i18n.translate('xpack.siem.dataProviders.highlighted', {
   defaultMessage: 'highlighted',
 });

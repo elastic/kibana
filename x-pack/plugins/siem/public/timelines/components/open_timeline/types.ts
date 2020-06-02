@@ -79,11 +79,11 @@ export type OnDeleteOneTimeline = (timelineIds: string[]) => void;
 export type OnOpenTimeline = ({
   duplicate,
   timelineId,
-  templateTimelineId,
+  timelineType,
 }: {
   duplicate: boolean;
   timelineId?: string;
-  templateTimelineId?: string;
+  timelineType?: TimelineTypeLiteral;
 }) => void;
 
 export type OnOpenDeleteTimelineModal = (selectedItem: OpenTimelineResult) => void;
@@ -117,7 +117,8 @@ export interface OnTableChangeParams {
 export type OnTableChange = (tableChange: OnTableChangeParams) => void;
 
 export type ActionTimelineToShow =
-  | 'createFromTemplate'
+  | 'createTimelineFromTemplate'
+  | 'createTemplateFromTimeline'
   | 'duplicate'
   | 'delete'
   | 'export'
