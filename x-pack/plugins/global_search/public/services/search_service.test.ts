@@ -13,6 +13,7 @@ import { duration } from 'moment';
 import { httpServiceMock, applicationServiceMock } from '../../../../../src/core/public/mocks';
 import { licenseCheckerMock } from '../../common/license_checker.mock';
 import { GlobalSearchProviderResult, GlobalSearchResult } from '../../common/types';
+import { GlobalSearchFindError } from '../../common/errors';
 import { GlobalSearchClientConfigType } from '../config';
 import { GlobalSearchResultProvider } from '../types';
 import { SearchService } from './search_service';
@@ -439,7 +440,9 @@ describe('SearchService', () => {
           expectObservable(results).toBe(
             '#',
             {},
-            'GlobalSearch API is disabled because of invalid license state: expired'
+            GlobalSearchFindError.invalidLicense(
+              'GlobalSearch API is disabled because of invalid license state: expired'
+            )
           );
         });
       });
