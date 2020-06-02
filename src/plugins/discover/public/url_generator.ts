@@ -90,23 +90,22 @@ export class DiscoverUrlGenerator
     timeRange,
     useHash = this.params.useHash,
   }: DiscoverUrlGeneratorState): Promise<string> => {
+    const savedSearchPath = savedSearchId ? encodeURIComponent(savedSearchId) : '';
     const appState: {
       query?: Query;
       filters?: Filter[];
       index?: string;
     } = {};
+    const queryState: QueryState = {};
 
     if (query) appState.query = query;
     if (filters) appState.filters = filters?.filter((f) => !esFilters.isFilterPinned(f));
     if (indexPatternId) appState.index = indexPatternId;
 
-    const queryState: QueryState = {};
-
     if (timeRange) queryState.time = timeRange;
-    if (refreshInterval) queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
+    if (filters) queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
-    const savedSearchPath = savedSearchId ? encodeURIComponent(savedSearchId) : '';
     let url = `${this.params.appBasePath}#/${savedSearchPath}`;
     url = setStateToKbnUrl<QueryState>('_g', queryState, { useHash }, url);
     url = setStateToKbnUrl('_a', appState, { useHash }, url);

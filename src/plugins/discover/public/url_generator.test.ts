@@ -21,6 +21,7 @@ import { DiscoverUrlGenerator } from './url_generator';
 import { hashedItemStore, getStatesFromKbnUrl } from '../../kibana_utils/public';
 // eslint-disable-next-line
 import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
+import { FilterStateStore } from '../../data/common';
 
 const appBasePath: string = 'xyz/app/discover';
 const indexPatternId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
@@ -114,6 +115,64 @@ describe('Discover url generator', () => {
       },
     });
     expect(_g).toEqual({});
+  });
+
+  test('can specify local and global filters', async () => {
+    const { generator } = await setup();
+    const url = await generator.createUrl({
+      filters: [
+        {
+          meta: {
+            alias: 'foo',
+            disabled: false,
+            negate: false,
+          },
+          $state: {
+            store: FilterStateStore.APP_STATE,
+          },
+        },
+        {
+          meta: {
+            alias: 'bar',
+            disabled: false,
+            negate: false,
+          },
+          $state: {
+            store: FilterStateStore.GLOBAL_STATE,
+          },
+        },
+      ],
+    });
+    const { _a, _g } = getStatesFromKbnUrl(url, ['_a', '_g']);
+
+    expect(_a).toEqual({
+      filters: [
+        {
+          $state: {
+            store: 'appState',
+          },
+          meta: {
+            alias: 'foo',
+            disabled: false,
+            negate: false,
+          },
+        },
+      ],
+    });
+    expect(_g).toEqual({
+      filters: [
+        {
+          $state: {
+            store: 'globalState',
+          },
+          meta: {
+            alias: 'bar',
+            disabled: false,
+            negate: false,
+          },
+        },
+      ],
+    });
   });
 
   test('can set refresh interval', async () => {
