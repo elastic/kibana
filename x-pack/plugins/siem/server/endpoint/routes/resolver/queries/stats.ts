@@ -190,6 +190,35 @@ export class StatsQuery extends ResolverQuery<StatsResult> {
       );
     }
 
+    /**
+     * The response for the events aggregation should look like this:
+     * "aggregations" : {
+     *  "ids" : {
+     *    "doc_count_error_upper_bound" : 0,
+     *    "sum_other_doc_count" : 0,
+     *    "buckets" : [
+     *      {
+     *        "key" : "entity_id1",
+     *        "doc_count" : 3,
+     *        "categories" : {
+     *          "doc_count_error_upper_bound" : 0,
+     *          "sum_other_doc_count" : 0,
+     *          "buckets" : [
+     *            {
+     *              "key" : "session",
+     *              "doc_count" : 3
+     *            },
+     *            {
+     *              "key" : "authentication",
+     *              "doc_count" : 2
+     *            }
+     *          ]
+     *        }
+     *      },
+     *
+     * Which would indicate that entity_id1 had 3 related events. 3 of the related events had category session,
+     * and 2 had authentication
+     */
     let events: Record<string, EventStats> = {};
     if (response.aggregations?.events?.ids?.buckets) {
       events = response.aggregations.events.ids.buckets.reduce(
