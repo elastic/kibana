@@ -23,7 +23,6 @@ import { TypesStart, VisType } from '../vis_types';
 import { NewVisModal } from './new_vis_modal';
 import { ApplicationStart, SavedObjectsStart } from '../../../../core/public';
 import { embeddablePluginMock } from '../../../embeddable/public/mocks';
-import { EmbeddableStateTransfer } from '../../../embeddable/public';
 
 describe('NewVisModal', () => {
   const { location } = window;
@@ -84,7 +83,6 @@ describe('NewVisModal', () => {
         addBasePath={addBasePath}
         uiSettings={uiSettings}
         application={{} as ApplicationStart}
-        stateTransfer={{} as EmbeddableStateTransfer}
         savedObjects={{} as SavedObjectsStart}
       />
     );
@@ -100,7 +98,6 @@ describe('NewVisModal', () => {
         addBasePath={addBasePath}
         uiSettings={uiSettings}
         application={{} as ApplicationStart}
-        stateTransfer={{} as EmbeddableStateTransfer}
         savedObjects={{} as SavedObjectsStart}
       />
     );
@@ -118,7 +115,6 @@ describe('NewVisModal', () => {
           addBasePath={addBasePath}
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
-          stateTransfer={{} as EmbeddableStateTransfer}
           savedObjects={{} as SavedObjectsStart}
         />
       );
@@ -138,7 +134,6 @@ describe('NewVisModal', () => {
           addBasePath={addBasePath}
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
-          stateTransfer={{} as EmbeddableStateTransfer}
           savedObjects={{} as SavedObjectsStart}
         />
       );
@@ -188,7 +183,6 @@ describe('NewVisModal', () => {
           addBasePath={addBasePath}
           uiSettings={uiSettings}
           application={({ navigateToApp } as unknown) as ApplicationStart}
-          stateTransfer={{} as EmbeddableStateTransfer}
           savedObjects={{} as SavedObjectsStart}
         />
       );
@@ -209,7 +203,6 @@ describe('NewVisModal', () => {
           addBasePath={addBasePath}
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
-          stateTransfer={{} as EmbeddableStateTransfer}
           savedObjects={{} as SavedObjectsStart}
         />
       );
@@ -230,7 +223,6 @@ describe('NewVisModal', () => {
           addBasePath={addBasePath}
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
-          stateTransfer={{} as EmbeddableStateTransfer}
           savedObjects={{} as SavedObjectsStart}
         />
       );
@@ -247,7 +239,6 @@ describe('NewVisModal', () => {
           addBasePath={addBasePath}
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
-          stateTransfer={{} as EmbeddableStateTransfer}
           savedObjects={{} as SavedObjectsStart}
         />
       );

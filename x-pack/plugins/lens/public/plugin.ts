@@ -43,10 +43,6 @@ export interface LensPluginStartDependencies {
   uiActions: UiActionsStart;
 }
 
-export interface LensIncomingState {
-  embeddableOriginatingApp: string;
-}
-
 export class LensPlugin {
   private datatableVisualization: DatatableVisualization;
   private editorFrameService: EditorFrameService;

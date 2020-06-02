@@ -209,7 +209,6 @@ export const EmbeddedMapComponent = ({
             inspector={services.inspector}
             application={services.application}
             SavedObjectFinder={getSavedObjectFinder(services.savedObjects, services.uiSettings)}
-            stateTransfer={services.embeddable.stateTransfer}
           />
         ) : !isLoading && isIndexError ? (
           <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />

@@ -89,7 +89,6 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
           overlays={{} as any}
           inspector={inspector}
           SavedObjectFinder={() => null}
-          stateTransfer={{} as any}
         />
       </KibanaContextProvider>
     </I18nProvider>

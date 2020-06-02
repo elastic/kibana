@@ -41,7 +41,7 @@ interface TypeSelectionProps {
   usageCollection?: UsageCollectionSetup;
   application: ApplicationStart;
   outsideVisualizeApp?: boolean;
-  stateTransfer: EmbeddableStart['stateTransfer'];
+  stateTransfer?: EmbeddableStart['stateTransfer'];
   originatingApp?: string;
 }
 
