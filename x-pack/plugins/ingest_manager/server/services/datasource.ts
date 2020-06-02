@@ -13,7 +13,7 @@ import {
   PackageInfo,
 } from '../../common';
 import { DATASOURCE_SAVED_OBJECT_TYPE } from '../constants';
-import { NewDatasource, Datasource, ListWithKuery } from '../types';
+import { NewDatasource, Datasource, ListWithKuery, DatasourceSOAttributes } from '../types';
 import { agentConfigService } from './agent_config';
 import { getPackageInfo, getInstallation } from './epm/packages';
 import { outputService } from './output';
@@ -32,7 +32,7 @@ class DatasourceService {
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<Datasource> {
     const isoDate = new Date().toISOString();
-    const newSo = await soClient.create<Omit<Datasource, 'id'>>(
+    const newSo = await soClient.create<DatasourceSOAttributes>(
       SAVED_OBJECT_TYPE,
       {
         ...datasource,
@@ -57,7 +57,7 @@ class DatasourceService {
   }
 
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<Datasource | null> {
-    const datasourceSO = await soClient.get<Datasource>(SAVED_OBJECT_TYPE, id);
+    const datasourceSO = await soClient.get<DatasourceSOAttributes>(SAVED_OBJECT_TYPE, id);
     if (!datasourceSO) {
       return null;
     }
@@ -66,14 +66,17 @@ class DatasourceService {
       throw new Error(datasourceSO.error.message);
     }
 
-    return datasourceSO.attributes;
+    return {
+      id: datasourceSO.id,
+      ...datasourceSO.attributes,
+    };
   }
 
   public async getByIDs(
     soClient: SavedObjectsClientContract,
     ids: string[]
   ): Promise<Datasource[] | null> {
-    const datasourceSO = await soClient.bulkGet<Datasource>(
+    const datasourceSO = await soClient.bulkGet<DatasourceSOAttributes>(
       ids.map((id) => ({
         id,
         type: SAVED_OBJECT_TYPE,
@@ -83,7 +86,10 @@ class DatasourceService {
       return null;
     }
 
-    return datasourceSO.saved_objects.map((so) => so.attributes);
+    return datasourceSO.saved_objects.map((so) => ({
+      id: so.id,
+      ...so.attributes,
+    }));
   }
 
   public async list(
@@ -92,7 +98,7 @@ class DatasourceService {
   ): Promise<{ items: Datasource[]; total: number; page: number; perPage: number }> {
     const { page = 1, perPage = 20, kuery } = options;
 
-    const datasources = await soClient.find<Datasource>({
+    const datasources = await soClient.find<DatasourceSOAttributes>({
       type: SAVED_OBJECT_TYPE,
       page,
       perPage,
@@ -106,7 +112,10 @@ class DatasourceService {
     });
 
     return {
-      items: datasources.saved_objects.map<Datasource>((datasourceSO) => datasourceSO.attributes),
+      items: datasources.saved_objects.map<Datasource>((datasourceSO) => ({
+        id: datasourceSO.id,
+        ...datasourceSO.attributes,
+      })),
       total: datasources.total,
       page,
       perPage,
@@ -125,7 +134,7 @@ class DatasourceService {
       throw new Error('Datasource not found');
     }
 
-    await soClient.update<Datasource>(SAVED_OBJECT_TYPE, id, {
+    await soClient.update<DatasourceSOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...datasource,
       revision: oldDatasource.revision + 1,
       updated_at: new Date().toISOString(),
