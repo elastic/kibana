@@ -267,12 +267,12 @@ export const MapsCreateEditView = class extends React.Component {
     });
   };
 
-  addFilters(newFilters) {
+  addFilters = (newFilters) => {
     newFilters.forEach((filter) => {
       filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
     });
     this.updateFiltersAndDispatch([...this.state.filters, ...newFilters]);
-  }
+  };
 
   onRefreshChange = ({ isPaused, refreshInterval }) => {
     const { refreshConfig } = this.state;
