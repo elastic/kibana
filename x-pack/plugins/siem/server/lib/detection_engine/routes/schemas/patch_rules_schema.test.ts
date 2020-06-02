@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertAction } from '../../../../../../alerting/common';
+import { AlertAction } from '../../../../../../alerts/common';
 import { patchRulesSchema } from './patch_rules_schema';
 import { PatchRuleAlertParamsRest } from '../../rules/types';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';

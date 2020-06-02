@@ -8,7 +8,7 @@ import { pickBy, countBy } from 'lodash/fp';
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import uuid from 'uuid';
 
-import { PartialAlert, FindResult } from '../../../../../../alerting/server';
+import { PartialAlert, FindResult } from '../../../../../../alerts/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
