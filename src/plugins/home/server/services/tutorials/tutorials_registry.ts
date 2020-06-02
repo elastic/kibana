@@ -65,7 +65,7 @@ export class TutorialsRegistry {
 
       unregisterTutorial: (specProvider: TutorialProvider) => {
         this.tutorialProviders = this.tutorialProviders.filter(
-          provider => provider !== specProvider
+          (provider) => provider !== specProvider
         );
       },
 

@@ -16,7 +16,7 @@ import {
   createJsAgentInstructions,
   createGoAgentInstructions,
   createJavaAgentInstructions,
-  createDotNetAgentInstructions
+  createDotNetAgentInstructions,
 } from '../../../../../src/plugins/apm_oss/server';
 import { CloudSetup } from '../../../cloud/server';
 
