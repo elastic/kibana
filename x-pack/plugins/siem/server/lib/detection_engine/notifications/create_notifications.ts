@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Alert } from '../../../../../alerting/common';
+import { Alert } from '../../../../../alerts/common';
 import { APP_ID, NOTIFICATIONS_ID } from '../../../../common/constants';
 import { CreateNotificationParams } from './types';
 import { addTags } from './add_tags';

@@ -5,8 +5,7 @@
  */
 
 import { defaults } from 'lodash/fp';
-
-import { PartialAlert } from '../../../../../alerting/server';
+import { PartialAlert } from '../../../../../alerts/server';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PatchRuleParams } from './types';
 import { addTags } from './add_tags';

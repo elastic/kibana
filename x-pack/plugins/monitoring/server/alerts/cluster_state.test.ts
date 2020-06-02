@@ -10,7 +10,7 @@ import { AlertCommonParams, AlertCommonState, AlertClusterStatePerClusterState }
 import { getPreparedAlert } from '../lib/alerts/get_prepared_alert';
 import { executeActions } from '../lib/alerts/cluster_state.lib';
 import { AlertClusterStateState } from './enums';
-import { alertsMock, AlertServicesMock } from '../../../alerting/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../alerts/server/mocks';
 
 jest.mock('../lib/alerts/cluster_state.lib', () => ({
   executeActions: jest.fn(),

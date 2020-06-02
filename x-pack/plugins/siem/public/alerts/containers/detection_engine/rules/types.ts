@@ -10,7 +10,7 @@ import { RuleTypeSchema } from '../../../../../common/detection_engine/types';
 
 /**
  * Params is an "record", since it is a type of AlertActionParams which is action templates.
- * @see x-pack/plugins/alerting/common/alert.ts
+ * @see x-pack/plugins/alerts/common/alert.ts
  */
 export const action = t.exact(
   t.type({
