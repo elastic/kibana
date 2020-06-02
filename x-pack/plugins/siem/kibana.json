@@ -5,7 +5,7 @@
   "configPath": ["xpack", "siem"],
   "requiredPlugins": [
     "actions",
-    "alerting",
+    "alerts",
     "data",
     "dataEnhanced",
     "embeddable",
