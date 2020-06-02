@@ -8,9 +8,10 @@ import { CoreSetup } from '../../../../../src/core/public';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { ES_SEARCH_STRATEGY } from '../../../../../src/plugins/data/common';
 import { enhancedEsSearchStrategyProvider } from './es_search_strategy';
+import { IAsyncSearchOptions } from '.';
 
 describe('Enhanced ES search strategy', () => {
-  let mockCoreSetup: MockedKeys<CoreSetup>;
+  let mockCoreSetup: jest.Mocked<CoreSetup>;
   const mockSearch = { search: jest.fn() };
 
   beforeEach(() => {
@@ -20,7 +21,7 @@ describe('Enhanced ES search strategy', () => {
 
   it('returns a strategy with `search` that calls the async search `search`', () => {
     const request = { params: {} };
-    const options = { pollInterval: 0 };
+    const options: IAsyncSearchOptions = { pollInterval: 0 };
 
     const esSearch = enhancedEsSearchStrategyProvider(mockCoreSetup, mockSearch);
     esSearch.search(request, options);
