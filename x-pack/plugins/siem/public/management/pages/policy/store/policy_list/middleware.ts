@@ -8,6 +8,7 @@ import { GetPolicyListResponse, PolicyListState } from '../../types';
 import { sendGetEndpointSpecificDatasources } from './services/ingest';
 import { isOnPolicyListPage, urlSearchParams } from './selectors';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
+import { initialPolicyListState } from './reducer';
 
 export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListState> = (
   coreStart
@@ -37,15 +38,13 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
         return;
       }
 
-      const { items: policyItems, total } = response;
-
       dispatch({
         type: 'serverReturnedPolicyListData',
         payload: {
-          policyItems,
+          policyItems: response ? response.items : initialPolicyListState.policyItems,
           pageIndex,
           pageSize,
-          total,
+          total: response ? response.total : initialPolicyListState.total,
         },
       });
     }
