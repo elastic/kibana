@@ -21,9 +21,11 @@ kibanaPipeline(timeoutMinutes: 240) {
 
 def handleIngestion(timestamp) {
   kibanaPipeline.downloadCoverageArtifacts()
+  kibanaCoverage.downloadCombined()
   kibanaCoverage.prokLinks("### Process HTML Links")
   kibanaCoverage.collectVcsInfo("### Collect VCS Info")
   kibanaCoverage.generateReports("### Merge coverage reports")
+  kibanaCoverage.uploadCombinedReports()
   // kibanaPipeline.downloadCoverageArtifacts('coverage/combined/')
   // kibanaCoverage.ingest(timestamp, '### Injest && Upload')
   // kibanaCoverage.uploadCoverageStaticSite(timestamp)

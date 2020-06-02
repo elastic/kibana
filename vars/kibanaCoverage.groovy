@@ -110,7 +110,30 @@ def generateReports(title) {
     . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
     tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*
   """, title)
-  kibanaPipeline.uploadGcsArtifact("kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/combined", 'kibana-coverage.tar.gz')
+}
+
+def combined() {
+  return "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/combined"
+}
+
+def uploadCombinedReports() {
+  kibanaPipeline.bash("""
+    ls -laR target/kibana-coverage/
+  """, "### List Combined Reports")
+
+  kibanaPipeline.uploadGcsArtifact(combined(), 'kibana-coverage.tar.gz')
+}
+
+def downloadCombined() {
+  def storageLocation = "gs://${combined()}/"
+  def targetLocation = "/tmp/downloaded_coverage_combined"
+  try {
+    sh "mkdir -p '${targetLocation}' && gsutil -m cp -r '${storageLocation}' '${targetLocation}'"
+    echo '### Download Combined Succeeded!'
+  } catch (err) {
+    echo '### Download Combined Failed!'
+    echo "### Error: ${err}"
+  }
 }
 
 def ingestData(buildNum, buildUrl, title) {
@@ -169,16 +192,16 @@ def ossProks() {
   return [
     'oss-ciGroup1' : kibanaPipeline.ossCiGroupProcess(1),
     'oss-ciGroup2' : kibanaPipeline.ossCiGroupProcess(2),
-    'oss-ciGroup3' : kibanaPipeline.ossCiGroupProcess(3),
-    'oss-ciGroup4' : kibanaPipeline.ossCiGroupProcess(4),
-    'oss-ciGroup5' : kibanaPipeline.ossCiGroupProcess(5),
-    'oss-ciGroup6' : kibanaPipeline.ossCiGroupProcess(6),
-    'oss-ciGroup7' : kibanaPipeline.ossCiGroupProcess(7),
-    'oss-ciGroup8' : kibanaPipeline.ossCiGroupProcess(8),
-    'oss-ciGroup9' : kibanaPipeline.ossCiGroupProcess(9),
-    'oss-ciGroup10': kibanaPipeline.ossCiGroupProcess(10),
-    'oss-ciGroup11': kibanaPipeline.ossCiGroupProcess(11),
-    'oss-ciGroup12': kibanaPipeline.ossCiGroupProcess(12),
+//    'oss-ciGroup3' : kibanaPipeline.ossCiGroupProcess(3),
+//    'oss-ciGroup4' : kibanaPipeline.ossCiGroupProcess(4),
+//    'oss-ciGroup5' : kibanaPipeline.ossCiGroupProcess(5),
+//    'oss-ciGroup6' : kibanaPipeline.ossCiGroupProcess(6),
+//    'oss-ciGroup7' : kibanaPipeline.ossCiGroupProcess(7),
+//    'oss-ciGroup8' : kibanaPipeline.ossCiGroupProcess(8),
+//    'oss-ciGroup9' : kibanaPipeline.ossCiGroupProcess(9),
+//    'oss-ciGroup10': kibanaPipeline.ossCiGroupProcess(10),
+//    'oss-ciGroup11': kibanaPipeline.ossCiGroupProcess(11),
+//    'oss-ciGroup12': kibanaPipeline.ossCiGroupProcess(12),
   ]
 }
 
@@ -186,14 +209,14 @@ def xpackProks() {
   return [
     'xpack-ciGroup1' : kibanaPipeline.xpackCiGroupProcess(1),
     'xpack-ciGroup2' : kibanaPipeline.xpackCiGroupProcess(2),
-    'xpack-ciGroup3' : kibanaPipeline.xpackCiGroupProcess(3),
-    'xpack-ciGroup4' : kibanaPipeline.xpackCiGroupProcess(4),
-    'xpack-ciGroup5' : kibanaPipeline.xpackCiGroupProcess(5),
-    'xpack-ciGroup6' : kibanaPipeline.xpackCiGroupProcess(6),
-    'xpack-ciGroup7' : kibanaPipeline.xpackCiGroupProcess(7),
-    'xpack-ciGroup8' : kibanaPipeline.xpackCiGroupProcess(8),
-    'xpack-ciGroup9' : kibanaPipeline.xpackCiGroupProcess(9),
-    'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
+//    'xpack-ciGroup3' : kibanaPipeline.xpackCiGroupProcess(3),
+//    'xpack-ciGroup4' : kibanaPipeline.xpackCiGroupProcess(4),
+//    'xpack-ciGroup5' : kibanaPipeline.xpackCiGroupProcess(5),
+//    'xpack-ciGroup6' : kibanaPipeline.xpackCiGroupProcess(6),
+//    'xpack-ciGroup7' : kibanaPipeline.xpackCiGroupProcess(7),
+//    'xpack-ciGroup8' : kibanaPipeline.xpackCiGroupProcess(8),
+//    'xpack-ciGroup9' : kibanaPipeline.xpackCiGroupProcess(9),
+//    'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
   ]
 }
 
