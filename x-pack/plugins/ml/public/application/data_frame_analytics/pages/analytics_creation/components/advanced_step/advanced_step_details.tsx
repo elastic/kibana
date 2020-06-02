@@ -34,7 +34,7 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
   setCurrentStep,
   state,
 }) => {
-  const { form } = state;
+  const { form, isJobCreated } = state;
   const {
     computeFeatureInfluence,
     dependentVariable,
@@ -256,17 +256,19 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiButtonEmpty
-        iconType="pencil"
-        size="s"
-        onClick={() => {
-          setCurrentStep(ANALYTICS_STEPS.ADVANCED);
-        }}
-      >
-        {i18n.translate('xpack.ml.dataframe.analytics.create.advancedDetails.editButtonText', {
-          defaultMessage: 'Edit',
-        })}
-      </EuiButtonEmpty>
+      {!isJobCreated && (
+        <EuiButtonEmpty
+          iconType="pencil"
+          size="s"
+          onClick={() => {
+            setCurrentStep(ANALYTICS_STEPS.ADVANCED);
+          }}
+        >
+          {i18n.translate('xpack.ml.dataframe.analytics.create.advancedDetails.editButtonText', {
+            defaultMessage: 'Edit',
+          })}
+        </EuiButtonEmpty>
+      )}
     </Fragment>
   );
 };

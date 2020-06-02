@@ -32,7 +32,7 @@ export enum ANALYSIS_ADVANCED_FIELDS {
   NUM_TOP_FEATURE_IMPORTANCE_VALUES = 'num_top_feature_importance_values',
 }
 
-export enum OUTLIER_ANALYSYS_METHOD {
+export enum OUTLIER_ANALYSIS_METHOD {
   LOF = 'lof',
   LDOF = 'ldof',
   DISTANCE_KTH_NN = 'distance_kth_nn',

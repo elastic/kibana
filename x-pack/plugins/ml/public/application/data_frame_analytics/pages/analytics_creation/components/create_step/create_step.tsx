@@ -5,7 +5,14 @@
  */
 
 import React, { FC, Fragment, useState } from 'react';
-import { EuiButton, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
@@ -42,7 +49,6 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
 
   return (
     <Fragment>
-      <Messages messages={requestMessages} />
       {!isJobCreated && !isJobStarted && (
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -51,7 +57,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
                 'xpack.ml.dataframe.analytics.create.startCheckboxHelpText',
                 {
                   defaultMessage:
-                    'If unselected, transform can be started later by returning to the transforms list.',
+                    'If unselected, job can be started later by returning to the jobs list.',
                 }
               )}
             >
@@ -81,6 +87,8 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
+      <EuiSpacer size="s" />
+      <Messages messages={requestMessages} />
       {isJobCreated === true && <BackToListPanel />}
     </Fragment>
   );

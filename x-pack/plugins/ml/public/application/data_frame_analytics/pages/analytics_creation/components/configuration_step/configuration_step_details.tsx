@@ -29,7 +29,7 @@ interface Props {
 export const ConfigurationStepDetails: FC<Props> = ({ setCurrentStep, state }) => {
   const mlContext = useMlContext();
   const { currentIndexPattern } = mlContext;
-  const { form } = state;
+  const { form, isJobCreated } = state;
   const { dependentVariable, excludes, jobConfigQueryString, jobType, trainingPercent } = form;
 
   const isJobTypeWithDepVar =
@@ -97,17 +97,19 @@ export const ConfigurationStepDetails: FC<Props> = ({ setCurrentStep, state }) =
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiButtonEmpty
-        iconType="pencil"
-        size="s"
-        onClick={() => {
-          setCurrentStep(ANALYTICS_STEPS.CONFIGURATION);
-        }}
-      >
-        {i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.editButtonText', {
-          defaultMessage: 'Edit',
-        })}
-      </EuiButtonEmpty>
+      {!isJobCreated && (
+        <EuiButtonEmpty
+          iconType="pencil"
+          size="s"
+          onClick={() => {
+            setCurrentStep(ANALYTICS_STEPS.CONFIGURATION);
+          }}
+        >
+          {i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.editButtonText', {
+            defaultMessage: 'Edit',
+          })}
+        </EuiButtonEmpty>
+      )}
     </Fragment>
   );
 };

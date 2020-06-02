@@ -25,13 +25,13 @@ export const DetailsStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
   setCurrentStep,
   state,
 }) => {
-  const { form } = state;
+  const { form, isJobCreated } = state;
   const { description, jobId, destinationIndex } = form;
 
   const detailsFirstCol: ListItems[] = [
     {
       title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.jobId', {
-        defaultMessage: 'Job id',
+        defaultMessage: 'Job ID',
       }),
       description: jobId,
     },
@@ -69,17 +69,19 @@ export const DetailsStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiButtonEmpty
-        iconType="pencil"
-        size="s"
-        onClick={() => {
-          setCurrentStep(ANALYTICS_STEPS.DETAILS);
-        }}
-      >
-        {i18n.translate('xpack.ml.dataframe.analytics.create.detailsDetails.editButtonText', {
-          defaultMessage: 'Edit',
-        })}
-      </EuiButtonEmpty>
+      {!isJobCreated && (
+        <EuiButtonEmpty
+          iconType="pencil"
+          size="s"
+          onClick={() => {
+            setCurrentStep(ANALYTICS_STEPS.DETAILS);
+          }}
+        >
+          {i18n.translate('xpack.ml.dataframe.analytics.create.detailsDetails.editButtonText', {
+            defaultMessage: 'Edit',
+          })}
+        </EuiButtonEmpty>
+      )}
     </Fragment>
   );
 };

@@ -25,7 +25,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.lambdaHelpText', {
             defaultMessage:
-              'Regularization parameter to prevent overfitting on the training data set. Must be a non negative value',
+              'Regularization parameter to prevent overfitting on the training data set. Must be a non negative value.',
           })}
         >
           <EuiFieldNumber
@@ -34,7 +34,9 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
                 'Regularization parameter to prevent overfitting on the training data set.',
             })}
             data-test-subj="mlAnalyticsCreateJobFlyoutLambdaInput"
-            onChange={(e) => setFormState({ lambda: +e.target.value })}
+            onChange={(e) =>
+              setFormState({ lambda: e.target.value === '' ? undefined : +e.target.value })
+            }
             step={0.001}
             min={0}
           />
@@ -46,8 +48,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
             defaultMessage: 'Max trees',
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.maxTreesText', {
-            defaultMessage:
-              'The maximum number of trees the forest is allowed to contain. Must be an integer',
+            defaultMessage: 'The maximum number of trees the forest is allowed to contain.',
           })}
         >
           <EuiFieldNumber
@@ -58,7 +59,9 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
               }
             )}
             data-test-subj="mlAnalyticsCreateJobFlyoutMaxTreesInput"
-            onChange={(e) => setFormState({ maxTrees: +e.target.value })}
+            onChange={(e) =>
+              setFormState({ maxTrees: e.target.value === '' ? undefined : +e.target.value })
+            }
             isInvalid={maxTrees !== undefined && !Number.isInteger(maxTrees)}
             step={1}
             min={1}
@@ -73,7 +76,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.gammaText', {
             defaultMessage:
-              'Multiplies a linear penalty associated with the size of individual trees in the forest. Must be non-negative value',
+              'Multiplies a linear penalty associated with the size of individual trees in the forest. Must be non-negative value.',
           })}
         >
           <EuiFieldNumber
@@ -82,7 +85,9 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
                 'Multiplies a linear penalty associated with the size of individual trees in the forest',
             })}
             data-test-subj="mlAnalyticsCreateJobWizardGammaInput"
-            onChange={(e) => setFormState({ gamma: +e.target.value })}
+            onChange={(e) =>
+              setFormState({ gamma: e.target.value === '' ? undefined : +e.target.value })
+            }
             step={0.001}
             min={0}
           />
@@ -102,7 +107,9 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
               defaultMessage: 'The shrinkage applied to the weights',
             })}
             data-test-subj="mlAnalyticsCreateJobWizardEtaInput"
-            onChange={(e) => setFormState({ eta: +e.target.value })}
+            onChange={(e) =>
+              setFormState({ eta: e.target.value === '' ? undefined : +e.target.value })
+            }
             step={0.001}
             min={0.001}
             max={1}
@@ -128,7 +135,11 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardFeatureBagFractionInput"
-            onChange={(e) => setFormState({ featureBagFraction: +e.target.value })}
+            onChange={(e) =>
+              setFormState({
+                featureBagFraction: e.target.value === '' ? undefined : +e.target.value,
+              })
+            }
             isInvalid={
               featureBagFraction !== undefined &&
               (featureBagFraction > 1 || featureBagFraction <= 0)
@@ -145,7 +156,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.randomizeSeedText', {
             defaultMessage:
-              'The seed to the random generator that is used to pick which documents will be used for training',
+              'The seed to the random generator that is used to pick which documents will be used for training.',
           })}
         >
           <EuiFieldNumber
@@ -157,7 +168,9 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardRandomizeSeedInput"
-            onChange={(e) => setFormState({ randomizeSeed: +e.target.value })}
+            onChange={(e) =>
+              setFormState({ randomizeSeed: e.target.value === '' ? undefined : +e.target.value })
+            }
             isInvalid={randomizeSeed !== undefined && typeof randomizeSeed !== 'number'}
             step={1}
           />

@@ -243,7 +243,9 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   }, []);
 
   useEffect(() => {
-    setFormState({ jobConfigQuery: savedSearchQuery, jobConfigQueryString: savedSearchQueryStr });
+    if (savedSearchQueryStr !== undefined) {
+      setFormState({ jobConfigQuery: savedSearchQuery, jobConfigQueryString: savedSearchQueryStr });
+    }
   }, [JSON.stringify(savedSearchQuery), savedSearchQueryStr]);
 
   useEffect(() => {
@@ -417,7 +419,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.trainingPercentHelpText', {
             defaultMessage:
-              'Defines what percentage of the eligible documents that will be used for training',
+              'Defines the percentage of eligible documents that will be used for training.',
           })}
         >
           <EuiRange

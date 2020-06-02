@@ -7,7 +7,7 @@
 import React, { FC, Fragment } from 'react';
 import { EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { OUTLIER_ANALYSYS_METHOD } from '../../../../common/analytics';
+import { OUTLIER_ANALYSIS_METHOD } from '../../../../common/analytics';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 
 export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
@@ -28,7 +28,7 @@ export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, 
           })}
         >
           <EuiSelect
-            options={Object.values(OUTLIER_ANALYSYS_METHOD).map((outlierMethod) => ({
+            options={Object.values(OUTLIER_ANALYSIS_METHOD).map((outlierMethod) => ({
               value: outlierMethod,
               text: outlierMethod,
             }))}
@@ -60,7 +60,9 @@ export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, 
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardnNeighborsInput"
-            onChange={(e) => setFormState({ nNeighbors: +e.target.value })}
+            onChange={(e) =>
+              setFormState({ nNeighbors: e.target.value === '' ? undefined : +e.target.value })
+            }
             step={1}
             min={1}
           />
@@ -85,7 +87,9 @@ export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, 
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardoutlierFractionInput"
-            onChange={(e) => setFormState({ outlierFraction: +e.target.value })}
+            onChange={(e) =>
+              setFormState({ outlierFraction: e.target.value === '' ? undefined : +e.target.value })
+            }
             step={0.001}
             min={0}
             max={1}

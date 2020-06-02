@@ -78,6 +78,20 @@ export const AnalysisFieldsTable: FC<{
   tableItems: FieldSelectionItem[];
 }> = ({ excludes, loadingItems, setFormState, tableItems }) => {
   const [sortableProperties, setSortableProperties] = useState();
+  const [currentSelection, setCurrentSelection] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (excludes.length > 0) {
+      setCurrentSelection(excludes);
+    }
+  }, []);
+
+  // Only set form state on unmount to prevent re-renders due to props changing if exludes was updated on each selection
+  useEffect(() => {
+    return () => {
+      setFormState({ excludes: currentSelection });
+    };
+  }, [currentSelection]);
 
   useEffect(() => {
     let sortablePropertyItems = [];
@@ -174,10 +188,10 @@ export const AnalysisFieldsTable: FC<{
             filters={filters}
             items={tableItems}
             itemsPerPage={5}
-            onTableChange={(currentSelection: FieldSelectionItem[]) => {
-              setFormState({ excludes: currentSelection });
+            onTableChange={(selection: FieldSelectionItem[]) => {
+              setCurrentSelection(selection);
             }}
-            selectedIds={excludes}
+            selectedIds={currentSelection}
             singleSelection={false}
             sortableProperties={sortableProperties}
             tableItemId={'name'}

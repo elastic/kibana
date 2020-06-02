@@ -118,12 +118,16 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             'xpack.ml.dataframe.analytics.create.featureInfluenceThresholdHelpText',
             {
               defaultMessage:
-                'The minimum outlier score that a document needs to have in order to calculate its feature influence score. Value range: 0-1. Defaults to 0.1',
+                'The minimum outlier score that a document needs to have in order to calculate its feature influence score. Value range: 0-1. Defaults to 0.1.',
             }
           )}
         >
           <EuiFieldNumber
-            onChange={(e) => setFormState({ featureInfluenceThreshold: +e.target.value })}
+            onChange={(e) =>
+              setFormState({
+                featureInfluenceThreshold: e.target.value === '' ? undefined : +e.target.value,
+              })
+            }
             data-test-subj="mlAnalyticsCreateJobWizardFeatureInfluenceThresholdInput"
             min={0}
             max={1}
@@ -177,7 +181,11 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             data-test-subj="mlAnalyticsCreateJobFlyoutnumTopFeatureImportanceValuesInput"
             isInvalid={numTopFeatureImportanceValuesValid === false}
             min={NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN}
-            onChange={(e) => setFormState({ numTopFeatureImportanceValues: +e.target.value })}
+            onChange={(e) =>
+              setFormState({
+                numTopFeatureImportanceValues: e.target.value === '' ? undefined : +e.target.value,
+              })
+            }
             step={1}
             value={numTopFeatureImportanceValues}
           />
@@ -192,7 +200,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             'xpack.ml.dataframe.analytics.create.predictionFieldNameHelpText',
             {
               defaultMessage:
-                'Defines the name of the prediction field in the results. Defaults to <dependent_variable>_prediction',
+                'Defines the name of the prediction field in the results. Defaults to <dependent_variable>_prediction.',
             }
           )}
         >
@@ -229,7 +237,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
                 'xpack.ml.dataframe.analytics.create.numTopClassesHelpText',
                 {
                   defaultMessage:
-                    'The number of categories for which the predicted probabilities are reported',
+                    'The number of categories for which the predicted probabilities are reported.',
                 }
               )}
             >
@@ -243,7 +251,11 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
                 )}
                 data-test-subj="mlAnalyticsCreateJobWizardnumTopClassesInput"
                 min={0}
-                onChange={(e) => setFormState({ numTopClasses: +e.target.value })}
+                onChange={(e) =>
+                  setFormState({
+                    numTopClasses: e.target.value === '' ? undefined : +e.target.value,
+                  })
+                }
                 step={1}
                 value={numTopClasses}
               />
@@ -261,7 +273,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
               'xpack.ml.dataframe.analytics.create.modelMemoryLimitHelpText',
               {
                 defaultMessage:
-                  'The approximate maximum amount of memory resources that are permitted for analytical processing',
+                  'The approximate maximum amount of memory resources that are permitted for analytical processing.',
               }
             )}
           >

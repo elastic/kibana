@@ -17,7 +17,7 @@ export {
   IndexPattern,
   REFRESH_ANALYTICS_LIST_STATE,
   ANALYSIS_CONFIG_TYPE,
-  OUTLIER_ANALYSYS_METHOD,
+  OUTLIER_ANALYSIS_METHOD,
   RegressionEvaluateResponse,
   getValuesFromResponse,
   loadEvalData,
