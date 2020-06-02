@@ -19,7 +19,6 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { v4 as uuidv4 } from 'uuid';
 import {
   SavedObject,
   SavedObjectsClientContract,
@@ -197,12 +196,12 @@ export async function getImportIdMapForRetries(
     (acc, cur) => acc.set(`${cur.type}:${cur.id}`, cur),
     new Map<string, SavedObjectsImportRetry>()
   );
-  const importIdMap = new Map<string, { id: string; omitOriginId?: boolean }>();
+  const importIdMap = new Map<string, { id: string }>();
 
   objects.forEach(({ type, id }) => {
     const retry = retryMap.get(`${type}:${id}`);
     if (retry) {
-      const { overwrite, idToOverwrite, duplicate } = retry;
+      const { overwrite, idToOverwrite } = retry;
       if (
         overwrite &&
         idToOverwrite &&
@@ -210,8 +209,6 @@ export async function getImportIdMapForRetries(
         typeRegistry.isMultiNamespace(type)
       ) {
         importIdMap.set(`${type}:${id}`, { id: idToOverwrite });
-      } else if (!overwrite && duplicate) {
-        importIdMap.set(`${type}:${id}`, { id: uuidv4(), omitOriginId: true });
       }
     }
   });

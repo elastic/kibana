@@ -15,15 +15,10 @@ export interface ResolveImportErrorsTestDefinition extends TestDefinition {
   request: {
     objects: Array<{ type: string; id: string; originId?: string }>;
     retries: Array<
-      { type: string; id: string } & (
-        | { overwrite: true; idToOverwrite?: string }
-        | { duplicate: true }
-        | {}
-      )
+      { type: string; id: string } & ({ overwrite: true; idToOverwrite?: string } | {})
     >;
   };
   overwrite: boolean;
-  duplicate: boolean;
 }
 export type ResolveImportErrorsTestSuite = TestSuite<ResolveImportErrorsTestDefinition>;
 export interface ResolveImportErrorsTestCase extends TestCase {
@@ -79,14 +74,11 @@ export const TEST_CASES = Object.freeze({
  */
 const createRequest = (
   { type, id, originId, idToOverwrite }: ResolveImportErrorsTestCase,
-  overwrite: boolean,
-  duplicate: boolean
+  overwrite: boolean
 ): ResolveImportErrorsTestDefinition['request'] => ({
   objects: [{ type, id, ...(originId && { originId }) }],
   retries: overwrite
     ? [{ type, id, overwrite, ...(idToOverwrite && { idToOverwrite }) }]
-    : duplicate
-    ? [{ type, id, duplicate: true }]
     : [{ type, id }],
 });
 
@@ -99,7 +91,6 @@ export function resolveImportErrorsTestSuiteFactory(
   const expectResponseBody = (
     testCases: ResolveImportErrorsTestCase | ResolveImportErrorsTestCase[],
     statusCode: 200 | 403,
-    duplicate: boolean,
     spaceId = SPACES.DEFAULT.spaceId
   ): ExpectResponseBody => async (response: Record<string, any>) => {
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
@@ -130,7 +121,7 @@ export function resolveImportErrorsTestSuiteFactory(
           // Kibana created the object with a different ID than what was specified in the import
           // This can happen due to an unresolvable conflict (so the new ID will be random), or due to an inexact match (so the new ID will
           // be equal to the ID or originID of the existing object that it inexactly matched)
-          if (idToOverwrite && !duplicate) {
+          if (idToOverwrite) {
             expect(newId).to.be(idToOverwrite);
           } else {
             // the new ID was randomly generated
@@ -162,7 +153,6 @@ export function resolveImportErrorsTestSuiteFactory(
     testCases: ResolveImportErrorsTestCase | ResolveImportErrorsTestCase[],
     forbidden: boolean,
     overwrite: boolean,
-    duplicate: boolean,
     options?: {
       spaceId?: string;
       singleRequest?: boolean;
@@ -176,13 +166,12 @@ export function resolveImportErrorsTestSuiteFactory(
       // this ensures that multiple test cases of a single type will each result in a forbidden error
       return cases.map((x) => ({
         title: getTestTitle(x, responseStatusCode),
-        request: createRequest(x, overwrite, duplicate),
+        request: createRequest(x, overwrite),
         responseStatusCode,
         responseBody:
           options?.responseBodyOverride ||
-          expectResponseBody(x, responseStatusCode, duplicate, options?.spaceId),
+          expectResponseBody(x, responseStatusCode, options?.spaceId),
         overwrite,
-        duplicate,
       }));
     }
     // batch into a single request to save time during test execution
@@ -190,7 +179,7 @@ export function resolveImportErrorsTestSuiteFactory(
       {
         title: getTestTitle(cases, responseStatusCode),
         request: cases
-          .map((x) => createRequest(x, overwrite, duplicate))
+          .map((x) => createRequest(x, overwrite))
           .reduce((acc, cur) => ({
             objects: [...acc.objects, ...cur.objects],
             retries: [...acc.retries, ...cur.retries],
@@ -198,9 +187,8 @@ export function resolveImportErrorsTestSuiteFactory(
         responseStatusCode,
         responseBody:
           options?.responseBodyOverride ||
-          expectResponseBody(cases, responseStatusCode, duplicate, options?.spaceId),
+          expectResponseBody(cases, responseStatusCode, options?.spaceId),
         overwrite,
-        duplicate,
       },
     ];
   };

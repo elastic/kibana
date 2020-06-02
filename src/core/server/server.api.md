@@ -2125,10 +2125,10 @@ export interface SavedObjectsImportResponse {
 
 // @public
 export interface SavedObjectsImportRetry {
-    duplicate?: boolean;
     // (undocumented)
     id: string;
     idToOverwrite?: string;
+    // (undocumented)
     overwrite: boolean;
     // (undocumented)
     replaceReferences: Array<{
