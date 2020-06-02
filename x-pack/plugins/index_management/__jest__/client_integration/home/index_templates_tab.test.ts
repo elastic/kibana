@@ -10,7 +10,7 @@ import * as fixtures from '../../../test/fixtures';
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, nextTick, getRandomString } from '../helpers';
 
-import { IdxMgmtHomeTestBed, setup } from './home.helpers';
+import { IndexTemplatesTabTestBed, setup } from './index_templates_tab.helpers';
 
 const removeWhiteSpaceOnArrayValues = (array: any[]) =>
   array.map((value) => {
@@ -22,7 +22,7 @@ const removeWhiteSpaceOnArrayValues = (array: any[]) =>
 
 describe('Index Templates tab', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
-  let testBed: IdxMgmtHomeTestBed;
+  let testBed: IndexTemplatesTabTestBed;
 
   afterAll(() => {
     server.restore();
@@ -47,7 +47,7 @@ describe('Index Templates tab', () => {
 
       httpRequestsMockHelpers.setLoadTemplatesResponse([]);
 
-      actions.selectHomeTab('templatesTab');
+      actions.goToTemplatesList();
 
       await act(async () => {
         await nextTick();
@@ -94,7 +94,7 @@ describe('Index Templates tab', () => {
 
       httpRequestsMockHelpers.setLoadTemplatesResponse(templates);
 
-      actions.selectHomeTab('templatesTab');
+      actions.goToTemplatesList();
 
       await act(async () => {
         await nextTick();
