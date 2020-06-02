@@ -87,6 +87,23 @@ export interface DiscoverSetup {
 
 export interface DiscoverStart {
   savedSearchLoader: SavedObjectLoader;
+
+  /**
+   * `share` plugin URL generator for Discover app. Use it to generate links into
+   * Discover application, example:
+   *
+   * ```ts
+   * const url = await plugins.discover.urlGenerator.createUrl({
+   *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
+   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
+   *   timeRange: {
+   *     to: 'now',
+   *     from: 'now-15m',
+   *     mode: 'relative',
+   *   },
+   * });
+   * ```
+   */
   readonly urlGenerator: undefined | UrlGeneratorContract<'DISCOVER_APP_URL_GENERATOR'>;
 }
 
