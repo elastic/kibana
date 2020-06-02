@@ -23,9 +23,9 @@ exports[`Transform: Aggregation <PopoverForm /> Minimal initialization 1`] = `
   >
     <EuiFieldText
       data-test-subj="transformAggName"
-      defaultValue="the-group-by-agg-name"
       isInvalid={false}
       onChange={[Function]}
+      value="the-group-by-agg-name"
     />
   </EuiFormRow>
   <EuiFormRow
