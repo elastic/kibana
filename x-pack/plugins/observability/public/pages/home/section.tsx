@@ -12,7 +12,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -44,7 +43,7 @@ const Icon = styled(EuiIcon)`
 
 export const Section = ({ section }: { section: ISection }) => {
   const { core } = usePluginContext();
-  const { id, icon, title, description, href } = section;
+  const { icon, title, description, href } = section;
 
   const sectionContent = (
     <EuiFlexGroup gutterSize="m">
@@ -53,18 +52,12 @@ export const Section = ({ section }: { section: ISection }) => {
       </EuiFlexItem>
       <EuiFlexItem style={{ textAlign: 'left' }}>
         <EuiTitle size="xs" className="title">
-          <h3>
-            {i18n.translate(`observability.section.${id}.title`, {
-              defaultMessage: title,
-            })}
-          </h3>
+          <h3>{title}</h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         {description && (
           <EuiText size="s" style={{ whiteSpace: 'normal' }} color="default">
-            {i18n.translate(`observability.section.${id}.description`, {
-              defaultMessage: description,
-            })}
+            {description}
           </EuiText>
         )}
       </EuiFlexItem>

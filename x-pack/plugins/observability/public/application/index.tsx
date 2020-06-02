@@ -11,11 +11,14 @@ import { Home } from '../pages/home';
 import { PluginContext } from '../context/plugin_context';
 
 export const renderApp = (core: CoreStart, { element }: AppMountParameters) => {
+  const i18nCore = core.i18n;
   const isDarkMode = core.uiSettings.get('theme:darkMode');
   ReactDOM.render(
     <PluginContext.Provider value={{ core }}>
       <EuiThemeProvider darkMode={isDarkMode}>
-        <Home />
+        <i18nCore.Context>
+          <Home />
+        </i18nCore.Context>
       </EuiThemeProvider>
     </PluginContext.Provider>,
     element

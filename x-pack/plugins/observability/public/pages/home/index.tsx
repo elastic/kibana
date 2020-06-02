@@ -26,38 +26,56 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 const appsSection: ISection[] = [
   {
     id: 'logs',
-    title: 'Logs',
+    title: i18n.translate('xpack.observability.section.apps.logs.title', {
+      defaultMessage: 'Logs',
+    }),
     icon: 'logoLogging',
-    description:
-      'The Elastic Stack (sometimes known as the ELK Stack) is the most popular open source logging platform.',
+    description: i18n.translate('xpack.observability.section.apps.logs.description', {
+      defaultMessage:
+        'The Elastic Stack (sometimes known as the ELK Stack) is the most popular open source logging platform.',
+    }),
   },
   {
     id: 'apm',
-    title: 'APM',
+    title: i18n.translate('xpack.observability.section.apps.apm.title', {
+      defaultMessage: 'APM',
+    }),
     icon: 'logoAPM',
-    description:
-      'See exactly where your application is spending time so you can quickly fix issues and feel good about the code you push.',
+    description: i18n.translate('xpack.observability.section.apps.apm.description', {
+      defaultMessage:
+        'See exactly where your application is spending time so you can quickly fix issues and feel good about the code you push.',
+    }),
   },
   {
     id: 'metrics',
-    title: 'Metrics',
+    title: i18n.translate('xpack.observability.section.apps.metrics.title', {
+      defaultMessage: 'Metrics',
+    }),
     icon: 'logoMetrics',
-    description:
-      'Already using the Elastic Stack for logs? Add metrics in just a few steps and correlate metrics and logs in one place.',
+    description: i18n.translate('xpack.observability.section.apps.metrics.description', {
+      defaultMessage:
+        'Already using the Elastic Stack for logs? Add metrics in just a few steps and correlate metrics and logs in one place.',
+    }),
   },
   {
     id: 'uptime',
-    title: 'Uptime',
+    title: i18n.translate('xpack.observability.section.apps.uptime.title', {
+      defaultMessage: 'Uptime',
+    }),
     icon: 'logoUptime',
-    description:
-      'React to availability issues across your apps and services before they affect users.',
+    description: i18n.translate('xpack.observability.section.apps.uptime.description', {
+      defaultMessage:
+        'React to availability issues across your apps and services before they affect users.',
+    }),
   },
 ];
 
 const tryItOutItemsSection: ISection[] = [
   {
     id: 'demo',
-    title: 'Demo Playground',
+    title: i18n.translate('xpack.observability.section.tryItOut.demo.title', {
+      defaultMessage: 'Demo Playground',
+    }),
     icon: 'play',
     description: '',
     href: 'https://demo.elastic.co/',
@@ -65,7 +83,9 @@ const tryItOutItemsSection: ISection[] = [
   },
   {
     id: 'sampleData',
-    title: 'Add sample data',
+    title: i18n.translate('xpack.observability.section.tryItOut.sampleData.title', {
+      defaultMessage: 'Add sample data',
+    }),
     icon: 'documents',
     description: '',
     href: '/app/home#/tutorial_directory/sampleData',
@@ -97,12 +117,12 @@ export const Home = () => {
     () => {
       core.chrome.setBreadcrumbs([
         {
-          text: i18n.translate('observability.home.breadcrumb.observability', {
+          text: i18n.translate('xpack.observability.home.breadcrumb.observability', {
             defaultMessage: 'Observability',
           }),
         },
         {
-          text: i18n.translate('observability.home.breadcrumb.gettingStarted', {
+          text: i18n.translate('xpack.observability.home.breadcrumb.gettingStarted', {
             defaultMessage: 'Getting started',
           }),
         },
@@ -124,7 +144,7 @@ export const Home = () => {
             <EuiFlexItem>
               <EuiTitle size="m">
                 <h1>
-                  {i18n.translate('observability.home.title', {
+                  {i18n.translate('xpack.observability.home.title', {
                     defaultMessage: 'Observability',
                   })}
                 </h1>
@@ -141,14 +161,14 @@ export const Home = () => {
           <EuiFlexItem style={{ maxWidth: 567 }}>
             <EuiTitle size="s">
               <h2>
-                {i18n.translate('observability.home.sectionTitle', {
+                {i18n.translate('xpack.observability.home.sectionTitle', {
                   defaultMessage: 'Observability built on the Elastic Stack',
                 })}
               </h2>
             </EuiTitle>
             <EuiSpacer size="m" />
             <EuiText size="s" color="subdued">
-              {i18n.translate('observability.home.sectionsubtitle', {
+              {i18n.translate('xpack.observability.home.sectionsubtitle', {
                 defaultMessage:
                   'Bring your logs, metrics, and APM traces together at scale in a single stack so you can monitor and react to events happening anywhere in your environment.',
               })}
@@ -189,7 +209,7 @@ export const Home = () => {
                   style={{ width: 175 }}
                   href={core.http.basePath.prepend('/app/home#/tutorial_directory/logging')}
                 >
-                  {i18n.translate('observability.home.getStatedButton', {
+                  {i18n.translate('xpack.observability.home.getStatedButton', {
                     defaultMessage: 'Get started',
                   })}
                 </EuiButton>
@@ -205,7 +225,7 @@ export const Home = () => {
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
                   <h3>
-                    {i18n.translate('observability.home.tryItOut', {
+                    {i18n.translate('xpack.observability.home.tryItOut', {
                       defaultMessage: 'Try it out',
                     })}
                   </h3>
