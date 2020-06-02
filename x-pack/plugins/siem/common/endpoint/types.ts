@@ -6,11 +6,19 @@
 
 import { Datasource, NewDatasource } from '../../../ingest_manager/common';
 
+/**
+ * Object that allows you to maintain stateful information in the location object across navigation events
+ *
+ */
+
 export interface AppLocation {
   pathname: string;
   search: string;
   hash: string;
   key?: string;
+  state?: {
+    isTabChange?: boolean;
+  };
 }
 
 /**
@@ -33,29 +41,95 @@ type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
+/**
+ * Statistical information for a node in a resolver tree.
+ */
 export interface ResolverNodeStats {
+  /**
+   * The total number of related events (all events except process and alerts) that exist for a node.
+   */
   totalEvents: number;
+  /**
+   * The total number of alerts that exist for a node.
+   */
   totalAlerts: number;
 }
 
-export interface ResolverNodePagination {
-  nextChild?: string | null;
-  nextEvent?: string | null;
-  nextAncestor?: string | null;
-  nextAlert?: string | null;
+/**
+ * A child node can also have additional children so we need to provide a pagination cursor.
+ */
+export interface ChildNode extends LifecycleNode {
+  /**
+   * A child node's pagination cursor can be null for a couple reasons:
+   * 1. At the time of querying it could have no children in ES, in which case it will be marked as
+   *  null because we know it does not have children during this query.
+   * 2. If the max level was reached we do not know if this node has children or not so we'll mark it as null
+   */
+  nextChild: string | null;
 }
 
 /**
- * A node that contains pointers to other nodes, arrrays of resolver events, and any metadata associated with resolver specific data
+ * The response structure for the children route. The structure is an array of nodes where each node
+ * has an array of lifecycle events.
  */
-export interface ResolverNode {
-  id: string;
-  children: ResolverNode[];
-  events: ResolverEvent[];
+export interface ResolverChildren {
+  childNodes: ChildNode[];
+  /**
+   * This is the children cursor for the origin of a tree.
+   */
+  nextChild: string | null;
+}
+
+/**
+ * A flattened tree representing the nodes in a resolver graph.
+ */
+export interface ResolverTree {
+  /**
+   * Origin of the tree. This is in the middle of the tree. Typically this would be the same
+   * process node that generated an alert.
+   */
+  entityID: string;
+  children: ResolverChildren;
+  relatedEvents: Omit<ResolverRelatedEvents, 'entityID'>;
+  ancestry: ResolverAncestry;
   lifecycle: ResolverEvent[];
-  ancestors?: ResolverNode[];
-  pagination: ResolverNodePagination;
+  stats: ResolverNodeStats;
+}
+
+/**
+ * The lifecycle events (start, end etc) for a node.
+ */
+export interface LifecycleNode {
+  entityID: string;
+  lifecycle: ResolverEvent[];
+  /**
+   * stats are only set when the entire tree is being fetched
+   */
   stats?: ResolverNodeStats;
+}
+
+/**
+ * The response structure when searching for ancestors of a node.
+ */
+export interface ResolverAncestry {
+  /**
+   * An array of ancestors with the lifecycle events grouped together
+   */
+  ancestors: LifecycleNode[];
+  /**
+   * A cursor for retrieving additional ancestors for a particular node. `null` indicates that there were no additional
+   * ancestors when the request returned. More could have been ingested by ES after the fact though.
+   */
+  nextAncestor: string | null;
+}
+
+/**
+ * Response structure for the related events route.
+ */
+export interface ResolverRelatedEvents {
+  entityID: string;
+  events: ResolverEvent[];
+  nextEvent: string | null;
 }
 
 /**
@@ -302,6 +376,10 @@ export interface LegacyEndpointEvent {
   process?: object;
   rule?: object;
   user?: object;
+  event?: {
+    action?: string;
+    type?: string;
+  };
 }
 
 export interface EndpointEvent {

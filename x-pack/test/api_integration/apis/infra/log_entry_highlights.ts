@@ -46,6 +46,34 @@ export default function ({ getService }: FtrProviderContext) {
         before(() => esArchiver.load('empty_kibana'));
         after(() => esArchiver.unload('empty_kibana'));
 
+        it('Handles empty responses', async () => {
+          const { body } = await supertest
+            .post(LOG_ENTRIES_HIGHLIGHTS_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesHighlightsRequestRT.encode({
+                sourceId: 'default',
+                startTimestamp: KEY_BEFORE_START.time,
+                endTimestamp: KEY_AFTER_END.time,
+                highlightTerms: ['some string that does not exist'],
+              })
+            )
+            .expect(200);
+
+          const logEntriesHighlightsResponse = pipe(
+            logEntriesHighlightsResponseRT.decode(body),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          expect(logEntriesHighlightsResponse.data).to.have.length(1);
+
+          const data = logEntriesHighlightsResponse.data[0];
+
+          expect(data.entries).to.have.length(0);
+          expect(data.topCursor).to.be(null);
+          expect(data.bottomCursor).to.be(null);
+        });
+
         it('highlights built-in message column', async () => {
           const { body } = await supertest
             .post(LOG_ENTRIES_HIGHLIGHTS_PATH)

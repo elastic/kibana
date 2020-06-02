@@ -10,10 +10,9 @@ import { AddLayerPanel } from './view';
 import { FLYOUT_STATE, INDEXING_STAGE } from '../../reducers/ui';
 import { getFlyoutDisplay, getIndexingStage } from '../../selectors/ui_selectors';
 import {
-  setTransientLayer,
-  addLayer,
-  setSelectedLayer,
-  removeTransientLayer,
+  addPreviewLayers,
+  promotePreviewLayers,
+  setFirstPreviewLayerToSelectedLayer,
   updateFlyout,
   updateIndexingStage,
 } from '../../actions';
@@ -32,20 +31,13 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
-    previewLayer: async (layerDescriptor: LayerDescriptor) => {
-      await dispatch(setSelectedLayer(null));
-      await dispatch(removeTransientLayer());
-      dispatch(addLayer(layerDescriptor));
-      dispatch(setSelectedLayer(layerDescriptor.id));
-      dispatch(setTransientLayer(layerDescriptor.id));
+    addPreviewLayers: (layerDescriptors: LayerDescriptor[]) => {
+      dispatch<any>(addPreviewLayers(layerDescriptors));
     },
-    removeTransientLayer: () => {
-      dispatch(setSelectedLayer(null));
-      dispatch(removeTransientLayer());
-    },
-    selectLayerAndAdd: () => {
-      dispatch(setTransientLayer(null));
+    promotePreviewLayers: () => {
+      dispatch<any>(setFirstPreviewLayerToSelectedLayer());
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
+      dispatch<any>(promotePreviewLayers());
     },
     setIndexingTriggered: () => dispatch(updateIndexingStage(INDEXING_STAGE.TRIGGERED)),
     resetIndexing: () => dispatch(updateIndexingStage(null)),

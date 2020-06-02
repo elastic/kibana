@@ -30,18 +30,20 @@ export const registerPrivilegesRoute = ({ license, router, config }: RouteDepend
       };
 
       // Skip the privileges check if security is not enabled
-      if (!config.isSecurityEnabled) {
+      if (!config.isSecurityEnabled()) {
         return res.ok({ body: privilegesResult });
       }
 
       const {
         core: {
-          elasticsearch: { dataClient },
+          elasticsearch: {
+            legacy: { client },
+          },
         },
       } = ctx;
 
       try {
-        const { has_all_requested: hasAllPrivileges, cluster } = await dataClient.callAsCurrentUser(
+        const { has_all_requested: hasAllPrivileges, cluster } = await client.callAsCurrentUser(
           'transport.request',
           {
             path: '/_security/user/_has_privileges',

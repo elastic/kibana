@@ -3,186 +3,29 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 import { StatsQuery } from './stats';
-import { fakeEventIndexPattern } from './children.test';
+import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 
-describe('stats query', () => {
-  it('generates the correct legacy queries', () => {
-    expect(new StatsQuery(legacyEventIndexPattern, 'awesome-id').build('5')).toStrictEqual({
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'agent.id': 'awesome-id',
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        filter: [
-                          {
-                            term: {
-                              'event.kind': 'event',
-                            },
-                          },
-                          {
-                            terms: {
-                              'endgame.unique_pid': ['5'],
-                            },
-                          },
-                          {
-                            bool: {
-                              must_not: {
-                                term: {
-                                  'event.category': 'process',
-                                },
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        filter: [
-                          {
-                            term: {
-                              'event.kind': 'alert',
-                            },
-                          },
-                          {
-                            terms: {
-                              'endgame.data.alert_details.acting_process.unique_pid': ['5'],
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          alerts: {
-            filter: {
-              term: {
-                'event.kind': 'alert',
-              },
-            },
-            aggs: {
-              ids: {
-                terms: {
-                  field: 'endgame.data.alert_details.acting_process.unique_pid',
-                },
-              },
-            },
-          },
-          events: {
-            filter: {
-              term: {
-                'event.kind': 'event',
-              },
-            },
-            aggs: {
-              ids: {
-                terms: {
-                  field: 'endgame.unique_pid',
-                },
-              },
-            },
-          },
-        },
-      },
-      index: legacyEventIndexPattern,
+describe('Stats query', () => {
+  it('constructs a legacy multi search query', () => {
+    const query = new StatsQuery('index-pattern', 'endpointID');
+    // using any here because otherwise ts complains that it doesn't know what bool and filter are
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const msearch: any = query.buildMSearch('1234');
+    expect(msearch[0].index).toBe(legacyEventIndexPattern);
+    expect(msearch[1].query.bool.filter[1].bool.should[1].bool.filter[1]).toStrictEqual({
+      terms: { 'endgame.data.alert_details.acting_process.unique_pid': ['1234'] },
     });
   });
 
-  it('generates the correct non-legacy queries', () => {
-    expect(new StatsQuery(fakeEventIndexPattern).build('baz')).toStrictEqual({
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'process.entity_id': ['baz'],
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        filter: [
-                          {
-                            term: {
-                              'event.kind': 'event',
-                            },
-                          },
-                          {
-                            bool: {
-                              must_not: {
-                                term: {
-                                  'event.category': 'process',
-                                },
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    {
-                      term: {
-                        'event.kind': 'alert',
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          alerts: {
-            filter: {
-              term: {
-                'event.kind': 'alert',
-              },
-            },
-            aggs: {
-              ids: {
-                terms: {
-                  field: 'process.entity_id',
-                },
-              },
-            },
-          },
-          events: {
-            filter: {
-              term: {
-                'event.kind': 'event',
-              },
-            },
-            aggs: {
-              ids: {
-                terms: {
-                  field: 'process.entity_id',
-                },
-              },
-            },
-          },
-        },
-      },
-      index: fakeEventIndexPattern,
+  it('constructs a non-legacy multi search query', () => {
+    const query = new StatsQuery('index-pattern');
+    // using any here because otherwise ts complains that it doesn't know what bool and filter are
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const msearch: any = query.buildMSearch(['1234', '5678']);
+    expect(msearch[0].index).toBe('index-pattern');
+    expect(msearch[1].query.bool.filter[0]).toStrictEqual({
+      terms: { 'process.entity_id': ['1234', '5678'] },
     });
   });
 });

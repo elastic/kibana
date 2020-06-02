@@ -6,12 +6,15 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Dispatch } from 'redux';
+// @ts-ignore
+import turf from 'turf';
 import { FeatureCollection } from 'geojson';
 import { MapStoreState } from '../reducers/store';
-import { LAYER_TYPE, SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import { LAYER_TYPE, SOURCE_DATA_REQUEST_ID } from '../../common/constants';
 import {
   getDataFilters,
   getDataRequestDescriptor,
+  getFittableLayers,
   getLayerById,
   getLayerList,
 } from '../selectors/map_selectors';
@@ -27,13 +30,15 @@ import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
   LAYER_DATA_LOAD_STARTED,
+  SET_GOTO,
   SET_LAYER_ERROR_STATUS,
   SET_LAYER_STYLE_META,
   UPDATE_LAYER_PROP,
   UPDATE_SOURCE_DATA_REQUEST,
 } from './map_action_constants';
 import { ILayer } from '../classes/layers/layer';
-import { DataMeta, MapFilters } from '../../common/descriptor_types';
+import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
+import { DataRequestAbortError } from '../classes/util/data_request';
 
 export type DataRequestContext = {
   startLoading(dataId: string, requestToken: symbol, meta: DataMeta): void;
@@ -72,7 +77,7 @@ export function cancelAllInFlightRequests() {
   };
 }
 
-export function updateStyleMeta(layerId: string) {
+export function updateStyleMeta(layerId: string | null) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
     if (!layer) {
@@ -143,7 +148,7 @@ export function syncDataForLayer(layer: ILayer) {
   };
 }
 
-export function syncDataForLayerId(layerId: string) {
+export function syncDataForLayerId(layerId: string | null) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
     if (layer) {
@@ -269,11 +274,107 @@ export function updateSourceDataRequest(layerId: string, newData: unknown) {
   return (dispatch: Dispatch) => {
     dispatch({
       type: UPDATE_SOURCE_DATA_REQUEST,
-      dataId: SOURCE_DATA_ID_ORIGIN,
+      dataId: SOURCE_DATA_REQUEST_ID,
       layerId,
       newData,
     });
 
     dispatch<any>(updateStyleMeta(layerId));
+  };
+}
+
+export function fitToLayerExtent(layerId: string) {
+  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+    const targetLayer = getLayerById(layerId, getState());
+
+    if (targetLayer) {
+      try {
+        const bounds = await targetLayer.getBounds(
+          getDataRequestContext(dispatch, getState, layerId)
+        );
+        if (bounds) {
+          await dispatch(setGotoWithBounds(bounds));
+        }
+      } catch (error) {
+        if (!(error instanceof DataRequestAbortError)) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            'Unhandled getBounds error for layer. Only DataRequestAbortError should be surfaced',
+            error
+          );
+        }
+        // new fitToLayerExtent request has superseded this thread of execution. Results no longer needed.
+        return;
+      }
+    }
+  };
+}
+
+export function fitToDataBounds() {
+  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+    const layerList = getFittableLayers(getState());
+
+    if (!layerList.length) {
+      return;
+    }
+
+    const boundsPromises = layerList.map(async (layer: ILayer) => {
+      return layer.getBounds(getDataRequestContext(dispatch, getState, layer.getId()));
+    });
+
+    let bounds;
+    try {
+      bounds = await Promise.all(boundsPromises);
+    } catch (error) {
+      if (!(error instanceof DataRequestAbortError)) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          'Unhandled getBounds error for layer. Only DataRequestAbortError should be surfaced',
+          error
+        );
+      }
+      // new fitToDataBounds request has superseded this thread of execution. Results no longer needed.
+      return;
+    }
+
+    const corners = [];
+    for (let i = 0; i < bounds.length; i++) {
+      const b = bounds[i];
+
+      // filter out undefined bounds (uses Infinity due to turf responses)
+      if (
+        b === null ||
+        b.minLon === Infinity ||
+        b.maxLon === Infinity ||
+        b.minLat === -Infinity ||
+        b.maxLat === -Infinity
+      ) {
+        continue;
+      }
+
+      corners.push([b.minLon, b.minLat]);
+      corners.push([b.maxLon, b.maxLat]);
+    }
+
+    if (!corners.length) {
+      return;
+    }
+
+    const turfUnionBbox = turf.bbox(turf.multiPoint(corners));
+    const dataBounds = {
+      minLon: turfUnionBbox[0],
+      minLat: turfUnionBbox[1],
+      maxLon: turfUnionBbox[2],
+      maxLat: turfUnionBbox[3],
+    };
+
+    dispatch(setGotoWithBounds(dataBounds));
+  };
+}
+
+function setGotoWithBounds(bounds: MapExtent) {
+  return {
+    type: SET_GOTO,
+    bounds,
   };
 }

@@ -21,14 +21,13 @@ export function handleEvents(
     } = req;
     try {
       const indexRetriever = endpointAppContext.service.getIndexPatternRetriever();
-      const client = context.core.elasticsearch.dataClient;
+      const client = context.core.elasticsearch.legacy.client;
       const indexPattern = await indexRetriever.getEventIndexPattern(context);
 
       const fetcher = new Fetcher(client, id, indexPattern, endpointID);
-      const tree = await fetcher.events(events, afterEvent);
 
       return res.ok({
-        body: tree.render(),
+        body: await fetcher.events(events, afterEvent),
       });
     } catch (err) {
       log.warn(err);

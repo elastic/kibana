@@ -109,6 +109,7 @@ export const createEmbeddable = async (
 
   if (!isErrorEmbeddable(embeddableObject)) {
     embeddableObject.setRenderTooltipContent(renderTooltipContent);
+    // @ts-ignore
     await embeddableObject.setLayerList(getLayerList(indexPatterns));
   }
 

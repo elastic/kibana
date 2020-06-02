@@ -119,6 +119,13 @@ async function main() {
       type: 'number',
       default: 30,
     },
+    maxChildrenPerNode: {
+      alias: 'maxCh',
+      describe:
+        'always generate the max number of children per node instead of it being random up to the max children',
+      type: 'boolean',
+      default: false,
+    },
     numHosts: {
       alias: 'ne',
       describe: 'number of different hosts to generate alerts for',
@@ -241,7 +248,8 @@ async function main() {
         argv.children,
         argv.relatedEvents,
         argv.percentWithRelated,
-        argv.percentTerminated
+        argv.percentTerminated,
+        argv.maxChildrenPerNode
       );
       let result = resolverDocGenerator.next();
       while (!result.done) {
