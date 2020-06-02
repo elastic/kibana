@@ -114,7 +114,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
           });
         }}
         onSearchChange={debounce(onSearchChange, 600)}
-        data-test-subj="filterTermValueSelection"
+        data-test-subj="filterTermValueSelector"
       />
     </EuiFormRow>
   );

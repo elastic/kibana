@@ -50,6 +50,14 @@ export default function ({ getService }: FtrProviderContext) {
             identifier: 'avg(products.base_price)',
             label: 'products.base_price.avg',
           },
+          {
+            identifier: 'filter(geoip.city_name)',
+            label: 'geoip.city_name.filter',
+            form: {
+              filterAggTypeSelector: 'term',
+              filterTermValueSelector: 'New York',
+            },
+          },
         ],
         transformId: `ec_1_${Date.now()}`,
         transformDescription:
@@ -77,6 +85,13 @@ export default function ({ getService }: FtrProviderContext) {
               'products.base_price.avg': {
                 avg: {
                   field: 'products.base_price',
+                },
+              },
+              'geoip.city_name.filter': {
+                filter: {
+                  term: {
+                    'geoip.city_name': 'New York',
+                  },
                 },
               },
             },
@@ -110,6 +125,13 @@ export default function ({ getService }: FtrProviderContext) {
             identifier: 'percentiles(products.base_price)',
             label: 'products.base_price.percentiles',
           },
+          {
+            identifier: 'filter(customer_phone)',
+            label: 'customer_phone.filter',
+            form: {
+              filterAggTypeSelector: 'exists',
+            },
+          },
         ],
         transformId: `ec_2_${Date.now()}`,
         transformDescription:
@@ -132,6 +154,13 @@ export default function ({ getService }: FtrProviderContext) {
                 percentiles: {
                   field: 'products.base_price',
                   percents: [1, 5, 25, 50, 75, 95, 99],
+                },
+              },
+              'customer_phone.filter': {
+                filter: {
+                  exists: {
+                    field: 'customer_phone',
+                  },
                 },
               },
             },
@@ -223,7 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
           for (const [index, agg] of testData.aggregationEntries.entries()) {
             await transform.wizard.assertAggregationInputExists();
             await transform.wizard.assertAggregationInputValue([]);
-            await transform.wizard.addAggregationEntry(index, agg.identifier, agg.label);
+            await transform.wizard.addAggregationEntry(index, agg.identifier, agg.label, agg.form);
           }
         });
 

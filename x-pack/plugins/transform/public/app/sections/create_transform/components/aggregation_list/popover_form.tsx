@@ -180,7 +180,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   }
 
   return (
-    <EuiForm style={{ width: '300px' }}>
+    <EuiForm style={{ width: '300px' }} data-test-subj={'transformAggPopoverForm_' + aggName}>
       <EuiFormRow
         error={!validAggName && [aggNameError]}
         isInvalid={!validAggName}
@@ -200,6 +200,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           defaultValue={aggName}
           isInvalid={!validAggName}
           onChange={(e) => setAggName(e.target.value)}
+          data-test-subj="transformAggName"
         />
       </EuiFormRow>
       {availableFields.length > 0 && (
@@ -212,6 +213,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
             options={availableFields}
             value={field}
             onChange={(e) => setField(e.target.value)}
+            data-test-subj="transformAggField"
           />
         </EuiFormRow>
       )}
@@ -225,6 +227,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
             options={availableAggs}
             value={agg}
             onChange={(e) => updateAgg(e.target.value as PivotSupportedAggs)}
+            data-test-subj="transformAggType"
           />
         </EuiFormRow>
       )}
@@ -273,7 +276,11 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
         />
       )}
       <EuiFormRow hasEmptyLabelSpace>
-        <EuiButton isDisabled={!formValid} onClick={() => onChange(getUpdatedItem())}>
+        <EuiButton
+          isDisabled={!formValid}
+          onClick={() => onChange(getUpdatedItem())}
+          data-test-subj="applyTransformAggChanges"
+        >
           {i18n.translate('xpack.transform.agg.popoverForm.submitButtonLabel', {
             defaultMessage: 'Apply',
           })}

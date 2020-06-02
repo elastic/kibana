@@ -80,6 +80,7 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
               aggTypeConfig: getFilterAggTypeConfig(filterAgg),
             });
           }}
+          data-test-subj="filterAggTypeSelector"
         />
       </EuiFormRow>
       {filterAggTypeConfig?.FilterAggFormComponent && (
