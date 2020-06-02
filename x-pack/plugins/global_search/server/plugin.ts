@@ -6,7 +6,7 @@
 
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { LicenseChecker, ILicenseChecker } from '../common/license_checker';
 import { SearchService, SearchServiceStart } from './services';
@@ -31,14 +31,12 @@ export interface GlobalSearchPluginSetupDeps {
 export class GlobalSearchPlugin
   implements
     Plugin<GlobalSearchPluginSetup, GlobalSearchPluginStart, GlobalSearchPluginSetupDeps, {}> {
-  private readonly logger: Logger;
   private readonly config$: Observable<GlobalSearchConfigType>;
   private readonly searchService = new SearchService();
   private searchServiceStart?: SearchServiceStart;
   private licenseChecker?: ILicenseChecker;
 
-  constructor(private readonly context: PluginInitializerContext) {
-    this.logger = this.context.logger.get();
+  constructor(context: PluginInitializerContext) {
     this.config$ = context.config.create<GlobalSearchConfigType>();
   }
 
@@ -46,8 +44,6 @@ export class GlobalSearchPlugin
     core: CoreSetup<{}, GlobalSearchPluginStart>,
     { licensing }: GlobalSearchPluginSetupDeps
   ) {
-    this.logger.debug('Setting up GlobalSearch plugin');
-
     this.licenseChecker = new LicenseChecker(licensing.license$);
 
     const config = await this.config$.pipe(take(1)).toPromise();
@@ -71,7 +67,6 @@ export class GlobalSearchPlugin
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('Starting up GlobalSearch plugin');
     this.searchServiceStart = this.searchService.start(core);
     return {
       find: this.searchServiceStart.find,

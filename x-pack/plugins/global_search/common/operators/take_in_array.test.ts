@@ -49,4 +49,14 @@ describe('takeInArray', () => {
       });
     });
   });
+
+  it('throws when trying to take a negative number of items', () => {
+    getTestScheduler().run(({ expectObservable, hot }) => {
+      const source = hot('a-b-c', { a: [1, 2, 3], b: [4, 5, 6], c: [7, 8] });
+
+      expect(() => {
+        source.pipe(takeInArray(-4)).subscribe(() => undefined);
+      }).toThrowErrorMatchingInlineSnapshot(`"Cannot take a negative number of items"`);
+    });
+  });
 });

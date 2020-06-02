@@ -18,8 +18,8 @@ interface ServerFetchResponse {
  * Fetch the server-side results from the GS internal HTTP API.
  *
  * @remarks
- * Even if the function is returning an observable, the current implementation is not streaming
- * results from the server, meaning that all results will be returned in a single batch when
+ * Though this function returns an Observable, the current implementation is not streaming
+ * results from the server. All results will be returned in a single batch when
  * all server-side providers are completed.
  */
 export const fetchServerResults = (

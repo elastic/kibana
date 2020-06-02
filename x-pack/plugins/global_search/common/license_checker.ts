@@ -34,11 +34,9 @@ export class LicenseChecker {
   private state: LicenseState = { valid: false, message: 'unknown' };
 
   constructor(license$: Observable<ILicense>) {
-    this.subscription = license$.subscribe((license) => this.update(license));
-  }
-
-  private update(license: ILicense | undefined) {
-    this.state = license ? checkLicense(license) : { valid: false, message: 'unavailable' };
+    this.subscription = license$.subscribe((license) => {
+      this.state = checkLicense(license);
+    });
   }
 
   public getState() {

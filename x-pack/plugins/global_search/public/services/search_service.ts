@@ -43,7 +43,7 @@ const defaultMaxProviderResults = 20;
 
 /** @internal */
 export class SearchService {
-  private readonly providers: GlobalSearchResultProvider[] = [];
+  private readonly providers = new Map<string, GlobalSearchResultProvider>();
   private config?: GlobalSearchClientConfigType;
   private http?: HttpStart;
   private application?: ApplicationStart;
@@ -61,10 +61,10 @@ export class SearchService {
 
     return {
       registerResultProvider: (provider) => {
-        if (this.providers.map((p) => p.id).includes(provider.id)) {
+        if (this.providers.has(provider.id)) {
           throw new Error(`trying to register duplicate provider: ${provider.id}`);
         }
-        this.providers.push(provider);
+        this.providers.set(provider.id, provider);
       },
     };
   }
@@ -108,7 +108,7 @@ export class SearchService {
       aborted$,
     }).pipe(map((results) => results.map((r) => addNavigate(r, navigateToUrl))));
 
-    const providersResults$ = this.providers.map((provider) =>
+    const providersResults$ = [...this.providers.values()].map((provider) =>
       provider.find(term, providerOptions).pipe(
         takeInArray(this.maxProviderResults),
         takeUntil(aborted$),
