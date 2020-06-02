@@ -38,11 +38,9 @@ export const substateMiddlewareFactory = <Substate = never>(
       // Return the substate instead of global state.
       getState(): Immutable<Substate> {
         /**
-         * The selector can return a mutable or immutable version of state, because state
-         * itself can be mutable or immutable (as the reducer can return a mutable or immutable version of state.)
-         *
-         * Casting to Immutable here means that when the middleware receives state,
-         * it will receive the immutable version (and so won't be allowed to directly mutate it.)
+         * The selector will receive the basic (mutable) version of state. This is because
+         * the top level state shape doesn't use `Immutable`. We cast the return value as `Immutable`
+         * so that the middleware won't be able to mutate state.
          *
          * Immutable enforces nothing structural about a type so casting
          * a value as `Immutable` is safe as long as nothing else is going to mutate.
