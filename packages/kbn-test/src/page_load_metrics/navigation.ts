@@ -121,15 +121,19 @@ export async function navigateToApps(log: ToolingLog, options: NavigationOptions
         readyAttempt += 1;
         try {
           await page.waitForSelector(app.locator, { timeout: 5000 });
-          selectorFound = true
+          selectorFound = true;
         } catch (error) {
-          log.error(`Page '${app.path}' was not loaded properly, unable to find '${app.locator}', url: ${page.url()}`);
+          log.error(
+            `Page '${app.path}' was not loaded properly, unable to find '${
+              app.locator
+            }', url: ${page.url()}`
+          );
 
           if (readyAttempt < 6) {
             continue;
           }
 
-          throw err;
+          throw error;
         }
       }
 
