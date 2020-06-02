@@ -72,6 +72,7 @@ export class SecurityLicenseService {
         showLinks: false,
         showRoleMappingsManagement: false,
         allowAccessAgreement: false,
+        allowAuditLogging: false,
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
@@ -90,6 +91,7 @@ export class SecurityLicenseService {
         showLinks: false,
         showRoleMappingsManagement: false,
         allowAccessAgreement: false,
+        allowAuditLogging: false,
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
@@ -97,6 +99,7 @@ export class SecurityLicenseService {
       };
     }
 
+    const isLicenseStandardOrBetter = rawLicense.hasAtLeast('standard');
     const isLicenseGoldOrBetter = rawLicense.hasAtLeast('gold');
     const isLicensePlatinumOrBetter = rawLicense.hasAtLeast('platinum');
     return {
@@ -105,6 +108,7 @@ export class SecurityLicenseService {
       showLinks: true,
       showRoleMappingsManagement: isLicenseGoldOrBetter,
       allowAccessAgreement: isLicenseGoldOrBetter,
+      allowAuditLogging: isLicenseStandardOrBetter,
       allowSubFeaturePrivileges: isLicenseGoldOrBetter,
       // Only platinum and trial licenses are compliant with field- and document-level security.
       allowRoleDocumentLevelSecurity: isLicensePlatinumOrBetter,

@@ -10,8 +10,8 @@ import {
   AlertType,
   State,
   AlertExecutorOptions,
-} from '../../../../../alerting/server';
-import { Alert } from '../../../../../alerting/common';
+} from '../../../../../alerts/server';
+import { Alert } from '../../../../../alerts/common';
 import { NOTIFICATIONS_ID } from '../../../../common/constants';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 

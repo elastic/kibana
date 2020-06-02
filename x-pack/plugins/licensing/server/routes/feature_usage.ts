@@ -15,15 +15,13 @@ export function registerFeatureUsageRoute(
     async (context, request, response) => {
       const [, , { featureUsage }] = await getStartServices();
       return response.ok({
-        body: [...featureUsage.getLastUsages().entries()].reduce(
-          (res, [featureName, lastUsage]) => {
-            return {
-              ...res,
-              [featureName]: new Date(lastUsage).toISOString(),
-            };
-          },
-          {}
-        ),
+        body: {
+          features: featureUsage.getLastUsages().map((usage) => ({
+            name: usage.name,
+            last_used: usage.lastUsed,
+            license_level: usage.licenseType,
+          })),
+        },
       });
     }
   );
