@@ -28,14 +28,14 @@ export const esDocumentsLayerWizardConfig: LayerWizard = {
     defaultMessage: 'Vector data from a Kibana index pattern',
   }),
   icon: 'logoElasticsearch',
-  renderWizard: ({ previewLayer, mapColors }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: unknown) => {
       if (!sourceConfig) {
-        previewLayer(null);
+        previewLayers([]);
         return;
       }
 
-      previewLayer(createDefaultLayerDescriptor(sourceConfig, mapColors));
+      previewLayers([createDefaultLayerDescriptor(sourceConfig, mapColors)]);
     };
     return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
