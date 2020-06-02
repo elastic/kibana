@@ -8,6 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 import { getSecurityIndexPatterns } from './security_index_pattern_utils';
+import { SecurityLayerTemplate } from './security_layer_template';
 
 export const SecurityLayerWizardConfig: LayerWizard = {
   checkVisibility: async () => {
@@ -19,7 +20,7 @@ export const SecurityLayerWizardConfig: LayerWizard = {
   }),
   icon: 'logoSecurity',
   renderWizard: (renderWizardArguments: RenderWizardArguments) => {
-    return <div>hello world</div>;
+    return <SecurityLayerTemplate {...renderWizardArguments} />;
   },
   title: i18n.translate('xpack.maps.security.title', {
     defaultMessage: 'Security',
