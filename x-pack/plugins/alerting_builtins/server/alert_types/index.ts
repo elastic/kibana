@@ -10,7 +10,7 @@ import { register as registerIndexThreshold } from './index_threshold';
 interface RegisterBuiltInAlertTypesParams {
   service: Service;
   router: IRouter;
-  alerting: AlertingSetup;
+  alerts: AlertingSetup;
   baseRoute: string;
 }
 

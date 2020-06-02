@@ -39,6 +39,7 @@ const StatefulFlyoutHeader = React.memo<Props>(
     title,
     noteIds,
     notesById,
+    status,
     timelineId,
     toggleLock,
     updateDescription,
@@ -62,6 +63,7 @@ const StatefulFlyoutHeader = React.memo<Props>(
         isFavorite={isFavorite}
         title={title}
         noteIds={noteIds}
+        status={status}
         timelineId={timelineId}
         toggleLock={toggleLock}
         updateDescription={updateDescription}
@@ -94,6 +96,7 @@ const makeMapStateToProps = () => {
       kqlQuery,
       title = '',
       noteIds = emptyNotesId,
+      status,
     } = timeline;
 
     const history = emptyHistory; // TODO: get history from store via selector
@@ -107,6 +110,7 @@ const makeMapStateToProps = () => {
       isFavorite,
       isDatepickerLocked: globalInput.linkTo.includes('timeline'),
       noteIds,
+      status,
       title,
     };
   };

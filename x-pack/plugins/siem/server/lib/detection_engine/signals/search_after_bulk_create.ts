@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertServices } from '../../../../../alerts/server';
 import { ListClient } from '../../../../../lists/server';
-import { AlertServices } from '../../../../../alerting/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes, RuleAlertParams } from '../types';
 import { Logger } from '../../../../../../../src/core/server';
