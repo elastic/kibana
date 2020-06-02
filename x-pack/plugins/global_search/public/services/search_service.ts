@@ -7,6 +7,7 @@
 import { merge, Observable, timer, throwError } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { duration } from 'moment';
+import { i18n } from '@kbn/i18n';
 import { HttpStart, ApplicationStart } from 'src/core/public';
 import { GlobalSearchProviderResult } from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
@@ -81,7 +82,10 @@ export class SearchService {
     if (!licenseState.valid) {
       return throwError(
         GlobalSearchFindError.invalidLicense(
-          `GlobalSearch API is disabled because of invalid license state: ${licenseState.message}`
+          i18n.translate('xpack.globalSearch.find.invalidLicenseError', {
+            defaultMessage: `GlobalSearch API is disabled because of invalid license state: {errorMessage}`,
+            values: { errorMessage: licenseState.message },
+          })
         )
       );
     }
