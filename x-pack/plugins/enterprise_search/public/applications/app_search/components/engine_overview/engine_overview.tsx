@@ -108,7 +108,7 @@ export const EngineOverview: ReactFC<> = () => {
               </h2>
             </EuiTitle>
           </EuiPageContentHeader>
-          <EuiPageContentBody>
+          <EuiPageContentBody data-test-subj="appSearchEngines">
             <EngineTable
               data={engines}
               pagination={{
@@ -133,7 +133,7 @@ export const EngineOverview: ReactFC<> = () => {
                   </h2>
                 </EuiTitle>
               </EuiPageContentHeader>
-              <EuiPageContentBody>
+              <EuiPageContentBody data-test-subj="appSearchMetaEngines">
                 <EngineTable
                   data={metaEngines}
                   pagination={{
