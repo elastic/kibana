@@ -77,10 +77,7 @@ describe('Properties', () => {
       </ReduxStoreProvider>
     );
 
-    wrapper
-      .find('[data-test-subj="settings-gear"]')
-      .at(0)
-      .simulate('click');
+    wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
 
     expect(wrapper.find('[data-test-subj="timeline-properties"]').exists()).toEqual(true);
     expect(wrapper.find('button[data-test-subj="attach-timeline-case"]').prop('disabled')).toEqual(
@@ -113,10 +110,7 @@ describe('Properties', () => {
       </ReduxStoreProvider>
     );
 
-    wrapper
-      .find('[data-test-subj="settings-gear"]')
-      .at(0)
-      .simulate('click');
+    wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
 
     expect(wrapper.find('button[data-test-subj="attach-timeline-case"]').prop('disabled')).toEqual(
       true
@@ -206,12 +200,7 @@ describe('Properties', () => {
       </ReduxStoreProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="timeline-title"]')
-        .first()
-        .props().value
-    ).toEqual(title);
+    expect(wrapper.find('[data-test-subj="timeline-title"]').first().props().value).toEqual(title);
   });
 
   test('it renders the date picker with the lock icon', () => {
