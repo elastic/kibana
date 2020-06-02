@@ -202,7 +202,7 @@ class FilterEditorUI extends Component<Props, State> {
       )
     ) {
       /**
-       * Don't render the index pattern index pattern selector if thre's just one \ zero index patterns
+       * Don't render the index pattern selector if there's just one \ zero index patterns
        * and if the index pattern the filter was LOADED with is in the indexPatterns list.
        **/
 
