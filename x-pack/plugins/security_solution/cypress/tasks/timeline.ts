@@ -21,9 +21,17 @@ import {
   TIMELINE_TITLE,
   TIMESTAMP_TOGGLE_FIELD,
   TOGGLE_TIMELINE_EXPAND_EVENT,
+  DRAGGABLE_HEADER,
+  REMOVE_COLUMN,
+  FIELDS_MENU,
+  RESET_FIELDS,
+  ITEMS_PER_PAGE_BUTTON,
+  HEADER_SORT_BUTTON,
+  EVENTS_PER_PAGE_BUTTON,
 } from '../screens/timeline';
 
 import { drag, drop } from '../tasks/common';
+import { FIELDS_MENU_CATEGORY_ID, FIELDS_MENU_ID } from '../screens/hosts/external_events';
 
 export const hostExistsQuery = 'host.name: *';
 
@@ -100,4 +108,33 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
   cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`).then((headersDropArea) =>
     drop(headersDropArea)
   );
+};
+
+export const removeColumn = (column: number) => {
+  cy.get(REMOVE_COLUMN).first().should('exist');
+  cy.get(REMOVE_COLUMN).eq(column).click({ force: true });
+  cy.wait(3000); // wait for DOM updates
+};
+
+export const addIdColumn = () => {
+  cy.get(FIELDS_MENU).click({ force: true });
+  cy.get(FIELDS_MENU_CATEGORY_ID).eq(0).click({ force: true });
+  cy.get(FIELDS_MENU_ID).check();
+  cy.get(DRAGGABLE_HEADER).eq(1).invoke('text').should('eql', '_id');
+  cy.wait(3000); // wait for DOM updates
+};
+
+export const resetFields = () => {
+  cy.get(RESET_FIELDS).click({ force: true });
+};
+
+export const changeItemsPerPage = (itemsPerPage: number) => {
+  cy.get(ITEMS_PER_PAGE_BUTTON).click({ force: true });
+  cy.get(EVENTS_PER_PAGE_BUTTON(itemsPerPage)).click();
+  cy.wait(3000); // wait for DOM updates
+};
+
+export const sortByColumn = (column: number) => {
+  cy.get(HEADER_SORT_BUTTON).first().should('exist');
+  cy.get(HEADER_SORT_BUTTON).eq(column).click({ force: true });
 };
