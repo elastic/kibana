@@ -5,7 +5,7 @@
  */
 
 import { performance } from 'perf_hooks';
-import { AlertServices } from '../../../../../alerting/server';
+import { AlertServices } from '../../../../../alerts/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
 import { buildEventsSearchQuery } from './build_events_query';
@@ -36,9 +36,6 @@ export const singleSearchAfter = async ({
   searchResult: SignalSearchResponse;
   searchDuration: string;
 }> => {
-  if (searchAfterSortId == null) {
-    throw Error('Attempted to search after with empty sort id');
-  }
   try {
     const searchAfterQuery = buildEventsSearchQuery({
       index,

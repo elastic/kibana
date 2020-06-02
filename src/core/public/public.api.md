@@ -287,6 +287,7 @@ export interface ChromeNavLink {
     readonly disableSubUrlTracking?: boolean;
     readonly euiIconType?: string;
     readonly hidden?: boolean;
+    readonly href?: string;
     readonly icon?: string;
     readonly id: string;
     // @internal
@@ -315,7 +316,7 @@ export interface ChromeNavLinks {
 }
 
 // @public (undocumented)
-export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase'>>;
+export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase' | 'href'>>;
 
 // @public
 export interface ChromeRecentlyAccessed {

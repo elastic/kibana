@@ -34812,10 +34812,11 @@ const makeError = ({
 
 	const prefix = getErrorPrefix({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled});
 	const execaMessage = `Command ${prefix}: ${command}`;
-	const shortMessage = error instanceof Error ? `${execaMessage}\n${error.message}` : execaMessage;
+	const isError = Object.prototype.toString.call(error) === '[object Error]';
+	const shortMessage = isError ? `${execaMessage}\n${error.message}` : execaMessage;
 	const message = [shortMessage, stderr, stdout].filter(Boolean).join('\n');
 
-	if (error instanceof Error) {
+	if (isError) {
 		error.originalMessage = error.message;
 		error.message = message;
 	} else {
@@ -36263,25 +36264,24 @@ module.exports = function (/*streams...*/) {
 
 "use strict";
 
-const mergePromiseProperty = (spawned, promise, property) => {
-	// Starting the main `promise` is deferred to avoid consuming streams
-	const value = typeof promise === 'function' ?
-		(...args) => promise()[property](...args) :
-		promise[property].bind(promise);
 
-	Object.defineProperty(spawned, property, {
-		value,
-		writable: true,
-		enumerable: false,
-		configurable: true
-	});
-};
+const nativePromisePrototype = (async () => {})().constructor.prototype;
+const descriptors = ['then', 'catch', 'finally'].map(property => [
+	property,
+	Reflect.getOwnPropertyDescriptor(nativePromisePrototype, property)
+]);
 
 // The return value is a mixin of `childProcess` and `Promise`
 const mergePromise = (spawned, promise) => {
-	mergePromiseProperty(spawned, promise, 'then');
-	mergePromiseProperty(spawned, promise, 'catch');
-	mergePromiseProperty(spawned, promise, 'finally');
+	for (const [property, descriptor] of descriptors) {
+		// Starting the main `promise` is deferred to avoid consuming streams
+		const value = typeof promise === 'function' ?
+			(...args) => Reflect.apply(descriptor.value, promise(), args) :
+			descriptor.value.bind(promise);
+
+		Reflect.defineProperty(spawned, property, {...descriptor, value});
+	}
+
 	return spawned;
 };
 
