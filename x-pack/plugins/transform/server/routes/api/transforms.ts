@@ -435,7 +435,7 @@ async function deleteTransformsWithDestIndex(
         if (userCanDeleteDestIndex) {
           try {
             await ctx.transform!.dataClient.callAsCurrentUser('indices.delete', {
-              index: destinationIndex,
+              index: 'blah_dne',
             });
             destIndexDeleted.success = true;
           } catch (deleteIndexError) {
@@ -455,8 +455,8 @@ async function deleteTransformsWithDestIndex(
           );
           if (indexPatternId) {
             await deleteDestIndexPatternById(indexPatternId, ctx.core.savedObjects.client);
+            destIndexPatternDeleted.success = true;
           }
-          destIndexPatternDeleted.success = true;
         } catch (deleteDestIndexPatternError) {
           destIndexPatternDeleted.error = wrapError(deleteDestIndexPatternError);
         }
