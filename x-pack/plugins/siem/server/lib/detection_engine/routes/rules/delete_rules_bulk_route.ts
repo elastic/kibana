@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import { IRouter, RouteConfig, RequestHandler } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { queryRulesBulkSchema } from '../schemas/query_rules_bulk_schema';
-import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError, validate } from './validate';
 import { transformBulkError, buildRouteValidation, buildSiemResponse } from '../utils';

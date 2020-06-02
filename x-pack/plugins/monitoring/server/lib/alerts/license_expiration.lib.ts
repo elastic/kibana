@@ -5,7 +5,7 @@
  */
 import { Moment } from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import { AlertInstance } from '../../../../alerting/server';
+import { AlertInstance } from '../../../../alerts/server';
 import {
   AlertCommonPerClusterMessageLinkToken,
   AlertCommonPerClusterMessageTimeToken,

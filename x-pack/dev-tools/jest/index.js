@@ -14,6 +14,7 @@ export function runJest() {
   const config = JSON.stringify(
     createJestConfig({
       kibanaDirectory: resolve(__dirname, '../../..'),
+      rootDir: resolve(__dirname, '../..'),
       xPackKibanaDirectory: resolve(__dirname, '../..'),
     })
   );

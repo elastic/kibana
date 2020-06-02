@@ -6,11 +6,11 @@
 import { get } from 'lodash/fp';
 import { Logger } from 'src/core/server';
 
+import { List } from '../../../../common/detection_engine/schemas/types/lists_default_array';
 import { type } from '../../../../../lists/common/schemas/common';
 import { ListClient } from '../../../../../lists/server';
 import { SignalSearchResponse, SearchTypes } from './types';
 import { RuleAlertParams } from '../types';
-import { List } from '../routes/schemas/types/lists_default_array';
 
 interface FilterEventsAgainstList {
   listClient: ListClient;

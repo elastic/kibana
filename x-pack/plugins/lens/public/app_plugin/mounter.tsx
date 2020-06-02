@@ -92,6 +92,7 @@ export async function mountApp(
           redirectTo(routeProps, id, returnToOrigin, originatingApp, newlyCreated)
         }
         originatingAppFromUrl={originatingAppFromUrl}
+        onAppLeave={params.onAppLeave}
       />
     );
   };
