@@ -22,7 +22,9 @@ import { scopedHistoryMock } from '../../../../core/public/mocks';
 export const setRootControllerMock = jest.fn();
 
 jest.doMock('ui/chrome', () => ({
-  setRootController: setRootControllerMock,
+  default: {
+    setRootController: setRootControllerMock,
+  },
 }));
 
 export const historyMock = scopedHistoryMock.create();
