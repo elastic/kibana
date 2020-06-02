@@ -20,7 +20,7 @@ export const DETECTION_ENGINE_PAGE_NAME = 'detections';
 export const RedirectToDetectionEnginePage = ({
   location: { search },
 }: DetectionEngineComponentProps) => {
-  const to = `/${DETECTION_ENGINE_PAGE_NAME}/${search}`;
+  const to = `/${DETECTION_ENGINE_PAGE_NAME}${search}`;
 
   return <RedirectWrapper to={to} />;
 };
