@@ -69,32 +69,7 @@ export async function setupIngestManager(
   ]);
 
   // ensure default packages are added to the default conifg
-  const configWithDatasource = await agentConfigService.get(soClient, config.id, true);
-  if (!configWithDatasource) {
-    throw new Error('Config not found');
-  }
-  if (
-    configWithDatasource.datasources.length &&
-    typeof configWithDatasource.datasources[0] === 'string'
-  ) {
-    throw new Error('Config not found');
-  }
-  for (const installedPackage of installedPackages) {
-    const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
-      (packageName) => installedPackage.name === packageName
-    );
-    if (!packageShouldBeInstalled) {
-      continue;
-    }
-
-    const isInstalled = configWithDatasource.datasources.some((d: Datasource | string) => {
-      return typeof d !== 'string' && d.package?.name === installedPackage.name;
-    });
-
-    if (!isInstalled) {
-      await addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
-    }
-  }
+  await addPackagesToConfig(installedPackages, soClient, config, defaultOutput);
 }
 
 export async function setupFleet(
@@ -157,18 +132,52 @@ function generateRandomPassword() {
   return Buffer.from(uuid.v4()).toString('base64');
 }
 
+async function addPackagesToConfig(
+  installedPackages: Installation[],
+  soClient: SavedObjectsClientContract,
+  config: AgentConfig,
+  defaultOutput: Output
+): Promise<void[]> {
+  const configWithDatasource = await agentConfigService.get(soClient, config.id, true);
+  if (!configWithDatasource) {
+    throw new Error('Config not found');
+  }
+  if (
+    configWithDatasource.datasources.length &&
+    typeof configWithDatasource.datasources[0] === 'string'
+  ) {
+    throw new Error('Config not found');
+  }
+  const addPackageToConfigPromises = installedPackages.map(async (installedPackage) => {
+    const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
+      (packageName) => installedPackage.name === packageName
+    );
+    if (!packageShouldBeInstalled) {
+      return;
+    }
+
+    const isInstalled = configWithDatasource.datasources.some((d: Datasource | string) => {
+      return typeof d !== 'string' && d.package?.name === installedPackage.name;
+    });
+
+    if (!isInstalled) {
+      return addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
+    }
+
+  })
+  return Promise.all(addPackageToConfigPromises);
+}
 async function addPackageToConfig(
   soClient: SavedObjectsClientContract,
   packageToInstall: Installation,
   config: AgentConfig,
   defaultOutput: Output
-) {
+): Promise<void> {
   const packageInfo = await getPackageInfo({
     savedObjectsClient: soClient,
     pkgName: packageToInstall.name,
     pkgVersion: packageToInstall.version,
   });
-
   const newDatasource = packageToConfigDatasource(
     packageInfo,
     config.id,
