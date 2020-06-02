@@ -27,10 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
-import {
-  createMapPath,
-  MAP_BASE_URL
-} from "../../common/constants";
+import { createMapPath, MAP_BASE_URL } from '../../common/constants';
 
 export const EMPTY_FILTER = '';
 
@@ -372,7 +369,7 @@ export class MapListing extends React.Component {
 
   renderListing() {
     let createButton;
-    let createMapPath = getHttp().basePath.prepend(MAP_BASE_URL);
+    const createMapPath = getHttp().basePath.prepend(MAP_BASE_URL);
     if (!this.props.readOnly) {
       createButton = (
         <EuiButton href={createMapPath} data-test-subj="newMapLink" fill>
