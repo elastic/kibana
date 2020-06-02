@@ -5,3 +5,4 @@
  */
 
 export * from './configure_section';
+export * from './simulate_template';

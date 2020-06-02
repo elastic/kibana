@@ -10,7 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiButtonEmpty,
+  EuiButton,
   EuiSpacer,
   // EuiFormRow,
   EuiText,
@@ -22,136 +22,39 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { documentationService } from '../../../services/documentation';
 import { ComponentTemplatesContainer, ComponentTemplates } from '../../../components';
-import { ConfigureSection } from '../components';
+import { ConfigureSection, SimulateTemplate } from '../components';
 import { StepProps } from '../types';
 // import { useJsonStep } from './use_json_step';
 
-// const IndexSettings = ({ defaultValue, setDataGetter, onStepValidityChange }: any) => {
-//   const { content, setContent, error } = useJsonStep({
-//     prop: 'settings',
-//     defaultValue,
-//     setDataGetter,
-//     onStepValidityChange,
-//   });
-
-//   return (
-//     <div data-test-subj="stepSettings">
-//       <EuiFlexGroup justifyContent="spaceBetween">
-//         <EuiFlexItem grow={false}>
-//           <EuiTitle>
-//             <h2 data-test-subj="stepTitle">
-//               <FormattedMessage
-//                 id="xpack.idxMgmt.templateForm.stepSettings.stepTitle"
-//                 defaultMessage="Index settings / Mappings / Aliases"
-//               />
-//             </h2>
-//           </EuiTitle>
-
-//           <EuiSpacer size="s" />
-
-//           <EuiText size="xs">
-//             <p>
-//               <FormattedMessage
-//                 id="xpack.idxMgmt.templateForm.stepSettings.settingsDescription"
-//                 defaultMessage="Configure your index template."
-//               />
-//             </p>
-//           </EuiText>
-//         </EuiFlexItem>
-
-//         <EuiFlexItem grow={false}>
-//           <EuiButtonEmpty
-//             size="s"
-//             flush="right"
-//             href={documentationService.getSettingsDocumentationLink()}
-//             target="_blank"
-//             iconType="help"
-//           >
-//             <FormattedMessage
-//               id="xpack.idxMgmt.templateForm.stepSettings.docsButtonLabel"
-//               defaultMessage="Preview index template"
-//             />
-//           </EuiButtonEmpty>
-//         </EuiFlexItem>
-//       </EuiFlexGroup>
-
-//       <EuiSpacer size="l" />
-
-//       {/* Settings code editor */}
-//       <EuiFormRow
-//         label={
-//           <FormattedMessage
-//             id="xpack.idxMgmt.templateForm.stepSettings.fieldIndexSettingsLabel"
-//             defaultMessage="Index settings"
-//           />
-//         }
-//         helpText={
-//           <FormattedMessage
-//             id="xpack.idxMgmt.templateForm.stepSettings.settingsEditorHelpText"
-//             defaultMessage="Use JSON format: {code}"
-//             values={{
-//               code: <EuiCode>{JSON.stringify({ number_of_replicas: 1 })}</EuiCode>,
-//             }}
-//           />
-//         }
-//         isInvalid={Boolean(error)}
-//         error={error}
-//         fullWidth
-//       >
-//         <EuiCodeEditor
-//           mode="json"
-//           theme="textmate"
-//           width="100%"
-//           height="500px"
-//           setOptions={{
-//             showLineNumbers: false,
-//             tabSize: 2,
-//           }}
-//           editorProps={{
-//             $blockScrolling: Infinity,
-//           }}
-//           showGutter={false}
-//           minLines={6}
-//           aria-label={i18n.translate(
-//             'xpack.idxMgmt.templateForm.stepSettings.fieldIndexSettingsAriaLabel',
-//             {
-//               defaultMessage: 'Index settings editor',
-//             }
-//           )}
-//           value={content}
-//           onChange={(updated: string) => setContent(updated)}
-//           data-test-subj="settingsEditor"
-//         />
-//       </EuiFormRow>
-//     </div>
-//   );
-// };
-
 export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = ({
-  template,
+  template = {},
   setDataGetter,
   onStepValidityChange,
 }) => {
-  const [isFromComponentsVisible] = useState(true);
-  const [isAddManualVisible] = useState(true);
+  const { _kbnMeta, ...rest } = template;
   const [isCreateComponentFromTemplateVisible, setIsCreateComponentFromTemplateVisible] = useState(
     false
   );
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
   const [isMappingsVisible, setIsMappingsVisible] = useState(false);
   const [isAliasesVisible, setIsAliasesVisible] = useState(false);
+  const [isSimulateVisible, setIsSimulateVisible] = useState(false);
+  const [currentTemplate, setCurrentTemplate] = useState({
+    ...rest,
+    composedOf: [],
+    template: {},
+  });
 
   useEffect(() => {
     setDataGetter(async () => ({
       isValid: true,
-      data: {
-        todo: true,
-      },
+      data: currentTemplate,
     }));
-  }, [setDataGetter]);
+  }, [currentTemplate, setDataGetter]);
 
   return (
     <>
+      {/* Header */}
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
@@ -175,19 +78,13 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
           </EuiText>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            flush="right"
-            href={documentationService.getSettingsDocumentationLink()}
-            target="_blank"
-            iconType="help"
-          >
+        <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+          <EuiButton size="s" onClick={() => setIsSimulateVisible(true)}>
             <FormattedMessage
               id="xpack.idxMgmt.templateForm.stepSettings.docsButtonLabel"
               defaultMessage="Preview index template"
             />
-          </EuiButtonEmpty>
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -359,6 +256,11 @@ export const StepSettingsMappingsAliases: React.FunctionComponent<StepProps> = (
           </div>
         </>
       </ConfigureSection>
+
+      {/* Simulate index template */}
+      {isSimulateVisible && (
+        <SimulateTemplate template={currentTemplate} onClose={() => setIsSimulateVisible(false)} />
+      )}
     </>
   );
 };

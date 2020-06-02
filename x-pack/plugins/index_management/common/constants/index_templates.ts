@@ -9,4 +9,4 @@
  * V1 and V2 index template formats. This constant keeps track of whether
  * we create V1 or V2 index template format in the UI.
  */
-export const DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT = 1;
+export const DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT = 2;
