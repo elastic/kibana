@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Alert } from '../../../../../alerting/common';
-import { AlertsClient } from '../../../../../alerting/server';
+import { Alert } from '../../../../../alerts/common';
+import { AlertsClient } from '../../../../../alerts/server';
 import { createRules } from './create_rules';
 import { PrepackagedRules } from '../types';
 
