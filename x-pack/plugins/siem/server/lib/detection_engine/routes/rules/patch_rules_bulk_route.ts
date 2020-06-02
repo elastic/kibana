@@ -122,6 +122,7 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
               version,
               anomalyThreshold,
               machineLearningJobId,
+              actions,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
               const ruleActions = await updateRulesNotifications({
