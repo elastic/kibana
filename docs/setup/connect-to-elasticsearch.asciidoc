@@ -101,5 +101,4 @@ You must select a time field to use global time filters on your dashboards.
 You’ll see a list of fields configured for the matching index.
 You can designate your index pattern the default by clicking the star icon on this page.
 +
-When you search your data in Discover or create a visualization, select your index pattern from
-the index pattern menu.
+When searching in Discover and creating visualizations, you choose a pattern from the index pattern menu to specify the {es} indices that contain the data you want to work with.
