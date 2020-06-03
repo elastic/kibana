@@ -203,6 +203,11 @@ module.exports = {
                 errorMessage: `Public code can not import from server, use a common directory.`,
               },
               {
+                target: ['(src|x-pack)/plugins/*/common/**/*'],
+                from: ['(src|x-pack)/plugins/*/(server|public)/**/*'],
+                errorMessage: `Common code can not import from server or public, use a common directory.`,
+              },
+              {
                 target: [
                   '(src|x-pack)/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
