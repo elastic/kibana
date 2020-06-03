@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { ShallowWrapper, mount, shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import { NewTimeline, NewTimelineProps } from './helpers';
 import { useCreateTimelineButton } from './use_create_timeline';
 
@@ -39,11 +39,9 @@ describe('NewTimeline', () => {
 
   describe('render', () => {
     describe('default', () => {
-      let wrapper: ShallowWrapper;
-
       beforeAll(() => {
         (useCreateTimelineButton as jest.Mock).mockReturnValue({ getButton: mockGetButton });
-        wrapper = shallow(<NewTimeline {...props} />);
+        shallow(<NewTimeline {...props} />);
       });
 
       afterAll(() => {
