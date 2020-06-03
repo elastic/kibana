@@ -9,6 +9,7 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { ComponentTemplateListTestBed } from './helpers/component_template_list.helpers';
 import { API_BASE_PATH } from '../../../../../../common/constants';
+import { ComponentTemplateListItem } from '../../types';
 
 const { setup } = pageHelpers.componentTemplateList;
 
@@ -26,43 +27,20 @@ describe('<ComponentTemplateList />', () => {
   });
 
   describe('With component templates', () => {
-    const componentTemplate1 = {
+    const componentTemplate1: ComponentTemplateListItem = {
       name: 'test_component_template_1',
-      template: {
-        settings: {
-          number_of_shards: 1,
-        },
-        mappings: {
-          properties: {
-            host_name: {
-              type: 'keyword',
-            },
-          },
-        },
-      },
-      version: 1,
-      _kbnMeta: {
-        usedBy: [],
-      },
+      hasMappings: true,
+      hasAliases: true,
+      hasSettings: true,
+      usedBy: [],
     };
 
-    const componentTemplate2 = {
+    const componentTemplate2: ComponentTemplateListItem = {
       name: 'test_component_template_2',
-      template: {
-        settings: {
-          number_of_shards: 1,
-        },
-        mappings: {
-          properties: {
-            host_name: {
-              type: 'keyword',
-            },
-          },
-        },
-      },
-      _kbnMeta: {
-        usedBy: [],
-      },
+      hasMappings: true,
+      hasAliases: true,
+      hasSettings: true,
+      usedBy: ['test_index_template_1'],
     };
 
     const componentTemplates = [componentTemplate1, componentTemplate2];
@@ -73,20 +51,21 @@ describe('<ComponentTemplateList />', () => {
       testBed = await setup();
 
       await act(async () => {
-        await nextTick(100); // todo fix
-        testBed.component.update();
+        await nextTick(100);
       });
+
+      testBed.component.update();
     });
 
     test('should render the list view', async () => {
       const { table } = testBed;
-
       // Verify table content
       const { tableCellsValues } = table.getMetaData('componentTemplatesTable');
       tableCellsValues.forEach((row, i) => {
-        const componentTemplate = componentTemplates[i];
+        const { name, usedBy } = componentTemplates[i];
+        const usedByText = usedBy.length === 0 ? 'Not in use' : `${usedBy.length} index template`;
 
-        expect(row).toEqual(['', componentTemplate.name, 'Not in use', '', '', '', '']);
+        expect(row).toEqual(['', name, usedByText, '', '', '', '']);
       });
     });
 
@@ -96,9 +75,9 @@ describe('<ComponentTemplateList />', () => {
 
       await act(async () => {
         actions.clickReloadButton();
-        await nextTick(100);
-        component.update();
       });
+
+      component.update();
 
       expect(server.requests.length).toBe(totalRequests + 1);
       expect(server.requests[server.requests.length - 1].url).toBe(
@@ -107,7 +86,7 @@ describe('<ComponentTemplateList />', () => {
     });
 
     test('should delete a component template', async () => {
-      const { actions, component } = testBed;
+      const { actions } = testBed;
       const { name: componentTemplateName } = componentTemplate1;
 
       httpRequestsMockHelpers.setDeleteComponentTemplateResponse({
@@ -115,7 +94,9 @@ describe('<ComponentTemplateList />', () => {
         errors: [],
       });
 
-      actions.clickDeleteActionAt(0);
+      act(() => {
+        actions.clickDeleteActionAt(0);
+      });
 
       // We need to read the document "body" as the modal is added there and not inside
       // the component DOM tree.
@@ -131,8 +112,6 @@ describe('<ComponentTemplateList />', () => {
 
       await act(async () => {
         confirmButton!.click();
-        await nextTick();
-        component.update();
       });
 
       const latestRequest = server.requests[server.requests.length - 1];
@@ -152,10 +131,10 @@ describe('<ComponentTemplateList />', () => {
       testBed = await setup();
 
       await act(async () => {
-        const { waitFor } = testBed;
-
-        await waitFor('emptyList');
+        await nextTick(100);
       });
+
+      testBed.component.update();
     });
 
     test('should display an empty prompt', async () => {
@@ -180,10 +159,10 @@ describe('<ComponentTemplateList />', () => {
       testBed = await setup();
 
       await act(async () => {
-        const { waitFor } = testBed;
-
-        await waitFor('componentTemplatesLoadError');
+        await nextTick(100);
       });
+
+      testBed.component.update();
     });
 
     test('should render an error message if error fetching component templates', async () => {
