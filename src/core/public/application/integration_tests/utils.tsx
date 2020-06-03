@@ -58,6 +58,7 @@ export const createAppMounter = ({
       mounter: {
         appRoute,
         appBasePath: appRoute,
+        legacy: false,
         mount: jest.fn(async (params: AppMountParameters) => {
           const { appBasePath: basename, element } = params;
           Object.assign(element, {
@@ -85,6 +86,7 @@ export const createLegacyAppMounter = (
       appRoute: `/app/${appId.split(':')[0]}`,
       appBasePath: `/app/${appId.split(':')[0]}`,
       unmountBeforeMounting: true,
+      legacy: true,
       mount: legacyMount,
     },
     unmount: jest.fn(),

@@ -37,8 +37,7 @@ export async function loadIndexTemplate(templateName, httpClient) {
 }
 
 export async function loadPolicies(withIndices, httpClient) {
-  const query = withIndices ? '?withIndices=true' : '';
-  return await sendGet('policies', query, httpClient);
+  return await sendGet('policies', { withIndices }, httpClient);
 }
 
 export async function savePolicy(policy, httpClient) {
