@@ -1,0 +1,12 @@
+#!/bin/sh
+
+SCRIPT=$0
+DIR="$(dirname "${SCRIPT}")/.."
+CONFIG_DIR=${KIBANA_PATH_CONF:-"$DIR/config"}
+NODE_DEV_OPTIONS_FILE=${CONFIG_DIR}/node.dev.options
+
+if test -f "$NODE_DEV_OPTIONS_FILE"; then
+  NODE_DEV_OPTIONS=$(grep -v ^# < $NODE_DEV_OPTIONS_FILE | xargs)
+fi
+
+NODE_OPTIONS="$NODE_DEV_OPTIONS $NODE_OPTIONS" exec "node" ${@}
