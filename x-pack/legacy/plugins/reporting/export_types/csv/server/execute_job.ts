@@ -85,7 +85,7 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
       raw: { req: { url: '/' } },
     } as Hapi.Request);
 
-    const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(fakeRequest);
+    const { callAsCurrentUser } = elasticsearch.legacy.client.asScoped(fakeRequest);
     const callEndpoint = (endpoint: string, clientParams = {}, options = {}) =>
       callAsCurrentUser(endpoint, clientParams, options);
 

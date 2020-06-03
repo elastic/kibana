@@ -5,7 +5,7 @@
  */
 
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
 import { updateRules } from './update_rules';
 
