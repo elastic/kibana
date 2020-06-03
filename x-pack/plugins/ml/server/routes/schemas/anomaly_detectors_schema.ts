@@ -184,4 +184,18 @@ export const getCategoriesSchema = schema.object({
   jobId: schema.string(),
 });
 
+export const getModelSnapshotsSchema = schema.object({
+  /** Snapshot id */
+  snapshotId: schema.maybe(schema.string()),
+  /** Job id */
+  jobId: schema.string(),
+});
+
+export const updateModelSnapshotSchema = schema.object({
+  /** description */
+  description: schema.maybe(schema.string()),
+  /** retain */
+  retain: schema.maybe(schema.boolean()),
+});
+
 export const forecastAnomalyDetector = schema.object({ duration: schema.any() });

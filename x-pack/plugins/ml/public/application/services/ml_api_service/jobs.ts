@@ -8,7 +8,11 @@ import { http } from '../http_service';
 
 import { basePath } from './index';
 import { Dictionary } from '../../../../common/types/common';
-import { MlJobWithTimeRange, MlSummaryJobs } from '../../../../common/types/anomaly_detection_jobs';
+import {
+  MlJobWithTimeRange,
+  MlSummaryJobs,
+  CombinedJobWithStats,
+} from '../../../../common/types/anomaly_detection_jobs';
 import { JobMessage } from '../../../../common/types/audit_message';
 import { AggFieldNamePair } from '../../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
@@ -41,7 +45,7 @@ export const jobs = {
 
   jobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return http<any>({
+    return http<CombinedJobWithStats[]>({
       path: `${basePath()}/jobs/jobs`,
       method: 'POST',
       body,
