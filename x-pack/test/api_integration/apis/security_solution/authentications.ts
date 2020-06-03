@@ -20,7 +20,7 @@ const EDGE_LENGTH = 1;
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const client = getService('siemGraphQLClient');
+  const client = getService('securitySolutionGraphQLClient');
 
   describe('authentications', () => {
     before(() => esArchiver.load('auditbeat/hosts'));

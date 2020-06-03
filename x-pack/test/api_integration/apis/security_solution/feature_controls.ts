@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const security = getService('security');
   const spaces = getService('spaces');
-  const clientFactory = getService('siemGraphQLClientFactory');
+  const clientFactory = getService('securitySolutionGraphQLClientFactory');
 
   const expectGraphQL404 = (result: any) => {
     expect(result.response).to.be(undefined);
