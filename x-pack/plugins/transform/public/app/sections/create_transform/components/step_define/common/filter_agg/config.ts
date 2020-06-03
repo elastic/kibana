@@ -128,7 +128,7 @@ export function getFilterAggTypeConfig(
         isValid() {
           if (
             typeof this.filterAggConfig !== 'object' ||
-            Object.values(this.filterAggConfig).filter((v) => v !== undefined).length < 1
+            (this.filterAggConfig.from === undefined && this.filterAggConfig.to === undefined)
           ) {
             return false;
           }
