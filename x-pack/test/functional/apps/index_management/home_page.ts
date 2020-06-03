@@ -59,9 +59,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const url = await browser.getCurrentUrl();
         expect(url).to.contain(`/component_templates`);
 
-        // Verify content
-        const componentTemplateList = await testSubjects.exists('componentTemplateList');
-        expect(componentTemplateList).to.be(true);
+        // There should be no component templates by default, so we verify the empty prompt displays
+        const componentTemplateEmptyPrompt = await testSubjects.exists('emptyList');
+        expect(componentTemplateEmptyPrompt).to.be(true);
       });
     });
   });
