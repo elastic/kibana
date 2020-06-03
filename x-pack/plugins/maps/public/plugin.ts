@@ -14,6 +14,7 @@ import {
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
+// @ts-ignore
 import { MapView } from './inspector/views/map_view';
 import {
   setAutocompleteService,
@@ -141,9 +142,6 @@ export class MapsPlugin
     core.application.register({
       id: APP_ID,
       title: getAppTitle(),
-      description: i18n.translate('xpack.maps.appDescription', {
-        defaultMessage: 'Maps application',
-      }),
       order: 4000,
       icon: 'plugins/maps/icon.svg',
       euiIconType: APP_ICON,
@@ -151,6 +149,7 @@ export class MapsPlugin
       async mount(context, params) {
         const [coreStart, startPlugins] = await core.getStartServices();
         bindStartCoreAndPlugins(coreStart, startPlugins);
+        // @ts-ignore
         const { renderApp } = await import('./routing/maps_router');
         return renderApp(context, params);
       },

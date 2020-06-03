@@ -15,7 +15,7 @@ import {
   MapEmbeddable,
   RenderTooltipContentParams,
   MapEmbeddableInput,
-} from '../../../../../../legacy/plugins/maps/public';
+} from '../../../../../../plugins/maps/public';
 import * as i18n from './translations';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import {

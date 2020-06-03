@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RenderTooltipContentParams } from '../../../../../../legacy/plugins/maps/public';
+import { RenderTooltipContentParams } from '../../../../../maps/public';
 import { inputsModel } from '../../../common/store/inputs';
 
 export interface IndexPatternMapping {

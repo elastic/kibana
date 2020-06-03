@@ -22,6 +22,7 @@ export function updateGlobalState(kbnUrlStateStorage: IKbnUrlStateStorage, newSt
   kbnUrlStateStorage.set(
     '_g',
     {
+      // @ts-ignore
       ...globalState,
       ...newState,
     },

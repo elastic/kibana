@@ -7,7 +7,7 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
-import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../../legacy/plugins/maps/public';
+import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../../plugins/maps/public';
 import * as i18n from './translations';
 import { Location } from '../../../../../common/runtime_types';
 import { getLayerList } from './map_config';

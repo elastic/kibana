@@ -13,7 +13,7 @@ import {
   EmbeddableExpression,
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
-import { MapEmbeddableInput } from '../../../../../legacy/plugins/maps/public';
+import { MapEmbeddableInput } from '../../../../../plugins/maps/public';
 
 interface Arguments {
   id: string;
