@@ -19,7 +19,6 @@ import {
   createExtentFilter,
   roundCoordinates,
   extractFeaturesFromFilters,
-  makeSizedGeotileGridDsl,
   makeESBbox,
   makeGeotileGridDsl,
 } from './elasticsearch_geo_utils';
@@ -618,7 +617,7 @@ describe('make[Sized]GeotileGridDsl', () => {
   });
 
   it('Should create a dsl with converted bbox and size', () => {
-    const dsl = makeSizedGeotileGridDsl(field, bounds, precision, 800);
+    const dsl = makeGeotileGridDsl(field, bounds, precision, { size: 800 });
     expect(dsl).toEqual({
       bounds: { bottom_right: [20, 0], top_left: [10, 1] },
       field: 'foobar',

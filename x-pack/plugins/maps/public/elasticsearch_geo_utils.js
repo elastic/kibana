@@ -397,18 +397,14 @@ export function getBoundingBoxGeometry(geometry) {
   return formatEnvelopeAsPolygon(extent);
 }
 
-export function makeGeotileGridDsl(field, bounds, precision) {
+export function makeGeotileGridDsl(field, bounds, precision, options = {}) {
   const esBbox = makeESBbox(bounds);
   return {
     bounds: esBbox,
     field,
     precision,
+    ...options,
   };
-}
-
-export function makeSizedGeotileGridDsl(field, bounds, precision, size) {
-  const dsl = makeGeotileGridDsl(field, bounds, precision);
-  return { size, ...dsl };
 }
 
 export function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
