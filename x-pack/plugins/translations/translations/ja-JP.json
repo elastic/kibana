@@ -4221,7 +4221,7 @@
     "xpack.apm.jvmsTable.nonHeapMemoryColumnLabel": "非ヒープ領域の平均",
     "xpack.apm.jvmsTable.threadCountColumnLabel": "最大スレッド数",
     "xpack.apm.kueryBar.disabledPlaceholder": "サービスマップの検索は利用できません",
-    "xpack.apm.kueryBar.placeholder": "検索 {event, select,\n            トランザクション {transactions}\n            メトリック: {metric}\n            エラー {errors}\n            その他 {transactions, errors and metrics}\n          } (E.g. {queryExample})",
+    "xpack.apm.kueryBar.placeholder": "検索 {event, select,\n            transaction {トランザクション}\n            metric {メトリック}\n            error {エラー}\n             other {その他}\n          } (E.g. {queryExample})",
     "xpack.apm.license.betaBadge": "ベータ",
     "xpack.apm.license.betaTooltipMessage": "現在、この機能はベータです。不具合を見つけた場合やご意見がある場合、サポートに問い合わせるか、またはディスカッションフォーラムにご報告ください。",
     "xpack.apm.license.button": "トライアルを開始",
