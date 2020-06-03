@@ -10,7 +10,7 @@ import { Observable, of } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 import { duration } from 'moment';
-import { httpServiceMock, applicationServiceMock } from '../../../../../src/core/public/mocks';
+import { httpServiceMock } from '../../../../../src/core/public/mocks';
 import { licenseCheckerMock } from '../../common/license_checker.mock';
 import { GlobalSearchProviderResult, GlobalSearchResult } from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
@@ -25,7 +25,6 @@ const getTestScheduler = () =>
 
 describe('SearchService', () => {
   let service: SearchService;
-  let applicationStart: ReturnType<typeof applicationServiceMock.createStartContract>;
   let httpStart: ReturnType<typeof httpServiceMock.createStartContract>;
   let licenseChecker: ReturnType<typeof licenseCheckerMock.create>;
 
@@ -36,7 +35,6 @@ describe('SearchService', () => {
   };
 
   const startDeps = () => ({
-    application: applicationStart,
     http: httpStart,
     licenseChecker,
   });
@@ -82,7 +80,6 @@ describe('SearchService', () => {
   beforeEach(() => {
     service = new SearchService();
     httpStart = httpServiceMock.createStartContract({ basePath: '/base-path' });
-    applicationStart = applicationServiceMock.createStartContract();
     licenseChecker = licenseCheckerMock.create();
 
     fetchServerResultsMock.mockClear();
@@ -401,12 +398,10 @@ describe('SearchService', () => {
         expect(batch.results[0]).toEqual({
           ...resultA,
           url: '/base-path/foo/bar',
-          navigate: expect.any(Function),
         });
         expect(batch.results[1]).toEqual({
           ...resultB,
           url: '/foo',
-          navigate: expect.any(Function),
         });
       });
 

@@ -12,7 +12,7 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import {
-  GlobalSearchResult,
+  GlobalSearchBatchedResults,
   GlobalSearchProviderFindOptions,
   GlobalSearchProviderResult,
 } from '../common/types';
@@ -70,17 +70,6 @@ export interface GlobalSearchFindOptions {
    * If/when provided and emitting, no further result emission will be performed and the result observable will be completed.
    */
   aborted$?: Observable<void>;
-}
-/**
- * Response returned from the server-side {@link GlobalSearchPluginStart | global search service}'s `find` API
- *
- * @public
- */
-export interface GlobalSearchBatchedResults {
-  /**
-   * Results for this batch
-   */
-  results: GlobalSearchResult[];
 }
 
 /**

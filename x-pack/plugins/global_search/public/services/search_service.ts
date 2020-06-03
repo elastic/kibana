@@ -8,16 +8,16 @@ import { merge, Observable, timer, throwError } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { HttpStart, ApplicationStart } from 'src/core/public';
-import { GlobalSearchProviderResult } from '../../common/types';
+import { HttpStart } from 'src/core/public';
+import { GlobalSearchProviderResult, GlobalSearchBatchedResults } from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
 import { takeInArray } from '../../common/operators';
 import { processProviderResult } from '../../common/process_result';
 import { ILicenseChecker } from '../../common/license_checker';
 import { GlobalSearchResultProvider } from '../types';
 import { GlobalSearchClientConfigType } from '../config';
-import { GlobalSearchBatchedResults, GlobalSearchFindOptions } from './types';
-import { addNavigate, getDefaultPreference } from './utils';
+import { GlobalSearchFindOptions } from './types';
+import { getDefaultPreference } from './utils';
 import { fetchServerResults } from './fetch_server_results';
 
 /** @public */
@@ -37,7 +37,6 @@ interface SetupDeps {
 
 interface StartDeps {
   http: HttpStart;
-  application: ApplicationStart;
   licenseChecker: ILicenseChecker;
 }
 
@@ -48,7 +47,6 @@ export class SearchService {
   private readonly providers = new Map<string, GlobalSearchResultProvider>();
   private config?: GlobalSearchClientConfigType;
   private http?: HttpStart;
-  private application?: ApplicationStart;
   private maxProviderResults = defaultMaxProviderResults;
   private licenseChecker?: ILicenseChecker;
 
@@ -67,9 +65,8 @@ export class SearchService {
     };
   }
 
-  start({ http, application, licenseChecker }: StartDeps): SearchServiceStart {
+  start({ http, licenseChecker }: StartDeps): SearchServiceStart {
     this.http = http;
-    this.application = application;
     this.licenseChecker = licenseChecker;
 
     return {
@@ -102,15 +99,13 @@ export class SearchService {
       aborted$,
     };
 
-    const navigateToUrl = this.application!.navigateToUrl;
-
     const processResult = (result: GlobalSearchProviderResult) =>
-      addNavigate(processProviderResult(result, this.http!.basePath), navigateToUrl);
+      processProviderResult(result, this.http!.basePath);
 
     const serverResults$ = fetchServerResults(this.http!, term, {
       preference,
       aborted$,
-    }).pipe(map((results) => results.map((r) => addNavigate(r, navigateToUrl))));
+    });
 
     const providersResults$ = [...this.providers.values()].map((provider) =>
       provider.find(term, providerOptions).pipe(

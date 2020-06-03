@@ -8,7 +8,7 @@ import { Observable, timer, merge, throwError } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest, CoreStart, IBasePath } from 'src/core/server';
-import { GlobalSearchProviderResult } from '../../common/types';
+import { GlobalSearchProviderResult, GlobalSearchBatchedResults } from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
 import { takeInArray } from '../../common/operators';
 import { ILicenseChecker } from '../../common/license_checker';
@@ -16,11 +16,7 @@ import { ILicenseChecker } from '../../common/license_checker';
 import { processProviderResult } from '../../common/process_result';
 import { GlobalSearchConfigType } from '../config';
 import { getContextFactory, GlobalSearchContextFactory } from './context';
-import {
-  GlobalSearchResultProvider,
-  GlobalSearchBatchedResults,
-  GlobalSearchFindOptions,
-} from '../types';
+import { GlobalSearchResultProvider, GlobalSearchFindOptions } from '../types';
 
 /** @public */
 export interface SearchServiceSetup {

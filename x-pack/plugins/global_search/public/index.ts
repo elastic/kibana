@@ -20,6 +20,7 @@ export const plugin: PluginInitializer<
 > = (context) => new GlobalSearchPlugin(context);
 
 export {
+  GlobalSearchBatchedResults,
   GlobalSearchProviderFindOptions,
   GlobalSearchProviderResult,
   GlobalSearchProviderResultUrl,
@@ -30,8 +31,4 @@ export {
   GlobalSearchPluginStart,
   GlobalSearchResultProvider,
 } from './types';
-export {
-  GlobalSearchBatchedResults,
-  GlobalSearchFindOptions,
-  NavigableGlobalSearchResult,
-} from './services/types';
+export { GlobalSearchFindOptions } from './services/types';

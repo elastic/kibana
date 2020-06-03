@@ -22,13 +22,13 @@ export const plugin: PluginInitializer<
 export { config } from './config';
 
 export {
+  GlobalSearchBatchedResults,
   GlobalSearchProviderFindOptions,
   GlobalSearchProviderResult,
   GlobalSearchProviderResultUrl,
   GlobalSearchResult,
 } from '../common/types';
 export {
-  GlobalSearchBatchedResults,
   GlobalSearchFindOptions,
   GlobalSearchProviderContext,
   GlobalSearchPluginStart,

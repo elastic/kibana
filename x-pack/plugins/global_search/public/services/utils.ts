@@ -5,24 +5,8 @@
  */
 
 import uuid from 'uuid';
-import { ApplicationStart } from 'src/core/public';
-import { GlobalSearchResult } from '../../common/types';
-import { NavigableGlobalSearchResult } from './types';
 
 const defaultPrefStorageKey = 'globalSearch:defaultPref';
-
-/**
- * Add the `navigate` method to a {@link GlobalSearchResult | result}.
- */
-export const addNavigate = (
-  result: GlobalSearchResult,
-  navigateToUrl: ApplicationStart['navigateToUrl']
-): NavigableGlobalSearchResult => {
-  return {
-    ...result,
-    navigate: () => navigateToUrl(result.url),
-  };
-};
 
 /**
  * Returns the default {@link GlobalSearchFindOptions.preference | preference} value.

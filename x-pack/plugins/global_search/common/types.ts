@@ -75,3 +75,15 @@ export type GlobalSearchResult = Omit<GlobalSearchProviderResult, 'url'> & {
    */
   url: string;
 };
+
+/**
+ * Response returned from the {@link GlobalSearchPluginStart | global search service}'s `find` API
+ *
+ * @public
+ */
+export interface GlobalSearchBatchedResults {
+  /**
+   * Results for this batch
+   */
+  results: GlobalSearchResult[];
+}
