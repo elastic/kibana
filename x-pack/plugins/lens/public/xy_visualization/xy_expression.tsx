@@ -449,8 +449,6 @@ export function XYChart({
               return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? 'no';
             },
           };
-          console.log(seriesProps);
-          debugger;
 
           switch (seriesType) {
             case 'line':
