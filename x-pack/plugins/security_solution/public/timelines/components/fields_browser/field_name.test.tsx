@@ -16,19 +16,22 @@ import { FieldName } from './field_name';
 const categoryId = 'base';
 const timestampFieldId = '@timestamp';
 
+const defaultProps = {
+  categoryId,
+  categoryColumns: getColumnsWithTimestamp({
+    browserFields: mockBrowserFields,
+    category: categoryId,
+  }),
+  fieldId: timestampFieldId,
+  onUpdateColumns: jest.fn(),
+  timelineId: 'timeline-id',
+};
+
 describe('FieldName', () => {
   test('it renders the field name', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldName
-          categoryId={categoryId}
-          categoryColumns={getColumnsWithTimestamp({
-            browserFields: mockBrowserFields,
-            category: categoryId,
-          })}
-          fieldId={timestampFieldId}
-          onUpdateColumns={jest.fn()}
-        />
+        <FieldName {...defaultProps} />
       </TestProviders>
     );
 
@@ -40,15 +43,7 @@ describe('FieldName', () => {
   test('it renders a copy to clipboard action menu item a user hovers over the name', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldName
-          categoryId={categoryId}
-          categoryColumns={getColumnsWithTimestamp({
-            browserFields: mockBrowserFields,
-            category: categoryId,
-          })}
-          fieldId={timestampFieldId}
-          onUpdateColumns={jest.fn()}
-        />
+        <FieldName {...defaultProps} />
       </TestProviders>
     );
 
@@ -62,16 +57,7 @@ describe('FieldName', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FieldName
-          categoryId={categoryId}
-          categoryColumns={getColumnsWithTimestamp({
-            browserFields: mockBrowserFields,
-            category: categoryId,
-          })}
-          fieldId={timestampFieldId}
-          highlight={highlight}
-          onUpdateColumns={jest.fn()}
-        />
+        <FieldName {...{ ...defaultProps, highlight }} />
       </TestProviders>
     );
 
