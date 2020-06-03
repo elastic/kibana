@@ -5,7 +5,6 @@
  */
 
 import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
-import { BASE_PATH } from '../../../common/constants';
 import { TemplateEdit } from '../../../public/application/sections/template_edit'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { WithAppDependencies } from '../helpers';
 
@@ -14,8 +13,8 @@ import { TEMPLATE_NAME } from './constants';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    initialEntries: [`${BASE_PATH}edit_template/${TEMPLATE_NAME}`],
-    componentRoutePath: `${BASE_PATH}edit_template/:name`,
+    initialEntries: [`/edit_template/${TEMPLATE_NAME}`],
+    componentRoutePath: `/edit_template/:name`,
   },
   doMountAsync: true,
 };

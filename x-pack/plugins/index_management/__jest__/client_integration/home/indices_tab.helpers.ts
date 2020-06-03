@@ -8,15 +8,14 @@ import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed, TestBedConfig } from '../../../../../test_utils';
 import { IndexList } from '../../../public/application/sections/home/index_list'; // eslint-disable-line @kbn/eslint/no-restricted-paths
-import { BASE_PATH } from '../../../common/constants';
 import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
 
 const testBedConfig: TestBedConfig = {
   store: () => indexManagementStore(services as any),
   memoryRouter: {
-    initialEntries: [`${BASE_PATH}indices?includeHidden=true`],
-    componentRoutePath: `${BASE_PATH}:section(indices|templates)`,
+    initialEntries: [`/indices?includeHidden=true`],
+    componentRoutePath: `/:section(indices|templates)`,
   },
   doMountAsync: true,
 };
