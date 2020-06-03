@@ -10,7 +10,7 @@ import { Store, applyMiddleware, createStore } from 'redux';
 import { coreMock } from '../../../../../../../../../src/core/public/mocks';
 import { DATASOURCE_SAVED_OBJECT_TYPE } from '../../../../../../../ingest_manager/common';
 
-import { policyListReducer, initialPolicyListState } from './reducer';
+import { policyListReducer } from './reducer';
 import { policyListMiddlewareFactory } from './middleware';
 
 import { isOnPolicyListPage, selectIsLoading, urlSearchParams } from './selectors';
@@ -39,7 +39,7 @@ describe('policy list store concerns', () => {
 
     store = createStore(
       policyListReducer,
-      initialPolicyListState(),
+      undefined,
       applyMiddleware(policyListMiddlewareFactory(fakeCoreStart, depsStart), actionSpyMiddleware)
     );
   });
