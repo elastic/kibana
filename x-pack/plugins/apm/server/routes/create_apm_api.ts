@@ -58,6 +58,7 @@ import {
   transactionsLocalFiltersRoute,
   serviceNodesLocalFiltersRoute,
   uiFiltersEnvironmentsRoute,
+  rumOverviewLocalFiltersRoute,
 } from './ui_filters';
 import { createApi } from './create_api';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
@@ -146,7 +147,10 @@ const createApmApi = () => {
     .add(updateCustomLinkRoute)
     .add(deleteCustomLinkRoute)
     .add(listCustomLinksRoute)
-    .add(customLinkTransactionRoute);
+    .add(customLinkTransactionRoute)
+
+    // Rum Overview
+    .add(rumOverviewLocalFiltersRoute);
 
   return api;
 };

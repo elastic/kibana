@@ -1,0 +1,40 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../server/lib/helpers/setup_request';
+import { PROCESSOR_EVENT } from '../elasticsearch_fieldnames';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { rangeFilter } from '../../server/lib/helpers/range_filter';
+
+export function getRumOverviewProjection({
+  setup,
+}: {
+  setup: Setup & SetupTimeRange & SetupUIFilters;
+}) {
+  const { start, end, uiFiltersES, indices } = setup;
+
+  const bool = {
+    filter: [
+      { range: rangeFilter(start, end) },
+      { term: { [PROCESSOR_EVENT]: 'transaction' } },
+      ...uiFiltersES,
+    ],
+  };
+
+  return {
+    index: indices['apm_oss.transactionIndices'],
+    body: {
+      query: {
+        bool,
+      },
+    },
+  };
+}
