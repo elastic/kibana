@@ -198,6 +198,8 @@ export const getSignalsActions = ({
   createTimeline,
   status,
   updateTimelineIsLoading,
+  onAlertStatusUpdateSuccess,
+  onAlertStatusUpdateFailure,
 }: {
   apolloClient?: ApolloClient<{}>;
   canUserCRUD: boolean;
@@ -207,6 +209,8 @@ export const getSignalsActions = ({
   createTimeline: CreateTimeline;
   status: 'open' | 'closed';
   updateTimelineIsLoading: UpdateTimelineLoading;
+  onAlertStatusUpdateSuccess: (count: number, status: string) => void;
+  onAlertStatusUpdateFailure: (status: string, error: Error) => void;
 }): TimelineAction[] => [
   {
     getAction: ({ ecsData }: TimelineActionProps): JSX.Element => (
@@ -246,6 +250,8 @@ export const getSignalsActions = ({
               status,
               setEventsLoading,
               setEventsDeleted,
+              onAlertStatusUpdateSuccess,
+              onAlertStatusUpdateFailure,
             })
           }
           isDisabled={!canUserCRUD || !hasIndexWrite}
