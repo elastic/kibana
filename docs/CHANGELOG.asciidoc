@@ -100,7 +100,14 @@ This section summarizes the changes in each release.
 [[release-notes-6.8.10]]
 == {kib} 6.8.10
 
-There are no changes in this release.
+[float]
+[[security-fix-6.8.10]]
+=== Security issues
+In {kib} 5.4.0 and later, TSVB visualizations contain a stored XSS flaw. Attackers that can 
+edit and create TSVB visualizations can obtain sensitive information, or perform 
+destructive actions, on behalf of the {kib} users who edit the TSVB visualization, CVE-2020-7015).
+
+You must upgrade to 6.8.10. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
 
 [[release-notes-6.8.9]]
 == {kib} 6.8.9
