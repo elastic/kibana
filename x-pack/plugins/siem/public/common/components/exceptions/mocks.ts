@@ -4,7 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Operator } from './types';
+import {
+  Operator,
+  ExceptionListItemSchema,
+  ExceptionEntry,
+  NestedExceptionEntry,
+  FormattedEntry,
+} from './types';
+
+export const getExceptionItemEntryMock = (): ExceptionEntry => ({
+  field: 'actingProcess.file.signer',
+  type: 'match',
+  operator: Operator.INCLUSION,
+  value: 'Elastic, N.V.',
+});
+
+export const getNestedExceptionItemEntryMock = (): NestedExceptionEntry => ({
+  field: 'actingProcess.file.signer',
+  type: 'nested',
+  entries: [{ ...getExceptionItemEntryMock() }],
+});
+
+export const getFormattedEntryMock = (isNested = false): FormattedEntry => ({
+  fieldName: 'host.name',
+  operator: 'is',
+  value: 'some name',
+  isNested,
+});
 
 export const getExceptionItemMock = (): ExceptionListItemSchema => ({
   id: 'uuid_here',

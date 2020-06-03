@@ -73,6 +73,7 @@ const ExceptionItemComponent = ({
             id="accordion--comments"
             arrowDisplay="none"
             forceState={showComments ? 'open' : 'closed'}
+            data-test-subj="exceptionsViewerCommentAccordion"
           >
             <EuiCommentList comments={formattedComments} />
           </EuiAccordion>

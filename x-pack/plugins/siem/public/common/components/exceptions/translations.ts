@@ -37,6 +37,10 @@ export const COMMENT = i18n.translate('xpack.siem.exceptions.commentLabel', {
   defaultMessage: 'Comment',
 });
 
+export const COMMENT_EVENT = i18n.translate('xpack.siem.exceptions.commentEventLabel', {
+  defaultMessage: 'added a comment',
+});
+
 export const OPERATING_SYSTEM = i18n.translate('xpack.siem.exceptions.operatingSystemLabel', {
   defaultMessage: 'OS',
 });

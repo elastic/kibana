@@ -21,10 +21,8 @@ import {
   OperatorType,
   Operator,
   NestedExceptionEntry,
-  ExceptionEntry,
   FormattedEntry,
   DescriptionListItem,
-  ExceptionListItemSchema,
 } from './types';
 import {
   isOperator,
@@ -36,69 +34,7 @@ import {
   existsOperator,
   doesNotExistOperator,
 } from './operators';
-
-const getExceptionItemMock = (): ExceptionListItemSchema => ({
-  id: 'uuid_here',
-  item_id: 'item-id',
-  created_at: '2020-04-23T00:19:13.289Z',
-  created_by: 'user_name',
-  list_id: 'test-exception',
-  tie_breaker_id: '77fd1909-6786-428a-a671-30229a719c1f',
-  updated_at: '2020-04-23T00:19:13.289Z',
-  updated_by: 'user_name',
-  namespace_type: 'single',
-  name: '',
-  description: '',
-  comments: [
-    {
-      user: 'user_name',
-      timestamp: '2020-04-23T00:19:13.289Z',
-      comment: 'Comment goes here',
-    },
-  ],
-  _tags: ['os:windows'],
-  tags: [],
-  type: 'simple',
-  entries: [
-    {
-      field: 'actingProcess.file.signer',
-      type: 'match',
-      operator: Operator.INCLUSION,
-      value: 'Elastic, N.V.',
-    },
-    {
-      field: 'host.name',
-      type: 'match',
-      operator: Operator.EXCLUSION,
-      value: 'Global Signer',
-    },
-    {
-      field: 'file.signature',
-      type: 'nested',
-      entries: [
-        {
-          field: 'signer',
-          type: 'match',
-          operator: Operator.INCLUSION,
-          value: 'Evil',
-        },
-        {
-          field: 'trusted',
-          type: 'match',
-          operator: Operator.INCLUSION,
-          value: 'true',
-        },
-      ],
-    },
-  ],
-});
-
-const getExceptionItemEntryMock = (): ExceptionEntry => ({
-  field: 'host.name',
-  type: 'match',
-  operator: Operator.INCLUSION,
-  value: 'jibberjabber',
-});
+import { getExceptionItemEntryMock, getExceptionItemMock } from './mocks';
 
 describe('Exception helpers', () => {
   describe('#getOperatorType', () => {
@@ -217,7 +153,7 @@ describe('Exception helpers', () => {
   describe('#determineIfIsNested', () => {
     test('it returns true if type NestedExceptionEntry', () => {
       const payload: NestedExceptionEntry = {
-        field: 'host.name',
+        field: 'actingProcess.file.signer',
         type: 'nested',
         entries: [],
       };
@@ -295,7 +231,7 @@ describe('Exception helpers', () => {
           value: 'Elastic, N.V.',
         },
         {
-          field: 'host.name',
+          field: 'actingProcess.file.signer',
           type: 'match',
           operator: Operator.EXCLUSION,
           value: 'Global Signer',
@@ -310,7 +246,7 @@ describe('Exception helpers', () => {
           value: 'Elastic, N.V.',
         },
         {
-          fieldName: 'host.name',
+          fieldName: 'actingProcess.file.signer',
           isNested: false,
           operator: 'is not',
           value: 'Global Signer',
@@ -363,10 +299,10 @@ describe('Exception helpers', () => {
       const payload = getExceptionItemEntryMock();
       const formattedEntry = formatEntry({ isNested: false, item: payload });
       const expected: FormattedEntry = {
-        fieldName: 'host.name',
+        fieldName: 'actingProcess.file.signer',
         isNested: false,
         operator: 'is',
-        value: 'jibberjabber',
+        value: 'Elastic, N.V.',
       };
 
       expect(formattedEntry).toEqual(expected);
@@ -376,10 +312,10 @@ describe('Exception helpers', () => {
       const payload = getExceptionItemEntryMock();
       const formattedEntry = formatEntry({ isNested: true, parent: 'parent', item: payload });
       const expected: FormattedEntry = {
-        fieldName: 'parent.host.name',
+        fieldName: 'parent.actingProcess.file.signer',
         isNested: true,
         operator: 'is',
-        value: 'jibberjabber',
+        value: 'Elastic, N.V.',
       };
 
       expect(formattedEntry).toEqual(expected);
@@ -429,6 +365,7 @@ describe('Exception helpers', () => {
   describe('#getDescriptionListContent', () => {
     test('it returns formatted description list with os if one is specified', () => {
       const payload = getExceptionItemMock();
+      payload.description = '';
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
         {

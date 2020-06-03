@@ -114,23 +114,39 @@ const ExceptionEntriesComponent = ({
           <EuiFlexGroup direction="row" gutterSize="none">
             {entries.length > 1 && (
               <AndOrBadgeContainer grow={false}>
-                <AndOrBadge type="and" includeAntenas />
+                <AndOrBadge type="and" includeAntenas data-test-subj="exceptionsViewerAndBadge" />
               </AndOrBadgeContainer>
             )}
             <EuiFlexItem grow={1}>
-              <EuiBasicTable isSelectable={false} itemId="id" columns={columns} items={entries} />
+              <EuiBasicTable
+                isSelectable={false}
+                itemId="id"
+                columns={columns}
+                items={entries}
+                responsive
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <StyledEditButton size="s" color="primary" onClick={handleEdit}>
+              <StyledEditButton
+                size="s"
+                color="primary"
+                onClick={handleEdit}
+                data-test-subj="exceptionsViewerEditBtn"
+              >
                 {i18n.EDIT}
               </StyledEditButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <StyledRemoveButton size="s" color="danger" onClick={() => handleDelete()}>
+              <StyledRemoveButton
+                size="s"
+                color="danger"
+                onClick={handleDelete}
+                data-test-subj="exceptionsViewerDeleteBtn"
+              >
                 {i18n.REMOVE}
               </StyledRemoveButton>
             </EuiFlexItem>
