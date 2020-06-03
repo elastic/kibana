@@ -4,20 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { EuiBasicTable, EuiText, EuiTableFieldDataColumnType, EuiLink } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, CSSProperties, useState } from 'react';
+import {
+  EuiBasicTable,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTableFieldDataColumnType,
+  EuiLink,
+  EuiPopover,
+  EuiContextMenuPanelProps,
+  EuiContextMenuItem,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { useLocation, useHistory } from 'react-router-dom';
-import {
-  selectApiError,
-  selectIsLoading,
-  selectPageIndex,
-  selectPageSize,
-  selectPolicyItems,
-  selectTotal,
-} from '../store/policy_list/selectors';
+import { createStructuredSelector } from 'reselect';
+import { CreateStructuredSelector } from '../../../../common/store';
+import * as selectors from '../store/policy_list/selectors';
 import { usePolicyListSelector } from './policy_hooks';
 import { PolicyListAction } from '../store/policy_list';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -27,10 +34,52 @@ import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { ManagementPageView } from '../../../components/management_page_view';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { getManagementUrl } from '../../../common/routing';
+import { FormattedDateAndTime } from '../../../../common/components/endpoint/formatted_date_time';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
 }
+
+interface PackageData {
+  name: string;
+  title: string;
+  version: string;
+}
+
+const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+// eslint-disable-next-line react/display-name
+export const TableRowActions = React.memo<{ items: EuiContextMenuPanelProps['items'] }>(
+  ({ items }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
+    const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+
+    return (
+      <EuiPopover
+        anchorPosition="downRight"
+        panelPaddingSize="none"
+        button={
+          <EuiButtonIcon
+            iconType="boxesHorizontal"
+            onClick={handleToggleMenu}
+            aria-label={i18n.translate('xpack.siem.endpoint.policyList.actionMenu', {
+              defaultMessage: 'Open',
+            })}
+          />
+        }
+        isOpen={isOpen}
+        closePopover={handleCloseMenu}
+      >
+        <EuiContextMenuPanel items={items} />
+      </EuiPopover>
+    );
+  }
+);
 
 const PolicyLink: React.FC<{ name: string; route: string; href: string }> = ({
   name,
@@ -40,24 +89,32 @@ const PolicyLink: React.FC<{ name: string; route: string; href: string }> = ({
   const clickHandler = useNavigateByRouterEventHandler(route);
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink href={href} onClick={clickHandler} data-test-subj="policyNameLink">
+    <EuiLink
+      href={href}
+      onClick={clickHandler}
+      data-test-subj="policyNameLink"
+      style={NO_WRAP_TRUNCATE_STYLE}
+    >
       {name}
     </EuiLink>
   );
 };
 
+const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const PolicyList = React.memo(() => {
   const { services, notifications } = useKibana();
   const history = useHistory();
   const location = useLocation();
 
   const dispatch = useDispatch<(action: PolicyListAction) => void>();
-  const policyItems = usePolicyListSelector(selectPolicyItems);
-  const pageIndex = usePolicyListSelector(selectPageIndex);
-  const pageSize = usePolicyListSelector(selectPageSize);
-  const totalItemCount = usePolicyListSelector(selectTotal);
-  const loading = usePolicyListSelector(selectIsLoading);
-  const apiError = usePolicyListSelector(selectApiError);
+  const {
+    selectPolicyItems: policyItems,
+    selectPageIndex: pageIndex,
+    selectPageSize: pageSize,
+    selectTotal: totalItemCount,
+    selectIsLoading: loading,
+    selectApiError: apiError,
+  } = usePolicyListSelector(selector);
 
   useEffect(() => {
     if (apiError) {
@@ -94,57 +151,109 @@ export const PolicyList = React.memo(() => {
           defaultMessage: 'Policy Name',
         }),
         // eslint-disable-next-line react/display-name
-        render: (value: string, item: Immutable<PolicyData>) => {
+        render: (name: string, item: Immutable<PolicyData>) => {
           const routePath = getManagementUrl({
             name: 'policyDetails',
             policyId: item.id,
             excludePrefix: true,
           });
           const routeUrl = getManagementUrl({ name: 'policyDetails', policyId: item.id });
-          return <PolicyLink name={value} route={routePath} href={routeUrl} />;
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
+              <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
+                <PolicyLink name={name} route={routePath} href={routeUrl} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
+                  <FormattedMessage
+                    id="xpack.siem.endpoint.policyList.revision"
+                    defaultMessage="rev. {revNumber}"
+                    values={{ revNumber: item.revision }}
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
         },
+      },
+      {
+        field: 'created_by',
+        name: i18n.translate('xpack.siem.endpoint.policyList.createdBy', {
+          defaultMessage: 'Created By',
+        }),
         truncateText: true,
       },
       {
-        field: 'revision',
-        name: i18n.translate('xpack.siem.endpoint.policyList.revisionField', {
-          defaultMessage: 'Revision',
+        field: 'created_at',
+        name: i18n.translate('xpack.siem.endpoint.policyList.createdAt', {
+          defaultMessage: 'Created Date',
         }),
-        dataType: 'number',
+        render(createdAt: string) {
+          return <FormattedDateAndTime date={new Date(createdAt)} />;
+        },
+      },
+      {
+        field: 'updated_by',
+        name: i18n.translate('xpack.siem.endpoint.policyList.updatedBy', {
+          defaultMessage: 'Last Updated By',
+        }),
+        truncateText: true,
+      },
+      {
+        field: 'updated_at',
+        name: i18n.translate('xpack.siem.endpoint.policyList.updatedAt', {
+          defaultMessage: 'Last Updated',
+        }),
+        render(updatedAt: string) {
+          return <FormattedDateAndTime date={new Date(updatedAt)} />;
+        },
       },
       {
         field: 'package',
-        name: i18n.translate('xpack.siem.endpoint.policyList.versionField', {
+        name: i18n.translate('xpack.siem.endpoint.policyList.versionFieldLabel', {
           defaultMessage: 'Version',
         }),
-        render(pkg) {
-          return `${pkg.title}  v${pkg.version}`;
+        render(pkg: Immutable<PackageData>) {
+          return i18n.translate('xpack.siem.endpoint.policyList.versionField', {
+            defaultMessage: '{title} v{version}',
+            values: {
+              title: pkg.title,
+              version: pkg.version,
+            },
+          });
         },
       },
       {
-        field: 'description',
-        name: i18n.translate('xpack.siem.endpoint.policyList.descriptionField', {
-          defaultMessage: 'Description',
-        }),
-        truncateText: true,
-      },
-      {
-        field: 'config_id',
-        name: i18n.translate('xpack.siem.endpoint.policyList.agentConfigField', {
-          defaultMessage: 'Agent Configuration',
-        }),
-        render(version: string) {
-          return (
-            <LinkToApp
-              data-test-subj="agentConfigLink"
-              appId="ingestManager"
-              appPath={`#/configs/${version}`}
-              href={`${services.application.getUrlForApp('ingestManager')}#/configs/${version}`}
-            >
-              {version}
-            </LinkToApp>
-          );
-        },
+        field: '',
+        name: 'Actions',
+        actions: [
+          {
+            // eslint-disable-next-line react/display-name
+            render: (item: Immutable<PolicyData>) => {
+              return (
+                <TableRowActions
+                  items={[
+                    <EuiContextMenuItem icon="link" key="agentConfigLink">
+                      <LinkToApp
+                        data-test-subj="agentConfigLink"
+                        appId="ingestManager"
+                        appPath={`#/configs/${item.config_id}`}
+                        href={`${services.application.getUrlForApp('ingestManager')}#/configs/${
+                          item.config_id
+                        }`}
+                      >
+                        <FormattedMessage
+                          id="xpack.siem.endpoint.policyList.agentConfigAction"
+                          defaultMessage="View Agent Configuration"
+                        />
+                      </LinkToApp>
+                    </EuiContextMenuItem>,
+                  ]}
+                />
+              );
+            },
+          },
+        ],
       },
     ],
     [services.application]
@@ -174,6 +283,7 @@ export const PolicyList = React.memo(() => {
         pagination={paginationSetup}
         onChange={handleTableChange}
         data-test-subj="policyTable"
+        hasActions={false}
       />
       <SpyRoute />
     </ManagementPageView>
