@@ -26,7 +26,9 @@ const createLink = ({
   target = '',
 }: { href?: string; target?: string } = {}): HTMLAnchorElement => {
   const el = document.createElement('a');
-  el.href = href;
+  if (href) {
+    el.href = href;
+  }
   el.target = target;
   return el;
 };
@@ -53,38 +55,32 @@ const createEvent = ({
 
 describe('createCrossAppClickHandler', () => {
   let container: HTMLElement;
-  let navigateToApp: jest.MockedFunction<ApplicationStart['navigateToApp']>;
-  let parseAppUrl: jest.MockedFunction<ApplicationStart['parseAppUrl']>;
-  let currentAppId: string;
+  let navigateToUrl: jest.MockedFunction<ApplicationStart['navigateToUrl']>;
 
   const createHandler = () =>
     createCrossAppClickHandler({
       container,
-      currentAppId,
-      navigateToApp,
-      parseAppUrl,
+      navigateToUrl,
     });
 
   beforeEach(() => {
     container = document.createElement('div');
-    navigateToApp = jest.fn();
-    parseAppUrl = jest.fn().mockReturnValue({ app: 'targetApp' });
-    currentAppId = 'currentApp';
+    navigateToUrl = jest.fn();
   });
 
-  it('calls `navigateToApp` when the target is a valid link to a cross app', () => {
-    parseAppUrl.mockReturnValue({ app: 'targetApp', path: '/foo' });
+  it('calls `navigateToUrl` with the link url', () => {
     const handler = createHandler();
 
-    const event = createEvent({});
+    const event = createEvent({
+      target: createLink({ href: '/base-path/app/targetApp' }),
+    });
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
-    expect(navigateToApp).toHaveBeenCalledWith('targetApp', { path: '/foo' });
+    expect(navigateToUrl).toHaveBeenCalledWith('http://localhost/base-path/app/targetApp');
   });
 
   it('is triggered if a non-link target has a parent link', () => {
-    parseAppUrl.mockReturnValue({ app: 'targetApp', path: '/foo' });
     const handler = createHandler();
 
     const link = createLink();
@@ -95,11 +91,10 @@ describe('createCrossAppClickHandler', () => {
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
-    expect(navigateToApp).toHaveBeenCalledWith('targetApp', { path: '/foo' });
+    expect(navigateToUrl).toHaveBeenCalledWith('http://localhost/base-path/app/targetApp');
   });
 
   it('is not triggered if a non-link target has no parent link', () => {
-    parseAppUrl.mockReturnValue({ app: 'targetApp', path: '/foo' });
     const handler = createHandler();
 
     const parent = document.createElement('div');
@@ -110,31 +105,19 @@ describe('createCrossAppClickHandler', () => {
     handler(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
-    expect(navigateToApp).not.toHaveBeenCalled();
+    expect(navigateToUrl).not.toHaveBeenCalled();
   });
 
-  it('is not triggered when the link is not parseable', () => {
-    parseAppUrl.mockReturnValue(undefined);
+  it('is not triggered when the link has no href', () => {
     const handler = createHandler();
 
-    const event = createEvent({});
+    const event = createEvent({
+      target: createLink({ href: '' }),
+    });
     handler(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
-    expect(navigateToApp).not.toHaveBeenCalled();
-  });
-
-  it('is not triggered when the link points to the current app', () => {
-    parseAppUrl.mockReturnValue({ app: 'targetApp', path: '/foo' });
-    currentAppId = 'targetApp';
-
-    const handler = createHandler();
-
-    const event = createEvent({});
-    handler(event);
-
-    expect(event.preventDefault).not.toHaveBeenCalled();
-    expect(navigateToApp).not.toHaveBeenCalled();
+    expect(navigateToUrl).not.toHaveBeenCalled();
   });
 
   it('is only triggered when the link does not have an external target', () => {
@@ -146,7 +129,7 @@ describe('createCrossAppClickHandler', () => {
     handler(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
-    expect(navigateToApp).not.toHaveBeenCalled();
+    expect(navigateToUrl).not.toHaveBeenCalled();
 
     event = createEvent({
       target: createLink({ target: 'some-target' }),
@@ -154,7 +137,7 @@ describe('createCrossAppClickHandler', () => {
     handler(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
-    expect(navigateToApp).not.toHaveBeenCalled();
+    expect(navigateToUrl).not.toHaveBeenCalled();
 
     event = createEvent({
       target: createLink({ target: '_self' }),
@@ -162,7 +145,7 @@ describe('createCrossAppClickHandler', () => {
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
-    expect(navigateToApp).toHaveBeenCalledTimes(1);
+    expect(navigateToUrl).toHaveBeenCalledTimes(1);
 
     event = createEvent({
       target: createLink({ target: '' }),
@@ -170,7 +153,7 @@ describe('createCrossAppClickHandler', () => {
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
-    expect(navigateToApp).toHaveBeenCalledTimes(2);
+    expect(navigateToUrl).toHaveBeenCalledTimes(2);
   });
 
   it('is only triggered from left clicks', () => {
@@ -182,7 +165,7 @@ describe('createCrossAppClickHandler', () => {
     handler(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
-    expect(navigateToApp).not.toHaveBeenCalled();
+    expect(navigateToUrl).not.toHaveBeenCalled();
 
     event = createEvent({
       button: 12,
@@ -190,7 +173,7 @@ describe('createCrossAppClickHandler', () => {
     handler(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
-    expect(navigateToApp).not.toHaveBeenCalled();
+    expect(navigateToUrl).not.toHaveBeenCalled();
 
     event = createEvent({
       button: 0,
@@ -198,7 +181,7 @@ describe('createCrossAppClickHandler', () => {
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
-    expect(navigateToApp).toHaveBeenCalledTimes(1);
+    expect(navigateToUrl).toHaveBeenCalledTimes(1);
   });
 
   it('is not triggered if the event default is prevented', () => {
@@ -210,7 +193,7 @@ describe('createCrossAppClickHandler', () => {
     handler(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
-    expect(navigateToApp).not.toHaveBeenCalled();
+    expect(navigateToUrl).not.toHaveBeenCalled();
 
     event = createEvent({
       defaultPrevented: false,
@@ -218,7 +201,7 @@ describe('createCrossAppClickHandler', () => {
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
-    expect(navigateToApp).toHaveBeenCalledTimes(1);
+    expect(navigateToUrl).toHaveBeenCalledTimes(1);
   });
 
   it('is not triggered if any modifier key is pressed', () => {
@@ -228,12 +211,12 @@ describe('createCrossAppClickHandler', () => {
     handler(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
-    expect(navigateToApp).not.toHaveBeenCalled();
+    expect(navigateToUrl).not.toHaveBeenCalled();
 
     event = createEvent({ modifierKey: false });
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
-    expect(navigateToApp).toHaveBeenCalledTimes(1);
+    expect(navigateToUrl).toHaveBeenCalledTimes(1);
   });
 });

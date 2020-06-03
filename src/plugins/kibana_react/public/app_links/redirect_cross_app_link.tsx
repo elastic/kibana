@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { FunctionComponent, useRef } from 'react';
+import React, { FunctionComponent, useRef, useMemo } from 'react';
 import classNames from 'classnames';
 import useObservable from 'react-use/lib/useObservable';
 import { ApplicationStart } from 'src/core/public';
@@ -53,15 +53,16 @@ export const RedirectCrossAppLinks: FunctionComponent<RedirectCrossAppLinksProps
   const currentAppId = useObservable(application.currentAppId$, undefined);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const clickHandler =
-    containerRef.current && currentAppId
-      ? createCrossAppClickHandler({
-          container: containerRef.current,
-          currentAppId,
-          navigateToApp: application.navigateToApp,
-          parseAppUrl: application.parseAppUrl,
-        })
-      : undefined;
+  const clickHandler = useMemo(
+    () =>
+      containerRef.current && currentAppId
+        ? createCrossAppClickHandler({
+            container: containerRef.current,
+            navigateToUrl: application.navigateToUrl,
+          })
+        : undefined,
+    [containerRef.current, application, currentAppId]
+  );
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events

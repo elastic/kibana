@@ -53,11 +53,11 @@ describe('RedirectCrossAppLinks', () => {
 
     component.find('a').simulate('click', { button: 0, defaultPrevented: false });
 
-    expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+    expect(application.navigateToUrl).toHaveBeenCalledTimes(1);
     expect(event!.defaultPrevented).toBe(true);
   });
 
-  it('intercept click events on children inside link elements', () => {
+  it('intercept click events on children inside link elements', async () => {
     let event: MouseEvent;
 
     const component = mount(
@@ -76,7 +76,7 @@ describe('RedirectCrossAppLinks', () => {
 
     component.find('span').simulate('click', { button: 0, defaultPrevented: false });
 
-    expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+    expect(application.navigateToUrl).toHaveBeenCalledTimes(1);
     expect(event!.defaultPrevented).toBe(true);
   });
 
@@ -236,29 +236,6 @@ describe('RedirectCrossAppLinks', () => {
     );
 
     component.find('a').simulate('click', { button: 0, ctrlKey: true, defaultPrevented: false });
-
-    expect(application.navigateToApp).not.toHaveBeenCalled();
-    expect(event!.defaultPrevented).toBe(false);
-  });
-
-  it('does not intercept click events when the link redirect to the current application', () => {
-    application.parseAppUrl.mockReturnValue({ app: 'currentApp' });
-
-    let event: MouseEvent;
-
-    const component = mount(
-      <div
-        onClick={(e) => {
-          event = e;
-        }}
-      >
-        <RedirectCrossAppLinks application={application}>
-          <a href="/mocked-anyway">content</a>
-        </RedirectCrossAppLinks>
-      </div>
-    );
-
-    component.find('a').simulate('click', { button: 0, defaultPrevented: false });
 
     expect(application.navigateToApp).not.toHaveBeenCalled();
     expect(event!.defaultPrevented).toBe(false);

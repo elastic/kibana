@@ -23,16 +23,12 @@ import { getClosestLink, hasActiveModifierKey } from './utils';
 
 interface CreateCrossAppClickHandlerOptions {
   container: HTMLElement;
-  currentAppId: string;
-  navigateToApp: ApplicationStart['navigateToApp'];
-  parseAppUrl: ApplicationStart['parseAppUrl'];
+  navigateToUrl: ApplicationStart['navigateToUrl'];
 }
 
 export const createCrossAppClickHandler = ({
   container,
-  currentAppId,
-  navigateToApp,
-  parseAppUrl,
+  navigateToUrl,
 }: CreateCrossAppClickHandlerOptions): React.MouseEventHandler<HTMLElement> => {
   return (e) => {
     if (container == null) {
@@ -53,11 +49,8 @@ export const createCrossAppClickHandler = ({
       !e.defaultPrevented && // ignore default prevented events
       !hasActiveModifierKey(e) // ignore clicks with modifier keys
     ) {
-      const appInfo = parseAppUrl(link.href);
-      if (appInfo && appInfo.app !== currentAppId) {
-        e.preventDefault();
-        navigateToApp(appInfo.app, { path: appInfo.path });
-      }
+      e.preventDefault();
+      navigateToUrl(link.href);
     }
   };
 };
