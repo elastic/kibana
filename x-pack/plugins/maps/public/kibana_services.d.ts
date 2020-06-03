@@ -76,4 +76,3 @@ export function setKibanaCommonConfig(config: MapsLegacyConfigType): void;
 export function setMapAppConfig(config: MapsConfigType): void;
 export function setKibanaVersion(version: string): void;
 export function setIsGoldPlus(isGoldPlus: boolean): void;
-
