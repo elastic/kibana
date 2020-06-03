@@ -19,7 +19,7 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
       const tableRows = await testSubjects.findAll('mlAnomaliesTable > ~mlAnomaliesListRow');
       expect(tableRows.length).to.be.greaterThan(
         0,
-        'Anomalies table should have at least one row (got 0)'
+        `Anomalies table should have at least one row (got '${tableRows.length}')`
       );
     },
   };

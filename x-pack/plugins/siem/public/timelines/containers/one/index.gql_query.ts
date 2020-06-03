@@ -128,6 +128,7 @@ export const oneTimelineQuery = gql`
         updatedBy
         version
       }
+      status
       title
       timelineType
       templateTimelineId

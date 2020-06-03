@@ -5,15 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { ReportingCore } from '../../../server';
 import { cryptoFactory, LevelLogger } from '../../../server/lib';
-import {
-  ExecuteJobFactory,
-  JobDocOutput,
-  JobDocPayload,
-  RequestFacade,
-} from '../../../server/types';
+import { ExecuteJobFactory, JobDocOutput, JobDocPayload } from '../../../server/types';
 import { CsvResultFromSearch } from '../../csv/types';
 import { FakeRequest, JobDocPayloadPanelCsv, JobParamsPanelCsv, SearchPanel } from '../types';
 import { createGenerateCsv } from './lib';
@@ -25,7 +21,8 @@ import { createGenerateCsv } from './lib';
 export type ImmediateExecuteFn<JobParamsType> = (
   jobId: null,
   job: JobDocPayload<JobParamsType>,
-  request: RequestFacade
+  context: RequestHandlerContext,
+  req: KibanaRequest
 ) => Promise<JobDocOutput>;
 
 export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
@@ -39,7 +36,8 @@ export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
   return async function executeJob(
     jobId: string | null,
     job: JobDocPayloadPanelCsv,
-    realRequest?: RequestFacade
+    context,
+    req
   ): Promise<JobDocOutput> {
     // There will not be a jobID for "immediate" generation.
     // jobID is only for "queued" jobs
@@ -58,10 +56,11 @@ export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
 
     jobLogger.debug(`Execute job generating [${visType}] csv`);
 
-    let requestObject: RequestFacade | FakeRequest;
-    if (isImmediate && realRequest) {
+    let requestObject: KibanaRequest | FakeRequest;
+
+    if (isImmediate && req) {
       jobLogger.info(`Executing job from Immediate API using request context`);
-      requestObject = realRequest;
+      requestObject = req;
     } else {
       jobLogger.info(`Executing job async using encrypted headers`);
       let decryptedHeaders: Record<string, unknown>;
@@ -103,6 +102,7 @@ export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
     let size = 0;
     try {
       const generateResults: CsvResultFromSearch = await generateCsv(
+        context,
         requestObject,
         visType as string,
         panel,

@@ -17,11 +17,7 @@ import {
 import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertsContextValue } from '../../../../../../triggers_actions_ui/public/application/context/alerts_context';
-import {
-  LogDocumentCountAlertParams,
-  Comparator,
-  TimeUnit,
-} from '../../../../../common/alerting/logs/types';
+import { LogDocumentCountAlertParams, Comparator } from '../../../../../common/alerting/logs/types';
 import { DocumentCount } from './document_count';
 import { Criteria } from './criteria';
 import { useSourceId } from '../../../../containers/source_id';
@@ -123,8 +119,6 @@ export const SourceStatusWrapper: React.FC<Props> = (props) => {
 
 export const Editor: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors } = props;
-  const [timeSize, setTimeSize] = useState<number | undefined>(1);
-  const [timeUnit, setTimeUnit] = useState<TimeUnit>('m');
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
   const { sourceStatus } = useLogSourceContext();
 
@@ -165,15 +159,13 @@ export const Editor: React.FC<Props> = (props) => {
 
   const updateTimeSize = useCallback(
     (ts: number | undefined) => {
-      setTimeSize(ts || undefined);
       setAlertParams('timeSize', ts);
     },
-    [setTimeSize, setAlertParams]
+    [setAlertParams]
   );
 
   const updateTimeUnit = useCallback(
     (tu: string) => {
-      setTimeUnit(tu as TimeUnit);
       setAlertParams('timeUnit', tu);
     },
     [setAlertParams]
@@ -217,8 +209,8 @@ export const Editor: React.FC<Props> = (props) => {
       />
 
       <ForLastExpression
-        timeWindowSize={timeSize}
-        timeWindowUnit={timeUnit}
+        timeWindowSize={alertParams.timeSize}
+        timeWindowUnit={alertParams.timeUnit}
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
         errors={errors as { [key: string]: string[] }}

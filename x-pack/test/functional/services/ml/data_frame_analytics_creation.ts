@@ -75,7 +75,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         )) === 'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
-        `Advanced editor switch check state should be ${expectedCheckState} (got ${actualCheckState})`
+        `Advanced editor switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
     },
 
@@ -317,7 +317,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       const actualCheckState = await this.getCreateIndexPatternSwitchCheckState();
       expect(actualCheckState).to.eql(
         expectedCheckState,
-        `Create index pattern switch check state should be ${expectedCheckState} (got ${actualCheckState})`
+        `Create index pattern switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
     },
 
