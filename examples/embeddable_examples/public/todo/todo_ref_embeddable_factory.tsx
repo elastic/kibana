@@ -24,7 +24,7 @@ import {
   EmbeddableStart,
   ErrorEmbeddable,
   EmbeddableFactoryDefinition,
-  BindEmbeddableFactoryDefinitionOutputType,
+  EmbeddableFactory,
 } from '../../../../src/plugins/embeddable/public';
 import {
   TodoRefEmbeddable,
@@ -38,8 +38,14 @@ interface StartServices {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
+export type TodoRefEmbeddableFactory = EmbeddableFactory<
+  TodoRefInput,
+  TodoRefOutput,
+  TodoRefEmbeddable,
+  TodoSavedObjectAttributes
+>;
+
 export class TodoRefEmbeddableFactoryDefinition
-  extends BindEmbeddableFactoryDefinitionOutputType<TodoRefOutput>
   implements
     EmbeddableFactoryDefinition<
       TodoRefInput,
@@ -55,9 +61,7 @@ export class TodoRefEmbeddableFactoryDefinition
     getIconForSavedObject: () => 'pencil',
   };
 
-  constructor(private getStartServices: () => Promise<StartServices>) {
-    super();
-  }
+  constructor(private getStartServices: () => Promise<StartServices>) {}
 
   public async isEditable() {
     return true;

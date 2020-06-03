@@ -22,12 +22,6 @@ import { IEmbeddable } from './i_embeddable';
 import { EmbeddableFactory } from './embeddable_factory';
 import { EmbeddableInput, EmbeddableOutput } from '..';
 
-export type EmbeddableFactoryTypeFromDefinitionType<
-  Definition
-> = Definition extends EmbeddableFactoryDefinition<infer I, infer O, infer E>
-  ? EmbeddableFactory<I, O, E>
-  : never;
-
 export type EmbeddableFactoryDefinition<
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
@@ -47,12 +41,4 @@ export type EmbeddableFactoryDefinition<
         | 'canCreateNew'
         | 'getDefaultInput'
       >
-    > &
-    BindEmbeddableFactoryDefinitionOutputType<O>;
-
-// TODO: hack to bind output to definition. is there a better way?
-export class BindEmbeddableFactoryDefinitionOutputType<
-  O extends EmbeddableOutput = EmbeddableOutput
-> {
-  __bindOutputTypeHack? = (undefined as unknown) as O;
-}
+    >;

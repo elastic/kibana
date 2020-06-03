@@ -66,20 +66,17 @@ const Nav = withRouter(({ history, pages }: NavProps) => {
 
 interface Props {
   basename: string;
-  DashboardEmbeddableByValueRenderer: DashboardStart['DashboardEmbeddableByValueRenderer'];
+  DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
 }
 
-const DashboardEmbeddableExplorerApp = ({
-  basename,
-  DashboardEmbeddableByValueRenderer,
-}: Props) => {
+const DashboardEmbeddableExplorerApp = ({ basename, DashboardContainerByValueRenderer }: Props) => {
   const pages: PageDef[] = [
     {
       title: 'By value dashboard embeddable',
       id: 'dashboardEmbeddableByValue',
       component: (
         <DashboardEmbeddableByValue
-          DashboardEmbeddableByValueRenderer={DashboardEmbeddableByValueRenderer}
+          DashboardContainerByValueRenderer={DashboardContainerByValueRenderer}
         />
       ),
     },

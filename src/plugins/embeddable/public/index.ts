@@ -71,8 +71,6 @@ export {
   isValueClickTriggerContext,
   EmbeddableRenderer,
   EmeddableRendererProps,
-  EmbeddableFactoryTypeFromDefinitionType,
-  BindEmbeddableFactoryDefinitionOutputType,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {

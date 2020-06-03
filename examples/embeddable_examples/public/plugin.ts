@@ -17,26 +17,35 @@
  * under the License.
  */
 
-import {
-  EmbeddableFactoryTypeFromDefinitionType,
-  EmbeddableSetup,
-  EmbeddableStart,
-} from '../../../src/plugins/embeddable/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
-import { HELLO_WORLD_EMBEDDABLE, HelloWorldEmbeddableFactoryDefinition } from './hello_world';
-import { TODO_EMBEDDABLE, TodoEmbeddableFactoryDefinition } from './todo';
+import {
+  HELLO_WORLD_EMBEDDABLE,
+  HelloWorldEmbeddableFactoryDefinition,
+  HelloWorldEmbeddableFactory,
+} from './hello_world';
+import { TODO_EMBEDDABLE, TodoEmbeddableFactory, TodoEmbeddableFactoryDefinition } from './todo';
 import {
   MULTI_TASK_TODO_EMBEDDABLE,
+  MultiTaskTodoEmbeddableFactory,
   MultiTaskTodoEmbeddableFactoryDefinition,
 } from './multi_task_todo';
 import {
   SEARCHABLE_LIST_CONTAINER,
   SearchableListContainerFactoryDefinition,
+  SearchableListContainerFactory,
 } from './searchable_list_container';
-import { LIST_CONTAINER, ListContainerFactoryDefinition } from './list_container';
+import {
+  LIST_CONTAINER,
+  ListContainerFactoryDefinition,
+  ListContainerFactory,
+} from './list_container';
 import { createSampleData } from './create_sample_data';
 import { TODO_REF_EMBEDDABLE } from './todo/todo_ref_embeddable';
-import { TodoRefEmbeddableFactoryDefinition } from './todo/todo_ref_embeddable_factory';
+import {
+  TodoRefEmbeddableFactory,
+  TodoRefEmbeddableFactoryDefinition,
+} from './todo/todo_ref_embeddable_factory';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -45,25 +54,6 @@ export interface EmbeddableExamplesSetupDependencies {
 export interface EmbeddableExamplesStartDependencies {
   embeddable: EmbeddableStart;
 }
-
-export type HelloWorldEmbeddableFactory = EmbeddableFactoryTypeFromDefinitionType<
-  HelloWorldEmbeddableFactoryDefinition
->;
-export type MultiTaskTodoEmbeddableFactory = EmbeddableFactoryTypeFromDefinitionType<
-  MultiTaskTodoEmbeddableFactoryDefinition
->;
-export type SearchableListContainerFactory = EmbeddableFactoryTypeFromDefinitionType<
-  SearchableListContainerFactoryDefinition
->;
-export type ListContainerFactory = EmbeddableFactoryTypeFromDefinitionType<
-  ListContainerFactoryDefinition
->;
-export type TodoEmbeddableFactory = EmbeddableFactoryTypeFromDefinitionType<
-  TodoEmbeddableFactoryDefinition
->;
-export type TodoRefEmbeddableFactory = EmbeddableFactoryTypeFromDefinitionType<
-  TodoRefEmbeddableFactoryDefinition
->;
 
 interface ExampleEmbeddableFactories {
   getHelloWorldEmbeddableFactory: () => HelloWorldEmbeddableFactory;

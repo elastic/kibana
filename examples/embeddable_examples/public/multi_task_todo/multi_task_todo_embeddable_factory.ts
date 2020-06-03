@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import {
   IContainer,
   EmbeddableFactoryDefinition,
-  BindEmbeddableFactoryDefinitionOutputType,
+  EmbeddableFactory,
 } from '../../../../src/plugins/embeddable/public';
 import {
   MultiTaskTodoEmbeddable,
@@ -30,9 +30,15 @@ import {
   MultiTaskTodoOutput,
 } from './multi_task_todo_embeddable';
 
+export type MultiTaskTodoEmbeddableFactory = EmbeddableFactory<
+  MultiTaskTodoInput,
+  MultiTaskTodoOutput,
+  MultiTaskTodoEmbeddable
+>;
+
 export class MultiTaskTodoEmbeddableFactoryDefinition
-  extends BindEmbeddableFactoryDefinitionOutputType<MultiTaskTodoOutput>
-  implements EmbeddableFactoryDefinition<MultiTaskTodoInput, MultiTaskTodoOutput> {
+  implements
+    EmbeddableFactoryDefinition<MultiTaskTodoInput, MultiTaskTodoOutput, MultiTaskTodoEmbeddable> {
   public readonly type = MULTI_TASK_TODO_EMBEDDABLE;
 
   public async isEditable() {

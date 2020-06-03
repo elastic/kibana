@@ -17,8 +17,21 @@
  * under the License.
  */
 
-export { SearchableListContainer, SEARCHABLE_LIST_CONTAINER } from './searchable_list_container';
-export {
-  SearchableListContainerFactoryDefinition,
-  SearchableListContainerFactory,
-} from './searchable_list_container_factory';
+import * as React from 'react';
+import { DashboardContainerInput } from './dashboard_container';
+import { DashboardContainerFactory } from './dashboard_container_factory';
+import { EmbeddableRenderer } from '../../../../embeddable/public';
+
+interface Props {
+  input: DashboardContainerInput;
+  onInputUpdated?: (newInput: DashboardContainerInput) => void;
+  // TODO: add other props as needed
+}
+
+export const createDashboardContainerByValueRenderer = ({
+  factory,
+}: {
+  factory: DashboardContainerFactory;
+}): React.FC<Props> => (props: Props) => (
+  <EmbeddableRenderer input={props.input} onInputUpdated={props.onInputUpdated} factory={factory} />
+);

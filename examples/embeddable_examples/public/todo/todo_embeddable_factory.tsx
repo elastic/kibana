@@ -26,7 +26,7 @@ import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import {
   IContainer,
   EmbeddableFactoryDefinition,
-  BindEmbeddableFactoryDefinitionOutputType,
+  EmbeddableFactory,
 } from '../../../../src/plugins/embeddable/public';
 import { TodoEmbeddable, TODO_EMBEDDABLE, TodoInput, TodoOutput } from './todo_embeddable';
 
@@ -51,14 +51,13 @@ interface StartServices {
   openModal: OverlayStart['openModal'];
 }
 
+export type TodoEmbeddableFactory = EmbeddableFactory<TodoInput, TodoOutput, TodoEmbeddable>;
+
 export class TodoEmbeddableFactoryDefinition
-  extends BindEmbeddableFactoryDefinitionOutputType<TodoOutput>
   implements EmbeddableFactoryDefinition<TodoInput, TodoOutput, TodoEmbeddable> {
   public readonly type = TODO_EMBEDDABLE;
 
-  constructor(private getStartServices: () => Promise<StartServices>) {
-    super();
-  }
+  constructor(private getStartServices: () => Promise<StartServices>) {}
 
   public async isEditable() {
     return true;

@@ -1134,7 +1134,6 @@
     "embeddableApi.customizeTitle.optionsMenuForm.panelTitleInputAriaLabel": "このインプットへの変更は直ちに適用されます。Enter を押して閉じます。",
     "embeddableApi.customizeTitle.optionsMenuForm.resetCustomDashboardButtonLabel": "タイトルをリセット",
     "embeddableApi.errors.embeddableFactoryNotFound": "{type} を読み込めません。Elasticsearch と Kibana のデフォルトのディストリビューションを適切なライセンスでアップグレードしてください。",
-    "embeddableApi.errors.factoryDoesNotExist": "{type} の埋め込み可能なファクトリーは存在しません。必要なプラグインが全てインストールおよび有効化済みであることを確かめてください。",
     "embeddableApi.errors.paneldoesNotExist": "パネルが見つかりません",
     "embeddableApi.panel.dashboardPanelAriaLabel": "ダッシュボードパネル",
     "embeddableApi.panel.editPanel.displayName": "{value} を編集",

@@ -22,9 +22,11 @@ import {
   IContainer,
   EmbeddableInput,
   EmbeddableFactoryDefinition,
+  EmbeddableFactory,
 } from '../../../../src/plugins/embeddable/public';
 import { HelloWorldEmbeddable, HELLO_WORLD_EMBEDDABLE } from './hello_world_embeddable';
 
+export type HelloWorldEmbeddableFactory = EmbeddableFactory;
 export class HelloWorldEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
   public readonly type = HELLO_WORLD_EMBEDDABLE;
 

@@ -34,13 +34,7 @@ import {
   ScopedHistory,
 } from 'src/core/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
-import {
-  CONTEXT_MENU_TRIGGER,
-  EmbeddableFactoryTypeFromDefinitionType,
-  EmbeddableRenderer,
-  EmbeddableSetup,
-  EmbeddableStart,
-} from '../../embeddable/public';
+import { CONTEXT_MENU_TRIGGER, EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from '../../data/public';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
@@ -73,7 +67,7 @@ import {
   ClonePanelActionContext,
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainerFactory,
-  DashboardContainerInput,
+  DashboardContainerFactoryDefinition,
   ExpandPanelAction,
   ExpandPanelActionContext,
   RenderDeps,
@@ -89,6 +83,7 @@ import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
 import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
+import { createDashboardContainerByValueRenderer } from './application';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -129,10 +124,7 @@ export interface DashboardStart {
     embeddableType: string;
   }) => void | undefined;
   dashboardUrlGenerator?: DashboardUrlGenerator;
-  DashboardEmbeddableByValueRenderer: React.FC<{
-    input: DashboardContainerInput;
-    onInputUpdated?: (newInput: DashboardContainerInput) => void;
-  }>;
+  DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
 }
 
 declare module '../../../plugins/ui_actions/public' {
@@ -203,7 +195,7 @@ export class DashboardPlugin
       };
     };
 
-    const factory = new DashboardContainerFactory(getStartServices);
+    const factory = new DashboardContainerFactoryDefinition(getStartServices);
     embeddable.registerEmbeddableFactory(factory.type, factory);
 
     const placeholderFactory = new PlaceholderEmbeddableFactory();
@@ -391,24 +383,15 @@ export class DashboardPlugin
     });
     const dashboardContainerFactory = plugins.embeddable.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
-    )! as EmbeddableFactoryTypeFromDefinitionType<DashboardContainerFactory>;
+    )! as DashboardContainerFactory;
 
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,
       addEmbeddableToDashboard: this.addEmbeddableToDashboard.bind(this, core),
       dashboardUrlGenerator: this.dashboardUrlGenerator,
-      DashboardEmbeddableByValueRenderer: (props: {
-        input: DashboardContainerInput;
-        onInputUpdated?: (newInput: DashboardContainerInput) => void;
-      }) => {
-        return (
-          <EmbeddableRenderer
-            input={props.input}
-            onInputUpdated={props.onInputUpdated}
-            factory={dashboardContainerFactory}
-          />
-        );
-      },
+      DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
+        factory: dashboardContainerFactory,
+      }),
     };
   }
 

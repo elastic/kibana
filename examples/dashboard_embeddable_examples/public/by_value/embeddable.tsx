@@ -52,16 +52,16 @@ const initialInput: DashboardContainerInput = {
 };
 
 export const DashboardEmbeddableByValue = ({
-  DashboardEmbeddableByValueRenderer,
+  DashboardContainerByValueRenderer,
 }: {
-  DashboardEmbeddableByValueRenderer: DashboardStart['DashboardEmbeddableByValueRenderer'];
+  DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
 }) => {
   const [input, setInput] = useState(initialInput);
 
   return (
     <>
       <InputEditor input={input} onSubmit={setInput} />
-      <DashboardEmbeddableByValueRenderer input={input} onInputUpdated={setInput} />
+      <DashboardContainerByValueRenderer input={input} onInputUpdated={setInput} />
     </>
   );
 };
