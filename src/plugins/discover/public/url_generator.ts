@@ -52,8 +52,7 @@ export interface DiscoverUrlGeneratorState {
   refreshInterval?: RefreshInterval;
 
   /**
-   * Optionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the
-   * saved dashboard has filters saved with it, this will _replace_ those filters.
+   * Optionally apply filers.
    */
   filters?: Filter[];
 
