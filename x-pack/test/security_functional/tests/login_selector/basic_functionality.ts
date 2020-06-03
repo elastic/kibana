@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { parse } from 'url';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['security', 'common']);
 
-  describe('Login Selector', function () {
+  describe('Basic functionality', function () {
     this.tags('includeFirefox');
 
     before(async () => {
@@ -23,12 +23,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .send({ roles: ['superuser'], enabled: true, rules: { field: { 'realm.name': 'saml1' } } })
         .expect(200);
 
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('../../functional/es_archives/empty_kibana');
       await PageObjects.security.forceLogout();
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('../../functional/es_archives/empty_kibana');
     });
 
     beforeEach(async () => {

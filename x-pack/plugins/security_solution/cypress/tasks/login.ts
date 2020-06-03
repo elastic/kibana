@@ -78,8 +78,13 @@ const loginViaEnvironmentCredentials = () => {
   // programmatically authenticate without interacting with the Kibana login page
   cy.request({
     body: {
-      username: Cypress.env(ELASTICSEARCH_USERNAME),
-      password: Cypress.env(ELASTICSEARCH_PASSWORD),
+      providerType: 'basic',
+      providerName: 'basic',
+      currentURL: '/',
+      params: {
+        username: Cypress.env(ELASTICSEARCH_USERNAME),
+        password: Cypress.env(ELASTICSEARCH_PASSWORD),
+      },
     },
     headers: { 'kbn-xsrf': 'cypress-creds-via-env' },
     method: 'POST',
@@ -104,8 +109,13 @@ const loginViaConfig = () => {
     // programmatically authenticate without interacting with the Kibana login page
     cy.request({
       body: {
-        username: config.elasticsearch.username,
-        password: config.elasticsearch.password,
+        providerType: 'basic',
+        providerName: 'basic',
+        currentURL: '/',
+        params: {
+          username: config.elasticsearch.username,
+          password: config.elasticsearch.password,
+        },
       },
       headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
       method: 'POST',

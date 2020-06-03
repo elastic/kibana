@@ -171,7 +171,7 @@ describe('LoginForm', () => {
       '/some-base-path/app/home#/?_g=()'
     )}`;
     const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
-    coreStartMock.http.post.mockResolvedValue({});
+    coreStartMock.http.post.mockResolvedValue({ location: '/some-base-path/app/home#/?_g=()' });
 
     const wrapper = mountWithIntl(
       <LoginForm
@@ -180,7 +180,7 @@ describe('LoginForm', () => {
         loginAssistanceMessage=""
         selector={{
           enabled: false,
-          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true }],
+          providers: [{ type: 'basic', name: 'basic1', usesLoginForm: true }],
         }}
       />
     );
@@ -198,7 +198,14 @@ describe('LoginForm', () => {
 
     expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
     expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
-      body: JSON.stringify({ username: 'username1', password: 'password1' }),
+      body: JSON.stringify({
+        providerType: 'basic',
+        providerName: 'basic1',
+        currentURL: `https://some-host/login?next=${encodeURIComponent(
+          '/some-base-path/app/home#/?_g=()'
+        )}`,
+        params: { username: 'username1', password: 'password1' },
+      }),
     });
 
     expect(window.location.href).toBe('/some-base-path/app/home#/?_g=()');
@@ -363,7 +370,7 @@ describe('LoginForm', () => {
       });
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
-      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login_with', {
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
         body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
       });
 
@@ -407,7 +414,7 @@ describe('LoginForm', () => {
       });
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
-      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login_with', {
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
         body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
       });
 

@@ -96,7 +96,7 @@ const providersConfigSchema = schema.object(
         schema.object({
           ...getCommonProviderSchemaProperties(),
           realm: schema.string(),
-          maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
+          maxRedirectURLSize: schema.maybe(schema.byteSize()),
           useRelayStateDeepLink: schema.boolean({ defaultValue: false }),
         })
       )
@@ -181,7 +181,7 @@ export const ConfigSchema = schema.object({
       'saml',
       schema.object({
         realm: schema.string(),
-        maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
+        maxRedirectURLSize: schema.maybe(schema.byteSize()),
       })
     ),
     http: schema.object({

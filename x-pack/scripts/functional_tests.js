@@ -9,7 +9,8 @@ const alwaysImportedTests = [
   require.resolve('../test/security_solution_endpoint/config.ts'),
   require.resolve('../test/functional_with_es_ssl/config.ts'),
   require.resolve('../test/functional/config_security_basic.ts'),
-  require.resolve('../test/functional/config_security_trial.ts'),
+  require.resolve('../test/security_functional/login_selector.config.ts'),
+  require.resolve('../test/security_functional/saml.config.ts'),
 ];
 const onlyNotInCoverageTests = [
   require.resolve('../test/api_integration/config_security_basic.ts'),

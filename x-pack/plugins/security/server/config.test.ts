@@ -272,9 +272,6 @@ describe('config schema', () => {
             "saml",
           ],
           "saml": Object {
-            "maxRedirectURLSize": ByteSizeValue {
-              "valueInBytes": 2048,
-            },
             "realm": "realm-1",
           },
           "selector": Object {},
@@ -294,13 +291,10 @@ describe('config schema', () => {
           authc: { providers: ['saml'], saml: { realm: 'realm-1' } },
         }).authc.saml
       ).toMatchInlineSnapshot(`
-                        Object {
-                          "maxRedirectURLSize": ByteSizeValue {
-                            "valueInBytes": 2048,
-                          },
-                          "realm": "realm-1",
-                        }
-                  `);
+        Object {
+          "realm": "realm-1",
+        }
+      `);
 
       expect(
         ConfigSchema.validate({
@@ -665,9 +659,6 @@ describe('config schema', () => {
             "saml": Object {
               "saml1": Object {
                 "enabled": true,
-                "maxRedirectURLSize": ByteSizeValue {
-                  "valueInBytes": 2048,
-                },
                 "order": 0,
                 "realm": "saml1",
                 "showInSelector": true,
@@ -685,9 +676,6 @@ describe('config schema', () => {
               },
               "saml3": Object {
                 "enabled": true,
-                "maxRedirectURLSize": ByteSizeValue {
-                  "valueInBytes": 2048,
-                },
                 "order": 2,
                 "realm": "saml3",
                 "showInSelector": true,
@@ -774,9 +762,6 @@ describe('config schema', () => {
           "saml": Object {
             "basic1": Object {
               "enabled": false,
-              "maxRedirectURLSize": ByteSizeValue {
-                "valueInBytes": 2048,
-              },
               "order": 3,
               "realm": "saml3",
               "showInSelector": true,
@@ -784,9 +769,6 @@ describe('config schema', () => {
             },
             "saml1": Object {
               "enabled": true,
-              "maxRedirectURLSize": ByteSizeValue {
-                "valueInBytes": 2048,
-              },
               "order": 1,
               "realm": "saml1",
               "showInSelector": true,
@@ -794,9 +776,6 @@ describe('config schema', () => {
             },
             "saml2": Object {
               "enabled": true,
-              "maxRedirectURLSize": ByteSizeValue {
-                "valueInBytes": 2048,
-              },
               "order": 2,
               "realm": "saml2",
               "showInSelector": true,
@@ -901,9 +880,6 @@ describe('createConfig()', () => {
           "saml": Object {
             "saml": Object {
               "enabled": true,
-              "maxRedirectURLSize": ByteSizeValue {
-                "valueInBytes": 2048,
-              },
               "order": 0,
               "realm": "saml-realm",
               "showInSelector": true,

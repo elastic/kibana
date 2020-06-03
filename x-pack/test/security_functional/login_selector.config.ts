@@ -8,8 +8,8 @@
 
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-import { services } from './services';
-import { pageObjects } from './page_objects';
+import { services } from '../functional/services';
+import { pageObjects } from '../functional/page_objects';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
@@ -26,7 +26,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const samlIdPPlugin = resolve(__dirname, '../saml_api_integration/fixtures/saml_provider');
 
   return {
-    testFiles: [resolve(__dirname, './apps/security/trial_license')],
+    testFiles: [resolve(__dirname, './tests/login_selector')],
 
     services,
     pageObjects,
@@ -78,7 +78,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     screenshots: { directory: resolve(__dirname, 'screenshots') },
 
     junit: {
-      reportName: 'Chrome X-Pack UI Functional Tests',
+      reportName: 'Chrome X-Pack Security Functional Tests',
     },
   };
 }
