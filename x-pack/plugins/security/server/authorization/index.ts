@@ -15,6 +15,7 @@ import {
 import { FeaturesService, SpacesService } from '../plugin';
 import { Actions } from './actions';
 import { CheckPrivilegesWithRequest, checkPrivilegesWithRequestFactory } from './check_privileges';
+export { CheckPrivilegesResponse } from './check_privileges';
 import {
   CheckPrivilegesDynamicallyWithRequest,
   checkPrivilegesDynamicallyWithRequestFactory,

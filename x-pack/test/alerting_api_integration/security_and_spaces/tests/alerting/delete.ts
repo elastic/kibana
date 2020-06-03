@@ -6,7 +6,12 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import {
+  getUrlPrefix,
+  getTestAlertData,
+  getUnauthorizedErrorMessage,
+  ObjectRemover,
+} from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -46,11 +51,11 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('delete', 'test.noop', 'alertsFixture'),
+                statusCode: 403,
               });
               objectRemover.add(space.id, createdAlert.id, 'alert');
               // Ensure task still exists
@@ -91,12 +96,6 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'global_read at space1':
             case 'space_1_all at space1':
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
             case 'superuser at space1':
               expect(response.body).to.eql({
                 statusCode: 404,
@@ -135,11 +134,11 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('delete', 'test.noop', 'alertsFixture'),
+                statusCode: 403,
               });
               objectRemover.add(space.id, createdAlert.id, 'alert');
               // Ensure task still exists

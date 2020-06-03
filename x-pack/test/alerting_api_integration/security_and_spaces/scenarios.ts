@@ -49,6 +49,7 @@ const GlobalRead: User = {
         feature: {
           alerting: ['read'],
           actions: ['read'],
+          alertsFixture: ['read'],
         },
         spaces: ['*'],
       },
@@ -77,6 +78,7 @@ const Space1All: User = {
         feature: {
           alerting: ['all'],
           actions: ['all'],
+          alertsFixture: ['all'],
         },
         spaces: ['space1'],
       },

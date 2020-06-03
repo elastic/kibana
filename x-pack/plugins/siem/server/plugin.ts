@@ -35,7 +35,7 @@ import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { SiemClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, APP_ICON } from '../common/constants';
+import { APP_ID, APP_ICON, SIGNALS_ID, NOTIFICATIONS_ID } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerAlertRoutes } from './endpoint/alerts/routes';
@@ -136,7 +136,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         all: {
           app: ['siem', 'kibana'],
           catalogue: ['siem'],
-          api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+          api: ['siem', 'actions-read', 'actions-all'],
           savedObject: {
             all: [
               'alert',
@@ -149,6 +149,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               ...savedObjectTypes,
             ],
             read: ['config'],
+          },
+          alerting: {
+            all: [SIGNALS_ID, NOTIFICATIONS_ID],
           },
           ui: [
             'show',
@@ -164,7 +167,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         read: {
           app: ['siem', 'kibana'],
           catalogue: ['siem'],
-          api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+          api: ['siem', 'actions-read', 'actions-all'],
           savedObject: {
             all: ['alert', 'action', 'action_task_params'],
             read: [
@@ -175,6 +178,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               'cases-user-actions',
               ...savedObjectTypes,
             ],
+          },
+          alerting: {
+            all: [SIGNALS_ID, NOTIFICATIONS_ID],
           },
           ui: [
             'show',

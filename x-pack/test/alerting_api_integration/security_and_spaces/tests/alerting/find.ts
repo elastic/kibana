@@ -6,7 +6,12 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import {
+  getUrlPrefix,
+  getTestAlertData,
+  ObjectRemover,
+  getUnauthorizedErrorMessage,
+} from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -36,20 +41,18 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             )
             .auth(user.username, user.password);
 
+          expect(response.statusCode).to.eql(200);
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
+              expect(response.body.page).to.equal(0);
+              expect(response.body.perPage).to.equal(0);
+              expect(response.body.total).to.equal(0);
+              expect(response.body.data.length).to.equal(0);
               break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(response.statusCode).to.eql(200);
               expect(response.body.page).to.equal(1);
               expect(response.body.perPage).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
@@ -59,7 +62,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 name: 'abc',
                 tags: ['foo'],
                 alertTypeId: 'test.noop',
-                consumer: 'bar',
+                consumer: 'alertsFixture',
                 schedule: { interval: '1m' },
                 enabled: true,
                 actions: [],
@@ -123,12 +126,10 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
+              expect(response.body.page).to.equal(0);
+              expect(response.body.perPage).to.equal(0);
+              expect(response.body.total).to.equal(0);
+              expect(response.body.data.length).to.equal(0);
               break;
             case 'global_read at space1':
             case 'superuser at space1':
@@ -143,7 +144,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 name: 'abc',
                 tags: ['foo'],
                 alertTypeId: 'test.noop',
-                consumer: 'bar',
+                consumer: 'alertsFixture',
                 schedule: { interval: '1m' },
                 enabled: false,
                 actions: [
@@ -190,12 +191,10 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'space_1_all at space1':
-              expect(response.statusCode).to.eql(404);
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
+              expect(response.body.page).to.equal(0);
+              expect(response.body.perPage).to.equal(0);
+              expect(response.body.total).to.equal(0);
+              expect(response.body.data.length).to.equal(0);
               break;
             case 'global_read at space1':
             case 'superuser at space1':

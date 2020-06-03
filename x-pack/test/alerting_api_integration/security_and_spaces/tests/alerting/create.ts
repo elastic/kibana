@@ -6,7 +6,13 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { checkAAD, getTestAlertData, getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import {
+  checkAAD,
+  getTestAlertData,
+  getUnauthorizedErrorMessage,
+  getUrlPrefix,
+  ObjectRemover,
+} from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -62,11 +68,11 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('create', 'test.noop', 'alertsFixture'),
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
@@ -87,7 +93,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 ],
                 enabled: true,
                 alertTypeId: 'test.noop',
-                consumer: 'bar',
+                consumer: 'alertsFixture',
                 params: {},
                 createdBy: user.username,
                 schedule: { interval: '1m' },
@@ -135,11 +141,11 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('create', 'test.noop', 'alertsFixture'),
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
@@ -168,15 +174,19 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage(
+                  'create',
+                  'test.unregistered-alert-type',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
-            case 'space_1_all at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -200,13 +210,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(400);
@@ -236,11 +239,11 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('create', 'test.validation', 'alertsFixture'),
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
@@ -269,13 +272,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(400);
@@ -301,13 +297,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(400);

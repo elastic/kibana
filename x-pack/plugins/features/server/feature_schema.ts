@@ -33,6 +33,14 @@ const privilegeSchema = Joi.object({
   catalogue: catalogueSchema,
   api: Joi.array().items(Joi.string()),
   app: Joi.array().items(Joi.string()),
+  alerting: Joi.object({
+    all: Joi.array().items(Joi.string()),
+    read: Joi.array().items(Joi.string()),
+    globally: Joi.object({
+      all: Joi.array().items(Joi.string()),
+      read: Joi.array().items(Joi.string()),
+    }),
+  }),
   savedObject: Joi.object({
     all: Joi.array()
       .items(Joi.string())

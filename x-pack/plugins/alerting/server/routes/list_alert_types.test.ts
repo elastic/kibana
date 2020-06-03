@@ -28,13 +28,6 @@ describe('listAlertTypesRoute', () => {
     const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alert/types"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-read",
-        ],
-      }
-    `);
 
     const listTypes = [
       {

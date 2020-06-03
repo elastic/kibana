@@ -31,13 +31,6 @@ describe('muteAlertInstanceRoute', () => {
     expect(config.path).toMatchInlineSnapshot(
       `"/api/alert/{alertId}/alert_instance/{alertInstanceId}/_mute"`
     );
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-all",
-        ],
-      }
-    `);
 
     alertsClient.muteInstance.mockResolvedValueOnce();
 
