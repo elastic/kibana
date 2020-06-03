@@ -22,6 +22,7 @@ export interface IndexPatternRetriever {
 export class IngestIndexPatternRetriever implements IndexPatternRetriever {
   private static endpointPackageName = 'endpoint';
   private static metadataDataset = 'metadata';
+  private static policyDataset = 'policy';
   private readonly log: Logger;
   constructor(private readonly service: ESIndexPatternService, loggerFactory: LoggerFactory) {
     this.log = loggerFactory.get('index-pattern-retriever');
@@ -76,7 +77,7 @@ export class IngestIndexPatternRetriever implements IndexPatternRetriever {
     }
   }
 
-  getPolicyResponseIndexPattern(ctx: RequestHandlerContext): Promise<string> {
-    return Promise.resolve('metrics-endpoint.policy-default-1');
+  async getPolicyResponseIndexPattern(ctx: RequestHandlerContext): Promise<string> {
+    return this.getIndexPattern(ctx, IngestIndexPatternRetriever.policyDataset);
   }
 }

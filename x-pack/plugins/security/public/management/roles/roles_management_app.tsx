@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HashRouter as Router, Route, Switch, useParams } from 'react-router-dom';
+import { Router, Route, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor, FatalErrorsSetup } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
@@ -27,11 +27,11 @@ export const rolesManagementApp = Object.freeze({
       id: this.id,
       order: 20,
       title: i18n.translate('xpack.security.management.rolesTitle', { defaultMessage: 'Roles' }),
-      async mount({ basePath, element, setBreadcrumbs }) {
+      async mount({ element, setBreadcrumbs, history }) {
         const rolesBreadcrumbs = [
           {
             text: i18n.translate('xpack.security.roles.breadcrumb', { defaultMessage: 'Roles' }),
-            href: `#${basePath}`,
+            href: `/`,
           },
         ];
 
@@ -59,7 +59,13 @@ export const rolesManagementApp = Object.freeze({
         const rolesAPIClient = new RolesAPIClient(http);
         const RolesGridPageWithBreadcrumbs = () => {
           setBreadcrumbs(rolesBreadcrumbs);
-          return <RolesGridPage notifications={notifications} rolesAPIClient={rolesAPIClient} />;
+          return (
+            <RolesGridPage
+              notifications={notifications}
+              rolesAPIClient={rolesAPIClient}
+              history={history}
+            />
+          );
         };
 
         const EditRolePageWithBreadcrumbs = ({ action }: { action: 'edit' | 'clone' }) => {
@@ -68,7 +74,7 @@ export const rolesManagementApp = Object.freeze({
           setBreadcrumbs([
             ...rolesBreadcrumbs,
             action === 'edit' && roleName
-              ? { text: roleName, href: `#${basePath}/edit/${encodeURIComponent(roleName)}` }
+              ? { text: roleName, href: `/edit/${encodeURIComponent(roleName)}` }
               : {
                   text: i18n.translate('xpack.security.roles.createBreadcrumb', {
                     defaultMessage: 'Create',
@@ -95,15 +101,16 @@ export const rolesManagementApp = Object.freeze({
               docLinks={new DocumentationLinksService(docLinks)}
               uiCapabilities={application.capabilities}
               indexPatterns={data.indexPatterns}
+              history={history}
             />
           );
         };
 
         render(
           <i18nStart.Context>
-            <Router basename={basePath}>
+            <Router history={history}>
               <Switch>
-                <Route path="/" exact={true}>
+                <Route path={['/', '']} exact={true}>
                   <RolesGridPageWithBreadcrumbs />
                 </Route>
                 <Route path="/edit/:roleName?">

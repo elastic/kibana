@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostResultList, Immutable } from '../../../common/endpoint/types';
+import { HostResultList } from '../../../common/endpoint/types';
 import { ImmutableMiddlewareFactory } from '../../common/store';
 import { isOnHostPage, hasSelectedHost, uiQueryParams, listData } from './selectors';
 import { HostState } from '../types';
 
-export const hostMiddlewareFactory: ImmutableMiddlewareFactory<Immutable<HostState>> = (
-  coreStart
-) => {
+export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (coreStart) => {
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();
