@@ -110,11 +110,11 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }: FtrPro
 
     async ensureAddPanelIsShowing() {
       log.debug('DashboardAddPanel.ensureAddPanelIsShowing');
-      const isOpen = await this.isAddPanelOpen();
+      let isOpen = await this.isAddPanelOpen();
       if (!isOpen) {
         await retry.try(async () => {
           await this.clickOpenAddPanel();
-          const isOpen = await this.isAddPanelOpen();
+          isOpen = await this.isAddPanelOpen();
           if (!isOpen) {
             throw new Error('Add panel still not open, trying again.');
           }
