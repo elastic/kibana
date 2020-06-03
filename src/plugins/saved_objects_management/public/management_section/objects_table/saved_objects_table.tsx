@@ -55,7 +55,7 @@ import {
   NotificationsStart,
   ApplicationStart,
 } from 'src/core/public';
-import { RedirectCrossAppLinks } from '../../../../kibana_react/public';
+import { RedirectAppLinks } from '../../../../kibana_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
   parseQuery,
@@ -735,7 +735,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           filteredCount={filteredItemCount}
         />
         <EuiSpacer size="xs" />
-        <RedirectCrossAppLinks application={applications}>
+        <RedirectAppLinks application={applications}>
           <Table
             basePath={http.basePath}
             itemId={'id'}
@@ -757,7 +757,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onShowRelationships={this.onShowRelationships}
             canGoInApp={this.props.canGoInApp}
           />
-        </RedirectCrossAppLinks>
+        </RedirectAppLinks>
       </EuiPageContent>
     );
   }

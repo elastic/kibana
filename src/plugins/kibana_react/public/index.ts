@@ -31,7 +31,7 @@ export { Markdown, MarkdownSimple } from './markdown';
 export { reactToUiComponent, uiToReactComponent } from './adapters';
 export { useUrlTracker } from './use_url_tracker';
 export { toMountPoint } from './util';
-export { RedirectCrossAppLinks } from './app_links';
+export { RedirectAppLinks } from './app_links';
 
 /** dummy plugin, we just want kibanaReact to have its own bundle */
 export function plugin() {

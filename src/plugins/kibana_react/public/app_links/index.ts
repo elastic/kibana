@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { RedirectCrossAppLinks } from './redirect_cross_app_link';
+export { RedirectAppLinks } from './redirect_app_link';

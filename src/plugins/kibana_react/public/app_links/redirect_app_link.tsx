@@ -30,12 +30,9 @@ interface RedirectCrossAppLinksProps {
 }
 
 /**
- * Utility component that will intercept click events on children anchor (`<a>`) elements to perform
- * SPA navigation if the link points to another application.
- *
- * @remarks
- * Links pointing to the current application will not be handled by the component, and should be handled
- * by the application's internal routing.
+ * Utility component that will intercept click events on children anchor (`<a>`) elements to call
+ * `application.navigateToUrl` with the link's href. This will trigger SPA friendly navigation
+ * when the link points to a valid kibana app.
  *
  * @example
  * ```tsx
@@ -44,7 +41,7 @@ interface RedirectCrossAppLinksProps {
  * </RedirectCrossAppLinks>
  * ```
  */
-export const RedirectCrossAppLinks: FunctionComponent<RedirectCrossAppLinksProps> = ({
+export const RedirectAppLinks: FunctionComponent<RedirectCrossAppLinksProps> = ({
   application,
   children,
   className,

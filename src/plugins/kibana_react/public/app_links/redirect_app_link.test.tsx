@@ -20,12 +20,12 @@
 import React, { MouseEvent } from 'react';
 import { mount } from 'enzyme';
 import { applicationServiceMock } from '../../../../core/public/mocks';
-import { RedirectCrossAppLinks } from './redirect_cross_app_link';
+import { RedirectAppLinks } from './redirect_app_link';
 import { BehaviorSubject } from 'rxjs';
 
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 
-describe('RedirectCrossAppLinks', () => {
+describe('RedirectAppLinks', () => {
   let application: ReturnType<typeof applicationServiceMock.createStartContract>;
 
   beforeEach(() => {
@@ -43,11 +43,11 @@ describe('RedirectCrossAppLinks', () => {
           event = e;
         }}
       >
-        <RedirectCrossAppLinks application={application}>
+        <RedirectAppLinks application={application}>
           <div>
             <a href="/mocked-anyway">content</a>
           </div>
-        </RedirectCrossAppLinks>
+        </RedirectAppLinks>
       </div>
     );
 
@@ -66,11 +66,11 @@ describe('RedirectCrossAppLinks', () => {
           event = e;
         }}
       >
-        <RedirectCrossAppLinks application={application}>
+        <RedirectAppLinks application={application}>
           <a href="/mocked-anyway">
             <span>content</span>
           </a>
-        </RedirectCrossAppLinks>
+        </RedirectAppLinks>
       </div>
     );
 
@@ -89,11 +89,11 @@ describe('RedirectCrossAppLinks', () => {
           event = e;
         }}
       >
-        <RedirectCrossAppLinks application={application}>
+        <RedirectAppLinks application={application}>
           <span>
             <a href="/mocked-anyway">content</a>
           </span>
-        </RedirectCrossAppLinks>
+        </RedirectAppLinks>
       </div>
     );
 
@@ -113,9 +113,9 @@ describe('RedirectCrossAppLinks', () => {
         }}
       >
         <a href="/mocked-anyway">
-          <RedirectCrossAppLinks application={application}>
+          <RedirectAppLinks application={application}>
             <span>content</span>
-          </RedirectCrossAppLinks>
+          </RedirectAppLinks>
         </a>
       </div>
     );
@@ -135,11 +135,11 @@ describe('RedirectCrossAppLinks', () => {
           event = e;
         }}
       >
-        <RedirectCrossAppLinks application={application}>
+        <RedirectAppLinks application={application}>
           <a href="/mocked-anyway" target="_blank">
             content
           </a>
-        </RedirectCrossAppLinks>
+        </RedirectAppLinks>
       </div>
     );
 
@@ -158,11 +158,11 @@ describe('RedirectCrossAppLinks', () => {
           event = e;
         }}
       >
-        <RedirectCrossAppLinks application={application}>
+        <RedirectAppLinks application={application}>
           <a href="/mocked-anyway" target="_blank">
             <span onClick={(e) => e.preventDefault()}>content</span>
           </a>
-        </RedirectCrossAppLinks>
+        </RedirectAppLinks>
       </div>
     );
 
@@ -181,11 +181,11 @@ describe('RedirectCrossAppLinks', () => {
           event = e;
         }}
       >
-        <RedirectCrossAppLinks application={application}>
+        <RedirectAppLinks application={application}>
           <a href="/mocked-anyway" target="_blank" onClick={(e) => e.stopPropagation()}>
             content
           </a>
-        </RedirectCrossAppLinks>
+        </RedirectAppLinks>
       </div>
     );
 
@@ -204,11 +204,11 @@ describe('RedirectCrossAppLinks', () => {
           event = e;
         }}
       >
-        <RedirectCrossAppLinks application={application}>
+        <RedirectAppLinks application={application}>
           <div>
             <a href="/mocked-anyway">content</a>
           </div>
-        </RedirectCrossAppLinks>
+        </RedirectAppLinks>
       </div>
     );
 
@@ -227,11 +227,11 @@ describe('RedirectCrossAppLinks', () => {
           event = e;
         }}
       >
-        <RedirectCrossAppLinks application={application}>
+        <RedirectAppLinks application={application}>
           <div>
             <a href="/mocked-anyway">content</a>
           </div>
-        </RedirectCrossAppLinks>
+        </RedirectAppLinks>
       </div>
     );
 
