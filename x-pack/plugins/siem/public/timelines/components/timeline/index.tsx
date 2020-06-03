@@ -9,7 +9,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { WithSource } from '../../../common/containers/source';
-import { useSignalIndex } from '../../../alerts/containers/detection_engine/signals/use_signal_index';
+import { useSignalIndex } from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
 import { inputsModel, inputsSelectors, State } from '../../../common/store';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
