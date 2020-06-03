@@ -47,6 +47,7 @@ describe('AppContainer', () => {
     appBasePath: '/base-path',
     appRoute: '/some-route',
     unmountBeforeMounting: false,
+    legacy: false,
     mount: async ({ element }: AppMountParameters) => {
       await promise;
       const container = document.createElement('div');

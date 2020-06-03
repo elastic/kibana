@@ -219,7 +219,10 @@ export class PageManager extends React.PureComponent {
                 content="Add a new page to this workpad"
                 position="left"
               >
-                <button onClick={addPage} className="canvasPageManager__addPage">
+                <button
+                  onClick={addPage}
+                  className="canvasPageManager__addPage kbn-resetFocusState"
+                >
                   <EuiIcon color="ghost" type="plusInCircle" size="l" />
                 </button>
               </EuiToolTip>

@@ -107,6 +107,7 @@ const embeddable = () => ({
       });
     } else {
       embeddablesRegistry[uniqueId].updateInput(input);
+      embeddablesRegistry[uniqueId].reload();
     }
   },
 });
