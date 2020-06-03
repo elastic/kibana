@@ -8,7 +8,7 @@ import {
   setBasePath,
   toggleIntegrationsPopover,
   setAlertFlyoutVisible,
-  setSearchText,
+  setSearchTextAction,
 } from '../../actions';
 import { uiReducer } from '../ui';
 import { Action } from 'redux-actions';
@@ -74,7 +74,7 @@ describe('ui reducer', () => {
   });
 
   it('sets the search text', () => {
-    const action = setSearchText('lorem ipsum') as Action<never>;
+    const action = setSearchTextAction('lorem ipsum') as Action<never>;
     expect(
       uiReducer(
         {

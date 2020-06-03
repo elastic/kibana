@@ -9,7 +9,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { selectMonitorStatusAlert, overviewFiltersSelector } from '../../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../index';
-import { fetchOverviewFilters, setSearchText } from '../../../../state/actions';
+import { fetchOverviewFilters, setSearchTextAction } from '../../../../state/actions';
 
 interface Props {
   alertParams: { [key: string]: any };
@@ -53,7 +53,7 @@ export const AlertMonitorStatus: React.FC<Props> = ({
   const { locations } = useSelector(selectMonitorStatusAlert);
   useEffect(() => {
     if (alertParams.search) {
-      dispatch(setSearchText(alertParams.search));
+      dispatch(setSearchTextAction(alertParams.search));
     }
   }, [alertParams, dispatch]);
 

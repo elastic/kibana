@@ -12,6 +12,7 @@ import { AlertExecutorOptions } from '../../../../alerts/server';
 import { UptimeAlertTypeFactory } from './types';
 import { GetMonitorStatusResult } from '../requests';
 import { esKuery, IIndexPattern } from '../../../../../../src/plugins/data/server';
+import { JsonObject } from '../../../../../../src/plugins/kibana_utils/common';
 import {
   StatusCheckParamsType,
   StatusCheckParams,
@@ -131,7 +132,7 @@ export const fullListByIdAndLocation = (
 // we might want to make this a parameter in the future
 const DEFAULT_MAX_MESSAGE_ROWS = 3;
 
-const hasFilters = (filters?: StatusCheckFilters) => {
+export const hasFilters = (filters?: StatusCheckFilters) => {
   if (!filters) return false;
   for (const list of Object.values(filters)) {
     if (list.length > 0) {
@@ -141,11 +142,11 @@ const hasFilters = (filters?: StatusCheckFilters) => {
   return false;
 };
 
-const genFilterString = async (
+export const genFilterString = async (
   getIndexPattern: () => Promise<IIndexPattern | undefined>,
   filters?: StatusCheckFilters,
   search?: string
-): Promise<string | undefined> => {
+): Promise<JsonObject | undefined> => {
   const filtersExist = hasFilters(filters);
   if (!filtersExist && !search) return undefined;
 
@@ -163,11 +164,9 @@ const genFilterString = async (
     combinedString = search;
   }
 
-  return JSON.stringify(
-    esKuery.toElasticsearchQuery(
-      esKuery.fromKueryExpression(combinedString ?? ''),
-      await getIndexPattern()
-    )
+  return esKuery.toElasticsearchQuery(
+    esKuery.fromKueryExpression(combinedString ?? ''),
+    await getIndexPattern()
   );
 };
 
@@ -245,12 +244,8 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
     if (isRight(atomicDecoded)) {
       const { filters, search, numTimes, timerangeCount, timerangeUnit } = atomicDecoded.right;
       const timerange = { from: `now-${String(timerangeCount) + timerangeUnit}`, to: 'now' };
-
-      params = {
-        timerange,
-        numTimes,
-        locations: [],
-        filters: await genFilterString(
+      const filterString = JSON.stringify(
+        await genFilterString(
           () =>
             libs.requests.getIndexPattern({
               callES: options.services.callCluster,
@@ -258,7 +253,13 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
             }),
           filters,
           search
-        ),
+        )
+      );
+      params = {
+        timerange,
+        numTimes,
+        locations: [],
+        filters: filterString,
       };
     } else if (isRight(decoded)) {
       params = decoded.right;

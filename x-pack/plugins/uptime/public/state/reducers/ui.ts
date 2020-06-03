@@ -13,7 +13,7 @@ import {
   UiPayload,
   setAlertFlyoutType,
   setAlertFlyoutVisible,
-  setSearchText,
+  setSearchTextAction,
 } from '../actions';
 
 export interface UiState {
@@ -60,7 +60,7 @@ export const uiReducer = handleActions<UiState, UiPayload>(
       alertFlyoutType: action.payload,
     }),
 
-    [String(setSearchText)]: (state, action: Action<string>) => ({
+    [String(setSearchTextAction)]: (state, action: Action<string>) => ({
       ...state,
       searchText: action.payload,
     }),
