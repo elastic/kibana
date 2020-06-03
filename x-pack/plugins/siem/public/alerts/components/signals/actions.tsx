@@ -56,17 +56,21 @@ export const updateSignalStatusAction = async ({
   status,
   setEventsLoading,
   setEventsDeleted,
+  onAlertStatusUpdateSuccess,
+  onAlertStatusUpdateFailure,
 }: UpdateSignalStatusActionProps) => {
   try {
     setEventsLoading({ eventIds: signalIds, isLoading: true });
 
     const queryObject = query ? { query: JSON.parse(query) } : getUpdateSignalsQuery(signalIds);
 
-    await updateSignalStatus({ query: queryObject, status });
+    const response = await updateSignalStatus({ query: queryObject, status });
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: signalIds, isDeleted: true });
-  } catch (e) {
-    // TODO: Show error toasts
+
+    onAlertStatusUpdateSuccess(response.updated, status);
+  } catch (error) {
+    onAlertStatusUpdateFailure(status, error);
   } finally {
     setEventsLoading({ eventIds: signalIds, isLoading: false });
   }
