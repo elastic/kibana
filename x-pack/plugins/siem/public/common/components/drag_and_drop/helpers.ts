@@ -258,7 +258,7 @@ export const allowTopN = ({
     'string',
   ].includes(fieldType);
 
-  // TODO: remove this explicit whitelist when the ECS documentation includes signals
+  // TODO: remove this explicit whitelist when the ECS documentation includes alerts
   const isWhitelistedNonBrowserField = [
     'signal.ancestors.depth',
     'signal.ancestors.id',
@@ -332,3 +332,6 @@ export const allowTopN = ({
 
   return isWhitelistedNonBrowserField || (isAggregatable && isAllowedType);
 };
+
+export const getTimelineIdFromColumnDroppableId = (droppableId: string) =>
+  droppableId.slice(droppableId.lastIndexOf('.') + 1);
