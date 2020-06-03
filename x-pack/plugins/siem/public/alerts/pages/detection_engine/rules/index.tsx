@@ -113,7 +113,7 @@ const RulesPageComponent: React.FC = () => {
         <DetectionEngineHeaderPage
           backOptions={{
             href: getDetectionEngineUrl(),
-            text: i18n.BACK_TO_DETECTION_ENGINE,
+            text: i18n.BACK_TO_ALERTS,
           }}
           title={i18n.PAGE_TITLE}
         >

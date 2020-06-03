@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { getMlResult } from '../routes/__mocks__/request_responses';
 import { createRules } from './create_rules';
 

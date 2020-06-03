@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertServices } from '../../../../../alerting/server';
+import { AlertServices } from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { getRuleActionsSavedObject } from './get_rule_actions_saved_object';
 import { createRuleActionsSavedObject } from './create_rule_actions_saved_object';

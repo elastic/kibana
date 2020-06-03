@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertsClient } from '../../../../../alerting/server';
+import { AlertsClient } from '../../../../../alerts/server';
 import { getNonPackagedRules } from './get_existing_prepackaged_rules';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { transformAlertsToRules } from '../routes/rules/utils';
