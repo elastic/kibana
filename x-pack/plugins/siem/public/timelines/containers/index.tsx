@@ -14,7 +14,7 @@ import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 import { GetTimelineQuery, PageInfo, SortField, TimelineItem } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../common/store';
-import { WithKibanaProps } from '../../common/lib/kibana';
+import { WithKibanaProps, useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { QueryTemplateProps } from '../../common/containers/query_template';
 import { EventType } from '../../timelines/store/timeline/model';
@@ -23,6 +23,8 @@ import { timelineActions } from '../../timelines/store/timeline';
 import { SIGNALS_PAGE_TIMELINE_ID } from '../../alerts/components/signals';
 import { useApolloClient } from '../../common/utils/apollo_context';
 import { useStateToaster, errorToToaster } from '../../common/components/toasters';
+import { SYNC_SEARCH_STRATEGY } from '../../../../../../src/plugins/data/public';
+import { buildTimelineQuery } from './query/query.dsl';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -79,6 +81,7 @@ export const useTimelineQuery = ({
   sourceId,
   sortField,
 }: TimelineQueryProps): TimelineArgs => {
+  const { search: serviceSearch } = useKibana().services.data;
   const getQuery = inputsSelectors.timelineQueryByIdSelector();
   const { isInspected } = useSelector((state: State) => getQuery(state, id));
   const dispatch = useDispatch();
@@ -166,26 +169,28 @@ export const useTimelineQuery = ({
   );
 
   const requestEvents = useCallback(
-    async (
-      cursor: string | null = null,
-      tiebreaker: string | null = null,
-      variables: GetTimelineQuery.Variables,
-      abortCtrl: AbortController
-    ) => {
+    async (variables: GetTimelineQuery.Variables, abortCtrl: AbortController) => {
       const fetch = async () =>
-        apolloClient?.query<GetTimelineQuery.Query, GetTimelineQuery.Variables>({
-          query: timelineQuery,
-          fetchPolicy: 'network-only',
-          variables,
-          context: {
-            fetchOptions: {
-              abortSignal: abortCtrl.signal,
-            },
+        serviceSearch.search({
+          request: buildTimelineQuery(variables),
+          options: {
+            signal: abortCtrl.signal,
           },
+          strategy: SYNC_SEARCH_STRATEGY,
         });
+      // apolloClient?.query<GetTimelineQuery.Query, GetTimelineQuery.Variables>({
+      //   query: timelineQuery,
+      //   fetchPolicy: 'network-only',
+      //   variables,
+      //   context: {
+      //     fetchOptions: {
+      //       abortSignal: abortCtrl.signal,
+      //     },
+      //   },
+      // });
       return fetch();
     },
-    [apolloClient, limit]
+    [apolloClient, serviceSearch]
   );
 
   const getEvents = useCallback(
@@ -249,7 +254,6 @@ export const useTimelineQuery = ({
   );
 
   useEffect(() => {
-    // T
     getEvents();
   }, [variablesMemo, limit]);
 
