@@ -15,8 +15,10 @@ import { PositiveInteger } from '../types/positive_integer';
 
 export const description = t.string;
 export const enabled = t.boolean;
+export type Enabled = t.TypeOf<typeof enabled>;
 export const exclude_export_details = t.boolean;
 export const false_positives = t.array(t.string);
+export type FalsePositives = t.TypeOf<typeof false_positives>;
 export const file_name = t.string;
 
 /**
@@ -43,9 +45,11 @@ export const action = t.exact(
 );
 
 export const actions = t.array(action);
+export type Actions = t.TypeOf<typeof actions>;
 
 // TODO: Create a regular expression type or custom date math part type here
 export const from = t.string;
+export type From = t.TypeOf<typeof from>;
 
 export const immutable = t.boolean;
 
@@ -57,14 +61,21 @@ export const rule_id = t.string;
 export const id = UUID;
 export const index = t.array(t.string);
 export const interval = t.string;
+export type Interval = t.TypeOf<typeof interval>;
 export const query = t.string;
+export type Query = t.TypeOf<typeof query>;
 export const language = t.keyof({ kuery: null, lucene: null });
+export type Language = t.TypeOf<typeof language>;
 export const objects = t.array(t.type({ rule_id }));
 export const output_index = t.string;
 export const saved_id = t.string;
 export const timeline_id = t.string;
 export const timeline_title = t.string;
 export const throttle = t.string;
+export const throttleOrNull = t.union([throttle, t.null]);
+export type Throttle = t.TypeOf<typeof throttle>;
+export type ThrottleOrNull = t.TypeOf<typeof throttleOrNull>;
+
 export const anomaly_threshold = PositiveInteger;
 export const machine_learning_job_id = t.string;
 
@@ -76,7 +87,9 @@ export const machine_learning_job_id = t.string;
  * so we have tighter control over 3rd party data structures.
  */
 export const meta = t.object;
+
 export const max_signals = PositiveIntegerGreaterThanZero;
+export type MaxSignals = t.TypeOf<typeof max_signals>;
 export const name = t.string;
 export const risk_score = RiskScore;
 export const severity = t.keyof({ low: null, medium: null, high: null, critical: null });
@@ -85,10 +98,12 @@ export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run
 
 // TODO: Create a regular expression type or custom date math part type here
 export const to = t.string;
+export type To = t.TypeOf<typeof to>;
 
 export const type = t.keyof({ machine_learning: null, query: null, saved_query: null });
 export const queryFilter = t.string;
 export const references = t.array(t.string);
+export type References = t.TypeOf<typeof references>;
 export const per_page = PositiveInteger;
 export const page = PositiveIntegerGreaterThanZero;
 export const signal_ids = t.array(t.string);
@@ -99,6 +114,7 @@ export const signal_status_query = t.object;
 export const sort_field = t.string;
 export const sort_order = t.keyof({ asc: null, desc: null });
 export const tags = t.array(t.string);
+export type Tags = t.TypeOf<typeof tags>;
 export const fields = t.array(t.string);
 export const threat_framework = t.string;
 export const threat_tactic_id = t.string;
@@ -129,11 +145,15 @@ export const threat = t.array(
     })
   )
 );
+
+export type Threat = t.TypeOf<typeof threat>;
+
 export const created_at = IsoDateString;
 export const updated_at = IsoDateString;
 export const updated_by = t.string;
 export const created_by = t.string;
 export const version = PositiveIntegerGreaterThanZero;
+export type Version = t.TypeOf<typeof version>;
 export const last_success_at = IsoDateString;
 export const last_success_message = t.string;
 export const last_failure_at = IsoDateString;

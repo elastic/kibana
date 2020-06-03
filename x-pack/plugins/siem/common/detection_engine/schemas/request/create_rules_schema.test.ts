@@ -4,11 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createRulesSchema, CreateRulesSchema } from './create_rules_schema';
+import {
+  createRulesSchema,
+  CreateRulesSchema,
+  CreateRulesSchemaDecoded,
+} from './create_rules_schema';
 import { exactCheck } from '../../../exact_check';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { foldLeftRight, getPaths } from '../../../test_utils';
 import { left } from 'fp-ts/lib/Either';
+import {
+  getCreateRulesSchemaMock,
+  getCreateRulesSchemaDecodedMock,
+} from './create_rules_schema.mock';
+import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 
 describe('create rules schema', () => {
   test('empty objects do not validate', () => {
@@ -17,1647 +26,1392 @@ describe('create rules schema', () => {
     const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions"',
-      'Invalid value "undefined" supplied to "anomaly_threshold"',
       'Invalid value "undefined" supplied to "description"',
-      'Invalid value "undefined" supplied to "enabled"',
-      'Invalid value "undefined" supplied to "false_positives"',
-      'Invalid value "undefined" supplied to "filters"',
-      'Invalid value "undefined" supplied to "from"',
-      'Invalid value "undefined" supplied to "rule_id"',
-      'Invalid value "undefined" supplied to "index"',
-      'Invalid value "undefined" supplied to "interval"',
-      'Invalid value "undefined" supplied to "query"',
-      'Invalid value "undefined" supplied to "language"',
-      'Invalid value "undefined" supplied to "output_index"',
-      'Invalid value "undefined" supplied to "saved_id"',
-      'Invalid value "undefined" supplied to "timeline_id"',
-      'Invalid value "undefined" supplied to "timeline_title"',
-      'Invalid value "undefined" supplied to "meta"',
-      'Invalid value "undefined" supplied to "machine_learning_job_id"',
       'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "max_signals"',
       'Invalid value "undefined" supplied to "name"',
       'Invalid value "undefined" supplied to "severity"',
-      'Invalid value "undefined" supplied to "tags"',
-      'Invalid value "undefined" supplied to "to"',
       'Invalid value "undefined" supplied to "type"',
-      'Invalid value "undefined" supplied to "threat"',
-      'Invalid value "undefined" supplied to "throttle"',
-      'Invalid value "undefined" supplied to "references"',
-      'Invalid value "undefined" supplied to "note"',
-      'Invalid value "undefined" supplied to "version"',
-      'Invalid value "undefined" supplied to "exceptions_list"',
     ]);
     expect(message.schema).toEqual({});
   });
 
   test('made up values do not validate', () => {
-    const payload: Partial<CreateRulesSchema & { madeUp: string }> = { madeUp: 'hi' };
+    const payload: CreateRulesSchema & { madeUp: string } = {
+      ...getCreateRulesSchemaMock(),
+      madeUp: 'hi',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['invalid keys "madeUp"']);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id] does not validate', () => {
+    const payload: Partial<CreateRulesSchema> = {
+      rule_id: 'rule-1',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "description"',
+      'Invalid value "undefined" supplied to "risk_score"',
+      'Invalid value "undefined" supplied to "name"',
+      'Invalid value "undefined" supplied to "severity"',
+      'Invalid value "undefined" supplied to "type"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description] does not validate', () => {
+    const payload: Partial<CreateRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+      'Invalid value "undefined" supplied to "name"',
+      'Invalid value "undefined" supplied to "severity"',
+      'Invalid value "undefined" supplied to "type"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from] does not validate', () => {
+    const payload: Partial<CreateRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+      'Invalid value "undefined" supplied to "name"',
+      'Invalid value "undefined" supplied to "severity"',
+      'Invalid value "undefined" supplied to "type"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from, to] does not validate', () => {
+    const payload: Partial<CreateRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+      'Invalid value "undefined" supplied to "name"',
+      'Invalid value "undefined" supplied to "severity"',
+      'Invalid value "undefined" supplied to "type"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from, to, name] does not validate', () => {
+    const payload: Partial<CreateRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+      'Invalid value "undefined" supplied to "severity"',
+      'Invalid value "undefined" supplied to "type"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from, to, name, severity] does not validate', () => {
+    const payload: Partial<CreateRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+      'Invalid value "undefined" supplied to "type"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from, to, name, severity, type] does not validate', () => {
+    const payload: Partial<CreateRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+      type: 'query',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from, to, name, severity, type, interval] does not validate', () => {
+    const payload: Partial<CreateRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from, to, name, severity, type, interval, index] does not validate', () => {
+    const payload: Partial<CreateRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+      type: 'query',
+      interval: '5m',
+      index: ['index-1'],
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from, to, name, severity, type, query, index, interval] does validate', () => {
+    const payload: CreateRulesSchema = {
+      rule_id: 'rule-1',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+      type: 'query',
+      query: 'some query',
+      index: ['index-1'],
+      interval: '5m',
+    };
 
     const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual({});
-  });
-  /*
-
-  expect(
-    createRulesSchema.validate<Partial<RuleAlertParamsRest & { madeUp: string }>>({
-      madeUp: 'hi',
-    }).error
-  ).toBeTruthy();
-
-  test('[rule_id] does not validate', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-      }).error
-    ).toBeTruthy();
-  });
-
-  test('[rule_id, description] does not validate', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        description: 'some description',
-      }).error
-    ).toBeTruthy();
-  });
-
-  test('[rule_id, description, from] does not validate', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-      }).error
-    ).toBeTruthy();
-  });
-
-  test('[rule_id, description, from, to] does not validate', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-      }).error
-    ).toBeTruthy();
-  });
-
-  test('[rule_id, description, from, to, name] does not validate', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-      }).error
-    ).toBeTruthy();
-  });
-
-  test('[rule_id, description, from, to, name, severity] does not validate', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-        severity: 'low',
-      }).error
-    ).toBeTruthy();
-  });
-
-  test('[rule_id, description, from, to, name, severity, type] does not validate', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-      }).error
-    ).toBeTruthy();
-  });
-
-  test('[rule_id, description, from, to, name, severity, type, interval] does not validate', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-      }).error
-    ).toBeTruthy();
-  });
-
-  test('[rule_id, description, from, to, name, severity, type, interval, index] does not validate', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        interval: '5m',
-        index: ['index-1'],
-      }).error
-    ).toBeTruthy();
-  });
-
-  test('[rule_id, description, from, to, name, severity, type, query, index, interval] does validate', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        query: 'some query',
-        index: ['index-1'],
-        interval: '5m',
-      }).error
-    ).toBeFalsy();
+    const expected: CreateRulesSchemaDecoded = {
+      rule_id: 'rule-1',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+      type: 'query',
+      query: 'some query',
+      index: ['index-1'],
+      interval: '5m',
+      references: [],
+      actions: [],
+      enabled: true,
+      false_positives: [],
+      max_signals: DEFAULT_MAX_SIGNALS,
+      tags: [],
+      threat: [],
+      throttle: null,
+      version: 1,
+      exceptions_list: [],
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        query: 'some query',
-        language: 'kuery',
-      }).error
-    ).toBeTruthy();
+    const payload: Partial<CreateRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      query: 'some query',
+      language: 'kuery',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score] does validate', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        query: 'some query',
-        language: 'kuery',
-      }).error
-    ).toBeFalsy();
+    const payload: CreateRulesSchema = {
+      rule_id: 'rule-1',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      query: 'some query',
+      language: 'kuery',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      rule_id: 'rule-1',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      query: 'some query',
+      language: 'kuery',
+      references: [],
+      actions: [],
+      enabled: true,
+      false_positives: [],
+      max_signals: DEFAULT_MAX_SIGNALS,
+      tags: [],
+      threat: [],
+      throttle: null,
+      version: 1,
+      exceptions_list: [],
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index] does validate', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        query: 'some query',
-        language: 'kuery',
-      }).error
-    ).toBeFalsy();
+    const payload: CreateRulesSchema = {
+      rule_id: 'rule-1',
+      output_index: '.siem-signals',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      query: 'some query',
+      language: 'kuery',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      rule_id: 'rule-1',
+      output_index: '.siem-signals',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      query: 'some query',
+      language: 'kuery',
+      references: [],
+      actions: [],
+      enabled: true,
+      false_positives: [],
+      max_signals: DEFAULT_MAX_SIGNALS,
+      tags: [],
+      threat: [],
+      throttle: null,
+      version: 1,
+      exceptions_list: [],
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score] does validate', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        risk_score: 50,
-      }).error
-    ).toBeFalsy();
+    const payload: CreateRulesSchema = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      risk_score: 50,
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      risk_score: 50,
+      references: [],
+      actions: [],
+      enabled: true,
+      false_positives: [],
+      max_signals: DEFAULT_MAX_SIGNALS,
+      tags: [],
+      threat: [],
+      throttle: null,
+      version: 1,
+      exceptions_list: [],
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index] does validate', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-      }).error
-    ).toBeFalsy();
+    const payload: CreateRulesSchema = {
+      rule_id: 'rule-1',
+      output_index: '.siem-signals',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      rule_id: 'rule-1',
+      output_index: '.siem-signals',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      references: [],
+      actions: [],
+      enabled: true,
+      false_positives: [],
+      max_signals: DEFAULT_MAX_SIGNALS,
+      tags: [],
+      threat: [],
+      throttle: null,
+      version: 1,
+      exceptions_list: [],
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('You can send in an empty array to threat', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        threat: [],
-      }).error
-    ).toBeFalsy();
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      threat: [],
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      ...getCreateRulesSchemaDecodedMock(),
+      threat: [],
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threat] does validate', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        threat: [
-          {
-            framework: 'someFramework',
-            tactic: {
-              id: 'fakeId',
-              name: 'fakeName',
-              reference: 'fakeRef',
-            },
-            technique: [
-              {
-                id: 'techniqueId',
-                name: 'techniqueName',
-                reference: 'techniqueRef',
-              },
-            ],
+    const payload: CreateRulesSchema = {
+      rule_id: 'rule-1',
+      output_index: '.siem-signals',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      threat: [
+        {
+          framework: 'someFramework',
+          tactic: {
+            id: 'fakeId',
+            name: 'fakeName',
+            reference: 'fakeRef',
           },
-        ],
-      }).error
-    ).toBeFalsy();
+          technique: [
+            {
+              id: 'techniqueId',
+              name: 'techniqueName',
+              reference: 'techniqueRef',
+            },
+          ],
+        },
+      ],
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      rule_id: 'rule-1',
+      output_index: '.siem-signals',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      threat: [
+        {
+          framework: 'someFramework',
+          tactic: {
+            id: 'fakeId',
+            name: 'fakeName',
+            reference: 'fakeRef',
+          },
+          technique: [
+            {
+              id: 'techniqueId',
+              name: 'techniqueName',
+              reference: 'techniqueRef',
+            },
+          ],
+        },
+      ],
+      references: [],
+      actions: [],
+      enabled: true,
+      false_positives: [],
+      max_signals: DEFAULT_MAX_SIGNALS,
+      tags: [],
+      throttle: null,
+      version: 1,
+      exceptions_list: [],
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('allows references to be sent as valid', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-      }).error
-    ).toBeFalsy();
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      references: ['index-1'],
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      ...getCreateRulesSchemaDecodedMock(),
+      references: ['index-1'],
+    };
+    expect(message.schema).toEqual(expected);
   });
 
-  test('defaults references to an array', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        query: 'some-query',
-        language: 'kuery',
-      }).value.references
-    ).toEqual([]);
+  test('defaults references to an array if it is not sent in', () => {
+    const { references, ...noReferences } = getCreateRulesSchemaMock();
+    const decoded = createRulesSchema.decode(noReferences);
+    const checked = exactCheck(noReferences, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      ...getCreateRulesSchemaDecodedMock(),
+      references: [],
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('references cannot be numbers', () => {
-    expect(
-      createRulesSchema.validate<
-        Partial<Omit<RuleAlertParamsRest, 'references'>> & { references: number[] }
-      >({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        query: 'some-query',
-        language: 'kuery',
-        references: [5],
-      }).error.message
-    ).toEqual(
-      'child "references" fails because ["references" at position 0 fails because ["0" must be a string]]'
-    );
+    const payload: Omit<CreateRulesSchema, 'references'> & { references: number[] } = {
+      ...getCreateRulesSchemaMock(),
+      references: [5],
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(message.schema).toEqual({});
   });
 
   test('indexes cannot be numbers', () => {
-    expect(
-      createRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'index'>> & { index: number[] }>(
-        {
-          rule_id: 'rule-1',
-          output_index: '.siem-signals',
-          risk_score: 50,
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: [5],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          query: 'some-query',
-          language: 'kuery',
-        }
-      ).error.message
-    ).toEqual(
-      'child "index" fails because ["index" at position 0 fails because ["0" must be a string]]'
-    );
-  });
+    const payload: Omit<CreateRulesSchema, 'index'> & { index: number[] } = {
+      ...getCreateRulesSchemaMock(),
+      index: [5],
+    };
 
-  test('defaults interval to 5 min', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-      }).value.interval
-    ).toEqual('5m');
-  });
-
-  test('defaults max signals to 100', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-      }).value.max_signals
-    ).toEqual(100);
-  });
-
-  test('saved_id is required when type is saved_query and will not validate without out', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'saved_query',
-      }).error.message
-    ).toEqual('child "saved_id" fails because ["saved_id" is required]');
-  });
-
-  test('saved_id is required when type is saved_query and validates with it', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        output_index: '.siem-signals',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'saved_query',
-        saved_id: 'some id',
-      }).error
-    ).toBeFalsy();
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "index"']);
+    expect(message.schema).toEqual({});
   });
 
   test('saved_query type can have filters with it', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'saved_query',
-        saved_id: 'some id',
-        filters: [],
-      }).error
-    ).toBeFalsy();
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      filters: [],
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      ...getCreateRulesSchemaDecodedMock(),
+      filters: [],
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('filters cannot be a string', () => {
-    expect(
-      createRulesSchema.validate<
-        Partial<Omit<RuleAlertParamsRest, 'filters'> & { filters: string }>
-      >({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'saved_query',
-        saved_id: 'some id',
-        filters: 'some string',
-      }).error.message
-    ).toEqual('child "filters" fails because ["filters" must be an array]');
+    const payload: Omit<CreateRulesSchema, 'filters'> & { filters: string } = {
+      ...getCreateRulesSchemaMock(),
+      filters: 'some string',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "some string" supplied to "filters"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('language validates with kuery', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-      }).error
-    ).toBeFalsy();
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      language: 'kuery',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      ...getCreateRulesSchemaDecodedMock(),
+      language: 'kuery',
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('language validates with lucene', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        output_index: '.siem-signals',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'lucene',
-      }).error
-    ).toBeFalsy();
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      language: 'lucene',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      ...getCreateRulesSchemaDecodedMock(),
+      language: 'lucene',
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('language does not validate with something made up', () => {
-    expect(
-      createRulesSchema.validate<
-        Partial<Omit<RuleAlertParamsRest, 'language'> & { language: string }>
-      >({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'something-made-up',
-      }).error.message
-    ).toEqual('child "language" fails because ["language" must be one of [kuery, lucene]]');
+    const payload: Omit<CreateRulesSchema, 'language'> & { language: string } = {
+      ...getCreateRulesSchemaMock(),
+      language: 'something-made-up',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "something-made-up" supplied to "language"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('max_signals cannot be negative', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: -1,
-      }).error.message
-    ).toEqual('child "max_signals" fails because ["max_signals" must be greater than 0]');
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      max_signals: -1,
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to ""']);
+    expect(message.schema).toEqual({});
   });
 
   test('max_signals cannot be zero', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 0,
-      }).error.message
-    ).toEqual('child "max_signals" fails because ["max_signals" must be greater than 0]');
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      max_signals: 0,
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to ""']);
+    expect(message.schema).toEqual({});
   });
 
   test('max_signals can be 1', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-      }).error
-    ).toBeFalsy();
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      max_signals: 1,
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      ...getCreateRulesSchemaDecodedMock(),
+      max_signals: 1,
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('You can optionally send in an array of tags', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        tags: ['tag_1', 'tag_2'],
-      }).error
-    ).toBeFalsy();
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      tags: ['tag_1', 'tag_2'],
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      ...getCreateRulesSchemaDecodedMock(),
+      tags: ['tag_1', 'tag_2'],
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('You cannot send in an array of tags that are numbers', () => {
-    expect(
-      createRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'tags'>> & { tags: number[] }>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        tags: [0, 1, 2],
-      }).error.message
-    ).toEqual(
-      'child "tags" fails because ["tags" at position 0 fails because ["0" must be a string]]'
-    );
+    const payload: Omit<CreateRulesSchema, 'tags'> & { tags: number[] } = {
+      ...getCreateRulesSchemaMock(),
+      tags: [0, 1, 2],
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "0" supplied to ""',
+      'Invalid value "1" supplied to ""',
+      'Invalid value "2" supplied to ""',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('You cannot send in an array of threat that are missing "framework"', () => {
-    expect(
-      createRulesSchema.validate<
-        Partial<Omit<RuleAlertParamsRest, 'threat'>> & {
-          threat: Array<Partial<Omit<ThreatParams, 'framework'>>>;
-        }
-      >({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        threat: [
-          {
-            tactic: {
-              id: 'fakeId',
-              name: 'fakeName',
-              reference: 'fakeRef',
-            },
-            technique: [
-              {
-                id: 'techniqueId',
-                name: 'techniqueName',
-                reference: 'techniqueRef',
-              },
-            ],
+    const payload: Omit<CreateRulesSchema, 'threat'> & {
+      threat: Array<Partial<Omit<CreateRulesSchema['threat'], 'framework'>>>;
+    } = {
+      ...getCreateRulesSchemaMock(),
+      threat: [
+        {
+          tactic: {
+            id: 'fakeId',
+            name: 'fakeName',
+            reference: 'fakeRef',
           },
-        ],
-      }).error.message
-    ).toEqual(
-      'child "threat" fails because ["threat" at position 0 fails because [child "framework" fails because ["framework" is required]]]'
-    );
+          technique: [
+            {
+              id: 'techniqueId',
+              name: 'techniqueName',
+              reference: 'techniqueRef',
+            },
+          ],
+        },
+      ],
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "framework"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('You cannot send in an array of threat that are missing "tactic"', () => {
-    expect(
-      createRulesSchema.validate<
-        Partial<Omit<RuleAlertParamsRest, 'threat'>> & {
-          threat: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
-        }
-      >({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        threat: [
-          {
-            framework: 'fake',
-            technique: [
-              {
-                id: 'techniqueId',
-                name: 'techniqueName',
-                reference: 'techniqueRef',
-              },
-            ],
-          },
-        ],
-      }).error.message
-    ).toEqual(
-      'child "threat" fails because ["threat" at position 0 fails because [child "tactic" fails because ["tactic" is required]]]'
-    );
+    const payload: Omit<CreateRulesSchema, 'threat'> & {
+      threat: Array<Partial<Omit<CreateRulesSchema['threat'], 'tactic'>>>;
+    } = {
+      ...getCreateRulesSchemaMock(),
+      threat: [
+        {
+          framework: 'fake',
+          technique: [
+            {
+              id: 'techniqueId',
+              name: 'techniqueName',
+              reference: 'techniqueRef',
+            },
+          ],
+        },
+      ],
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "tactic"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('You cannot send in an array of threat that are missing "technique"', () => {
-    expect(
-      createRulesSchema.validate<
-        Partial<Omit<RuleAlertParamsRest, 'threat'>> & {
-          threat: Array<Partial<Omit<ThreatParams, 'technique'>>>;
-        }
-      >({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        threat: [
-          {
-            framework: 'fake',
-            tactic: {
-              id: 'fakeId',
-              name: 'fakeName',
-              reference: 'fakeRef',
-            },
+    const payload: Omit<CreateRulesSchema, 'threat'> & {
+      threat: Array<Partial<Omit<CreateRulesSchema['threat'], 'technique'>>>;
+    } = {
+      ...getCreateRulesSchemaMock(),
+      threat: [
+        {
+          framework: 'fake',
+          tactic: {
+            id: 'fakeId',
+            name: 'fakeName',
+            reference: 'fakeRef',
           },
-        ],
-      }).error.message
-    ).toEqual(
-      'child "threat" fails because ["threat" at position 0 fails because [child "technique" fails because ["technique" is required]]]'
-    );
+        },
+      ],
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "technique"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('You can optionally send in an array of false positives', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        false_positives: ['false_1', 'false_2'],
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-      }).error
-    ).toBeFalsy();
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      false_positives: ['false_1', 'false_2'],
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      ...getCreateRulesSchemaDecodedMock(),
+      false_positives: ['false_1', 'false_2'],
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('You cannot send in an array of false positives that are numbers', () => {
-    expect(
-      createRulesSchema.validate<
-        Partial<Omit<RuleAlertParamsRest, 'false_positives'>> & { false_positives: number[] }
-      >({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        false_positives: [5, 4],
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-      }).error.message
-    ).toEqual(
-      'child "false_positives" fails because ["false_positives" at position 0 fails because ["0" must be a string]]'
-    );
+    const payload: Omit<CreateRulesSchema, 'false_positives'> & { false_positives: number[] } = {
+      ...getCreateRulesSchemaMock(),
+      false_positives: [5, 4],
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "5" supplied to ""',
+      'Invalid value "4" supplied to ""',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
-  test('You cannot set the immutable when trying to create a rule', () => {
-    expect(
-      createRulesSchema.validate<
-        Partial<Omit<RuleAlertParamsRest, 'immutable'>> & { immutable: number }
-      >({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        immutable: 5,
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-      }).error.message
-    ).toEqual('"immutable" is not allowed');
+  test('You cannot set the immutable to a number when trying to create a rule', () => {
+    const payload: Omit<CreateRulesSchema, 'immutable'> & { immutable: number } = {
+      ...getCreateRulesSchemaMock(),
+      immutable: 5,
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['invalid keys "immutable"']);
+    expect(message.schema).toEqual({});
   });
 
   test('You cannot set the risk_score to 101', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 101,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-      }).error.message
-    ).toEqual('child "risk_score" fails because ["risk_score" must be less than 101]');
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      risk_score: 101,
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "101" supplied to "risk_score"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('You cannot set the risk_score to -1', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: -1,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-      }).error.message
-    ).toEqual('child "risk_score" fails because ["risk_score" must be greater than -1]');
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      risk_score: -1,
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to "risk_score"']);
+    expect(message.schema).toEqual({});
   });
 
   test('You can set the risk_score to 0', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 0,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-      }).error
-    ).toBeFalsy();
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      risk_score: 0,
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      ...getCreateRulesSchemaDecodedMock(),
+      risk_score: 0,
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('You can set the risk_score to 100', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 100,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-      }).error
-    ).toBeFalsy();
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      risk_score: 100,
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      ...getCreateRulesSchemaDecodedMock(),
+      risk_score: 100,
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('You can set meta to any object you want', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        meta: {
-          somethingMadeUp: { somethingElse: true },
-        },
-      }).error
-    ).toBeFalsy();
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      meta: {
+        somethingMadeUp: { somethingElse: true },
+      },
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      ...getCreateRulesSchemaDecodedMock(),
+      meta: {
+        somethingMadeUp: { somethingElse: true },
+      },
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('You cannot create meta as a string', () => {
-    expect(
-      createRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'meta'> & { meta: string }>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        meta: 'should not work',
-      }).error.message
-    ).toEqual('child "meta" fails because ["meta" must be an object]');
+    const payload: Omit<CreateRulesSchema, 'meta'> & { meta: string } = {
+      ...getCreateRulesSchemaMock(),
+      meta: 'should not work',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "should not work" supplied to "meta"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('You can omit the query string when filters are present', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        language: 'kuery',
-        filters: [],
-        max_signals: 1,
-      }).error
-    ).toBeFalsy();
+    const { query, ...noQuery } = getCreateRulesSchemaMock();
+    const payload: CreateRulesSchema = {
+      ...noQuery,
+      filters: [],
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+
+    const { query: expectedQuery, ...expectedNoQuery } = getCreateRulesSchemaDecodedMock();
+    const expected: CreateRulesSchemaDecoded = {
+      ...expectedNoQuery,
+      filters: [],
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('validates with timeline_id and timeline_title', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        timeline_id: 'timeline-id',
-        timeline_title: 'timeline-title',
-      }).error
-    ).toBeFalsy();
-  });
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      timeline_id: 'timeline-id',
+      timeline_title: 'timeline-title',
+    };
 
-  test('You cannot omit timeline_title when timeline_id is present', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        timeline_id: 'some_id',
-      }).error.message
-    ).toEqual('child "timeline_title" fails because ["timeline_title" is required]');
-  });
-
-  test('You cannot have a null value for timeline_title when timeline_id is present', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        timeline_id: 'some_id',
-        timeline_title: null,
-      }).error.message
-    ).toEqual('child "timeline_title" fails because ["timeline_title" must be a string]');
-  });
-
-  test('You cannot have empty string for timeline_title when timeline_id is present', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        timeline_id: 'some_id',
-        timeline_title: '',
-      }).error.message
-    ).toEqual('child "timeline_title" fails because ["timeline_title" is not allowed to be empty]');
-  });
-
-  test('You cannot have timeline_title with an empty timeline_id', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        timeline_id: '',
-        timeline_title: 'some-title',
-      }).error.message
-    ).toEqual('child "timeline_id" fails because ["timeline_id" is not allowed to be empty]');
-  });
-
-  test('You cannot have timeline_title without timeline_id', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        timeline_title: 'some-title',
-      }).error.message
-    ).toEqual('child "timeline_title" fails because ["timeline_title" is not allowed]');
-  });
-
-  test('The default for "from" will be "now-6m"', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-      }).value.from
-    ).toEqual('now-6m');
-  });
-
-  test('The default for "to" will be "now"', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-      }).value.to
-    ).toEqual('now');
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      ...getCreateRulesSchemaDecodedMock(),
+      timeline_id: 'timeline-id',
+      timeline_title: 'timeline-title',
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        name: 'some-name',
-        severity: 'junk',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-      }).error.message
-    ).toEqual(
-      'child "severity" fails because ["severity" must be one of [low, medium, high, critical]]'
-    );
-  });
+    const payload: Omit<CreateRulesSchema, 'severity'> & { severity: string } = {
+      ...getCreateRulesSchemaMock(),
+      severity: 'junk',
+    };
 
-  test('The default for "actions" will be an empty array', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-      }).value.actions
-    ).toEqual([]);
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "junk" supplied to "severity"']);
+    expect(message.schema).toEqual({});
   });
 
   test('You cannot send in an array of actions that are missing "group"', () => {
-    expect(
-      createRulesSchema.validate<
-        Partial<
-          Omit<RuleAlertParamsRest, 'actions'> & {
-            actions: Array<Omit<RuleAlertAction, 'group'>>;
-          }
-        >
-      >({
-        actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-      }).error.message
-    ).toEqual(
-      'child "actions" fails because ["actions" at position 0 fails because [child "group" fails because ["group" is required]]]'
-    );
-  });
+    const payload: Omit<CreateRulesSchema['actions'], 'id'> = {
+      ...getCreateRulesSchemaMock(),
+      actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
+    };
 
-  test('You cannot send in an array of actions that are missing "id"', () => {
-    expect(
-      createRulesSchema.validate<
-        Partial<
-          Omit<RuleAlertParamsRest, 'actions'> & {
-            actions: Array<Omit<RuleAlertAction, 'id'>>;
-          }
-        >
-      >({
-        actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-      }).error.message
-    ).toEqual(
-      'child "actions" fails because ["actions" at position 0 fails because [child "id" fails because ["id" is required]]]'
-    );
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "undefined" supplied to "id"']);
+    expect(message.schema).toEqual({});
   });
 
   test('You cannot send in an array of actions that are missing "action_type_id"', () => {
-    expect(
-      createRulesSchema.validate<
-        Partial<
-          Omit<RuleAlertParamsRest, 'actions'> & {
-            actions: Array<Omit<RuleAlertAction, 'action_type_id'>>;
-          }
-        >
-      >({
-        actions: [{ group: 'group', id: 'id', params: {} }],
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-      }).error.message
-    ).toEqual(
-      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
-    );
+    const payload: Omit<CreateRulesSchema['actions'], 'action_type_id'> = {
+      ...getCreateRulesSchemaMock(),
+      actions: [{ group: 'group', id: 'id', params: {} }],
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "action_type_id"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('You cannot send in an array of actions that are missing "params"', () => {
-    expect(
-      createRulesSchema.validate<
-        Partial<
-          Omit<RuleAlertParamsRest, 'actions'> & {
-            actions: Array<Omit<RuleAlertAction, 'params'>>;
-          }
-        >
-      >({
-        actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-      }).error.message
-    ).toEqual(
-      'child "actions" fails because ["actions" at position 0 fails because [child "params" fails because ["params" is required]]]'
-    );
+    const payload: Omit<CreateRulesSchema['actions'], 'params'> = {
+      ...getCreateRulesSchemaMock(),
+      actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "params"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('You cannot send in an array of actions that are including "actionTypeId"', () => {
-    expect(
-      createRulesSchema.validate<
-        Partial<
-          Omit<RuleAlertParamsRest, 'actions'> & {
-            actions: AlertAction[];
-          }
-        >
-      >({
-        actions: [
-          {
-            group: 'group',
-            id: 'id',
-            actionTypeId: 'actionTypeId',
-            params: {},
-          },
-        ],
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-      }).error.message
-    ).toEqual(
-      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
-    );
-  });
+    const payload: Omit<CreateRulesSchema['actions'], 'actions'> = {
+      ...getCreateRulesSchemaMock(),
+      actions: [
+        {
+          group: 'group',
+          id: 'id',
+          actionTypeId: 'actionTypeId',
+          params: {},
+        },
+      ],
+    };
 
-  test('The default for "throttle" will be null', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-      }).value.throttle
-    ).toEqual(null);
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "action_type_id"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   describe('note', () => {
     test('You can set note to a string', () => {
-      expect(
-        createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-          rule_id: 'rule-1',
-          output_index: '.siem-signals',
-          risk_score: 50,
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          references: ['index-1'],
-          query: 'some query',
-          language: 'kuery',
-          max_signals: 1,
-          note: '# documentation markdown here',
-        }).error
-      ).toBeFalsy();
+      const payload: CreateRulesSchema = {
+        ...getCreateRulesSchemaMock(),
+        note: '# documentation markdown here',
+      };
+
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: CreateRulesSchemaDecoded = {
+        ...getCreateRulesSchemaDecodedMock(),
+        note: '# documentation markdown here',
+      };
+      expect(message.schema).toEqual(expected);
     });
 
-    test('You can set note to an emtpy string', () => {
-      expect(
-        createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-          rule_id: 'rule-1',
-          output_index: '.siem-signals',
-          risk_score: 50,
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          references: ['index-1'],
-          query: 'some query',
-          language: 'kuery',
-          max_signals: 1,
-          note: '',
-        }).error
-      ).toBeFalsy();
+    test('You can set note to an empty string', () => {
+      const payload: CreateRulesSchema = {
+        ...getCreateRulesSchemaMock(),
+        note: '',
+      };
+
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: CreateRulesSchemaDecoded = {
+        ...getCreateRulesSchemaDecodedMock(),
+        note: '',
+      };
+      expect(message.schema).toEqual(expected);
     });
 
     test('You cannot create note as an object', () => {
-      expect(
-        createRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'note'> & { note: object }>>({
-          rule_id: 'rule-1',
-          output_index: '.siem-signals',
-          risk_score: 50,
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          references: ['index-1'],
-          query: 'some query',
-          language: 'kuery',
-          max_signals: 1,
-          note: {
-            somethingHere: 'something else',
-          },
-        }).error.message
-      ).toEqual('child "note" fails because ["note" must be a string]');
+      const payload: Omit<CreateRulesSchema, 'note'> & { note: {} } = {
+        ...getCreateRulesSchemaMock(),
+        note: {
+          somethingHere: 'something else',
+        },
+      };
+
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck<CreateRulesSchema>(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        // TODO: Fix/Change the formatErrors to be better able to handle objects
+        'Invalid value "[object Object]" supplied to "note"',
+      ]);
+      expect(message.schema).toEqual({});
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note] does validate', () => {
-      expect(
-        createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-          rule_id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          risk_score: 50,
-          note: '# some markdown',
-        }).error
-      ).toBeFalsy();
-    });
+      const payload: CreateRulesSchema = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+      };
 
-    // TODO: (LIST-FEATURE) We can enable this once we change the schema's to not be global per module but rather functions that can create the schema
-    // on demand. Since they are per module, we have a an issue where the ENV variables do not take effect. It is better we change all the
-    // schema's to be function calls to avoid global side effects or just wait until the feature is available. If you want to test this early,
-    // you can remove the .skip and set your env variable of export ELASTIC_XPACK_SIEM_LISTS_FEATURE=true locally
-    describe.skip('exceptions_list', () => {
-      test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and exceptions_list] does validate', () => {
-        expect(
-          createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-            rule_id: 'rule-1',
-            description: 'some description',
-            from: 'now-5m',
-            to: 'now',
-            index: ['index-1'],
-            name: 'some-name',
-            severity: 'low',
-            interval: '5m',
-            type: 'query',
-            risk_score: 50,
-            note: '# some markdown',
-            exceptions_list: [
-              {
-                field: 'source.ip',
-                values_operator: 'included',
-                values_type: 'exists',
-              },
-              {
-                field: 'host.name',
-                values_operator: 'excluded',
-                values_type: 'match',
-                values: [
-                  {
-                    name: 'rock01',
-                  },
-                ],
-                and: [
-                  {
-                    field: 'host.id',
-                    values_operator: 'included',
-                    values_type: 'match_all',
-                    values: [
-                      {
-                        name: '123',
-                      },
-                      {
-                        name: '678',
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          }).error
-        ).toBeFalsy();
-      });
-
-      test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {
-        expect(
-          createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-            rule_id: 'rule-1',
-            description: 'some description',
-            from: 'now-5m',
-            to: 'now',
-            index: ['index-1'],
-            name: 'some-name',
-            severity: 'low',
-            interval: '5m',
-            type: 'query',
-            risk_score: 50,
-            note: '# some markdown',
-            exceptions_list: [],
-          }).error
-        ).toBeFalsy();
-      });
-
-      test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and invalid exceptions_list] does NOT validate', () => {
-        expect(
-          createRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'exceptions_list'>>>({
-            rule_id: 'rule-1',
-            description: 'some description',
-            from: 'now-5m',
-            to: 'now',
-            index: ['index-1'],
-            name: 'some-name',
-            severity: 'low',
-            interval: '5m',
-            type: 'query',
-            risk_score: 50,
-            note: '# some markdown',
-            exceptions_list: [{ invalid_value: 'invalid value' }],
-          }).error.message
-        ).toEqual(
-          'child "exceptions_list" fails because ["exceptions_list" at position 0 fails because [child "field" fails because ["field" is required]]]'
-        );
-      });
-
-      test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and non-existent exceptions_list] does validate with empty exceptions_list', () => {
-        expect(
-          createRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'exceptions_list'>>>({
-            rule_id: 'rule-1',
-            description: 'some description',
-            from: 'now-5m',
-            to: 'now',
-            index: ['index-1'],
-            name: 'some-name',
-            severity: 'low',
-            interval: '5m',
-            type: 'query',
-            risk_score: 50,
-            note: '# some markdown',
-          }).value.exceptions_list
-        ).toEqual([]);
-      });
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: CreateRulesSchemaDecoded = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+        references: [],
+        actions: [],
+        enabled: true,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        version: 1,
+        exceptions_list: [],
+      };
+      expect(message.schema).toEqual(expected);
     });
   });
-  */
+
+  test('defaults interval to 5 min', () => {
+    const { interval, ...noInterval } = getCreateRulesSchemaMock();
+    const payload: CreateRulesSchema = {
+      ...noInterval,
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+
+    const { interval: expectedInterval, ...expectedNoInterval } = getCreateRulesSchemaDecodedMock();
+    const expected: CreateRulesSchemaDecoded = {
+      ...expectedNoInterval,
+      interval: '5m',
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
+  test('defaults max signals to 100', () => {
+    const { max_signals, ...noMaxSignals } = getCreateRulesSchemaMock();
+    const payload: CreateRulesSchema = {
+      ...noMaxSignals,
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+
+    const {
+      max_signals: expectedMaxSignals,
+      ...expectedNoMaxSignals
+    } = getCreateRulesSchemaDecodedMock();
+    const expected: CreateRulesSchemaDecoded = {
+      ...expectedNoMaxSignals,
+      max_signals: 100,
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
+  test('The default for "from" will be "now-6m"', () => {
+    const { from, ...noFrom } = getCreateRulesSchemaMock();
+    const payload: CreateRulesSchema = {
+      ...noFrom,
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+
+    const { from: expectedFrom, ...expectedNoFrom } = getCreateRulesSchemaDecodedMock();
+    const expected: CreateRulesSchemaDecoded = {
+      ...expectedNoFrom,
+      from: 'now-6m',
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
+  test('The default for "to" will be "now"', () => {
+    const { to, ...noTo } = getCreateRulesSchemaMock();
+    const payload: CreateRulesSchema = {
+      ...noTo,
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+
+    const { to: expectedTo, ...expectedNoTo } = getCreateRulesSchemaDecodedMock();
+    const expected: CreateRulesSchemaDecoded = {
+      ...expectedNoTo,
+      to: 'now',
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
+  test('The default for "actions" will be an empty array', () => {
+    const { actions, ...noActions } = getCreateRulesSchemaMock();
+    const payload: CreateRulesSchema = {
+      ...noActions,
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+
+    const { actions: expectedActions, ...expectedNoActions } = getCreateRulesSchemaDecodedMock();
+    const expected: CreateRulesSchemaDecoded = {
+      ...expectedNoActions,
+      actions: [],
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
+  test('The default for "throttle" will be null', () => {
+    const { throttle, ...noThrottle } = getCreateRulesSchemaMock();
+    const payload: CreateRulesSchema = {
+      ...noThrottle,
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+
+    const { throttle: expectedThrottle, ...expectedNoThrottle } = getCreateRulesSchemaDecodedMock();
+    const expected: CreateRulesSchemaDecoded = {
+      ...expectedNoThrottle,
+      throttle: null,
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
+  test('machine_learning type does validate', () => {
+    const payload: CreateRulesSchema = {
+      type: 'machine_learning',
+      anomaly_threshold: 50,
+      machine_learning_job_id: 'linux_anomalous_network_activity_ecs',
+      false_positives: [],
+      references: [],
+      risk_score: 50,
+      threat: [],
+      name: 'ss',
+      description: 'ss',
+      severity: 'low',
+      tags: [],
+      interval: '5m',
+      from: 'now-360s',
+      to: 'now',
+      meta: { from: '1m' },
+      actions: [],
+      enabled: true,
+      throttle: 'no_actions',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: CreateRulesSchemaDecoded = {
+      type: 'machine_learning',
+      anomaly_threshold: 50,
+      machine_learning_job_id: 'linux_anomalous_network_activity_ecs',
+      false_positives: [],
+      references: [],
+      risk_score: 50,
+      threat: [],
+      name: 'ss',
+      description: 'ss',
+      severity: 'low',
+      tags: [],
+      interval: '5m',
+      from: 'now-360s',
+      to: 'now',
+      meta: { from: '1m' },
+      actions: [],
+      enabled: true,
+      throttle: 'no_actions',
+      exceptions_list: [],
+      max_signals: DEFAULT_MAX_SIGNALS,
+      version: 1,
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
+  // TODO: The exception_list tests are skipped and empty until we re-integrate it from the lists plugin
+  describe.skip('exception_list', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and exceptions_list] does validate', () => {});
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {});
+
+    test('rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and invalid exceptions_list] does NOT validate', () => {});
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and non-existent exceptions_list] does validate with empty exceptions_list', () => {});
+  });
 });

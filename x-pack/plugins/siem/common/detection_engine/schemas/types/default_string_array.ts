@@ -7,18 +7,14 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-export type ReferencesDefaultArrayC = t.Type<string[], string[], unknown>;
+export type DefaultStringArrayC = t.Type<string[], string[], unknown>;
 
 /**
- * Types the ReferencesDefaultArray as:
+ * Types the DefaultStringArray as:
  *   - If null or undefined, then a default array will be set
  */
-export const ReferencesDefaultArray: ReferencesDefaultArrayC = new t.Type<
-  string[],
-  string[],
-  unknown
->(
-  'referencesWithDefaultArray',
+export const DefaultStringArray: DefaultStringArrayC = new t.Type<string[], string[], unknown>(
+  'DefaultStringArray',
   t.array(t.string).is,
   (input): Either<t.Errors, string[]> =>
     input == null ? t.success([]) : t.array(t.string).decode(input),

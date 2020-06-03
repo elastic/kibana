@@ -9,6 +9,8 @@ import { Either } from 'fp-ts/lib/Either';
 
 export type DefaultStringArrayC = t.Type<string[], string[], unknown>;
 
+// TODO: Replace this one with the one from SIEM
+
 /**
  * Types the DefaultStringArray as:
  *   - If null or undefined, then a default array will be set
