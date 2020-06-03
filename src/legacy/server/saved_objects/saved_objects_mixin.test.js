@@ -129,13 +129,6 @@ describe('Saved Objects Mixin', () => {
           waitUntilReady: jest.fn(),
         },
       },
-      newPlatform: {
-        __internals: {
-          elasticsearch: {
-            adminClient: { callAsInternalUser: mockCallCluster },
-          },
-        },
-      },
     };
 
     const coreStart = coreMock.createStart();
