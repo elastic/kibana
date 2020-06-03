@@ -2378,7 +2378,7 @@ exports[`Header renders 2`] = `
                     aria-label="Go to home page"
                     data-test-subj="logo"
                     href="/"
-                    iconType="logoKibana"
+                    iconType="logoElastic"
                     onClick={[Function]}
                   >
                     <a
@@ -2392,12 +2392,12 @@ exports[`Header renders 2`] = `
                         aria-label="Elastic"
                         className="euiHeaderLogo__icon"
                         size="l"
-                        type="logoKibana"
+                        type="logoElastic"
                       >
                         <div
                           aria-label="Elastic"
                           className="euiHeaderLogo__icon"
-                          data-euiicon-type="logoKibana"
+                          data-euiicon-type="logoElastic"
                           size="l"
                         />
                       </EuiIcon>
@@ -6460,7 +6460,7 @@ exports[`Header renders 3`] = `
                     aria-label="Go to home page"
                     data-test-subj="logo"
                     href="/"
-                    iconType="logoKibana"
+                    iconType="logoElastic"
                     onClick={[Function]}
                   >
                     <a
@@ -6474,12 +6474,12 @@ exports[`Header renders 3`] = `
                         aria-label="Elastic"
                         className="euiHeaderLogo__icon"
                         size="l"
-                        type="logoKibana"
+                        type="logoElastic"
                       >
                         <div
                           aria-label="Elastic"
                           className="euiHeaderLogo__icon"
-                          data-euiicon-type="logoKibana"
+                          data-euiicon-type="logoElastic"
                           size="l"
                         />
                       </EuiIcon>
@@ -11610,7 +11610,7 @@ exports[`Header renders 4`] = `
                     aria-label="Go to home page"
                     data-test-subj="logo"
                     href="/"
-                    iconType="logoKibana"
+                    iconType="logoElastic"
                     onClick={[Function]}
                   >
                     <a
@@ -11624,12 +11624,12 @@ exports[`Header renders 4`] = `
                         aria-label="Elastic"
                         className="euiHeaderLogo__icon"
                         size="l"
-                        type="logoKibana"
+                        type="logoElastic"
                       >
                         <div
                           aria-label="Elastic"
                           className="euiHeaderLogo__icon"
-                          data-euiicon-type="logoKibana"
+                          data-euiicon-type="logoElastic"
                           size="l"
                         />
                       </EuiIcon>
