@@ -426,7 +426,7 @@ describe('Cookie based SessionStorage', () => {
   });
 
   describe('#options', () => {
-    describe('#SameSite = None', () => {
+    describe('#SameSite', () => {
       it('throws an exception if "SameSite: None" set on not Secure connection', async () => {
         const { server: innerServer } = await server.setup(setupDeps);
 
