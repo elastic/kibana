@@ -157,7 +157,11 @@ export class ESGeoGridSource extends AbstractESAggSource {
           sources: [
             {
               gridSplit: {
-                geotile_grid: this._buildGeotileGridDsl(precision, bufferedExtent),
+                geotile_grid: makeGeotileGridDsl(
+                  this._descriptor.geoField,
+                  bufferedExtent,
+                  precision
+                ),
               },
             },
           ],
@@ -237,7 +241,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }) {
     searchSource.setField('aggs', {
       gridSplit: {
-        geotile_grid: this._buildGeotileGridDsl(precision, bufferedExtent),
+        geotile_grid: makeGeotileGridDsl(this._descriptor.geoField, bufferedExtent, precision),
         aggs: {
           gridCentroid: {
             geo_centroid: {
@@ -260,10 +264,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
     });
 
     return convertRegularRespToGeoJson(esResponse, this._descriptor.requestType);
-  }
-
-  _buildGeotileGridDsl(precision, bounds) {
-    return makeGeotileGridDsl(this._descriptor.geoField, bounds, precision);
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback, isRequestStillActive) {
