@@ -11,10 +11,7 @@ import _ from 'lodash';
 import { getLayerListRaw } from '../../selectors/map_selectors';
 import { copyPersistentState } from '../../reducers/util';
 import { getStore } from '../store_operations';
-
-function isOnMapNow() {
-  return window.location.hash.startsWith(`#/${MAP_SAVED_OBJECT_TYPE}`);
-}
+import { returnToMapsList } from '../maps_router';
 
 function hasUnsavedChanges(savedMap, initialLayerListConfig) {
   const state = getStore.getState();
@@ -33,24 +30,25 @@ function hasUnsavedChanges(savedMap, initialLayerListConfig) {
       !_.isEqual(JSON.parse(JSON.stringify(layerListConfigOnly)), savedLayerList);
 }
 
-export const updateBreadcrumbs = (savedMap, initialLayerListConfig) => {
+export const updateBreadcrumbs = (savedMap, initialLayerListConfig, currentPath) => {
+  const isOnMapNow = currentPath.startsWith(`/${MAP_SAVED_OBJECT_TYPE}`);
   getCoreChrome().setBreadcrumbs([
     {
       text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
         defaultMessage: 'Maps',
       }),
       onClick: () => {
-        if (isOnMapNow() && hasUnsavedChanges(savedMap, initialLayerListConfig)) {
+        if (isOnMapNow && hasUnsavedChanges(savedMap, initialLayerListConfig)) {
           const navigateAway = window.confirm(
             i18n.translate('xpack.maps.mapController.unsavedChangesWarning', {
               defaultMessage: `Your unsaved changes might not be saved`,
             })
           );
           if (navigateAway) {
-            window.location.hash = '#';
+            returnToMapsList();
           }
         } else {
-          window.location.hash = '#';
+          returnToMapsList();
         }
       },
     },

@@ -15,9 +15,12 @@ import { getStore } from './store_operations';
 import { Provider } from 'react-redux';
 import { getMapsSavedObjectLoader } from '../angular/services/gis_map_saved_object_loader';
 
+export let returnToMapsList;
+
 export async function renderApp(context, { appBasePath, element, history }) {
   const { hits = [] } = await getMapsSavedObjectLoader().find();
   const hasSavedMaps = !!hits.length;
+  returnToMapsList = () => history.push('/');
 
   render(<App history={history} appBasePath={appBasePath} hasSavedMaps={hasSavedMaps} />, element);
 

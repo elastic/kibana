@@ -47,6 +47,8 @@ export function MapsTopNavMenu({
   openMapSettings,
   syncSavedMap,
   inspectorAdapters,
+  syncAppAndGlobalState,
+  currentPath,
 }) {
   const { TopNavMenu } = getNavigation().ui;
   const { filterManager } = getData().query;
@@ -74,7 +76,8 @@ export function MapsTopNavMenu({
     enableFullScreen,
     openMapSettings,
     syncSavedMap,
-    inspectorAdapters
+    inspectorAdapters,
+    currentPath
   );
 
   const submitQuery = function ({ dateRange, query }) {
@@ -93,8 +96,7 @@ export function MapsTopNavMenu({
       },
       () => setRefreshStoreConfig(refreshConfig)
     );
-    // TODO: Global sync state
-    // syncAppAndGlobalState();
+    syncAppAndGlobalState();
   };
 
   return isVisible ? (
@@ -133,7 +135,8 @@ function getTopNavConfig(
   enableFullScreen,
   openMapSettings,
   syncSavedMap,
-  inspectorAdapters
+  inspectorAdapters,
+  currentPath
 ) {
   return [
     {
@@ -220,7 +223,8 @@ function getTopNavConfig(
                   saveOptions,
                   initialLayerListConfig,
                   closeFlyout,
-                  syncSavedMap
+                  syncSavedMap,
+                  currentPath
                 ).then((response) => {
                   // If the save wasn't successful, put the original values back.
                   if (!response.id || response.error) {
@@ -248,7 +252,14 @@ function getTopNavConfig(
   ];
 }
 
-async function doSave(savedMap, saveOptions, initialLayerListConfig, closeFlyout, syncSavedMap) {
+async function doSave(
+  savedMap,
+  saveOptions,
+  initialLayerListConfig,
+  closeFlyout,
+  syncSavedMap,
+  currentPath
+) {
   closeFlyout();
   syncSavedMap(savedMap);
   let id;
@@ -277,14 +288,7 @@ async function doSave(savedMap, saveOptions, initialLayerListConfig, closeFlyout
       'data-test-subj': 'saveMapSuccess',
     });
 
-    updateBreadcrumbs(savedMap, initialLayerListConfig);
-
-    // TODO: handle redirect if id doesn't match
-    // if (savedMap.id !== $route.current.params.id) {
-    //   $scope.$evalAsync(() => {
-    //     kbnUrl.change(`map/{{id}}`, { id: savedMap.id });
-    //   });
-    // }
+    updateBreadcrumbs(savedMap, initialLayerListConfig, currentPath);
   }
   return { id };
 }

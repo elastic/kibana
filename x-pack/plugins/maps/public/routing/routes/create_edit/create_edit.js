@@ -56,11 +56,15 @@ export const MapsCreateEditView = class extends React.Component {
       isOpenSettingsDisabled: false,
       isFullScreen: false,
       savedQuery: null,
+      currentPath: '',
     };
   }
 
   componentDidMount() {
     const { match, kbnUrlStateStorage } = this.props;
+    this.setState({
+      currentPath: match.path,
+    });
 
     // Init sync utils
     this.globalSyncUnsubscribe = useGlobalStateSyncing(kbnUrlStateStorage);
@@ -359,6 +363,7 @@ export const MapsCreateEditView = class extends React.Component {
       isVisible,
       indexPatterns,
       isSaveDisabled,
+      currentPath,
     } = this.state;
 
     const initialized = !!query && !!time && !!refreshConfig;
@@ -393,6 +398,7 @@ export const MapsCreateEditView = class extends React.Component {
         }}
         isSaveDisabled={isSaveDisabled}
         syncAppAndGlobalState={this.syncAppAndGlobalState}
+        currentPath={currentPath}
       />
     ) : null;
   }
