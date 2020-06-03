@@ -42,9 +42,7 @@ export function toNavLink(
     legacy: isLegacyApp(app),
     baseUrl,
     ...(isLegacyApp(app)
-      ? {
-          href: url && !url.startsWith(app.subUrlBase!) ? url : baseUrl,
-        }
+      ? {}
       : {
           href: url,
           url,
