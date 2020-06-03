@@ -60,6 +60,7 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
               onChange={(e) => {
                 updateConfig({ from: e.target.value === '' ? undefined : Number(e.target.value) });
               }}
+              step={0.1}
               prepend={
                 <EuiButtonToggle
                   style={{ minWidth: '40px' }}
@@ -89,6 +90,7 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
               onChange={(e) => {
                 updateConfig({ to: e.target.value === '' ? undefined : Number(e.target.value) });
               }}
+              step={0.1}
               append={
                 <EuiButtonToggle
                   style={{ minWidth: '40px' }}
