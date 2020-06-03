@@ -49,7 +49,7 @@ In {kib} 5.4.0 and later, TSVB visualizations contain a stored XSS flaw. Attacke
 edit and create TSVB visualizations can obtain sensitive information, or perform 
 destructive actions, on behalf of the {kib} users who edit the TSVB visualization, CVE-2020-7015.
 
-You must upgrade to 7.1.1. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
+You must upgrade to 7.7.1. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
 
 [float]
 [[bug-7.7.1]]
