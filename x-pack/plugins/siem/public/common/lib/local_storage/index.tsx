@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import { Storage, IStorage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { SiemStorage } from './types';
 
-const LOCAL_STORAGE_TIMELINE_KEY = 'timelines';
+export const LOCAL_STORAGE_TIMELINE_KEY = 'timelines';
 
-export const createSiemLocalStorage = (): SiemStorage => {
-  const storage = new Storage(localStorage);
+export const createSiemLocalStorage = (store: IStorage): SiemStorage => {
+  const storage = new Storage(store);
 
   const getAllTimelines: SiemStorage['getAllTimelines'] = () => {
     return storage.get(LOCAL_STORAGE_TIMELINE_KEY);

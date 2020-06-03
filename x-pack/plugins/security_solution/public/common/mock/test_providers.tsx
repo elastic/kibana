@@ -22,7 +22,7 @@ import { mockGlobalState } from './global_state';
 import { createKibanaContextProviderMock } from './kibana_react';
 import { FieldHook, useForm } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
-import { createSiemLocalStorageMock } from './mock_local_storage';
+import { createSiemLocalStorageMock, localStorageMock } from './mock_local_storage';
 
 const state: State = mockGlobalState;
 
@@ -38,22 +38,6 @@ export const apolloClient = new ApolloClient({
 });
 
 export const apolloClientObservable = new BehaviorSubject(apolloClient);
-
-const localStorageMock = () => {
-  let store: Record<string, unknown> = {};
-
-  return {
-    getItem: (key: string) => {
-      return store[key] || null;
-    },
-    setItem: (key: string, value: unknown) => {
-      store[key] = value;
-    },
-    clear() {
-      store = {};
-    },
-  };
-};
 
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock(),

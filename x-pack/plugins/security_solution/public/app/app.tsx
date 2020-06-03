@@ -80,7 +80,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ subPlugins, ...libs }) => {
   const { i18n } = useKibana().services;
   const history = createHashHistory();
   const libs$ = new BehaviorSubject(libs);
-  const storage = createSiemLocalStorage();
+  const storage = createSiemLocalStorage(localStorage);
 
   const store = createStore(
     createInitialState({
