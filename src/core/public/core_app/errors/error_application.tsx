@@ -68,7 +68,7 @@ const ErrorApp: React.FC<{ basePath: IBasePath; history: History }> = ({ basePat
   if (errorType === 'urlOverflow') {
     return (
       <ErrorPage
-        title={i18n.translate('common.ui.errorUrlOverflow.errorTitle', {
+        title={i18n.translate('core.ui.errorUrlOverflow.errorTitle', {
           defaultMessage: 'Woah there!',
         })}
       >

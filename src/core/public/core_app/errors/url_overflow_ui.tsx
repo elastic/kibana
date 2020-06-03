@@ -31,7 +31,7 @@ export const UrlOverflowUi: React.FC<{ basePath: IBasePath }> = ({ basePath }) =
       <EuiText>
         <p>
           <FormattedMessage
-            id="common.ui.errorUrlOverflow.errorDescription"
+            id="core.ui.errorUrlOverflow.errorDescription"
             defaultMessage="That's a big URL you have there. I have some unfortunate news: Your browser doesn't play nice
     with Kibana's bacon-double-cheese-burger-with-extra-fries sized URL. To keep you from running
     into problems Kibana limits URLs in your browser to {urlCharacterLimit} characters for your
@@ -46,14 +46,14 @@ export const UrlOverflowUi: React.FC<{ basePath: IBasePath }> = ({ basePath }) =
       <EuiText textAlign="left">
         <h3>
           <FormattedMessage
-            id="common.ui.errorUrlOverflow.howTofixErrorTitle"
+            id="core.ui.errorUrlOverflow.howTofixErrorTitle"
             defaultMessage="Ok, how do I fix this?"
           />
         </h3>
 
         <p>
           <FormattedMessage
-            id="common.ui.errorUrlOverflow.howTofixErrorDescription"
+            id="core.ui.errorUrlOverflow.howTofixErrorDescription"
             defaultMessage="This usually only happens with big, complex dashboards, so you have some options:"
           />
         </p>
@@ -61,7 +61,7 @@ export const UrlOverflowUi: React.FC<{ basePath: IBasePath }> = ({ basePath }) =
         <ol>
           <li>
             <FormattedMessage
-              id="common.ui.errorUrlOverflow.howTofixError.enableOptionText"
+              id="core.ui.errorUrlOverflow.howTofixError.enableOptionText"
               defaultMessage="Enable the {storeInSessionStorageConfig} option in the {kibanaSettingsLink}. This will prevent the URLs from
       getting long, but makes them a bit less portable."
               values={{
@@ -69,7 +69,7 @@ export const UrlOverflowUi: React.FC<{ basePath: IBasePath }> = ({ basePath }) =
                 kibanaSettingsLink: (
                   <a href={basePath.prepend('/app/management/kibana/settings')}>
                     <FormattedMessage
-                      id="common.ui.errorUrlOverflow.howTofixError.enableOptionText.advancedSettingsLinkText"
+                      id="core.ui.errorUrlOverflow.howTofixError.enableOptionText.advancedSettingsLinkText"
                       defaultMessage="advanced settings"
                     />
                   </a>
@@ -79,14 +79,14 @@ export const UrlOverflowUi: React.FC<{ basePath: IBasePath }> = ({ basePath }) =
           </li>
           <li>
             <FormattedMessage
-              id="common.ui.errorUrlOverflow.howTofixError.removeStuffFromDashboardText"
+              id="core.ui.errorUrlOverflow.howTofixError.removeStuffFromDashboardText"
               defaultMessage="Remove some stuff from your dashboard. This will reduce the length of the URL and keep your browser in a good place."
             />
           </li>
           {IS_IE && (
             <li>
               <FormattedMessage
-                id="common.ui.errorUrlOverflow.howTofixError.doNotUseIEText"
+                id="core.ui.errorUrlOverflow.howTofixError.doNotUseIEText"
                 defaultMessage="Don't use IE. Every other supported browser we know of doesn't have this limit."
               />
             </li>

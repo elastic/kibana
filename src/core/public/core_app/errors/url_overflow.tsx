@@ -66,12 +66,12 @@ export const setupUrlOverflowDetection = ({ basePath, history, toasts, uiSetting
       window.location.reload();
     } else if (absUrlLength >= URL_WARNING_LENGTH) {
       toasts.addWarning({
-        title: i18n.translate('kibana_legacy.bigUrlWarningNotificationTitle', {
+        title: i18n.translate('core.ui.errorUrlOverflow.bigUrlWarningNotificationTitle', {
           defaultMessage: 'The URL is big and Kibana might stop working',
         }),
         text: mountReactNode(
           <FormattedMessage
-            id="kibana_legacy.bigUrlWarningNotificationMessage"
+            id="core.ui.errorUrlOverflow.bigUrlWarningNotificationMessage"
             defaultMessage="Either enable the {storeInSessionStorageParam} option
                     in {advancedSettingsLink} or simplify the onscreen visuals."
             values={{
@@ -79,7 +79,7 @@ export const setupUrlOverflowDetection = ({ basePath, history, toasts, uiSetting
               advancedSettingsLink: (
                 <a href={basePath.prepend('/app/management/kibana/settings')}>
                   <FormattedMessage
-                    id="kibana_legacy.bigUrlWarningNotificationMessage.advancedSettingsLinkText"
+                    id="core.ui.errorUrlOverflow.bigUrlWarningNotificationMessage.advancedSettingsLinkText"
                     defaultMessage="advanced settings"
                   />
                 </a>
