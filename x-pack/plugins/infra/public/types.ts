@@ -6,16 +6,20 @@
 
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
-import { DataEnhancedStart } from '../../data_enhanced/public';
+import { DataEnhancedSetup } from '../../data_enhanced/public';
 
 export interface ClientPluginsSetup {
+  dataEnhanced: DataEnhancedSetup;
   home: HomePublicPluginSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export interface ClientPluginsStart {
   data: DataPublicPluginStart;
-  dataEnhanced: DataEnhancedStart;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
+
+export type ClientPluginDeps = ClientPluginsSetup & ClientPluginsStart;

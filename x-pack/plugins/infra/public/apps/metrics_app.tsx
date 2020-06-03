@@ -11,21 +11,25 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { AppMountParameters } from '../../../../../src/core/public';
+import '../index.scss';
 import { NotFoundPage } from '../pages/404';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';
 import { MetricDetail } from '../pages/metrics/metric_detail';
-import { ClientPluginsStart } from '../types';
+import { ClientPluginDeps } from '../types';
 import { createApolloClient } from '../utils/apollo_client';
 import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
+import { prepareMountElement } from './common_styles';
 
 export const renderApp = (
   core: CoreStart,
-  plugins: ClientPluginsStart,
+  plugins: ClientPluginDeps,
   { element, history }: AppMountParameters
 ) => {
   const apolloClient = createApolloClient(core.http.fetch);
+
+  prepareMountElement(element);
 
   ReactDOM.render(
     <MetricsApp apolloClient={apolloClient} core={core} history={history} plugins={plugins} />,
@@ -41,7 +45,7 @@ const MetricsApp: React.FC<{
   apolloClient: ApolloClient<{}>;
   core: CoreStart;
   history: History<unknown>;
-  plugins: ClientPluginsStart;
+  plugins: ClientPluginDeps;
 }> = ({ apolloClient, core, history, plugins }) => {
   const uiCapabilities = core.application.capabilities;
 

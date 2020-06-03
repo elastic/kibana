@@ -12,7 +12,7 @@ import {
   KibanaContextProvider,
 } from '../../../../../src/plugins/kibana_react/public';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
-import { ClientPluginsStart } from '../types';
+import { ClientPluginDeps } from '../types';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
 import { ApolloClientContext } from '../utils/apollo_context';
 import { EuiThemeProvider } from '../../../observability/public';
@@ -37,7 +37,7 @@ export const CommonInfraProviders: React.FC<{
 
 export const CoreProviders: React.FC<{
   core: CoreStart;
-  plugins: ClientPluginsStart;
+  plugins: ClientPluginDeps;
 }> = ({ children, core, plugins }) => {
   return (
     <KibanaContextProvider services={{ ...core, ...plugins }}>
