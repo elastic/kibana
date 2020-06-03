@@ -50,6 +50,7 @@ export interface AnalysisConfig {
   latency?: number;
   multivariate_by_fields?: boolean;
   summary_count_field_name?: string;
+  per_partition_categorization?: PerPartitionCategorization;
 }
 
 export interface Detector {
@@ -85,4 +86,9 @@ export interface CustomRule {
   actions: string[];
   scope?: object;
   conditions: any[];
+}
+
+export interface PerPartitionCategorization {
+  enabled: boolean;
+  stop_on_warn?: boolean;
 }
