@@ -12,14 +12,16 @@ const ONE_HUNDRED_MEGABYTES = 104857600;
 
 describe('Reporting: Validate Max Content Length', () => {
   const elasticsearch = {
-    dataClient: {
-      callAsInternalUser: () => ({
-        defaults: {
-          http: {
-            max_content_length: '100mb',
+    legacy: {
+      client: {
+        callAsInternalUser: () => ({
+          defaults: {
+            http: {
+              max_content_length: '100mb',
+            },
           },
-        },
-      }),
+        }),
+      },
     },
   };
 
@@ -34,14 +36,16 @@ describe('Reporting: Validate Max Content Length', () => {
   it('should log warning messages when reporting has a higher max-size than elasticsearch', async () => {
     const config = { get: sinon.stub().returns(FIVE_HUNDRED_MEGABYTES) };
     const elasticsearch = {
-      dataClient: {
-        callAsInternalUser: () => ({
-          defaults: {
-            http: {
-              max_content_length: '100mb',
+      legacy: {
+        client: {
+          callAsInternalUser: () => ({
+            defaults: {
+              http: {
+                max_content_length: '100mb',
+              },
             },
-          },
-        }),
+          }),
+        },
       },
     };
 

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import Boom from 'boom';
 import {
   IScopedClusterClient,
   SavedObjectsClientContract,
@@ -191,6 +191,44 @@ export class ActionsClient {
       this.scopedClusterClient,
       mergedResult
     );
+  }
+
+  /**
+   * Get bulk actions with preconfigured list
+   */
+  public async getBulk(ids: string[]): Promise<ActionResult[]> {
+    const actionResults = new Array<ActionResult>();
+    for (const actionId of ids) {
+      const action = this.preconfiguredActions.find(
+        (preconfiguredAction) => preconfiguredAction.id === actionId
+      );
+      if (action !== undefined) {
+        actionResults.push(action);
+      }
+    }
+
+    // Fetch action objects in bulk
+    // Excluding preconfigured actions to avoid an not found error, which is already added
+    const actionSavedObjectsIds = [
+      ...new Set(
+        ids.filter(
+          (actionId) => !actionResults.find((actionResult) => actionResult.id === actionId)
+        )
+      ),
+    ];
+
+    const bulkGetOpts = actionSavedObjectsIds.map((id) => ({ id, type: 'action' }));
+    const bulkGetResult = await this.savedObjectsClient.bulkGet<RawAction>(bulkGetOpts);
+
+    for (const action of bulkGetResult.saved_objects) {
+      if (action.error) {
+        throw Boom.badRequest(
+          `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
+        );
+      }
+      actionResults.push(actionFromSavedObject(action));
+    }
+    return actionResults;
   }
 
   /**
