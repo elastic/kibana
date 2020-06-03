@@ -40,7 +40,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
         'xpack.securitySolution.uiSettings.defaultRefreshIntervalDescription',
         {
           defaultMessage:
-            '<p>Default refresh interval for the SIEM time filter, in milliseconds.</p>',
+            '<p>Default refresh interval for the Security time filter, in milliseconds.</p>',
         }
       ),
       category: ['securitySolution'],
@@ -60,7 +60,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
   "to": "${DEFAULT_TO}"
 }`,
       description: i18n.translate('xpack.securitySolution.uiSettings.defaultTimeRangeDescription', {
-        defaultMessage: '<p>Default period of time in the SIEM time filter.</p>',
+        defaultMessage: '<p>Default period of time in the Security time filter.</p>',
       }),
       category: ['securitySolution'],
       requiresPageReload: true,
@@ -76,7 +76,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       value: DEFAULT_INDEX_PATTERN,
       description: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexDescription', {
         defaultMessage:
-          '<p>Comma-delimited list of Elasticsearch indices from which the SIEM app collects events.</p>',
+          '<p>Comma-delimited list of Elasticsearch indices from which the Security app collects events.</p>',
       }),
       category: ['securitySolution'],
       requiresPageReload: true,
@@ -92,7 +92,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
         'xpack.securitySolution.uiSettings.defaultAnomalyScoreDescription',
         {
           defaultMessage:
-            '<p>Value above which Machine Learning job anomalies are displayed in the SIEM app.</p><p>Valid values: 0 to 100.</p>',
+            '<p>Value above which Machine Learning job anomalies are displayed in the Security app.</p><p>Valid values: 0 to 100.</p>',
         }
       ),
       category: ['securitySolution'],

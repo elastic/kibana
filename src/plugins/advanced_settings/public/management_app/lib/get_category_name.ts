@@ -47,7 +47,7 @@ const names: Record<string, string> = {
     defaultMessage: 'Search',
   }),
   securitySolution: i18n.translate('advancedSettings.categoryNames.securitySolutionLabel', {
-    defaultMessage: 'Security solution',
+    defaultMessage: 'Security Solution',
   }),
 };
 
