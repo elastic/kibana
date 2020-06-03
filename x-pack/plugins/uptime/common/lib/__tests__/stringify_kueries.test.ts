@@ -59,4 +59,32 @@ describe('stringifyKueries', () => {
     kueries.set('monitor.id', ['https://elastic.co', 'https://example.com']);
     expect(stringifyKueries(kueries)).toMatchSnapshot();
   });
+
+  it('handles precending empty array', () => {
+    kueries = new Map<string, string[]>(
+      Object.entries({
+        'monitor.type': [],
+        'observer.geo.name': ['us-east', 'apj', 'sydney', 'us-west'],
+        tags: [],
+        'url.port': [],
+      })
+    );
+    expect(stringifyKueries(kueries)).toMatchInlineSnapshot(
+      `"(observer.geo.name:us-east or observer.geo.name:apj or observer.geo.name:sydney or observer.geo.name:us-west)"`
+    );
+  });
+
+  it('handles skipped empty arrays', () => {
+    kueries = new Map<string, string[]>(
+      Object.entries({
+        tags: [],
+        'monitor.type': ['http'],
+        'url.port': [],
+        'observer.geo.name': ['us-east', 'apj', 'sydney', 'us-west'],
+      })
+    );
+    expect(stringifyKueries(kueries)).toMatchInlineSnapshot(
+      `"monitor.type:http and (observer.geo.name:us-east or observer.geo.name:apj or observer.geo.name:sydney or observer.geo.name:us-west)"`
+    );
+  });
 });
