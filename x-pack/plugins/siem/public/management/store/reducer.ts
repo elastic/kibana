@@ -28,10 +28,10 @@ const immutableCombineReducers: ImmutableCombineReducers = combineReducers;
 /**
  * Returns the initial state of the store for the SIEM Management section
  */
-export const mockManagementStatemockManagementState: Immutable<ManagementState> = {
+export const mockManagementState: Immutable<ManagementState> = {
   [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: initialPolicyListState(),
   [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: initialPolicyDetailsState(),
-  [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: initialHostListState(),
+  [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: initialHostListState,
 };
 
 /**

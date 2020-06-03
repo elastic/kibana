@@ -17,22 +17,28 @@ import {
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
 } from '../common/constants';
-import { hostMiddlewareFactory } from '../pages/endpoint_hosts/store';
+import { hostMiddlewareFactory } from '../pages/endpoint_hosts/store/middleware';
+
+const policyListSelector = (state: State) =>
+  state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_POLICY_LIST_NAMESPACE];
+const policyDetailsSelector = (state: State) =>
+  state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE];
+const endpointsSelector = (state: State) =>
+  state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_ENDPOINTS_NAMESPACE];
 
 export const managementMiddlewareFactory: SecuritySubPluginMiddlewareFactory = (
   coreStart,
   depsStart
 ) => {
-  const listSelector = (state: State) => state.management.policyList;
-  const detailSelector = (state: State) => state.management.policyDetails;
-
   return [
-    substateMiddlewareFactory(listSelector, policyListMiddlewareFactory(coreStart, depsStart)),
-    substateMiddlewareFactory(detailSelector, policyDetailsMiddlewareFactory(coreStart, depsStart)),
     substateMiddlewareFactory(
-      (globalState) =>
-        globalState[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_ENDPOINTS_NAMESPACE],
-      hostMiddlewareFactory(coreStart, depsStart)
+      policyListSelector,
+      policyListMiddlewareFactory(coreStart, depsStart)
     ),
+    substateMiddlewareFactory(
+      policyDetailsSelector,
+      policyDetailsMiddlewareFactory(coreStart, depsStart)
+    ),
+    substateMiddlewareFactory(endpointsSelector, hostMiddlewareFactory(coreStart, depsStart)),
   ];
 };
