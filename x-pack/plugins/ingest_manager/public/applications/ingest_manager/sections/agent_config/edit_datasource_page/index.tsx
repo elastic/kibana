@@ -69,7 +69,8 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
   const [loadingError, setLoadingError] = useState<Error>();
   const [agentConfig, setAgentConfig] = useState<AgentConfig>();
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
-  const [datasource, setDatasource] = useState<NewDatasource>({
+  const [datasource, setDatasource] = useState<NewDatasource & { id: string }>({
+    id: '',
     name: '',
     description: '',
     config_id: '',
@@ -93,7 +94,6 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
         }
         if (datasourceData?.item) {
           const {
-            id,
             revision,
             inputs,
             created_by,
@@ -299,6 +299,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
                 ),
                 children: (
                   <StepConfigureDatasource
+                    from={'edit'}
                     packageInfo={packageInfo}
                     datasource={datasource}
                     updateDatasource={updateDatasource}
