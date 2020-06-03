@@ -71,6 +71,7 @@ export function MachineLearningDataFrameAnalyticsProvider(
     },
 
     async waitForAnalyticsCompletion(analyticsId: string) {
+      await mlApi.waitForDFAJobTrainingRecordCountToBePositive(analyticsId);
       await mlApi.waitForAnalyticsState(analyticsId, DATA_FRAME_TASK_STATE.STOPPED);
     },
   };

@@ -158,28 +158,28 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
-        // it('displays details for the created job in the analytics table', async () => {
-        //   await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
-        //     id: testData.jobId,
-        //     description: testData.jobDescription,
-        //     sourceIndex: testData.source,
-        //     destinationIndex: testData.destinationIndex,
-        //     type: testData.expected.row.type,
-        //     status: testData.expected.row.status,
-        //     progress: testData.expected.row.progress,
-        //   });
-        // });
+        it('displays details for the created job in the analytics table', async () => {
+          await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
+            id: testData.jobId,
+            description: testData.jobDescription,
+            sourceIndex: testData.source,
+            destinationIndex: testData.destinationIndex,
+            type: testData.expected.row.type,
+            status: testData.expected.row.status,
+            progress: testData.expected.row.progress,
+          });
+        });
 
-        // it('creates the destination index and writes results to it', async () => {
-        //   await ml.api.assertIndicesExist(testData.destinationIndex);
-        //   await ml.api.assertIndicesNotEmpty(testData.destinationIndex);
-        // });
+        it('creates the destination index and writes results to it', async () => {
+          await ml.api.assertIndicesExist(testData.destinationIndex);
+          await ml.api.assertIndicesNotEmpty(testData.destinationIndex);
+        });
 
-        // it('displays the results view for created job', async () => {
-        //   await ml.dataFrameAnalyticsTable.openResultsView();
-        //   await ml.dataFrameAnalytics.assertClassificationEvaluatePanelElementsExists();
-        //   await ml.dataFrameAnalytics.assertClassificationTablePanelExists();
-        // });
+        it('displays the results view for created job', async () => {
+          await ml.dataFrameAnalyticsTable.openResultsView();
+          await ml.dataFrameAnalytics.assertClassificationEvaluatePanelElementsExists();
+          await ml.dataFrameAnalytics.assertClassificationTablePanelExists();
+        });
       });
     }
   });
