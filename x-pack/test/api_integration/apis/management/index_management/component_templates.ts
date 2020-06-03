@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(testComponentTemplate).to.eql({
             name: COMPONENT_NAME,
-            isInUse: false,
+            usedBy: [],
             hasSettings: true,
             hasMappings: true,
             hasAliases: false,
