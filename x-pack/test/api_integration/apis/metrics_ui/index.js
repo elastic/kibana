@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('InfraOps Endpoints', () => {
+  describe('MetricsUI Endpoints', () => {
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./log_analysis'));
     loadTestFile(require.resolve('./log_entries'));
@@ -15,7 +15,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./log_summary'));
     loadTestFile(require.resolve('./metrics'));
     loadTestFile(require.resolve('./sources'));
-    loadTestFile(require.resolve('./waffle'));
+    loadTestFile(require.resolve('./snapshot'));
     loadTestFile(require.resolve('./log_item'));
     loadTestFile(require.resolve('./metrics_alerting'));
     loadTestFile(require.resolve('./metrics_explorer'));
