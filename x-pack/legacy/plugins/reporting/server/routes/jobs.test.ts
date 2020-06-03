@@ -43,7 +43,7 @@ describe('GET /api/reporting/jobs/download', () => {
     ({ server, httpSetup } = await setupServer());
     core = await createMockReportingCore(config, ({
       elasticsearch: {
-        adminClient: { callAsInternalUser: jest.fn() },
+        legacy: { client: { callAsInternalUser: jest.fn() } },
       },
       security: {
         authc: {
@@ -89,7 +89,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('fails on malformed download IDs', async () => {
     // @ts-ignore
-    core.pluginSetupDeps.elasticsearch.adminClient = {
+    core.pluginSetupDeps.elasticsearch.legacy.client = {
       callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(getHits())),
     };
     registerJobInfoRoutes(core);
@@ -158,7 +158,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('returns 404 if job not found', async () => {
     // @ts-ignore
-    core.pluginSetupDeps.elasticsearch.adminClient = {
+    core.pluginSetupDeps.elasticsearch.legacy.client = {
       callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(getHits())),
     };
 
@@ -171,7 +171,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('returns a 401 if not a valid job type', async () => {
     // @ts-ignore
-    core.pluginSetupDeps.elasticsearch.adminClient = {
+    core.pluginSetupDeps.elasticsearch.legacy.client = {
       callAsInternalUser: jest
         .fn()
         .mockReturnValue(Promise.resolve(getHits({ jobtype: 'invalidJobType' }))),
@@ -185,7 +185,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('when a job is incomplete', async () => {
     // @ts-ignore
-    core.pluginSetupDeps.elasticsearch.adminClient = {
+    core.pluginSetupDeps.elasticsearch.legacy.client = {
       callAsInternalUser: jest
         .fn()
         .mockReturnValue(
@@ -205,7 +205,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('when a job fails', async () => {
     // @ts-ignore
-    core.pluginSetupDeps.elasticsearch.adminClient = {
+    core.pluginSetupDeps.elasticsearch.legacy.client = {
       callAsInternalUser: jest.fn().mockReturnValue(
         Promise.resolve(
           getHits({
@@ -248,7 +248,7 @@ describe('GET /api/reporting/jobs/download', () => {
     it('when a known job-type is complete', async () => {
       const hits = getCompleteHits();
       // @ts-ignore
-      core.pluginSetupDeps.elasticsearch.adminClient = {
+      core.pluginSetupDeps.elasticsearch.legacy.client = {
         callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
       };
       registerJobInfoRoutes(core);
@@ -264,7 +264,7 @@ describe('GET /api/reporting/jobs/download', () => {
     it('succeeds when security is not there or disabled', async () => {
       const hits = getCompleteHits();
       // @ts-ignore
-      core.pluginSetupDeps.elasticsearch.adminClient = {
+      core.pluginSetupDeps.elasticsearch.legacy.client = {
         callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
       };
 
@@ -288,7 +288,7 @@ describe('GET /api/reporting/jobs/download', () => {
         outputContent: 'test',
       });
       // @ts-ignore
-      core.pluginSetupDeps.elasticsearch.adminClient = {
+      core.pluginSetupDeps.elasticsearch.legacy.client = {
         callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
       };
       registerJobInfoRoutes(core);
@@ -308,7 +308,7 @@ describe('GET /api/reporting/jobs/download', () => {
         outputContentType: 'application/pdf',
       });
       // @ts-ignore
-      core.pluginSetupDeps.elasticsearch.adminClient = {
+      core.pluginSetupDeps.elasticsearch.legacy.client = {
         callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
       };
       registerJobInfoRoutes(core);
@@ -329,7 +329,7 @@ describe('GET /api/reporting/jobs/download', () => {
         outputContentType: 'application/html',
       });
       // @ts-ignore
-      core.pluginSetupDeps.elasticsearch.adminClient = {
+      core.pluginSetupDeps.elasticsearch.legacy.client = {
         callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
       };
       registerJobInfoRoutes(core);
