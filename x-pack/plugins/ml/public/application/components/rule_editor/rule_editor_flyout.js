@@ -422,10 +422,6 @@ class RuleEditorFlyoutUI extends Component {
           );
         }
       })
-      // .then(() => {
-      //   const blah = mlJobService.getJob(anomaly.jobId);
-      //   console.log('blah', blah);
-      // })
       .catch((error) => {
         console.error(error);
         let errorMessage = i18n.translate(
