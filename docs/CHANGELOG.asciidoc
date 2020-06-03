@@ -126,10 +126,7 @@ could lead to an attacker executing code with the permissions of the {kib} proce
 +
 By default, the Upgrade Assistant flaw is mitigated in all {kib} instances accessed through {ess}.
 +
-For all other installations, you must upgrade to 7.7.0. If you are unable to upgrade, disable the Upgrade Assistant in your kibana.yml file:
-
-** In 6.7.0 and 6.7.1, set `upgrade_assistant.enabled:false`
-** In 6.7.2 and later, set `xpack.upgrade_assistant_enabled:false`
+For all other installations, you must upgrade to 7.7.0. If you are unable to upgrade, set `xpack.upgrade_assistant_enabled:false` in your kibana.yml file to disable the Upgrade Assistant.
 
 * In 7.7.0 and earlier, TSVB contains a prototype pollution flaw. Authenticated attackers with privileges to create 
 TSVB visualizations can insert data that could cause {kib} to execute arbitrary code. This 
