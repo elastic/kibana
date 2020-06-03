@@ -31,6 +31,11 @@ import { IUiSettingsClient } from '../../ui_settings';
 // Exported for testing only
 const IE_REGEX = /(; ?MSIE |Edge\/\d|Trident\/[\d+\.]+;.*rv:*11\.\d+)/;
 export const IS_IE = IE_REGEX.test(window.navigator.userAgent);
+/**
+ * The max URL length allowed by the current browser. Should be used to display warnings to users when query parameters
+ * cause URL to exceed this limit.
+ * @public
+ */
 export const URL_MAX_LENGTH = IS_IE ? 2000 : 25000;
 export const URL_WARNING_LENGTH = IS_IE ? 1000 : 24000;
 const ERROR_ROUTE = '/app/error';

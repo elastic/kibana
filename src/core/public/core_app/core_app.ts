@@ -53,6 +53,9 @@ export class CoreApp {
       title: 'App Error',
       navLinkStatus: AppNavLinkStatus.hidden,
       mount(params: AppMountParameters) {
+        // Do not use an async import here in order to ensure that network failures
+        // cannot prevent the error UI from displaying. This UI is tiny so an async
+        // import here is probably not useful anyways.
         return renderApp(params, { basePath: http.basePath });
       },
     });

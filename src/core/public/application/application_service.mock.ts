@@ -58,10 +58,8 @@ const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
   };
 };
 
-const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart> => {
-  const currentAppId$ = new Subject<string | undefined>();
-
-  const historyMock: jest.Mocked<History> = {
+const createHistoryMock = (): jest.Mocked<History> => {
+  return {
     block: jest.fn(),
     createHref: jest.fn(),
     go: jest.fn(),
@@ -80,6 +78,10 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
       state: undefined,
     },
   };
+};
+
+const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart> => {
+  const currentAppId$ = new Subject<string | undefined>();
 
   return {
     applications$: new BehaviorSubject<Map<string, PublicAppInfo | PublicLegacyAppInfo>>(new Map()),
@@ -90,7 +92,7 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
     navigateToApp: jest.fn().mockImplementation((appId) => currentAppId$.next(appId)),
     navigateToUrl: jest.fn(),
     registerMountContext: jest.fn(),
-    history: historyMock,
+    history: createHistoryMock(),
   };
 };
 

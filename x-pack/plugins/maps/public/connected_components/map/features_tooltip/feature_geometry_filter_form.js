@@ -9,6 +9,7 @@ import { EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
+import { URL_MAX_LENGTH } from '../../../../../../../src/core/public';
 import { createSpatialFilterWithGeometry } from '../../../elasticsearch_geo_utils';
 import { GEO_JSON_TYPE } from '../../../../common/constants';
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
@@ -77,8 +78,10 @@ export class FeatureGeometryFilterForm extends Component {
 
     // Ensure filter will not overflow URL. Filters that contain geometry can be extremely large.
     // No elasticsearch support for pre-indexed shapes and geo_point spatial queries.
-    // TODO: should we expose the max from core?
-    if (window.location.href.length + rison.encode(filter).length + META_OVERHEAD > 25000) {
+    if (
+      window.location.href.length + rison.encode(filter).length + META_OVERHEAD >
+      URL_MAX_LENGTH
+    ) {
       this.setState({
         errorMsg: i18n.translate('xpack.maps.tooltip.geometryFilterForm.filterTooLargeMessage', {
           defaultMessage:

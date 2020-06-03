@@ -33,7 +33,7 @@ interface Props {
   children?: ReactChild;
 }
 
-const AppError: React.FC<Props> = ({ title, children }) => {
+const ErrorPage: React.FC<Props> = ({ title, children }) => {
   title =
     title ??
     i18n.translate('core.application.appRenderError.defaultTitle', {
@@ -58,24 +58,26 @@ const AppError: React.FC<Props> = ({ title, children }) => {
 
 const ErrorApp: React.FC<{ basePath: IBasePath; history: History }> = ({ basePath, history }) => {
   const [currentLocation, setCurrentLocation] = useState(history.location);
-  useLayoutEffect(() => history.listen((location) => setCurrentLocation(location)), [history]);
+  useLayoutEffect(() => {
+    return history.listen((location) => setCurrentLocation(location));
+  }, [history]);
 
   const searchParams = new URLSearchParams(currentLocation.search);
   const errorType = searchParams.get('errorType');
 
   if (errorType === 'urlOverflow') {
     return (
-      <AppError
+      <ErrorPage
         title={i18n.translate('common.ui.errorUrlOverflow.errorTitle', {
           defaultMessage: 'Woah there!',
         })}
       >
         <UrlOverflowUi basePath={basePath} />
-      </AppError>
+      </ErrorPage>
     );
   }
 
-  return <AppError />;
+  return <ErrorPage />;
 };
 
 interface Deps {
