@@ -15,7 +15,7 @@ import { TypeRegistry } from './application/type_registry';
 import { ManagementStart, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { boot } from './application/boot';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import { PluginStartContract as AlertingStart } from '../../alerting/public';
+import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
@@ -32,7 +32,7 @@ interface PluginsStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   management: ManagementStart;
-  alerting?: AlertingStart;
+  alerts?: AlertingStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
 }
 
@@ -83,7 +83,7 @@ export class Plugin
           boot({
             dataPlugin: plugins.data,
             charts: plugins.charts,
-            alerting: plugins.alerting,
+            alerts: plugins.alerts,
             element: params.element,
             toastNotifications: core.notifications.toasts,
             http: core.http,

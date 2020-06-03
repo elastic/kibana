@@ -36,17 +36,17 @@ import {
   RULES_TABLE,
   SEVERITY,
   SHOWING_RULES_TEXT,
-} from '../screens/signal_detection_rules';
+} from '../screens/alert_detection_rules';
 
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
-  fillDefineCustomRuleAndContinue,
+  fillDefineCustomRuleWithImportedQueryAndContinue,
 } from '../tasks/create_new_rule';
 import {
-  goToManageSignalDetectionRules,
-  waitForSignalsIndexToBeCreated,
-  waitForSignalsPanelToBeLoaded,
+  goToManageAlertDetectionRules,
+  waitForAlertsIndexToBeCreated,
+  waitForAlertsPanelToBeLoaded,
 } from '../tasks/detections';
 import {
   changeToThreeHundredRowsPerPage,
@@ -58,29 +58,29 @@ import {
   selectNumberOfRules,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
-} from '../tasks/signal_detection_rules';
+} from '../tasks/alert_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
 
-describe('Signal detection rules, custom', () => {
+describe('Detection rules, custom', () => {
   before(() => {
-    esArchiverLoad('prebuilt_rules_loaded');
+    esArchiverLoad('custom_rule_with_timeline');
   });
 
   after(() => {
-    esArchiverUnload('prebuilt_rules_loaded');
+    esArchiverUnload('custom_rule_with_timeline');
   });
 
   it('Creates and activates a new custom rule', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
-    waitForSignalsPanelToBeLoaded();
-    waitForSignalsIndexToBeCreated();
-    goToManageSignalDetectionRules();
+    waitForAlertsPanelToBeLoaded();
+    waitForAlertsIndexToBeCreated();
+    goToManageAlertDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     goToCreateNewRule();
-    fillDefineCustomRuleAndContinue(newRule);
+    fillDefineCustomRuleWithImportedQueryAndContinue(newRule);
     fillAboutRuleAndContinue(newRule);
     createAndActivateRule();
 
@@ -170,9 +170,9 @@ describe('Deletes custom rules', () => {
   beforeEach(() => {
     esArchiverLoad('custom_rules');
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
-    waitForSignalsPanelToBeLoaded();
-    waitForSignalsIndexToBeCreated();
-    goToManageSignalDetectionRules();
+    waitForAlertsPanelToBeLoaded();
+    waitForAlertsIndexToBeCreated();
+    goToManageAlertDetectionRules();
   });
 
   after(() => {

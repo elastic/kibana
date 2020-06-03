@@ -60,6 +60,14 @@ export const analyticsIdSchema = schema.object({
   analyticsId: schema.string(),
 });
 
+export const deleteDataFrameAnalyticsJobSchema = schema.object({
+  /**
+   * Analytics Destination Index
+   */
+  deleteDestIndex: schema.maybe(schema.boolean()),
+  deleteDestIndexPattern: schema.maybe(schema.boolean()),
+});
+
 export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({
   force: schema.maybe(schema.boolean()),
 });

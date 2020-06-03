@@ -55,7 +55,7 @@ export const createList = async ({
     updated_at: createdAt,
     updated_by: user,
   };
-  const response: CreateDocumentResponse = await callCluster('index', {
+  const response = await callCluster<CreateDocumentResponse>('index', {
     body,
     id,
     index: listIndex,
