@@ -194,7 +194,10 @@ const useFetchEntriesEffect = (
     }
   };
 
-  const runFetchMoreEntriesRequest = async (direction: ShouldFetchMoreEntries) => {
+  const runFetchMoreEntriesRequest = async (
+    direction: ShouldFetchMoreEntries,
+    overrides: Partial<LogEntriesProps> = {}
+  ) => {
     if (!props.startTimestamp || !props.endTimestamp) {
       return;
     }
@@ -209,10 +212,10 @@ const useFetchEntriesEffect = (
 
     try {
       const commonFetchArgs: LogEntriesBaseRequest = {
-        sourceId: props.sourceId,
-        startTimestamp: props.startTimestamp,
-        endTimestamp: props.endTimestamp,
-        query: props.filterQuery,
+        sourceId: overrides.sourceId || props.sourceId,
+        startTimestamp: overrides.startTimestamp || props.startTimestamp,
+        endTimestamp: overrides.endTimestamp || props.endTimestamp,
+        query: overrides.filterQuery || props.filterQuery,
       };
 
       const fetchArgs: LogEntriesRequest = getEntriesBefore
@@ -279,10 +282,10 @@ const useFetchEntriesEffect = (
   const streamEntriesEffect = () => {
     (async () => {
       if (props.isStreaming && !state.isLoadingMore && !state.isReloading) {
+        const endTimestamp = Date.now();
         if (startedStreaming) {
           await new Promise((res) => setTimeout(res, LIVE_STREAM_INTERVAL));
         } else {
-          const endTimestamp = Date.now();
           props.jumpToTargetPosition({ tiebreaker: 0, time: endTimestamp });
           setStartedStreaming(true);
           if (state.hasMoreAfterEnd) {
@@ -290,7 +293,9 @@ const useFetchEntriesEffect = (
             return;
           }
         }
-        const newEntriesEnd = await runFetchMoreEntriesRequest(ShouldFetchMoreEntries.After);
+        const newEntriesEnd = await runFetchMoreEntriesRequest(ShouldFetchMoreEntries.After, {
+          endTimestamp,
+        });
         if (newEntriesEnd) {
           props.jumpToTargetPosition(newEntriesEnd);
         }

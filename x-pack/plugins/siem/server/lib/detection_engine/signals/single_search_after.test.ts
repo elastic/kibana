@@ -10,7 +10,7 @@ import {
   sampleDocSearchResultsWithSortId,
 } from './__mocks__/es_results';
 import { singleSearchAfter } from './single_search_after';
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 
 describe('singleSearchAfter', () => {
   const mockService: AlertServicesMock = alertsMock.createAlertServices();
