@@ -7,137 +7,52 @@
       {
         "monitor_id": "0090-intermittent",
         "histogram": {
-          "count": 20,
+          "count": null,
           "points": [
             {
-              "timestamp": 1568172657286,
-              "up": 0,
+              "timestamp": 1568172660000,
+              "up": null,
               "down": 1
             },
             {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172702888,
-              "up": 0,
+              "timestamp": 1568172720000,
+              "up": null,
               "down": 1
             },
             {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568172780000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172840000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172900000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172960000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568173020000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173080000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 0,
+              "timestamp": 1568173140000,
+              "up": null,
               "down": 1
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
             }
           ]
         },
@@ -170,7 +85,9 @@
           "geo": null,
           "observer": {
             "geo": {
-              "name": ["mpls"],
+              "name": [
+                "mpls"
+              ],
               "location": null
             }
           },
@@ -195,137 +112,52 @@
       {
         "monitor_id": "0091-up",
         "histogram": {
-          "count": 20,
+          "count": null,
           "points": [
             {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172660000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172720000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172780000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568172840000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172900000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172960000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173020000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568173080000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173140000,
+              "up": null,
+              "down": null
             }
           ]
         },
@@ -358,7 +190,9 @@
           "geo": null,
           "observer": {
             "geo": {
-              "name": ["mpls"],
+              "name": [
+                "mpls"
+              ],
               "location": null
             }
           },
@@ -383,137 +217,52 @@
       {
         "monitor_id": "0092-up",
         "histogram": {
-          "count": 20,
+          "count": null,
           "points": [
             {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172660000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172720000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172780000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568172840000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172900000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172960000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173020000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568173080000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173140000,
+              "up": null,
+              "down": null
             }
           ]
         },
@@ -546,7 +295,9 @@
           "geo": null,
           "observer": {
             "geo": {
-              "name": ["mpls"],
+              "name": [
+                "mpls"
+              ],
               "location": null
             }
           },
@@ -571,137 +322,52 @@
       {
         "monitor_id": "0093-up",
         "histogram": {
-          "count": 20,
+          "count": null,
           "points": [
             {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172660000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172720000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172780000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568172840000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172900000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172960000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173020000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568173080000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173140000,
+              "up": null,
+              "down": null
             }
           ]
         },
@@ -734,7 +400,9 @@
           "geo": null,
           "observer": {
             "geo": {
-              "name": ["mpls"],
+              "name": [
+                "mpls"
+              ],
               "location": null
             }
           },
@@ -759,137 +427,52 @@
       {
         "monitor_id": "0094-up",
         "histogram": {
-          "count": 20,
+          "count": null,
           "points": [
             {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172660000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172720000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172780000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568172840000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172900000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172960000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173020000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568173080000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173140000,
+              "up": null,
+              "down": null
             }
           ]
         },
@@ -922,7 +505,9 @@
           "geo": null,
           "observer": {
             "geo": {
-              "name": ["mpls"],
+              "name": [
+                "mpls"
+              ],
               "location": null
             }
           },
@@ -947,137 +532,52 @@
       {
         "monitor_id": "0095-up",
         "histogram": {
-          "count": 20,
+          "count": null,
           "points": [
             {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172660000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172720000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172780000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568172840000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172900000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172960000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173020000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568173080000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173140000,
+              "up": null,
+              "down": null
             }
           ]
         },
@@ -1110,7 +610,9 @@
           "geo": null,
           "observer": {
             "geo": {
-              "name": ["mpls"],
+              "name": [
+                "mpls"
+              ],
               "location": null
             }
           },
@@ -1135,137 +637,52 @@
       {
         "monitor_id": "0096-up",
         "histogram": {
-          "count": 20,
+          "count": null,
           "points": [
             {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172660000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172720000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172780000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568172840000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172900000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172960000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173020000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568173080000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173140000,
+              "up": null,
+              "down": null
             }
           ]
         },
@@ -1298,7 +715,9 @@
           "geo": null,
           "observer": {
             "geo": {
-              "name": ["mpls"],
+              "name": [
+                "mpls"
+              ],
               "location": null
             }
           },
@@ -1323,137 +742,52 @@
       {
         "monitor_id": "0097-up",
         "histogram": {
-          "count": 20,
+          "count": null,
           "points": [
             {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172660000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172720000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172780000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568172840000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172900000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172960000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173020000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568173080000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173140000,
+              "up": null,
+              "down": null
             }
           ]
         },
@@ -1486,7 +820,9 @@
           "geo": null,
           "observer": {
             "geo": {
-              "name": ["mpls"],
+              "name": [
+                "mpls"
+              ],
               "location": null
             }
           },
@@ -1511,137 +847,52 @@
       {
         "monitor_id": "0098-up",
         "histogram": {
-          "count": 20,
+          "count": null,
           "points": [
             {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172660000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172720000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172780000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568172840000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172900000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172960000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173020000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568173080000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173140000,
+              "up": null,
+              "down": null
             }
           ]
         },
@@ -1674,7 +925,9 @@
           "geo": null,
           "observer": {
             "geo": {
-              "name": ["mpls"],
+              "name": [
+                "mpls"
+              ],
               "location": null
             }
           },
@@ -1699,137 +952,52 @@
       {
         "monitor_id": "0099-up",
         "histogram": {
-          "count": 20,
+          "count": null,
           "points": [
             {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172660000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172720000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172780000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568172840000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172900000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568172960000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173020000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
+              "timestamp": 1568173080000,
+              "up": null,
+              "down": null
             },
             {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
+              "timestamp": 1568173140000,
+              "up": null,
+              "down": null
             }
           ]
         },
@@ -1862,7 +1030,9 @@
           "geo": null,
           "observer": {
             "geo": {
-              "name": ["mpls"],
+              "name": [
+                "mpls"
+              ],
               "location": null
             }
           },
