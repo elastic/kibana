@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const CASES = '/app/siem#/case';
-export const DETECTIONS = 'app/siem#/detections';
-export const HOSTS_PAGE = '/app/siem#/hosts/allHosts';
+export const CASES = '/app/security#/case';
+export const DETECTIONS = 'app/security#/detections';
+export const HOSTS_PAGE = '/app/security#/hosts/allHosts';
 export const HOSTS_PAGE_TAB_URLS = {
-  allHosts: '/app/siem#/hosts/allHosts',
-  anomalies: '/app/siem#/hosts/anomalies',
-  authentications: '/app/siem#/hosts/authentications',
-  events: '/app/siem#/hosts/events',
-  uncommonProcesses: '/app/siem#/hosts/uncommonProcesses',
+  allHosts: '/app/security#/hosts/allHosts',
+  anomalies: '/app/security#/hosts/anomalies',
+  authentications: '/app/security#/hosts/authentications',
+  events: '/app/security#/hosts/events',
+  uncommonProcesses: '/app/security#/hosts/uncommonProcesses',
 };
-export const NETWORK_PAGE = '/app/siem#/network';
-export const OVERVIEW_PAGE = '/app/siem#/overview';
-export const TIMELINES_PAGE = '/app/siem#/timelines';
+export const NETWORK_PAGE = '/app/security#/network';
+export const OVERVIEW_PAGE = '/app/security#/overview';
+export const TIMELINES_PAGE = '/app/security#/timelines';
