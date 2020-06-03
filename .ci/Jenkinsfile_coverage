@@ -16,7 +16,7 @@ kibanaPipeline(timeoutMinutes: 240) {
           kibanaCoverage.runTests()
           handleIngestion(TIME_STAMP)
         }
-        handleFail()
+        handleFail(TIME_STAMP)
       }
     }
     kibanaPipeline.sendMail()
@@ -33,10 +33,10 @@ def handleIngestion(timestamp) {
   kibanaCoverage.uploadCoverageStaticSite(timestamp)
 }
 
-def handleFail() {
+def handleFail(timestamp) {
   def buildStatus = buildUtils.getBuildStatus()
   if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
-    kibanaCoverage.onFailure()
+    kibanaCoverage.onFailure([timestamp: timestamp])
   }
 }
 
