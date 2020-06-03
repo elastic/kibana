@@ -53,7 +53,6 @@ export const InfraTimerangeInputRT = rt.intersection([
     lookbackSize: rt.number,
     ignoreLookback: rt.boolean,
     forceInterval: rt.boolean,
-    interval: rt.string,
   }),
 ]);
 
@@ -108,8 +107,6 @@ export const SnapshotRequestRT = rt.intersection([
     region: rt.string,
     filterQuery: rt.union([rt.string, rt.null]),
     includeTimeseries: rt.boolean,
-    limit: rt.number,
-    afterKey: rt.record(rt.string, rt.string),
   }),
 ]);
 
