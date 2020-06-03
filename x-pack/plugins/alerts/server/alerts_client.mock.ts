@@ -25,6 +25,7 @@ const createAlertsClientMock = () => {
     muteInstance: jest.fn(),
     unmuteInstance: jest.fn(),
     listAlertTypes: jest.fn(),
+    getAlertStatus: jest.fn(),
   };
   return mocked;
 };

@@ -30,6 +30,15 @@ describe('EventLogClientService', () => {
       expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
         includedHiddenTypes: ['action', 'alert'],
       });
+
+      const [{ value: savedObjectsClient }] = savedObjectsService.getScopedClient.mock.results;
+
+      expect(jest.requireMock('./event_log_client').EventLogClient).toHaveBeenCalledWith({
+        esContext,
+        request,
+        savedObjectsClient,
+        spacesService: undefined,
+      });
     });
   });
 });

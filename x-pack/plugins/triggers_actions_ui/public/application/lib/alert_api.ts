@@ -11,7 +11,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { pick } from 'lodash';
 import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerts/common';
 import { BASE_ALERT_API_PATH } from '../constants';
-import { Alert, AlertType, AlertWithoutId, AlertTaskState } from '../../types';
+import { Alert, AlertType, AlertWithoutId, AlertTaskState, AlertStatus } from '../../types';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
   return await http.get(`${BASE_ALERT_API_PATH}/list_alert_types`);
@@ -46,6 +46,16 @@ export async function loadAlertState({
         }, t.identity)
       );
     });
+}
+
+export async function loadAlertStatus({
+  http,
+  alertId,
+}: {
+  http: HttpSetup;
+  alertId: string;
+}): Promise<AlertStatus> {
+  return await http.get(`${BASE_ALERT_API_PATH}/alert/${alertId}/status`);
 }
 
 export async function loadAlerts({
