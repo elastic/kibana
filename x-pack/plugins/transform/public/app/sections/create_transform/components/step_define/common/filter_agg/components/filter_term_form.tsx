@@ -9,9 +9,11 @@ import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
 import { useUpdateEffect } from 'react-use';
+import { i18n } from '@kbn/i18n';
 import { useApi } from '../../../../../../../hooks';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { FilterAggConfigTerm } from '../types';
+import { useToastNotifications } from '../../../../../../../app_dependencies';
 
 /**
  * Form component for the term filter aggregation.
@@ -23,23 +25,19 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
 }) => {
   const api = useApi();
   const { indexPattern } = useContext(CreateTransformWizardContext);
+  const toastNotifications = useToastNotifications();
 
   const [options, setOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const onSearchChange = useCallback(
-    (searchValue) => {
-      if (selectedField === undefined) return;
-
-      setIsLoading(true);
-      setOptions([]);
-
+  const fetchOptions = useCallback(
+    debounce(async (searchValue: string) => {
       const esSearchRequest = {
         index: indexPattern!.title,
         body: {
           query: {
             wildcard: {
-              [selectedField]: {
+              [selectedField!]: {
                 value: `*${searchValue}*`,
               },
             },
@@ -56,16 +54,50 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
         },
       };
 
-      api.esSearch(esSearchRequest).then((response) => {
+      try {
+        const response = await api.esSearch(esSearchRequest);
         setOptions(
           response.aggregations.field_values.buckets.map(
             (value: { key: string; doc_count: number }) => ({ label: value.key })
           )
         );
-        setIsLoading(false);
+      } catch (e) {
+        toastNotifications.addWarning(
+          i18n.translate('xpack.transform.agg.popoverForm.filerAgg.term.errorFetchSuggestions', {
+            defaultMessage: 'Unable to fetch suggestions',
+          })
+        );
+      }
+
+      setIsLoading(false);
+    }, 600),
+    [selectedField]
+  );
+
+  const onSearchChange = useCallback(
+    async (searchValue) => {
+      if (selectedField === undefined) return;
+
+      setIsLoading(true);
+      setOptions([]);
+
+      await fetchOptions(searchValue);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedField]
+  );
+
+  const updateConfig = useCallback(
+    (update) => {
+      onChange({
+        config: {
+          ...config,
+          ...update,
+        },
       });
     },
-    [api, indexPattern, selectedField]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [config]
   );
 
   useEffect(() => {
@@ -107,13 +139,12 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
         selectedOptions={selectedOptions}
         isClearable={false}
         onChange={(selected) => {
-          onChange({
-            config: {
-              value: selected.length > 0 ? selected[0].label : undefined,
-            },
-          });
+          updateConfig({ value: selected.length > 0 ? selected[0].label : undefined });
         }}
-        onSearchChange={debounce(onSearchChange, 600)}
+        onCreateOption={(value) => {
+          updateConfig({ value });
+        }}
+        onSearchChange={onSearchChange}
         data-test-subj="filterTermValueSelector"
       />
     </EuiFormRow>
