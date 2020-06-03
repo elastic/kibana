@@ -67,7 +67,7 @@ const warmPhaseSchema = schema.maybe(
     actions: schema.object({
       set_priority: setPrioritySchema,
       unfollow: unfollowSchema,
-      read_only: schema.maybe(schema.object({})), // Readonly has no options
+      readonly: schema.maybe(schema.object({})), // Readonly has no options
       allocate: allocateSchema,
       shrink: schema.maybe(
         schema.object({
