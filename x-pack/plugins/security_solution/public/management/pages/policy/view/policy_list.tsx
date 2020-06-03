@@ -67,7 +67,7 @@ export const TableRowActions = React.memo<{ items: EuiContextMenuPanelProps['ite
           <EuiButtonIcon
             iconType="boxesHorizontal"
             onClick={handleToggleMenu}
-            aria-label={i18n.translate('xpack.siem.endpoint.policyList.actionMenu', {
+            aria-label={i18n.translate('xpack.securitySolution.endpoint.policyList.actionMenu', {
               defaultMessage: 'Open',
             })}
           />
@@ -147,7 +147,7 @@ export const PolicyList = React.memo(() => {
     () => [
       {
         field: 'name',
-        name: i18n.translate('xpack.siem.endpoint.policyList.nameField', {
+        name: i18n.translate('xpack.securitySolution.endpoint.policyList.nameField', {
           defaultMessage: 'Policy Name',
         }),
         // eslint-disable-next-line react/display-name
@@ -166,7 +166,7 @@ export const PolicyList = React.memo(() => {
               <EuiFlexItem>
                 <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
                   <FormattedMessage
-                    id="xpack.siem.endpoint.policyList.revision"
+                    id="xpack.securitySolution.endpoint.policyList.revision"
                     defaultMessage="rev. {revNumber}"
                     values={{ revNumber: item.revision }}
                   />
@@ -178,14 +178,14 @@ export const PolicyList = React.memo(() => {
       },
       {
         field: 'created_by',
-        name: i18n.translate('xpack.siem.endpoint.policyList.createdBy', {
+        name: i18n.translate('xpack.securitySolution.endpoint.policyList.createdBy', {
           defaultMessage: 'Created By',
         }),
         truncateText: true,
       },
       {
         field: 'created_at',
-        name: i18n.translate('xpack.siem.endpoint.policyList.createdAt', {
+        name: i18n.translate('xpack.securitySolution.endpoint.policyList.createdAt', {
           defaultMessage: 'Created Date',
         }),
         render(createdAt: string) {
@@ -194,14 +194,14 @@ export const PolicyList = React.memo(() => {
       },
       {
         field: 'updated_by',
-        name: i18n.translate('xpack.siem.endpoint.policyList.updatedBy', {
+        name: i18n.translate('xpack.securitySolution.endpoint.policyList.updatedBy', {
           defaultMessage: 'Last Updated By',
         }),
         truncateText: true,
       },
       {
         field: 'updated_at',
-        name: i18n.translate('xpack.siem.endpoint.policyList.updatedAt', {
+        name: i18n.translate('xpack.securitySolution.endpoint.policyList.updatedAt', {
           defaultMessage: 'Last Updated',
         }),
         render(updatedAt: string) {
@@ -210,11 +210,11 @@ export const PolicyList = React.memo(() => {
       },
       {
         field: 'package',
-        name: i18n.translate('xpack.siem.endpoint.policyList.versionFieldLabel', {
+        name: i18n.translate('xpack.securitySolution.endpoint.policyList.versionFieldLabel', {
           defaultMessage: 'Version',
         }),
         render(pkg: Immutable<PackageData>) {
-          return i18n.translate('xpack.siem.endpoint.policyList.versionField', {
+          return i18n.translate('xpack.securitySolution.endpoint.policyList.versionField', {
             defaultMessage: '{title} v{version}',
             values: {
               title: pkg.title,
@@ -243,7 +243,7 @@ export const PolicyList = React.memo(() => {
                         }`}
                       >
                         <FormattedMessage
-                          id="xpack.siem.endpoint.policyList.agentConfigAction"
+                          id="xpack.securitySolution.endpoint.policyList.agentConfigAction"
                           defaultMessage="View Agent Configuration"
                         />
                       </LinkToApp>
@@ -263,13 +263,13 @@ export const PolicyList = React.memo(() => {
     <ManagementPageView
       viewType="list"
       data-test-subj="policyListPage"
-      headerLeft={i18n.translate('xpack.siem.endpoint.policyList.viewTitle', {
+      headerLeft={i18n.translate('xpack.securitySolution.endpoint.policyList.viewTitle', {
         defaultMessage: 'Policies',
       })}
       bodyHeader={
         <EuiText color="subdued" data-test-subj="policyTotalCount">
           <FormattedMessage
-            id="xpack.siem.endpoint.policyList.viewTitleTotalCount"
+            id="xpack.securitySolution.endpoint.policyList.viewTitleTotalCount"
             defaultMessage="{totalItemCount, plural, one {# Policy} other {# Policies}}"
             values={{ totalItemCount }}
           />

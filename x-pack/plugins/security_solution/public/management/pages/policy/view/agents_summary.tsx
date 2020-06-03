@@ -31,30 +31,42 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
     return [
       {
         key: 'total',
-        title: i18n.translate('xpack.siem.endpoint.policyDetails.agentsSummary.totalTitle', {
-          defaultMessage: 'Hosts',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetails.agentsSummary.totalTitle',
+          {
+            defaultMessage: 'Hosts',
+          }
+        ),
         health: '',
       },
       {
         key: 'online',
-        title: i18n.translate('xpack.siem.endpoint.policyDetails.agentsSummary.onlineTitle', {
-          defaultMessage: 'Online',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetails.agentsSummary.onlineTitle',
+          {
+            defaultMessage: 'Online',
+          }
+        ),
         health: 'success',
       },
       {
         key: 'offline',
-        title: i18n.translate('xpack.siem.endpoint.policyDetails.agentsSummary.offlineTitle', {
-          defaultMessage: 'Offline',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetails.agentsSummary.offlineTitle',
+          {
+            defaultMessage: 'Offline',
+          }
+        ),
         health: 'warning',
       },
       {
         key: 'error',
-        title: i18n.translate('xpack.siem.endpoint.policyDetails.agentsSummary.errorTitle', {
-          defaultMessage: 'Error',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetails.agentsSummary.errorTitle',
+          {
+            defaultMessage: 'Error',
+          }
+        ),
         health: 'danger',
       },
     ];

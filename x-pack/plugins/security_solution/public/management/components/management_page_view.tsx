@@ -16,7 +16,7 @@ export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) =>
   const tabs = useMemo((): PageViewProps['tabs'] => {
     return [
       {
-        name: i18n.translate('xpack.siem.managementTabs.endpoints', {
+        name: i18n.translate('xpack.securitySolution.managementTabs.endpoints', {
           defaultMessage: 'Endpoints',
         }),
         id: ManagementSubTab.endpoints,
@@ -24,7 +24,9 @@ export const ManagementPageView = memo<Omit<PageViewProps, 'tabs'>>((options) =>
         href: getManagementUrl({ name: 'endpointList' }),
       },
       {
-        name: i18n.translate('xpack.siem.managementTabs.policies', { defaultMessage: 'Policies' }),
+        name: i18n.translate('xpack.securitySolution.managementTabs.policies', {
+          defaultMessage: 'Policies',
+        }),
         id: ManagementSubTab.policies,
         isSelected: tabName === ManagementSubTab.policies,
         href: getManagementUrl({ name: 'policyList' }),

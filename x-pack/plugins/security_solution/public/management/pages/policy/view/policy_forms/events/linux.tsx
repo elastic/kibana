@@ -27,23 +27,32 @@ export const LinuxEvents = React.memo(() => {
       protectionField: keyof UIPolicyConfig['linux']['events'];
     }> = [
       {
-        name: i18n.translate('xpack.siem.endpoint.policyDetailsConfig.linux.events.file', {
-          defaultMessage: 'File',
-        }),
+        name: i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.file',
+          {
+            defaultMessage: 'File',
+          }
+        ),
         os: OS.linux,
         protectionField: 'file',
       },
       {
-        name: i18n.translate('xpack.siem.endpoint.policyDetailsConfig.linux.events.process', {
-          defaultMessage: 'Process',
-        }),
+        name: i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.process',
+          {
+            defaultMessage: 'Process',
+          }
+        ),
         os: OS.linux,
         protectionField: 'process',
       },
       {
-        name: i18n.translate('xpack.siem.endpoint.policyDetailsConfig.linux.events.network', {
-          defaultMessage: 'Network',
-        }),
+        name: i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.network',
+          {
+            defaultMessage: 'Network',
+          }
+        ),
         os: OS.linux,
         protectionField: 'network',
       },
@@ -53,7 +62,7 @@ export const LinuxEvents = React.memo(() => {
         <EuiTitle size="xxs">
           <h5>
             <FormattedMessage
-              id="xpack.siem.endpoint.policyDetailsConfig.eventingEvents"
+              id="xpack.securitySolution.endpoint.policyDetailsConfig.eventingEvents"
               defaultMessage="Events"
             />
           </h5>
@@ -79,7 +88,7 @@ export const LinuxEvents = React.memo(() => {
     return (
       <EuiText size="s" color="subdued">
         <FormattedMessage
-          id="xpack.siem.endpoint.policy.details.eventCollectionsEnabled"
+          id="xpack.securitySolution.endpoint.policy.details.eventCollectionsEnabled"
           defaultMessage="{selected} / {total} event collections enabled"
           values={{ selected, total }}
         />
@@ -89,13 +98,16 @@ export const LinuxEvents = React.memo(() => {
 
   return (
     <ConfigForm
-      type={i18n.translate('xpack.siem.endpoint.policy.details.eventCollection', {
+      type={i18n.translate('xpack.securitySolution.endpoint.policy.details.eventCollection', {
         defaultMessage: 'Event Collection',
       })}
-      description={i18n.translate('xpack.siem.endpoint.policy.details.eventCollectionLabel', {
-        defaultMessage: 'Event Collection',
-      })}
-      supportedOss={i18n.translate('xpack.siem.endpoint.policy.details.linux', {
+      description={i18n.translate(
+        'xpack.securitySolution.endpoint.policy.details.eventCollectionLabel',
+        {
+          defaultMessage: 'Event Collection',
+        }
+      )}
+      supportedOss={i18n.translate('xpack.securitySolution.endpoint.policy.details.linux', {
         defaultMessage: 'Linux',
       })}
       dataTestSubj="linuxEventingForm"
