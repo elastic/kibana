@@ -10,7 +10,7 @@
 
 This section summarizes the changes in each release.
 
-*<<release-notes-7.7.1>>
+* <<release-notes-7.7.1>>
 * <<release-notes-7.7.0>>
 * <<release-notes-7.6.2>>
 * <<release-notes-7.6.1>>
@@ -41,6 +41,15 @@ This section summarizes the changes in each release.
 == {kib} 7.7.1
 
 See <<breaking-changes-7.7,breaking changes in 7.7>>.
+
+[float]
+[[security-update-7.1.1]]
+=== Security update
+In {kib} 5.4.0 and later, TSVB visualizations contain a stored XSS flaw. Attackers that can 
+edit and create TSVB visualizations can obtain sensitive information, or perform 
+destructive actions, on behalf of the {kib} users who edit the TSVB visualization, CVE-2020-7015.
+
+You must upgrade to 7.7.1. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
 
 [float]
 [[bug-7.7.1]]
