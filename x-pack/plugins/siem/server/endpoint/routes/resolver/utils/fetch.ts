@@ -9,6 +9,7 @@ import {
   ResolverChildren,
   ResolverRelatedEvents,
   ResolverAncestry,
+  ResolverAlerts,
 } from '../../../../../common/endpoint/types';
 import { entityId, parentEntityId } from '../../../../../common/endpoint/models/event';
 import { PaginationBuilder } from './pagination';
@@ -17,8 +18,9 @@ import { LifecycleQuery } from '../queries/lifecycle';
 import { ChildrenQuery } from '../queries/children';
 import { EventsQuery } from '../queries/events';
 import { StatsQuery } from '../queries/stats';
-import { createAncestry, createRelatedEvents, createLifecycle } from './node';
+import { createAncestry, createRelatedEvents, createLifecycle, createAlerts } from './node';
 import { ChildrenNodesHelper } from './children_helper';
+import { AlertsQuery } from '../queries/alerts';
 
 /**
  * Handles retrieving nodes of a resolver tree.
@@ -81,6 +83,16 @@ export class Fetcher {
   }
 
   /**
+   * Retrieves the alerts for the origin node.
+   *
+   * @param limit the upper bound number of alerts to return
+   * @param after a cursor to use as the starting point for retrieving alerts
+   */
+  public async alerts(limit: number, after?: string): Promise<ResolverAlerts> {
+    return this.doAlerts(limit, after);
+  }
+
+  /**
    * Enriches a resolver tree with statistics for how many related events and alerts exist for each node in the tree.
    *
    * @param tree a resolver tree to enrich with statistical information.
@@ -136,6 +148,25 @@ export class Fetcher {
       results,
       PaginationBuilder.buildCursor(totals[this.id], results)
     );
+  }
+
+  private async doAlerts(limit: number, after?: string) {
+    const query = new AlertsQuery(
+      PaginationBuilder.createBuilder(limit, after),
+      this.indexPattern,
+      this.endpointID
+    );
+
+    const { totals, results } = await query.search(this.client, this.id);
+    if (results.length === 0) {
+      // return an empty set of results
+      return createAlerts(this.id);
+    }
+    if (!totals[this.id]) {
+      throw new Error(`Could not find the totals for related events entity_id: ${this.id}`);
+    }
+
+    return createAlerts(this.id, results, PaginationBuilder.buildCursor(totals[this.id], results));
   }
 
   private async doChildren(

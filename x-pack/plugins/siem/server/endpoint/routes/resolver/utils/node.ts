@@ -11,6 +11,7 @@ import {
   ResolverRelatedEvents,
   ResolverTree,
   ChildNode,
+  ResolverAlerts,
 } from '../../../../../common/endpoint/types';
 
 /**
@@ -26,6 +27,21 @@ export function createRelatedEvents(
   nextEvent: string | null = null
 ): ResolverRelatedEvents {
   return { entityID, events, nextEvent };
+}
+
+/**
+ * Creates an alert object that the alerts handler would return
+ *
+ * @param entityID the entity_id for these related events
+ * @param alerts array of alerts
+ * @param nextAlert the cursor to retrieve the next alert
+ */
+export function createAlerts(
+  entityID: string,
+  alerts: ResolverEvent[] = [],
+  nextAlert: string | null = null
+): ResolverAlerts {
+  return { entityID, alerts, nextAlert };
 }
 
 /**
@@ -73,6 +89,10 @@ export function createTree(entityID: string): ResolverTree {
     relatedEvents: {
       events: [],
       nextEvent: null,
+    },
+    relatedAlerts: {
+      alerts: [],
+      nextAlert: null,
     },
     lifecycle: [],
     ancestry: {

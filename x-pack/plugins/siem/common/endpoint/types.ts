@@ -91,6 +91,7 @@ export interface ResolverTree {
   entityID: string;
   children: ResolverChildren;
   relatedEvents: Omit<ResolverRelatedEvents, 'entityID'>;
+  relatedAlerts: Omit<ResolverAlerts, 'entityID'>;
   ancestry: ResolverAncestry;
   lifecycle: ResolverEvent[];
   stats: ResolverNodeStats;
@@ -130,6 +131,15 @@ export interface ResolverRelatedEvents {
   entityID: string;
   events: ResolverEvent[];
   nextEvent: string | null;
+}
+
+/**
+ * Response structure for the alerts route.
+ */
+export interface ResolverAlerts {
+  entityID: string;
+  alerts: ResolverEvent[];
+  nextAlert: string | null;
 }
 
 /**
