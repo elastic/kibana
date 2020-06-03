@@ -232,16 +232,44 @@ export function registerPolicyRoutes({
       const { callAsCurrentUser } = ctx.snapshotRestore!.client;
 
       try {
-        const indices: Array<{
-          index: string;
-        }> = await callAsCurrentUser('cat.indices', {
-          format: 'json',
-          h: 'index',
+        const indices: {
+          [indexName: string]: { data_stream?: string };
+        } = await callAsCurrentUser('transport.request', {
+          method: 'GET',
+          path: `/*`,
+          query: {
+            expand_wildcards: 'all,hidden',
+          },
         });
+
+        // TODO: This needs to be revisited once https://github.com/elastic/kibana/issues/64858 is
+        // because we will have a better endpoint for retrieving index, data stream and alias information.
+        const indicesAndDataStreams = Object.entries(indices).reduce<{
+          indices: string[];
+          dataStreams: Record<string, undefined>;
+        }>(
+          (acc, [name, { data_stream: dataStream }]) => {
+            if (dataStream) {
+              return {
+                ...acc,
+                dataStreams: {
+                  ...acc.dataStreams,
+                  [dataStream]: undefined,
+                },
+              };
+            }
+            return {
+              ...acc,
+              indices: acc.indices.concat(name),
+            };
+          },
+          { indices: [], dataStreams: {} }
+        );
 
         return res.ok({
           body: {
-            indices: indices.map(({ index }) => index).sort(),
+            indices: indicesAndDataStreams.indices.sort(),
+            dataStreams: Object.keys(indicesAndDataStreams.dataStreams).sort(),
           },
         });
       } catch (e) {
