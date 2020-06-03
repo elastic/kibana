@@ -20,7 +20,6 @@ import {
   roundCoordinates,
   extractFeaturesFromFilters,
   makeESBbox,
-  makeGeotileGridDsl,
 } from './elasticsearch_geo_utils';
 import { indexPatterns } from '../../../../src/plugins/data/public';
 
@@ -594,36 +593,6 @@ describe('extractFeaturesFromFilters', () => {
     };
 
     expect(extractFeaturesFromFilters([spatialFilter])).toEqual([]);
-  });
-});
-
-describe('make[Sized]GeotileGridDsl', () => {
-  const field = 'foobar';
-  const bounds = {
-    minLon: 10,
-    maxLon: 20,
-    minLat: 0,
-    maxLat: 1,
-  };
-  const precision = 8;
-
-  it('Should create a dsl with converted bbox', () => {
-    const dsl = makeGeotileGridDsl(field, bounds, precision);
-    expect(dsl).toEqual({
-      bounds: { bottom_right: [20, 0], top_left: [10, 1] },
-      field: 'foobar',
-      precision: 8,
-    });
-  });
-
-  it('Should create a dsl with converted bbox and size', () => {
-    const dsl = makeGeotileGridDsl(field, bounds, precision, { size: 800 });
-    expect(dsl).toEqual({
-      bounds: { bottom_right: [20, 0], top_left: [10, 1] },
-      field: 'foobar',
-      precision: 8,
-      size: 800,
-    });
   });
 });
 

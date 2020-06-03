@@ -21,7 +21,7 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
-import { makeGeotileGridDsl } from '../../../elasticsearch_geo_utils';
+import { makeESBbox } from '../../../elasticsearch_geo_utils';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -157,11 +157,11 @@ export class ESGeoGridSource extends AbstractESAggSource {
           sources: [
             {
               gridSplit: {
-                geotile_grid: makeGeotileGridDsl(
-                  this._descriptor.geoField,
-                  bufferedExtent,
-                  precision
-                ),
+                geotile_grid: {
+                  bounds: makeESBbox(bufferedExtent),
+                  field: this._descriptor.geoField,
+                  precision,
+                },
               },
             },
           ],
@@ -241,7 +241,11 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }) {
     searchSource.setField('aggs', {
       gridSplit: {
-        geotile_grid: makeGeotileGridDsl(this._descriptor.geoField, bufferedExtent, precision),
+        geotile_grid: {
+          bounds: makeESBbox(bufferedExtent),
+          field: this._descriptor.geoField,
+          precision,
+        },
         aggs: {
           gridCentroid: {
             geo_centroid: {

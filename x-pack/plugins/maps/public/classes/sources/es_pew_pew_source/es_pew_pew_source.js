@@ -16,7 +16,6 @@ import { convertToLines } from './convert_to_lines';
 import { AbstractESAggSource } from '../es_agg_source';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { registerSource } from '../source_registry';
-import { makeGeotileGridDsl } from '../../../elasticsearch_geo_utils';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -107,12 +106,6 @@ export class ESPewPewSource extends AbstractESAggSource {
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
-    const geotileGridDsl = makeGeotileGridDsl(
-      this._descriptor.sourceGeoField,
-      searchFilters.buffer,
-      searchFilters.geogridPrecision,
-      { size: 500 }
-    );
     searchSource.setField('aggs', {
       destSplit: {
         terms: {
@@ -127,7 +120,11 @@ export class ESPewPewSource extends AbstractESAggSource {
         },
         aggs: {
           sourceGrid: {
-            geotile_grid: geotileGridDsl,
+            geotile_grid: {
+              field: this._descriptor.sourceGeoField,
+              precision: searchFilters.geogridPrecision,
+              size: 500,
+            },
             aggs: {
               sourceCentroid: {
                 geo_centroid: {
