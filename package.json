@@ -409,7 +409,7 @@
     "chai": "3.5.0",
     "chance": "1.0.18",
     "cheerio": "0.22.0",
-    "chromedriver": "^81.0.0",
+    "chromedriver": "^83.0.0",
     "classnames": "2.2.6",
     "dedent": "^0.7.0",
     "delete-empty": "^2.0.0",

@@ -5,7 +5,7 @@
   "configPath": ["xpack", "siem"],
   "requiredPlugins": [
     "actions",
-    "alerting",
+    "alerts",
     "data",
     "dataEnhanced",
     "embeddable",
@@ -24,7 +24,8 @@
     "newsfeed",
     "security",
     "spaces",
-    "usageCollection"
+    "usageCollection",
+    "lists"
   ],
   "server": true,
   "ui": true

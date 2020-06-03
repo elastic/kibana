@@ -10,26 +10,24 @@ import { AppAction } from '../../common/store/actions';
 import { ImmutableReducer } from '../../common/store';
 import { Immutable } from '../../../common/endpoint/types';
 
-export const initialHostListState = (): HostState => {
-  return {
-    hosts: [],
-    pageSize: 10,
-    pageIndex: 0,
-    total: 0,
-    loading: false,
-    error: undefined,
-    details: undefined,
-    detailsLoading: false,
-    detailsError: undefined,
-    policyResponse: undefined,
-    policyResponseLoading: false,
-    policyResponseError: undefined,
-    location: undefined,
-  };
+export const initialHostListState: Immutable<HostState> = {
+  hosts: [],
+  pageSize: 10,
+  pageIndex: 0,
+  total: 0,
+  loading: false,
+  error: undefined,
+  details: undefined,
+  detailsLoading: false,
+  detailsError: undefined,
+  policyResponse: undefined,
+  policyResponseLoading: false,
+  policyResponseError: undefined,
+  location: undefined,
 };
 
 export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
-  state = initialHostListState(),
+  state = initialHostListState,
   action
 ) => {
   if (action.type === 'serverReturnedHostList') {
