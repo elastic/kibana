@@ -113,24 +113,20 @@ const Page = styled.div`
 export const Home = () => {
   const { core } = usePluginContext();
 
-  useEffect(
-    () => {
-      core.chrome.setBreadcrumbs([
-        {
-          text: i18n.translate('xpack.observability.home.breadcrumb.observability', {
-            defaultMessage: 'Observability',
-          }),
-        },
-        {
-          text: i18n.translate('xpack.observability.home.breadcrumb.gettingStarted', {
-            defaultMessage: 'Getting started',
-          }),
-        },
-      ]);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  useEffect(() => {
+    core.chrome.setBreadcrumbs([
+      {
+        text: i18n.translate('xpack.observability.home.breadcrumb.observability', {
+          defaultMessage: 'Observability',
+        }),
+      },
+      {
+        text: i18n.translate('xpack.observability.home.breadcrumb.gettingStarted', {
+          defaultMessage: 'Getting started',
+        }),
+      },
+    ]);
+  }, [core]);
 
   return (
     <Container>
@@ -158,7 +154,7 @@ export const Home = () => {
         <EuiSpacer size="xxl" />
         <EuiFlexGroup direction="column">
           {/* title and description */}
-          <EuiFlexItem style={{ maxWidth: 567 }}>
+          <EuiFlexItem style={{ maxWidth: '50%' }}>
             <EuiTitle size="s">
               <h2>
                 {i18n.translate('xpack.observability.home.sectionTitle', {
@@ -191,7 +187,7 @@ export const Home = () => {
                   size="xl"
                   alt="observability overview image"
                   url={core.http.basePath.prepend(
-                    '/plugins/observability/assets/observability-overview.png'
+                    '/plugins/observability/assets/observability_overview.png'
                   )}
                 />
               </EuiFlexItem>
@@ -206,7 +202,6 @@ export const Home = () => {
                   fill
                   iconType="sortRight"
                   iconSide="right"
-                  style={{ width: 175 }}
                   href={core.http.basePath.prepend('/app/home#/tutorial_directory/logging')}
                 >
                   {i18n.translate('xpack.observability.home.getStatedButton', {
@@ -238,7 +233,7 @@ export const Home = () => {
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="center">
               {tryItOutItemsSection.map((item) => (
-                <EuiFlexItem grow={false} key={item.id} style={{ width: 260 }}>
+                <EuiFlexItem grow={false} key={item.id}>
                   <EuiPanel
                     hasShadow
                     paddingSize="s"
