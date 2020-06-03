@@ -19,7 +19,7 @@ const paramsSchema = schema.object({
 export function registerUpdateRoute({ router, license, lib }: RouteDependencies) {
   router.put(
     {
-      path: addBasePath('/templates/{name}'),
+      path: addBasePath('/index-templates/{name}'),
       validate: { body: bodySchema, params: paramsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {

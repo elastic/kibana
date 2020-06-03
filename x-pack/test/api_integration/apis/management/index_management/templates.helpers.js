@@ -7,10 +7,10 @@
 import { API_BASE_PATH, INDEX_PATTERNS } from './constants';
 
 export const registerHelpers = ({ supertest }) => {
-  const getAllTemplates = () => supertest.get(`${API_BASE_PATH}/templates`);
+  const getAllTemplates = () => supertest.get(`${API_BASE_PATH}/index-templates`);
 
   const getOneTemplate = (name, isLegacy = true) =>
-    supertest.get(`${API_BASE_PATH}/templates/${name}?legacy=${isLegacy}`);
+    supertest.get(`${API_BASE_PATH}/index-templates/${name}?legacy=${isLegacy}`);
 
   const getTemplatePayload = (name, isLegacy = true) => ({
     name,
@@ -50,14 +50,17 @@ export const registerHelpers = ({ supertest }) => {
   });
 
   const createTemplate = (payload) =>
-    supertest.post(`${API_BASE_PATH}/templates`).set('kbn-xsrf', 'xxx').send(payload);
+    supertest.post(`${API_BASE_PATH}/index-templates`).set('kbn-xsrf', 'xxx').send(payload);
 
   const deleteTemplates = (templates) =>
-    supertest.post(`${API_BASE_PATH}/delete-templates`).set('kbn-xsrf', 'xxx').send({ templates });
+    supertest
+      .post(`${API_BASE_PATH}/delete-index-templates`)
+      .set('kbn-xsrf', 'xxx')
+      .send({ templates });
 
   const updateTemplate = (payload, templateName) =>
     supertest
-      .put(`${API_BASE_PATH}/templates/${templateName}`)
+      .put(`${API_BASE_PATH}/index-templates/${templateName}`)
       .set('kbn-xsrf', 'xxx')
       .send(payload);
 
