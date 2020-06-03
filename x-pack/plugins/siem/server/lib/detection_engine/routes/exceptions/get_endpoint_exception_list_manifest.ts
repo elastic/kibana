@@ -33,15 +33,13 @@ async function handleAllowlistManifest(context, req, res) {
 
     // transform and validate response
     for (const manifest of resp.saved_objects) {
-      if (!manifestResp[manifest.name]) {
-        manifestResp[manifest.name] = {
-          [manifest.name]: {
-            url: `${allowlistBaseRoute}/download/${manifest.sha256}`,
-            sha256: manifest.sha256,
-            size: manifest.size,
-          },
-        };
-      }
+      manifestResp[manifest.attributes.name] = {
+        [manifest.attributes.name]: {
+          url: `${allowlistBaseRoute}/download/${manifest.attributes.sha256}`,
+          sha256: manifest.attributes.sha256,
+          size: manifest.attributes.size, // TODO add size
+        },
+      };
     }
 
     return res.ok({ body: manifestResp });
@@ -61,8 +59,8 @@ async function getAllowlistManifest(ctx, schemaVersion) {
     fields: ['name', 'schemaVersion', 'sha256', 'encoding', 'size', 'created'],
     search: schemaVersion,
     searchFields: ['schemaVersion'],
-    sortField: 'created_at',
-    sortOrder: 'desc',
+    sortField: 'created',
+    sortOrder: 'asc',
   });
 
   return manifestResp;
