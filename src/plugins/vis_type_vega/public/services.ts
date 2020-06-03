@@ -48,6 +48,5 @@ export const [getMapsLegacyConfig, setMapsLegacyConfig] = createGetterSetter<Map
   'MapsLegacyConfig'
 );
 
-export const getEsShardTimeout = () => getInjectedVars().esShardTimeout;
 export const getEnableExternalUrls = () => getInjectedVars().enableExternalUrls;
 export const getEmsTileLayerId = () => getMapsLegacyConfig().emsTileLayerId;

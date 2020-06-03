@@ -78,7 +78,7 @@ import { fieldWildcardFilter } from '../../../../kibana_utils/public';
 import { META_FIELDS_SETTING, DOC_HIGHLIGHT_SETTING } from '../../../common';
 import { IIndexPattern, ISearchGeneric, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
-import { FetchOptions, RequestFailure, getSearchParams, handleResponse } from '../fetch';
+import { FetchOptions, RequestFailure, handleResponse, getSearchParamsFromRequest } from '../fetch';
 
 import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
@@ -205,13 +205,12 @@ export class SearchSource {
    */
   private fetch$(searchRequest: SearchRequest, signal?: AbortSignal) {
     const { search, injectedMetadata, uiSettings } = this.dependencies;
-    const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
-    const searchParams = getSearchParams(uiSettings, esShardTimeout);
-    const params = {
-      index: searchRequest.index.title || searchRequest.index,
-      body: searchRequest.body,
-      ...searchParams,
-    };
+
+    const params = getSearchParamsFromRequest(searchRequest, {
+      injectedMetadata,
+      uiSettings,
+    });
+
     return search({ params, indexType: searchRequest.indexType }, { signal }).pipe(
       map(({ rawResponse }) => handleResponse(searchRequest, rawResponse))
     );

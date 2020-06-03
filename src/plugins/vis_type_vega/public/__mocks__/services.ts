@@ -40,16 +40,13 @@ export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObject
 setSavedObjects(coreMock.createStart().savedObjects);
 
 export const [getInjectedVars, setInjectedVars] = createGetterSetter<{
-  esShardTimeout: number;
   enableExternalUrls: boolean;
   emsTileLayerId: unknown;
 }>('InjectedVars');
 setInjectedVars({
   emsTileLayerId: {},
   enableExternalUrls: true,
-  esShardTimeout: 10000,
 });
 
-export const getEsShardTimeout = () => getInjectedVars().esShardTimeout;
 export const getEnableExternalUrls = () => getInjectedVars().enableExternalUrls;
 export const getEmsTileLayerId = () => getInjectedVars().emsTileLayerId;

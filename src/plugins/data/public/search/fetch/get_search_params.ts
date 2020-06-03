@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient, CoreStart } from 'kibana/public';
+import { SearchRequest } from './types';
 
 const sessionId = Date.now();
 
@@ -51,4 +52,19 @@ export function getPreference(config: IUiSettingsClient) {
 
 export function getTimeout(esShardTimeout: number) {
   return esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined;
+}
+
+export function getSearchParamsFromRequest(
+  searchRequest: SearchRequest,
+  dependencies: { injectedMetadata: CoreStart['injectedMetadata']; uiSettings: IUiSettingsClient }
+) {
+  const { injectedMetadata, uiSettings } = dependencies;
+  const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
+  const searchParams = getSearchParams(uiSettings, esShardTimeout);
+
+  return {
+    index: searchRequest.index.title || searchRequest.index,
+    body: searchRequest.body,
+    ...searchParams,
+  };
 }
