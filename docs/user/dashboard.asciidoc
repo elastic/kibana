@@ -186,3 +186,5 @@ tools. To create a short URL, you must have write access to {kib}.
 
 To export the dashboard, go to *Management > Saved Objects*. For more information,
 see <<managing-saved-objects, Managing saved objects>>.
+
+include::{kib-repo-dir}/drilldowns/drilldowns.asciidoc[]
