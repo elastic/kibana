@@ -64,7 +64,7 @@ export function runPageLoadMetricsCli() {
         default: { username: 'elastic', password: 'changeme', debug: true },
         help: `
           --kibana-url       Url for Kibana we should connect to, can include login info
-          --head             Run pupeteer with graphical user interface
+          --head             Run puppeteer with graphical user interface
           --username         Set username, defaults to 'elastic'
           --password         Set password, defaults to 'changeme'
         `,
