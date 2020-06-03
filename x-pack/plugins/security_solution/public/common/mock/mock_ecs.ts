@@ -1281,7 +1281,7 @@ export const mockEcsData: Ecs[] = [
   },
 ];
 
-export const mockEcsDataWithSignal: Ecs = {
+export const mockEcsDataWithAlert: Ecs = {
   _id: '1',
   timestamp: '2018-11-05T19:03:25.937Z',
   host: {

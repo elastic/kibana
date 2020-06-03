@@ -16,7 +16,7 @@ export const PAGE_TITLE = i18n.translate(
 export const BACK_TO_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.backToRulesDescription',
   {
-    defaultMessage: 'Back to signal detection rules',
+    defaultMessage: 'Back to detection rules',
   }
 );
 

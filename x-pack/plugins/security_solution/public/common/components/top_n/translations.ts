@@ -18,6 +18,6 @@ export const RAW_EVENTS = i18n.translate('xpack.securitySolution.topN.rawEventsS
   defaultMessage: 'Raw events',
 });
 
-export const SIGNAL_EVENTS = i18n.translate('xpack.securitySolution.topN.signalEventsSelectLabel', {
-  defaultMessage: 'Signal events',
+export const ALERT_EVENTS = i18n.translate('xpack.securitySolution.topN.alertEventsSelectLabel', {
+  defaultMessage: 'Alert events',
 });

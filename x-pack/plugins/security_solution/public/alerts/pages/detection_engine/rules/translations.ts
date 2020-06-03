@@ -6,10 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BACK_TO_DETECTION_ENGINE = i18n.translate(
+export const BACK_TO_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.backOptionsHeader',
   {
-    defaultMessage: 'Back to detections',
+    defaultMessage: 'Back to alerts',
   }
 );
 
@@ -28,7 +28,7 @@ export const ADD_NEW_RULE = i18n.translate(
 );
 
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine.rules.pageTitle', {
-  defaultMessage: 'Signal detection rules',
+  defaultMessage: 'Detection rules',
 });
 
 export const ADD_PAGE_TITLE = i18n.translate(

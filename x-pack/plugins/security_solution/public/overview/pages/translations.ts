@@ -25,7 +25,7 @@ export const NEWS_FEED_TITLE = i18n.translate(
 );
 
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.overview.pageTitle', {
-  defaultMessage: 'SIEM',
+  defaultMessage: 'Security',
 });
 
 export const PAGE_SUBTITLE = i18n.translate('xpack.securitySolution.overview.pageSubtitle', {
@@ -46,8 +46,8 @@ export const RECENT_TIMELINES = i18n.translate(
   }
 );
 
-export const SIGNAL_COUNT = i18n.translate('xpack.securitySolution.overview.signalCountTitle', {
-  defaultMessage: 'Signal count',
+export const ALERT_COUNT = i18n.translate('xpack.securitySolution.overview.signalCountTitle', {
+  defaultMessage: 'Alert count',
 });
 
 export const TOP = (fieldName: string) =>

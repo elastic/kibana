@@ -9,16 +9,13 @@ import { i18n } from '@kbn/i18n';
 export const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.detectionsPageTitle',
   {
-    defaultMessage: 'Detections',
+    defaultMessage: 'Alerts',
   }
 );
 
-export const LAST_SIGNAL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.lastSignalTitle',
-  {
-    defaultMessage: 'Last signal',
-  }
-);
+export const LAST_ALERT = i18n.translate('xpack.securitySolution.detectionEngine.lastSignalTitle', {
+  defaultMessage: 'Last alert',
+});
 
 export const TOTAL_SIGNAL = i18n.translate(
   'xpack.securitySolution.detectionEngine.totalSignalTitle',
@@ -28,7 +25,7 @@ export const TOTAL_SIGNAL = i18n.translate(
 );
 
 export const SIGNAL = i18n.translate('xpack.securitySolution.detectionEngine.signalTitle', {
-  defaultMessage: 'Detected signals',
+  defaultMessage: 'Detected alerts',
 });
 
 export const ALERT = i18n.translate('xpack.securitySolution.detectionEngine.alertTitle', {
@@ -38,7 +35,7 @@ export const ALERT = i18n.translate('xpack.securitySolution.detectionEngine.aler
 export const BUTTON_MANAGE_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.buttonManageRules',
   {
-    defaultMessage: 'Manage signal detection rules',
+    defaultMessage: 'Manage detection rules',
   }
 );
 
