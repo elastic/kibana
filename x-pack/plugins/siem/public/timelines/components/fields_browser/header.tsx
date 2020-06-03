@@ -16,8 +16,8 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../common/containers/source';
-import { signalsHeaders } from '../../../alerts/components/signals/default_config';
-import { alertsHeaders } from '../../../common/components/alerts_viewer/default_headers';
+import { alertsHeaders } from '../../../alerts/components/alerts_table/default_config';
+import { alertsHeaders as externalAlertsHeaders } from '../../../common/components/alerts_viewer/default_headers';
 import { defaultHeaders as eventsDefaultHeaders } from '../../../common/components/events_viewer/default_headers';
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { OnUpdateColumns } from '../timeline/events';
@@ -104,10 +104,10 @@ const TitleRow = React.memo<{
   const handleResetColumns = useCallback(() => {
     let resetDefaultHeaders = defaultHeaders;
     if (isEventViewer) {
-      if (timelineTypeContext.documentType?.toLocaleLowerCase() === 'alerts') {
+      if (timelineTypeContext.documentType?.toLocaleLowerCase() === 'externalAlerts') {
+        resetDefaultHeaders = externalAlertsHeaders;
+      } else if (timelineTypeContext.documentType?.toLocaleLowerCase() === 'alerts') {
         resetDefaultHeaders = alertsHeaders;
-      } else if (timelineTypeContext.documentType?.toLocaleLowerCase() === 'signals') {
-        resetDefaultHeaders = signalsHeaders;
       } else {
         resetDefaultHeaders = eventsDefaultHeaders;
       }
