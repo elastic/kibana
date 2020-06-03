@@ -179,7 +179,7 @@ function getTimeseriesData(
       { name: 'timestamp', type: 'date' },
       { name: 'metric_0', type: 'number' },
     ],
-    rows: buckets.map(bucket => ({
+    rows: buckets.map((bucket) => ({
       timestamp: bucket.key as number,
       metric_0: getMetricValueFromBucket(type, bucket),
     })),

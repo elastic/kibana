@@ -10,8 +10,6 @@ import { first, last } from 'lodash';
 import {
   InfraSnapshotMetricInput,
   InfraNodeType,
-  InfraTimerangeInput,
-  InfraSnapshotGroupbyInput,
 } from '../../../../plugins/infra/server/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
