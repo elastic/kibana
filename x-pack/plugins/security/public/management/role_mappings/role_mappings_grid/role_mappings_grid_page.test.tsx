@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { ScopedHistory } from 'kibana/public';
+import { CoreStart, ScopedHistory } from 'kibana/public';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { RoleMappingsGridPage } from '.';
 import { SectionLoading, PermissionDenied, NoCompatibleRealms } from '../components';
@@ -20,10 +20,13 @@ import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 
 describe('RoleMappingsGridPage', () => {
-  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
-  const getUrlForApp = (appId: string, options?: { path: string }) => {
-    return appId + '/' + (options ? options.path : '');
-  };
+  let history: ScopedHistory;
+  let coreStart: CoreStart;
+
+  beforeEach(() => {
+    history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+    coreStart = coreMock.createStart();
+  });
 
   it('renders an empty prompt when no role mappings exist', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
@@ -41,7 +44,7 @@ describe('RoleMappingsGridPage', () => {
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
         history={history}
-        getUrlForApp={getUrlForApp}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
@@ -70,7 +73,7 @@ describe('RoleMappingsGridPage', () => {
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
         history={history}
-        getUrlForApp={getUrlForApp}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
@@ -107,7 +110,7 @@ describe('RoleMappingsGridPage', () => {
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
         history={history}
-        getUrlForApp={getUrlForApp}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
@@ -143,7 +146,7 @@ describe('RoleMappingsGridPage', () => {
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
         history={history}
-        getUrlForApp={getUrlForApp}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
     await nextTick();
@@ -151,9 +154,7 @@ describe('RoleMappingsGridPage', () => {
 
     const links = findTestSubject(wrapper, 'roleMappingRoles').find(EuiLink);
     expect(links).toHaveLength(1);
-    expect(links.at(0).props()).toMatchObject({
-      href: 'management/security/roles/edit/superuser',
-    });
+    expect(links.at(0).props().onClick).toBeDefined();
   });
 
   it('describes the number of mapped role templates', async () => {
@@ -179,7 +180,7 @@ describe('RoleMappingsGridPage', () => {
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
         history={history}
-        getUrlForApp={getUrlForApp}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
     await nextTick();
@@ -219,7 +220,7 @@ describe('RoleMappingsGridPage', () => {
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
         history={history}
-        getUrlForApp={getUrlForApp}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
     await nextTick();
@@ -282,7 +283,7 @@ describe('RoleMappingsGridPage', () => {
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
         history={history}
-        getUrlForApp={getUrlForApp}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
     await nextTick();

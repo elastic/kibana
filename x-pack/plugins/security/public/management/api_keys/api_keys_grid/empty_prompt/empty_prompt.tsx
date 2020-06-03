@@ -14,13 +14,13 @@ import { DocumentationLinksService } from '../../documentation_links';
 interface Props {
   isAdmin: boolean;
   docLinks: DocumentationLinksService;
-  getUrlForApp: ApplicationStart['getUrlForApp'];
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
 export const EmptyPrompt: React.FunctionComponent<Props> = ({
   isAdmin,
   docLinks,
-  getUrlForApp,
+  navigateToApp,
 }) => (
   <EuiEmptyPrompt
     iconType="managementApp"
@@ -60,7 +60,11 @@ export const EmptyPrompt: React.FunctionComponent<Props> = ({
       </Fragment>
     }
     actions={
-      <EuiButton type="primary" href={getUrlForApp('dev_tools')} data-test-subj="goToConsoleButton">
+      <EuiButton
+        type="primary"
+        onClick={() => navigateToApp('dev_tools')}
+        data-test-subj="goToConsoleButton"
+      >
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.emptyPromptConsoleButtonMessage"
           defaultMessage="Go to Console"

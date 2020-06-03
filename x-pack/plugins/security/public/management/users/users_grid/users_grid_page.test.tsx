@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { LocationDescriptorObject } from 'history';
-import { ScopedHistory } from 'kibana/public';
+import { CoreStart, ScopedHistory } from 'kibana/public';
 
 import { User } from '../../../../common/model';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
@@ -18,13 +18,16 @@ import { findTestSubject } from 'test_utils/find_test_subject';
 import { EuiBasicTable } from '@elastic/eui';
 
 describe('UsersGridPage', () => {
-  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
-  history.createHref = (location: LocationDescriptorObject) => {
-    return `${location.pathname}${location.search ? '?' + location.search : ''}`;
-  };
-  const getUrlForApp = (appId: string, options?: { path: string }) => {
-    return appId + '/' + (options ? options.path : '');
-  };
+  let history: ScopedHistory;
+  let coreStart: CoreStart;
+
+  beforeEach(() => {
+    history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+    history.createHref = (location: LocationDescriptorObject) => {
+      return `${location.pathname}${location.search ? '?' + location.search : ''}`;
+    };
+    coreStart = coreMock.createStart();
+  });
 
   it('renders the list of users', async () => {
     const apiClientMock = userAPIClientMock.create();
@@ -54,9 +57,9 @@ describe('UsersGridPage', () => {
       <UsersGridPage
         userAPIClient={apiClientMock}
         rolesAPIClient={rolesAPIClientMock.create()}
-        notifications={coreMock.createStart().notifications}
+        notifications={coreStart.notifications}
         history={history}
-        getUrlForApp={getUrlForApp}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
 
@@ -76,9 +79,9 @@ describe('UsersGridPage', () => {
       <UsersGridPage
         userAPIClient={apiClient}
         rolesAPIClient={rolesAPIClientMock.create()}
-        notifications={coreMock.createStart().notifications}
+        notifications={coreStart.notifications}
         history={history}
-        getUrlForApp={getUrlForApp}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
 
@@ -107,9 +110,9 @@ describe('UsersGridPage', () => {
       <UsersGridPage
         userAPIClient={apiClientMock}
         rolesAPIClient={rolesAPIClientMock.create()}
-        notifications={coreMock.createStart().notifications}
+        notifications={coreStart.notifications}
         history={history}
-        getUrlForApp={getUrlForApp}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
 
@@ -141,9 +144,9 @@ describe('UsersGridPage', () => {
       <UsersGridPage
         userAPIClient={apiClientMock}
         rolesAPIClient={rolesAPIClientMock.create()}
-        notifications={coreMock.createStart().notifications}
+        notifications={coreStart.notifications}
         history={history}
-        getUrlForApp={getUrlForApp}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
 
@@ -191,9 +194,9 @@ describe('UsersGridPage', () => {
       <UsersGridPage
         userAPIClient={apiClientMock}
         rolesAPIClient={roleAPIClientMock}
-        notifications={coreMock.createStart().notifications}
+        notifications={coreStart.notifications}
         history={history}
-        getUrlForApp={getUrlForApp}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
 
@@ -251,9 +254,9 @@ describe('UsersGridPage', () => {
       <UsersGridPage
         userAPIClient={apiClientMock}
         rolesAPIClient={roleAPIClientMock}
-        notifications={coreMock.createStart().notifications}
+        notifications={coreStart.notifications}
         history={history}
-        getUrlForApp={getUrlForApp}
+        navigateToApp={coreStart.application.navigateToApp}
       />
     );
 

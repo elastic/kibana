@@ -58,7 +58,7 @@ export const usersManagementApp = Object.freeze({
               userAPIClient={userAPIClient}
               rolesAPIClient={rolesAPIClient}
               history={history}
-              getUrlForApp={coreStart.application.getUrlForApp}
+              navigateToApp={coreStart.application.navigateToApp}
             />
           );
         };

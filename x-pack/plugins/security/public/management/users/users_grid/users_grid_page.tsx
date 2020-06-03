@@ -38,7 +38,7 @@ interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   notifications: NotificationsStart;
   history: ScopedHistory;
-  getUrlForApp: ApplicationStart['getUrlForApp'];
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
 interface State {
@@ -154,8 +154,7 @@ export class UsersGridPage extends Component<Props, State> {
               <RoleTableDisplay
                 role={roleDefinition}
                 key={rolename}
-                history={this.props.history}
-                getUrlForApp={this.props.getUrlForApp}
+                navigateToApp={this.props.navigateToApp}
               />
             );
           });

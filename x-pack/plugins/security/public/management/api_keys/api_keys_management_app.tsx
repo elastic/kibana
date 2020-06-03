@@ -48,7 +48,7 @@ export const apiKeysManagementApp = Object.freeze({
         render(
           <i18nStart.Context>
             <APIKeysGridPage
-              getUrlForApp={application.getUrlForApp}
+              navigateToApp={application.navigateToApp}
               notifications={notifications}
               docLinks={new DocumentationLinksService(docLinks)}
               apiKeysAPIClient={new APIKeysAPIClient(http)}

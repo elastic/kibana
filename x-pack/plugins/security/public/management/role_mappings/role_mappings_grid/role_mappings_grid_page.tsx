@@ -33,7 +33,7 @@ import {
   PermissionDenied,
   SectionLoading,
 } from '../components';
-import { EDIT_ROLES_PATH, getEditRoleMappingHref } from '../../management_urls';
+import { EDIT_ROLE_MAPPING_PATH, getEditRoleMappingHref } from '../../management_urls';
 import { DocumentationLinksService } from '../documentation_links';
 import { RoleMappingsAPIClient } from '../role_mappings_api_client';
 import { RoleTableDisplay } from '../../role_table_display';
@@ -47,7 +47,7 @@ interface Props {
   notifications: NotificationsStart;
   docLinks: DocumentationLinksService;
   history: ScopedHistory;
-  getUrlForApp: ApplicationStart['getUrlForApp'];
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
 interface State {
@@ -165,7 +165,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           <EuiPageContentHeaderSection>
             <EuiButton
               data-test-subj="createRoleMappingButton"
-              {...reactRouterNavigate(this.props.history, EDIT_ROLES_PATH)}
+              {...reactRouterNavigate(this.props.history, EDIT_ROLE_MAPPING_PATH)}
             >
               <FormattedMessage
                 id="xpack.security.management.roleMappings.createRoleMappingButtonLabel"
@@ -333,8 +333,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
               <RoleTableDisplay
                 role={role}
                 key={rolename}
-                history={this.props.history}
-                getUrlForApp={this.props.getUrlForApp}
+                navigateToApp={this.props.navigateToApp}
               />
             );
           });

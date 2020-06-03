@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const EDIT_ROLES_PATH = `/edit`;
-export const CLONE_ROLES_PATH = `/clone`;
-export const USERS_PATH = `../users`;
-export const EDIT_USERS_PATH = `${USERS_PATH}/edit`;
+export const EDIT_ROLE_MAPPING_PATH = `/edit`;
 
 export const getEditRoleMappingHref = (roleMappingName: string) =>
-  `${EDIT_ROLES_PATH}/${encodeURIComponent(roleMappingName)}`;
+  `${EDIT_ROLE_MAPPING_PATH}/${encodeURIComponent(roleMappingName)}`;

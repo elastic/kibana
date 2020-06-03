@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ScopedHistory } from 'kibana/public';
-import { EDIT_ROLES_PATH } from '../../../management_urls';
+import { EDIT_ROLE_MAPPING_PATH } from '../../../management_urls';
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface CreateRoleMappingButtonProps {
@@ -19,7 +19,7 @@ export const CreateRoleMappingButton = ({ history }: CreateRoleMappingButtonProp
   return (
     <EuiButton
       data-test-subj="createRoleMappingButton"
-      {...reactRouterNavigate(history, EDIT_ROLES_PATH)}
+      {...reactRouterNavigate(history, EDIT_ROLE_MAPPING_PATH)}
       fill
     >
       <FormattedMessage

@@ -40,7 +40,7 @@ interface Props {
   notifications: NotificationsStart;
   docLinks: DocumentationLinksService;
   apiKeysAPIClient: PublicMethodsOf<APIKeysAPIClient>;
-  getUrlForApp: ApplicationStart['getUrlForApp'];
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
 interface State {
@@ -141,7 +141,7 @@ export class APIKeysGridPage extends Component<Props, State> {
           <EmptyPrompt
             isAdmin={isAdmin}
             docLinks={this.props.docLinks}
-            getUrlForApp={this.props.getUrlForApp}
+            navigateToApp={this.props.navigateToApp}
           />
         </EuiPageContent>
       );

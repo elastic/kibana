@@ -62,7 +62,7 @@ export const roleMappingsManagementApp = Object.freeze({
               roleMappingsAPI={roleMappingsAPIClient}
               docLinks={dockLinksService}
               history={history}
-              getUrlForApp={coreStart.application.getUrlForApp}
+              navigateToApp={coreStart.application.navigateToApp}
             />
           );
         };
