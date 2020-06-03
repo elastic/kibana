@@ -1,12 +1,12 @@
 def onFailure(Map options = [:]) {
-  catchError {
-    def status = buildUtils.getBuildStatus()
-    if (status != "SUCCESS") {
+//  catchError {
+//    def status = buildUtils.getBuildStatus()
+//    if (status != "SUCCESS") {
       catchErrors {
         sendSlackMsg(options)
       }
-    }
-  }
+//    }
+//  }
 }
 
 def sendSlackMsg(Map params = [:]) {
