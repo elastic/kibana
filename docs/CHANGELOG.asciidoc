@@ -105,7 +105,8 @@ Platform::
 Security::
 * Allows IdP initiated SAML login with session containing expired token {pull}59686[#59686]
 SIEM::
-* Updates alert apiKey when the rule is updated {pull}67364[#67364]
+* Updates the alert apiKey when a rule is modified, so deactivating rule actions does not cause failures {pull}67364[#67364]
+* Corrects validation and error handling of PagerDuty action timestamps {pull}63954[#63954]
 * Fixes Network Map empty tooltip {pull}66828[#66828]
 * Changes find_statuses route HTTP method from GET to POST {pull}63508[#63508]
 Uptime::
