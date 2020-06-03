@@ -18,7 +18,7 @@ import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/m
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
-export type EventType = 'all' | 'raw' | 'signal';
+export type EventType = 'all' | 'raw' | 'alert';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
