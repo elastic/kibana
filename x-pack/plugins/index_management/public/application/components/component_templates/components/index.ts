@@ -5,3 +5,4 @@
  */
 
 export * from './create_button_popover';
+export * from './filter_list_button';

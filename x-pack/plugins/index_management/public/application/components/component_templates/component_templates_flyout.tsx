@@ -19,6 +19,7 @@ import {
 import { ComponentTemplateSerialized } from '../../../../common';
 import { CreateButtonPopOver } from './components';
 import { ComponentTemplatesContainer } from './component_templates_container';
+import { ComponentTemplates } from './component_templates';
 
 interface Props {
   onClose(): void;
@@ -50,7 +51,17 @@ export const ComponentTemplatesFlyout = ({ onClose }: Props) => {
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody data-test-subj="content">
-        <ComponentTemplatesContainer onComponents={onComponents} />
+        <ComponentTemplatesContainer onComponents={onComponents}>
+          {({ isLoading, components }) => {
+            return (
+              <ComponentTemplates
+                isLoading={isLoading}
+                components={components ?? []}
+                list={{ isSelectable: true }}
+              />
+            );
+          }}
+        </ComponentTemplatesContainer>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

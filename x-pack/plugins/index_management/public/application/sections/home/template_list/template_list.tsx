@@ -12,7 +12,6 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiText,
-  EuiSwitch,
   EuiFlexItem,
   EuiFlexGroup,
   EuiButton,
@@ -51,7 +50,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   let content;
 
-  const [showSystemTemplates, setShowSystemTemplates] = useState<boolean>(false);
+  const [showSystemTemplates] = useState<boolean>(false);
 
   // Filter out system index templates
   const filteredTemplates = useMemo(
@@ -121,7 +120,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   } else if (Array.isArray(templates) && templates.length > 0) {
     content = (
       <Fragment>
-        <EuiFlexGroup alignItems="center">
+        {/* <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={true}>
             <EuiTitle size="s">
               <EuiText color="subdued">
@@ -146,7 +145,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
               }
             />
           </EuiFlexItem>
-        </EuiFlexGroup>
+        </EuiFlexGroup> */}
         <EuiSpacer size="l" />
         <TemplateTable
           templates={showSystemTemplates ? templates : filteredTemplates}

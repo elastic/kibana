@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 
 import { ComponentTemplateDeserialized } from '../../../../common';
-import { CreateButtonPopOver } from './components';
+import { CreateButtonPopOver, FilterListButton } from './components';
 import { ComponentTemplatesList } from './component_templates_list';
 
 interface Props {
@@ -24,6 +24,11 @@ interface Props {
   emptyPrompt?: {
     text?: string | JSX.Element;
     showCreateButton?: boolean;
+  };
+  list?: {
+    isSelectable?: boolean;
+    isDragable?: boolean;
+    actions?: Array<{ label: string; handler: (component: any) => void }>;
   };
 }
 
@@ -37,8 +42,24 @@ export const ComponentTemplates = ({
   isLoading,
   components,
   emptyPrompt: { text, showCreateButton } = {},
+  list = {},
 }: Props) => {
   const [searchValue, setSearchValue] = useState('');
+
+  const [filters, setFilters] = useState({
+    settings: {
+      name: 'Index settings',
+      checked: 'on',
+    },
+    mappings: {
+      name: 'Mappings',
+      checked: 'on',
+    },
+    aliases: {
+      name: 'Aliases',
+      checked: 'on',
+    },
+  });
 
   const filteredComponents = useMemo<ComponentTemplateDeserialized[]>(() => {
     if (isLoading) {
@@ -105,23 +126,25 @@ export const ComponentTemplates = ({
   return (
     <>
       <div>
-        <EuiFlexGroup>
+        <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
             <EuiFieldSearch
+              style={{ width: '100%' }}
               placeholder="Search components"
               value={searchValue}
               onChange={(e) => {
                 setSearchValue(e.target.value);
               }}
               aria-label="Search components"
-              compressed
             />
           </EuiFlexItem>
-          <EuiFlexItem>View</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FilterListButton filters={filters as any} onChange={setFilters} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </div>
       <div>
-        <ComponentTemplatesList components={filteredComponents} />
+        <ComponentTemplatesList components={filteredComponents} {...list} />
       </div>
     </>
   );
