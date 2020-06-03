@@ -66,9 +66,8 @@ image::images/add-data-tutorials.png[Add Data tutorials]
 [[connect-to-es]]
 === Connect with {es} indices
 
-If you want to connect with existing {es} indices, you must
-create an index pattern. {kib} requires an index pattern to identify
-which indices you want to explore. When you add data with the File Visualizer, GeoJSON Upload,
+To visualize data in existing {es} indices, you
+create index patterns that match the names of the indices you want to explore. When you add data with the File Visualizer, GeoJSON Upload,
 or an Add Data tutorial, an index pattern is created for you.
 
 ////
