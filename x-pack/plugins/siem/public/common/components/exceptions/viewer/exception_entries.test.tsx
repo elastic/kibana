@@ -11,6 +11,7 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionEntries } from './exception_entries';
 import { getFormattedEntryMock } from '../mocks';
+import { getEmptyValue } from '../../empty_value';
 
 describe('ExceptionEntries', () => {
   test('it does NOT render the and badge if only one exception item entry exists', () => {
@@ -24,7 +25,7 @@ describe('ExceptionEntries', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find('AndOrBadge[data-test-subj="exceptionsViewerAndBadge"]')).toHaveLength(0);
+    expect(wrapper.find('[data-test-subj="exceptionsViewerAndBadge"]')).toHaveLength(0);
   });
 
   test('it renders the and badge if more than one exception item exists', () => {
@@ -38,7 +39,7 @@ describe('ExceptionEntries', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find('AndOrBadge[data-test-subj="exceptionsViewerAndBadge"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="exceptionsViewerAndBadge"]')).toHaveLength(1);
   });
 
   test('it invokes "handlEdit" when edit button clicked', () => {
@@ -91,30 +92,30 @@ describe('ExceptionEntries', () => {
     );
 
     const parentField = wrapper
-      .find('EuiTableRowCell[data-test-subj="exceptionFieldNameCell"] .euiTableCellContent')
+      .find('[data-test-subj="exceptionFieldNameCell"] .euiTableCellContent')
       .at(0);
     const parentOperator = wrapper
-      .find('EuiTableRowCell[data-test-subj="exceptionFieldOperatorCell"] .euiTableCellContent')
+      .find('[data-test-subj="exceptionFieldOperatorCell"] .euiTableCellContent')
       .at(0);
     const parentValue = wrapper
-      .find('EuiTableRowCell[data-test-subj="exceptionFieldValueCell"] .euiTableCellContent')
+      .find('[data-test-subj="exceptionFieldValueCell"] .euiTableCellContent')
       .at(0);
 
     const nestedField = wrapper
-      .find('EuiTableRowCell[data-test-subj="exceptionFieldNameCell"] .euiTableCellContent')
+      .find('[data-test-subj="exceptionFieldNameCell"] .euiTableCellContent')
       .at(1);
     const nestedOperator = wrapper
-      .find('EuiTableRowCell[data-test-subj="exceptionFieldOperatorCell"] .euiTableCellContent')
+      .find('[data-test-subj="exceptionFieldOperatorCell"] .euiTableCellContent')
       .at(1);
     const nestedValue = wrapper
-      .find('EuiTableRowCell[data-test-subj="exceptionFieldValueCell"] .euiTableCellContent')
+      .find('[data-test-subj="exceptionFieldValueCell"] .euiTableCellContent')
       .at(1);
 
     expect(parentField.text()).toEqual('host.name');
-    expect(parentOperator.text()).toEqual('—');
-    expect(parentValue.text()).toEqual('—');
+    expect(parentOperator.text()).toEqual(getEmptyValue());
+    expect(parentValue.text()).toEqual(getEmptyValue());
 
-    expect(nestedField.exists('EuiToolTip')).toBeTruthy();
+    expect(nestedField.exists('.euiToolTipAnchor')).toBeTruthy();
     expect(nestedField.text()).toEqual('host.name');
     expect(nestedOperator.text()).toEqual('is');
     expect(nestedValue.text()).toEqual('some name');
@@ -132,16 +133,16 @@ describe('ExceptionEntries', () => {
     );
 
     const field = wrapper
-      .find('EuiTableRowCell[data-test-subj="exceptionFieldNameCell"] .euiTableCellContent')
+      .find('[data-test-subj="exceptionFieldNameCell"] .euiTableCellContent')
       .at(0);
     const operator = wrapper
-      .find('EuiTableRowCell[data-test-subj="exceptionFieldOperatorCell"] .euiTableCellContent')
+      .find('[data-test-subj="exceptionFieldOperatorCell"] .euiTableCellContent')
       .at(0);
     const value = wrapper
-      .find('EuiTableRowCell[data-test-subj="exceptionFieldValueCell"] .euiTableCellContent')
+      .find('[data-test-subj="exceptionFieldValueCell"] .euiTableCellContent')
       .at(0);
 
-    expect(field.exists('EuiToolTip')).toBeFalsy();
+    expect(field.exists('.euiToolTipAnchor')).toBeFalsy();
     expect(field.text()).toEqual('host.name');
     expect(operator.text()).toEqual('is');
     expect(value.text()).toEqual('some name');

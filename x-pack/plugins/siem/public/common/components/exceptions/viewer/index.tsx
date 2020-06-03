@@ -14,29 +14,31 @@ import { getFormattedEntries, getFormattedComments } from '../helpers';
 import { FormattedEntry, ExceptionListItemSchema } from '../types';
 
 const MyFlexItem = styled(EuiFlexItem)`
-  &.comments--show {
-    padding: 16px;
-    border-top: 1px solid #d3dae6;
-  }
+    &.comments--show {
+      padding: ${({ theme }) => theme.eui.euiSize};
+      border-top: ${({ theme }) => `${theme.eui.euiBorderThin}`}
+
 `;
 
 interface ExceptionItemProps {
   exceptionItem: ExceptionListItemSchema;
+  commentsAccordionId: string;
   handleDelete: ({ id }: { id: string }) => void;
   handleEdit: (item: ExceptionListItemSchema) => void;
 }
 
 const ExceptionItemComponent = ({
   exceptionItem,
+  commentsAccordionId,
   handleDelete,
   handleEdit,
-}: ExceptionItemProps) => {
+}: ExceptionItemProps): JSX.Element => {
   const [entryItems, setEntryItems] = useState<FormattedEntry[]>([]);
-  const [showComments, setShowComments] = useState<boolean>(false);
+  const [showComments, setShowComments] = useState(false);
 
   useEffect(() => {
-    const formattedEntries = getFormattedEntries(exceptionItem.entries ?? []);
-    setEntryItems([...formattedEntries]);
+    const formattedEntries = getFormattedEntries(exceptionItem.entries);
+    setEntryItems(formattedEntries);
   }, [exceptionItem.entries]);
 
   const onDelete = useCallback(() => {
@@ -52,7 +54,7 @@ const ExceptionItemComponent = ({
   }, [setShowComments, showComments]);
 
   const formattedComments = useMemo(() => {
-    return getFormattedComments(exceptionItem.comments ?? []);
+    return getFormattedComments(exceptionItem.comments);
   }, [exceptionItem]);
 
   return (
@@ -70,7 +72,7 @@ const ExceptionItemComponent = ({
         </EuiFlexItem>
         <MyFlexItem className={showComments ? 'comments--show' : ''}>
           <EuiAccordion
-            id="accordion--comments"
+            id={commentsAccordionId}
             arrowDisplay="none"
             forceState={showComments ? 'open' : 'closed'}
             data-test-subj="exceptionsViewerCommentAccordion"

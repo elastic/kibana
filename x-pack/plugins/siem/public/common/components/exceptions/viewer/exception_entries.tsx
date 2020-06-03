@@ -10,34 +10,32 @@ import styled, { css } from 'styled-components';
 import { transparentize } from 'polished';
 
 import { AndOrBadge } from '../../and_or_badge';
-import { getEmptyValue } from '../helpers';
+import { getEmptyValue } from '../../empty_value';
 import * as i18n from '../translations';
 import { FormattedEntry } from '../types';
 
 const EntriesDetails = styled(EuiFlexItem)`
-  padding: 16px;
+  padding: ${({ theme }) => theme.eui.euiSize};
 `;
 
 const StyledEditButton = styled(EuiButton)`
   ${({ theme }) => css`
     background-color: ${transparentize(0.9, theme.eui.euiColorPrimary)};
-    width: 111px;
     border: none;
-    font-weight: 600;
+    font-weight: ${theme.eui.euiFontWeightSemiBold};
   `}
 `;
 
 const StyledRemoveButton = styled(EuiButton)`
   ${({ theme }) => css`
     background-color: ${transparentize(0.9, theme.eui.euiColorDanger)};
-    width: 111px;
     border: none;
-    font-weight: 600;
+    font-weight: ${theme.eui.euiFontWeightSemiBold};
   `}
 `;
 
 const AndOrBadgeContainer = styled(EuiFlexItem)`
-  padding-top: 32px;
+  padding-top: ${({ theme }) => theme.eui.euiSizeXL};
 `;
 
 interface ExceptionEntriesComponentProps {
@@ -50,7 +48,7 @@ const ExceptionEntriesComponent = ({
   entries,
   handleDelete,
   handleEdit,
-}: ExceptionEntriesComponentProps) => {
+}: ExceptionEntriesComponentProps): JSX.Element => {
   const columns = useMemo(
     () => [
       {
@@ -61,7 +59,7 @@ const ExceptionEntriesComponent = ({
         'data-test-subj': 'exceptionFieldNameCell',
         width: '30%',
         render: (value: string | null, data: FormattedEntry) => {
-          if (value !== null && data.isNested) {
+          if (value != null && data.isNested) {
             return (
               <>
                 <EuiIconTip type="grabHorizontal" size="m" />
@@ -114,7 +112,7 @@ const ExceptionEntriesComponent = ({
           <EuiFlexGroup direction="row" gutterSize="none">
             {entries.length > 1 && (
               <AndOrBadgeContainer grow={false}>
-                <AndOrBadge type="and" includeAntenas data-test-subj="exceptionsViewerAndBadge" />
+                <AndOrBadge type="and" includeAntennas data-test-subj="exceptionsViewerAndBadge" />
               </AndOrBadgeContainer>
             )}
             <EuiFlexItem grow={1}>

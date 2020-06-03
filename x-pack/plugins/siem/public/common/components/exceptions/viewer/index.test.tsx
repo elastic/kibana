@@ -19,6 +19,7 @@ describe('ExceptionItem', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          commentsAccordionId={'accordion--comments'}
           handleDelete={jest.fn()}
           handleEdit={jest.fn()}
           exceptionItem={exceptionItem}
@@ -37,6 +38,7 @@ describe('ExceptionItem', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          commentsAccordionId={'accordion--comments'}
           handleDelete={jest.fn()}
           handleEdit={mockHandleEdit}
           exceptionItem={exceptionItem}
@@ -57,6 +59,7 @@ describe('ExceptionItem', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          commentsAccordionId={'accordion--comments'}
           handleDelete={mockHandleDelete}
           handleEdit={jest.fn()}
           exceptionItem={exceptionItem}
@@ -77,6 +80,7 @@ describe('ExceptionItem', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          commentsAccordionId={'accordion--comments'}
           handleDelete={mockHandleDelete}
           handleEdit={jest.fn()}
           exceptionItem={exceptionItem}
@@ -94,6 +98,7 @@ describe('ExceptionItem', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
+          commentsAccordionId={'accordion--comments'}
           handleDelete={mockHandleDelete}
           handleEdit={jest.fn()}
           exceptionItem={exceptionItem}
@@ -102,7 +107,7 @@ describe('ExceptionItem', () => {
     );
 
     const commentsBtn = wrapper
-      .find('EuiButtonEmpty[data-test-subj="exceptionsViewerItemCommentsBtn"]')
+      .find('.euiButtonEmpty[data-test-subj="exceptionsViewerItemCommentsBtn"]')
       .at(0);
     commentsBtn.simulate('click');
 

@@ -10,7 +10,7 @@ import styled, { css } from 'styled-components';
 
 import * as i18n from './translations';
 
-const AndOrBadgeAntena = styled(EuiFlexItem)`
+const AndOrBadgeAntenna = styled(EuiFlexItem)`
   ${({ theme }) => css`
     background: ${theme.eui.euiColorLightShade};
     position: relative;
@@ -72,28 +72,28 @@ export type AndOr = 'and' | 'or';
 
 /** Displays AND / OR in a round badge */
 // Ref: https://github.com/elastic/eui/issues/1655
-export const AndOrBadge = React.memo<{ type: AndOr; includeAntenas?: boolean }>(
-  ({ type, includeAntenas = false }) => {
+export const AndOrBadge = React.memo<{ type: AndOr; includeAntennas?: boolean }>(
+  ({ type, includeAntennas = false }) => {
     const getBadge = () => (
       <RoundedBadge data-test-subj="and-or-badge" color="hollow">
         {type === 'and' ? i18n.AND : i18n.OR}
       </RoundedBadge>
     );
 
-    const getBadgeWithAntenas = () => (
+    const getBadgeWithAntennas = () => (
       <EuiFlexGroup
         className="andBadgeContainer"
         gutterSize="none"
         direction="column"
         alignItems="center"
       >
-        <AndOrBadgeAntena
+        <AndOrBadgeAntenna
           className="topAndOrBadgeAntenna"
           data-test-subj="and-or-badge-bar"
           grow={1}
         />
         <EuiFlexItemWrapper grow={false}>{getBadge()}</EuiFlexItemWrapper>
-        <AndOrBadgeAntena
+        <AndOrBadgeAntenna
           className="bottomAndOrBadgeAntenna"
           data-test-subj="and-or-badge-bar"
           grow={1}
@@ -101,7 +101,7 @@ export const AndOrBadge = React.memo<{ type: AndOr; includeAntenas?: boolean }>(
       </EuiFlexGroup>
     );
 
-    return includeAntenas ? getBadgeWithAntenas() : getBadge();
+    return includeAntennas ? getBadgeWithAntennas() : getBadge();
   }
 );
 

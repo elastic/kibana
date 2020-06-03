@@ -8,11 +8,20 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import moment from 'moment-timezone';
 
 import { ExceptionDetails } from './exception_details';
 import { getExceptionItemMock } from '../mocks';
 
 describe('ExceptionDetails', () => {
+  beforeEach(() => {
+    moment.tz.setDefault('UTC');
+  });
+
+  afterEach(() => {
+    moment.tz.setDefault('Browser');
+  });
+
   test('it renders no comments button if no comments exist', () => {
     const exceptionItem = getExceptionItemMock();
     exceptionItem.comments = [];
@@ -27,9 +36,7 @@ describe('ExceptionDetails', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper.find('EuiButtonEmpty[data-test-subj="exceptionsViewerItemCommentsBtn"]')
-    ).toHaveLength(0);
+    expect(wrapper.find('[data-test-subj="exceptionsViewerItemCommentsBtn"]')).toHaveLength(0);
   });
 
   test('it renders comments button if comments exist', () => {
@@ -46,7 +53,7 @@ describe('ExceptionDetails', () => {
     );
 
     expect(
-      wrapper.find('EuiButtonEmpty[data-test-subj="exceptionsViewerItemCommentsBtn"]')
+      wrapper.find('.euiButtonEmpty[data-test-subj="exceptionsViewerItemCommentsBtn"]')
     ).toHaveLength(1);
   });
 
@@ -63,9 +70,9 @@ describe('ExceptionDetails', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper.find('EuiButtonEmpty[data-test-subj="exceptionsViewerItemCommentsBtn"]').at(0).text()
-    ).toEqual('Show (1) Comment');
+    expect(wrapper.find('[data-test-subj="exceptionsViewerItemCommentsBtn"]').at(0).text()).toEqual(
+      'Show (1) Comment'
+    );
   });
 
   test('it renders comments plural if more than one', () => {
@@ -92,9 +99,9 @@ describe('ExceptionDetails', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper.find('EuiButtonEmpty[data-test-subj="exceptionsViewerItemCommentsBtn"]').at(0).text()
-    ).toEqual('Show (2) Comments');
+    expect(wrapper.find('[data-test-subj="exceptionsViewerItemCommentsBtn"]').at(0).text()).toEqual(
+      'Show (2) Comments'
+    );
   });
 
   test('it renders comments show text if "showComments" is false', () => {
@@ -109,9 +116,9 @@ describe('ExceptionDetails', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper.find('EuiButtonEmpty[data-test-subj="exceptionsViewerItemCommentsBtn"]').at(0).text()
-    ).toEqual('Show (1) Comment');
+    expect(wrapper.find('[data-test-subj="exceptionsViewerItemCommentsBtn"]').at(0).text()).toEqual(
+      'Show (1) Comment'
+    );
   });
 
   test('it renders comments hide text if "showComments" is true', () => {
@@ -126,9 +133,9 @@ describe('ExceptionDetails', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper.find('EuiButtonEmpty[data-test-subj="exceptionsViewerItemCommentsBtn"]').at(0).text()
-    ).toEqual('Hide (1) Comment');
+    expect(wrapper.find('[data-test-subj="exceptionsViewerItemCommentsBtn"]').at(0).text()).toEqual(
+      'Hide (1) Comment'
+    );
   });
 
   test('it invokes "onCommentsClick" when comments button clicked', () => {
@@ -143,9 +150,7 @@ describe('ExceptionDetails', () => {
         />
       </ThemeProvider>
     );
-    const commentsBtn = wrapper
-      .find('EuiButtonEmpty[data-test-subj="exceptionsViewerItemCommentsBtn"]')
-      .at(0);
+    const commentsBtn = wrapper.find('[data-test-subj="exceptionsViewerItemCommentsBtn"]').at(0);
     commentsBtn.simulate('click');
 
     expect(mockOnCommentsClick).toHaveBeenCalledTimes(1);

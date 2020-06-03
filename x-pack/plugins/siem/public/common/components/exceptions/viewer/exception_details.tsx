@@ -16,7 +16,7 @@ import * as i18n from '../translations';
 const StyledExceptionDetails = styled(EuiFlexItem)`
   ${({ theme }) => css`
     background-color: ${transparentize(0.95, theme.eui.euiColorPrimary)};
-    padding: 16px;
+    padding: ${theme.eui.euiSize};
 
     .euiDescriptionList__title.listTitle--width {
       width: 40%;
@@ -36,12 +36,12 @@ const ExceptionDetailsComponent = ({
   showComments: boolean;
   exceptionItem: ExceptionListItemSchema;
   onCommentsClick: () => void;
-}) => {
+}): JSX.Element => {
   const descriptionList = useMemo(() => getDescriptionListContent(exceptionItem), [exceptionItem]);
 
   const commentsSection = useMemo(() => {
     const { comments } = exceptionItem;
-    if (comments !== null && comments && comments.length > 0) {
+    if (comments.length > 0) {
       return (
         <EuiButtonEmpty
           onClick={onCommentsClick}

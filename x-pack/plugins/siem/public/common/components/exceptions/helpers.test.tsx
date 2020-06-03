@@ -335,23 +335,23 @@ describe('Exception helpers', () => {
     test('it returns null if no operating system tag specified', () => {
       const result = getOperatingSystems(['some tag', 'some other tag']);
 
-      expect(result).toBeNull();
+      expect(result).toEqual('');
     });
 
     test('it returns null if operating system tag malformed', () => {
       const result = getOperatingSystems(['some tag', 'jibberos:mac,windows', 'some other tag']);
 
-      expect(result).toBeNull();
-    });
-
-    test('it returns formatted operating systems if specified in tags', () => {
-      const result = getOperatingSystems(['some tag', 'os:mac,windows', 'some other tag']);
-
-      expect(result).toEqual('Mac, Windows');
+      expect(result).toEqual('');
     });
 
     test('it returns formatted operating systems if space included in os tag', () => {
-      const result = getOperatingSystems(['some tag', 'os: mac, windows', 'some other tag']);
+      const result = getOperatingSystems(['some tag', 'os: mac', 'some other tag']);
+
+      expect(result).toEqual('Mac');
+    });
+
+    test('it returns formatted operating systems if multiple os tags specified', () => {
+      const result = getOperatingSystems(['some tag', 'os: mac', 'some other tag', 'os:windows']);
 
       expect(result).toEqual('Mac, Windows');
     });

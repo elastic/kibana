@@ -29,7 +29,7 @@ storiesOf('components/AndOrBadge', module)
     <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: true })}>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <AndOrBadge type="and" includeAntenas />
+          <AndOrBadge type="and" includeAntennas />
         </EuiFlexItem>
         <EuiFlexItem>
           <p>{sampleText}</p>

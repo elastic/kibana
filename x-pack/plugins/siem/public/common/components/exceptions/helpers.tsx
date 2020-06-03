@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiText, EuiCommentProps, EuiAvatar } from '@elastic/eui';
-import { flatten, capitalize } from 'lodash';
+import { capitalize } from 'lodash';
 import moment from 'moment';
 
 import * as i18n from './translations';
@@ -21,8 +21,6 @@ import {
   ExceptionListItemSchema,
 } from './types';
 import { EXCEPTION_OPERATORS, isOperator } from './operators';
-
-export const getEmptyValue = () => '—';
 
 /**
  * Returns the operator type, may not need this if using io-ts types
@@ -95,7 +93,7 @@ export const getFormattedEntries = (
     }
   });
 
-  return flatten(formattedEntries);
+  return formattedEntries.flat();
 };
 
 /**
@@ -122,17 +120,13 @@ export const formatEntry = ({
   };
 };
 
-export const getOperatingSystems = (tags: string[]): string | null => {
-  const [includesOs, osMatch] = getTagsInclude({ tags, regex: /(?<=\b)(os:[^;]*)(?=\b)/ });
-  if (includesOs && osMatch !== null) {
-    const os = osMatch.split(':')[1];
-    const items = os.split(',').map((item) => {
-      return capitalize(item.trim());
-    });
-    return items.join(', ');
-  } else {
-    return null;
-  }
+export const getOperatingSystems = (tags: string[]): string => {
+  const osMatches = tags
+    .filter((tag) => tag.startsWith('os:'))
+    .map((os) => capitalize(os.substring(3).trim()))
+    .join(', ');
+
+  return osMatches;
 };
 
 export const getTagsInclude = ({
@@ -143,8 +137,8 @@ export const getTagsInclude = ({
   regex: RegExp;
 }): [boolean, string | null] => {
   const matches: string[] | null = tags.join(';').match(regex);
-  const match = matches !== null ? matches[1] : null;
-  return [matches !== null, match];
+  const match = matches != null ? matches[1] : null;
+  return [matches != null, match];
 };
 
 /**
@@ -175,7 +169,7 @@ export const getDescriptionListContent = (
   ];
 
   return details.reduce<DescriptionListItem[]>((acc, { value, title }) => {
-    if (value !== null && value) {
+    if (value != null && value.trim() !== '') {
       return [...acc, { title, description: value }];
     } else {
       return acc;
