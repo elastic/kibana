@@ -17,6 +17,8 @@ kibanaPipeline(timeoutMinutes: 240) {
           kibanaPipeline.bash("""
             echo '### params.NOTIFY_ON_FAILURE: true'
           """, '### Handle Notify on Failure')
+
+          sendSlackMsg()
         }
 
       }
@@ -33,4 +35,31 @@ def handleIngestion(timestamp) {
   kibanaCoverage.uploadCoverageStaticSite(timestamp)
 }
 
+def sendSlackMsg(Map params = [:]) {
+  def config = [
+    channel: '#kibana-qa',
+    title: "*<${env.BUILD_URL}|${slackNotifications.getDefaultDisplayName()}>*",
+    message: slackNotifications.getDefaultDisplayName(),
+    color: 'danger',
+    icon: ':jenkins:',
+    username: 'Kibana QA',
+    context: slackNotifications.getDefaultContext(),
+  ] + params
+
+  def title = "${slackNotifications.getStatusIcon()} ${config.title}"
+
+  def blocks = [slackNotifications.markdownBlock(title)]
+  slackNotifications.getFailedBuildBlocks().each { blocks << it }
+  blocks << slackNotifications.dividerBlock()
+  blocks << config.context
+
+  slackSend(
+    channel: config.channel,
+    username: config.username,
+    iconEmoji: config.icon,
+    color: config.color,
+    message: config.message,
+    blocks: blocks
+  )
+}
 
