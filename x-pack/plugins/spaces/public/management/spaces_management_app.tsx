@@ -32,7 +32,7 @@ export const spacesManagementApp = Object.freeze({
       title: i18n.translate('xpack.spaces.displayName', {
         defaultMessage: 'Spaces',
       }),
-      async mount({ basePath, element, setBreadcrumbs, history }) {
+      async mount({ element, setBreadcrumbs, history }) {
         const [
           { notifications, i18n: i18nStart, application },
           { features },
