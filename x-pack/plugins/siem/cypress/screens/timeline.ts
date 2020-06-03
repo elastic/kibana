@@ -8,6 +8,11 @@ export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 
+export const DRAGGABLE_HEADER =
+  '[data-test-subj="headers-group"] [data-test-subj="draggable-header"]';
+
+export const HEADERS_GROUP = '[data-test-subj="headers-group"]';
+
 export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="header-text-_id"]';
 
 export const ID_FIELD = '[data-test-subj="timeline"] [data-test-subj="field-name-_id"]';
@@ -20,6 +25,10 @@ export const SEARCH_OR_FILTER_CONTAINER =
   '[data-test-subj="timeline-search-or-filter-search-container"]';
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
+
+export const TIMELINE = (id: string) => {
+  return `[data-test-subj="title-${id}"]`;
+};
 
 export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
 

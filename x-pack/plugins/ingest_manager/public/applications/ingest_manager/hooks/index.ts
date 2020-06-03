@@ -10,6 +10,7 @@ export { useConfig, ConfigContext } from './use_config';
 export { useSetupDeps, useStartDeps, DepsContext } from './use_deps';
 export { useBreadcrumbs } from './use_breadcrumbs';
 export { useLink } from './use_link';
+export { useKibanaLink } from './use_kibana_link';
 export { usePackageIconType, UsePackageIconType } from './use_package_icon_type';
 export { usePagination, Pagination } from './use_pagination';
 export { useDebounce } from './use_debounce';

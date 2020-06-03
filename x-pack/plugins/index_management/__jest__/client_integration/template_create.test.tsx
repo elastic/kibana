@@ -59,7 +59,8 @@ const KEYWORD_MAPPING_FIELD = {
   type: 'keyword',
 };
 
-describe('<TemplateCreate />', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/67833
+describe.skip('<TemplateCreate />', () => {
   let testBed: TemplateFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();

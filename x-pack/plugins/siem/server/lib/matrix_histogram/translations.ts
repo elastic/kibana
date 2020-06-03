@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const ALL_OTHERS = i18n.translate(
-  'xpack.siem.detectionEngine.signals.histogram.allOthersGroupingLabel',
+  'xpack.siem.detectionEngine.alerts.histogram.allOthersGroupingLabel',
   {
     defaultMessage: 'All others',
   }

@@ -17,7 +17,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should retrieve the index pattern for metadata', async () => {
       const { body } = await supertest.get('/api/endpoint/index_pattern/metadata').expect(200);
-      expect(body.indexPattern).to.eql('metrics-endpoint-*');
+      expect(body.indexPattern).to.eql('metrics-endpoint.metadata-*');
+    });
+
+    it('should retrieve the index pattern for policy', async () => {
+      const { body } = await supertest.get('/api/endpoint/index_pattern/policy').expect(200);
+      expect(body.indexPattern).to.eql('metrics-endpoint.policy-*');
     });
 
     it('should not retrieve the index pattern for an invalid key', async () => {

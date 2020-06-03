@@ -48,6 +48,7 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
           comment,
           entries,
           item_id: itemId,
+          namespace_type: namespaceType,
           tags,
         } = request.body;
         const exceptionLists = getExceptionListClient(context);
@@ -60,7 +61,7 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
           itemId,
           meta,
           name,
-          namespaceType: 'single', // TODO: Bubble this up
+          namespaceType,
           tags,
           type,
         });

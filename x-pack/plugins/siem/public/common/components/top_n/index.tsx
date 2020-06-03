@@ -94,14 +94,14 @@ const StatefulTopNComponent: React.FC<Props> = ({
   const kibana = useKibana();
 
   //  Regarding data from useTimelineTypeContext:
-  //  * `documentType` (e.g. 'signals') may only be populated in some views,
-  //    e.g. the `Signals` view on the `Detections` page.
+  //  * `documentType` (e.g. 'alerts') may only be populated in some views,
+  //    e.g. the `Alerts` view on the `Detections` page.
   //  * `id` (`timelineId`) may only be populated when we are rendered in the
   //    context of the active timeline.
-  //  * `indexToAdd`, which enables the signals index to be appended to
+  //  * `indexToAdd`, which enables the alerts index to be appended to
   //    the `indexPattern` returned by `WithSource`, may only be populated when
   //    this component is rendered in the context of the active timeline. This
-  //    behavior enables the 'All events' view by appending the signals index
+  //    behavior enables the 'All events' view by appending the alerts index
   //    to the index pattern.
   const { documentType, id: timelineId, indexToAdd } = useTimelineTypeContext();
 
@@ -135,7 +135,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
               }
               data-test-subj="top-n"
               defaultView={
-                documentType?.toLocaleLowerCase() === 'signals' ? 'signal' : options[0].value
+                documentType?.toLocaleLowerCase() === 'alerts' ? 'alert' : options[0].value
               }
               deleteQuery={timelineId === ACTIVE_TIMELINE_REDUX_ID ? undefined : deleteQuery}
               field={field}
