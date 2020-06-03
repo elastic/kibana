@@ -12,10 +12,10 @@ import {
 } from 'reselect';
 import { encode, decode } from 'rison-node';
 
+import { Immutable } from '../../../common/endpoint/types';
 import { Query, TimeRange, Filter } from '../../../../../../src/plugins/data/public';
 
 import {
-  Immutable,
   AlertingIndexGetQueryInput,
   AlertListState,
   AlertingIndexUIQueryParams,
