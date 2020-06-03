@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 
 import { disableTemplate } from '../../../../../common/constants';
-import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
+import { TimelineStatus } from '../../../../../common/types/timeline';
 
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -27,8 +27,8 @@ import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal
 import { OpenTimelineModal } from '../../open_timeline/open_timeline_modal';
 
 import * as i18n from './translations';
-import { Description, NotesButton, NewCase } from './helpers';
-import { CreateTimelineBtn } from './create_timeline_btn';
+import { Description, NotesButton, NewCase, NewTimeline } from './helpers';
+import { NewTemplateTimeline } from './new_template_timeline';
 
 export const PropertiesRightStyle = styled(EuiFlexGroup)`
   margin-right: 5px;
@@ -136,11 +136,10 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
             <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
               {capabilitiesCanUserCRUD && (
                 <EuiFlexItem grow={false}>
-                  <CreateTimelineBtn
-                    onClosePopover={onClosePopover}
+                  <NewTimeline
                     timelineId={timelineId}
-                    timelineType={TimelineType.default}
                     title={i18n.NEW_TIMELINE}
+                    closeGearMenu={onClosePopover}
                   />
                 </EuiFlexItem>
               )}
@@ -151,10 +150,9 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
                */}
               {!disableTemplate && capabilitiesCanUserCRUD && (
                 <EuiFlexItem grow={false}>
-                  <CreateTimelineBtn
-                    onClosePopover={onClosePopover}
+                  <NewTemplateTimeline
+                    closeGearMenu={onClosePopover}
                     timelineId={timelineId}
-                    timelineType={TimelineType.template}
                     title={i18n.NEW_TEMPLATE_TIMELINE}
                   />
                 </EuiFlexItem>

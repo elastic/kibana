@@ -15,14 +15,14 @@ import { HeaderPage } from '../../common/components/header_page';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
+
 import { StatefulOpenTimeline } from '../components/open_timeline';
+import { NEW_TEMPLATE_TIMELINE } from '../components/timeline/properties/translations';
+import { NewTemplateTimeline } from '../components/timeline/properties/new_template_timeline';
+import { NewTimeline } from '../components/timeline/properties/helpers';
+
 import * as i18n from './translations';
-import {
-  NEW_TIMELINE,
-  NEW_TEMPLATE_TIMELINE,
-} from '../components/timeline/properties/translations';
-import { CreateTimelineBtn } from '../components/timeline/properties/create_timeline_btn';
-import { TimelineType } from '../../../common/types/timeline';
+
 const TimelinesContainer = styled.div`
   width: 100%;
 `;
@@ -62,24 +62,16 @@ export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => 
               )}
             </EuiFlexItem>
             <EuiFlexItem>
-              {capabilitiesCanUserCRUD && (
-                <CreateTimelineBtn
-                  outline={true}
-                  timelineType={TimelineType.default}
-                  title={NEW_TIMELINE}
-                  data-test-subj="create-default-btn"
-                />
-              )}
+              {capabilitiesCanUserCRUD && <NewTimeline timelineId="timeline-1" outline={true} />}
             </EuiFlexItem>
             {/**
              * CreateTemplateTimelineBtn
              * Remove the comment here to enable CreateTemplateTimelineBtn
              */}
-            {!disableTemplate && capabilitiesCanUserCRUD && (
+            {!disableTemplate && (
               <EuiFlexItem>
-                <CreateTimelineBtn
+                <NewTemplateTimeline
                   outline={true}
-                  timelineType={TimelineType.template}
                   title={NEW_TEMPLATE_TIMELINE}
                   data-test-subj="create-template-btn"
                 />

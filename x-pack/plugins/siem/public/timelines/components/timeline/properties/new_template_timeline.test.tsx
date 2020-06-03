@@ -14,8 +14,7 @@ import {
 } from '../../../../common/mock';
 import { createStore, State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
-import { TimelineType } from '../../../../../common/types/timeline';
-import { CreateTimelineBtn } from './create_timeline_btn';
+import { NewTemplateTimeline } from './new_template_timeline';
 
 jest.mock('../../../../common/lib/kibana', () => {
   return {
@@ -23,7 +22,7 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-describe('CreateTimelineBtn', () => {
+describe('NewTemplateTimeline', () => {
   const state: State = mockGlobalState;
   const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
   const mockClosePopover = jest.fn();
@@ -50,45 +49,21 @@ describe('CreateTimelineBtn', () => {
 
       wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <CreateTimelineBtn
-            onClosePopover={mockClosePopover}
-            timelineType={TimelineType.default}
-            title={mockTitle}
-          />
+          <NewTemplateTimeline outline={true} closeGearMenu={mockClosePopover} title={mockTitle} />
         </ReduxStoreProvider>
       );
     });
 
-    test('render with onClosePopover', () => {
-      expect(wrapper.find('[data-test-subj="new-timeline-btn"]').prop('onClosePopover')).toEqual(
-        mockClosePopover
-      );
-    });
-
-    test('render with showTimeline', () => {
-      expect(wrapper.find('[data-test-subj="new-timeline-btn"]').prop('showTimeline')).toBeTruthy();
-    });
-
-    test('render with createTimeline', () => {
+    test('render with iconType', () => {
       expect(
-        wrapper.find('[data-test-subj="new-timeline-btn"]').prop('createTimeline')
+        wrapper.find('[data-test-subj="timeline-new-with-border"]').first().prop('iconType')
+      ).toEqual('plusInCircle');
+    });
+
+    test('render with onClick', () => {
+      expect(
+        wrapper.find('[data-test-subj="timeline-new-with-border"]').first().prop('onClick')
       ).toBeTruthy();
-    });
-
-    test('render with default timelineId', () => {
-      expect(wrapper.find('[data-test-subj="new-timeline-btn"]').prop('timelineId')).toEqual(
-        'timeline-1'
-      );
-    });
-
-    test('render with timelineType', () => {
-      expect(wrapper.find('[data-test-subj="new-timeline-btn"]').prop('timelineType')).toEqual(
-        TimelineType.default
-      );
-    });
-
-    test('render with title', () => {
-      expect(wrapper.find('[data-test-subj="new-timeline-btn"]').prop('title')).toEqual(mockTitle);
     });
   });
 
@@ -108,11 +83,7 @@ describe('CreateTimelineBtn', () => {
 
       wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <CreateTimelineBtn
-            onClosePopover={mockClosePopover}
-            timelineType={TimelineType.default}
-            title={mockTitle}
-          />
+          <NewTemplateTimeline outline={true} closeGearMenu={mockClosePopover} title={mockTitle} />
         </ReduxStoreProvider>
       );
     });
@@ -122,7 +93,7 @@ describe('CreateTimelineBtn', () => {
     });
 
     test('no render', () => {
-      expect(wrapper.find('[data-test-subj="new-timeline-btn"]').exists()).not.toBeTruthy();
+      expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').exists()).toBeFalsy();
     });
   });
 });

@@ -18,22 +18,20 @@ import { createStore, State } from '../../../../common/store';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
 
-jest.mock('../../../../common/lib/kibana', () => {
-  return {
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        application: {
-          capabilities: {
-            siem: {
-              crud: true,
-            },
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      application: {
+        capabilities: {
+          siem: {
+            crud: true,
           },
         },
       },
-    }),
-    useUiSetting$: jest.fn().mockReturnValue([]),
-  };
-});
+    },
+  }),
+  useUiSetting$: jest.fn().mockReturnValue([]),
+}));
 
 jest.mock('../../../../common/components/utils', () => {
   return {
@@ -58,6 +56,10 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(),
   };
 });
+
+jest.mock('./use_create_timeline', () => ({
+  useCreateTimelineButton: jest.fn().mockReturnValue({ getButton: jest.fn() }),
+}));
 
 describe('Properties', () => {
   const usersViewing = ['elastic'];
@@ -321,7 +323,6 @@ describe('Properties', () => {
 
   test('it renders a description on the left when the width is at least as wide as the threshold', () => {
     const description = 'strange';
-    // mockedWidth = showDescriptionThreshold;
 
     (useThrottledResizeObserver as jest.Mock).mockReset();
     (useThrottledResizeObserver as jest.Mock).mockReturnValue({ width: showDescriptionThreshold });

@@ -3,103 +3,83 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { shallow, ShallowWrapper, mount } from 'enzyme';
 import React from 'react';
+import { ShallowWrapper, mount, shallow } from 'enzyme';
 import { NewTimeline, NewTimelineProps } from './helpers';
-import { TimelineType } from '../../../../../common/types/timeline';
+import { useCreateTimelineButton } from './use_create_timeline';
+
+jest.mock('./use_create_timeline', () => ({
+  useCreateTimelineButton: jest.fn(),
+}));
+
+jest.mock('../../../../common/lib/kibana', () => {
+  return {
+    useKibana: jest.fn().mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            siem: {
+              crud: true,
+            },
+          },
+        },
+      },
+    }),
+  };
+});
 
 describe('NewTimeline', () => {
-  let wrapper: ShallowWrapper;
-  let onClickWrapper;
+  const mockGetButton = jest.fn();
 
   const props: NewTimelineProps = {
-    createTimeline: jest.fn(),
-    onClosePopover: jest.fn(),
-    outline: false,
-    showTimeline: jest.fn(),
+    closeGearMenu: jest.fn(),
     timelineId: 'mockTimelineId',
-    timelineType: TimelineType.default,
     title: 'mockTitle',
   };
 
   describe('render', () => {
     describe('default', () => {
+      let wrapper: ShallowWrapper;
+
       beforeAll(() => {
+        (useCreateTimelineButton as jest.Mock).mockReturnValue({ getButton: mockGetButton });
         wrapper = shallow(<NewTimeline {...props} />);
       });
 
-      test('it should render EuiButtonEmpty by default', () => {
-        expect(wrapper.find('EuiButtonEmpty').exists()).toBeTruthy();
+      afterAll(() => {
+        jest.clearAllMocks();
       });
 
-      test('it should not render EuiButton', () => {
-        expect(wrapper.find('EuiButton').exists()).not.toBeTruthy();
+      test('it should not render outline', () => {
+        expect(mockGetButton.mock.calls[0][0].outline).toEqual(false);
       });
 
-      test('it should render plusInCircle icon', () => {
-        expect(wrapper.prop('iconType')).toEqual('plusInCircle');
-      });
-
-      test('it should render text as color', () => {
-        expect(wrapper.prop('color')).toEqual('text');
+      test('it should render title', () => {
+        expect(mockGetButton.mock.calls[0][0].title).toEqual(props.title);
       });
     });
 
     describe('show outline', () => {
       beforeAll(() => {
+        (useCreateTimelineButton as jest.Mock).mockReturnValue({ getButton: mockGetButton });
+
         const enableOutline = {
           ...props,
           outline: true,
         };
-        wrapper = shallow(<NewTimeline {...enableOutline} />);
+        mount(<NewTimeline {...enableOutline} />);
       });
 
-      test('it should not render EuiButtonEmpty by default', () => {
-        expect(wrapper.find('EuiButtonEmpty').exists()).not.toBeTruthy();
+      afterAll(() => {
+        jest.clearAllMocks();
       });
 
-      test('it should render EuiButton', () => {
-        expect(wrapper.find('EuiButton').exists()).toBeTruthy();
+      test('it should  render outline', () => {
+        expect(mockGetButton.mock.calls[0][0].outline).toEqual(true);
       });
 
-      test('it should render plusInCircle icon', () => {
-        expect(wrapper.prop('iconType')).toEqual('plusInCircle');
-      });
-
-      test('it should render with filled background', () => {
-        expect(wrapper.prop('fill')).toBeTruthy();
-      });
-    });
-  });
-
-  describe('onClick', () => {
-    beforeAll(() => {
-      jest.clearAllMocks();
-      onClickWrapper = mount(<NewTimeline {...props} />);
-      onClickWrapper.find('EuiButtonEmpty').simulate('click');
-    });
-
-    afterAll(() => {
-      jest.clearAllMocks();
-    });
-
-    test('should call createTimeline', () => {
-      expect(props.createTimeline).toHaveBeenCalledWith({
-        id: props.timelineId,
-        show: true,
-        timelineType: props.timelineType,
-      });
-    });
-
-    test('should call onClosePopover', () => {
-      expect(props.onClosePopover).toHaveBeenCalled();
-    });
-
-    test('should call showTimeline', () => {
-      expect(props.showTimeline).toHaveBeenCalledWith({
-        id: props.timelineId,
-        show: true,
+      test('it should render title', () => {
+        expect(mockGetButton.mock.calls[0][0].title).toEqual(props.title);
       });
     });
   });

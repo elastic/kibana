@@ -146,4 +146,4 @@ export const showAllOthersBucket: string[] = [
  * CreateTemplateTimelineBtn
  * Remove the comment here to enable template timeline
  */
-export const disableTemplate = true;
+export const disableTemplate = false;

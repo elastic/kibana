@@ -10,6 +10,7 @@ import React from 'react';
 import { PropertiesRight } from './properties_right';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineStatus } from '../../../../../common/types/timeline';
+import { disableTemplate } from '../../../../../common/constants';
 
 jest.mock('../../../../common/lib/kibana', () => {
   return {
@@ -18,11 +19,9 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('./create_timeline_btn', () => {
+jest.mock('./new_template_timeline', () => {
   return {
-    CreateTimelineBtn: jest.fn(({ timelineType }) => (
-      <div data-test-subj={`create-${timelineType}-btn`} />
-    )),
+    NewTemplateTimeline: jest.fn(() => <div data-test-subj="create-template-btn" />),
   };
 });
 
@@ -31,6 +30,7 @@ jest.mock('./helpers', () => {
     Description: jest.fn().mockReturnValue(<div data-test-subj="Description" />),
     NotesButton: jest.fn().mockReturnValue(<div data-test-subj="NotesButton" />),
     NewCase: jest.fn().mockReturnValue(<div data-test-subj="NewCase" />),
+    NewTimeline: jest.fn().mockReturnValue(<div data-test-subj="create-default-btn" />),
   };
 });
 
@@ -103,7 +103,9 @@ describe('Properties Right', () => {
        * Remove the comment here to enable CreateTemplateTimelineBtn
        */
       test('it renders no create template timelin btn', () => {
-        expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).not.toBeTruthy();
+        expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toEqual(
+          !disableTemplate
+        );
       });
 
       test('it renders create attach timeline to a case btn', () => {
