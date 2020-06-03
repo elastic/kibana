@@ -41,8 +41,8 @@ function joinPath(pathA: string, pathB: string) {
   }`;
 }
 
-export function createUrl(path: string, options: NavigationOptions) {
-  const baseUrl = Url.parse(options.appConfig.url);
+export function createUrl(path: string, url: string) {
+  const baseUrl = Url.parse(url);
   return Url.format({
     protocol: baseUrl.protocol,
     hostname: baseUrl.hostname,
@@ -58,7 +58,7 @@ async function loginToKibana(
 ) {
   log.debug(`log in to the app..`);
   const page = await browser.newPage();
-  const loginUrl = createUrl('/login', options);
+  const loginUrl = createUrl('/login', options.appConfig.url);
   await page.goto(loginUrl, {
     waitUntil: 'networkidle0',
   });
@@ -109,7 +109,7 @@ export async function navigateToApps(log: ToolingLog, options: NavigationOptions
         getRequestData(event.requestId).dataLength += event.dataLength;
       });
 
-      const url = createUrl(app.path, options);
+      const url = createUrl(app.path, options.appConfig.url);
       log.debug(`goto ${url}`);
       await page.goto(url, {
         waitUntil: 'networkidle0',
