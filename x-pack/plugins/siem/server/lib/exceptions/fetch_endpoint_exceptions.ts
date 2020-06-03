@@ -30,7 +30,8 @@ export interface EntryEntry {
 }
 
 export async function GetFullEndpointExceptionList(
-  eClient: ExceptionListClient
+  eClient: ExceptionListClient,
+  os: string // TODO: make type
 ): Promise<EndpointExceptionList> {
   const exceptions: EndpointExceptionList = { exceptions_list: [] };
   let numResponses = 0;
@@ -40,7 +41,7 @@ export async function GetFullEndpointExceptionList(
     const response = await eClient.findExceptionListItem({
       listId: 'endpoint_list', // TODO
       namespaceType: 'single', // ?
-      filter: undefined,
+      filter: `exception-list-item.attributes.sensor_os:${os}`,
       perPage: 100,
       page,
       sortField: undefined,

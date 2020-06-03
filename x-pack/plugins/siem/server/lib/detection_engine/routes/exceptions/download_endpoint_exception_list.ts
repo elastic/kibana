@@ -41,8 +41,11 @@ async function handleEndpointExceptionDownload(context, req, res) {
       searchFields: ['sha256'],
     });
     if (resp.total > 0) {
-      return res.ok({ body: resp.saved_objects[0] });
-    } else if (resp.total > 1) {
+      return res.ok({
+        body: resp.saved_objects[0].body,
+        headers: { 'content-encoding': 'xz' },
+      });
+    } else if (res.total > 1) {
       context.logger.warn(`Duplicate allowlist entries found: ${req.params.sha256}`);
     } else {
       return res.notFound();
