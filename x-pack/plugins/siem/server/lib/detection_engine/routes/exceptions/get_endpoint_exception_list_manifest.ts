@@ -5,6 +5,7 @@
  */
 
 import { IRouter } from '../../../../../../../../src/core/server';
+import { ArtifactConstants } from '../../../exceptions';
 
 const allowlistBaseRoute: string = '/api/endpoint/allowlist';
 
@@ -56,11 +57,11 @@ async function getAllowlistManifest(ctx, schemaVersion) {
   const soClient = ctx.core.savedObjects.client;
 
   const manifestResp = soClient.find({
-    type: 'siem-exceptions-artifact', // TODO: use exported const
+    type: ArtifactConstants.SAVED_OBJECT_TYPE,
     fields: ['name', 'schemaVersion', 'sha256', 'encoding', 'size', 'created'],
     search: schemaVersion,
     searchFields: ['schemaVersion'],
-    sortField: 'updated_at',
+    sortField: 'created_at',
     sortOrder: 'desc',
   });
 

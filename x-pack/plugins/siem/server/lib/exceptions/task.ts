@@ -20,7 +20,7 @@ const PackagerTaskConstants = {
 };
 
 export const ArtifactConstants = {
-  GLOBAL_ALLOWLIST_NAME: 'global-allowlist',
+  GLOBAL_ALLOWLIST_NAME: 'endpoint-allowlist',
   SAVED_OBJECT_TYPE: 'siem-exceptions-artifact',
   SUPPORTED_OPERATING_SYSTEMS: ['windows'],
   SUPPORTED_SCHEMA_VERSIONS: ['1.0.0'],
@@ -70,7 +70,7 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
           encoding: 'xz',
           created: Date.now(),
           body: compressedExceptions.toString(),
-          size: Buffer.from(exceptions).byteLength,
+          size: Buffer.from(JSON.stringify(exceptions)).byteLength,
         };
 
         const resp = await soClient.find({
