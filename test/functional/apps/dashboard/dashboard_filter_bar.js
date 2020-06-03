@@ -186,5 +186,37 @@ export default function ({ getService, getPageObjects }) {
         expect(filterCount).to.equal(1);
       });
     });
+
+    describe('bad filters are loaded properly', function () {
+      before(async () => {
+        await filterBar.ensureFieldEditorModalIsClosed();
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.loadSavedDashboard('dashboard with bad filters');
+      });
+
+      it('filter with non-existent index pattern renders in error mode', async function () {
+        const hasBadFieldFilter = await filterBar.hasFilter('name', 'error', false);
+        expect(hasBadFieldFilter).to.be(true);
+      });
+
+      it('filter with non-existent field renders in error mode', async function () {
+        const hasBadFieldFilter = await filterBar.hasFilter('baad-field', 'error', false);
+        expect(hasBadFieldFilter).to.be(true);
+      });
+
+      it('filter from unrelated index pattern is still applicable if field name is found', async function () {
+        const hasUnrelatedIndexPatternFilterPhrase = await filterBar.hasFilter(
+          '@timestamp',
+          '123',
+          true
+        );
+        expect(hasUnrelatedIndexPatternFilterPhrase).to.be(true);
+      });
+
+      it('filter from unrelated index pattern is rendred as a warning if field name is not found', async function () {
+        const hasWarningFieldFilter = await filterBar.hasFilter('extension', 'warn', true);
+        expect(hasWarningFieldFilter).to.be(true);
+      });
+    });
   });
 }

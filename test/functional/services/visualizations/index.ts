@@ -18,3 +18,4 @@
  */
 
 export { PieChartProvider } from './pie_chart';
+export { ElasticChartProvider } from './elastic_chart';

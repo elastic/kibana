@@ -565,7 +565,6 @@
     "data.filter.filterBar.filterItemBadgeIconAriaLabel": "删除",
     "data.filter.filterBar.includeFilterButtonLabel": "包括结果",
     "data.filter.filterBar.indexPatternSelectPlaceholder": "选择索引模式",
-    "data.filter.filterBar.labelErrorMessage": "无法显示筛选",
     "data.filter.filterBar.labelErrorText": "错误",
     "data.filter.filterBar.moreFilterActionsMessage": "筛选：{innerText}。选择以获取更多筛选操作。",
     "data.filter.filterBar.negatedFilterPrefix": "非 ",
