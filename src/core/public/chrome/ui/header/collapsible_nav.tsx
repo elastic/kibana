@@ -145,7 +145,6 @@ export function CollapsibleNav({
               style={{ maxHeight: '40vh' }}
             >
               <EuiListGroup
-                aria-label={customNavLink.title}
                 listItems={[
                   createEuiListItem({
                     link: customNavLink,
