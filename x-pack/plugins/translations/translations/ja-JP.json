@@ -12670,8 +12670,6 @@
     "xpack.reporting.panelContent.successfullyQueuedReportNotificationTitle": "{objectType} のレポートキュー",
     "xpack.reporting.panelContent.whatCanBeExportedWarningDescription": "初めに変更内容を保存してください",
     "xpack.reporting.panelContent.whatCanBeExportedWarningTitle": "保存された {objectType} のみエクスポートできます",
-    "xpack.reporting.pdfFooterImageDescription": "PDF のフッターに使用するカスタム画像です",
-    "xpack.reporting.pdfFooterImageLabel": "PDF フッター画像",
     "xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage": "レポートには、スプレッドシートアプリケーションで式と解釈される可能性のある文字が含まれています。",
     "xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle": "レポートには式{reportObjectType} '{reportObjectTitle}'が含まれている場合があります",
     "xpack.reporting.publicNotifier.downloadReportButtonLabel": "レポートをダウンロード",
