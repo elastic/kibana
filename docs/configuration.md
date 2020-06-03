@@ -194,7 +194,6 @@ Default: `https://api.github.com/graphql`
 
 CLI: `--github-api-base-url-v4 "https://github-enterprise.acme-inc.com/api"`
 
-
 Config:
 
 ```json
@@ -288,7 +287,7 @@ Config:
 
 Labels that will be added to the source (original) pull request. This can be useful if you, at a later time, want to find the PRs that were already backported.
 
-CLI: `--source-labels was-backported`
+CLI: `--source-pr-labels was-backported`
 
 Config:
 

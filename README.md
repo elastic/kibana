@@ -9,8 +9,6 @@ A simple CLI tool that automates the process of backporting commits on a GitHub 
 
 ![backport-demo](https://user-images.githubusercontent.com/209966/80993576-95766380-8e3b-11ea-9efd-b35eb2e6a9ec.gif)
 
-
-
 ## Requirements
 
 - Node 10 or higher
@@ -21,8 +19,6 @@ A simple CLI tool that automates the process of backporting commits on a GitHub 
 ```sh
 npm install -g backport
 ```
-
-
 
 After installation you should update the [global config](https://github.com/sqren/backport/blob/master/docs/configuration.md#global-config-backportconfigjson) in `~/.backport/config.json` with your Github username and a Github access token. See the [documentation](https://github.com/sqren/backport/blob/master/docs/configuration.md#accesstoken-required) for how the access token is generated.
 
@@ -58,31 +54,32 @@ See [configuration.md](https://github.com/sqren/backport/blob/master/docs/config
 
 ### CLI options
 
-| Option           | Description                                            | Default        | Type    |
-| ---------------- | ------------------------------------------------------ | -------------- | ------- |
-| --accesstoken    | Github access token                                    |                | string  |
-| --all            | Show commits from other than me                        | false          | boolean |
-| --author         | Filter commits by author                               | _Current user_ | string  |
-| --branch         | Target branch to backport to                           |                | string  |
-| --dry-run        | Perform backport without pushing to Github             | false          | boolean |
-| --editor         | Editor (eg. `code`) to open and solve conflicts        |                | string  |
-| --fork           | Create backports in fork (true) or origin repo (false) | true           | boolean |
-| --labels         | Pull request labels                                    |                | string  |
-| --mainline       | Parent id of merge commit                              | 1              | number  |
-| --max-number     | Number of commits to choose from                       | 10             | number  |
-| --multiple       | Select multiple commits/branches                       | false          | boolean |
-| --path           | Only list commits touching files under a specific path |                | string  |
-| --pr             | Pull request to backport                               |                | number  |
-| --pr-filter      | List commits from PRs filtered by a given query        |                | string  |
-| --pr-description | Pull request description suffix                        |                | string  |
-| --pr-title       | Pull request title pattern                             |                | string  |
-| --reset-author   | Set yourself as commit author                          |                | boolean |
-| --sha            | Sha of commit to backport                              |                | string  |
-| --source-branch  | The branch to source commits from                      |                | string  |
-| --upstream       | Name of organization and repository                    |                | string  |
-| --username       | Github username                                        |                | string  |
-| --help           | Show help                                              |                |         |
-| -v, --version    | Show version number                                    |                |         |
+| Option             | Description                                            | Default        | Type    |
+| ------------------ | ------------------------------------------------------ | -------------- | ------- |
+| --accesstoken      | Github access token                                    |                | string  |
+| --all              | Show commits from other than me                        | false          | boolean |
+| --author           | Filter commits by author                               | _Current user_ | string  |
+| --branch           | Target branch to backport to                           |                | string  |
+| --dry-run          | Perform backport without pushing to Github             | false          | boolean |
+| --editor           | Editor (eg. `code`) to open and solve conflicts        |                | string  |
+| --fork             | Create backports in fork (true) or origin repo (false) | true           | boolean |
+| --mainline         | Parent id of merge commit                              | 1              | number  |
+| --max-number       | Number of commits to choose from                       | 10             | number  |
+| --multiple         | Select multiple commits/branches                       | false          | boolean |
+| --path             | Only list commits touching files under a specific path |                | string  |
+| --pr               | Pull request to backport                               |                | number  |
+| --pr-description   | Pull request description suffix                        |                | string  |
+| --pr-filter        | List commits from PRs filtered by a given query        |                | string  |
+| --pr-title         | Pull request title pattern                             |                | string  |
+| --reset-author     | Set yourself as commit author                          |                | boolean |
+| --sha              | Sha of commit to backport                              |                | string  |
+| --source-branch    | The branch to source commits from                      |                | string  |
+| --source-pr-labels | Labels added to the source PR                          |                | string  |
+| --target-pr-labels | Labels added to the target PR                          |                | string  |
+| --upstream         | Name of organization and repository                    |                | string  |
+| --username         | Github username                                        |                | string  |
+| --help             | Show help                                              |                |         |
+| -v, --version      | Show version number                                    |                |         |
 
 The CLI options will override the [configuration options](https://github.com/sqren/backport/blob/master/docs/configuration.md).
 
