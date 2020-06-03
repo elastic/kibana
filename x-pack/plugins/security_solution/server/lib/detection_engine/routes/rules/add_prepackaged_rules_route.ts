@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  PrePackagedRulesSchema,
+  prePackagedRulesSchema,
+} from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 import { getIndexExists } from '../../index/get_index_exists';
@@ -14,10 +18,6 @@ import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
-import {
-  PrePackagedRulesSchema,
-  prePackagedRulesSchema,
-} from '../schemas/response/prepackaged_rules_schema';
 import { validate } from './validate';
 
 export const addPrepackedRulesRoute = (router: IRouter) => {

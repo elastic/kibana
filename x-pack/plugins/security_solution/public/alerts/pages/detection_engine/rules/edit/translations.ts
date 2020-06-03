@@ -6,17 +6,26 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine.editRule.pageTitle', {
-  defaultMessage: 'Edit rule settings',
-});
+export const PAGE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.editRule.pageTitle',
+  {
+    defaultMessage: 'Edit rule settings',
+  }
+);
 
-export const CANCEL = i18n.translate('xpack.securitySolution.detectionEngine.editRule.cancelTitle', {
-  defaultMessage: 'Cancel',
-});
+export const CANCEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.editRule.cancelTitle',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
 
-export const SAVE_CHANGES = i18n.translate('xpack.securitySolution.detectionEngine.editRule.saveChangeTitle', {
-  defaultMessage: 'Save changes',
-});
+export const SAVE_CHANGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.editRule.saveChangeTitle',
+  {
+    defaultMessage: 'Save changes',
+  }
+);
 
 export const SORRY_ERRORS = i18n.translate(
   'xpack.securitySolution.detectionEngine.editRule.errorMsgDescription',
@@ -25,9 +34,12 @@ export const SORRY_ERRORS = i18n.translate(
   }
 );
 
-export const BACK_TO = i18n.translate('xpack.securitySolution.detectionEngine.editRule.backToDescription', {
-  defaultMessage: 'Back to',
-});
+export const BACK_TO = i18n.translate(
+  'xpack.securitySolution.detectionEngine.editRule.backToDescription',
+  {
+    defaultMessage: 'Back to',
+  }
+);
 
 export const SUCCESSFULLY_SAVED_RULE = (ruleName: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.update.successfullySavedRuleTitle', {

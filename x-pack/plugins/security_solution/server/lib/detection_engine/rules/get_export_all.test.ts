@@ -9,7 +9,7 @@ import {
   getFindResultWithSingleHit,
   FindHit,
 } from '../routes/__mocks__/request_responses';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { getExportAll } from './get_export_all';
 import { unSetFeatureFlagsForTestsOnly, setFeatureFlagsForTestsOnly } from '../feature_flags';
 

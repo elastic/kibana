@@ -6,9 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.pageTitle', {
-  defaultMessage: 'Rule details',
-});
+export const PAGE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.pageTitle',
+  {
+    defaultMessage: 'Rule details',
+  }
+);
 
 export const BACK_TO_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.backToRulesDescription',
@@ -31,9 +34,12 @@ export const ACTIVATE_RULE = i18n.translate(
   }
 );
 
-export const UNKNOWN = i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.unknownDescription', {
-  defaultMessage: 'Unknown',
-});
+export const UNKNOWN = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.unknownDescription',
+  {
+    defaultMessage: 'Unknown',
+  }
+);
 
 export const ERROR_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.errorCalloutTitle',

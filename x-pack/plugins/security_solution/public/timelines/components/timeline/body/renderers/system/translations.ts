@@ -39,13 +39,19 @@ export const ACCEPTED_A_CONNECTION_VIA = i18n.translate(
   }
 );
 
-export const ATTEMPTED_LOGIN = i18n.translate('xpack.securitySolution.system.attemptedLoginDescription', {
-  defaultMessage: 'attempted a login via',
-});
+export const ATTEMPTED_LOGIN = i18n.translate(
+  'xpack.securitySolution.system.attemptedLoginDescription',
+  {
+    defaultMessage: 'attempted a login via',
+  }
+);
 
-export const DISCONNECTED_VIA = i18n.translate('xpack.securitySolution.system.disconnectedViaDescription', {
-  defaultMessage: 'disconnected via',
-});
+export const DISCONNECTED_VIA = i18n.translate(
+  'xpack.securitySolution.system.disconnectedViaDescription',
+  {
+    defaultMessage: 'disconnected via',
+  }
+);
 
 export const LOGGED_OUT = i18n.translate('xpack.securitySolution.system.loggedOutDescription', {
   defaultMessage: 'logged out via',
@@ -55,17 +61,26 @@ export const USING = i18n.translate('xpack.securitySolution.system.usingDescript
   defaultMessage: 'using',
 });
 
-export const PROCESS_STARTED = i18n.translate('xpack.securitySolution.system.processStartedDescription', {
-  defaultMessage: 'started process',
-});
+export const PROCESS_STARTED = i18n.translate(
+  'xpack.securitySolution.system.processStartedDescription',
+  {
+    defaultMessage: 'started process',
+  }
+);
 
-export const PROCESS_STOPPED = i18n.translate('xpack.securitySolution.system.processStoppedDescription', {
-  defaultMessage: 'stopped process',
-});
+export const PROCESS_STOPPED = i18n.translate(
+  'xpack.securitySolution.system.processStoppedDescription',
+  {
+    defaultMessage: 'stopped process',
+  }
+);
 
-export const TERMINATED_PROCESS = i18n.translate('xpack.securitySolution.system.terminatedProcessDescription', {
-  defaultMessage: 'terminated process',
-});
+export const TERMINATED_PROCESS = i18n.translate(
+  'xpack.securitySolution.system.terminatedProcessDescription',
+  {
+    defaultMessage: 'terminated process',
+  }
+);
 
 export const CREATED_FILE = i18n.translate('xpack.securitySolution.system.createdFileDescription', {
   defaultMessage: 'created a file',
@@ -75,29 +90,47 @@ export const DELETED_FILE = i18n.translate('xpack.securitySolution.system.delete
   defaultMessage: 'deleted a file',
 });
 
-export const EXISTING_PROCESS = i18n.translate('xpack.securitySolution.system.existingProcessDescription', {
-  defaultMessage: 'is running process',
-});
+export const EXISTING_PROCESS = i18n.translate(
+  'xpack.securitySolution.system.existingProcessDescription',
+  {
+    defaultMessage: 'is running process',
+  }
+);
 
-export const SOCKET_OPENED = i18n.translate('xpack.securitySolution.system.socketOpenedDescription', {
-  defaultMessage: 'opened a socket with',
-});
+export const SOCKET_OPENED = i18n.translate(
+  'xpack.securitySolution.system.socketOpenedDescription',
+  {
+    defaultMessage: 'opened a socket with',
+  }
+);
 
-export const SOCKET_CLOSED = i18n.translate('xpack.securitySolution.system.socketClosedDescription', {
-  defaultMessage: 'closed a socket with',
-});
+export const SOCKET_CLOSED = i18n.translate(
+  'xpack.securitySolution.system.socketClosedDescription',
+  {
+    defaultMessage: 'closed a socket with',
+  }
+);
 
-export const EXISTING_USER = i18n.translate('xpack.securitySolution.system.existingUserDescription', {
-  defaultMessage: 'is an existing user',
-});
+export const EXISTING_USER = i18n.translate(
+  'xpack.securitySolution.system.existingUserDescription',
+  {
+    defaultMessage: 'is an existing user',
+  }
+);
 
-export const EXISTING_SOCKET = i18n.translate('xpack.securitySolution.system.existingSocketDescription', {
-  defaultMessage: 'is using an existing socket from',
-});
+export const EXISTING_SOCKET = i18n.translate(
+  'xpack.securitySolution.system.existingSocketDescription',
+  {
+    defaultMessage: 'is using an existing socket from',
+  }
+);
 
-export const EXISTING_PACKAGE = i18n.translate('xpack.securitySolution.system.existingPackageDescription', {
-  defaultMessage: 'is using an existing package',
-});
+export const EXISTING_PACKAGE = i18n.translate(
+  'xpack.securitySolution.system.existingPackageDescription',
+  {
+    defaultMessage: 'is using an existing package',
+  }
+);
 
 export const INVALID = i18n.translate('xpack.securitySolution.system.invalidDescription', {
   defaultMessage: 'attempted invalid usage of',
@@ -115,33 +148,48 @@ export const USER_ADDED = i18n.translate('xpack.securitySolution.system.userAdde
   defaultMessage: 'user was added',
 });
 
-export const PROCESS_ERROR = i18n.translate('xpack.securitySolution.system.processErrorDescription', {
-  defaultMessage: 'encountered a process error with',
-});
+export const PROCESS_ERROR = i18n.translate(
+  'xpack.securitySolution.system.processErrorDescription',
+  {
+    defaultMessage: 'encountered a process error with',
+  }
+);
 
 export const ERROR = i18n.translate('xpack.securitySolution.system.errorDescription', {
   defaultMessage: 'encountered an error with',
 });
 
-export const PACKAGE_INSTALLED = i18n.translate('xpack.securitySolution.system.packageInstalledDescription', {
-  defaultMessage: 'installed package',
-});
+export const PACKAGE_INSTALLED = i18n.translate(
+  'xpack.securitySolution.system.packageInstalledDescription',
+  {
+    defaultMessage: 'installed package',
+  }
+);
 
-export const BOOT = i18n.translate('xpack.securitySolution.system.packageSystemStartedDescription', {
-  defaultMessage: 'system started',
-});
+export const BOOT = i18n.translate(
+  'xpack.securitySolution.system.packageSystemStartedDescription',
+  {
+    defaultMessage: 'system started',
+  }
+);
 
 export const ACCEPTED = i18n.translate('xpack.securitySolution.system.acceptedDescription', {
   defaultMessage: 'accepted the user via',
 });
 
-export const PACKAGE_UPDATED = i18n.translate('xpack.securitySolution.system.packageUpdatedDescription', {
-  defaultMessage: 'updated package',
-});
+export const PACKAGE_UPDATED = i18n.translate(
+  'xpack.securitySolution.system.packageUpdatedDescription',
+  {
+    defaultMessage: 'updated package',
+  }
+);
 
-export const PACKAGE_REMOVED = i18n.translate('xpack.securitySolution.system.packageRemovedDescription', {
-  defaultMessage: 'removed package',
-});
+export const PACKAGE_REMOVED = i18n.translate(
+  'xpack.securitySolution.system.packageRemovedDescription',
+  {
+    defaultMessage: 'removed package',
+  }
+);
 
 export const USER_REMOVED = i18n.translate('xpack.securitySolution.system.userRemovedDescription', {
   defaultMessage: 'was removed',
@@ -151,10 +199,16 @@ export const VIA = i18n.translate('xpack.securitySolution.system.viaDescription'
   defaultMessage: 'via',
 });
 
-export const VIA_PARENT_PROCESS = i18n.translate('xpack.securitySolution.system.viaParentProcessDescription', {
-  defaultMessage: 'via parent process',
-});
+export const VIA_PARENT_PROCESS = i18n.translate(
+  'xpack.securitySolution.system.viaParentProcessDescription',
+  {
+    defaultMessage: 'via parent process',
+  }
+);
 
-export const WITH_EXIT_CODE = i18n.translate('xpack.securitySolution.system.withExitCodeDescription', {
-  defaultMessage: 'with exit code',
-});
+export const WITH_EXIT_CODE = i18n.translate(
+  'xpack.securitySolution.system.withExitCodeDescription',
+  {
+    defaultMessage: 'with exit code',
+  }
+);

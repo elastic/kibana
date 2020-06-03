@@ -21,6 +21,10 @@ exports[`PageView component should display body header custom element 1`] = `
   background: none;
 }
 
+.c0 .endpoint-navTabs {
+  margin-left: 24px;
+}
+
 <PageView
   bodyHeader={
     <p>
@@ -110,6 +114,10 @@ exports[`PageView component should display body header wrapped in EuiTitle 1`] =
   padding: 0;
   border: none;
   background: none;
+}
+
+.c0 .endpoint-navTabs {
+  margin-left: 24px;
 }
 
 <PageView
@@ -204,6 +212,10 @@ exports[`PageView component should display header left and right 1`] = `
   padding: 0;
   border: none;
   background: none;
+}
+
+.c0 .endpoint-navTabs {
+  margin-left: 24px;
 }
 
 <PageView
@@ -315,6 +327,10 @@ exports[`PageView component should display only body if not header props used 1`
   background: none;
 }
 
+.c0 .endpoint-navTabs {
+  margin-left: 24px;
+}
+
 <PageView
   viewType="list"
 >
@@ -381,6 +397,10 @@ exports[`PageView component should display only header left 1`] = `
   padding: 0;
   border: none;
   background: none;
+}
+
+.c0 .endpoint-navTabs {
+  margin-left: 24px;
 }
 
 <PageView
@@ -481,6 +501,10 @@ exports[`PageView component should display only header right but include an empt
   background: none;
 }
 
+.c0 .endpoint-navTabs {
+  margin-left: 24px;
+}
+
 <PageView
   headerRight="right side actions"
   viewType="list"
@@ -576,6 +600,10 @@ exports[`PageView component should pass through EuiPage props 1`] = `
   background: none;
 }
 
+.c0 .endpoint-navTabs {
+  margin-left: 24px;
+}
+
 <PageView
   aria-label="test-aria-label-here"
   className="test-class-name-here"
@@ -659,6 +687,10 @@ exports[`PageView component should use custom element for header left and not wr
   padding: 0;
   border: none;
   background: none;
+}
+
+.c0 .endpoint-navTabs {
+  margin-left: 24px;
 }
 
 <PageView

@@ -20,9 +20,12 @@ export const RESPONSE_CODE = i18n.translate(
   }
 );
 
-export const VIA = i18n.translate('xpack.securitySolution.timeline.body.renderers.dns.viaDescription', {
-  defaultMessage: 'via',
-});
+export const VIA = i18n.translate(
+  'xpack.securitySolution.timeline.body.renderers.dns.viaDescription',
+  {
+    defaultMessage: 'via',
+  }
+);
 
 export const WHICH_RESOLVED_TO = i18n.translate(
   'xpack.securitySolution.timeline.body.renderers.dns.whichResolvedToDescription',

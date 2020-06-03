@@ -6,17 +6,26 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PIN_SELECTED = i18n.translate('xpack.securitySolution.timeline.eventsSelect.actions.pinSelected', {
-  defaultMessage: 'Pin selected',
-});
+export const PIN_SELECTED = i18n.translate(
+  'xpack.securitySolution.timeline.eventsSelect.actions.pinSelected',
+  {
+    defaultMessage: 'Pin selected',
+  }
+);
 
-export const SELECT_ALL = i18n.translate('xpack.securitySolution.timeline.eventsSelect.actions.selectAll', {
-  defaultMessage: 'All',
-});
+export const SELECT_ALL = i18n.translate(
+  'xpack.securitySolution.timeline.eventsSelect.actions.selectAll',
+  {
+    defaultMessage: 'All',
+  }
+);
 
-export const SELECT_NONE = i18n.translate('xpack.securitySolution.timeline.eventsSelect.actions.selectNone', {
-  defaultMessage: 'None',
-});
+export const SELECT_NONE = i18n.translate(
+  'xpack.securitySolution.timeline.eventsSelect.actions.selectNone',
+  {
+    defaultMessage: 'None',
+  }
+);
 
 export const SELECT_PINNED = i18n.translate(
   'xpack.securitySolution.timeline.eventsSelect.actions.selectPinned',

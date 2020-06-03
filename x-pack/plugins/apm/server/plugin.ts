@@ -17,7 +17,7 @@ import { ObservabilityPluginSetup } from '../../observability/server';
 import { SecurityPluginSetup } from '../../security/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { TaskManagerSetupContract } from '../../task_manager/server';
-import { AlertingPlugin } from '../../alerting/server';
+import { AlertingPlugin } from '../../alerts/server';
 import { ActionsPlugin } from '../../actions/server';
 import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
@@ -57,7 +57,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       cloud?: CloudSetup;
       usageCollection?: UsageCollectionSetup;
       taskManager?: TaskManagerSetupContract;
-      alerting?: AlertingPlugin['setup'];
+      alerts?: AlertingPlugin['setup'];
       actions?: ActionsPlugin['setup'];
       observability?: ObservabilityPluginSetup;
       features: FeaturesPluginSetup;
@@ -73,9 +73,9 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
     core.savedObjects.registerType(apmIndices);
     core.savedObjects.registerType(apmTelemetry);
 
-    if (plugins.actions && plugins.alerting) {
+    if (plugins.actions && plugins.alerts) {
       registerApmAlerts({
-        alerting: plugins.alerting,
+        alerts: plugins.alerts,
         actions: plugins.actions,
         config$: mergedConfig$,
       });

@@ -123,7 +123,27 @@ describe('usePushToService', () => {
     });
   });
 
-  it('Displays message when user does not have a connector configured', async () => {
+  it('Displays message when user does not have any connector configured', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () =>
+          usePushToService({
+            ...defaultArgs,
+            connectors: [],
+            caseConnectorId: 'none',
+          }),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+      await waitForNextUpdate();
+      const errorsMsg = result.current.pushCallouts?.props.messages;
+      expect(errorsMsg).toHaveLength(1);
+      expect(errorsMsg[0].title).toEqual(i18n.PUSH_DISABLE_BY_NO_CONFIG_TITLE);
+    });
+  });
+
+  it('Displays message when user does have a connector but is configured to none', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
         () =>
@@ -148,6 +168,27 @@ describe('usePushToService', () => {
         () =>
           usePushToService({
             ...defaultArgs,
+            caseConnectorId: 'not-exist',
+            isValidConnector: false,
+          }),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+      await waitForNextUpdate();
+      const errorsMsg = result.current.pushCallouts?.props.messages;
+      expect(errorsMsg).toHaveLength(1);
+      expect(errorsMsg[0].title).toEqual(i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE);
+    });
+  });
+
+  it('Displays message when connector is deleted with empty connectors', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () =>
+          usePushToService({
+            ...defaultArgs,
+            connectors: [],
             caseConnectorId: 'not-exist',
             isValidConnector: false,
           }),

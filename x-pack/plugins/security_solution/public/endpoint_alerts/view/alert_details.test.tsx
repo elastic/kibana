@@ -11,7 +11,7 @@ import { Store } from 'redux';
 import { mockAlertDetailsResult } from '../store/mock_alert_result_list';
 import { alertPageTestRender } from './test_helpers/render_alert_page';
 import { AppAction } from '../../common/store/actions';
-import { State } from '../../common/store/reducer';
+import { State } from '../../common/store/types';
 
 describe('when the alert details flyout is open', () => {
   let render: () => reactTestingLibrary.RenderResult;

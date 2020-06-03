@@ -51,9 +51,12 @@ export const DISPOSED_CREDENTIALS_TO = i18n.translate(
   }
 );
 
-export const ATTEMPTED_LOGIN = i18n.translate('xpack.securitySolution.auditd.attemptedLoginDescription', {
-  defaultMessage: 'attempted a login via',
-});
+export const ATTEMPTED_LOGIN = i18n.translate(
+  'xpack.securitySolution.auditd.attemptedLoginDescription',
+  {
+    defaultMessage: 'attempted a login via',
+  }
+);
 
 export const WITH_RESULT = i18n.translate('xpack.securitySolution.auditd.withResultDescription', {
   defaultMessage: 'with result',
@@ -67,9 +70,12 @@ export const AS = i18n.translate('xpack.securitySolution.auditd.asDescription', 
   defaultMessage: 'as',
 });
 
-export const CONNECTED_USING = i18n.translate('xpack.securitySolution.auditd.connectedUsingDescription', {
-  defaultMessage: 'connected using',
-});
+export const CONNECTED_USING = i18n.translate(
+  'xpack.securitySolution.auditd.connectedUsingDescription',
+  {
+    defaultMessage: 'connected using',
+  }
+);
 
 export const USING = i18n.translate('xpack.securitySolution.auditd.usingDescription', {
   defaultMessage: 'using',
@@ -114,9 +120,12 @@ export const UNLOADED_KERNEL_MODULE_OF = i18n.translate(
   }
 );
 
-export const CREATED_DIRECTORY = i18n.translate('xpack.securitySolution.auditd.createdDirectoryDescription', {
-  defaultMessage: 'created directory',
-});
+export const CREATED_DIRECTORY = i18n.translate(
+  'xpack.securitySolution.auditd.createdDirectoryDescription',
+  {
+    defaultMessage: 'created directory',
+  }
+);
 
 export const MOUNTED = i18n.translate('xpack.securitySolution.auditd.mountedDescription', {
   defaultMessage: 'mounted',
@@ -166,21 +175,30 @@ export const LISTEN_FOR_CONNECTIONS = i18n.translate(
   }
 );
 
-export const BOUND_SOCKET_FROM = i18n.translate('xpack.securitySolution.auditd.boundSocketFromDescription', {
-  defaultMessage: 'bound socket from',
-});
+export const BOUND_SOCKET_FROM = i18n.translate(
+  'xpack.securitySolution.auditd.boundSocketFromDescription',
+  {
+    defaultMessage: 'bound socket from',
+  }
+);
 
-export const RECEIVED_FROM = i18n.translate('xpack.securitySolution.auditd.receivedFromDescription', {
-  defaultMessage: 'received from',
-});
+export const RECEIVED_FROM = i18n.translate(
+  'xpack.securitySolution.auditd.receivedFromDescription',
+  {
+    defaultMessage: 'received from',
+  }
+);
 
 export const SENT_TO = i18n.translate('xpack.securitySolution.auditd.sentToDescription', {
   defaultMessage: 'sent to',
 });
 
-export const KILLED_PROCESS_ID_OF = i18n.translate('xpack.securitySolution.auditd.killedProcessIdDescription', {
-  defaultMessage: 'killed process id of',
-});
+export const KILLED_PROCESS_ID_OF = i18n.translate(
+  'xpack.securitySolution.auditd.killedProcessIdDescription',
+  {
+    defaultMessage: 'killed process id of',
+  }
+);
 
 export const CHANGED_IDENTITY_USING = i18n.translate(
   'xpack.securitySolution.auditd.changedIdentityUsingDescription',
@@ -196,9 +214,12 @@ export const CHANGED_SYSTEM_TIME_WITH = i18n.translate(
   }
 );
 
-export const MADE_DEVICE_WITH = i18n.translate('xpack.securitySolution.auditd.madeDeviceWithDescription', {
-  defaultMessage: 'made device with',
-});
+export const MADE_DEVICE_WITH = i18n.translate(
+  'xpack.securitySolution.auditd.madeDeviceWithDescription',
+  {
+    defaultMessage: 'made device with',
+  }
+);
 
 export const CHANGED_SYSTEM_NAME = i18n.translate(
   'xpack.securitySolution.auditd.changedSystemNameDescription',
@@ -221,9 +242,12 @@ export const SCHEDULED_POLICY_OF = i18n.translate(
   }
 );
 
-export const ADDED_USER_ACCOUNT = i18n.translate('xpack.securitySolution.auditd.addedUserAccountDescription', {
-  defaultMessage: 'added user account',
-});
+export const ADDED_USER_ACCOUNT = i18n.translate(
+  'xpack.securitySolution.auditd.addedUserAccountDescription',
+  {
+    defaultMessage: 'added user account',
+  }
+);
 
 export const CAUSED_MAC_POLICY_ERROR = i18n.translate(
   'xpack.securitySolution.auditd.causedMacPolicyErrorDescription',
@@ -246,13 +270,19 @@ export const CHANGED_PROMISCUOUS_MODE = i18n.translate(
   }
 );
 
-export const LOCKED_ACCOUNT = i18n.translate('xpack.securitySolution.auditd.lockedAccountDescription', {
-  defaultMessage: 'locked account',
-});
+export const LOCKED_ACCOUNT = i18n.translate(
+  'xpack.securitySolution.auditd.lockedAccountDescription',
+  {
+    defaultMessage: 'locked account',
+  }
+);
 
-export const UNLOCKED_ACCOUNT = i18n.translate('xpack.securitySolution.auditd.unlockedAccountDescription', {
-  defaultMessage: 'unlocked account',
-});
+export const UNLOCKED_ACCOUNT = i18n.translate(
+  'xpack.securitySolution.auditd.unlockedAccountDescription',
+  {
+    defaultMessage: 'unlocked account',
+  }
+);
 
 export const ADDED_GROUP_ACCOUNT_USING = i18n.translate(
   'xpack.securitySolution.auditd.adddedGroupAccountUsingDescription',
@@ -261,9 +291,12 @@ export const ADDED_GROUP_ACCOUNT_USING = i18n.translate(
   }
 );
 
-export const CRASHED_PROGRAM = i18n.translate('xpack.securitySolution.auditd.crashedProgramDescription', {
-  defaultMessage: 'crashed program',
-});
+export const CRASHED_PROGRAM = i18n.translate(
+  'xpack.securitySolution.auditd.crashedProgramDescription',
+  {
+    defaultMessage: 'crashed program',
+  }
+);
 
 export const EXECUTION_OF_FORBIDDEN_PROGRAM = i18n.translate(
   'xpack.securitySolution.auditd.executionOfForbiddenProgramDescription',
@@ -328,13 +361,19 @@ export const VIOLATED_APP_ARMOR_POLICY_FROM = i18n.translate(
   }
 );
 
-export const CHANGED_GROUP = i18n.translate('xpack.securitySolution.auditd.changedGroupDescription', {
-  defaultMessage: 'changed group',
-});
+export const CHANGED_GROUP = i18n.translate(
+  'xpack.securitySolution.auditd.changedGroupDescription',
+  {
+    defaultMessage: 'changed group',
+  }
+);
 
-export const CHANGED_USER_ID = i18n.translate('xpack.securitySolution.auditd.changedUserIdDescription', {
-  defaultMessage: 'changed user id',
-});
+export const CHANGED_USER_ID = i18n.translate(
+  'xpack.securitySolution.auditd.changedUserIdDescription',
+  {
+    defaultMessage: 'changed user id',
+  }
+);
 
 export const CHANGED_AUDIT_CONFIGURATION = i18n.translate(
   'xpack.securitySolution.auditd.changedAuditConfigurationDescription',
@@ -378,9 +417,12 @@ export const STARTED_CRYPTO_SESSION = i18n.translate(
   }
 );
 
-export const ACCESS_RESULT = i18n.translate('xpack.securitySolution.auditd.accessResultDescription', {
-  defaultMessage: 'access result',
-});
+export const ACCESS_RESULT = i18n.translate(
+  'xpack.securitySolution.auditd.accessResultDescription',
+  {
+    defaultMessage: 'access result',
+  }
+);
 
 export const ABORTED_AUDIT_STARTUP = i18n.translate(
   'xpack.securitySolution.auditd.abortedAuditStartupDescription',
@@ -403,17 +445,23 @@ export const REMOTE_AUDIT_DISCONNECTED = i18n.translate(
   }
 );
 
-export const SHUTDOWN_AUDIT = i18n.translate('xpack.securitySolution.auditd.shutDownAuditDescription', {
-  defaultMessage: 'shutdown audit',
-});
+export const SHUTDOWN_AUDIT = i18n.translate(
+  'xpack.securitySolution.auditd.shutDownAuditDescription',
+  {
+    defaultMessage: 'shutdown audit',
+  }
+);
 
 export const AUDIT_ERROR = i18n.translate('xpack.securitySolution.auditd.auditErrorDescription', {
   defaultMessage: 'audit error',
 });
 
-export const RECONFIGURED_AUDIT = i18n.translate('xpack.securitySolution.auditd.reconfiguredAuditDescription', {
-  defaultMessage: 'reconfigured audit',
-});
+export const RECONFIGURED_AUDIT = i18n.translate(
+  'xpack.securitySolution.auditd.reconfiguredAuditDescription',
+  {
+    defaultMessage: 'reconfigured audit',
+  }
+);
 
 export const RESUMED_AUDIT_LOGGING = i18n.translate(
   'xpack.securitySolution.auditd.resumedAuditLoggingDescription',
@@ -422,13 +470,19 @@ export const RESUMED_AUDIT_LOGGING = i18n.translate(
   }
 );
 
-export const ROTATED_AUDIT_LOGS = i18n.translate('xpack.securitySolution.auditd.rotatedAuditLogsDescription', {
-  defaultMessage: 'rotated-audit-logs',
-});
+export const ROTATED_AUDIT_LOGS = i18n.translate(
+  'xpack.securitySolution.auditd.rotatedAuditLogsDescription',
+  {
+    defaultMessage: 'rotated-audit-logs',
+  }
+);
 
-export const STARTED_AUDIT = i18n.translate('xpack.securitySolution.auditd.startedAuditDescription', {
-  defaultMessage: 'started audit',
-});
+export const STARTED_AUDIT = i18n.translate(
+  'xpack.securitySolution.auditd.startedAuditDescription',
+  {
+    defaultMessage: 'started audit',
+  }
+);
 
 export const DELETED_GROUP_ACCOUNT_USING = i18n.translate(
   'xpack.securitySolution.auditd.deletedGroupAccountUsingDescription',
@@ -486,21 +540,33 @@ export const INITIALIZED_AUDIT_SUBSYSTEM = i18n.translate(
   }
 );
 
-export const MODIFIED_LEVEL_OF = i18n.translate('xpack.securitySolution.auditd.modifiedLevelOfDescription', {
-  defaultMessage: 'modified level of',
-});
+export const MODIFIED_LEVEL_OF = i18n.translate(
+  'xpack.securitySolution.auditd.modifiedLevelOfDescription',
+  {
+    defaultMessage: 'modified level of',
+  }
+);
 
-export const OVERRODE_LABEL_OF = i18n.translate('xpack.securitySolution.auditd.overrodeLabelOfDescription', {
-  defaultMessage: 'overrode label of',
-});
+export const OVERRODE_LABEL_OF = i18n.translate(
+  'xpack.securitySolution.auditd.overrodeLabelOfDescription',
+  {
+    defaultMessage: 'overrode label of',
+  }
+);
 
-export const CHANGED_LOGIN_ID_TO = i18n.translate('xpack.securitySolution.auditd.changedLoginIdToDescription', {
-  defaultMessage: 'changed login id to',
-});
+export const CHANGED_LOGIN_ID_TO = i18n.translate(
+  'xpack.securitySolution.auditd.changedLoginIdToDescription',
+  {
+    defaultMessage: 'changed login id to',
+  }
+);
 
-export const MAC_PERMISSION = i18n.translate('xpack.securitySolution.auditd.macPermissionDescription', {
-  defaultMessage: 'mac permission',
-});
+export const MAC_PERMISSION = i18n.translate(
+  'xpack.securitySolution.auditd.macPermissionDescription',
+  {
+    defaultMessage: 'mac permission',
+  }
+);
 
 export const CHANGED_SELINUX_BOOLEAN = i18n.translate(
   'xpack.securitySolution.auditd.changedSeLinuxBooleanDescription',
@@ -530,9 +596,12 @@ export const ASSIGNED_USER_ROLE_TO = i18n.translate(
   }
 );
 
-export const MODIFIED_ROLE = i18n.translate('xpack.securitySolution.auditd.modifiedRoleDescription', {
-  defaultMessage: 'modified role',
-});
+export const MODIFIED_ROLE = i18n.translate(
+  'xpack.securitySolution.auditd.modifiedRoleDescription',
+  {
+    defaultMessage: 'modified role',
+  }
+);
 
 export const REMOVED_USER_ROLE_FROM = i18n.translate(
   'xpack.securitySolution.auditd.removedUserRoleFromDescription',
@@ -548,17 +617,26 @@ export const VIOLATED_SECCOMP_POLICY_WITH = i18n.translate(
   }
 );
 
-export const STARTED_SERVICE = i18n.translate('xpack.securitySolution.auditd.startedServiceDescription', {
-  defaultMessage: 'started service',
-});
+export const STARTED_SERVICE = i18n.translate(
+  'xpack.securitySolution.auditd.startedServiceDescription',
+  {
+    defaultMessage: 'started service',
+  }
+);
 
-export const STOPPED_SERVICE = i18n.translate('xpack.securitySolution.auditd.stoppedServiceDescription', {
-  defaultMessage: 'stopped service',
-});
+export const STOPPED_SERVICE = i18n.translate(
+  'xpack.securitySolution.auditd.stoppedServiceDescription',
+  {
+    defaultMessage: 'stopped service',
+  }
+);
 
-export const BOOTED_SYSTEM = i18n.translate('xpack.securitySolution.auditd.bootedSystemDescription', {
-  defaultMessage: 'booted system',
-});
+export const BOOTED_SYSTEM = i18n.translate(
+  'xpack.securitySolution.auditd.bootedSystemDescription',
+  {
+    defaultMessage: 'booted system',
+  }
+);
 
 export const CHANGED_TO_RUN_LEVEL_WITH = i18n.translate(
   'xpack.securitySolution.auditd.changedToRunLevelWithDescription',
@@ -567,9 +645,12 @@ export const CHANGED_TO_RUN_LEVEL_WITH = i18n.translate(
   }
 );
 
-export const SHUTDOWN_SYSTEM = i18n.translate('xpack.securitySolution.auditd.shutdownSystemDescription', {
-  defaultMessage: 'shutdown system',
-});
+export const SHUTDOWN_SYSTEM = i18n.translate(
+  'xpack.securitySolution.auditd.shutdownSystemDescription',
+  {
+    defaultMessage: 'shutdown system',
+  }
+);
 
 export const SENT_TEST = i18n.translate('xpack.securitySolution.auditd.sentTestDescription', {
   defaultMessage: 'sent test',
@@ -583,9 +664,12 @@ export const SENT_MESSAGE = i18n.translate('xpack.securitySolution.auditd.sentMe
   defaultMessage: 'sent message',
 });
 
-export const ACCESS_PERMISSION = i18n.translate('xpack.securitySolution.auditd.accessPermissionDescription', {
-  defaultMessage: 'access permission',
-});
+export const ACCESS_PERMISSION = i18n.translate(
+  'xpack.securitySolution.auditd.accessPermissionDescription',
+  {
+    defaultMessage: 'access permission',
+  }
+);
 
 export const AUTHENTICATED_USING = i18n.translate(
   'xpack.securitySolution.auditd.authenticatedUsingDescription',
@@ -620,9 +704,12 @@ export const CHANGED_MAC_CONFIGURATION = i18n.translate(
   }
 );
 
-export const LOADED_MAC_POLICY = i18n.translate('xpack.securitySolution.auditd.loadedMacPolicyDescription', {
-  defaultMessage: 'loaded mac policy',
-});
+export const LOADED_MAC_POLICY = i18n.translate(
+  'xpack.securitySolution.auditd.loadedMacPolicyDescription',
+  {
+    defaultMessage: 'loaded mac policy',
+  }
+);
 
 export const MODIFIED_USER_ACCOUNT = i18n.translate(
   'xpack.securitySolution.auditd.modifiedUserAccountDescription',
@@ -630,9 +717,12 @@ export const MODIFIED_USER_ACCOUNT = i18n.translate(
     defaultMessage: 'modified user account',
   }
 );
-export const CHANGED_ROLE_USING = i18n.translate('xpack.securitySolution.auditd.changedRoleUsingDescription', {
-  defaultMessage: 'changed role using',
-});
+export const CHANGED_ROLE_USING = i18n.translate(
+  'xpack.securitySolution.auditd.changedRoleUsingDescription',
+  {
+    defaultMessage: 'changed role using',
+  }
+);
 
 export const ACCESS_ERROR = i18n.translate('xpack.securitySolution.auditd.accessErrorDescription', {
   defaultMessage: 'access error',
@@ -645,17 +735,26 @@ export const CHANGED_CONFIGURATION_WITH = i18n.translate(
   }
 );
 
-export const ISSUED_VM_CONTROL = i18n.translate('xpack.securitySolution.auditd.issuedVmControlDescription', {
-  defaultMessage: 'issued vm control',
-});
+export const ISSUED_VM_CONTROL = i18n.translate(
+  'xpack.securitySolution.auditd.issuedVmControlDescription',
+  {
+    defaultMessage: 'issued vm control',
+  }
+);
 
-export const CREATED_VM_IMAGE = i18n.translate('xpack.securitySolution.auditd.createdVmImageDescription', {
-  defaultMessage: 'created vm image',
-});
+export const CREATED_VM_IMAGE = i18n.translate(
+  'xpack.securitySolution.auditd.createdVmImageDescription',
+  {
+    defaultMessage: 'created vm image',
+  }
+);
 
-export const DELETED_VM_IMAGE = i18n.translate('xpack.securitySolution.auditd.deletedVmImageDescription', {
-  defaultMessage: 'deleted vm image',
-});
+export const DELETED_VM_IMAGE = i18n.translate(
+  'xpack.securitySolution.auditd.deletedVmImageDescription',
+  {
+    defaultMessage: 'deleted vm image',
+  }
+);
 
 export const CHECKED_INTEGRITY_OF = i18n.translate(
   'xpack.securitySolution.auditd.checkedIntegrityOfDescription',
@@ -664,17 +763,26 @@ export const CHECKED_INTEGRITY_OF = i18n.translate(
   }
 );
 
-export const ASSIGNED_VM_ID = i18n.translate('xpack.securitySolution.auditd.assignedVmIdDescription', {
-  defaultMessage: 'assigned vm id',
-});
+export const ASSIGNED_VM_ID = i18n.translate(
+  'xpack.securitySolution.auditd.assignedVmIdDescription',
+  {
+    defaultMessage: 'assigned vm id',
+  }
+);
 
-export const MIGRATED_VM_FROM = i18n.translate('xpack.securitySolution.auditd.migratedVmFromDescription', {
-  defaultMessage: 'migrated vm from',
-});
+export const MIGRATED_VM_FROM = i18n.translate(
+  'xpack.securitySolution.auditd.migratedVmFromDescription',
+  {
+    defaultMessage: 'migrated vm from',
+  }
+);
 
-export const MIGRATED_VM_TO = i18n.translate('xpack.securitySolution.auditd.migratedVmToDescription', {
-  defaultMessage: 'migrated vm to',
-});
+export const MIGRATED_VM_TO = i18n.translate(
+  'xpack.securitySolution.auditd.migratedVmToDescription',
+  {
+    defaultMessage: 'migrated vm to',
+  }
+);
 
 export const ASSIGNED_VM_RESOURCE = i18n.translate(
   'xpack.securitySolution.auditd.assignedVMResourceDescription',

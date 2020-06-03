@@ -5,7 +5,7 @@
  */
 
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
-import { AlertServices } from '../../../../../alerting/server';
+import { AlertServices } from '../../../../../alerts/server';
 
 export const getInputIndex = async (
   services: AlertServices,

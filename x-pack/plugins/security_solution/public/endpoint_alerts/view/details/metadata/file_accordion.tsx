@@ -6,7 +6,8 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiDescriptionList } from '@elastic/eui';
-import { Immutable, AlertData } from '../../../../../common/endpoint_alerts/types';
+import { Immutable } from '../../../../../common/endpoint/types';
+import { AlertData } from '../../../../../common/endpoint_alerts/types';
 import { FormattedDate } from '../../formatted_date';
 
 export const FileAccordion = memo(({ alertData }: { alertData: Immutable<AlertData> }) => {

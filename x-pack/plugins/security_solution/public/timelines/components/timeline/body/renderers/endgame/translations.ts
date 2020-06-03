@@ -111,9 +111,12 @@ export const TARGET_LOGON_ID = i18n.translate(
   }
 );
 
-export const TO = i18n.translate('xpack.securitySolution.timeline.body.renderers.endgame.toDescription', {
-  defaultMessage: 'to',
-});
+export const TO = i18n.translate(
+  'xpack.securitySolution.timeline.body.renderers.endgame.toDescription',
+  {
+    defaultMessage: 'to',
+  }
+);
 
 export const USING_LOGON_TYPE = i18n.translate(
   'xpack.securitySolution.timeline.body.renderers.endgame.usingLogonTypeDescription',
@@ -122,9 +125,12 @@ export const USING_LOGON_TYPE = i18n.translate(
   }
 );
 
-export const VIA = i18n.translate('xpack.securitySolution.timeline.body.renderers.endgame.viaDescription', {
-  defaultMessage: 'via',
-});
+export const VIA = i18n.translate(
+  'xpack.securitySolution.timeline.body.renderers.endgame.viaDescription',
+  {
+    defaultMessage: 'via',
+  }
+);
 
 export const WITH_SPECIAL_PRIVILEGES = i18n.translate(
   'xpack.securitySolution.timeline.body.renderers.endgame.withSpecialPrivilegesDescription',
