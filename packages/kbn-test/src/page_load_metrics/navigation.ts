@@ -76,7 +76,7 @@ export async function navigateToApps(log: ToolingLog, options: NavigationOptions
     { path: '/app/discover', locator: '[data-test-subj="discover-sidebar"]' },
     { path: '/app/home', locator: '[data-test-subj="homeApp"]' },
     { path: '/app/canvas', locator: '[data-test-subj="create-workpad-button"]' },
-    { path: '/app/maps', locator: '[data-test-subj="newMapLink"]' },
+    { path: '/app/maps', locator: '[data-test-subj="mapContainer"]' },
     { path: '/app/apm', locator: '[data-test-subj="apmMainContainer"]' },
   ];
 

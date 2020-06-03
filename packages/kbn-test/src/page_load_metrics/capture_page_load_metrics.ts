@@ -42,7 +42,7 @@ export async function capturePageLoadMetrics(log: ToolingLog, options: Navigatio
 
   return Array.from(assetSizeMeasurements.entries())
     .map(([url, measurements]) => {
-      const baseUrl = createUrl('/', options);
+      const baseUrl = createUrl('/', options.appConfig.url);
       const relativeUrl = url
         // remove the baseUrl (expect the trailing slash) to make url relative
         .replace(baseUrl.slice(0, -1), '')
