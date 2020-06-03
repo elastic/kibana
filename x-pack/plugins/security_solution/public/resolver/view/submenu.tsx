@@ -164,7 +164,7 @@ const NodeSubMenuComponents = React.memo(
      * Render with a panel of options that appear when the menu host button is clicked
      */
 
-    const button = (
+    const submenuPopoverButton = (
       <EuiButton
         onClick={
           typeof optionsWithActions === 'object' ? handleMenuOpenClick : handleMenuActionClick
@@ -184,7 +184,7 @@ const NodeSubMenuComponents = React.memo(
         <EuiPopover
           id="popover"
           panelPaddingSize="none"
-          button={button}
+          button={submenuPopoverButton}
           isOpen={menuIsOpen}
           closePopover={closePopover}
         >
@@ -221,8 +221,6 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
 
   & .euiPopover__anchor {
     display: flex;
-  }
-
   }
 
   &.is-open .euiButton {
