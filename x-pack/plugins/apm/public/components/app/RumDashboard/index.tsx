@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { PROJECTION } from '../../../../common/projections/typings';
-import { RumDashboard } from './RumOverview';
+import { RumDashboard } from './RumDashboard';
 
 export function RumOverview() {
   useTrackPageview({ app: 'apm', path: 'rum_overview' });
