@@ -70,13 +70,7 @@ To visualize data in existing {es} indices, you
 create index patterns that match the names of the indices you want to explore. When you add data with the File Visualizer, GeoJSON Upload,
 or an Add Data tutorial, an index pattern is created for you.
 
-////
-TIP: By default, {kib} connects to the {es} instance running on `localhost`. To connect to a
-different {es} instance, modify the {es} URL in the `kibana.yml` configuration file and
-restart {kib}. For information about using {kib} with your production nodes, see <<production>>.
-////
-
-. Go to *Stack Management* and then click *Index Patterns*.
+. Go to *Stack Management*, and then click *Index Patterns*.
 
 . Click *Create index pattern*.
 
@@ -99,6 +93,7 @@ You must select a time field to use global time filters on your dashboards.
 +
 {kib} is now configured to access your {es} indices.
 You’ll see a list of fields configured for the matching index.
-You can designate your index pattern the default by clicking the star icon on this page.
+You can designate your index pattern as the default by clicking the star icon on this page.
 +
-When searching in Discover and creating visualizations, you choose a pattern from the index pattern menu to specify the {es} indices that contain the data you want to work with.
+When searching in *Discover* and creating visualizations, you choose a pattern
+from the index pattern menu to specify the {es} indices that contain the data you want to work with.
