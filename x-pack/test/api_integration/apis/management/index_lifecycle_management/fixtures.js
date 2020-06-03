@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRandomString } from './lib';
 import { INDEX_TEMPLATE_PATTERN_PREFIX } from './constants';
 
-export const getPolicyPayload = ({ name = getRandomString() } = {}) => ({
+export const getPolicyPayload = (name) => ({
   name,
   phases: {
     hot: {

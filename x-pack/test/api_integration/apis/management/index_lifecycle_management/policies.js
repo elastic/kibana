@@ -61,7 +61,7 @@ export default function ({ getService }) {
 
       it('should add the indices linked to the policies', async () => {
         // Create a policy
-        const policy = getPolicyPayload();
+        const policy = getPolicyPayload('link-test-policy');
         const { name: policyName } = policy;
         await createPolicy(policy);
 
@@ -78,7 +78,7 @@ export default function ({ getService }) {
 
     describe('create', () => {
       it('should create a lifecycle policy', async () => {
-        const policy = getPolicyPayload();
+        const policy = getPolicyPayload('create-test-policy');
         const { name } = policy;
 
         // Load current policies
@@ -96,7 +96,7 @@ export default function ({ getService }) {
 
     describe('delete', () => {
       it('should delete the policy created', async () => {
-        const policy = getPolicyPayload();
+        const policy = getPolicyPayload('delete-test-policy');
         const { name } = policy;
 
         // Create new policy
