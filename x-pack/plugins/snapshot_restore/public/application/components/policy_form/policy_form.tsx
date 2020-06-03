@@ -28,6 +28,7 @@ import { PolicyNavigation } from './navigation';
 interface Props {
   policy: SlmPolicyPayload;
   indices: string[];
+  dataStreams: string[];
   currentUrl: string;
   isEditing?: boolean;
   isSaving: boolean;
@@ -40,6 +41,7 @@ interface Props {
 export const PolicyForm: React.FunctionComponent<Props> = ({
   policy: originalPolicy,
   indices,
+  dataStreams,
   currentUrl,
   isEditing,
   isSaving,
@@ -132,6 +134,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
         <CurrentStepForm
           policy={policy}
           indices={indices}
+          dataStreams={dataStreams}
           updatePolicy={updatePolicy}
           isEditing={isEditing}
           currentUrl={currentUrl}
@@ -184,7 +187,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
               {currentStep === lastStep ? (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    fill={isEditing && policy.isManagedPolicy ? false : true}
+                    fill={!(isEditing && policy.isManagedPolicy)}
                     color={isEditing && policy.isManagedPolicy ? 'warning' : 'secondary'}
                     iconType="check"
                     onClick={() => savePolicy()}

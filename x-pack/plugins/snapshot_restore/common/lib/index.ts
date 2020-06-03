@@ -16,3 +16,4 @@ export {
   serializeSnapshotRetention,
 } from './snapshot_serialization';
 export { deserializePolicy, serializePolicy } from './policy_serialization';
+export { indicesToArray } from './utils';

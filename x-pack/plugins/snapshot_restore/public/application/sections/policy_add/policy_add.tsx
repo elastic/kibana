@@ -28,8 +28,9 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
   const {
     error: errorLoadingIndices,
     isLoading: isLoadingIndices,
-    data: { indices } = {
+    data: { indices, dataStreams } = {
       indices: [],
+      dataStreams: [],
     },
   } = useLoadIndices();
 
@@ -123,6 +124,7 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
           <PolicyForm
             policy={emptyPolicy}
             indices={indices}
+            dataStreams={dataStreams}
             currentUrl={pathname}
             isSaving={isSaving}
             saveError={renderSaveError()}

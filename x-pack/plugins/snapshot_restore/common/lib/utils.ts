@@ -4,5 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { IndicesField } from './indices_field';
-export { DataStreamsField } from './data_streams_field';
+export const indicesToArray = (indices?: string | string[]): string[] => {
+  return indices && Array.isArray(indices)
+    ? indices
+    : typeof indices === 'string'
+    ? indices.split(',')
+    : [];
+};
