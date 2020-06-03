@@ -5,7 +5,7 @@
  */
 
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { PartialAlert } from '../../../../../alerting/server';
+import { PartialAlert } from '../../../../../alerts/server';
 import { readRules } from './read_rules';
 import { UpdateRuleParams } from './types';
 import { addTags } from './add_tags';
