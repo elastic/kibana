@@ -9034,7 +9034,6 @@ exports[`Header renders 3`] = `
                                   class="euiCollapsibleNavGroup__children"
                                 >
                                   <ul
-                                    aria-label="Manage cloud deployment"
                                     class="euiListGroup"
                                     style="max-width: none;"
                                   >
@@ -9309,7 +9308,6 @@ exports[`Header renders 3`] = `
                                     class="euiCollapsibleNavGroup__children"
                                   >
                                     <ul
-                                      aria-label="Manage cloud deployment"
                                       class="euiListGroup"
                                       style="max-width: none;"
                                     >
@@ -9604,7 +9602,6 @@ exports[`Header renders 3`] = `
                                 className="euiCollapsibleNavGroup__children"
                               >
                                 <EuiListGroup
-                                  aria-label="Manage cloud deployment"
                                   color="text"
                                   gutterSize="none"
                                   listItems={
@@ -9625,7 +9622,6 @@ exports[`Header renders 3`] = `
                                   size="s"
                                 >
                                   <ul
-                                    aria-label="Manage cloud deployment"
                                     className="euiListGroup"
                                     style={
                                       Object {
