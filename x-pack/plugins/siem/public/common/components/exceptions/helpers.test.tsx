@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { mount } from 'enzyme';
+import moment from 'moment-timezone';
 
 import {
   getOperatorType,
@@ -37,6 +38,14 @@ import {
 import { getExceptionItemEntryMock, getExceptionItemMock } from './mocks';
 
 describe('Exception helpers', () => {
+  beforeEach(() => {
+    moment.tz.setDefault('UTC');
+  });
+
+  afterEach(() => {
+    moment.tz.setDefault('Browser');
+  });
+
   describe('#getOperatorType', () => {
     test('returns operator type "match" if entry.type is "match"', () => {
       const payload = getExceptionItemEntryMock();
@@ -373,7 +382,7 @@ describe('Exception helpers', () => {
           title: 'OS',
         },
         {
-          description: 'April 22nd 2020 @ 20:19:13',
+          description: 'April 23rd 2020 @ 00:19:13',
           title: 'Date created',
         },
         {
@@ -392,7 +401,7 @@ describe('Exception helpers', () => {
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
         {
-          description: 'April 22nd 2020 @ 20:19:13',
+          description: 'April 23rd 2020 @ 00:19:13',
           title: 'Date created',
         },
         {
@@ -415,7 +424,7 @@ describe('Exception helpers', () => {
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
         {
-          description: 'April 22nd 2020 @ 20:19:13',
+          description: 'April 23rd 2020 @ 00:19:13',
           title: 'Date created',
         },
         {
@@ -434,7 +443,7 @@ describe('Exception helpers', () => {
       const result = getFormattedComments(payload);
 
       expect(result[0].username).toEqual('user_name');
-      expect(result[0].timestamp).toEqual('on Apr 22nd 2020 @ 20:19:13');
+      expect(result[0].timestamp).toEqual('on Apr 23rd 2020 @ 00:19:13');
     });
 
     test('it returns formatted timeline icon with comment users initial', () => {
