@@ -5,66 +5,66 @@
  */
 
 import {
-  CLOSED_SIGNALS_BTN,
-  EXPAND_SIGNAL_BTN,
-  LOADING_SIGNALS_PANEL,
-  MANAGE_SIGNAL_DETECTION_RULES_BTN,
-  OPEN_CLOSE_SIGNAL_BTN,
-  OPEN_CLOSE_SIGNALS_BTN,
-  OPENED_SIGNALS_BTN,
-  SEND_SIGNAL_TO_TIMELINE_BTN,
-  SIGNALS,
-  SIGNAL_CHECKBOX,
+  CLOSED_ALERTS_BTN,
+  EXPAND_ALERT_BTN,
+  LOADING_ALERTS_PANEL,
+  MANAGE_ALERT_DETECTION_RULES_BTN,
+  OPEN_CLOSE_ALERT_BTN,
+  OPEN_CLOSE_ALERTS_BTN,
+  OPENED_ALERTS_BTN,
+  SEND_ALERT_TO_TIMELINE_BTN,
+  ALERTS,
+  ALERT_CHECKBOX,
 } from '../screens/detections';
 import { REFRESH_BUTTON } from '../screens/siem_header';
 
-export const closeFirstSignal = () => {
-  cy.get(OPEN_CLOSE_SIGNAL_BTN).first().click({ force: true });
+export const closeFirstAlert = () => {
+  cy.get(OPEN_CLOSE_ALERT_BTN).first().click({ force: true });
 };
 
-export const closeSignals = () => {
-  cy.get(OPEN_CLOSE_SIGNALS_BTN).click({ force: true });
+export const closeAlerts = () => {
+  cy.get(OPEN_CLOSE_ALERTS_BTN).click({ force: true });
 };
 
-export const expandFirstSignal = () => {
-  cy.get(EXPAND_SIGNAL_BTN).first().click({ force: true });
+export const expandFirstAlert = () => {
+  cy.get(EXPAND_ALERT_BTN).first().click({ force: true });
 };
 
-export const goToClosedSignals = () => {
-  cy.get(CLOSED_SIGNALS_BTN).click({ force: true });
+export const goToClosedAlerts = () => {
+  cy.get(CLOSED_ALERTS_BTN).click({ force: true });
 };
 
-export const goToManageSignalDetectionRules = () => {
-  cy.get(MANAGE_SIGNAL_DETECTION_RULES_BTN).should('exist').click({ force: true });
+export const goToManageAlertDetectionRules = () => {
+  cy.get(MANAGE_ALERT_DETECTION_RULES_BTN).should('exist').click({ force: true });
 };
 
-export const goToOpenedSignals = () => {
-  cy.get(OPENED_SIGNALS_BTN).click({ force: true });
+export const goToOpenedAlerts = () => {
+  cy.get(OPENED_ALERTS_BTN).click({ force: true });
 };
 
-export const openFirstSignal = () => {
-  cy.get(OPEN_CLOSE_SIGNAL_BTN).first().click({ force: true });
+export const openFirstAlert = () => {
+  cy.get(OPEN_CLOSE_ALERT_BTN).first().click({ force: true });
 };
 
-export const openSignals = () => {
-  cy.get(OPEN_CLOSE_SIGNALS_BTN).click({ force: true });
+export const openAlerts = () => {
+  cy.get(OPEN_CLOSE_ALERTS_BTN).click({ force: true });
 };
 
-export const selectNumberOfSignals = (numberOfSignals: number) => {
-  for (let i = 0; i < numberOfSignals; i++) {
-    cy.get(SIGNAL_CHECKBOX).eq(i).click({ force: true });
+export const selectNumberOfAlerts = (numberOfAlerts: number) => {
+  for (let i = 0; i < numberOfAlerts; i++) {
+    cy.get(ALERT_CHECKBOX).eq(i).click({ force: true });
   }
 };
 
-export const investigateFirstSignalInTimeline = () => {
-  cy.get(SEND_SIGNAL_TO_TIMELINE_BTN).first().click({ force: true });
+export const investigateFirstAlertInTimeline = () => {
+  cy.get(SEND_ALERT_TO_TIMELINE_BTN).first().click({ force: true });
 };
 
-export const waitForSignals = () => {
+export const waitForAlerts = () => {
   cy.get(REFRESH_BUTTON).invoke('text').should('not.equal', 'Updating');
 };
 
-export const waitForSignalsIndexToBeCreated = () => {
+export const waitForAlertsIndexToBeCreated = () => {
   cy.request({ url: '/api/detection_engine/index', retryOnStatusCodeFailure: true }).then(
     (response) => {
       if (response.status !== 200) {
@@ -74,12 +74,12 @@ export const waitForSignalsIndexToBeCreated = () => {
   );
 };
 
-export const waitForSignalsPanelToBeLoaded = () => {
-  cy.get(LOADING_SIGNALS_PANEL).should('exist');
-  cy.get(LOADING_SIGNALS_PANEL).should('not.exist');
+export const waitForAlertsPanelToBeLoaded = () => {
+  cy.get(LOADING_ALERTS_PANEL).should('exist');
+  cy.get(LOADING_ALERTS_PANEL).should('not.exist');
 };
 
-export const waitForSignalsToBeLoaded = () => {
-  const expectedNumberOfDisplayedSignals = 25;
-  cy.get(SIGNALS).should('have.length', expectedNumberOfDisplayedSignals);
+export const waitForAlertsToBeLoaded = () => {
+  const expectedNumberOfDisplayedAlerts = 25;
+  cy.get(ALERTS).should('have.length', expectedNumberOfDisplayedAlerts);
 };
