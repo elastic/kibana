@@ -245,7 +245,6 @@ export const persistTimeline = async (
   const savedObjectsClient = request.context.core.savedObjects.client;
 
   try {
-    console.error('aaa', timelineId);
     if (timelineId == null) {
       // Create new timeline
       const newTimeline = convertSavedObjectToSavedTimeline(

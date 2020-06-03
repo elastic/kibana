@@ -274,10 +274,7 @@ export const addProviderToGroup = ({
   providerToAdd: DataProvider;
   timelineId: string;
 }) => {
-  console.error('addProviderToGroup', destination);
   const dataProviderGroups = [...flattenIntoAndGroups(dataProviders), ...EMPTY_GROUP];
-
-  console.error('dataProviderGroups', dataProviderGroups);
 
   if (!isValidDestination(destination)) {
     return;
@@ -285,7 +282,6 @@ export const addProviderToGroup = ({
 
   const destinationGroupIndex = getGroupIndexFromDroppableId(destination.droppableId);
 
-  console.error('destinationGroupIndex', destinationGroupIndex);
   if (
     indexIsValid({
       index: destinationGroupIndex,

@@ -266,7 +266,6 @@ export const queryTimelineById = <TCache>({
         if (onOpenTimeline != null) {
           onOpenTimeline(timeline);
         } else if (updateTimeline) {
-          console.error('updateTimeline', timeline, timelineType);
           const { from, to } = getTimeRangeSettings();
           updateTimeline({
             duplicate,
