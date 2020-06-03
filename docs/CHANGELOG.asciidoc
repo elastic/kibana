@@ -10,7 +10,7 @@
 
 This section summarizes the changes in each release.
 
-*<<release-notes-7.7.1>>
+* <<release-notes-7.7.1>>
 * <<release-notes-7.7.0>>
 * <<release-notes-7.6.2>>
 * <<release-notes-7.6.1>>
@@ -41,6 +41,15 @@ This section summarizes the changes in each release.
 == {kib} 7.7.1
 
 See <<breaking-changes-7.7,breaking changes in 7.7>>.
+
+[float]
+[[security-update-7.1.1]]
+=== Security update
+In {kib} 5.4.0 and later, TSVB visualizations contain a stored XSS flaw. Attackers that can 
+edit and create TSVB visualizations can obtain sensitive information, or perform 
+destructive actions, on behalf of the {kib} users who edit the TSVB visualization, CVE-2020-7015.
+
+You must upgrade to 7.7.1. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
 
 [float]
 [[bug-7.7.1]]
@@ -105,7 +114,8 @@ Platform::
 Security::
 * Allows IdP initiated SAML login with session containing expired token {pull}59686[#59686]
 SIEM::
-* Updates alert apiKey when the rule is updated {pull}67364[#67364]
+* Updates the alert apiKey when a rule is modified, so deactivating rule actions does not cause failures {pull}67364[#67364]
+* Corrects validation and error handling of PagerDuty action timestamps {pull}63954[#63954]
 * Fixes Network Map empty tooltip {pull}66828[#66828]
 * Changes find_statuses route HTTP method from GET to POST {pull}63508[#63508]
 Uptime::
