@@ -10,9 +10,9 @@ import * as labels from '../translations';
 import { AlertFieldNumber } from '../alert_field_number';
 
 interface Props {
-  setAlertParams: (key: string, value: any) => void;
-  hasFilters: boolean;
   defaultNumTimes?: number;
+  hasFilters: boolean;
+  setAlertParams: (key: string, value: any) => void;
 }
 
 export const DownNoExpressionSelect: React.FC<Props> = ({

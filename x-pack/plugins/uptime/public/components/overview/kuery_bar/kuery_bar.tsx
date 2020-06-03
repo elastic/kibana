@@ -36,19 +36,19 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 interface Props {
   'aria-label': string;
   autocomplete: DataPublicPluginSetup['autocomplete'];
-  updateDefaultKuery?: (value: string) => void;
   defaultKuery?: string;
   'data-test-subj': string;
   shouldUpdateUrl?: boolean;
+  updateDefaultKuery?: (value: string) => void;
 }
 
 export function KueryBar({
   'aria-label': ariaLabel,
   autocomplete: autocompleteService,
   defaultKuery,
-  updateDefaultKuery,
   'data-test-subj': dataTestSubj,
   shouldUpdateUrl,
+  updateDefaultKuery,
 }: Props) {
   const { loading, index_pattern: indexPattern } = useIndexPattern();
   const { updateSearchText } = useSearchText();

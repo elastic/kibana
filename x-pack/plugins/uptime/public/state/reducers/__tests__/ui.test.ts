@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setBasePath, toggleIntegrationsPopover, setAlertFlyoutVisible } from '../../actions';
+import {
+  setBasePath,
+  toggleIntegrationsPopover,
+  setAlertFlyoutVisible,
+  setSearchText,
+} from '../../actions';
 import { uiReducer } from '../ui';
 import { Action } from 'redux-actions';
 
@@ -64,6 +69,30 @@ describe('ui reducer', () => {
         "esKuery": "",
         "integrationsPopoverOpen": null,
         "searchText": "",
+      }
+    `);
+  });
+
+  it('sets the search text', () => {
+    const action = setSearchText('lorem ipsum') as Action<never>;
+    expect(
+      uiReducer(
+        {
+          alertFlyoutVisible: false,
+          basePath: '',
+          esKuery: '',
+          integrationsPopoverOpen: null,
+          searchText: '',
+        },
+        action
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "alertFlyoutVisible": false,
+        "basePath": "",
+        "esKuery": "",
+        "integrationsPopoverOpen": null,
+        "searchText": "lorem ipsum",
       }
     `);
   });

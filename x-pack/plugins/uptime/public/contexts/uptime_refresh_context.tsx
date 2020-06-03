@@ -5,16 +5,10 @@
  */
 
 import React, { createContext, useMemo, useState } from 'react';
-import { Store } from 'redux';
-import { triggerAppRefresh } from '../state/actions';
 
 interface UptimeRefreshContext {
   lastRefresh: number;
   refreshApp: () => void;
-}
-
-interface RefreshContextProps {
-  store: Store<any>;
 }
 
 const defaultContext: UptimeRefreshContext = {
@@ -26,20 +20,17 @@ const defaultContext: UptimeRefreshContext = {
 
 export const UptimeRefreshContext = createContext(defaultContext);
 
-export const UptimeRefreshContextProvider: React.FC<RefreshContextProps> = ({
-  children,
-  store,
-}) => {
+export const UptimeRefreshContextProvider: React.FC = ({ children }) => {
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
+  const refreshApp = () => {
+    const refreshTime = Date.now();
+    setLastRefresh(refreshTime);
+  };
+
   const value = useMemo(() => {
-    const refreshApp = () => {
-      const refreshTime = Date.now();
-      setLastRefresh(refreshTime);
-      store.dispatch(triggerAppRefresh(refreshTime));
-    };
     return { lastRefresh, refreshApp };
-  }, [lastRefresh, store]);
+  }, [lastRefresh]);
 
   return <UptimeRefreshContext.Provider value={value} children={children} />;
 };

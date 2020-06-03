@@ -96,7 +96,7 @@ const Application = (props: UptimeAppProps) => {
         <ReduxProvider store={store}>
           <KibanaContextProvider services={{ ...core, ...plugins }}>
             <Router basename={routerBasename}>
-              <UptimeRefreshContextProvider store={store}>
+              <UptimeRefreshContextProvider>
                 <UptimeSettingsContextProvider {...props}>
                   <UptimeThemeContextProvider darkMode={darkMode}>
                     <UptimeStartupPluginsContextProvider {...startPlugins}>

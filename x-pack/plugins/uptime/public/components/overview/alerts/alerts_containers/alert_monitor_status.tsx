@@ -33,11 +33,13 @@ export const AlertMonitorStatus: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   useEffect(() => {
+    // example output: `now-13h`
+    const dateRangeStart = `now-${alertParams?.timerangeCount ?? 15}${
+      alertParams?.timerangeUnit ?? 'd'
+    }`;
     dispatch(
       fetchOverviewFilters({
-        dateRangeStart: `now-${alertParams?.timerangeCount ?? 15}${
-          alertParams?.timerangeUnit ?? 'd'
-        }`,
+        dateRangeStart,
         dateRangeEnd: 'now',
         locations: alertParams.filters?.['observer.geo.name'] ?? [],
         ports: alertParams.filters?.['url.port'] ?? [],
