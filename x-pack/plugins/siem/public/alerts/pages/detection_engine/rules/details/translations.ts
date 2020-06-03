@@ -13,7 +13,7 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.ruleDetails
 export const BACK_TO_RULES = i18n.translate(
   'xpack.siem.detectionEngine.ruleDetails.backToRulesDescription',
   {
-    defaultMessage: 'Back to signal detection rules',
+    defaultMessage: 'Back to detection rules',
   }
 );
 

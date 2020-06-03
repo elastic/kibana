@@ -17,7 +17,6 @@ import {
 // NOTE: We have to use the Home component instead of the TemplateList component because we depend
 // upon react router to provide the name of the template to load in the detail panel.
 import { IndexManagementHome } from '../../../public/application/sections/home'; // eslint-disable-line @kbn/eslint/no-restricted-paths
-import { BASE_PATH } from '../../../common/constants';
 import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { TemplateDeserialized } from '../../../common';
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
@@ -25,8 +24,8 @@ import { WithAppDependencies, services, TestSubjects } from '../helpers';
 const testBedConfig: TestBedConfig = {
   store: () => indexManagementStore(services as any),
   memoryRouter: {
-    initialEntries: [`${BASE_PATH}indices?includeHidden=true`],
-    componentRoutePath: `${BASE_PATH}:section(indices|templates)`,
+    initialEntries: [`/indices?includeHidden=true`],
+    componentRoutePath: `/:section(indices|templates)`,
   },
   doMountAsync: true,
 };

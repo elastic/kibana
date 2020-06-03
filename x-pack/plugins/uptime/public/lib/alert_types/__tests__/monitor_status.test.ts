@@ -12,12 +12,9 @@ describe('monitor status alert type', () => {
 
     beforeEach(() => {
       params = {
-        locations: [],
         numTimes: 5,
-        timerange: {
-          from: 'now-15m',
-          to: 'now',
-        },
+        timerangeCount: 15,
+        timerangeUnit: 'm',
       };
     });
 
@@ -27,9 +24,9 @@ describe('monitor status alert type', () => {
           "errors": Object {
             "typeCheckFailure": "Provided parameters do not conform to the expected type.",
             "typeCheckParsingMessage": Array [
-              "Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/locations: Array<string>",
-              "Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/numTimes: number",
-              "Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/timerange: { from: string, to: string }",
+              "Invalid value undefined supplied to : ({ numTimes: number, timerangeCount: number, timerangeUnit: string } & Partial<{ search: string, filters: { monitor.type: Array<string>, observer.geo.name: Array<string>, tags: Array<string>, url.port: Array<string> } }>)/0: { numTimes: number, timerangeCount: number, timerangeUnit: string }/numTimes: number",
+              "Invalid value undefined supplied to : ({ numTimes: number, timerangeCount: number, timerangeUnit: string } & Partial<{ search: string, filters: { monitor.type: Array<string>, observer.geo.name: Array<string>, tags: Array<string>, url.port: Array<string> } }>)/0: { numTimes: number, timerangeCount: number, timerangeUnit: string }/timerangeCount: number",
+              "Invalid value undefined supplied to : ({ numTimes: number, timerangeCount: number, timerangeUnit: string } & Partial<{ search: string, filters: { monitor.type: Array<string>, observer.geo.name: Array<string>, tags: Array<string>, url.port: Array<string> } }>)/0: { numTimes: number, timerangeCount: number, timerangeUnit: string }/timerangeUnit: string",
             ],
           },
         }
@@ -37,88 +34,21 @@ describe('monitor status alert type', () => {
     });
 
     describe('timerange', () => {
-      it('is undefined', () => {
-        delete params.timerange;
-        expect(validate(params)).toMatchInlineSnapshot(`
+      it('has invalid timerangeCount value', () => {
+        expect(validate({ ...params, timerangeCount: 0 })).toMatchInlineSnapshot(`
           Object {
             "errors": Object {
-              "typeCheckFailure": "Provided parameters do not conform to the expected type.",
-              "typeCheckParsingMessage": Array [
-                "Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/timerange: { from: string, to: string }",
-              ],
+              "invalidTimeRangeValue": "Time range value must be greater than 0",
             },
           }
         `);
       });
 
-      it('is missing `from` or `to` value', () => {
-        expect(
-          validate({
-            ...params,
-            timerange: {},
-          })
-        ).toMatchInlineSnapshot(`
+      it('has NaN timerangeCount value', () => {
+        expect(validate({ ...params, timerangeCount: NaN })).toMatchInlineSnapshot(`
           Object {
             "errors": Object {
-              "typeCheckFailure": "Provided parameters do not conform to the expected type.",
-              "typeCheckParsingMessage": Array [
-                "Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/timerange: { from: string, to: string }/from: string",
-                "Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/timerange: { from: string, to: string }/to: string",
-              ],
-            },
-          }
-        `);
-      });
-
-      it('is invalid timespan', () => {
-        expect(
-          validate({
-            ...params,
-            timerange: {
-              from: 'now',
-              to: 'now-15m',
-            },
-          })
-        ).toMatchInlineSnapshot(`
-            Object {
-              "errors": Object {
-                "invalidTimeRange": "Time range start cannot exceed time range end",
-              },
-            }
-          `);
-      });
-
-      it('has unparseable `from` value', () => {
-        expect(
-          validate({
-            ...params,
-            timerange: {
-              from: 'cannot parse this to a date',
-              to: 'now',
-            },
-          })
-        ).toMatchInlineSnapshot(`
-          Object {
-            "errors": Object {
-              "timeRangeStartValueNaN": "Specified time range \`from\` is an invalid value",
-            },
-          }
-        `);
-      });
-
-      it('has unparseable `to` value', () => {
-        expect(
-          validate({
-            ...params,
-            timerange: {
-              from: 'now-15m',
-              to: 'cannot parse this to a date',
-            },
-          })
-        ).toMatchInlineSnapshot(`
-          Object {
-            "errors": Object {
-              "timeRangeEndValueNaN": "Specified time range \`to\` is an invalid value",
+              "timeRangeStartValueNaN": "Specified time range value must be a number",
             },
           }
         `);
@@ -133,7 +63,7 @@ describe('monitor status alert type', () => {
             "errors": Object {
               "typeCheckFailure": "Provided parameters do not conform to the expected type.",
               "typeCheckParsingMessage": Array [
-                "Invalid value undefined supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/numTimes: number",
+                "Invalid value undefined supplied to : ({ numTimes: number, timerangeCount: number, timerangeUnit: string } & Partial<{ search: string, filters: { monitor.type: Array<string>, observer.geo.name: Array<string>, tags: Array<string>, url.port: Array<string> } }>)/0: { numTimes: number, timerangeCount: number, timerangeUnit: string }/numTimes: number",
               ],
             },
           }
@@ -146,7 +76,7 @@ describe('monitor status alert type', () => {
             "errors": Object {
               "typeCheckFailure": "Provided parameters do not conform to the expected type.",
               "typeCheckParsingMessage": Array [
-                "Invalid value \\"this isn't a number\\" supplied to : (Partial<{ filters: string }> & { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } })/1: { locations: Array<string>, numTimes: number, timerange: { from: string, to: string } }/numTimes: number",
+                "Invalid value \\"this isn't a number\\" supplied to : ({ numTimes: number, timerangeCount: number, timerangeUnit: string } & Partial<{ search: string, filters: { monitor.type: Array<string>, observer.geo.name: Array<string>, tags: Array<string>, url.port: Array<string> } }>)/0: { numTimes: number, timerangeCount: number, timerangeUnit: string }/numTimes: number",
               ],
             },
           }
