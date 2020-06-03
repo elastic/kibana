@@ -529,7 +529,8 @@ export class EndpointDocGenerator {
    * @param alertAncestors - number of ancestor generations to create relative to the alert
    * @param childGenerations - number of child generations to create relative to the alert
    * @param maxChildrenPerNode - maximum number of children for any given node in the tree
-   * @param relatedEventsPerNode - Array of RelatedEventInfo objects describing the related events that should be generated for each process node
+   * @param relatedEventsPerNode - can be an array of RelatedEventInfo objects describing the related events that should be generated for each process node
+   *  or a number which defines the number of related events and will default to random categories
    * @param percentNodesWithRelated - percent of nodes which should have related events
    * @param percentTerminated - percent of nodes which will have process termination events
    * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
@@ -538,7 +539,7 @@ export class EndpointDocGenerator {
     alertAncestors?: number,
     childGenerations?: number,
     maxChildrenPerNode?: number,
-    relatedEventsPerNode?: RelatedEventInfo[],
+    relatedEventsPerNode?: RelatedEventInfo[] | number,
     percentNodesWithRelated?: number,
     percentTerminated?: number,
     alwaysGenMaxChildrenPerNode?: boolean
@@ -567,15 +568,14 @@ export class EndpointDocGenerator {
   /**
    * Creates an alert event and associated process ancestry. The alert event will always be the last event in the return array.
    * @param alertAncestors - number of ancestor generations to create
-   * @param relatedEventsPerNode - Array of RelatedEventInfo objects describing the related events that should be generated for each process node
+   * @param relatedEventsPerNode - can be an array of RelatedEventInfo objects describing the related events that should be generated for each process node
+   *  or a number which defines the number of related events and will default to random categories
    * @param pctWithRelated - percent of ancestors that will have related events
    * @param pctWithTerminated - percent of ancestors that will have termination events
    */
   public createAlertEventAncestry(
     alertAncestors = 3,
-    relatedEventsPerNode: RelatedEventInfo[] = [
-      { category: RelatedEventCategory.Random, count: 5 },
-    ],
+    relatedEventsPerNode: RelatedEventInfo[] | number = 5,
     pctWithRelated = 30,
     pctWithTerminated = 100
   ): Event[] {
@@ -655,7 +655,8 @@ export class EndpointDocGenerator {
    * @param root - The process event to use as the root node of the tree
    * @param generations - number of child generations to create. The root node is not counted as a generation.
    * @param maxChildrenPerNode - maximum number of children for any given node in the tree
-   * @param relatedEventsPerNode - Array of RelatedEventInfo objects describing the related events that should be generated for each process node
+   * @param relatedEventsPerNode - can be an array of RelatedEventInfo objects describing the related events that should be generated for each process node
+   *  or a number which defines the number of related events and will default to random categories
    * @param percentNodesWithRelated - percent of nodes which should have related events
    * @param percentChildrenTerminated - percent of nodes which will have process termination events
    * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
@@ -664,9 +665,7 @@ export class EndpointDocGenerator {
     root: Event,
     generations = 2,
     maxChildrenPerNode = 2,
-    relatedEventsPerNode: RelatedEventInfo[] = [
-      { category: RelatedEventCategory.Random, count: 3 },
-    ],
+    relatedEventsPerNode: RelatedEventInfo[] | number = 3,
     percentNodesWithRelated = 100,
     percentChildrenTerminated = 100,
     alwaysGenMaxChildrenPerNode = false
@@ -732,15 +731,22 @@ export class EndpointDocGenerator {
   /**
    * Creates related events for a process event
    * @param node - process event to relate events to by entityID
-   * @param relatedEvents - the categories of related events to generate with a specified count for each category
+   * @param relatedEvents - can be an array of RelatedEventInfo objects describing the related events that should be generated for each process node
+   *  or a number which defines the number of related events and will default to random categories
    * @param processDuration - maximum number of seconds after process event that related event timestamp can be
    */
   public *relatedEventsGenerator(
     node: Event,
-    relatedEvents: RelatedEventInfo[] = [{ category: RelatedEventCategory.Random, count: 10 }],
+    relatedEvents: RelatedEventInfo[] | number = 10,
     processDuration: number = 6 * 3600
   ) {
-    for (const event of relatedEvents) {
+    let relatedEventsInfo: RelatedEventInfo[];
+    if (typeof relatedEvents === 'number') {
+      relatedEventsInfo = [{ category: RelatedEventCategory.Random, count: relatedEvents }];
+    } else {
+      relatedEventsInfo = relatedEvents;
+    }
+    for (const event of relatedEventsInfo) {
       let eventInfo: EventInfo;
 
       for (let i = 0; i < event.count; i++) {

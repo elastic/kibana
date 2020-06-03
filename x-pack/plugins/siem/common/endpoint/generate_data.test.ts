@@ -232,7 +232,7 @@ describe('data generator', () => {
     let events: Event[];
 
     beforeEach(() => {
-      events = generator.createAlertEventAncestry(3, [], 0, 0);
+      events = generator.createAlertEventAncestry(3, 0, 0, 0);
     });
 
     it('with n-1 process events', () => {

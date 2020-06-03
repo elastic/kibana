@@ -191,7 +191,7 @@ export class StatsQuery extends ResolverQuery<StatsResult> {
     }
 
     /**
-     * The response for the events aggregation should look like this:
+     * The response for the events ids aggregation should look like this:
      * "aggregations" : {
      *  "ids" : {
      *    "doc_count_error_upper_bound" : 0,
