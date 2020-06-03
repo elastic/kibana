@@ -56,7 +56,7 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
     standardizationEnabled,
   } = form;
 
-  const isDepVarJob =
+  const isRegOrClassJob =
     jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
 
   const advancedFirstCol: ListItems[] = [];
@@ -128,7 +128,7 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
     });
   }
 
-  if (isDepVarJob) {
+  if (isRegOrClassJob) {
     if (jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) {
       advancedFirstCol.push({
         title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.numTopClasses', {

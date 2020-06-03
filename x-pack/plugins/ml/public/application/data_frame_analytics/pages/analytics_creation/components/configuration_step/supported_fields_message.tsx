@@ -34,13 +34,13 @@ const containsRegressionFieldsCb = ({ name, type }: Field) =>
 const containsOutlierFieldsCb = ({ name, type }: Field) =>
   !OMIT_FIELDS.includes(name) && name !== EVENT_RATE_FIELD_ID && BASIC_NUMERICAL_TYPES.has(type);
 
-const callbacks: any = {
+const callbacks: Record<ANALYSIS_CONFIG_TYPE, (f: Field) => boolean> = {
   [ANALYSIS_CONFIG_TYPE.CLASSIFICATION]: containsClassificationFieldsCb,
   [ANALYSIS_CONFIG_TYPE.REGRESSION]: containsRegressionFieldsCb,
   [ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION]: containsOutlierFieldsCb,
 };
 
-const messages: any = {
+const messages: Record<ANALYSIS_CONFIG_TYPE, JSX.Element> = {
   [ANALYSIS_CONFIG_TYPE.CLASSIFICATION]: (
     <FormattedMessage
       id="xpack.ml.dataframe.analytics.create.sourceObjectClassificationHelpText"

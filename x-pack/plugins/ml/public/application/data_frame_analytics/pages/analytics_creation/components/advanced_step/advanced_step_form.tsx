@@ -29,6 +29,10 @@ import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';
 import { OutlierHyperParameters } from './outlier_hyper_parameters';
 
+export function getNumberValue(value?: number) {
+  return value === undefined ? '' : +value;
+}
+
 export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   actions,
   state,
@@ -38,6 +42,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   const { form, isJobCreated } = state;
   const {
     computeFeatureInfluence,
+    featureInfluenceThreshold,
     jobType,
     modelMemoryLimit,
     modelMemoryLimitValidationResult,
@@ -132,6 +137,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             min={0}
             max={1}
             step={0.001}
+            value={getNumberValue(featureInfluenceThreshold)}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -187,7 +193,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
               })
             }
             step={1}
-            value={numTopFeatureImportanceValues}
+            value={getNumberValue(numTopFeatureImportanceValues)}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -257,7 +263,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
                   })
                 }
                 step={1}
-                value={numTopClasses}
+                value={getNumberValue(numTopClasses)}
               />
             </EuiFormRow>
           </EuiFlexItem>

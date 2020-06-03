@@ -34,7 +34,7 @@ import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';
 import { JobType } from './job_type';
 import { SupportedFieldsMessage } from './supported_fields_message';
-import { AnalysisFieldsTable } from './analysis_fields_table';
+import { MemoizedAnalysisFieldsTable } from './analysis_fields_table';
 import { DataGrid } from '../../../../../components/data_grid';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
@@ -405,7 +405,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       >
         <Fragment />
       </EuiFormRow>
-      <AnalysisFieldsTable
+      <MemoizedAnalysisFieldsTable
         excludes={excludes}
         tableItems={excludesTableItems}
         loadingItems={loadingFieldOptions}

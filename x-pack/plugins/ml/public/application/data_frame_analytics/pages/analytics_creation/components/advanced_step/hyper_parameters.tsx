@@ -8,13 +8,14 @@ import React, { FC, Fragment } from 'react';
 import { EuiFieldNumber, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { getNumberValue } from './advanced_step_form';
 
 const MAX_TREES_LIMIT = 2000;
 
 export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const { setFormState } = actions;
 
-  const { featureBagFraction, maxTrees, randomizeSeed } = state.form;
+  const { eta, featureBagFraction, gamma, lambda, maxTrees, randomizeSeed } = state.form;
 
   return (
     <Fragment>
@@ -39,6 +40,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
             }
             step={0.001}
             min={0}
+            value={getNumberValue(lambda)}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -66,6 +68,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
             step={1}
             min={1}
             max={MAX_TREES_LIMIT}
+            value={getNumberValue(maxTrees)}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -90,6 +93,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
             }
             step={0.001}
             min={0}
+            value={getNumberValue(gamma)}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -113,6 +117,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
             step={0.001}
             min={0.001}
             max={1}
+            value={getNumberValue(eta)}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -146,6 +151,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
             }
             step={0.001}
             max={1}
+            value={getNumberValue(featureBagFraction)}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -172,6 +178,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
               setFormState({ randomizeSeed: e.target.value === '' ? undefined : +e.target.value })
             }
             isInvalid={randomizeSeed !== undefined && typeof randomizeSeed !== 'number'}
+            value={getNumberValue(randomizeSeed)}
             step={1}
           />
         </EuiFormRow>

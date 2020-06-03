@@ -9,11 +9,12 @@ import { EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import { OUTLIER_ANALYSIS_METHOD } from '../../../../common/analytics';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { getNumberValue } from './advanced_step_form';
 
 export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const { setFormState } = actions;
 
-  const { method, standardizationEnabled } = state.form;
+  const { method, nNeighbors, outlierFraction, standardizationEnabled } = state.form;
 
   return (
     <Fragment>
@@ -65,6 +66,7 @@ export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, 
             }
             step={1}
             min={1}
+            value={getNumberValue(nNeighbors)}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -93,6 +95,7 @@ export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, 
             step={0.001}
             min={0}
             max={1}
+            value={getNumberValue(outlierFraction)}
           />
         </EuiFormRow>
       </EuiFlexItem>
