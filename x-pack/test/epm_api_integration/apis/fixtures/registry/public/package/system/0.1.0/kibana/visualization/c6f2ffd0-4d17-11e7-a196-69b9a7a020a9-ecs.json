@@ -1,0 +1,21 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Number of hosts [Metrics System] ECS",
+    "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}}",
+    "version": 1,
+    "visState": "{\"aggs\":[{\"enabled\":true,\"id\":\"1\",\"params\":{\"customLabel\":\"Number of hosts\",\"field\":\"host.name\"},\"schema\":\"metric\",\"type\":\"cardinality\"}],\"params\":{\"addLegend\":false,\"addTooltip\":true,\"gauge\":{\"autoExtend\":false,\"backStyle\":\"Full\",\"colorSchema\":\"Green to Red\",\"colorsRange\":[{\"from\":0,\"to\":100}],\"gaugeColorMode\":\"None\",\"gaugeStyle\":\"Full\",\"gaugeType\":\"Metric\",\"invertColors\":false,\"labels\":{\"color\":\"black\",\"show\":false},\"orientation\":\"vertical\",\"percentageMode\":false,\"scale\":{\"color\":\"#333\",\"labels\":false,\"show\":false,\"width\":2},\"style\":{\"bgColor\":false,\"bgFill\":\"#000\",\"fontSize\":\"63\",\"labelColor\":false,\"subText\":\"\"},\"type\":\"simple\",\"useRange\":false,\"verticalSplit\":false},\"type\":\"gauge\"},\"title\":\"Number of hosts [Metrics System] ECS\",\"type\":\"metric\"}"
+  },
+  "id": "c6f2ffd0-4d17-11e7-a196-69b9a7a020a9-ecs",
+  "references": [
+    {
+      "id": "metrics-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization"
+}

@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Disk IO (Bytes) [Metrics System] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"filter\":\"\",\"id\":\"d3c67db0-1b1a-11e7-b09e-037021c4f8df\",\"index_pattern\":\"metrics-*\",\"interval\":\"auto\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(22,165,165,1)\",\"fill\":\"1\",\"formatter\":\"bytes\",\"id\":\"d3c67db1-1b1a-11e7-b09e-037021c4f8df\",\"label\":\"reads\",\"line_width\":1,\"metrics\":[{\"field\":\"system.diskio.read.bytes\",\"id\":\"d3c67db2-1b1a-11e7-b09e-037021c4f8df\",\"type\":\"max\"},{\"field\":\"d3c67db2-1b1a-11e7-b09e-037021c4f8df\",\"id\":\"f55b9910-1b1a-11e7-b09e-037021c4f8df\",\"type\":\"derivative\",\"unit\":\"1s\"},{\"field\":\"f55b9910-1b1a-11e7-b09e-037021c4f8df\",\"id\":\"dcbbb100-1b93-11e7-8ada-3df93aab833e\",\"type\":\"positive_only\",\"unit\":\"\"}],\"point_size\":\"0\",\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"everything\",\"stacked\":\"none\",\"value_template\":\"{{value}}/s\"},{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(251,158,0,1)\",\"fill\":\"1\",\"formatter\":\"bytes\",\"id\":\"144124d0-1b1b-11e7-b09e-037021c4f8df\",\"label\":\"writes\",\"line_width\":1,\"metrics\":[{\"field\":\"system.diskio.write.bytes\",\"id\":\"144124d1-1b1b-11e7-b09e-037021c4f8df\",\"type\":\"max\"},{\"field\":\"144124d1-1b1b-11e7-b09e-037021c4f8df\",\"id\":\"144124d2-1b1b-11e7-b09e-037021c4f8df\",\"type\":\"derivative\",\"unit\":\"1s\"},{\"id\":\"144124d4-1b1b-11e7-b09e-037021c4f8df\",\"script\":\"params.rate \\u003e 0 ? params.rate * -1 : 0\",\"type\":\"calculation\",\"variables\":[{\"field\":\"144124d2-1b1b-11e7-b09e-037021c4f8df\",\"id\":\"144124d3-1b1b-11e7-b09e-037021c4f8df\",\"name\":\"rate\"}]}],\"point_size\":\"0\",\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"everything\",\"stacked\":\"none\",\"value_template\":\"{{value}}/s\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"timeseries\"},\"title\":\"Disk IO (Bytes) [Metrics System] ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "4e4bb1e0-1b1b-11e7-b09e-037021c4f8df-ecs",
+  "references": [],
+  "type": "visualization"
+}

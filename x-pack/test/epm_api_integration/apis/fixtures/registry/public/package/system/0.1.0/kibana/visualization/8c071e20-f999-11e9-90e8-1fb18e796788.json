@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Top Services By Memory Usage [Metrics System]",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"bar_color_rules\":[{\"id\":\"5af08c50-f998-11e9-ac67-272468589910\"}],\"default_index_pattern\":\"metrics-*\",\"default_timefield\":\"@timestamp\",\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"index_pattern\":\"\",\"interval\":\"\",\"isModelInvalid\":false,\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"bytes\",\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"line_width\":1,\"metrics\":[{\"field\":\"system.service.resources.memory.usage.bytes\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"avg\"}],\"point_size\":1,\"separate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"system.service.name\",\"terms_order_by\":\"61ca57f2-469d-11e7-af02-69e470af7417\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"\",\"type\":\"top_n\"},\"title\":\"Top Services By Memory Usage [Metrics System]\",\"type\":\"metrics\"}"
+  },
+  "id": "8c071e20-f999-11e9-90e8-1fb18e796788",
+  "references": [],
+  "type": "visualization"
+}

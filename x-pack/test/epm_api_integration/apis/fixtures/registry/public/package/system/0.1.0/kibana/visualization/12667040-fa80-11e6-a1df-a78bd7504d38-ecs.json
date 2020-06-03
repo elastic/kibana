@@ -1,0 +1,22 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[]}"
+    },
+    "savedSearchRefName": "search_0",
+    "title": "New groups [Logs System] ECS",
+    "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+    "version": 1,
+    "visState": "{\"aggs\":[{\"enabled\":true,\"id\":\"1\",\"params\":{},\"schema\":\"metric\",\"type\":\"count\"},{\"enabled\":true,\"id\":\"2\",\"params\":{\"field\":\"group.name\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":5},\"schema\":\"bucket\",\"type\":\"terms\"},{\"enabled\":true,\"id\":\"3\",\"params\":{\"field\":\"group.id\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":5},\"schema\":\"bucket\",\"type\":\"terms\"}],\"listeners\":{},\"params\":{\"perPage\":10,\"showMeticsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\"},\"title\":\"New groups ECS\",\"type\":\"table\"}"
+  },
+  "id": "12667040-fa80-11e6-a1df-a78bd7504d38-ecs",
+  "references": [
+    {
+      "id": "eb0039f0-fa7f-11e6-a1df-a78bd7504d38-ecs",
+      "name": "search_0",
+      "type": "search"
+    }
+  ],
+  "type": "visualization"
+}

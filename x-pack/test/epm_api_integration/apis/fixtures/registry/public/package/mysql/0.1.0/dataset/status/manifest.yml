@@ -1,0 +1,21 @@
+title: MySQL status metrics
+type: metrics
+release: beta
+streams:
+- input: mysql/metrics
+  vars:
+  - name: period
+    type: text
+    title: Period
+    required: true
+    show_user: true
+    default: 10s
+  - name: raw
+    type: bool
+    title: Raw
+    description: >
+      When enabled, in addition to the existing data structure, all fields available from the mysql service through
+      "SHOW /*!50002 GLOBAL */ STATUS;" will be added to the event.
+    default: false
+  title: MySQL status metrics
+  description: Collect MySQL status metrics

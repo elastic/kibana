@@ -1,0 +1,55 @@
+- name: nginx.ingress_controller
+  type: group
+  fields:
+  - name: remote_ip_list
+    type: array
+    description: |
+      An array of remote IP addresses. It is a list because it is common to include, besides the client IP address, IP addresses from headers like `X-Forwarded-For`. Real source IP is restored to `source.ip`.
+  - name: http.request.length
+    type: long
+    format: bytes
+    description: |
+      The request length (including request line, header, and request body)
+  - name: http.request.time
+    type: double
+    format: duration
+    description: |
+      Time elapsed since the first bytes were read from the client
+  - name: upstream.name
+    type: text
+    description: |
+      The name of the upstream.
+  - name: upstream.alternative_name
+    type: text
+    description: |
+      The name of the alternative upstream.
+  - name: upstream.response.length
+    type: long
+    format: bytes
+    description: |
+      The length of the response obtained from the upstream server
+  - name: upstream.response.time
+    type: double
+    format: duration
+    description: |
+      The time spent on receiving the response from the upstream server as seconds with millisecond resolution
+  - name: upstream.response.status_code
+    type: long
+    description: |
+      The status code of the response obtained from the upstream server
+  - name: http.request.id
+    type: text
+    description: |
+      The randomly generated ID of the request
+  - name: upstream.ip
+    type: ip
+    description: |
+      The IP address of the upstream server. If several servers were contacted during request processing, their addresses are separated by commas.
+  - name: upstream.port
+    type: long
+    description: |
+      The port of the upstream server.
+  - name: user_agent
+    type: group
+  - name: geoip
+    type: group

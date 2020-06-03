@@ -1,0 +1,21 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Container CPU usage [Metrics System] ECS",
+    "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+    "version": 1,
+    "visState": "{\"aggs\":[{\"enabled\":true,\"id\":\"1\",\"params\":{\"customLabel\":\"CPU user\",\"field\":\"system.process.cgroup.cpuacct.stats.user.ns\"},\"schema\":\"metric\",\"type\":\"max\"},{\"enabled\":true,\"id\":\"2\",\"params\":{\"customLabel\":\"CPU quota\",\"field\":\"system.process.cgroup.cpu.cfs.quota.us\"},\"schema\":\"metric\",\"type\":\"max\"},{\"enabled\":true,\"id\":\"3\",\"params\":{\"customLabel\":\"Container ID\",\"field\":\"system.process.cgroup.id\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":5},\"schema\":\"bucket\",\"type\":\"terms\"},{\"enabled\":true,\"id\":\"4\",\"params\":{\"customLabel\":\"CPU throttling\",\"field\":\"system.process.cgroup.cpu.stats.throttled.ns\"},\"schema\":\"metric\",\"type\":\"max\"},{\"enabled\":true,\"id\":\"5\",\"params\":{\"customLabel\":\"CPU kernel\",\"field\":\"system.process.cgroup.cpuacct.stats.system.ns\"},\"schema\":\"metric\",\"type\":\"max\"},{\"enabled\":true,\"id\":\"6\",\"params\":{\"customLabel\":\"Process name\",\"field\":\"process.name\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":5},\"schema\":\"bucket\",\"type\":\"terms\"}],\"params\":{\"perPage\":10,\"showMeticsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\"},\"title\":\"Container CPU usage [Metrics System] ECS\",\"type\":\"table\"}"
+  },
+  "id": "Container-CPU-usage-ecs",
+  "references": [
+    {
+      "id": "metrics-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization"
+}

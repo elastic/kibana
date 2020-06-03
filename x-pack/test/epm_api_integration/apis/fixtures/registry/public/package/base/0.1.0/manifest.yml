@@ -1,0 +1,30 @@
+format_version: 1.0.0
+
+name: base
+title: Base package
+description: >
+  The base package contains assets which are needed for the basic setup of the stack.
+
+  It contains the default ILM policies.
+version: 0.1.0
+categories: []
+release: ga
+
+# The base package cannot be removed
+removable: false
+
+# The user should not see this package and not be able to install it
+internal: true
+
+license: basic
+# This is called type integration because it is required for all the integration packages
+type: integration
+
+requirement:
+  elasticsearch:
+    # Requires ILM which was released in 6.6.
+    versions: ">6.6.0"
+
+# No icons
+icons:
+

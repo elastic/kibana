@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Swap usage [Metrics System] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"filter\":\"\",\"gauge_color_rules\":[{\"gauge\":\"rgba(104,188,0,1)\",\"id\":\"d17c1e90-4d59-11e7-aee5-fdc812cc3bec\",\"operator\":\"gte\",\"value\":0},{\"gauge\":\"rgba(251,158,0,1)\",\"id\":\"fc1d3490-4d59-11e7-aee5-fdc812cc3bec\",\"operator\":\"gte\",\"value\":0.7},{\"gauge\":\"rgba(211,49,21,1)\",\"id\":\"0e204240-4d5a-11e7-aee5-fdc812cc3bec\",\"operator\":\"gte\",\"value\":0.85}],\"gauge_inner_width\":10,\"gauge_max\":\"\",\"gauge_style\":\"half\",\"gauge_width\":10,\"id\":\"cee2fd20-4d59-11e7-aee5-fdc812cc3bec\",\"index_pattern\":\"metrics-*\",\"interval\":\"auto\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"percent\",\"id\":\"cee2fd21-4d59-11e7-aee5-fdc812cc3bec\",\"label\":\"Swap usage\",\"line_width\":1,\"metrics\":[{\"field\":\"system.memory.swap.used.pct\",\"id\":\"cee2fd22-4d59-11e7-aee5-fdc812cc3bec\",\"type\":\"avg\"}],\"point_size\":1,\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"everything\",\"stacked\":\"none\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"gauge\"},\"title\":\"Swap usage [Metrics System] ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "19e123b0-4d5a-11e7-aee5-fdc812cc3bec-ecs",
+  "references": [],
+  "type": "visualization"
+}

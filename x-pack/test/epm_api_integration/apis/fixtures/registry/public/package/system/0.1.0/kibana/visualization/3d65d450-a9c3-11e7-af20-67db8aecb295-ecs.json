@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "title": "Tip [Metrics System] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"fontSize\":12,\"markdown\":\"**TIP:** To select another host, go to the [System Overview](#/dashboard/Metrics-system-overview-ecs) dashboard and double-click a host name.\"},\"title\":\"Tip [Metrics System] ECS\",\"type\":\"markdown\"}"
+  },
+  "id": "3d65d450-a9c3-11e7-af20-67db8aecb295-ecs",
+  "references": [],
+  "type": "visualization"
+}

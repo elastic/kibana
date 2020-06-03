@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Disk Usage [Metrics System] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"bar_color_rules\":[{\"bar_color\":\"rgba(104,188,0,1)\",\"id\":\"bf525310-1b95-11e7-8ada-3df93aab833e\",\"operator\":\"gte\",\"value\":0},{\"bar_color\":\"rgba(254,146,0,1)\",\"id\":\"125fc4c0-1b96-11e7-8ada-3df93aab833e\",\"operator\":\"gte\",\"value\":0.7},{\"bar_color\":\"rgba(211,49,21,1)\",\"id\":\"1a5c7240-1b96-11e7-8ada-3df93aab833e\",\"operator\":\"gte\",\"value\":0.85}],\"default_index_pattern\":\"metrics-*\",\"default_timefield\":\"@timestamp\",\"drilldown_url\":\"\",\"filter\":{\"language\":\"lucene\",\"query\":\"-system.filesystem.mount_point:\\\\/run* AND -system.filesystem.mount_point:\\\\/sys* AND -system.filesystem.mount_point:\\\\/dev* AND -system.filesystem.mount_point:\\\\/proc* AND -system.filesystem.mount_point:\\\\/var* AND -system.filesystem.mount_point:\\\\/boot\"},\"id\":\"9f7e48a0-1b95-11e7-8ada-3df93aab833e\",\"index_pattern\":\"metrics-*\",\"interval\":\"auto\",\"isModelInvalid\":false,\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"percent\",\"id\":\"9f7e48a1-1b95-11e7-8ada-3df93aab833e\",\"line_width\":1,\"metrics\":[{\"agg_with\":\"avg\",\"field\":\"system.filesystem.used.pct\",\"id\":\"9f7e48a2-1b95-11e7-8ada-3df93aab833e\",\"order\":\"desc\",\"order_by\":\"@timestamp\",\"size\":1,\"type\":\"top_hit\"}],\"point_size\":1,\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"system.filesystem.mount_point\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"time_range_mode\":\"entire_time_range\",\"type\":\"top_n\"},\"title\":\"Disk Usage [Metrics System] ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "34f97ee0-1b96-11e7-8ada-3df93aab833e-ecs",
+  "references": [],
+  "type": "visualization"
+}

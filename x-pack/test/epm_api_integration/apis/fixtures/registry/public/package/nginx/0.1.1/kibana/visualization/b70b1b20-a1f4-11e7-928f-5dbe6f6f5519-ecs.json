@@ -1,0 +1,18 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "title": "Response codes over time [Logs Nginx] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"filter\":{\"language\":\"lucene\",\"query\":\"stream.dataset:nginx.access\"},\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"index_pattern\":\"logs-*\",\"interval\":\"auto\",\"legend_position\":\"bottom\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"bar\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"number\",\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"label\":\"\",\"line_width\":1,\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"count\"}],\"point_size\":1,\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_filters\":[{\"color\":\"#68BC00\",\"filter\":{\"language\":\"lucene\",\"query\":\"http.response.status_code:[200 TO 299]\"},\"id\":\"5acdc750-a29d-11e7-a062-a1c3587f4874\",\"label\":\"200s\"},{\"color\":\"rgba(252,196,0,1)\",\"filter\":{\"language\":\"lucene\",\"query\":\"http.response.status_code:[300 TO 399]\"},\"id\":\"6efd2ae0-a29d-11e7-a062-a1c3587f4874\",\"label\":\"300s\"},{\"color\":\"rgba(211,49,21,1)\",\"filter\":{\"language\":\"lucene\",\"query\":\"http.response.status_code:[400 TO 499]\"},\"id\":\"76089a90-a29d-11e7-a062-a1c3587f4874\",\"label\":\"400s\"},{\"color\":\"rgba(171,20,158,1)\",\"filter\":{\"language\":\"lucene\",\"query\":\"http.response.status_code:[500 TO 599]\"},\"id\":\"7c7929d0-a29d-11e7-a062-a1c3587f4874\",\"label\":\"500s\"}],\"split_mode\":\"filters\",\"stacked\":\"stacked\",\"terms_field\":\"http.response.status_code\",\"terms_order_by\":\"61ca57f2-469d-11e7-af02-69e470af7417\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"timeseries\"},\"title\":\"Response codes over time [Logs Nginx] ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "b70b1b20-a1f4-11e7-928f-5dbe6f6f5519-ecs",
+  "migrationVersion": {
+    "visualization": "7.8.0"
+  },
+  "references": [],
+  "type": "visualization"
+}

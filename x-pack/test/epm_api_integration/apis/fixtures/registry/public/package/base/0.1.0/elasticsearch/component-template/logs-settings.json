@@ -1,0 +1,21 @@
+{
+    "template": {
+        "settings": {
+            "index": {
+                "lifecycle": {
+                    "name": "logs-default"
+                },
+                "codec": "best_compression",
+                "refresh_interval": "5s",
+                "number_of_shards": "1",
+                "query": {
+                    "default_field": [
+                        "message"
+                    ]
+                },
+                "number_of_routing_shards": "30"
+            }
+        },
+        "aliases": {}
+    }
+}

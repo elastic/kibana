@@ -1,0 +1,10 @@
+{
+  "index_patterns": [
+      "metrics-*-*"
+  ],
+  "priority": 0,
+  "composed_of": [
+      "metrics-mappings",
+      "metrics-settings"
+  ]
+}

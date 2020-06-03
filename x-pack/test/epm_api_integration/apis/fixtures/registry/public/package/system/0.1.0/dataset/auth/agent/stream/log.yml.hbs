@@ -1,0 +1,14 @@
+paths:
+{{#each paths as |path i|}}
+ - {{path}}
+{{/each}}
+exclude_files: [".gz$"]
+multiline:
+  pattern: "^\\s"
+  match: after
+processors:
+  - add_locale: ~
+  - add_fields:
+      target: ''
+      fields:
+        ecs.version: 1.5.0

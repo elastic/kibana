@@ -1,0 +1,25 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[]}"
+    },
+    "savedSearchRefName": "search_0",
+    "title": "Slow queries over time [Logs MySQL] ECS",
+    "uiStateJSON": "{\"vis\":{\"colors\":{\"Slow queries\":\"#EF843C\"}}}",
+    "version": 1,
+    "visState": "{\"aggs\":[{\"enabled\":true,\"id\":\"1\",\"params\":{\"customLabel\":\"Slow queries\"},\"schema\":\"metric\",\"type\":\"count\"},{\"enabled\":true,\"id\":\"2\",\"params\":{\"extended_bounds\":{},\"field\":\"@timestamp\",\"interval\":\"auto\",\"min_doc_count\":1},\"schema\":\"segment\",\"type\":\"date_histogram\"}],\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"labels\":{\"show\":true,\"truncate\":100},\"position\":\"bottom\",\"scale\":{\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"@timestamp per 30 seconds\"},\"type\":\"category\"}],\"defaultYExtents\":false,\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"legendPosition\":\"right\",\"mode\":\"stacked\",\"scale\":\"linear\",\"seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":\"Slow queries\"},\"drawLinesBetweenPoints\":true,\"mode\":\"stacked\",\"show\":\"true\",\"showCircles\":true,\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,\"shareYAxis\":true,\"times\":[],\"type\":\"histogram\",\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":{\"mode\":\"normal\",\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"Slow queries\"},\"type\":\"value\"}],\"yAxis\":{}},\"title\":\"Slow queries over time [Logs MySQL] ECS\",\"type\":\"histogram\"}"
+  },
+  "id": "MySQL-Slow-queries-over-time-ecs",
+  "migrationVersion": {
+    "visualization": "7.8.0"
+  },
+  "references": [
+    {
+      "id": "Logs-MySQL-Slow-log-ecs",
+      "name": "search_0",
+      "type": "search"
+    }
+  ],
+  "type": "visualization"
+}

@@ -1,0 +1,29 @@
+- name: source
+  title: Source
+  group: 2
+  type: group
+  fields:
+  - name: domain
+    level: core
+    type: keyword
+    description: Source domain.
+    ignore_above: 1024
+  - name: ip
+    level: core
+    type: ip
+    description: IP address of the source (IPv4 or IPv6).
+- name: user
+  title: User
+  group: 2
+  type: group
+  fields:
+  - name: name
+    level: core
+    type: keyword
+    description: Short name or login of the user.
+    ignore_above: 1024
+    multi_fields:
+    - name: text
+      type: text
+      norms: false
+      default_field: false

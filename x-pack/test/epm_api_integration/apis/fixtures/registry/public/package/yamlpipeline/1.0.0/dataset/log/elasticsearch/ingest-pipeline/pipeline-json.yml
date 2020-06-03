@@ -1,0 +1,32 @@
+---
+description: Pipeline for dissecting CoreDNS JSON logs.
+processors:
+  - rename:
+      field: message
+      target_field: event.original
+      ignore_failure: true
+  - json:
+      field: event.original
+      target_field: json
+  - dissect:
+      field: json.message
+      pattern: '%{timestamp} [%{log.level}] %{temp.source} - %{dns.id} "%{dns.question.type}
+      %{dns.question.class} %{dns.question.name} %{network.transport} %{coredns.query.size}
+      %{coredns.dnssec_ok} %{?bufsize}" %{dns.response_code} %{dns.header_flags}
+      %{coredns.response.size} %{coredns.duration}s'
+  - rename:
+      field: json.message
+      target_field: message
+      ignore_failure: true
+  - rename:
+      field: json.kubernetes
+      target_field: kubernetes
+      ignore_failure: true
+  - remove:
+      field:
+        - json
+      ignore_failure: true
+on_failure:
+  - set:
+      field: error.message
+      value: "{{ _ingest.on_failure_message }}"

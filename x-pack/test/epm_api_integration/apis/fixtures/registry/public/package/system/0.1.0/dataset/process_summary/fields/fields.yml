@@ -1,0 +1,37 @@
+- name: system.process.summary
+  title: Process Summary
+  type: group
+  release: ga
+  fields:
+  - name: total
+    type: long
+    description: |
+      Total number of processes on this host.
+  - name: running
+    type: long
+    description: |
+      Number of running processes on this host.
+  - name: idle
+    type: long
+    description: |
+      Number of idle processes on this host.
+  - name: sleeping
+    type: long
+    description: |
+      Number of sleeping processes on this host.
+  - name: stopped
+    type: long
+    description: |
+      Number of stopped processes on this host.
+  - name: zombie
+    type: long
+    description: |
+      Number of zombie processes on this host.
+  - name: dead
+    type: long
+    description: |
+      Number of dead processes on this host. It's very unlikely that it will appear but in some special situations it may happen.
+  - name: unknown
+    type: long
+    description: |
+      Number of processes for which the state couldn't be retrieved or is unknown.

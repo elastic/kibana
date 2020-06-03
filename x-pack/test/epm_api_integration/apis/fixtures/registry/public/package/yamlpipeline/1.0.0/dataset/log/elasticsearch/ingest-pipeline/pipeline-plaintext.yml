@@ -1,0 +1,13 @@
+---
+description: Pipeline for dissecting CoreDNS plaintext logs.
+processors:
+  - dissect:
+      field: message
+      pattern: '%{timestamp} [%{log.level}] %{temp.source} - %{dns.id} "%{dns.question.type}
+      %{dns.question.class} %{dns.question.name} %{network.transport} %{coredns.query.size}
+      %{coredns.dnssec_ok} %{?bufsize}" %{dns.response_code} %{dns.header_flags}
+      %{coredns.response.size} %{coredns.duration}s'
+on_failure:
+  - set:
+      field: error.message
+      value: "{{ _ingest.on_failure_message }}"

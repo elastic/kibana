@@ -37,7 +37,7 @@ target
 /x-pack/legacy/plugins/infra/public/graphql/types.ts
 /x-pack/legacy/plugins/infra/server/graphql/types.ts
 /x-pack/legacy/plugins/maps/public/vendor/**
-
+/x-pack/test/epm_api_integration/apis/fixtures/**
 # package overrides
 /packages/eslint-config-kibana
 /packages/kbn-interpreter/src/common/lib/grammar.js

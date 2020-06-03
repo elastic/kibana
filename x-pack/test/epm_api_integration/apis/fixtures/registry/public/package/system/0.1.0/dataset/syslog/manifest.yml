@@ -1,0 +1,24 @@
+title: System syslog logs
+release: experimental
+type: logs
+streams:
+- input: logs
+  vars:
+  - name: paths
+    type: text
+    title: Paths
+    multi: true
+    required: true
+    show_user: true
+    default:
+    - /var/log/messages*
+    - /var/log/syslog*
+    os:
+      darwin:
+        default:
+        - /var/log/system.log*
+      windows:
+        default: []
+  template_path: log.yml.hbs
+  title: System syslog logs (log)
+  description: Collect System syslog logs using log input

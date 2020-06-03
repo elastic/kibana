@@ -1,0 +1,24 @@
+title: System filesystem metrics
+release: experimental
+type: metrics
+streams:
+- input: system/metrics
+  vars:
+  - name: period
+    type: text
+    title: Period
+    multi: false
+    required: true
+    show_user: true
+    default: 1m
+  - name: processors
+    type: yaml
+    title: Processors
+    multi: false
+    required: true
+    show_user: true
+    default: |
+      - drop_event.when.regexp:
+          system.filesystem.mount_point: ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
+  title: System filesystem metrics
+  description: Collect System filesystem metrics

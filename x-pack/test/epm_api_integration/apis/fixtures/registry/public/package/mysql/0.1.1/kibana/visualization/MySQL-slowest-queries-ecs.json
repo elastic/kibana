@@ -1,0 +1,25 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[]}"
+    },
+    "savedSearchRefName": "search_0",
+    "title": "Top slowest queries [Logs MySQL] ECS",
+    "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+    "version": 1,
+    "visState": "{\"aggs\":[{\"enabled\":true,\"id\":\"1\",\"params\":{\"customLabel\":\"Query time\",\"field\":\"event.duration\"},\"schema\":\"metric\",\"type\":\"max\"},{\"enabled\":true,\"id\":\"2\",\"params\":{\"customLabel\":\"Query\",\"field\":\"mysql.slowlog.query\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":5},\"schema\":\"bucket\",\"type\":\"terms\"},{\"enabled\":true,\"id\":\"3\",\"params\":{\"customLabel\":\"User\",\"field\":\"user.name\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":5},\"schema\":\"bucket\",\"type\":\"terms\"}],\"params\":{\"perPage\":10,\"showMeticsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\"},\"title\":\"Top slowest queries [Logs MySQL] ECS\",\"type\":\"table\"}"
+  },
+  "id": "MySQL-slowest-queries-ecs",
+  "migrationVersion": {
+    "visualization": "7.8.0"
+  },
+  "references": [
+    {
+      "id": "Logs-MySQL-Slow-log-ecs",
+      "name": "search_0",
+      "type": "search"
+    }
+  ],
+  "type": "visualization"
+}

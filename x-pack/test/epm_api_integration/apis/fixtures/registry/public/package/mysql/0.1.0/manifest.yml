@@ -1,0 +1,59 @@
+format_version: 1.0.0
+name: mysql
+title: MySQL
+version: 0.1.0
+license: basic
+description: MySQL Integration
+type: integration
+categories:
+- logs
+- metrics
+release: beta
+removable: true
+requirement:
+  kibana:
+    versions: '>=7.3.1 <8.0.0'
+  elasticsearch:
+    versions: '>7.0.1'
+screenshots:
+- src: /img/kibana-mysql.png
+  title: kibana mysql
+  size: 1227x1026
+  type: image/png
+- src: /img/metricbeat-mysql.png
+  title: metricbeat mysql
+  size: 2562x2540
+  type: image/png
+icons:
+- src: /img/logo_mysql.svg
+  title: logo mysql
+  size: 32x32
+  type: image/svg+xml
+datasources:
+- name: mysql
+  title: MySQL logs and metrics
+  description: Collect logs and metrics from MySQL instances
+  inputs:
+  - type: logs
+    title: Collect logs from MySQL hosts
+    description: Collecting MySQL error and slowlog logs
+  - type: mysql/metrics
+    title: Collect metrics from MySQL hosts
+    description: Collecting MySQL status and galera_status metrics
+    vars:
+      - name: hosts
+        type: text
+        title: MySQL DSN
+        multi: true
+        required: true
+        show_user: true
+        default:
+          - tcp(127.0.0.1:3306)/
+      - name: username
+        type: text
+        title: Username
+        default: root
+      - name: password
+        type: password
+        title: Password
+        default: test

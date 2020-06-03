@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import path from 'path';
+
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { defineDockerServersConfig } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
@@ -12,6 +15,25 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     testFiles: [require.resolve('./apis')],
     servers: xPackAPITestsConfig.get('servers'),
+    dockerServers: defineDockerServersConfig(
+      process.env.INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT
+        ? {
+            registry: {
+              image: 'docker.elastic.co/package-registry/package-registry:master',
+              portInContainer: 8080,
+              port: process.env.INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT,
+              waitForLogLine: 'package manifests loaded into memory',
+              args: [
+                '-v',
+                `${path.join(
+                  path.dirname(__filename),
+                  './apis/fixtures/registry/public'
+                )}:/registry/public`,
+              ],
+            },
+          }
+        : {}
+    ),
     services: {
       supertest: xPackAPITestsConfig.get('services.supertest'),
       es: xPackAPITestsConfig.get('services.es'),
@@ -28,7 +50,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.ingestManager.epm.registryUrl=http://localhost:6666',
+        `--xpack.ingestManager.epm.registryUrl=http://localhost:${process.env.INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT}`,
       ],
     },
   };

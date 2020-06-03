@@ -1,0 +1,7 @@
+title: System entropy metrics
+release: experimental
+type: metrics
+streams:
+- input: system/metrics
+  title: System entropy metrics
+  description: Collect System entropy metrics

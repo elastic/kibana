@@ -1,0 +1,33 @@
+{
+  "attributes": {
+    "columns": [
+      "user.name",
+      "user.id",
+      "group.id",
+      "system.auth.useradd.home",
+      "system.auth.useradd.shell"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"system.auth.useradd:*\"}}"
+    },
+    "sort": [
+      [
+        "@timestamp",
+        "desc"
+      ]
+    ],
+    "title": "useradd logs [Logs System] ECS",
+    "version": 1
+  },
+  "id": "8030c1b0-fa77-11e6-ae9b-81e5311e8cab-ecs",
+  "references": [
+    {
+      "id": "logs-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}

@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "CPU Usage Gauge [Metrics System] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"filter\":\"\",\"gauge_color_rules\":[{\"gauge\":\"rgba(104,188,0,1)\",\"id\":\"4ef2c3b0-1b91-11e7-bec4-a5e9ec5cab8b\",\"operator\":\"gte\",\"value\":0},{\"gauge\":\"rgba(254,146,0,1)\",\"id\":\"e6561ae0-1b91-11e7-bec4-a5e9ec5cab8b\",\"operator\":\"gte\",\"value\":0.7},{\"gauge\":\"rgba(211,49,21,1)\",\"id\":\"ec655040-1b91-11e7-bec4-a5e9ec5cab8b\",\"operator\":\"gte\",\"value\":0.85}],\"gauge_inner_width\":10,\"gauge_max\":\"1\",\"gauge_style\":\"half\",\"gauge_width\":10,\"id\":\"4c9e2550-1b91-11e7-bec4-a5e9ec5cab8b\",\"index_pattern\":\"metrics-*\",\"interval\":\"auto\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"percent\",\"id\":\"4c9e2551-1b91-11e7-bec4-a5e9ec5cab8b\",\"label\":\"CPU Usage\",\"line_width\":1,\"metrics\":[{\"field\":\"system.cpu.user.pct\",\"id\":\"4c9e2552-1b91-11e7-bec4-a5e9ec5cab8b\",\"type\":\"avg\"},{\"field\":\"system.cpu.system.pct\",\"id\":\"225c2140-5fd7-11e7-a63a-a937b7c1a7e1\",\"type\":\"avg\"},{\"field\":\"system.cpu.cores\",\"id\":\"837a30c0-5fd7-11e7-a63a-a937b7c1a7e1\",\"type\":\"avg\"},{\"id\":\"587aa510-1b91-11e7-bec4-a5e9ec5cab8b\",\"script\":\"params.n \\u003e 0 ? (params.user+params.system)/params.n : null\",\"type\":\"calculation\",\"variables\":[{\"field\":\"4c9e2552-1b91-11e7-bec4-a5e9ec5cab8b\",\"id\":\"5a19af10-1b91-11e7-bec4-a5e9ec5cab8b\",\"name\":\"user\"},{\"field\":\"225c2140-5fd7-11e7-a63a-a937b7c1a7e1\",\"id\":\"32b54f80-5fd7-11e7-a63a-a937b7c1a7e1\",\"name\":\"system\"},{\"field\":\"837a30c0-5fd7-11e7-a63a-a937b7c1a7e1\",\"id\":\"8ba6eef0-5fd7-11e7-a63a-a937b7c1a7e1\",\"name\":\"n\"}]}],\"point_size\":1,\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"everything\",\"stacked\":\"none\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"gauge\"},\"title\":\"CPU Usage Gauge [Metrics System] ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "83e12df0-1b91-11e7-bec4-a5e9ec5cab8b-ecs",
+  "references": [],
+  "type": "visualization"
+}

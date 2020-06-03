@@ -1,0 +1,21 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Hosts histogram by CPU usage [Metrics System] ECS",
+    "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0% - 5%\":\"rgb(247,252,245)\",\"10% - 15%\":\"rgb(116,196,118)\",\"15% - 20%\":\"rgb(35,139,69)\",\"5% - 10%\":\"rgb(199,233,192)\"}}}",
+    "version": 1,
+    "visState": "{\"aggs\":[{\"enabled\":true,\"id\":\"1\",\"params\":{\"customLabel\":\"CPU usage\",\"field\":\"system.cpu.user.pct\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"enabled\":true,\"id\":\"2\",\"params\":{\"extended_bounds\":{},\"field\":\"@timestamp\",\"interval\":\"auto\",\"min_doc_count\":1},\"schema\":\"segment\",\"type\":\"date_histogram\"},{\"enabled\":true,\"id\":\"3\",\"params\":{\"customLabel\":\"Hosts\",\"field\":\"host.name\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":20},\"schema\":\"group\",\"type\":\"terms\"}],\"params\":{\"addLegend\":true,\"addTooltip\":true,\"colorSchema\":\"Greens\",\"colorsNumber\":4,\"colorsRange\":[],\"enableHover\":false,\"invertColors\":false,\"legendPosition\":\"right\",\"percentageMode\":false,\"setColorRange\":false,\"times\":[],\"type\":\"heatmap\",\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"color\":\"#555\",\"rotate\":0,\"show\":false},\"scale\":{\"defaultYExtents\":false,\"type\":\"linear\"},\"show\":false,\"type\":\"value\"}]},\"title\":\"Hosts histogram by CPU usage [Metrics System] ECS\",\"type\":\"heatmap\"}"
+  },
+  "id": "7cdb1330-4d1a-11e7-a196-69b9a7a020a9-ecs",
+  "references": [
+    {
+      "id": "metrics-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization"
+}

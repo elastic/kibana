@@ -1,0 +1,11 @@
+- name: nginx.access
+  type: group
+  fields:
+  - name: remote_ip_list
+    type: array
+    description: |
+      An array of remote IP addresses. It is a list because it is common to include, besides the client IP address, IP addresses from headers like `X-Forwarded-For`. Real source IP is restored to `source.ip`.
+  - name: user_agent
+    type: group
+  - name: geoip
+    type: group

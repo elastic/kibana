@@ -1,0 +1,11 @@
+metricsets: ["uptime"]
+{{#if core.metrics}}
+core.metrics: {{core.metrics}}
+{{/if}}
+{{#if cpu.metrics}}
+cpu.metrics: {{cpu.metrics}}
+{{/if}}
+period: {{period}}
+{{#if processes}}
+processes: {{processes}}
+{{/if}}

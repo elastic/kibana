@@ -1,0 +1,42 @@
+- name: system.network
+  type: group
+  release: ga
+  fields:
+  - name: name
+    type: keyword
+    description: |
+      The network interface name.
+  - name: out.bytes
+    type: long
+    format: bytes
+    description: |
+      The number of bytes sent.
+  - name: in.bytes
+    type: long
+    format: bytes
+    description: |
+      The number of bytes received.
+  - name: out.packets
+    type: long
+    description: |
+      The number of packets sent.
+  - name: in.packets
+    type: long
+    description: |
+      The number or packets received.
+  - name: in.errors
+    type: long
+    description: |
+      The number of errors while receiving.
+  - name: out.errors
+    type: long
+    description: |
+      The number of errors while sending.
+  - name: in.dropped
+    type: long
+    description: |
+      The number of incoming packets that were dropped.
+  - name: out.dropped
+    type: long
+    description: |
+      The number of outgoing packets that were dropped. This value is always 0 on Darwin and BSD because it is not reported by the operating system.

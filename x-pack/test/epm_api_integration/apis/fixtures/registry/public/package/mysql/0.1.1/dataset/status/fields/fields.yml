@@ -1,0 +1,282 @@
+- name: mysql.status
+  type: group
+  release: ga
+  fields:
+  - name: aborted
+    type: group
+    fields:
+    - name: clients
+      type: long
+      description: |
+        The number of connections that were aborted because the client died without closing the connection properly.
+    - name: connects
+      type: long
+      description: |
+        The number of failed attempts to connect to the MySQL server.
+  - name: binlog
+    type: group
+    fields:
+    - name: cache.disk_use
+      type: long
+    - name: cache.use
+      type: long
+  - name: bytes
+    type: group
+    fields:
+    - name: received
+      type: long
+      format: bytes
+      description: |
+        The number of bytes received from all clients.
+    - name: sent
+      type: long
+      format: bytes
+      description: |
+        The number of bytes sent to all clients.
+  - name: threads
+    type: group
+    fields:
+    - name: cached
+      type: long
+      description: |
+        The number of cached threads.
+    - name: created
+      type: long
+      description: |
+        The number of created threads.
+    - name: connected
+      type: long
+      description: |
+        The number of connected threads.
+    - name: running
+      type: long
+      description: |
+        The number of running threads.
+  - name: connections
+    type: long
+  - name: created
+    type: group
+    fields:
+    - name: tmp.disk_tables
+      type: long
+    - name: tmp.files
+      type: long
+    - name: tmp.tables
+      type: long
+  - name: delayed
+    type: group
+    fields:
+    - name: errors
+      type: long
+    - name: insert_threads
+      type: long
+    - name: writes
+      type: long
+  - name: flush_commands
+    type: long
+  - name: max_used_connections
+    type: long
+  - name: open
+    type: group
+    fields:
+    - name: files
+      type: long
+    - name: streams
+      type: long
+    - name: tables
+      type: long
+  - name: opened_tables
+    type: long
+  - name: command
+    type: group
+    fields:
+    - name: delete
+      type: long
+      description: |
+        The number of DELETE queries since startup.
+    - name: insert
+      type: long
+      description: |
+        The number of INSERT queries since startup.
+    - name: select
+      type: long
+      description: |
+        The number of SELECT queries since startup.
+    - name: update
+      type: long
+      description: |
+        The number of UPDATE queries since startup.
+  - name: queries
+    type: long
+    description: |
+      The number of statements executed by the server. This variable includes statements executed within stored programs, unlike the Questions variable. It does not count COM_PING or COM_STATISTICS commands.
+  - name: questions
+    type: long
+    description: |
+      The number of statements executed by the server. This includes only statements sent to the server by clients and not statements executed within stored programs, unlike the Queries variable. This variable does not count COM_PING, COM_STATISTICS, COM_STMT_PREPARE, COM_STMT_CLOSE, or COM_STMT_RESET commands.
+  - name: handler
+    type: group
+    fields:
+    - name: commit
+      type: long
+      description: |
+        The number of internal COMMIT statements.
+    - name: delete
+      type: long
+      description: |
+        The number of times that rows have been deleted from tables.
+    - name: external_lock
+      type: long
+      description: |
+        The server increments this variable for each call to its external_lock() function, which generally occurs at the beginning and end of access to a table instance.
+    - name: mrr_init
+      type: long
+      description: |
+        The number of times the server uses a storage engine's own Multi-Range Read implementation for table access.
+    - name: prepare
+      type: long
+      description: |
+        A counter for the prepare phase of two-phase commit operations.
+    - name: read
+      type: group
+      fields:
+      - name: first
+        type: long
+        description: |
+          The number of times the first entry in an index was read.
+      - name: key
+        type: long
+        description: |
+          The number of requests to read a row based on a key.
+      - name: last
+        type: long
+        description: "The number of requests to read the last key in an index. \n"
+      - name: next
+        type: long
+        description: |
+          The number of requests to read the next row in key order.
+      - name: prev
+        type: long
+        description: |
+          The number of requests to read the previous row in key order.
+      - name: rnd
+        type: long
+        description: "The number of requests to read a row based on a fixed position.
+          \n"
+      - name: rnd_next
+        type: long
+        description: "The number of requests to read the next row in the data file.
+          \n"
+    - name: rollback
+      type: long
+      description: |
+        The number of requests for a storage engine to perform a rollback operation.
+    - name: savepoint
+      type: long
+      description: |
+        The number of requests for a storage engine to place a savepoint.
+    - name: savepoint_rollback
+      type: long
+      description: |
+        The number of requests for a storage engine to roll back to a savepoint.
+    - name: update
+      type: long
+      description: |
+        The number of requests to update a row in a table.
+    - name: write
+      type: long
+      description: |
+        The number of requests to insert a row in a table.
+  - name: innodb
+    type: group
+    fields:
+    - name: buffer_pool
+      type: group
+      fields:
+      - name: dump_status
+        type: long
+        description: |
+          The progress of an operation to record the pages held in the InnoDB buffer pool, triggered by the setting of innodb_buffer_pool_dump_at_shutdown or innodb_buffer_pool_dump_now.
+      - name: load_status
+        type: long
+        description: |
+          The progress of an operation to warm up the InnoDB buffer pool by reading in a set of pages corresponding to an earlier point in time, triggered by the setting of innodb_buffer_pool_load_at_startup or innodb_buffer_pool_load_now.
+      - name: bytes
+        type: group
+        fields:
+        - name: data
+          type: long
+          description: "The total number of bytes in the InnoDB buffer pool containing
+            data. \n"
+        - name: dirty
+          type: long
+          description: |
+            The total current number of bytes held in dirty pages in the InnoDB buffer pool.
+      - name: pages
+        type: group
+        fields:
+        - name: data
+          type: long
+          description: |
+            he number of pages in the InnoDB buffer pool containing data.
+        - name: dirty
+          type: long
+          description: |
+            The current number of dirty pages in the InnoDB buffer pool.
+        - name: flushed
+          type: long
+          description: |
+            The number of requests to flush pages from the InnoDB buffer pool.
+        - name: free
+          type: long
+          description: |
+            The number of free pages in the InnoDB buffer pool.
+        - name: latched
+          type: long
+          description: |
+            The number of latched pages in the InnoDB buffer pool.
+        - name: misc
+          type: long
+          description: |
+            The number of pages in the InnoDB buffer pool that are busy because they have been allocated for administrative overhead, such as row locks or the adaptive hash index.
+        - name: total
+          type: long
+          description: |
+            The total size of the InnoDB buffer pool, in pages.
+      - name: read
+        type: group
+        fields:
+        - name: ahead
+          type: long
+          description: |
+            The number of pages read into the InnoDB buffer pool by the read-ahead background thread.
+        - name: ahead_evicted
+          type: long
+          description: |
+            The number of pages read into the InnoDB buffer pool by the read-ahead background thread that were subsequently evicted without having been accessed by queries.
+        - name: ahead_rnd
+          type: long
+          description: |
+            The number of "random" read-aheads initiated by InnoDB.
+        - name: requests
+          type: long
+          description: |
+            The number of logical read requests.
+      - name: pool
+        type: group
+        fields:
+        - name: reads
+          type: long
+          description: |
+            The number of logical reads that InnoDB could not satisfy from the buffer pool, and had to read directly from disk.
+        - name: resize_status
+          type: long
+          description: |
+            The status of an operation to resize the InnoDB buffer pool dynamically, triggered by setting the innodb_buffer_pool_size parameter dynamically.
+        - name: wait_free
+          type: long
+          description: |
+            Normally, writes to the InnoDB buffer pool happen in the background. When InnoDB needs to read or create a page and no clean pages are available, InnoDB flushes some dirty pages first and waits for that operation to finish. This counter counts instances of these waits.
+      - name: write_requests
+        type: long
+        description: The number of writes done to the InnoDB buffer pool.

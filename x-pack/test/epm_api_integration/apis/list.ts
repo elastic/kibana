@@ -5,53 +5,11 @@
  */
 
 import expect from '@kbn/expect';
-import ServerMock from 'mock-http-server';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('list', () => {
-    const server = new ServerMock({ host: 'localhost', port: 6666 });
-    beforeEach(() => {
-      server.start(() => {});
-    });
-    afterEach(() => {
-      server.stop(() => {});
-    });
     it('lists all packages from the registry', async () => {
-      const searchResponse = [
-        {
-          description: 'First integration package',
-          download: '/package/first-1.0.1.tar.gz',
-          name: 'first',
-          title: 'First',
-          type: 'integration',
-          version: '1.0.1',
-        },
-        {
-          description: 'Second integration package',
-          download: '/package/second-2.0.4.tar.gz',
-          icons: [
-            {
-              src: '/package/second-2.0.4/img/icon.svg',
-              type: 'image/svg+xml',
-            },
-          ],
-          name: 'second',
-          title: 'Second',
-          type: 'integration',
-          version: '2.0.4',
-        },
-      ];
-      server.on({
-        method: 'GET',
-        path: '/search',
-        reply: {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(searchResponse),
-        },
-      });
-
       const supertest = getService('supertest');
       const fetchPackageList = async () => {
         const response = await supertest
@@ -62,63 +20,82 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       const listResponse = await fetchPackageList();
-      expect(listResponse.response.length).to.be(2);
-      expect(listResponse.response[0]).to.eql({ ...searchResponse[0], status: 'not_installed' });
-      expect(listResponse.response[1]).to.eql({ ...searchResponse[1], status: 'not_installed' });
-    });
-
-    it('sorts the packages even if the registry sends them unsorted', async () => {
-      const searchResponse = [
-        {
-          description: 'BBB integration package',
-          download: '/package/bbb-1.0.1.tar.gz',
-          name: 'bbb',
-          title: 'BBB',
-          type: 'integration',
-          version: '1.0.1',
-        },
-        {
-          description: 'CCC integration package',
-          download: '/package/ccc-2.0.4.tar.gz',
-          name: 'ccc',
-          title: 'CCC',
-          type: 'integration',
-          version: '2.0.4',
-        },
-        {
-          description: 'AAA integration package',
-          download: '/package/aaa-0.0.1.tar.gz',
-          name: 'aaa',
-          title: 'AAA',
-          type: 'integration',
-          version: '0.0.1',
-        },
-      ];
-      server.on({
-        method: 'GET',
-        path: '/search',
-        reply: {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(searchResponse),
-        },
-      });
-
-      const supertest = getService('supertest');
-      const fetchPackageList = async () => {
-        const response = await supertest
-          .get('/api/ingest_manager/epm/packages')
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        return response.body;
-      };
-
-      const listResponse = await fetchPackageList();
-
-      expect(listResponse.response.length).to.be(3);
-      expect(listResponse.response[0].name).to.eql('aaa');
-      expect(listResponse.response[1].name).to.eql('bbb');
-      expect(listResponse.response[2].name).to.eql('ccc');
+      expect(listResponse.response.length).to.be(4);
+      expect(listResponse).to.eql(registryListResponse);
     });
   });
 }
+
+// This corresponds to the packages in fixtures/registry/public/package
+// and illustrates how tests with registry packages are set up.
+// Once we have more test cases this might be too cumbersome and not
+// relevant enough to keep up-to-date.
+const registryListResponse = {
+  response: [
+    {
+      description: 'MySQL Integration',
+      download: '/epr/mysql/mysql-0.1.1.tar.gz',
+      icons: [
+        {
+          src: '/package/mysql/0.1.1/img/logo_mysql.svg',
+          title: 'logo mysql',
+          size: '32x32',
+          type: 'image/svg+xml',
+        },
+      ],
+      name: 'mysql',
+      path: '/package/mysql/0.1.1',
+      title: 'MySQL',
+      type: 'integration',
+      version: '0.1.1',
+      status: 'not_installed',
+    },
+    {
+      description: 'Nginx Integration',
+      download: '/epr/nginx/nginx-0.1.1.tar.gz',
+      icons: [
+        {
+          src: '/package/nginx/0.1.1/img/logo_nginx.svg',
+          title: 'logo nginx',
+          size: '32x32',
+          type: 'image/svg+xml',
+        },
+      ],
+      name: 'nginx',
+      path: '/package/nginx/0.1.1',
+      title: 'Nginx',
+      type: 'integration',
+      version: '0.1.1',
+      status: 'not_installed',
+    },
+    {
+      description: 'System Integration',
+      download: '/epr/system/system-0.1.0.tar.gz',
+      icons: [
+        {
+          src: '/package/system/0.1.0/img/system.svg',
+          title: 'system',
+          size: '1000x1000',
+          type: 'image/svg+xml',
+        },
+      ],
+      name: 'system',
+      path: '/package/system/0.1.0',
+      title: 'System',
+      type: 'integration',
+      version: '0.1.0',
+      status: 'not_installed',
+    },
+    {
+      description: 'This package contains a yaml pipeline.\n',
+      download: '/epr/yamlpipeline/yamlpipeline-1.0.0.tar.gz',
+      name: 'yamlpipeline',
+      path: '/package/yamlpipeline/1.0.0',
+      title: 'Yaml Pipeline package',
+      type: 'integration',
+      version: '1.0.0',
+      status: 'not_installed',
+    },
+  ],
+  success: true,
+};

@@ -1,0 +1,23 @@
+- name: mysql.error
+  type: group
+- name: event.code
+  type: keyword
+  description: Identification code for this event
+- name: event.provider
+  type: keyword
+  description: Source of the event (e.g. Server)
+- name: event.created
+  type: date
+  description: Date/time when the event was first read by an agent, or by your pipeline.
+- name: event.timezone
+  type: keyword
+  description: Time zone information
+- name: event.kind
+  type: keyword
+  description: Event kind (e.g. event)
+- name: event.category
+  type: keyword
+  description: Event category (e.g. database)
+- name: event.type
+  type: keyword
+  description: Event severity (e.g. info, error)

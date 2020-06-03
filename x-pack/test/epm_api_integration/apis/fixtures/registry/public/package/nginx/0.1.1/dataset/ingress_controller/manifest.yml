@@ -1,0 +1,24 @@
+title: Nginx ingress_controller logs
+type: logs
+release: beta
+streams:
+- input: logs
+  enabled: false
+  vars:
+  - name: paths
+    type: text
+    title: Paths
+    multi: true
+    required: true
+    show_user: true
+    default:
+    - /var/log/nginx/ingress.log*
+    os:
+      darwin:
+        default:
+        - /usr/local/var/log/nginx/ingress.log*
+      windows:
+        default:
+        - c:/programdata/nginx/logs/*ingress.log*
+  title: Nginx ingress controller logs
+  description: Collect Nginx ingress controller logs

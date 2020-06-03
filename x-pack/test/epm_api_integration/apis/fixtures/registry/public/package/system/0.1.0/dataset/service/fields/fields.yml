@@ -1,0 +1,52 @@
+- name: system.service
+  type: group
+  release: beta
+  fields:
+  - name: name
+    type: keyword
+    description: The name of the service
+  - name: load_state
+    type: keyword
+    description: The load state of the service
+  - name: state
+    type: keyword
+    description: The activity state of the service
+  - name: sub_state
+    type: keyword
+    description: The sub-state of the service
+  - name: state_since
+    type: date
+    description: The timestamp of the last state change. If the service is active
+      and running, this is its uptime.
+  - name: exec_code
+    type: keyword
+    description: The SIGCHLD code from the service's main process
+  - name: resources
+    type: group
+    fields:
+    - name: cpu.usage.ns
+      type: long
+      description: CPU usage in nanoseconds
+    - name: memory.usage.bytes
+      type: long
+      description: memory usage in bytes
+    - name: tasks.count
+      type: long
+      description: number of tasks associated with the service
+    - name: network
+      type: group
+      fields:
+      - name: in.bytes
+        type: long
+        format: bytes
+        description: bytes in
+      - name: in.packets
+        type: long
+        format: bytes
+        description: packets in
+      - name: out.packets
+        type: long
+        description: packets out
+      - name: out.bytes
+        type: long
+        description: bytes out

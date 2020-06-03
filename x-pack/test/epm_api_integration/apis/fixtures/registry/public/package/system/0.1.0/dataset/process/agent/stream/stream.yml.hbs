@@ -1,0 +1,17 @@
+metricsets: ["process"]
+{{#if core.metrics}}
+core.metrics: {{core.metrics}}
+{{/if}}
+{{#if cpu.metrics}}
+cpu.metrics: {{cpu.metrics}}
+{{/if}}
+period: {{period}}
+{{#if process.include_top_n.by_cpu}}
+process.include_top_n.by_cpu: {{process.include_top_n.by_cpu}}
+{{/if}}
+{{#if process.include_top_n.by_memory}}
+process.include_top_n.by_memory: {{process.include_top_n.by_memory}}
+{{/if}}
+{{#if processes}}
+processes: {{processes}}
+{{/if}}

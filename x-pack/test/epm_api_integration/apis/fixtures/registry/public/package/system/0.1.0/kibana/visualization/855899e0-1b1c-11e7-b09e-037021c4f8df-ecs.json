@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Top Hosts By CPU (Realtime) [Metrics System] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"bar_color_rules\":[{\"bar_color\":\"rgba(104,188,0,1)\",\"id\":\"33349dd0-1b1c-11e7-b09e-037021c4f8df\",\"operator\":\"gte\",\"value\":0},{\"bar_color\":\"rgba(254,146,0,1)\",\"id\":\"997dc440-1b1c-11e7-b09e-037021c4f8df\",\"operator\":\"gte\",\"value\":0.6},{\"bar_color\":\"rgba(211,49,21,1)\",\"id\":\"a10d7f20-1b1c-11e7-b09e-037021c4f8df\",\"operator\":\"gte\",\"value\":0.85}],\"drilldown_url\":\"../app/kibana#/dashboard/79ffd6e0-faa0-11e6-947f-177f697178b8-ecs?_a=(query:(language:kuery,query:'host.name:\\\"{{key}}\\\"'))\",\"filter\":\"\",\"id\":\"31e5afa0-1b1c-11e7-b09e-037021c4f8df\",\"index_pattern\":\"metrics-*\",\"interval\":\"auto\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"percent\",\"id\":\"31e5afa1-1b1c-11e7-b09e-037021c4f8df\",\"line_width\":1,\"metrics\":[{\"field\":\"system.cpu.user.pct\",\"id\":\"31e5afa2-1b1c-11e7-b09e-037021c4f8df\",\"type\":\"avg\"}],\"point_size\":1,\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"host.name\",\"terms_order_by\":\"31e5afa2-1b1c-11e7-b09e-037021c4f8df\",\"terms_size\":\"10\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"top_n\"},\"title\":\"Top Hosts By CPU (Realtime) [Metrics System] ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "855899e0-1b1c-11e7-b09e-037021c4f8df-ecs",
+  "references": [],
+  "type": "visualization"
+}

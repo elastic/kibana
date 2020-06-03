@@ -1,0 +1,130 @@
+- name: system.cpu
+  type: group
+  release: ga
+  fields:
+  - name: cores
+    type: long
+    description: |
+      The number of CPU cores present on the host. The non-normalized percentages will have a maximum value of `100% * cores`. The normalized percentages already take this value into account and have a maximum value of 100%.
+  - name: user.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent in user space. On multi-core systems, you can have percentages that are greater than 100%. For example, if 3 cores are at 60% use, then the `system.cpu.user.pct` will be 180%.
+  - name: system.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent in kernel space.
+  - name: nice.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent on low-priority processes.
+  - name: idle.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent idle.
+  - name: iowait.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent in wait (on disk).
+  - name: irq.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent servicing and handling hardware interrupts.
+  - name: softirq.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent servicing and handling software interrupts.
+  - name: steal.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent in involuntary wait by the virtual CPU while the hypervisor was servicing another processor. Available only on Unix.
+  - name: total.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent in states other than Idle and IOWait.
+  - name: user.norm.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent in user space.
+  - name: system.norm.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent in kernel space.
+  - name: nice.norm.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent on low-priority processes.
+  - name: idle.norm.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent idle.
+  - name: iowait.norm.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent in wait (on disk).
+  - name: irq.norm.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent servicing and handling hardware interrupts.
+  - name: softirq.norm.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent servicing and handling software interrupts.
+  - name: steal.norm.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time spent in involuntary wait by the virtual CPU while the hypervisor was servicing another processor. Available only on Unix.
+  - name: total.norm.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of CPU time in states other than Idle and IOWait, normalised by the number of cores.
+  - name: user.ticks
+    type: long
+    description: |
+      The amount of CPU time spent in user space.
+  - name: system.ticks
+    type: long
+    description: |
+      The amount of CPU time spent in kernel space.
+  - name: nice.ticks
+    type: long
+    description: |
+      The amount of CPU time spent on low-priority processes.
+  - name: idle.ticks
+    type: long
+    description: |
+      The amount of CPU time spent idle.
+  - name: iowait.ticks
+    type: long
+    description: |
+      The amount of CPU time spent in wait (on disk).
+  - name: irq.ticks
+    type: long
+    description: |
+      The amount of CPU time spent servicing and handling hardware interrupts.
+  - name: softirq.ticks
+    type: long
+    description: |
+      The amount of CPU time spent servicing and handling software interrupts.
+  - name: steal.ticks
+    type: long
+    description: |
+      The amount of CPU time spent in involuntary wait by the virtual CPU while the hypervisor was servicing another processor. Available only on Unix.

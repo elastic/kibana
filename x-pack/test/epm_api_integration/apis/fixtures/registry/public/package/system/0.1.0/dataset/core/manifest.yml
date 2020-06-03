@@ -1,0 +1,16 @@
+title: System core metrics
+release: experimental
+type: metrics
+streams:
+- input: system/metrics
+  vars:
+  - name: core.metrics
+    type: text
+    title: Core Metrics
+    multi: true
+    required: true
+    show_user: true
+    default:
+    - percentages
+  title: System core metrics
+  description: Collect System core metrics

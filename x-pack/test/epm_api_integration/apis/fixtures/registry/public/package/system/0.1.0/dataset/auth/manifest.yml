@@ -1,0 +1,24 @@
+title: System auth logs
+release: experimental
+type: logs
+streams:
+- input: logs
+  vars:
+  - name: paths
+    type: text
+    title: Paths
+    multi: true
+    required: true
+    show_user: true
+    default:
+    - /var/log/auth.log*
+    - /var/log/secure*
+    os:
+      darwin:
+        default:
+        - /var/log/secure.log*
+      windows:
+        default: []
+  template_path: log.yml.hbs
+  title: System auth logs (log)
+  description: Collect System auth logs using log input

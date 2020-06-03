@@ -1,0 +1,22 @@
+title: MySQL galera_status metrics
+type: metrics
+release: beta
+streams:
+- input: mysql/metrics
+  enabled: false
+  vars:
+  - name: period
+    type: text
+    title: Period
+    required: true
+    show_user: true
+    default: 10s
+  - name: raw
+    type: bool
+    title: Raw
+    description: >
+      When enabled, in addition to the existing data structure, all fields available from the mysql service through
+      "SHOW /*!50002 GLOBAL */ STATUS;" will be added to the event.
+    default: false
+  title: MySQL galera_status metrics
+  description: Collect MySQL galera_status metrics

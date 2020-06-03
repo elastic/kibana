@@ -1,0 +1,41 @@
+{
+  "attributes": {
+    "description": "Dashboard for the Logs Nginx integration",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false}",
+    "panelsJSON": "[{\"embeddableConfig\":{\"columns\":[\"log.level\",\"message\"],\"sort\":[\"@timestamp\",\"desc\"]},\"gridData\":{\"h\":12,\"i\":\"11\",\"w\":48,\"x\":0,\"y\":16},\"panelIndex\":\"11\",\"panelRefName\":\"panel_0\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{\"columns\":[\"url.original\",\"http.request.method\",\"http.response.status_code\",\"http.response.body.bytes\"],\"sort\":[\"@timestamp\",\"desc\"]},\"gridData\":{\"h\":28,\"i\":\"16\",\"w\":48,\"x\":0,\"y\":28},\"panelIndex\":\"16\",\"panelRefName\":\"panel_1\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":12,\"i\":\"18\",\"w\":48,\"x\":0,\"y\":4},\"panelIndex\":\"18\",\"panelRefName\":\"panel_2\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":4,\"i\":\"19\",\"w\":48,\"x\":0,\"y\":0},\"panelIndex\":\"19\",\"panelRefName\":\"panel_3\",\"version\":\"7.3.0\"}]",
+    "timeRestore": false,
+    "title": "[Logs Nginx] Access and error logs ECS",
+    "version": 1
+  },
+  "id": "046212a0-a2a1-11e7-928f-5dbe6f6f5519-ecs",
+  "migrationVersion": {
+    "dashboard": "7.3.0"
+  },
+  "references": [
+    {
+      "id": "9eb25600-a1f0-11e7-928f-5dbe6f6f5519-ecs",
+      "name": "panel_0",
+      "type": "search"
+    },
+    {
+      "id": "6d9e66d0-a1f0-11e7-928f-5dbe6f6f5519-ecs",
+      "name": "panel_1",
+      "type": "search"
+    },
+    {
+      "id": "1cfb1a80-a1f4-11e7-928f-5dbe6f6f5519-ecs",
+      "name": "panel_2",
+      "type": "visualization"
+    },
+    {
+      "id": "97109780-a2a5-11e7-928f-5dbe6f6f5519-ecs",
+      "name": "panel_3",
+      "type": "visualization"
+    }
+  ],
+  "type": "dashboard"
+}

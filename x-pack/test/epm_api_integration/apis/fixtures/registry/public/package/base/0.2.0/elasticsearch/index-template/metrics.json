@@ -1,0 +1,13 @@
+{
+    "index_patterns": [
+        "metrics-*-*"
+    ],
+    "priority": 0,
+    "data_stream": {
+        "timestamp_field": "@timestamp"
+    },
+    "composed_of": [
+        "metrics-mappings",
+        "metrics-settings"
+    ]
+}

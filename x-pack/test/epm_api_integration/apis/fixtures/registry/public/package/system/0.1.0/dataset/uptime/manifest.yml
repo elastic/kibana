@@ -1,0 +1,40 @@
+title: System uptime metrics
+release: experimental
+type: metrics
+streams:
+- input: system/metrics
+  vars:
+  - name: core.metrics
+    type: text
+    title: Core Metrics
+    multi: true
+    required: true
+    show_user: true
+    default:
+    - percentages
+  - name: cpu.metrics
+    type: text
+    title: Cpu Metrics
+    multi: true
+    required: true
+    show_user: true
+    default:
+    - percentages
+    - normalized_percentages
+  - name: period
+    type: text
+    title: Period
+    multi: false
+    required: true
+    show_user: true
+    default: 10s
+  - name: processes
+    type: text
+    title: Processes
+    multi: true
+    required: true
+    show_user: true
+    default:
+    - .*
+  title: System uptime metrics
+  description: Collect System uptime metrics

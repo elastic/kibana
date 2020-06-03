@@ -1,0 +1,18 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "title": "Errors over time [Logs Nginx] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"filter\":{\"language\":\"lucene\",\"query\":\"stream.dataset:nginx.error\"},\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"index_pattern\":\"logs-*\",\"interval\":\"auto\",\"legend_position\":\"bottom\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"bar\",\"color\":\"rgba(211,49,21,1)\",\"fill\":0.5,\"formatter\":\"number\",\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"line_width\":1,\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"count\"}],\"point_size\":1,\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"log.level\",\"terms_order_by\":\"61ca57f2-469d-11e7-af02-69e470af7417\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"timeseries\"},\"title\":\"Errors over time [Logs Nginx] ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "46322e50-a1f6-11e7-928f-5dbe6f6f5519-ecs",
+  "migrationVersion": {
+    "visualization": "7.8.0"
+  },
+  "references": [],
+  "type": "visualization"
+}

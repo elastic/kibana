@@ -1,0 +1,7 @@
+title: System socket metrics
+release: experimental
+type: metrics
+streams:
+- input: system/metrics
+  title: System socket metrics
+  description: Collect System socket metrics

@@ -61,6 +61,10 @@ export const IGNORE_FILE_GLOBS = [
   // filename required by api-extractor
   'api-documenter.json',
 
+  // test cases come from elastic/package-storage repo, which uses
+  // nameing conventions from elastic/beats modules
+  'x-pack/test/epm_api_integration/apis/fixtures/**',
+
   // TODO fix file names in APM to remove these
   'x-pack/plugins/apm/public/**/*',
   'x-pack/plugins/apm/scripts/**/*',

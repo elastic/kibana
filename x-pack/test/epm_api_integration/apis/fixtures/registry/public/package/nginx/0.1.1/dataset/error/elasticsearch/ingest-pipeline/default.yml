@@ -1,0 +1,52 @@
+---
+description: Pipeline for parsing the Nginx error logs
+processors:
+- grok:
+    field: message
+    patterns:
+    - '%{DATA:nginx.error.time} \[%{DATA:log.level}\] %{NUMBER:process.pid:long}#%{NUMBER:process.thread.id:long}:
+      (\*%{NUMBER:nginx.error.connection_id:long} )?%{GREEDYMULTILINE:message}'
+    pattern_definitions:
+      GREEDYMULTILINE: |-
+        (.|
+        |	)*
+    ignore_missing: true
+- rename:
+    field: '@timestamp'
+    target_field: event.created
+- date:
+    if: ctx.event.timezone == null
+    field: nginx.error.time
+    target_field: '@timestamp'
+    formats:
+    - yyyy/MM/dd H:m:s
+    on_failure:
+    - append:
+        field: error.message
+        value: '{{ _ingest.on_failure_message }}'
+- date:
+    if: ctx.event.timezone != null
+    field: nginx.error.time
+    target_field: '@timestamp'
+    formats:
+    - yyyy/MM/dd H:m:s
+    timezone: '{{ event.timezone }}'
+    on_failure:
+    - append:
+        field: error.message
+        value: '{{ _ingest.on_failure_message }}'
+- remove:
+    field: nginx.error.time
+- set:
+    field: event.kind
+    value: event
+- append:
+    field: event.category
+    value: web
+- append:
+    field: event.type
+    value: error
+on_failure:
+- set:
+    field: error.message
+    value: '{{ _ingest.on_failure_message }}'

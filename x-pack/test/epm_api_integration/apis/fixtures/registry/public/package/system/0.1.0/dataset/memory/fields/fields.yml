@@ -1,0 +1,157 @@
+- name: system.memory
+  type: group
+  release: ga
+  fields:
+  - name: total
+    type: long
+    format: bytes
+    description: |
+      Total memory.
+  - name: used.bytes
+    type: long
+    format: bytes
+    description: |
+      Used memory.
+  - name: free
+    type: long
+    format: bytes
+    description: |
+      The total amount of free memory in bytes. This value does not include memory consumed by system caches and buffers (see system.memory.actual.free).
+  - name: used.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of used memory.
+  - name: actual
+    type: group
+    fields:
+    - name: used.bytes
+      type: long
+      format: bytes
+      description: |
+        Actual used memory in bytes. It represents the difference between the total and the available memory. The available memory depends on the OS. For more details, please check `system.actual.free`.
+    - name: free
+      type: long
+      format: bytes
+      description: |
+        Actual free memory in bytes. It is calculated based on the OS. On Linux this value will be MemAvailable from /proc/meminfo,  or calculated from free memory plus caches and buffers if /proc/meminfo is not available. On OSX it is a sum of free memory and the inactive memory. On Windows, it is equal to `system.memory.free`.
+    - name: used.pct
+      type: scaled_float
+      format: percent
+      description: |
+        The percentage of actual used memory.
+  - name: swap
+    type: group
+    fields:
+    - name: total
+      type: long
+      format: bytes
+      description: |
+        Total swap memory.
+    - name: used.bytes
+      type: long
+      format: bytes
+      description: |
+        Used swap memory.
+    - name: free
+      type: long
+      format: bytes
+      description: |
+        Available swap memory.
+    - name: out.pages
+      type: long
+      description: count of pages swapped out
+    - name: in.pages
+      type: long
+      description: count of pages swapped in
+    - name: readahead.pages
+      type: long
+      description: swap readahead pages
+    - name: readahead.cached
+      type: long
+      description: swap readahead cache hits
+    - name: used.pct
+      type: scaled_float
+      format: percent
+      description: |
+        The percentage of used swap memory.
+  - name: page_stats
+    type: group
+    fields:
+    - name: pgscan_kswapd.pages
+      type: long
+      format: number
+      description: pages scanned by kswapd
+    - name: pgscan_direct.pages
+      type: long
+      format: number
+      description: pages scanned directly
+    - name: pgfree.pages
+      type: long
+      format: number
+      description: pages freed by the system
+    - name: pgsteal_kswapd.pages
+      type: long
+      format: number
+      description: number of pages reclaimed by kswapd
+    - name: pgsteal_direct.pages
+      type: long
+      format: number
+      description: number of pages reclaimed directly
+    - name: direct_efficiency.pct
+      type: scaled_float
+      format: percent
+      description: direct reclaim efficiency percentage. A lower percentage indicates
+        the system is struggling to reclaim memory.
+    - name: kswapd_efficiency.pct
+      type: scaled_float
+      format: percent
+      description: kswapd reclaim efficiency percentage. A lower percentage indicates
+        the system is struggling to reclaim memory.
+  - name: hugepages
+    type: group
+    fields:
+    - name: total
+      type: long
+      format: number
+      description: |
+        Number of huge pages in the pool.
+    - name: used.bytes
+      type: long
+      format: bytes
+      description: |
+        Memory used in allocated huge pages.
+    - name: used.pct
+      type: long
+      format: percent
+      description: |
+        Percentage of huge pages used.
+    - name: free
+      type: long
+      format: number
+      description: |
+        Number of available huge pages in the pool.
+    - name: reserved
+      type: long
+      format: number
+      description: |
+        Number of reserved but not allocated huge pages in the pool.
+    - name: surplus
+      type: long
+      format: number
+      description: |
+        Number of overcommited huge pages.
+    - name: default_size
+      type: long
+      format: bytes
+      description: |
+        Default size for huge pages.
+    - name: swap.out
+      type: group
+      fields:
+      - name: pages
+        type: long
+        description: pages swapped out
+      - name: fallback
+        type: long
+        description: Count of huge pages that must be split before swapout

@@ -1,0 +1,36 @@
+- name: system.socket
+  type: group
+  release: ga
+  fields:
+  - name: local.ip
+    type: ip
+    description: |
+      Local IP address. This can be an IPv4 or IPv6 address.
+  - name: local.port
+    type: long
+    description: |
+      Local port.
+  - name: remote.ip
+    type: ip
+    description: |
+      Remote IP address. This can be an IPv4 or IPv6 address.
+  - name: remote.port
+    type: long
+    description: |
+      Remote port.
+  - name: remote.host
+    type: keyword
+    description: |
+      PTR record associated with the remote IP. It is obtained via reverse IP lookup.
+  - name: remote.etld_plus_one
+    type: keyword
+    description: |
+      The effective top-level domain (eTLD) of the remote host plus one more label. For example, the eTLD+1 for "foo.bar.golang.org." is "golang.org.". The data for determining the eTLD comes from an embedded copy of the data from http://publicsuffix.org.
+  - name: remote.host_error
+    type: keyword
+    description: |
+      Error describing the cause of the reverse lookup failure.
+  - name: process.cmdline
+    type: keyword
+    description: |
+      Full command line

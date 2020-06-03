@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Processes By Memory [Metrics System] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"bar_color_rules\":[{\"bar_color\":\"rgba(104,188,0,1)\",\"id\":\"efb9b660-1b18-11e7-b09e-037021c4f8df\",\"operator\":\"gte\",\"value\":0},{\"bar_color\":\"rgba(254,146,0,1)\",\"id\":\"17fcb820-1b19-11e7-b09e-037021c4f8df\",\"operator\":\"gte\",\"value\":0.7},{\"bar_color\":\"rgba(211,49,21,1)\",\"id\":\"1dd61070-1b19-11e7-b09e-037021c4f8df\",\"operator\":\"gte\",\"value\":0.85}],\"drilldown_url\":\"\",\"filter\":\"\",\"id\":\"edfceb30-1b18-11e7-b09e-037021c4f8df\",\"index_pattern\":\"metrics-*\",\"interval\":\"auto\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"percent\",\"id\":\"edfceb31-1b18-11e7-b09e-037021c4f8df\",\"line_width\":1,\"metrics\":[{\"field\":\"system.process.memory.rss.pct\",\"id\":\"edfceb32-1b18-11e7-b09e-037021c4f8df\",\"type\":\"avg\"}],\"point_size\":1,\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"process.name\",\"terms_order_by\":\"edfceb32-1b18-11e7-b09e-037021c4f8df\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"top_n\"},\"title\":\"Processes By Memory [Metrics System] ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "2e224660-1b19-11e7-b09e-037021c4f8df-ecs",
+  "references": [],
+  "type": "visualization"
+}

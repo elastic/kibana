@@ -1,0 +1,18 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Aborted Connections Rate [Metrics MySQL] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"bar_color_rules\":[{\"id\":\"d61928d0-6309-11ea-99e6-b5eed31db613\"}],\"default_index_pattern\":\"metrics-*\",\"default_timefield\":\"@timestamp\",\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"index_pattern\":\"metrics-*\",\"interval\":\"auto\",\"isModelInvalid\":false,\"legend_position\":\"bottom\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(176,188,0,1)\",\"fill\":\"0.3\",\"formatter\":\"'0.0a'\",\"id\":\"3c2a2a40-f1f4-11e7-a752-236fe3270d99\",\"label\":\"Aborted Connections\",\"line_width\":1,\"metrics\":[{\"field\":\"mysql.status.aborted.clients\",\"id\":\"3c2a2a41-f1f4-11e7-a752-236fe3270d99\",\"type\":\"max\"},{\"field\":\"3c2a2a41-f1f4-11e7-a752-236fe3270d99\",\"id\":\"6d053540-639b-11ea-83d6-4f7a6fe5aed4\",\"type\":\"derivative\",\"unit\":\"1s\"},{\"field\":\"6d053540-639b-11ea-83d6-4f7a6fe5aed4\",\"id\":\"7548afc0-639b-11ea-83d6-4f7a6fe5aed4\",\"type\":\"positive_only\",\"unit\":\"\"}],\"point_size\":1,\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"everything\",\"stacked\":\"none\",\"type\":\"timeseries\"},{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(251,158,0,1)\",\"fill\":0.5,\"formatter\":\"number\",\"id\":\"d6572ee0-639b-11ea-83d6-4f7a6fe5aed4\",\"label\":\"Failed Attempts to Connect \",\"line_width\":1,\"metrics\":[{\"field\":\"mysql.status.aborted.connects\",\"id\":\"d6572ee1-639b-11ea-83d6-4f7a6fe5aed4\",\"type\":\"max\"},{\"field\":\"d6572ee1-639b-11ea-83d6-4f7a6fe5aed4\",\"id\":\"e4a63540-639b-11ea-83d6-4f7a6fe5aed4\",\"type\":\"derivative\",\"unit\":\"1s\"},{\"id\":\"ec492a00-639b-11ea-83d6-4f7a6fe5aed4\",\"type\":\"positive_only\"}],\"point_size\":1,\"separate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"everything\",\"stacked\":\"none\",\"type\":\"timeseries\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"timeseries\"},\"title\":\"Aborted Connections Rate [Metrics MySQL] ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "bf60bc10-639b-11ea-a83e-25b8612d00cc",
+  "migrationVersion": {
+    "visualization": "7.8.0"
+  },
+  "references": [],
+  "type": "visualization"
+}

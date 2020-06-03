@@ -1,0 +1,38 @@
+{
+  "attributes": {
+    "description": "Sudo commands dashboard from the Logs System integration",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false}",
+    "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"1\",\"w\":48,\"x\":0,\"y\":20},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":12,\"i\":\"2\",\"w\":48,\"x\":0,\"y\":36},\"panelIndex\":\"2\",\"panelRefName\":\"panel_1\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"gridData\":{\"h\":16,\"i\":\"3\",\"w\":48,\"x\":0,\"y\":4},\"panelIndex\":\"3\",\"panelRefName\":\"panel_2\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":4,\"i\":\"4\",\"w\":48,\"x\":0,\"y\":0},\"panelIndex\":\"4\",\"panelRefName\":\"panel_3\",\"version\":\"7.3.0\"}]",
+    "timeRestore": false,
+    "title": "[Logs System] Sudo commands ECS",
+    "version": 1
+  },
+  "id": "277876d0-fa2c-11e6-bbd3-29c986c96e5a-ecs",
+  "references": [
+    {
+      "id": "5c7af030-fa2a-11e6-bbd3-29c986c96e5a-ecs",
+      "name": "panel_0",
+      "type": "visualization"
+    },
+    {
+      "id": "51164310-fa2b-11e6-bbd3-29c986c96e5a-ecs",
+      "name": "panel_1",
+      "type": "visualization"
+    },
+    {
+      "id": "dc589770-fa2b-11e6-bbd3-29c986c96e5a-ecs",
+      "name": "panel_2",
+      "type": "visualization"
+    },
+    {
+      "id": "327417e0-8462-11e7-bab8-bd2f0fb42c54-ecs",
+      "name": "panel_3",
+      "type": "visualization"
+    }
+  ],
+  "type": "dashboard"
+}

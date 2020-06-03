@@ -1,0 +1,96 @@
+- name: system.diskio
+  type: group
+  release: ga
+  fields:
+  - name: name
+    type: keyword
+    description: |
+      The disk name.
+  - name: serial_number
+    type: keyword
+    description: |
+      The disk's serial number. This may not be provided by all operating systems.
+  - name: read.count
+    type: long
+    description: |
+      The total number of reads completed successfully.
+  - name: write.count
+    type: long
+    description: |
+      The total number of writes completed successfully.
+  - name: read.bytes
+    type: long
+    format: bytes
+    description: |
+      The total number of bytes read successfully. On Linux this is the number of sectors read multiplied by an assumed sector size of 512.
+  - name: write.bytes
+    type: long
+    format: bytes
+    description: |
+      The total number of bytes written successfully. On Linux this is the number of sectors written multiplied by an assumed sector size of 512.
+  - name: read.time
+    type: long
+    description: |
+      The total number of milliseconds spent by all reads.
+  - name: write.time
+    type: long
+    description: |
+      The total number of milliseconds spent by all writes.
+  - name: io.time
+    type: long
+    description: |
+      The total number of of milliseconds spent doing I/Os.
+  - name: iostat.read.request.merges_per_sec
+    type: float
+    description: |
+      The number of read requests merged per second that were queued to the device.
+  - name: iostat.write.request.merges_per_sec
+    type: float
+    description: |
+      The number of write requests merged per second that were queued to the device.
+  - name: iostat.read.request.per_sec
+    type: float
+    description: |
+      The number of read requests that were issued to the device per second
+  - name: iostat.write.request.per_sec
+    type: float
+    description: |
+      The number of write requests that were issued to the device per second
+  - name: iostat.read.per_sec.bytes
+    type: float
+    format: bytes
+    description: |
+      The number of Bytes read from the device per second.
+  - name: iostat.read.await
+    type: float
+    description: |
+      The average time spent for read requests issued to the device to be served.
+  - name: iostat.write.per_sec.bytes
+    type: float
+    format: bytes
+    description: |
+      The number of Bytes write from the device per second.
+  - name: iostat.write.await
+    type: float
+    description: |
+      The average time spent for write requests issued to the device to be served.
+  - name: iostat.request.avg_size
+    type: float
+    description: |
+      The average size (in bytes) of the requests that were issued to the device.
+  - name: iostat.queue.avg_size
+    type: float
+    description: |
+      The average queue length of the requests that were issued to the device.
+  - name: iostat.await
+    type: float
+    description: |
+      The average time spent for requests issued to the device to be served.
+  - name: iostat.service_time
+    type: float
+    description: |
+      The average service time (in milliseconds) for I/O requests that were issued to the device.
+  - name: iostat.busy
+    type: float
+    description: |
+      Percentage of CPU time during which I/O requests were issued to the device (bandwidth utilization for the device). Device saturation occurs when this value is close to 100%.

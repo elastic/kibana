@@ -1,0 +1,86 @@
+{
+  "description": "Pipeline for parsing MySQL slow logs.",
+  "processors": [{
+    "grok": {
+      "field": "message",
+      "patterns":[
+        "^# User@Host: %{USER:user.name}(\\[%{USER:mysql.slowlog.current_user}\\])? @ %{HOSTNAME:source.domain}? \\[%{IP:source.ip}?\\]%{METRICSPACE}(Id:%{SPACE}%{NUMBER:mysql.thread_id:long}%{METRICSPACE})?(Thread_id:%{SPACE}%{NUMBER:mysql.thread_id}%{METRICSPACE})?(Schema:%{SPACE}%{WORD:mysql.slowlog.schema}?%{METRICSPACE})?(Last_errno: %{NUMBER:mysql.slowlog.last_errno:long}%{METRICSPACE})?(Killed: %{NUMBER:mysql.slowlog.killed:long}%{METRICSPACE})?(QC_hit: %{WORD:mysql.slowlog.query_cache_hit}%{METRICSPACE})?(Query_time: %{NUMBER:temp.duration:float}%{METRICSPACE})?(Lock_time: %{NUMBER:mysql.slowlog.lock_time.sec:float}%{METRICSPACE})?(Rows_sent: %{NUMBER:mysql.slowlog.rows_sent:long}%{METRICSPACE})?(Rows_examined: %{NUMBER:mysql.slowlog.rows_examined:long}%{METRICSPACE})?(Rows_affected: %{NUMBER:mysql.slowlog.rows_affected:long}%{METRICSPACE})?(Thread_id: %{NUMBER:mysql.thread_id}%{METRICSPACE})?(Errno: %{NUMBER:mysql.slowlog.last_errno:long}%{METRICSPACE})?(Killed: %{NUMBER:mysql.slowlog.killed:long}%{METRICSPACE})?(Bytes_received: %{NUMBER:mysql.slowlog.bytes_received:long}%{METRICSPACE})?(Bytes_sent: %{NUMBER:mysql.slowlog.bytes_sent:long}%{METRICSPACE})?(Read_first: %{NUMBER:mysql.slowlog.read_first:long}%{METRICSPACE})?(Read_last: %{NUMBER:mysql.slowlog.read_last:long}%{METRICSPACE})?(Read_key: %{NUMBER:mysql.slowlog.read_key:long}%{METRICSPACE})?(Read_next: %{NUMBER:mysql.slowlog.read_next:long}%{METRICSPACE})?(Read_prev: %{NUMBER:mysql.slowlog.read_prev:long}%{METRICSPACE})?(Read_rnd: %{NUMBER:mysql.slowlog.read_rnd:long}%{METRICSPACE})?(Read_rnd_next: %{NUMBER:mysql.slowlog.read_rnd_next:long}%{METRICSPACE})?(Sort_merge_passes: %{NUMBER:mysql.slowlog.sort_merge_passes:long}%{METRICSPACE})?(Sort_range_count: %{NUMBER:mysql.slowlog.sort_range_count:long}%{METRICSPACE})?(Sort_rows: %{NUMBER:mysql.slowlog.sort_rows:long}%{METRICSPACE})?(Sort_scan_count: %{NUMBER:mysql.slowlog.sort_scan_count:long}%{METRICSPACE})?(Created_tmp_disk_tables: %{NUMBER:mysql.slowlog.tmp_disk_tables:long}%{METRICSPACE})?(Created_tmp_tables: %{NUMBER:mysql.slowlog.tmp_tables:long}%{METRICSPACE})?(Tmp_tables: %{NUMBER:mysql.slowlog.tmp_tables:long}%{METRICSPACE})?(Tmp_disk_tables: %{NUMBER:mysql.slowlog.tmp_disk_tables}%{METRICSPACE})?(Tmp_table_sizes: %{NUMBER:mysql.slowlog.tmp_table_sizes:long}%{METRICSPACE})?(Start: %{TIMESTAMP_ISO8601:event.start}%{METRICSPACE})?(End: %{TIMESTAMP_ISO8601:event.end}%{METRICSPACE})?(InnoDB_trx_id: %{WORD:mysql.slowlog.innodb.trx_id}%{METRICSPACE})?(QC_Hit: %{WORD:mysql.slowlog.query_cache_hit}%{METRICSPACE})?(Full_scan: %{WORD:mysql.slowlog.full_scan}%{METRICSPACE})?(Full_join: %{WORD:mysql.slowlog.full_join}%{METRICSPACE})?(Tmp_table: %{WORD:mysql.slowlog.tmp_table}%{METRICSPACE})?(Tmp_table_on_disk: %{WORD:mysql.slowlog.tmp_table_on_disk}%{METRICSPACE})?(Filesort: %{WORD:mysql.slowlog.filesort}%{METRICSPACE})?(Filesort_on_disk: %{WORD:mysql.slowlog.filesort_on_disk}%{METRICSPACE})?(Merge_passes: %{NUMBER:mysql.slowlog.merge_passes:long}%{METRICSPACE})?(Priority_queue: %{WORD:mysql.slowlog.priority_queue}%{METRICSPACE})?(No InnoDB statistics available for this query%{METRICSPACE})?(InnoDB_IO_r_ops: %{NUMBER:mysql.slowlog.innodb.io_r_ops:long}%{METRICSPACE})?(InnoDB_IO_r_bytes: %{NUMBER:mysql.slowlog.innodb.io_r_bytes:long}%{METRICSPACE})?(InnoDB_IO_r_wait: %{NUMBER:mysql.slowlog.innodb.io_r_wait.sec:float}%{METRICSPACE})?(InnoDB_rec_lock_wait: %{NUMBER:mysql.slowlog.innodb.rec_lock_wait.sec:float}%{METRICSPACE})?(InnoDB_queue_wait: %{NUMBER:mysql.slowlog.innodb.queue_wait.sec:float}%{METRICSPACE})?(InnoDB_pages_distinct: %{NUMBER:mysql.slowlog.innodb.pages_distinct:long}%{METRICSPACE})?(Log_slow_rate_type: %{WORD:mysql.slowlog.log_slow_rate_type}%{METRICSPACE})?(Log_slow_rate_limit: %{NUMBER:mysql.slowlog.log_slow_rate_limit:long}%{METRICSPACE})?%{EXPLAIN}(use %{WORD:mysql.slowlog.schema};\n)?SET timestamp=%{NUMBER:mysql.slowlog.timestamp:long};\n%{GREEDYMULTILINE:mysql.slowlog.query}"
+        ],
+      "pattern_definitions" : {
+        "GREEDYMULTILINE": "(.|\n)*",
+        "METRICSPACE": "([ #\n]*)",
+        "EXPLAIN": "(# explain:.*\n|#\\s*\n)*"
+      },
+      "ignore_missing": true
+    }
+  }, {
+    "remove":{
+      "field": "message"
+    }
+  }, {
+    "script": {
+      "lang": "painless",
+      "source": "for (field in params.fields) { def v = ctx.mysql.slowlog.get(field); if (v != null) { ctx.mysql.slowlog.put(field, params.mapping.get(v)) } }",
+      "params": {
+         "mapping": {
+           "Yes": true,
+           "No": false
+         },
+         "fields": [
+           "query_cache_hit",
+           "tmp_table",
+           "tmp_table_on_disk",
+           "filesort",
+           "filesort_on_disk",
+           "priority_queue",
+           "full_scan",
+           "full_join"
+         ]
+      }
+    }
+  }, {
+    "script": {
+      "lang": "painless",
+      "source": "ctx.event.duration = Math.round(ctx.temp.duration * 1000000) * 1000",
+      "if": "ctx.temp?.duration != null"
+    }
+  }, {
+    "remove": {
+      "field": "temp.duration",
+      "ignore_missing": true
+    }
+  }, {
+    "date": {
+      "field": "mysql.slowlog.timestamp",
+      "target_field": "@timestamp",
+      "formats": ["UNIX"],
+      "ignore_failure": true
+    }
+  }, {
+    "remove":{
+      "field": "mysql.slowlog.timestamp",
+      "ignore_missing": true
+    }
+  }, {
+    "set":{
+      "field": "event.kind",
+      "value": "event"
+    }
+  }, {
+    "append":{
+      "field": "event.category",
+      "value": "database"
+    }
+  }, {
+    "append":{
+      "field": "event.type",
+      "value": "info"
+    }
+  }],
+  "on_failure" : [{
+    "set" : {
+      "field" : "error.message",
+      "value" : "{{ _ingest.on_failure_message }}"
+    }
+  }]
+}

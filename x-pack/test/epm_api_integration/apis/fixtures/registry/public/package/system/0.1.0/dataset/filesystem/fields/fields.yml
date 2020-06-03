@@ -1,0 +1,49 @@
+- name: system.filesystem
+  type: group
+  release: ga
+  fields:
+  - name: available
+    type: long
+    format: bytes
+    description: |
+      The disk space available to an unprivileged user in bytes.
+  - name: device_name
+    type: keyword
+    description: |
+      The disk name. For example: `/dev/disk1`
+  - name: type
+    type: keyword
+    description: |
+      The disk type. For example: `ext4`
+  - name: mount_point
+    type: keyword
+    description: |
+      The mounting point. For example: `/`
+  - name: files
+    type: long
+    description: |
+      The total number of file nodes in the file system.
+  - name: free
+    type: long
+    format: bytes
+    description: |
+      The disk space available in bytes.
+  - name: free_files
+    type: long
+    description: |
+      The number of free file nodes in the file system.
+  - name: total
+    type: long
+    format: bytes
+    description: |
+      The total disk space in bytes.
+  - name: used.bytes
+    type: long
+    format: bytes
+    description: |
+      The used disk space in bytes.
+  - name: used.pct
+    type: scaled_float
+    format: percent
+    description: |
+      The percentage of used disk space.

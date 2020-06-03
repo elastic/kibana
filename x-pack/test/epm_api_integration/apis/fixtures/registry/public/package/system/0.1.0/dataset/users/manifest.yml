@@ -1,0 +1,7 @@
+title: System users metrics
+release: experimental
+type: metrics
+streams:
+- input: system/metrics
+  title: System users metrics
+  description: Collect System users metrics

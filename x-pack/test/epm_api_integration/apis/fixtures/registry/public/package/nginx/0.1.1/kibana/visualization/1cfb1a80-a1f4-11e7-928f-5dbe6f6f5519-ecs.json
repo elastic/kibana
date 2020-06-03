@@ -1,0 +1,18 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "title": "Access logs over time [Logs Nginx] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"annotations\":[{\"color\":\"#F00\",\"icon\":\"fa-tag\",\"id\":\"970b1420-a1f3-11e7-a062-a1c3587f4874\",\"ignore_global_filters\":1,\"ignore_panel_filters\":1,\"index_pattern\":\"logs-*\",\"time_field\":\"@timestamp\"}],\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"background_color_rules\":[{\"id\":\"3189aa80-a1f3-11e7-a062-a1c3587f4874\"}],\"filter\":{\"language\":\"lucene\",\"query\":\"stream.dataset:nginx.access\"},\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"index_pattern\":\"logs-*\",\"interval\":\"auto\",\"legend_position\":\"bottom\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"number\",\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"label\":\"Access logs\",\"line_width\":1,\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"count\"}],\"point_size\":1,\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_filters\":[{\"color\":\"#68BC00\",\"id\":\"1db649a0-a1f3-11e7-a062-a1c3587f4874\"}],\"split_mode\":\"everything\",\"stacked\":\"none\",\"terms_field\":\"url.original\",\"terms_order_by\":\"61ca57f2-469d-11e7-af02-69e470af7417\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"timeseries\"},\"title\":\"Access logs over time [Logs Nginx] ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "1cfb1a80-a1f4-11e7-928f-5dbe6f6f5519-ecs",
+  "migrationVersion": {
+    "visualization": "7.8.0"
+  },
+  "references": [],
+  "type": "visualization"
+}

@@ -1,0 +1,17 @@
+
+- name: stream.type
+  type: constant_keyword
+  description: >
+    Stream type
+- name: stream.dataset
+  type: constant_keyword
+  description: >
+    Stream dataset.
+- name: stream.namespace
+  type: constant_keyword
+  description: >
+    Stream namespace.
+- name: "@timestamp"
+  type: date
+  description: >
+    Event timestamp.

@@ -1,0 +1,18 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Buffer Pool Pages [Metrics MySQL] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_min\":0,\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"default_index_pattern\":\"metrics-*\",\"default_timefield\":\"@timestamp\",\"filter\":{\"language\":\"kuery\",\"query\":\"\"},\"id\":\"515b9dd0-639f-11ea-96d8-1943b9bb65d9\",\"index_pattern\":\"metrics-*\",\"interval\":\"auto\",\"isModelInvalid\":false,\"legend_position\":\"bottom\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":\"0\",\"formatter\":\"'0.0a'\",\"id\":\"37f2d600-63a0-11ea-90a2-c51229c5db5f\",\"label\":\"Buffer Pool Pages Data\",\"line_width\":1,\"metrics\":[{\"field\":\"mysql.status.innodb.buffer_pool.pages.data\",\"id\":\"37f2d601-63a0-11ea-90a2-c51229c5db5f\",\"type\":\"avg\"}],\"point_size\":1,\"separate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"everything\",\"stacked\":\"none\",\"type\":\"timeseries\"},{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(22,165,165,1)\",\"fill\":\"0\",\"formatter\":\"'0.0a'\",\"id\":\"57ae9d80-63a0-11ea-90a2-c51229c5db5f\",\"label\":\"Buffer Pool Pages Free\",\"line_width\":\"2\",\"metrics\":[{\"field\":\"mysql.status.innodb.buffer_pool.pages.free\",\"id\":\"57ae9d81-63a0-11ea-90a2-c51229c5db5f\",\"type\":\"avg\"}],\"point_size\":1,\"separate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"everything\",\"stacked\":\"none\",\"type\":\"timeseries\"},{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(102,102,102,1)\",\"fill\":\"0\",\"formatter\":\"'0.0a'\",\"id\":\"c86cc470-63a0-11ea-90a2-c51229c5db5f\",\"label\":\"Buffer Pool Pages Total\",\"line_width\":\"2\",\"metrics\":[{\"field\":\"mysql.status.innodb.buffer_pool.pages.total\",\"id\":\"c86ceb80-63a0-11ea-90a2-c51229c5db5f\",\"type\":\"avg\"}],\"point_size\":1,\"separate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"everything\",\"stacked\":\"none\",\"type\":\"timeseries\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"timeseries\"},\"title\":\"Buffer Pool Pages [Metrics MySQL] ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "98c7bca0-63a2-11ea-a83e-25b8612d00cc",
+  "migrationVersion": {
+    "visualization": "7.8.0"
+  },
+  "references": [],
+  "type": "visualization"
+}

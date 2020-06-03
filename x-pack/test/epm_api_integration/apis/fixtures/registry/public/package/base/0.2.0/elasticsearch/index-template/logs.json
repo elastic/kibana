@@ -1,0 +1,13 @@
+{
+    "index_patterns": [
+        "logs-*-*"
+    ],
+    "priority": 0,
+    "data_stream": {
+        "timestamp_field": "@timestamp"
+    },
+    "composed_of": [
+        "logs-mappings",
+        "logs-settings"
+    ]
+}

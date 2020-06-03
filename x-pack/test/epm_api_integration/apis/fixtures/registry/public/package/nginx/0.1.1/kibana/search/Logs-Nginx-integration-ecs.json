@@ -1,0 +1,36 @@
+{
+  "attributes": {
+    "columns": [
+      "url.original",
+      "http.request.method",
+      "http.response.status_code",
+      "http.request.referrer",
+      "http.response.body.bytes"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlight\":{\"fields\":{\"*\":{}},\"fragment_size\":2147483647,\"post_tags\":[\"@/kibana-highlighted-field@\"],\"pre_tags\":[\"@kibana-highlighted-field@\"],\"require_field_match\":false},\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"(stream.dataset:nginx.access OR stream.dataset:nginx.error OR stream.dataset:nginx.ingress_controller)\"},\"version\":true}"
+    },
+    "sort": [
+      [
+        "@timestamp",
+        "desc"
+      ]
+    ],
+    "title": "Nginx logs [Logs Nginx] ECS",
+    "version": 1
+  },
+  "id": "Logs-Nginx-integration-ecs",
+  "migrationVersion": {
+    "search": "7.4.0"
+  },
+  "references": [
+    {
+      "id": "logs-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}

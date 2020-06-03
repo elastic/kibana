@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"}}"
+    },
+    "title": "Network Traffic (Bytes) [Metrics System] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"listeners\":{},\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"filter\":{\"language\":\"lucene\",\"query\":\"-system.network.name:l*\"},\"id\":\"da1046f0-faa0-11e6-86b1-cd7735ff7e23\",\"index_pattern\":\"*\",\"interval\":\"auto\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(0,156,224,1)\",\"fill\":\"1\",\"formatter\":\"bytes\",\"id\":\"da1046f1-faa0-11e6-86b1-cd7735ff7e23\",\"label\":\"Inbound \",\"line_width\":\"0\",\"metrics\":[{\"field\":\"system.network.in.bytes\",\"id\":\"da1046f2-faa0-11e6-86b1-cd7735ff7e23\",\"type\":\"max\"},{\"field\":\"da1046f2-faa0-11e6-86b1-cd7735ff7e23\",\"id\":\"f41f9280-faa0-11e6-86b1-cd7735ff7e23\",\"type\":\"derivative\",\"unit\":\"1s\"},{\"field\":\"f41f9280-faa0-11e6-86b1-cd7735ff7e23\",\"id\":\"a87398e0-1b93-11e7-8ada-3df93aab833e\",\"type\":\"positive_only\",\"unit\":\"\"},{\"function\":\"sum\",\"id\":\"2d533df0-2c2d-11e7-be71-3162da85303f\",\"type\":\"series_agg\"}],\"point_size\":\"0\",\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"system.network.name\",\"value_template\":\"{{value}}/s\"},{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(250,40,255,1)\",\"fill\":\"1\",\"formatter\":\"bytes\",\"id\":\"fbbd5720-faa0-11e6-86b1-cd7735ff7e23\",\"label\":\"Outbound \",\"line_width\":\"0\",\"metrics\":[{\"field\":\"system.network.out.bytes\",\"id\":\"fbbd7e30-faa0-11e6-86b1-cd7735ff7e23\",\"type\":\"max\"},{\"field\":\"fbbd7e30-faa0-11e6-86b1-cd7735ff7e23\",\"id\":\"fbbd7e31-faa0-11e6-86b1-cd7735ff7e23\",\"type\":\"derivative\",\"unit\":\"1s\"},{\"id\":\"17e597a0-faa1-11e6-86b1-cd7735ff7e23\",\"script\":\"params.rate != null \\u0026\\u0026 params.rate \\u003e 0 ? params.rate * -1 : null\",\"type\":\"calculation\",\"variables\":[{\"field\":\"fbbd7e31-faa0-11e6-86b1-cd7735ff7e23\",\"id\":\"1940bad0-faa1-11e6-86b1-cd7735ff7e23\",\"name\":\"rate\"}]},{\"function\":\"sum\",\"id\":\"533da9b0-2c2d-11e7-be71-3162da85303f\",\"type\":\"series_agg\"}],\"point_size\":\"0\",\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"system.network.name\",\"value_template\":\"{{value}}/s\"}],\"show_legend\":1,\"time_field\":\"@timestamp\",\"type\":\"timeseries\"},\"title\":\"Mericbeat: Network Traffic (Bytes) ECS\",\"type\":\"metrics\"}"
+  },
+  "id": "089b85d0-1b16-11e7-b09e-037021c4f8df-ecs",
+  "references": [],
+  "type": "visualization"
+}

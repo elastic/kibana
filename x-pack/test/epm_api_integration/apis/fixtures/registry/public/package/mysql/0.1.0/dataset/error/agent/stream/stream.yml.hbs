@@ -1,0 +1,12 @@
+paths:
+{{#each paths}}
+  - {{this}}
+{{/each}}
+exclude_files: [".gz$"]
+multiline:
+  # Consider lines without timestamp part of the previous message
+  pattern: '^([0-9]{4}-[0-9]{2}-[0-9]{2}|[0-9]{6})'
+  negate: true
+  match: after
+processors:
+- add_locale: ~

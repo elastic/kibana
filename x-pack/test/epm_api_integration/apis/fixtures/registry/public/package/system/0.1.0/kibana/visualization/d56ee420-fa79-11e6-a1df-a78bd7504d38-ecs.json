@@ -1,0 +1,22 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[]}"
+    },
+    "savedSearchRefName": "search_0",
+    "title": "New users by home directory [Logs System] ECS",
+    "uiStateJSON": "{\"vis\":{\"colors\":{\"/bin/bash\":\"#E24D42\",\"/bin/false\":\"#508642\",\"/nonexistent\":\"#629E51\",\"/sbin/nologin\":\"#7EB26D\"},\"legendOpen\":true}}",
+    "version": 1,
+    "visState": "{\"aggs\":[{\"enabled\":true,\"id\":\"1\",\"params\":{},\"schema\":\"metric\",\"type\":\"count\"},{\"enabled\":true,\"id\":\"2\",\"params\":{\"field\":\"system.auth.useradd.home\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":5},\"schema\":\"segment\",\"type\":\"terms\"},{\"enabled\":true,\"id\":\"3\",\"params\":{\"field\":\"user.name\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":5},\"schema\":\"segment\",\"type\":\"terms\"}],\"listeners\":{},\"params\":{\"addLegend\":true,\"addTooltip\":true,\"isDonut\":false,\"legendPosition\":\"right\"},\"title\":\"New users by home directory ECS\",\"type\":\"pie\"}"
+  },
+  "id": "d56ee420-fa79-11e6-a1df-a78bd7504d38-ecs",
+  "references": [
+    {
+      "id": "8030c1b0-fa77-11e6-ae9b-81e5311e8cab-ecs",
+      "name": "search_0",
+      "type": "search"
+    }
+  ],
+  "type": "visualization"
+}
