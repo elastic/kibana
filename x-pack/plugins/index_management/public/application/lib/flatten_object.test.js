@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flattenObject } from '../../public/application/lib/flatten_object';
+import { flattenObject } from './flatten_object';
+
 describe('flatten_object', () => {
   test('it flattens an object', () => {
     const obj = {
@@ -17,6 +18,7 @@ describe('flatten_object', () => {
     };
     expect(flattenObject(obj)).toMatchSnapshot();
   });
+
   test('it flattens an object that contains an array in a field', () => {
     const obj = {
       foo: {

@@ -5,20 +5,22 @@
  */
 
 import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
-import { BASE_PATH } from '../../../common/constants';
-import { TemplateEdit } from '../../../public/application/sections/template_edit'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { TemplateCreate } from '../../../public/application/sections/template_create'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { WithAppDependencies } from '../helpers';
+
 import { formSetup, TestSubjects } from './template_form.helpers';
-import { TEMPLATE_NAME } from './constants';
-import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    initialEntries: [`${BASE_PATH}edit_template/${TEMPLATE_NAME}`],
-    componentRoutePath: `${BASE_PATH}edit_template/:name`,
+    initialEntries: [`/create_template`],
+    componentRoutePath: `/create_template`,
   },
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed<TestSubjects>(WithAppDependencies(TemplateEdit), testBedConfig);
+const initTestBed = registerTestBed<TestSubjects>(
+  WithAppDependencies(TemplateCreate),
+  testBedConfig
+);
 
 export const setup = formSetup.bind(null, initTestBed);
