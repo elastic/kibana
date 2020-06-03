@@ -7,7 +7,6 @@
 import React from 'react';
 import tinycolor from 'tinycolor2';
 import chroma from 'chroma-js';
-// @ts-ignore
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { ColorGradient } from './components/color_gradient';
 import { RawColorSchema, vislibColorMaps } from '../../../../../../src/plugins/charts/public';
@@ -139,11 +138,11 @@ const COLOR_PALETTES_CONFIGS: ColorPalette[] = [
   },
   {
     id: 'palette_20',
-    colors: euiPaletteColorBlind(2),
+    colors: euiPaletteColorBlind({ rotations: 2 }),
   },
   {
     id: 'palette_30',
-    colors: euiPaletteColorBlind(3),
+    colors: euiPaletteColorBlind({ rotations: 3 }),
   },
 ];
 
