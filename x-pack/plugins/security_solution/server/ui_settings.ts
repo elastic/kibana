@@ -40,10 +40,10 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
         'xpack.securitySolution.uiSettings.defaultRefreshIntervalDescription',
         {
           defaultMessage:
-            '<p>Default refresh interval for the SIEM time filter, in milliseconds.</p>',
+            '<p>Default refresh interval for the Security time filter, in milliseconds.</p>',
         }
       ),
-      category: ['siem'],
+      category: ['securitySolution'],
       requiresPageReload: true,
       schema: schema.object({
         value: schema.number(),
@@ -60,9 +60,9 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
   "to": "${DEFAULT_TO}"
 }`,
       description: i18n.translate('xpack.securitySolution.uiSettings.defaultTimeRangeDescription', {
-        defaultMessage: '<p>Default period of time in the SIEM time filter.</p>',
+        defaultMessage: '<p>Default period of time in the Security time filter.</p>',
       }),
-      category: ['siem'],
+      category: ['securitySolution'],
       requiresPageReload: true,
       schema: schema.object({
         from: schema.string(),
@@ -76,9 +76,9 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       value: DEFAULT_INDEX_PATTERN,
       description: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexDescription', {
         defaultMessage:
-          '<p>Comma-delimited list of Elasticsearch indices from which the SIEM app collects events.</p>',
+          '<p>Comma-delimited list of Elasticsearch indices from which the Security app collects events.</p>',
       }),
-      category: ['siem'],
+      category: ['securitySolution'],
       requiresPageReload: true,
       schema: schema.arrayOf(schema.string()),
     },
@@ -92,10 +92,10 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
         'xpack.securitySolution.uiSettings.defaultAnomalyScoreDescription',
         {
           defaultMessage:
-            '<p>Value above which Machine Learning job anomalies are displayed in the SIEM app.</p><p>Valid values: 0 to 100.</p>',
+            '<p>Value above which Machine Learning job anomalies are displayed in the Security app.</p><p>Valid values: 0 to 100.</p>',
         }
       ),
-      category: ['siem'],
+      category: ['securitySolution'],
       requiresPageReload: true,
       schema: schema.number(),
     },
@@ -108,7 +108,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
         defaultMessage: '<p>Enables the News feed</p>',
       }),
       type: 'boolean',
-      category: ['siem'],
+      category: ['securitySolution'],
       requiresPageReload: true,
       schema: schema.boolean(),
     },
@@ -120,7 +120,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       description: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrlDescription', {
         defaultMessage: '<p>News feed content will be retrieved from this URL</p>',
       }),
-      category: ['siem'],
+      category: ['securitySolution'],
       requiresPageReload: true,
       schema: schema.string(),
     },
@@ -137,7 +137,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
             'Array of URL templates to build the list of reputation URLs to be displayed on the IP Details page.',
         }
       ),
-      category: ['siem'],
+      category: ['securitySolution'],
       requiresPageReload: true,
       schema: schema.arrayOf(
         schema.object({
