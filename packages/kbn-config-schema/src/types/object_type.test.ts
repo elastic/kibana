@@ -374,3 +374,55 @@ test('handles optional properties', () => {
 
   expect(foo).toBeDefined();
 });
+
+describe('#extends', () => {
+  it('allows to extend an existing schema by adding new properties', () => {
+    const origin = schema.object({
+      initial: schema.string(),
+    });
+
+    const extended = origin.extends({
+      added: schema.number(),
+    });
+
+    expect(() => {
+      extended.validate({ initial: 'foo' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[added]: expected value of type [number] but got [undefined]"`
+    );
+
+    expect(() => {
+      extended.validate({ initial: 'foo', added: 42 });
+    }).not.toThrowError();
+
+    // asserting that the resulting type is valid
+    const value: TypeOf<typeof extended> = {
+      added: 12,
+      initial: 'foo',
+    };
+    expect(value).toBeDefined();
+  });
+
+  it('allows to extend an existing schema by removing properties', () => {
+    const origin = schema.object({
+      string: schema.string(),
+      number: schema.number(),
+    });
+
+    const extended = origin.extends({ number: undefined });
+
+    expect(() => {
+      extended.validate({ string: 'foo', number: 12 });
+    }).toThrowErrorMatchingInlineSnapshot(`"[number]: definition for this key is missing"`);
+
+    expect(() => {
+      extended.validate({ string: 'foo' });
+    }).not.toThrowError();
+
+    // asserting that the resulting type is valid
+    const value: TypeOf<typeof extended> = {
+      string: 'foo',
+    };
+    expect(value).toBeDefined();
+  });
+});
