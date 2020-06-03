@@ -20,6 +20,7 @@ import { KibanaServices } from './common/lib/kibana/services';
 import { serviceNowActionType, jiraActionType } from './common/lib/connectors';
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, StartServices } from './types';
 import { APP_ID, APP_NAME, APP_ICON, APP_PATH } from '../common/constants';
+import { ConfigureEndpointDatasource } from './management/pages/policy/view/ingest_manager_integration/configure_datasource';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -132,6 +133,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
+    plugins.ingestManager.registerDatasource('endpoint', ConfigureEndpointDatasource);
 
     return {};
   }
