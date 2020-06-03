@@ -31,7 +31,7 @@ exports[`CertStatus renders expected elements for valid props 1`] = `
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            for 4 months
+             for 4 months
           </div>
         </div>
       </span>
