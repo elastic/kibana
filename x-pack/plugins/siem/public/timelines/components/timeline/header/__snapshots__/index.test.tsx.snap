@@ -142,6 +142,7 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
     onDataProviderRemoved={[MockFunction]}
     onToggleDataProviderEnabled={[MockFunction]}
     onToggleDataProviderExcluded={[MockFunction]}
+    onToggleDataProviderType={[MockFunction]}
     timelineId="foo"
     timelineType="default"
   />

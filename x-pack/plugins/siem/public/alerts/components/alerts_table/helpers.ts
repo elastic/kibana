@@ -106,21 +106,28 @@ export const findValueToChangeInQuery = (
   );
 };
 
-export const replaceTemplateFieldFromQuery = (query: string, ecsData: Ecs): string => {
-  // if default
-  if (query.trim() !== '') {
-    const valueToChange = findValueToChangeInQuery(esKuery.fromKueryExpression(query));
-    return valueToChange.reduce((newQuery, vtc) => {
-      const newValue = getStringArray(vtc.field, ecsData);
-      if (newValue.length) {
-        return newQuery.replace(vtc.valueToChange, newValue[0]);
-      } else {
-        return newQuery;
-      }
-    }, query);
-  } else {
-    return '';
+export const replaceTemplateFieldFromQuery = (
+  query: string,
+  ecsData: Ecs,
+  timelineType: TimelineType
+): string => {
+  if (timelineType === TimelineType.default) {
+    if (query.trim() !== '') {
+      const valueToChange = findValueToChangeInQuery(esKuery.fromKueryExpression(query));
+      return valueToChange.reduce((newQuery, vtc) => {
+        const newValue = getStringArray(vtc.field, ecsData);
+        if (newValue.length) {
+          return newQuery.replace(vtc.valueToChange, newValue[0]);
+        } else {
+          return newQuery;
+        }
+      }, query);
+    } else {
+      return '';
+    }
   }
+
+  return query;
 };
 
 export const replaceTemplateFieldFromMatchFilters = (filters: Filter[], ecsData: Ecs): Filter[] =>
@@ -144,6 +151,7 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
   ecsData: Ecs,
   timelineType: TimelineType = TimelineType.default
 ): T => {
+  // Support for legacy "template-like" timeline behavior that is using hardcoded list of templateFields
   if (timelineType === TimelineType.default) {
     if (templateFields.includes(dataProvider.queryMatch.field)) {
       const newValue = getStringArray(dataProvider.queryMatch.field, ecsData);

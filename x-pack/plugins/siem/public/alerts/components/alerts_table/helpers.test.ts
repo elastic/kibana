@@ -5,6 +5,7 @@
  */
 import { cloneDeep } from 'lodash/fp';
 
+import { TimelineType } from '../../../../common/types/timeline';
 import { mockEcsData } from '../../../common/mock/mock_ecs';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
@@ -96,33 +97,47 @@ describe('helpers', () => {
 
   describe('replaceTemplateFieldFromQuery', () => {
     test('given an empty query string this returns an empty query string', () => {
-      const replacement = replaceTemplateFieldFromQuery('', mockEcsDataClone[0]);
+      const replacement = replaceTemplateFieldFromQuery(
+        '',
+        mockEcsDataClone[0],
+        TimelineType.default
+      );
       expect(replacement).toEqual('');
     });
 
     test('given a query string with spaces this returns an empty query string', () => {
-      const replacement = replaceTemplateFieldFromQuery('    ', mockEcsDataClone[0]);
+      const replacement = replaceTemplateFieldFromQuery(
+        '    ',
+        mockEcsDataClone[0],
+        TimelineType.default
+      );
       expect(replacement).toEqual('');
     });
 
     test('it should replace a query with a template value such as apache from a mock template', () => {
       const replacement = replaceTemplateFieldFromQuery(
         'host.name: placeholdertext',
-        mockEcsDataClone[0]
+        mockEcsDataClone[0],
+        TimelineType.default
       );
       expect(replacement).toEqual('host.name: apache');
     });
 
     test('it should replace a template field with an ECS value that is not an array', () => {
       mockEcsDataClone[0].host!.name = ('apache' as unknown) as string[]; // very unsafe cast for this test case
-      const replacement = replaceTemplateFieldFromQuery('host.name: *', mockEcsDataClone[0]);
+      const replacement = replaceTemplateFieldFromQuery(
+        'host.name: *',
+        mockEcsDataClone[0],
+        TimelineType.default
+      );
       expect(replacement).toEqual('host.name: *');
     });
 
     test('it should NOT replace a query with a template value that is not part of the template fields array', () => {
       const replacement = replaceTemplateFieldFromQuery(
         'user.id: placeholdertext',
-        mockEcsDataClone[0]
+        mockEcsDataClone[0],
+        TimelineType.default
       );
       expect(replacement).toEqual('user.id: placeholdertext');
     });

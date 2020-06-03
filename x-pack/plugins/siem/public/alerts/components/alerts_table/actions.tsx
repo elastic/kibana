@@ -131,7 +131,8 @@ export const sendAlertToTimelineAction = async ({
         const { timeline } = formatTimelineResultToModel(timelineTemplate, true);
         const query = replaceTemplateFieldFromQuery(
           timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
-          ecsData
+          ecsData,
+          timeline.timelineType
         );
         const filters = replaceTemplateFieldFromMatchFilters(timeline.filters ?? [], ecsData);
         const dataProviders = replaceTemplateFieldFromDataProviders(
