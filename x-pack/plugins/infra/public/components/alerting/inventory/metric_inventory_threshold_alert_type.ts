@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../../triggers_actions_ui/public/types';
-import { Expressions } from './expression';
 import { validateMetricThreshold } from './validation';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
@@ -18,7 +18,7 @@ export function getInventoryMetricAlertType(): AlertTypeModel {
       defaultMessage: 'Inventory',
     }),
     iconClass: 'bell',
-    alertParamsExpression: Expressions,
+    alertParamsExpression: React.lazy(() => import('./expression_lazy')),
     validate: validateMetricThreshold,
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.inventory.threshold.defaultActionMessage',
