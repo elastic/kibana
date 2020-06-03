@@ -10,7 +10,7 @@ import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../../graphql/types';
 import { allTimelinesQuery } from '../../timelines/containers/all/index.gql_query';
-import { CreateTimelineProps } from '../../alerts/components/signals/types';
+import { CreateTimelineProps } from '../../alerts/components/alerts_table/types';
 import { TimelineModel } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 export interface MockedProvidedQuery {
@@ -2206,7 +2206,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
         enabled: true,
         excluded: false,
         id:
-          'send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-signal-id-1',
+          'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-1',
         kqlQuery: '',
         name: '1',
         queryMatch: { field: '_id', operator: ':', value: '1' },

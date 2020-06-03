@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Immutable } from '../../../common/endpoint_alerts/types';
-
 import { HttpFetchQuery } from '../../../../../../src/core/public';
+import { Immutable } from '../../../common/endpoint/types';
 
 export function cloneHttpFetchQuery(query: Immutable<HttpFetchQuery>): HttpFetchQuery {
   const clone: HttpFetchQuery = {};
