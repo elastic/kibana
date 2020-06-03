@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { WebElementWrapper } from '../lib/web_element_wrapper';
+
 const REMOVE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-deletePanel';
 const EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-editPanel';
 const REPLACE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-replacePanel';
@@ -26,13 +29,13 @@ const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CUSTOMIZE_P
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'embeddablePanelToggleMenuIcon';
 const OPEN_INSPECTOR_TEST_SUBJ = 'embeddablePanelAction-openInspector';
 
-export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
+export function DashboardPanelActionsProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header', 'common']);
 
   return new (class DashboardPanelActions {
-    async findContextMenu(parent) {
+    async findContextMenu(parent?: WebElementWrapper) {
       return parent
         ? await testSubjects.findDescendant(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ, parent)
         : await testSubjects.find(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ);
@@ -43,7 +46,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       return await testSubjects.exists(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ);
     }
 
-    async toggleContextMenu(parent) {
+    async toggleContextMenu(parent?: WebElementWrapper) {
       log.debug('toggleContextMenu');
       await (parent ? parent.moveMouseTo() : testSubjects.moveMouseTo('dashboardPanelTitle'));
       const toggleMenuItem = await this.findContextMenu(parent);
@@ -54,7 +57,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       await testSubjects.existOrFail('embeddablePanelContextMenuOpen');
     }
 
-    async openContextMenu(parent) {
+    async openContextMenu(parent?: WebElementWrapper) {
       log.debug(`openContextMenu(${parent}`);
       await this.toggleContextMenu(parent);
       await this.expectContextMenuToBeOpen();
@@ -77,43 +80,45 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       await testSubjects.click(REMOVE_PANEL_DATA_TEST_SUBJ);
     }
 
-    async removePanelByTitle(title) {
+    async removePanelByTitle(title: string) {
       const header = await this.getPanelHeading(title);
       await this.openContextMenu(header);
       await testSubjects.click(REMOVE_PANEL_DATA_TEST_SUBJ);
     }
 
-    async customizePanel(parent) {
+    async customizePanel(parent?: WebElementWrapper) {
       await this.openContextMenu(parent);
       await testSubjects.click(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
     }
 
-    async replacePanelByTitle(title) {
+    async replacePanelByTitle(title?: string) {
       log.debug(`replacePanel(${title})`);
-      let panelOptions = null;
       if (title) {
-        panelOptions = await this.getPanelHeading(title);
+        const panelOptions = await this.getPanelHeading(title);
+        await this.openContextMenu(panelOptions);
+      } else {
+        await this.openContextMenu();
       }
-      await this.openContextMenu(panelOptions);
       await testSubjects.click(REPLACE_PANEL_DATA_TEST_SUBJ);
     }
 
-    async clonePanelByTitle(title) {
+    async clonePanelByTitle(title?: string) {
       log.debug(`clonePanel(${title})`);
-      let panelOptions = null;
       if (title) {
-        panelOptions = await this.getPanelHeading(title);
+        const panelOptions = await this.getPanelHeading(title);
+        await this.openContextMenu(panelOptions);
+      } else {
+        await this.openContextMenu();
       }
-      await this.openContextMenu(panelOptions);
       await testSubjects.click(CLONE_PANEL_DATA_TEST_SUBJ);
     }
 
-    async openInspectorByTitle(title) {
+    async openInspectorByTitle(title: string) {
       const header = await this.getPanelHeading(title);
       await this.openInspector(header);
     }
 
-    async openInspector(parent) {
+    async openInspector(parent: WebElementWrapper) {
       await this.openContextMenu(parent);
       await testSubjects.click(OPEN_INSPECTOR_TEST_SUBJ);
     }
@@ -163,7 +168,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       await testSubjects.existOrFail(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     }
 
-    async getPanelHeading(title) {
+    async getPanelHeading(title: string) {
       return await testSubjects.find(`embeddablePanelHeading-${title.replace(/\s/g, '')}`);
     }
 
@@ -171,13 +176,14 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       await testSubjects.click('customizePanelHideTitle');
     }
 
-    async toggleHidePanelTitle(originalTitle) {
+    async toggleHidePanelTitle(originalTitle: string) {
       log.debug(`hidePanelTitle(${originalTitle})`);
-      let panelOptions = null;
       if (originalTitle) {
-        panelOptions = await this.getPanelHeading(originalTitle);
+        const panelOptions = await this.getPanelHeading(originalTitle);
+        await this.customizePanel(panelOptions);
+      } else {
+        await this.customizePanel();
       }
-      await this.customizePanel(panelOptions);
       await this.clickHidePanelTitleToggle();
       await testSubjects.click('saveNewTitleButton');
     }
@@ -188,18 +194,19 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
      * @param originalTitle - optional to specify which panel to change the title on.
      * @return {Promise<void>}
      */
-    async setCustomPanelTitle(customTitle, originalTitle) {
+    async setCustomPanelTitle(customTitle: string, originalTitle?: string) {
       log.debug(`setCustomPanelTitle(${customTitle}, ${originalTitle})`);
-      let panelOptions = null;
       if (originalTitle) {
-        panelOptions = await this.getPanelHeading(originalTitle);
+        const panelOptions = await this.getPanelHeading(originalTitle);
+        await this.customizePanel(panelOptions);
+      } else {
+        await this.customizePanel();
       }
-      await this.customizePanel(panelOptions);
       await testSubjects.setValue('customEmbeddablePanelTitleInput', customTitle);
       await testSubjects.click('saveNewTitleButton');
     }
 
-    async resetCustomPanelTitle(panel) {
+    async resetCustomPanelTitle(panel: WebElementWrapper) {
       log.debug('resetCustomPanelTitle');
       await this.customizePanel(panel);
       await testSubjects.click('resetCustomEmbeddablePanelTitle');

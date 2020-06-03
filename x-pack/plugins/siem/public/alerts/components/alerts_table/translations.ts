@@ -98,3 +98,31 @@ export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
     defaultMessage: 'Investigate in timeline',
   }
 );
+
+export const CLOSED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
+  i18n.translate('xpack.siem.detectionEngine.alerts.closedAlertSuccessToastMessage', {
+    values: { totalAlerts },
+    defaultMessage:
+      'Successfully closed {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
+  });
+
+export const OPENED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
+  i18n.translate('xpack.siem.detectionEngine.alerts.openedAlertSuccessToastMessage', {
+    values: { totalAlerts },
+    defaultMessage:
+      'Successfully opened {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
+  });
+
+export const CLOSED_ALERT_FAILED_TOAST = i18n.translate(
+  'xpack.siem.detectionEngine.alerts.closedAlertFailedToastMessage',
+  {
+    defaultMessage: 'Failed to close alert(s).',
+  }
+);
+
+export const OPENED_ALERT_FAILED_TOAST = i18n.translate(
+  'xpack.siem.detectionEngine.alerts.openedAlertFailedToastMessage',
+  {
+    defaultMessage: 'Failed to open alert(s)',
+  }
+);

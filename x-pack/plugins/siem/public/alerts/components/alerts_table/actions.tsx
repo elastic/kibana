@@ -56,17 +56,21 @@ export const updateAlertStatusAction = async ({
   status,
   setEventsLoading,
   setEventsDeleted,
+  onAlertStatusUpdateSuccess,
+  onAlertStatusUpdateFailure,
 }: UpdateAlertStatusActionProps) => {
   try {
     setEventsLoading({ eventIds: alertIds, isLoading: true });
 
     const queryObject = query ? { query: JSON.parse(query) } : getUpdateAlertsQuery(alertIds);
 
-    await updateAlertStatus({ query: queryObject, status });
+    const response = await updateAlertStatus({ query: queryObject, status });
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: alertIds, isDeleted: true });
-  } catch (e) {
-    // TODO: Show error toasts
+
+    onAlertStatusUpdateSuccess(response.updated, status);
+  } catch (error) {
+    onAlertStatusUpdateFailure(status, error);
   } finally {
     setEventsLoading({ eventIds: alertIds, isLoading: false });
   }

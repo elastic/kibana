@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { UpdateDocumentByQueryResponse } from 'elasticsearch';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -54,7 +55,7 @@ export const updateAlertStatus = async ({
   query,
   status,
   signal,
-}: UpdateAlertStatusProps): Promise<unknown> =>
+}: UpdateAlertStatusProps): Promise<UpdateDocumentByQueryResponse> =>
   KibanaServices.get().http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
     method: 'POST',
     body: JSON.stringify({ status, ...query }),

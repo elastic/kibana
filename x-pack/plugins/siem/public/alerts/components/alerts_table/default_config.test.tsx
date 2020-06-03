@@ -54,11 +54,16 @@ describe('alerts default_config', () => {
     let createTimeline: CreateTimeline;
     let updateTimelineIsLoading: UpdateTimelineLoading;
 
+    let onAlertStatusUpdateSuccess: (count: number, status: string) => void;
+    let onAlertStatusUpdateFailure: (status: string, error: Error) => void;
+
     beforeEach(() => {
       setEventsLoading = jest.fn();
       setEventsDeleted = jest.fn();
       createTimeline = jest.fn();
       updateTimelineIsLoading = jest.fn();
+      onAlertStatusUpdateSuccess = jest.fn();
+      onAlertStatusUpdateFailure = jest.fn();
     });
 
     describe('timeline tooltip', () => {
@@ -71,6 +76,8 @@ describe('alerts default_config', () => {
           createTimeline,
           status: 'open',
           updateTimelineIsLoading,
+          onAlertStatusUpdateSuccess,
+          onAlertStatusUpdateFailure,
         });
         const timelineAction = alertsActions[0].getAction({
           eventId: 'even-id',
@@ -97,6 +104,8 @@ describe('alerts default_config', () => {
           createTimeline,
           status: 'open',
           updateTimelineIsLoading,
+          onAlertStatusUpdateSuccess,
+          onAlertStatusUpdateFailure,
         });
 
         alertOpenAction = alertsActions[1].getAction({
@@ -119,6 +128,8 @@ describe('alerts default_config', () => {
           status: 'open',
           setEventsLoading,
           setEventsDeleted,
+          onAlertStatusUpdateSuccess,
+          onAlertStatusUpdateFailure,
         });
       });
 
@@ -151,6 +162,8 @@ describe('alerts default_config', () => {
           createTimeline,
           status: 'closed',
           updateTimelineIsLoading,
+          onAlertStatusUpdateSuccess,
+          onAlertStatusUpdateFailure,
         });
 
         alertCloseAction = alertsActions[1].getAction({
@@ -173,6 +186,8 @@ describe('alerts default_config', () => {
           status: 'closed',
           setEventsLoading,
           setEventsDeleted,
+          onAlertStatusUpdateSuccess,
+          onAlertStatusUpdateFailure,
         });
       });
 
