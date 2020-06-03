@@ -46,10 +46,10 @@ export const AvailabilityReporting: React.FC<Props> = ({ ups, downs, allLocation
   ];
 
   const pagination: Pagination | undefined =
-    allLocations.length > 3
+    allLocations.length > 4
       ? {
           pageIndex,
-          pageSize: 3,
+          pageSize: 4,
           totalItemCount: allLocations.length,
           hidePerPageOptions: true,
         }
@@ -68,8 +68,9 @@ export const AvailabilityReporting: React.FC<Props> = ({ ups, downs, allLocation
       {/* @ts-ignore weird TS issue*/}
       <EuiBasicTable
         responsive={false}
+        compressed={true}
         columns={cols}
-        items={allLocations.slice(pageIndex * 3, pageIndex * 3 + 3)}
+        items={allLocations.slice(pageIndex * 4, pageIndex * 4 + 4)}
         pagination={pagination}
         onChange={onTableChange}
       />

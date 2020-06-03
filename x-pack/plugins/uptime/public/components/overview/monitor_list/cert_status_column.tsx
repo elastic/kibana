@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { Cert } from '../../../../common/runtime_types';
 import { useCertStatus } from '../../../hooks';
-import { EXPIRED, EXPIRES_SOON } from '../../certificates/translations';
+import { EXPIRED, EXPIRES, EXPIRES_SOON } from '../../certificates/translations';
 import { CERT_STATUS } from '../../../../common/constants';
 
 interface Props {
@@ -47,5 +47,5 @@ export const CertStatusColumn: React.FC<Props> = ({ cert }) => {
     return <CertStatus color="danger" text={EXPIRED} />;
   }
 
-  return certStatus ? <CertStatus color="success" text={'Expires'} /> : <span>--</span>;
+  return certStatus ? <CertStatus color="success" text={EXPIRES} /> : <span>--</span>;
 };

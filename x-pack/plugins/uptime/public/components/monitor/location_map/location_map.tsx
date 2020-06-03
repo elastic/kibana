@@ -105,21 +105,19 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
 
   return (
     <EuiErrorBoundary>
-      <EuiHideFor sizes={['xl']}>
-        <ToggleViewButtons>
-          <EuiButtonGroup
-            options={toggleButtons}
-            idToSelectedMap={selectedView}
-            onChange={(id) => onChangeView(id)}
-            type="multi"
-            isIconOnly
-            style={{ marginLeft: 'auto' }}
-          />
-        </ToggleViewButtons>
-      </EuiHideFor>
+      <ToggleViewButtons>
+        <EuiButtonGroup
+          options={toggleButtons}
+          idToSelectedMap={selectedView}
+          onChange={(id) => onChangeView(id)}
+          type="multi"
+          isIconOnly
+          style={{ marginLeft: 'auto' }}
+        />
+      </ToggleViewButtons>
 
       <FlexGroup wrap={true} gutterSize="none" justifyContent="flexEnd">
-        <EuiShowFor sizes={!selectedView.listBtn ? ['xl'] : []}>
+        {selectedView.listBtn && (
           <EuiFlexItemTags grow={true}>
             <LocationStatusTags
               locations={monitorLocations?.locations || []}
@@ -127,15 +125,15 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
               downs={monitorLocations?.downs ?? 0}
             />
           </EuiFlexItemTags>
-        </EuiShowFor>
-        <EuiShowFor sizes={!selectedView.mapBtn ? ['xl'] : []}>
+        )}
+        {selectedView.mapBtn && (
           <EuiFlexItem grow={false}>
             {isGeoInfoMissing && <LocationMissingWarning />}
             <MapPanel>
               <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
             </MapPanel>
           </EuiFlexItem>
-        </EuiShowFor>
+        )}
       </FlexGroup>
     </EuiErrorBoundary>
   );

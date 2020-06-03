@@ -16777,7 +16777,6 @@
     "xpack.uptime.monitorStatusBar.locations.oneLocStatus": "在 {loc} 位置{status}",
     "xpack.uptime.monitorStatusBar.locations.upStatus": "在 {loc} 位置{status}",
     "xpack.uptime.monitorStatusBar.monitorUrlLinkAriaLabel": "监测 URL 链接",
-    "xpack.uptime.monitorStatusBar.sslCertificate.overview": "证书概览",
     "xpack.uptime.monitorStatusBar.sslCertificate.title": "证书",
     "xpack.uptime.monitorStatusBar.sslCertificateExpired.badgeContent": "{emphasizedText}过期",
     "xpack.uptime.monitorStatusBar.sslCertificateExpired.label.ariaLabel": "已于 {validityDate}过期",

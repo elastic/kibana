@@ -16771,7 +16771,6 @@
     "xpack.uptime.monitorStatusBar.locations.oneLocStatus": "{loc}場所での{status}",
     "xpack.uptime.monitorStatusBar.locations.upStatus": "{loc}場所での{status}",
     "xpack.uptime.monitorStatusBar.monitorUrlLinkAriaLabel": "監視 URL リンク",
-    "xpack.uptime.monitorStatusBar.sslCertificate.overview": "証明書概要",
     "xpack.uptime.monitorStatusBar.sslCertificate.title": "証明書",
     "xpack.uptime.monitorStatusBar.sslCertificateExpired.badgeContent": "{emphasizedText}が期限切れになりました",
     "xpack.uptime.monitorStatusBar.sslCertificateExpired.label.ariaLabel": "{validityDate}に期限切れになりました",
