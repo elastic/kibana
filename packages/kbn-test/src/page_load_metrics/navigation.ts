@@ -17,11 +17,15 @@
  * under the License.
  */
 
+import Fs from 'fs';
 import Url from 'url';
 import _ from 'lodash';
 import puppeteer from 'puppeteer';
-import { ToolingLog } from '@kbn/dev-utils';
+import { resolve } from 'path';
+import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { ResponseReceivedEvent, DataReceivedEvent } from './event';
+
+const failureDir = resolve(REPO_ROOT, 'x-pack/test/page_load_metrics/screenshots/failure');
 
 export interface NavigationOptions {
   headless: boolean;
@@ -132,6 +136,14 @@ export async function navigateToApps(log: ToolingLog, options: NavigationOptions
           if (readyAttempt < 6) {
             continue;
           }
+
+          await page.bringToFront();
+          Fs.mkdirSync(failureDir, { recursive: true });
+          await page.screenshot({
+            path: resolve(failureDir, `${app.path.replace('/', '_')}_navigation.png`),
+            type: 'png',
+            fullPage: true,
+          });
 
           throw error;
         }
