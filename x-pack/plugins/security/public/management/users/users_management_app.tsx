@@ -25,7 +25,7 @@ export const usersManagementApp = Object.freeze({
       id: this.id,
       order: 10,
       title: i18n.translate('xpack.security.management.usersTitle', { defaultMessage: 'Users' }),
-      async mount({ basePath, element, setBreadcrumbs, history }) {
+      async mount({ element, setBreadcrumbs, history }) {
         const [coreStart] = await getStartServices();
         const usersBreadcrumbs = [
           {
