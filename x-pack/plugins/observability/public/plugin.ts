@@ -21,7 +21,7 @@ export class Plugin implements PluginClass<ClientSetup, ClientStart> {
     core.application.register({
       id: 'observability-overview',
       title: 'Overview',
-      order: 7999,
+      order: 8000,
       appRoute: '/app/observability',
       category: DEFAULT_APP_CATEGORIES.observability,
 
