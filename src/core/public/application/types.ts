@@ -453,10 +453,10 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * import ReactDOM from 'react-dom';
    * import { BrowserRouter, Route } from 'react-router-dom';
    *
-   * import { CoreStart, AppMountParams } from 'src/core/public';
+   * import { CoreStart, AppMountParameters } from 'src/core/public';
    * import { MyPluginDepsStart } from './plugin';
    *
-   * export renderApp = ({ element, history, onAppLeave }: AppMountParams) => {
+   * export renderApp = ({ element, history, onAppLeave }: AppMountParameters) => {
    *    const { renderApp, hasUnsavedChanges } = await import('./application');
    *    onAppLeave(actions => {
    *      if(hasUnsavedChanges()) {

@@ -16,15 +16,21 @@ import * as i18n from '../translations';
 import { OnRowSelected } from '../../events';
 import { Ecs } from '../../../../../graphql/types';
 
-export interface TimelineActionProps {
+export interface TimelineRowActionOnClick {
   eventId: string;
   ecsData: Ecs;
 }
 
-export interface TimelineAction {
-  getAction: ({ eventId, ecsData }: TimelineActionProps) => JSX.Element;
-  width: number;
+export interface TimelineRowAction {
+  ariaLabel?: string;
+  dataTestSubj?: string;
+  displayType: 'icon' | 'contextMenu';
+  iconType: string;
   id: string;
+  isActionDisabled?: boolean;
+  onClick: ({ eventId, ecsData }: TimelineRowActionOnClick) => void;
+  content: string;
+  width?: number;
 }
 
 interface Props {
@@ -77,6 +83,21 @@ export const Actions = React.memo<Props>(
       actionsColumnWidth={actionsColumnWidth}
       data-test-subj="event-actions-container"
     >
+      <EventsTd>
+        <EventsTdContent textAlign="center">
+          {loading && <EventsLoading />}
+
+          {!loading && (
+            <EuiButtonIcon
+              aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
+              data-test-subj="expand-event"
+              iconType={expanded ? 'arrowDown' : 'arrowRight'}
+              id={eventId}
+              onClick={onEventToggled}
+            />
+          )}
+        </EventsTdContent>
+      </EventsTd>
       {showCheckboxes && (
         <EventsTd data-test-subj="select-event-container">
           <EventsTdContent textAlign="center">
@@ -100,22 +121,6 @@ export const Actions = React.memo<Props>(
       )}
 
       <>{additionalActions}</>
-
-      <EventsTd>
-        <EventsTdContent textAlign="center">
-          {loading && <EventsLoading />}
-
-          {!loading && (
-            <EuiButtonIcon
-              aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
-              data-test-subj="expand-event"
-              iconType={expanded ? 'arrowDown' : 'arrowRight'}
-              id={eventId}
-              onClick={onEventToggled}
-            />
-          )}
-        </EventsTdContent>
-      </EventsTd>
 
       {!isEventViewer && (
         <>
@@ -161,6 +166,7 @@ export const Actions = React.memo<Props>(
   (nextProps, prevProps) => {
     return (
       prevProps.actionsColumnWidth === nextProps.actionsColumnWidth &&
+      prevProps.additionalActions === nextProps.additionalActions &&
       prevProps.checked === nextProps.checked &&
       prevProps.expanded === nextProps.expanded &&
       prevProps.eventId === nextProps.eventId &&
