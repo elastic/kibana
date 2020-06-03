@@ -24,7 +24,14 @@ export class SecurityLayerTemplate extends Component<RenderWizardArguments, Stat
   };
 
   _previewLayer() {
-    this.props.previewLayers(createLayerDescriptors(this.state.indexPattern));
+    if (!this.state.indexPattern) {
+      this.props.previewLayers([]);
+      return;
+    }
+
+    this.props.previewLayers(
+      createLayerDescriptors(this.state.indexPattern.id, this.state.indexPattern.title)
+    );
   }
 
   render() {

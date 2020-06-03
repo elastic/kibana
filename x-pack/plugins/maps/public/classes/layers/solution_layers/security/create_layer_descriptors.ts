@@ -5,6 +5,7 @@
  */
 
 import minimatch from 'minimatch';
+import { i18n } from '@kbn/i18n';
 import { IndexPattern } from 'src/plugins/data/public';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import {
@@ -32,15 +33,66 @@ import { ESSearchSource } from '../../../sources/es_search_source';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 
-function isApmIndex(indexPattern: IndexPattern) {
-  return minimatch(indexPattern.title, 'apm-*');
+function isApmIndex(indexPatternTitle: string) {
+  return minimatch(indexPatternTitle, 'apm-*');
 }
 
-function createDestinationLayerDescriptor(indexPattern: IndexPattern) {
+function createSourceLayerDescriptor(indexPatternId: string, indexPatternTitle: string) {
   const sourceDescriptor = ESSearchSource.createDescriptor({
-    indexPatternId: indexPattern.id,
-    geoField: isApmIndex(indexPattern) ? 'server.geo.location' : 'destination.geo.location',
-    tooltipProperties: isApmIndex(indexPattern)
+    indexPatternId,
+    geoField: isApmIndex(indexPatternTitle) ? 'client.geo.location' : 'source.geo.location',
+    tooltipProperties: isApmIndex(indexPatternTitle)
+      ? [
+          'host.name',
+          'client.ip',
+          'client.domain',
+          'client.geo.country_iso_code',
+          'client.as.organization.name',
+        ]
+      : [
+          'host.name',
+          'source.ip',
+          'source.domain',
+          'source.geo.country_iso_code',
+          'source.as.organization.name',
+        ],
+  });
+
+  const styleProperties: VectorStylePropertiesDescriptor = {
+    [VECTOR_STYLES.FILL_COLOR]: {
+      type: STYLE_TYPE.STATIC,
+      options: { color: euiVisColorPalette[1] },
+    },
+    [VECTOR_STYLES.LINE_COLOR]: {
+      type: STYLE_TYPE.STATIC,
+      options: { color: '#FFFFFF' },
+    },
+    [VECTOR_STYLES.LINE_WIDTH]: { type: STYLE_TYPE.STATIC, options: { size: 2 } },
+    [VECTOR_STYLES.SYMBOLIZE_AS]: {
+      options: { value: SYMBOLIZE_AS_TYPES.ICON },
+    },
+    [VECTOR_STYLES.ICON]: {
+      type: STYLE_TYPE.STATIC,
+      options: { value: 'home' },
+    },
+    [VECTOR_STYLES.ICON_SIZE]: { type: STYLE_TYPE.STATIC, options: { size: 8 } },
+  };
+
+  return VectorLayer.createDescriptor({
+    label: i18n.translate('xpack.maps.sescurity.destinationLayerLabel', {
+      defaultMessage: '{indexPatternTitle} | Source Point',
+      values: { indexPatternTitle },
+    }),
+    sourceDescriptor,
+    style: VectorStyle.createDescriptor(styleProperties),
+  });
+}
+
+function createDestinationLayerDescriptor(indexPatternId: string, indexPatternTitle: string) {
+  const sourceDescriptor = ESSearchSource.createDescriptor({
+    indexPatternId,
+    geoField: isApmIndex(indexPatternTitle) ? 'server.geo.location' : 'destination.geo.location',
+    tooltipProperties: isApmIndex(indexPatternTitle)
       ? [
           'host.name',
           'server.ip',
@@ -78,16 +130,21 @@ function createDestinationLayerDescriptor(indexPattern: IndexPattern) {
   };
 
   return VectorLayer.createDescriptor({
-    label: `${indexPattern.title} | Destination point`,
+    label: i18n.translate('xpack.maps.sescurity.destinationLayerLabel', {
+      defaultMessage: '{indexPatternTitle} | Destination point',
+      values: { indexPatternTitle },
+    }),
     sourceDescriptor,
     style: VectorStyle.createDescriptor(styleProperties),
   });
 }
 
-export function createLayerDescriptors(indexPattern: IndexPattern | undefined): LayerDescriptor[] {
-  if (!indexPattern) {
-    return [];
-  }
-
-  return [createDestinationLayerDescriptor(indexPattern)];
+export function createLayerDescriptors(
+  indexPatternId: string,
+  indexPatternTitle: string
+): LayerDescriptor[] {
+  return [
+    createSourceLayerDescriptor(indexPatternId, indexPatternTitle),
+    createDestinationLayerDescriptor(indexPatternId, indexPatternTitle),
+  ];
 }
