@@ -10,7 +10,7 @@ export const exceptionsArtifactSavedObjectType = 'siem-exceptions-artifact';
 
 export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
-    // e.g. 'global-whitelist'
+    // e.g. 'global-whitelist-windows'
     name: {
       type: 'keyword',
     },
@@ -28,6 +28,9 @@ export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings']
     },
     body: {
       type: 'binary',
+    },
+    size: {
+      type: 'long',
     },
   },
 };

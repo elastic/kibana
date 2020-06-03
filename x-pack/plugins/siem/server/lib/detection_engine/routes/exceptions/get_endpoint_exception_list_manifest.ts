@@ -14,7 +14,7 @@ const allowlistBaseRoute: string = '/api/endpoint/allowlist';
 export function getEndpointExceptionListManifest(router: IRouter) {
   router.get(
     {
-      path: `${allowlistBaseRoute}/manifest`,
+      path: `${allowlistBaseRoute}/manifest/{schemaVersion}`,
       validate: {},
       options: { authRequired: true },
     },
@@ -27,9 +27,23 @@ export function getEndpointExceptionListManifest(router: IRouter) {
  */
 async function handleAllowlistManifest(context, req, res) {
   try {
-    const manifest = await getAllowlistManifest(context);
-    // TODO: transform and validate response
-    return res.ok({ body: manifest });
+    const resp = await getAllowlistManifest(context, req.params.schemaVersion);
+    const manifestResp = {};
+
+    // transform and validate response
+    for (const manifest of resp.saved_objects) {
+      if (!manifestResp[manifest.name]) {
+        manifestResp[manifest.name] = {
+          [manifest.name]: {
+            url: `${allowlistBaseRoute}/download/${manifest.sha256}`,
+            sha256: manifest.sha256,
+            size: manifest.size,
+          },
+        };
+      }
+    }
+
+    return res.ok({ body: manifestResp });
   } catch (err) {
     return res.internalError({ body: err });
   }
@@ -38,12 +52,16 @@ async function handleAllowlistManifest(context, req, res) {
 /**
  * Creates the manifest for the whitelist
  */
-async function getAllowlistManifest(ctx) {
+async function getAllowlistManifest(ctx, schemaVersion) {
   const soClient = ctx.core.savedObjects.client;
 
   const manifestResp = soClient.find({
-    type: 'siem-exceptions-artifact',
-    fields: ['name', 'schemaVersion', 'sha256', 'encoding', 'created'],
+    type: 'siem-exceptions-artifact', // TODO: use exported const
+    fields: ['name', 'schemaVersion', 'sha256', 'encoding', 'size', 'created'],
+    search: schemaVersion,
+    searchFields: ['schemaVersion'],
+    sortField: 'updated_at',
+    sortOrder: 'desc',
   });
 
   return manifestResp;
