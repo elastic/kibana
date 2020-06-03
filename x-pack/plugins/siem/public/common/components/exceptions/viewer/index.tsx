@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiCommentList, EuiAccordion, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiCommentProps,
+  EuiCommentList,
+  EuiAccordion,
+  EuiFlexItem,
+} from '@elastic/eui';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 
@@ -36,24 +43,24 @@ const ExceptionItemComponent = ({
   const [entryItems, setEntryItems] = useState<FormattedEntry[]>([]);
   const [showComments, setShowComments] = useState(false);
 
-  useEffect(() => {
+  useEffect((): void => {
     const formattedEntries = getFormattedEntries(exceptionItem.entries);
     setEntryItems(formattedEntries);
   }, [exceptionItem.entries]);
 
-  const onDelete = useCallback(() => {
+  const onDelete = useCallback((): void => {
     handleDelete({ id: exceptionItem.id });
   }, [handleDelete, exceptionItem]);
 
-  const onEdit = useCallback(() => {
+  const onEdit = useCallback((): void => {
     handleEdit(exceptionItem);
   }, [handleEdit, exceptionItem]);
 
-  const onCommentsClick = useCallback(() => {
+  const onCommentsClick = useCallback((): void => {
     setShowComments(!showComments);
   }, [setShowComments, showComments]);
 
-  const formattedComments = useMemo(() => {
+  const formattedComments = useMemo((): EuiCommentProps[] => {
     return getFormattedComments(exceptionItem.comments);
   }, [exceptionItem]);
 

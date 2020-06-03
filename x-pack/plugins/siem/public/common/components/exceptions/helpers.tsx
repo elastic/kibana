@@ -107,7 +107,7 @@ export const formatEntry = ({
   isNested: boolean;
   parent?: string;
   item: ExceptionEntry;
-}) => {
+}): FormattedEntry => {
   const operator = getExceptionOperatorSelect(item);
   const operatorType = getOperatorType(item);
   const value = operatorType === OperatorType.EXISTS ? null : item.value;

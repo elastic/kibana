@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable, EuiIconTip, EuiFlexItem, EuiFlexGroup, EuiButton } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiIconTip,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButton,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import { transparentize } from 'polished';
@@ -50,7 +57,7 @@ const ExceptionEntriesComponent = ({
   handleEdit,
 }: ExceptionEntriesComponentProps): JSX.Element => {
   const columns = useMemo(
-    () => [
+    (): Array<EuiTableFieldDataColumnType<FormattedEntry>> => [
       {
         field: 'fieldName',
         name: 'Field',

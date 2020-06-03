@@ -39,7 +39,7 @@ const ExceptionDetailsComponent = ({
 }): JSX.Element => {
   const descriptionList = useMemo(() => getDescriptionListContent(exceptionItem), [exceptionItem]);
 
-  const commentsSection = useMemo(() => {
+  const commentsSection = useMemo((): JSX.Element => {
     const { comments } = exceptionItem;
     if (comments.length > 0) {
       return (
