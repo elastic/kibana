@@ -5,9 +5,10 @@
  */
 
 import { IRouter } from '../../../../../../../../src/core/server';
+import { ArtifactConstants } from '../../../exceptions';
+import { DownloadExceptionListRequestParams } from '../../exceptions/types';
 import { buildRouteValidation } from '../utils';
 import { downloadExceptionListSchema } from '../schemas/download_exception_list_schema';
-import { DownloadExceptionListRequestParams } from '../../exceptions/types';
 
 const allowlistBaseRoute: string = '/api/endpoint/allowlist';
 
@@ -36,7 +37,7 @@ async function handleEndpointExceptionDownload(context, req, res) {
   try {
     const soClient = context.core.savedObjects.client;
     const resp = await soClient.find({
-      type: 'siem-exceptions-artifact',
+      type: ArtifactConstants.SAVED_OBJECT_TYPE,
       search: req.params.sha256,
       searchFields: ['sha256'],
     });
