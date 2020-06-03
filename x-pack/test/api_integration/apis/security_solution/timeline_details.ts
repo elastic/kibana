@@ -299,7 +299,7 @@ const EXPECTED_DATA: DetailItem[] = [
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const client = getService('siemGraphQLClient');
+  const client = getService('securitySolutionGraphQLClient');
 
   describe('Timeline Details', () => {
     before(() => esArchiver.load('filebeat/default'));
