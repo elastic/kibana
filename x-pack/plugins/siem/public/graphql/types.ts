@@ -5122,6 +5122,8 @@ export namespace GetOneTimeline {
 
     pinnedEventsSaveObject: Maybe<PinnedEventsSaveObject[]>;
 
+    status: Maybe<TimelineStatus>;
+
     title: Maybe<string>;
 
     timelineType: Maybe<TimelineType>;
