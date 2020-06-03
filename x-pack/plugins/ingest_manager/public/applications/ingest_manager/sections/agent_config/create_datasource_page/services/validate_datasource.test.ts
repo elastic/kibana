@@ -184,7 +184,7 @@ describe('Ingest Manager - validateDatasource()', () => {
             vars: { 'var-name': { value: undefined, type: 'text' } },
           },
           {
-            id: 'with-disabled-streams-disabled2',
+            id: 'with-disabled-streams-disabled-without-vars',
             dataset: 'disabled2',
             enabled: false,
           },
@@ -271,7 +271,7 @@ describe('Ingest Manager - validateDatasource()', () => {
             },
           },
           {
-            id: 'with-disabled-streams-disabled2',
+            id: 'with-disabled-streams-disabled-without-vars',
             dataset: 'disabled2',
             enabled: false,
           },
@@ -318,7 +318,7 @@ describe('Ingest Manager - validateDatasource()', () => {
           'with-disabled-streams-disabled': {
             vars: { 'var-name': null },
           },
-          'with-disabled-streams-disabled2': {},
+          'with-disabled-streams-disabled-without-vars': {},
         },
       },
       'with-no-stream-vars': {
@@ -360,7 +360,7 @@ describe('Ingest Manager - validateDatasource()', () => {
         'with-disabled-streams': {
           streams: {
             'with-disabled-streams-disabled': { vars: { 'var-name': null } },
-            'with-disabled-streams-disabled2': {},
+            'with-disabled-streams-disabled-without-vars': {},
           },
         },
         'with-no-stream-vars': {
@@ -418,7 +418,7 @@ describe('Ingest Manager - validateDatasource()', () => {
             'with-disabled-streams-disabled': {
               vars: { 'var-name': null },
             },
-            'with-disabled-streams-disabled2': {},
+            'with-disabled-streams-disabled-without-vars': {},
           },
         },
         'with-no-stream-vars': {
