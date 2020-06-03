@@ -6,7 +6,10 @@
 
 import { ESTermSource } from '../sources/es_term_source';
 import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
-import { META_ID_ORIGIN_SUFFIX, FORMATTERS_ID_ORIGIN_SUFFIX } from '../../../common/constants';
+import {
+  META_DATA_REQUEST_ID_SUFFIX,
+  FORMATTERS_DATA_REQUEST_ID_SUFFIX,
+} from '../../../common/constants';
 
 export class InnerJoin {
   constructor(joinDescriptor, leftSource) {
@@ -42,11 +45,11 @@ export class InnerJoin {
   }
 
   getSourceMetaDataRequestId() {
-    return `${this.getSourceDataRequestId()}_${META_ID_ORIGIN_SUFFIX}`;
+    return `${this.getSourceDataRequestId()}_${META_DATA_REQUEST_ID_SUFFIX}`;
   }
 
   getSourceFormattersDataRequestId() {
-    return `${this.getSourceDataRequestId()}_${FORMATTERS_ID_ORIGIN_SUFFIX}`;
+    return `${this.getSourceDataRequestId()}_${FORMATTERS_DATA_REQUEST_ID_SUFFIX}`;
   }
 
   getLeftField() {

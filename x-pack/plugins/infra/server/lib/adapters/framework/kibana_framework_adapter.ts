@@ -213,7 +213,7 @@ export class KibanaFramework {
         }
       : {};
 
-    return elasticsearch.dataClient.callAsCurrentUser(endpoint, {
+    return elasticsearch.legacy.client.callAsCurrentUser(endpoint, {
       ...params,
       ...frozenIndicesParams,
     });
@@ -223,7 +223,7 @@ export class KibanaFramework {
     return new IndexPatternsFetcher((...rest: Parameters<APICaller>) => {
       rest[1] = rest[1] || {};
       rest[1].allowNoIndices = true;
-      return requestContext.core.elasticsearch.adminClient.callAsCurrentUser(...rest);
+      return requestContext.core.elasticsearch.legacy.client.callAsCurrentUser(...rest);
     });
   }
 

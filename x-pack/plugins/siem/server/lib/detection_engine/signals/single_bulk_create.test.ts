@@ -18,7 +18,7 @@ import {
 } from './__mocks__/es_results';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { singleBulkCreate, filterDuplicateRules } from './single_bulk_create';
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 
 describe('singleBulkCreate', () => {
   const mockService: AlertServicesMock = alertsMock.createAlertServices();
@@ -141,7 +141,7 @@ describe('singleBulkCreate', () => {
       ],
     });
     const { success, createdItemsCount } = await singleBulkCreate({
-      someResult: sampleDocSearchResultsNoSortId(),
+      filteredEvents: sampleDocSearchResultsNoSortId(),
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -175,7 +175,7 @@ describe('singleBulkCreate', () => {
       ],
     });
     const { success, createdItemsCount } = await singleBulkCreate({
-      someResult: sampleDocSearchResultsNoSortIdNoVersion(),
+      filteredEvents: sampleDocSearchResultsNoSortIdNoVersion(),
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -201,7 +201,7 @@ describe('singleBulkCreate', () => {
     const sampleParams = sampleRuleAlertParams();
     mockService.callCluster.mockResolvedValue(false);
     const { success, createdItemsCount } = await singleBulkCreate({
-      someResult: sampleEmptyDocSearchResults(),
+      filteredEvents: sampleEmptyDocSearchResults(),
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -228,7 +228,7 @@ describe('singleBulkCreate', () => {
     const sampleSearchResult = sampleDocSearchResultsNoSortId;
     mockService.callCluster.mockResolvedValue(sampleBulkCreateDuplicateResult);
     const { success, createdItemsCount } = await singleBulkCreate({
-      someResult: sampleSearchResult(),
+      filteredEvents: sampleSearchResult(),
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -257,7 +257,7 @@ describe('singleBulkCreate', () => {
     const sampleSearchResult = sampleDocSearchResultsNoSortId;
     mockService.callCluster.mockResolvedValue(sampleBulkCreateErrorResult);
     const { success, createdItemsCount } = await singleBulkCreate({
-      someResult: sampleSearchResult(),
+      filteredEvents: sampleSearchResult(),
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -352,7 +352,7 @@ describe('singleBulkCreate', () => {
     const sampleParams = sampleRuleAlertParams();
     mockService.callCluster.mockResolvedValue(sampleBulkCreateDuplicateResult);
     const { success, createdItemsCount } = await singleBulkCreate({
-      someResult: sampleDocSearchResultsNoSortId(),
+      filteredEvents: sampleDocSearchResultsNoSortId(),
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,

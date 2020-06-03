@@ -87,7 +87,7 @@ export function runRoute(
           allowedGraphiteUrls: configManager.getGraphiteUrls(),
           esShardTimeout: configManager.getEsShardTimeout(),
           savedObjectsClient: context.core.savedObjects.client,
-          esDataClient: () => context.core.elasticsearch.dataClient,
+          esDataClient: () => context.core.elasticsearch.legacy.client,
         });
         const chainRunner = chainRunnerFn(tlConfig);
         const sheet = await Bluebird.all(chainRunner.processRequest(request.body));

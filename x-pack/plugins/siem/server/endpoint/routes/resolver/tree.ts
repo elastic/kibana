@@ -29,7 +29,7 @@ export function handleTree(
       },
     } = req;
     try {
-      const client = context.core.elasticsearch.dataClient;
+      const client = context.core.elasticsearch.legacy.client;
       const indexRetriever = endpointAppContext.service.getIndexPatternRetriever();
       const indexPattern = await indexRetriever.getEventIndexPattern(context);
 

@@ -60,6 +60,43 @@ describe('CaseCallOut ', () => {
     ).toBeTruthy();
   });
 
+  it('it applies the correct color to button', () => {
+    const props = {
+      ...defaultProps,
+      messages: [
+        {
+          ...defaultProps,
+          description: <p>{'one'}</p>,
+          errorType: 'danger' as 'primary' | 'success' | 'warning' | 'danger',
+        },
+        {
+          ...defaultProps,
+          description: <p>{'two'}</p>,
+          errorType: 'success' as 'primary' | 'success' | 'warning' | 'danger',
+        },
+        {
+          ...defaultProps,
+          description: <p>{'three'}</p>,
+          errorType: 'primary' as 'primary' | 'success' | 'warning' | 'danger',
+        },
+      ],
+    };
+
+    const wrapper = mount(<CaseCallOut {...props} />);
+
+    expect(wrapper.find(`[data-test-subj="callout-dismiss-danger"]`).first().prop('color')).toBe(
+      'danger'
+    );
+
+    expect(wrapper.find(`[data-test-subj="callout-dismiss-success"]`).first().prop('color')).toBe(
+      'secondary'
+    );
+
+    expect(wrapper.find(`[data-test-subj="callout-dismiss-primary"]`).first().prop('color')).toBe(
+      'primary'
+    );
+  });
+
   it('Dismisses callout', () => {
     const props = {
       ...defaultProps,

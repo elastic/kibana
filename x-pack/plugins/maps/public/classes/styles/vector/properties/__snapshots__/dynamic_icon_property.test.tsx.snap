@@ -2,50 +2,9 @@
 
 exports[`Should render categorical legend with breaks 1`] = `
 <div>
-  <EuiSpacer
-    size="s"
-  />
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="none"
-  >
-    <Category
-      color="grey"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="US"
-      label="US_format"
-      styleName="icon"
-      symbolId="circle"
-    />
-    <Category
-      color="grey"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="CN"
-      label="CN_format"
-      styleName="icon"
-      symbolId="marker"
-    />
-    <Category
-      color="grey"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="fallbackCategory"
-      label={
-        <EuiTextColor
-          color="secondary"
-        >
-          Other
-        </EuiTextColor>
-      }
-      styleName="icon"
-      symbolId="square"
-    />
-  </EuiFlexGroup>
   <EuiFlexGroup
     gutterSize="xs"
-    justifyContent="spaceAround"
+    justifyContent="spaceBetween"
   >
     <EuiFlexItem
       grow={false}
@@ -72,6 +31,35 @@ exports[`Should render categorical legend with breaks 1`] = `
           </small>
         </EuiText>
       </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      key="0"
+    >
+      <Category
+        color="grey"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="US_format"
+        styleName="icon"
+        symbolId="circle"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="1"
+    >
+      <Category
+        color="grey"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="CN_format"
+        styleName="icon"
+        symbolId="marker"
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
 </div>
