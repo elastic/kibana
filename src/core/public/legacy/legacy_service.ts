@@ -131,6 +131,7 @@ export class LegacyPlatformService {
     const legacyCore: LegacyCoreStart = {
       ...core,
       application: {
+        applications$: core.application.applications$,
         currentAppId$: core.application.currentAppId$,
         capabilities: core.application.capabilities,
         getUrlForApp: core.application.getUrlForApp,
