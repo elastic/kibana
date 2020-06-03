@@ -565,7 +565,6 @@
     "data.filter.filterBar.filterItemBadgeIconAriaLabel": "削除",
     "data.filter.filterBar.includeFilterButtonLabel": "結果を含める",
     "data.filter.filterBar.indexPatternSelectPlaceholder": "インデックスパターンの選択",
-    "data.filter.filterBar.labelErrorMessage": "フィルターを表示できませんでした",
     "data.filter.filterBar.labelErrorText": "エラー",
     "data.filter.filterBar.moreFilterActionsMessage": "フィルター：{innerText}。他のフィルターアクションを使用するには選択してください。",
     "data.filter.filterBar.negatedFilterPrefix": "NOT ",
