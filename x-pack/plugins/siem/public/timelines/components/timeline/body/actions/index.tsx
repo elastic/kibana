@@ -166,6 +166,7 @@ export const Actions = React.memo<Props>(
   (nextProps, prevProps) => {
     return (
       prevProps.actionsColumnWidth === nextProps.actionsColumnWidth &&
+      prevProps.additionalActions === nextProps.additionalActions &&
       prevProps.checked === nextProps.checked &&
       prevProps.expanded === nextProps.expanded &&
       prevProps.eventId === nextProps.eventId &&
