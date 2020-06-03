@@ -60,7 +60,7 @@ export const eventTypeOptions: EventTypeOptionItem[] = [
     inputDisplay: <EuiHealth color="subdued">{i18n.RAW_EVENT}</EuiHealth>,
   },
   {
-    value: 'signal',
+    value: 'alert',
     inputDisplay: <EuiHealth color="warning">{i18n.SIGNAL_EVENT}</EuiHealth>,
   },
 ];

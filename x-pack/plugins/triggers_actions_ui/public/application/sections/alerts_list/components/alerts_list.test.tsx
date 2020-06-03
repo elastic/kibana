@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
+import { ScopedHistory } from 'kibana/public';
+
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
@@ -15,7 +17,7 @@ import { ValidationResult } from '../../../../types';
 import { AppContextProvider } from '../../../app_context';
 import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { alertingPluginMock } from '../../../../../../alerting/public/mocks';
+import { alertingPluginMock } from '../../../../../../alerts/public/mocks';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
@@ -101,6 +103,7 @@ describe('alerts_list component empty', () => {
           'alerting:delete': true,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
@@ -219,6 +222,7 @@ describe('alerts_list component with items', () => {
           'alerting:delete': true,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
@@ -300,6 +304,7 @@ describe('alerts_list component empty with show only capability', () => {
           'alerting:delete': false,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -414,6 +419,7 @@ describe('alerts_list with show only capability', () => {
           'alerting:delete': false,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,

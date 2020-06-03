@@ -6,9 +6,9 @@
 
 import React, { useCallback } from 'react';
 
-import { SignalsHistogramPanel } from '../../../alerts/components/signals_histogram_panel';
-import { signalsHistogramOptions } from '../../../alerts/components/signals_histogram_panel/config';
-import { useSignalIndex } from '../../../alerts/containers/detection_engine/signals/use_signal_index';
+import { AlertsHistogramPanel } from '../../../alerts/components/alerts_histogram_panel';
+import { alertsHistogramOptions } from '../../../alerts/components/alerts_histogram_panel/config';
+import { useSignalIndex } from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
 import { SetAbsoluteRangeDatePicker } from '../../../network/pages/types';
 import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../../common/store';
@@ -65,10 +65,10 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
   );
 
   const defaultStackByOption =
-    signalsHistogramOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? signalsHistogramOptions[0];
+    alertsHistogramOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? alertsHistogramOptions[0];
 
   return (
-    <SignalsHistogramPanel
+    <AlertsHistogramPanel
       deleteQuery={deleteQuery}
       defaultStackByOption={defaultStackByOption}
       filters={filters}
@@ -78,12 +78,12 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
       query={query}
       signalIndexName={signalIndexName}
       setQuery={setQuery}
-      showTotalSignalsCount={true}
-      showLinkToSignals={onlyField == null ? true : false}
-      stackByOptions={onlyField == null ? signalsHistogramOptions : undefined}
+      showTotalAlertsCount={true}
+      showLinkToAlerts={onlyField == null ? true : false}
+      stackByOptions={onlyField == null ? alertsHistogramOptions : undefined}
       legendPosition={'right'}
       to={to}
-      title={i18n.SIGNAL_COUNT}
+      title={i18n.ALERT_COUNT}
       updateDateRange={updateDateRangeCallback}
     />
   );
