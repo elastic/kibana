@@ -43,11 +43,10 @@ export class GlobalSearchPlugin
     };
   }
 
-  start({ http, application }: CoreStart, { licensing }: GlobalSearchPluginStartDeps) {
+  start({ http }: CoreStart, { licensing }: GlobalSearchPluginStartDeps) {
     this.licenseChecker = new LicenseChecker(licensing.license$);
     const { find } = this.searchService.start({
       http,
-      application,
       licenseChecker: this.licenseChecker,
     });
 
