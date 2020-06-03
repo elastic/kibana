@@ -8,10 +8,18 @@ import _ from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { AppMountContext, AppMountParameters, NotificationsStart } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { History } from 'history';
+import {
+  Query,
+  DataPublicPluginStart,
+  syncQueryStateWithUrl,
+} from '../../../../../src/plugins/data/public';
+import {
+  createKbnUrlStateStorage,
+  IStorageWrapper,
+} from '../../../../../src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
   SavedObjectSaveModalOrigin,
@@ -58,6 +66,7 @@ export function App({
   originatingAppFromUrl,
   navigation,
   onAppLeave,
+  history,
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
@@ -74,6 +83,7 @@ export function App({
   ) => void;
   originatingAppFromUrl?: string | undefined;
   onAppLeave: AppMountParameters['onAppLeave'];
+  history: History;
 }) {
   const language =
     storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
@@ -127,7 +137,17 @@ export function App({
       },
     });
 
+    const kbnUrlStateStorage = createKbnUrlStateStorage({
+      history,
+      useHash: core.uiSettings.get('state:storeInSessionStorage'),
+    });
+    const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+      data.query,
+      kbnUrlStateStorage
+    );
+
     return () => {
+      stopSyncingQueryServiceStateWithUrl();
       filterSubscription.unsubscribe();
       timeSubscription.unsubscribe();
     };
