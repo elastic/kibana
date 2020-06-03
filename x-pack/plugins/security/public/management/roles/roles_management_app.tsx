@@ -27,7 +27,7 @@ export const rolesManagementApp = Object.freeze({
       id: this.id,
       order: 20,
       title: i18n.translate('xpack.security.management.rolesTitle', { defaultMessage: 'Roles' }),
-      async mount({ basePath, element, setBreadcrumbs, history }) {
+      async mount({ element, setBreadcrumbs, history }) {
         const rolesBreadcrumbs = [
           {
             text: i18n.translate('xpack.security.roles.breadcrumb', { defaultMessage: 'Roles' }),
