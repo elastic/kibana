@@ -16,26 +16,26 @@ describe('top-level navigation common to all pages in the SIEM app', () => {
   });
   it('navigates to the Overview page', () => {
     navigateFromHeaderTo(OVERVIEW);
-    cy.url().should('include', '/siem#/overview');
+    cy.url().should('include', '/security#/overview');
   });
 
   it('navigates to the Hosts page', () => {
     navigateFromHeaderTo(HOSTS);
-    cy.url().should('include', '/siem#/hosts');
+    cy.url().should('include', '/security#/hosts');
   });
 
   it('navigates to the Network page', () => {
     navigateFromHeaderTo(NETWORK);
-    cy.url().should('include', '/siem#/network');
+    cy.url().should('include', '/security#/network');
   });
 
   it('navigates to the Detections page', () => {
     navigateFromHeaderTo(DETECTIONS);
-    cy.url().should('include', '/siem#/detections');
+    cy.url().should('include', '/security#/detections');
   });
 
   it('navigates to the Timelines page', () => {
     navigateFromHeaderTo(TIMELINES);
-    cy.url().should('include', '/siem#/timelines');
+    cy.url().should('include', '/security#/timelines');
   });
 });

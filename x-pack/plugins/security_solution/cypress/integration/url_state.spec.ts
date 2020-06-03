@@ -255,8 +255,8 @@ describe('url state', () => {
       expect(matched).to.have.lengthOf(1);
       closeTimeline();
       cy.visit('/app/kibana');
-      cy.visit(`/app/siem#/overview?timeline\=(id:'${newTimelineId}',isOpen:!t)`);
-      cy.contains('a', 'SIEM');
+      cy.visit(`/app/security#/overview?timeline\=(id:'${newTimelineId}',isOpen:!t)`);
+      cy.contains('a', 'Security');
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).invoke('text').should('not.equal', 'Updating');
       cy.get(TIMELINE_TITLE).should('have.attr', 'value', timelineName);
     });
