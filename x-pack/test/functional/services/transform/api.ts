@@ -20,9 +20,24 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
   const esSupertest = getService('esSupertest');
 
   return {
+    async createIndices(indices: string) {
+      log.debug(`Creating indices: '${indices}'...`);
+      if (await es.indices.exists({ index: indices, allowNoIndices: false })) {
+        log.debug(`Indices '${indices}' already exist. Nothing to create.`);
+        return;
+      }
+
+      const createResponse = await es.indices.create({ index: indices });
+      expect(createResponse)
+        .to.have.property('acknowledged')
+        .eql(true, 'Response for create request indices should be acknowledged.');
+
+      await this.waitForIndicesToExist(indices);
+    },
+
     async deleteIndices(indices: string) {
       log.debug(`Deleting indices: '${indices}'...`);
-      if ((await es.indices.exists({ index: indices, allowNoIndices: false })) === false) {
+      if (!(await es.indices.exists({ index: indices, allowNoIndices: false }))) {
         log.debug(`Indices '${indices}' don't exist. Nothing to delete.`);
         return;
       }
@@ -34,11 +49,25 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
         .to.have.property('acknowledged')
         .eql(true, 'Response for delete request should be acknowledged');
 
-      await retry.waitForWithTimeout(`'${indices}' indices to be deleted`, 30 * 1000, async () => {
-        if ((await es.indices.exists({ index: indices, allowNoIndices: false })) === false) {
+      await this.waitForIndicesNotToExist(indices, `expected indices '${indices}' to be deleted`);
+    },
+
+    async waitForIndicesToExist(indices: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        if (await es.indices.exists({ index: indices, allowNoIndices: false })) {
           return true;
         } else {
-          throw new Error(`expected indices '${indices}' to be deleted`);
+          throw new Error(`indices '${indices}' should exist`);
+        }
+      });
+    },
+
+    async waitForIndicesNotToExist(indices: string, errorMsg?: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        if (!(await es.indices.exists({ index: indices, allowNoIndices: false }))) {
+          return true;
+        } else {
+          throw new Error(errorMsg || `indices '${indices}' should not exist`);
         }
       });
     },
@@ -63,9 +92,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
 
     async getTransformState(transformId: string): Promise<TRANSFORM_STATE> {
       const stats = await this.getTransformStats(transformId);
-      const state: TRANSFORM_STATE = stats.state;
-
-      return state;
+      return stats.state;
     },
 
     async waitForTransformState(transformId: string, expectedState: TRANSFORM_STATE) {
@@ -96,8 +123,8 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async getTransform(transformId: string) {
-      return await esSupertest.get(`/_transform/${transformId}`).expect(200);
+    async getTransform(transformId: string, expectedCode = 200) {
+      return await esSupertest.get(`/_transform/${transformId}`).expect(expectedCode);
     },
 
     async createTransform(transformConfig: TransformPivotConfig) {
@@ -105,11 +132,26 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       log.debug(`Creating transform with id '${transformId}'...`);
       await esSupertest.put(`/_transform/${transformId}`).send(transformConfig).expect(200);
 
-      await retry.waitForWithTimeout(`'${transformId}' to be created`, 5 * 1000, async () => {
-        if (await this.getTransform(transformId)) {
+      await this.waitForTransformJobToExist(
+        transformId,
+        `expected transform '${transformId}' to be created`
+      );
+    },
+    async waitForTransformJobToExist(transformId: string, errorMsg?: string) {
+      await retry.waitForWithTimeout(`'${transformId}' to exist`, 5 * 1000, async () => {
+        if (await this.getTransform(transformId, 200)) {
           return true;
         } else {
-          throw new Error(`expected transform '${transformId}' to be created`);
+          throw new Error(errorMsg || `expected transform '${transformId}' to exist`);
+        }
+      });
+    },
+    async waitForTransformJobNotToExist(transformId: string, errorMsg?: string) {
+      await retry.waitForWithTimeout(`'${transformId}' to exist`, 5 * 1000, async () => {
+        if (await this.getTransform(transformId, 404)) {
+          return true;
+        } else {
+          throw new Error(errorMsg || `expected transform '${transformId}' to not exist`);
         }
       });
     },

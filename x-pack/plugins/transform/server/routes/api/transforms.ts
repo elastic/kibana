@@ -472,6 +472,9 @@ async function deleteTransformsWithDestIndex(
         if (transformJobDeleted.error.statusCode === 404) {
           return response.notFound();
         }
+        if (transformJobDeleted.error.statusCode === 403) {
+          return response.forbidden();
+        }
       }
 
       results[transformId] = {

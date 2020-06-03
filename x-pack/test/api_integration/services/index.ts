@@ -25,6 +25,7 @@ import { InfraLogSourceConfigurationProvider } from './infra_log_source_configur
 import { MachineLearningProvider } from './ml';
 import { IngestManagerProvider } from './ingest_manager';
 import { ResolverGeneratorProvider } from './resolver';
+import { TransformProvider } from './transform';
 
 export const services = {
   ...commonServices,
@@ -45,4 +46,5 @@ export const services = {
   ml: MachineLearningProvider,
   ingestManager: IngestManagerProvider,
   resolverGenerator: ResolverGeneratorProvider,
+  transform: TransformProvider,
 };
