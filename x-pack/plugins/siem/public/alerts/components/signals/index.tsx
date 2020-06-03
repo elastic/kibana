@@ -46,6 +46,11 @@ import {
   UpdateSignalsStatusProps,
 } from './types';
 import { dispatchUpdateTimeline } from '../../../timelines/components/open_timeline/helpers';
+import {
+  useStateToaster,
+  displaySuccessToast,
+  displayErrorToast,
+} from '../../../common/components/toasters';
 
 export const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
 
@@ -91,6 +96,7 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
     signalsIndex !== '' ? [signalsIndex] : []
   );
   const kibana = useKibana();
+  const [, dispatchToaster] = useStateToaster();
 
   const getGlobalQuery = useCallback(() => {
     if (browserFields != null && indexPatterns != null) {
@@ -146,6 +152,27 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
     [setEventsDeleted, SIGNALS_PAGE_TIMELINE_ID]
   );
 
+  const onAlertStatusUpdateSuccess = useCallback(
+    (count: number, status: string) => {
+      const title =
+        status === 'closed'
+          ? i18n.CLOSED_ALERT_SUCCESS_TOAST(count)
+          : i18n.OPENED_ALERT_SUCCESS_TOAST(count);
+
+      displaySuccessToast(title, dispatchToaster);
+    },
+    [dispatchToaster]
+  );
+
+  const onAlertStatusUpdateFailure = useCallback(
+    (status: string, error: Error) => {
+      const title =
+        status === 'closed' ? i18n.CLOSED_ALERT_FAILED_TOAST : i18n.OPENED_ALERT_FAILED_TOAST;
+      displayErrorToast(title, [error.message], dispatchToaster);
+    },
+    [dispatchToaster]
+  );
+
   // Catches state change isSelectAllChecked->false upon user selection change to reset utility bar
   useEffect(() => {
     if (!isSelectAllChecked) {
@@ -189,6 +216,8 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
         status,
         setEventsDeleted: setEventsDeletedCallback,
         setEventsLoading: setEventsLoadingCallback,
+        onAlertStatusUpdateSuccess,
+        onAlertStatusUpdateFailure,
       });
       refetchQuery();
     },
@@ -198,6 +227,8 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
       setEventsDeletedCallback,
       setEventsLoadingCallback,
       showClearSelectionAction,
+      onAlertStatusUpdateSuccess,
+      onAlertStatusUpdateFailure,
     ]
   );
 
@@ -244,6 +275,8 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
         setEventsDeleted: setEventsDeletedCallback,
         status: filterGroup === FILTER_OPEN ? FILTER_CLOSED : FILTER_OPEN,
         updateTimelineIsLoading,
+        onAlertStatusUpdateSuccess,
+        onAlertStatusUpdateFailure,
       }),
     [
       apolloClient,
@@ -254,6 +287,8 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
       setEventsLoadingCallback,
       setEventsDeletedCallback,
       updateTimelineIsLoading,
+      onAlertStatusUpdateSuccess,
+      onAlertStatusUpdateFailure,
     ]
   );
 

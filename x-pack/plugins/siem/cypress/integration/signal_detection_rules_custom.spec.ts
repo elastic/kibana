@@ -41,7 +41,7 @@ import {
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
-  fillDefineCustomRuleAndContinue,
+  fillDefineCustomRuleWithImportedQueryAndContinue,
 } from '../tasks/create_new_rule';
 import {
   goToManageSignalDetectionRules,
@@ -66,11 +66,11 @@ import { DETECTIONS } from '../urls/navigation';
 
 describe('Signal detection rules, custom', () => {
   before(() => {
-    esArchiverLoad('prebuilt_rules_loaded');
+    esArchiverLoad('custom_rule_with_timeline');
   });
 
   after(() => {
-    esArchiverUnload('prebuilt_rules_loaded');
+    esArchiverUnload('custom_rule_with_timeline');
   });
 
   it('Creates and activates a new custom rule', () => {
@@ -80,7 +80,7 @@ describe('Signal detection rules, custom', () => {
     goToManageSignalDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     goToCreateNewRule();
-    fillDefineCustomRuleAndContinue(newRule);
+    fillDefineCustomRuleWithImportedQueryAndContinue(newRule);
     fillAboutRuleAndContinue(newRule);
     createAndActivateRule();
 

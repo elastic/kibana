@@ -15,7 +15,5 @@ export interface ElasticsearchServiceSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [adminClient](./kibana-plugin-core-server.elasticsearchservicesetup.adminclient.md) | <code>IClusterClient</code> |  |
-|  [createClient](./kibana-plugin-core-server.elasticsearchservicesetup.createclient.md) | <code>(type: string, clientConfig?: Partial&lt;ElasticsearchClientConfig&gt;) =&gt; ICustomClusterClient</code> |  |
-|  [dataClient](./kibana-plugin-core-server.elasticsearchservicesetup.dataclient.md) | <code>IClusterClient</code> |  |
+|  [legacy](./kibana-plugin-core-server.elasticsearchservicesetup.legacy.md) | <code>{</code><br/><code>        readonly createClient: (type: string, clientConfig?: Partial&lt;ElasticsearchClientConfig&gt;) =&gt; ICustomClusterClient;</code><br/><code>        readonly client: IClusterClient;</code><br/><code>    }</code> |  |
 

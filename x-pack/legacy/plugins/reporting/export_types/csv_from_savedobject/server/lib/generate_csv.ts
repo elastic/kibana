@@ -5,15 +5,16 @@
  */
 
 import { badRequest } from 'boom';
-import { ReportingCore } from '../../../../server';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { LevelLogger } from '../../../../server/lib';
-import { RequestFacade } from '../../../../server/types';
+import { ReportingCore } from '../../../../server';
 import { FakeRequest, JobParamsPanelCsv, SearchPanel, VisPanel } from '../../types';
 import { generateCsvSearch } from './generate_csv_search';
 
 export function createGenerateCsv(reporting: ReportingCore, logger: LevelLogger) {
   return async function generateCsv(
-    request: RequestFacade | FakeRequest,
+    context: RequestHandlerContext,
+    request: KibanaRequest | FakeRequest,
     visType: string,
     panel: VisPanel | SearchPanel,
     jobParams: JobParamsPanelCsv
@@ -26,11 +27,12 @@ export function createGenerateCsv(reporting: ReportingCore, logger: LevelLogger)
     switch (visType) {
       case 'search':
         return await generateCsvSearch(
-          request as RequestFacade,
           reporting,
-          logger,
+          context,
+          request as KibanaRequest,
           panel as SearchPanel,
-          jobParams
+          jobParams,
+          logger
         );
       default:
         throw badRequest(`Unsupported or unrecognized saved object type: ${visType}`);

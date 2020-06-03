@@ -5,16 +5,32 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { managementReducer, getManagementInitialState, managementMiddlewareFactory } from './store';
-import { getManagementRoutes } from './routes';
+import { Reducer, CombinedState } from 'redux';
+import { managementRoutes } from './routes';
 import { StartPlugins } from '../types';
-import { MANAGEMENT_STORE_GLOBAL_NAMESPACE } from './common/constants';
 import { SecuritySubPluginWithStore } from '../app/types';
-import { Immutable } from '../../common/endpoint/types';
-import { ManagementStoreGlobalNamespace } from './types';
-import { ManagementState } from './store/types';
+import { managementReducer } from './store/reducer';
+import { AppAction } from '../common/store/actions';
+import { managementMiddlewareFactory } from './store/middleware';
+import { ManagementState } from './types';
 
 export { getManagementUrl } from './common/routing';
+
+/**
+ * Internally, our state is sometimes immutable, ignore that in our external
+ * interface.
+ */
+export interface ManagementPluginState {
+  management: ManagementState;
+}
+
+/**
+ * Internally, we use `ImmutableReducer`, but we present a regular reducer
+ * externally for compatibility w/ regular redux.
+ */
+export interface ManagementPluginReducer {
+  management: Reducer<CombinedState<ManagementState>, AppAction>;
+}
 
 export class Management {
   public setup() {}
@@ -22,16 +38,20 @@ export class Management {
   public start(
     core: CoreStart,
     plugins: StartPlugins
-  ): SecuritySubPluginWithStore<ManagementStoreGlobalNamespace, Immutable<ManagementState>> {
+  ): SecuritySubPluginWithStore<'management', ManagementState> {
     return {
-      routes: getManagementRoutes(),
+      routes: managementRoutes(),
       store: {
         initialState: {
-          [MANAGEMENT_STORE_GLOBAL_NAMESPACE]: getManagementInitialState(),
+          management: undefined,
         },
+        /**
+         * Cast the ImmutableReducer to a regular reducer for compatibility with
+         * the subplugin architecture (which expects plain redux reducers.)
+         */
         reducer: {
-          [MANAGEMENT_STORE_GLOBAL_NAMESPACE]: managementReducer,
-        },
+          management: managementReducer,
+        } as ManagementPluginReducer,
         middleware: managementMiddlewareFactory(core, plugins),
       },
     };
