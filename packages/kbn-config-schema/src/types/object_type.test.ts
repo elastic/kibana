@@ -425,4 +425,69 @@ describe('#extends', () => {
     };
     expect(value).toBeDefined();
   });
+
+  it('allows to extend an existing schema by overriding an existing properties', () => {
+    const origin = schema.object({
+      string: schema.string(),
+      mutated: schema.number(),
+    });
+
+    const extended = origin.extends({
+      mutated: schema.string(),
+    });
+
+    expect(() => {
+      extended.validate({ string: 'foo', mutated: 12 });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[mutated]: expected value of type [string] but got [number]"`
+    );
+
+    expect(() => {
+      extended.validate({ string: 'foo', mutated: 'bar' });
+    }).not.toThrowError();
+
+    // asserting that the resulting type is valid
+    const value: TypeOf<typeof extended> = {
+      string: 'foo',
+      mutated: 'bar',
+    };
+    expect(value).toBeDefined();
+  });
+
+  it('properly infer the type from optional properties', () => {
+    const origin = schema.object({
+      original: schema.maybe(schema.string()),
+      mutated: schema.maybe(schema.number()),
+      removed: schema.maybe(schema.string()),
+    });
+
+    const extended = origin.extends({
+      removed: undefined,
+      mutated: schema.string(),
+    });
+
+    expect(() => {
+      extended.validate({ original: 'foo' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[mutated]: expected value of type [string] but got [undefined]"`
+    );
+    expect(() => {
+      extended.validate({ original: 'foo' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[mutated]: expected value of type [string] but got [undefined]"`
+    );
+    expect(() => {
+      extended.validate({ original: 'foo', mutated: 'bar' });
+    }).not.toThrowError();
+
+    // asserting that the resulting type is valid
+    let value: TypeOf<typeof extended> = {
+      original: 'foo',
+      mutated: 'bar',
+    };
+    value = {
+      mutated: 'bar',
+    };
+    expect(value).toBeDefined();
+  });
 });
