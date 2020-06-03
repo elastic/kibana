@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
 interface Props {
   mappings: boolean;
@@ -13,14 +14,32 @@ interface Props {
   aliases: boolean;
 }
 
+const texts = {
+  settings: i18n.translate('xpack.idxMgmt.templateContentIndicator.indexSettingsTooltipLabel', {
+    defaultMessage: 'Index settings',
+  }),
+  mappings: i18n.translate('xpack.idxMgmt.templateContentIndicator.mappingsTooltipLabel', {
+    defaultMessage: 'Mappings',
+  }),
+  aliases: i18n.translate('xpack.idxMgmt.templateContentIndicator.aliasesTooltipLabel', {
+    defaultMessage: 'Aliases',
+  }),
+};
+
 export const TemplateContentIndicator = ({ mappings, settings, aliases }: Props) => {
   const getColor = (flag: boolean) => (flag ? 'primary' : 'hollow');
 
   return (
     <>
-      <EuiBadge color={getColor(mappings)}>M</EuiBadge>
-      <EuiBadge color={getColor(settings)}>S</EuiBadge>
-      <EuiBadge color={getColor(aliases)}>A</EuiBadge>
+      <EuiToolTip content={texts.mappings}>
+        <EuiBadge color={getColor(mappings)}>M</EuiBadge>
+      </EuiToolTip>
+      <EuiToolTip content={texts.settings}>
+        <EuiBadge color={getColor(settings)}>S</EuiBadge>
+      </EuiToolTip>
+      <EuiToolTip content={texts.aliases}>
+        <EuiBadge color={getColor(aliases)}>A</EuiBadge>
+      </EuiToolTip>
     </>
   );
 };
