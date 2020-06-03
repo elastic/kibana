@@ -51,7 +51,7 @@ image::images/add-data-geo-upload.png[GeoJSON Upload]
 The built-in data tutorials can help you quickly get up and running with
 metrics data, log analytics, and security events.
 These tutorials walk you through installing and configuring a
-Beats data shipper to periodically collect and send data to the Elastic Stack.
+Beats data shipper to periodically collect and send data to {es}.
 You can then use the pre-built dashboards to explore and analyze the data.
 
 You access the tutorials from the {kib} home page.
