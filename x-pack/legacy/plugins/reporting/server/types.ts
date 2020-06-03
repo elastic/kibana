@@ -5,11 +5,13 @@
  */
 
 import { Legacy } from 'kibana';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import * as Rx from 'rxjs';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 import { ReportingPluginSpecOptions } from '../';
 import { CancellationToken } from '../../../../plugins/reporting/common';
 import { JobStatus } from '../../../../plugins/reporting/common/types';
@@ -52,8 +54,8 @@ export type ReportingRequestPayload = GenerateExportTypePayload | JobParamPostPa
 
 export interface TimeRangeParams {
   timezone: string;
-  min: Date | string | number;
-  max: Date | string | number;
+  min: Date | string | number | null;
+  max: Date | string | number | null;
 }
 
 export interface JobParamPostPayload {
@@ -160,6 +162,7 @@ export type ScreenshotsObservableFn = ({
 
 export interface ReportingSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
+  licensing: LicensingPluginSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
   __LEGACY: LegacySetup;
@@ -187,22 +190,10 @@ export interface LegacySetup {
  * Internal Types
  */
 
-export interface RequestFacade {
-  getBasePath: Legacy.Request['getBasePath'];
-  getSavedObjectsClient: Legacy.Request['getSavedObjectsClient'];
-  headers: Legacy.Request['headers'];
-  params: Legacy.Request['params'];
-  payload: JobParamPostPayload | GenerateExportTypePayload;
-  query: ReportingRequestQuery;
-  route: Legacy.Request['route'];
-  pre: ReportingRequestPre;
-  getRawRequest: () => Legacy.Request;
-}
-
 export type ESQueueCreateJobFn<JobParamsType> = (
   jobParams: JobParamsType,
-  headers: Record<string, string>,
-  request: RequestFacade
+  context: RequestHandlerContext,
+  request: KibanaRequest
 ) => Promise<JobParamsType>;
 
 export type ESQueueWorkerExecuteFn<JobDocPayloadType> = (

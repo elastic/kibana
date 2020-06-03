@@ -11,7 +11,7 @@ import { Store } from 'redux';
 import { mockAlertDetailsResult } from '../store/mock_alert_result_list';
 import { alertPageTestRender } from './test_helpers/render_alert_page';
 import { AppAction } from '../../common/store/actions';
-import { State } from '../../common/store/reducer';
+import { State } from '../../common/store/types';
 
 describe('when the alert details flyout is open', () => {
   let render: () => reactTestingLibrary.RenderResult;
@@ -57,6 +57,20 @@ describe('when the alert details flyout is open', () => {
         it('should display the correct fields in the dropdown', async () => {
           await renderResult.findByTestId('alertDetailTakeActionCloseAlertButton');
           await renderResult.findByTestId('alertDetailTakeActionWhitelistButton');
+        });
+      });
+      describe('when the user navigates to the resolver tab', () => {
+        beforeEach(() => {
+          reactTestingLibrary.act(() => {
+            history.push({
+              ...history.location,
+              search: '?selected_alert=1&active_details_tab=overviewResolver',
+            });
+          });
+        });
+        it('should show the resolver view', async () => {
+          const resolver = await render().findByTestId('alertResolver');
+          expect(resolver).toBeInTheDocument();
         });
       });
       describe('when the user navigates to the overview tab', () => {

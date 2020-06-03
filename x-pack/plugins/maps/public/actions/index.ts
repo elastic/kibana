@@ -8,7 +8,13 @@ export * from './ui_actions';
 
 export * from './map_actions';
 export * from './map_action_constants';
-export { cancelAllInFlightRequests, DataRequestContext } from './data_request_actions';
+export * from './layer_actions';
+export {
+  cancelAllInFlightRequests,
+  DataRequestContext,
+  fitToLayerExtent,
+  fitToDataBounds,
+} from './data_request_actions';
 export {
   closeOnClickTooltip,
   openOnClickTooltip,

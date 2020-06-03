@@ -19,6 +19,6 @@ describe('getBreadcrumbs', () => {
         },
         []
       )
-    ).toEqual([{ href: '#/link-to/detections', text: 'Detections' }]);
+    ).toEqual([{ href: '#/link-to/detections', text: 'Alerts' }]);
   });
 });

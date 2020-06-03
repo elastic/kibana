@@ -21,7 +21,7 @@ export const registerDeleteRoute = ({ router, license }: RouteDependencies): voi
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       const { names } = req.params;
       const pipelineNames = names.split(',');
 

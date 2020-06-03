@@ -6,20 +6,28 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 
-import { ExceptionListSoSchema, FoundExceptionListSchema } from '../../../common/schemas';
+import {
+  ExceptionListSoSchema,
+  FilterOrUndefined,
+  FoundExceptionListSchema,
+  NamespaceType,
+  PageOrUndefined,
+  PerPageOrUndefined,
+  SortFieldOrUndefined,
+  SortOrderOrUndefined,
+} from '../../../common/schemas';
 import { SavedObjectType } from '../../saved_objects';
 
 import { getSavedObjectType, transformSavedObjectsToFounExceptionList } from './utils';
-import { NamespaceType } from './types';
 
 interface FindExceptionListOptions {
   namespaceType: NamespaceType;
   savedObjectsClient: SavedObjectsClientContract;
-  filter: string | undefined;
-  perPage: number | undefined;
-  page: number | undefined;
-  sortField: string | undefined;
-  sortOrder: string | undefined;
+  filter: FilterOrUndefined;
+  perPage: PerPageOrUndefined;
+  page: PageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
 }
 
 export const findExceptionList = async ({
@@ -40,14 +48,14 @@ export const findExceptionList = async ({
     sortOrder,
     type: savedObjectType,
   });
-  return transformSavedObjectsToFounExceptionList({ savedObjectsFindResponse });
+  return transformSavedObjectsToFounExceptionList({ namespaceType, savedObjectsFindResponse });
 };
 
 export const getExceptionListFilter = ({
   filter,
   savedObjectType,
 }: {
-  filter: string | undefined;
+  filter: FilterOrUndefined;
   savedObjectType: SavedObjectType;
 }): string => {
   if (filter == null) {

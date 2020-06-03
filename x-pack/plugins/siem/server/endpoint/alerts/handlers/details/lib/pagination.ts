@@ -56,7 +56,7 @@ export class AlertDetailsPagination extends Pagination<
     }
 
     const response = await searchESForAlerts(
-      this.requestContext.core.elasticsearch.dataClient,
+      this.requestContext.core.elasticsearch.legacy.client,
       reqData,
       this.indexPattern
     );
