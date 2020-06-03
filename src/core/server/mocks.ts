@@ -101,6 +101,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
 }
 
 type CoreSetupMockType = MockedKeys<CoreSetup> & {
+  elasticsearch: ReturnType<typeof elasticsearchServiceMock.createSetup>;
   getStartServices: jest.MockedFunction<StartServicesAccessor<any, any>>;
 };
 
