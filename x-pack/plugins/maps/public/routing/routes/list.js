@@ -312,7 +312,14 @@ export const MapsListView = withRouter(
             defaultMessage: 'Title',
           }),
           sortable: true,
-          render: (field, record) => <Link to={`/map/${record.id}`}>{field}</Link>,
+          render: (field, record) => (
+            <Link
+              to={`/map/${record.id}`}
+              data-test-subj={`mapListingTitleLink-${record.title.split(' ').join('-')}`}
+            >
+              {field}
+            </Link>
+          ),
         },
         {
           field: 'description',
